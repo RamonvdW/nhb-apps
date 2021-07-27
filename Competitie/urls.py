@@ -90,6 +90,11 @@ urlpatterns = [
          views_regio_teams.WijzigPouleView.as_view(),
          name='wijzig-poule'),
 
+    path('regio/<deelcomp_pk>/team-ronde/',
+         views_regio_teams.StuurTeamRondeView.as_view(),
+         name='stuur-team-ronde'),
+
+
     # ingeschreven
     path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/dagdeel-behoefte/',
          views_aangemeld.Inschrijfmethode3BehoefteView.as_view(),
@@ -226,10 +231,6 @@ urlpatterns = [
     path('scores/dynamic/scores-opslaan/',
          views_scores.DynamicScoresOpslaanView.as_view(),
          name='dynamic-scores-opslaan'),
-
-    path('scores/team-samenstelling/<wedstrijd_pk>/',
-         views_scores.WedstrijdTeamSamenstelling.as_view(),
-         name='wedstrijd-team-samenstelling'),
 
 
     # competitie uitslagen

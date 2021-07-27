@@ -49,6 +49,14 @@ urlpatterns = [
          view_teams.WijzigRegioTeamsView.as_view(),
          name='teams-regio-wijzig'),
 
+    path('teams/regio/<deelcomp_pk>/invallers/',
+         view_teams.TeamsRegioInvallersView.as_view(),
+         name='teams-regio-invallers'),
+
+    path('teams/regio/invallers-koppelen/<team_pk>/',
+         view_teams.TeamsRegioInvallersKoppelLedenView.as_view(),
+         name='teams-regio-invallers-koppelen'),
+
     path('teams/regio/<deelcomp_pk>/',
          view_teams.TeamsRegioView.as_view(),
          name='teams-regio'),

@@ -92,7 +92,7 @@
                     {% if not forloop.first %}
                         </tr><tr>
                     {% endif %}
-                    <td>{{ deelnemer.naam_str }}</td>
+                    <td{% if deelnemer.is_bezet %} class="grey-text"{% endif %}>{{ deelnemer.naam_str }}</td>
                     <td>{{ deelnemer.vsg }}</td>
                     <td>{{ deelnemer.is_gekoppeld }}</td>
                 {% endfor %}

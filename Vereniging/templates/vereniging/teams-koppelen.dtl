@@ -29,9 +29,16 @@
     <script type="application/javascript">
         function gewijzigd() {
             // het formulier is aangepast en moet opgeslagen worden
-            // enable de 'opslaan' knop
+            // enable/disable de 'opslaan' knop
             const el = document.getElementById("opslaan_knop")
-            el.disabled = false
+
+            const els = document.querySelectorAll('input[type=checkbox]')
+            let count = 0
+            els.forEach(checkbox => {
+                    if (checkbox.checked) count += 1
+                })
+
+            el.disabled = (count > 4)
             el.parentElement.style.display = "block"
         }
     </script>
@@ -84,7 +91,7 @@
 
             <tr>
                 {% if mag_wijzigen %}
-                    <td style="vertical-align: top">Selecteer sporters</td>
+                    <td style="vertical-align: top">Selecteer 3 of 4 sporters</td>
 
                     {% if not deelnemers.count %}
                         <td colspan="3"><i class="red-text">Geen sporters gevonden met toegestaan boog type</i></td>

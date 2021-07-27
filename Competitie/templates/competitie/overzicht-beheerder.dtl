@@ -81,6 +81,10 @@
 
         {% for deelcomp in planning_deelcomp %}
 
+            {% if deelcomp.url_team_ronde %}
+                {% include 'plein/card.dtl' with title=deelcomp.titel_team_ronde text=deelcomp.tekst_team_ronde icon="mediation" url=deelcomp.url_team_ronde %}
+            {% endif %}
+
             <!-- planning deelcomp -->
             {% include 'plein/card.dtl' with title=deelcomp.titel text=deelcomp.tekst icon="pending_actions" url=deelcomp.url %}
 

@@ -15,19 +15,19 @@
         <p>In jullie regio wordt geen team competitie gehouden.</p>
         <p>Voor meer informatie: neem contact op met de RCL.</p>
     {% else %}
-        <p>Op deze pagina kan je als HWL de teams opgeven voor de regiocompetitie van de <b>{{ deelcomp }}</b>.</p>
+
+        <p>Als HWL ben je verantwoordelijk om je teams compleet te houden. Als iemand niet kan ("uitvalt") dan mag deze vervangen worden door een invaller.</p>
+        <p>Voor elke ronde moeten deze invallers opnieuw opgegeven worden.</p>
+
+        <p>Een belangrijke regel is deze: de invaller mag nu niet sterker zijn dan de uitvaller was aan het begin van de competitie. Oftewel: het huidige gemiddelde invaller mag niet hoger zijn dan het aanvangsgemiddelde uitvaller.</p>
+
+        <p>Op deze pagina kan je als HWL de invallers opgeven voor de regiocompetitie van de <b>{{ deelcomp }}</b>.</p>
 
         <p>&nbsp;</p>
         <div class="container">
             <table class="white">
                 <tr>
-                    {% if mag_wijzigen %}
-                        <td class="center-align">Teams kunnen aangepast worden tot <b>{{ deelcomp.einde_teams_aanmaken }}</b>.</td>
-                    {% else %}
-                        <td class="center-align">De deadline van {{ deelcomp.einde_teams_aanmaken }} is gepasseerd, dus de teams kunnen niet meer aangepast worden.<br>
-Wel is het mogelijk om uitvallers / invallers door te voeren.
-                        </td>
-                    {% endif %}
+                    <td class="center-align">De invallers voor <b class="red-text">RONDE {{ deelcomp.huidige_team_ronde }}</b> kunnen nu doorgegeven worden.</td>
                 </tr>
             </table>
         </div>
@@ -54,41 +54,18 @@ Wel is het mogelijk om uitvallers / invallers door te voeren.
                     <td>{{ team.team_naam }}</td>
                     <td class="hide-on-small-only center-align{% if team.aantal < 3 or team.aantal > 4 %} red-text{% endif %}">{{ team.aantal }}</td>
 
-                    {% if team.klasse %}
-                        <td class="hide-on-small-only">{{ team.ag_str }}</td>
-                        <td>{{ team.klasse.team.beschrijving }}</td>
-                    {% else %}
-                        <td class="hide-on-small-only"></td>
-                        <td><i class="red-text">team is niet compleet</i></td>
-                    {% endif %}
+                    <td class="hide-on-small-only">{{ team.ag_str }}</td>
+                    <td>{{ team.klasse.team.beschrijving }}</td>
 
                     <td>
-                        {% if team.url_wijzig %}
-                            <a class="btn-nhb-blauw" href="{{ team.url_wijzig }}">Wijzig</a>
-                            <span>&nbsp;&nbsp;</span>
-                        {% endif %}
-                        {% if mag_wijzigen %}
-                            <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Koppel</a>
-                        {% else %}
-                            <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Bekijk</a>
-                        {% endif %}
+                        <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Invallers koppelen</a>
                     </td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="5"><i>Er zijn nog geen teams</i></td>
+                    <td colspan="5"><i>Er zijn geen teams</i></td>
                 </tr>
             {% endfor %}
-
-            <!-- knop om een team toe te voegen -->
-            {% if url_nieuw_team %}
-                <tr>
-                    <td colspan="5">
-                        <a class="btn-nhb-blauw" href="{{ url_nieuw_team }}">
-                            <i class="material-icons-round left">add</i>Team toevoegen</a>
-                    </td>
-                </tr>
-            {% endif %}
 
         </table>
 
@@ -101,8 +78,7 @@ Wel is het mogelijk om uitvallers / invallers door te voeren.
                     <th>Boogtype</th>
                     <th>Naam</th>
                     <th>In team</th>
-                    <th>Aanvangsgemiddelde</th>
-                    <th><!-- kolom voor de knoppen --></th>
+                    <th>Huidig gemiddelde</th>
                 </tr>
             </thead>
 
@@ -111,12 +87,7 @@ Wel is het mogelijk om uitvallers / invallers door te voeren.
                     <td>{{ deelnemer.boog_str }}</td>
                     <td>{{ deelnemer.naam_str }}</td>
                     <td>{{ deelnemer.in_team_str }}</td>
-                    <td{% if deelnemer.rood_ag %} class="red-text"{% endif %}>{{ deelnemer.ag_str }}</td>
-                    <td>
-                        {% if deelnemer.url_wijzig_ag %}
-                            <a class="btn-nhb-blauw" href="{{ deelnemer.url_wijzig_ag }}">Wijzig</a>
-                        {% endif %}
-                    </td>
+                    <td>{{ deelnemer.vsg_str }}</td>
                 </tr>
             {% empty %}
                 <tr>

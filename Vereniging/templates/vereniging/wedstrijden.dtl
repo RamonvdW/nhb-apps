@@ -28,9 +28,7 @@
                 <tr>
                     <th>Wanneer</th>
                     <th>Beschrijving</th>
-                    {% if uitslag_invoeren %}
-                        <th>Team samenstelling</th>
-                    {% else %}
+                    {% if not uitslag_invoeren %}
                         <th>Waarschijnlijke deelnemers</th>
                     {% endif %}
                     <th>Uitslag</th>
@@ -48,14 +46,6 @@
                             {% if obj.url_waarschijnlijke_deelnemers %}
                                 <a class="btn-nhb-blauw" href="{{ obj.url_waarschijnlijke_deelnemers }}">Toon lijst</a>
                             {% endif %}
-                        </td>
-                    {% endif %}
-
-                    <!-- knop om team samenstelling aan te passen -->
-                    {% if obj.url_team_samenstelling %}
-                        <td>
-                            <a class="btn-nhb-blauw" href="{{ obj.url_team_samenstelling }}">
-                                <i class="material-icons-round left">arrow_forward</i>Aanpassen</a>
                         </td>
                     {% endif %}
 

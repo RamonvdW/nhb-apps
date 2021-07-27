@@ -31,6 +31,7 @@ TEMPLATE_COMPETITIE_RCL_TEAMS = 'competitie/rcl-teams.dtl'
 TEMPLATE_COMPETITIE_RCL_TEAMS_POULES = 'competitie/rcl-teams-poules.dtl'
 TEMPLATE_COMPETITIE_RCL_WIJZIG_POULE = 'competitie/wijzig-poule.dtl'
 TEMPLATE_COMPETITIE_RCL_AG_CONTROLE = 'competitie/rcl-ag-controle.dtl'
+TEMPLATE_COMPETITIE_RCL_TEAM_RONDE = 'competitie/rcl-team-ronde.dtl'
 
 
 class RegioInstellingenView(UserPassesTestMixin, TemplateView):
@@ -726,6 +727,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als ... knop ... """
 
         try:
             poule_pk = int(kwargs['poule_pk'][:6])      # afkappen voor de veiligheid
@@ -782,6 +784,74 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
 
         url = reverse('Competitie:regio-poules',
                       kwargs={'deelcomp_pk': deelcomp.pk})
+        return HttpResponseRedirect(url)
+
+
+class StuurTeamRondeView(UserPassesTestMixin, TemplateView):
+
+    """ Met deze view kan de RCL de punten verdelen in de teamcompetitie en deze doorzetten naar de volgende ronde.
+    """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_RCL_TEAM_RONDE
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_RCL
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])      # afkappen voor de veiligheid
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie')
+                        .get(pk=deelcomp_pk,
+                             nhb_regio=self.functie_nu.nhb_regio))
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Http404('Competitie bestaat niet')
+
+        context['deelcomp'] = deelcomp
+        context['regio'] = self.functie_nu.nhb_regio
+
+        if deelcomp.huidige_team_ronde <= 7:
+            context['url_volgende_ronde'] = reverse('Competitie:stuur-team-ronde',
+                                                    kwargs={'deelcomp_pk': deelcomp.pk})
+
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        return context
+
+    def post(self, request, *args, **kwargs):
+
+        """ deze functie wordt aangeroepen als de RCL op de knop om de volgende ronde te beginnen.
+        """
+
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])      # afkappen voor de veiligheid
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie')
+                        .get(pk=deelcomp_pk,
+                             nhb_regio=self.functie_nu.nhb_regio))
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Http404('Competitie bestaat niet')
+
+        # TODO: controleer dat het redelijk is om de volgende ronde op te starten
+
+        if deelcomp.huidige_team_ronde <= 7:
+            deelcomp.huidige_team_ronde += 1
+            deelcomp.save(update_fields=['huidige_team_ronde'])
+
+        url = reverse('Competitie:overzicht',
+                      kwargs={'comp_pk': deelcomp.competitie.pk})
         return HttpResponseRedirect(url)
 
 

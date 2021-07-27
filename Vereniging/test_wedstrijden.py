@@ -385,7 +385,7 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
 
         urls2 = self.extract_all_urls(resp, skip_menu=True)
         for url in urls2:
-            self.assertTrue("/waarschijnlijke-deelnemers/" in url or '/team-samenstelling/' in url or url.startswith('/bondscompetities/scores/uitslag-invoeren/'))
+            self.assertTrue("/waarschijnlijke-deelnemers/" in url or url.startswith('/bondscompetities/scores/uitslag-invoeren/'))
         # for
 
         url = self.url_waarschijnlijke % self.wedstrijden[0].pk

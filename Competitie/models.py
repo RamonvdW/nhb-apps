@@ -415,6 +415,9 @@ class DeelCompetitie(models.Model):
                                                default=TEAM_PUNTEN_TWEE,
                                                choices=TEAM_PUNTEN)
 
+    # de RCL bepaalt in welke ronde van de competitie we zijn
+    huidige_team_ronde = models.PositiveSmallIntegerField(default=0)
+
     def heeft_poules_nodig(self):
         # centrale plek om de poules behoefte te controleren
         return self.regio_organiseert_teamcompetitie and self.regio_team_punten_model == TEAM_PUNTEN_TWEE
@@ -650,6 +653,9 @@ class RegiocompetitieRondeTeam(models.Model):
 
     # toegekende punten in deze ronde
     team_punten = models.PositiveSmallIntegerField(default=0)
+
+    # logboek voor noteren gemiddelde van de invallers
+    logboek = models.TextField(max_length=1024, blank=True)
 
 
 class KampioenschapSchutterBoog(models.Model):

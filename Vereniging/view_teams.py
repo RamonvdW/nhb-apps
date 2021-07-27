@@ -12,9 +12,8 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.models import (CompetitieKlasse, AG_NUL,
-                               DeelCompetitie, LAAG_REGIO,
-                               RegioCompetitieSchutterBoog, RegiocompetitieTeam)
+from Competitie.models import (CompetitieKlasse, AG_NUL, DeelCompetitie, LAAG_REGIO,
+                               RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Score.models import ScoreHist, SCORE_TYPE_TEAM_AG
@@ -26,6 +25,8 @@ TEMPLATE_TEAMS_REGIO = 'vereniging/teams-regio.dtl'
 TEMPLATE_TEAMS_REGIO_WIJZIG = 'vereniging/teams-regio-wijzig.dtl'
 TEMPLATE_TEAMS_WIJZIG_AG = 'vereniging/teams-wijzig-ag.dtl'
 TEMPLATE_TEAMS_KOPPELEN = 'vereniging/teams-koppelen.dtl'
+TEMPLATE_TEAMS_INVALLERS = 'vereniging/teams-invallers.dtl'
+TEMPLATE_TEAMS_INVALLERS_KOPPELEN = 'vereniging/teams-invallers-koppelen.dtl'
 TEMPLATE_TEAMS_RK = 'vereniging/teams-rk.dtl'
 
 
@@ -148,8 +149,9 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         # for
         context['teams'] = teams
 
-        context['url_nieuw_team'] = reverse('Vereniging:teams-regio-nieuw',
-                                            kwargs={'deelcomp_pk': deelcomp.pk})
+        if mag_wijzigen:
+            context['url_nieuw_team'] = reverse('Vereniging:teams-regio-nieuw',
+                                                kwargs={'deelcomp_pk': deelcomp.pk})
 
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
@@ -238,6 +240,16 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
         ver = self.functie_nu.nhb_ver
 
+        now = timezone.now()
+        einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
+                                  month=deelcomp.einde_teams_aanmaken.month,
+                                  day=deelcomp.einde_teams_aanmaken.day,
+                                  hour=0,
+                                  minute=0,
+                                  second=0)
+        einde = timezone.make_aware(einde)
+        mag_wijzigen = (now <= einde)
+
         teamtype_default = None
         teams = TeamType.objects.order_by('volgorde')
         for obj in teams:
@@ -258,6 +270,9 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
             raise Http404('Team niet gevonden of niet van jouw vereniging')
         except KeyError:
             # dit is een nieuw team
+            if not mag_wijzigen:
+                raise Http404('Kan geen nieuw team meer aanmaken')
+
             team = RegiocompetitieTeam(
                             pk=0,
                             vereniging=self.functie_nu.nhb_ver,
@@ -268,16 +283,6 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         for obj in teams:
             obj.actief = team.team_type == obj
         # for
-
-        now = timezone.now()
-        einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
-                                  month=deelcomp.einde_teams_aanmaken.month,
-                                  day=deelcomp.einde_teams_aanmaken.day,
-                                  hour=0,
-                                  minute=0,
-                                  second=0)
-        einde = timezone.make_aware(einde)
-        mag_wijzigen = (now <= einde)
 
         if mag_wijzigen:
             context['url_opslaan'] = reverse('Vereniging:teams-regio-wijzig',
@@ -597,7 +602,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                           .order_by('-ag_voor_team'))
             for obj in deelnemers:
                 obj.sel_str = "deelnemer_%s" % obj.pk
-                obj.naam_str = obj.schutterboog.nhblid.volledige_naam()
+                obj.naam_str = "[%s] %s" % (obj.schutterboog.nhblid.nhb_nr, obj.schutterboog.nhblid.volledige_naam())
                 obj.boog_str = obj.schutterboog.boogtype.beschrijving
                 obj.ag_str = "%.3f" % obj.ag_voor_team
                 obj.blokkeer = (obj.ag_voor_team < 0.001)
@@ -618,10 +623,294 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                                                                 'schutterboog__boogtype')
                                                 .order_by('ag_voor_team'))
             for obj in gekoppeld:
-                obj.naam_str = obj.schutterboog.nhblid.volledige_naam()
+                obj.naam_str = "[%s] %s" % (obj.schutterboog.nhblid.nhb_nr, obj.schutterboog.nhblid.volledige_naam())
                 obj.boog_str = obj.schutterboog.boogtype.beschrijving
                 obj.ag_str = "%.3f" % obj.ag_voor_team
             # for
+
+        menu_dynamics(self.request, context, actief='vereniging')
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de HWL op Opslaan drukt om team leden te koppelen """
+
+        # zoek het team erbij en controleer dat deze bij de vereniging van de beheerder hoort
+        try:
+            team_pk = int(kwargs['team_pk'][:6])
+            team = (RegiocompetitieTeam
+                    .objects
+                    .select_related('deelcompetitie',
+                                    'team_type')
+                    .prefetch_related('team_type__boog_typen')
+                    .get(pk=team_pk,
+                         vereniging=self.functie_nu.nhb_ver))
+        except (ValueError, RegiocompetitieTeam.DoesNotExist):
+            raise Http404()
+
+        deelcomp = team.deelcompetitie
+
+        now = timezone.now()
+        einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
+                                  month=deelcomp.einde_teams_aanmaken.month,
+                                  day=deelcomp.einde_teams_aanmaken.day,
+                                  hour=0,
+                                  minute=0,
+                                  second=0)
+        einde = timezone.make_aware(einde)
+        mag_wijzigen = (now <= einde)
+        if not mag_wijzigen:
+            raise Http404('Voorbij de einddatum voor wijzigingen')
+
+        # toegestane boogtypen en schutters
+        boog_pks = team.team_type.boog_typen.values_list('pk', flat=True)
+        bezet_pks = team.gekoppelde_schutters.values_list('pk', flat=True)
+
+        # leden die nog niet in een team zitten
+        ok1_pks = (RegioCompetitieSchutterBoog
+                   .objects
+                   .exclude(pk__in=bezet_pks)
+                   .filter(deelcompetitie=team.deelcompetitie,
+                           inschrijf_voorkeur_team=True,
+                           ag_voor_team__gte=1.0,
+                           bij_vereniging=self.functie_nu.nhb_ver,
+                           schutterboog__boogtype__in=boog_pks)
+                   .values_list('pk', flat=True))
+
+        # huidige leden mogen blijven ;-)
+        ok2_pks = team.gekoppelde_schutters.values_list('pk', flat=True)
+
+        ok_pks = list(ok1_pks) + list(ok2_pks)
+
+        pks = list()
+        for key in request.POST.keys():
+            if key.startswith('deelnemer_'):
+                try:
+                    pk = int(key[10:])
+                except ValueError:
+                    pass
+                else:
+                    if pk in ok_pks:
+                        pks.append(pk)
+                    # silently ignore bad pks
+        # for
+
+        team.gekoppelde_schutters.clear()
+        team.gekoppelde_schutters.add(*pks)
+
+        bepaal_team_sterkte_en_klasse(team)
+
+        url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': team.deelcompetitie.pk})
+        return HttpResponseRedirect(url)
+
+
+class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
+
+    """ Laat de HWL de invallers van zijn teams opgeven.
+    """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_TEAMS_INVALLERS
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_HWL
+
+    def _get_deelcomp(self, deelcomp_pk) -> DeelCompetitie:
+
+        # haal de gevraagde deelcompetitie op
+        try:
+            deelcomp_pk = int(deelcomp_pk[:6])     # afkappen voor de veiligheid
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie', 'nhb_regio')
+                        .get(pk=deelcomp_pk,
+                             is_afgesloten=False,
+                             laag=LAAG_REGIO,                           # moet regiocompetitie zijn
+                             regio_organiseert_teamcompetitie=True,
+                             nhb_regio=self.functie_nu.nhb_ver.regio))
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Http404()
+
+        comp = deelcomp.competitie
+        comp.bepaal_fase()
+        if comp.fase != 'E':
+            # staat niet meer open voor instellen regiocompetitie teams
+            raise Http404('Competitie is niet in de juiste fase')
+
+        return deelcomp
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
+        context['deelcomp'] = deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
+
+        if deelcomp.competitie.afstand == '18':
+            aantal_pijlen = 30
+        else:
+            aantal_pijlen = 25
+
+        teams = (RegiocompetitieTeam
+                 .objects
+                 .select_related('vereniging',
+                                 'team_type')
+                 .filter(deelcompetitie=deelcomp,
+                         vereniging=self.functie_nu.nhb_ver)
+                 .annotate(gekoppelde_schutters_count=Count('gekoppelde_schutters'))
+                 .order_by('volg_nr'))
+
+        for team in teams:
+            team.aantal = team.gekoppelde_schutters_count
+            ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            team.ag_str = ag_str.replace('.', ',')
+
+            team.url_koppelen = reverse('Vereniging:teams-regio-invallers-koppelen',
+                                        kwargs={'team_pk': team.pk})
+        # for
+        context['teams'] = teams
+
+        deelnemers = (RegioCompetitieSchutterBoog
+                      .objects
+                      .select_related('schutterboog',
+                                      'schutterboog__nhblid',
+                                      'schutterboog__boogtype')
+                      .prefetch_related('regiocompetitieteam_set')
+                      .filter(deelcompetitie=deelcomp,
+                              bij_vereniging=self.functie_nu.nhb_ver,
+                              inschrijf_voorkeur_team=True)
+                      .order_by('schutterboog__boogtype__volgorde',
+                                '-ag_voor_team'))
+
+        unsorted_deelnemers = list()
+        for deelnemer in deelnemers:
+            deelnemer.boog_str = deelnemer.schutterboog.boogtype.beschrijving
+            deelnemer.naam_str = "[%s] %s" % (deelnemer.schutterboog.nhblid.nhb_nr, deelnemer.schutterboog.nhblid.volledige_naam())
+
+            if deelnemer.aantal_scores == 0:
+                vsg = deelnemer.ag_voor_team
+            else:
+                vsg = deelnemer.gemiddelde
+            vsg_str = "%.3f" % vsg
+            deelnemer.vsg_str = vsg_str.replace('.', ',')
+
+            tup = (-vsg, deelnemer.schutterboog.nhblid.nhb_nr, deelnemer.pk, deelnemer)
+            unsorted_deelnemers.append(tup)
+
+            try:
+                team = deelnemer.regiocompetitieteam_set.all()[0]
+            except IndexError:
+                pass
+            else:
+                deelnemer.in_team_str = team.maak_team_naam_kort()
+
+            if deelnemer.ag_voor_team < 0.001:
+                deelnemer.rood_ag = True
+        # for
+
+        unsorted_deelnemers.sort()
+        context['deelnemers'] = [tup[-1] for tup in unsorted_deelnemers]
+
+        menu_dynamics(self.request, context, actief='vereniging')
+        return context
+
+
+class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
+
+    """ Via deze view kan de HWL leden van zijn vereniging koppelen als invaller voor een team """
+
+    template_name = TEMPLATE_TEAMS_INVALLERS_KOPPELEN
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_HWL
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        # zoek het team erbij en controleer dat deze bij de vereniging van de beheerder hoort
+        try:
+            team_pk = int(kwargs['team_pk'][:6])
+            team = (RegiocompetitieTeam
+                    .objects
+                    .select_related('deelcompetitie',
+                                    'team_type')
+                    .prefetch_related('team_type__boog_typen')
+                    .get(pk=team_pk,
+                         vereniging=self.functie_nu.nhb_ver))
+        except (ValueError, RegiocompetitieTeam.DoesNotExist):
+            raise Http404('Team niet gevonden of niet van jouw vereniging')
+
+        context['team'] = team
+
+        context['deelcomp'] = deelcomp = team.deelcompetitie
+
+        boog_typen = team.team_type.boog_typen.all()
+        boog_pks = boog_typen.values_list('pk', flat=True)
+        context['boog_typen'] = boog_typen
+
+        if deelcomp.competitie.afstand == '18':
+            aantal_pijlen = 30
+        else:
+            aantal_pijlen = 25
+        ag_str = "%5.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+        team.ag_str = ag_str.replace('.', ',')
+
+        context['begin_ags'] = gekoppeld = (team
+                                            .gekoppelde_schutters
+                                            .select_related('schutterboog',
+                                                            'schutterboog__nhblid',
+                                                            'schutterboog__boogtype')
+                                            .order_by('ag_voor_team'))
+        for obj in gekoppeld:
+            obj.naam_str = "[%s] %s" % (obj.schutterboog.nhblid.nhb_nr, obj.schutterboog.nhblid.volledige_naam())
+            #obj.boog_str = obj.schutterboog.boogtype.beschrijving
+            ag_str = "%.3f" % obj.ag_voor_team
+            obj.ag_str = ag_str.replace('.', ',')
+        # for
+
+        if True:
+            pks = team.gekoppelde_schutters.values_list('pk', flat=True)
+
+            deelnemers = (RegioCompetitieSchutterBoog
+                          .objects
+                          .filter(deelcompetitie=deelcomp,
+                                  inschrijf_voorkeur_team=True,
+                                  bij_vereniging=self.functie_nu.nhb_ver,
+                                  schutterboog__boogtype__in=boog_pks)
+                          .annotate(in_team_count=Count('regiocompetitieteam'))
+                          .select_related('schutterboog',
+                                          'schutterboog__nhblid',
+                                          'schutterboog__boogtype')
+                          .order_by('-ag_voor_team'))
+            for obj in deelnemers:
+                obj.sel_str = "deelnemer_%s" % obj.pk
+                obj.naam_str = "[%s] %s" % (obj.schutterboog.nhblid.nhb_nr, obj.schutterboog.nhblid.volledige_naam())
+                obj.boog_str = obj.schutterboog.boogtype.beschrijving
+                obj.ag_str = "%.3f" % obj.ag_voor_team
+                obj.blokkeer = (obj.ag_voor_team < 0.001)
+                obj.geselecteerd = (obj.pk in pks)          # vinkje zetten: gekoppeld aan dit team
+                if not obj.geselecteerd:
+                    if obj.in_team_count > 0:
+                        obj.blokkeer = True                 # niet te selecteren: gekoppeld aan een ander team
+            # for
+            context['deelnemers'] = deelnemers
+
+            context['url_opslaan'] = reverse('Vereniging:teams-regio-koppelen',
+                                             kwargs={'team_pk': team.pk})
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context

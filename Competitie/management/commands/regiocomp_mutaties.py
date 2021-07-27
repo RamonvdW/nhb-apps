@@ -7,8 +7,6 @@
 # werk de tussenstand bij voor deelcompetities die niet afgesloten zijn zodra er nieuwe ScoreHist records zijn
 # verwerkt ook een aantal opdrachten die concurrency protection nodig hebben
 
-# TODO: hernoem naar competitie_mutaties
-
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.models import F
@@ -27,7 +25,7 @@ VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
 
 
 class Command(BaseCommand):
-    help = "Competitie kampioenschap mutaties verwerken"
+    help = "Competitie mutaties verwerken"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
