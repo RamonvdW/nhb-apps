@@ -91,6 +91,7 @@ MUTATIE_CUT = 10
 MUTATIE_INITIEEL = 20
 MUTATIE_AFMELDEN = 30
 MUTATIE_AANMELDEN = 40
+MUTATIE_TEAM_RONDE = 50
 
 MUTATIE_TO_STR = {
     MUTATIE_AG_VASTSTELLEN_18M: "AG vaststellen 18m",
@@ -100,41 +101,9 @@ MUTATIE_TO_STR = {
     MUTATIE_CUT: "limiet aanpassen",
     MUTATIE_AFMELDEN: "afmelden",
     MUTATIE_AANMELDEN: "aanmelden",
+    MUTATIE_TEAM_RONDE: "team ronde"
 }
 
-
-def bepaal_blazoen_team(afstand, team_wedstrijdklasse):
-
-    if afstand == '25':
-        # 25m 1pijl
-        blazoen = BLAZOEN_60CM
-    else:
-        # Indoor
-        blazoen = BLAZOEN_40CM
-
-        if team_wedstrijdklasse.schiet_op_dt:
-            blazoen = BLAZOEN_DT
-
-    return blazoen
-
-
-def bepaal_blazoen_indiv(afstand, indiv_wedstrijdklasse):
-
-    if afstand == '25':
-        # 25m 1pijl
-        blazoen = BLAZOEN_60CM
-    else:
-        # Indoor
-
-        if indiv_wedstrijdklasse.is_aspirant_klasse:
-            blazoen = BLAZOEN_60CM
-        else:
-            blazoen = BLAZOEN_40CM
-
-        if indiv_wedstrijdklasse.schiet_op_dt:
-            blazoen = BLAZOEN_DT
-
-    return blazoen
 
 
 class Competitie(models.Model):
@@ -746,8 +715,7 @@ class KampioenschapTeam(models.Model):
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
 
 
-class KampioenschapMutatie(models.Model):       # TODO: hernoem naar CompetitieMutaties
-
+class CompetitieMutatie(models.Model):
     """ Deze tabel houdt de mutaties bij de lijst van (reserve-)schutters van
         de RK en BK wedstrijden.
         Alle verzoeken tot mutaties worden hier aan toegevoegd en na afhandelen bewaard
@@ -788,8 +756,7 @@ class KampioenschapMutatie(models.Model):       # TODO: hernoem naar CompetitieM
     cut_nieuw = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
-        verbose_name = "Kampioenschap Mutatie"
-        verbose_name_plural = "Kampioenschap Mutaties"
+        verbose_name = "Competitie mutatie"
 
     def __str__(self):
         msg = "[%s]" % self.when
@@ -818,13 +785,10 @@ class CompetitieTaken(models.Model):
                                           null=True, blank=True,        # mag leeg in admin interface
                                           on_delete=models.SET_NULL)
 
-    # wat is de hoogste KampioenschapMutatie tot nu toe verwerkt in de deelnemerslijst?
-    hoogste_mutatie = models.ForeignKey(KampioenschapMutatie,
+    # wat is de hoogste mutatie tot nu toe verwerkt in de deelnemerslijst?
+    hoogste_mutatie = models.ForeignKey(CompetitieMutatie,
                                         null=True, blank=True,
                                         on_delete=models.SET_NULL)
-
-
-# TODO: opruimen oude KampioenschapMutaties
 
 
 # end of file

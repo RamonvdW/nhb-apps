@@ -14,15 +14,19 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Handleiding.views import reverse_handleiding
+from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbRayon
+from Overig.background_sync import BackgroundSync
 from .models import (LAAG_REGIO, AG_NUL,
                      TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_TWEE, TEAM_PUNTEN_SOM_SCORES, TEAM_PUNTEN,
                      INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3,
                      Competitie, CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
-                     RegiocompetitieTeam, RegiocompetitieTeamPoule)
+                     RegiocompetitieTeam, RegiocompetitieTeamPoule,
+                     CompetitieMutatie, MUTATIE_TEAM_RONDE)
 from .menu import menu_dynamics_competitie
 from types import SimpleNamespace
 import datetime
+import time
 
 
 TEMPLATE_COMPETITIE_RCL_INSTELLINGEN = 'competitie/rcl-instellingen.dtl'
@@ -32,6 +36,8 @@ TEMPLATE_COMPETITIE_RCL_TEAMS_POULES = 'competitie/rcl-teams-poules.dtl'
 TEMPLATE_COMPETITIE_RCL_WIJZIG_POULE = 'competitie/wijzig-poule.dtl'
 TEMPLATE_COMPETITIE_RCL_AG_CONTROLE = 'competitie/rcl-ag-controle.dtl'
 TEMPLATE_COMPETITIE_RCL_TEAM_RONDE = 'competitie/rcl-team-ronde.dtl'
+
+mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
 
 class RegioInstellingenView(UserPassesTestMixin, TemplateView):
@@ -831,7 +837,9 @@ class StuurTeamRondeView(UserPassesTestMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
 
-        """ deze functie wordt aangeroepen als de RCL op de knop om de volgende ronde te beginnen.
+        """ deze functie wordt aangeroepen als de RCL op de knop drukt om de volgende ronde te beginnen.
+
+            verwerking gebeurt in het achtergrondprocess.
         """
 
         try:
@@ -845,10 +853,31 @@ class StuurTeamRondeView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie bestaat niet')
 
         # TODO: controleer dat het redelijk is om de volgende ronde op te starten
-
         if deelcomp.huidige_team_ronde <= 7:
-            deelcomp.huidige_team_ronde += 1
-            deelcomp.save(update_fields=['huidige_team_ronde'])
+
+            account = request.user
+            schrijf_in_logboek(account, 'Competitie', 'Teamcompetitie doorzetten naar ronde %s voor %s' % (deelcomp.huidige_team_ronde+1, deelcomp))
+
+            # voor concurrency protection, laat de achtergrondtaak de competitie aanmaken
+            door_str = "RCL %s" % account.volledige_naam()
+            mutatie = CompetitieMutatie(mutatie=MUTATIE_TEAM_RONDE,
+                                        deelcompetitie=deelcomp,
+                                        door=door_str)
+            mutatie.save()
+
+            mutatie_ping.ping()
+
+            snel = str(request.POST.get('snel', ''))[:1]
+            if snel != '1':
+                # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
+                interval = 0.2  # om steeds te verdubbelen
+                total = 0.0  # om een limiet te stellen
+                while not mutatie.is_verwerkt and total + interval <= 3.0:
+                    time.sleep(interval)
+                    total += interval  # 0.0 --> 0.2, 0.6, 1.4, 3.0
+                    interval *= 2  # 0.2 --> 0.4, 0.8, 1.6, 3.2
+                    mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
+                # while
 
         url = reverse('Competitie:overzicht',
                       kwargs={'comp_pk': deelcomp.competitie.pk})

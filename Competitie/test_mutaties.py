@@ -14,8 +14,8 @@ from Schutter.models import SchutterBoog
 from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
                      LAAG_REGIO, LAAG_RK, LAAG_BK,
-                     RegioCompetitieSchutterBoog,  DeelcompetitieKlasseLimiet,
-                     KampioenschapMutatie, MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AFMELDEN,
+                     RegioCompetitieSchutterBoog, DeelcompetitieKlasseLimiet,
+                     CompetitieMutatie, MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AFMELDEN,
                      MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
                      KampioenschapSchutterBoog, DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
 import datetime
@@ -304,16 +304,16 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         self._verwerk_mutaties(90)
         # self._dump_deelnemers()
 
-        KampioenschapMutatie(mutatie=MUTATIE_INITIEEL,
-                             deelcompetitie=self.deelcomp_rk).save()
+        CompetitieMutatie(mutatie=MUTATIE_INITIEEL,
+                          deelcompetitie=self.deelcomp_rk).save()
         self._verwerk_mutaties(42)
         # self._dump_deelnemers()
         self._check_volgorde_en_rank()
 
         # nu zonder limiet
         DeelcompetitieKlasseLimiet.objects.all().delete()
-        KampioenschapMutatie(mutatie=MUTATIE_INITIEEL,
-                             deelcompetitie=self.deelcomp_rk).save()
+        CompetitieMutatie(mutatie=MUTATIE_INITIEEL,
+                          deelcompetitie=self.deelcomp_rk).save()
         self._verwerk_mutaties(42)
 
     def test_rko_bevestigen(self):
@@ -814,9 +814,9 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         self._begin_rk()        # BB met rol RKO1
 
         # slechte mutatie code
-        mutatie = KampioenschapMutatie(mutatie=0,
-                                       deelnemer=KampioenschapSchutterBoog.objects.all()[0],
-                                       door='Tester')
+        mutatie = CompetitieMutatie(mutatie=0,
+                                    deelnemer=KampioenschapSchutterBoog.objects.all()[0],
+                                    door='Tester')
         mutatie.save()
 
         self.assertTrue("???" in str(mutatie))  # geen beschrijving beschikbaar
@@ -833,33 +833,33 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         self.assertTrue(str(mutatie) != "")     # wel een beschrijving
 
         # mutatie die al verwerkt is
-        KampioenschapMutatie(mutatie=0,
-                             is_verwerkt=True,
-                             deelnemer=KampioenschapSchutterBoog.objects.all()[0],
-                             door='Tester').save()
+        CompetitieMutatie(mutatie=0,
+                          is_verwerkt=True,
+                          deelnemer=KampioenschapSchutterBoog.objects.all()[0],
+                          door='Tester').save()
 
         # mutatie nieuw record van 24 wordt niet opgeslagen
-        KampioenschapMutatie(mutatie=MUTATIE_CUT,
-                             deelcompetitie=self.deelcomp_rk,
-                             klasse=self.klasse,
-                             cut_oud=23,
-                             cut_nieuw=24,              # verwijder oude record
-                             door='Tester').save()
+        CompetitieMutatie(mutatie=MUTATIE_CUT,
+                          deelcompetitie=self.deelcomp_rk,
+                          klasse=self.klasse,
+                          cut_oud=23,
+                          cut_nieuw=24,  # verwijder oude record
+                          door='Tester').save()
 
-        KampioenschapMutatie(mutatie=MUTATIE_CUT,
-                             deelcompetitie=self.deelcomp_rk,
-                             klasse=self.klasse,
-                             cut_oud=23,
-                             cut_nieuw=24,
-                             door='Tester').save()
+        CompetitieMutatie(mutatie=MUTATIE_CUT,
+                          deelcompetitie=self.deelcomp_rk,
+                          klasse=self.klasse,
+                          cut_oud=23,
+                          cut_nieuw=24,
+                          door='Tester').save()
 
         # mutatie die geen wijziging is
-        KampioenschapMutatie(mutatie=MUTATIE_CUT,
-                             deelcompetitie=self.deelcomp_rk,
-                             klasse=self.klasse,
-                             cut_oud=24,
-                             cut_nieuw=24,
-                             door='Tester').save()
+        CompetitieMutatie(mutatie=MUTATIE_CUT,
+                          deelcompetitie=self.deelcomp_rk,
+                          klasse=self.klasse,
+                          cut_oud=24,
+                          cut_nieuw=24,
+                          door='Tester').save()
 
         self._verwerk_mutaties(210)
 
@@ -874,17 +874,17 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
     def test_competitie(self):
         # competitie opstarten
-        KampioenschapMutatie(mutatie=MUTATIE_COMPETITIE_OPSTARTEN,
-                             door='Tester').save()
-        KampioenschapMutatie(mutatie=MUTATIE_COMPETITIE_OPSTARTEN,      # triggered "al opgestart" pad
-                             door='Tester').save()
+        CompetitieMutatie(mutatie=MUTATIE_COMPETITIE_OPSTARTEN,
+                          door='Tester').save()
+        CompetitieMutatie(mutatie=MUTATIE_COMPETITIE_OPSTARTEN,  # triggered "al opgestart" pad
+                          door='Tester').save()
         self._verwerk_mutaties(28)
 
         # AG vaststellen
-        KampioenschapMutatie(mutatie=MUTATIE_AG_VASTSTELLEN_18M,
-                             door='Tester').save()
-        KampioenschapMutatie(mutatie=MUTATIE_AG_VASTSTELLEN_25M,
-                             door='Tester').save()
+        CompetitieMutatie(mutatie=MUTATIE_AG_VASTSTELLEN_18M,
+                          door='Tester').save()
+        CompetitieMutatie(mutatie=MUTATIE_AG_VASTSTELLEN_25M,
+                          door='Tester').save()
         self._verwerk_mutaties(20)
 
 

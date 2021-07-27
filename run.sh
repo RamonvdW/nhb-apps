@@ -10,8 +10,8 @@ DEBUG=0
 [ "$1" = "--debug" ] && DEBUG=1
 
 # start the background process
-echo "[INFO] Starting kampioenschap_mutaties (runtime: 60 minutes)"
-./manage.py kampioenschap_mutaties 60 &
+echo "[INFO] Starting regiocomp_mutaties (runtime: 60 minutes)"
+./manage.py regiocomp_mutaties 60 &
 sleep 1
 
 # start the development webserver
@@ -27,7 +27,7 @@ else
 fi
 
 # kill the background process
-echo "[INFO] Stopping kampioenschap_mutaties"
-pkill -f kampioenschap_mutaties
+echo "[INFO] Stopping regiocomp_mutaties"
+pkill -f regiocomp_mutaties
 
 # end of file

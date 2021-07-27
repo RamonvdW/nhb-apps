@@ -10,7 +10,7 @@ from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
                      RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
-                     KampioenschapMutatie)
+                     CompetitieMutatie)
 
 
 class DeelCompetitieAdmin(admin.ModelAdmin):
@@ -207,7 +207,7 @@ class KampioenschapSchutterBoogAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
-class KampioenschapMutatieAdmin(admin.ModelAdmin):
+class CompetitieMutatieAdmin(admin.ModelAdmin):
 
     readonly_fields = ('mutatie', 'when', 'deelnemer', 'door')
 
@@ -225,7 +225,7 @@ admin.site.register(DeelcompetitieRonde, DeelcompetitieRondeAdmin)
 admin.site.register(RegioCompetitieSchutterBoog, RegioCompetitieSchutterBoogAdmin)
 admin.site.register(KampioenschapSchutterBoog, KampioenschapSchutterBoogAdmin)
 admin.site.register(DeelcompetitieKlasseLimiet)
-admin.site.register(KampioenschapMutatie, KampioenschapMutatieAdmin)
+admin.site.register(CompetitieMutatie, CompetitieMutatieAdmin)
 admin.site.register(RegiocompetitieTeam, RegiocompetitieTeamAdmin)
 admin.site.register(RegiocompetitieTeamPoule)
 admin.site.register(RegiocompetitieRondeTeam)

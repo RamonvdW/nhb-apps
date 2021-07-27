@@ -182,7 +182,7 @@ INTERNAL_IPS = [
 
 
 BACKGROUND_SYNC_POORT = 3000
-BACKGROUND_SYNC__KAMPIOENSCHAP_MUTATIES = BACKGROUND_SYNC_POORT + 1
+BACKGROUND_SYNC__REGIOCOMP_MUTATIES = BACKGROUND_SYNC_POORT + 1
 
 
 # our own test runner that executes the tests ordered by application hierarchy indicators to ensure that

@@ -19,7 +19,7 @@ from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from Score.operations import wanneer_ag_vastgesteld
 from django.utils.formats import localize
-from .models import (Competitie, DeelCompetitie, KampioenschapMutatie, LAAG_REGIO,
+from .models import (Competitie, DeelCompetitie, CompetitieMutatie, LAAG_REGIO,
                      MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
 from .operations import (bepaal_startjaar_nieuwe_competitie, get_mappings_wedstrijdklasse_to_competitieklasse,
                          bepaal_klassegrenzen_indiv, bepaal_klassegrenzen_teams, competitie_klassegrenzen_vaststellen)
@@ -35,7 +35,7 @@ TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
 TEMPLATE_COMPETITIE_AG_VASTSTELLEN = 'competitie/bb-ag-vaststellen.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_DATUMS = 'competitie/bb-wijzig-datums.dtl'
 
-mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__KAMPIOENSCHAP_MUTATIES)
+mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
 
 class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
@@ -123,8 +123,8 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
 
             # voor concurrency protection, laat de achtergrondtaak de competitie aanmaken
             door_str = "BB %s" % account.volledige_naam()
-            mutatie = KampioenschapMutatie(mutatie=MUTATIE_COMPETITIE_OPSTARTEN,
-                                           door=door_str)
+            mutatie = CompetitieMutatie(mutatie=MUTATIE_COMPETITIE_OPSTARTEN,
+                                        door=door_str)
             mutatie.save()
 
             mutatie_ping.ping()
@@ -138,7 +138,7 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
                     time.sleep(interval)
                     total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0
                     interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
-                    mutatie = KampioenschapMutatie.objects.get(pk=mutatie.pk)
+                    mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
                 # while
 
         return redirect('Competitie:kies')
@@ -232,8 +232,8 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
 
         # voor concurrency protection, laat de achtergrondtaak de competitie aanmaken
         door_str = "BB %s" % account.volledige_naam()
-        mutatie = KampioenschapMutatie(mutatie=mutatie,
-                                       door=door_str)
+        mutatie = CompetitieMutatie(mutatie=mutatie,
+                                    door=door_str)
         mutatie.save()
 
         mutatie_ping.ping()
@@ -245,7 +245,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
             while not mutatie.is_verwerkt and total < 7:
                 time.sleep(1)
                 total += 1
-                mutatie = KampioenschapMutatie.objects.get(pk=mutatie.pk)
+                mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
             # while
 
         return redirect('Competitie:overzicht', comp_pk=comp.pk)

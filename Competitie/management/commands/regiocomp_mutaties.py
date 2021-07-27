@@ -12,9 +12,9 @@ from django.core.management.base import BaseCommand
 from django.db.models import F
 from Competitie.models import (Competitie, CompetitieTaken, DeelCompetitie, DeelcompetitieKlasseLimiet,
                                KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE,
-                               KampioenschapMutatie,
+                               CompetitieMutatie,
                                MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M, MUTATIE_COMPETITIE_OPSTARTEN,
-                               MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AANMELDEN, MUTATIE_AFMELDEN)
+                               MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AANMELDEN, MUTATIE_AFMELDEN, MUTATIE_TEAM_RONDE)
 from Competitie.operations import (competities_aanmaken, bepaal_startjaar_nieuwe_competitie,
                                    aanvangsgemiddelden_vaststellen_voor_afstand)
 from Overig.background_sync import BackgroundSync
@@ -38,7 +38,7 @@ class Command(BaseCommand):
 
         self._onbekend2beter = dict()   # [competitieklasse.pk] = [klasse, ..] met oplopend AG
 
-        self._sync = BackgroundSync(settings.BACKGROUND_SYNC__KAMPIOENSCHAP_MUTATIES)
+        self._sync = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
         self._count_ping = 0
 
     def add_arguments(self, parser):
@@ -498,6 +498,12 @@ class Command(BaseCommand):
         if Competitie.objects.filter(begin_jaar=jaar).count() == 0:
             competities_aanmaken(jaar)
 
+    @staticmethod
+    def _verwerk_mutatie_team_ronde(deelcompetitie):
+        if deelcompetitie.huidige_team_ronde < 7:
+            deelcompetitie.huidige_team_ronde += 1
+            deelcompetitie.save(update_fields=['huidige_team_ronde'])
+
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie
 
@@ -529,24 +535,28 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Verwerk mutatie %s: afmelden' % mutatie.pk)
             self._verwerk_mutatie_afmelden(mutatie.deelnemer)
 
+        elif code == MUTATIE_TEAM_RONDE:
+            self.stdout.write('[INFO] Verwerk mutatie %s: team ronde' % mutatie.pk)
+            self._verwerk_mutatie_team_ronde(mutatie.deelcompetitie)
+
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s door %s (pk=%s)' % (code, mutatie.door, mutatie.pk))
 
     def _verwerk_nieuwe_mutaties(self):
         begin = datetime.datetime.now()
 
-        mutatie_latest = KampioenschapMutatie.objects.latest('pk')
+        mutatie_latest = CompetitieMutatie.objects.latest('pk')
         # als hierna een extra mutatie aangemaakt wordt dan verwerken we een record
         # misschien dubbel, maar daar kunnen we tegen
 
         if self.taken.hoogste_mutatie:
             # gebruik deze informatie om te filteren
             self.stdout.write('[INFO] vorige hoogste KampioenschapMutatie pk is %s' % self.taken.hoogste_mutatie.pk)
-            qset = (KampioenschapMutatie
+            qset = (CompetitieMutatie
                     .objects
                     .filter(pk__gt=self.taken.hoogste_mutatie.pk))
         else:
-            qset = (KampioenschapMutatie
+            qset = (CompetitieMutatie
                     .objects
                     .all())
 
@@ -559,7 +569,7 @@ class Command(BaseCommand):
         for pk in mutatie_pks:
             # LET OP: we halen de records hier 1 voor 1 op
             #         zodat we verse informatie hebben inclusief de vorige mutatie
-            mutatie = (KampioenschapMutatie
+            mutatie = (CompetitieMutatie
                        .objects
                        .select_related('deelnemer',
                                        'deelnemer__deelcompetitie',
@@ -585,7 +595,7 @@ class Command(BaseCommand):
         now = datetime.datetime.now()
         while now < self.stop_at:                   # pragma: no branch
             # self.stdout.write('tick')
-            new_count = KampioenschapMutatie.objects.count()
+            new_count = CompetitieMutatie.objects.count()
             if new_count != mutatie_count:
                 mutatie_count = new_count
                 self._verwerk_nieuwe_mutaties()

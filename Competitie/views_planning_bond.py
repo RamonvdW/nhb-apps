@@ -19,7 +19,7 @@ from Taken.taken import maak_taak
 from .models import (Competitie, CompetitieKlasse,
                      LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
-                     KampioenschapMutatie, MUTATIE_INITIEEL, DEELNAME_ONBEKEND)
+                     CompetitieMutatie, MUTATIE_INITIEEL, DEELNAME_ONBEKEND)
 from Wedstrijden.models import CompetitieWedstrijd
 
 
@@ -212,9 +212,9 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
             deelcomp_rk.save()
 
             # laat de lijsten sorteren en de volgorde bepalen
-            KampioenschapMutatie(mutatie=MUTATIE_INITIEEL,
-                                 door=door_str,
-                                 deelcompetitie=deelcomp_rk).save()
+            CompetitieMutatie(mutatie=MUTATIE_INITIEEL,
+                              door=door_str,
+                              deelcompetitie=deelcomp_rk).save()
 
             # stuur de RKO een taak ('ter info')
             rko_namen = list()
