@@ -8,9 +8,11 @@
 # verwerkt ook een aantal opdrachten die concurrency protection nodig hebben
 
 from django.conf import settings
+from django.utils import timezone
 from django.core.management.base import BaseCommand
 from django.db.models import F
 from Competitie.models import (Competitie, CompetitieTaken, DeelCompetitie, DeelcompetitieKlasseLimiet,
+                               RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE,
                                CompetitieMutatie,
                                MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M, MUTATIE_COMPETITIE_OPSTARTEN,
@@ -499,10 +501,34 @@ class Command(BaseCommand):
             competities_aanmaken(jaar)
 
     @staticmethod
-    def _verwerk_mutatie_team_ronde(deelcompetitie):
-        if deelcompetitie.huidige_team_ronde < 7:
-            deelcompetitie.huidige_team_ronde += 1
-            deelcompetitie.save(update_fields=['huidige_team_ronde'])
+    def _verwerk_mutatie_team_ronde(deelcomp):
+
+        # TODO: sanity check voordat we doorzetten: alle scores toegekend?
+
+        ronde_nr = deelcomp.huidige_team_ronde + 1
+
+        if ronde_nr <= 7:
+            now = timezone.now()
+            now = timezone.localtime(now)
+            now_str = now.strftime("%Y-%m-%d %H:%M")
+
+            # maak voor elk team een 'ronde instantie' aan waarin de invallers en score bijgehouden worden
+            for team in (RegiocompetitieTeam
+                         .objects
+                         .prefetch_related('gekoppelde_schutters')
+                         .filter(deelcompetitie=deelcomp)):
+                ronde_team = RegiocompetitieRondeTeam(
+                                team=team,
+                                ronde_nr=ronde_nr,
+                                logboek="[%s] Aangemaakt door mutatie" % now_str)
+                ronde_team.save()
+
+                schutter_pks = team.gekoppelde_schutters.values_list('pk', flat=True)
+                ronde_team.schutters.set(schutter_pks)
+            # for
+
+            deelcomp.huidige_team_ronde = ronde_nr
+            deelcomp.save(update_fields=['huidige_team_ronde'])
 
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie

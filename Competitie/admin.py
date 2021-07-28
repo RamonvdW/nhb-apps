@@ -218,6 +218,45 @@ class CompetitieMutatieAdmin(admin.ModelAdmin):
     list_filter = ('is_verwerkt', 'mutatie')
 
 
+class RegiocompetitieRondeTeamAdmin(admin.ModelAdmin):
+
+    readonly_fields = ('team', 'ronde_nr')
+
+
+    fieldsets = (
+        ('',
+            {'fields': ('team',
+                        'ronde_nr',
+                        'schutters',
+                        'team_score',
+                        'team_punten',
+                        'logboek')
+             }),
+    )
+
+    def get_form(self, request, obj=None, **kwargs):
+        if obj:                     # pragma: no cover
+            team = obj.team
+            self.deelcomp = team.deelcompetitie
+            self.ver = team.vereniging
+
+        return super().get_form(request, obj, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        if db_field.name == 'schutters':
+            kwargs['queryset'] = (RegioCompetitieSchutterBoog
+                                  .objects
+                                  .select_related('schutterboog',
+                                                  'schutterboog__nhblid',
+                                                  'schutterboog__boogtype')
+                                  .filter(deelcompetitie=self.deelcomp,
+                                          bij_vereniging=self.ver,
+                                          inschrijf_voorkeur_team=True))
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+
 admin.site.register(Competitie)
 admin.site.register(DeelCompetitie, DeelCompetitieAdmin)
 admin.site.register(CompetitieKlasse, CompetitieKlasseAdmin)
@@ -228,6 +267,6 @@ admin.site.register(DeelcompetitieKlasseLimiet)
 admin.site.register(CompetitieMutatie, CompetitieMutatieAdmin)
 admin.site.register(RegiocompetitieTeam, RegiocompetitieTeamAdmin)
 admin.site.register(RegiocompetitieTeamPoule)
-admin.site.register(RegiocompetitieRondeTeam)
+admin.site.register(RegiocompetitieRondeTeam, RegiocompetitieRondeTeamAdmin)
 
 # end of file

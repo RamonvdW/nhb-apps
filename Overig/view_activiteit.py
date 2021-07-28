@@ -215,7 +215,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                 else:
                     lid.email_is_bevestigd_str = 'Nee'
 
-                lid.laatste_inlog_str = localize(account.last_login)
+                lid.laatste_inlog = account.last_login
 
                 do_vhpg = True
                 if account.otp_is_actief:
@@ -238,9 +238,9 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                         opnieuw = vhpg.acceptatie_datum + datetime.timedelta(days=334)
                         now = timezone.now()
                         if opnieuw < now:
-                            lid.vhpg_str = 'Verlopen (geaccepteerd op %s)' % localize(vhpg.acceptatie_datum)
+                            lid.vhpg_str = 'Verlopen (geaccepteerd op %s)' % localize(vhpg.acceptatie_datum)    # TODO: localize() werkt niet zonder activate()
                         else:
-                            lid.vhpg_str = 'Ja (op %s)' % localize(vhpg.acceptatie_datum)
+                            lid.vhpg_str = 'Ja (op %s)' % localize(vhpg.acceptatie_datum)                       # TODO: localize() werkt niet zonder activate()
 
                 lid.functies = account.functie_set.order_by('beschrijving')
         # for
