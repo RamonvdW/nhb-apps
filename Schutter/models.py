@@ -28,8 +28,8 @@ class SchutterVoorkeuren(models.Model):
 
     nhblid = models.ForeignKey(NhbLid, on_delete=models.CASCADE, null=True)
 
-    # (opt-in) voorkeur voor DT ipv 40cm blazoen (alleen voor 18m Recurve)
-    voorkeur_dutchtarget_18m = models.BooleanField(default=False)
+    # (opt-in) voorkeur voor eigen blazoen: Dutch Target (Recurve) of 60cm 4spot (Compound)
+    voorkeur_eigen_blazoen = models.BooleanField(default=False)
 
     # (opt-out) wel/niet aanbieden om mee te doen met de competitie
     voorkeur_meedoen_competitie = models.BooleanField(default=True)

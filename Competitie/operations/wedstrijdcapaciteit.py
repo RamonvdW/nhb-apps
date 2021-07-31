@@ -13,6 +13,7 @@ from types import SimpleNamespace
 import math
 
 
+# TODO: vervangen door standaard strings uit BasisTypen
 BLAZOEN_STR_WENS_DT = 'DT (wens)'
 BLAZOEN_STR_WENS_4SPOT = '4-spot (wens)'
 
@@ -153,21 +154,13 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
 
     # wens_dt: als het bondsnummer hier in voorkomt heeft de sporters voorkeur voor DT (=eigen blazoen)
     if afstand == '18':
-        wens_dt = list(SchutterVoorkeuren
-                       .objects
-                       .select_related('nhblid')
-                       .filter(voorkeur_dutchtarget_18m=True)
-                       .values_list('nhblid__nhb_nr', flat=True))
+        wens_eigen_blazoen = list(SchutterVoorkeuren
+                                  .objects
+                                  .select_related('nhblid')
+                                  .filter(voorkeur_eigen_blazoen=True)
+                                  .values_list('nhblid__nhb_nr', flat=True))
     else:
-        wens_dt = list()
-
-    # wens_4spot: als het bondsnummer hier in voorkomt heeft de sporter voorkeur voor de Compound 4-spot (=eigen blazoen)
-    wens_4spot = list()         # TODO: ondersteuning voorkeur 4spot
-    # wens_4spot = list(SchutterVoorkeuren
-    #                   .objects
-    #                   .select_related('nhblid')
-    #                   .filter(voorkeur_4spot=True)
-    #                   .values_list('nhblid__nhb_nr', flat=True))
+        wens_eigen_blazoen = list()
 
     nhbnr2para_opmerking = dict()
     for voorkeur in (SchutterVoorkeuren
@@ -195,8 +188,8 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
                         deelnemer_pk=deelnemer.pk,
                         schiet_boog_r=(boog.afkorting == 'R'),
                         schiet_boog_c=(boog.afkorting == 'C'),
-                        voorkeur_dt=(nhblid.nhb_nr in wens_dt),
-                        voorkeur_4spot=(nhblid.nhb_nr in wens_4spot),
+                        voorkeur_dt=(nhblid.nhb_nr in wens_eigen_blazoen),
+                        voorkeur_4spot=(nhblid.nhb_nr in wens_eigen_blazoen),
                         is_aspirant=deelnemer.klasse.indiv.is_aspirant_klasse,
                         wil_team_schieten=deelnemer.inschrijf_voorkeur_team,
                         team_pk=0,

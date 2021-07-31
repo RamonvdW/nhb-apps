@@ -254,7 +254,7 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
 
         schutterboog = self.schutterboog_100001
 
-        SchutterVoorkeuren(nhblid=schutterboog.nhblid, voorkeur_dutchtarget_18m=True).save()
+        SchutterVoorkeuren(nhblid=schutterboog.nhblid, voorkeur_eigen_blazoen=True).save()
 
         klasse = (CompetitieKlasse
                   .objects

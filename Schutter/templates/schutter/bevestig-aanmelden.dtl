@@ -51,13 +51,13 @@
             {% if show_dt %}
                 <tr>
                     <td>
-                        <span>Voorkeur voor Dutch Target: </span>
-                        {% if voorkeuren.voorkeur_dutchtarget_18m %}
+                        <span>Voorkeur voor eigen blazoen: </span>
+                        {% if voorkeuren.voorkeur_eigen_blazoen %}
                             <span><b>Ja</b></span>
                         {% else %}
                             <span><b>Nee</b></span>
                         {% endif %}
-                        <span class="grey-text right">(ga naar Voorkeuren om dit te wijzigen)</span>
+                        <span class="right">(ga naar Voorkeuren om dit te wijzigen)</span>
                     </td>
                 </tr>
             {% endif %}

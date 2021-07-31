@@ -9,7 +9,7 @@ from django.http import HttpResponse, Http404
 from django.utils.formats import localize, date_format
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_DT_WENS, BLAZOEN2STR, BLAZOEN2STR_COMPACT
+from BasisTypen.models import COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_WENS_DT, BLAZOEN2STR, BLAZOEN2STR_COMPACT
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
@@ -415,11 +415,11 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         # for
 
         # schutters met recurve boog willen mogelijk DT
-        voorkeur_dt = (SchutterVoorkeuren
-                       .objects
-                       .select_related('nhblid')
-                       .filter(voorkeur_dutchtarget_18m=True)
-                       .values_list('nhblid__nhb_nr', flat=True))
+        voorkeur_eigen_blazoen = (SchutterVoorkeuren
+                                  .objects
+                                  .select_related('nhblid')
+                                  .filter(voorkeur_eigen_blazoen=True)
+                                  .values_list('nhblid__nhb_nr', flat=True))
 
         for deelnemer in deelnemers:
             klasse = deelnemer.klasse.indiv
@@ -432,8 +432,8 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
             if blazoenen[0] != blazoenen[1]:
                 # meerder mogelijkheden
                 if BLAZOEN_DT in blazoenen:
-                    if deelnemer.schutterboog.nhblid.nhb_nr in voorkeur_dt:
-                        blazoen = BLAZOEN_DT_WENS
+                    if deelnemer.schutterboog.nhblid.nhb_nr in voorkeur_eigen_blazoen:
+                        blazoen = BLAZOEN_WENS_DT
 
             try:
                 blazoen_count[blazoen][deelnemer.inschrijf_voorkeur_dagdeel] += 1
@@ -608,7 +608,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="behoefte-%s.csv"' % regio.regio_nr
 
-        writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
+        writer = csv.writer(response, delimiter=";")      # ; is good for import with dutch regional settings
 
         # voorkeur dagdelen per vereniging
         writer.writerow(['ver_nr', 'Naam'] + context['dagdelen'] + ['Totaal'])
@@ -687,11 +687,11 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
         context['blazoenen'] = [BLAZOEN2STR_COMPACT[blazoen] for blazoen in COMPETITIE_BLAZOENEN[afstand]]
 
         # schutters met recurve boog willen mogelijk DT
-        voorkeur_dt = (SchutterVoorkeuren
-                       .objects
-                       .select_related('nhblid')
-                       .filter(voorkeur_dutchtarget_18m=True)
-                       .values_list('nhblid__nhb_nr', flat=True))
+        voorkeur_eigen_blazoen = (SchutterVoorkeuren
+                                  .objects
+                                  .select_related('nhblid')
+                                  .filter(voorkeur_eigen_blazoen=True)
+                                  .values_list('nhblid__nhb_nr', flat=True))
 
         # zoek alle wedstrijdplannen in deze deelcompetitie (1 per cluster + 1 voor de regio)
         plan_pks = list(DeelcompetitieRonde
@@ -742,8 +742,8 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                 if blazoenen[0] != blazoenen[1]:
                     # meerder mogelijkheden
                     if BLAZOEN_DT in blazoenen_dict:
-                        if deelnemer.schutterboog.nhblid.nhb_nr in voorkeur_dt:
-                            blazoen = BLAZOEN_DT_WENS
+                        if deelnemer.schutterboog.nhblid.nhb_nr in voorkeur_eigen_blazoen:
+                            blazoen = BLAZOEN_WENS_DT
 
                 blazoenen_dict[blazoen] += 1
             # for  deelnemer
@@ -811,11 +811,11 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
         afstand = deelcomp.competitie.afstand
 
         # schutters met recurve boog willen mogelijk DT
-        voorkeur_dt = (SchutterVoorkeuren
-                       .objects
-                       .select_related('nhblid')
-                       .filter(voorkeur_dutchtarget_18m=True)
-                       .values_list('nhblid__nhb_nr', flat=True))
+        voorkeur_eigen_blazoen = (SchutterVoorkeuren
+                                  .objects
+                                  .select_related('nhblid')
+                                  .filter(voorkeur_eigen_blazoen=True)
+                                  .values_list('nhblid__nhb_nr', flat=True))
 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="inschrijf-keuzes-%s.csv"' % regio.regio_nr
@@ -877,8 +877,8 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
                 if blazoenen[0] != blazoenen[1]:
                     # meerder mogelijkheden
                     if BLAZOEN_DT in blazoenen_dict:
-                        if deelnemer.schutterboog.nhblid.nhb_nr in voorkeur_dt:
-                            blazoen = BLAZOEN_DT_WENS
+                        if deelnemer.schutterboog.nhblid.nhb_nr in voorkeur_eigen_blazoen:
+                            blazoen = BLAZOEN_WENS_DT
 
                 blazoenen_dict[blazoen] += 1
             # for  deelnemer

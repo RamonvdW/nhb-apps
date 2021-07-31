@@ -179,7 +179,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
                     with self.assert_max_queries(20):
                         resp = self.client.post(url_voorkeuren, {'nhblid_pk': nhb_nr,
                                                                  'schiet_R': 'on',
-                                                                 'voorkeur_dt': 'on'})
+                                                                 'voorkeur_eigen_blazoen': 'on'})
                     # onthoud deze schutterboog om straks in bulk aan te melden
                     # 'lid_NNNNNN_boogtype_MM'
                     post_params['lid_%s_boogtype_%s' % (nhb_nr, recurve_boog_pk)] = 'on'
