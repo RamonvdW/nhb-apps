@@ -94,7 +94,8 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         # gebruiker moet valide e-mailadres invoeren via POST
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_vergeten, {'email': 'normaal@test.com'})
+            resp = self.client.post(self.url_vergeten, {'nhb_nr': 'normaal',
+                                                        'email': 'normaal@test.com'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/email_wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
@@ -138,6 +139,18 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.client.logout()
         self.e2e_login(self.account_normaal, wachtwoord=nieuw_ww)
 
+    def test_dupe_email(self):
+        # maak nog een account aan met hetzelfde e-mailadres
+        # door ook het de inlog naam op te geven lukt het toch om het wachtwoord te resetten
+        account_twee = self.e2e_create_account('twee', 'normaal@test.com', 'Twee')  # dupe email
+        self.assertTrue(str(account_twee) != '')    # coverage for __str__
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_vergeten, {'nhb_nr': 'twee',
+                                                        'email': 'normaal@test.com'})
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/email_wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
+
     def test_vergeten_geblokkeerd(self):
         # raak het pad in receive_wachtwoord_vergeten waarbij plugin blokkeert
 
@@ -147,7 +160,8 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         # gebruiker moet valide e-mailadres invoeren via POST
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_vergeten, {'email': 'normaal@test.com'})
+            resp = self.client.post(self.url_vergeten, {'nhb_nr': 'normaal',
+                                                        'email': 'normaal@test.com'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/email_wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
@@ -179,7 +193,8 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         # gebruiker moet valide e-mailadres invoeren via POST
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_vergeten, {'email': 'normaal@test.com'})
+            resp = self.client.post(self.url_vergeten, {'nhb_nr': 'normaal',
+                                                        'email': 'normaal@test.com'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/email_wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
@@ -232,7 +247,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Voer het e-mailadres in van een bestaand account')
+        self.assertContains(resp, 'Voer een valide e-mailadres in van een bestaand account')
 
         # niet valide e-mailadres
         with self.assert_max_queries(20):
@@ -240,23 +255,16 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Voer het e-mailadres in van een bestaand account')
+        self.assertContains(resp, 'Voer een valide e-mailadres in van een bestaand account')
 
         # niet bestaand valide e-mailadres
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_vergeten, {'email': 'als.het.maar@test.org'})
+            resp = self.client.post(self.url_vergeten, {'nhb_nr': '123456',
+                                                        'email': 'als.het.maar@test.org'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Voer het e-mailadres in van een bestaand account')
-
-        account_twee = self.e2e_create_account('twee', 'normaal@test.com', 'Twee')  # dupe email
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_vergeten, {'email': 'normaal@test.com'})
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('account/wachtwoord-vergeten.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Er is een probleem met dit e-mailadres. Neem contact op met het bondsburo!')
+        self.assertContains(resp, 'Voer het e-mailadres en NHB nummer in van een bestaand account')
 
 
 # TODO: controleer dat andere sessies van deze gebruiker verdwijnen bij wijzigen wachtwoord?
