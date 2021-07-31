@@ -682,11 +682,19 @@ class E2EHelpers(object):
 
     def assert403(self, resp):
         # controleer dat we op de speciale code-403 handler pagina gekomen zijn
+        if resp.status_code != 200:
+            self.e2e_dump_resp(resp)
+            self.fail(msg="Unexpected real status code %s instead of 403" % resp.status_code)
+
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
 
     def assert404(self, resp, expected_msg=''):
         # self.assertEqual(resp.status_code, 404)
+        if resp.status_code != 200:
+            self.e2e_dump_resp(resp)
+            self.fail(msg="Unexpected real status code %s instead of 404" % resp.status_code)
+
         # controleer dat we op de speciale code-404 handler pagina gekomen zijn
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
