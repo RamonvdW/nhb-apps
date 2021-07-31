@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2020 Ramon van der Winkel.
+                Copyright (c) 2019-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -16,18 +16,22 @@
 
     <p>Op deze pagina tonen we de toegekende Nederlandse Records van de handboogsport.</p>
 
-    <p>Bekijk een lijst met alle records die verbeterd kunnen worden:<br>
-        <a class="btn-nhb-blauw" href="{% url 'Records:indiv-verbeterbaar' %}">Verbeterbare records</a></p>
 
-    <p>Vind een record door te filteren:<br>
-        <a class="btn-nhb-blauw" href="{% url 'Records:indiv' %}">Individuele records</a></p>
+    <p>&nbsp;</p>
+    <h5>Snel vinden</h5>
 
-    <p>Zoek in de records op naam van de sporter of een vereniging:<br>
-        <a class="btn-nhb-blauw" href="{% url 'Records:zoek' %}">Zoek in de records</a></p>
+    {% url 'Records:indiv-verbeterbaar' as card_url %}
+    {% include 'plein/card.dtl' with title="Verbeterbaar" text="Vind met een paar kliks de records die verbeterd kunnen worden." icon="leaderboard" url=card_url %}
+
+    {% url 'Records:indiv' as card_url %}
+    {% include 'plein/card.dtl' with title="Filteren" text="Vind records van interesse door te filteren op boog, klasse, etc." icon="filter_alt" url=card_url %}
+
+    {% url 'Records:zoek' as card_url %}
+    {% include 'plein/card.dtl' with title="Zoeken" text="Zoek in de records op naam van de sporter of een vereniging." icon="search" url=card_url %}
+
 
     <p>&nbsp;</p>
     <h5>De nieuwste toegekende records</h5>
-
     <div class="row">
         {% for obj in object_list %}
             <div class="nhb-card">

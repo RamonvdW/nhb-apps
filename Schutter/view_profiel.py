@@ -58,7 +58,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     .order_by('histcompetitie__comp_type',      # 18/25
                               '-histcompetitie__seizoen')):     # jaartal, aflopend
             obj.competitie_str = HistCompetitie.comptype2str[obj.histcompetitie.comp_type]
-            obj.seizoen_str = 'Seizoen ' + obj.histcompetitie.seizoen
+            obj.seizoen_str = obj.histcompetitie.seizoen
             try:
                 obj.boog_str = boogtype2str[obj.boogtype]
             except KeyError:
@@ -151,6 +151,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                 boogafk2schutterboog[afkorting] = schutterboog
         # for
 
+        moet_bogen_kiezen = (len(boogafk2schutterboog) == 0)
+        gebruik_knoppen = False
+
         # zoek alle inschrijvingen van deze schutter erbij
         inschrijvingen = list(RegioCompetitieSchutterBoog
                               .objects
@@ -159,7 +162,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         if not voorkeuren.voorkeur_meedoen_competitie:
             if len(inschrijvingen) == 0:        # niet nodig om "afmelden" knoppen te tonen
-                return None
+                return None, moet_bogen_kiezen, gebruik_knoppen
 
         objs = list()
 
@@ -198,10 +201,12 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                         if comp.fase <= 'B':
                             obj.url_afmelden = reverse('Schutter:afmelden',
                                                        kwargs={'deelnemer_pk': inschrijving.pk})
+                            gebruik_knoppen = True
 
                         if obj.inschrijf_methode == INSCHRIJF_METHODE_1 and comp.fase <= 'E':
                             obj.url_schietmomenten = reverse('Schutter:schietmomenten',
                                                              kwargs={'deelnemer_pk': inschrijving.pk})
+                            gebruik_knoppen = True
                         break
                 # for
 
@@ -211,6 +216,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                         obj.url_aanmelden = reverse('Schutter:bevestig-aanmelden',
                                                     kwargs={'schutterboog_pk': schutterboog.pk,
                                                             'deelcomp_pk': obj.pk})
+                        gebruik_knoppen = True
             # for
         # for
 
@@ -230,9 +236,10 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             if comp.fase <= 'B':
                 obj.url_afmelden = reverse('Schutter:afmelden',
                                            kwargs={'deelnemer_pk': inschrijving.pk})
+                gebruik_knoppen = True
         # for
 
-        return objs
+        return objs, moet_bogen_kiezen, gebruik_knoppen
 
     @staticmethod
     def _find_gemiddelden(nhblid, alle_bogen):
@@ -365,16 +372,22 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         context['nhblid'] = nhblid
         context['records'], context['show_loc'] = self._find_records(nhblid)
         context['histcomp'] = self._find_histcomp_scores(nhblid, alle_bogen)
-        context['toon_bondscompetities'] = False
 
+        context['toon_bondscompetities'] = False
         if nhblid.bij_vereniging and not nhblid.bij_vereniging.geen_wedstrijden:
             context['toon_bondscompetities'] = True
+
             context['competities'] = comps = self._find_competities(voorkeuren)
-            context['regiocompetities'] = regiocomp = self._find_regiocompetities(comps, nhblid, voorkeuren, alle_bogen)
+
+            regiocomps, moet_bogen_kiezen, gebruik_knoppen = self._find_regiocompetities(comps, nhblid, voorkeuren, alle_bogen)
+            context['regiocompetities'] = regiocomps
+            context['moet_bogen_kiezen'] = moet_bogen_kiezen
+            context['gebruik_knoppen'] = gebruik_knoppen
+
             context['gemiddelden'], context['heeft_ags'] = self._find_gemiddelden(nhblid, alle_bogen)
 
             if not voorkeuren.voorkeur_meedoen_competitie:
-                if regiocomp is None:
+                if regiocomps is None:
                     # niet ingeschreven en geen interesse
                     context['toon_bondscompetities'] = False
 
