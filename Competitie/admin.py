@@ -83,7 +83,8 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
                            'klasse__indiv',
                            'klasse__team',
                            'schutterboog',
-                           'schutterboog__nhblid')
+                           'schutterboog__nhblid',
+                           'schutterboog__boogtype')
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
@@ -222,7 +223,6 @@ class RegiocompetitieRondeTeamAdmin(admin.ModelAdmin):
 
     readonly_fields = ('team', 'ronde_nr')
 
-
     fieldsets = (
         ('',
             {'fields': ('team',
@@ -234,27 +234,34 @@ class RegiocompetitieRondeTeamAdmin(admin.ModelAdmin):
              }),
     )
 
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self.deelcomp = None
+        self.ver = None
+
     def get_form(self, request, obj=None, **kwargs):
         if obj:                     # pragma: no cover
             team = obj.team
             self.deelcomp = team.deelcompetitie
             self.ver = team.vereniging
+        else:
+            self.deelcomp = self.ver = None
 
         return super().get_form(request, obj, **kwargs)
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
-        if db_field.name == 'schutters':
-            kwargs['queryset'] = (RegioCompetitieSchutterBoog
-                                  .objects
-                                  .select_related('schutterboog',
-                                                  'schutterboog__nhblid',
-                                                  'schutterboog__boogtype')
-                                  .filter(deelcompetitie=self.deelcomp,
-                                          bij_vereniging=self.ver,
-                                          inschrijf_voorkeur_team=True))
+    def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
+        if self.deelcomp and self.ver:
+            if db_field.name == 'schutters':
+                kwargs['queryset'] = (RegioCompetitieSchutterBoog
+                                      .objects
+                                      .select_related('schutterboog',
+                                                      'schutterboog__nhblid',
+                                                      'schutterboog__boogtype')
+                                      .filter(deelcompetitie=self.deelcomp,
+                                              bij_vereniging=self.ver,
+                                              inschrijf_voorkeur_team=True))
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
 
 
 admin.site.register(Competitie)
