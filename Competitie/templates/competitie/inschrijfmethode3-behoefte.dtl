@@ -53,11 +53,11 @@
         </tr>
 
         <tr class="nhb-grijs">
-            <td>
+            <td colspan="{{ dagdelen|length }}">
                 <p>&nbsp;</p>
                 <h5>Aantal sporters per blazoen type:</h5>
             </td>
-            {% for beschrijving in dagdelen %}<td></td>{% endfor %}
+            <td></td>   <!-- type kolom -->
             <td></td>   <!-- totalen -->
         </tr>
 

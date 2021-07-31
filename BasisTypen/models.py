@@ -23,6 +23,28 @@ BLAZOEN_40CM = '40'
 BLAZOEN_60CM = '60'
 BLAZOEN_60CM_4SPOT = '4S'
 BLAZOEN_DT = 'DT'
+BLAZOEN_DT_WENS = 'DTw'
+
+BLAZOEN2STR = {
+    BLAZOEN_40CM: '40cm',
+    BLAZOEN_60CM: '60cm',
+    BLAZOEN_60CM_4SPOT: '60cm 4-spot',
+    BLAZOEN_DT: 'Dutch Target',
+    BLAZOEN_DT_WENS: 'Dutch Target (wens)'
+}
+
+BLAZOEN2STR_COMPACT = {
+    BLAZOEN_40CM: '40cm',
+    BLAZOEN_60CM: '60cm',
+    BLAZOEN_60CM_4SPOT: '60cm 4sp',
+    BLAZOEN_DT: 'DT',
+    BLAZOEN_DT_WENS: 'DT (wens)'
+}
+
+COMPETITIE_BLAZOENEN = {
+    '18': (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_DT_WENS, BLAZOEN_60CM),
+    '25': (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT)
+}
 
 BLAZOEN_CHOICES = [
     (BLAZOEN_40CM, '40cm'),
@@ -30,13 +52,6 @@ BLAZOEN_CHOICES = [
     (BLAZOEN_60CM_4SPOT, '60cm 4-spot'),
     (BLAZOEN_DT, 'Dutch Target')
 ]
-
-BLAZOEN2STR = {
-    BLAZOEN_40CM: '40cm',
-    BLAZOEN_60CM: '60cm',
-    BLAZOEN_60CM_4SPOT: '60cm 4-spot',
-    BLAZOEN_DT: 'Dutch Target'
-}
 
 
 class BoogType(models.Model):

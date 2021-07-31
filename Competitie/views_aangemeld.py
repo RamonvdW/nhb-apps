@@ -6,9 +6,10 @@
 
 from django.urls import reverse
 from django.http import HttpResponse, Http404
-from django.utils.formats import localize
+from django.utils.formats import localize, date_format
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from BasisTypen.models import COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_DT_WENS, BLAZOEN2STR, BLAZOEN2STR_COMPACT
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
@@ -28,17 +29,6 @@ TEMPLATE_COMPETITIE_INSCHRIJFMETHODE3_BEHOEFTE = 'competitie/inschrijfmethode3-b
 JA_NEE = {
     False: 'Nee',
     True: 'Ja'
-}
-
-BLAZOEN_DT_C = 'DT Compound'
-BLAZOEN_DT_R = 'DT Recurve (wens)'
-BLAZOEN_40CM = '40cm'
-BLAZOEN_60CM = '60cm'
-BLAZOEN_60CM_C = '60cm Compound'
-
-COMP_BLAZOENEN = {
-    '18': (BLAZOEN_40CM, BLAZOEN_DT_C, BLAZOEN_DT_R, BLAZOEN_60CM),
-    '25': (BLAZOEN_60CM, BLAZOEN_60CM_C)
 }
 
 
@@ -329,7 +319,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         return rol_nu == Rollen.ROL_RCL
 
     @staticmethod
-    def _maak_data_dagdeel_behoefte(context, deelcomp, objs, regio):
+    def _maak_data_dagdeel_behoefte(context, deelcomp, deelnemers, regio):
         """ voegt de volgende elementen toe aan de context:
                 regio_verenigingen: lijst van NhbVereniging met counts_list met telling van dagdelen
                 dagdelen: beschrijving van dagdelen voor de kolom headers
@@ -363,13 +353,13 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
 
         # doe de telling voor alle ingeschreven schutters
         # objs = RegioCompetitieSchutterBoog
-        for obj in objs:
+        for deelnemer in deelnemers:
             try:
-                nhb_ver = vers_dict[obj.bij_vereniging.ver_nr]
+                nhb_ver = vers_dict[deelnemer.bij_vereniging.ver_nr]
             except KeyError:
                 pass
             else:
-                afkorting = obj.inschrijf_voorkeur_dagdeel
+                afkorting = deelnemer.inschrijf_voorkeur_dagdeel
                 try:
                     nhb_ver.counts_dict[afkorting] += 1
                 except KeyError:
@@ -387,7 +377,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
             nhb_ver.counts_list = list()
             som = 0
             for afkorting in DAGDEEL_AFKORTINGEN:
-                if alles_mag or (afkorting in deelcomp.toegestane_dagdelen):
+                if alles_mag or (afkorting in dagdelen_spl):
                     count = nhb_ver.counts_dict[afkorting]
                     nhb_ver.counts_list.append(count)
                     totals[afkorting] += count
@@ -399,7 +389,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         context['totalen'] = totalen = list()
         som = 0
         for afkorting in DAGDEEL_AFKORTINGEN:
-            if alles_mag or (afkorting in deelcomp.toegestane_dagdelen):
+            if alles_mag or (afkorting in dagdelen_spl):
                 count = totals[afkorting]
                 totalen.append(count)
                 som += count
@@ -407,17 +397,18 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         totalen.append(som)
 
     @staticmethod
-    def _maak_data_blazoen_behoefte(context, deelcomp, objs):
+    def _maak_data_blazoen_behoefte(context, deelcomp, deelnemers):
         """ maak het overzicht hoeveel blazoenen er nodig zijn
             voor elk dagdeel
         """
 
         afstand = deelcomp.competitie.afstand
         alles_mag = (deelcomp.toegestane_dagdelen == '')
+        dagdelen_spl = deelcomp.toegestane_dagdelen.split(',')
 
-        blazoenen = dict()
-        for blazoen in COMP_BLAZOENEN[afstand]:
-            blazoenen[blazoen] = afk_count = dict()
+        blazoen_count = dict()
+        for blazoen in COMPETITIE_BLAZOENEN[afstand]:
+            blazoen_count[blazoen] = afk_count = dict()
             for afkorting in DAGDEEL_AFKORTINGEN:
                 afk_count[afkorting] = 0
             # for
@@ -430,56 +421,38 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                        .filter(voorkeur_dutchtarget_18m=True)
                        .values_list('nhblid__nhb_nr', flat=True))
 
-        # objs = RegioCompetitieSchutterBoog
-        for obj in objs:
-            boog_afkorting = obj.schutterboog.boogtype.afkorting
+        for deelnemer in deelnemers:
+            klasse = deelnemer.klasse.indiv
             if afstand == '18':
-                # 18m wordt geschoten op 40cm blazoen
-                #       uitzondering: alle Compound + Recurve klasse 1+2
-                #       uitzondering: aspiranten schieten op 60cm blazoen
-                # recurve schutters mogen voorkeur voor DT opgeven
-
-                blazoen = BLAZOEN_40CM
-                if boog_afkorting == 'C':
-                    # dit is inclusief alle compound teams
-                    blazoen = 'DT Compound'
-                elif boog_afkorting == 'R':
-                    # TODO: tel Recurve klasse 1+2, Recurve ERE teams
-                    # deze schutter heeft misschien voorkeur voor DT
-                    if obj.schutterboog.nhblid.nhb_nr in voorkeur_dt:
-                        blazoen = BLAZOEN_DT_R
-
-                # controleer of schutter een aspirant is
-                # TODO: omzetten naar "is_aspirant()" en ook de compound asp meenemen!DT
-                if obj.klasse.indiv.niet_voor_rk_bk and not obj.klasse.indiv.is_onbekend:
-                    # schutterboog is ingeschreven in een aspirant klasse
-                    blazoen = BLAZOEN_60CM
+                blazoenen = (klasse.blazoen1_18m_regio, klasse.blazoen2_18m_regio)
             else:
-                # 25m wordt geschoten op 60cm blazoen
-                #       aspiranten schieten op 18m
-                #       compound kan een eigen klein blazoen krijgen??
-                blazoen = BLAZOEN_60CM
-                if boog_afkorting == 'C':
-                    blazoen = BLAZOEN_60CM_C
+                blazoenen = (klasse.blazoen1_25m_regio, klasse.blazoen2_25m_regio)
+
+            blazoen = blazoenen[0]
+            if blazoenen[0] != blazoenen[1]:
+                # meerder mogelijkheden
+                if BLAZOEN_DT in blazoenen:
+                    if deelnemer.schutterboog.nhblid.nhb_nr in voorkeur_dt:
+                        blazoen = BLAZOEN_DT_WENS
 
             try:
-                blazoenen[blazoen][obj.inschrijf_voorkeur_dagdeel] += 1
+                blazoen_count[blazoen][deelnemer.inschrijf_voorkeur_dagdeel] += 1
             except KeyError:
                 pass
         # for
 
         # converteer naar lijstjes met vaste volgorde van de dagdelen
         context['blazoen_count'] = blazoen_behoefte = list()
-        for blazoen in COMP_BLAZOENEN[afstand]:     # bepaalt volgorde
+        for blazoen in COMPETITIE_BLAZOENEN[afstand]:     # bepaalt volgorde
             kolommen = list()
             blazoen_behoefte.append(kolommen)
 
-            kolommen.append(blazoen)        # 1e kolom: beschrijving blazoen
+            kolommen.append(BLAZOEN2STR[blazoen])        # 1e kolom: beschrijving blazoen
 
             som = 0
-            tellingen = blazoenen[blazoen]
+            tellingen = blazoen_count[blazoen]
             for afkorting in DAGDEEL_AFKORTINGEN:
-                if alles_mag or (afkorting in deelcomp.toegestane_dagdelen):
+                if alles_mag or (afkorting in dagdelen_spl):
                     count = tellingen[afkorting]
                     kolommen.append(count)
                     som += count
@@ -528,22 +501,22 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_3:
             raise Http404('Verkeerde inschrijfmethode')
 
-        objs = (RegioCompetitieSchutterBoog
-                .objects
-                .select_related('klasse',
-                                'klasse__indiv',
-                                'deelcompetitie',
-                                'bij_vereniging',
-                                'schutterboog',
-                                'schutterboog__boogtype',
-                                'schutterboog__nhblid',
-                                'schutterboog__nhblid__bij_vereniging')
-                .filter(deelcompetitie=deelcomp)
-                .order_by('klasse__indiv__volgorde',
-                          'ag_voor_indiv'))             # TODO: niet nodig??
+        deelnemers = (RegioCompetitieSchutterBoog
+                      .objects
+                      .select_related('klasse',
+                                      'klasse__indiv',
+                                      'deelcompetitie',
+                                      'bij_vereniging',
+                                      'schutterboog',
+                                      'schutterboog__boogtype',
+                                      'schutterboog__nhblid',
+                                      'schutterboog__nhblid__bij_vereniging')
+                      .filter(deelcompetitie=deelcomp)
+                      .order_by('klasse__indiv__volgorde',
+                                'ag_voor_indiv'))
 
         volgorde = -1
-        for obj in objs:
+        for obj in deelnemers:
             obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]
             if volgorde != obj.klasse.indiv.volgorde:
                 obj.nieuwe_klasse = True
@@ -551,8 +524,8 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         # for
 
         # voeg de tabel met dagdeel-behoefte toe
-        self._maak_data_dagdeel_behoefte(context, deelcomp, objs, regio)
-        self._maak_data_blazoen_behoefte(context, deelcomp, objs)
+        self._maak_data_dagdeel_behoefte(context, deelcomp, deelnemers, regio)
+        self._maak_data_blazoen_behoefte(context, deelcomp, deelnemers)
 
         # context['url_terug'] = reverse('Competitie:lijst-regiocomp-regio',
         #                                kwargs={'comp_pk': comp.pk,
@@ -622,7 +595,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
                                 'schutterboog__nhblid__bij_vereniging')
                 .filter(deelcompetitie=deelcomp)
                 .order_by('klasse__indiv__volgorde',
-                          'ag_voor_indiv'))         # TODO: niet nodig?
+                          'ag_voor_indiv'))
 
         context['object_list'] = objs
 
@@ -711,7 +684,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
             raise Http404('Verkeerde inschrijfmethode')
 
         afstand = deelcomp.competitie.afstand
-        context['blazoenen'] = COMP_BLAZOENEN[afstand]
+        context['blazoenen'] = [BLAZOEN2STR_COMPACT[blazoen] for blazoen in COMPETITIE_BLAZOENEN[afstand]]
 
         # schutters met recurve boog willen mogelijk DT
         voorkeur_dt = (SchutterVoorkeuren
@@ -734,17 +707,20 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                        .order_by('datum_wanneer',
                                  'tijd_begin_wedstrijd',
                                  'vereniging__ver_nr'))
+
+        context['wedstrijden'] = wedstrijden
+
         for wedstrijd in wedstrijden:
-            wedstrijd.beschrijving_str = "%s om %s" % (localize(wedstrijd.datum_wanneer),
+            wedstrijd.beschrijving_str = "%s om %s" % (date_format(wedstrijd.datum_wanneer, "l j E Y"),
                                                        wedstrijd.tijd_begin_wedstrijd.strftime("%H:%M"))
             wedstrijd.locatie_str = str(wedstrijd.vereniging)
             wedstrijd.keuze_count = wedstrijd.regiocompetitieschutterboog_set.count()
 
             deelnemer_pks = wedstrijd.regiocompetitieschutterboog_set.values_list('pk', flat=True)
 
-            blazoenen = dict()
-            for blazoen in COMP_BLAZOENEN[afstand]:
-                blazoenen[blazoen] = 0
+            blazoenen_dict = dict()
+            for blazoen in COMPETITIE_BLAZOENEN[afstand]:
+                blazoenen_dict[blazoen] = 0
             # for
 
             for deelnemer in (RegioCompetitieSchutterBoog
@@ -756,42 +732,26 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                                               'klasse__indiv')
                               .filter(pk__in=deelnemer_pks)):
 
-                boog_afkorting = deelnemer.schutterboog.boogtype.afkorting
-
+                klasse = deelnemer.klasse.indiv
                 if afstand == '18':
-                    # 18m wordt geschoten op 40cm blazoen
-                    #       uitzondering: alle Compound + Recurve klasse 1+2
-                    #       uitzondering: aspiranten schieten op 60cm blazoen
-                    # recurve schutters mogen voorkeur voor DT opgeven
-
-                    blazoen = BLAZOEN_40CM
-                    if boog_afkorting == 'C':
-                        blazoen = 'DT Compound'
-                    elif boog_afkorting == 'R':
-                        # deze schutter heeft misschien voorkeur voor DT
-                        if deelnemer.schutterboog.nhblid.nhb_nr in voorkeur_dt:
-                            blazoen = BLAZOEN_DT_R
-
-                    # controleer of schutter een aspirant is
-                    if deelnemer.klasse.indiv.niet_voor_rk_bk and not deelnemer.klasse.indiv.is_onbekend:
-                        # schutterboog is ingeschreven in een aspirant klasse
-                        blazoen = BLAZOEN_60CM
+                    blazoenen = (klasse.blazoen1_18m_regio, klasse.blazoen2_18m_regio)
                 else:
-                    # 25m wordt geschoten op 60cm blazoen
-                    #       aspiranten schieten op 18m
-                    #       compound kan een eigen klein blazoen krijgen??
-                    blazoen = BLAZOEN_60CM
-                    if boog_afkorting == 'C':
-                        blazoen = BLAZOEN_60CM_C
+                    blazoenen = (klasse.blazoen1_25m_regio, klasse.blazoen2_25m_regio)
 
-                blazoenen[blazoen] += 1
+                blazoen = blazoenen[0]
+                if blazoenen[0] != blazoenen[1]:
+                    # meerder mogelijkheden
+                    if BLAZOEN_DT in blazoenen_dict:
+                        if deelnemer.schutterboog.nhblid.nhb_nr in voorkeur_dt:
+                            blazoen = BLAZOEN_DT_WENS
+
+                blazoenen_dict[blazoen] += 1
             # for  deelnemer
 
             # convert dict to list
-            wedstrijd.blazoen_count = [blazoenen[blazoen] for blazoen in COMP_BLAZOENEN[afstand]]
+            wedstrijd.blazoen_count = [blazoenen_dict[blazoen] for blazoen in COMPETITIE_BLAZOENEN[afstand]]
 
         # for  wedstrijd
-        context['wedstrijden'] = wedstrijden
 
         context['url_download'] = reverse('Competitie:inschrijfmethode1-behoefte-als-bestand',
                                           kwargs={'comp_pk': comp.pk,
@@ -848,13 +808,24 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
         if deelcomp.inschrijf_methode != INSCHRIJF_METHODE_1:
             raise Http404('Verkeerde inschrijfmethode')
 
+        afstand = deelcomp.competitie.afstand
+
+        # schutters met recurve boog willen mogelijk DT
+        voorkeur_dt = (SchutterVoorkeuren
+                       .objects
+                       .select_related('nhblid')
+                       .filter(voorkeur_dutchtarget_18m=True)
+                       .values_list('nhblid__nhb_nr', flat=True))
+
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="inschrijf-keuzes-%s.csv"' % regio.regio_nr
 
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
 
+        blazoen_headers = [BLAZOEN2STR_COMPACT[blazoen] for blazoen in COMPETITIE_BLAZOENEN[afstand]]
+
         # wedstrijden header
-        writer.writerow(['Nummer', 'Wedstrijd', 'Locatie'])
+        writer.writerow(['Nummer', 'Wedstrijd', 'Locatie', 'Blazoenen:'] + blazoen_headers)
 
         # zoek alle wedstrijdplannen in deze deelcompetitie (1 per cluster + 1 voor de regio)
         plan_pks = list(DeelcompetitieRonde
@@ -869,16 +840,54 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
                        .order_by('datum_wanneer',
                                  'tijd_begin_wedstrijd',
                                  'vereniging__ver_nr'))
+
+        # maak een blok met genummerde wedstrijden
+        # deze nummers komen verderop terug in de kruisjes met de sporters
         nr = 0
         kolom_pks = list()
         for wedstrijd in wedstrijden:
             kolom_pks.append(wedstrijd.pk)
             nr += 1
-            beschrijving = "%s om %s" % (localize(wedstrijd.datum_wanneer),
-                                         wedstrijd.tijd_begin_wedstrijd.strftime("%H:%M"))
+            beschrijving_str = "%s om %s" % (date_format(wedstrijd.datum_wanneer, "l j E Y"),
+                                             wedstrijd.tijd_begin_wedstrijd.strftime("%H:%M"))
 
-            # wedstrijd nr + beschrijving --> csv
-            writer.writerow([nr, beschrijving, wedstrijd.vereniging])
+            deelnemer_pks = wedstrijd.regiocompetitieschutterboog_set.values_list('pk', flat=True)
+
+            blazoenen_dict = dict()
+            for blazoen in COMPETITIE_BLAZOENEN[afstand]:
+                blazoenen_dict[blazoen] = 0
+            # for
+
+            for deelnemer in (RegioCompetitieSchutterBoog
+                              .objects
+                              .select_related('schutterboog',
+                                              'schutterboog__boogtype',
+                                              'schutterboog__nhblid',
+                                              'klasse',
+                                              'klasse__indiv')
+                              .filter(pk__in=deelnemer_pks)):
+
+                klasse = deelnemer.klasse.indiv
+                if afstand == '18':
+                    blazoenen = (klasse.blazoen1_18m_regio, klasse.blazoen2_18m_regio)
+                else:
+                    blazoenen = (klasse.blazoen1_25m_regio, klasse.blazoen2_25m_regio)
+
+                blazoen = blazoenen[0]
+                if blazoenen[0] != blazoenen[1]:
+                    # meerder mogelijkheden
+                    if BLAZOEN_DT in blazoenen_dict:
+                        if deelnemer.schutterboog.nhblid.nhb_nr in voorkeur_dt:
+                            blazoen = BLAZOEN_DT_WENS
+
+                blazoenen_dict[blazoen] += 1
+            # for  deelnemer
+
+            # convert dict to list
+            blazoen_count = [blazoenen_dict[blazoen] for blazoen in COMPETITIE_BLAZOENEN[afstand]]
+
+            # wedstrijd nr + beschrijving + blazoenen telling --> csv
+            writer.writerow([nr, beschrijving_str, wedstrijd.vereniging, ''] + blazoen_count)
         # for
 
         # sporters header
