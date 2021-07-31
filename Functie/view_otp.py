@@ -6,9 +6,12 @@
 
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from django.shortcuts import render
+from django.utils import timezone
+from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
-from Account.otp import account_otp_prepare_koppelen, account_otp_koppel, account_otp_controleer
+from django.contrib.auth.mixins import UserPassesTestMixin
+from Account.otp import account_otp_prepare_koppelen, account_otp_koppel, account_otp_controleer, account_otp_is_gekoppeld
+from Functie.rol import rol_evalueer_opnieuw, rol_get_huidige_functie, rol_mag_wisselen
 from Plein.menu import menu_dynamics
 from .models import account_needs_otp
 from .forms import OTPControleForm
@@ -16,8 +19,11 @@ from .maak_qrcode import qrcode_get
 
 
 TEMPLATE_OTP_CONTROLE = 'functie/otp-controle.dtl'
-TEMPLATE_OTP_KOPPELEN = 'functie/otp-koppelen.dtl'
 TEMPLATE_OTP_GEKOPPELD = 'functie/otp-koppelen-gelukt.dtl'
+TEMPLATE_OTP_KOPPELEN = 'functie/otp-koppelen-stap2-scan-qr-code.dtl'
+TEMPLATE_OTP_KOPPELEN_STAP1 = 'functie/otp-koppelen-stap1-uitleg.dtl'
+TEMPLATE_OTP_KOPPELEN_STAP2 = 'functie/otp-koppelen-stap2-scan-qr-code.dtl'
+TEMPLATE_OTP_KOPPELEN_STAP3 = 'functie/otp-koppelen-stap3-code-invoeren.dtl'
 
 
 class OTPControleView(TemplateView):
@@ -79,58 +85,97 @@ class OTPControleView(TemplateView):
         return render(request, TEMPLATE_OTP_CONTROLE, context)
 
 
-class OTPKoppelenView(TemplateView):
-    """ Met deze view kan de OTP koppeling tot stand gebracht worden
-    """
+class OTPKoppelenStapView(UserPassesTestMixin, TemplateView):
 
-    @staticmethod
-    def _account_needs_otp_or_redirect(request):
-        """ Controleer dat het account OTP nodig heeft, of wegsturen """
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+
+        # evalueer opnieuw welke rechten de gebruiker heeft
+        rol_evalueer_opnieuw(self.request)
+
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+
+        return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
+
+    def dispatch(self, request, *args, **kwargs):
+        """ wegsturen als de tweede factor niet meer gekoppeld hoeft te worden """
 
         if not request.user.is_authenticated:
-            # gebruiker is niet ingelogd, dus zou hier niet moeten komen
-            return None, HttpResponseRedirect(reverse('Plein:plein'))
+            return redirect('Plein:plein')
 
-        account = request.user
+        if account_otp_is_gekoppeld(request.user):
+            return redirect('Plein:plein')
 
-        if not account_needs_otp(account):
-            # gebruiker heeft geen OTP nodig
-            return account, HttpResponseRedirect(reverse('Plein:plein'))
+        return super().dispatch(request, *args, **kwargs)
 
-        if account.otp_is_actief:
-            # gebruiker is al gekoppeld, dus niet zomaar toestaan om een ander apparaat ook te koppelen!!
-            return account, HttpResponseRedirect(reverse('Plein:plein'))
 
-        return account, None
+class OTPKoppelenStap1View(OTPKoppelenStapView):
 
-    def get(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als een GET request ontvangen is
-        """
-        account, response = self._account_needs_otp_or_redirect(request)
-        if response:
-            return response
+    template_name = TEMPLATE_OTP_KOPPELEN_STAP1
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        context['url_stap_2'] = reverse('Functie:otp-koppelen-stap2')
+
+        menu_dynamics(self.request, context, actief="wissel-van-rol")
+        return context
+
+
+class OTPKoppelenStap2View(OTPKoppelenStapView):
+
+    template_name = TEMPLATE_OTP_KOPPELEN_STAP2
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        context['url_stap_1'] = reverse('Functie:otp-koppelen-stap1')
+        context['url_stap_3'] = reverse('Functie:otp-koppelen-stap3')
+
+        account = self.request.user
 
         # haal de QR code op (en alles wat daar voor nodig is)
         account_otp_prepare_koppelen(account)
-        qrcode = qrcode_get(account)
+        context['qrcode'] = qrcode_get(account)
 
         tmp = account.otp_code.lower()
-        secret = " ".join([tmp[i:i+4] for i in range(0, len(tmp), 4)])
+        context['otp_secret'] = " ".join([tmp[i:i+4] for i in range(0, len(tmp), 4)])
 
-        form = OTPControleForm()
-        context = {'form': form,
-                   'qrcode': qrcode,
-                   'otp_secret': secret}
-        menu_dynamics(request, context, actief="wissel-van-rol")
-        return render(request, TEMPLATE_OTP_KOPPELEN, context)
+        menu_dynamics(self.request, context, actief="wissel-van-rol")
+        return context
+
+
+class OTPKoppelenStap3View(OTPKoppelenStapView):
+
+    template_name = TEMPLATE_OTP_KOPPELEN_STAP3
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        context['url_stap_2'] = reverse('Functie:otp-koppelen-stap2')
+        context['url_controleer'] = reverse('Functie:otp-koppelen-stap3')
+
+        context['form'] = OTPControleForm()
+        context['now'] = timezone.now()
+
+        menu_dynamics(self.request, context, actief="wissel-van-rol")
+        return context
 
     def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de Controleer knop.
         """
-        account, response = self._account_needs_otp_or_redirect(request)
-        if response:
-            return response
+
+        account = request.user
 
         form = OTPControleForm(request.POST)
         if form.is_valid():
@@ -145,15 +190,17 @@ class OTPKoppelenView(TemplateView):
             form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
             # FUTURE: blokkeer na X pogingen
 
-        # still here --> re-render with error message
-        qrcode = qrcode_get(account)
-        tmp = account.otp_code.lower()
-        secret = " ".join([tmp[i:i+4] for i in range(0, len(tmp), 4)])
-        context = {'form': form,
-                   'qrcode': qrcode,
-                   'otp_secret': secret}
-        menu_dynamics(request, context, actief="wissel-van-rol")
-        return render(request, TEMPLATE_OTP_KOPPELEN, context)
 
+        # still here --> re-render with error message
+        context = dict()
+
+        context['url_stap_2'] = reverse('Functie:otp-koppelen-stap2')
+        context['url_controleer'] = reverse('Functie:otp-koppelen-stap3')
+
+        context['form'] = form
+        context['now'] = timezone.now()
+
+        menu_dynamics(request, context, actief="wissel-van-rol")
+        return render(request, self.template_name, context)
 
 # end of file

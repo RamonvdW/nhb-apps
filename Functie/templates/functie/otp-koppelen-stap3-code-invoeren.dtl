@@ -1,0 +1,79 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2019-2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Registreer tweede factor{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="otp-koppelen-stap3" %}
+
+    <h4>Koppel tweede factor</h4>
+
+    <p>&nbsp;</p>
+    <p>
+        <a class="btn-nhb-blauw margin-5" href="{{ url_stap_2 }}"><i class="material-icons-round left">arrow_back_ios</i>Terug naar stap 2</a>
+    </p>
+
+    <p>&nbsp;</p>
+    <h5>Stap 3</h5>
+    <div class="row white">
+        <div class="col s12">
+            <p>De laatste stap is het controleren dat de 6 cijfers goed aangemaakt worden.</p>
+            <p>Ga naar de applicatie en bekijk de 6 cijfers onder "MijnHandboogsport". Noteer dat de cijfers elke 30 seconden veranderen.</p>
+            <p>Tik deze 6 cijfers hieronder in en druk op de knop.</p>
+        </div>
+    </div>
+
+    <p>&nbsp;</p>
+    <div class="container z-depth-2 white">
+        <div class="row nhb-blauw white-text">
+            <div class="col s12 center-align">
+                <h5>Controleer de tweede factor</h5>
+                <p>Voer de 6 cijfers in om de koppeling te voltooien</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <form class="col s12" action="{{ url_controleer }}" method="post">
+                {% csrf_token %}
+
+                <div class="row"><div class="input-field col s12">
+                    {{ form.otp_code.label_tag }}{{ form.otp_code }}
+                </div></div>
+
+                {% if form.errors %}
+                <div class="row">
+                    <div class="col s2 m1 red-text">Fout:</div>
+                    {% for error in form.non_field_errors %}
+                    <div class="row"><div class="col s9 red-text">{{ error|escape }}</div></div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="row"><div class="col s12"></div>
+                    <div class="center-align">
+                        <input class="btn-nhb-blauw" name="button_login" type="submit" value="Controleer">
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <p>&nbsp;</p>
+    <h5>Tips</h5>
+    <div class="row white">
+        <div class="col s12">
+            <p>Let op dat de code niet net verandert terwijl je deze over tikt.</p>
+            <p>Het is niet mogelijk om de code op te schrijven en over een paar minuten pas te gebruiken.</p>
+            <p><b>Belangrijk:</b> de klok van je mobiel of tablet moet goed lopen, anders kloppen de 6 cijfers niet. Geeft het klokje ongeveer {{ now|date:'H:i' }} weer? Zo niet, schakel dan automatische tijd synchronisatie in (onder instellingen).</p>
+        </div>
+    </div>
+    <p>&nbsp;</p>
+
+
+{% endblock %}

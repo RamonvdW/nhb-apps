@@ -1,0 +1,86 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Koppel tweede factor{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="otp-koppelen-stap1" %}
+
+    <h4>Koppel tweede factor</h4>
+
+    <p>Voordat je als beheerder aan de slag kant moet je een extra beveiliging activeren: de tweede factor.</p>
+    <p>Hiervoor is een klein programma nodig.</p>
+
+    <p>&nbsp;</p>
+    <h5>Stappenplan</h5>
+    <div class="row white">
+        <div class="col s12">
+            <p>1. Installeer de applicatie op je mobiel of tablet.</p>
+            <p>2. Scan een QR-code om de koppeling te maken met MijnHandboogsport.</p>
+            <p>3. Voer 6 cijfers in om koppeling te controleren.</p>
+            <p></p>
+        </div>
+    </div>
+
+
+    <p>&nbsp;</p>
+    <h5>Stap 1</h5>
+    <div class="row white">
+        <div class="col s12">
+            <p>De applicatie die we nodig hebben kan elke 30 seconden een 6-cijferige code genereren, bijvoorbeeld 649012.</p>
+            <p>Wij adviseren om een apart apparaat (zoals een mobiele telefoon) te gebruiken voor deze applicatie.</p>
+            <p>Bekende applicaties zijn de gratis Google Authenticator en Authy. Installeer deze via de app store van je mobiel of tablet.</p>
+            <p>Via onderstaande knoppen kan je meer informatie krijgen over deze apps.</p>
+            <div style="margin-left:50px">
+                <p>
+                    <a class="btn-nhb-blauw" href="https://en.wikipedia.org/wiki/Google_Authenticator" target="_blank" rel="noopener noreferrer">
+                        <i class="material-icons-round left">open_in_new</i>Google Authenticator</a>&nbsp;&nbsp;(Play store, Apple store)
+                </p>
+
+                <p>
+                    <a class="btn-nhb-blauw" href="https://authy.com" target="_blank" rel="noopener noreferrer">
+                        <i class="material-icons-round left">open_in_new</i>Authy</a>&nbsp;&nbsp;(Play store, Apple store)
+                </p>
+            </div>
+
+            <p>&nbsp;</p>
+            <p>Ook is het mogelijk om een plug-in voor je browser te gebruiken.</p>
+            <p>Een bekende extensie voor zowel Chrome als FireFox is Authenticator.</p>
+            <div style="margin-left:50px">
+                <p>
+                    <a class="btn-nhb-blauw" href="https://chrome.google.com/webstore/detail/authenticator/bhghoamapcdpbohphigoooaddinpkbai?hl=nl-nl" target="_blank" rel="noopener noreferrer">
+                        <i class="material-icons-round left">open_in_new</i>Authenticator</a>&nbsp;&nbsp;(extensie voor de Chrome browser)
+                </p>
+
+                <p>
+                    <a class="btn-nhb-blauw" href="https://addons.mozilla.org/en-GB/firefox/addon/auth-helper/" target="_blank" rel="noopener noreferrer">
+                        <i class="material-icons-round left">open_in_new</i>Authenticator</a>&nbsp;&nbsp;(extensie voor de FireFox browser)
+                </p>
+            </div>
+
+            <p>&nbsp;</p>
+            <p>Als je een applicatie of plug-in ge&iuml;nstalleerd hebt, dan kan je door naar de volgende stap.</p>
+        </div>
+    </div>
+
+    <p>&nbsp;</p>
+    <div class="row center-align">
+        <a class="btn-nhb-rood" href="{{ url_stap_2 }}"><i class="material-icons-round right">arrow_forward_ios</i>Verder naar stap 2</a>
+    </div>
+
+    <p>&nbsp;</p>
+    <h5>Ik heb een andere app!</h5>
+    <div class="row white">
+        <div class="col s12">
+            <p>MijnHandboogsport ondersteunt iedere applicatie die de TOPT (time-based one time password) standaard ondersteunt.</p>
+            <p></p>
+        </div>
+    </div>
+
+{% endblock %}

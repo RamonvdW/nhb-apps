@@ -90,15 +90,12 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # controleer dat de link naar het wisselen van rol op de pagina staat
         self.account_admin.otp_is_actief = False
         self.account_admin.save()
+
         self.e2e_login(self.account_admin)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assertNotContains(resp, 'IT beheerder')
-        self.assertNotContains(resp, 'Manager competitiezaken')
-        self.assertContains(resp, 'Gebruiker')
-        self.assertContains(resp, 'Controle met een tweede factor is verplicht voor gebruikers met toegang tot persoonsgegevens')
+        self.assert_is_redirect_not_plein(resp)
+
         self.account_admin.otp_is_actief = True
         self.account_admin.save()
 
