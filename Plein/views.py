@@ -104,7 +104,7 @@ class PleinView(View):
                 except KeyError:
                     handleiding_pagina = settings.HANDLEIDING_TOP
 
-                context['handleiding_url'] = reverse_handleiding(handleiding_pagina)
+                context['handleiding_url'] = reverse_handleiding(request, handleiding_pagina)
 
                 if rol_nu == Rollen.ROL_IT:
                     context['rol_is_it'] = True

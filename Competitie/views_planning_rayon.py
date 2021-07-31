@@ -632,7 +632,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
             context['aantal_bevestigd'] = aantal_bevestigd
             context['aantal_attentie'] = aantal_attentie
 
-        context['wiki_rk_schutters'] = reverse_handleiding(settings.HANDLEIDING_RK_SELECTIE)
+        context['wiki_rk_schutters'] = reverse_handleiding(self.request, settings.HANDLEIDING_RK_SELECTIE)
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
         return context
@@ -917,7 +917,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         context['url_terug'] = reverse('Competitie:kies')
 
-        context['wiki_rk_schutters'] = reverse_handleiding(settings.HANDLEIDING_RK_SELECTIE)
+        context['wiki_rk_schutters'] = reverse_handleiding(self.request, settings.HANDLEIDING_RK_SELECTIE)
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
         return context

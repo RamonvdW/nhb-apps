@@ -127,7 +127,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
                                          kwargs={'comp_pk': deelcomp.competitie.pk,
                                                  'regio_nr': deelcomp.nhb_regio.regio_nr})
 
-        context['wiki_rcl_regio_instellingen_url'] = reverse_handleiding(settings.HANDLEIDING_RCL_INSTELLINGEN_REGIO)
+        context['wiki_rcl_regio_instellingen_url'] = reverse_handleiding(self.request, settings.HANDLEIDING_RCL_INSTELLINGEN_REGIO)
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context
@@ -631,7 +631,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
         context['poules'] = poules
         context['url_nieuwe_poule'] = reverse('Competitie:regio-poules',
                                               kwargs={'deelcomp_pk': deelcomp.pk})
-        context['wiki_rcl_poules_url'] = reverse_handleiding(settings.HANDLEIDING_POULES)
+        context['wiki_rcl_poules_url'] = reverse_handleiding(self.request, settings.HANDLEIDING_POULES)
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context

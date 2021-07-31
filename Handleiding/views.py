@@ -13,11 +13,23 @@ from Plein.menu import menu_dynamics
 from Functie.rol import rol_mag_wisselen
 
 
-def reverse_handleiding(pagina):
+def reverse_handleiding(request, pagina):
     """ geeft de URL terug voor een handleiding pagina,
         voor de wiki of de statische pagina
     """
+
+    mag_op_wiki = False
     if settings.ENABLE_WIKI:
+        if request:
+            account = request.user
+            if account.is_authenticated:
+                if account.is_BB:
+                    mag_op_wiki = True
+        else:
+            # test only
+            mag_op_wiki = True
+
+    if mag_op_wiki:
         url = settings.WIKI_URL
         if url[-1] != '/':
             url += '/'
