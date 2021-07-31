@@ -39,7 +39,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('kampioenschap_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+            management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
         if show:                    # pragma: no coverage
             print(f1.getvalue())
