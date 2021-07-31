@@ -241,11 +241,15 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_wissel_naar_functie(self.functie_wl)
 
-        # controleer dat wijzig-email niet gebruikt mag worden
-        url = '/functie/wijzig-email/%s/' % self.functie_wl.pk
-        with self.assert_max_queries(1):
-            resp = self.client.get(url)
-        self.assert403(resp)
+        # controleer dat de juiste e-mailadressen wel/niet wijzigbaar zijn
+        self._check_niet_wijzigbaar(self.functie_bko1)
+        self._check_niet_wijzigbaar(self.functie_bko2)
+        self._check_niet_wijzigbaar(self.functie_rko1)
+        self._check_niet_wijzigbaar(self.functie_rcl101)
+        self._check_niet_wijzigbaar(self.functie_rcl105)
+        self._check_niet_wijzigbaar(self.functie_sec)
+        self._check_niet_wijzigbaar(self.functie_hwl)
+        self._check_wijzigbaar(self.functie_wl)
 
     def test_multi_change(self):
         # voer meerdere malen een e-mailadres is

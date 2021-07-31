@@ -136,8 +136,8 @@ def mag_email_wijzigen_of_403(request, functie):
     if not functie_nu:
         raise PermissionDenied()     # pragma: no cover
 
-    # SEC en HWL mogen email van HWL en WL aanpassen
-    if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
+    # SEC, HWL en WL mogen email van HWL en WL aanpassen
+    if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
         # alleen binnen eigen vereniging
         if functie_nu.nhb_ver != functie.nhb_ver:
             raise PermissionDenied('Verkeerde vereniging')
@@ -145,6 +145,10 @@ def mag_email_wijzigen_of_403(request, functie):
         if functie.rol not in ('HWL', 'WL'):
             # hier verdwijnt SEC in het putje
             # secretaris email is alleen aan te passen via Onze Relaties
+            raise PermissionDenied()
+
+        if rol_nu == Rollen.ROL_WL and functie.rol != 'WL':
+            # WL mag alleen zijn eigen e-mailadres aanpassen
             raise PermissionDenied()
 
         return
@@ -252,7 +256,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_SEC, Rollen.ROL_HWL)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def _get_functie_or_404(self):
         functie_pk = self.kwargs['functie_pk']
@@ -267,7 +271,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
         context = dict()
         context['functie'] = functie
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
             menu_dynamics(self.request, context, actief='vereniging')
         else:
@@ -321,7 +325,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
         context['functie'] = functie
 
         # stuur terug naar het overzicht
-        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
+        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
         else:
             context['terug_url'] = reverse('Functie:overzicht')
@@ -593,19 +597,26 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
             obj.wijzig_url = None
             obj.email_url = None
 
-            mag_wijzigen = False
+            mag_koppelen = False
+            mag_email_wijzigen = False
             if rol_nu == Rollen.ROL_SEC and obj.rol in ('SEC', 'HWL'):
                 # SEC mag andere SEC and HWL koppelen
-                mag_wijzigen = True
+                mag_koppelen = True
+                if obj.rol != 'SEC':
+                    # email voor secretaris komt uit Onze Relaties
+                    mag_email_wijzigen = True
             elif rol_nu == Rollen.ROL_HWL and obj.rol in ('HWL', 'WL'):
                 # HWL mag andere HWL en WL koppelen
-                mag_wijzigen = True
+                mag_koppelen = True
+                mag_email_wijzigen = True
+            elif rol_nu == Rollen.ROL_WL and obj.rol == 'WL':
+                mag_email_wijzigen = True
 
-            if mag_wijzigen:
+            if mag_koppelen:
                 obj.wijzig_url = reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': obj.pk})
-                # email voor secretaris komt uit Onze Relaties
-                if obj.rol != 'SEC':
-                    obj.email_url = reverse('Functie:wijzig-email', kwargs={'functie_pk': obj.pk})
+
+            if mag_email_wijzigen:
+                obj.email_url = reverse('Functie:wijzig-email', kwargs={'functie_pk': obj.pk})
         # for
 
         return self._sorteer(objs)
@@ -650,7 +661,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # alle competitie beheerders + HWL
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL)
+        return self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     @staticmethod
     def _sorteer_functies(objs):

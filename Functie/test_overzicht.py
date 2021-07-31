@@ -229,10 +229,10 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         self.e2e_check_rol('WL')
 
         # vraag het overzicht van competitie-bestuurders op
-        # de WL heeft hier niets mee te maken en krijgt het overzicht dus niet
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
-        self.assert403(resp)
+        urls = [url for url in self.extract_all_urls(resp) if url.startswith(self.url_wijzig)]
+        self.assertEqual(len(urls), 0)      # geen wijzig knoppen voor de WL
 
         # haal het overzicht van verenigingsbestuurders op
         with self.assert_max_queries(20):
