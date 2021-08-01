@@ -6,7 +6,7 @@
 
 from django.db import models
 from django.utils import timezone
-from django.utils.formats import localize
+from django.utils.formats import date_format
 from NhbStructuur.models import NhbRegio, NhbRayon, NhbVereniging
 from Account.models import Account
 import datetime
@@ -92,7 +92,8 @@ class VerklaringHanterenPersoonsgegevens(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        return "[%s] %s" % (self.account.username, localize(self.acceptatie_datum))
+        to_tz = timezone.get_default_timezone()
+        return "[%s] %s" % (self.account.username, date_format(self.acceptatie_datum.astimezone(to_tz), 'j F Y H:i'))
 
     class Meta:
         """ meta data voor de admin interface """

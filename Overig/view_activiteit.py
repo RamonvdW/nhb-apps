@@ -7,9 +7,9 @@
 from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models.functions import Concat
-from django.utils.timezone import make_aware
+from django.utils.timezone import make_aware, get_default_timezone
 from django.views.generic import TemplateView
-from django.utils.formats import localize
+from django.utils.formats import localize, date_format
 from django.db.models import F, Q, Value, Count
 from django.utils import timezone
 from django.urls import reverse
@@ -196,6 +196,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                                  Q(account__unaccented_naam__icontains=zoekterm))
                          .order_by('account__unaccented_naam', 'achternaam', 'voornaam'))[:50]
 
+        to_tz = get_default_timezone()
         context['zoek_leden'] = list(leden)
         for lid in leden:
             lid.nhb_nr_str = str(lid.nhb_nr)
@@ -215,7 +216,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                 else:
                     lid.email_is_bevestigd_str = 'Nee'
 
-                lid.laatste_inlog = account.last_login
+                lid.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz), 'j F H:i')
 
                 do_vhpg = True
                 if account.otp_is_actief:
@@ -236,11 +237,12 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                         # elke 11 maanden moet de verklaring afgelegd worden
                         # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
                         opnieuw = vhpg.acceptatie_datum + datetime.timedelta(days=334)
+                        opnieuw = opnieuw.astimezone(to_tz)
                         now = timezone.now()
                         if opnieuw < now:
-                            lid.vhpg_str = 'Verlopen (geaccepteerd op %s)' % localize(vhpg.acceptatie_datum)    # TODO: localize() werkt niet zonder activate()
+                            lid.vhpg_str = 'Verlopen (geaccepteerd op %s)' % date_format(vhpg.acceptatie_datum, 'j F H:i')
                         else:
-                            lid.vhpg_str = 'Ja (op %s)' % localize(vhpg.acceptatie_datum)                       # TODO: localize() werkt niet zonder activate()
+                            lid.vhpg_str = 'Ja (op %s)' % date_format(vhpg.acceptatie_datum.astimezone(to_tz), 'j F H:i')
 
                 lid.functies = account.functie_set.order_by('beschrijving')
         # for

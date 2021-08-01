@@ -72,7 +72,7 @@
                                 <span>Volledige naam:<br>Inlog naam:<br>E-mail is bevestigd:<br>Tweede factor:<br>VHPG:<br>Laatste inlog:<br>Gekoppelde functies:{% for functie in obj.functies %}<br>{% endfor %}</span>
                             </div>
                             <div>
-                                <span>{{ obj.volledige_naam }}<br>{{ obj.inlog_naam_str }}<br>{{ obj.email_is_bevestigd_str }}<br>{{ obj.tweede_factor_str }}<br>{{ obj.vhpg_str }}<br>{{ obj.laatste_inlog }}{% for functie in obj.functies %}<br>{{ functie.beschrijving }}{% empty %}<br>-{% endfor %}</span>
+                                <span>{{ obj.volledige_naam }}<br>{{ obj.inlog_naam_str }}<br>{{ obj.email_is_bevestigd_str }}<br>{{ obj.tweede_factor_str }}<br>{{ obj.vhpg_str }}<br>{{ obj.laatste_inlog_str }}{% for functie in obj.functies %}<br>{{ functie.beschrijving }}{% empty %}<br>-{% endfor %}</span>
                             </div>
                         </div>
                     </li>
