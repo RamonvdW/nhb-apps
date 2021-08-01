@@ -9,10 +9,11 @@
 
 from django.conf import settings
 from django.utils import timezone
-from django.core.management.base import BaseCommand
 from django.db.models import F
+from django.core.management.base import BaseCommand
+from BasisTypen.models import TeamType
 from Competitie.models import (Competitie, CompetitieTaken, DeelCompetitie, DeelcompetitieKlasseLimiet,
-                               RegiocompetitieTeam, RegiocompetitieRondeTeam,
+                               RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE,
                                CompetitieMutatie,
                                MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M, MUTATIE_COMPETITIE_OPSTARTEN,
@@ -31,6 +32,11 @@ class Command(BaseCommand):
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
+
+        self._boogtypen = list()        # [boog_type.pk, ..]
+        self._team_boogtypen = dict()   # [team_type.pk] = [boog_type.pk, ..]
+        self._team_volgorde = list()    # [team_type.pk, ..]
+
         self.stop_at = datetime.datetime.now()
 
         self.taken = CompetitieTaken.objects.all()[0]
@@ -49,6 +55,34 @@ class Command(BaseCommand):
                             help="Aantal minuten actief blijven")
         parser.add_argument('--all', action='store_true')       # alles opnieuw vaststellen
         parser.add_argument('--quick', action='store_true')     # for testing
+
+    def _bepaal_boog2team(self):
+        """ bepaalde boog typen mogen meedoen in bepaalde team types
+            straks als we de team schutters gaan verdelen over de teams moeten dat in een slimme volgorde
+            zodat de sporters in toegestane teams en alle team typen gevuld worden.
+            Voorbeeld: LB mag meedoen in LB, IB, BB en R teams terwijl C alleen in C team mag.
+                       we moeten dus niet beginnen met de LB schutter in een R team te stoppen en daarna
+                       geen sporters meer over hebben voor het LB team.
+        """
+
+        for team_type in (TeamType
+                          .objects
+                          .prefetch_related('boog_typen')
+                          .all()):
+
+            self._team_boogtypen[team_type.pk] = boog_lijst = list()
+
+            for boog_type in team_type.boog_typen.all():
+                boog_lijst.append(boog_type.pk)
+
+                if boog_type.pk not in self._boogtypen:
+                    self._boogtypen.append(boog_type.pk)
+            # for
+        # for
+
+        team_aantal = [(len(boog_typen), team_type_pk) for team_type_pk, boog_typen in self._team_boogtypen.items()]
+        team_aantal.sort()
+        self._team_volgorde = [team_type_pk for _, team_type_pk in team_aantal]
 
     @staticmethod
     def _get_limiet(deelcomp, klasse):
@@ -500,10 +534,9 @@ class Command(BaseCommand):
         if Competitie.objects.filter(begin_jaar=jaar).count() == 0:
             competities_aanmaken(jaar)
 
-    @staticmethod
-    def _verwerk_mutatie_team_ronde(deelcomp):
+    def _verwerk_mutatie_team_ronde(self, deelcomp):
 
-        # TODO: sanity check voordat we doorzetten: alle scores toegekend?
+        # TODO: sanity check voordat we doorzetten: alle team wedstrijdpunten toegekend?
 
         ronde_nr = deelcomp.huidige_team_ronde + 1
 
@@ -512,19 +545,83 @@ class Command(BaseCommand):
             now = timezone.localtime(now)
             now_str = now.strftime("%Y-%m-%d %H:%M")
 
-            # maak voor elk team een 'ronde instantie' aan waarin de invallers en score bijgehouden worden
-            for team in (RegiocompetitieTeam
-                         .objects
-                         .prefetch_related('gekoppelde_schutters')
-                         .filter(deelcompetitie=deelcomp)):
-                ronde_team = RegiocompetitieRondeTeam(
-                                team=team,
-                                ronde_nr=ronde_nr,
-                                logboek="[%s] Aangemaakt door mutatie" % now_str)
-                ronde_team.save()
+            ver_dict = dict()       # [ver_nr] = list(vsg, deelnemer_pk, boog_type_pk)
 
-                schutter_pks = team.gekoppelde_schutters.values_list('pk', flat=True)
-                ronde_team.schutters.set(schutter_pks)
+            # voor elke deelnemer het gemiddelde_begin_team_ronde invullen
+            for deelnemer in (RegioCompetitieSchutterBoog
+                              .objects
+                              .select_related('bij_vereniging',
+                                              'schutterboog',
+                                              'schutterboog__boogtype')
+                              .filter(deelcompetitie=deelcomp,
+                                      inschrijf_voorkeur_team=True)):
+
+                if deelnemer.aantal_scores == 0:
+                    vsg = deelnemer.ag_voor_team
+                else:
+                    vsg = deelnemer.gemiddelde  # individuele voortschrijdend gemiddelde
+
+                deelnemer.gemiddelde_begin_team_ronde = vsg
+                deelnemer.save(update_fields=['gemiddelde_begin_team_ronde'])
+
+                ver_nr = deelnemer.bij_vereniging.ver_nr
+                tup = (-vsg, deelnemer.pk, deelnemer.schutterboog.boogtype.pk)
+                try:
+                    ver_dict[ver_nr].append(tup)
+                except KeyError:
+                    ver_dict[ver_nr] = [tup]
+            # for
+
+            for team_schutters in ver_dict.values():
+                team_schutters.sort()
+            # for
+
+            # maak voor elk team een 'ronde instantie' aan waarin de invallers en score bijgehouden worden
+            # verdeel ook de sporters volgens VSG
+            for team_type_pk in self._team_volgorde:
+
+                team_boogtypen = self._team_boogtypen[team_type_pk]
+
+                for team in (RegiocompetitieTeam
+                             .objects
+                             .select_related('vereniging')
+                             .prefetch_related('gekoppelde_schutters')
+                             .filter(deelcompetitie=deelcomp,
+                                     team_type__pk=team_type_pk)
+                             .order_by('-aanvangsgemiddelde')):     # hoogste eerst
+
+                    ronde_team = RegiocompetitieRondeTeam(
+                                    team=team,
+                                    ronde_nr=ronde_nr,
+                                    logboek="[%s] Aangemaakt door mutatie" % now_str)
+                    ronde_team.save()
+
+                    # koppel de schutters
+                    if deelcomp.regio_heeft_vaste_teams:
+                        # vaste team begint elke keer met de vaste schutters
+                        schutter_pks = team.gekoppelde_schutters.values_list('pk', flat=True)
+                    else:
+                        # voortschrijdend gemiddelde: pak de volgende 4 beste sporters van de vereniging
+                        schutter_pks = list()
+                        ver_nr = team.vereniging.ver_nr
+                        ver_schutters = ver_dict[ver_nr]
+                        gebruikt = list()
+                        for tup in ver_schutters:
+                            _, deelnemer_pk, boogtype_pk = tup
+                            if boogtype_pk in team_boogtypen:
+                                schutter_pks.append(deelnemer_pk)
+                                gebruikt.append(tup)
+
+                            if len(schutter_pks) == 4:
+                                break
+                        # for
+
+                        for tup in gebruikt:
+                            ver_schutters.remove(tup)
+                        # for
+
+                    ronde_team.schutters.set(schutter_pks)
+                # for
             # for
 
             deelcomp.huidige_team_ronde = ronde_nr
@@ -658,6 +755,8 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Taak loopt tot %s' % str(self.stop_at))
 
     def handle(self, *args, **options):
+
+        self._bepaal_boog2team()
         self._set_stop_time(**options)
 
         if options['all']:

@@ -121,7 +121,7 @@ class CompetitieOverzichtView(View):
                 if obj.regio_organiseert_teamcompetitie and comp.fase == 'E':
                     obj.titel_team_ronde = "Team Ronde"
                     obj.tekst_team_ronde = "Stel de team punten vast en zet de teamcompetitie door naar de volgende ronde."
-                    obj.url_team_ronde = reverse('Competitie:stuur-team-ronde',
+                    obj.url_team_ronde = reverse('Competitie:start-volgende-team-ronde',
                                                  kwargs={'deelcomp_pk': obj.pk})
 
                 obj.tekst_scores = "Scores invoeren en aanpassen voor %s voor deze competitie." % obj.nhb_regio.naam

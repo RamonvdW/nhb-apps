@@ -16,12 +16,16 @@
         <p>Voor meer informatie: neem contact op met de RCL.</p>
     {% else %}
 
-        <p>Als HWL ben je verantwoordelijk om je teams compleet te houden. Als iemand niet kan ("uitvalt") dan mag deze vervangen worden door een invaller.</p>
-        <p>Voor elke ronde moeten deze invallers opnieuw opgegeven worden.</p>
-
-        <p>Een belangrijke regel is deze: de invaller mag nu niet sterker zijn dan de uitvaller was aan het begin van de competitie. Oftewel: het huidige gemiddelde invaller mag niet hoger zijn dan het aanvangsgemiddelde uitvaller.</p>
+        <p>Als HWL ben je verantwoordelijk om je teams compleet te houden. Als iemand niet kan ("uitvalt") dan mag deze vervangen worden door een invaller. Voor elke ronde moeten deze invallers opnieuw opgegeven worden.</p>
 
         <p>Op deze pagina kan je als HWL de invallers opgeven voor de regiocompetitie van de <b>{{ deelcomp }}</b>.</p>
+
+        <p>Een belangrijke regel is deze: de invaller mag nu niet sterker zijn dan de uitvaller.</p>
+        {% if deelcomp.regio_heeft_vaste_teams %}
+            <p>Omdat jullie regio vaste teams heeft mag het huidige gemiddelde van de invaller niet hoger zijn dan het aanvangsgemiddelde van de uitvaller.</p>
+        {% else %}
+            <p>Omdat jullie regio voortschrijdend gemiddelde gebruikt wordt er gekeken naar het huidige gemiddelde van de invaller en het gemiddelde wat de uitvaller had aan het begin van deze ronde.</p>
+        {% endif %}
 
         <p>&nbsp;</p>
         <div class="container">

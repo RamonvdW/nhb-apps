@@ -515,6 +515,9 @@ class RegioCompetitieSchutterBoog(models.Model):
     # gemiddelde over de 6 beste scores, dus exclusief laatste_score_nr
     gemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 10,000
 
+    # bovenstaande gemiddelde vastgesteld aan het begin van de huidige team ronde
+    gemiddelde_begin_team_ronde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 10,000
+
     # voorkeuren opgegeven bij het inschrijven
     inschrijf_voorkeur_team = models.BooleanField(default=False)
 

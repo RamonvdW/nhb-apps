@@ -91,8 +91,8 @@ urlpatterns = [
          name='wijzig-poule'),
 
     path('regio/<deelcomp_pk>/team-ronde/',
-         views_regio_teams.StuurTeamRondeView.as_view(),
-         name='stuur-team-ronde'),
+         views_regio_teams.StartVolgendeTeamRondeView.as_view(),
+         name='start-volgende-team-ronde'),
 
 
     # ingeschreven

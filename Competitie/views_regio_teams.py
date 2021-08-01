@@ -793,7 +793,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
         return HttpResponseRedirect(url)
 
 
-class StuurTeamRondeView(UserPassesTestMixin, TemplateView):
+class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
 
     """ Met deze view kan de RCL de punten verdelen in de teamcompetitie en deze doorzetten naar de volgende ronde.
     """
@@ -829,7 +829,7 @@ class StuurTeamRondeView(UserPassesTestMixin, TemplateView):
         context['regio'] = self.functie_nu.nhb_regio
 
         if deelcomp.huidige_team_ronde <= 7:
-            context['url_volgende_ronde'] = reverse('Competitie:stuur-team-ronde',
+            context['url_volgende_ronde'] = reverse('Competitie:start-volgende-team-ronde',
                                                     kwargs={'deelcomp_pk': deelcomp.pk})
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
@@ -839,7 +839,7 @@ class StuurTeamRondeView(UserPassesTestMixin, TemplateView):
 
         """ deze functie wordt aangeroepen als de RCL op de knop drukt om de volgende ronde te beginnen.
 
-            verwerking gebeurt in het achtergrondprocess.
+            verwerking gebeurt in de achtergrond taak.
         """
 
         try:
