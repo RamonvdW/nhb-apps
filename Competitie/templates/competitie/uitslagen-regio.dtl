@@ -29,9 +29,9 @@
     <div class="white shrink-wrap-5">
         {% for boog in boog_filters %}
             {% if boog.zoom_url %}
-                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ boog.zoom_url }}">{{ boog.beschrijving }}</a>
+                <a class="margin-5 btn-outline" href="{{ boog.zoom_url }}">{{ boog.beschrijving }}</a>
             {% else %}
-                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ boog.beschrijving }}</a>
+                <a class="margin-5 btn-nhb-blauw" href="#">{{ boog.beschrijving }}</a>
             {% endif %}
         {% endfor %}
     </div>
@@ -45,9 +45,9 @@
                 <br>
             {% endif %}
             {% if regio.zoom_url %}
-                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ regio.zoom_url }}">{{ regio.title_str }}</a>
+                <a class="margin-5 btn-outline" href="{{ regio.zoom_url }}">{{ regio.title_str }}</a>
             {% else %}
-                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ regio.title_str }}</a>
+                <a class="margin-5 btn-nhb-blauw" href="#">{{ regio.title_str }}</a>
             {% endif %}
         {% endfor %}
     </div>

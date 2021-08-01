@@ -21,9 +21,9 @@
     <div class="white shrink-wrap-5">
         {% for gesl in gesl_filters %}
             {% if gesl.zoom_url %}
-                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ gesl.zoom_url }}">{{ gesl.beschrijving }}</a>
+                <a class="margin-5 btn-outline" href="{{ gesl.zoom_url }}">{{ gesl.beschrijving }}</a>
             {% else %}
-                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ gesl.beschrijving }}</a>
+                <a class="margin-5 btn-nhb-blauw" href="#">{{ gesl.beschrijving }}</a>
             {% endif %}
         {% endfor %}
     </div>
@@ -33,9 +33,9 @@
     <div class="white shrink-wrap-5">
         {% for para in para_filters %}
             {% if para.zoom_url %}
-                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ para.zoom_url }}">{{ para.beschrijving }}</a>
+                <a class="margin-5 btn-outline" href="{{ para.zoom_url }}">{{ para.beschrijving }}</a>
             {% else %}
-                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ para.beschrijving }}</a>
+                <a class="margin-5 btn-nhb-blauw" href="#">{{ para.beschrijving }}</a>
             {% endif %}
         {% endfor %}
 
@@ -47,9 +47,9 @@
     <div class="white shrink-wrap-5">
         {% for disc in disc_filters %}
             {% if disc.zoom_url %}
-                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ disc.zoom_url }}">{{ disc.beschrijving }}</a>
+                <a class="margin-5 btn-outline" href="{{ disc.zoom_url }}">{{ disc.beschrijving }}</a>
             {% else %}
-                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ disc.beschrijving }}</a>
+                <a class="margin-5 btn-nhb-blauw" href="#">{{ disc.beschrijving }}</a>
             {% endif %}
         {% endfor %}
     </div>
@@ -59,9 +59,9 @@
     <div class="white shrink-wrap-5">
         {% for makl in makl_filters %}
             {% if makl.zoom_url %}
-                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ makl.zoom_url }}">{{ makl.beschrijving }}</a>
+                <a class="margin-5 btn-outline" href="{{ makl.zoom_url }}">{{ makl.beschrijving }}</a>
             {% else %}
-                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ makl.beschrijving }}</a>
+                <a class="margin-5 btn-nhb-blauw" href="#">{{ makl.beschrijving }}</a>
             {% endif %}
         {% endfor %}
     </div>
@@ -73,9 +73,9 @@
         <div class="white shrink-wrap-5">
             {% for lcat in lcat_filters %}
                 {% if lcat.zoom_url %}
-                    <a class="margin-5 btn-nhb-blauw btn-small" href="{{ lcat.zoom_url }}">{{ lcat.beschrijving }}</a>
+                    <a class="margin-5 btn-outline" href="{{ lcat.zoom_url }}">{{ lcat.beschrijving }}</a>
                 {% else %}
-                    <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ lcat.beschrijving }}</a>
+                    <a class="margin-5 btn-nhb-blauw" href="#">{{ lcat.beschrijving }}</a>
                 {% endif %}
             {% endfor %}
         </div>
@@ -89,9 +89,9 @@
         <div class="white shrink-wrap-5">
             {% for verb in verb_filters %}
                 {% if verb.zoom_url %}
-                    <a class="margin-5 btn-nhb-blauw btn-small" href="{{ verb.zoom_url }}">{{ verb.beschrijving }}</a>
+                    <a class="margin-5 btn-outline" href="{{ verb.zoom_url }}">{{ verb.beschrijving }}</a>
                 {% else %}
-                    <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ verb.beschrijving }}</a>
+                    <a class="margin-5 btn-nhb-blauw" href="#">{{ verb.beschrijving }}</a>
                 {% endif %}
             {% endfor %}
         </div>
@@ -105,9 +105,9 @@
         <div class="white shrink-wrap-5">
             {% for obj in soorten %}
                 {% if not obj.is_gekozen %}
-                    <a class="margin-5 btn-nhb-blauw btn-small" href="{{ obj.url }}">{{ obj.soort_record }}</a>
+                    <a class="margin-5 btn-outline" href="{{ obj.url }}">{{ obj.soort_record }}</a>
                 {% else %}
-                    <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ obj.soort_record }}</a>
+                    <a class="margin-5 btn-nhb-blauw" href="#">{{ obj.soort_record }}</a>
                 {% endif %}
             {% endfor %}
         </div>
