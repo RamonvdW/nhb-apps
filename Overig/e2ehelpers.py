@@ -211,6 +211,8 @@ class E2EHelpers(object):
         resp = self.client.post('/functie/activeer-functie/%s/' % functie.pk)
         if functie.rol in ('SEC', 'HWL', 'WL'):
             expected_redirect = '/vereniging/'
+        elif functie.rol == 'RCL':
+            expected_redirect = '/bondscompetities/##'
         else:
             expected_redirect = '/functie/wissel-van-rol/'
         assert isinstance(self, E2EHelpers)
@@ -602,7 +604,11 @@ class E2EHelpers(object):
     def assert_is_redirect(self, resp, expected_url):
         assert isinstance(self, TestCase)
         self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resp.url, expected_url)
+        pos = expected_url.find('##')
+        if pos > 0:
+            self.assertTrue(resp.url.startswith(expected_url[:pos]))
+        else:
+            self.assertEqual(resp.url, expected_url)
 
     def assert_is_redirect_not_plein(self, resp):
         assert isinstance(self, TestCase)
