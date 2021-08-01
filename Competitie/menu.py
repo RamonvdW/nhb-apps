@@ -60,4 +60,19 @@ def menu_dynamics_competitie(request, context, comp_pk=None, actief=''):
     menu_dynamics(request, context, actief=menu_actief)
 
 
+def get_url_voor_rcl(functie_nu):
+    """ Geef de url terug naar de specifieke bondscompetities overzicht pagina voor de RCL """
+
+    # bepaal bij welke competitie deze rol hoort
+    afstand = functie_nu.comp_type  # 18/25
+    comps = Competitie.objects.filter(afstand=afstand).order_by('begin_jaar')  # laagste (oudste) eerst
+
+    if len(comps) > 0:
+        url = reverse('Competitie:overzicht', kwargs={'comp_pk': comps[0].pk})
+    else:
+        # er zijn competities
+        url = None
+
+    return url
+
 # end of file

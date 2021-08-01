@@ -11,6 +11,7 @@ from django.views.generic import ListView, TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.otp import account_otp_is_gekoppeld
 from Account.rechten import account_rechten_is_otp_verified
+from Competitie.menu import get_url_voor_rcl
 from Handleiding.views import reverse_handleiding
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
@@ -334,12 +335,18 @@ class ActiveerRolView(UserPassesTestMixin, View):
 
         # stuur een aantal rollen door naar een functionele pagina
         # de rest blijft in Wissel van Rol
-        rol = rol_get_huidige(request)
+        rol_nu, functie_nu = rol_get_huidige_functie(request)
+
         # if rol == Rollen.ROL_BB:
         #     return redirect('Competitie:kies')
 
-        if rol in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
+        if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
             return redirect('Vereniging:overzicht')
+
+        if rol_nu == Rollen.ROL_RCL:
+            url = get_url_voor_rcl(functie_nu)
+            if url:
+                return redirect(url)
 
         return redirect('Functie:wissel-van-rol')
 

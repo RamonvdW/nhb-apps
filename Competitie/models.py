@@ -105,7 +105,6 @@ MUTATIE_TO_STR = {
 }
 
 
-
 class Competitie(models.Model):
     """ Deze database tabel bevat een van de jaarlijkse competities voor 18m of 25m
         Elke competitie heeft een beschrijving, een aantal belangrijke datums
