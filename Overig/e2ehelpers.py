@@ -209,14 +209,15 @@ class E2EHelpers(object):
     def e2e_wissel_naar_functie(self, functie):
         assert isinstance(self, TestCase)
         resp = self.client.post('/functie/activeer-functie/%s/' % functie.pk)
-        if functie.rol in ('SEC', 'HWL', 'WL'):
-            expected_redirect = '/vereniging/'
-        elif functie.rol == 'RCL':
-            expected_redirect = '/bondscompetities/##'
-        else:
-            expected_redirect = '/functie/wissel-van-rol/'
+
         assert isinstance(self, E2EHelpers)
-        self.assert_is_redirect(resp, expected_redirect)
+        if functie.rol in ('SEC', 'HWL', 'WL'):
+            self.assert_is_redirect(resp, '/vereniging/')
+        elif functie.rol in ('BKO', 'RKO', 'RCL') and resp.url.startswith('/bondscompetities/'):
+            # als er geen competitie is, dan verwijst deze alsnog naar wissel-van-rol
+            self.assert_is_redirect(resp, '/bondscompetities/##')
+        else:
+            self.assert_is_redirect(resp, '/functie/wissel-van-rol/')
 
     def e2e_check_rol(self, rol_verwacht):
         assert isinstance(self, TestCase)
