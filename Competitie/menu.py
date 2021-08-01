@@ -60,8 +60,8 @@ def menu_dynamics_competitie(request, context, comp_pk=None, actief=''):
     menu_dynamics(request, context, actief=menu_actief)
 
 
-def get_url_voor_rcl(functie_nu):
-    """ Geef de url terug naar de specifieke bondscompetities overzicht pagina voor de RCL """
+def get_url_voor_competitie(functie_nu):
+    """ Geef de url terug naar de specifieke bondscompetities overzicht pagina voor de BKO/RKO/RCL """
 
     # bepaal bij welke competitie deze rol hoort
     afstand = functie_nu.comp_type  # 18/25

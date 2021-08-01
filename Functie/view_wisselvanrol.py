@@ -11,7 +11,7 @@ from django.views.generic import ListView, TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.otp import account_otp_is_gekoppeld
 from Account.rechten import account_rechten_is_otp_verified
-from Competitie.menu import get_url_voor_rcl
+from Competitie.menu import get_url_voor_competitie
 from Handleiding.views import reverse_handleiding
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
@@ -343,8 +343,8 @@ class ActiveerRolView(UserPassesTestMixin, View):
         if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
             return redirect('Vereniging:overzicht')
 
-        if rol_nu == Rollen.ROL_RCL:
-            url = get_url_voor_rcl(functie_nu)
+        if rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+            url = get_url_voor_competitie(functie_nu)
             if url:
                 return redirect(url)
 
