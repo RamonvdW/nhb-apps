@@ -74,6 +74,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu, self.functie_nu = None, None
+        self.readonly = False
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -97,9 +98,11 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        if comp.fase > 'C':
+        if comp.fase > 'E':
             # staat niet meer open voor instellen regiocompetitie teams
             raise Http404('Competitie is niet in de juiste fase')
+
+        self.readonly = (comp.fase > 'C')
 
         return deelcomp
 
@@ -118,8 +121,9 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                                   minute=0,
                                   second=0)
         einde = timezone.make_aware(einde)
-        mag_wijzigen = (now < einde)
+        mag_wijzigen = (now < einde) and not self.readonly
         context['mag_wijzigen'] = mag_wijzigen
+        context['readonly'] = self.readonly
 
         if deelcomp.competitie.afstand == '18':
             aantal_pijlen = 30
@@ -180,8 +184,9 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
 
             if obj.ag_voor_team_mag_aangepast_worden:
                 obj.ag_str += " (handmatig)"
-                obj.url_wijzig_ag = reverse('Vereniging:wijzig-ag',
-                                            kwargs={'deelnemer_pk': obj.pk})
+                if mag_wijzigen:
+                    obj.url_wijzig_ag = reverse('Vereniging:wijzig-ag',
+                                                kwargs={'deelnemer_pk': obj.pk})
         # for
         context['deelnemers'] = deelnemers
 
@@ -248,7 +253,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
                                   minute=0,
                                   second=0)
         einde = timezone.make_aware(einde)
-        mag_wijzigen = (now <= einde)
+        mag_wijzigen = (now <= einde) and not self.readonly
 
         teamtype_default = None
         teams = TeamType.objects.order_by('volgorde')
@@ -538,6 +543,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu, self.functie_nu = None, None
+        self.readonly = False
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -565,6 +571,10 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         context['deelcomp'] = deelcomp = team.deelcompetitie
 
+        comp = deelcomp.competitie
+        comp.bepaal_fase()
+        context['readonly'] = readonly = (comp.fase > 'C')
+
         now = timezone.now()
         einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
                                   month=deelcomp.einde_teams_aanmaken.month,
@@ -573,7 +583,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                                   minute=0,
                                   second=0)
         einde = timezone.make_aware(einde)
-        mag_wijzigen = (now <= einde)
+        mag_wijzigen = (now <= einde) and not readonly
         context['mag_wijzigen'] = mag_wijzigen
 
         boog_typen = team.team_type.boog_typen.all()
@@ -649,6 +659,10 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         deelcomp = team.deelcompetitie
 
+        comp = deelcomp.competitie
+        comp.bepaal_fase()
+        readonly = (comp.fase > 'C')
+
         now = timezone.now()
         einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
                                   month=deelcomp.einde_teams_aanmaken.month,
@@ -657,7 +671,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                                   minute=0,
                                   second=0)
         einde = timezone.make_aware(einde)
-        mag_wijzigen = (now <= einde)
+        mag_wijzigen = (now <= einde) and not readonly
         if not mag_wijzigen:
             raise Http404('Voorbij de einddatum voor wijzigingen')
 

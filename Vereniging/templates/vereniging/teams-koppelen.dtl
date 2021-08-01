@@ -6,24 +6,25 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Koppel teamleden{% endblock %}
+{% block title %}{% if readonly %}Bekijk{% else %}Koppel{% endif %} teamleden{% endblock %}
 
 {% block pagina %}
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="teams-koppelen" %}
 
-    <h4>Koppel teamleden</h4>
+    <h4>{% if readonly %}Bekijk{% else %}Koppel{% endif %} teamleden</h4>
 
-    <p>Op deze pagina kan je leden van de vereniging koppelen aan het team.</p>
-    {% if deelcomp.regio_heeft_vaste_teams %}
-        <p>In jullie regio is gekozen voor <b>vaste teams</b>, dus de leden die je koppelt blijven het hele seizoen in dit team en kunnen vervangen worden door een invaller.</p>
+    {% if mag_wijzigen %}
+        <p>Op deze pagina kan je leden van de vereniging koppelen aan het team.</p>
+        {% if deelcomp.regio_heeft_vaste_teams %}
+            <p>In jullie regio is gekozen voor <b>vaste teams</b>, dus de leden die je koppelt blijven het hele seizoen in dit team en kunnen vervangen worden door een invaller.</p>
+        {% else %}
+            <p>In jullie regio is gekozen voor dynamische teams gebaseerd op het principe van <b>voortschrijdend gemiddelde</b> (VSG), dus elke ronde krijgt het team automatisch leden toegekend.</p>
+            <p>Tijdens de inschrijving moet je leden handmatig koppelen zodat sporters met een BB, IB or LB boog in het gewenste type team komen.</p>
+        {% endif %}
     {% else %}
-        <p>In jullie regio is gekozen voor dynamische teams gebaseerd op het principe van <b>voortschrijdend gemiddelde</b> (VSG), dus elke ronde krijgt het team automatisch leden toegekend.</p>
-        <p>Tijdens de inschrijving moet je leden handmatig koppelen zodat sporters met een BB, IB or LB boog in het gewenste type team komen.</p>
-    {% endif %}
-
-    {% if not mag_wijzigen %}
-        <p>Vanaf {{ deelcomp.einde_teams_aanmaken }} is het niet meer mogelijk om wijzigingen aan te brengen.</p>
+        <p>Op deze pagina kan je zien wie er aan het team gekoppeld zijn.</p>
+        <p>Het is niet meer mogelijk om wijzigingen aan te brengen. Zodra de RCL de eerste ronde opstart kan je invallers doorvoeren.</p>
     {% endif %}
 
     <script type="application/javascript">

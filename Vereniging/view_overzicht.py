@@ -144,17 +144,6 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
             for deelcomp in deelcomps:
                 if deelcomp.competitie == comp:
-                    # 2 - teams aanmaken
-                    if deelcomp.regio_organiseert_teamcompetitie and comp.fase <= 'C':
-                        kaartje = SimpleNamespace()
-                        kaartje.titel = "Teams Regio"
-                        kaartje.tekst = 'Verenigingsteams voor de regiocompetitie samenstellen voor de %s.' % comp.beschrijving
-                        kaartje.url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
-                        kaartje.icon = 'gamepad'
-                        if comp.fase < 'B':
-                            kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)
-                        kaartjes.append(kaartje)
-
                     if deelcomp.regio_organiseert_teamcompetitie and comp.fase == 'E' and 1 <= deelcomp.huidige_team_ronde <= 7:
                         # team invallers opgeven
                         kaartje = SimpleNamespace(
@@ -163,7 +152,17 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                     url=reverse('Vereniging:teams-regio-invallers', kwargs={'deelcomp_pk': deelcomp.pk}),
                                     icon='how_to_reg')
                         kaartjes.append(kaartje)
-
+                    else:
+                        # 2 - teams aanmaken
+                        if deelcomp.regio_organiseert_teamcompetitie and comp.fase <= 'E':
+                            kaartje = SimpleNamespace()
+                            kaartje.titel = "Teams Regio"
+                            kaartje.tekst = 'Verenigingsteams voor de regiocompetitie samenstellen voor de %s.' % comp.beschrijving
+                            kaartje.url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
+                            kaartje.icon = 'gamepad'
+                            if comp.fase < 'B':
+                                kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)
+                            kaartjes.append(kaartje)
             # for
             del deelcomp
 
