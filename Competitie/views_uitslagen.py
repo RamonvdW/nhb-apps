@@ -7,10 +7,11 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from BasisTypen.models import BoogType
+from BasisTypen.models import BoogType, TeamType
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DEELNAME_NEE,
                                DeelCompetitie, DeelcompetitieKlasseLimiet,
+                               RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_huidige
@@ -24,40 +25,76 @@ TEMPLATE_COMPETITIE_UITSLAGEN_RAYON_INDIV = 'competitie/uitslagen-rayon-indiv.dt
 TEMPLATE_COMPETITIE_UITSLAGEN_BOND = 'competitie/uitslagen-bond.dtl'
 
 
+def get_schutter_regio_nr(request):
+    """ Geeft het regio nummer van de ingelogde schutter terug,
+        of 101 als er geen regio vastgesteld kan worden
+    """
+    regio_nr = 101
+
+    rol_nu, functie_nu = rol_get_huidige_functie(request)
+
+    if functie_nu:
+        if functie_nu.nhb_ver:
+            # HWL, WL
+            regio_nr = functie_nu.nhb_ver.regio.regio_nr
+        elif functie_nu.nhb_regio:
+            # RCL
+            regio_nr = functie_nu.nhb_regio.regio_nr
+        elif functie_nu.nhb_rayon:
+            # RKO
+            regio = (NhbRegio
+                     .objects
+                     .filter(rayon=functie_nu.nhb_rayon,
+                             is_administratief=False)
+                     .order_by('regio_nr'))[0]
+            regio_nr = regio.regio_nr
+    elif rol_nu == Rollen.ROL_SCHUTTER:
+        # schutter
+        account = request.user
+        if account.nhblid_set.count() > 0:
+            nhblid = account.nhblid_set.all()[0]
+            if nhblid.is_actief_lid and nhblid.bij_vereniging:
+                nhb_ver = nhblid.bij_vereniging
+                regio_nr = nhb_ver.regio.regio_nr
+
+    return regio_nr
+
+
+def get_schutter_ver_nr(request):
+
+    """ Geeft het vereniging nhb nummer van de ingelogde schutter terug,
+        of 101 als er geen regio vastgesteld kan worden
+    """
+    ver_nr = -1
+
+    if request.user.is_authenticated:
+        rol_nu, functie_nu = rol_get_huidige_functie(request)
+
+        if functie_nu and functie_nu.nhb_ver:
+            # HWL, WL, SEC
+            ver_nr = functie_nu.nhb_ver.ver_nr
+
+        if ver_nr < 0:
+            # pak de vereniging van de ingelogde gebruiker
+            account = request.user
+            if account.nhblid_set.count() > 0:
+                nhblid = account.nhblid_set.all()[0]
+                if nhblid.is_actief_lid and nhblid.bij_vereniging:
+                    ver_nr = nhblid.bij_vereniging.ver_nr
+
+    ver_nrs = list(NhbVereniging.objects.order_by('ver_nr').values_list('ver_nr', flat=True))
+    if ver_nr not in ver_nrs:
+        ver_nr = ver_nrs[0]
+
+    return ver_nr
+
+
 class UitslagenVerenigingView(TemplateView):
 
     """ Django class-based view voor de de uitslagen van de competitie """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING
-
-    def _get_schutter_ver_nr(self):
-
-        """ Geeft het vereniging nhb nummer van de ingelogde schutter terug,
-            of 101 als er geen regio vastgesteld kan worden
-        """
-        ver_nr = -1
-
-        if self.request.user.is_authenticated:
-            rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-
-            if functie_nu and functie_nu.nhb_ver:
-                # HWL, WL, SEC
-                ver_nr = functie_nu.nhb_ver.ver_nr
-
-            if ver_nr < 0:
-                # pak de vereniging van de ingelogde gebruiker
-                account = self.request.user
-                if account.nhblid_set.count() > 0:
-                    nhblid = account.nhblid_set.all()[0]
-                    if nhblid.is_actief_lid and nhblid.bij_vereniging:
-                        ver_nr = nhblid.bij_vereniging.ver_nr
-
-        ver_nrs = list(NhbVereniging.objects.order_by('ver_nr').values_list('ver_nr', flat=True))
-        if ver_nr not in ver_nrs:
-            ver_nr = ver_nrs[0]
-
-        return ver_nr
 
     @staticmethod
     def _maak_filter_knoppen(context, comp, ver_nr, comp_boog):
@@ -147,7 +184,7 @@ class UitslagenVerenigingView(TemplateView):
             ver_nr = int(ver_nr)
         except KeyError:
             # zoek de vereniging die bij de huidige gebruiker past
-            ver_nr = self._get_schutter_ver_nr()
+            ver_nr = get_schutter_ver_nr(self.request)
         except ValueError:
             raise Http404('Verkeerd verenigingsnummer')
 
@@ -182,46 +219,12 @@ class UitslagenVerenigingView(TemplateView):
 
 class UitslagenRegioIndivView(TemplateView):
 
-    """ Django class-based view voor de de uitslagen van de competitie in 1 regio """
+    """ Django class-based view voor de de individuele uitslagen van de competitie in 1 regio """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_INDIV
     url_name = 'Competitie:uitslagen-regio-indiv-n'
     order_gemiddelde = '-gemiddelde'
-
-    def _get_schutter_regio_nr(self):
-        """ Geeft het regio nummer van de ingelogde schutter terug,
-            of 101 als er geen regio vastgesteld kan worden
-        """
-        regio_nr = 101
-
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-
-        if functie_nu:
-            if functie_nu.nhb_ver:
-                # HWL, WL
-                regio_nr = functie_nu.nhb_ver.regio.regio_nr
-            elif functie_nu.nhb_regio:
-                # RCL
-                regio_nr = functie_nu.nhb_regio.regio_nr
-            elif functie_nu.nhb_rayon:
-                # RKO
-                regio = (NhbRegio
-                         .objects
-                         .filter(rayon=functie_nu.nhb_rayon,
-                                 is_administratief=False)
-                         .order_by('regio_nr'))[0]
-                regio_nr = regio.regio_nr
-        elif rol_nu == Rollen.ROL_SCHUTTER:
-            # schutter
-            account = self.request.user
-            if account.nhblid_set.count() > 0:
-                nhblid = account.nhblid_set.all()[0]
-                if nhblid.is_actief_lid and nhblid.bij_vereniging:
-                    nhb_ver = nhblid.bij_vereniging
-                    regio_nr = nhb_ver.regio.regio_nr
-
-        return regio_nr
 
     def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, comp_boog, zes_scores):
         """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
@@ -300,7 +303,8 @@ class UitslagenRegioIndivView(TemplateView):
                                                      'comp_boog': comp_boog,
                                                      'regio_nr': gekozen_regio_nr})
 
-    def filter_zes_scores(self, deelnemers):
+    @staticmethod
+    def filter_zes_scores(deelnemers):
         return deelnemers.filter(aantal_scores__gte=6)
 
     @staticmethod
@@ -354,8 +358,8 @@ class UitslagenRegioIndivView(TemplateView):
             regio_nr = kwargs['regio_nr'][:3]   # afkappen voor veiligheid
             regio_nr = int(regio_nr)
         except KeyError:
-            # keep welke (initiële) regio bij de huidige gebruiker past
-            regio_nr = self._get_schutter_regio_nr()
+            # bepaal welke (initiële) regio bij de huidige gebruiker past
+            regio_nr = get_schutter_regio_nr(self.request)
         except ValueError:
             raise Http404('Verkeer regionummer')
 
@@ -397,7 +401,6 @@ class UitslagenRegioIndivView(TemplateView):
         if zes_scores == 'zes':
             deelnemers = self.filter_zes_scores(deelnemers)
 
-        toon_geslacht = False
         klasse = -1
         rank = 0
         objs = list()
@@ -442,16 +445,201 @@ class UitslagenRegioIndivView(TemplateView):
 
         context['deelnemers'] = objs
 
-        rol_nu = rol_get_huidige(self.request)
-        is_beheerder = rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
-        context['is_beheerder'] = is_beheerder
-
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context
 
 
 class UitslagenRegioTeamsView(TemplateView):
-    pass
+
+    """ Django class-based view voor de de team uitslagen van de competitie in 1 regio """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_TEAMS
+    url_name = 'Competitie:uitslagen-regio-teams-n'
+
+    def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, teamtype_afkorting):
+        """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
+
+        teamtypen = TeamType.objects.order_by('volgorde').all()
+
+        context['teamtype'] = None
+        context['teamtype_filters'] = teamtypen
+
+        for team in teamtypen:
+            if team.afkorting.upper() == teamtype_afkorting.upper():
+                context['teamtype'] = team
+                teamtype_afkorting = team.afkorting.lower()
+                # geen url --> knop disabled
+            else:
+                team.zoom_url = reverse(self.url_name,
+                                        kwargs={'comp_pk': comp.pk,
+                                                'team_type': team.afkorting.lower(),
+                                                'regio_nr': gekozen_regio_nr})
+        # for
+
+        # regio filters
+        if context['teamtype']:
+            regios = (NhbRegio
+                      .objects
+                      .select_related('rayon')
+                      .filter(is_administratief=False)
+                      .order_by('rayon__rayon_nr', 'regio_nr'))
+
+            context['regio_filters'] = regios
+
+            prev_rayon = 1
+            for regio in regios:
+                regio.break_before = (prev_rayon != regio.rayon.rayon_nr)
+                prev_rayon = regio.rayon.rayon_nr
+
+                regio.title_str = 'Regio %s' % regio.regio_nr
+                if regio.regio_nr != gekozen_regio_nr:
+                    regio.zoom_url = reverse(self.url_name,
+                                             kwargs={'comp_pk': comp.pk,
+                                                     'team_type': teamtype_afkorting,
+                                                     'regio_nr': regio.regio_nr})
+                else:
+                    # geen zoom_url --> knop disabled
+                    context['regio'] = regio
+            # for
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp = (Competitie
+                    .objects
+                    .get(pk=comp_pk))
+        except (ValueError, Competitie.DoesNotExist):
+            raise Http404('Competitie niet gevonden')
+
+        comp.bepaal_fase()
+        context['comp'] = comp
+
+        teamtype_afkorting = kwargs['team_type'][:2]     # afkappen voor veiligheid
+
+        # regio_nr is optioneel (eerste binnenkomst zonder regio nummer)
+        try:
+            regio_nr = kwargs['regio_nr'][:3]   # afkappen voor veiligheid
+            regio_nr = int(regio_nr)
+        except KeyError:
+            # bepaal welke (initiële) regio bij de huidige gebruiker past
+            regio_nr = get_schutter_regio_nr(self.request)
+        except ValueError:
+            raise Http404('Verkeer regionummer')
+
+        # voorkom 404 voor leden in de administratieve regio
+        if regio_nr == 100:
+            regio_nr = 101
+
+        try:
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie', 'nhb_regio')
+                        .get(laag=LAAG_REGIO,
+                             competitie=comp,
+                             competitie__is_afgesloten=False,
+                             nhb_regio__regio_nr=regio_nr))
+        except DeelCompetitie.DoesNotExist:
+            raise Http404('Competitie niet gevonden')
+
+        context['deelcomp'] = deelcomp
+
+        self._maak_filter_knoppen(context, comp, regio_nr, teamtype_afkorting)
+        if not context['teamtype']:
+            raise Http404('Verkeerd team type')
+
+        # zoek alle regio teams erbij
+
+        heeft_poules = False
+        poules = RegiocompetitieTeamPoule.objects.prefetch_related('teams').filter(deelcompetitie=deelcomp)
+        team_pk2poule = dict()
+        for poule in poules:
+            heeft_poules = True
+            for team in poule.teams.all():
+                team_pk2poule[team.pk] = poule
+            # for
+        # for
+
+        dummy_poule = RegiocompetitieTeamPoule(pk=888888, beschrijving='??')
+
+        teams = (RegiocompetitieTeam
+                 .objects
+                 .exclude(klasse=None)
+                 .filter(deelcompetitie=deelcomp,
+                         team_type=context['teamtype'])
+                 .select_related('vereniging')
+                 .order_by('klasse__team__volgorde'))
+        pk2team = dict()
+        for team in teams:
+            pk2team[team.pk] = team
+            team.rondes = list()
+            team.ronde_scores = list()
+            team.naam_str = "[%s] %s" % (team.vereniging.ver_nr, team.team_naam)
+            team.totaal_score = 0
+            team.totaal_punten = 0
+        # for
+
+        ronde_teams = RegiocompetitieRondeTeam.objects.filter(team__in=teams).order_by('ronde_nr')
+        for ronde_team in ronde_teams:
+            team = pk2team[ronde_team.team.pk]
+            team.rondes.append(ronde_team)
+            team.ronde_scores.append(ronde_team.team_score)
+            team.totaal_score += ronde_team.team_score
+            team.totaal_punten += ronde_team.team_punten
+        # for
+
+        # sorteer de teams
+        unsorted_teams = list()
+        for team in teams:
+            try:
+                poule = team_pk2poule[team.pk]
+            except KeyError:
+                # team is niet in een poule geplaatst
+                # laat deze voorlopig uit de uitslag
+                pass
+            else:
+                tup = (poule.pk, team.klasse.team.volgorde, team.totaal_punten, team.totaal_score, team.pk, poule, team)
+
+                while len(team.ronde_scores) < 7:
+                    team.ronde_scores.append('-')
+
+                unsorted_teams.append(tup)
+        # for
+        unsorted_teams.sort()
+
+        print('heeft_poules: %s in deelcomp %s' % (heeft_poules, deelcomp))
+
+        context['teams'] = teams = list()
+        prev_klasse = None
+        prev_poule = None
+        rank = 0
+        for tup in unsorted_teams:
+            poule = tup[-2]
+            team = tup[-1]
+
+            if heeft_poules:
+                if poule != prev_poule:
+                    team.break_poule = True
+                    team.poule_str = poule.beschrijving
+                    prev_poule = poule
+
+            if team.klasse != prev_klasse:
+                team.break_klasse = True
+                team.klasse_str = team.klasse.team.beschrijving
+                prev_klasse = team.klasse
+                rank = 1
+            else:
+                rank += 1
+
+            team.rank = rank
+            teams.append(team)
+        # for
+
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        return context
 
 
 class UitslagenRayonIndivView(TemplateView):

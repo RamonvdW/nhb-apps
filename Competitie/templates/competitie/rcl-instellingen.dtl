@@ -6,17 +6,17 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Instellingen Teams{% endblock %}
+{% block title %}Instellingen Teamcompetitie{% endblock %}
 
 {% block pagina %}
 
-    <h4>Instellingen Teams</h4>
+    <h4>Instellingen Teamcompetitie</h4>
 
-    {% if readonly %}
+    {% if readonly_na_fase_C %}
         <p>Hieronder kan je de gemaakte keuzes maken voor jouw regiocompetitie inzien. Wijzigen is niet meer mogelijk.</p>
     {% else %}
         <p>Hieronder kan je als RCL keuzes maken voor jouw regiocompetitie.</p>
-        <p>LET OP: Wijzigen van het puntensysteem kan nog tot in fase C van de competitie. Overige instellingen kunnen alleen in fase A aanpast worden.</p>
+        <p>LET OP: De eerste twee instellingen kunnen alleen in fase A van de competitie aangepast worden; de andere twee instellingen tot en met fase C.</p>
     {% endif %}
 
     <script type="application/javascript">
@@ -60,7 +60,7 @@
             <tr>
                 <td>Regio organiseert Team Competitie</td>
                 <td>
-                    {% if readonly_partly %}
+                    {% if readonly_na_fase_A %}
                         <span>{% if deelcomp.regio_organiseert_teamcompetitie %}Ja{% else %}Nee{% endif %}</span>
                     {% else %}
                         <ul id="id_teams">
@@ -84,7 +84,7 @@
             <tr>
                 <td>Team samenstellingen</td>
                 <td>
-                    {% if readonly_partly %}
+                    {% if readonly_na_fase_A %}
                         {% for opt in opt_team_alloc %}
                             {% if opt.actief %}
                                 <span>{{ opt.beschrijving }}</span>
@@ -107,7 +107,7 @@
 
             <tr>
                 <td>Teams aanmaken toestaan tot en met</td>
-                <td>{% if readonly %}
+                <td>{% if readonly_na_fase_C %}
                         <span>{{ deelcomp.einde_teams_aanmaken|date:'Y-m-d' }}</span>
                     {% else %}
                         <input type="text" class="nl_datepicker" id="datum1" onchange="datum_gewijzigd(this)"{% if not deelcomp.regio_organiseert_teamcompetitie %} disabled{% endif %}>
@@ -119,7 +119,7 @@
             <tr>
                 <td>Wedstrijdpunten</td>
                 <td>
-                    {% if readonly %}
+                    {% if readonly_na_fase_C %}
                         {% for opt in opt_team_punten %}
                             {% if opt.actief %}
                                 <span>{{ opt.beschrijving }}</span>
@@ -141,7 +141,7 @@
             </tr>
         </table>
 
-    {% if not readonly %}
+    {% if not readonly_na_fase_C %}
         <p>
             <button id="opslaan_knop" class="btn-nhb-rood disabled" type="submit">
                 <i class="material-icons-round left">check</i>Opslaan</button>

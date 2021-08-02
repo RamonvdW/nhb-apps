@@ -601,6 +601,9 @@ class RegiocompetitieTeamPoule(models.Model):
     teams = models.ManyToManyField(RegiocompetitieTeam,
                                    blank=True)      # mag leeg zijn
 
+    def __str__(self):
+        return self.beschrijving
+
 
 class RegiocompetitieRondeTeam(models.Model):
     """ Deze tabel houdt bij wat de samenstelling was van een team in een ronde van de regiocompetitie
@@ -627,6 +630,9 @@ class RegiocompetitieRondeTeam(models.Model):
 
     # logboek voor noteren gemiddelde van de invallers
     logboek = models.TextField(max_length=1024, blank=True)
+
+    def __str__(self):
+        return "Ronde %s, team %s" % (self.ronde_nr, self.team.id)
 
 
 class KampioenschapSchutterBoog(models.Model):

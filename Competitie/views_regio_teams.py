@@ -81,11 +81,11 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         if deelcomp.competitie.fase > 'F':
             raise Http404('Verkeerde competitie fase')
 
-        if deelcomp.competitie.fase >= 'B':
-            context['readonly_partly'] = True
+        if deelcomp.competitie.fase > 'A':
+            context['readonly_na_fase_A'] = True
 
             if deelcomp.competitie.fase > 'C':
-                context['readonly'] = True
+                context['readonly_na_fase_C'] = True
 
         context['deelcomp'] = deelcomp
 
@@ -620,15 +620,34 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
 
         poules = (RegiocompetitieTeamPoule
                   .objects
+                  .prefetch_related('teams')
                   .filter(deelcompetitie=deelcomp)
                   .annotate(team_count=Count('teams')))
 
+        team_pk2poule = dict()
         for poule in poules:
             poule.url_wijzig = reverse('Competitie:wijzig-poule',
                                        kwargs={'poule_pk': poule.pk})
+
+            for team in poule.teams.all():
+                team_pk2poule[team.pk] = poule
         # for
 
         context['poules'] = poules
+
+        teams = RegiocompetitieTeam.objects.filter(deelcompetitie=deelcomp).order_by('klasse__team__volgorde')
+
+        for team in teams:
+            try:
+                poule = team_pk2poule[team.pk]
+            except KeyError:
+                pass
+            else:
+                team.poule = poule
+        # for
+
+        context['teams'] = teams
+
         context['url_nieuwe_poule'] = reverse('Competitie:regio-poules',
                                               kwargs={'deelcomp_pk': deelcomp.pk})
         context['wiki_rcl_poules_url'] = reverse_handleiding(self.request, settings.HANDLEIDING_POULES)
@@ -711,11 +730,17 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
                  .objects
                  .select_related('klasse__team',
                                  'team_type')
-                 .filter(deelcompetitie=deelcomp))
+                 .prefetch_related('regiocompetitieteampoule_set')
+                 .filter(deelcompetitie=deelcomp)
+                 .order_by('klasse__team__volgorde'))
         for team in teams:
             team.sel_str = 'team_%s' % team.pk
             if team.pk in team_pks:
                 team.geselecteerd = True
+            else:
+                if team.regiocompetitieteampoule_set.count():
+                    team.in_andere_poule = True
+
             if team.klasse:
                 team.klasse_str = team.klasse.team.beschrijving
             else:
@@ -761,16 +786,30 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
 
             gekozen = list()
             type_counts = dict()
-            for team in RegiocompetitieTeam.objects.filter(deelcompetitie=deelcomp):
+            for team in (RegiocompetitieTeam
+                         .objects
+                         .prefetch_related('regiocompetitieteampoule_set')
+                         .filter(deelcompetitie=deelcomp)):
 
                 sel_str = 'team_%s' % team.pk
                 if request.POST.get(sel_str, ''):
-                    gekozen.append(team)
+                    kies = False
 
-                    try:
-                        type_counts[team.team_type] += 1
-                    except KeyError:
-                        type_counts[team.team_type] = 1
+                    if team.regiocompetitieteampoule_set.count() == 0:
+                        # nog niet in te een poule, dus mag gekozen worden
+                        kies = True
+                    else:
+                        if team.regiocompetitieteampoule_set.all()[0].pk == poule.pk:
+                            # herverkozen in dezelfde poule
+                            kies = True
+
+                    if kies:
+                        gekozen.append(team)
+
+                        try:
+                            type_counts[team.team_type] += 1
+                        except KeyError:
+                            type_counts[team.team_type] = 1
             # for
 
             # kijk welk team type dit gaat worden

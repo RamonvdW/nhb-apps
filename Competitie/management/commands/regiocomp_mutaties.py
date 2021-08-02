@@ -621,6 +621,16 @@ class Command(BaseCommand):
                         # for
 
                     ronde_team.schutters.set(schutter_pks)
+
+                    # schrijf de namen van de leden in het logboek
+                    ronde_team.logboek += '\n[%s] Gekoppelde schutters:' % now_str
+                    for deelnemer in (RegioCompetitieSchutterBoog
+                                      .objects
+                                      .select_related('schutterboog__nhblid')
+                                      .filter(pk__in=schutter_pks)):
+                        ronde_team.logboek += '\n   ' + str(deelnemer.schutterboog.nhblid)
+                    # for
+                    ronde_team.save(update_fields=['logboek'])
                 # for
             # for
 

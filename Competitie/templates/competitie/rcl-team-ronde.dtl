@@ -23,17 +23,17 @@
             <div class="white-text nhb-blauw z-depth-2">
 
                 <div class="row small-row">
-                    <div class="col s3">Competitie:</div>
+                    <div class="col s4">Competitie:</div>
                     <div class="col s7">{{ deelcomp.competitie.beschrijving }}</div>
                 </div>
 
                 <div class="row small-row">
-                    <div class="col s3">Regio:</div>
+                    <div class="col s4">Regio:</div>
                     <div class="col s7">{{ regio }}</div>
                 </div>
 
                 <div class="row small-row">
-                    <div class="col s3">Huidige ronde:</div>
+                    <div class="col s4">Huidige ronde:</div>
                     <div class="col s7">{{ deelcomp.huidige_team_ronde }}</div>
                 </div>
 

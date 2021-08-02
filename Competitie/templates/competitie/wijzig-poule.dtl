@@ -45,7 +45,7 @@
                             {% if team.klasse_str %}
                                 <tr>
                                     <td><label>
-                                        <input type="checkbox" class="filled-in" name="{{ team.sel_str }}"{% if team.geselecteerd %} checked{% endif %}>
+                                        <input type="checkbox" class="filled-in" name="{{ team.sel_str }}"{% if team.geselecteerd %} checked{% endif %}{% if team.in_andere_poule %} disabled{% endif %}>
                                         <span>&nbsp;</span>
                                         </label>
                                     </td>

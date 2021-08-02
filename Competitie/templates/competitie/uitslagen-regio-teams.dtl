@@ -22,7 +22,7 @@
     <div class="white shrink-wrap-5">
         {% for teamtype in teamtype_filters %}
             {% if teamtype.zoom_url %}
-                <a class="margin-5 btn-outline" href="{{ boog.zoom_url }}">{{ teamtype.beschrijving }}</a>
+                <a class="margin-5 btn-outline" href="{{ teamtype.zoom_url }}">{{ teamtype.beschrijving }}</a>
             {% else %}
                 <a class="margin-5 btn-nhb-blauw" href="#">{{ teamtype.beschrijving }}</a>
             {% endif %}
@@ -59,8 +59,8 @@
                 </div>
 
                 <div class="row small-row">
-                    <div class="col s3">Wedstrijdboog:</div>
-                    <div class="col s7">{{ comp_boog.beschrijving }}</div>
+                    <div class="col s3">Team type:</div>
+                    <div class="col s7">{{ teamtype.beschrijving }}</div>
                 </div>
 
                 <div class="row small-row">
@@ -74,13 +74,12 @@
     <p>&nbsp;</p>
 
     <table class="white">
-        {% for obj in deelnemers %}
-            {% if forloop.first %}      <!-- alleen toevoegen als er deelnemers zijn, anders probleem met colspan=2 -->
+        {% for team in teams %}
+            {% if forloop.first %}      <!-- alleen toevoegen als er teams zijn, anders probleem met colspan=2 -->
                 <!-- forceer gelijkmatige layout in de Scores kolommen -->
                 <tr style="visibility: collapse">
                     <td colspan="2"><!-- rank, naam --></td>
-                    <td class="hide-on-small-only"><!-- vereniging --></td>
-                    <td><!-- gemiddelde --></td>
+                    <td class="center-align"><!-- punten --></td>
                     <td class="right-align smal">888</td>
                     <td class="right-align smal">888</td>
                     <td class="right-align smal">888</td>
@@ -92,37 +91,48 @@
                 </tr>
             {% endif %}
 
-            {% if obj.break_klasse %}
+            {% if team.break_poule %}
                 <tr class="nhb-grijs">
-                    <td colspan="12"><h5>{{ obj.klasse_str }}</h5></td>
+                    <td colspan="12">
+                        <br>
+                        {% if team.poule_str == '??' %}
+                            <h5 class="red-text">Nog niet in een poule geplaatst</h5>
+                        {% else %}
+                            <h5>{{ team.poule_str }}</h5>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endif %}
+
+            {% if team.break_klasse %}
+                <tr class="nhb-grijs">
+                    <td colspan="12"><h6>{{ team.klasse_str }}</h6></td>
                 </tr>
                 <tr>
                     <th><!-- rank --></th>
-                    <th>Sporter</th>
-                    <th class="hide-on-small-only">Vereniging</th>
-                    <th class="center-align">Gemiddelde</th>
+                    <th>Team</th>
+                    <th class="center-align">Punten</th>
                     <th class="center-align" colspan="7">Scores</th>
                     <th class="right-align hide-on-small-only">Totaal</th>
                 </tr>
             {% endif %}
 
             <tr>
-                <td class="center-align smal">{{ obj.rank }}</td>
-                <td class="smal">{{ obj.naam_str }}</td>
-                <td class="smal hide-on-small-only">{{ obj.ver_str }}</td>
-                <td class="center-align smal">{{ obj.gemiddelde }}</td>
-                <td class="right-align smal">{% if obj.laagste_score_nr == 1 %}<del>{{ obj.score1 }}</del>{% else %}{{ obj.score1 }}{% endif %}</td>
-                <td class="right-align smal">{% if obj.laagste_score_nr == 2 %}<del>{{ obj.score2 }}</del>{% else %}{{ obj.score2 }}{% endif %}</td>
-                <td class="right-align smal">{% if obj.laagste_score_nr == 3 %}<del>{{ obj.score3 }}</del>{% else %}{{ obj.score3 }}{% endif %}</td>
-                <td class="right-align smal">{% if obj.laagste_score_nr == 4 %}<del>{{ obj.score4 }}</del>{% else %}{{ obj.score4 }}{% endif %}</td>
-                <td class="right-align smal">{% if obj.laagste_score_nr == 5 %}<del>{{ obj.score5 }}</del>{% else %}{{ obj.score5 }}{% endif %}</td>
-                <td class="right-align smal">{% if obj.laagste_score_nr == 6 %}<del>{{ obj.score6 }}</del>{% else %}{{ obj.score6 }}{% endif %}</td>
-                <td class="right-align smal">{% if obj.laagste_score_nr == 7 %}<del>{{ obj.score7 }}</del>{% else %}{{ obj.score7 }}{% endif %}</td>
-                <td class="right-align hide-on-small-only">{{ obj.totaal }}</td>
+                <td class="center-align smal">{{ team.rank }}</td>
+                <td class="smal">{{ team.naam_str }}</td>
+                <td class="center-align smal">{{ team.totaal_punten }}</td>
+                {% for score in team.ronde_scores %}
+                    <td class="right-align smal">{{ score }}</td>
+                {% endfor %}
+                <td class="right-align hide-on-small-only">{{ team.totaal_score }}</td>
             </tr>
 
         {% endfor %}
     </table>
+
+    {% if not deelcomp.regio_organiseert_teamcompetitie %}
+        <p>Deze regio organiseert geen team competitie.</p>
+    {% endif %}
 
 {% endblock %}
 

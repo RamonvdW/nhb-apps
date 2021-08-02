@@ -83,6 +83,30 @@
 
     </table>
 
+    <p>&nbsp;</p>
+    <p>Overzicht van alle teams die in een poule geplaatst moeten worden:</p>
+
+    <table class="white">
+        {% for team in teams %}
+            {% if forloop.first %}
+                <thead>
+                    <tr>
+                        <th>Team</th>
+                        <th>Poule</th>
+                        <th>Klasse</th>
+                    </tr>
+                </thead>
+            {% endif %}
+
+            <tr>
+                <td>{{ team.team_naam }}</td>
+                <td>{% if team.poule %}{{ team.poule.beschrijving }}{% else %}<i class="red-text">Geen</i>{% endif %}</td>
+                <td>{% if team.klasse %}{{ team.klasse }}{% else %}<i>Onbekend</i><span class="red-text">&nbsp;&nbsp;(team is niet compleet)</span>{% endif %}</td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-rcl-teams-poules" %}
 
 {% endblock %}
