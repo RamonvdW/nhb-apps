@@ -17,11 +17,11 @@
         }
     </script>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-regio" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-regio-indiv" %}
 
     <h4>Uitslagen regiocompetitie</h4>
 
-    <p>Deze pagina toont de {% if comp.alle_regiocompetities_afgesloten %}eindstand{% else %}tussenstand{% endif %} van de regiocompetities.</p>
+    <p>Deze pagina toont de {% if comp.alle_regiocompetities_afgesloten %}eindstand{% else %}tussenstand{% endif %} van de individuele regiocompetities.</p>
 
 
     <p>Kies een wedstrijdboog:</p>

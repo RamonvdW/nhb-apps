@@ -253,7 +253,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
                                   minute=0,
                                   second=0)
         einde = timezone.make_aware(einde)
-        mag_wijzigen = (now <= einde) and not self.readonly
+        mag_wijzigen = (now <= einde)
 
         teamtype_default = None
         teams = TeamType.objects.order_by('volgorde')

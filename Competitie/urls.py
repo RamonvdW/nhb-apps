@@ -243,21 +243,29 @@ urlpatterns = [
          views_uitslagen.UitslagenVerenigingView.as_view(),
          name='uitslagen-vereniging'),
 
-    path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio/<regio_nr>/',
-         views_uitslagen.UitslagenRegioView.as_view(),
-         name='uitslagen-regio-n'),
+    path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio-individueel/<regio_nr>/',
+         views_uitslagen.UitslagenRegioIndivView.as_view(),
+         name='uitslagen-regio-indiv-n'),
 
-    path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio/',
-         views_uitslagen.UitslagenRegioView.as_view(),
-         name='uitslagen-regio'),
+    path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio-individueel/',
+         views_uitslagen.UitslagenRegioIndivView.as_view(),
+         name='uitslagen-regio-indiv'),
 
-    path('<comp_pk>/uitslagen/<comp_boog>/rayon/',
-         views_uitslagen.UitslagenRayonView.as_view(),
-         name='uitslagen-rayon'),
+    path('<comp_pk>/uitslagen/<team_type>/regio-teams/',
+         views_uitslagen.UitslagenRegioTeamsView.as_view(),
+         name='uitslagen-regio-teams'),
 
-    path('<comp_pk>/uitslagen/<comp_boog>/rayon/<rayon_nr>/',
-         views_uitslagen.UitslagenRayonView.as_view(),
-         name='uitslagen-rayon-n'),
+    path('<comp_pk>/uitslagen/<team_type>/regio-teams/<regio_nr>/',
+         views_uitslagen.UitslagenRegioTeamsView.as_view(),
+         name='uitslagen-regio-teams-n'),
+
+    path('<comp_pk>/uitslagen/<comp_boog>/rayon-individueel/',
+         views_uitslagen.UitslagenRayonIndivView.as_view(),
+         name='uitslagen-rayon-indiv'),
+
+    path('<comp_pk>/uitslagen/<comp_boog>/rayon-individueel/<rayon_nr>/',
+         views_uitslagen.UitslagenRayonIndivView.as_view(),
+         name='uitslagen-rayon-indiv-n'),
 
     path('<comp_pk>/uitslagen/<comp_boog>/bond/',
          views_uitslagen.UitslagenBondView.as_view(),

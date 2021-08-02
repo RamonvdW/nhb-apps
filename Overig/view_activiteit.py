@@ -216,7 +216,8 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                 else:
                     lid.email_is_bevestigd_str = 'Nee'
 
-                lid.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz), 'j F H:i')
+                if account.last_login:
+                    lid.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz), 'j F H:i')
 
                 do_vhpg = True
                 if account.otp_is_actief:

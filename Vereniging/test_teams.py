@@ -380,8 +380,8 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
             resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0))
         self.assert404(resp)     # 404 = Not found
 
-        # zet de competitie naar fase > C
-        zet_competitie_fase(self.comp_18, 'D')
+        # zet de competitie naar > fase E
+        zet_competitie_fase(self.comp_18, 'F')
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_regio_teams % self.deelcomp18_regio111.pk)

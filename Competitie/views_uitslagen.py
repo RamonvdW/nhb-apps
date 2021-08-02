@@ -18,8 +18,9 @@ from .models import Competitie
 
 
 TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING = 'competitie/uitslagen-vereniging.dtl'
-TEMPLATE_COMPETITIE_UITSLAGEN_REGIO = 'competitie/uitslagen-regio.dtl'
-TEMPLATE_COMPETITIE_UITSLAGEN_RAYON = 'competitie/uitslagen-rayon.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_INDIV = 'competitie/uitslagen-regio-indiv.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_TEAMS = 'competitie/uitslagen-regio-teams.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_RAYON_INDIV = 'competitie/uitslagen-rayon-indiv.dtl'
 TEMPLATE_COMPETITIE_UITSLAGEN_BOND = 'competitie/uitslagen-bond.dtl'
 
 
@@ -164,7 +165,7 @@ class UitslagenVerenigingView(TemplateView):
             raise Http404('Boogtype niet bekend')
 
         regio_nr = ver.regio.regio_nr
-        context['url_terug'] = reverse('Competitie:uitslagen-regio-n',
+        context['url_terug'] = reverse('Competitie:uitslagen-regio-indiv-n',
                                        kwargs={'comp_pk': comp.pk,
                                                'zes_scores': 'alle',
                                                'comp_boog': comp_boog,
@@ -179,13 +180,13 @@ class UitslagenVerenigingView(TemplateView):
         return context
 
 
-class UitslagenRegioView(TemplateView):
+class UitslagenRegioIndivView(TemplateView):
 
     """ Django class-based view voor de de uitslagen van de competitie in 1 regio """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_REGIO
-    url_name = 'Competitie:uitslagen-regio-n'
+    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_INDIV
+    url_name = 'Competitie:uitslagen-regio-indiv-n'
     order_gemiddelde = '-gemiddelde'
 
     def _get_schutter_regio_nr(self):
@@ -449,12 +450,16 @@ class UitslagenRegioView(TemplateView):
         return context
 
 
-class UitslagenRayonView(TemplateView):
+class UitslagenRegioTeamsView(TemplateView):
+    pass
+
+
+class UitslagenRayonIndivView(TemplateView):
 
     """ Django class-based view voor de de uitslagen van de rayonkampioenschappen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_RAYON
+    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_RAYON_INDIV
 
     @staticmethod
     def _maak_filter_knoppen(context, comp, gekozen_rayon_nr, comp_boog):
@@ -472,7 +477,7 @@ class UitslagenRayonView(TemplateView):
                 comp_boog = boogtype.afkorting.lower()
                 # geen url --> knop disabled
             else:
-                boogtype.zoom_url = reverse('Competitie:uitslagen-rayon-n',
+                boogtype.zoom_url = reverse('uitslagen-rayon-indiv-n',
                                             kwargs={'comp_pk': comp.pk,
                                                     'comp_boog': boogtype.afkorting.lower(),
                                                     'rayon_nr': gekozen_rayon_nr})
@@ -490,7 +495,7 @@ class UitslagenRayonView(TemplateView):
             for rayon in rayons:
                 rayon.title_str = 'Rayon %s' % rayon.rayon_nr
                 if rayon.rayon_nr != gekozen_rayon_nr:
-                    rayon.zoom_url = reverse('Competitie:uitslagen-rayon-n',
+                    rayon.zoom_url = reverse('uitslagen-rayon-indiv-n',
                                              kwargs={'comp_pk': comp.pk,
                                                      'comp_boog': comp_boog,
                                                      'rayon_nr': rayon.rayon_nr})
