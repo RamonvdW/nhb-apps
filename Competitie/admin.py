@@ -227,7 +227,8 @@ class RegiocompetitieRondeTeamAdmin(admin.ModelAdmin):
         ('',
             {'fields': ('team',
                         'ronde_nr',
-                        'schutters',
+                        'deelnemers_geselecteerd',
+                        'deelnemers_feitelijk',
                         'team_score',
                         'team_punten',
                         'logboek')
@@ -251,7 +252,7 @@ class RegiocompetitieRondeTeamAdmin(admin.ModelAdmin):
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
         if self.deelcomp and self.ver:
-            if db_field.name == 'schutters':
+            if db_field.name in ('deelnemers_geselecteerd', 'deelnemers_feitelijk'):
                 kwargs['queryset'] = (RegioCompetitieSchutterBoog
                                       .objects
                                       .select_related('schutterboog',

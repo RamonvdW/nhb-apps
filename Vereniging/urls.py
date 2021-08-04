@@ -53,7 +53,7 @@ urlpatterns = [
          view_teams.TeamsRegioInvallersView.as_view(),
          name='teams-regio-invallers'),
 
-    path('teams/regio/invallers-koppelen/<team_pk>/',
+    path('teams/regio/invallers-koppelen/<ronde_team_pk>/',
          view_teams.TeamsRegioInvallersKoppelLedenView.as_view(),
          name='teams-regio-invallers-koppelen'),
 

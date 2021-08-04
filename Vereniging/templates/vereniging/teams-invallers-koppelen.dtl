@@ -16,53 +16,69 @@
 
     <p>Op deze pagina kan je leden van de vereniging koppelen als invaller voor een team.</p>
 
+
     <script type="application/javascript">
+        function invallers_uitgrijzen() {
+            let bezette_nrs = Array()
+            document.querySelectorAll('input[type=radio]:checked').forEach(el => {
+                bezette_nrs.push(el.dataset["nr"])
+            })
+            console.log('bezette nrs:', bezette_nrs)
+
+            const uls = document.querySelectorAll('ul[data-uitvaller="1"]')
+            uls.forEach(el_ul => {
+                const invallers = el_ul.querySelectorAll('input')
+                invallers.forEach(invaller => {
+                    const nr = invaller.dataset["nr"]
+                    if (invaller.dataset["magInvallen"] === "0") {
+                        invaller.disabled = true
+                    } else if (!invaller.checked && bezette_nrs.includes(nr)) {
+                        invaller.disabled = true
+                    } else {
+                        invaller.disabled = false
+                    }
+
+                    const isUitvaller = (invaller.dataset["isUitvaller"] === "1")
+
+                    if (invaller.checked) bezette_nrs.push(nr)
+                })
+            })
+        }
+
         function gewijzigd() {
-            // het formulier is aangepast en moet opgeslagen worden
+            // het formulier is aangepast en moet opgeslagen kunnen worden
+            invallers_uitgrijzen()
+
             // enable/disable de 'opslaan' knop
             const el = document.getElementById("opslaan_knop")
-
-            const els = document.querySelectorAll('input[type=checkbox]')
-            let count = 0
-            els.forEach(checkbox => {
-                    if (checkbox.checked) count += 1
-                })
-
-            el.disabled = (count > 4)
+            el.disabled = false
             el.parentElement.style.display = "block"
         }
     </script>
 
-    {% if mag_wijzigen %}
     <form action="{{ url_opslaan }}" method="post">
         {% csrf_token %}
-    {% endif %}
 
         <table class="white">
 
             <tr>
                 <td>Vereniging</td>
-                <td colspan="2">{{ team.vereniging }}</td>
-            </tr>
-
-            <tr>
-                <td>Team nummer</td>
-                <td colspan="2">{{ team.volg_nr }}</td>
+                <td>{{ team.vereniging }}</td>
             </tr>
 
             <tr>
                 <td>Team naam</td>
-                <td colspan="2">{{ team.team_naam }}</td>
+                <td>{{ team.team_naam }}</td>
             </tr>
 
             <tr>
                 <td>Soort team</td>
-                <td colspan="2">{{ team.team_type.beschrijving }}</td>
+                <td>{{ team.team_type.beschrijving }}</td>
             </tr>
 
             <tr>
                 <td style="vertical-align: top">Toegestane bogen</td>
-                <td colspan="2">
+                <td>
                     {% for boog in boog_typen %}
                         <span>{{ boog.beschrijving }}</span><br>
                     {% endfor %}
@@ -70,64 +86,54 @@
             </tr>
 
             <tr>
-                <td>Team sterkte</td>
-                <td colspan="2">{{ team.ag_str }}</td>
-            </tr>
-
-            <tr>
                 <td>Team wedstrijdklasse</td>
-                <td colspan="2">{{ team.klasse.team.beschrijving }}</td>
+                <td>{{ team.klasse.team.beschrijving }}</td>
             </tr>
 
             <tr>
-                <td>Aanvangsgemiddelden van de initi&euml;le sporters</td>
-                <td>
-                    <b>Aanvangsgemiddelde</b><br>
-                    {% for lid in begin_ags %}
-                        <span>{{ lid.ag_str }}</span><br>
-                    {% endfor %}
-                </td>
-                <td>
-                    <b>Sporter</b><br>
-                    {% for lid in begin_ags %}
-                        <span>{{ lid.naam_str }}</span><br>
-                    {% endfor %}
-                </td>
+                <td>Teamleden voor teamcompetitie ronde</td>
+                <td class="red-text"><b>RONDE {{ deelcomp.huidige_team_ronde }}</b></td>
+            </tr>
+
+            <tr class="nhb-grijs">
+                <td colspan="2">Let op: een invaller mag nu niet sterker zijn dan de uitvaller. Het actuele gemiddelde van de invaller mag niet hoger zijn dan het gemiddelde van de uitvaller zoals vastgelegd aan het begin van de ronde.</td>
             </tr>
 
             <tr>
-                <td style="vertical-align: top">Selecteer 3 of 4 sporters</td>
+                <th>Geselecteerd voor het team</th>
+                <th>Toegestane invallers</th>
+            </tr>
 
-                {% if not deelnemers.count %}
-                    <td colspan="2"><i class="red-text">Geen sporters gevonden met toegestaan boog type</i></td>
-                {% else %}
-                    <td colspan="2">
-                        <table class="striped">
-                            <thead>
-                                <tr>
-                                    <th><!-- checkbox column --></th>
-                                    <th>Aanvangs<wbr/>gemiddelde</th>
-                                    <th>Boog</th>
-                                    <th>Naam</th>
-                                </tr>
-                            </thead>
-                            {% for obj in deelnemers %}
-                                <tr>
-                                    <td>
-                                        <label>
-                                            <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.blokkeer %} disabled{% endif %} onchange="gewijzigd()">
-                                            <span>&nbsp;</span>
-                                        </label>
-                                    </td>
-                                    <td>{{ obj.ag_str }}</td>
-                                    <td>{{ obj.boog_str }}</td>
-                                    <td>{{ obj.naam_str }}</td>
-                                </tr>
+            {% for uitvaller_naam_str, uitvaller_gem_str, group_str, invallers in uitvallers %}
+                <tr>
+                    <td>{{ uitvaller_naam_str }} ({{ uitvaller_gem_str }})</td>
+                    <td>
+                        <ul id="id_{{ group_str }}" data-uitvaller="1">
+                            {% for is_uitvaller, invaller_gem_str, id_invaller, invaller_nr, invaller_naam_str, toon_checked in invallers %}
+                                <li>
+                                    <label class="black-text" for="{{ id_invaller }}">
+                                        <input class="with-gap" type="radio" name="{{ group_str }}" value="{{ invaller_nr }}" data-nr="{{ invaller_nr }}" data-is-uitvaller="{{ is_uitvaller }}" required id="{{ id_invaller }}"{% if toon_checked %} checked{% endif %} onchange="gewijzigd()">
+                                        <span>({{ invaller_gem_str }})&nbsp;&nbsp;{{ invaller_naam_str }}</span>
+                                    </label>
+                                </li>
                             {% endfor %}
-                        </table>
+                        </ul>
                     </td>
-                {% endif %}
-            </tr>
+                </tr>
+            {% endfor %}
+
+            {% if bezet %}
+                <tr class="nhb-grijs">
+                    <td colspan="2">De volgende sporters zijn al gekoppeld aan een ander team en kunnen daarom niet gekozen worden.</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        {% for deelnemer in bezet %}
+                            <span>({{ deelnemer.invaller_gem_str }})&nbsp;&nbsp;{{ deelnemer.naam_str }}</span><br>
+                        {% endfor %}
+                    </td>
+            {% endif %}
 
         </table>
 
@@ -135,11 +141,18 @@
             <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
                 <i class="material-icons-round left">check</i>Opslaan</button>
         </div>
-    {% if mag_wijzigen %}
     </form>
-    {% endif %}
 
-    <p>De <i>team sterkte</i> wordt berekend uit het aanvangsgemiddelde van de drie sterkste teamleden.</p>
-    <p>De <i>team wedstrijdklasse</i> wordt bepaald door de team sterkte en de vastgestelde minimum sterkte voor een wedstrijdklasse.</p>
+    <p>&nbsp;</p>
+    <p>Eerdere wijzigingen:</p>
+    <table class="white">
+        <tr>
+            <td>{{ logboek|linebreaks }}</td>
+        </tr>
+    </table>
 
+
+    <script>
+        window.addEventListener("load", function() { invallers_uitgrijzen() })
+    </script>
 {% endblock %}

@@ -20,13 +20,6 @@
 
         <p>Op deze pagina kan je als HWL de invallers opgeven voor de regiocompetitie van de <b>{{ deelcomp }}</b>.</p>
 
-        <p>Een belangrijke regel is deze: de invaller mag nu niet sterker zijn dan de uitvaller.</p>
-        {% if deelcomp.regio_heeft_vaste_teams %}
-            <p>Omdat jullie regio vaste teams heeft mag het huidige gemiddelde van de invaller niet hoger zijn dan het aanvangsgemiddelde van de uitvaller.</p>
-        {% else %}
-            <p>Omdat jullie regio voortschrijdend gemiddelde gebruikt wordt er gekeken naar het huidige gemiddelde van de invaller en het gemiddelde wat de uitvaller had aan het begin van deze ronde.</p>
-        {% endif %}
-
         <p>&nbsp;</p>
         <div class="container">
             <table class="white">
@@ -82,7 +75,7 @@
                     <th>Boogtype</th>
                     <th>Naam</th>
                     <th>In team</th>
-                    <th>Huidig gemiddelde</th>
+                    <th>Actuele gemiddelde</th>
                 </tr>
             </thead>
 

@@ -618,9 +618,15 @@ class RegiocompetitieRondeTeam(models.Model):
     # welke van de 7 rondes is dit
     ronde_nr = models.PositiveSmallIntegerField(default=0)
 
-    # schutters in het team (afhankelijk van invallers)
-    schutters = models.ManyToManyField(RegioCompetitieSchutterBoog,
-                                       blank=True)
+    # schutters die (automatisch) gekoppeld zijn aan het team
+    deelnemers_geselecteerd = models.ManyToManyField(RegioCompetitieSchutterBoog,
+                                                     related_name='teamronde_geselecteerd',
+                                                     blank=True)
+
+    # feitelijke schutters, inclusief invallers
+    deelnemers_feitelijk = models.ManyToManyField(RegioCompetitieSchutterBoog,
+                                                  related_name='teamronde_feitelijk',
+                                                  blank=True)
 
     # beste 3 scores van schutters in het team
     team_score = models.PositiveSmallIntegerField(default=0)
@@ -629,7 +635,7 @@ class RegiocompetitieRondeTeam(models.Model):
     team_punten = models.PositiveSmallIntegerField(default=0)
 
     # logboek voor noteren gemiddelde van de invallers
-    logboek = models.TextField(max_length=1024, blank=True)
+    logboek = models.TextField(max_length=1024, blank=True)     # TODO: max_length is not enforce, so can be removed
 
     def __str__(self):
         return "Ronde %s, team %s" % (self.ronde_nr, self.team.id)

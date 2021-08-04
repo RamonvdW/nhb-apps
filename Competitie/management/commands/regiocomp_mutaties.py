@@ -593,7 +593,7 @@ class Command(BaseCommand):
                     ronde_team = RegiocompetitieRondeTeam(
                                     team=team,
                                     ronde_nr=ronde_nr,
-                                    logboek="[%s] Aangemaakt door mutatie" % now_str)
+                                    logboek="[%s] Aangemaakt bij opstarten ronde %s\n" % (now_str, ronde_nr))
                     ronde_team.save()
 
                     # koppel de schutters
@@ -620,15 +620,16 @@ class Command(BaseCommand):
                             ver_schutters.remove(tup)
                         # for
 
-                    ronde_team.schutters.set(schutter_pks)
+                    ronde_team.deelnemers_geselecteerd.set(schutter_pks)
+                    ronde_team.deelnemers_feitelijk.set(schutter_pks)
 
                     # schrijf de namen van de leden in het logboek
-                    ronde_team.logboek += '\n[%s] Gekoppelde schutters:' % now_str
+                    ronde_team.logboek += '[%s] Geselecteerde schutters:\n' % now_str
                     for deelnemer in (RegioCompetitieSchutterBoog
                                       .objects
                                       .select_related('schutterboog__nhblid')
                                       .filter(pk__in=schutter_pks)):
-                        ronde_team.logboek += '\n   ' + str(deelnemer.schutterboog.nhblid)
+                        ronde_team.logboek += '   ' + str(deelnemer.schutterboog.nhblid) + '\n'
                     # for
                     ronde_team.save(update_fields=['logboek'])
                 # for
