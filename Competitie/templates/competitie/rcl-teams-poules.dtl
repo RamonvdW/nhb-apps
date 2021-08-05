@@ -39,7 +39,7 @@
 
 
     <p>&nbsp;</p>
-    <p>Op deze pagina kan de RCL de poules instellen voor de teamcompetitie in de regio.</p>
+    <p>Op deze pagina kan de RCL de poules {% if readonly %}bekijken{% else %}instellen{% endif %} voor de teamcompetitie in de regio.</p>
 
     <p>Handleiding over de poules: <a class="btn-small btn-nhb-blauw" href="{{ wiki_rcl_poules_url }}" target="_blank" rel="noopener noreferrer">
         <i class="material-icons-round">help_outline</i></a></p>
@@ -60,7 +60,11 @@
             <tr>
                 <td>{{ poule.beschrijving }}</td>
                 <td>{{ poule.team_count }}</td>
-                <td><a class="btn-nhb-blauw" href="{{ poule.url_wijzig }}">Wijzig</a></td>
+                <td>
+                    {% if poule.url_wijzig %}
+                        <a class="btn-nhb-blauw" href="{{ poule.url_wijzig }}">Wijzig</a>
+                    {% endif %}
+                </td>
             </tr>
         {% empty %}
             <tr>
@@ -84,7 +88,11 @@
     </table>
 
     <p>&nbsp;</p>
-    <p>Overzicht van alle teams die in een poule geplaatst moeten worden:</p>
+    {% if readonly %}
+        <p>Overzicht van alle teams en in welke poule ze geplaatst zijn:</p>
+    {% else %}
+        <p>Overzicht van alle teams die in een poule geplaatst moeten worden:</p>
+    {% endif %}
 
     <table class="white">
         {% for team in teams %}

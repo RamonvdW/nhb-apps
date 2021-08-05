@@ -480,6 +480,10 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/rcl-teams-poules.dtl', 'plein/site_layout.dtl'))
 
+        # tot en met fase D mag alles nog
+        comp = deelcomp.competitie
+        zet_competitie_fase(comp, 'D')
+
         # maak een poule aan
         self.assertEqual(0, RegiocompetitieTeamPoule.objects.count())
         with self.assert_max_queries(20):
@@ -545,6 +549,38 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
 
+        # na fase D mag je nog kijken maar niet aanpassen
+        comp = deelcomp.competitie
+        zet_competitie_fase(comp, 'E')
+
+        url = self.url_regio_poules % deelcomp.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-teams-poules.dtl', 'plein/site_layout.dtl'))
+
+        # maak een poule aan
+        self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert404(resp)
+        self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
+
+        # wijzig de poule
+        url = self.url_wijzig_poule % poule.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'beschrijving': ' hoi test!'})
+        self.assert404(resp)
+
+        # terug naar fase D
+        comp = deelcomp.competitie
+        zet_competitie_fase(comp, 'D')
+
         # verwijder een poule
         self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
         url = self.url_wijzig_poule % poule.pk
@@ -559,6 +595,11 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
 
         # maak een poule aan
         deelcomp = DeelCompetitie.objects.get(competitie=self.comp_18, functie=self.functie_rcl112_18)
+
+        # tot en met fase D mag alles nog
+        comp = deelcomp.competitie
+        zet_competitie_fase(comp, 'B')
+
         url = self.url_regio_poules % deelcomp.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url)

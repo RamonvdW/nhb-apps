@@ -619,6 +619,11 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied('Niet de beheerder van deze regio')
 
         context['deelcomp'] = deelcomp
+
+        comp = deelcomp.competitie
+        comp.bepaal_fase()
+        context['readonly'] = readonly = (comp.fase > 'D')
+
         context['regio'] = deelcomp.nhb_regio
 
         poules = (RegiocompetitieTeamPoule
@@ -629,8 +634,9 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
 
         team_pk2poule = dict()
         for poule in poules:
-            poule.url_wijzig = reverse('Competitie:wijzig-poule',
-                                       kwargs={'poule_pk': poule.pk})
+            if not readonly:
+                poule.url_wijzig = reverse('Competitie:wijzig-poule',
+                                           kwargs={'poule_pk': poule.pk})
 
             for team in poule.teams.all():
                 team_pk2poule[team.pk] = poule
@@ -651,8 +657,10 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
 
         context['teams'] = teams
 
-        context['url_nieuwe_poule'] = reverse('Competitie:regio-poules',
-                                              kwargs={'deelcomp_pk': deelcomp.pk})
+        if not readonly:
+            context['url_nieuwe_poule'] = reverse('Competitie:regio-poules',
+                                                  kwargs={'deelcomp_pk': deelcomp.pk})
+
         context['wiki_rcl_poules_url'] = reverse_handleiding(self.request, settings.HANDLEIDING_POULES)
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
@@ -674,6 +682,11 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
 
         if deelcomp.nhb_regio != self.functie_nu.nhb_regio:
             raise PermissionDenied('Niet de beheerder van deze regio')
+
+        comp = deelcomp.competitie
+        comp.bepaal_fase()
+        if comp.fase > 'D':
+            raise Http404('Poules kunnen niet meer aangepast worden')
 
         aantal = (RegiocompetitieTeamPoule
                   .objects
@@ -717,7 +730,8 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
             poule = (RegiocompetitieTeamPoule
                      .objects
                      .select_related('deelcompetitie',
-                                     'deelcompetitie__nhb_regio')
+                                     'deelcompetitie__nhb_regio',
+                                     'deelcompetitie__competitie')
                      .prefetch_related('teams')
                      .get(pk=poule_pk))
         except (ValueError, RegiocompetitieTeamPoule.DoesNotExist):
@@ -726,6 +740,11 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
         deelcomp = poule.deelcompetitie
         if deelcomp.nhb_regio != self.functie_nu.nhb_regio:
             raise PermissionDenied('Niet de beheerder van deze regio')
+
+        comp = deelcomp.competitie
+        comp.bepaal_fase()
+        if comp.fase > 'D':
+            raise Http404('Poules kunnen niet meer aangepast worden')
 
         team_pks = list(poule.teams.values_list('pk', flat=True))
 
@@ -776,6 +795,11 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
         deelcomp = poule.deelcompetitie
         if deelcomp.nhb_regio != self.functie_nu.nhb_regio:
             raise PermissionDenied('Niet de beheerder van deze regio')
+
+        comp = deelcomp.competitie
+        comp.bepaal_fase()
+        if comp.fase > 'D':
+            raise Http404('Poules kunnen niet meer aangepast worden')
 
         if request.POST.get('verwijder_poule', ''):
             # deze poule is niet meer nodig
