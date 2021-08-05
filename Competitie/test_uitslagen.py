@@ -103,6 +103,8 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.url_overzicht = '/bondscompetities/%s/'
         self.url_uitslagen_regio = '/bondscompetities/%s/uitslagen/%s/%s/regio-individueel/'
         self.url_uitslagen_regio_n = '/bondscompetities/%s/uitslagen/%s/%s/regio-individueel/%s/'
+        self.url_uitslagen_regio_teams = '/bondscompetities/%s/uitslagen/%s/regio-teams/'
+        self.url_uitslagen_regio_teams_n = '/bondscompetities/%s/uitslagen/%s/regio-teams/%s/'
         self.url_uitslagen_rayon = '/bondscompetities/%s/uitslagen/%s/rayon-individueel/'
         self.url_uitslagen_rayon_n = '/bondscompetities/%s/uitslagen/%s/rayon-individueel/%s/'
         self.url_uitslagen_bond = '/bondscompetities/%s/uitslagen/%s/bond/'
@@ -266,6 +268,21 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_uitslagen_regio_teams % (self.comp_18.pk, 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
+
+        # lijst met onze deelnemers
+        url = self.url_uitslagen_regio_teams_n % (self.comp_18.pk, 'IB', 101)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
 
         # als BKO
         self.e2e_wissel_naar_functie(self.functie_bko)
@@ -577,6 +594,21 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_uitslagen_regio_teams % (self.comp_18.pk, 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
+
+        # lijst met onze deelnemers
+        url = self.url_uitslagen_regio_teams_n % (self.comp_18.pk, 'IB', 101)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslagen_rayon % (self.comp_18.pk, 'R'))
