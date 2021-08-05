@@ -141,6 +141,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         for obj in teams:
             obj.aantal = obj.gekoppelde_schutters_count
             obj.ag_str = "%05.1f" % (obj.aanvangsgemiddelde * aantal_pijlen)
+            obj.ag_str = obj.ag_str.replace('.', ',')
 
             if mag_wijzigen:
                 obj.url_wijzig = reverse('Vereniging:teams-regio-wijzig',
@@ -172,6 +173,8 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
             obj.boog_str = obj.schutterboog.boogtype.beschrijving
             obj.naam_str = "[%s] %s" % (obj.schutterboog.nhblid.nhb_nr, obj.schutterboog.nhblid.volledige_naam())
             obj.ag_str = "%.3f" % obj.ag_voor_team
+            obj.ag_str = obj.ag_str.replace('.', ',')
+
             try:
                 team = obj.regiocompetitieteam_set.all()[0]
             except IndexError:

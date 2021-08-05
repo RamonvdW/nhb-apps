@@ -402,7 +402,8 @@ class RegioTeamsView(TemplateView):
                 prev_sterkte = ''
                 prev_team = klasse.team.team_type
 
-            min_ag_str = "%5.1f" % (klasse.min_ag * aantal_pijlen)
+            min_ag_str = "%05.1f" % (klasse.min_ag * aantal_pijlen)
+            min_ag_str = min_ag_str.replace('.', ',')
             if prev_sterkte:
                 if klasse.min_ag > AG_NUL:
                     klasse.sterkte_str = "sterkte " + min_ag_str + " tot " + prev_sterkte
@@ -435,6 +436,7 @@ class RegioTeamsView(TemplateView):
 
             # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
             team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            team.ag_str = team.ag_str.replace('.', ',')
             totaal_teams += 1
 
             klasse2teams[team.klasse].append(team)
@@ -458,6 +460,7 @@ class RegioTeamsView(TemplateView):
         for team in regioteams:
             # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
             team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            team.ag_str = team.ag_str.replace('.', ',')
             totaal_teams += 1
 
             team.break_before = is_eerste
