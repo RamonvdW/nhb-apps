@@ -411,7 +411,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-rayon.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/uitslagen-rayon-indiv.dtl', 'plein/site_layout.dtl'))
 
     def test_rayon_n(self):
         url = self.url_uitslagen_rayon_n % (self.comp_18.pk, 'IB', 1)      # bevat onze enige deelnemer met 6 scores
@@ -419,7 +419,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-rayon.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/uitslagen-rayon-indiv.dtl', 'plein/site_layout.dtl'))
 
     def test_rayon_bad(self):
         # slecht boogtype
@@ -582,13 +582,13 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(self.url_uitslagen_rayon % (self.comp_18.pk, 'R'))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-rayon.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/uitslagen-rayon-indiv.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslagen_rayon_n % (self.comp_18.pk, 'R', 2))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-rayon.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/uitslagen-rayon-indiv.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslagen_bond % (self.comp_18.pk, 'R'))
