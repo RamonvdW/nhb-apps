@@ -69,6 +69,33 @@
             </tr>
         {% endif %}
 
+        {% for team in regioteams_niet_af %}
+            {% if team.break_before %}
+                <tr class="nhb-grijs">
+                    <td colspan="{% if subset_filter %}5{% else %}4{% endif %}"><h5 class="red-text">Nog niet geplaatste teams</h5></td>
+                </tr>
+                <tr>
+                    {% if subset_filter %}
+                        <th>Regio</th>
+                    {% endif %}
+                    <th>Vereniging</th>
+                    <th>Naam</th>
+                    <th>Team sterkte</th>
+                    <th>Soort team</th>
+                </tr>
+            {% endif %}
+
+            <tr>
+                {% if subset_filter %}
+                    <td>{{ team.vereniging.regio.regio_nr }}</td>
+                {% endif %}
+                <td>{{ team.vereniging }}</td>
+                <td>{{ team.team_naam }}</td>
+                <td>{{ team.ag_str }}</td>
+                <td>{{ team.team_type.beschrijving }}</td>
+            </tr>
+        {% endfor %}
+
         {% for klasse, teams in regioteams.items %}
             <tr class="nhb-grijs">
                 <td colspan="{% if subset_filter %}5{% else %}4{% endif %}"><h5>{{ klasse.team.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
@@ -96,33 +123,6 @@
                     <td colspan="{% if subset_filter %}5{% else %}4{% endif %}"><i>Nog geen teams</i></td>
                 </tr>
             {% endfor %}
-        {% endfor %}
-
-        {% for team in regioteams_niet_af %}
-            {% if team.break_before %}
-                <tr class="nhb-grijs">
-                    <td colspan="{% if subset_filter %}5{% else %}4{% endif %}"><h5>Nog niet geplaatste teams</h5></td>
-                </tr>
-                <tr>
-                    {% if subset_filter %}
-                        <th>Regio</th>
-                    {% endif %}
-                    <th>Vereniging</th>
-                    <th>Naam</th>
-                    <th>Team sterkte</th>
-                    <th>Soort team</th>
-                </tr>
-            {% endif %}
-
-            <tr>
-                {% if subset_filter %}
-                    <td>{{ team.vereniging.regio.regio_nr }}</td>
-                {% endif %}
-                <td>{{ team.vereniging }}</td>
-                <td>{{ team.team_naam }}</td>
-                <td>{{ team.ag_str }}</td>
-                <td>{{ team.team_type.beschrijving }}</td>
-            </tr>
         {% endfor %}
     </table>
 
