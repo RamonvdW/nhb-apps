@@ -665,7 +665,7 @@ class UitslagenRayonIndivView(TemplateView):
                 comp_boog = boogtype.afkorting.lower()
                 # geen url --> knop disabled
             else:
-                boogtype.zoom_url = reverse('uitslagen-rayon-indiv-n',
+                boogtype.zoom_url = reverse('Competitie:uitslagen-rayon-indiv-n',
                                             kwargs={'comp_pk': comp.pk,
                                                     'comp_boog': boogtype.afkorting.lower(),
                                                     'rayon_nr': gekozen_rayon_nr})
@@ -683,7 +683,7 @@ class UitslagenRayonIndivView(TemplateView):
             for rayon in rayons:
                 rayon.title_str = 'Rayon %s' % rayon.rayon_nr
                 if rayon.rayon_nr != gekozen_rayon_nr:
-                    rayon.zoom_url = reverse('uitslagen-rayon-indiv-n',
+                    rayon.zoom_url = reverse('Competitie:uitslagen-rayon-indiv-n',
                                              kwargs={'comp_pk': comp.pk,
                                                      'comp_boog': comp_boog,
                                                      'rayon_nr': rayon.rayon_nr})
