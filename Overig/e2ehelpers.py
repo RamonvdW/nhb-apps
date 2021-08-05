@@ -548,6 +548,7 @@ class E2EHelpers(object):
         """ Controleer dat de gevraagde templates gebruikt zijn """
         lst = self._get_templates_not_used(resp, template_names)
         if len(lst):    # pragma: no cover
+            self.e2e_dump_resp(resp)
             msg = "Following templates should have been used: %s\n" % repr(lst)
             msg += "Actually used: %s" % repr([t.name for t in resp.templates])
             self.assertTrue(False, msg=msg)
