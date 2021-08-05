@@ -308,7 +308,7 @@ class CompetitieKlasse(models.Model):
             msg = self.indiv.beschrijving
         if self.team:
             msg = self.team.beschrijving
-        msg += " (%s)" % self.min_ag
+        msg += " (%.3f)" % self.min_ag
         return msg
 
     class Meta:

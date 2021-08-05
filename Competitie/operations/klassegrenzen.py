@@ -9,6 +9,7 @@ from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse, MAXIMAL
 from NhbStructuur.models import NhbLid
 from Score.models import Score, SCORE_TYPE_INDIV_AG
 from Competitie.models import AG_NUL, AG_LAAGSTE_NIET_NUL, CompetitieKlasse
+from decimal import Decimal
 
 
 def _get_targets_indiv():
@@ -437,10 +438,18 @@ class KlasseBepaler(object):
 
     def bepaal_klasse_deelnemer(self, deelnemer):
         """ deze functie zet deelnemer.klasse aan de hand van de schutterboog """
+
         ag = deelnemer.ag_voor_indiv
         schutterboog = deelnemer.schutterboog
         nhblid = schutterboog.nhblid
         age = nhblid.bereken_wedstrijdleeftijd(self.competitie.begin_jaar + 1)
+
+        if not isinstance(ag, Decimal):
+            raise LookupError('Verkeerde type')
+
+        # voorkom problemen in de >= vergelijking verderop door afrondingsfouten
+        # door conversie naar Decimal, want Decimal(7,42) = 7,4199999999
+        ag += Decimal(0.00005)
 
         mogelijkheden = list()
         for klasse in self.boogtype2klassen[schutterboog.boogtype.afkorting]:
@@ -462,7 +471,7 @@ class KlasseBepaler(object):
         else:
             # niet vast kunnen stellen
             # deelnemer.klasse = None       # werkt niet, want ForeignKey kan je niet testen op None (geen DoesNotExist exceptie)
-            raise LookupError("Geen passende klasse")
+            raise LookupError("Geen passende wedstrijdklasse")
 
 
 def competitie_klassegrenzen_vaststellen(comp):

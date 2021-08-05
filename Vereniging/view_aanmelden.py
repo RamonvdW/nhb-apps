@@ -23,6 +23,7 @@ from Plein.menu import menu_dynamics
 from Schutter.models import SchutterBoog, SchutterVoorkeuren
 from Score.models import Score, SCORE_TYPE_INDIV_AG
 from Wedstrijden.models import CompetitieWedstrijd
+from decimal import Decimal
 import copy
 
 
@@ -458,7 +459,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 for score in Score.objects.filter(schutterboog=schutterboog,
                                                   afstand_meter=comp.afstand,
                                                   type=SCORE_TYPE_INDIV_AG):
-                    ag = score.waarde / 1000
+                    ag = Decimal(score.waarde / 1000)
                     aanmelding.ag_voor_indiv = ag
                     aanmelding.ag_voor_team = ag
                     aanmelding.ag_voor_team_mag_aangepast_worden = False
@@ -467,8 +468,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 # zoek een toepasselijke klasse aan de hand van de leeftijd
                 try:
                     bepaler.bepaal_klasse_deelnemer(aanmelding)
-                except LookupError:
-                    raise Http404('Geen passende klasse')
+                except LookupError as exc:
+                    raise Http404(str(exc))
 
                 # kijk of de schutter met een team mee wil en mag schieten voor deze competitie
                 if age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and dvl < udvl:

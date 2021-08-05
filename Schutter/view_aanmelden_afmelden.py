@@ -20,6 +20,7 @@ from Plein.menu import menu_dynamics
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
 from Wedstrijden.models import CompetitieWedstrijd
 from .models import SchutterVoorkeuren, SchutterBoog
+from decimal import Decimal
 
 
 TEMPLATE_AANMELDEN = 'schutter/bevestig-aanmelden.dtl'
@@ -96,10 +97,10 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         scores = Score.objects.filter(schutterboog=schutterboog,
                                       type=SCORE_TYPE_INDIV_AG,
                                       afstand_meter=deelcomp.competitie.afstand)
-        ag = AG_NUL
+        ag = Decimal(AG_NUL)
         if len(scores):
             score = scores[0]
-            ag = score.waarde / 1000
+            ag = Decimal(score.waarde / 1000)
             hist = ScoreHist.objects.filter(score=score).order_by('-when')
             if len(hist):
                 context['ag_hist'] = hist[0]
@@ -113,8 +114,8 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         bepaler = KlasseBepaler(deelcomp.competitie)
         try:
             bepaler.bepaal_klasse_deelnemer(aanmelding)
-        except LookupError:
-            raise Http404('Geen passende wedstrijdklasse')
+        except LookupError as exc:
+            raise Http404(str(exc))
 
         context['wedstrijdklasse'] = aanmelding.klasse.indiv.beschrijving
         context['is_klasse_onbekend'] = aanmelding.klasse.indiv.is_onbekend
@@ -300,7 +301,7 @@ class RegiocompetitieAanmeldenView(View):
                                       afstand_meter=deelcomp.competitie.afstand)
         if len(scores):
             score = scores[0]
-            ag = score.waarde / 1000
+            ag = Decimal(score.waarde / 1000)
             aanmelding.ag_voor_indiv = ag
             aanmelding.ag_voor_team = ag
             if ag > 0.000:
@@ -309,8 +310,8 @@ class RegiocompetitieAanmeldenView(View):
         bepaler = KlasseBepaler(deelcomp.competitie)
         try:
             bepaler.bepaal_klasse_deelnemer(aanmelding)
-        except LookupError:
-            raise Http404('Geen passende wedstrijdklasse')
+        except LookupError as exc:
+            raise Http404(str(exc))
 
         udvl = deelcomp.competitie.uiterste_datum_lid       # uiterste datum van lidmaatschap
         dvl = schutterboog.nhblid.sinds_datum               # datum van lidmaatschap
