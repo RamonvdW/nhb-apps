@@ -204,7 +204,44 @@
                 <br>
             </div>
         </div>
+    {% endif %}
 
+
+    {% if speelsterktes %}
+        <p>&nbsp;</p>
+        <h5>Prestatiespelden</h5>
+
+        <!-- details: https://worldarchery.sport/rulebook/article/17#article-723
+          en: https://worldarchery.sport/sport/education/badge-awards -->
+
+        <div class="row white">
+            <div class="col s12">
+                <p>De volgende spelden, veren of schilden zijn door jou behaald:</p>
+
+                <div class="table-wrap-5">
+                    <table class="white">
+                        <thead>
+                            <tr>
+                                <th>Discipline</th>
+                                <th>Onderscheiding</th>
+                                <th>Categorie</th>
+                                <th>Datum</th>
+                            </tr>
+                        </thead>
+
+                        {% for obj in speelsterktes %}
+                            <tr>
+                                <td>{{ obj.discipline }}</td>
+                                <td>{{ obj.beschrijving }}</td>
+                                <td>{{ obj.category }}</td>
+                                <td>{{ obj.datum }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                <br>
+            </div>
+        </div>
     {% endif %}
 
 

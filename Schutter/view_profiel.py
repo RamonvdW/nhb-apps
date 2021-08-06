@@ -9,14 +9,15 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils.formats import localize
 from django.db.models import Q
-from Plein.menu import menu_dynamics
-from Functie.rol import Rollen, rol_get_huidige
-from Functie.models import Functie
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie,
                                RegioCompetitieSchutterBoog,
                                LAAG_REGIO, INSCHRIJF_METHODE_1)
+from Functie.rol import Rollen, rol_get_huidige
+from Functie.models import Functie
+from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from NhbStructuur.models import Speelsterkte
+from Plein.menu import menu_dynamics
 from Records.models import IndivRecord, MATERIAALKLASSE
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
 from .models import SchutterVoorkeuren, SchutterBoog
@@ -354,6 +355,13 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     context['rcl25_email'] = functie.bevestigde_email
         # for
 
+    @staticmethod
+    def _find_speelsterktes(nhblid):
+        sterktes = Speelsterkte.objects.filter(lid=nhblid).order_by('volgorde')
+        if sterktes.count() == 0:
+            sterktes = None
+        return sterktes
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -390,6 +398,8 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                 if regiocomps is None:
                     # niet ingeschreven en geen interesse
                     context['toon_bondscompetities'] = False
+
+            context['speelsterktes'] = self._find_speelsterktes(nhblid)
 
         self._get_contact_gegevens(nhblid, context)
 

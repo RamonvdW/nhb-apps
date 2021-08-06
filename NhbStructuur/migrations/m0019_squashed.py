@@ -124,6 +124,7 @@ class Migration(migrations.Migration):
         ('Account', 'm0019_squashed'),
     ]
 
+    # migratie functies
     operations = [
         migrations.CreateModel(
             name='NhbRayon',
