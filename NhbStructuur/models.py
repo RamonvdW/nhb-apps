@@ -289,4 +289,7 @@ class Speelsterkte(models.Model):
     # sorteer volgorde (lager = eerder tonen)
     volgorde = models.PositiveSmallIntegerField()
 
+    def __str__(self):
+        return "[%s] %s - %s - %s - %s (%s) " % (self.datum, self.lid.volledige_naam(), self.category, self.discipline, self.beschrijving, self.volgorde)
+
 # end of file
