@@ -879,7 +879,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                           .prefetch_related('team__team_type__boog_typen')
                           .get(pk=ronde_team_pk,
                                team__vereniging=self.functie_nu.nhb_ver))
-        except (ValueError, RegiocompetitieTeam.DoesNotExist):
+        except (ValueError, RegiocompetitieRondeTeam.DoesNotExist):
             raise Http404('Team niet gevonden of niet van jouw vereniging')
 
         team = ronde_team.team
@@ -995,7 +995,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                           .prefetch_related('deelnemers_geselecteerd')
                           .get(pk=ronde_team_pk,
                                team__vereniging=self.functie_nu.nhb_ver))
-        except (ValueError, RegiocompetitieTeam.DoesNotExist):
+        except (ValueError, RegiocompetitieRondeTeam.DoesNotExist):
             raise Http404('Team ronde niet gevonden of niet van jouw vereniging')
 
         team = ronde_team.team
