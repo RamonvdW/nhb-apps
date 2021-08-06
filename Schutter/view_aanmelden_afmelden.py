@@ -100,7 +100,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         ag = Decimal(AG_NUL)
         if len(scores):
             score = scores[0]
-            ag = Decimal(score.waarde / 1000)
+            ag = Decimal(score.waarde) / 1000
             hist = ScoreHist.objects.filter(score=score).order_by('-when')
             if len(hist):
                 context['ag_hist'] = hist[0]
@@ -301,7 +301,7 @@ class RegiocompetitieAanmeldenView(View):
                                       afstand_meter=deelcomp.competitie.afstand)
         if len(scores):
             score = scores[0]
-            ag = Decimal(score.waarde / 1000)
+            ag = Decimal(score.waarde) / 1000
             aanmelding.ag_voor_indiv = ag
             aanmelding.ag_voor_team = ag
             if ag > 0.000:

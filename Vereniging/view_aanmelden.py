@@ -136,7 +136,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                       .select_related('schutterboog')
                       .filter(type=SCORE_TYPE_INDIV_AG,
                               afstand_meter=comp.afstand)):
-            ag = score.waarde / 1000
+            ag = Decimal(score.waarde) / 1000
             ag_dict[score.schutterboog.pk] = ag
         # for
 
@@ -459,7 +459,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 for score in Score.objects.filter(schutterboog=schutterboog,
                                                   afstand_meter=comp.afstand,
                                                   type=SCORE_TYPE_INDIV_AG):
-                    ag = Decimal(score.waarde / 1000)
+                    ag = Decimal(score.waarde) / 1000
                     aanmelding.ag_voor_indiv = ag
                     aanmelding.ag_voor_team = ag
                     aanmelding.ag_voor_team_mag_aangepast_worden = False

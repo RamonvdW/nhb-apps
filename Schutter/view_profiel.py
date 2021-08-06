@@ -21,6 +21,7 @@ from Plein.menu import menu_dynamics
 from Records.models import IndivRecord, MATERIAALKLASSE
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
 from .models import SchutterVoorkeuren, SchutterBoog
+from decimal import Decimal
 import logging
 import copy
 
@@ -285,7 +286,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                  .filter(score__in=score_pks)
                  .order_by('-when'))
         for score in scores:
-            score.ag = score.waarde / 1000
+            score.ag = Decimal(score.waarde) / 1000
             for hist in hists:
                 if hist.score.pk == score.pk:
                     score.scorehist = hist       # nieuwste
