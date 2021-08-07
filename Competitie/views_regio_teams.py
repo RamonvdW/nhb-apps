@@ -1072,26 +1072,27 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
         if deelcomp.huidige_team_ronde <= 7:
 
             # controleer dat het redelijk is om de volgende ronde op te starten
-            alle_regels, is_redelijk = self._bepaal_wedstrijdpunten(deelcomp)
-            if not is_redelijk:
-                raise Http404('Te weinig scores')
+            if deelcomp.huidige_team_ronde > 0:
+                alle_regels, is_redelijk = self._bepaal_wedstrijdpunten(deelcomp)
+                if not is_redelijk:
+                    raise Http404('Te weinig scores')
 
-            # pas de wedstrijdpunten toe
-            if deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_TWEE:
-                for regel in alle_regels:
-                    regel.ronde_team1.team_punten = regel.team1_wp
-                    regel.ronde_team1.save(update_fields=['team_punten'])
+                # pas de wedstrijdpunten toe
+                if deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_TWEE:
+                    for regel in alle_regels:
+                        regel.ronde_team1.team_punten = regel.team1_wp
+                        regel.ronde_team1.save(update_fields=['team_punten'])
 
-                    if regel.ronde_team2:       # None == Bye
-                        regel.ronde_team2.team_punten = regel.team2_wp
-                        regel.ronde_team2.save(update_fields=['team_punten'])
-                # for
+                        if regel.ronde_team2:       # None == Bye
+                            regel.ronde_team2.team_punten = regel.team2_wp
+                            regel.ronde_team2.save(update_fields=['team_punten'])
+                    # for
 
-            elif deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_FORMULE1:
-                for ronde_team in alle_regels:
-                    ronde_team.team_punten = ronde_team.ronde_wp
-                    ronde_team.save(update_fields=['team_punten'])
-                # for
+                elif deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_FORMULE1:
+                    for ronde_team in alle_regels:
+                        ronde_team.team_punten = ronde_team.ronde_wp
+                        ronde_team.save(update_fields=['team_punten'])
+                    # for
 
             account = request.user
             schrijf_in_logboek(account, 'Competitie', 'Teamcompetitie doorzetten naar ronde %s voor %s' % (deelcomp.huidige_team_ronde+1, deelcomp))
