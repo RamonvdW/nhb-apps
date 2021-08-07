@@ -14,9 +14,9 @@ from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_dee
 from Competitie.models import RegiocompetitieTeam
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
-from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE
+from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from .models import (LAAG_REGIO, DeelCompetitie,
                      DeelcompetitieRonde, RegioCompetitieSchutterBoog)
 import json
@@ -553,7 +553,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         # hiermee kunnen we snel controleren of iemand al in de uitslag
         # voorkomt
         pk2score_obj = dict()
-        for score_obj in uitslag.scores.all():
+        for score_obj in uitslag.scores.select_related('schutterboog').all():
             pk2score_obj[score_obj.schutterboog.pk] = score_obj     # TODO: moet deelnemer.pk worden!
         # for
         # print('pk2score_obj: %s' % repr(pk2score_obj))

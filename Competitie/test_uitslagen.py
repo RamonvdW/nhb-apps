@@ -498,14 +498,14 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.ver_nr)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
         # als je de pagina ophaalt als een ingelogd lid, dan krijg je je eigen vereniging
         self.e2e_login(self.account_lid_100002)
@@ -516,7 +516,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, '[1000] Grote Club')
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
         # tenzij je geen lid meer bent bij een vereniging
         nhblid = self.account_lid_100002.nhblid_set.all()[0]
@@ -526,7 +526,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
     def test_vereniging_hwl(self):
         functie = Functie.objects.get(rol='HWL', nhb_ver=self.ver)
@@ -540,7 +540,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, '[1000] Grote Club')
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
     def test_vereniging_regio_100(self):
         self.ver.regio = NhbRegio.objects.get(regio_nr=100)
@@ -551,7 +551,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
     def test_vereniging_bad(self):
         url = self.url_uitslagen_ver % ('x', 'R')
@@ -632,13 +632,13 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(self.url_uitslagen_ver % (self.comp_18.pk, 'R'))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.ver_nr))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
 
 # end of file

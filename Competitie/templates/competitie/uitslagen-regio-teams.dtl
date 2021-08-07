@@ -45,6 +45,27 @@
         {% endfor %}
     </div>
 
+    {% if ver_filters %}
+        <br><br>
+        <div class="row">
+            <div class="col s12 m6" style="padding:0">
+                <ul class="collapsible" style="box-shadow: none; border:0px">
+                    <li>
+                        <div class="collapsible-header white">Klik voor verenigingen</div>
+                        <div class="collapsible-body white">
+                            <span>Kies een vereniging:</span><br>
+                            {% for ver in ver_filters %}
+                                <p>
+                                <a class="btn-nhb-blauw" href="{{ ver.zoom_url }}">{{ ver.ver_nr }}</a>
+                                <span>&nbsp;&nbsp;{{ ver.naam }}</span>
+                                </p>
+                            {% endfor %}
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    {% endif %}
 
     <p>&nbsp;</p>
     <div class="row">
@@ -79,7 +100,6 @@
                 <!-- forceer gelijkmatige layout in de Scores kolommen -->
                 <tr style="visibility: collapse">
                     <td colspan="2"><!-- rank, naam --></td>
-                    <td class="center-align"><!-- punten --></td>
                     <td class="right-align smal">888</td>
                     <td class="right-align smal">888</td>
                     <td class="right-align smal">888</td>
@@ -87,7 +107,8 @@
                     <td class="right-align smal">888</td>
                     <td class="right-align smal">888</td>
                     <td class="right-align smal">888</td>
-                    <td class="right-align hide-on-small-only"><!-- totaal --></td>
+                    <td class="right-align hide-on-small-only">8888</td>
+                    <td class="right-align">88</td>
                 </tr>
             {% endif %}
 
@@ -111,20 +132,20 @@
                 <tr>
                     <th><!-- rank --></th>
                     <th>Team</th>
-                    <th class="center-align">Punten</th>
                     <th class="center-align" colspan="7">Scores</th>
                     <th class="right-align hide-on-small-only">Totaal</th>
+                    <th class="right-align">Punten</th>
                 </tr>
             {% endif %}
 
             <tr>
                 <td class="center-align smal">{{ team.rank }}</td>
                 <td class="smal">{{ team.naam_str }}</td>
-                <td class="center-align smal">{{ team.totaal_punten }}</td>
                 {% for score in team.ronde_scores %}
                     <td class="right-align smal">{{ score }}</td>
                 {% endfor %}
                 <td class="right-align hide-on-small-only">{{ team.totaal_score }}</td>
+                <td class="right-align">{{ team.totaal_punten }}</td>
             </tr>
 
         {% endfor %}

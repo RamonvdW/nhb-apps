@@ -21,7 +21,7 @@ from .models import (LAAG_REGIO, AG_NUL,
                      TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_TWEE, TEAM_PUNTEN_SOM_SCORES, TEAM_PUNTEN,
                      INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3,
                      Competitie, CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
-                     RegiocompetitieTeam, RegiocompetitieTeamPoule,
+                     RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                      CompetitieMutatie, MUTATIE_TEAM_RONDE)
 from .menu import menu_dynamics_competitie
 from types import SimpleNamespace
@@ -893,6 +893,15 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
 
         context['deelcomp'] = deelcomp
         context['regio'] = self.functie_nu.nhb_regio
+
+        teams = RegiocompetitieTeam.objects.filter(deelcompetitie=deelcomp).values_list('pk', flat=True)
+        ronde_teams = (RegiocompetitieRondeTeam
+                       .objects
+                       .filter(team__in=teams,
+                               ronde_nr=deelcomp.huidige_team_ronde)
+                       .order_by('-team_score'))        # hoogste bovenaan
+
+        context['ronde_teams'] = ronde_teams
 
         if deelcomp.huidige_team_ronde <= 7:
             context['url_volgende_ronde'] = reverse('Competitie:start-volgende-team-ronde',

@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-vereniging" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-vereniging-indiv" %}
 
     <h4>Uitslagen</h4>
 

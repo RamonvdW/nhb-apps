@@ -234,14 +234,18 @@ urlpatterns = [
 
 
     # competitie uitslagen
-    path('<comp_pk>/uitslagen/<comp_boog>/vereniging/<ver_nr>/',
-         views_uitslagen.UitslagenVerenigingView.as_view(),
-         name='uitslagen-vereniging-n'),
+    path('<comp_pk>/uitslagen/<comp_boog>/vereniging/<ver_nr>/individueel/',
+         views_uitslagen.UitslagenVerenigingIndivView.as_view(),
+         name='uitslagen-vereniging-indiv-n'),
+
+    path('<comp_pk>/uitslagen/<team_type>/vereniging/<ver_nr>/teams/',
+         views_uitslagen.UitslagenVerenigingTeamsView.as_view(),
+         name='uitslagen-vereniging-teams-n'),
 
     # TODO: wordt deze gebruikt?
     path('<comp_pk>/uitslagen/<comp_boog>/vereniging/',
-         views_uitslagen.UitslagenVerenigingView.as_view(),
-         name='uitslagen-vereniging'),
+         views_uitslagen.UitslagenVerenigingIndivView.as_view(),
+         name='uitslagen-vereniging-indiv'),
 
     path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio-individueel/<regio_nr>/',
          views_uitslagen.UitslagenRegioIndivView.as_view(),

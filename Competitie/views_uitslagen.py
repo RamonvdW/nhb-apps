@@ -16,9 +16,11 @@ from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DEELNAME_NEE,
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_huidige
 from .models import Competitie
+from types import SimpleNamespace
 
 
-TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING = 'competitie/uitslagen-vereniging.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING_INDIV = 'competitie/uitslagen-vereniging-indiv.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING_TEAMS = 'competitie/uitslagen-vereniging-teams.dtl'
 TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_INDIV = 'competitie/uitslagen-regio-indiv.dtl'
 TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_TEAMS = 'competitie/uitslagen-regio-teams.dtl'
 TEMPLATE_COMPETITIE_UITSLAGEN_RAYON_INDIV = 'competitie/uitslagen-rayon-indiv.dtl'
@@ -89,12 +91,12 @@ def get_schutter_ver_nr(request):
     return ver_nr
 
 
-class UitslagenVerenigingView(TemplateView):
+class UitslagenVerenigingIndivView(TemplateView):
 
     """ Django class-based view voor de de uitslagen van de competitie """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING
+    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING_INDIV
 
     @staticmethod
     def _maak_filter_knoppen(context, comp, ver_nr, comp_boog):
@@ -503,6 +505,30 @@ class UitslagenRegioTeamsView(TemplateView):
                     context['regio'] = regio
             # for
 
+        # vereniging filters
+        if context['teamtype']:
+            ver_nrs = list()
+            vers = list()
+            for team in (RegiocompetitieTeam
+                         .objects
+                         .filter(deelcompetitie__competitie=comp,
+                                 vereniging__regio__regio_nr=gekozen_regio_nr)
+                         .order_by('vereniging__ver_nr')):
+                if team.vereniging.ver_nr not in ver_nrs:
+                    ver_nrs.append(team.vereniging.ver_nr)
+                    vers.append(team.vereniging)
+            # for
+
+            if len(vers):
+                for ver in vers:
+                    ver.zoom_url = reverse('Competitie:uitslagen-vereniging-teams-n',
+                                           kwargs={'comp_pk': comp.pk,
+                                                   'team_type': context['teamtype'].afkorting.lower(),
+                                                   'ver_nr': ver.ver_nr})
+                # for
+
+                context['ver_filters'] = vers
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -563,8 +589,6 @@ class UitslagenRegioTeamsView(TemplateView):
             # for
         # for
 
-        dummy_poule = RegiocompetitieTeamPoule(pk=888888, beschrijving='??')
-
         teams = (RegiocompetitieTeam
                  .objects
                  .exclude(klasse=None)
@@ -580,9 +604,15 @@ class UitslagenRegioTeamsView(TemplateView):
             team.naam_str = "[%s] %s" % (team.vereniging.ver_nr, team.team_naam)
             team.totaal_score = 0
             team.totaal_punten = 0
+            team.leden = dict()     # [deelnemer.pk] = [ronde status, ..]
         # for
 
-        ronde_teams = RegiocompetitieRondeTeam.objects.filter(team__in=teams).order_by('ronde_nr')
+        ronde_teams = (RegiocompetitieRondeTeam
+                       .objects
+                       .filter(team__in=teams)
+                       .prefetch_related('deelnemers_geselecteerd',
+                                         'deelnemers_feitelijk')
+                       .order_by('ronde_nr'))
         for ronde_team in ronde_teams:
             team = pk2team[ronde_team.team.pk]
             team.rondes.append(ronde_team)
@@ -610,8 +640,6 @@ class UitslagenRegioTeamsView(TemplateView):
         # for
         unsorted_teams.sort()
 
-        print('heeft_poules: %s in deelcomp %s' % (heeft_poules, deelcomp))
-
         context['teams'] = teams = list()
         prev_klasse = None
         prev_poule = None
@@ -637,6 +665,235 @@ class UitslagenRegioTeamsView(TemplateView):
             team.rank = rank
             teams.append(team)
         # for
+
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        return context
+
+
+class UitslagenVerenigingTeamsView(TemplateView):
+
+    """ Django class-based view voor de de uitslagen van de teamcompetitie voor een specifieke vereniging """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING_TEAMS
+
+    @staticmethod
+    def _maak_filter_knoppen(context, comp, ver_nr, teamtype_afkorting):
+        """ filter knoppen voor de vereniging """
+
+        teamtypen = TeamType.objects.order_by('volgorde').all()
+
+        context['teamtype'] = None
+        context['teamtype_filters'] = teamtypen
+
+        for team in teamtypen:
+            if team.afkorting.upper() == teamtype_afkorting.upper():
+                context['teamtype'] = team
+                teamtype_afkorting = team.afkorting.lower()
+                # geen url --> knop disabled
+            else:
+                team.zoom_url = reverse('Competitie:uitslagen-vereniging-teams-n',
+                                        kwargs={'comp_pk': comp.pk,
+                                                'team_type': team.afkorting.lower(),
+                                                'ver_nr': ver_nr})
+        # for
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp = (Competitie
+                    .objects
+                    .get(pk=comp_pk))
+        except (ValueError, Competitie.DoesNotExist):
+            raise Http404('Competitie niet gevonden')
+
+        comp.bepaal_fase()
+        context['comp'] = comp
+
+        teamtype_afkorting = kwargs['team_type'][:2]     # afkappen voor veiligheid
+
+        # ver_nr is optioneel en resulteert in het nummer van de schutter
+        try:
+            ver_nr = kwargs['ver_nr'][:4]     # afkappen voor veiligheid
+            ver_nr = int(ver_nr)
+        except KeyError:
+            # zoek de vereniging die bij de huidige gebruiker past
+            ver_nr = get_schutter_ver_nr(self.request)
+        except ValueError:
+            raise Http404('Verkeerd verenigingsnummer')
+
+        try:
+            ver = NhbVereniging.objects.select_related('regio').get(ver_nr=ver_nr)
+        except NhbVereniging.DoesNotExist:
+            raise Http404('Vereniging niet gevonden')
+
+        context['ver'] = ver
+
+        self._maak_filter_knoppen(context, comp, ver_nr, teamtype_afkorting)
+
+        teamtype = context['teamtype']
+        if not teamtype:
+            raise Http404('Team type niet bekend')
+
+        regio_nr = ver.regio.regio_nr
+        context['url_terug'] = reverse('Competitie:uitslagen-regio-teams-n',
+                                       kwargs={'comp_pk': comp.pk,
+                                               'team_type': teamtype.afkorting.lower(),
+                                               'regio_nr': regio_nr})
+
+        context['deelcomp'] = DeelCompetitie.objects.get(competitie=comp, nhb_regio=ver.regio)
+
+        # zoek alle verenigingsteams erbij
+        teams = (RegiocompetitieTeam
+                 .objects
+                 .exclude(klasse=None)
+                 .filter(deelcompetitie__competitie=comp,
+                         team_type=context['teamtype'],
+                         vereniging=ver)
+                 .order_by('klasse__team__volgorde'))
+
+        pk2team = dict()
+        for team in teams:
+            pk2team[team.pk] = team
+            team.rondes = list()
+            team.ronde_scores = list()
+            team.naam_str = "[%s] %s" % (team.vereniging.ver_nr, team.team_naam)
+            team.totaal_score = 0
+            team.totaal_punten = 0
+            team.leden = dict()     # [deelnemer.pk] = [ronde status, ..]
+        # for
+
+        ronde_teams = (RegiocompetitieRondeTeam
+                       .objects
+                       .filter(team__in=teams)
+                       .prefetch_related('deelnemers_geselecteerd',
+                                         'deelnemers_feitelijk')
+                       .order_by('ronde_nr'))
+        for ronde_team in ronde_teams:
+            team = pk2team[ronde_team.team.pk]
+            team.rondes.append(ronde_team)
+            team.ronde_scores.append(ronde_team.team_score)
+            team.totaal_score += ronde_team.team_score
+            team.totaal_punten += ronde_team.team_punten
+
+            for deelnemer in ronde_team.deelnemers_geselecteerd.all():
+                if deelnemer.pk not in team.leden:
+                    team.leden[deelnemer.pk] = voorgaand = list()
+                    while len(voorgaand) < ronde_team.ronde_nr:
+                        inzet = SimpleNamespace(tekst='-', score=-1)
+                        voorgaand.append(inzet)
+                    # while
+                else:
+                    voorgaand = team.leden[deelnemer.pk]
+
+                score = (deelnemer.score1, deelnemer.score2, deelnemer.score3,
+                         deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7)[ronde_team.ronde_nr - 1]
+
+                inzet = SimpleNamespace(
+                                tekst=str(score),
+                                score=score)
+                voorgaand.append(inzet)
+            # for
+
+            for deelnemer in ronde_team.deelnemers_feitelijk.all():
+                if deelnemer.pk not in team.leden:
+                    team.leden[deelnemer.pk] = voorgaand = list()
+                    while len(voorgaand) < ronde_team.ronde_nr:
+                        inzet = SimpleNamespace(tekst='-', score=-1)
+                        voorgaand.append(inzet)
+                    # while
+                else:
+                    voorgaand = team.leden[deelnemer.pk]
+
+                # als deze deelnemer geselecteerd was, dan staat er al een X
+                if len(voorgaand) < ronde_team.ronde_nr:
+                    score = (deelnemer.score1, deelnemer.score2, deelnemer.score3,
+                             deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7)[ronde_team.ronde_nr - 1]
+
+                    inzet = SimpleNamespace(
+                                tekst='(i) ' + str(score),
+                                score=score)
+
+                    voorgaand.append(inzet)
+            # for
+
+            # samenvatting van deze ronde maken
+            laagste_inzet = None
+            laagste_score = 9999
+            aantal_scores = 0
+            for voorgaand in team.leden.values():
+                # iedereen die voorheen in het team zaten door laten groeien
+                if len(voorgaand) < ronde_team.ronde_nr:
+                    inzet = SimpleNamespace(tekst='', score=-1)
+                    voorgaand.append(inzet)
+
+                # track het aantal scores en de laagste score
+                inzet = voorgaand[-1]
+                if inzet.score >= 0:
+                    aantal_scores += 1
+                    if inzet.score < laagste_score:
+                        laagste_score = inzet.score
+                        laagste_inzet = inzet
+            # for
+            if aantal_scores > 3 and laagste_inzet:
+                # de score die buiten de top-3 valt wegstrepen
+                laagste_inzet.is_laagste = True
+        # for
+
+        # converteer de team leden
+        pks = list()
+        for team in teams:
+            pks.extend(team.leden.keys())
+        # for
+
+        pk2deelnemer = dict()
+        for deelnemer in (RegioCompetitieSchutterBoog
+                          .objects
+                          .select_related('schutterboog',
+                                          'schutterboog__nhblid')
+                          .filter(pk__in=pks)):
+            pk2deelnemer[deelnemer.pk] = deelnemer
+        # for
+
+        for team in teams:
+            # TODO: we kunnen de leden hier nog wat sorteren, bijvoorbeeld op score of aantal keer in team
+
+            nieuw = list()
+            for pk, voorgaand in team.leden.items():
+                deelnemer = pk2deelnemer[pk]
+                lid = deelnemer.schutterboog.nhblid
+                deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+                tup = (deelnemer, voorgaand[1:])
+                nieuw.append(tup)
+            # for
+
+            team.leden = nieuw
+        # for
+
+        # sorteer de teams
+        unsorted_teams = list()
+        for team in teams:
+            # TODO: zou moeten sorteren op team klasse volgorde, niet punten of score
+            tup = (team.klasse.team.volgorde, team.totaal_punten, team.totaal_score, team.pk, team)
+
+            while len(team.ronde_scores) < 7:
+                team.ronde_scores.append('-')
+
+            unsorted_teams.append(tup)
+        # for
+        unsorted_teams.sort()
+
+        context['teams'] = teams = list()
+        for tup in unsorted_teams:
+            team = tup[-1]
+            team.klasse_str = team.klasse.team.beschrijving
+            teams.append(team)
+        # for
+
+        context['geen_teams'] = (len(teams) == 0)
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context
