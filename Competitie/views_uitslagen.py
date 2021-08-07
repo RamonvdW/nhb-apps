@@ -13,6 +13,7 @@ from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DEELNAME_NEE,
                                DeelCompetitie, DeelcompetitieKlasseLimiet,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
+from Competitie.operations.poules import maak_poule_schema
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_huidige
 from .models import Competitie
@@ -114,7 +115,7 @@ class UitslagenVerenigingIndivView(TemplateView):
                 comp_boog = boogtype.afkorting.lower()
                 # geen url --> knop disabled
             else:
-                boogtype.zoom_url = reverse('Competitie:uitslagen-vereniging-n',
+                boogtype.zoom_url = reverse('Competitie:uitslagen-vereniging-indiv-n',
                                             kwargs={'comp_pk': comp.pk,
                                                     'comp_boog': boogtype.afkorting.lower(),
                                                     'ver_nr': ver_nr})
@@ -286,7 +287,7 @@ class UitslagenRegioIndivView(TemplateView):
                     .order_by('ver_nr'))
 
             for ver in vers:
-                ver.zoom_url = reverse('Competitie:uitslagen-vereniging-n',
+                ver.zoom_url = reverse('Competitie:uitslagen-vereniging-indiv-n',
                                        kwargs={'comp_pk': comp.pk,
                                                'comp_boog': comp_boog,
                                                'ver_nr': ver.ver_nr})
@@ -580,13 +581,24 @@ class UitslagenRegioTeamsView(TemplateView):
         # zoek alle regio teams erbij
 
         heeft_poules = False
-        poules = RegiocompetitieTeamPoule.objects.prefetch_related('teams').filter(deelcompetitie=deelcomp)
+        poules = (RegiocompetitieTeamPoule
+                  .objects
+                  .prefetch_related('teams')
+                  .filter(deelcompetitie=deelcomp))
+
         team_pk2poule = dict()
         for poule in poules:
             heeft_poules = True
-            for team in poule.teams.all():
-                team_pk2poule[team.pk] = poule
+            heeft_teams = False
+
+            for team in poule.teams.order_by('pk'):
+                if team.team_type == context['teamtype']:
+                    team_pk2poule[team.pk] = poule
+                    heeft_teams = True
             # for
+
+            if heeft_teams:
+                maak_poule_schema(poule)
         # for
 
         teams = (RegiocompetitieTeam
@@ -652,6 +664,8 @@ class UitslagenRegioTeamsView(TemplateView):
                 if poule != prev_poule:
                     team.break_poule = True
                     team.poule_str = poule.beschrijving
+                    if prev_poule:
+                        team.schema = prev_poule.schema
                     prev_poule = poule
 
             if team.klasse != prev_klasse:
@@ -665,6 +679,13 @@ class UitslagenRegioTeamsView(TemplateView):
             team.rank = rank
             teams.append(team)
         # for
+
+        if prev_poule:
+            afsluiter = SimpleNamespace(
+                            is_afsluiter=True,
+                            break_poule=True,
+                            schema=prev_poule.schema)
+            teams.append(afsluiter)
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context

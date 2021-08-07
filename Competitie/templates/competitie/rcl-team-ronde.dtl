@@ -42,37 +42,68 @@
         </div>
     </div>
 
-    {% if deelcomp.huidige_team_ronde == 0 %}
+
+    <p>&nbsp;</p>
+
+    {% if deelcomp.huidige_team_ronde > 7 %}
+
+        <p>Alle rondes van de teamcompetitie in deze regio zijn afgerond. Je hoeft niets meer te doen.</p>
+
+    {% elif deelcomp.huidige_team_ronde == 0 %}
+
         <p>De teamcompetitie wacht totdat jij de eerste ronde opent.</p>
 
         <form method="post" action="{{ url_volgende_ronde }}">{% csrf_token %}
             <button class="btn-nhb-rood">Start de eerste ronde</button>
         </form>
 
+        <p>&nbsp;</p>
+        <p>Na het opstarten van een ronde krijgen alle HWL's een seintje dat ze de teams moeten controleren en eventuele invallers in moeten voeren.</p>
+
     {% else %}
 
+        <p>Hieronder staan de team scores en voorgestelde wedstrijdpunten.</p>
+
+        <table class="white">
+            {% for ronde_team in ronde_teams %}
+                {% if ronde_team.break_poule %}
+                    <tr>
+                        <td colspan="4" class="nhb-grijs"><h6>{{ ronde_team.poule_str }}</h6></td>
+                    </tr>
+                    <tr>
+                        <th><!-- rank --></th>
+                        <th>Team</th>
+                        <th>Score</th>
+                        <th>Wedstrijdpunten</th>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <td class="center-align smal">{{ ronde_team.rank }}</td>
+                    <td>{{ ronde_team.team_str }}</td>
+                    <td>{{ ronde_team.team_score }}</td>
+                    <td>{{ ronde_team.ronde_wp }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+
+
         <p>&nbsp;</p>
 
-        <p>Voordat de teamcompetitie doorzet naar de volgende ronde moeten de volgende stappen doorlopen zijn:</p>
-        <p>1. Alle discussies over individuele scores (die gebruikt worden voor de team score) moeten afgerond zijn.</p>
-        <p>2. Team uitslag vaststellen. Deze wordt bepaald door de scores van de gekoppelde sporters.</p>
-        <p>3. Wedstrijdpunten toekennen aan de teams.</p>
-
-        <p>&nbsp;</p>
-
-        <p>Tijdens het doorzetten worden de volgende stappen doorlopen:</p>
-        <p>Bij VSG worden de sporters opnieuw over de teams verdeeld aan de hand van hun gemiddelde.</p>
-
-        <p>&nbsp;</p>
+        <p><span class="red-text"><b>Let op: </b></span>Eventuele discussies over individuele scores moeten afgerond zijn. Na het afsluiten van deze ronde worden de teamscores en wedstrijdpunten bevroren.</p>
 
         <form method="post" action="{{ url_volgende_ronde }}">{% csrf_token %}
-            <button class="btn-nhb-rood">Ik bevestig dat ronde {{ deelcomp.huidige_team_ronde }} helemaal afgehandeld is</button>
+            <button class="btn-nhb-rood">Ronde {{ deelcomp.huidige_team_ronde }} nu afsluiten</button>
         </form>
 
-    {% endif %}
+        <p>&nbsp;</p>
+        <p>Na het opstarten van een ronde krijgen alle HWL's een seintje dat ze de teams moeten controleren en eventuele invallers in moeten voeren.</p>
 
-    <p>&nbsp;</p>
-    <p>Na het opstarten van een ronde krijgen alle HWL's een seintje dat ze de teams moeten controleren en eventuele invallers in moeten voeren.</p>
+        {% if deelcomp.regio_heeft_vaste_teams %}
+            <p>Tijdens het doorzetten krijgt elk team nieuwe deelnemers afhankelijk van het voortschrijdend gemiddelde van de sporters.</p>
+        {% endif %}
+
+    {% endif %}
 
 
 {% endblock %}

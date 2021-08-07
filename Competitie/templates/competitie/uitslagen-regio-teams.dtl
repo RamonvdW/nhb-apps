@@ -113,16 +113,51 @@
             {% endif %}
 
             {% if team.break_poule %}
-                <tr class="nhb-grijs">
-                    <td colspan="12">
-                        <br>
-                        {% if team.poule_str == '??' %}
-                            <h5 class="red-text">Nog niet in een poule geplaatst</h5>
-                        {% else %}
-                            <h5>{{ team.poule_str }}</h5>
-                        {% endif %}
-                    </td>
-                </tr>
+                {% if team.schema %}
+                    <tr class="nhb-grijs">
+                        <td colspan="12">
+                            <h6>Wedstrijdschema</h6>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="12">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Ronde</th>
+                                        <th>Thuis team</th>
+                                        <th>Bezoekend team</th>
+                                    </tr>
+                                </thead>
+                                {% for ronde_nr, wedstrijden in team.schema %}
+                                    <tr>
+                                        <td>{{ ronde_nr }}</td>
+                                        <td>
+                                            {% for team1, team2 in wedstrijden %}{{ team1.team_str }}<br>{% endfor %}
+                                        </td>
+                                        <td>
+                                            {% for team1, team2 in wedstrijden %}{% if team2.team_str == '' %}<i class="grey-text">Bye</i>{% else %}{{ team2.team_str }}{% endif %}<br>{% endfor %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if not team.is_afsluiter %}
+                    <tr class="nhb-grijs">
+                        <td colspan="12">
+                            <br>
+                            {% if team.poule_str == '??' %}
+                                <h5 class="red-text">Nog niet in een poule geplaatst</h5>
+                            {% else %}
+                                <h5>{{ team.poule_str }}</h5>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
             {% endif %}
 
             {% if team.break_klasse %}
@@ -138,15 +173,17 @@
                 </tr>
             {% endif %}
 
-            <tr>
-                <td class="center-align smal">{{ team.rank }}</td>
-                <td class="smal">{{ team.naam_str }}</td>
-                {% for score in team.ronde_scores %}
-                    <td class="right-align smal">{{ score }}</td>
-                {% endfor %}
-                <td class="right-align hide-on-small-only">{{ team.totaal_score }}</td>
-                <td class="right-align">{{ team.totaal_punten }}</td>
-            </tr>
+            {% if not team.is_afsluiter %}
+                <tr>
+                    <td class="center-align smal">{{ team.rank }}</td>
+                    <td class="smal">{{ team.naam_str }}</td>
+                    {% for score in team.ronde_scores %}
+                        <td class="right-align smal">{{ score }}</td>
+                    {% endfor %}
+                    <td class="right-align hide-on-small-only">{{ team.totaal_score }}</td>
+                    <td class="right-align">{{ team.totaal_punten }}</td>
+                </tr>
+            {% endif %}
 
         {% endfor %}
     </table>

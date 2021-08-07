@@ -18,8 +18,8 @@ from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbRayon
 from Overig.background_sync import BackgroundSync
 from .models import (LAAG_REGIO, AG_NUL,
-                     TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_TWEE, TEAM_PUNTEN_SOM_SCORES, TEAM_PUNTEN,
-                     INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3,
+                     TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES, TEAM_PUNTEN,
+                     INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3, TEAM_PUNTEN_F1,
                      Competitie, CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
                      RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                      CompetitieMutatie, MUTATIE_TEAM_RONDE)
@@ -108,19 +108,19 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         obj = SimpleNamespace()
         obj.choice_name = 'F1'
         obj.beschrijving = 'Formule 1 systeem (10/8/6/5/4/3/2/1)'
-        obj.actief = deelcomp.regio_team_punten_model == TEAM_PUNTEN_FORMULE1
+        obj.actief = deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_FORMULE1
         opts.append(obj)
 
         obj = SimpleNamespace()
         obj.choice_name = '2P'
         obj.beschrijving = 'Twee punten systeem (2/1/0)'
-        obj.actief = deelcomp.regio_team_punten_model == TEAM_PUNTEN_TWEE
+        obj.actief = deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_TWEE
         opts.append(obj)
 
         obj = SimpleNamespace()
         obj.choice_name = 'SS'
         obj.beschrijving = 'Cumulatief: som van team totaal'
-        obj.actief = deelcomp.regio_team_punten_model == TEAM_PUNTEN_SOM_SCORES
+        obj.actief = deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_SOM_SCORES
         opts.append(obj)
 
         context['url_opslaan'] = reverse('Competitie:regio-instellingen',
@@ -176,7 +176,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         # dit voorkomt foutmelding over de datum bij het uitzetten van de teamcompetitie
         if deelcomp.regio_organiseert_teamcompetitie:
             punten = request.POST.get('team_punten', '?')[:2]    # 2p/ss/f1
-            if punten in (TEAM_PUNTEN_TWEE, TEAM_PUNTEN_FORMULE1, TEAM_PUNTEN_SOM_SCORES):
+            if punten in (TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_SOM_SCORES):
                 deelcomp.regio_team_punten_model = punten
                 updated.append('regio_team_punten_model')
 
@@ -877,6 +877,59 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rollen.ROL_RCL
 
+    @staticmethod
+    def _bepaal_wedstrijdpunten(deelcomp):
+        alle_ronde_teams = list()
+        wp_model = deelcomp.regio_team_punten_model
+
+        # TODO: poules sorteren
+        for poule in (RegiocompetitieTeamPoule
+                      .objects
+                      .prefetch_related('teams')
+                      .filter(deelcompetitie=deelcomp)):
+
+            team_pks = poule.teams.values_list('pk', flat=True)
+
+            ronde_teams = (RegiocompetitieRondeTeam
+                           .objects
+                           .filter(team__in=team_pks,
+                                   ronde_nr=deelcomp.huidige_team_ronde)
+                           .order_by('-team_score'))  # hoogste bovenaan
+
+            f1_scores = list(TEAM_PUNTEN_F1)
+            rank = 0
+            for ronde_team in ronde_teams:
+                alle_ronde_teams.append(ronde_team)
+
+                if rank == 0:
+                    ronde_team.break_poule = True
+                    ronde_team.poule_str = poule.beschrijving
+
+                rank += 1
+                ronde_team.rank = rank
+
+                ronde_team.team_str = "[%s] %s" % (ronde_team.team.vereniging.ver_nr, ronde_team.team.maak_team_naam_kort())
+
+                ronde_team.ronde_wp = 0
+
+                if wp_model == TEAM_PUNTEN_MODEL_FORMULE1:
+                    if len(f1_scores):
+                        ronde_team.ronde_wp = f1_scores[0]
+                        f1_scores.pop(0)
+
+                elif wp_model == TEAM_PUNTEN_MODEL_TWEE:
+                    # afhankelijk van head-to-head resultaat
+                    # TODO: implement
+                    if len(f1_scores):
+                        ronde_team.ronde_wp = f1_scores[0]
+                        f1_scores.pop(0)
+                    pass
+
+            # for
+        # for
+
+        return alle_ronde_teams
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -894,13 +947,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
         context['regio'] = self.functie_nu.nhb_regio
 
-        teams = RegiocompetitieTeam.objects.filter(deelcompetitie=deelcomp).values_list('pk', flat=True)
-        ronde_teams = (RegiocompetitieRondeTeam
-                       .objects
-                       .filter(team__in=teams,
-                               ronde_nr=deelcomp.huidige_team_ronde)
-                       .order_by('-team_score'))        # hoogste bovenaan
-
+        ronde_teams = self._bepaal_wedstrijdpunten(deelcomp)
         context['ronde_teams'] = ronde_teams
 
         if deelcomp.huidige_team_ronde <= 7:

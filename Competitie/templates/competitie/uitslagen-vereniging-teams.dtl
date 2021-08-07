@@ -99,9 +99,7 @@
 
                     <tr>
                         <td>{{ team.naam_str }}</td>
-                        {% for score in team.ronde_scores %}
-                            <td class="right-align smal">{{ score }}</td>
-                        {% endfor %}
+                        <td colspan="7"></td>
                         <td><!-- spacing --></td>
                         <td>{{ team.klasse_str }}</td>
                     </tr>
@@ -116,6 +114,15 @@
                             <td><!-- klasse --></td>
                         </tr>
                     {% endfor %}
+
+                    <tr>
+                        <td class="right-align">Ronde score:</td>
+                        {% for score in team.ronde_scores %}
+                            <!--{% if score != '-' %} style="text-decoration:overline"{% endif %}-->
+                            <td class="right-align smal">{{ score }}</td>
+                        {% endfor %}
+                        <td colspan="2"><!-- spacing, klasse --></td>
+                    </tr>
 
                 {% endfor %}
             </table>

@@ -64,14 +64,16 @@ INSCHRIJF_METHODES = (
     (INSCHRIJF_METHODE_3, 'Voorkeur dagdelen')
 )
 
-TEAM_PUNTEN_TWEE = '2P'                 # head-to-head, via een poule
-TEAM_PUNTEN_FORMULE1 = 'F1'
-TEAM_PUNTEN_SOM_SCORES = 'SS'
+TEAM_PUNTEN_MODEL_TWEE = '2P'                 # head-to-head, via een poule
+TEAM_PUNTEN_MODEL_FORMULE1 = 'F1'
+TEAM_PUNTEN_MODEL_SOM_SCORES = 'SS'
+
+TEAM_PUNTEN_F1 = (10, 8, 6, 5, 4, 3, 2, 1)
 
 TEAM_PUNTEN = (
-    (TEAM_PUNTEN_TWEE, 'Twee punten systeem (2/1/0)'),                      # alleen bij head-to-head
-    (TEAM_PUNTEN_SOM_SCORES, 'Cumulatief: som van team totaal elke ronde'),
-    (TEAM_PUNTEN_FORMULE1, 'Formule 1 systeem (10/8/6/5/4/3/2/1)'),         # afhankelijk van score
+    (TEAM_PUNTEN_MODEL_TWEE, 'Twee punten systeem (2/1/0)'),  # alleen bij head-to-head
+    (TEAM_PUNTEN_MODEL_SOM_SCORES, 'Cumulatief: som van team totaal elke ronde'),
+    (TEAM_PUNTEN_MODEL_FORMULE1, 'Formule 1 systeem (10/8/6/5/4/3/2/1)'),         # afhankelijk van score
 )
 
 DEELNAME_ONBEKEND = '?'
@@ -380,7 +382,7 @@ class DeelCompetitie(models.Model):
 
     # punten model
     regio_team_punten_model = models.CharField(max_length=2,
-                                               default=TEAM_PUNTEN_TWEE,
+                                               default=TEAM_PUNTEN_MODEL_TWEE,
                                                choices=TEAM_PUNTEN)
 
     # de RCL bepaalt in welke ronde van de competitie we zijn
@@ -391,7 +393,7 @@ class DeelCompetitie(models.Model):
 
     def heeft_poules_nodig(self):
         # centrale plek om de poules behoefte te controleren
-        return self.regio_organiseert_teamcompetitie and self.regio_team_punten_model == TEAM_PUNTEN_TWEE
+        return self.regio_organiseert_teamcompetitie and self.regio_team_punten_model == TEAM_PUNTEN_MODEL_TWEE
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
