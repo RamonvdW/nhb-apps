@@ -37,6 +37,10 @@
                     <div class="col s7">{{ deelcomp.huidige_team_ronde }}</div>
                 </div>
 
+                <div class="row small-row">
+                    <div class="col s4">Punten model:</div>
+                    <div class="col s7">{{ wp_model_str }}</div>
+                </div>
 
             </div>
         </div>
@@ -62,45 +66,86 @@
 
     {% else %}
 
-        <p>Hieronder staan de team scores en voorgestelde wedstrijdpunten.</p>
+        {% if toon_som %}
+            <p>Het is niet nodig om wedstrijdpunten toe te kennen.</p>
+        {% else %}
+            <p>Hieronder staan de team scores en voorgestelde wedstrijdpunten.</p>
+        {% endif %}
 
         <table class="white">
-            {% for ronde_team in ronde_teams %}
-                {% if ronde_team.break_poule %}
-                    <tr>
-                        <td colspan="4" class="nhb-grijs"><h6>{{ ronde_team.poule_str }}</h6></td>
-                    </tr>
-                    <tr>
-                        <th><!-- rank --></th>
-                        <th>Team</th>
-                        <th>Score</th>
-                        <th>Wedstrijdpunten</th>
-                    </tr>
-                {% endif %}
+            {% if toon_h2h %}
 
-                <tr>
-                    <td class="center-align smal">{{ ronde_team.rank }}</td>
-                    <td>{{ ronde_team.team_str }}</td>
-                    <td>{{ ronde_team.team_score }}</td>
-                    <td>{{ ronde_team.ronde_wp }}</td>
-                </tr>
-            {% endfor %}
+                <!-- directe tegenstanders -->
+                {% for regel in alle_regels %}
+                    {% if regel.break_poule %}
+                        <tr>
+                            <td colspan="4" class="nhb-grijs"><h6>{{ regel.poule_str }}</h6></td>
+                        </tr>
+                        <tr>
+                            <th>Team</th>
+                            <th>Team</th>
+                            <th>Scores</th>
+                            <th>Wedstrijdpunten</th>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <td>{{ regel.team1_str }}</td>
+                        <td>{% if regel.team2_is_bye %}<i class="grey-text">Bye</i>{% else %}{{ regel.team2_str }}{% endif %}</td>
+                        <td>{{ regel.team1_score }} - {{ regel.team2_score }}</td>
+                        <td>{{ regel.team1_wp }} - {{ regel.team2_wp }}</td>
+                    </tr>
+                {% endfor %}
+
+            {% elif toon_f1 %}
+
+                <!-- formule 1 -->
+                {% for regel in alle_regels %}
+                    {% if regel.break_poule %}
+                        <tr>
+                            <td colspan="4" class="nhb-grijs"><h6>{{ regel.poule_str }}</h6></td>
+                        </tr>
+                        <tr>
+                            <th><!-- rank --></th>
+                            <th>Team</th>
+                            <th>Score</th>
+                            <th>Wedstrijdpunten</th>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <td>{{ regel.rank }}</td>
+                        <td>{{ regel.team_str }}</td>
+                        <td>{{ regel.team_score }}</td>
+                        <td>{{ regel.ronde_wp }}</td>
+                    </tr>
+
+                {% endfor %}
+
+            {% endif %}
         </table>
 
-
         <p>&nbsp;</p>
 
-        <p><span class="red-text"><b>Let op: </b></span>Eventuele discussies over individuele scores moeten afgerond zijn. Na het afsluiten van deze ronde worden de teamscores en wedstrijdpunten bevroren.</p>
+        {% if is_redelijk %}
 
-        <form method="post" action="{{ url_volgende_ronde }}">{% csrf_token %}
-            <button class="btn-nhb-rood">Ronde {{ deelcomp.huidige_team_ronde }} nu afsluiten</button>
-        </form>
+            <p><span class="red-text"><b>Let op: </b></span>Eventuele discussies over individuele scores moeten afgerond zijn. Na het afsluiten van deze ronde worden de teamscores{% if not toon_som %} en wedstrijdpunten{% endif %} bevroren.</p>
 
-        <p>&nbsp;</p>
-        <p>Na het opstarten van een ronde krijgen alle HWL's een seintje dat ze de teams moeten controleren en eventuele invallers in moeten voeren.</p>
+            <form method="post" action="{{ url_volgende_ronde }}">{% csrf_token %}
+                <button class="btn-nhb-rood">Ronde {{ deelcomp.huidige_team_ronde }} nu afsluiten</button>
+            </form>
 
-        {% if deelcomp.regio_heeft_vaste_teams %}
-            <p>Tijdens het doorzetten krijgt elk team nieuwe deelnemers afhankelijk van het voortschrijdend gemiddelde van de sporters.</p>
+            <p>&nbsp;</p>
+            <p>Na het opstarten van een ronde krijgen alle HWL's een seintje dat ze de teams moeten controleren en eventuele invallers in moeten voeren.</p>
+
+            {% if not deelcomp.regio_heeft_vaste_teams %}
+                <p>Tijdens het doorzetten krijgt elk team nieuwe deelnemers afhankelijk van het voortschrijdend gemiddelde van de sporters.</p>
+            {% endif %}
+
+        {% else %}
+
+            <p>Afsluiten van de ronde kan pas als er scores zijn.</p>
+
         {% endif %}
 
     {% endif %}

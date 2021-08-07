@@ -109,7 +109,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.url_uitslagen_rayon_n = '/bondscompetities/%s/uitslagen/%s/rayon-individueel/%s/'
         self.url_uitslagen_bond = '/bondscompetities/%s/uitslagen/%s/bond/'
         self.url_uitslagen_ver = '/bondscompetities/%s/uitslagen/%s/vereniging/'
-        self.url_uitslagen_ver_n = '/bondscompetities/%s/uitslagen/%s/vereniging/%s/'
+        self.url_uitslagen_ver_n = '/bondscompetities/%s/uitslagen/%s/vereniging/%s/individueel/'
 
         # log in as BB en maak de competitie aan
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -538,9 +538,9 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, '[1000] Grote Club')
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, '[1000] Grote Club')
 
     def test_vereniging_regio_100(self):
         self.ver.regio = NhbRegio.objects.get(regio_nr=100)

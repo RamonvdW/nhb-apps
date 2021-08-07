@@ -121,18 +121,18 @@
                     </tr>
 
                     <tr>
-                        <td colspan="12">
+                        <td colspan="12" style="padding:0">
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Ronde</th>
+                                        <th class="center-align">Ronde</th>
                                         <th>Thuis team</th>
                                         <th>Bezoekend team</th>
                                     </tr>
                                 </thead>
                                 {% for ronde_nr, wedstrijden in team.schema %}
                                     <tr>
-                                        <td>{{ ronde_nr }}</td>
+                                        <td class="center-align{% if deelcomp.huidige_team_ronde == ronde_nr %} nhb-blauw white-text{% endif %}">{{ ronde_nr }}</td>
                                         <td>
                                             {% for team1, team2 in wedstrijden %}{{ team1.team_str }}<br>{% endfor %}
                                         </td>

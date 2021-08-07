@@ -19,7 +19,7 @@ RONDE_PLANNEN_8 = (                       # 0 1 2 3 4 5 6 7 thuis
 
 # 4 teams: 0, 1, 2, 3
 RONDE_PLANNEN_4 = (                         # 0 1 2 3 thuis
-    [(0, 9), (1, 9), (2, 9), (3, 9)],       # 1 1 1 1
+    [(0, 9), (1, 9), (2, 9), (3, 9)],       # 1 1 1 1           # oude programma had de bye wedstrijden ook eerst
     [(0, 1), (2, 3)],                       # 1 2 1 2
     [(3, 0), (1, 2)],                       # 2 2 2 2
     [(0, 2), (3, 1)],                       # 2 3 3 2
@@ -61,7 +61,7 @@ def maak_poule_schema(poule):
     team_pks += [0, 0, 0, 0, 0, 0, 0, 0]
 
     # dummy team
-    pk2team[0] = SimpleNamespace(team_str='')
+    pk2team[0] = SimpleNamespace(team_str='', pk=-1)
 
     poule.schema = list()
 

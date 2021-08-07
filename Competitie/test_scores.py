@@ -715,7 +715,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
             resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)     # garandeert wedstrijd.uitslag
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
-        with self.assert_max_queries(91):
+        with self.assert_max_queries(92):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
