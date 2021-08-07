@@ -634,7 +634,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                                                 .select_related('schutterboog',
                                                                 'schutterboog__nhblid',
                                                                 'schutterboog__boogtype')
-                                                .order_by('ag_voor_team'))
+                                                .order_by('-ag_voor_team'))
             for obj in gekoppeld:
                 obj.naam_str = "[%s] %s" % (obj.schutterboog.nhblid.nhb_nr, obj.schutterboog.nhblid.volledige_naam())
                 obj.boog_str = obj.schutterboog.boogtype.beschrijving
