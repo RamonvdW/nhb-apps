@@ -502,7 +502,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         lid.save()
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(153):
+        with self.assert_max_queries(154):
             management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
@@ -516,7 +516,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         self._score_opslaan(self.uitslagen[2], self.schutterboog_100001, 124)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(155):
+        with self.assert_max_queries(156):
             management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
 
@@ -526,7 +526,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         lid.save()
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(157, check_duration=False):        # 7 seconden is boven de limiet
+        with self.assert_max_queries(158, check_duration=False):        # 7 seconden is boven de limiet
             management.call_command('regiocomp_tussenstand', '7', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())

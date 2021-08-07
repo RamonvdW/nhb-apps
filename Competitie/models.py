@@ -12,7 +12,7 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Functie.models import Functie
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist
-from Wedstrijden.models import CompetitieWedstrijdenPlan, CompetitieWedstrijdenPlan, CompetitieWedstrijd
+from Wedstrijden.models import CompetitieWedstrijdenPlan, CompetitieWedstrijd
 from decimal import Decimal
 import datetime
 import logging
@@ -384,6 +384,9 @@ class DeelCompetitie(models.Model):
                                                choices=TEAM_PUNTEN)
 
     # de RCL bepaalt in welke ronde van de competitie we zijn
+    #    0 = initieel
+    # 1..7 = wedstrijd ronde
+    #    8 = afgesloten
     huidige_team_ronde = models.PositiveSmallIntegerField(default=0)
 
     def heeft_poules_nodig(self):

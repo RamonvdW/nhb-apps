@@ -12,7 +12,8 @@ from django.db.models import F
 import django.db.utils
 from Competitie.models import (CompetitieTaken, CompetitieKlasse,
                                LAAG_REGIO, Competitie, DeelCompetitie, DeelcompetitieRonde,
-                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
+                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
+                               RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Score.models import ScoreHist, SCORE_WAARDE_VERWIJDERD
 import datetime
 import time
@@ -377,6 +378,46 @@ class Command(BaseCommand):
         # for
         self.stdout.write('[INFO] Scores voor %s schuttersboog bijgewerkt' % count)
 
+    @staticmethod
+    def _update_team_scores():
+        """ Update alle team scores aan de hand van wie er in de teams zitten en de huidige scores
+        """
+        for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_REGIO, is_afgesloten=False):
+            ronde_nr = deelcomp.huidige_team_ronde
+            if 1 <= ronde_nr <= 7:
+                # pak alle teams in deze deelcompetitie erbij
+                teams = RegiocompetitieTeam.objects.filter(deelcompetitie=deelcomp).values_list('pk', flat=True)
+
+                # doorloop alle ronde-teams voor de huidige ronde van de deelcompetitie
+                for team in (RegiocompetitieRondeTeam
+                             .objects
+                             .prefetch_related('deelnemers_feitelijk')
+                             .filter(team__in=teams,
+                                     ronde_nr=ronde_nr)):
+
+                    team_scores = list()
+                    for deelnemer in team.deelnemers_feitelijk.all():
+                        score = (deelnemer.score1, deelnemer.score2, deelnemer.score3,
+                                 deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7)[ronde_nr - 1]
+                        team_scores.append(score)
+                    # for
+                    team_scores.sort(reverse=True)      # hoogste eerst
+
+                    # de hoogste 3 scores maken de team score
+                    team_score = 0
+                    for score in team_scores[:3]:
+                        team_score += score
+                    # for
+
+                    # is de team score aangepast?
+                    if team.team_score != team_score:
+                        # print('nieuwe team_score voor team %s: %s --> %s' % (team, team.team_score, team_score))
+                        team.team_score = team_score
+                        team.save(update_fields=['team_score'])
+
+                # for (ronde team)
+        # for (deelcomp)
+
     def _update_tussenstand(self):
         begin = datetime.datetime.now()
 
@@ -385,6 +426,9 @@ class Command(BaseCommand):
 
         # stap 2: overige velden bijwerken van aangepaste RegioCompetitieSchutterBoog
         self._update_regiocompetitieschuttersboog()
+
+        # stap 3: teams scores bijwerken
+        self._update_team_scores()
 
         klaar = datetime.datetime.now()
         self.stdout.write('[INFO] Tussenstand bijgewerkt in %s seconden' % (klaar - begin))
@@ -400,10 +444,10 @@ class Command(BaseCommand):
                 self._update_tussenstand()
                 now = datetime.datetime.now()
 
-            # sleep at least 5 seconds, then check again
+            # sleep at least 2 seconds, then check again
             secs = (self.stop_at - now).total_seconds()
-            if secs > 5:                    # pragma: no branch
-                secs = min(secs, 5.0)
+            if secs > 2:                    # pragma: no branch
+                secs = min(secs, 2.0)
                 time.sleep(secs)
             else:
                 break       # from the while
