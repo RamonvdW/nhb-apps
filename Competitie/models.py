@@ -393,7 +393,8 @@ class DeelCompetitie(models.Model):
 
     def heeft_poules_nodig(self):
         # centrale plek om de poules behoefte te controleren
-        return self.regio_organiseert_teamcompetitie and self.regio_team_punten_model == TEAM_PUNTEN_MODEL_TWEE
+        # poule zijn onafhankelijk van punten model: 10 teams zijn te verdelen over 2 poules
+        return self.regio_organiseert_teamcompetitie
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
