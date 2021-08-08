@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.core import management
 from BasisTypen.models import BoogType, TeamType
 from Competitie.test_fase import zet_competitie_fase
 from Functie.models import maak_functie
@@ -14,9 +15,11 @@ from Wedstrijden.models import WedstrijdLocatie
 from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse, LAAG_BK, LAAG_RK, LAAG_REGIO,
                      RegioCompetitieSchutterBoog,
-                     RegiocompetitieTeam, RegiocompetitieTeamPoule)
+                     RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
+                     TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_SOM_SCORES)
 from .operations import competities_aanmaken
 import datetime
+import io
 
 
 class TestCompetitieRegioTeams(E2EHelpers, TestCase):
@@ -184,8 +187,79 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
         self.url_regio_globaal = '/bondscompetities/%s/instellingen/globaal/'           # comp_pk
         self.url_ag_controle = '/bondscompetities/%s/ag-controle/regio-%s/'             # comp_pk, regio-nr
         self.url_regio_teams = '/bondscompetities/regio/%s/teams/'                      # deelcomp_pk
+        self.url_regio_teams_alle = '/bondscompetities/regio/%s/teams/%s/'              # comp_pk, subset = auto/alle/rayon_nr
         self.url_regio_poules = '/bondscompetities/regio/%s/poules/'                    # deelcomp_pk
         self.url_wijzig_poule = '/bondscompetities/regio/poules/%s/wijzig/'             # poule_pk
+        self.url_team_ronde = '/bondscompetities/regio/%s/team-ronde/'                  # deelcomp_pk
+
+    def _verwerk_mutaties(self, max_mutaties=20, show_warnings=True, show_all=False):
+        # vraag de achtergrond taak om de mutaties te verwerken
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(max_mutaties):
+            management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+
+        if show_all:                                    # pragma: no coverage
+            print(f1.getvalue())
+            print(f2.getvalue())
+
+        elif show_warnings:
+            lines = f1.getvalue() + '\n' + f2.getvalue()
+            for line in lines.split('\n'):
+                if line.startswith('[WARNING] '):       # pragma: no coverage
+                    print(line)
+            # for
+
+    def _maak_teams(self, deelcomp):
+        """ schrijf een aantal teams in """
+
+        teamtype_r = TeamType.objects.get(afkorting='R')
+        klasse_r_ere = CompetitieKlasse.objects.get(
+                                    competitie=deelcomp.competitie,
+                                    team__volgorde=10)        # zie WKL_TEAM in BasisTypen migrations
+
+        team1 = RegiocompetitieTeam(
+                    deelcompetitie=deelcomp,
+                    vereniging=self.nhbver_112,
+                    volg_nr=1,
+                    team_type=teamtype_r,
+                    team_naam='Test team 1',
+                    aanvangsgemiddelde=600.0,
+                    klasse=klasse_r_ere)
+        team1.save()
+
+        team2 = RegiocompetitieTeam(
+                    deelcompetitie=deelcomp,
+                    vereniging=self.nhbver_112,
+                    volg_nr=1,
+                    team_type=teamtype_r,
+                    team_naam='Test team 2',
+                    aanvangsgemiddelde=610.1,
+                    klasse=klasse_r_ere)
+        team2.save()
+
+        team3 = RegiocompetitieTeam(
+                    deelcompetitie=deelcomp,
+                    vereniging=self.nhbver_112,
+                    volg_nr=1,
+                    team_type=teamtype_r,
+                    team_naam='Test team 3',
+                    aanvangsgemiddelde=500,
+                    klasse=klasse_r_ere)
+        team3.save()
+
+        # initiële schutters in het team
+        #gekoppelde_schutters = models.ManyToManyField(RegioCompetitieSchutterBoog,
+        #                                              blank=True)  # mag leeg zijn
+
+        poule = RegiocompetitieTeamPoule(
+                    deelcompetitie=deelcomp,
+                    beschrijving='Test poule')
+        poule.save()
+        poule.teams.add(team1)
+        poule.teams.add(team2)
+        poule.teams.add(team3)
+        # 3 teams zorgt voor een wedstrijd met een Bye
 
     def test_regio_instellingen(self):
         self.e2e_login_and_pass_otp(self.account_rcl112_18)
@@ -424,6 +498,57 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
+        # BB
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+
+        url = self.url_regio_teams_alle % (self.comp_18.pk, 'auto')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-teams.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_regio_teams_alle % (self.comp_18.pk, 'alle')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-teams.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_regio_teams_alle % (self.comp_18.pk, '3')        # rayon_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-teams.dtl', 'plein/site_layout.dtl'))
+
+        self.e2e_wissel_naar_functie(self.functie_rko1_18)
+
+        url = self.url_regio_teams_alle % (self.comp_18.pk, 'auto')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-teams.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_regio_teams_alle % (999999, 'auto')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
+
+        url = self.url_regio_teams_alle % (self.comp_18.pk, '999999')        # rayon_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Selectie wordt niet ondersteund')
+
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
+
+        url = self.url_regio_teams_alle % (self.comp_18.pk, 'auto')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Selectie wordt niet ondersteund')
+
     def test_ag_controle(self):
         self.e2e_login_and_pass_otp(self.account_rcl112_18)
         self.e2e_wissel_naar_functie(self.functie_rcl112_18)
@@ -630,7 +755,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
                     vereniging=self.nhbver_112,
                     volg_nr=1,
                     team_type=type_c,
-                    team_naam='Compound Testers %s' % (lp + 1),
+                    team_naam='Compound Testers 9',
                     klasse=klasse_c_ere)
         team_c.save()
 
@@ -669,5 +794,218 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
         poule = RegiocompetitieTeamPoule.objects.prefetch_related('teams').get(pk=poule.pk)
         self.assertEqual(8, poule.teams.count())
+
+    def test_team_ronde_2p(self):
+        self.e2e_login_and_pass_otp(self.account_rcl112_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl112_18)
+
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 0)
+
+        self.deelcomp_regio112_18.regio_team_punten_model = TEAM_PUNTEN_MODEL_TWEE
+        self.deelcomp_regio112_18.save(update_fields=['regio_team_punten_model'])
+
+        url = self.url_team_ronde % 999999
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Competitie bestaat niet')
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
+        self.assert404(resp, 'Competitie bestaat niet')
+
+        url = self.url_team_ronde % self.deelcomp_regio112_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        # print('urls: %s' % repr(urls))
+        self.assertTrue(len(urls) == 1)
+        self.assertTrue(url in urls)
+
+        # maak een paar teams aan
+        self._maak_teams(self.deelcomp_regio112_18)
+
+        # start de eerste ronde op
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+
+        # nog een paar om concurrency echt flink te testen
+        self.client.post(url, {'snel': 1})
+        self.client.post(url, {'snel': 1})
+
+        self._verwerk_mutaties(51, show_warnings=False)
+
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
+
+        # doorzetten zonder scores werkt niet
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert404(resp, 'Te weinig scores')
+
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
+
+        self._verwerk_mutaties(20)
+
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
+
+        # voer een paar scores in
+        for ronde_team in RegiocompetitieRondeTeam.objects.all():
+            ronde_team.team_score = 100 + ronde_team.pk
+            ronde_team.save(update_fields=['team_score'])
+        # for
+
+        # doorzetten met scores werkt wel
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+        self._verwerk_mutaties(39)
+
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 2)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
+
+        # nog een rondje, dan komen in het schema met head-to-head wedstrijden
+
+        # voer weer een paar scores in
+        for ronde_team in RegiocompetitieRondeTeam.objects.all():
+            ronde_team.team_score = 100 + ronde_team.pk
+            ronde_team.save(update_fields=['team_score'])
+        # for
+
+        # doorzetten
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+        self._verwerk_mutaties(39)
+
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 3)
+
+    def test_team_ronde_f1(self):
+        self.e2e_login_and_pass_otp(self.account_rcl112_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl112_18)
+
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 0)
+
+        self.deelcomp_regio112_18.regio_team_punten_model = TEAM_PUNTEN_MODEL_FORMULE1
+        self.deelcomp_regio112_18.save(update_fields=['regio_team_punten_model'])
+        # TEAM_PUNTEN_MODEL_SOM_SCORES
+
+        # maak een paar teams aan
+        self._maak_teams(self.deelcomp_regio112_18)
+
+        url = self.url_team_ronde % self.deelcomp_regio112_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
+
+        # start de eerste ronde op
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+
+        self._verwerk_mutaties(39)
+
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
+
+        # doorzetten zonder scores werkt niet
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert404(resp, 'Te weinig scores')
+
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
+
+        self._verwerk_mutaties(20)
+
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
+
+        # voor een paar scores in
+        for ronde_team in RegiocompetitieRondeTeam.objects.all():
+            ronde_team.team_score = 100 + ronde_team.pk
+            ronde_team.save(update_fields=['team_score'])
+        # for
+
+        # doorzetten met scores werkt wel
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+        self._verwerk_mutaties(39)
+
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 2)
+
+    def test_team_ronde_som(self):
+        self.e2e_login_and_pass_otp(self.account_rcl112_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl112_18)
+
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 0)
+
+        self.deelcomp_regio112_18.regio_team_punten_model = TEAM_PUNTEN_MODEL_SOM_SCORES
+        self.deelcomp_regio112_18.save(update_fields=['regio_team_punten_model'])
+
+        # maak een paar teams aan
+        self._maak_teams(self.deelcomp_regio112_18)
+
+        url = self.url_team_ronde % self.deelcomp_regio112_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
+
+        # start de eerste ronde op
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+
+        self._verwerk_mutaties(39)
+
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
+
+        # doorzetten zonder scores werkt niet
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert404(resp, 'Te weinig scores')
+
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
+
+        self._verwerk_mutaties(20)
+
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
+
+        # voor een paar scores in
+        for ronde_team in RegiocompetitieRondeTeam.objects.all():
+            ronde_team.team_score = 100 + ronde_team.pk
+            ronde_team.save(update_fields=['team_score'])
+        # for
+
+        # doorzetten met scores werkt wel
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
+        self._verwerk_mutaties(39)
+
+        self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
+        self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 2)
+
 
 # end of file

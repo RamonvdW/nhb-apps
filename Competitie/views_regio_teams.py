@@ -922,7 +922,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
 
                 # haal de juiste ronde eruit
                 schemas = [schema for nr, schema in poule.schema if nr == deelcomp.huidige_team_ronde]
-                if len(schemas) != 1:
+                if len(schemas) != 1:       # pragma: no cover
                     raise Http404('Probleem met poule wedstrijdschema')
 
                 schema = schemas[0]
@@ -938,7 +938,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                     regel = SimpleNamespace()
                     regel.team1_str = "[%s] %s" % (team1.vereniging.ver_nr, team1.team_naam)
                     regel.team1_wp = 0
-                    regel.ronde_team2 = ronde_team1 = team_pk2ronde_team[team1.pk]
+                    regel.ronde_team1 = ronde_team1 = team_pk2ronde_team[team1.pk]
                     regel.team1_score = ronde_team1.team_score
 
                     if ronde_team1.team_score > 0:
@@ -1107,7 +1107,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
             mutatie_ping.ping()
 
             snel = str(request.POST.get('snel', ''))[:1]
-            if snel != '1':
+            if snel != '1':         # pragma: no cover
                 # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
                 interval = 0.2  # om steeds te verdubbelen
                 total = 0.0  # om een limiet te stellen

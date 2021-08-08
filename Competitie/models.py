@@ -571,7 +571,7 @@ class RegiocompetitieTeam(models.Model):
                                                   blank=True)    # mag leeg zijn
 
     # de berekende team sterkte / team gemiddelde
-    aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
+    aanvangsgemiddelde = models.DecimalField(max_digits=4, decimal_places=1, default=0.0)    # 900,0
 
     # de klasse waarin dit team ingedeeld is
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE,
