@@ -853,7 +853,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.comp_18.pk)
 
-        self._verwerk_mutaties(30)
+        self._verwerk_mutaties(31)
         self.assertEqual(1, RegiocompetitieRondeTeam.objects.count())
 
         pks0 = [self.deelnemer_100002_18.pk, self.deelnemer_100003_18.pk, self.deelnemer_100004_18.pk]
