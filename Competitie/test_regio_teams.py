@@ -224,7 +224,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
                     volg_nr=1,
                     team_type=teamtype_r,
                     team_naam='Test team 1',
-                    aanvangsgemiddelde=600.0,
+                    aanvangsgemiddelde=20.0,
                     klasse=klasse_r_ere)
         team1.save()
 
@@ -234,7 +234,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
                     volg_nr=1,
                     team_type=teamtype_r,
                     team_naam='Test team 2',
-                    aanvangsgemiddelde=610.1,
+                    aanvangsgemiddelde=21.123,
                     klasse=klasse_r_ere)
         team2.save()
 
@@ -244,7 +244,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
                     volg_nr=1,
                     team_type=teamtype_r,
                     team_naam='Test team 3',
-                    aanvangsgemiddelde=500,
+                    aanvangsgemiddelde=18.042,
                     klasse=klasse_r_ere)
         team3.save()
 
