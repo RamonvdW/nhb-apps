@@ -571,7 +571,8 @@ class RegiocompetitieTeam(models.Model):
                                                   blank=True)    # mag leeg zijn
 
     # de berekende team sterkte / team gemiddelde
-    aanvangsgemiddelde = models.DecimalField(max_digits=4, decimal_places=1, default=0.0)    # 900,0
+    # LET OP: dit is zonder de vermenigvuldiging met aantal pijlen, dus 30,000 voor Indoor ipv 900,0
+    aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 30,000
 
     # de klasse waarin dit team ingedeeld is
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE,
