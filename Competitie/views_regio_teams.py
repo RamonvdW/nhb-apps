@@ -891,7 +891,6 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
         is_redelijk = False
 
         wp_model = deelcomp.regio_team_punten_model
-        aantal_scores = 0
 
         # TODO: poules sorteren
         for poule in (RegiocompetitieTeamPoule
@@ -1033,7 +1032,8 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
         context['regio'] = self.functie_nu.nhb_regio
 
-        context['alle_regels'], context['is_redelijk'] = self._bepaal_wedstrijdpunten(deelcomp)
+        if 1 <= deelcomp.huidige_team_ronde <= 7:
+            context['alle_regels'], context['is_redelijk'] = self._bepaal_wedstrijdpunten(deelcomp)
 
         if deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_FORMULE1:
             context['toon_f1'] = True
