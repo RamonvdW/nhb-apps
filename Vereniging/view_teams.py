@@ -957,15 +957,25 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                        .select_related('team')
                        .prefetch_related('deelnemers_geselecteerd',
                                          'deelnemers_feitelijk')
-                       .filter(team=team,
+                       .filter(team__vereniging=self.functie_nu.nhb_ver,
                                ronde_nr=deelcomp.huidige_team_ronde))
-        if ronde_teams.count() != 1:
+
+        deelnemers_bezet_pks = list()
+
+        ronde_team_nu = None
+        for ronde_team in ronde_teams:
+            if ronde_team.team == team:
+                ronde_team_nu = ronde_team
+            else:
+                pks = list(ronde_team.deelnemers_feitelijk.values_list('pk', flat=True))
+                deelnemers_bezet_pks.extend(pks)
+        # for
+
+        if not ronde_team_nu:
             raise Http404('Kan vastgestelde team leden niet ophalen')
 
-        ronde_team = ronde_teams[0]
-
-        deelnemers_geselecteerd_pks = list(ronde_team.deelnemers_geselecteerd.values_list('pk', flat=True))
-        deelnemers_feitelijk_pks = list(ronde_team.deelnemers_feitelijk.values_list('pk', flat=True))
+        deelnemers_geselecteerd_pks = list(ronde_team_nu.deelnemers_geselecteerd.values_list('pk', flat=True))
+        deelnemers_feitelijk_pks = list(ronde_team_nu.deelnemers_feitelijk.values_list('pk', flat=True))
 
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
@@ -973,36 +983,28 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                               inschrijf_voorkeur_team=True,
                               bij_vereniging=self.functie_nu.nhb_ver,
                               schutterboog__boogtype__in=boog_pks)
-                      .annotate(in_team_count=Count('regiocompetitieteam'))
                       .select_related('schutterboog',
                                       'schutterboog__nhblid',
                                       'schutterboog__boogtype')
-                      .order_by('-gemiddelde', '-ag_voor_team'))
+                      .order_by('-gemiddelde_begin_team_ronde', '-ag_voor_team'))
 
         unsorted_uitvallers = list()
         unsorted_bezet = list()
         for deelnemer in deelnemers:
-            deelnemer.naam_str = "[%s] %s" % (deelnemer.schutterboog.nhblid.nhb_nr, deelnemer.schutterboog.nhblid.volledige_naam())
-
-            if deelnemer.aantal_scores > 0:
-                deelnemer.invaller_gem = deelnemer.gemiddelde
-            else:
-                deelnemer.invaller_gem = deelnemer.ag_voor_team
-
-            gem_str = "%.3f" % deelnemer.invaller_gem
+            gem_str = "%.3f" % deelnemer.gemiddelde_begin_team_ronde
             deelnemer.invaller_gem_str = gem_str.replace('.', ',')
+            deelnemer.naam_str = "[%s] %s" % (deelnemer.schutterboog.nhblid.nhb_nr, deelnemer.schutterboog.nhblid.volledige_naam())
 
             if deelnemer.pk in deelnemers_geselecteerd_pks:
                 deelnemer.origineel_team_lid = True
-                deelnemer.uitvaller_gem = deelnemer.gemiddelde_begin_team_ronde
-                gem_str = "%.3f" % deelnemer.uitvaller_gem
+                gem_str = "%.3f" % deelnemer.gemiddelde_begin_team_ronde
                 deelnemer.uitvaller_gem_str = gem_str.replace('.', ',')
 
-                tup = (deelnemer.uitvaller_gem, deelnemer.pk, deelnemer)
+                tup = (deelnemer.gemiddelde_begin_team_ronde, deelnemer.pk, deelnemer)
                 unsorted_uitvallers.append(tup)
             else:
                 deelnemer.origineel_team_lid = False
-                if deelnemer.in_team_count > 0:
+                if deelnemer.pk in deelnemers_bezet_pks:
                     tup = (deelnemer.invaller_gem, deelnemer.pk, deelnemer)
                     unsorted_bezet.append(tup)
         # for
@@ -1017,16 +1019,16 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         uniq_nr = 999000
         while len(unsorted_uitvallers) > 0:
-            _, _, uitvaller = unsorted_uitvallers.pop(0)
+            _, _, uitvaller = unsorted_uitvallers.pop(-1)
             group_str = "invaller_%s" % (1 + len(uitvallers))
             invallers = list()
             tup = (uitvaller.naam_str, uitvaller.uitvaller_gem_str, group_str, invallers)
-            uitvallers.append(tup)
+            uitvallers.insert(0, tup)
 
             zoek_checked = True
             for deelnemer in deelnemers:
                 # mag deze persoon invallen?
-                if deelnemer.pk == uitvaller.pk or (deelnemer.in_team_count == 0 and deelnemer.invaller_gem <= uitvaller.uitvaller_gem):
+                if deelnemer.pk == uitvaller.pk or deelnemer.gemiddelde_begin_team_ronde <= uitvaller.gemiddelde_begin_team_ronde:
                     is_uitvaller = "1" if deelnemer.origineel_team_lid else "0"
                     id_invaller = group_str + '_door_%s' % deelnemer.pk
                     toon_checked = False
@@ -1045,7 +1047,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
         # while
 
         context['url_opslaan'] = reverse('Vereniging:teams-regio-invallers-koppelen',
-                                         kwargs={'ronde_team_pk': ronde_team.pk})
+                                         kwargs={'ronde_team_pk': ronde_team_nu.pk})
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context
@@ -1068,6 +1070,22 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
         team = ronde_team.team
         deelcomp = team.deelcompetitie
 
+        # zoek uit wie 'bezet' zijn in een ander team
+        deelnemers_bezet_pks = list()
+
+        for ronde_team2 in (RegiocompetitieRondeTeam
+                            .objects
+                            .select_related('team')
+                            .prefetch_related('deelnemers_geselecteerd',
+                                              'deelnemers_feitelijk')
+                            .exclude(team=team)
+                            .filter(team__vereniging=self.functie_nu.nhb_ver,
+                                    ronde_nr=deelcomp.huidige_team_ronde)):
+
+            pks = list(ronde_team2.deelnemers_feitelijk.values_list('pk', flat=True))
+            deelnemers_bezet_pks.extend(pks)
+        # for
+
         boog_typen = team.team_type.boog_typen.all()
         boog_pks = boog_typen.values_list('pk', flat=True)
 
@@ -1087,16 +1105,15 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
-                      .annotate(in_team_count=Count('regiocompetitieteam'))
                       .filter(deelcompetitie=deelcomp,
                               inschrijf_voorkeur_team=True,
                               bij_vereniging=self.functie_nu.nhb_ver,
-                              schutterboog__boogtype__in=boog_pks,
-                              in_team_count=0))
+                              schutterboog__boogtype__in=boog_pks))
 
         for deelnemer in deelnemers:
-            if deelnemer.gemiddelde_begin_team_ronde <= max_gem[0]:
-                pk2gem[deelnemer.pk] = deelnemer.gemiddelde_begin_team_ronde
+            if deelnemer.pk not in deelnemers_bezet_pks:
+                if deelnemer.gemiddelde_begin_team_ronde <= max_gem[0]:
+                    pk2gem[deelnemer.pk] = deelnemer.gemiddelde_begin_team_ronde
         # for
 
         # we hebben nu alle toegestane deelnemer pk's in pk2gem
