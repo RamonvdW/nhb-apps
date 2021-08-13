@@ -134,7 +134,6 @@
                 <br>
             </div>
         </div>
-        <div class="row">
 
     {% endif %}
 
