@@ -73,7 +73,7 @@
         {% for team in regioteams_niet_af %}
             {% if team.break_before %}
                 <tr class="nhb-grijs">
-                    <td colspan="{% if subset_filter %}5{% else %}4{% endif %}"><h5 class="red-text">Nog niet geplaatste teams</h5></td>
+                    <td colspan="{% if subset_filter %}6{% else %}5{% endif %}"><h5 class="red-text">Nog niet geplaatste teams</h5></td>
                 </tr>
                 <tr>
                     {% if subset_filter %}
@@ -83,6 +83,7 @@
                     <th>Naam</th>
                     <th>Team sterkte</th>
                     <th>Soort team</th>
+                    <th><!-- kolom voor de knoppen --></th>
                 </tr>
             {% endif %}
 
@@ -94,12 +95,25 @@
                 <td>{{ team.team_naam }}</td>
                 <td>{{ team.ag_str }}</td>
                 <td>{{ team.team_type.beschrijving }}</td>
+                <td>
+                    {% if team.url_aanpassen %}
+                        <a class="btn-nhb-blauw" href="{{ team.url_aanpassen }}">Aanpassen</a>
+                    {% endif %}
+                    {% if team.url_verwijder %}
+                        <span>&nbsp;&nbsp;</span>
+                        <form action="{{ team.url_verwijder }}" method="post" style="display: inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="verwijderen" value="1">
+                            <button class="btn-nhb-rood" type="submit">Verwijder</button>
+                        </form>
+                    {% endif %}
+                </td>
             </tr>
         {% endfor %}
 
         {% for klasse, teams in regioteams.items %}
             <tr class="nhb-grijs">
-                <td colspan="{% if subset_filter %}5{% else %}4{% endif %}"><h5>{{ klasse.team.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
+                <td colspan="{% if subset_filter %}6{% else %}5{% endif %}"><h5>{{ klasse.team.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
             </tr>
             <tr>
                 {% if subset_filter %}
@@ -109,6 +123,7 @@
                 <th>Naam</th>
                 <th>Team sterkte</th>
                 <th></th>
+                <th><!-- kolom voor knoppen --></th>
             </tr>
 
             {% for team in teams %}
@@ -120,10 +135,15 @@
                     <td>{{ team.team_naam }}</td>
                     <td>{{ team.ag_str }}</td>
                     <td></td>
+                    <td>
+                        {% if team.url_aanpassen %}
+                            <a class="btn-nhb-blauw" href="{{ team.url_aanpassen }}">Aanpassen</a>
+                        {% endif %}
+                    </td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="{% if subset_filter %}5{% else %}4{% endif %}"><i>Nog geen teams</i></td>
+                    <td colspan="{% if subset_filter %}6{% else %}5{% endif %}"><i>Nog geen teams</i></td>
                 </tr>
             {% endfor %}
         {% endfor %}

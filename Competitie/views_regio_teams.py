@@ -308,6 +308,7 @@ class RegioTeamsView(TemplateView):
                 raise Http404('Competitie niet gevonden')
 
             context['comp'] = comp
+            comp.bepaal_fase()
 
             subset = kwargs['subset'][:10]
             if subset == 'auto':
@@ -372,6 +373,8 @@ class RegioTeamsView(TemplateView):
             deelcomp_pks = [deelcomp.pk]
 
             context['comp'] = comp = deelcomp.competitie
+            comp.bepaal_fase()
+
             context['deelcomp'] = deelcomp
             context['rayon'] = self.functie_nu.nhb_regio.rayon
             context['regio'] = self.functie_nu.nhb_regio
@@ -438,6 +441,10 @@ class RegioTeamsView(TemplateView):
             # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
             team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = team.ag_str.replace('.', ',')
+
+            if comp.fase <= 'D':
+                team.url_aanpassen = reverse('Vereniging:teams-regio-koppelen',
+                                             kwargs={'team_pk': team.pk})
             totaal_teams += 1
 
             klasse2teams[team.klasse].append(team)
@@ -462,6 +469,14 @@ class RegioTeamsView(TemplateView):
             # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
             team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = team.ag_str.replace('.', ',')
+
+            if comp.fase <= 'D':
+                team.url_aanpassen = reverse('Vereniging:teams-regio-koppelen',
+                                             kwargs={'team_pk': team.pk})
+
+                team.url_verwijder = reverse('Vereniging:teams-regio-wijzig',
+                                             kwargs={'deelcomp_pk': deelcomp.pk,
+                                                     'team_pk': team.pk})
             totaal_teams += 1
 
             team.break_before = is_eerste
@@ -1034,26 +1049,44 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
 
         probleem_met_teams = False
         if deelcomp.huidige_team_ronde == 0:
-            # check dat alle teams geplaatst of verwijderd zijn
+            # check dat alle teams geplaatst in een wedstrijdklasse (dus genoeg sporters gekoppeld hebben)
+            # en dat alle teams in een poule zitten
+
+            team_pk2poule = dict()
+            poules = RegiocompetitieTeamPoule.objects.filter(deelcompetitie=deelcomp).prefetch_related('teams')
+            for poule in poules:
+                for team in poule.teams.all():
+                    team_pk2poule[team.pk] = poule
+                # for
+            # for
+
             regioteams = (RegiocompetitieTeam
                           .objects
                           .select_related('vereniging',
                                           'vereniging__regio',
                                           'team_type')
-                          .filter(deelcompetitie=deelcomp,
-                                  klasse=None)
+                          .filter(deelcompetitie=deelcomp)
                           .prefetch_related('gekoppelde_schutters')
                           .order_by('team_type__volgorde',
                                     '-aanvangsgemiddelde',
                                     'vereniging__ver_nr'))
 
-            if regioteams.count() > 0:
-                probleem_met_teams = True
-                context['teams_niet_af'] = regioteams
+            for team in regioteams:
+                team.aantal_sporters = team.gekoppelde_schutters.count()
 
-                for team in regioteams:
-                    team.aantal_sporters = team.gekoppelde_schutters.count()
-                # for
+                if not team.klasse:
+                    probleem_met_teams = True
+                    team.is_niet_af = True
+
+                try:
+                    team.poule = team_pk2poule[team.pk]
+                except KeyError:
+                    team.poule = None
+                    team.is_niet_af = True
+            # for
+
+            if probleem_met_teams:
+                context['teams_niet_af'] = regioteams
 
         if not probleem_met_teams:
             if 1 <= deelcomp.huidige_team_ronde <= 7:

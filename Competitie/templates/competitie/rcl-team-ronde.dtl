@@ -66,17 +66,21 @@
                         <th>Vereniging</th>
                         <th>Soort team</th>
                         <th>Aantal gekoppelde sporters</th>
-                        <th>Naam</th>
+                        <th>Poule</th>
+                        <th>Team naam</th>
                     </tr>
                 </thead>
 
                 {% for team in teams_niet_af %}
-                    <tr>
-                        <td>{{ team.vereniging }}</td>
-                        <td>{{ team.team_type.beschrijving }}</td>
-                        <td{% if team.aantal_sporters < 3 %} class="red-text"{% endif %}>{{ team.aantal_sporters }}</td>
-                        <td>{{ team.team_naam }}</td>
-                    </tr>
+                    {% if team.is_niet_af  %}
+                        <tr>
+                            <td>{{ team.vereniging }}</td>
+                            <td>{{ team.team_type.beschrijving }}</td>
+                            <td{% if team.aantal_sporters < 3 %} class="red-text"{% endif %}>{{ team.aantal_sporters }}</td>
+                            <td>{% if team.poule %}{{ team.poule }}{% else %}<span class="red-text">Geen</span>{% endif %}</td>
+                            <td>{{ team.team_naam }}</td>
+                        </tr>
+                    {% endif %}
                 {% endfor %}
             </table>
         {% else %}
