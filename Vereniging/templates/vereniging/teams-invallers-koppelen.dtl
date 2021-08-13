@@ -18,7 +18,7 @@
 
 
     <script type="application/javascript">
-        function invallers_uitgrijzen() {
+        function invallers_grijs_maken() {
             let bezette_nrs = Array()
             document.querySelectorAll('input[type=radio]:checked').forEach(el => {
                 bezette_nrs.push(el.dataset["nr"])
@@ -47,7 +47,7 @@
 
         function gewijzigd() {
             // het formulier is aangepast en moet opgeslagen kunnen worden
-            invallers_uitgrijzen()
+            invallers_grijs_maken()
 
             // enable/disable de 'opslaan' knop
             const el = document.getElementById("opslaan_knop")
@@ -113,7 +113,7 @@
                                 <li>
                                     <label class="black-text" for="{{ id_invaller }}">
                                         <input class="with-gap" type="radio" name="{{ group_str }}" value="{{ invaller_nr }}" data-nr="{{ invaller_nr }}" data-is-uitvaller="{{ is_uitvaller }}" required id="{{ id_invaller }}"{% if toon_checked %} checked{% endif %} onchange="gewijzigd()">
-                                        <span>({{ invaller_gem_str }})&nbsp;&nbsp;{{ invaller_naam_str }}</span>
+                                        <span>{% if invaller_gem_str %}({{ invaller_gem_str }})&nbsp;&nbsp;{% endif %}{{ invaller_naam_str }}</span>
                                     </label>
                                 </li>
                             {% endfor %}
@@ -153,6 +153,6 @@
 
 
     <script>
-        window.addEventListener("load", function() { invallers_uitgrijzen() })
+        window.addEventListener("load", function() { invallers_grijs_maken() })
     </script>
 {% endblock %}

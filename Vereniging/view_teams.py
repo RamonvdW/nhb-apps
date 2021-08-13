@@ -772,34 +772,38 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
         if not (1 <= deelcomp.huidige_team_ronde <= 7):
             raise Http404('Competitie ronde klopt niet')
 
-        if deelcomp.competitie.afstand == '18':
-            aantal_pijlen = 30
-        else:
-            aantal_pijlen = 25
-
         teams = (RegiocompetitieTeam
                  .objects
                  .select_related('vereniging',
                                  'team_type')
                  .filter(deelcompetitie=deelcomp,
                          vereniging=self.functie_nu.nhb_ver)
-                 .annotate(gekoppelde_schutters_count=Count('gekoppelde_schutters'))
                  .order_by('volg_nr'))
-
         team_pks = [team.pk for team in teams]
-        team_pk2ronde_pk = dict()
-        for ronde_team in RegiocompetitieRondeTeam.objects.filter(team__pk__in=team_pks):
-            team_pk2ronde_pk[ronde_team.team.pk] = ronde_team.pk
+
+        ronde_nr = deelcomp.huidige_team_ronde
+        team_pk2ronde = dict()
+        deelnemer_pk2in_team = dict()
+
+        for ronde_team in (RegiocompetitieRondeTeam
+                           .objects
+                           .prefetch_related('deelnemers_feitelijk')
+                           .annotate(feitelijke_deelnemers_count=Count('deelnemers_feitelijk'))
+                           .filter(team__pk__in=team_pks,
+                                   ronde_nr=ronde_nr)):
+
+            team_pk2ronde[ronde_team.team.pk] = ronde_team
+
+            for deelnemer in ronde_team.deelnemers_feitelijk.all():
+                deelnemer_pk2in_team[deelnemer.pk] = ronde_team.team.maak_team_naam_kort()
+            # for
         # for
 
         for team in teams:
-            team.aantal = team.gekoppelde_schutters_count
-            ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
-            team.ag_str = ag_str.replace('.', ',')
-
-            ronde_team_pk = team_pk2ronde_pk[team.pk]
+            ronde_team = team_pk2ronde[team.pk]
+            team.aantal = ronde_team.feitelijke_deelnemers_count
             team.url_koppelen = reverse('Vereniging:teams-regio-invallers-koppelen',
-                                        kwargs={'ronde_team_pk': ronde_team_pk})
+                                        kwargs={'ronde_team_pk': ronde_team.pk})
         # for
         context['teams'] = teams
 
@@ -831,14 +835,9 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
             unsorted_deelnemers.append(tup)
 
             try:
-                team = deelnemer.regiocompetitieteam_set.all()[0]
-            except IndexError:
-                pass
-            else:
-                deelnemer.in_team_str = team.maak_team_naam_kort()
-
-            if deelnemer.ag_voor_team < 0.001:
-                deelnemer.rood_ag = True
+                deelnemer.in_team_str = deelnemer_pk2in_team[deelnemer.pk]
+            except KeyError:
+                deelnemer.in_team_str = ''
         # for
 
         unsorted_deelnemers.sort()
@@ -954,6 +953,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         context['uitvallers'] = uitvallers = list()
 
+        uniq_nr = 999000
         while len(unsorted_uitvallers) > 0:
             _, _, uitvaller = unsorted_uitvallers.pop(0)
             group_str = "invaller_%s" % (1 + len(uitvallers))
@@ -975,6 +975,11 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                     tup = (is_uitvaller, deelnemer.invaller_gem_str, id_invaller, deelnemer.pk, deelnemer.naam_str, toon_checked)
                     invallers.append(tup)
             # for
+
+            # voeg de optie "Geen invaller" toe
+            tup = (False, "", group_str + "_door_geen", uniq_nr, "Geen invaller", zoek_checked)
+            uniq_nr += 1
+            invallers.append(tup)
         # while
 
         context['url_opslaan'] = reverse('Vereniging:teams-regio-invallers-koppelen',
@@ -1044,15 +1049,17 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
             except ValueError:
                 raise Http404('Verkeerde parameters')
 
-            try:
-                gem1 = pk2gem[sel_pk]
-                gem2 = max_gem[len(sel_pks)]
-                if gem1 > gem2:
-                    raise Http404('Selectie is te sterk: %.3f > %.3f' % (gem1, gem2))
-            except KeyError:
-                raise Http404('Geen valide selectie')
+            # nummers 999000 en hoger worden gebruikt voor "geen invaller"
+            if sel_pk < 999000:
+                try:
+                    gem1 = pk2gem[sel_pk]
+                    gem2 = max_gem[len(sel_pks)]
+                    if gem1 > gem2:
+                        raise Http404('Selectie is te sterk: %.3f > %.3f' % (gem1, gem2))
+                except KeyError:
+                    raise Http404('Geen valide selectie')
 
-            sel_pks.append(sel_pk)
+                sel_pks.append(sel_pk)
         # while
 
         # sel_pks bevat de geaccepteerde feitelijke sporters

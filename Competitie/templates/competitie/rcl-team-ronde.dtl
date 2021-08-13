@@ -62,7 +62,8 @@
         </form>
 
         <p>&nbsp;</p>
-        <p>Na het opstarten van een ronde krijgen alle HWL's een seintje dat ze de teams moeten controleren en eventuele invallers in moeten voeren.</p>
+        <!-- <p>Na het opstarten van een ronde krijgen alle HWL's een seintje dat ze de teams moeten controleren en eventuele invallers in moeten voeren.</p> -->
+        <p>Na het opstarten van een ronde krijgen moet je zelf alles HWL's laten weten dat ze invallers in kunnen voeren.</p>
 
     {% else %}
 
