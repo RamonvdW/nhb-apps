@@ -457,7 +457,8 @@ class RegioTeamsView(TemplateView):
                       .objects
                       .select_related('vereniging',
                                       'vereniging__regio',
-                                      'team_type')
+                                      'team_type',
+                                      'deelcompetitie')
                       .filter(deelcompetitie__in=deelcomp_pks,
                               klasse=None)
                       .order_by('team_type__volgorde',
@@ -475,7 +476,7 @@ class RegioTeamsView(TemplateView):
                                              kwargs={'team_pk': team.pk})
 
                 team.url_verwijder = reverse('Vereniging:teams-regio-wijzig',
-                                             kwargs={'deelcomp_pk': deelcomp.pk,
+                                             kwargs={'deelcomp_pk': team.deelcompetitie.pk,
                                                      'team_pk': team.pk})
             totaal_teams += 1
 
