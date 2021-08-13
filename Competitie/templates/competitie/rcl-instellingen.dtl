@@ -51,7 +51,7 @@
         }
     </script>
 
-    {% if not readonly %}
+    {% if not readonly_na_fase_C %}
     <form method="post" action="{{ url_opslaan }}">
         {% csrf_token %}
     {% endif %}

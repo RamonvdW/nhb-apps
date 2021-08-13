@@ -64,8 +64,9 @@
 
     <table class="white">
         {% if totaal_teams == 0 %}
+            <!-- 0 teams en 0 niet-af teams -->
             <tr>
-                <td colspan="{% if subset_filter %}5{% else %}4{% endif %}"><i>Er zijn nog geen teams aangemaakt</i></td>
+                <td><i>Er zijn nog geen teams aangemaakt</i></td>
             </tr>
         {% endif %}
 
@@ -106,7 +107,8 @@
                 {% endif %}
                 <th>Vereniging</th>
                 <th>Naam</th>
-                <th colspan="2">Team sterkte</th>
+                <th>Team sterkte</th>
+                <th></th>
             </tr>
 
             {% for team in teams %}
@@ -116,7 +118,8 @@
                     {% endif %}
                     <td>{{ team.vereniging }}</td>
                     <td>{{ team.team_naam }}</td>
-                    <td colspan="2">{{ team.ag_str }}</td>
+                    <td>{{ team.ag_str }}</td>
+                    <td></td>
                 </tr>
             {% empty %}
                 <tr>
