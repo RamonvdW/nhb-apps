@@ -52,10 +52,12 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                                   kwargs={'vereniging_pk': ver.pk})
 
         if rol_nu == Rollen.ROL_SEC or ver.regio.is_administratief:
+            # SEC
             comps = list()
             deelcomps = list()
             deelcomps_rk = list()
         else:
+            # HWL of WL
             context['toon_competities'] = True
 
             if rol_nu == Rollen.ROL_HWL:

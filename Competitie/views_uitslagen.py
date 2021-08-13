@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.http import Http404
 from BasisTypen.models import BoogType, TeamType
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
-from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DEELNAME_NEE,
+from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DEELNAME_NEE, TEAM_PUNTEN_MODEL_TWEE,
                                DeelCompetitie, DeelcompetitieKlasseLimiet,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
@@ -597,8 +597,11 @@ class UitslagenRegioTeamsView(TemplateView):
                     heeft_teams = True
             # for
 
-            if heeft_teams:
+            # alleen een poule schema maken als er teams zijn en er head-to-head wedstrijden gehouden worden
+            if heeft_teams and deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_TWEE:
                 maak_poule_schema(poule)
+            else:
+                poule.schema = None
         # for
 
         teams = (RegiocompetitieTeam

@@ -79,7 +79,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu == Rollen.ROL_HWL
+        return self.functie_nu and self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def _get_deelcomp(self, deelcomp_pk) -> DeelCompetitie:
 
@@ -103,6 +103,9 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie is niet in de juiste fase')
 
         self.readonly = (comp.fase > 'C')
+
+        if self.rol_nu == Rollen.ROL_WL:
+            self.readonly = True
 
         return deelcomp
 
@@ -732,11 +735,12 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu, self.functie_nu = None, None
+        self.readonly = False
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
+        return self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def _get_deelcomp(self, deelcomp_pk) -> DeelCompetitie:
 
@@ -760,6 +764,9 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
             # staat niet meer open voor instellen regiocompetitie teams
             raise Http404('Competitie is niet in de juiste fase')
 
+        if self.rol_nu == Rollen.ROL_WL:
+            self.readonly = True
+
         return deelcomp
 
     def get_context_data(self, **kwargs):
@@ -771,6 +778,8 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
 
         if not (1 <= deelcomp.huidige_team_ronde <= 7):
             raise Http404('Competitie ronde klopt niet')
+
+        context['readonly'] = self.readonly
 
         teams = (RegiocompetitieTeam
                  .objects
@@ -802,8 +811,10 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
         for team in teams:
             ronde_team = team_pk2ronde[team.pk]
             team.aantal = ronde_team.feitelijke_deelnemers_count
-            team.url_koppelen = reverse('Vereniging:teams-regio-invallers-koppelen',
-                                        kwargs={'ronde_team_pk': ronde_team.pk})
+
+            if not self.readonly:
+                team.url_koppelen = reverse('Vereniging:teams-regio-invallers-koppelen',
+                                            kwargs={'ronde_team_pk': ronde_team.pk})
         # for
         context['teams'] = teams
 

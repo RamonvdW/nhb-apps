@@ -18,7 +18,7 @@
 
         <p>Als HWL ben je verantwoordelijk om je teams compleet te houden. Als iemand niet kan ("uitvalt") dan mag deze vervangen worden door een invaller. Voor elke ronde moeten deze invallers opnieuw opgegeven worden.</p>
 
-        <p>Op deze pagina kan je als HWL de invallers opgeven voor de regiocompetitie van de <b>{{ deelcomp }}</b>.</p>
+        <p>Op deze pagina kan {% if readonly %}<b>de HWL</b>{% else %}je als HWL{% endif %} de invallers opgeven voor de regiocompetitie van de <b>{{ deelcomp }}</b>.</p>
 
         <p>&nbsp;</p>
         <div class="container">
@@ -51,7 +51,9 @@
                     <td>{{ team.klasse.team.beschrijving }}</td>
                     <td class="hide-on-small-only center-align{% if team.aantal < 3 or team.aantal > 4 %} red-text{% endif %}">{{ team.aantal }}</td>
                     <td>
-                        <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Invallers koppelen</a>
+                        {% if team.url_koppelen %}
+                            <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Invallers koppelen</a>
+                        {% endif %}
                     </td>
                 </tr>
             {% empty %}

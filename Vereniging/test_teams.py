@@ -973,7 +973,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self.assert404(resp, 'Verkeerde parameters')
 
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'invaller_1': 999999})
+            resp = self.client.post(url, {'invaller_1': 888888})
         self.assert404(resp, 'Geen valide selectie')
 
         # niet bestaande deelcomp
