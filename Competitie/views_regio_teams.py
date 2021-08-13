@@ -1032,22 +1032,46 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
         context['regio'] = self.functie_nu.nhb_regio
 
-        if 1 <= deelcomp.huidige_team_ronde <= 7:
-            context['alle_regels'], context['is_redelijk'] = self._bepaal_wedstrijdpunten(deelcomp)
+        probleem_met_teams = False
+        if deelcomp.huidige_team_ronde == 0:
+            # check dat alle teams geplaatst of verwijderd zijn
+            regioteams = (RegiocompetitieTeam
+                          .objects
+                          .select_related('vereniging',
+                                          'vereniging__regio',
+                                          'team_type')
+                          .filter(deelcompetitie=deelcomp,
+                                  klasse=None)
+                          .prefetch_related('gekoppelde_schutters')
+                          .order_by('team_type__volgorde',
+                                    '-aanvangsgemiddelde',
+                                    'vereniging__ver_nr'))
 
-        if deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_FORMULE1:
-            context['toon_f1'] = True
-            context['wp_model_str'] = 'Formule 1'
-        elif deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_TWEE:
-            context['toon_h2h'] = True
-            context['wp_model_str'] = '2 punten, directe tegenstanders'
-        else:
-            context['toon_som'] = True
-            context['wp_model_str'] = 'Som van de scores'
+            if regioteams.count() > 0:
+                probleem_met_teams = True
+                context['teams_niet_af'] = regioteams
 
-        if deelcomp.huidige_team_ronde <= 7:
-            context['url_volgende_ronde'] = reverse('Competitie:start-volgende-team-ronde',
-                                                    kwargs={'deelcomp_pk': deelcomp.pk})
+                for team in regioteams:
+                    team.aantal_sporters = team.gekoppelde_schutters.count()
+                # for
+
+        if not probleem_met_teams:
+            if 1 <= deelcomp.huidige_team_ronde <= 7:
+                context['alle_regels'], context['is_redelijk'] = self._bepaal_wedstrijdpunten(deelcomp)
+
+            if deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_FORMULE1:
+                context['toon_f1'] = True
+                context['wp_model_str'] = 'Formule 1'
+            elif deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_TWEE:
+                context['toon_h2h'] = True
+                context['wp_model_str'] = '2 punten, directe tegenstanders'
+            else:
+                context['toon_som'] = True
+                context['wp_model_str'] = 'Som van de scores'
+
+            if deelcomp.huidige_team_ronde <= 7:
+                context['url_volgende_ronde'] = reverse('Competitie:start-volgende-team-ronde',
+                                                        kwargs={'deelcomp_pk': deelcomp.pk})
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context

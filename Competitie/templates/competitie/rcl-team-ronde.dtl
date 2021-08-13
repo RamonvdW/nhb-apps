@@ -55,16 +55,45 @@
 
     {% elif deelcomp.huidige_team_ronde == 0 %}
 
-        <p>De teamcompetitie wacht totdat jij de eerste ronde opent.</p>
+        {% if teams_niet_af %}
+            <h5 class="red-text">Nog niet geplaatst teams</h5>
+            <p>De volgende teams zijn niet compleet en daarom niet geplaatst in een wedstrijdklasse.</p>
+            <p>Dit moet eerst opgelost worden: sporters koppelen of het team verwijderen.</p>
 
-        <form method="post" action="{{ url_volgende_ronde }}">{% csrf_token %}
-            <button class="btn-nhb-rood">Start de eerste ronde</button>
-        </form>
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Vereniging</th>
+                        <th>Soort team</th>
+                        <th>Aantal gekoppelde sporters</th>
+                        <th>Naam</th>
+                    </tr>
+                </thead>
 
-        <p>&nbsp;</p>
-        <!-- <p>Na het opstarten van een ronde krijgen alle HWL's een seintje dat ze de teams moeten controleren en eventuele invallers in moeten voeren.</p> -->
-        <p>Na het opstarten van een ronde krijgen moet je zelf alles HWL's laten weten dat ze invallers in kunnen voeren.</p>
+                {% for team in teams_niet_af %}
+                    <tr>
+                        <td>{{ team.vereniging }}</td>
+                        <td>{{ team.team_type.beschrijving }}</td>
+                        <td{% if team.aantal_sporters < 3 %} class="red-text"{% endif %}>{{ team.aantal_sporters }}</td>
+                        <td>{{ team.team_naam }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>De teamcompetitie wacht totdat jij de eerste ronde opent.</p>
+        {% endif %}
 
+        {% if url_volgende_ronde %}
+
+            <form method="post" action="{{ url_volgende_ronde }}">{% csrf_token %}
+                <button class="btn-nhb-rood">Start de eerste ronde</button>
+            </form>
+
+            <p>&nbsp;</p>
+            <!-- <p>Na het opstarten van een ronde krijgen alle HWL's een seintje dat ze de teams moeten controleren en eventuele invallers in moeten voeren.</p> -->
+            <p>Na het opstarten van een ronde krijgen moet je zelf alles HWL's laten weten dat ze invallers in kunnen voeren.</p>
+
+        {% endif %}
     {% else %}
 
         {% if toon_som %}
