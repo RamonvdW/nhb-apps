@@ -803,23 +803,16 @@ class UitslagenVerenigingTeamsView(TemplateView):
             team.totaal_score += ronde_team.team_score
             team.totaal_punten += ronde_team.team_punten
 
+            geselecteerd_pks = list()
             for deelnemer in ronde_team.deelnemers_geselecteerd.all():
+                geselecteerd_pks.append(deelnemer.pk)
+
                 if deelnemer.pk not in team.leden:
                     team.leden[deelnemer.pk] = voorgaand = list()
                     while len(voorgaand) < ronde_team.ronde_nr:
                         inzet = SimpleNamespace(tekst='-', score=-1)
                         voorgaand.append(inzet)
                     # while
-                else:
-                    voorgaand = team.leden[deelnemer.pk]
-
-                score = (deelnemer.score1, deelnemer.score2, deelnemer.score3,
-                         deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7)[ronde_team.ronde_nr - 1]
-
-                inzet = SimpleNamespace(
-                                tekst=str(score),
-                                score=score)
-                voorgaand.append(inzet)
             # for
 
             for deelnemer in ronde_team.deelnemers_feitelijk.all():
@@ -832,26 +825,35 @@ class UitslagenVerenigingTeamsView(TemplateView):
                 else:
                     voorgaand = team.leden[deelnemer.pk]
 
-                # als deze deelnemer geselecteerd was, dan staat er al een X
-                if len(voorgaand) < ronde_team.ronde_nr:
-                    score = (deelnemer.score1, deelnemer.score2, deelnemer.score3,
-                             deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7)[ronde_team.ronde_nr - 1]
+                score = (deelnemer.score1, deelnemer.score2, deelnemer.score3,
+                         deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7)[ronde_team.ronde_nr - 1]
 
-                    inzet = SimpleNamespace(
-                                tekst='(i) ' + str(score),
-                                score=score)
+                score_str = str(score)
+                if deelnemer.pk not in geselecteerd_pks:
+                    score_str = '* ' + score_str
+                else:
+                    geselecteerd_pks.remove(deelnemer.pk)
 
-                    voorgaand.append(inzet)
+                inzet = SimpleNamespace(
+                            tekst=score_str,
+                            score=score)
+
+                voorgaand.append(inzet)
             # for
 
             # samenvatting van deze ronde maken
             laagste_inzet = None
             laagste_score = 9999
             aantal_scores = 0
-            for voorgaand in team.leden.values():
+            for deelnemer_pk, voorgaand in team.leden.items():
                 # iedereen die voorheen in het team zaten door laten groeien
-                if len(voorgaand) < ronde_team.ronde_nr:
-                    inzet = SimpleNamespace(tekst='', score=-1)
+                if len(voorgaand) <= ronde_team.ronde_nr:
+                    if deelnemer_pk in geselecteerd_pks:
+                        # was geselecteerd voor deze ronde, dus uitvaller
+                        inzet = SimpleNamespace(tekst='-', score=-1)
+                    else:
+                        # niet geselecteerd voor deze ronde
+                        inzet = SimpleNamespace(tekst='', score=-1)
                     voorgaand.append(inzet)
 
                 # track het aantal scores en de laagste score

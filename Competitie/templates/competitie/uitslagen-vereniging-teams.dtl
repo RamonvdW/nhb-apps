@@ -126,6 +126,8 @@
 
                 {% endfor %}
             </table>
+
+            <p>Scores van invallers zijn gemarkeerd met een sterretje (*). Uitvallers hebben een minteken als score (-).</p>
         {% endif %}
 
     {% endif %}
