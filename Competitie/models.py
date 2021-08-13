@@ -645,7 +645,7 @@ class RegiocompetitieRondeTeam(models.Model):
     logboek = models.TextField(max_length=1024, blank=True)     # TODO: max_length is not enforce, so can be removed
 
     def __str__(self):
-        return "Ronde %s, team %s" % (self.ronde_nr, self.team.id)
+        return "Ronde %s, team %s" % (self.ronde_nr, self.team)
 
 
 class KampioenschapSchutterBoog(models.Model):

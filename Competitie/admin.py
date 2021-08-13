@@ -223,6 +223,12 @@ class RegiocompetitieRondeTeamAdmin(admin.ModelAdmin):
 
     readonly_fields = ('team', 'ronde_nr')
 
+    list_filter = ('team__deelcompetitie__competitie',
+                   'team__vereniging__regio',
+                   'ronde_nr')
+
+    list_select_related = ('team', )
+
     fieldsets = (
         ('',
             {'fields': ('team',
