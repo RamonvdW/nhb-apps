@@ -11,10 +11,12 @@ DEBUG=0
 
 # start the background processes
 echo "[INFO] Starting regiocomp_mutaties (runtime: 60 minutes)"
+pkill -f regiocomp_mutaties
 ./manage.py regiocomp_mutaties 60 &
 sleep 1
 
 echo "[INFO] Starting regiocomp_tussenstand (runtime: 60 minutes)"
+pkill -f regiocomp_tussenstand
 ./manage.py regiocomp_tussenstand 60 &
 sleep 1
 
@@ -31,10 +33,8 @@ else
 fi
 
 # kill the background processes
-echo "[INFO] Stopping regiocomp_mutaties"
+echo "[INFO] Stopping background tasks"
 pkill -f regiocomp_mutaties
-
-echo "[INFO] Stopping regiocomp_tussenstand"
 pkill -f regiocomp_tussenstand
 
 # end of file

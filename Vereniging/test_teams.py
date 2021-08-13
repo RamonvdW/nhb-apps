@@ -987,15 +987,6 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         resp = self.client.post(url, {})
         self.assert404(resp)
 
-        # onverwachte situatie: meer dan 1 rondeteam
-        ronde_team.pk = None
-        ronde_team.save()
-
-        url = self.url_team_invallers_koppelen % ronde_team.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)
-
         # team zonder initiële sporters
         ronde_team.deelnemers_geselecteerd.clear()
 
