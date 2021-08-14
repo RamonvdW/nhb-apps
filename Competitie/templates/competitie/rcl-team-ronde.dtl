@@ -95,7 +95,7 @@
 
             <p>&nbsp;</p>
             <!-- <p>Na het opstarten van een ronde krijgen alle HWL's een seintje dat ze de teams moeten controleren en eventuele invallers in moeten voeren.</p> -->
-            <p>Na het opstarten van een ronde krijgen moet je zelf alles HWL's laten weten dat ze invallers in kunnen voeren.</p>
+            <p>Na het opstarten van een ronde moet je zelf alles HWL's laten weten dat ze de teams moeten controleren en eventuele invallers in kunnen voeren.</p>
 
         {% endif %}
     {% else %}
@@ -170,7 +170,8 @@
             </form>
 
             <p>&nbsp;</p>
-            <p>Na het opstarten van een ronde krijgen alle HWL's een seintje dat ze de teams moeten controleren en eventuele invallers in moeten voeren.</p>
+            <!--<p>Na het opstarten van een ronde krijgen alle HWL's een seintje dat ze de teams moeten controleren en eventuele invallers in moeten voeren.</p>-->
+            <p>Na het opstarten van een ronde moet je zelf alles HWL's laten weten dat ze de teams moeten controleren en eventuele invallers in kunnen voeren.</p>
 
             {% if not deelcomp.regio_heeft_vaste_teams %}
                 <p>Tijdens het doorzetten krijgt elk team nieuwe deelnemers afhankelijk van het voortschrijdend gemiddelde van de sporters.</p>

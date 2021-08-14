@@ -6,9 +6,9 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from BasisTypen.models import BoogType
+from BasisTypen.models import BoogType, TeamType
 from Competitie.models import (Competitie, CompetitieKlasse, DeelCompetitie,
-                               RegioCompetitieSchutterBoog,
+                               RegioCompetitieSchutterBoog, RegiocompetitieTeam,
                                LAAG_BK, LAAG_RK, LAAG_REGIO, AG_NUL)
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from Functie.models import maak_functie, Functie
@@ -141,10 +141,10 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
         # Schutter 1 aanmelden
 
-        schutterboog = SchutterBoog(nhblid=self.lid_100001,
-                                    boogtype=boog_ib,
-                                    voor_wedstrijd=True)
-        schutterboog.save()
+        schutterboog1 = SchutterBoog(nhblid=self.lid_100001,
+                                     boogtype=boog_ib,
+                                     voor_wedstrijd=True)
+        schutterboog1.save()
 
         klasse = (CompetitieKlasse
                   .objects
@@ -152,12 +152,12 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
                           indiv__boogtype=boog_ib,
                           indiv__is_onbekend=True))[0]
 
-        aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
-                                                 schutterboog=schutterboog,
-                                                 bij_vereniging=schutterboog.nhblid.bij_vereniging,
-                                                 klasse=klasse)
-        aanmelding.aantal_scores = 6        # nodig om voor te komen in de rayon uitslagen
-        aanmelding.save()
+        aanmelding1 = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
+                                                  schutterboog=schutterboog1,
+                                                  bij_vereniging=schutterboog1.nhblid.bij_vereniging,
+                                                  klasse=klasse)
+        aanmelding1.aantal_scores = 6        # nodig om voor te komen in de rayon uitslagen
+        aanmelding1.save()
 
         # Schutter 2 aanmelden
 
@@ -167,30 +167,30 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
                           indiv__boogtype=boog_ib,
                           indiv__is_onbekend=False))[0]
 
-        schutterboog = SchutterBoog(nhblid=self.lid_100002,
-                                    boogtype=boog_ib,
-                                    voor_wedstrijd=True)
-        schutterboog.save()
+        schutterboog2 = SchutterBoog(nhblid=self.lid_100002,
+                                     boogtype=boog_ib,
+                                     voor_wedstrijd=True)
+        schutterboog2.save()
 
-        aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
-                                                 schutterboog=schutterboog,
-                                                 bij_vereniging=schutterboog.nhblid.bij_vereniging,
-                                                 klasse=klasse)
-        aanmelding.aantal_scores = 6        # nodig om voor te komen in de rayon uitslagen
-        aanmelding.save()
+        aanmelding2 = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
+                                                  schutterboog=schutterboog2,
+                                                  bij_vereniging=schutterboog2.nhblid.bij_vereniging,
+                                                  klasse=klasse)
+        aanmelding2.aantal_scores = 6        # nodig om voor te komen in de rayon uitslagen
+        aanmelding2.save()
 
         # nog een aanmelding in dezelfde klasse
-        schutterboog = SchutterBoog(nhblid=self.lid_100002,
-                                    boogtype=boog_ib,
-                                    voor_wedstrijd=True)
-        schutterboog.save()
+        schutterboog3 = SchutterBoog(nhblid=self.lid_100003,
+                                     boogtype=boog_ib,
+                                     voor_wedstrijd=True)
+        schutterboog3.save()
 
-        aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
-                                                 schutterboog=schutterboog,
-                                                 bij_vereniging=schutterboog.nhblid.bij_vereniging,
-                                                 klasse=klasse)
-        aanmelding.aantal_scores = 6        # nodig om voor te komen in de rayon uitslagen
-        aanmelding.save()
+        aanmelding3 = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
+                                                  schutterboog=schutterboog3,
+                                                  bij_vereniging=schutterboog3.nhblid.bij_vereniging,
+                                                  klasse=klasse)
+        aanmelding3.aantal_scores = 6        # nodig om voor te komen in de rayon uitslagen
+        aanmelding3.save()
 
         # Schutter 3 (aspirant) aanmelden
         self.lid_100003.geboorte_datum = datetime.date(year=self.comp_18.begin_jaar - 10, month=1, day=1)
@@ -202,16 +202,33 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
                           indiv__boogtype=boog_r,
                           indiv__beschrijving__contains="Aspirant"))[0]
 
-        schutterboog = SchutterBoog(nhblid=self.lid_100003,
-                                    boogtype=boog_r,
-                                    voor_wedstrijd=True)
-        schutterboog.save()
+        schutterboog4 = SchutterBoog(nhblid=self.lid_100003,
+                                     boogtype=boog_r,
+                                     voor_wedstrijd=True)
+        schutterboog4.save()
 
-        aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
-                                                 schutterboog=schutterboog,
-                                                 bij_vereniging=schutterboog.nhblid.bij_vereniging,
-                                                 klasse=klasse)
-        aanmelding.save()
+        aanmelding4 = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
+                                                  schutterboog=schutterboog4,
+                                                  bij_vereniging=schutterboog4.nhblid.bij_vereniging,
+                                                  klasse=klasse)
+        aanmelding4.save()
+
+        # maak teams aan
+        team_type = TeamType.objects.get(afkorting='R')
+        team_klasse = CompetitieKlasse.objects.get(
+                                competitie=deelcomp.competitie,
+                                team__volgorde=13)       # Recurve Klasse C
+        team = RegiocompetitieTeam(
+                    deelcompetitie=deelcomp,
+                    vereniging=self.ver,
+                    volg_nr=1,
+                    team_type=team_type,
+                    team_naam="Test team 1",
+                    aanvangsgemiddelde=25.0,
+                    klasse=team_klasse)
+        team.save()
+
+        team.gekoppelde_schutters.set([aanmelding1, aanmelding2, aanmelding3])
 
     def test_top(self):
         now = timezone.now()
@@ -639,6 +656,14 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
+
+    def test_teams(self):
+        url = self.url_uitslagen_regio_teams % (self.comp_18.pk, 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
 
 
 # end of file
