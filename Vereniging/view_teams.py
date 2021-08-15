@@ -751,7 +751,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         else:
             # RCL
             readonly = (comp.fase > 'D')
-            mag_wijzigen = True
+            mag_wijzigen = not readonly
 
         if not mag_wijzigen:
             raise Http404('Voorbij de einddatum voor wijzigingen')
@@ -1032,7 +1032,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
             else:
                 deelnemer.origineel_team_lid = False
                 if deelnemer.pk in deelnemers_bezet_pks:
-                    tup = (deelnemer.invaller_gem, deelnemer.pk, deelnemer)
+                    tup = (deelnemer.gemiddelde_begin_team_ronde, deelnemer.pk, deelnemer)
                     unsorted_bezet.append(tup)
         # for
 
