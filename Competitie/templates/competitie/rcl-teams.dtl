@@ -47,9 +47,9 @@
         <div class="white shrink-wrap-5">
             {% for filter in filters %}
                 {% if filter.url %}
-                    <a class="margin-5 btn-nhb-blauw btn-small" href="{{ filter.url }}">{{ filter.label }}</a>
+                    <a class="margin-5 btn-outline" href="{{ filter.url }}">{{ filter.label }}</a>
                 {% else %}
-                    <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ filter.label }}</a>
+                    <a class="margin-5 btn-nhb-blauw" href="#">{{ filter.label }}</a>
                 {% endif %}
             {% endfor %}
         </div>
