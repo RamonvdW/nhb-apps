@@ -442,7 +442,7 @@ class RegioTeamsView(TemplateView):
             team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = team.ag_str.replace('.', ',')
 
-            if comp.fase <= 'D':
+            if comp.fase <= 'D' and self.rol_nu == Rollen.ROL_RCL:
                 team.url_aanpassen = reverse('Vereniging:teams-regio-koppelen',
                                              kwargs={'team_pk': team.pk})
             totaal_teams += 1
@@ -471,7 +471,7 @@ class RegioTeamsView(TemplateView):
             team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = team.ag_str.replace('.', ',')
 
-            if comp.fase <= 'D':
+            if comp.fase <= 'D' and self.rol_nu == Rollen.ROL_RCL:
                 team.url_aanpassen = reverse('Vereniging:teams-regio-koppelen',
                                              kwargs={'team_pk': team.pk})
 
@@ -961,12 +961,13 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                         is_redelijk = True
 
                     if team2.pk == -1:
-                        # van een bye win je altijd
+                        # van een bye win je altijd, als er maar een score neergezet is
                         regel.team2_is_bye = True
                         regel.team2_score = 0
                         regel.ronde_team2 = None
                         regel.team2_wp = 0
-                        regel.team1_wp = 2
+                        if regel.team1_score > 0:
+                            regel.team1_wp = 2
                     else:
                         regel.team2_str = "[%s] %s" % (team2.vereniging.ver_nr, team2.team_naam)
                         regel.team2_wp = 0
@@ -978,8 +979,9 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                         elif ronde_team2.team_score < ronde_team1.team_score:
                             regel.team1_wp = 2
                         else:
-                            regel.team1_wp = 1
-                            regel.team2_wp = 1
+                            if regel.team1_score > 0:
+                                regel.team1_wp = 1
+                                regel.team2_wp = 1
 
                     if is_eerste:
                         regel.break_poule = True
