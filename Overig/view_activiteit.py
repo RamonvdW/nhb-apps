@@ -206,6 +206,11 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
             lid.vhpg_str = '-'
             lid.laatste_inlog_str = '-'
 
+            if lid.bij_vereniging:
+                lid.ver_str = str(lid.bij_vereniging)
+            else:
+                lid.ver_str = 'Geen'
+
             if lid.account:
                 account = lid.account
                 lid.inlog_naam_str = account.username
