@@ -64,7 +64,7 @@
 
     <p>&nbsp;</p>
     <h5>Verder</h5>
-    <p>De volgende sites zijn misschien ook van interesse.</p>
+    <p>De volgende websites zijn misschien ook interessant voor je.</p>
     <div class="row">
         <!-- andere sites van de NHB -->
         {% include 'plein/andere-sites-van-de-nhb.dtl' %}
