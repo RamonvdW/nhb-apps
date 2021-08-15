@@ -245,14 +245,16 @@ class TeamWedstrijdklasse(models.Model):
 
     # op welk soort blazoen schiet deze klasse in de regiocompetitie
     # als er meerdere opties zijn dan is blazoen1 != blazoen2
-    blazoen_18m_regio = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
+    blazoen1_18m_regio = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
+    blazoen2_18m_regio = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
 
     blazoen1_25m_regio = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_60CM)
     blazoen2_25m_regio = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_60CM)
 
     # op welk soort blazoen schiet deze klasse in de kampioenschappen
-    # (maar 1 keuze mogelijk)
-    blazoen_18m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
+    blazoen1_18m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
+    blazoen2_18m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
+
     blazoen_25m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_60CM)
 
     def __str__(self):

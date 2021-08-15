@@ -85,9 +85,13 @@ class KlassegrenzenTonenView(View):
                 obj.min_ag_str = ag_str.replace('.', ',')  # nederlands: komma ipv punt
 
             if is_18m:
-                obj.blazoen_regio_str = BLAZOEN2STR[obj.team.blazoen_18m_regio]
+                obj.blazoen_regio_str = BLAZOEN2STR[obj.team.blazoen1_18m_regio]
+                if obj.team.blazoen2_18m_regio != obj.team.blazoen1_18m_regio:
+                    obj.blazoen_regio_str += " of " + BLAZOEN2STR[obj.team.blazoen2_18m_regio]
 
-                obj.blazoen_rk_bk_str = BLAZOEN2STR[obj.team.blazoen_18m_rk_bk]
+                obj.blazoen_rk_bk_str = BLAZOEN2STR[obj.team.blazoen1_18m_rk_bk]
+                if obj.team.blazoen2_18m_rk_bk != obj.team.blazoen1_18m_rk_bk:
+                    obj.blazoen_rk_bk_str += " of " + BLAZOEN2STR[obj.team.blazoen2_18m_rk_bk]
             else:
                 obj.blazoen_regio_str = BLAZOEN2STR[obj.team.blazoen1_25m_regio]
                 if obj.team.blazoen1_25m_regio != obj.team.blazoen2_25m_regio:

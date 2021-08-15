@@ -64,7 +64,7 @@ class BasisTypenTeamWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
     # record weergave
     fieldsets = (
         (None, {'fields': ('volgorde', 'beschrijving', 'team_type', 'buiten_gebruik')}),
-        ('Blazoenen Indoor', {'fields': ('blazoen_18m_regio', 'blazoen_18m_rk_bk')}),
+        ('Blazoenen Indoor', {'fields': ('blazoen1_18m_regio', 'blazoen2_18m_regio', 'blazoen1_18m_rk_bk', 'blazoen2_18m_rk_bk')}),
         ('Blazoenen 25m 1pijl', {'fields': ('blazoen1_25m_regio', 'blazoen2_25m_regio', 'blazoen_25m_rk_bk')})
     )
 

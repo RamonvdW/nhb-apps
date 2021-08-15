@@ -11,21 +11,22 @@ from BasisTypen.models import (MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
 
 
 # team wedstrijdklassen volgens spec v2.1, deel 3, tabel 3.5
-WKL_TEAM = (                                 # 18m            # 25m
-    (10, 'Recurve klasse ERE',         'R',  (BLAZOEN_DT,),   (BLAZOEN_60CM,)),        # R = team type
-    (11, 'Recurve klasse A',           'R',  (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
-    (12, 'Recurve klasse B',           'R',  (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
-    (13, 'Recurve klasse C',           'R',  (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
-    (14, 'Recurve klasse D',           'R',  (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+WKL_TEAM = (                                 # 18m                          # 25m
+                                             # regio1/2 == rk-bk1/2         # regio1, regio2, rk/bk
+    (10, 'Recurve klasse ERE',         'R',  (BLAZOEN_40CM, BLAZOEN_DT),    (BLAZOEN_60CM,)),        # R = team type
+    (11, 'Recurve klasse A',           'R',  (BLAZOEN_40CM,),               (BLAZOEN_60CM,)),
+    (12, 'Recurve klasse B',           'R',  (BLAZOEN_40CM,),               (BLAZOEN_60CM,)),
+    (13, 'Recurve klasse C',           'R',  (BLAZOEN_40CM,),               (BLAZOEN_60CM,)),
+    (14, 'Recurve klasse D',           'R',  (BLAZOEN_40CM,),               (BLAZOEN_60CM,)),
 
-    (20, 'Compound klasse ERE',        'C',  (BLAZOEN_DT,),   (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
-    (21, 'Compound klasse A',          'C',  (BLAZOEN_DT,),   (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
+    (20, 'Compound klasse ERE',        'C',  (BLAZOEN_DT,),                 (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
+    (21, 'Compound klasse A',          'C',  (BLAZOEN_DT,),                 (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
 
-    (30, 'Barebow klasse ERE',         'BB', (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (30, 'Barebow klasse ERE',         'BB', (BLAZOEN_40CM,),               (BLAZOEN_60CM,)),
 
-    (40, 'Instinctive Bow klasse ERE', 'IB', (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (40, 'Instinctive Bow klasse ERE', 'IB', (BLAZOEN_40CM,),               (BLAZOEN_60CM,)),
 
-    (50, 'Longbow klasse ERE',         'LB', (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (50, 'Longbow klasse ERE',         'LB', (BLAZOEN_40CM,),               (BLAZOEN_60CM,)),
 )
 
 # individuele wedstrijdklassen volgens spec v2.1, deel 3, tabel 3.4
@@ -178,16 +179,22 @@ def zet_blazoen_team(apps, _):
     for volgorde, beschrijving, teamtype_afkorting, blazoenen_18m, blazoenen_25m in WKL_TEAM:
 
         klasse = volgorde2team[volgorde]
-        klasse.blazoen_18m_regio = klasse.blazoen_18m_rk_bk = blazoenen_18m[0]
 
+        # blazoenen_18m is 1 of 2 lang; dezelfde toepassing voor regio en RK/BK
+        blazoenen_18m = list(blazoenen_18m)
+        if len(blazoenen_18m) < 2:
+            blazoenen_18m.append(blazoenen_18m[0])
+        klasse.blazoen1_18m_regio = klasse.blazoen1_18m_rk_bk = blazoenen_18m[0]
+        klasse.blazoen2_18m_regio = klasse.blazoen2_18m_rk_bk = blazoenen_18m[1]
+
+        # blazoenen_25m is 1 of 3 lang (1 = repeated up to 3), daarna: 1+2 voor regio en 3 voor rk/bk
         blazoenen_25m = list(blazoenen_25m)
         while len(blazoenen_25m) < 3:
             blazoenen_25m.append(blazoenen_25m[0])
         # while
-
         klasse.blazoen1_25m_regio, klasse.blazoen2_25m_regio, klasse.blazoen_25m_rk_bk = blazoenen_25m
 
-        klasse.save(update_fields=['blazoen_18m_regio', 'blazoen_18m_rk_bk',
+        klasse.save(update_fields=['blazoen1_18m_regio', 'blazoen2_18m_regio', 'blazoen1_18m_rk_bk', 'blazoen2_18m_rk_bk',
                                    'blazoen1_25m_regio', 'blazoen2_25m_regio', 'blazoen_25m_rk_bk'])
     # for
 
@@ -252,12 +259,22 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='teamwedstrijdklasse',
-            name='blazoen_18m_regio',
+            name='blazoen1_18m_regio',
             field=models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2),
         ),
         migrations.AddField(
             model_name='teamwedstrijdklasse',
-            name='blazoen_18m_rk_bk',
+            name='blazoen2_18m_regio',
+            field=models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2),
+        ),
+        migrations.AddField(
+            model_name='teamwedstrijdklasse',
+            name='blazoen1_18m_rk_bk',
+            field=models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2),
+        ),
+        migrations.AddField(
+            model_name='teamwedstrijdklasse',
+            name='blazoen2_18m_rk_bk',
             field=models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2),
         ),
         migrations.AddField(

@@ -61,5 +61,28 @@ class TestBasisTypen(TestCase):
         html = adm._leeftijdsklassen(obj)
         self.assertTrue(html.count('<p>') == obj.leeftijdsklassen.count())
 
+    def test_max_wedstrijdleeftijd(self):
+        lkl = LeeftijdsKlasse(
+                    geslacht='M',
+                    min_wedstrijdleeftijd=20,
+                    max_wedstrijdleeftijd=30)
+
+        self.assertFalse(lkl.leeftijd_is_compatible(19))
+        self.assertTrue(lkl.leeftijd_is_compatible(20))
+        self.assertTrue(lkl.leeftijd_is_compatible(29))
+        self.assertTrue(lkl.leeftijd_is_compatible(30))
+        self.assertFalse(lkl.leeftijd_is_compatible(31))
+
+        lkl = LeeftijdsKlasse(
+                    geslacht='M',
+                    min_wedstrijdleeftijd=20,
+                    max_wedstrijdleeftijd=0)
+
+        self.assertFalse(lkl.leeftijd_is_compatible(19))
+        self.assertTrue(lkl.leeftijd_is_compatible(20))
+        self.assertTrue(lkl.leeftijd_is_compatible(30))
+        self.assertTrue(lkl.leeftijd_is_compatible(31))
+        self.assertTrue(lkl.leeftijd_is_compatible(100))
+
 # end of file
 
