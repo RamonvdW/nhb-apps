@@ -56,7 +56,7 @@
     {% elif deelcomp.huidige_team_ronde == 0 %}
 
         {% if teams_niet_af %}
-            <h5 class="red-text">Nog niet geplaatst teams</h5>
+            <h5 class="red-text">Nog niet geplaatste teams</h5>
             <p>De volgende teams zijn niet compleet en daarom niet geplaatst in een wedstrijdklasse.</p>
             <p>Dit moet eerst opgelost worden: sporters koppelen of het team verwijderen.</p>
 
@@ -95,7 +95,7 @@
 
             <p>&nbsp;</p>
             <!-- <p>Na het opstarten van een ronde krijgen alle HWL's een seintje dat ze de teams moeten controleren en eventuele invallers in moeten voeren.</p> -->
-            <p>Na het opstarten van een ronde moet je zelf alles HWL's laten weten dat ze de teams moeten controleren en eventuele invallers in kunnen voeren.</p>
+            <p>Na het opstarten van een ronde moet je zelf alle HWL's laten weten dat ze de teams moeten controleren en eventuele invallers in kunnen voeren.</p>
 
         {% endif %}
     {% else %}
@@ -170,8 +170,8 @@
             </form>
 
             <p>&nbsp;</p>
-            <!--<p>Na het opstarten van een ronde krijgen alle HWL's een seintje dat ze de teams moeten controleren en eventuele invallers in moeten voeren.</p>-->
-            <p>Na het opstarten van een ronde moet je zelf alles HWL's laten weten dat ze de teams moeten controleren en eventuele invallers in kunnen voeren.</p>
+            <!-- <p>Na het opstarten van een ronde krijgen alle HWL's een seintje dat ze de teams moeten controleren en eventuele invallers in moeten voeren.</p>-->
+            <p>Na het opstarten van een ronde moet je zelf alle HWL's laten weten dat ze de teams moeten controleren en eventuele invallers in kunnen voeren.</p>
 
             {% if not deelcomp.regio_heeft_vaste_teams %}
                 <p>Tijdens het doorzetten krijgt elk team nieuwe deelnemers afhankelijk van het voortschrijdend gemiddelde van de sporters.</p>
