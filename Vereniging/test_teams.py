@@ -131,6 +131,19 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         lid.save()
         self.nhblid_100003 = lid
 
+        # maak een senior lid aan
+        lid = NhbLid()
+        lid.nhb_nr = 100013
+        lid.geslacht = "M"
+        lid.voornaam = "Instinctive"
+        lid.achternaam = "de Bower"
+        lid.email = ""
+        lid.geboorte_datum = datetime.date(year=1972, month=3, day=5)
+        lid.sinds_datum = datetime.date(year=jaar-4, month=7, day=1)
+        lid.bij_vereniging = ver
+        lid.save()
+        self.nhblid_100013 = lid
+
         # maak een lid aan van een andere vereniging
         # maak een test vereniging
         ver2 = NhbVereniging()
@@ -247,6 +260,11 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
                                                                   'schiet_BB': 'on',
                                                                   'info_R': 'on',
                                                                   'voorkeur_meedoen_competitie': 'on'})
+        elif nhb_nr == 100013:
+            with self.assert_max_queries(20):
+                resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr,
+                                                                  'schiet_IB': 'on',
+                                                                  'voorkeur_meedoen_competitie': 'on'})
         else:
             with self.assert_max_queries(20):
                 resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr,
@@ -259,6 +277,8 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
     def _zet_ag(self, nhb_nr, afstand):
         if nhb_nr == 100003:
             afkorting = 'BB'
+        elif nhb_nr == 100013:
+            afkorting = 'IB'
         else:
             afkorting = 'R'
         schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=nhb_nr, boogtype__afkorting=afkorting)
@@ -272,18 +292,21 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self._zet_schutter_voorkeuren(100003)       # BB
         self._zet_schutter_voorkeuren(100004)       # R
         self._zet_schutter_voorkeuren(100012)       # R
+        self._zet_schutter_voorkeuren(100013)       # IB
 
         if do_18:           # pragma: no branch
             self._zet_ag(100002, 18)
             self._zet_ag(100003, 18)
             self._zet_ag(100004, 18)
+            self._zet_ag(100013, 18)
 
             url = url_inschrijven % self.comp_18.pk
-            with self.assert_max_queries(28):
+            with self.assert_max_queries(33):
                 resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
                                               'lid_100003_boogtype_3': 'on',    # 3=BB
                                               'lid_100004_boogtype_1': 'on',    # 1=R
                                               'lid_100012_boogtype_1': 'on',    # 1=R
+                                              'lid_100013_boogtype_4': 'on',    # 4=IB
                                               'wil_in_team': 'ja!'})
             self.assert_is_redirect_not_plein(resp)     # check success
 
@@ -301,8 +324,10 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
                     self.deelnemer_100003_18 = obj
                 elif nr == 100004:
                     self.deelnemer_100004_18 = obj
-                elif nr == 100012:      # pragma: no branch
+                elif nr == 100012:
                     self.deelnemer_100012_18 = obj
+                elif nr == 100013:  # pragma: no branch
+                    self.deelnemer_100013_18 = obj
             # for
 
         if do_25:
@@ -829,6 +854,20 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
                                      'deelnemer_%s' % self.deelnemer_100004_18.pk: 1})
         self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
 
+        # maak nog een team aan
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
+                                    {'team_type': 'IB'})
+        self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
+        self.assertEqual(2, RegiocompetitieTeam.objects.count())
+        team2 = RegiocompetitieTeam.objects.exclude(pk=team.pk)[0]
+
+        # koppel 100013 aan dit tweede team, dan is deze 'bezet' voor het 1e team
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_koppelen % team2.pk,
+                                    {'deelnemer_%s' % self.deelnemer_100013_18.pk: 1})
+        self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
+
         # competitie in verkeerde fase
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_team_invallers % self.deelcomp18_regio111.pk)
@@ -853,14 +892,14 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.comp_18.pk)
 
-        self._verwerk_mutaties(31)
-        self.assertEqual(1, RegiocompetitieRondeTeam.objects.count())
+        self._verwerk_mutaties(41)
+        self.assertEqual(2, RegiocompetitieRondeTeam.objects.count())
 
         pks0 = [self.deelnemer_100002_18.pk, self.deelnemer_100003_18.pk, self.deelnemer_100004_18.pk]
         pks0.sort()
         self.assertEqual(len(pks0), 3)
 
-        ronde_team = RegiocompetitieRondeTeam.objects.all()[0]
+        ronde_team = RegiocompetitieRondeTeam.objects.filter(team=team.pk)[0]
         pks1 = list(ronde_team.deelnemers_geselecteerd.order_by('pk').values_list('pk', flat=True))
         self.assertEqual(len(pks1), 3)
         self.assertEqual(pks0, pks1)
@@ -907,25 +946,29 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         ronde_team = RegiocompetitieRondeTeam.objects.get(pk=ronde_team.pk)
 
         pks1 = list(ronde_team.deelnemers_geselecteerd.order_by('pk').values_list('pk', flat=True))
+        # sort pks1 like pks0?
         self.assertEqual(len(pks1), 3)
         self.assertEqual(pks0, pks1)
 
         pks2 = list(ronde_team.deelnemers_feitelijk.order_by('pk').values_list('pk', flat=True))
+        # sort pks2?
         self.assertEqual(len(pks2), 3)
         self.assertEqual(pks1, pks2)
 
         # probeer 1 sporter drie keer te koppelen
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.post(url, {'invaller_1': self.deelnemer_100002_18.pk,
                                           'invaller_2': self.deelnemer_100002_18.pk,
                                           'invaller_3': self.deelnemer_100002_18.pk})
         self.assert_is_redirect(resp, self.url_team_invallers % self.deelcomp18_regio111.pk)
 
         pks1 = list(ronde_team.deelnemers_geselecteerd.order_by('pk').values_list('pk', flat=True))
+        # sort pks1?
         self.assertEqual(len(pks1), 3)
         self.assertEqual(pks0, pks1)
 
         pks2 = list(ronde_team.deelnemers_feitelijk.order_by('pk').values_list('pk', flat=True))
+        # sort pks2?
         self.assertEqual(len(pks2), 1)
 
         # pas het huidig gemiddelde van een van de originele team schutter aan
@@ -934,7 +977,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self.deelnemer_100003_18.save(update_fields=['gemiddelde'])
 
         # voer 3 vervangers in
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.post(url, {'invaller_1': self.deelnemer_100003_18.pk,
                                           'invaller_2': self.deelnemer_100004_18.pk,
                                           'invaller_3': self.deelnemer_100012_18.pk})
@@ -945,6 +988,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
 
         pks3 = [self.deelnemer_100003_18.pk, self.deelnemer_100004_18.pk, self.deelnemer_100012_18.pk ]
         pks3.sort()
+        # sort pks2?
         self.assertEqual(pks2, pks3)
 
         self.deelnemer_100003_18.gemiddelde_begin_team_ronde = 9.5
@@ -994,5 +1038,6 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert404(resp, 'Team is niet compleet')
+
 
 # end of file
