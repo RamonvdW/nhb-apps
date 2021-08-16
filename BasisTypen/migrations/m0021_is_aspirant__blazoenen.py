@@ -245,7 +245,7 @@ class Migration(migrations.Migration):
             name='is_aspirant_klasse',
             field=models.BooleanField(default=False),
         ),
-        migrations.RunPython(zet_asp_en_blazoen_individueel),
+        migrations.RunPython(zet_asp_en_blazoen_individueel, reverse_code=migrations.RunPython.noop),
 
         migrations.AddField(
             model_name='teamwedstrijdklasse',
@@ -282,7 +282,7 @@ class Migration(migrations.Migration):
             name='blazoen_25m_rk_bk',
             field=models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='60', max_length=2),
         ),
-        migrations.RunPython(zet_blazoen_team),
+        migrations.RunPython(zet_blazoen_team, reverse_code=migrations.RunPython.noop),
     ]
 
 # end of file
