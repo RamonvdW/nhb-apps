@@ -228,10 +228,10 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
                 sporter.vsg = deelnemer.gemiddelde
 
             # zoek het huidige team erbij
-            teams = deelnemer.regiocompetitieteam_set.all()
-            if teams.count() > 0:
+            ronde_teams = deelnemer.teamronde_feitelijk.filter(ronde_nr=deelcomp.huidige_team_ronde)
+            if ronde_teams.count() > 0:
                 # sporter is gekoppeld aan een team
-                sporter.team_pk = teams[0].pk
+                sporter.team_pk = ronde_teams[0].team.pk
 
         if afstand == '18':
             blazoenen = (deelnemer.klasse.indiv.blazoen1_18m_regio, deelnemer.klasse.indiv.blazoen2_18m_regio)

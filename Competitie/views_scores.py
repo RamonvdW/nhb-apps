@@ -11,7 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers
-from Competitie.models import RegiocompetitieTeam
+from Competitie.models import RegiocompetitieTeam, RegiocompetitieRondeTeam
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Schutter.models import SchutterBoog
@@ -192,17 +192,17 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
                       .objects
                       .filter(deelcompetitie=deelcomp,
                               schutterboog__pk__in=schutterboog_pks))
-        deelnemer_pks = deelnemers.values_list('pk', flat=True)
 
-        teams = (RegiocompetitieTeam
-                 .objects
-                 .filter(deelcompetitie=deelcomp,
-                         gekoppelde_schutters__pk__in=deelnemer_pks))
+        ronde_teams = (RegiocompetitieRondeTeam
+                       .objects
+                       .prefetch_related('deelnemers_feitelijk')
+                       .filter(team__deelcompetitie=deelcomp,
+                               ronde_nr=deelcomp.huidige_team_ronde))
 
         deelnemer_pk2teamnaam = dict()
-        for team in teams:
-            team_naam = team.maak_team_naam_kort()
-            for deelnemer in team.gekoppelde_schutters.all():
+        for ronde_team in ronde_teams:
+            team_naam = ronde_team.team.maak_team_naam_kort()
+            for deelnemer in ronde_team.deelnemers_feitelijk.all():
                 deelnemer_pk2teamnaam[deelnemer.pk] = team_naam
             # for
         # for
