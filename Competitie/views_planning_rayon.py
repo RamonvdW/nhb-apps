@@ -19,7 +19,7 @@ from Plein.menu import menu_dynamics
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdenPlan, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, DeelCompetitie,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet, DeelcompetitieRonde,
-                     KampioenschapSchutterBoog, KampioenschapMutatie,
+                     KampioenschapSchutterBoog, CompetitieMutatie,
                      MUTATIE_CUT, MUTATIE_AFMELDEN, MUTATIE_AANMELDEN, DEELNAME_JA, DEELNAME_NEE)
 from .menu import menu_dynamics_competitie
 from types import SimpleNamespace
@@ -34,7 +34,7 @@ TEMPLATE_COMPETITIE_LIJST_RK = 'competitie/lijst-rk-selectie.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_STATUS_RK_SCHUTTER = 'competitie/wijzig-status-rk-deelnemer.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_LIMIETEN_RK = 'competitie/wijzig-limieten-rk.dtl'
 
-mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__KAMPIOENSCHAP_MUTATIES)
+mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
 
 class RayonPlanningView(UserPassesTestMixin, TemplateView):
@@ -552,7 +552,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
         if not deelcomp_rk.heeft_deelnemerslijst:
             # situatie 1)
-            context['url_uitslagen'] = reverse('Competitie:uitslagen-rayon-n',
+            context['url_uitslagen'] = reverse('Competitie:uitslagen-rayon-indiv-n',
                                                kwargs={'comp_pk': deelcomp_rk.competitie.pk,
                                                        'comp_boog': 'r',
                                                        'rayon_nr': deelcomp_rk.nhb_rayon.rayon_nr})
@@ -632,7 +632,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
             context['aantal_bevestigd'] = aantal_bevestigd
             context['aantal_attentie'] = aantal_attentie
 
-        context['wiki_rk_schutters'] = reverse_handleiding(settings.HANDLEIDING_RK_SELECTIE)
+        context['wiki_rk_schutters'] = reverse_handleiding(self.request, settings.HANDLEIDING_RK_SELECTIE)
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
         return context
@@ -818,13 +818,13 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
             if not deelnemer.bij_vereniging:
                 # kan niet bevestigen zonder verenigingslid te zijn
                 raise Http404('Sporter moet lid zijn bij een vereniging')
-            mutatie = KampioenschapMutatie(mutatie=MUTATIE_AANMELDEN,
-                                           deelnemer=deelnemer,
-                                           door=door_str)
+            mutatie = CompetitieMutatie(mutatie=MUTATIE_AANMELDEN,
+                                        deelnemer=deelnemer,
+                                        door=door_str)
         elif afmelden == "1":
-            mutatie = KampioenschapMutatie(mutatie=MUTATIE_AFMELDEN,
-                                           deelnemer=deelnemer,
-                                           door=door_str)
+            mutatie = CompetitieMutatie(mutatie=MUTATIE_AFMELDEN,
+                                        deelnemer=deelnemer,
+                                        door=door_str)
         else:
             mutatie = None
 
@@ -840,7 +840,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
                     time.sleep(interval)
                     total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0
                     interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
-                    mutatie = KampioenschapMutatie.objects.get(pk=mutatie.pk)
+                    mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
                 # while
 
         if self.rol_nu == Rollen.ROL_RKO:
@@ -917,7 +917,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         context['url_terug'] = reverse('Competitie:kies')
 
-        context['wiki_rk_schutters'] = reverse_handleiding(settings.HANDLEIDING_RK_SELECTIE)
+        context['wiki_rk_schutters'] = reverse_handleiding(self.request, settings.HANDLEIDING_RK_SELECTIE)
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
         return context
@@ -997,12 +997,12 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                     str(klasse), str(deelcomp_rk), oude_limiet, nieuwe_limiet)
             schrijf_in_logboek(self.request.user, "Competitie", msg)
 
-            mutatie = KampioenschapMutatie(mutatie=MUTATIE_CUT,
-                                           door=door_str,
-                                           deelcompetitie=deelcomp_rk,
-                                           klasse=klasse,
-                                           cut_oud=oude_limiet,
-                                           cut_nieuw=nieuwe_limiet)
+            mutatie = CompetitieMutatie(mutatie=MUTATIE_CUT,
+                                        door=door_str,
+                                        deelcompetitie=deelcomp_rk,
+                                        klasse=klasse,
+                                        cut_oud=oude_limiet,
+                                        cut_nieuw=nieuwe_limiet)
             mutatie.save()
         # for
 
@@ -1020,7 +1020,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                     time.sleep(interval)
                     total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0, 6.2
                     interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
-                    mutatie = KampioenschapMutatie.objects.get(pk=mutatie.pk)
+                    mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
                 # while
 
         return HttpResponseRedirect(reverse('Competitie:kies'))

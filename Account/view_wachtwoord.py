@@ -77,28 +77,22 @@ class WachtwoordVergetenView(TemplateView):
 
         email = request.POST.get('email', '')[:150]   # afkappen voor extra veiligheid
         if not mailer_email_is_valide(email):
-            context['foutmelding'] = 'Voer het e-mailadres in van een bestaand account'
+            context['foutmelding'] = 'Voer een valide e-mailadres in van een bestaand account'
 
         if not context['foutmelding']:
+            username = request.POST.get('nhb_nr', '')[:10]  # afkappen voor extra veiligheid
+
             # zoek een account met deze email
             try:
                 account_email = (AccountEmail
                                  .objects
-                                 .get(bevestigde_email__iexact=email))  # iexact = case insensitive volledige match
+                                 .get(bevestigde_email__iexact=email,  # iexact = case insensitive volledige match
+                                      account__username=username))
 
             except AccountEmail.DoesNotExist:
-                # email is ook niet bekend
-                context['foutmelding'] = 'Voer het e-mailadres in van een bestaand account'
-
-            except AccountEmail.MultipleObjectsReturned:
-                # kan niet kiezen tussen verschillende accounts
-                # werkt dus niet als het email hergebruikt is voor meerdere accounts
-                context['foutmelding'] = 'Er is een probleem met dit e-mailadres. Neem contact op met het bondsburo!'
-
-                # schrijf de intentie in het logboek
-                schrijf_in_logboek(account=None,
-                                   gebruikte_functie="Wachtwoord",
-                                   activiteit="E-mail adres %s wordt gebruikt voor meer dan een account. Dit wordt niet ondersteund." % repr(email))
+                # email is niet bekend en past niet bij de inlog naam
+                context['foutmelding'] = 'Voer het e-mailadres en NHB nummer in van een bestaand account'
+                # (niet te veel wijzer maken over de combi NHB nummer en e-mailadres)
 
         # we controleren hier niet of het account inactief is, dat doet login wel weer
 

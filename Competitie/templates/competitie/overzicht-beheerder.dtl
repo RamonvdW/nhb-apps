@@ -22,10 +22,11 @@
 
         <div class="row">
             <!-- regio -->
-            {% include 'plein/card.dtl' with title="Regio" text=text_regio icon="view_comfy" url=url_regio %}
+            {% include 'plein/card.dtl' with title="Regio Individueel" text=text_regio_indiv icon="view_comfy" url=url_regio_indiv %}
+            {% include 'plein/card.dtl' with title="Regio Teams" text=text_regio_teams icon="view_comfy" url=url_regio_teams %}
 
             <!-- rayon -->
-            {% include 'plein/card.dtl' with title="Rayon" text=text_rayon icon="view_compact" url=url_rayon %}
+            {% include 'plein/card.dtl' with title="Rayon Individueel" text=text_rayon_indiv icon="view_compact" url=url_rayon_indiv %}
 
             <!-- bond -->
             {% include 'plein/card.dtl' with title="Bond" text=text_bond icon="flag" url=url_bond %}
@@ -67,12 +68,6 @@
                 {% include 'plein/card.dtl' with title="Zet klassegrenzen" text="Klassegrenzen vaststellen (eenmalige actie)." icon="equalizer" url=card_url %}
             {% endif %}
 
-            <!-- datums wijzigen (lage prio) -->
-            {% if comp.fase >= 'B' %}
-                {% url 'Competitie:wijzig-datums' comp_pk=comp.pk as card_url %}
-                {% include 'plein/card.dtl' with title="Fase datums" text="Datums aanpassen voor de fases van de competitie." icon="build" url=card_url %}
-            {% endif %}
-
         {% endif %}     <!-- rol_is_bb -->
 
         {% if comp.url_regio_instellingen and comp.fase < 'B' %}
@@ -80,6 +75,10 @@
         {% endif %}
 
         {% for deelcomp in planning_deelcomp %}
+
+            {% if deelcomp.url_team_ronde %}
+                {% include 'plein/card.dtl' with title=deelcomp.titel_team_ronde text=deelcomp.tekst_team_ronde icon="mediation" url=deelcomp.url_team_ronde %}
+            {% endif %}
 
             <!-- planning deelcomp -->
             {% include 'plein/card.dtl' with title=deelcomp.titel text=deelcomp.tekst icon="pending_actions" url=deelcomp.url %}
@@ -107,6 +106,10 @@
 
         {% if comp.url_regio_handmatige_ag and comp.fase >= 'B' %}
             {% include 'plein/card.dtl' with title="AG controle" text="Bekijk handmatig ingevoerde aanvangsgemiddelden voor de teamcompetitie in de regio." icon="how_to_reg" url=comp.url_regio_handmatige_ag %}
+        {% endif %}
+
+        {% if tekst_regio_teams_alle %}
+            {% include 'plein/card.dtl' with title="Regio Teams" text=tekst_regio_teams_alle icon="gamepad" url=url_regio_teams_alle %}
         {% endif %}
 
         {% if comp.fase >= 'E' %}
@@ -147,10 +150,18 @@
             {% include 'plein/card.dtl' with title="Regio keuzes" text="Overzicht van de keuzes gemaakt per regio" icon="flaky" url=card_url %}
         {% endif %}
 
-        <!-- toon klassegrenzen regiocompetitie -->
+        {% if rol_is_bb %}
+            <!-- datums wijzigen (lage prio) -->
+            {% if comp.fase >= 'B' %}
+                {% url 'Competitie:wijzig-datums' comp_pk=comp.pk as card_url %}
+                {% include 'plein/card.dtl' with title="Fase datums" text="Datums aanpassen voor de fases van de competitie." icon="build" url=card_url %}
+            {% endif %}
+        {% endif %}     <!-- rol_is_bb -->
+
+        <!-- toon klassen -->
         {% if comp.klassegrenzen_vastgesteld %}
             {% url 'Competitie:klassegrenzen-tonen' comp_pk=comp.pk as card_url %}
-            {% include 'plein/card.dtl' with title="Klassegrenzen" text="Vastgestelde klassegrenzen voor de wedstrijdklassen van de competities." icon="equalizer" url=card_url %}
+            {% include 'plein/card.dtl' with title="Wedstrijdklassen" text="Toon de wedstrijdklassen, klassegrenzen en blazoenen voor de competitie." icon="equalizer" url=card_url %}
         {% endif %}
 
     </div>

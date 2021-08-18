@@ -19,11 +19,12 @@ from Taken.taken import maak_taak
 from Wedstrijden.models import CompetitieWedstrijd, WedstrijdLocatie
 from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
                      DeelCompetitie, DeelcompetitieRonde,
-                     CompetitieKlasse, RegioCompetitieSchutterBoog)
+                     CompetitieKlasse, RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from .operations import maak_deelcompetitie_ronde
 from .menu import menu_dynamics_competitie
 from types import SimpleNamespace
 import datetime
+import math
 
 
 TEMPLATE_COMPETITIE_PLANNING_REGIO = 'competitie/planning-regio.dtl'
@@ -491,6 +492,8 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         klasse2schutters = dict()
         niet_gebruikt = dict()
         if heeft_wkl:
+            teams_tonen = ronde.deelcompetitie.regio_organiseert_teamcompetitie
+
             for obj in (RegioCompetitieSchutterBoog
                         .objects
                         .filter(deelcompetitie=ronde.deelcompetitie)
@@ -506,30 +509,54 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                         .select_related('indiv', 'team')
                         .filter(competitie=ronde.deelcompetitie.competitie)):
                 if wkl.indiv:
-                    niet_gebruikt[100000 + wkl.indiv.pk] = wkl.indiv.beschrijving
-                if wkl.team:
-                    niet_gebruikt[200000 + wkl.team.pk] = wkl.team.beschrijving
+                    niet_gebruikt[200000 + wkl.indiv.pk] = (2000 + wkl.indiv.volgorde, wkl.indiv.beschrijving)
+                if wkl.team and teams_tonen:
+                    niet_gebruikt[100000 + wkl.team.pk] = (1000 + wkl.team.volgorde, wkl.team.beschrijving)
             # for
 
+        is_18m = ronde.deelcompetitie.competitie.afstand == '18'
+
         for wedstrijd in context['wedstrijden']:
-            wedstrijd.aantal_schutters = 0
+            wedstrijd.aantal_sporters = 0
             if heeft_wkl:
+                wedstrijd.wkl_lijst = list()
+
+                for wkl in wedstrijd.team_klassen.order_by('volgorde'):
+                    wedstrijd.aantal_sporters += 4
+                    wedstrijd.wkl_lijst.append(wkl)
+                    niet_gebruikt[10000 + wkl.pk] = None
+                # for
+
                 for wkl in wedstrijd.indiv_klassen.order_by('volgorde'):
                     try:
-                        wedstrijd.aantal_schutters += klasse2schutters[wkl.pk]
+                        wedstrijd.aantal_sporters += klasse2schutters[wkl.pk]
                     except KeyError:        # pragma: no cover
                         # geen schutters in deze klasse
                         pass
+                    else:
+                        wedstrijd.wkl_lijst.append(wkl)
 
-                    niet_gebruikt[100000 + wkl.pk] = None
+                    niet_gebruikt[200000 + wkl.pk] = None
                 # for
 
-                # FUTURE: team klassen toevoegen
+            if wedstrijd.locatie:
+                if is_18m:
+                    wedstrijd.max_sporters = wedstrijd.locatie.max_sporters_18m
+                else:
+                    wedstrijd.max_sporters = wedstrijd.locatie.max_sporters_25m
+            else:
+                wedstrijd.max_sporters = '?'
         # for
 
-        context['wkl_niet_gebruikt'] = [beschrijving for beschrijving in niet_gebruikt.values() if beschrijving]
-        if len(context['wkl_niet_gebruikt']) == 0:
-            del context['wkl_niet_gebruikt']
+        niet_lijst = list()
+        for tup in niet_gebruikt.values():
+            if tup:
+                niet_lijst.append(tup)
+        # for
+        niet_lijst.sort()
+
+        if len(niet_lijst):
+            context['wkl_niet_gebruikt'] = [beschrijving for _, beschrijving in niet_lijst]
 
         if self.rol_nu != Rollen.ROL_RCL:
             context['readonly'] = True
@@ -769,6 +796,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _get_wedstrijdklassen(deelcomp, wedstrijd):
+
+        # wedstrijdklassen individueel
         klasse2schutters = dict()
         for obj in (RegioCompetitieSchutterBoog
                     .objects
@@ -780,7 +809,6 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                 klasse2schutters[obj.klasse.indiv.pk] = 1
         # for
 
-        # wedstrijdklassen
         wedstrijd_indiv_pks = [obj.pk for obj in wedstrijd.indiv_klassen.all()]
         wkl_indiv = (CompetitieKlasse
                      .objects
@@ -795,27 +823,48 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                 prev_boogtype = obj.indiv.boogtype
                 obj.break_before = True
             try:
-                schutters = klasse2schutters[obj.indiv.pk]
+                obj.aantal_sporters = klasse2schutters[obj.indiv.pk]
             except KeyError:
-                schutters = 0
+                obj.aantal_sporters = 0
             obj.short_str = obj.indiv.beschrijving
-            obj.schutters = schutters
             obj.sel_str = "wkl_indiv_%s" % obj.indiv.pk
             obj.geselecteerd = (obj.indiv.pk in wedstrijd_indiv_pks)
         # for
 
-        wedstrijd_team_pks = [obj.pk for obj in wedstrijd.team_klassen.all()]
-        wkl_team = (CompetitieKlasse
-                    .objects
-                    .filter(competitie=deelcomp.competitie,
-                            indiv=None)
-                    .order_by('indiv__volgorde')
-                    .all())
-        for obj in wkl_team:
-            obj.short_str = obj.team.beschrijving
-            obj.sel_str = "wkl_team_%s" % obj.team.pk
-            obj.geselecteerd = (obj.team.pk in wedstrijd_team_pks)
-        # for
+        # wedstrijdklassen teams
+        if deelcomp.regio_organiseert_teamcompetitie:
+            klasse2teams = dict()
+            for obj in (RegiocompetitieTeam
+                        .objects
+                        .filter(deelcompetitie=deelcomp)
+                        .exclude(klasse=None)
+                        .select_related('klasse',
+                                        'klasse__team')):
+                try:
+                    klasse2teams[obj.klasse.team.pk] += 1
+                except KeyError:
+                    klasse2teams[obj.klasse.team.pk] = 1
+            # for
+
+            wedstrijd_team_pks = [obj.pk for obj in wedstrijd.team_klassen.all()]
+            wkl_team = (CompetitieKlasse
+                        .objects
+                        .filter(competitie=deelcomp.competitie,
+                                indiv=None)
+                        .select_related('team')
+                        .order_by('team__volgorde')
+                        .all())
+            for obj in wkl_team:
+                obj.short_str = obj.team.beschrijving
+                obj.sel_str = "wkl_team_%s" % obj.team.pk
+                try:
+                    obj.aantal_teams = klasse2teams[obj.team.pk]
+                except KeyError:
+                    obj.aantal_teams = 0
+                obj.geselecteerd = (obj.team.pk in wedstrijd_team_pks)
+            # for
+        else:
+            wkl_team = list()
 
         return wkl_indiv, wkl_team
 
@@ -954,6 +1003,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                     if not keuze:
                         keuze = 'Locatie zonder naam (%s)' % loc.pk
                     loc.keuze_str = keuze
+                    if wedstrijd.locatie == loc:
+                        loc.selected = True
             # for
         # for
 
@@ -1080,6 +1131,9 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         wkl_indiv, wkl_team = self._get_wedstrijdklassen(ronde.deelcompetitie, wedstrijd)
         indiv_pks = [wkl.indiv.pk for wkl in wkl_indiv]
+        teams_pks = [wkl.team.pk for wkl in wkl_team]
+
+        # klassen koppelen - individueel
 
         gekozen_klassen = list()
         for key, value in request.POST.items():
@@ -1087,11 +1141,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                 try:
                     pk = int(key[10:10+6])
                 except (IndexError, TypeError, ValueError):
-                    raise Http404('Geen valide klasse')
+                    raise Http404('Geen valide individuele klasse')
                 else:
                     if pk not in indiv_pks:
                         # unsupported number
-                        raise Http404('Geen valide klasse')
+                        raise Http404('Geen valide individuele klasse')
                     gekozen_klassen.append(pk)
         # for
 
@@ -1107,6 +1161,35 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         # alle nieuwe klassen toevoegen
         if len(gekozen_klassen):
             wedstrijd.indiv_klassen.add(*gekozen_klassen)
+
+        # klassen koppelen - teams
+
+        gekozen_klassen = list()
+        for key, value in request.POST.items():
+            if key[:9] == "wkl_team_":
+                try:
+                    pk = int(key[9:9+6])
+                except (IndexError, TypeError, ValueError):
+                    raise Http404('Geen valide team klasse')
+                else:
+                    if pk not in teams_pks:
+                        # unsupported number
+                        raise Http404('Geen valide team klasse')
+                    gekozen_klassen.append(pk)
+        # for
+
+        for obj in wedstrijd.team_klassen.all():
+            if obj.pk in gekozen_klassen:
+                # was al gekozen
+                gekozen_klassen.remove(obj.pk)
+            else:
+                # moet uitgezet worden
+                wedstrijd.team_klassen.remove(obj)
+        # for
+
+        # alle nieuwe klassen toevoegen
+        if len(gekozen_klassen):
+            wedstrijd.team_klassen.add(*gekozen_klassen)
 
         if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
             url = reverse('Competitie:regio-methode1-planning',

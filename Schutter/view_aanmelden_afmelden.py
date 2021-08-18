@@ -20,6 +20,7 @@ from Plein.menu import menu_dynamics
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
 from Wedstrijden.models import CompetitieWedstrijd
 from .models import SchutterVoorkeuren, SchutterBoog
+from decimal import Decimal
 
 
 TEMPLATE_AANMELDEN = 'schutter/bevestig-aanmelden.dtl'
@@ -96,10 +97,10 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         scores = Score.objects.filter(schutterboog=schutterboog,
                                       type=SCORE_TYPE_INDIV_AG,
                                       afstand_meter=deelcomp.competitie.afstand)
-        ag = AG_NUL
+        ag = Decimal(AG_NUL)
         if len(scores):
             score = scores[0]
-            ag = score.waarde / 1000
+            ag = Decimal(score.waarde) / 1000
             hist = ScoreHist.objects.filter(score=score).order_by('-when')
             if len(hist):
                 context['ag_hist'] = hist[0]
@@ -113,8 +114,8 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         bepaler = KlasseBepaler(deelcomp.competitie)
         try:
             bepaler.bepaal_klasse_deelnemer(aanmelding)
-        except LookupError:
-            raise Http404('Geen passende wedstrijdklasse')
+        except LookupError as exc:
+            raise Http404(str(exc))
 
         context['wedstrijdklasse'] = aanmelding.klasse.indiv.beschrijving
         context['is_klasse_onbekend'] = aanmelding.klasse.indiv.is_onbekend
@@ -141,22 +142,56 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                                                   'deelcomp_pk': deelcomp.pk})
 
         if methode == INSCHRIJF_METHODE_1:
+            # toon de sporter alle wedstrijden in de regio, dus alle clusters
             pks = list()
             for ronde in (DeelcompetitieRonde
                           .objects
                           .select_related('plan')
                           .filter(deelcompetitie=deelcomp)):
-                # toon de HWL alle wedstrijden in de regio, dus alle clusters
                 pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
             # for
 
             wedstrijden = (CompetitieWedstrijd
                            .objects
                            .filter(pk__in=pks)
+                           .exclude(vereniging__isnull=True)  # voorkom wedstrijd niet toegekend aan vereniging
                            .select_related('vereniging')
                            .order_by('datum_wanneer',
                                      'tijd_begin_wedstrijd'))
-            context['wedstrijden'] = wedstrijden
+
+            # splits de wedstrijden op naar in-cluster en out-of-cluster
+            ver = schutterboog.nhblid.bij_vereniging
+            ver_in_hwl_cluster = dict()  # [ver_nr] = True/False
+            for cluster in (ver
+                            .clusters
+                            .prefetch_related('nhbvereniging_set')
+                            .filter(gebruik=deelcomp.competitie.afstand)
+                            .all()):
+                ver_nrs = list(cluster.nhbvereniging_set.values_list('ver_nr', flat=True))
+                for ver_nr in ver_nrs:
+                    ver_in_hwl_cluster[ver_nr] = True
+                # for
+            # for
+
+            wedstrijden1 = list()
+            wedstrijden2 = list()
+            for wedstrijd in wedstrijden:
+                try:
+                    in_cluster = ver_in_hwl_cluster[wedstrijd.vereniging.ver_nr]
+                except KeyError:
+                    in_cluster = False
+
+                if in_cluster:
+                    wedstrijden1.append(wedstrijd)
+                else:
+                    wedstrijden2.append(wedstrijd)
+            # for
+
+            if len(wedstrijden1):
+                context['wedstrijden_1'] = wedstrijden1
+                context['wedstrijden_2'] = wedstrijden2
+            else:
+                context['wedstrijden_1'] = wedstrijden2
 
         if methode == INSCHRIJF_METHODE_3:
             context['dagdelen'] = DAGDELEN
@@ -266,7 +301,7 @@ class RegiocompetitieAanmeldenView(View):
                                       afstand_meter=deelcomp.competitie.afstand)
         if len(scores):
             score = scores[0]
-            ag = score.waarde / 1000
+            ag = Decimal(score.waarde) / 1000
             aanmelding.ag_voor_indiv = ag
             aanmelding.ag_voor_team = ag
             if ag > 0.000:
@@ -275,8 +310,8 @@ class RegiocompetitieAanmeldenView(View):
         bepaler = KlasseBepaler(deelcomp.competitie)
         try:
             bepaler.bepaal_klasse_deelnemer(aanmelding)
-        except LookupError:
-            raise Http404('Geen passende wedstrijdklasse')
+        except LookupError as exc:
+            raise Http404(str(exc))
 
         udvl = deelcomp.competitie.uiterste_datum_lid       # uiterste datum van lidmaatschap
         dvl = schutterboog.nhblid.sinds_datum               # datum van lidmaatschap
@@ -375,6 +410,8 @@ class RegiocompetitieAfmeldenView(View):
 
 class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
 
+    """ Via deze view kunnen sporters hun gekozen schietmomenten aanpassen (inschrijfmethode 1)"""
+
     template_name = TEMPLATE_SCHIETMOMENTEN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
@@ -424,16 +461,51 @@ class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
         wedstrijden = (CompetitieWedstrijd
                        .objects
                        .filter(pk__in=pks)
+                       .exclude(vereniging__isnull=True)  # voorkom wedstrijd niet toegekend aan vereniging
                        .select_related('vereniging')
                        .order_by('datum_wanneer',
                                  'tijd_begin_wedstrijd'))
 
-        context['wedstrijden'] = wedstrijden
-
         keuze = list(deelnemer.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True))
+
+        # splits de wedstrijden op naar in-cluster en out-of-cluster
+        ver = deelnemer.schutterboog.nhblid.bij_vereniging
+        ver_in_hwl_cluster = dict()  # [ver_nr] = True/False
+        for cluster in (ver
+                        .clusters
+                        .prefetch_related('nhbvereniging_set')
+                        .filter(gebruik=deelnemer.deelcompetitie.competitie.afstand)
+                        .all()):
+            ver_nrs = list(cluster.nhbvereniging_set.values_list('ver_nr', flat=True))
+            for ver_nr in ver_nrs:
+                ver_in_hwl_cluster[ver_nr] = True
+            # for
+        # for
+
+        wedstrijden1 = list()
+        wedstrijden2 = list()
         for wedstrijd in wedstrijden:
             wedstrijd.is_gekozen = (wedstrijd.pk in keuze)
+
+            if wedstrijd.is_gekozen:
+                wedstrijden1.append(wedstrijd)
+            else:
+                try:
+                    in_cluster = ver_in_hwl_cluster[wedstrijd.vereniging.ver_nr]
+                except KeyError:
+                    in_cluster = False
+
+                if in_cluster:
+                    wedstrijden1.append(wedstrijd)
+                else:
+                    wedstrijden2.append(wedstrijd)
         # for
+
+        if len(wedstrijden1):
+            context['wedstrijden_1'] = wedstrijden1
+            context['wedstrijden_2'] = wedstrijden2
+        else:
+            context['wedstrijden_1'] = wedstrijden2
 
         context['url_opslaan'] = reverse('Schutter:schietmomenten',
                                          kwargs={'deelnemer_pk': deelnemer.pk})

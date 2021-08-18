@@ -28,11 +28,11 @@
 
         <div class="white shrink-wrap-5">
             {% if url_alles %}
-                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">Toon alleen onze sporters</a>
-                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ url_alles }}">Toon alle deelnemers</a>
+                <a class="margin-5 btn-nhb-blauw" href="#">Toon alleen onze sporters</a>
+                <a class="margin-5 btn-outline" href="{{ url_alles }}">Toon alle deelnemers</a>
             {% else %}
-                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ url_filtered }}">Toon alleen onze sporters</a>
-                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">Toon alle deelnemers</a>
+                <a class="margin-5 btn-outline" href="{{ url_filtered }}">Toon alleen onze sporters</a>
+                <a class="margin-5 btn-nhb-blauw" href="#">Toon alle deelnemers</a>
             {% endif %}
         </div>
 

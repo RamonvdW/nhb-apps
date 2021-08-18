@@ -10,7 +10,7 @@ from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
                      RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
-                     KampioenschapMutatie)
+                     CompetitieMutatie)
 
 
 class DeelCompetitieAdmin(admin.ModelAdmin):
@@ -31,7 +31,7 @@ class DeelcompetitieRondeAdmin(admin.ModelAdmin):
 
 class CompetitieKlasseAdmin(admin.ModelAdmin):
 
-    list_filter = ('competitie',)
+    list_filter = ('competitie', 'team__team_type')
 
     list_select_related = ('competitie', 'indiv', 'team')
 
@@ -83,7 +83,8 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
                            'klasse__indiv',
                            'klasse__team',
                            'schutterboog',
-                           'schutterboog__nhblid')
+                           'schutterboog__nhblid',
+                           'schutterboog__boogtype')
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
@@ -207,7 +208,7 @@ class KampioenschapSchutterBoogAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
-class KampioenschapMutatieAdmin(admin.ModelAdmin):
+class CompetitieMutatieAdmin(admin.ModelAdmin):
 
     readonly_fields = ('mutatie', 'when', 'deelnemer', 'door')
 
@@ -218,6 +219,58 @@ class KampioenschapMutatieAdmin(admin.ModelAdmin):
     list_filter = ('is_verwerkt', 'mutatie')
 
 
+class RegiocompetitieRondeTeamAdmin(admin.ModelAdmin):
+
+    readonly_fields = ('team', 'ronde_nr')
+
+    list_filter = ('team__deelcompetitie__competitie',
+                   'team__vereniging__regio',
+                   'ronde_nr')
+
+    list_select_related = ('team', )
+
+    fieldsets = (
+        ('',
+            {'fields': ('team',
+                        'ronde_nr',
+                        'deelnemers_geselecteerd',
+                        'deelnemers_feitelijk',
+                        'team_score',
+                        'team_punten',
+                        'logboek')
+             }),
+    )
+
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self.deelcomp = None
+        self.ver = None
+
+    def get_form(self, request, obj=None, **kwargs):
+        if obj:                     # pragma: no cover
+            team = obj.team
+            self.deelcomp = team.deelcompetitie
+            self.ver = team.vereniging
+        else:
+            self.deelcomp = self.ver = None
+
+        return super().get_form(request, obj, **kwargs)
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
+        if self.deelcomp and self.ver:
+            if db_field.name in ('deelnemers_geselecteerd', 'deelnemers_feitelijk'):
+                kwargs['queryset'] = (RegioCompetitieSchutterBoog
+                                      .objects
+                                      .select_related('schutterboog',
+                                                      'schutterboog__nhblid',
+                                                      'schutterboog__boogtype')
+                                      .filter(deelcompetitie=self.deelcomp,
+                                              bij_vereniging=self.ver,
+                                              inschrijf_voorkeur_team=True))
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
 admin.site.register(Competitie)
 admin.site.register(DeelCompetitie, DeelCompetitieAdmin)
 admin.site.register(CompetitieKlasse, CompetitieKlasseAdmin)
@@ -225,9 +278,9 @@ admin.site.register(DeelcompetitieRonde, DeelcompetitieRondeAdmin)
 admin.site.register(RegioCompetitieSchutterBoog, RegioCompetitieSchutterBoogAdmin)
 admin.site.register(KampioenschapSchutterBoog, KampioenschapSchutterBoogAdmin)
 admin.site.register(DeelcompetitieKlasseLimiet)
-admin.site.register(KampioenschapMutatie, KampioenschapMutatieAdmin)
+admin.site.register(CompetitieMutatie, CompetitieMutatieAdmin)
 admin.site.register(RegiocompetitieTeam, RegiocompetitieTeamAdmin)
 admin.site.register(RegiocompetitieTeamPoule)
-admin.site.register(RegiocompetitieRondeTeam)
+admin.site.register(RegiocompetitieRondeTeam, RegiocompetitieRondeTeamAdmin)
 
 # end of file

@@ -98,6 +98,16 @@ $button-floating-color: #fff !default;
 $button-floating-size: 40px !default;
 $button-floating-radius: 50% !default;
 
+// Outline buttons
+$button-outline-border: solid !default;
+$button-outline-border-width: 3px !default;
+$button-outline-padding: 0 13px !default;   // compensate for px taken by border: 16-3 = 13
+$button-outline-height: 30px !default;      // compensate for px taken by border: 36-2x3 = 30
+$button-outline-border-color: $secondary-color !default;
+$button-outline-background: transparent !default;
+$button-outline-background-focus: $secondary-color !default;
+$button-outline-text-focus: $button-raised-color;
+
 
 // 4. Cards
 // ==========================================================================

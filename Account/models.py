@@ -11,6 +11,7 @@ from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
 from Mailer.models import mailer_email_is_valide
 from django.utils import timezone
 import datetime
+import psycopg2
 
 
 class AccountCreateError(Exception):
@@ -179,7 +180,13 @@ def account_create(username, voornaam, achternaam, wachtwoord, email, email_is_b
     account.set_password(wachtwoord)
     account.first_name = voornaam
     account.last_name = achternaam
-    account.save()
+
+    try:
+        account.save()
+    except psycopg2.errors.UniqueViolation:     # pragma: no cover
+        # TODO: vervang dit door veilige database operatie (get_or_create?)
+        # dus ondanks de check hierboven lukt het sommige mensen toch om een dubbel account aan te maken
+        raise AccountCreateError('Account bestaat al')
 
     # maak het email record aan
     mail = AccountEmail()
@@ -223,15 +230,15 @@ def account_check_gewijzigde_email(account):
 
         if email.nieuwe_email:
             if email.nieuwe_email != email.bevestigde_email:
-                # vraag om bevestiging van deze gewijzgde email
+                # vraag om bevestiging van deze gewijzigde email
                 # email kan eerder overgenomen zijn uit de NHB administratie
                 # of handmatig ingevoerd zijn
 
-                # blokkeer inlog totdat dit nieuwe emailadres bevestigd is
+                # blokkeer inlog totdat dit nieuwe e-mailadres bevestigd is
                 email.email_is_bevestigd = False
                 email.save()
 
-                # maak de url aan om het emailadres te bevestigen
+                # maak de url aan om het e-mailadres te bevestigen
                 # extra parameters are just to make the url unique
                 mailadres = email.nieuwe_email
                 url = maak_tijdelijke_url_account_email(email, username=account.username, email=mailadres)

@@ -243,7 +243,7 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
                     with self.assert_max_queries(20):
                         resp = self.client.post(url_voorkeuren, {'nhblid_pk': nhb_nr,
                                                                  'schiet_R': 'on',
-                                                                 'voorkeur_dt': 'on'})
+                                                                 'voorkeur_eigen_blazoen': 'on'})
                     # onthoud deze schutterboog om straks in bulk aan te melden
                     # 'lid_NNNNNN_boogtype_MM'
                     post_params['lid_%s_boogtype_%s' % (nhb_nr, recurve_boog_pk)] = 'on'
@@ -324,19 +324,19 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/inschrijfmethode1-behoefte.dtl', 'plein/site_layout.dtl'))
         # 0 keer de eerste keuze
-        self.assertContains(resp, '<td>15 juli 2019 om 19:00</td><td>[1000] Grote Club</td><td>0</td>')
+        self.assertContains(resp, '<td>maandag 15 juli 2019 om 19:00</td><td>[1000] Grote Club</td><td>0</td>')
         # 10 keer de tweede (en overige) keuzes
-        self.assertContains(resp, '<td>15 augustus 2019 om 19:00</td><td>[1000] Grote Club</td><td>10</td>')
+        self.assertContains(resp, '<td>donderdag 15 augustus 2019 om 19:00</td><td>[1000] Grote Club</td><td>10</td>')
 
-        with self.assert_max_queries(28):       # TODO: probeer omlaag te krijgen
+        with self.assert_max_queries(34):       # TODO: probeer omlaag te krijgen
             resp = self.client.get(self.url_behoefte1_bestand % (self.comp_18.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        csv_file = 'Nummer;Wedstrijd;Locatie\r\n'
-        csv_file += '1;15 juli 2019 om 19:00;[1000] Grote Club\r\n'
-        csv_file += '2;15 augustus 2019 om 19:00;[1000] Grote Club\r\n'
-        csv_file += '3;15 september 2019 om 19:00;[1000] Grote Club\r\n'
-        csv_file += '4;15 oktober 2019 om 19:00;[1000] Grote Club\r\n'
-        csv_file += '5;15 november 2019 om 19:00;[1000] Grote Club\r\n'
+        csv_file = 'Nummer;Wedstrijd;Locatie;Blazoenen:;40cm;DT;DT wens;60cm\r\n'
+        csv_file += '1;maandag 15 juli 2019 om 19:00;[1000] Grote Club;;0;0;0;0\r\n'
+        csv_file += '2;donderdag 15 augustus 2019 om 19:00;[1000] Grote Club;;5;2;2;1\r\n'
+        csv_file += '3;zondag 15 september 2019 om 19:00;[1000] Grote Club;;5;2;2;1\r\n'
+        csv_file += '4;dinsdag 15 oktober 2019 om 19:00;[1000] Grote Club;;5;2;2;1\r\n'
+        csv_file += '5;vrijdag 15 november 2019 om 19:00;[1000] Grote Club;;5;2;2;1\r\n'
         csv_file += '\r\nBondsnummer;Sporter;Vereniging;Wedstrijdklasse (individueel);1;2;3;4;5\r\n'
         csv_file += '110001;Lid 110001 de Tester;[1000] Grote Club;Barebow Aspiranten 11-12 jaar;;X;X;X;X\r\n'
         csv_file += '110002;Lid 110002 de Tester;[1000] Grote Club;Recurve Junioren klasse onbekend;;X;X;X;X\r\n'

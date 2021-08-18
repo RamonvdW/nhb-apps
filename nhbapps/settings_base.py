@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2021-08-05'
+SITE_VERSIE = '2021-08-18'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -182,7 +182,7 @@ INTERNAL_IPS = [
 
 
 BACKGROUND_SYNC_POORT = 3000
-BACKGROUND_SYNC__KAMPIOENSCHAP_MUTATIES = BACKGROUND_SYNC_POORT + 1
+BACKGROUND_SYNC__REGIOCOMP_MUTATIES = BACKGROUND_SYNC_POORT + 1
 
 
 # our own test runner that executes the tests ordered by application hierarchy indicators to ensure that
@@ -258,6 +258,104 @@ RECORDS_TOEGESTANE_PARA_KLASSEN = (
     "VI2/3"         # sinds 2014-04-01
     # andere historische record typen zijn niet in gebruik dus niet in dit lijstje
 )
+
+
+SPEELSTERKTE_VOLGORDE = (
+    # discipline, beschrijving, volgorde
+    ('NHB Graadspelden Schutter', 'Allroundschutter', 1),
+    ('NHB Graadspelden Schutter', 'Meesterschutter', 2),
+    ('NHB Graadspelden Schutter', 'Grootmeesterschutter', 3),
+
+    ('NHB Graadspelden Indoor', '1e Graad Indoor', 10),
+    ('NHB Graadspelden Indoor', '2e Graad Indoor', 11),
+    ('NHB Graadspelden Indoor', '3e Graad Indoor', 12),
+
+    ('NHB Graadspelden Outdoor', '1e Graad Outdoor', 20),
+    ('NHB Graadspelden Outdoor', '2e Graad Outdoor', 21),
+    ('NHB Graadspelden Outdoor', '3e Graad Outdoor', 22),
+
+    ('NHB Graadspelden Veld', '1e Graad Veld', 30),
+    ('NHB Graadspelden Veld', '2e Graad Veld', 31),
+    ('NHB Graadspelden Veld', '3e Graad Veld', 32),
+
+    ('NHB Graadspelden Short Metric', '1e Graad Short Metric', 40),
+    ('NHB Graadspelden Short Metric', '2e Graad Short Metric', 41),
+    ('NHB Graadspelden Short Metric', '3e Graad Short Metric', 42),
+
+    ('Compound', 'Compound 1400', 100),
+    ('Compound', 'Compound 1350', 101),
+    ('Compound', 'Compound 1300', 102),
+    ('Compound', 'Compound 1200', 103),
+    ('Compound', 'Compound 1100', 104),
+    ('Compound', 'Compound 1000', 105),
+
+    ('Compound', 'Compound Cadet 1400', 110),
+    ('Compound', 'Compound Cadet 1350', 111),
+    ('Compound', 'Compound Cadet 1300', 112),
+    ('Compound', 'Compound Cadet 1200', 113),
+    ('Compound', 'Compound Cadet 1100', 114),
+    ('Compound', 'Compound Cadet 1000', 115),
+
+    ('Compound', 'Compound Master 1400', 120),
+    ('Compound', 'Compound Master 1350', 121),
+    ('Compound', 'Compound Master 1300', 122),
+    ('Compound', 'Compound Master 1200', 123),
+    ('Compound', 'Compound Master 1100', 124),
+    ('Compound', 'Compound Master 1000', 125),
+
+    ('Recurve', 'Recurve 1400', 130),
+    ('Recurve', 'Recurve 1350', 131),
+    ('Recurve', 'Recurve 1300', 132),
+    ('Recurve', 'Recurve 1200', 133),
+    ('Recurve', 'Recurve 1100', 134),
+    ('Recurve', 'Recurve 1000', 135),
+
+    ('Recurve', 'Recurve Cadet 1350', 141),
+    ('Recurve', 'Recurve Cadet 1300', 142),
+    ('Recurve', 'Recurve Cadet 1200', 143),
+    ('Recurve', 'Recurve Cadet 1100', 144),
+    ('Recurve', 'Recurve Cadet 1000', 145),
+
+    ('Recurve', 'Recurve Master 1350', 151),
+    ('Recurve', 'Recurve Master 1300', 152),
+    ('Recurve', 'Recurve Master 1200', 153),
+    ('Recurve', 'Recurve Master 1100', 154),
+    ('Recurve', 'Recurve Master 1000', 155),
+
+    # tussenspelden alleen op het RK in het eigen rayon
+    ('NHB Tussenspelden', '1250', 200),
+    ('NHB Tussenspelden', '1150', 201),
+    ('NHB Tussenspelden', '1050', 202),
+    ('NHB Tussenspelden', '950', 203),
+
+    ('Veld', 'Goud', 301),
+    ('Veld', 'Zilver', 302),
+    ('Veld', 'Wit', 303),
+    ('Veld', 'Zwart', 304),
+    ('Veld', 'Grijs', 305),
+    ('Veld', 'Bruin', 306),
+    ('Veld', 'Groen', 307),
+
+    ('Veld', 'Rode posten', 0),
+    ('Veld', 'Blauwe posten', 0),
+    ('Veld', 'Gele posten', 0),
+
+    ('World Archery Target Awards', 'Purper', 0),
+    ('World Archery Target Awards', 'Goud', 0),
+    ('World Archery Target Awards', 'Rood', 0),
+    ('World Archery Target Awards', 'Blauw', 0),
+    ('World Archery Target Awards', 'Zwart', 0),
+    ('World Archery Target Awards', 'Wit', 0),
+
+    ('Algemeen', 'Blauwe Pijl', 0),
+    ('Algemeen', 'Gouden Pijl', 0),
+    ('Algemeen', 'Gouden Veer', 0),
+    ('Algemeen', 'Rode Pijl', 0),
+    ('Algemeen', 'Rode Veer', 0),
+    ('Algemeen', 'Witte Pijl', 0),
+    ('Algemeen', 'Zwarte Pijl', 0),
+)
+
 
 # definitions taken from saml2.saml to avoid importing saml2
 # because it replaces ElementTree with cElementTree, which gives problems with QR code generation

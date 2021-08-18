@@ -123,6 +123,13 @@ input.table-filter {
     padding: 5px;
 }
 
+/* een grijs kader om een witte tabel die in een wit vlak staat */
+.table-wrap-5 {
+    background-color: #eee;  /* nhb-grijs */
+    padding: 5px;
+    border-radius: 2px;
+}
+
 /* site feedback floater */
 .site-sidebar-box {
     width: 180px;

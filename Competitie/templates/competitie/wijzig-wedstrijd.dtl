@@ -12,11 +12,24 @@
 
     <script type="application/javascript">
 
+        let ignore_changes = true
+
+        function gewijzigd() {
+            // het formulier is aangepast en moet opgeslagen worden
+
+            if (!ignore_changes) {
+                // enable de 'opslaan' knop
+                const el = document.getElementById("opslaan_knop")
+                el.disabled = false
+                el.parentElement.style.display = "block"
+            }
+        }
+
         // omdat materialize-css het option 'hidden' attribuut niet ondersteund, verwijderen we opties
         // hierin stoppen we de kopie om de lijst mee te herstellen
         let locatie_keuzes_html = ''
 
-        function locatie_keuzes_aanpassen() {
+        function locatie_keuze_tonen() {
             // herstel de hele lijst
             const el_td = document.getElementById('id_accommodatie_td')
             el_td.innerHTML = locatie_keuzes_html
@@ -46,15 +59,21 @@
             }
         }
 
+        function locatie_keuzes_aanpassen() {
+            locatie_keuze_tonen()
+            gewijzigd()
+        }
+
         function locatie_keuzes_init() {
             locatie_keuzes_html = document.getElementById('id_accommodatie_td').innerHTML
-            locatie_keuzes_aanpassen()
+            locatie_keuze_tonen()
         }
 
         function datum_omzetten() {
             let el1 = document.querySelector('#wanneer')
             let el2 = document.querySelector('#datum')
             el1.value = el2.M_Datepicker.toString('yyyy-mm-dd')
+            gewijzigd()
         }
     </script>
 
@@ -122,7 +141,7 @@
                 <td>
                     {% if opt_weekdagen %}
                         <!-- drop-down voor dagen in de week -->
-                        <select name="weekdag">
+                        <select name="weekdag" onchange="gewijzigd()">
                             {% for opt in opt_weekdagen %}
                                 <option value="{{ opt.weekdag_nr }}"{% if opt.actief %} selected{% endif %}>{{ opt.datum|date:"l j F Y" }}</option>
                             {% endfor %}
@@ -140,7 +159,7 @@
             <tr>
                 <td>Aanvang wedstrijd:</td>
                 <td>
-                    <input id="tijd1" name="aanvang" type="text" class="timepicker">
+                    <input id="tijd1" name="aanvang" type="text" class="timepicker" onchange="gewijzigd()">
                 </td>
             </tr>
 
@@ -158,38 +177,65 @@
             <tr>
                 <td>Accommodatie:</td>
                 <td id="id_accommodatie_td">
-                    <select name="loc_pk" id="id_loc_sel">
+                    <select name="loc_pk" id="id_loc_sel" onchange="gewijzigd()">
                         {% for opt in all_locaties %}
-                            <option value="{{ opt.pk }}" data-ver="{{ opt.ver_pk }}">{{ opt.keuze_str }}</option>
+                            <option value="{{ opt.pk }}" data-ver="{{ opt.ver_pk }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
                         {% endfor %}
                     </select>
                 </td>
             </tr>
 
+            {% if heeft_wkl and wkl_team %}
+                <tr>
+                    <!-- inline-block gives vertical align top -->
+                    <td style="display: inline-block">Wedstrijdklassen teams:</td>
+                    <td>
+                        <table class="striped">
+                            <tr>
+                                <th><!-- checkbox column --></th>
+                                <th>Klasse</th>
+                                <th>Aantal teams</th>
+                            </tr>
+                            {% for obj in wkl_team %}
+                                <tr>
+                                    <td>
+                                        <label>
+                                            <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %} onchange="gewijzigd()">
+                                            <span>&nbsp;</span>
+                                        </label>
+                                    </td>
+                                    <td>{{ obj.short_str }}</td>
+                                    <td>{{ obj.aantal_teams }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                </tr>
+            {% endif %}
+
             {% if heeft_wkl %}
                 <tr>
                     <!-- inline-block gives vertical align top -->
                     <td style="display: inline-block">Wedstrijdklassen individueel:</td>
-
                     <td>
                         <table class="striped">
-                            <thead>
-                                <tr>
-                                    <th><!-- checkbox column --></th>
-                                    <th>Klasse</th>
-                                    <th>Aantal sporters</th>
-                                </tr>
-                            </thead>
                             {% for obj in wkl_indiv %}
+                                {% if obj.break_before %}
+                                    <tr>
+                                        <th><!-- checkbox column --></th>
+                                        <th>Klasse</th>
+                                        <th>Aantal sporters</th>
+                                    </tr>
+                                {% endif %}
                                 <tr>
-                                    <!-- {% if obj.break_before %}<br>{% endif %} -->
-                                    <td><label>
-                                        <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}>
-                                        <span>&nbsp;</span>
+                                    <td>
+                                        <label>
+                                            <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %} onchange="gewijzigd()">
+                                            <span>&nbsp;</span>
                                         </label>
                                     </td>
                                     <td>{{ obj.short_str }}</td>
-                                    <td>{{ obj.schutters }}</td>
+                                    <td>{{ obj.aantal_sporters }}</td>
                                 </tr>
                             {% endfor %}
                         </table>
@@ -201,13 +247,13 @@
 
         <p>
             <a class="btn-nhb-blauw" href="{{ url_terug }}">
-                <i class="material-icons-round left">close</i>Terug</a>
-
-            <span>&nbsp;&nbsp;</span>
-
-            <button class="btn-nhb-rood" type="submit">
-                <i class="material-icons-round left">check</i>Opslaan</button>
+                <i class="material-icons-round left">close</i>Terug (niet opslaan)</a>
         </p>
+
+        <div class="fixed-action-btn" style="display: none">
+            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                <i class="material-icons-round left">check</i>Opslaan</button>
+        </div>
 
     </form>
 
@@ -267,6 +313,8 @@
                 M.Datepicker.init(el2, options2)
 
                 locatie_keuzes_init()
+
+                ignore_changes = false
             })
     </script>
 

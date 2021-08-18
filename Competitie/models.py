@@ -12,7 +12,7 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Functie.models import Functie
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist
-from Wedstrijden.models import CompetitieWedstrijdenPlan, CompetitieWedstrijdenPlan, CompetitieWedstrijd
+from Wedstrijden.models import CompetitieWedstrijdenPlan, CompetitieWedstrijd
 from decimal import Decimal
 import datetime
 import logging
@@ -64,23 +64,27 @@ INSCHRIJF_METHODES = (
     (INSCHRIJF_METHODE_3, 'Voorkeur dagdelen')
 )
 
-TEAM_PUNTEN_TWEE = '2P'                 # head-to-head, via een poule
-TEAM_PUNTEN_FORMULE1 = 'F1'
-TEAM_PUNTEN_SOM_SCORES = 'SS'
+TEAM_PUNTEN_MODEL_TWEE = '2P'                 # head-to-head, via een poule
+TEAM_PUNTEN_MODEL_FORMULE1 = 'F1'
+TEAM_PUNTEN_MODEL_SOM_SCORES = 'SS'
+
+TEAM_PUNTEN_F1 = (10, 8, 6, 5, 4, 3, 2, 1)
 
 TEAM_PUNTEN = (
-    (TEAM_PUNTEN_TWEE, 'Twee punten systeem (2/1/0)'),                      # alleen bij head-to-head
-    (TEAM_PUNTEN_SOM_SCORES, 'Cumulatief: som van team totaal elke ronde'),
-    (TEAM_PUNTEN_FORMULE1, 'Formule 1 systeem (10/8/6/5/4/3/2/1)'),         # afhankelijk van score
+    (TEAM_PUNTEN_MODEL_TWEE, 'Twee punten systeem (2/1/0)'),  # alleen bij head-to-head
+    (TEAM_PUNTEN_MODEL_SOM_SCORES, 'Cumulatief: som van team totaal elke ronde'),
+    (TEAM_PUNTEN_MODEL_FORMULE1, 'Formule 1 systeem (10/8/6/5/4/3/2/1)'),         # afhankelijk van score
 )
 
 DEELNAME_ONBEKEND = '?'
 DEELNAME_JA = 'J'
 DEELNAME_NEE = 'N'
 
-DEELNAME_CHOICES = [(DEELNAME_ONBEKEND, 'Onbekend'),
-                    (DEELNAME_JA, 'Bevestigd'),
-                    (DEELNAME_NEE, 'Afgemeld')]
+DEELNAME_CHOICES = [
+    (DEELNAME_ONBEKEND, 'Onbekend'),
+    (DEELNAME_JA, 'Bevestigd'),
+    (DEELNAME_NEE, 'Afgemeld')
+]
 
 MUTATIE_COMPETITIE_OPSTARTEN = 1
 MUTATIE_AG_VASTSTELLEN_18M = 2
@@ -89,6 +93,7 @@ MUTATIE_CUT = 10
 MUTATIE_INITIEEL = 20
 MUTATIE_AFMELDEN = 30
 MUTATIE_AANMELDEN = 40
+MUTATIE_TEAM_RONDE = 50
 
 MUTATIE_TO_STR = {
     MUTATIE_AG_VASTSTELLEN_18M: "AG vaststellen 18m",
@@ -98,6 +103,7 @@ MUTATIE_TO_STR = {
     MUTATIE_CUT: "limiet aanpassen",
     MUTATIE_AFMELDEN: "afmelden",
     MUTATIE_AANMELDEN: "aanmelden",
+    MUTATIE_TEAM_RONDE: "team ronde"
 }
 
 
@@ -304,7 +310,7 @@ class CompetitieKlasse(models.Model):
             msg = self.indiv.beschrijving
         if self.team:
             msg = self.team.beschrijving
-        msg += " (%s)" % self.min_ag
+        msg += " (%.3f)" % self.min_ag
         return msg
 
     class Meta:
@@ -376,12 +382,19 @@ class DeelCompetitie(models.Model):
 
     # punten model
     regio_team_punten_model = models.CharField(max_length=2,
-                                               default=TEAM_PUNTEN_TWEE,
+                                               default=TEAM_PUNTEN_MODEL_TWEE,
                                                choices=TEAM_PUNTEN)
+
+    # de RCL bepaalt in welke ronde van de competitie we zijn
+    #    0 = initieel
+    # 1..7 = wedstrijd ronde
+    #    8 = afgesloten
+    huidige_team_ronde = models.PositiveSmallIntegerField(default=0)
 
     def heeft_poules_nodig(self):
         # centrale plek om de poules behoefte te controleren
-        return self.regio_organiseert_teamcompetitie and self.regio_team_punten_model == TEAM_PUNTEN_TWEE
+        # poule zijn onafhankelijk van punten model: 10 teams zijn te verdelen over 2 poules
+        return self.regio_organiseert_teamcompetitie
 
     def __str__(self):
         """ geef een tekstuele afkorting van dit object, voor in de admin interface """
@@ -474,7 +487,7 @@ class RegioCompetitieSchutterBoog(models.Model):
     ag_voor_indiv = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
 
     # aanvangsgemiddelde voor de teamcompetitie (typisch gelijk aan ag_voor_indiv)
-    ag_voor_team = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
+    ag_voor_team = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)     # 10,000
 
     # indien ag_voor_team niet gebaseerd op de uitslag van vorig seizoen,
     # of 0,000 is (voor nieuwe sporters of bij onvoldoende scores in vorig seizoen)
@@ -507,6 +520,9 @@ class RegioCompetitieSchutterBoog(models.Model):
 
     # gemiddelde over de 6 beste scores, dus exclusief laatste_score_nr
     gemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 10,000
+
+    # bovenstaande gemiddelde vastgesteld aan het begin van de huidige team ronde
+    gemiddelde_begin_team_ronde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 10,000
 
     # voorkeuren opgegeven bij het inschrijven
     inschrijf_voorkeur_team = models.BooleanField(default=False)
@@ -555,7 +571,8 @@ class RegiocompetitieTeam(models.Model):
                                                   blank=True)    # mag leeg zijn
 
     # de berekende team sterkte / team gemiddelde
-    aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
+    # LET OP: dit is zonder de vermenigvuldiging met aantal pijlen, dus 30,000 voor Indoor ipv 900,0
+    aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 30,000
 
     # de klasse waarin dit team ingedeeld is
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE,
@@ -591,6 +608,9 @@ class RegiocompetitieTeamPoule(models.Model):
     teams = models.ManyToManyField(RegiocompetitieTeam,
                                    blank=True)      # mag leeg zijn
 
+    def __str__(self):
+        return self.beschrijving
+
 
 class RegiocompetitieRondeTeam(models.Model):
     """ Deze tabel houdt bij wat de samenstelling was van een team in een ronde van de regiocompetitie
@@ -605,15 +625,27 @@ class RegiocompetitieRondeTeam(models.Model):
     # welke van de 7 rondes is dit
     ronde_nr = models.PositiveSmallIntegerField(default=0)
 
-    # schutters in het team (afhankelijk van invallers)
-    schutters = models.ManyToManyField(RegioCompetitieSchutterBoog,
-                                       blank=True)
+    # schutters die (automatisch) gekoppeld zijn aan het team
+    deelnemers_geselecteerd = models.ManyToManyField(RegioCompetitieSchutterBoog,
+                                                     related_name='teamronde_geselecteerd',
+                                                     blank=True)
+
+    # feitelijke schutters, inclusief invallers
+    deelnemers_feitelijk = models.ManyToManyField(RegioCompetitieSchutterBoog,
+                                                  related_name='teamronde_feitelijk',
+                                                  blank=True)
 
     # beste 3 scores van schutters in het team
     team_score = models.PositiveSmallIntegerField(default=0)
 
     # toegekende punten in deze ronde
     team_punten = models.PositiveSmallIntegerField(default=0)
+
+    # logboek voor noteren gemiddelde van de invallers
+    logboek = models.TextField(max_length=1024, blank=True)     # TODO: max_length is not enforce, so can be removed
+
+    def __str__(self):
+        return "Ronde %s, team %s" % (self.ronde_nr, self.team)
 
 
 class KampioenschapSchutterBoog(models.Model):
@@ -704,8 +736,7 @@ class KampioenschapTeam(models.Model):
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
 
 
-class KampioenschapMutatie(models.Model):       # TODO: hernoem naar CompetitieMutaties
-
+class CompetitieMutatie(models.Model):
     """ Deze tabel houdt de mutaties bij de lijst van (reserve-)schutters van
         de RK en BK wedstrijden.
         Alle verzoeken tot mutaties worden hier aan toegevoegd en na afhandelen bewaard
@@ -746,8 +777,7 @@ class KampioenschapMutatie(models.Model):       # TODO: hernoem naar CompetitieM
     cut_nieuw = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
-        verbose_name = "Kampioenschap Mutatie"
-        verbose_name_plural = "Kampioenschap Mutaties"
+        verbose_name = "Competitie mutatie"
 
     def __str__(self):
         msg = "[%s]" % self.when
@@ -776,13 +806,10 @@ class CompetitieTaken(models.Model):
                                           null=True, blank=True,        # mag leeg in admin interface
                                           on_delete=models.SET_NULL)
 
-    # wat is de hoogste KampioenschapMutatie tot nu toe verwerkt in de deelnemerslijst?
-    hoogste_mutatie = models.ForeignKey(KampioenschapMutatie,
+    # wat is de hoogste mutatie tot nu toe verwerkt in de deelnemerslijst?
+    hoogste_mutatie = models.ForeignKey(CompetitieMutatie,
                                         null=True, blank=True,
                                         on_delete=models.SET_NULL)
-
-
-# TODO: opruimen oude KampioenschapMutaties
 
 
 # end of file

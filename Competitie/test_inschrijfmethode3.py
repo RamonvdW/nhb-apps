@@ -185,7 +185,7 @@ class TestCompetitieInschrijfmethode3(E2EHelpers, TestCase):
                     with self.assert_max_queries(20):
                         resp = self.client.post(url_voorkeuren, {'nhblid_pk': nhb_nr,
                                                                  'schiet_R': 'on',
-                                                                 'voorkeur_dt': 'on'})
+                                                                 'voorkeur_eigen_blazoen': 'on'})
                     # onthoud deze schutterboog om straks in bulk aan te melden
                     # 'lid_NNNNNN_boogtype_MM'
                     post_params['lid_%s_boogtype_%s' % (nhb_nr, recurve_boog_pk)] = 'on'
@@ -249,7 +249,7 @@ class TestCompetitieInschrijfmethode3(E2EHelpers, TestCase):
             resp = self.client.get(self.url_behoefte3_bestand % (comp.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         # self.e2e_dump_resp(resp)
-        csv_file = 'ver_nr;Naam;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n1000;Grote Club;0;0;3;3\r\n1100;Kleine Club;0;2;0;2\r\n-;Totalen;0;2;3;5\r\n-;-;-;-;-;-\r\n-;Blazoen type;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n-;40cm;0;1;0;1\r\n-;DT Compound;0;0;1;1\r\n-;DT Recurve (wens);0;1;1;2\r\n-;60cm;0;0;1;1\r\n'
+        csv_file = 'ver_nr;Naam;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n1000;Grote Club;0;0;3;3\r\n1100;Kleine Club;0;2;0;2\r\n-;Totalen;0;2;3;5\r\n-;-;-;-;-;-\r\n-;Blazoen type;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n-;40cm;0;1;0;1\r\n-;Dutch Target;0;0;1;1\r\n-;Dutch Target (wens);0;1;1;2\r\n-;60cm;0;0;1;1\r\n'
         self.assertContains(resp, csv_file, msg_prefix="(was: %s)" % resp.content)
 
         # creëer een beetje puinhoop
@@ -282,11 +282,11 @@ class TestCompetitieInschrijfmethode3(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/inschrijfmethode3-behoefte.dtl', 'plein/site_layout.dtl'))
 
+        # TODO: eigen_blazoen aanzetten zodat 60cm 4-spot ook gekozen wordt
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_behoefte3_bestand % (comp.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        # self.e2e_dump_resp(resp)
-        csv_file = 'ver_nr;Naam;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n1000;Grote Club;0;0;3;3\r\n1100;Kleine Club;0;2;0;2\r\n-;Totalen;0;2;3;5\r\n-;-;-;-;-;-\r\n-;Blazoen type;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n-;60cm;0;2;2;4\r\n-;60cm Compound;0;0;1;1\r\n'
+        csv_file = 'ver_nr;Naam;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n1000;Grote Club;0;0;3;3\r\n1100;Kleine Club;0;2;0;2\r\n-;Totalen;0;2;3;5\r\n-;-;-;-;-;-\r\n-;Blazoen type;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n-;60cm;0;2;3;5\r\n-;60cm 4-spot;0;0;0;0\r\n'
         self.assertContains(resp, csv_file)
 
         # creëer een beetje puinhoop

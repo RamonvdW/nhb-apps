@@ -15,7 +15,7 @@ class FunctieAdmin(admin.ModelAdmin):
 
 
 class VHPGAdmin(admin.ModelAdmin):
-
+    search_fields = ('account__username',)
     list_select_related = ('account',)
 
 

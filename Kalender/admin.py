@@ -42,7 +42,7 @@ class KalenderWedstrijdAdmin(admin.ModelAdmin):                 # pragma: no cov
         return super().get_form(request, obj, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
-        if db_field.name == 'locatie':
+        if db_field.name == 'locatie' and self.obj:
             ver = self.obj.organiserende_vereniging
             kwargs['queryset'] = ver.wedstrijdlocatie_set.all()
 

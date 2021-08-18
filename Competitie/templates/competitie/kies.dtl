@@ -24,7 +24,7 @@
         {% endfor %}
 
         {% url 'HistComp:top' as card_url %}
-        {% include 'plein/card.dtl' with title="Uitslag vorig seizoen" text="De uitslag van vorig seizoen is hier in te zien." icon="skip_previous" url=card_url %}
+        {% include 'plein/card.dtl' with title="Uitslag vorig seizoen" text="De uitslag van vorig seizoen is hier in te zien." icon="undo" url=card_url %}
     </div>
 
     {% if bb_kan_competitie_aanmaken %}

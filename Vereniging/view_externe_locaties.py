@@ -258,14 +258,39 @@ class ExterneLocatieDetailsView(TemplateView):
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
                 locatie.banen_25m = banen
 
-            max_dt = 3
-            if request.POST.get('max_dt', '') == '4':
-                max_dt = 4
-            if locatie.max_dt_per_baan != max_dt:
-                activiteit = "Aanpassing max DT per baan van externe locatie %s van vereniging %s: naar %s (was %s)" % (
-                                locatie.naam, ver, max_dt, locatie.max_dt_per_baan)
+            # FUTURE: remove when max_dt_per_baan has been removed
+            # max_dt = 3
+            # if request.POST.get('max_dt', '') == '4':
+            #     max_dt = 4
+            # if locatie.max_dt_per_baan != max_dt:
+            #     activiteit = "Aanpassing max DT per baan van externe locatie %s van vereniging %s: naar %s (was %s)" % (
+            #                     locatie.naam, ver, max_dt, locatie.max_dt_per_baan)
+            #     schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
+            #     locatie.max_dt_per_baan = max_dt
+
+            try:
+                sporters = int(request.POST.get('max_sporters_18m', 0))
+                sporters = max(sporters, 0)     # ondergrens
+                sporters = min(sporters, 99)    # bovengrens
+            except ValueError:
+                sporters = 0
+            if locatie.max_sporters_18m != sporters:
+                activiteit = "Aanpassing maximum sporters 18m van externe locatie %s van vereniging %s: naar %s (was %s)" % (
+                                locatie.naam, ver, sporters, locatie.max_sporters_18m)
                 schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
-                locatie.max_dt_per_baan = max_dt
+                locatie.max_sporters_18m = sporters
+
+            try:
+                sporters = int(request.POST.get('max_sporters_25m', 0))
+                sporters = max(sporters, 0)     # ondergrens
+                sporters = min(sporters, 99)    # bovengrens
+            except ValueError:
+                sporters = 0
+            if locatie.max_sporters_25m != sporters:
+                activiteit = "Aanpassing maximum sporters 25m van externe locatie %s van vereniging %s: naar %s (was %s)" % (
+                                locatie.naam, ver, sporters, locatie.max_sporters_25m)
+                schrijf_in_logboek(request.user, 'Accommodaties', activiteit)
+                locatie.max_sporters_25m = sporters
 
         # extra velden voor outdoor locaties
         if locatie.discipline_outdoor or locatie.discipline_veld:

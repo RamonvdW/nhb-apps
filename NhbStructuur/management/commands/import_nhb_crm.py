@@ -8,13 +8,14 @@
 
 from django.core.management.base import BaseCommand
 from django.db.models import ProtectedError
-from django.utils import timezone
 from django.db.utils import DataError
+from django.utils import timezone
+from django.conf import settings
 from Account.models import Account
 from Functie.models import Functie, maak_functie, maak_account_vereniging_secretaris
 from Logboek.models import schrijf_in_logboek
 from Mailer.models import mailer_email_is_valide
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbLid, NhbVereniging
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbLid, NhbVereniging, Speelsterkte
 from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord
 from Wedstrijden.models import WedstrijdLocatie, BAAN_TYPE_EXTERN, BAAN_TYPE_BUITEN
@@ -93,6 +94,9 @@ class Command(BaseCommand):
         self._cache_ver = dict()        # [ver_nr] = NhbVereniging()
         self._cache_lid = dict()        # [nhb_nr] = NhbLid()
         self._cache_functie = dict()    # [(rol, beschrijving)] = Functie()
+        self._cache_sterk = dict()      # [nhb_nr] = [SpeelSterkte(), ...]
+
+        self._speelsterkte2volgorde = dict()    # [(discipline, beschrijving)] = volgorde
 
     def _maak_cache(self):
         for rayon in NhbRayon.objects.all():
@@ -124,6 +128,18 @@ class Command(BaseCommand):
                         .all()):
             tup = (functie.rol, functie.beschrijving)
             self._cache_functie[tup] = functie
+        # for
+
+        for sterkte in Speelsterkte.objects.select_related('lid').all():
+            try:
+                self._cache_sterk[sterkte.lid.nhb_nr].append(sterkte)
+            except KeyError:
+                self._cache_sterk[sterkte.lid.nhb_nr] = [sterkte]
+        # for
+
+        for disc, beschr, volgorde in settings.SPEELSTERKTE_VOLGORDE:
+            # discipline, beschrijving, volgorde
+            self._speelsterkte2volgorde[(disc, beschr)] = volgorde
         # for
 
     def _vind_rayon(self, rayon_nr):
@@ -672,6 +688,20 @@ class Command(BaseCommand):
             if not is_valid:
                 continue
 
+            # try:
+            #     lid_edu = member['educations']
+            #     print('lid: %s, edu: %s' % (lid_nhb_nr, repr(lid_edu)))
+            #     #"educations": [
+            #     #    {"code": "011", "name": "HANDBOOGTRAINER A", "date_start": "1990-01-01", "date_stop": "1990-01-01"},
+            #     #    {"code": "031", "name": "WEDSTRIJDLEIDER INDOOR\/OUTDOOR", "date_start": "1990-01-01", "date_stop": "1990-01-01"}]
+            # except KeyError:
+            #     lid_edu = ''
+
+            try:
+                lid_sterk = member['skill_levels']
+            except KeyError:
+                lid_sterk = list()
+
             self._count_members += 1
 
             is_nieuw = False
@@ -681,6 +711,7 @@ class Command(BaseCommand):
                 is_nieuw = True
             else:
                 try:
+                    # krimp de lijst zodat verwijderde leden over blijven
                     nhb_nrs.remove(lid_nhb_nr)
                 except ValueError:
                     self.stderr.write("[ERROR] Unexpected: nhb_nr %s onverwacht niet in lijst bestaande nhb nrs" % (repr(lid_nhb_nr)))
@@ -799,23 +830,80 @@ class Command(BaseCommand):
                     self._count_lid_no_email += 1
                     lid_email = ""  # convert invalid email to no email
 
-                lid = NhbLid()
-                lid.nhb_nr = lid_nhb_nr
-                lid.voornaam = lid_voornaam
-                lid.achternaam = lid_achternaam
-                lid.email = lid_email
-                lid.geboorte_datum = lid_geboorte_datum
-                lid.geslacht = lid_geslacht
-                lid.para_classificatie = lid_para
-                lid.sinds_datum = lid_sinds
-                lid.bij_vereniging = lid_ver
-                lid.lid_tot_einde_jaar = self.lidmaatschap_jaar
+                obj = NhbLid()
+                obj.nhb_nr = lid_nhb_nr
+                obj.voornaam = lid_voornaam
+                obj.achternaam = lid_achternaam
+                obj.email = lid_email
+                obj.geboorte_datum = lid_geboorte_datum
+                obj.geslacht = lid_geslacht
+                obj.para_classificatie = lid_para
+                obj.sinds_datum = lid_sinds
+                obj.bij_vereniging = lid_ver
+                obj.lid_tot_einde_jaar = self.lidmaatschap_jaar
                 if lid_blocked:
-                    lid.is_actief_lid = False
+                    obj.is_actief_lid = False
                 if not self.dryrun:
-                    lid.save()
-                    self._cache_lid[lid.pk] = lid
+                    obj.save()
+                    self._cache_lid[obj.pk] = obj
                 self._count_toevoegingen += 1
+
+            # speel sterkte verwerken
+            nieuwe_lijst = list()
+            try:
+                huidige_lijst = self._cache_sterk[lid_nhb_nr]
+            except KeyError:
+                huidige_lijst = list()
+
+            for sterk in lid_sterk:
+                # sterk = {"date": "1990-01-01", "skill_level_code": "R1000", "skill_level_name": "Recurve 1000", "discipline_code": "REC", "discipline_name": "Recurve", "category_name": "Senior"}
+                cat = sterk['category_name']
+                disc = sterk['discipline_name']
+                datum = sterk['date']
+                beschr = sterk['skill_level_name']
+
+                # kijk of deze al bestaat
+                found = None
+                for huidig in huidige_lijst:
+                    if huidig.beschrijving == beschr and huidig.discipline == disc and huidig.category == cat:
+                        # bestaat al
+                        found = huidig
+                        break   # from the for
+                # for
+
+                if found:
+                    # TODO: datum kunnen corrigeren
+
+                    # verwijderen uit de lijst zodat echt verwijderde speelsterktes kunnen vinden
+                    huidige_lijst.remove(found)
+                else:
+                    # toevoegen
+                    self.stdout.write('[INFO] Lid %s: nieuwe speelsterkte %s, %s, %s' % (lid_nhb_nr, datum, disc, beschr))
+
+                    try:
+                        volgorde = self._speelsterkte2volgorde[(disc, beschr)]
+                    except KeyError:
+                        volgorde = 9999
+                        self.stderr.write('[WARNING] Kan speelsterkte volgorde niet vaststellen voor: (%s, %s)' % (repr(disc), repr(beschr)))
+
+                    sterk = Speelsterkte(
+                                 lid=obj,
+                                 beschrijving=beschr,
+                                 discipline=disc,
+                                 category=cat,
+                                 volgorde=volgorde,
+                                 datum=datum)
+                    nieuwe_lijst.append(sterk)
+                    self._count_toevoegingen += 1
+            # for
+
+            if len(huidige_lijst):
+                # TODO: verwijder oude speelsterktes
+                self.stderr.write('[WARNING] Kan speelsterktes nog niet verwijderen: lid=%s, te verwijderen: %s' % (lid_nhb_nr, repr(huidige_lijst)))
+                # self._count_verwijderingen += 1
+
+            if len(nieuwe_lijst):
+                Speelsterkte.objects.bulk_create(nieuwe_lijst)
         # for
 
         # self.stdout.write('[DEBUG] Volgende %s NHB nummers moeten verwijderd worden: %s' % (len(nhb_nrs), repr(nhb_nrs)))
@@ -1033,9 +1121,11 @@ class Command(BaseCommand):
         self.stdout.write('Import van CRM data is klaar')
         # self.stdout.write("Read %s lines; skipped %s dupes; skipped %s errors; added %s records" % (line_nr, dupe_count, error_count, added_count))
 
+        count_sterkte = Speelsterkte.objects.count()
+
         # rapporteer de samenvatting en schrijf deze ook in het logboek
         samenvatting = "Samenvatting: %s fouten; %s waarschuwingen; %s nieuw; %s wijzigingen; %s verwijderingen; "\
-                       "%s leden, %s inactief, %s uitgeschreven; %s verenigingen; %s secretarissen zonder account; %s regios; %s rayons; %s actieve leden zonder e-mail" %\
+                       "%s leden, %s inactief, %s uitgeschreven; %s verenigingen; %s speelsterktes, %s secretarissen zonder account; %s regios; %s rayons; %s actieve leden zonder e-mail" %\
                        (self._count_errors,
                         self._count_warnings,
                         self._count_toevoegingen,
@@ -1045,6 +1135,7 @@ class Command(BaseCommand):
                         self._count_blocked,
                         self._count_uitgeschreven,
                         self._count_clubs,
+                        count_sterkte,
                         self._count_sec_no_account,
                         self._count_regios,
                         self._count_rayons,

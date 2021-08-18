@@ -111,7 +111,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on',
                                                           'info_BB': 'on',
-                                                          'voorkeur_dt': 'on'})
+                                                          'voorkeur_eigen_blazoen': 'on'})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
         self.assertEqual(SchutterBoog.objects.count(), 5)
         self.assertEqual(SchutterVoorkeuren.objects.count(), 1)
@@ -121,7 +121,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.assertTrue(obj.voor_wedstrijd)
 
         voorkeuren = SchutterVoorkeuren.objects.all()[0]
-        self.assertTrue(voorkeuren.voorkeur_dutchtarget_18m)
+        self.assertTrue(voorkeuren.voorkeur_eigen_blazoen)
         self.assertFalse(voorkeuren.voorkeur_meedoen_competitie)
         self.assertEqual(voorkeuren.nhblid, self.nhblid1)
 
@@ -135,7 +135,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         # check DT=aan
         checked, unchecked = self.extract_checkboxes(resp)
-        self.assertTrue("voorkeur_dt" in checked)
+        self.assertTrue("voorkeur_eigen_blazoen" in checked)
         self.assertTrue("voorkeur_meedoen_competitie" in unchecked)
 
         # DT voorkeur uitzetten
@@ -148,7 +148,7 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         self.assertTrue(obj.voor_wedstrijd)
 
         voorkeuren = SchutterVoorkeuren.objects.all()[0]
-        self.assertFalse(voorkeuren.voorkeur_dutchtarget_18m)
+        self.assertFalse(voorkeuren.voorkeur_eigen_blazoen)
 
         # voorkeur competitie weer aan zetten
         with self.assert_max_queries(20):

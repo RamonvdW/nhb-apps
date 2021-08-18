@@ -10,15 +10,16 @@ from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Plein.menu import menu_dynamics
+from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers
+from Competitie.models import RegiocompetitieTeam, RegiocompetitieRondeTeam
+from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
-from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE
+from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from .models import (LAAG_REGIO, DeelCompetitie,
                      DeelcompetitieRonde, RegioCompetitieSchutterBoog)
 import json
-import sys
 
 
 TEMPLATE_COMPETITIE_SCORES_REGIO = 'competitie/scores-regio.dtl'
@@ -108,7 +109,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 
         context['wedstrijden'] = wedstrijden
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context
 
 
@@ -181,6 +182,53 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         rol_nu = rol_get_huidige(self.request)
         return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
 
+    @staticmethod
+    def _team_naam_toevoegen(scores, deelcomp):
+        """ aan elke score de team naam en vsg toevoegen """
+
+        schutterboog_pks = scores.values_list('schutterboog__pk', flat=True)
+
+        deelnemers = (RegioCompetitieSchutterBoog
+                      .objects
+                      .filter(deelcompetitie=deelcomp,
+                              schutterboog__pk__in=schutterboog_pks))
+
+        ronde_teams = (RegiocompetitieRondeTeam
+                       .objects
+                       .prefetch_related('deelnemers_feitelijk')
+                       .filter(team__deelcompetitie=deelcomp,
+                               ronde_nr=deelcomp.huidige_team_ronde))
+
+        deelnemer_pk2teamnaam = dict()
+        for ronde_team in ronde_teams:
+            team_naam = ronde_team.team.maak_team_naam_kort()
+            for deelnemer in ronde_team.deelnemers_feitelijk.all():
+                deelnemer_pk2teamnaam[deelnemer.pk] = team_naam
+            # for
+        # for
+
+        schutterboog_pk2tup = dict()
+        for deelnemer in deelnemers:
+            if deelnemer.aantal_scores == 0:
+                vsg = deelnemer.ag_voor_team
+            else:
+                vsg = deelnemer.gemiddelde  # individuele voortschrijdend gemiddelde
+
+            try:
+                schutterboog_pk2tup[deelnemer.schutterboog.pk] = (vsg, deelnemer_pk2teamnaam[deelnemer.pk])
+            except KeyError:
+                # geen teamschutter
+                pass
+        # for
+
+        for score in scores:
+            try:
+                score.vsg, score.team_naam = schutterboog_pk2tup[score.schutterboog.pk]
+            except KeyError:
+                score.team_naam = "-"
+                score.vsg = ""
+        # for
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -203,20 +251,31 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
             context['url_geef_akkoord'] = reverse('Competitie:wedstrijd-geef-akkoord',
                                                   kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-        context['scores'] = (wedstrijd
-                             .uitslag
-                             .scores
-                             .filter(type=SCORE_TYPE_SCORE)
-                             .exclude(waarde=SCORE_WAARDE_VERWIJDERD)
-                             .select_related('schutterboog',
-                                             'schutterboog__boogtype',
-                                             'schutterboog__nhblid',
-                                             'schutterboog__nhblid__bij_vereniging')
-                             .order_by('schutterboog__nhblid__nhb_nr'))
+        scores = (wedstrijd
+                  .uitslag
+                  .scores
+                  .filter(type=SCORE_TYPE_SCORE)
+                  .exclude(waarde=SCORE_WAARDE_VERWIJDERD)
+                  .select_related('schutterboog',
+                                  'schutterboog__boogtype',
+                                  'schutterboog__nhblid',
+                                  'schutterboog__nhblid__bij_vereniging')
+                  .order_by('schutterboog__nhblid__nhb_nr'))
+        context['scores'] = scores
+
+        self._team_naam_toevoegen(scores, deelcomp)
 
         context['url_check_nhbnr'] = reverse('Competitie:dynamic-check-nhbnr')
         context['url_opslaan'] = reverse('Competitie:dynamic-scores-opslaan')
         context['url_deelnemers_ophalen'] = reverse('Competitie:dynamic-deelnemers-ophalen')
+
+        teams = (RegiocompetitieTeam
+                 .objects
+                 .filter(deelcompetitie=deelcomp)
+                 .select_related('vereniging'))
+        for team in teams:
+            team.naam_str = team.maak_team_naam_kort()
+        context['teams'] = teams
 
         # plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
         # ronde = DeelcompetitieRonde.objects.get(plan=plan)
@@ -227,7 +286,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         else:
             context['url_terug'] = reverse('Vereniging:wedstrijden-uitslag-invoeren')
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context
 
 
@@ -272,7 +331,9 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
 
     @staticmethod
     def post(request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de knop 'deelnemers ophalen' gebruikt wordt
+        """ Deze functie wordt aangeroepen als de knop 'waarschijnlijke deelnemers ophalen' gebruikt wordt
+
+            Dit is een POST by design, om caching te voorkomen.
         """
 
         try:
@@ -281,38 +342,39 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
             # garbage in
             raise Http404('Geen valide verzoek')
 
-        # print('data: %s' % repr(data))
-
         try:
             deelcomp_pk = int(str(data['deelcomp_pk'])[:6])   # afkappen voor extra veiligheid
-            deelcomp = DeelCompetitie.objects.get(laag=LAAG_REGIO,
-                                                  pk=deelcomp_pk)
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie')
+                        .get(laag=LAAG_REGIO,
+                             pk=deelcomp_pk))
         except (KeyError, ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
-        # TODO: filter deelnemers op cluster (wedstrijd.vereniging.clusters)
+        try:
+            wedstrijd_pk = int(str(data['wedstrijd_pk'])[:6])   # afkappen voor extra veiligheid
+            wedstrijd = (CompetitieWedstrijd
+                         .objects
+                         .get(pk=wedstrijd_pk))
+        except (KeyError, ValueError, CompetitieWedstrijd.DoesNotExist):
+            raise Http404('Wedstrijd niet gevonden')
+
+        sporters, teams = bepaal_waarschijnlijke_deelnemers(deelcomp.competitie.afstand, deelcomp, wedstrijd)
 
         out = dict()
         out['deelnemers'] = deelnemers = list()
-
-        for obj in (RegioCompetitieSchutterBoog
-                    .objects
-                    .select_related('schutterboog',
-                                    'schutterboog__nhblid',
-                                    'schutterboog__boogtype',
-                                    'bij_vereniging')
-                    .filter(deelcompetitie=deelcomp)):
-
-            deelnemer = {
-                'pk': obj.schutterboog.pk,
-                'nhb_nr': obj.schutterboog.nhblid.nhb_nr,
-                'naam': obj.schutterboog.nhblid.volledige_naam(),
-                'ver_nr': obj.bij_vereniging.ver_nr,
-                'ver_naam': obj.bij_vereniging.naam,
-                'boog': obj.schutterboog.boogtype.beschrijving,
-            }
-
-            deelnemers.append(deelnemer)
+        for sporter in sporters:
+            deelnemers.append({
+                'pk': sporter.schutterboog_pk,
+                'nhb_nr': sporter.nhb_nr,
+                'naam': sporter.volledige_naam,
+                'ver_nr': sporter.ver_nr,
+                'ver_naam': sporter.ver_naam,
+                'boog': sporter.boog,
+                'vsg': sporter.vsg,
+                'team_pk': sporter.team_pk,
+            })
         # for
 
         return JsonResponse(out)
@@ -377,19 +439,42 @@ class DynamicZoekOpNhbnrView(UserPassesTestMixin, View):
         if len(deelnemers) == 0:
             out['fail'] = 1         # is niet ingeschreven voor deze competitie
         else:
-            # bouw het antwoord op
-            nhblid = deelnemers[0].schutterboog.nhblid
-            out['nhb_nr'] = nhblid.nhb_nr
-            out['naam'] = nhblid.volledige_naam()
-            out['vereniging'] = str(nhblid.bij_vereniging)
-            out['regio'] = str(nhblid.bij_vereniging.regio)
-            out['bogen'] = bogen = list()
+
+            out['deelnemers'] = list()
+
             for deelnemer in deelnemers:
+                schutterboog = deelnemer.schutterboog
+                nhblid = schutterboog.nhblid
+                boog = schutterboog.boogtype
 
-                # TODO: MISSCHIEN BETER OM DEELNEMER.PK terug te geven
+                # volgende blok wordt een paar keer uitgevoerd, maar dat maak niet uit
+                out['vereniging'] = str(nhblid.bij_vereniging)
+                out['regio'] = str(nhblid.bij_vereniging.regio)
+                out['nhb_nr'] = nhblid.nhb_nr
+                out['naam'] = nhblid.volledige_naam()
+                out['ver_nr'] = nhblid.bij_vereniging.ver_nr
+                out['ver_naam'] = nhblid.bij_vereniging.naam
 
-                bogen.append({'pk': deelnemer.schutterboog.pk,
-                              'boog': deelnemer.schutterboog.boogtype.beschrijving})
+                sub = {
+                    'pk': schutterboog.pk,
+                    'boog': boog.beschrijving,
+                    'team_pk': 0,
+                    'vsg': ''
+                }
+
+                if deelnemer.inschrijf_voorkeur_team:
+                    if deelnemer.aantal_scores == 0:
+                        sub['vsg'] = deelnemer.ag_voor_team
+                    else:
+                        sub['vsg'] = deelnemer.gemiddelde
+
+                    # zoek het huidige team erbij
+                    teams = deelnemer.regiocompetitieteam_set.all()
+                    if teams.count() > 0:
+                        # sporter is gekoppeld aan een team
+                        sub['team_pk'] = teams[0].pk
+
+                out['deelnemers'].append(sub)
             # for
 
         return JsonResponse(out)
@@ -468,8 +553,8 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         # hiermee kunnen we snel controleren of iemand al in de uitslag
         # voorkomt
         pk2score_obj = dict()
-        for score_obj in uitslag.scores.all():
-            pk2score_obj[score_obj.schutterboog.pk] = score_obj
+        for score_obj in uitslag.scores.select_related('schutterboog').all():
+            pk2score_obj[score_obj.schutterboog.pk] = score_obj     # TODO: moet deelnemer.pk worden!
         # for
         # print('pk2score_obj: %s' % repr(pk2score_obj))
 
@@ -552,11 +637,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         door_account = request.user
         when = timezone.now()
 
-        try:
-            self.scores_opslaan(uitslag, data, when, door_account)
-        except:                         # pragma: no cover
-            exc = sys.exc_info()[1]
-            print('OHOH: %s' % exc)     # TODO: opruimen of loggen
+        self.scores_opslaan(uitslag, data, when, door_account)
 
         out = {'done': 1}
         return JsonResponse(out)
@@ -592,6 +673,7 @@ class WedstrijdUitslagBekijkenView(TemplateView):
                           .select_related('schutterboog',
                                           'bij_vereniging')
                           .filter(schutterboog__pk__in=schutterboog_pks))
+
         schutterboog2vereniging = dict()
         for regioschutter in regioschutters:
             schutterboog2vereniging[regioschutter.schutterboog.pk] = regioschutter.bij_vereniging
@@ -600,7 +682,11 @@ class WedstrijdUitslagBekijkenView(TemplateView):
         for score in scores:
             score.schutter_str = score.schutterboog.nhblid.volledige_naam()
             score.boog_str = score.schutterboog.boogtype.beschrijving
-            score.vereniging_str = str(schutterboog2vereniging[score.schutterboog.pk])
+            try:
+                score.vereniging_str = str(schutterboog2vereniging[score.schutterboog.pk])
+            except KeyError:
+                # unlikely inconsistency
+                score.vereniging_str = "?"
         # for
 
         te_sorteren = [(score.vereniging_str, score.schutter_str, score.boog_str, score) for score in scores]
@@ -612,7 +698,7 @@ class WedstrijdUitslagBekijkenView(TemplateView):
         context['deelcomp'] = deelcomp
         context['ronde'] = ronde
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context
 
 

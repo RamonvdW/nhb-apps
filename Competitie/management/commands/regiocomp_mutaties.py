@@ -7,16 +7,17 @@
 # werk de tussenstand bij voor deelcompetities die niet afgesloten zijn zodra er nieuwe ScoreHist records zijn
 # verwerkt ook een aantal opdrachten die concurrency protection nodig hebben
 
-# TODO: hernoem naar competitie_mutaties
-
 from django.conf import settings
-from django.core.management.base import BaseCommand
+from django.utils import timezone
 from django.db.models import F
+from django.core.management.base import BaseCommand
+from BasisTypen.models import TeamType
 from Competitie.models import (Competitie, CompetitieTaken, DeelCompetitie, DeelcompetitieKlasseLimiet,
+                               RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE,
-                               KampioenschapMutatie,
+                               CompetitieMutatie, RegiocompetitieTeamPoule,
                                MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M, MUTATIE_COMPETITIE_OPSTARTEN,
-                               MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AANMELDEN, MUTATIE_AFMELDEN)
+                               MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AANMELDEN, MUTATIE_AFMELDEN, MUTATIE_TEAM_RONDE)
 from Competitie.operations import (competities_aanmaken, bepaal_startjaar_nieuwe_competitie,
                                    aanvangsgemiddelden_vaststellen_voor_afstand)
 from Overig.background_sync import BackgroundSync
@@ -27,10 +28,15 @@ VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
 
 
 class Command(BaseCommand):
-    help = "Competitie kampioenschap mutaties verwerken"
+    help = "Competitie mutaties verwerken"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
+
+        self._boogtypen = list()        # [boog_type.pk, ..]
+        self._team_boogtypen = dict()   # [team_type.pk] = [boog_type.pk, ..]
+        self._team_volgorde = list()    # [team_type.pk, ..]
+
         self.stop_at = datetime.datetime.now()
 
         self.taken = CompetitieTaken.objects.all()[0]
@@ -40,7 +46,7 @@ class Command(BaseCommand):
 
         self._onbekend2beter = dict()   # [competitieklasse.pk] = [klasse, ..] met oplopend AG
 
-        self._sync = BackgroundSync(settings.BACKGROUND_SYNC__KAMPIOENSCHAP_MUTATIES)
+        self._sync = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
         self._count_ping = 0
 
     def add_arguments(self, parser):
@@ -49,6 +55,34 @@ class Command(BaseCommand):
                             help="Aantal minuten actief blijven")
         parser.add_argument('--all', action='store_true')       # alles opnieuw vaststellen
         parser.add_argument('--quick', action='store_true')     # for testing
+
+    def _bepaal_boog2team(self):
+        """ bepaalde boog typen mogen meedoen in bepaalde team types
+            straks als we de team schutters gaan verdelen over de teams moeten dat in een slimme volgorde
+            zodat de sporters in toegestane teams en alle team typen gevuld worden.
+            Voorbeeld: LB mag meedoen in LB, IB, BB en R teams terwijl C alleen in C team mag.
+                       we moeten dus niet beginnen met de LB schutter in een R team te stoppen en daarna
+                       geen sporters meer over hebben voor het LB team.
+        """
+
+        for team_type in (TeamType
+                          .objects
+                          .prefetch_related('boog_typen')
+                          .all()):
+
+            self._team_boogtypen[team_type.pk] = boog_lijst = list()
+
+            for boog_type in team_type.boog_typen.all():
+                boog_lijst.append(boog_type.pk)
+
+                if boog_type.pk not in self._boogtypen:
+                    self._boogtypen.append(boog_type.pk)
+            # for
+        # for
+
+        team_aantal = [(len(boog_typen), team_type_pk) for team_type_pk, boog_typen in self._team_boogtypen.items()]
+        team_aantal.sort()
+        self._team_volgorde = [team_type_pk for _, team_type_pk in team_aantal]
 
     @staticmethod
     def _get_limiet(deelcomp, klasse):
@@ -500,6 +534,140 @@ class Command(BaseCommand):
         if Competitie.objects.filter(begin_jaar=jaar).count() == 0:
             competities_aanmaken(jaar)
 
+    @staticmethod
+    def _check_redelijkheid_volgende_team_ronde(deelcomp):
+        """ Als alle teams nog geen scores hebben gekregen, dan is het niet redelijk om door te gaan naar
+            de volgende ronde.
+            Oftewel: als er minimaal 1 team is met een team_score > 0 dan is het redelijk.
+        """
+
+    def _verwerk_mutatie_team_ronde(self, deelcomp):
+
+        ronde_nr = deelcomp.huidige_team_ronde + 1
+
+        if ronde_nr > 7:
+            # alle rondes al gehad - silently ignore
+            return
+
+        if ronde_nr == 1:
+            teams = (RegiocompetitieTeam
+                     .objects
+                     .filter(deelcompetitie=deelcomp))
+
+            if teams.count() == 0:
+                self.stdout.write('[WARNING] Team ronde doorzetten voor regio %s geweigerd want 0 teams' % deelcomp)
+                return
+        else:
+            ronde_teams = (RegiocompetitieRondeTeam
+                           .objects
+                           .filter(team__deelcompetitie=deelcomp,
+                                   ronde_nr=deelcomp.huidige_team_ronde))
+            if ronde_teams.count() == 0:
+                self.stdout.write('[WARNING] Team ronde doorzetten voor regio %s geweigerd want 0 ronde teams' % deelcomp)
+                return
+
+            aantal_scores = ronde_teams.filter(team_score__gt=0).count()
+            if aantal_scores == 0:
+                self.stdout.write('[WARNING] Team ronde doorzetten voor regio %s geweigerd want alle team_scores zijn 0' % deelcomp)
+                return
+
+        now = timezone.now()
+        now = timezone.localtime(now)
+        now_str = now.strftime("%Y-%m-%d %H:%M")
+
+        ver_dict = dict()       # [ver_nr] = list(vsg, deelnemer_pk, boog_type_pk)
+
+        # voor elke deelnemer het gemiddelde_begin_team_ronde invullen
+        for deelnemer in (RegioCompetitieSchutterBoog
+                          .objects
+                          .select_related('bij_vereniging',
+                                          'schutterboog',
+                                          'schutterboog__boogtype')
+                          .filter(deelcompetitie=deelcomp,
+                                  inschrijf_voorkeur_team=True)):
+
+            if deelnemer.aantal_scores == 0:
+                vsg = deelnemer.ag_voor_team
+            else:
+                vsg = deelnemer.gemiddelde  # individuele voortschrijdend gemiddelde
+
+            deelnemer.gemiddelde_begin_team_ronde = vsg
+            deelnemer.save(update_fields=['gemiddelde_begin_team_ronde'])
+
+            ver_nr = deelnemer.bij_vereniging.ver_nr
+            tup = (-vsg, deelnemer.pk, deelnemer.schutterboog.boogtype.pk)
+            try:
+                ver_dict[ver_nr].append(tup)
+            except KeyError:
+                ver_dict[ver_nr] = [tup]
+        # for
+
+        for team_schutters in ver_dict.values():
+            team_schutters.sort()
+        # for
+
+        # maak voor elk team een 'ronde instantie' aan waarin de invallers en score bijgehouden worden
+        # verdeel ook de sporters volgens VSG
+        for team_type_pk in self._team_volgorde:
+
+            team_boogtypen = self._team_boogtypen[team_type_pk]
+
+            for team in (RegiocompetitieTeam
+                         .objects
+                         .select_related('vereniging')
+                         .prefetch_related('gekoppelde_schutters')
+                         .filter(deelcompetitie=deelcomp,
+                                 team_type__pk=team_type_pk)
+                         .order_by('-aanvangsgemiddelde')):     # hoogste eerst
+
+                ronde_team = RegiocompetitieRondeTeam(
+                                team=team,
+                                ronde_nr=ronde_nr,
+                                logboek="[%s] Aangemaakt bij opstarten ronde %s\n" % (now_str, ronde_nr))
+                ronde_team.save()
+
+                # koppel de schutters
+                if deelcomp.regio_heeft_vaste_teams:
+                    # vaste team begint elke keer met de vaste schutters
+                    schutter_pks = team.gekoppelde_schutters.values_list('pk', flat=True)
+                else:
+                    # voortschrijdend gemiddelde: pak de volgende 4 beste sporters van de vereniging
+                    schutter_pks = list()
+                    ver_nr = team.vereniging.ver_nr
+                    ver_schutters = ver_dict[ver_nr]
+                    gebruikt = list()
+                    for tup in ver_schutters:
+                        _, deelnemer_pk, boogtype_pk = tup
+                        if boogtype_pk in team_boogtypen:
+                            schutter_pks.append(deelnemer_pk)
+                            gebruikt.append(tup)
+
+                        if len(schutter_pks) == 4:
+                            break
+                    # for
+
+                    for tup in gebruikt:
+                        ver_schutters.remove(tup)
+                    # for
+
+                ronde_team.deelnemers_geselecteerd.set(schutter_pks)
+                ronde_team.deelnemers_feitelijk.set(schutter_pks)
+
+                # schrijf de namen van de leden in het logboek
+                ronde_team.logboek += '[%s] Geselecteerde schutters:\n' % now_str
+                for deelnemer in (RegioCompetitieSchutterBoog
+                                  .objects
+                                  .select_related('schutterboog__nhblid')
+                                  .filter(pk__in=schutter_pks)):
+                    ronde_team.logboek += '   ' + str(deelnemer.schutterboog.nhblid) + '\n'
+                # for
+                ronde_team.save(update_fields=['logboek'])
+            # for
+        # for
+
+        deelcomp.huidige_team_ronde = ronde_nr
+        deelcomp.save(update_fields=['huidige_team_ronde'])
+
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie
 
@@ -531,24 +699,28 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Verwerk mutatie %s: afmelden' % mutatie.pk)
             self._verwerk_mutatie_afmelden(mutatie.deelnemer)
 
+        elif code == MUTATIE_TEAM_RONDE:
+            self.stdout.write('[INFO] Verwerk mutatie %s: team ronde' % mutatie.pk)
+            self._verwerk_mutatie_team_ronde(mutatie.deelcompetitie)
+
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s door %s (pk=%s)' % (code, mutatie.door, mutatie.pk))
 
     def _verwerk_nieuwe_mutaties(self):
         begin = datetime.datetime.now()
 
-        mutatie_latest = KampioenschapMutatie.objects.latest('pk')
+        mutatie_latest = CompetitieMutatie.objects.latest('pk')
         # als hierna een extra mutatie aangemaakt wordt dan verwerken we een record
         # misschien dubbel, maar daar kunnen we tegen
 
         if self.taken.hoogste_mutatie:
             # gebruik deze informatie om te filteren
             self.stdout.write('[INFO] vorige hoogste KampioenschapMutatie pk is %s' % self.taken.hoogste_mutatie.pk)
-            qset = (KampioenschapMutatie
+            qset = (CompetitieMutatie
                     .objects
                     .filter(pk__gt=self.taken.hoogste_mutatie.pk))
         else:
-            qset = (KampioenschapMutatie
+            qset = (CompetitieMutatie
                     .objects
                     .all())
 
@@ -561,7 +733,7 @@ class Command(BaseCommand):
         for pk in mutatie_pks:
             # LET OP: we halen de records hier 1 voor 1 op
             #         zodat we verse informatie hebben inclusief de vorige mutatie
-            mutatie = (KampioenschapMutatie
+            mutatie = (CompetitieMutatie
                        .objects
                        .select_related('deelnemer',
                                        'deelnemer__deelcompetitie',
@@ -587,7 +759,7 @@ class Command(BaseCommand):
         now = datetime.datetime.now()
         while now < self.stop_at:                   # pragma: no branch
             # self.stdout.write('tick')
-            new_count = KampioenschapMutatie.objects.count()
+            new_count = CompetitieMutatie.objects.count()
             if new_count != mutatie_count:
                 mutatie_count = new_count
                 self._verwerk_nieuwe_mutaties()
@@ -624,6 +796,8 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Taak loopt tot %s' % str(self.stop_at))
 
     def handle(self, *args, **options):
+
+        self._bepaal_boog2team()
         self._set_stop_time(**options)
 
         if options['all']:

@@ -117,22 +117,35 @@ def _maak_deelcompetities(comp, rayons, regios, functies):
     DeelCompetitie.objects.bulk_create(bulk)
 
 
-def _maak_competitieklassen(comp, klassen_indiv, klassen_team):
+def _maak_competitieklassen(comp):
     """ Maak de competitieklassen aan voor een nieuwe competitie
         het min_ag per klasse wordt later ingevuld
     """
 
     bulk = list()
 
-    for indiv in klassen_indiv:
+    for indiv in (IndivWedstrijdklasse
+                  .objects
+                  .prefetch_related('leeftijdsklassen')
+                  .exclude(buiten_gebruik=True)):
+
         klasse = CompetitieKlasse(
                         competitie=comp,
                         indiv=indiv,
                         min_ag=AG_NUL)
+
+        # bepaal of deze klasse voor aspiranten is
+        for lkl in indiv.leeftijdsklassen.all():
+            if lkl.is_aspirant_klasse():
+                klasse.is_aspirant_klasse = True
+        # for
+
         bulk.append(klasse)
     # for
 
-    for team in klassen_team:
+    for team in (TeamWedstrijdklasse
+                 .objects
+                 .exclude(buiten_gebruik=True)):
         klasse = CompetitieKlasse(
                         competitie=comp,
                         team=team,
@@ -165,8 +178,6 @@ def competities_aanmaken(jaar=None):
 
     rayons = NhbRayon.objects.all()
     regios = NhbRegio.objects.filter(is_administratief=False)
-    klassen_indiv = IndivWedstrijdklasse.objects.exclude(buiten_gebruik=True)
-    klassen_team = TeamWedstrijdklasse.objects.exclude(buiten_gebruik=True)
 
     functies = dict()   # [rol, afstand, 0/rayon_nr/regio_nr] = functie
     for functie in (Functie
@@ -208,7 +219,7 @@ def competities_aanmaken(jaar=None):
 
         _maak_deelcompetities(comp, rayons, regios, functies)
 
-        _maak_competitieklassen(comp, klassen_indiv, klassen_team)
+        _maak_competitieklassen(comp)
     # for
 
 

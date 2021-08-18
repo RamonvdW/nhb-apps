@@ -1,0 +1,98 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Teams regiocompetitie{% endblock %}
+
+{% block pagina %}
+    <h4>Teams Regiocompetitie</h4>
+
+    {% if not deelcomp.regio_organiseert_teamcompetitie %}
+        <p>In jullie regio wordt geen team competitie gehouden.</p>
+        <p>Voor meer informatie: neem contact op met de RCL.</p>
+    {% else %}
+
+        <p>Als HWL ben je verantwoordelijk om je teams compleet te houden. Als iemand niet kan ("uitvalt") dan mag deze vervangen worden door een invaller. Voor elke ronde moeten deze invallers opnieuw opgegeven worden.</p>
+
+        <p>Op deze pagina kan {% if readonly %}<b>de HWL</b>{% else %}je als HWL{% endif %} de invallers opgeven voor de regiocompetitie van de <b>{{ deelcomp }}</b>.</p>
+
+        <p>&nbsp;</p>
+        <div class="container">
+            <table class="white">
+                <tr>
+                    <td class="center-align">De invallers voor <b class="red-text">RONDE {{ deelcomp.huidige_team_ronde }}</b> kunnen nu doorgegeven worden.</td>
+                </tr>
+            </table>
+        </div>
+        <p>&nbsp;</p>
+
+        <table class="white">
+
+            <thead>
+                <tr>
+                    <th class="hide-on-small-only">Soort team</th>
+                    <th class="hide-on-med-and-up">Soort</th>
+                    <th>Naam</th>
+                    <th>Wedstrijd<wbr/>klasse</th>
+                    <th class="hide-on-small-only center-align">Gekoppeld</th>
+                    <th><!-- kolom voor de knoppen --></th>
+                </tr>
+            </thead>
+
+            {% for team in teams %}
+                <tr>
+                    <td class="hide-on-small-only">{{ team.team_type.beschrijving }}</td>
+                    <td class="hide-on-med-and-up">{{ team.team_type.afkorting }}</td>
+                    <td>{{ team.team_naam }}</td>
+                    <td>{{ team.klasse.team.beschrijving }}</td>
+                    <td class="hide-on-small-only center-align{% if team.aantal < 3 or team.aantal > 4 %} red-text{% endif %}">{{ team.aantal }}</td>
+                    <td>
+                        {% if team.url_koppelen %}
+                            <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Invallers koppelen</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5"><i>Er zijn geen teams</i></td>
+                </tr>
+            {% endfor %}
+
+        </table>
+
+        <p>&nbsp;</p>
+        <p>Onderstaande leden van de vereniging zijn ingeschreven voor de regiocompetitie en hebben voorkeur opgegeven voor schieten in een team:</p>
+
+        <table class="white">
+            <thead>
+                <tr>
+                    <th>Boogtype</th>
+                    <th>Actuele gemiddelde</th>
+                    <th>Naam</th>
+                    <th>In team</th>
+                </tr>
+            </thead>
+
+            {% for deelnemer in deelnemers %}
+                <tr>
+                    <td>{{ deelnemer.boog_str }}</td>
+                    <td>{{ deelnemer.vsg_str }}</td>
+                    <td>{{ deelnemer.naam_str }}</td>
+                    <td>{% if deelnemer.in_team_str %}{{ deelnemer.in_team_str }}{% else %}<i>Geen</i>{% endif %}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3"><i>Geen leden gevonden</i></td>
+                </tr>
+            {% endfor %}
+        </table>
+
+    {% endif %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="teams-regio" %}
+
+{% endblock %}

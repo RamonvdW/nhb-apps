@@ -52,10 +52,12 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                                   kwargs={'vereniging_pk': ver.pk})
 
         if rol_nu == Rollen.ROL_SEC or ver.regio.is_administratief:
+            # SEC
             comps = list()
             deelcomps = list()
             deelcomps_rk = list()
         else:
+            # HWL of WL
             context['toon_competities'] = True
 
             if rol_nu == Rollen.ROL_HWL:
@@ -102,7 +104,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         # bepaal de volgorde waarin de kaartjes getoond worden
         # 1 - aanmelden
-        # 2 - teams regio
+        # 2 - teams regio aanmelden / aanpassen
         # 3 - teams rk
         # 4 - ingeschreven
         # 5 - wie schiet waar (voor inschrijfmethode 1)
@@ -144,16 +146,25 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
             for deelcomp in deelcomps:
                 if deelcomp.competitie == comp:
-                    # 2 - teams aanmaken
-                    if deelcomp.regio_organiseert_teamcompetitie and comp.fase <= 'C':
-                        kaartje = SimpleNamespace()
-                        kaartje.titel = "Teams Regio"
-                        kaartje.tekst = 'Verenigingsteams voor de regiocompetitie samenstellen voor de %s.' % comp.beschrijving
-                        kaartje.url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
-                        kaartje.icon = 'gamepad'
-                        if comp.fase < 'B':
-                            kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)
+                    if deelcomp.regio_organiseert_teamcompetitie and comp.fase == 'E' and 1 <= deelcomp.huidige_team_ronde <= 7:
+                        # team invallers opgeven
+                        kaartje = SimpleNamespace(
+                                    titel="Team Invallers",
+                                    tekst="Invallers opgeven voor ronde %s van de regiocompetitie voor de %s." % (deelcomp.huidige_team_ronde, comp.beschrijving),
+                                    url=reverse('Vereniging:teams-regio-invallers', kwargs={'deelcomp_pk': deelcomp.pk}),
+                                    icon='how_to_reg')
                         kaartjes.append(kaartje)
+                    else:
+                        # 2 - teams aanmaken
+                        if deelcomp.regio_organiseert_teamcompetitie and comp.fase <= 'E':
+                            kaartje = SimpleNamespace()
+                            kaartje.titel = "Teams Regio"
+                            kaartje.tekst = 'Verenigingsteams voor de regiocompetitie samenstellen voor de %s.' % comp.beschrijving
+                            kaartje.url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
+                            kaartje.icon = 'gamepad'
+                            if comp.fase < 'B':
+                                kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)
+                            kaartjes.append(kaartje)
             # for
             del deelcomp
 

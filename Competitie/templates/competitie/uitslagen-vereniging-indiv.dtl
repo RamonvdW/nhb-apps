@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-vereniging" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-vereniging-indiv" %}
 
     <h4>Uitslagen</h4>
 
@@ -54,9 +54,9 @@
     <div class="white shrink-wrap-5">
         {% for boog in boog_filters %}
             {% if boog.zoom_url %}
-                <a class="margin-5 btn-nhb-blauw btn-small" href="{{ boog.zoom_url }}">{{ boog.beschrijving }}</a>
+                <a class="margin-5 btn-outline" href="{{ boog.zoom_url }}">{{ boog.beschrijving }}</a>
             {% else %}
-                <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ boog.beschrijving }}</a>
+                <a class="margin-5 btn-nhb-blauw" href="#">{{ boog.beschrijving }}</a>
             {% endif %}
         {% endfor %}
     </div>

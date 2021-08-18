@@ -1,0 +1,158 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Koppel invallers{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="teams-invallers-koppelen" %}
+
+    <h4>Koppel invallers</h4>
+
+    <p>Op deze pagina kan je leden van de vereniging koppelen als invaller voor een team.</p>
+
+
+    <script type="application/javascript">
+        function invallers_grijs_maken() {
+            let bezette_nrs = Array()
+            document.querySelectorAll('input[type=radio]:checked').forEach(el => {
+                bezette_nrs.push(el.dataset["nr"])
+            })
+            //console.log('bezette nrs:', bezette_nrs)
+
+            const uls = document.querySelectorAll('ul[data-uitvaller="1"]')
+            uls.forEach(el_ul => {
+                const invallers = el_ul.querySelectorAll('input')
+                invallers.forEach(invaller => {
+                    const nr = invaller.dataset["nr"]
+                    if (invaller.dataset["magInvallen"] === "0") {
+                        invaller.disabled = true
+                    } else if (!invaller.checked && bezette_nrs.includes(nr)) {
+                        invaller.disabled = true
+                    } else {
+                        invaller.disabled = false
+                    }
+
+                    //const isUitvaller = (invaller.dataset["isUitvaller"] === "1")
+
+                    if (invaller.checked) bezette_nrs.push(nr)
+                })
+            })
+        }
+
+        function gewijzigd() {
+            // het formulier is aangepast en moet opgeslagen kunnen worden
+            invallers_grijs_maken()
+
+            // enable/disable de 'opslaan' knop
+            const el = document.getElementById("opslaan_knop")
+            el.disabled = false
+            el.parentElement.style.display = "block"
+        }
+    </script>
+
+    <form action="{{ url_opslaan }}" method="post">
+        {% csrf_token %}
+
+        <table class="white">
+
+            <tr>
+                <td>Vereniging</td>
+                <td>{{ team.vereniging }}</td>
+            </tr>
+
+            <tr>
+                <td>Team naam</td>
+                <td>{{ team.team_naam }}</td>
+            </tr>
+
+            <tr>
+                <td>Soort team</td>
+                <td>{{ team.team_type.beschrijving }}</td>
+            </tr>
+
+            <tr>
+                <td style="vertical-align: top">Toegestane bogen</td>
+                <td>
+                    {% for boog in boog_typen %}
+                        <span>{{ boog.beschrijving }}</span><br>
+                    {% endfor %}
+                </td>
+            </tr>
+
+            <tr>
+                <td>Team wedstrijdklasse</td>
+                <td>{{ team.klasse.team.beschrijving }}</td>
+            </tr>
+
+            <tr>
+                <td>Teamleden voor teamcompetitie ronde</td>
+                <td class="red-text"><b>RONDE {{ deelcomp.huidige_team_ronde }}</b></td>
+            </tr>
+
+            <tr class="nhb-grijs">
+                <td colspan="2">Let op: een invaller mag nu niet sterker zijn dan de uitvaller, zoals voor beide sporters vastgelegd aan het begin van de ronde.</td>
+            </tr>
+
+            <tr>
+                <th>Geselecteerd voor het team</th>
+                <th>Toegestane invallers</th>
+            </tr>
+
+            {% for uitvaller_naam_str, uitvaller_gem_str, group_str, invallers in uitvallers %}
+                <tr>
+                    <td>{{ uitvaller_naam_str }} ({{ uitvaller_gem_str }})</td>
+                    <td>
+                        <ul id="id_{{ group_str }}" data-uitvaller="1">
+                            {% for is_uitvaller, invaller_gem_str, id_invaller, invaller_nr, invaller_naam_str, toon_checked in invallers %}
+                                <li>
+                                    <label class="black-text" for="{{ id_invaller }}">
+                                        <input class="with-gap" type="radio" name="{{ group_str }}" value="{{ invaller_nr }}" data-nr="{{ invaller_nr }}" data-is-uitvaller="{{ is_uitvaller }}" required id="{{ id_invaller }}"{% if toon_checked %} checked{% endif %} onchange="gewijzigd()">
+                                        <span>{% if invaller_gem_str %}({{ invaller_gem_str }})&nbsp;&nbsp;{% endif %}{{ invaller_naam_str }}</span>
+                                    </label>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+            {% endfor %}
+
+            {% if bezet %}
+                <tr class="nhb-grijs">
+                    <td colspan="2">De volgende sporters zijn al gekoppeld aan een ander team en kunnen daarom niet gekozen worden.</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        {% for deelnemer in bezet %}
+                            <span>({{ deelnemer.invaller_gem_str }})&nbsp;&nbsp;{{ deelnemer.naam_str }}</span><br>
+                        {% endfor %}
+                    </td>
+            {% endif %}
+
+        </table>
+
+        <div class="fixed-action-btn" style="display: none">
+            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                <i class="material-icons-round left">check</i>Opslaan</button>
+        </div>
+    </form>
+
+    <p>&nbsp;</p>
+    <p>Eerdere wijzigingen:</p>
+    <table class="white">
+        <tr>
+            <td>{{ logboek|linebreaks }}</td>
+        </tr>
+    </table>
+
+
+    <script>
+        window.addEventListener("load", function() { invallers_grijs_maken() })
+    </script>
+{% endblock %}

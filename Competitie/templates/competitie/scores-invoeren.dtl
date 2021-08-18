@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-wedstrijd-uitslag-controleren" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-scores-invoeren-controleren" %}
 
     {% if is_controle %}
         <h4>Uitslag controleren</h4>
@@ -91,18 +91,29 @@
     {% endif %}
 
     <script type="application/javascript">
+
+        {% if deelcomp.regio_organiseert_teamcompetitie %}
+        // lijst met verenigingen
+        const team_pk2naam = {
+                0: '-',                         // nodig voor correct interpretatie template tag binnen javascript dict
+                {% for team in teams %}
+                    {{ team.pk }}: '{{ team.naam_str }}',
+                {% endfor %}
+        }
+        {% endif %}
+
         function opzoeken_toon_status(dataset, tekst, color)
         {
             for (let d in dataset)
             {
-                if (d != 'xhr' && d != 'opzoeken')
+                if (d !== 'xhr' && d !== 'opzoeken')
                 {
                     const id = dataset[d]
                     const el = document.getElementById(id)
 
                     // underscore aan het einde wordt gebruikt voor twee regels
                     // die onder elkaar staan, zodat de melding maar 1x getoond wordt
-                    if (id.slice(-1) == '_')
+                    if (id.slice(-1) === '_')
                     {
                         el.innerHTML = ""
                         el.style.color = color
@@ -120,11 +131,11 @@
         {
             //console.log('opzoeken_klaar: ready=',xhr.readyState, 'status=', xhr.status)
             let is_fail = true
-            if (xhr.readyState == XMLHttpRequest.DONE && xhr.status == 200)
+            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200)
             {
                 // verzoek is klaar en we hebben een antwoord
                 // responseText is leeg bij connection failure
-                if (xhr.responseText != "")
+                if (xhr.responseText !== "")
                 {
                     const rsp = JSON.parse(xhr.responseText)
                     //console.log('response:', rsp)
@@ -138,12 +149,18 @@
                     if (rsp['fail'] === undefined)
                     {
                         // toon het zoekresultaat
+                        let deelnemer = rsp['deelnemers'][0]
+                        //console.log('deelnemer:', deelnemer)
+
+                        //console.log('btn.dataset:', btn.dataset)
                         is_fail = false
-                        for (let d in btn.dataset)
+                        for (let d in btn.dataset)      // geeft keys
                         {
-                            if (d != 'xhr' && d != 'opzoeken')      // deze overslaan
+                            if (d !== 'xhr' && d !== 'opzoeken')      // deze keys overslaan
                             {
-                                const antwoord = rsp[d]
+                                // voor deze key de data uit de response halen
+                                let antwoord = rsp[d]
+
                                 if (antwoord !== undefined)
                                 {
                                     // zet het resultaat in het veld: naam, vereniging, regio
@@ -237,16 +254,11 @@
 
             const el_rsp = document.getElementById('id_zoekresultaat')
             const rsp = el_rsp.value
-            //console.log('zoekresultaat:', rsp)
+            //console.log('toevoegen: rsp:', rsp)
             el_rsp.value = ""
 
             const nhb_nr = rsp['nhb_nr']
-            const naam = rsp['naam']
-            const ver = rsp['vereniging']                   // "[1234] De Naam"
-            const ver_nr = ver.slice(0, 6)                  // "[1234]"
-            const ver_naam = "&nbsp;" + ver.slice(7)        // "De Naam"
-            let bogen = rsp['bogen']
-            //console.log(nhb_nr, naam, ver_nr, ver_naam)
+            let found_dupe = false
 
             // zoek het plekje in de tabel waar deze toegevoegd moet worden
             const table = document.getElementById('table1')
@@ -262,64 +274,61 @@
                 if (row_nhb_nr < nhb_nr) row_smaller = i
 
                 if (row_nhb_nr == nhb_nr)
-                {
-                    // al bestaande regel van deze sporter gevonden
-                    // verwijder deze boog uit het zoekresultaat
-                    const row_pk = row.cells[0].dataset.pk
-                    bogen.forEach(tup => {
-                        if (tup['pk'] == row_pk)
-                            tup['pk'] = -1     // markeer om niet toe te voegen
+                    // sporter zit al in de uitslag - selecteer deze regel en verder niets
+                    found_dupe = true
+            } // for
+
+            if (!found_dupe) {
+                // table filter uitzetten zodat de nieuwe regel getoond kan worden
+                // maak zoekveld leeg; dit triggert myTableFilter()
+                const el_filter = document.getElementById("table1_zoeken_input")
+                el_filter.value = ""
+                myTableFilter(el_filter, 'table1')
+
+                // voeg een regel(s) toe aan de tabel, op de juiste positie
+                // doe dit door een kopie te maken
+                const base_row = body.rows[0]       // regel om te clonen
+                let row = body.rows[row_smaller]
+                rsp['deelnemers'].forEach(deelnemer =>
+                    {
+                        const new_row = base_row.cloneNode(true)
+
+                        // verwijder attributen van de template die toegevoegd zijn door de tabel filter
+                        new_row.cells[0].removeAttribute("data-clean_text")
+                        new_row.cells[1].removeAttribute("data-clean_text")
+                        new_row.cells[2].removeAttribute("data-clean_text")
+
+                        // volgende statement is gelijk aan insertAfter, welke niet bestaat
+                        // werkt ook aan het einde van de tabel
+                        // zie https://stackoverflow.com/questions/4793604/how-to-insert-an-element-after-another-element-in-javascript-without-using-a-lib
+                        row.parentNode.insertBefore(new_row, row.nextSibling)
+
+                        // pas de nieuwe regel aan met de gevonden data
+                        new_row.cells[0].dataset.pk = deelnemer['pk']
+                        new_row.cells[0].innerHTML = nhb_nr
+
+                        new_row.cells[1].innerHTML = rsp['naam']
+
+                        let span = new_row.cells[2].firstChild
+                        span.innerHTML = "[" + rsp['ver_nr'] + "]"
+                        span.nextSibling.innerHTML = " " + rsp['ver_naam']    // hidden on small
+
+                        new_row.cells[3].innerHTML = deelnemer['boog']
+                        let vsg = deelnemer['vsg']
+                        if (vsg !== '') new_row.cells[3].innerHTML += ' (' + vsg + ')'
+
+                        {% if deelcomp.regio_organiseert_teamcompetitie %}
+                            let team_pk = deelnemer['team_pk']
+                            let team_naam = team_pk2naam[team_pk]
+                            new_row.cells[5].innerHTML = team_naam
+                        {% endif %}
+
+                        // maak de nieuwe row zichtbaar
+                        new_row.classList.remove('hide')
+
+                        row = new_row
                     })
-                }
-            } // for
-
-            // table filter uitzetten zodat de nieuwe regel getoond kan worden
-            // maak zoekveld leeg; dit triggert myTableFilter()
-            const el_filter = document.getElementById("table1_zoeken_input")
-            el_filter.value = ""
-            myTableFilter(el_filter, 'table1')
-
-            // voeg een regel(s) toe aan de tabel, op de juiste positie
-            // doe dit door een kopie te maken
-            const base_row = body.rows[0]       // regel om te clonen
-            let row = body.rows[row_smaller]
-            for (let i=0; i < bogen.length; i++)
-            {
-                let tup = bogen[i]
-                const new_row = base_row.cloneNode(true)
-
-                // verwijder attributen van de template die toegevoegd zijn door de tabel filter
-                new_row.cells[0].removeAttribute("data-clean_text")
-                new_row.cells[1].removeAttribute("data-clean_text")
-                new_row.cells[2].removeAttribute("data-clean_text")
-
-                const pk = tup['pk']
-                if (pk == -1)
-                    continue        // with the for
-                const boog = tup['boog']
-
-                // volgende statement is gelijk aan insertAfter, welke niet bestaat
-                // werkt ook aan het einde van de tabel
-                // zie https://stackoverflow.com/questions/4793604/how-to-insert-an-element-after-another-element-in-javascript-without-using-a-lib
-                row.parentNode.insertBefore(new_row, row.nextSibling)
-
-                // pas de nieuwe regel aan met de gevonden data
-                new_row.cells[0].innerHTML = nhb_nr
-                new_row.cells[0].dataset.pk = pk
-
-                new_row.cells[1].innerHTML = naam
-
-                let span = new_row.cells[2].firstChild
-                span.innerHTML = ver_nr
-                span.nextSibling.innerHTML = ver_naam
-
-                new_row.cells[3].innerHTML = boog
-
-                // maak de nieuwe row zichtbaar
-                new_row.classList.remove('hide')
-
-                row = new_row
-            } // for
+            }
 
             // scroll nieuwe regel into view + zet focus op invoer score
             body.rows[row_smaller + 1].cells[4].firstChild.focus()
@@ -344,9 +353,9 @@
         function opslaan_klaar(xhr)
         {
             //console.log('opslaan_klaar: ready=',xhr.readyState, 'status=', xhr.status)
-            if (xhr.readyState == XMLHttpRequest.DONE)
+            if (xhr.readyState === XMLHttpRequest.DONE)
             {
-                if (xhr.status == 200) {
+                if (xhr.status === 200) {
                     M.toast({html: 'De scores zijn opgeslagen'})
                 } else {
                     M.toast({html: 'Opslaan is NIET gelukt'})
@@ -361,7 +370,7 @@
             const body = table.tBodies[0]
 
             let obj = { wedstrijd_pk: {{ wedstrijd.pk }} }
-            // begin bij 1 om de clone-template over te slaan
+            // begin op row 1 om de clone-template over te slaan
             for (let i=1; i < body.rows.length; i++)
             {
                 let row = body.rows[i]
@@ -439,7 +448,7 @@
                     const row_pk = row.cells[0].dataset.pk
                     const row_nhb_nr = row.cells[0].innerText
 
-                    if (pk == row_pk)
+                    if (pk == row_pk)  // warning: breaks when changed to ===
                     {
                         // dit is een dubbele
                         skip = true
@@ -469,11 +478,18 @@
 
                     new_row.cells[1].innerHTML = deelnemer['naam']
 
-                    let span = new_row.cells[2].firstChild
+                    const span = new_row.cells[2].firstChild
                     span.innerHTML = "[" + deelnemer['ver_nr'] + "]"
-                    span.nextSibling.innerHTML = "&nbsp;" + deelnemer['ver_naam']
+                    span.nextSibling.innerHTML = " " + deelnemer['ver_naam']
 
                     new_row.cells[3].innerHTML = deelnemer['boog']
+                    const vsg = deelnemer['vsg']
+                    if (vsg !== '') new_row.cells[3].innerHTML += ' (' + vsg + ')'
+
+                    {% if deelcomp.regio_organiseert_teamcompetitie %}
+                    const team_pk = deelnemer['team_pk']
+                    new_row.cells[5].innerHTML = team_pk2naam[team_pk]
+                    {% endif %}
 
                     // volgende statement is gelijk aan insertAfter, welke niet bestaat
                     // werkt ook aan het einde van de tabel
@@ -500,7 +516,7 @@
                     // maak de nieuwe row zichtbaar
                     row.classList.remove('hide')
 
-                    if (i == first_added_row)
+                    if (i === first_added_row)
                         row.cells[4].firstChild.focus()
                 }
             }
@@ -508,15 +524,15 @@
 
         function deelnemers_ophalen_klaar(xhr, btn)
         {
-            let is_fail = true
+            //let is_fail = true
             //console.log('deelnemers_ophalen_klaar: ready=',xhr.readyState, 'status=', xhr.status)
-            if (xhr.readyState == XMLHttpRequest.DONE)
+            if (xhr.readyState === XMLHttpRequest.DONE)
             {
-                if (xhr.status == 200)
+                if (xhr.status === 200)
                 {
                     // verzoek is klaar en we hebben een antwoord
                     // responseText is leeg bij connection failure
-                    if (xhr.responseText != "")
+                    if (xhr.responseText !== "")
                     {
                         const rsp = JSON.parse(xhr.responseText)
                         deelnemers_ophalen_toevoegen(rsp)
@@ -578,12 +594,15 @@
                 <th data-filter="on">Vereniging</th>
                 <th data-filter="on">Boog type</th>
                 <th>Score</th>
+                {% if deelcomp.regio_organiseert_teamcompetitie %}
+                    <th>In team</th>
+                {% endif %}
             </tr>
         </thead>
 
         <!-- eerste regel van de body is een template om een 'clone' mee uit te voeren
              dit maakt ook de JS eenvoudiger omdat we nooit in hoeven te voegen voor row[0] -->
-        <!-- let op dat de tabel filter hier attributen aan toe zal voegen die we moeten verwijderen bij kopieren -->
+        <!-- let op dat de tabel filter hier attributen aan toe zal voegen die we moeten verwijderen bij kopiëren -->
         <tr class="hide">
             <td data-pk="0">000000</td>
             <td>dit is een niet zo korte naam</td>
@@ -593,6 +612,9 @@
             </td>
             <td>boogtype</td>
             <td><input type="text" oninput="controleer_score(this)" placeholder="0" value="" size="3" maxlength="3" style="width:3em; height:2rem; margin:0"></td>
+            {% if deelcomp.regio_organiseert_teamcompetitie %}
+                <td><!-- team name --></td>
+            {% endif %}
         </tr>
 
         {% for score in scores %}
@@ -603,14 +625,16 @@
                     <span>[{{ score.schutterboog.nhblid.bij_vereniging.ver_nr }}]</span>
                     <span class="hide-on-small-only">&nbsp;{{ score.schutterboog.nhblid.bij_vereniging.naam }}</span>
                 </td>
-                <td>{{ score.schutterboog.boogtype.beschrijving }}</td>
+                <td>{{ score.schutterboog.boogtype.beschrijving }}{% if score.vsg %} ({{ score.vsg }}){% endif %}</td>
                 <td><input type="text" oninput="controleer_score(this)" placeholder="0" value="{{ score.waarde }}" size="3" maxlength="3" style="width:3em; height:2rem; margin:0"></td>
+                {% if deelcomp.regio_organiseert_teamcompetitie %}
+                    <td>{{ score.team_naam }}</td>
+                {% endif %}
             </tr>
         {% endfor %}
 
-
-        <tr class="nhb-grijs" data-tablefilter="stop" style="border: 0px">
-            <td colspan="5" class="center-align">
+        <tr class="nhb-grijs" data-tablefilter="stop" style="border: 0">
+            <td colspan="{% if deelcomp.regio_organiseert_teamcompetitie %}6{% else %}5{% endif %}" class="center-align">
                 <button class="btn-nhb-blauw" onclick="deelnemers_ophalen(this)">Waarschijnlijke deelnemers toevoegen</button>
             </td>
         </tr>
@@ -618,7 +642,7 @@
         <!-- Hieronder: zoekveld voor ander lid (nhb-nr >> naam + vereniging) -->
 
         <tr class="nhb-grijs" data-tablefilter="stop">
-            <td colspan="5">
+            <td colspan="{% if deelcomp.regio_organiseert_teamcompetitie %}6{% else %}5{% endif %}">
                 <span>Gebruik onderstaand formulier om een ander bondsnummer toe te voegen</span>
             </td>
         </tr>
@@ -627,10 +651,10 @@
             <th>Bondsnummer</th>
             <th>Naam</th>
             <th>Vereniging</th>
-            <th colspan="2"></th>   <!-- kolom voor knop 'toevoegen' -->
+            <th colspan="{% if deelcomp.regio_organiseert_teamcompetitie %}3{% else %}2{% endif %}"></th>
         </tr>
 
-        <tr style="border: 0px">
+        <tr style="border: 0">
             <td>
                 <input id="id_nhbnr" type="text" placeholder="123456" size="6" maxlength="6" style="width:auto; margin:0">
                 <div id="id_zoekresultaat" style="display: none"></div>
@@ -647,7 +671,7 @@
                   <!-- underscore ^  onderdrukt status melding -->
             </td>
 
-            <td colspan="2">
+            <td colspan="{% if deelcomp.regio_organiseert_teamcompetitie %}3{% else %}2{% endif %}">
                 <button id="id_btn_toevoegen" class="btn-nhb-blauw" onclick="toevoegen()" disabled>
                     <i class="material-icons-round left">add</i>Toevoegen</button>
             </td>
@@ -658,7 +682,7 @@
                 <button class="btn-nhb-blauw" onclick="opzoeken(this)" data-opzoeken="id_nhbnr" data-naam="id_naam" data-vereniging="id_ver" data-regio="id_regio_">
                     <i class="material-icons-round left">search</i>Zoek</button>
             </td>
-            <td colspan="2"></td>
+            <td colspan="{% if deelcomp.regio_organiseert_teamcompetitie %}4{% else %}3{% endif %}"></td>
         </tr>
 
     </table>

@@ -13,6 +13,30 @@
   -webkit-tap-highlight-color: transparent; // Gets rid of tap active state
 }
 
+.btn-outline {
+  border: $button-outline-border-width $button-outline-border $button-outline-border-color;
+  border-radius: $button-radius;
+  display: inline-block;
+  white-space: nowrap;      // added to prevent text after icon from wrapping
+  height: $button-height;
+  line-height: $button-outline-height;
+  padding: $button-outline-padding;
+  text-decoration: none;
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: .5px;
+  vertical-align: middle;
+  -webkit-tap-highlight-color: transparent; // Gets rid of tap active state
+  background-color: $button-outline-background;
+  cursor: pointer;
+  transition: background-color .2s ease-in-out, color .5s ease-in-out;
+  &:hover {
+    background-color: $button-outline-background-focus;
+    color: $button-outline-text-focus;
+  }
+  @extend .z-depth-1;
+}
+
 // Disabled shared style
 .btn.disabled,
 .btn-floating.disabled,
@@ -42,6 +66,7 @@
 
 // Shared icon styles
 .btn,
+.btn-outline,
 .btn-floating,
 .btn-large,
 .btn-small,

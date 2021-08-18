@@ -6,6 +6,7 @@
 
 from django.http import Http404
 from django.urls import reverse
+from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
@@ -29,10 +30,15 @@ class LedenSchietmomentView(UserPassesTestMixin, TemplateView):
     template_name = TEMPLATE_LEDEN_SCHIETMOMENT
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+        self.functie_nu = None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        _, functie_nu = rol_get_huidige_functie(self.request)
-        return functie_nu and functie_nu.rol in ('HWL', 'WL')
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.functie_nu and self.functie_nu.rol in ('HWL', 'WL')
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -50,20 +56,33 @@ class LedenSchietmomentView(UserPassesTestMixin, TemplateView):
 
         context['deelcomp'] = deelcomp
 
-        # zoek alle dagdelen erbij
-        pks = list()
-        for ronde in (DeelcompetitieRonde
-                      .objects
-                      .select_related('deelcompetitie',
-                                      'plan')
-                      .prefetch_related('plan__wedstrijden')
-                      .filter(deelcompetitie=deelcomp)):
-            pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+        context['nhb_ver'] = self.functie_nu.nhb_ver
+
+        objs = (RegioCompetitieSchutterBoog
+                .objects
+                .select_related('schutterboog',
+                                'schutterboog__nhblid')
+                .prefetch_related('inschrijf_gekozen_wedstrijden')
+                .filter(deelcompetitie=deelcomp,
+                        bij_vereniging=self.functie_nu.nhb_ver)
+                .order_by('schutterboog__nhblid__voornaam',
+                          'schutterboog__nhblid__achternaam'))
+
+        context['object_list'] = objs
+
+        # toon alleen de wedstrijden die in gebruik zijn (anders wordt het zo veel)
+        wedstrijd_pks = list()
+        for obj in objs:
+            obj.pks = obj.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True)
+
+            for pk in obj.pks:
+                if pk not in wedstrijd_pks:
+                    wedstrijd_pks.append(pk)
         # for
 
         wedstrijden = (CompetitieWedstrijd
                        .objects
-                       .filter(pk__in=pks)
+                       .filter(pk__in=wedstrijd_pks)
                        .select_related('vereniging')
                        .order_by('datum_wanneer',
                                  'tijd_begin_wedstrijd'))
@@ -85,22 +104,9 @@ class LedenSchietmomentView(UserPassesTestMixin, TemplateView):
                                                                     wedstrijd.tijd_begin_wedstrijd,
                                                                     wedstrijd.vereniging.naam,
                                                                     wedstrijd.vereniging.plaats)
+
+            wedstrijd.waar_str = "%s in %s" % (wedstrijd.vereniging.naam, wedstrijd.vereniging.plaats)      # TODO: moet locatie.plaats zijn?!
         # for
-
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        context['nhb_ver'] = functie_nu.nhb_ver
-
-        objs = (RegioCompetitieSchutterBoog
-                .objects
-                .select_related('schutterboog',
-                                'schutterboog__nhblid')
-                .prefetch_related('inschrijf_gekozen_wedstrijden')
-                .filter(deelcompetitie=deelcomp,
-                        bij_vereniging=functie_nu.nhb_ver)
-                .order_by('schutterboog__nhblid__voornaam',
-                          'schutterboog__nhblid__achternaam'))
-
-        context['object_list'] = objs
 
         herhaal = 0
         for obj in objs:
@@ -112,21 +118,20 @@ class LedenSchietmomentView(UserPassesTestMixin, TemplateView):
             obj.nhb_nr = lid.nhb_nr
             obj.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
 
-            if rol_nu == Rollen.ROL_HWL:
+            if self.rol_nu == Rollen.ROL_HWL:
                 obj.url_wijzig = reverse('Schutter:schietmomenten',
                                          kwargs={'deelnemer_pk': obj.pk})
 
-            pks = obj.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True)
             obj.kruisjes = list()
             for index in range(aantal):
-                if index2pk[index] in pks:
+                if index2pk[index] in obj.pks:
                     obj.kruisjes.append('X')
                 else:
                     obj.kruisjes.append('')
             # for
         # for
 
-        if rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rollen.ROL_HWL:
             context['afmelden_url'] = reverse('Vereniging:leden-ingeschreven', kwargs={'deelcomp_pk': deelcomp.pk})
 
         menu_dynamics(self.request, context, actief='vereniging')

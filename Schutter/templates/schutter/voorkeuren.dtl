@@ -81,8 +81,8 @@
                 <tr>
                     <td>
                         <label>
-                            <input type="checkbox" class="filled-in" name="voorkeur_dt"{% if voorkeuren.voorkeur_dutchtarget_18m %} checked{% endif %}>
-                            <span class="black-text">Voorkeur voor Dutch Targets (zie uitleg onder aan de pagina)</span>
+                            <input type="checkbox" class="filled-in" name="voorkeur_eigen_blazoen"{% if voorkeuren.voorkeur_eigen_blazoen %} checked{% endif %}>
+                            <span class="black-text">Voorkeur voor eigen blazoen (zie uitleg onder aan de pagina)</span>
                         </label>
                     </td>
                 </tr>
@@ -212,7 +212,7 @@
     {% endif %}
 
         <br>
-        <button class="btn-nhb-blauw" type="submit">
+        <button class="btn-nhb-rood" type="submit">
             <i class="material-icons-round left">check</i>Voorkeuren opslaan</button>
     </form>
 
@@ -220,10 +220,10 @@
         <div class="container" style="margin-top:30px">
 
             <div class="white-text nhb-blauw z-depth-2" style="padding:20px">
-                <h6 class="center-align">Uitleg 'Voorkeur voor Dutch Target'</h6>
-                <p>De voorkeur voor Dutch Target / 3-spot is alleen van toepassing op Indoor wedstrijden op 18 meter waar normaal op 40cm blazoen geschoten wordt, zoals de Bondscompetities Individueel.</p>
+                <h6 class="center-align">Uitleg 'Voorkeur voor eigen blazoen'</h6>
+                <p>Deze voorkeur geeft aan dat je liever op een eigen Dutch Target 3-spot of een 60cm 4-spot wilt schieten in plaats van op een 40cm / 60cm blazoen waar tot 4 sporters op schieten.</p>
                 <p>Als je het vakje aankruist zal, waar mogelijk, jouw voorkeur worden doorgegeven aan de wedstrijdleider.</p>
-                <p>Noteer dat dit een voorkeur is, maar geen recht. Als er bijvoorbeeld geen ruimte is op de accommodatie, dan moet je toch op een 40cm blazoen schieten.</p>
+                <p>Noteer dat dit een voorkeur is, maar geen recht. Als er bijvoorbeeld geen ruimte is op de accommodatie, dan moet je toch op een gedeeld 40cm of 60cm blazoen schieten.</p>
             </div>
 
         </div>

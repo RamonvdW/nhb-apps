@@ -11,7 +11,7 @@ from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.e2ehelpers import E2EHelpers
 from Schutter.models import SchutterBoog
 from Functie.models import maak_functie
-from .models import (Competitie, DeelCompetitie, CompetitieKlasse, KampioenschapMutatie,
+from .models import (Competitie, DeelCompetitie, CompetitieKlasse, CompetitieMutatie,
                      INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3,
                      DAGDEEL_AFKORTINGEN)
 from .operations import (competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand,
@@ -372,11 +372,11 @@ class TestCompetitie(E2EHelpers, TestCase):
         # geen parameters nodig
         self.assertEqual(Competitie.objects.count(), 0)
         self.assertEqual(DeelCompetitie.objects.count(), 0)
-        self.assertEqual(0, KampioenschapMutatie.objects.count())
+        self.assertEqual(0, CompetitieMutatie.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmaken, {'snel': 1})
         self.assert_is_redirect(resp, self.url_kies)
-        self.assertEqual(1, KampioenschapMutatie.objects.count())       # voor achtergrondtaak
+        self.assertEqual(1, CompetitieMutatie.objects.count())       # voor achtergrondtaak
 
     def test_dubbel_aanmaken(self):
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -630,6 +630,10 @@ class TestCompetitie(E2EHelpers, TestCase):
             resp = self.client.post(self.url_klassegrenzen_vaststellen % 'xx')
         self.assert404(resp)
 
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_klassegrenzen_tonen % 999999)
+        self.assert404(resp)
+
     def test_klassegrenzen_tonen(self):
         # competitie opstarten
         self.e2e_login_and_pass_otp(self.account_bb)
@@ -677,6 +681,14 @@ class TestCompetitie(E2EHelpers, TestCase):
         # nog een keer
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_klassegrenzen_tonen % comp_25.pk)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/klassegrenzen-tonen.dtl', 'plein/site_layout.dtl'))
+        self.assertNotContains(resp, ' zijn nog niet vastgesteld')
+        self.assertNotContains(resp, 'De klassegrenzen voor de ')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_klassegrenzen_tonen % comp_18.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/klassegrenzen-tonen.dtl', 'plein/site_layout.dtl'))

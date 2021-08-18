@@ -268,4 +268,28 @@ class NhbLid(models.Model):
     objects = models.Manager()      # for the editor only
 
 
+class Speelsterkte(models.Model):
+    """ Deze tabel houdt de behaalde spelden/veren/schilden bij """
+
+    lid = models.ForeignKey(NhbLid, on_delete=models.CASCADE)
+
+    datum = models.DateField()
+
+    # beschrijving van de specifieke prestatiespeld (WA: 'award'): "Recurve 1000" of "NHB Graadspelden Schutter"
+    beschrijving = models.CharField(max_length=50)
+
+    # beschrijving van de discipline, zoals "Recurve" en "Compound"
+    # maar ook "World Archery Target Awards" en "NHB tussenspelden"
+    discipline = models.CharField(max_length=50)
+
+    # Senior / Master / Cadet
+    # sommige spelden zijn apart te behalen in verschillende categorieën
+    category = models.CharField(max_length=50)
+
+    # sorteer volgorde (lager = eerder tonen)
+    volgorde = models.PositiveSmallIntegerField()
+
+    def __str__(self):
+        return "[%s] %s - %s - %s - %s (%s) " % (self.datum, self.lid.volledige_naam(), self.category, self.discipline, self.beschrijving, self.volgorde)
+
 # end of file

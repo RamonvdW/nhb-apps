@@ -74,8 +74,12 @@ urlpatterns = [
          views_regio_teams.AGControleView.as_view(),
          name='regio-ag-controle'),
 
+    path('regio/<comp_pk>/teams/<subset>/',
+         views_regio_teams.RegioTeamsAlleView.as_view(),
+         name='regio-teams-alle'),
+
     path('regio/<deelcomp_pk>/teams/',
-         views_regio_teams.RegioTeamsView.as_view(),
+         views_regio_teams.RegioTeamsRCLView.as_view(),
          name='regio-teams'),
 
     path('regio/<deelcomp_pk>/poules/',
@@ -85,6 +89,11 @@ urlpatterns = [
     path('regio/poules/<poule_pk>/wijzig/',
          views_regio_teams.WijzigPouleView.as_view(),
          name='wijzig-poule'),
+
+    path('regio/<deelcomp_pk>/team-ronde/',
+         views_regio_teams.StartVolgendeTeamRondeView.as_view(),
+         name='start-volgende-team-ronde'),
+
 
     # ingeschreven
     path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/dagdeel-behoefte/',
@@ -225,30 +234,42 @@ urlpatterns = [
 
 
     # competitie uitslagen
-    path('<comp_pk>/uitslagen/<comp_boog>/vereniging/<ver_nr>/',
-         views_uitslagen.UitslagenVerenigingView.as_view(),
-         name='uitslagen-vereniging-n'),
+    path('<comp_pk>/uitslagen/<comp_boog>/vereniging/<ver_nr>/individueel/',
+         views_uitslagen.UitslagenVerenigingIndivView.as_view(),
+         name='uitslagen-vereniging-indiv-n'),
+
+    path('<comp_pk>/uitslagen/<team_type>/vereniging/<ver_nr>/teams/',
+         views_uitslagen.UitslagenVerenigingTeamsView.as_view(),
+         name='uitslagen-vereniging-teams-n'),
 
     # TODO: wordt deze gebruikt?
     path('<comp_pk>/uitslagen/<comp_boog>/vereniging/',
-         views_uitslagen.UitslagenVerenigingView.as_view(),
-         name='uitslagen-vereniging'),
+         views_uitslagen.UitslagenVerenigingIndivView.as_view(),
+         name='uitslagen-vereniging-indiv'),
 
-    path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio/<regio_nr>/',
-         views_uitslagen.UitslagenRegioView.as_view(),
-         name='uitslagen-regio-n'),
+    path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio-individueel/<regio_nr>/',
+         views_uitslagen.UitslagenRegioIndivView.as_view(),
+         name='uitslagen-regio-indiv-n'),
 
-    path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio/',
-         views_uitslagen.UitslagenRegioView.as_view(),
-         name='uitslagen-regio'),
+    path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio-individueel/',
+         views_uitslagen.UitslagenRegioIndivView.as_view(),
+         name='uitslagen-regio-indiv'),
 
-    path('<comp_pk>/uitslagen/<comp_boog>/rayon/',
-         views_uitslagen.UitslagenRayonView.as_view(),
-         name='uitslagen-rayon'),
+    path('<comp_pk>/uitslagen/<team_type>/regio-teams/',
+         views_uitslagen.UitslagenRegioTeamsView.as_view(),
+         name='uitslagen-regio-teams'),
 
-    path('<comp_pk>/uitslagen/<comp_boog>/rayon/<rayon_nr>/',
-         views_uitslagen.UitslagenRayonView.as_view(),
-         name='uitslagen-rayon-n'),
+    path('<comp_pk>/uitslagen/<team_type>/regio-teams/<regio_nr>/',
+         views_uitslagen.UitslagenRegioTeamsView.as_view(),
+         name='uitslagen-regio-teams-n'),
+
+    path('<comp_pk>/uitslagen/<comp_boog>/rayon-individueel/',
+         views_uitslagen.UitslagenRayonIndivView.as_view(),
+         name='uitslagen-rayon-indiv'),
+
+    path('<comp_pk>/uitslagen/<comp_boog>/rayon-individueel/<rayon_nr>/',
+         views_uitslagen.UitslagenRayonIndivView.as_view(),
+         name='uitslagen-rayon-indiv-n'),
 
     path('<comp_pk>/uitslagen/<comp_boog>/bond/',
          views_uitslagen.UitslagenBondView.as_view(),

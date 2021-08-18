@@ -33,13 +33,22 @@ urlpatterns = [
          name='overzicht'),
 
 
+    path('otp-koppelen-stap1/',
+         view_otp.OTPKoppelenStap1View.as_view(),
+         name="otp-koppelen-stap1"),
+
+    path('otp-koppelen-stap2/',
+         view_otp.OTPKoppelenStap2View.as_view(),
+         name="otp-koppelen-stap2"),
+
+    path('otp-koppelen-stap3/',
+         view_otp.OTPKoppelenStap3View.as_view(),
+         name="otp-koppelen-stap3"),
+
+
     path('otp-controle/',
          view_otp.OTPControleView.as_view(),
          name="otp-controle"),
-
-    path('otp-koppelen/',
-         view_otp.OTPKoppelenView.as_view(),
-         name="otp-koppelen"),
 
 
     path('activeer-functie/<str:functie_pk>/',

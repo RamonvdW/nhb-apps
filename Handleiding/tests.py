@@ -53,15 +53,15 @@ class TestHandleiding(E2EHelpers, TestCase):
 
     def test_reverse(self):
         with self.settings(ENABLE_WIKI=True, WIKI_URL='https://test.now/wiki/'):
-            url = reverse_handleiding(settings.HANDLEIDING_TOP)
+            url = reverse_handleiding(None, settings.HANDLEIDING_TOP)
             self.assertEqual(url, 'https://test.now/wiki/' + settings.HANDLEIDING_TOP)
 
         with self.settings(ENABLE_WIKI=True, WIKI_URL='https://test.now/wiki'):
-            url = reverse_handleiding(settings.HANDLEIDING_TOP)
+            url = reverse_handleiding(None, settings.HANDLEIDING_TOP)
             self.assertEqual(url, 'https://test.now/wiki/' + settings.HANDLEIDING_TOP)
 
         with self.settings(ENABLE_WIKI=False):
-            url = reverse_handleiding(settings.HANDLEIDING_TOP)
+            url = reverse_handleiding(None, settings.HANDLEIDING_TOP)
             self.assertEqual(url, '/handleiding/%s/' % settings.HANDLEIDING_TOP)
 
 # end of file

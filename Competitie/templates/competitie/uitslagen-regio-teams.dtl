@@ -1,0 +1,199 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Uitslagen regiocompetitie teams{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-regio-teams" %}
+
+    <h4>Uitslagen regiocompetitie teams</h4>
+
+    <p>Deze pagina toont de {% if comp.alle_regiocompetities_afgesloten %}eindstand{% else %}tussenstand{% endif %} van de regiocompetities teams.</p>
+
+
+    <p>Kies een team type:</p>
+
+    <div class="white shrink-wrap-5">
+        {% for teamtype in teamtype_filters %}
+            {% if teamtype.zoom_url %}
+                <a class="margin-5 btn-outline" href="{{ teamtype.zoom_url }}">{{ teamtype.beschrijving }}</a>
+            {% else %}
+                <a class="margin-5 btn-nhb-blauw" href="#">{{ teamtype.beschrijving }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+
+    <p>Kies een regio:</p>
+
+    <div class="white shrink-wrap-5">
+        {% for regio in regio_filters %}
+            {% if regio.break_before %}
+                <br>
+            {% endif %}
+            {% if regio.zoom_url %}
+                <a class="margin-5 btn-outline" href="{{ regio.zoom_url }}">{{ regio.title_str }}</a>
+            {% else %}
+                <a class="margin-5 btn-nhb-blauw" href="#">{{ regio.title_str }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    {% if ver_filters %}
+        <br><br>
+        <div class="row">
+            <div class="col s12 m6" style="padding:0">
+                <ul class="collapsible" style="box-shadow: none; border:0px">
+                    <li>
+                        <div class="collapsible-header white">Klik voor verenigingen</div>
+                        <div class="collapsible-body white">
+                            <span>Kies een vereniging:</span><br>
+                            {% for ver in ver_filters %}
+                                <p>
+                                <a class="btn-nhb-blauw" href="{{ ver.zoom_url }}">{{ ver.ver_nr }}</a>
+                                <span>&nbsp;&nbsp;{{ ver.naam }}</span>
+                                </p>
+                            {% endfor %}
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+
+    <p>&nbsp;</p>
+    <div class="row">
+
+        <!-- toon gegevens van de regio en competitie in een blauwe box -->
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
+
+                <div class="row small-row">
+                    <div class="col s3">Competitie:</div>
+                    <div class="col s7">{{ deelcomp.competitie.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Team type:</div>
+                    <div class="col s7">{{ teamtype.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Regio:</div>
+                    <div class="col s7">{{ regio }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p>&nbsp;</p>
+
+    <table class="white">
+        {% for team in teams %}
+            {% if forloop.first %}      <!-- alleen toevoegen als er teams zijn, anders probleem met colspan=2 -->
+                <!-- forceer gelijkmatige layout in de Scores kolommen -->
+                <tr style="visibility: collapse">
+                    <td colspan="2"><!-- rank, naam --></td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align smal">888</td>
+                    <td class="right-align hide-on-small-only">8888</td>
+                    <td class="right-align">88</td>
+                </tr>
+            {% endif %}
+
+            {% if team.break_poule %}
+                {% if team.schema %}
+                    <tr class="nhb-grijs">
+                        <td colspan="12">
+                            <h6>Wedstrijdschema</h6>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="12" style="padding:0">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th class="center-align">Ronde</th>
+                                        <th>Thuis team</th>
+                                        <th>Bezoekend team</th>
+                                    </tr>
+                                </thead>
+                                {% for ronde_nr, wedstrijden in team.schema %}
+                                    <tr>
+                                        <td class="center-align{% if deelcomp.huidige_team_ronde == ronde_nr %} nhb-blauw white-text{% endif %}">{{ ronde_nr }}</td>
+                                        <td>
+                                            {% for team1, team2 in wedstrijden %}{{ team1.team_str }}<br>{% endfor %}
+                                        </td>
+                                        <td>
+                                            {% for team1, team2 in wedstrijden %}{% if team2.team_str == '' %}<i class="grey-text">Bye</i>{% else %}{{ team2.team_str }}{% endif %}<br>{% endfor %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if not team.is_afsluiter %}
+                    <tr class="nhb-grijs">
+                        <td colspan="12">
+                            <br>
+                            {% if team.poule_str == '??' %}
+                                <h5 class="red-text">Nog niet in een poule geplaatst</h5>
+                            {% else %}
+                                <h5>{{ team.poule_str }}</h5>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endif %}
+
+            {% if team.break_klasse %}
+                <tr class="nhb-grijs">
+                    <td colspan="12"><h6>{{ team.klasse_str }}</h6></td>
+                </tr>
+                <tr>
+                    <th><!-- rank --></th>
+                    <th>Team</th>
+                    <th class="center-align" colspan="7">Scores</th>
+                    <th class="right-align hide-on-small-only">Totaal</th>
+                    <th class="right-align">Punten</th>
+                </tr>
+            {% endif %}
+
+            {% if not team.is_afsluiter %}
+                <tr>
+                    <td class="center-align smal">{{ team.rank }}</td>
+                    <td class="smal">{{ team.naam_str }}</td>
+                    {% for score in team.ronde_scores %}
+                        <td class="right-align smal">{{ score }}</td>
+                    {% endfor %}
+                    <td class="right-align hide-on-small-only">{{ team.totaal_score }}</td>
+                    <td class="right-align">{{ team.totaal_punten }}</td>
+                </tr>
+            {% endif %}
+
+        {% endfor %}
+    </table>
+
+    {% if not deelcomp.regio_organiseert_teamcompetitie %}
+        <p>Deze regio organiseert geen team competitie.</p>
+    {% endif %}
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

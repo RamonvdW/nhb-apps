@@ -103,12 +103,14 @@ class RegistreerNhbNummerView(TemplateView):
                 context = {'sec_email': '',
                            'sec_naam': '',
                            'email_bb': settings.EMAIL_BONDSBURO}
-                ver = exc.nhblid.bij_vereniging     # gegarandeerd !None
-                sec_lid = ver.secretaris_lid
-                if sec_lid:
-                    context['sec_naam'] = sec_lid.volledige_naam()
-                functie = Functie.objects.get(rol='SEC', nhb_ver=ver)
-                context['sec_email'] = functie.bevestigde_email
+                ver = exc.nhblid.bij_vereniging
+                if ver:
+                    sec_lid = ver.secretaris_lid
+                    if sec_lid:
+                        context['sec_naam'] = sec_lid.volledige_naam()
+
+                    functie = Functie.objects.get(rol='SEC', nhb_ver=ver)
+                    context['sec_email'] = functie.bevestigde_email
 
                 menu_dynamics(request, context)
                 return render(request, TEMPLATE_REGISTREER_GEEN_EMAIL, context)

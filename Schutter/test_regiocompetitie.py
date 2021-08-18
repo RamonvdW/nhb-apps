@@ -139,7 +139,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Dutch Target')
+        self.assertContains(resp, 'eigen blazoen')
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % (deelcomp.pk, schutterboog.pk))
@@ -175,7 +175,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, 'Dutch Target')
+        self.assertNotContains(resp, 'eigen blazoen')
 
         # uitzondering: AG score zonder hist
         res = score_indiv_ag_opslaan(schutterboog, 18, 7.18, None, 'Test 2')
@@ -201,7 +201,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, 'Dutch Target')
+        self.assertNotContains(resp, 'eigen blazoen')
 
         # schrijf in voor de 25m BB, zonder AG
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
@@ -524,7 +524,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Dutch Target')
+        self.assertContains(resp, 'eigen blazoen')
         self.assertContains(resp, 'Zaterdag')
         self.assertContains(resp, 'Zondagmiddag')
         self.assertNotContains(resp, 's Avonds')
@@ -595,7 +595,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Dutch Target')
+        self.assertContains(resp, 'eigen blazoen')
         self.assertContains(resp, 'Zaterdag')
         self.assertContains(resp, 'Zondag')
         self.assertContains(resp, 's Avonds')
@@ -721,7 +721,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
         # wijzig de instellingen van deze wedstrijd
         url_wed = self.url_wijzig_wedstrijd % wedstrijd_pk
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(20):
             resp = self.client.post(url_wed, {'nhbver_pk': self.nhbver.pk,
                                               'wanneer': '2020-12-11', 'aanvang': '12:34'})
         self.assert_is_redirect(resp, url_ronde)
@@ -748,7 +748,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('schutter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Dutch Target')
+        self.assertContains(resp, 'eigen blazoen')
         self.assertContains(resp, 'Kies wanneer je wilt schieten')
         self.assertContains(resp, '11 december 2020 om 12:34')
 

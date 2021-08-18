@@ -22,9 +22,9 @@
         <div class="white shrink-wrap-5">
             {% for obj in geslacht %}
                 {% if obj.url %}
-                    <a class="margin-5 btn-nhb-blauw btn-small" href="{{ obj.url }}">{{ obj.button_str }}</a>
+                    <a class="margin-5 btn-outline" href="{{ obj.url }}">{{ obj.button_str }}</a>
                 {% else %}
-                    <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ obj.button_str }}</a>
+                    <a class="margin-5 btn-nhb-blauw" href="#">{{ obj.button_str }}</a>
                 {% endif %}
             {% endfor %}
         </div>
@@ -34,9 +34,9 @@
         <div class="white shrink-wrap-5">
             {% for obj in bogen %}
                 {% if obj.url %}
-                    <a class="margin-5 btn-nhb-blauw btn-small" href="{{ obj.url }}">{{ obj.button_str }}</a>
+                    <a class="margin-5 btn-outline" href="{{ obj.url }}">{{ obj.button_str }}</a>
                 {% else %}
-                    <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ obj.button_str }}</a>
+                    <a class="margin-5 btn-nhb-blauw" href="#">{{ obj.button_str }}</a>
                 {% endif %}
             {% endfor %}
         </div>
@@ -46,9 +46,9 @@
         <div class="white shrink-wrap-5">
             {% for obj in leeftijd %}
                 {% if obj.url %}
-                    <a class="margin-5 btn-nhb-blauw btn-small" href="{{ obj.url }}">{{ obj.button_str }}</a>
+                    <a class="margin-5 btn-outline" href="{{ obj.url }}">{{ obj.button_str }}</a>
                 {% else %}
-                    <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ obj.button_str }}</a>
+                    <a class="margin-5 btn-nhb-blauw" href="#">{{ obj.button_str }}</a>
                 {% endif %}
             {% endfor %}
         </div>
@@ -94,14 +94,21 @@
 
     <p>&nbsp;</p>
     <h5>Nieuw record aanvragen?</h5>
+    <div class="row white">
+        <div class="col s12">
+            <p>Om een nieuw record aan te vragen moet je de volgende stappen doorlopen:</p>
+            <p>&nbsp;1. Wedstrijd moet de A-status hebben;</p>
+            <p>&nbsp;2. Scorebriefje door de scheidsrechter laten controleren en ondertekenen;</p>
+            <p>&nbsp;3. Aanvraagformulier invullen en samen met de scorebriefjes naar het bondsbureau sturen.</p>
 
-    <p>Om een nieuw record aan te vragen moet je de volgende stappen doorlopen:</p>
-    <p>&nbsp;1. Wedstrijd moet de A-status hebben;</p>
-    <p>&nbsp;2. Scorebriefje door de scheidsrechter laten controleren en ondertekenen;</p>
-    <p>&nbsp;3. Aanvraagformulier invullen en samen met de scorebriefjes naar het bondsbureau sturen.</p>
-
-    <p>&nbsp;</p>
-    <p>Directe link naar het aanvraagformulier: <a class="btn-nhb-blauw" href="https://docs.google.com/spreadsheets/d/1hTMVLe_HmMqCdOeoauW7n8PFf0CvuEXORX7gRWzqLoA/edit?usp=sharing" target="_blank" rel="noopener noreferrer">Openen</a></p>
-    <p>Mocht deze niet werken, kijk dan <code>www.handboogsport.nl</code> onder Procedures: <a class="btn-nhb-blauw" href="https://www.handboogsport.nl/de-nhb/#procedures" target="_blank" rel="noopener noreferrer">Link</a></p>
+            <p>&nbsp;</p>
+            <p>Directe link naar het aanvraagformulier:
+                <a class="btn-nhb-blauw" href="https://docs.google.com/spreadsheets/d/1hTMVLe_HmMqCdOeoauW7n8PFf0CvuEXORX7gRWzqLoA/edit?usp=sharing" target="_blank" rel="noopener noreferrer">
+                    <i class="material-icons-round left">open_in_new</i>Openen</a></p>
+            <p>Mocht deze niet werken, kijk dan <code>www.handboogsport.nl</code> onder Procedures:
+                <a class="btn-nhb-blauw" href="https://www.handboogsport.nl/de-nhb/#procedures" target="_blank" rel="noopener noreferrer">
+                    <i class="material-icons-round left">open_in_new</i>Link</a></p>
+        </div>
+    </div>
 
 {% endblock %}

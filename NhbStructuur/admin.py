@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import NhbRayon, NhbRegio, NhbCluster, NhbLid, NhbVereniging
+from .models import NhbRayon, NhbRegio, NhbCluster, NhbLid, NhbVereniging, Speelsterkte
 
 
 class NhbLidAdmin(admin.ModelAdmin):
@@ -84,9 +84,22 @@ class NhbClusterAdmin(admin.ModelAdmin):
     list_select_related = ('regio',)
 
 
+class SpeelsterkteAdmin(admin.ModelAdmin):
+    """ Admin configuratie voor Speelsterkte klasse """
+
+    search_fields = ('beschrijving', 'category', 'discipline', 'lid__unaccented_naam')
+
+    list_filter = ('discipline', 'beschrijving', 'category')
+
+    readonly_fields = ('lid',)
+
+    list_select_related = True
+
+
 admin.site.register(NhbLid, NhbLidAdmin)
 admin.site.register(NhbVereniging, NhbVerenigingAdmin)
 admin.site.register(NhbCluster, NhbClusterAdmin)
+admin.site.register(Speelsterkte, SpeelsterkteAdmin)
 
 # NhbRayon en NhbRegio zijn hard-coded, dus geen admin interface
 # hard-coded data: zie NhbStructuur/migrations/m00??_nhbstructuur_20??

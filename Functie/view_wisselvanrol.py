@@ -11,6 +11,7 @@ from django.views.generic import ListView, TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.otp import account_otp_is_gekoppeld
 from Account.rechten import account_rechten_is_otp_verified
+from Competitie.menu import get_url_voor_competitie
 from Handleiding.views import reverse_handleiding
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
@@ -52,6 +53,15 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
 
         return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
+
+    def dispatch(self, request, *args, **kwargs):
+        """ wegsturen naar tweede factor koppelen uitleg """
+
+        if request.user.is_authenticated:
+            if not account_otp_is_gekoppeld(request.user):
+                return redirect('Functie:otp-koppelen-stap1')
+
+        return super().dispatch(request, *args, **kwargs)
 
     @staticmethod
     def _functie_volgorde(functie):
@@ -223,26 +233,20 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+
         context['show_vhpg'], context['vhpg'] = account_needs_vhpg(self.request.user)
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
-        if account_rechten_is_otp_verified(self.request):
-            context['show_otp_controle'] = False
-            context['show_otp_koppelen'] = False
-        else:
-            if account_otp_is_gekoppeld(self.request.user):
-                context['show_otp_koppelen'] = False
-                context['show_otp_controle'] = True
-            else:
-                context['show_otp_koppelen'] = True
-                context['show_otp_controle'] = False
+        # als we hier komen weten is de tweede factor gekoppeld is
+        # de controle van de tweede factor moet misschien nog uitgevoerd worden
+        context['show_otp_controle'] = not account_rechten_is_otp_verified(self.request)
 
-        if context['show_otp_koppelen'] or context['show_vhpg']:
+        if context['show_vhpg']:
             context['show_beheerder_intro'] = True
 
-        context['wiki_2fa_url'] = reverse_handleiding(settings.HANDLEIDING_2FA)
-        context['wiki_rollen'] = reverse_handleiding(settings.HANDLEIDING_ROLLEN)
-        context['wiki_intro_nieuwe_beheerders'] = reverse_handleiding(settings.HANDLEIDING_INTRO_NIEUWE_BEHEERDERS)
+        context['wiki_2fa_url'] = reverse_handleiding(self.request, settings.HANDLEIDING_2FA)
+        context['wiki_rollen'] = reverse_handleiding(self.request, settings.HANDLEIDING_ROLLEN)
+        context['wiki_intro_nieuwe_beheerders'] = reverse_handleiding(self.request, settings.HANDLEIDING_INTRO_NIEUWE_BEHEERDERS)
 
         # login-as functie voor IT beheerder
         if self.rol_nu == Rollen.ROL_IT:
@@ -331,12 +335,19 @@ class ActiveerRolView(UserPassesTestMixin, View):
 
         # stuur een aantal rollen door naar een functionele pagina
         # de rest blijft in Wissel van Rol
-        rol = rol_get_huidige(request)
+        rol_nu, functie_nu = rol_get_huidige_functie(request)
+
         # if rol == Rollen.ROL_BB:
         #     return redirect('Competitie:kies')
 
-        if rol in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
+        if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
             return redirect('Vereniging:overzicht')
+
+        if rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+            url = get_url_voor_competitie(functie_nu)
+            # print('rol=%s, comp_type=%s, url=%s' % (functie_nu.rol, functie_nu.comp_type, url))
+            if url:
+                return redirect(url)
 
         return redirect('Functie:wissel-van-rol')
 

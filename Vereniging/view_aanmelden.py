@@ -18,11 +18,12 @@ from Competitie.models import (AG_NUL, DAGDELEN, DAGDEEL_AFKORTINGEN,
                                RegioCompetitieSchutterBoog)
 from Competitie.operations import KlasseBepaler
 from Functie.rol import Rollen, rol_get_huidige_functie
-from NhbStructuur.models import NhbLid
+from NhbStructuur.models import NhbLid, NhbVereniging, NhbCluster
 from Plein.menu import menu_dynamics
 from Schutter.models import SchutterBoog, SchutterVoorkeuren
 from Score.models import Score, SCORE_TYPE_INDIV_AG
 from Wedstrijden.models import CompetitieWedstrijd
+from decimal import Decimal
 import copy
 
 
@@ -135,7 +136,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                       .select_related('schutterboog')
                       .filter(type=SCORE_TYPE_INDIV_AG,
                               afstand_meter=comp.afstand)):
-            ag = score.waarde / 1000
+            ag = Decimal(score.waarde) / 1000
             ag_dict[score.schutterboog.pk] = ag
         # for
 
@@ -223,7 +224,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['nhb_ver'] = self.functie_nu.nhb_ver
+        context['nhb_ver'] = hwl_ver = self.functie_nu.nhb_ver
         # rol is HWL (zie test_func)
 
         # splits the ledenlijst op in jeugd, senior en inactief
@@ -259,22 +260,55 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             methode = deelcomp.inschrijf_methode
 
             if methode == INSCHRIJF_METHODE_1:
+                # toon de HWL alle wedstrijden in de regio, dus alle clusters
                 pks = list()
                 for ronde in (DeelcompetitieRonde
                               .objects
                               .select_related('plan')
                               .filter(deelcompetitie=deelcomp)):
-                    # toon de HWL alle wedstrijden in de regio, dus alle clusters
                     pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
                 # for
 
                 wedstrijden = (CompetitieWedstrijd
                                .objects
                                .filter(pk__in=pks)
+                               .exclude(vereniging__isnull=True)        # voorkom wedstrijd niet toegekend aan vereniging
                                .select_related('vereniging')
                                .order_by('datum_wanneer',
                                          'tijd_begin_wedstrijd'))
-                context['wedstrijden'] = wedstrijden
+
+                # splits de wedstrijden op naar in-cluster en out-of-cluster
+                ver_in_hwl_cluster = dict()     # [ver_nr] = True/False
+                for cluster in (hwl_ver
+                                .clusters
+                                .prefetch_related('nhbvereniging_set')
+                                .filter(gebruik=self.comp.afstand)
+                                .all()):
+                    ver_nrs = list(cluster.nhbvereniging_set.values_list('ver_nr', flat=True))
+                    for ver_nr in ver_nrs:
+                        ver_in_hwl_cluster[ver_nr] = True
+                    # for
+                # for
+
+                wedstrijden1 = list()
+                wedstrijden2 = list()
+                for wedstrijd in wedstrijden:
+                    try:
+                        in_cluster = ver_in_hwl_cluster[wedstrijd.vereniging.ver_nr]
+                    except KeyError:
+                        in_cluster = False
+
+                    if in_cluster:
+                        wedstrijden1.append(wedstrijd)
+                    else:
+                        wedstrijden2.append(wedstrijd)
+                # for
+
+                if len(wedstrijden1):
+                    context['wedstrijden_1'] = wedstrijden1
+                    context['wedstrijden_2'] = wedstrijden2
+                else:
+                    context['wedstrijden_1'] = wedstrijden2
 
             if methode == INSCHRIJF_METHODE_3:
                 context['dagdelen'] = DAGDELEN
@@ -425,7 +459,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 for score in Score.objects.filter(schutterboog=schutterboog,
                                                   afstand_meter=comp.afstand,
                                                   type=SCORE_TYPE_INDIV_AG):
-                    ag = score.waarde / 1000
+                    ag = Decimal(score.waarde) / 1000
                     aanmelding.ag_voor_indiv = ag
                     aanmelding.ag_voor_team = ag
                     aanmelding.ag_voor_team_mag_aangepast_worden = False
@@ -434,8 +468,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 # zoek een toepasselijke klasse aan de hand van de leeftijd
                 try:
                     bepaler.bepaal_klasse_deelnemer(aanmelding)
-                except LookupError:
-                    raise Http404('Geen passende klasse')
+                except LookupError as exc:
+                    raise Http404(str(exc))
 
                 # kijk of de schutter met een team mee wil en mag schieten voor deze competitie
                 if age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and dvl < udvl:

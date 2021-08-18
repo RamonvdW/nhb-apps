@@ -49,6 +49,14 @@ urlpatterns = [
          view_teams.WijzigRegioTeamsView.as_view(),
          name='teams-regio-wijzig'),
 
+    path('teams/regio/<deelcomp_pk>/invallers/',
+         view_teams.TeamsRegioInvallersView.as_view(),
+         name='teams-regio-invallers'),
+
+    path('teams/regio/invallers-koppelen/<ronde_team_pk>/',
+         view_teams.TeamsRegioInvallersKoppelLedenView.as_view(),
+         name='teams-regio-invallers-koppelen'),
+
     path('teams/regio/<deelcomp_pk>/',
          view_teams.TeamsRegioView.as_view(),
          name='teams-regio'),
@@ -85,6 +93,10 @@ urlpatterns = [
     path('regio-clusters/',
          view_clusters.WijzigClustersView.as_view(),
          name='clusters'),
+
+    path('wedstrijden/<wedstrijd_pk>/waarschijnlijke-deelnemers/',
+         view_wedstrijden.WaarschijnlijkeDeelnemersView.as_view(),
+         name='waarschijnlijke-deelnemers'),
 
     path('wedstrijden/',
          view_wedstrijden.WedstrijdenView.as_view(),

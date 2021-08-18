@@ -9,9 +9,15 @@ export PYTHONDONTWRITEBYTECODE=1
 DEBUG=0
 [ "$1" = "--debug" ] && DEBUG=1
 
-# start the background process
-echo "[INFO] Starting kampioenschap_mutaties (runtime: 60 minutes)"
-./manage.py kampioenschap_mutaties 60 &
+# start the background processes
+echo "[INFO] Starting regiocomp_mutaties (runtime: 60 minutes)"
+pkill -f regiocomp_mutaties
+./manage.py regiocomp_mutaties 60 &
+sleep 1
+
+echo "[INFO] Starting regiocomp_tussenstand (runtime: 60 minutes)"
+pkill -f regiocomp_tussenstand
+./manage.py regiocomp_tussenstand 60 &
 sleep 1
 
 # start the development webserver
@@ -26,8 +32,9 @@ else
     ./manage.py runserver --settings=nhbapps.settings --insecure
 fi
 
-# kill the background process
-echo "[INFO] Stopping kampioenschap_mutaties"
-pkill -f kampioenschap_mutaties
+# kill the background processes
+echo "[INFO] Stopping background tasks"
+pkill -f regiocomp_mutaties
+pkill -f regiocomp_tussenstand
 
 # end of file

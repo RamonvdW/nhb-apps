@@ -25,10 +25,21 @@ class AccommodatieDetailsForm(forms.Form):
                             min_value=0,
                             max_value=25)
 
-    max_dt = forms.IntegerField(
+	# FUTURE: remove this option
+    # max_dt = forms.IntegerField(
+    #                         required=False,
+    #                         min_value=3,
+    #                         max_value=4)
+
+    max_sporters_18m = forms.IntegerField(
                             required=False,
-                            min_value=3,
-                            max_value=4)
+                            min_value=0,
+                            max_value=99)
+
+    max_sporters_25m = forms.IntegerField(
+                            required=False,
+                            min_value=0,
+                            max_value=99)
 
     notities = forms.CharField(
                             required=False,

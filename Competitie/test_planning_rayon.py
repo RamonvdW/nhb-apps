@@ -15,7 +15,7 @@ from Score.models import Score
 from Wedstrijden.models import WedstrijdLocatie, CompetitieWedstrijdUitslag
 from .models import (Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
                      KampioenschapSchutterBoog, CompetitieKlasse, DeelcompetitieKlasseLimiet,
-                     KampioenschapMutatie, DEELNAME_NEE, DEELNAME_JA, INSCHRIJF_METHODE_1,
+                     CompetitieMutatie, DEELNAME_NEE, DEELNAME_JA, INSCHRIJF_METHODE_1,
                      RegioCompetitieSchutterBoog)
 from .operations import competities_aanmaken
 import datetime
@@ -39,7 +39,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('kampioenschap_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+            management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
         if show:                    # pragma: no coverage
             print(f1.getvalue())
@@ -170,14 +170,17 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.klasse_r = CompetitieKlasse.objects.filter(competitie=self.comp_18,
                                                         indiv__is_onbekend=False,
                                                         indiv__niet_voor_rk_bk=False,
+                                                        indiv__volgorde=100,            # Recurve klasse 1
                                                         indiv__boogtype__afkorting='R')[0]
         self.klasse_c = CompetitieKlasse.objects.filter(competitie=self.comp_18,
                                                         indiv__is_onbekend=False,
                                                         indiv__niet_voor_rk_bk=False,
+                                                        indiv__volgorde=201,            # Compound klasse 2
                                                         indiv__boogtype__afkorting='C')[0]
         self.klasse_ib = CompetitieKlasse.objects.filter(competitie=self.comp_18,
                                                          indiv__is_onbekend=False,
                                                          indiv__niet_voor_rk_bk=False,
+                                                         indiv__volgorde=400,           # IB klasse 1
                                                          indiv__boogtype__afkorting='IB')[0]
 
         # maak nog een test vereniging, zonder HWL functie
@@ -815,27 +818,27 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
 
-        self.assertEqual(KampioenschapMutatie.objects.count(), 0)
+        self.assertEqual(CompetitieMutatie.objects.count(), 0)
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': '0', 'afmelden': '0', 'snel': 1})
-        self.assertEqual(KampioenschapMutatie.objects.count(), 0)
+        self.assertEqual(CompetitieMutatie.objects.count(), 0)
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': '0', 'afmelden': '1', 'snel': 1})
-        self.assertEqual(KampioenschapMutatie.objects.count(), 1)
+        self.assertEqual(CompetitieMutatie.objects.count(), 1)
 
         # bevestigen mag niet, want geen lid bij vereniging
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': '1', 'afmelden': '0', 'snel': 1})
-        self.assertEqual(KampioenschapMutatie.objects.count(), 1)
+        self.assertEqual(CompetitieMutatie.objects.count(), 1)
 
         # verbouw 'time' en voer een test uit zonder 'snel'
         time.sleep = self._dummy_sleep
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': '0', 'afmelden': '1'})
         time.sleep = sleep_oud
-        self.assertEqual(KampioenschapMutatie.objects.count(), 2)
+        self.assertEqual(CompetitieMutatie.objects.count(), 2)
 
     def test_wijzig_status_hwl(self):
         # HWL
@@ -990,12 +993,12 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
                                               klasse=self.klasse_r)
         deelnemer.save()
 
-        aantal = KampioenschapMutatie.objects.count()
+        aantal = CompetitieMutatie.objects.count()
         with self.assert_max_queries(20):
             resp = self.client.post(url, {sel: 4, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self._verwerk_mutaties()
-        self.assertEqual(KampioenschapMutatie.objects.count(), aantal + 1)
+        self.assertEqual(CompetitieMutatie.objects.count(), aantal + 1)
 
     def test_geen_vereniging(self):
         # deelnemer regiocompetitie is nu zonder vereniging

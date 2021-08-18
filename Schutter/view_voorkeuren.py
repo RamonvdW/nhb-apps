@@ -103,10 +103,10 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
 
         voorkeuren, _ = SchutterVoorkeuren.objects.get_or_create(nhblid=nhblid)
 
-        old_dutchtarget_18m = voorkeuren.voorkeur_dutchtarget_18m
-        voorkeuren.voorkeur_dutchtarget_18m = False
-        if request.POST.get('voorkeur_dt', None):
-            voorkeuren.voorkeur_dutchtarget_18m = True
+        old_eigen_blazoen = voorkeuren.voorkeur_eigen_blazoen
+        voorkeuren.voorkeur_eigen_blazoen = False
+        if request.POST.get('voorkeur_eigen_blazoen', None):
+            voorkeuren.voorkeur_eigen_blazoen = True
 
         old_voorkeur_meedoen_competitie = voorkeuren.voorkeur_meedoen_competitie
         voorkeuren.voorkeur_meedoen_competitie = False
@@ -114,9 +114,9 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             voorkeuren.voorkeur_meedoen_competitie = True
 
         if (old_voorkeur_meedoen_competitie != voorkeuren.voorkeur_meedoen_competitie or
-                old_dutchtarget_18m != voorkeuren.voorkeur_dutchtarget_18m):
+                old_eigen_blazoen != voorkeuren.voorkeur_eigen_blazoen):
             # wijzigingen opslaan
-            voorkeuren.save(update_fields=['voorkeur_dutchtarget_18m', 'voorkeur_meedoen_competitie'])
+            voorkeuren.save(update_fields=['voorkeur_eigen_blazoen', 'voorkeur_meedoen_competitie'])
 
         if nhblid.para_classificatie:
             para_notitie = request.POST.get('para_notitie', '')

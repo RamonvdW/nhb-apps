@@ -170,6 +170,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
 
         # niet bestaande wedstrijd
         with self.assert_max_queries(20):

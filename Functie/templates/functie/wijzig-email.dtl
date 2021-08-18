@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,77 +10,82 @@
 {% block title %}Wijzig e-mailadres{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-wijzig-email" %}
 
-<h4>Wijzig e-mailadres</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-wijzig-email" %}
 
-<p>Wijzig het e-mailadres waarop de beheerders voor de functie <b>{{ functie.beschrijving }}</b> bereikt kunnen worden.</p>
+    <h4>Wijzig e-mailadres</h4>
 
-<div class="row white">
-    <div class="col s12">
-        <p>
-        <span>Huidige (bevestigde) e-mailadres: </span>
-        {% if functie.bevestigde_email %}
-            <code>{{ functie.bevestigde_email }}</code>
-        {% else %}
-            <span><i class="red-text">Geen</i></span>
-        {% endif %}
-        </p>
-    </div>
-</div>
+    <p>Wijzig het e-mailadres waarop de beheerders voor de functie <b>{{ functie.beschrijving }}</b> bereikt kunnen worden.</p>
 
-{% if functie.nieuwe_email %}
-    <h5>Let op!</h5>
-    <p>Er is al een nieuw e-mailadres ingevoerd (<code>{{ functie.nieuwe_email }}</code>), maar deze is nog niet bevestigd. Volg de instructies in de e-mail om de bevestiging af te ronden.</p>
-    <p>Ondanks dit is het is ook mogelijk om een nieuw e-mailadres op te geven.</p>
-{% endif %}
-
-<div class="container z-depth-2 white">
-
-    <div class="row nav nhb-blauw white-text">
-        <div class="col s12 center">
-            <h5>E-mailadres wijzigen</h5>
-            <p>voor beheerders van een functie/rol</p>
-        </div>
-    </div>
-
-    <div class="row">
+    <div class="row white">
         <div class="col s12">
-            <span>Voer het nieuwe e-mailadres in</span>
-        </div>
-    </div>
-
-    <div class="row">
-        <form class="col s12" action="{{ form_submit_url }}" method="post">
-            {% csrf_token %}
-
-            {{ form.email.label_tag }}{{ form.email }}
-
-            {% if form.errors %}
-                <p class="red-text">
-                    <span>Fout: </span>
-                    {% for error in form.non_field_errors %}
-                        <span>{{ error|escape }}</span>
-                    {% endfor %}
-                </p>
+            <p>
+            <span>Huidige (bevestigde) e-mailadres: </span>
+            {% if functie.bevestigde_email %}
+                <code>{{ functie.bevestigde_email }}</code>
+            {% else %}
+                <span><i class="red-text">Geen</i></span>
             {% endif %}
-
-            <p>&nbsp;</p>
-            <div class="center-align">
-                <button class="btn-nhb-rood" type="submit"><i class="material-icons-round left">check</i>Opslaan</button>
-            </div>
-        </form>
-    </div>
-
-    <div class="row">
-        <div class="col s12">
-            <p>Na het opslaan wordt een e-mail gestuurd naar het opgegeven adres. Volg de instructies in de e-mail om het adres te bevestigen.</p>
+            </p>
         </div>
     </div>
 
-</div>
+    {% if functie.nieuwe_email %}
+        <h5>Let op!</h5>
+        <p>Er is al een nieuw e-mailadres ingevoerd (<code>{{ functie.nieuwe_email }}</code>), maar deze is nog niet bevestigd. Volg de instructies in de e-mail om de bevestiging af te ronden.</p>
+        <p>Ondanks dit is het is ook mogelijk om een nieuw e-mailadres op te geven.</p>
+    {% endif %}
 
-<p><a class="btn-nhb-blauw margin-5" href="{{ terug_url }}"><i class="material-icons-round left">arrow_back</i>Terug (niet opslaan)</a></p>
+    <div class="container z-depth-2 white">
+
+        <div class="row nav nhb-blauw white-text">
+            <div class="col s12 center">
+                <h5>E-mailadres wijzigen</h5>
+                <p>voor beheerders van een functie/rol</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s12">
+                <span>Voer het nieuwe e-mailadres in</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <form class="col s12" action="{{ form_submit_url }}" method="post">
+                {% csrf_token %}
+
+                {{ form.email.label_tag }}{{ form.email }}
+
+                {% if form.errors %}
+                    <p class="red-text">
+                        <span>Fout: </span>
+                        {% for error in form.non_field_errors %}
+                            <span>{{ error|escape }}</span>
+                        {% endfor %}
+                    </p>
+                {% endif %}
+
+                <p>&nbsp;</p>
+                <div class="center-align">
+                    <button class="btn-nhb-blauw" type="submit">
+                        <i class="material-icons-round left">check</i>Opslaan</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="row">
+            <div class="col s12">
+                <p>Na het opslaan wordt een e-mail gestuurd naar het opgegeven adres. Volg de instructies in de e-mail om het adres te bevestigen.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <p>
+        <a class="btn-nhb-blauw margin-5" href="{{ terug_url }}">
+            <i class="material-icons-round left">arrow_back</i>Terug (niet opslaan)</a>
+    </p>
 
 {% endblock %}
 

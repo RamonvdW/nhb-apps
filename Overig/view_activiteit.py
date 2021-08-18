@@ -7,13 +7,13 @@
 from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models.functions import Concat
-from django.utils.timezone import make_aware
+from django.utils.timezone import make_aware, get_default_timezone
 from django.views.generic import TemplateView
-from django.utils.formats import localize
+from django.utils.formats import localize, date_format
 from django.db.models import F, Q, Value, Count
 from django.utils import timezone
 from django.urls import reverse
-from Functie.models import Functie
+from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN, rol2url, rol_get_huidige, Rollen
 from NhbStructuur.models import NhbLid
 from Plein.menu import menu_dynamics
@@ -96,18 +96,16 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                         .annotate(aantal=Count('accounts'))
                         .filter(aantal__gt=0)):
             for account in functie.accounts.all():
-                add = False
-
-                if account.vhpg.count() > 0:
-                    vhpg = account.vhpg.all()[0]
+                try:
+                    vhpg = account.vhpg
+                except VerklaringHanterenPersoonsgegevens.DoesNotExist:
+                    add = True
+                else:
                     # elke 11 maanden moet de verklaring afgelegd worden
                     # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
                     opnieuw = vhpg.acceptatie_datum + datetime.timedelta(days=334)
                     now = timezone.now()
-                    if opnieuw < now:
-                        add = True
-                else:
-                    add = True
+                    add = (opnieuw < now)
 
                 if not account.otp_is_actief:
                     add = True
@@ -127,9 +125,11 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                         .order_by('last_login',
                                   'unaccented_naam')):
 
-            if account.vhpg.count() > 0:
-                vhpg = account.vhpg.all()[0]
-
+            try:
+                vhpg = account.vhpg
+            except VerklaringHanterenPersoonsgegevens.DoesNotExist:
+                account.vhpg_str = 'Nee'
+            else:
                 # elke 11 maanden moet de verklaring afgelegd worden
                 # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
                 opnieuw = vhpg.acceptatie_datum + datetime.timedelta(days=334)
@@ -138,8 +138,6 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                     account.vhpg_str = 'Verlopen'
                 else:
                     account.vhpg_str = 'Ja'
-            else:
-                account.vhpg_str = 'Nee'
 
             if account.otp_is_actief:
                 account.tweede_factor_str = 'Ja'
@@ -198,6 +196,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                                  Q(account__unaccented_naam__icontains=zoekterm))
                          .order_by('account__unaccented_naam', 'achternaam', 'voornaam'))[:50]
 
+        to_tz = get_default_timezone()
         context['zoek_leden'] = list(leden)
         for lid in leden:
             lid.nhb_nr_str = str(lid.nhb_nr)
@@ -206,6 +205,11 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
             lid.tweede_factor_str = '-'
             lid.vhpg_str = '-'
             lid.laatste_inlog_str = '-'
+
+            if lid.bij_vereniging:
+                lid.ver_str = str(lid.bij_vereniging)
+            else:
+                lid.ver_str = 'Geen'
 
             if lid.account:
                 account = lid.account
@@ -217,7 +221,8 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                 else:
                     lid.email_is_bevestigd_str = 'Nee'
 
-                lid.laatste_inlog_str = localize(account.last_login)
+                if account.last_login:
+                    lid.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz), 'j F H:i')
 
                 do_vhpg = True
                 if account.otp_is_actief:
@@ -230,19 +235,20 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
 
                 if do_vhpg:
                     lid.vhpg_str = 'Nee'
-                    if account.vhpg.count() > 0:
-                        vhpg = account.vhpg.all()[0]
-
+                    try:
+                        vhpg = account.vhpg
+                    except VerklaringHanterenPersoonsgegevens.DoesNotExist:
+                        lid.vhpg_str = 'n.v.t.'
+                    else:
                         # elke 11 maanden moet de verklaring afgelegd worden
                         # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
                         opnieuw = vhpg.acceptatie_datum + datetime.timedelta(days=334)
+                        opnieuw = opnieuw.astimezone(to_tz)
                         now = timezone.now()
                         if opnieuw < now:
-                            lid.vhpg_str = 'Verlopen (geaccepteerd op %s)' % localize(vhpg.acceptatie_datum)
+                            lid.vhpg_str = 'Verlopen (geaccepteerd op %s)' % date_format(vhpg.acceptatie_datum, 'j F H:i')
                         else:
-                            lid.vhpg_str = 'Ja (op %s)' % localize(vhpg.acceptatie_datum)
-                else:
-                    lid.vhpg_str = 'n.v.t.'
+                            lid.vhpg_str = 'Ja (op %s)' % date_format(vhpg.acceptatie_datum.astimezone(to_tz), 'j F H:i')
 
                 lid.functies = account.functie_set.order_by('beschrijving')
         # for

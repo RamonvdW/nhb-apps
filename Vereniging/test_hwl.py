@@ -255,6 +255,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             with self.assert_max_queries(20):
                 resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr,
                                                                   'schiet_BB': 'on',
+                                                                  'schiet_R': 'on',         # 2 bogen
                                                                   'info_R': 'on',
                                                                   'voorkeur_meedoen_competitie': 'on'})
         elif nhb_nr == 100012:
@@ -277,10 +278,10 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
     def _zet_ag(self, nhb_nr, afstand, waarde=7.42):
         if nhb_nr == 100003:
-            afkorting = 'BB'
-        else:
-            afkorting = 'R'
-        schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=nhb_nr, boogtype__afkorting=afkorting)
+            schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=nhb_nr, boogtype__afkorting='BB')
+            score_indiv_ag_opslaan(schutterboog, afstand, waarde, self.account_hwl, 'Test AG %s' % afstand)
+
+        schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=nhb_nr, boogtype__afkorting='R')
         score_indiv_ag_opslaan(schutterboog, afstand, waarde, self.account_hwl, 'Test AG %s' % afstand)
 
     def _maak_wedstrijden(self):
@@ -317,7 +318,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # wijzig de instellingen van deze wedstrijd
         url_wed = self.url_wijzig_wedstrijd % wedstrijd_pk
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(20):
             resp = self.client.post(url_wed, {'nhbver_pk': self.nhbver1.pk,
                                               'wanneer': '2020-12-11', 'aanvang': '12:34'})
         self.assert_is_redirect(resp, url_ronde)
@@ -497,12 +498,30 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertTrue('Cadet' in inschrijving.klasse.indiv.beschrijving)
         inschrijving.delete()
 
+        # zet het min_ag voor Recurve klassen
+        klasse_5 = None
+        for klasse in (CompetitieKlasse
+                       .objects
+                       .filter(competitie=self.comp_18,
+                               indiv__volgorde__in=(100, 101, 102, 103, 104, 105))):
+            if klasse.indiv.volgorde == 105:
+                klasse.min_ag = 0.001
+            elif klasse.indiv.volgorde == 104:
+                klasse.min_ag = 7.420
+                klasse_5 = klasse
+            else:
+                klasse.min_ag = 9.000
+
+            klasse.save(update_fields=['min_ag'])
+        # for
+
         # stel een paar bogen in
         self._zet_schutter_voorkeuren(100002)
         self._zet_schutter_voorkeuren(100003)
         self._zet_schutter_voorkeuren(100012)
 
         self._zet_ag(100002, 18)
+        self._zet_ag(100003, 18)
         self._zet_ag(100003, 25)
 
         with self.assert_max_queries(20):
@@ -520,9 +539,13 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',       # 1=R
-                                          'lid_100003_boogtype_3': 'on'})      # 3=BB
+                                          'lid_100003_boogtype_1': 'on'})      # 3=BB
         self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
+
+        deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog__nhblid__nhb_nr=100003)
+        # print('deelnemer:', deelnemer, 'klasse:', deelnemer.klasse)
+        self.assertEqual(deelnemer.klasse, klasse_5)
 
         # dubbele inschrijving
         with self.assert_max_queries(20):
@@ -703,7 +726,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         url = self.url_inschrijven % self.comp_18.pk
         zet_competitie_fase(self.comp_18, 'B')
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))

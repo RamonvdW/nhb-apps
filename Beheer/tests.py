@@ -11,21 +11,22 @@ from Overig.e2ehelpers import E2EHelpers
 
 
 # updaten met dit commando:
-#  for x in `./manage.py show_urls --settings=nhbapps.settings_dev | rev | cut -d'/' -f2- | rev | grep '/beheer/'; do echo "'$x/',"; done | grep -vE ':object_id>/|/add/|/autocomplete/'
+#  for x in `./manage.py show_urls --settings=nhbapps.settings_dev | rev | cut -d'/' -f2- | rev | grep '/beheer/'`; do echo "'$x/',"; done | grep -vE ':object_id>/|/add/|/autocomplete/'
 BEHEER_PAGINAS = (
     '/beheer/Account/account/',
     '/beheer/Account/accountemail/',
     '/beheer/BasisTypen/boogtype/',
     '/beheer/BasisTypen/indivwedstrijdklasse/',
+    '/beheer/BasisTypen/kalenderwedstrijdklasse/',
     '/beheer/BasisTypen/leeftijdsklasse/',
     '/beheer/BasisTypen/teamtype/',
     '/beheer/BasisTypen/teamwedstrijdklasse/',
     '/beheer/Competitie/competitie/',
     '/beheer/Competitie/competitieklasse/',
+    '/beheer/Competitie/competitiemutatie/',
     '/beheer/Competitie/deelcompetitie/',
     '/beheer/Competitie/deelcompetitieklasselimiet/',
     '/beheer/Competitie/deelcompetitieronde/',
-    '/beheer/Competitie/kampioenschapmutatie/',
     '/beheer/Competitie/kampioenschapschutterboog/',
     '/beheer/Competitie/regiocompetitierondeteam/',
     '/beheer/Competitie/regiocompetitieschutterboog/',
@@ -36,6 +37,9 @@ BEHEER_PAGINAS = (
     '/beheer/HistComp/histcompetitie/',
     '/beheer/HistComp/histcompetitieindividueel/',
     '/beheer/HistComp/histcompetitieteam/',
+    '/beheer/Kalender/kalenderwedstrijd/',
+    '/beheer/Kalender/kalenderwedstrijddeeluitslag/',
+    '/beheer/Kalender/kalenderwedstrijdsessie/',
     '/beheer/Logboek/logboekregel/',
     '/beheer/Mailer/mailqueue/',
     '/beheer/NhbStructuur/nhbcluster/',
@@ -43,6 +47,7 @@ BEHEER_PAGINAS = (
     '/beheer/NhbStructuur/nhbrayon/',
     '/beheer/NhbStructuur/nhbregio/',
     '/beheer/NhbStructuur/nhbvereniging/',
+    '/beheer/NhbStructuur/speelsterkte/',
     '/beheer/Overig/sitefeedback/',
     '/beheer/Overig/sitetijdelijkeurl/',
     '/beheer/Records/besteindivrecords/',

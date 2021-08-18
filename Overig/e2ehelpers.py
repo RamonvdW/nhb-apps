@@ -209,12 +209,15 @@ class E2EHelpers(object):
     def e2e_wissel_naar_functie(self, functie):
         assert isinstance(self, TestCase)
         resp = self.client.post('/functie/activeer-functie/%s/' % functie.pk)
-        if functie.rol in ('SEC', 'HWL', 'WL'):
-            expected_redirect = '/vereniging/'
-        else:
-            expected_redirect = '/functie/wissel-van-rol/'
+
         assert isinstance(self, E2EHelpers)
-        self.assert_is_redirect(resp, expected_redirect)
+        if functie.rol in ('SEC', 'HWL', 'WL'):
+            self.assert_is_redirect(resp, '/vereniging/')
+        elif functie.rol in ('BKO', 'RKO', 'RCL') and resp.url.startswith('/bondscompetities/'):
+            # als er geen competitie is, dan verwijst deze alsnog naar wissel-van-rol
+            self.assert_is_redirect(resp, '/bondscompetities/##')
+        else:
+            self.assert_is_redirect(resp, '/functie/wissel-van-rol/')
 
     def e2e_check_rol(self, rol_verwacht):
         assert isinstance(self, TestCase)
@@ -545,6 +548,7 @@ class E2EHelpers(object):
         """ Controleer dat de gevraagde templates gebruikt zijn """
         lst = self._get_templates_not_used(resp, template_names)
         if len(lst):    # pragma: no cover
+            self.e2e_dump_resp(resp)
             msg = "Following templates should have been used: %s\n" % repr(lst)
             msg += "Actually used: %s" % repr([t.name for t in resp.templates])
             self.assertTrue(False, msg=msg)
@@ -602,7 +606,11 @@ class E2EHelpers(object):
     def assert_is_redirect(self, resp, expected_url):
         assert isinstance(self, TestCase)
         self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resp.url, expected_url)
+        pos = expected_url.find('##')
+        if pos > 0:
+            self.assertTrue(resp.url.startswith(expected_url[:pos]))
+        else:
+            self.assertEqual(resp.url, expected_url)
 
     def assert_is_redirect_not_plein(self, resp):
         assert isinstance(self, TestCase)
@@ -682,11 +690,19 @@ class E2EHelpers(object):
 
     def assert403(self, resp):
         # controleer dat we op de speciale code-403 handler pagina gekomen zijn
+        if resp.status_code != 200:     # pragma: no cover
+            self.e2e_dump_resp(resp)
+            self.fail(msg="Unexpected real status code %s instead of 403" % resp.status_code)
+
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
 
     def assert404(self, resp, expected_msg=''):
         # self.assertEqual(resp.status_code, 404)
+        if resp.status_code != 200:     # pragma: no cover
+            self.e2e_dump_resp(resp)
+            self.fail(msg="Unexpected real status code %s instead of 404" % resp.status_code)
+
         # controleer dat we op de speciale code-404 handler pagina gekomen zijn
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))

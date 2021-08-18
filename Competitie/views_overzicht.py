@@ -96,6 +96,12 @@ class CompetitieOverzichtView(View):
                                   kwargs={'deelcomp_pk': obj.pk})
             # for
 
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
+            context['tekst_regio_teams_alle'] = "Alle teams inzien van de regiocompetitie."
+            context['url_regio_teams_alle'] = reverse('Competitie:regio-teams-alle',
+                                                       kwargs={'comp_pk': comp.pk,
+                                                               'subset': 'auto'})
+
         if self.rol_nu == Rollen.ROL_RCL:
             toon_handmatige_ag = False
             context['planning_deelcomp'] = (DeelCompetitie
@@ -111,6 +117,12 @@ class CompetitieOverzichtView(View):
                 obj.tekst = 'Planning van de wedstrijden in %s voor deze competitie.' % obj.nhb_regio.naam
                 obj.url = reverse('Competitie:regio-planning',
                                   kwargs={'deelcomp_pk': obj.pk})
+
+                if obj.regio_organiseert_teamcompetitie and comp.fase == 'E':
+                    obj.titel_team_ronde = "Team Ronde"
+                    obj.tekst_team_ronde = "Stel de team punten vast en zet de teamcompetitie door naar de volgende ronde."
+                    obj.url_team_ronde = reverse('Competitie:start-volgende-team-ronde',
+                                                 kwargs={'deelcomp_pk': obj.pk})
 
                 obj.tekst_scores = "Scores invoeren en aanpassen voor %s voor deze competitie." % obj.nhb_regio.naam
                 obj.url_scores = reverse('Competitie:scores-regio',
@@ -278,20 +290,25 @@ class CompetitieOverzichtView(View):
         # kijk of de uitslagen klaar zijn om te tonen
         context['toon_uitslagen'] = (comp.fase >= 'B')      # inschrijving is open
 
-        context['url_regio'] = reverse('Competitie:uitslagen-regio',
-                                       kwargs={'comp_pk': comp.pk,
-                                               'zes_scores': 'alle',
-                                               'comp_boog': 'r'})
-        context['url_rayon'] = reverse('Competitie:uitslagen-rayon',
-                                       kwargs={'comp_pk': comp.pk,
-                                               'comp_boog': 'r'})
+        context['url_regio_indiv'] = reverse('Competitie:uitslagen-regio-indiv',
+                                             kwargs={'comp_pk': comp.pk,
+                                                     'zes_scores': 'alle',
+                                                     'comp_boog': 'r'})
+        context['url_regio_teams'] = reverse('Competitie:uitslagen-regio-teams',
+                                             kwargs={'comp_pk': comp.pk,
+                                                     'team_type': 'r'})
+        context['url_rayon_indiv'] = reverse('Competitie:uitslagen-rayon-indiv',
+                                             kwargs={'comp_pk': comp.pk,
+                                                     'comp_boog': 'r'})
         context['url_bond'] = reverse('Competitie:uitslagen-bond',
                                       kwargs={'comp_pk': comp.pk,
                                               'comp_boog': 'r'})
 
         # TODO: tussenstand --> eindstand
-        context['text_regio'] = 'Tussenstand voor de regiocompetitie'
-        context['text_rayon'] = 'Tussenstand voor de rayonkampioenschappen'
+        context['text_regio_indiv'] = 'Tussenstand voor de regiocompetitie individueel'
+        context['text_regio_teams'] = 'Tussenstand voor de regiocompetitie teams'
+        context['text_rayon_indiv'] = 'Tussenstand voor de rayonkampioenschappen individueel'
+        context['text_rayon_teams'] = 'Tussenstand voor de rayonkampioenschappen teams'
         context['text_bond'] = 'Tussenstand voor de bondskampioenschappen'
 
     def get(self, request, *args, **kwargs):
