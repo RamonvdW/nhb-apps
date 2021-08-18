@@ -177,9 +177,9 @@
             <tr>
                 <td>Accommodatie:</td>
                 <td id="id_accommodatie_td">
-                    <select name="loc_pk" id="id_loc_sel">
+                    <select name="loc_pk" id="id_loc_sel" onchange="gewijzigd()">
                         {% for opt in all_locaties %}
-                            <option value="{{ opt.pk }}" data-ver="{{ opt.ver_pk }}">{{ opt.keuze_str }}</option>
+                            <option value="{{ opt.pk }}" data-ver="{{ opt.ver_pk }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
                         {% endfor %}
                     </select>
                 </td>

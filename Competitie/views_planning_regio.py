@@ -1003,6 +1003,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                     if not keuze:
                         keuze = 'Locatie zonder naam (%s)' % loc.pk
                     loc.keuze_str = keuze
+                    if wedstrijd.locatie == loc:
+                        loc.selected = True
             # for
         # for
 

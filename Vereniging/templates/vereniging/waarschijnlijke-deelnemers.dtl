@@ -169,6 +169,16 @@
                     </tr>
                 {% endif %}
 
+                {% if blazoenen.teams_dt_of_40cm > 0 %}
+                    <tr>
+                        <td>{{ blazoenen.teams_dt_of_40cm }}</td>
+                        <td>Dutch Target of 40cm</td>
+                        <td>{{ blazoenen.teams_dt_of_40cm }}</td>
+                        <td>4</td>
+                        <td>1 of 4 blazoenen per team</td>
+                    </tr>
+                {% endif %}
+
                 {% if blazoenen.teams_dt > 0 %}
                     <tr>
                         <td>{{ blazoenen.teams_dt }}</td>
@@ -194,7 +204,7 @@
                     <td>Dutch Target</td>
                     <td>-</td>
                     <td>{{ blazoenen.sporters_dt_excl_teams }}</td>
-                    <td>1 blazoen per 1 sporter</td>
+                    <td>1 blazoen per sporter</td>
                 </tr>
             {% endif %}
 
@@ -216,6 +226,14 @@
                     <td>{{ blazoenen.teams_60cm }}</td>
                     <td>60cm</td>
                     <td>{{ blazoenen.teams_60cm }}</td>
+                    <td>4</td>
+                    <td>1 blazoen per team</td>
+                </tr>
+
+                <tr>
+                    <td>{{ blazoenen.teams_60cm_4spot_of_60cm }}</td>
+                    <td>60cm 4-spot of 60cm</td>
+                    <td>{{ blazoenen.teams_60cm_4spot_of_60cm }}</td>
                     <td>4</td>
                     <td>1 blazoen per team</td>
                 </tr>
