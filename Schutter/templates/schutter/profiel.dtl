@@ -68,9 +68,9 @@
                 </p>
             </div>
         </div>
+        
 
         {% if regiocompetities %}
-
             <br>
             <h5>Doe je mee?</h5>
             <div class="row white">
