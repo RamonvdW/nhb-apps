@@ -376,11 +376,7 @@
     <h5>Contactgegevens</h5>
     <div class="row white">
         <div class="col s12">
-            {% if not geen_wedstrijden %}
-                <p>De regiocompetitieleiders (RCL) regelen alles rond de competities en kan je benaderen als er problemen zijn met de uitslagen.</p>
-
-                <p>De wedstrijdleiding van jouw vereniging is er voor vragen over wedstrijden en de competitie, zoals waar je heen moet.</p>
-            {% endif %}
+            <p>Deze personen kunnen jou helpen:</p>
 
             <div class="table-wrap-5">
                 <table class="white">
@@ -484,7 +480,14 @@
 
                 </table>
             </div>
-            <br>
+
+            {% if geen_wedstrijden %}
+                <br>
+            {% else %}
+                <p>De regiocompetitieleiders (RCL) regelen alles rond de competities en kan je benaderen als er problemen zijn met de uitslagen.</p>
+
+                <p>De wedstrijdleiding van jouw vereniging is er voor vragen over wedstrijden en de competitie, zoals waar je heen moet.</p>
+            {% endif %}
         </div>
     </div>
 
