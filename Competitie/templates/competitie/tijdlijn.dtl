@@ -50,7 +50,7 @@
             {% if comp.fase > 'B' %}
                 <span class="green-text">Afgerond</span>
             {% else %}
-                <span>{{ comp.begin_aanmeldingen }}{% if comp.einde_aanmeldingen > comp.begin_aanmeldingen %} tot<br>{{ comp.einde_aanmeldingen }}{% endif %}</span>
+                <span>{{ comp.begin_aanmeldingen }}{% if comp.einde_aanmeldingen > comp.begin_aanmeldingen %} tot en met<br>{{ comp.einde_aanmeldingen }}{% endif %}</span>
             {% endif %}
         </td>
     </tr>
