@@ -522,7 +522,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         self.deelcomp = deelcomp
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        mag_toggle = comp.fase <= 'B' and self.functie_nu.rol == 'HWL'
+        mag_toggle = comp.fase <= 'C' and self.functie_nu.rol == 'HWL'
 
         dagdeel_str = dict()
         for afkorting, beschrijving in DAGDELEN:
