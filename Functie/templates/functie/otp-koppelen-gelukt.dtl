@@ -14,7 +14,7 @@
 
     <h4>Gelukt!</h4>
 
-    <p>De registratie van de twee-factor authenticatie was succesvol.</p>
+    <p>Het koppelen van de tweede factor is gelukt.</p>
 
     <p>Naast de inlog met gebruikersnaam en wachtwoord vraagt deze website vanaf nu bij een rol wissel ook om de tweede-factor code.</p>
 
