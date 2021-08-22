@@ -10,17 +10,17 @@ cachetools==4.2.2
     # via google-auth
 certifi==2021.5.30
     # via requests
-charset-normalizer==2.0.3
+charset-normalizer==2.0.4
     # via requests
 django==3.1.13
     # via
     #   -c constraints.in
     #   -r requirements.in
-google-api-core==1.31.0
+google-api-core==2.0.0
     # via google-api-python-client
-google-api-python-client==2.14.0
+google-api-python-client==2.17.0
     # via -r requirements.in
-google-auth==1.33.1
+google-auth==2.0.1
     # via
     #   -r requirements.in
     #   google-api-core
@@ -36,8 +36,6 @@ httplib2==0.19.1
     #   google-auth-httplib2
 idna==2.10
     # via requests
-packaging==21.0
-    # via google-api-core
 protobuf==3.17.3
     # via
     #   google-api-core
@@ -53,14 +51,10 @@ pyasn1-modules==0.2.8
 pyotp==2.6.0
     # via -r requirements.in
 pyparsing==2.4.7
-    # via
-    #   httplib2
-    #   packaging
+    # via httplib2
 pytz==2021.1
-    # via
-    #   django
-    #   google-api-core
-qrcode==7.2
+    # via django
+qrcode==7.3
     # via -r requirements.in
 requests==2.26.0
     # via google-api-core
@@ -68,9 +62,6 @@ rsa==4.7.2
     # via google-auth
 six==1.16.0
     # via
-    #   google-api-core
-    #   google-api-python-client
-    #   google-auth
     #   google-auth-httplib2
     #   protobuf
 sqlparse==0.4.1

@@ -180,7 +180,10 @@ INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
+# globale keuze voor automatische primary keys
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
+# interface naar achtergrondtaken
 BACKGROUND_SYNC_POORT = 3000
 BACKGROUND_SYNC__REGIOCOMP_MUTATIES = BACKGROUND_SYNC_POORT + 1
 

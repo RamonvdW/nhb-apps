@@ -50,17 +50,18 @@ class Command(BaseCommand):
                 .exclude(bij_vereniging=F('schutterboog__nhblid__bij_vereniging')))   # bevat geen uitstappers
         for obj in objs:
             lid = obj.schutterboog.nhblid
-            # het lijkt erop dat lid.bij_vereniging == None niet voor kan komen
-            self.stdout.write('[INFO] Verwerk overstap %s: [%s] %s --> [%s] %s' % (
-                              lid.nhb_nr,
-                              obj.bij_vereniging.regio.regio_nr, obj.bij_vereniging,
-                              lid.bij_vereniging.regio.regio_nr, lid.bij_vereniging))
-            if obj.bij_vereniging.regio != lid.bij_vereniging.regio:
+            if lid.bij_vereniging:
+                self.stdout.write('[INFO] Verwerk overstap %s: [%s] %s --> [%s] %s' % (
+                                  lid.nhb_nr,
+                                  obj.bij_vereniging.regio.regio_nr, obj.bij_vereniging,
+                                  lid.bij_vereniging.regio.regio_nr, lid.bij_vereniging))
+
                 # overschrijven naar andere deelcompetitie
-                obj.deelcompetitie = DeelCompetitie.objects.get(competitie=obj.deelcompetitie.competitie,
-                                                                nhb_regio=lid.bij_vereniging.regio)
-            obj.bij_vereniging = lid.bij_vereniging
-            obj.save()
+                if obj.bij_vereniging.regio != lid.bij_vereniging.regio:
+                    obj.deelcompetitie = DeelCompetitie.objects.get(competitie=obj.deelcompetitie.competitie,
+                                                                    nhb_regio=lid.bij_vereniging.regio)
+                obj.bij_vereniging = lid.bij_vereniging
+                obj.save()
         # for
 
     def _verwerk_overstappers_rk(self, comp):
