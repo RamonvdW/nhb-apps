@@ -76,7 +76,7 @@
         {% if not deelnemer.bij_vereniging %}
             <tr class="nhb-grijs"><td></td></tr>
             <tr>
-                <td class="center">Deze sporter is niet aangemeld bij een vereniging en mag zo niet deelnemen aan het RK.<br>Laat het bondsburo uitzoeken of dit een niet-afgeronde overschrijving is.</td>
+                <td class="center">Deze sporter is niet aangemeld bij een vereniging en mag zo niet deelnemen aan het RK.<br>Laat het bondsbureau uitzoeken of dit een niet-afgeronde overschrijving is.</td>
             </tr>
         {% else %}
 

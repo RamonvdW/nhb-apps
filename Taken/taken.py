@@ -62,7 +62,7 @@ def stuur_taak_email_herinnering(email, aantal_open):
                  + "Er zijn taken die jouw aandacht nodig hebben op %s\n" % settings.SITE_URL
                  + "Op het moment van sturen stonden er %s taken open.\n\n" % aantal_open
                  + "Bedankt voor je aandacht!\n"
-                 + "Het bondsburo\n")
+                 + "Het bondsbureau\n")
 
     mailer_queue_email(email.bevestigde_email,
                        'Er zijn taken voor jou',
@@ -77,7 +77,7 @@ def stuur_nieuwe_taak_email(email, aantal_open):
                  + "Er is zojuist een nieuwe taak voor jou aangemaakt op %s\n" % settings.SITE_URL
                  + "Op het moment van sturen stonden er %s taken open.\n\n" % aantal_open
                  + "Bedankt voor je aandacht!\n"
-                 + "Het bondsburo\n")
+                 + "Het bondsbureau\n")
 
     mailer_queue_email(email.bevestigde_email,
                        'Er is een nieuwe taak voor jou',

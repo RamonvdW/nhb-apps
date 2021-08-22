@@ -43,9 +43,9 @@ def account_stuur_email_wachtwoord_vergeten(accountemail, **kwargs):
                  + "Je hebt aangegeven je wachtwoord vergeten te zijn voor " + settings.NAAM_SITE + ".\n"
                  + "Klik op onderstaande link om een nieuw wachtwoord in te stellen.\n\n"
                  + url + "\n\n"
-                 + "Als jij dit niet was, neem dan contact met ons op via " + settings.EMAIL_BONDSBURO + "\n\n"
+                 + "Als jij dit niet was, neem dan contact met ons op via " + settings.EMAIL_BONDSBUREAU + "\n\n"
                  + "Veel plezier met de site!\n"
-                 + "Het bondsburo\n")
+                 + "Het bondsbureau\n")
 
     mailer_queue_email(accountemail.bevestigde_email,
                        'Wachtwoord vergeten',

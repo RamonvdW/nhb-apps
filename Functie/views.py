@@ -233,8 +233,8 @@ def functie_vraag_email_bevestiging(functie):
                  + "Een beheerder heeft dit e-mailadres gekoppeld op " + settings.NAAM_SITE + ".\n"
                  + "Klik op onderstaande link om dit te bevestigen.\n\n"
                  + url + "\n\n"
-                 + "Als je dit niet herkent, neem dan contact met ons op via " + settings.EMAIL_BONDSBURO + "\n\n"
-                 + "Het bondsburo\n")
+                 + "Als je dit niet herkent, neem dan contact met ons op via " + settings.EMAIL_BONDSBUREAU + "\n\n"
+                 + "Het bondsbureau\n")
 
     mailer_queue_email(functie.nieuwe_email,
                        'Bevestig gebruik e-mail voor rol',
@@ -413,8 +413,8 @@ class OntvangBeheerderWijzigingenView(View):
         text_body = ("Hallo!\n\n"
                      + "Je rollen zijn aangepast op " + settings.NAAM_SITE + ".\n\n"
                      + actie + " rol: " + functie_beschrijving + ".\n\n"
-                     + "Als je dit niet herkent, neem dan contact met ons op via " + settings.EMAIL_BONDSBURO + "\n\n"
-                     + "Het bondsburo\n")
+                     + "Als je dit niet herkent, neem dan contact met ons op via " + settings.EMAIL_BONDSBUREAU + "\n\n"
+                     + "Het bondsbureau\n")
 
         email = account.accountemail_set.all()[0]
         mailer_queue_email(email.bevestigde_email,

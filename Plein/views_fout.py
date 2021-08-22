@@ -4,14 +4,12 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.http import Http404, HttpResponse
 from django.urls import Resolver404
 from django.shortcuts import render
 from django.views.generic import View
 from django.views.defaults import ERROR_PAGE_TEMPLATE
 from django.core.exceptions import PermissionDenied
-from Functie.rol import Rollen
 from Mailer.models import mailer_notify_internal_error
 from nhbapps import urls
 import traceback

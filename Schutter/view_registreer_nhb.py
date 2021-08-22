@@ -102,7 +102,7 @@ class RegistreerNhbNummerView(TemplateView):
                 # redirect naar een pagina met een uitgebreider duidelijk bericht
                 context = {'sec_email': '',
                            'sec_naam': '',
-                           'email_bb': settings.EMAIL_BONDSBURO}
+                           'email_bb': settings.EMAIL_BONDSBUREAU}
                 ver = exc.nhblid.bij_vereniging
                 if ver:
                     sec_lid = ver.secretaris_lid

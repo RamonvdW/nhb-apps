@@ -148,7 +148,7 @@ class PrivacyView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
         context['url_privacyverklaring'] = settings.PRIVACYVERKLARING_URL
-        context['email_bondsburo'] = settings.EMAIL_BONDSBURO
+        context['email_bondsbureau'] = settings.EMAIL_BONDSBUREAU
         menu_dynamics(self.request, context)
         return context
 

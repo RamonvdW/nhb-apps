@@ -51,9 +51,9 @@ def account_vraag_email_bevestiging(accountmail, **kwargs):
                  + "Je hebt een account aangemaakt op " + settings.NAAM_SITE + ".\n"
                  + "Klik op onderstaande link om dit te bevestigen.\n\n"
                  + url + "\n\n"
-                 + "Als jij dit niet was, neem dan contact met ons op via " + settings.EMAIL_BONDSBURO + "\n\n"
+                 + "Als jij dit niet was, neem dan contact met ons op via " + settings.EMAIL_BONDSBUREAU + "\n\n"
                  + "Veel plezier met de site!\n"
-                 + "Het bondsburo\n")
+                 + "Het bondsbureau\n")
 
     mailer_queue_email(accountmail.nieuwe_email,
                        'Aanmaken account voltooien',
