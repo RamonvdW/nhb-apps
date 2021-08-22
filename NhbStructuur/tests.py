@@ -49,7 +49,6 @@ class TestNhbStructuur(TestCase):
         self.assertEqual(NhbRayon.objects.count(), 4)
         rayon = NhbRayon.objects.get(pk=3)
         self.assertEqual(rayon.naam, "Rayon 3")
-        self.assertEqual(rayon.geografisch_gebied, "Oost Brabant en Noord Limburg")
         self.assertIsNotNone(str(rayon))
 
     def test_regios(self):

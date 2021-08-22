@@ -32,9 +32,6 @@ class NhbRayon(models.Model):
     # korte naam van het rayon (Rayon 1)
     naam = models.CharField(max_length=20)      # Rayon 3
 
-    # beschrijving van het gebied dat dit rayon dekt
-    geografisch_gebied = models.CharField(max_length=50)        # FUTURE: verwijderen
-
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         # geografisch gebied klopt niet helemaal en wordt nu niet meer getoond
