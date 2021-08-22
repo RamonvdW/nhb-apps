@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.http import Http404, HttpResponse
 from django.urls import Resolver404
 from django.shortcuts import render
@@ -38,6 +39,8 @@ def site_handler403_permission_denied(request, exception=None):
     info = str(exception)
     if len(info):
         context['info'] = info
+
+    context['email_support'] = settings.EMAIL_SUPPORT
     return render(request, TEMPLATE_HANDLER_403, context)
 
 
@@ -82,6 +85,8 @@ def site_handler404_page_not_found(request, exception=None):
         info = str(exception)
     if len(info):
         context['info'] = info
+
+    context['email_support'] = settings.EMAIL_SUPPORT
     return render(request, TEMPLATE_HANDLER_404, context)
 
 
@@ -116,6 +121,7 @@ def site_handler500_internal_server_error(request, exception=None):
         in_500_handler = False
 
     context = dict()
+    context['email_support'] = settings.EMAIL_SUPPORT
     return render(request, TEMPLATE_HANDLER_500, context)
 
 

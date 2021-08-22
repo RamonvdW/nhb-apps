@@ -158,7 +158,8 @@ class NietOndersteundView(View):
 
     """ Django class-based om te rapporteren dat de browser niet ondersteund wordt """
 
-    def get(self, request, *args, **kwargs):
+    @staticmethod
+    def get(request, *args, **kwargs):
         context = dict()
         context['email_support'] = settings.EMAIL_SUPPORT
         return render(request, TEMPLATE_NIET_ONDERSTEUND, context)
