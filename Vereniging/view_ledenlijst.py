@@ -44,12 +44,10 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         self._huidige_jaar = huidige_jaar
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        qset = NhbLid.objects.filter(bij_vereniging=functie_nu.nhb_ver)     # TODO: niet gebruikt?!
-
-        objs = list()
 
         prev_lkl = None
         prev_wedstrijdleeftijd = 0
+        objs = list()
 
         # sorteer op geboorte jaar en daarna naam
         for obj in (NhbLid
