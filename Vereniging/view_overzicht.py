@@ -171,7 +171,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             # 3 - teams RK
             for deelcomp_rk in deelcomps_rk:
                 if deelcomp_rk.competitie == comp:
-                    if comp.fase <= 'K':
+                    if 'E' <= comp.fase <= 'K':
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Teams RK"
                         kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen samenstellen voor de %s." % comp.beschrijving
@@ -181,7 +181,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         vanaf = comp.eerste_wedstrijd + datetime.timedelta(days=4*7)
                         if datetime.date.today() < vanaf:
                             kaartje.beschikbaar_vanaf = localize(vanaf)
-                        # kaartjes.append(kaartje)        # TODO: enable na goedkeuring bondsraad
+                        kaartjes.append(kaartje)
             # for
             del deelcomp_rk
 
