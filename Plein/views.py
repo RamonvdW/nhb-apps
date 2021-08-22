@@ -132,6 +132,7 @@ class PleinView(View):
                 eval_open_taken(request)
 
         context['naam_site'] = settings.NAAM_SITE
+        context['email_support'] = settings.EMAIL_SUPPORT
 
         menu_dynamics(self.request, context)
         return render(request, template, context)
@@ -159,6 +160,7 @@ class NietOndersteundView(View):
 
     def get(self, request, *args, **kwargs):
         context = dict()
+        context['email_support'] = settings.EMAIL_SUPPORT
         return render(request, TEMPLATE_NIET_ONDERSTEUND, context)
 
 
