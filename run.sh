@@ -6,8 +6,8 @@
 
 export PYTHONDONTWRITEBYTECODE=1
 
-DEBUG=0
-[ "$1" = "--debug" ] && DEBUG=1
+DEBUG=1
+[ "$1" = "--nodebug" ] && DEBUG=0
 
 # start the background processes
 echo "[INFO] Starting regiocomp_mutaties (runtime: 60 minutes)"
