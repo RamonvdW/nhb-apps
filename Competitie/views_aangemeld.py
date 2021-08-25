@@ -9,7 +9,7 @@ from django.http import HttpResponse, Http404
 from django.utils.formats import localize, date_format
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_WENS_DT, BLAZOEN2STR, BLAZOEN2STR_COMPACT
+from BasisTypen.models import COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60CM_4SPOT, BLAZOEN_WENS_4SPOT, BLAZOEN_WENS_DT, BLAZOEN2STR, BLAZOEN2STR_COMPACT
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
@@ -327,6 +327,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
 
         alles_mag = (deelcomp.toegestane_dagdelen == '')
         dagdelen_spl = deelcomp.toegestane_dagdelen.split(',')
+
         context['dagdelen'] = dagdelen = list()
         for afkorting, beschrijving in DAGDELEN:
             if alles_mag or (afkorting in dagdelen_spl):
@@ -335,7 +336,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
 
         # maak een lijst van alle verenigingen in deze regio
         context['regio_verenigingen'] = vers = list()
-        vers_dict = dict()
+        ver_nr2nhb_ver = dict()
         for nhb_ver in (NhbVereniging
                         .objects
                         .filter(regio=regio)
@@ -343,47 +344,99 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                         .all()):
 
             vers.append(nhb_ver)
-            vers_dict[nhb_ver.ver_nr] = nhb_ver
+            ver_nr2nhb_ver[nhb_ver.ver_nr] = nhb_ver
 
-            nhb_ver.counts_dict = dict()
-            for afkorting in DAGDEEL_AFKORTINGEN:
-                nhb_ver.counts_dict[afkorting] = 0
-            # for
+            nhb_ver.blazoen_dict = dict()
         # for
 
-        # doe de telling voor alle ingeschreven schutters
-        # objs = RegioCompetitieSchutterBoog
+        # schutters met voorkeur voor eigen blazoen (DT of 60cm 4spot)
+        voorkeur_eigen_blazoen = (SchutterVoorkeuren
+                                  .objects
+                                  .select_related('nhblid')
+                                  .filter(voorkeur_eigen_blazoen=True)
+                                  .values_list('nhblid__nhb_nr', flat=True))
+
+        alle_blazoenen = list()
+        afstand = deelcomp.competitie.afstand
+
         for deelnemer in deelnemers:
+            # bepaal welk blazoen deze sporter nodig heeft
+            klasse = deelnemer.klasse.indiv
+            if afstand == '18':
+                blazoenen = (klasse.blazoen1_18m_regio, klasse.blazoen2_18m_regio)
+            else:
+                blazoenen = (klasse.blazoen1_25m_regio, klasse.blazoen2_25m_regio)
+
+            if blazoenen[0] == blazoenen[1]:
+                blazoen_str = BLAZOEN2STR[blazoenen[0]]
+            else:
+                # meerder mogelijkheden
+                blazoen_str = BLAZOEN2STR[blazoenen[0]]     # ga uit van eerste optie bij geen voorkeur
+                # blazoen_str = "%s of %s" % (BLAZOEN2STR[blazoenen[0]], BLAZOEN2STR[blazoenen[1]])
+                if BLAZOEN_DT in blazoenen:
+                    if deelnemer.schutterboog.nhblid.nhb_nr in voorkeur_eigen_blazoen:
+                        blazoen_str = BLAZOEN2STR[BLAZOEN_WENS_DT]
+                elif BLAZOEN_60CM_4SPOT in blazoenen:
+                    if deelnemer.schutterboog.nhblid.nhb_nr in voorkeur_eigen_blazoen:
+                        blazoen_str = BLAZOEN2STR[BLAZOEN_WENS_4SPOT]
+
             try:
-                nhb_ver = vers_dict[deelnemer.bij_vereniging.ver_nr]
+                nhb_ver = ver_nr2nhb_ver[deelnemer.bij_vereniging.ver_nr]
             except KeyError:
                 pass
             else:
+                try:
+                    counts_dict = nhb_ver.blazoen_dict[blazoen_str]
+                except KeyError:
+                    counts_dict = dict()
+                    for afkorting in DAGDEEL_AFKORTINGEN:
+                        counts_dict[afkorting] = 0
+                    # for
+                    nhb_ver.blazoen_dict[blazoen_str] = counts_dict
+                    if blazoen_str not in alle_blazoenen:
+                        alle_blazoenen.append(blazoen_str)
+
                 afkorting = deelnemer.inschrijf_voorkeur_dagdeel
                 try:
-                    nhb_ver.counts_dict[afkorting] += 1
+                    counts_dict[afkorting] += 1
                 except KeyError:
                     pass
         # for
 
-        # tel totalen
+        alle_blazoenen.sort()
+
+        # convert dicts to lists en tel totalen
         totals = dict()
         for afkorting in DAGDEEL_AFKORTINGEN:
             totals[afkorting] = 0
         # for
 
-        # convert dict to list
         for nhb_ver in vers:
-            nhb_ver.counts_list = list()
-            som = 0
-            for afkorting in DAGDEEL_AFKORTINGEN:
-                if alles_mag or (afkorting in dagdelen_spl):
-                    count = nhb_ver.counts_dict[afkorting]
-                    nhb_ver.counts_list.append(count)
-                    totals[afkorting] += count
-                    som += count
+            nhb_ver.blazoen_list = list()
+
+            for blazoen_str in alle_blazoenen:
+                try:
+                    counts_dict = nhb_ver.blazoen_dict[blazoen_str]
+                except KeyError:
+                    # blazoen niet nodig voor deze vereniging
+                    pass
+                else:
+                    counts_list = list()
+
+                    som = 0
+                    for afkorting in DAGDEEL_AFKORTINGEN:
+                        if alles_mag or (afkorting in dagdelen_spl):
+                            count = counts_dict[afkorting]
+                            counts_list.append(count)
+                            totals[afkorting] += count
+                            som += count
+                    # for
+                    counts_list.append(som)
+
+                    if som > 0:
+                        tup = (blazoen_str, counts_list)
+                        nhb_ver.blazoen_list.append(tup)
             # for
-            nhb_ver.counts_list.append(som)
         # for
 
         context['totalen'] = totalen = list()
@@ -402,62 +455,33 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
             voor elk dagdeel
         """
 
-        afstand = deelcomp.competitie.afstand
-        alles_mag = (deelcomp.toegestane_dagdelen == '')
-        dagdelen_spl = deelcomp.toegestane_dagdelen.split(',')
+        alle_blazoenen = list()
 
         blazoen_count = dict()
-        for blazoen in COMPETITIE_BLAZOENEN[afstand]:
-            blazoen_count[blazoen] = afk_count = dict()
-            for afkorting in DAGDEEL_AFKORTINGEN:
-                afk_count[afkorting] = 0
+        for nhb_ver in context['regio_verenigingen']:
+            for blazoen_str, counts_list in nhb_ver.blazoen_list:
+                try:
+                    counts = blazoen_count[blazoen_str]
+                except KeyError:
+                    counts = [0] * len(counts_list)
+                    blazoen_count[blazoen_str] = counts
+                    if blazoen_str not in alle_blazoenen:
+                        alle_blazoenen.append(blazoen_str)
+
+                for nr in range(len(counts_list)):
+                    counts[nr] += counts_list[nr]
+                # for
             # for
         # for
 
-        # schutters met recurve boog willen mogelijk DT
-        voorkeur_eigen_blazoen = (SchutterVoorkeuren
-                                  .objects
-                                  .select_related('nhblid')
-                                  .filter(voorkeur_eigen_blazoen=True)
-                                  .values_list('nhblid__nhb_nr', flat=True))
-
-        for deelnemer in deelnemers:
-            klasse = deelnemer.klasse.indiv
-            if afstand == '18':
-                blazoenen = (klasse.blazoen1_18m_regio, klasse.blazoen2_18m_regio)
-            else:
-                blazoenen = (klasse.blazoen1_25m_regio, klasse.blazoen2_25m_regio)
-
-            blazoen = blazoenen[0]
-            if blazoenen[0] != blazoenen[1]:
-                # meerder mogelijkheden
-                if BLAZOEN_DT in blazoenen:
-                    if deelnemer.schutterboog.nhblid.nhb_nr in voorkeur_eigen_blazoen:
-                        blazoen = BLAZOEN_WENS_DT
-
-            try:
-                blazoen_count[blazoen][deelnemer.inschrijf_voorkeur_dagdeel] += 1
-            except KeyError:
-                pass
-        # for
+        alle_blazoenen.sort()
 
         # converteer naar lijstjes met vaste volgorde van de dagdelen
         context['blazoen_count'] = blazoen_behoefte = list()
-        for blazoen in COMPETITIE_BLAZOENEN[afstand]:     # bepaalt volgorde
-            kolommen = list()
-            blazoen_behoefte.append(kolommen)
-
-            kolommen.append(BLAZOEN2STR[blazoen])        # 1e kolom: beschrijving blazoen
-
-            som = 0
-            tellingen = blazoen_count[blazoen]
-            for afkorting in DAGDEEL_AFKORTINGEN:
-                if alles_mag or (afkorting in dagdelen_spl):
-                    count = tellingen[afkorting]
-                    kolommen.append(count)
-                    som += count
-            # for
-            kolommen.append(som)
+        for blazoen_str in alle_blazoenen:
+            counts = blazoen_count[blazoen_str]
+            tup = (blazoen_str, counts)
+            blazoen_behoefte.append(tup)
         # for
 
     def get_context_data(self, **kwargs):
@@ -515,21 +539,9 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                       .order_by('klasse__indiv__volgorde',
                                 'ag_voor_indiv'))
 
-        volgorde = -1
-        for obj in deelnemers:
-            obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]
-            if volgorde != obj.klasse.indiv.volgorde:
-                obj.nieuwe_klasse = True
-                volgorde = obj.klasse.indiv.volgorde
-        # for
-
         # voeg de tabel met dagdeel-behoefte toe
         self._maak_data_dagdeel_behoefte(context, deelcomp, deelnemers, regio)
         self._maak_data_blazoen_behoefte(context, deelcomp, deelnemers)
-
-        # context['url_terug'] = reverse('Competitie:lijst-regiocomp-regio',
-        #                                kwargs={'comp_pk': comp.pk,
-        #                                        'regio_pk': regio.pk})
 
         context['url_download'] = reverse('Competitie:inschrijfmethode3-behoefte-als-bestand',
                                           kwargs={'comp_pk': comp.pk,
@@ -611,20 +623,21 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         writer = csv.writer(response, delimiter=";")      # ; is good for import with dutch regional settings
 
         # voorkeur dagdelen per vereniging
-        writer.writerow(['ver_nr', 'Naam'] + context['dagdelen'] + ['Totaal'])
+        writer.writerow(['ver_nr', 'Naam', 'Blazoen'] + context['dagdelen'] + ['Totaal'])
 
         for nhb_ver in context['regio_verenigingen']:
-            writer.writerow([nhb_ver.ver_nr, nhb_ver.naam] + nhb_ver.counts_list)
+            for blazoen_str, counts_list in nhb_ver.blazoen_list:
+                writer.writerow([nhb_ver.ver_nr, nhb_ver.naam, blazoen_str] + counts_list)
         # for
 
-        writer.writerow(['-', 'Totalen'] + context['totalen'])
+        writer.writerow(['-', '-', 'Totalen'] + context['totalen'])
 
         # blazoen behoefte
-        writer.writerow(['-', '-'] + ['-' for _ in context['totalen']])
-        writer.writerow(['-', 'Blazoen type'] + context['dagdelen'] + ['Totaal'])
+        writer.writerow(['-', '-', '-'] + ['-' for _ in context['totalen']])
+        writer.writerow(['-', '-', 'Blazoen'] + context['dagdelen'] + ['Totaal'])
 
-        for behoefte in context['blazoen_count']:
-            writer.writerow(['-'] + behoefte)
+        for blazoen_str, behoefte in context['blazoen_count']:
+            writer.writerow(['-', '-', blazoen_str] + behoefte)
         # for
 
         return response

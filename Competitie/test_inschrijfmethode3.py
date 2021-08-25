@@ -248,8 +248,7 @@ class TestCompetitieInschrijfmethode3(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_behoefte3_bestand % (comp.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        # self.e2e_dump_resp(resp)
-        csv_file = 'ver_nr;Naam;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n1000;Grote Club;0;0;3;3\r\n1100;Kleine Club;0;2;0;2\r\n-;Totalen;0;2;3;5\r\n-;-;-;-;-;-\r\n-;Blazoen type;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n-;40cm;0;1;0;1\r\n-;Dutch Target;0;0;1;1\r\n-;Dutch Target (wens);0;1;1;2\r\n-;60cm;0;0;1;1\r\n'
+        csv_file = 'ver_nr;Naam;Blazoen;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n1000;Grote Club;60cm;0;0;1;1\r\n1000;Grote Club;Dutch Target;0;0;1;1\r\n1000;Grote Club;Dutch Target (wens);0;0;1;1\r\n1100;Kleine Club;40cm;0;1;0;1\r\n1100;Kleine Club;Dutch Target (wens);0;1;0;1\r\n-;-;Totalen;0;2;3;5\r\n-;-;-;-;-;-;-\r\n-;-;Blazoen;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n-;-;40cm;0;1;0;1\r\n-;-;60cm;0;0;1;1\r\n-;-;Dutch Target;0;0;1;1\r\n-;-;Dutch Target (wens);0;1;1;2\r\n'
         self.assertContains(resp, csv_file, msg_prefix="(was: %s)" % resp.content)
 
         # creëer een beetje puinhoop
@@ -286,8 +285,8 @@ class TestCompetitieInschrijfmethode3(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_behoefte3_bestand % (comp.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        csv_file = 'ver_nr;Naam;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n1000;Grote Club;0;0;3;3\r\n1100;Kleine Club;0;2;0;2\r\n-;Totalen;0;2;3;5\r\n-;-;-;-;-;-\r\n-;Blazoen type;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n-;60cm;0;2;3;5\r\n-;60cm 4-spot;0;0;0;0\r\n'
-        self.assertContains(resp, csv_file)
+        csv_file = 'ver_nr;Naam;Blazoen;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n1000;Grote Club;60cm;0;0;3;3\r\n1100;Kleine Club;60cm;0;2;0;2\r\n-;-;Totalen;0;2;3;5\r\n-;-;-;-;-;-;-\r\n-;-;Blazoen;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n-;-;60cm;0;2;3;5\r\n'
+        self.assertContains(resp, csv_file, msg_prefix="(was: %s)" % resp.content)
 
         # creëer een beetje puinhoop
         self._ver2.regio = NhbRegio.objects.get(pk=102)
