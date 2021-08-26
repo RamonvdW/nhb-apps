@@ -530,6 +530,13 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         # for
         dagdeel_str[''] = ''
 
+        # maak lijst nhb_nrs van sporters met voorkeur voor eigen blazoen
+        wens_eigen_blazoen = list(SchutterVoorkeuren
+                                  .objects
+                                  .select_related('nhblid')
+                                  .filter(voorkeur_eigen_blazoen=True)
+                                  .values_list('nhblid__nhb_nr', flat=True))
+
         objs = (RegioCompetitieSchutterBoog
                 .objects
                 .select_related('schutterboog', 'schutterboog__nhblid',
@@ -541,6 +548,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                           'schutterboog__nhblid__achternaam'))
 
         for obj in objs:
+            obj.eigen_blazoen_ja_nee = JA_NEE[obj.schutterboog.nhblid.nhb_nr in wens_eigen_blazoen]
             obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]
             obj.dagdeel_str = dagdeel_str[obj.inschrijf_voorkeur_dagdeel]
             obj.check = "pk_%s" % obj.pk
