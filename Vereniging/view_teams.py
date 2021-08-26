@@ -1013,7 +1013,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                       .select_related('schutterboog',
                                       'schutterboog__nhblid',
                                       'schutterboog__boogtype')
-                      .order_by('-gemiddelde_begin_team_ronde', '-ag_voor_team'))
+                      .order_by('-gemiddelde_begin_team_ronde', 'schutterboog__pk'))
 
         unsorted_uitvallers = list()
         unsorted_bezet = list()
@@ -1027,12 +1027,12 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                 gem_str = "%.3f" % deelnemer.gemiddelde_begin_team_ronde
                 deelnemer.uitvaller_gem_str = gem_str.replace('.', ',')
 
-                tup = (deelnemer.gemiddelde_begin_team_ronde, deelnemer.pk, deelnemer)
+                tup = (deelnemer.gemiddelde_begin_team_ronde, 0-deelnemer.pk, deelnemer)
                 unsorted_uitvallers.append(tup)
             else:
                 deelnemer.origineel_team_lid = False
                 if deelnemer.pk in deelnemers_bezet_pks:
-                    tup = (deelnemer.gemiddelde_begin_team_ronde, deelnemer.pk, deelnemer)
+                    tup = (deelnemer.gemiddelde_begin_team_ronde, 0-deelnemer.pk, deelnemer)
                     unsorted_bezet.append(tup)
         # for
 
@@ -1042,12 +1042,14 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
             unsorted_bezet.sort(reverse=True)
             context['bezet'] = [tup[-1] for tup in unsorted_bezet]
 
+        # bouw een lijst van uitvallers
+        #   elke uitvaller heeft een lijst van mogelijke invallers
         context['uitvallers'] = uitvallers = list()
 
         uniq_nr = 999000
         while len(unsorted_uitvallers) > 0:
             _, _, uitvaller = unsorted_uitvallers.pop(-1)              # begin bij de laagste
-            group_str = "invaller_%s" % (1+ len(unsorted_uitvallers))  # laagste invaller heeft hoogste nummer
+            group_str = "invaller_%s" % (1 + len(unsorted_uitvallers))  # laagste invaller heeft hoogste nummer
             invallers = list()
             tup = (uitvaller.naam_str, uitvaller.uitvaller_gem_str, group_str, invallers)
             uitvallers.insert(0, tup)
