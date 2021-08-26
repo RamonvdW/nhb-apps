@@ -557,12 +557,16 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                 wkl = obj.klasse.indiv
                 if comp.afstand == '18':
                     # Indoor
-                    if BLAZOEN_DT in (wkl.blazoen1_18m_regio, wkl.blazoen2_18m_regio):
-                        obj.eigen_blazoen_ja_nee = 'DT'
+                    if wkl.blazoen1_18m_regio != wkl.blazoen2_18m_regio:
+                        # er is keuze
+                        if BLAZOEN_DT in (wkl.blazoen1_18m_regio, wkl.blazoen2_18m_regio):
+                            obj.eigen_blazoen_ja_nee = 'DT'
                 else:
                     # 25m1pijl
-                    if BLAZOEN_60CM_4SPOT in (wkl.blazoen1_25m_regio, wkl.blazoen2_25m_regio):
-                        obj.eigen_blazoen_ja_nee = '4spot'
+                    if wkl.blazoen1_25m_regio != wkl.blazoen2_25m_regio:
+                        # er is keuze
+                        if BLAZOEN_60CM_4SPOT in (wkl.blazoen1_25m_regio, wkl.blazoen2_25m_regio):
+                            obj.eigen_blazoen_ja_nee = '4spot'
 
             obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]
             obj.dagdeel_str = dagdeel_str[obj.inschrijf_voorkeur_dagdeel]
