@@ -81,14 +81,14 @@
                     <th data-filter="on">Bonds<wbr/>nummer</th>
                     <th data-filter="on">Naam</th>
 
-                    <th>Voorkeur<br>eigen blazoen</th>
-
                     <th colspan="2"><span class="show-on-small hide-on-med-and-up">Team</span><span class="hide-on-small-only">Voorkeur<br>teamschieten</span></th>
                     <!-- 2e kolom is voor team toggle knop -->
 
                     {% if toon_dagdeel %}
-                        <th><span class="show-on-small hide-on-med-and-up">Dagdelen</span><span class="hide-on-small-only">Voorkeur dagdelen</span></th>
+                        <th><span class="show-on-small hide-on-med-and-up">Dagdelen</span><span class="hide-on-small-only">Voorkeur<br>dagdelen</span></th>
                     {% endif %}
+
+                    <th>Voorkeur<br>blazoen</th>
 
                     <th class="hide-on-small-only">Opmerking</th>
                 </tr>
@@ -110,8 +110,6 @@
                 <td>{{ obj.nhb_nr }}</td>
                 <td>{{ obj.naam_str }}</td>
 
-                <td>{{ obj.eigen_blazoen_ja_nee }}</td>
-
                 <td>{{ obj.team_ja_nee }}</td>
                 <td>
                     {% if obj.maak_ja %}
@@ -124,6 +122,8 @@
                 {% if toon_dagdeel %}
                     <td>{{ obj.dagdeel_str }}</td>
                 {% endif %}
+
+                <td>{{ obj.eigen_blazoen_ja_nee }}</td>
 
                 <td class="hide-on-small-only">{{ obj.inschrijf_notitie|linebreaksbr }}</td>
             </tr>
