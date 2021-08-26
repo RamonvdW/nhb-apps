@@ -27,6 +27,7 @@
         <thead>
             <tr>
                 <th>Vereniging</th>
+                <th>Blazoen</th>
 
                 {% for beschrijving in dagdelen %}
                     <th class="center-align">{{ beschrijving }}</th>
@@ -39,30 +40,42 @@
         {% for nhb_ver in regio_verenigingen %}
             <tr>
                 <td>{{ nhb_ver }}</td>  <!-- geeft [ver_nr] naam -->
-                {% for count in nhb_ver.counts_list %}
-                    <td class="center-align">{{ count }}</td>
-                {% endfor %}
+                <td><!-- blazoen --></td>
+                <td colspan="{{ dagdelen|length }}"></td>
             </tr>
+            {% for blazoen_str, counts_list in nhb_ver.blazoen_list %}
+                <tr>
+                    <td><!-- vereniging --></td>
+                    <td>{{ blazoen_str }}</td>
+                    {% for count in counts_list %}
+                        <td class="center-align">{{ count }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
         {% endfor %}
 
         <tr>
+            <td><!-- vereniging --></td>
             <td class="right-align"><b>Totalen:</b></td>
             {% for count in totalen %}
                 <td class="center-align"><b>{{ count }}</b></td>
             {% endfor %}
         </tr>
 
+
+        <!-- Aantal sporters per blazoen -->
+
         <tr class="nhb-grijs">
             <td colspan="{{ dagdelen|length }}">
                 <p>&nbsp;</p>
                 <h5>Aantal sporters per blazoen type:</h5>
             </td>
-            <td></td>   <!-- type kolom -->
-            <td></td>   <!-- totalen -->
+            <td colspan="3"></td>
         </tr>
 
         <!-- thead -->
             <tr>
+                <th><!-- vereniging naam --></th>
                 <th>Type blazoen</th>
 
                 {% for beschrijving in dagdelen %}
@@ -73,10 +86,12 @@
             </tr>
         <!-- /thead -->
 
-        {% for kolommen in blazoen_count %}
+        {% for blazoen_str, kolommen in blazoen_count %}
             <tr>
+                <td><!-- vereniging naam --></td>
+                <td>{{ blazoen_str }}</td>
                 {% for kolom in kolommen %}
-                    <td {% if not forloop.first %}class="center-align"{% endif %}>{{ kolom }}</td>
+                    <td class="center-align">{{ kolom }}</td>
                 {% endfor %}
             </tr>
         {% endfor %}

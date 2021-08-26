@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2021-08-20'
+SITE_VERSIE = '2021-08-26'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -181,6 +181,7 @@ INTERNAL_IPS = [
 ]
 
 
+# interface naar achtergrondtaken
 BACKGROUND_SYNC_POORT = 3000
 BACKGROUND_SYNC__REGIOCOMP_MUTATIES = BACKGROUND_SYNC_POORT + 1
 
