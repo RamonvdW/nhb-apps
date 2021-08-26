@@ -12,6 +12,17 @@
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="schutter-voorkeuren" %}
 
+    <script type="application/javascript">
+        function gewijzigd() {
+            // het formulier is aangepast en moet opgeslagen worden
+
+            // enable de 'opslaan' knop
+            const el = document.getElementById("opslaan_knop")
+            el.disabled = false
+            el.parentElement.style.display = "block"
+        }
+    </script>
+
     <h4>Voorkeuren</h4>
 
     {% if is_hwl %}
@@ -59,14 +70,14 @@
                     <tr>
                         <td>
                             <label>
-                                <input type="checkbox" class="filled-in" name="{{ obj.check_schiet }}" {% if obj.voor_wedstrijd %}checked{% endif %}>
+                                <input type="checkbox" class="filled-in" name="{{ obj.check_schiet }}" {% if obj.voor_wedstrijd %}checked{% endif %} onchange="gewijzigd()">
                                 <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
                             </label>
                         </td>
 
                         <td>
                             <label>
-                                <input type="checkbox" class="filled-in" name="{{ obj.check_info }}" {% if obj.heeft_interesse %}checked{% endif %}>
+                                <input type="checkbox" class="filled-in" name="{{ obj.check_info }}" {% if obj.heeft_interesse %}checked{% endif %} onchange="gewijzigd()">
                                 <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
                             </label>
                         </td>
@@ -81,7 +92,7 @@
                 <tr>
                     <td>
                         <label>
-                            <input type="checkbox" class="filled-in" name="voorkeur_eigen_blazoen"{% if voorkeuren.voorkeur_eigen_blazoen %} checked{% endif %}>
+                            <input type="checkbox" class="filled-in" name="voorkeur_eigen_blazoen"{% if voorkeuren.voorkeur_eigen_blazoen %} checked{% endif %} onchange="gewijzigd()">
                             <span class="black-text">Voorkeur voor eigen blazoen (zie uitleg onder aan de pagina)</span>
                         </label>
                     </td>
@@ -90,7 +101,7 @@
                 <tr>
                     <td>
                         <label>
-                            <input type="checkbox" class="filled-in" name="voorkeur_meedoen_competitie"{% if voorkeuren.voorkeur_meedoen_competitie %} checked{% endif %}>
+                            <input type="checkbox" class="filled-in" name="voorkeur_meedoen_competitie"{% if voorkeuren.voorkeur_meedoen_competitie %} checked{% endif %} onchange="gewijzigd()">
                             <span class="black-text">Voorkeur voor de bondscompetities (Indoor en 25m1pijl)</span>
                         </label>
                     </td>
@@ -104,7 +115,7 @@
                 <tr>
                     <td>
                         <label>
-                            <input type="checkbox" class="filled-in" name="voorkeur_disc_outdoor"{% if voorkeuren.voorkeur_discipline_outdoor %} checked{% endif %}>
+                            <input type="checkbox" class="filled-in" name="voorkeur_disc_outdoor"{% if voorkeuren.voorkeur_discipline_outdoor %} checked{% endif %} onchange="gewijzigd()">
                             <span class="black-text">Voorkeur voor de discipline Outdoor</span>
                         </label>
                     </td>
@@ -113,7 +124,7 @@
                 <tr>
                     <td>
                         <label>
-                            <input type="checkbox" class="filled-in" name="voorkeur_disc_indoor"{% if voorkeuren.voorkeur_discipline_indoor %} checked{% endif %}>
+                            <input type="checkbox" class="filled-in" name="voorkeur_disc_indoor"{% if voorkeuren.voorkeur_discipline_indoor %} checked{% endif %} onchange="gewijzigd()">
                             <span class="black-text">Voorkeur voor de discipline Indoor</span>
                         </label>
                     </td>
@@ -122,7 +133,7 @@
                 <tr>
                     <td>
                         <label>
-                            <input type="checkbox" class="filled-in" name="voorkeur_disc_25m1p"{% if voorkeuren.voorkeur_discipline_25m1pijl %} checked{% endif %}>
+                            <input type="checkbox" class="filled-in" name="voorkeur_disc_25m1p"{% if voorkeuren.voorkeur_discipline_25m1pijl %} checked{% endif %} onchange="gewijzigd()">
                             <span class="black-text">Voorkeur voor de discipline 25m 1pijl</span>
                         </label>
                     </td>
@@ -131,7 +142,7 @@
                 <tr>
                     <td>
                         <label>
-                            <input type="checkbox" class="filled-in" name="voorkeur_disc_veld"{% if voorkeuren.voorkeur_discipline_veld %} checked{% endif %}>
+                            <input type="checkbox" class="filled-in" name="voorkeur_disc_veld"{% if voorkeuren.voorkeur_discipline_veld %} checked{% endif %} onchange="gewijzigd()">
                             <span class="black-text">Voorkeur voor de discipline Veld</span>
                         </label>
                     </td>
@@ -140,7 +151,7 @@
                 <tr>
                     <td>
                         <label>
-                            <input type="checkbox" class="filled-in" name="voorkeur_disc_3d"{% if voorkeuren.voorkeur_discipline_3d %} checked{% endif %}>
+                            <input type="checkbox" class="filled-in" name="voorkeur_disc_3d"{% if voorkeuren.voorkeur_discipline_3d %} checked{% endif %} onchange="gewijzigd()">
                             <span class="black-text">Voorkeur voor de discipline 3D</span>
                         </label>
                     </td>
@@ -149,7 +160,7 @@
                 <tr>
                     <td>
                         <label>
-                            <input type="checkbox" class="filled-in" name="voorkeur_disc_run"{% if voorkeuren.voorkeur_discipline_run %} checked{% endif %}>
+                            <input type="checkbox" class="filled-in" name="voorkeur_disc_run"{% if voorkeuren.voorkeur_discipline_run %} checked{% endif %} onchange="gewijzigd()">
                             <span class="black-text">Voorkeur voor de discipline Run archery</span>
                         </label>
                     </td>
@@ -158,7 +169,7 @@
                 <tr>
                     <td>
                         <label>
-                            <input type="checkbox" class="filled-in" name="voorkeur_disc_clout"{% if voorkeuren.voorkeur_discipline_clout %} checked{% endif %}>
+                            <input type="checkbox" class="filled-in" name="voorkeur_disc_clout"{% if voorkeuren.voorkeur_discipline_clout %} checked{% endif %} onchange="gewijzigd()">
                             <span class="black-text">Voorkeur voor de discipline Clout</span>
                         </label>
                     </td>
@@ -178,7 +189,7 @@
                     </tr>
                     <tr>
                         <td class="input-field">
-                            <input type="text" maxlength="256" name="para_notitie" placeholder="Hier invoeren" value="{{ voorkeuren.opmerking_para_sporter }}">
+                            <input type="text" maxlength="256" name="para_notitie" placeholder="Hier invoeren" value="{{ voorkeuren.opmerking_para_sporter }}" oninput="gewijzigd()">
                         </td>
                     </tr>
                 </table>
@@ -194,7 +205,7 @@
                 <tr>
                     <td>
                         <label>
-                            <input type="checkbox" class="filled-in" name="optout_nieuwe_taak"{% if email.optout_nieuwe_taak %} checked{% endif %}>
+                            <input type="checkbox" class="filled-in" name="optout_nieuwe_taak"{% if email.optout_nieuwe_taak %} checked{% endif %} onchange="gewijzigd()">
                             <span class="black-text">Stuur e-mail zodra er een nieuwe taak voor mij is aangemaakt</span>
                         </label>
                     </td>
@@ -203,7 +214,7 @@
                 <tr>
                     <td>
                         <label>
-                            <input type="checkbox" class="filled-in" name="optout_herinnering_taken"{% if email.optout_herinnering_taken %} checked{% endif %}>
+                            <input type="checkbox" class="filled-in" name="optout_herinnering_taken"{% if email.optout_herinnering_taken %} checked{% endif %} onchange="gewijzigd()">
                             <span class="black-text">Stuur e-mail om te herinneren aan taken (maximaal &eacute;&eacute;n e-mail per week)</span>
                         </label>
                     </td>
@@ -211,9 +222,11 @@
             </table>
     {% endif %}
 
-        <br>
-        <button class="btn-nhb-rood" type="submit">
-            <i class="material-icons-round left">check</i>Voorkeuren opslaan</button>
+        <div class="fixed-action-btn" style="display: none">
+            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                <i class="material-icons-round left">check</i>Voorkeuren opslaan</button>
+        </div>
+
     </form>
 
     {% if not geen_wedstrijden %}
