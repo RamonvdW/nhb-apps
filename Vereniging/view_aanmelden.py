@@ -11,7 +11,8 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import (LeeftijdsKlasse, TeamType,
                                MAXIMALE_LEEFTIJD_JEUGD,
-                               MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
+                               MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
+                               BLAZOEN_60CM_4SPOT, BLAZOEN_DT)
 from Competitie.models import (AG_NUL, DAGDELEN, DAGDEEL_AFKORTINGEN,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
                                Competitie, DeelCompetitie, DeelcompetitieRonde,
@@ -530,10 +531,20 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         # for
         dagdeel_str[''] = ''
 
+        # maak lijst nhb_nrs van sporters met voorkeur voor eigen blazoen
+        wens_eigen_blazoen = list(SchutterVoorkeuren
+                                  .objects
+                                  .select_related('nhblid')
+                                  .filter(voorkeur_eigen_blazoen=True)
+                                  .values_list('nhblid__nhb_nr', flat=True))
+
         objs = (RegioCompetitieSchutterBoog
                 .objects
-                .select_related('schutterboog', 'schutterboog__nhblid',
-                                'bij_vereniging', 'klasse', 'klasse__indiv')
+                .select_related('schutterboog',
+                                'schutterboog__nhblid',
+                                'bij_vereniging',
+                                'klasse',
+                                'klasse__indiv')
                 .filter(deelcompetitie=deelcomp,
                         bij_vereniging=self.functie_nu.nhb_ver)
                 .order_by('klasse__indiv__volgorde',
@@ -541,6 +552,22 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                           'schutterboog__nhblid__achternaam'))
 
         for obj in objs:
+            obj.eigen_blazoen_ja_nee = '-'
+            if obj.schutterboog.nhblid.nhb_nr in wens_eigen_blazoen:
+                wkl = obj.klasse.indiv
+                if comp.afstand == '18':
+                    # Indoor
+                    if wkl.blazoen1_18m_regio != wkl.blazoen2_18m_regio:
+                        # er is keuze
+                        if BLAZOEN_DT in (wkl.blazoen1_18m_regio, wkl.blazoen2_18m_regio):
+                            obj.eigen_blazoen_ja_nee = 'DT'
+                else:
+                    # 25m1pijl
+                    if wkl.blazoen1_25m_regio != wkl.blazoen2_25m_regio:
+                        # er is keuze
+                        if BLAZOEN_60CM_4SPOT in (wkl.blazoen1_25m_regio, wkl.blazoen2_25m_regio):
+                            obj.eigen_blazoen_ja_nee = '4spot'
+
             obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]
             obj.dagdeel_str = dagdeel_str[obj.inschrijf_voorkeur_dagdeel]
             obj.check = "pk_%s" % obj.pk
