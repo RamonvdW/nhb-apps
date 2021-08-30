@@ -152,15 +152,12 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
             # for
         # for
 
-    # wens_dt: als het bondsnummer hier in voorkomt heeft de sporters voorkeur voor DT (=eigen blazoen)
-    if afstand == '18':
-        wens_eigen_blazoen = list(SchutterVoorkeuren
-                                  .objects
-                                  .select_related('nhblid')
-                                  .filter(voorkeur_eigen_blazoen=True)
-                                  .values_list('nhblid__nhb_nr', flat=True))
-    else:
-        wens_eigen_blazoen = list()
+    # maak lijst nhb_nrs van sporters met voorkeur voor eigen blazoen
+    wens_eigen_blazoen = list(SchutterVoorkeuren
+                              .objects
+                              .select_related('nhblid')
+                              .filter(voorkeur_eigen_blazoen=True)
+                              .values_list('nhblid__nhb_nr', flat=True))
 
     nhbnr2para_opmerking = dict()
     for voorkeur in (SchutterVoorkeuren
