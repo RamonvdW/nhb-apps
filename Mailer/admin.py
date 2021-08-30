@@ -11,6 +11,8 @@ from .models import MailQueue
 class MailQueueAdmin(admin.ModelAdmin):
     search_fields = ('mail_to',)
 
+    list_filter = ('is_verstuurd', )
+
 
 admin.site.register(MailQueue, MailQueueAdmin)
 
