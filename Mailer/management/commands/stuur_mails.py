@@ -39,8 +39,9 @@ class Command(BaseCommand):
                 .objects
                 .filter(toegevoegd_op__lt=one_month_ago,
                         is_blocked=True))
-        self.stdout.write('[DEBUG] Could delete %s old blocked mails' % len(objs))
-        # TODO: actually delete old blocked mails
+        if len(objs) > 0:
+            self.stdout.write('[DEBUG] Found %s blocked mails over 1 month old (that could be deleted)' % len(objs))
+            # TODO: actually delete old blocked mails
 
     def _stuur_oude_mails(self):
         # probeer eenmalig oude mails te sturen en keer daarna terug
