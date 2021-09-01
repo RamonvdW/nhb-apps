@@ -554,7 +554,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         # voorkomt
         pk2score_obj = dict()
         for score_obj in uitslag.scores.select_related('schutterboog').all():
-            pk2score_obj[score_obj.schutterboog.pk] = score_obj     # TODO: moet deelnemer.pk worden!
+            pk2score_obj[score_obj.schutterboog.pk] = score_obj
         # for
         # print('pk2score_obj: %s' % repr(pk2score_obj))
 
@@ -578,7 +578,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
             if isinstance(value, str) and value == '':
                 # lege invoer betekent: schutter deed niet mee
                 if score_obj:
-                    # verwijder deze score uit de uit, maar behoud de geschiedenis
+                    # verwijder deze score uit de uitslag, maar behoud de geschiedenis
                     self.bijgewerkte_score(score_obj, SCORE_WAARDE_VERWIJDERD, when, door_account)
                 # laat tegen exceptie hieronder aanlopen
 

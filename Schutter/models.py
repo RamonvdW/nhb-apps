@@ -77,7 +77,12 @@ class SchutterBoog(models.Model):
         verbose_name_plural = "SchuttersBoog"
 
     def __str__(self):
-        return "%s - %s" % (self.nhblid.nhb_nr, self.boogtype.beschrijving)
+        # voorkom exceptie als nhblid op None staat
+        if self.nhblid:
+            return "%s - %s" % (self.nhblid.nhb_nr, self.boogtype.beschrijving)
+        else:
+            # komt voor als we een fake ScoreHist record aanmaken om de background task te triggeren
+            return "lid? - %s" % self.boogtype.beschrijving
 
     objects = models.Manager()      # for the editor only
 

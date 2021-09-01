@@ -441,6 +441,14 @@ class Command(BaseCommand):
         while now < self.stop_at:               # pragma: no branch
             new_count = ScoreHist.objects.count()
             if new_count != hist_count:
+                # verwijder eventuele 'fake records' die gebruikt zijn als trigger van deze dienst
+                fake_objs = ScoreHist.objects.filter(score__schutterboog__nhblid=None)
+                fake_count = fake_objs.count()
+                if fake_count > 0:
+                    self.stdout.write('[DEBUG] Verwijder %s fake ScoreHist records' % fake_count)
+                    fake_objs.delete()
+                    new_count = ScoreHist.objects.count()
+
                 hist_count = new_count
                 self._update_tussenstand()
                 now = datetime.datetime.now()
