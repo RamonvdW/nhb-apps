@@ -13,11 +13,13 @@ class Command(BaseCommand):
     help = "Controleer AG tegen klasse waarin sporter geplaatst is"
 
     def add_arguments(self, parser):
-        parser.add_argument('--commit', action='store_true')
+        parser.add_argument('--commit', action='store_true', help='Voorgestelde wijzigingen opslaan')
 
     def handle(self, *args, **options):
 
         do_save = options['commit']
+        if not do_save:
+            print('Let op: gebruik --commit om voorgestelde wijzigingen op te slaan')
 
         volgorde2klasse = dict()             # [(competitie.pk, volgorde)] = CompetitieKlasse
         volgorde2hogere_klasse = dict()      # [(competitie.pk, volgorde)] = CompetitieKlasse
