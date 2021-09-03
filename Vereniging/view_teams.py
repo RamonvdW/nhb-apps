@@ -32,7 +32,7 @@ TEMPLATE_TEAMS_RK = 'vereniging/teams-rk.dtl'
 
 
 def update_uitslag_teamcompetitie():
-    # regiocomp_tussenstand moet getriggered worden
+    # regiocomp_tussenstand moet getriggerd worden
     # maak daarvoor een ScoreHist record aan, welke verwijst naar een fake Score record
 
     fake_scores = Score.objects.filter(schutterboog=None)
@@ -151,7 +151,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                                   minute=0,
                                   second=0)
         einde = timezone.make_aware(einde)
-        mag_wijzigen = (now < einde) and not self.readonly
+        mag_wijzigen = (now < einde) # and not self.readonly
         context['mag_wijzigen'] = mag_wijzigen
         context['readonly'] = self.readonly
 

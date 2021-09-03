@@ -11,7 +11,7 @@ from .models import Functie, VerklaringHanterenPersoonsgegevens
 class FunctieAdmin(admin.ModelAdmin):
     filter_horizontal = ('accounts',)
     ordering = ('beschrijving',)
-    search_fields = ('beschrijving', 'nhb_ver__naam', 'nhb_ver__plaats')
+    search_fields = ('beschrijving', 'nhb_ver__naam', 'nhb_ver__plaats', 'bevestigde_email', 'nieuwe_email')
 
 
 class VHPGAdmin(admin.ModelAdmin):
