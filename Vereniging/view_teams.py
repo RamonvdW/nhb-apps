@@ -251,11 +251,9 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rollen.ROL_HWL:
             regio = self.functie_nu.nhb_ver.regio
-            max_fase = 'C'
         else:
             # RCL
             regio = self.functie_nu.nhb_regio
-            max_fase = 'D'
 
         try:
             deelcomp_pk = int(deelcomp_pk[:6])     # afkappen voor de veiligheid
@@ -273,7 +271,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
         comp.bepaal_fase()
 
-        if comp.fase > max_fase:
+        if comp.fase > 'D':
             # staat niet meer open voor instellen regiocompetitie teams
             raise Http404('Competitie is niet in de juiste fase')
 
@@ -638,7 +636,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         comp.bepaal_fase()
 
         if self.rol_nu == Rollen.ROL_HWL:
-            context['readonly'] = readonly = (comp.fase > 'C')
+            context['readonly'] = readonly = (comp.fase > 'D')
             now = timezone.now()
             einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
                                       month=deelcomp.einde_teams_aanmaken.month,
@@ -738,7 +736,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         comp.bepaal_fase()
 
         if self.rol_nu == Rollen.ROL_HWL:
-            readonly = (comp.fase > 'C')
+            readonly = (comp.fase > 'D')
             now = timezone.now()
             einde = datetime.datetime(year=deelcomp.einde_teams_aanmaken.year,
                                       month=deelcomp.einde_teams_aanmaken.month,
