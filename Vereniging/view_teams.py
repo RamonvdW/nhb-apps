@@ -151,7 +151,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                                   minute=0,
                                   second=0)
         einde = timezone.make_aware(einde)
-        mag_wijzigen = (now < einde) and not self.readonly
+        mag_wijzigen = (now < einde) # and not self.readonly
         context['mag_wijzigen'] = mag_wijzigen
         context['readonly'] = self.readonly
 

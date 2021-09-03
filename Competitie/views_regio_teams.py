@@ -85,8 +85,8 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         if deelcomp.competitie.fase > 'A':
             context['readonly_na_fase_A'] = True
 
-            if deelcomp.competitie.fase > 'C':
-                context['readonly_na_fase_C'] = True
+            if deelcomp.competitie.fase > 'D':
+                context['readonly_na_fase_D'] = True
 
         context['deelcomp'] = deelcomp
 
@@ -153,7 +153,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied()
 
         deelcomp.competitie.bepaal_fase()
-        if deelcomp.competitie.fase > 'C':
+        if deelcomp.competitie.fase > 'D':
             # niet meer te wijzigen
             raise Http404()
 

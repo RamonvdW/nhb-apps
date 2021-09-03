@@ -12,7 +12,7 @@
 
     <h4>Instellingen Teamcompetitie</h4>
 
-    {% if readonly_na_fase_C %}
+    {% if readonly_na_fase_D %}
         <p>Hieronder kan je de gemaakte keuzes maken voor jouw regiocompetitie inzien. Wijzigen is niet meer mogelijk.</p>
     {% else %}
         <p>Hieronder kan je als RCL keuzes maken voor jouw regiocompetitie.</p>
@@ -51,7 +51,7 @@
         }
     </script>
 
-    {% if not readonly_na_fase_C %}
+    {% if not readonly_na_fase_D %}
     <form method="post" action="{{ url_opslaan }}">
         {% csrf_token %}
     {% endif %}
@@ -107,7 +107,7 @@
 
             <tr>
                 <td>Teams aanmaken toestaan tot en met</td>
-                <td>{% if readonly_na_fase_C %}
+                <td>{% if readonly_na_fase_D %}
                         <span>{{ deelcomp.einde_teams_aanmaken|date:'Y-m-d' }}</span>
                     {% else %}
                         <input type="text" class="nl_datepicker" id="datum1" onchange="datum_gewijzigd(this)"{% if not deelcomp.regio_organiseert_teamcompetitie %} disabled{% endif %}>
@@ -119,7 +119,7 @@
             <tr>
                 <td>Wedstrijdpunten</td>
                 <td>
-                    {% if readonly_na_fase_C %}
+                    {% if readonly_na_fase_D %}
                         {% for opt in opt_team_punten %}
                             {% if opt.actief %}
                                 <span>{{ opt.beschrijving }}</span>
@@ -141,7 +141,7 @@
             </tr>
         </table>
 
-    {% if not readonly_na_fase_C %}
+    {% if not readonly_na_fase_D %}
         <p>
             <button id="opslaan_knop" class="btn-nhb-rood disabled" type="submit">
                 <i class="material-icons-round left">check</i>Opslaan</button>
