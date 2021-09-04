@@ -901,7 +901,8 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _bepaal_wedstrijdpunten(deelcomp):
-        """ bepaal de wedstrijdpunten, afhankelijk van het team punten model dat in gebruik is
+        """ bepaal de wedstrijdpunten voor elk team in de huidige ronde (1..7),
+            afhankelijk van het team punten model dat in gebruik is
             geeft terug:
                 2p:  lijst van tup(team1, team2) met elk: team1/2_str, team1/2_score, team1/2_wp = 0/1/2
                 f1:  ronde teams met voorstel wp in ronde_wp (10/8/6/5/4/3/2/1/0)
@@ -927,7 +928,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                                            'team__vereniging')
                            .filter(team__in=team_pks,
                                    ronde_nr=deelcomp.huidige_team_ronde)
-                           .order_by('-team_score'))  # hoogste bovenaan
+                           .order_by('-team_score'))        # belangrijke: hoogste score eerst
 
             # common
             for ronde_team in ronde_teams:

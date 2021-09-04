@@ -37,6 +37,13 @@
 
     <p>&nbsp;</p>
 
+    {% if url_team_scores %}
+        <p>
+            <a class="btn-nhb-blauw" href="{{ url_team_scores }}">Team scores</a>
+        </p>
+        <p>&nbsp;</p>
+    {% endif %}
+
     <table class="white">
         <thead>
             <tr>

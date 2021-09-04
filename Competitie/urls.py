@@ -202,6 +202,10 @@ urlpatterns = [
          views_scores.ScoresRegioView.as_view(),
          name='scores-regio'),
 
+    path('scores/teams/<deelcomp_pk>/',
+         views_scores.ScoresRegioTeamsView.as_view(),
+         name='scores-regio-teams'),
+
 
     # uitslag invoeren
     path('scores/uitslag-invoeren/<wedstrijd_pk>/',

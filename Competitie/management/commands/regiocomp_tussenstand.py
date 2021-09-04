@@ -4,8 +4,8 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-# werk de tussenstand bij voor deelcompetities die niet afgesloten zijn
-# zodra er nieuwe ScoreHist records zijn
+# zodra er nieuwe ScoreHist records zijn, de tussenstand bijwerken voor deelcompetities die niet afgesloten zijn
+# voor zowel individueel als team score aspecten
 
 from django.core.management.base import BaseCommand
 from django.db.models import F

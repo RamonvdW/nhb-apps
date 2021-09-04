@@ -11,7 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers
-from Competitie.models import RegiocompetitieTeam, RegiocompetitieRondeTeam
+from Competitie.models import RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieTeamPoule
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Schutter.models import SchutterBoog
@@ -19,12 +19,14 @@ from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_S
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from .models import (LAAG_REGIO, DeelCompetitie,
                      DeelcompetitieRonde, RegioCompetitieSchutterBoog)
+from types import SimpleNamespace
 import json
 
 
 TEMPLATE_COMPETITIE_SCORES_REGIO = 'competitie/scores-regio.dtl'
 TEMPLATE_COMPETITIE_SCORES_INVOEREN = 'competitie/scores-invoeren.dtl'
 TEMPLATE_COMPETITIE_SCORES_BEKIJKEN = 'competitie/scores-bekijken.dtl'
+TEMPLATE_COMPETITIE_SCORES_TEAMS = 'competitie/scores-regio-teams.dtl'
 
 
 class ScoresRegioView(UserPassesTestMixin, TemplateView):
@@ -57,6 +59,10 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied()
 
         context['deelcomp'] = deelcomp
+
+        if deelcomp.regio_organiseert_teamcompetitie:
+            context['url_team_scores'] = reverse('Competitie:scores-regio-teams',
+                                                 kwargs={'deelcomp_pk': deelcomp.pk})
 
         # deelcompetitie bestaat uit rondes
         # elke ronde heeft een plan met wedstrijden
@@ -697,6 +703,178 @@ class WedstrijdUitslagBekijkenView(TemplateView):
         context['wedstrijd'] = wedstrijd
         context['deelcomp'] = deelcomp
         context['ronde'] = ronde
+
+        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        return context
+
+
+class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
+
+    """ Deze view geeft de RCL de mogelijkheid om voor de teamcompetitie de juiste individuele scores
+        te selecteren voor sporters die meer dan 1 score neergezet hebben (inhalen/voorschieten).
+    """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_SCORES_TEAMS
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_RCL
+
+    def _bepaal_teams_en_scores(self, deelcomp):
+        alle_regels = list()
+
+        # sporters waarvan we de scores op moeten zoeken
+        schutterboog_pks = list()
+
+        # TODO: poules sorteren
+        for poule in (RegiocompetitieTeamPoule
+                      .objects
+                      .prefetch_related('teams')
+                      .filter(deelcompetitie=deelcomp)
+                      .order_by('beschrijving')):
+
+            team_pks = poule.teams.values_list('pk', flat=True)
+
+            ronde_teams = (RegiocompetitieRondeTeam
+                           .objects
+                           .select_related('team',
+                                           'team__vereniging')
+                           .prefetch_related('deelnemers_feitelijk')
+                           .filter(team__in=team_pks,
+                                   ronde_nr=deelcomp.huidige_team_ronde)
+                           .order_by('-team_score'))        # belangrijke: hoogste score eerst
+
+            for ronde_team in ronde_teams:
+                ronde_team.ronde_wp = 0
+                ronde_team.team_str = "[%s] %s" % (ronde_team.team.vereniging.ver_nr,
+                                                   ronde_team.team.maak_team_naam_kort())
+            # for
+
+            break_poule = poule.beschrijving
+            prev_klasse = None
+            for ronde_team in ronde_teams:
+                regel = SimpleNamespace()
+
+                regel.poule_str = break_poule
+                break_poule = ""
+
+                regel.team_str = ronde_team.team.maak_team_naam()
+
+                klasse_str = ronde_team.team.klasse.team.beschrijving
+                if klasse_str != prev_klasse:
+                    regel.klasse_str = klasse_str
+                    prev_klasse = klasse_str
+
+                regel.deelnemers = deelnemers = list()
+                for deelnemer in ronde_team.deelnemers_feitelijk.all():
+                    lid = deelnemer.schutterboog.nhblid
+                    deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+                    deelnemer.schutterboog_pk = deelnemer.schutterboog.pk
+                    deelnemer.gevonden_scores = None
+                    deelnemer.keuze_nodig = False
+
+                    schutterboog_pks.append(deelnemer.schutterboog.pk)
+
+                    regel.deelnemers.append(deelnemer)
+                # for
+
+                alle_regels.append(regel)
+            # for
+        # for
+
+        # via schutterboog_pks kunnen we alle scores vinden
+        # bepaal welke relevant kunnen zijn
+        score2wedstrijd = dict()
+
+        # haal alle wedstrijdplannen van deze deelcompetitie op
+        plan_pks = (DeelcompetitieRonde
+                    .objects
+                    .filter(deelcompetitie=deelcomp)
+                    .values_list('plan__pk', flat=True))
+
+        # doorloop alle wedstrijden van deze plannen
+        # de wedstrijd heeft een datum en uitslag met scores
+        for wedstrijd in (CompetitieWedstrijd
+                          .objects
+                          .select_related('uitslag')
+                          .prefetch_related('uitslag__scores')
+                          .exclude(uitslag=None)
+                          .filter(competitiewedstrijdenplan__in=plan_pks)):
+
+            # noteer welke scores interessant zijn
+            # en de koppeling naar de wedstrijd, voor de datum
+            for score in wedstrijd.uitslag.scores.all():
+                score2wedstrijd[score.pk] = wedstrijd
+            # for
+        # for
+
+        schutterboog2wedstrijdscores = dict()        # [schutterboog_pk] = [(score, wedstrijd), ...]
+
+        # doorloop alle scores van de relevante sporters
+        for score in (Score
+                      .objects
+                      .select_related('schutterboog')
+                      .filter(schutterboog__pk__in=schutterboog_pks)):
+            try:
+                wedstrijd = score2wedstrijd[score.pk]
+            except KeyError:
+                # niet relevante score
+                pass
+            else:
+                tup = (wedstrijd, score)
+                pk = score.schutterboog.pk
+                try:
+                    schutterboog2wedstrijdscores[pk].append(tup)
+                except KeyError:
+                    schutterboog2wedstrijdscores[pk] = [tup]
+        # for
+
+        for regel in alle_regels:
+            for deelnemer in regel.deelnemers:
+                try:
+                    tups = schutterboog2wedstrijdscores[deelnemer.schutterboog_pk]
+                except KeyError:
+                    # geen score voor deze sporter
+                    pass
+                else:
+                    deelnemer.gevonden_scores = tups
+                    deelnemer.keuze_nodig = len(tups) > 1
+                    if deelnemer.keuze_nodig:
+                        deelnemer.id_radio = "id_score_%s" % deelnemer.schutterboog_pk
+                        for wedstrijd, score in tups:
+                            score.id_radio = "id_score_%s" % score.pk
+                            score.is_selected = False
+            # for
+        # for
+
+        return alle_regels
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk,
+                                                  laag=LAAG_REGIO)
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Http404('Competitie niet gevonden')
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        if deelcomp.functie != functie_nu:
+            # niet de beheerder
+            raise PermissionDenied()
+
+        if not deelcomp.regio_organiseert_teamcompetitie:
+            raise Http404('Geen teamcompetitie in deze regio')
+
+        context['deelcomp'] = deelcomp
+
+        if 1 <= deelcomp.huidige_team_ronde <= 7:
+            context['alle_regels'] = self._bepaal_teams_en_scores(deelcomp)
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context

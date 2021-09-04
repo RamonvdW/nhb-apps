@@ -1,0 +1,123 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Scores koppelen aan team{% endblock %}
+
+{% block pagina %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-scores-regio-teams" %}
+
+    <h4>Scores koppelen aan team</h4>
+
+    <p>Via deze pagina kan de RCL de individuele scores koppelen aan een team voor een specifieke ronde.</p>
+
+    <p>&nbsp;</p>
+    <div class="row">
+
+        <!-- toon gegevens van de regio en competitie in een blauwe box -->
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
+
+                <div class="row small-row">
+                    <div class="col s3">Competitie:</div>
+                    <div class="col s7">{{ deelcomp.competitie.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Regio:</div>
+                    <div class="col s7">{{ deelcomp.nhb_regio }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Huidige ronde:</div>
+                    <div class="col s7">{{ deelcomp.huidige_team_ronde }}</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <p>&nbsp;</p>
+
+    {% if 1 <= deelcomp.huidige_team_ronde <= 7 %}
+        <table class="white">
+            {% for regel in alle_regels %}
+                {% if regel.poule_str %}
+                    <tr class="nhb-grijs">
+                        <td colspan="3"><h5>Poule: {{ regel.poule_str }}</h5></td>
+                    </tr>
+                {% endif %}
+
+                {% if regel.klasse_str %}
+                    <tr class="nhb-grijs">
+                        <td colspan="3"><h6>Klasse: {{ regel.klasse_str }}</h6></td>
+                    </tr>
+
+                    <tr>
+                        <th>Team, sporters</th>
+                        <th>Beschikbare score</th>
+                        <th>Van wedstrijd</th>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <td colspan="3">{{ regel.team_str }}</td>
+                </tr>
+
+                {% for deelnemer in regel.deelnemers %}
+                    <tr>
+                        <td style="padding-left: 50px">{{ deelnemer.naam_str }}</td>
+                        <td>
+                            {% if deelnemer.keuze_nodig %}
+                                <span class="red-text">Keuze nodig:</span><br>
+                                <ul id="{{ deelnemer.id_radio }}">
+                                    {% for wedstrijd, score in deelnemer.gevonden_scores %}
+                                        <li>
+                                            <label class="black-text" for="{{ score.id_radio }}">
+                                                <input class="with-gap" type="radio" name="{{ deelnemer.id_radio }}" value="X" required id="{{ score.id_radio }}"{%if score.is_selected %} checked{% endif %}>
+                                                <span>{{ score.waarde }}</span><br>
+                                            </label>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                {% for wedstrijd, score in deelnemer.gevonden_scores %}
+                                    <span class="">{{ score.waarde }}</span><br>
+                                {% empty %}
+                                    <span>0</span>
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if deelnemer.keuze_nodig %}
+                                <!-- Keuze maken: --><br>
+                                {% for wedstrijd, score in deelnemer.gevonden_scores %}
+                                    <!-- TODO: extra class nodig voor line-height compatible met input -->
+                                    <span class="input" style="line-height:25px">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij {{ wedstrijd.vereniging.naam }}</span><br>
+                                {% endfor %}
+                            {% else %}
+                                {% for wedstrijd, score in deelnemer.gevonden_scores %}
+                                    <span>{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij {{ wedstrijd.vereniging.naam }}</span><br>
+                                {% empty %}
+                                    <i>Geen score gevonden</i>
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>Deze pagina is niet beschikbaar voor de huidige team ronde</p>
+    {% endif %}
+
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}
