@@ -20,6 +20,7 @@ from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from .models import (LAAG_REGIO, DeelCompetitie,
                      DeelcompetitieRonde, RegioCompetitieSchutterBoog)
 from types import SimpleNamespace
+import datetime
 import json
 
 
@@ -745,7 +746,8 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                            .prefetch_related('deelnemers_feitelijk')
                            .filter(team__in=team_pks,
                                    ronde_nr=deelcomp.huidige_team_ronde)
-                           .order_by('-team_score'))        # belangrijke: hoogste score eerst
+                           .order_by('team__vereniging__ver_nr',
+                                     'team__volg_nr'))
 
             for ronde_team in ronde_teams:
                 ronde_team.ronde_wp = 0
@@ -812,11 +814,13 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         # for
 
         schutterboog2wedstrijdscores = dict()        # [schutterboog_pk] = [(score, wedstrijd), ...]
+        early_date = datetime.date(year=2000, month=1, day=1)
 
         # doorloop alle scores van de relevante sporters
         for score in (Score
                       .objects
                       .select_related('schutterboog')
+                      .exclude(waarde=SCORE_WAARDE_VERWIJDERD)
                       .filter(schutterboog__pk__in=schutterboog_pks)):
             try:
                 wedstrijd = score2wedstrijd[score.pk]
@@ -824,12 +828,14 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                 # niet relevante score
                 pass
             else:
-                tup = (wedstrijd, score)
+                tup = (wedstrijd.datum_wanneer, wedstrijd.tijd_begin_wedstrijd, wedstrijd.pk, wedstrijd, score)
                 pk = score.schutterboog.pk
                 try:
                     schutterboog2wedstrijdscores[pk].append(tup)
                 except KeyError:
-                    schutterboog2wedstrijdscores[pk] = [tup]
+                    nul_score = Score(waarde=0, pk=0)
+                    schutterboog2wedstrijdscores[pk] = [(early_date, 0, 0, None, nul_score)]     # 0-score
+                    schutterboog2wedstrijdscores[pk].append(tup)
         # for
 
         for regel in alle_regels:
@@ -840,11 +846,12 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                     # geen score voor deze sporter
                     pass
                 else:
-                    deelnemer.gevonden_scores = tups
+                    tups.sort()
+                    deelnemer.gevonden_scores = [(wedstrijd, score) for _, _, _, wedstrijd, score in tups]
                     deelnemer.keuze_nodig = len(tups) > 1
                     if deelnemer.keuze_nodig:
                         deelnemer.id_radio = "id_score_%s" % deelnemer.schutterboog_pk
-                        for wedstrijd, score in tups:
+                        for wedstrijd, score in deelnemer.gevonden_scores:
                             score.id_radio = "id_score_%s" % score.pk
                             score.is_selected = False
             # for
@@ -875,9 +882,36 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         if 1 <= deelcomp.huidige_team_ronde <= 7:
             context['alle_regels'] = self._bepaal_teams_en_scores(deelcomp)
+            context['url_opslaan'] = reverse('Competitie:scores-regio-teams',
+                                             kwargs={'deelcomp_pk': deelcomp.pk})
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context
+
+    def post(self, request, *args, **kwargs):
+
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk,
+                                                  laag=LAAG_REGIO)
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Http404('Competitie niet gevonden')
+
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        if deelcomp.functie != functie_nu:
+            # niet de beheerder
+            raise PermissionDenied()
+
+        if not deelcomp.regio_organiseert_teamcompetitie:
+            raise Http404('Geen teamcompetitie in deze regio')
+
+        for k, v in request.POST.items():
+            print('%s=%s' % (k, repr(v)))
+
+        url = reverse('Competitie:scores-regio',
+                      kwargs={'deelcomp_pk': deelcomp.pk})
+
+        return HttpResponseRedirect(url)
 
 
 # end of file
