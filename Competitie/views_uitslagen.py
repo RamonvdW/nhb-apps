@@ -670,6 +670,7 @@ class UitslagenRegioTeamsView(TemplateView):
                     if prev_poule:
                         team.schema = prev_poule.schema
                     prev_poule = poule
+                    prev_klasse = None
 
             if team.klasse != prev_klasse:
                 team.break_klasse = True
