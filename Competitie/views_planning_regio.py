@@ -172,7 +172,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             context['rondes'].append(ronde)
         # for
 
-        if mag_wijzigen and len(context['rondes']) < 10:
+        if mag_wijzigen and len(context['rondes']) < 16:
             context['url_nieuwe_week'] = reverse('Competitie:regio-planning',
                                                  kwargs={'deelcomp_pk': deelcomp.pk})
 
@@ -327,7 +327,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
         # for
 
         # alleen de RCL mag de planning uitbreiden
-        if self.rol_nu == Rollen.ROL_RCL and len(context['rondes']) < 10:
+        if self.rol_nu == Rollen.ROL_RCL and len(context['rondes']) < 16:
             context['url_nieuwe_week'] = reverse('Competitie:regio-cluster-planning',
                                                  kwargs={'deelcomp_pk': deelcomp.pk,
                                                          'cluster_pk': cluster.pk})
