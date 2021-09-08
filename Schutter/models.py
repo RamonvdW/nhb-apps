@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-
 from django.db import models
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbLid

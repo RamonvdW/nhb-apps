@@ -11,7 +11,8 @@ from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers
-from Competitie.models import RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieTeamPoule
+from Competitie.models import (RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieTeamPoule,
+                               update_uitslag_teamcompetitie)
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Schutter.models import SchutterBoog
@@ -724,13 +725,15 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_RCL
 
-    def _bepaal_teams_en_scores(self, deelcomp):
+    @staticmethod
+    def _bepaal_teams_en_scores(deelcomp):
         alle_regels = list()
 
         # sporters waarvan we de scores op moeten zoeken
         schutterboog_pks = list()
 
-        # TODO: poules sorteren
+        used_score_pks = list()
+
         for poule in (RegiocompetitieTeamPoule
                       .objects
                       .prefetch_related('teams')
@@ -739,11 +742,21 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
             team_pks = poule.teams.values_list('pk', flat=True)
 
+            # alle al gebruikte scores
+            used_scores = list(RegiocompetitieRondeTeam
+                               .objects
+                               .prefetch_related('scores_feitelijk')
+                               .filter(team__in=team_pks)
+                               .exclude(ronde_nr=deelcomp.huidige_team_ronde)
+                               .values_list('scores_feitelijk__pk', flat=True))
+            used_score_pks.extend(used_scores)
+
             ronde_teams = (RegiocompetitieRondeTeam
                            .objects
                            .select_related('team',
                                            'team__vereniging')
-                           .prefetch_related('deelnemers_feitelijk')
+                           .prefetch_related('deelnemers_feitelijk',
+                                             'scores_feitelijk')
                            .filter(team__in=team_pks,
                                    ronde_nr=deelcomp.huidige_team_ronde)
                            .order_by('team__vereniging__ver_nr',
@@ -763,6 +776,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                 regel.poule_str = break_poule
                 break_poule = ""
 
+                regel.ronde_team = ronde_team
                 regel.team_str = ronde_team.team.maak_team_naam()
 
                 klasse_str = ronde_team.team.klasse.team.beschrijving
@@ -782,6 +796,10 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
                     regel.deelnemers.append(deelnemer)
                 # for
+
+                regel.score_pks_feitelijk = list(ronde_team
+                                                 .scores_feitelijk
+                                                 .values_list('pk', flat=True))
 
                 alle_regels.append(regel)
             # for
@@ -822,38 +840,71 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                       .select_related('schutterboog')
                       .exclude(waarde=SCORE_WAARDE_VERWIJDERD)
                       .filter(schutterboog__pk__in=schutterboog_pks)):
+
+            score.block_selection = (score.pk in used_score_pks)
+
             try:
                 wedstrijd = score2wedstrijd[score.pk]
             except KeyError:
                 # niet relevante score
                 pass
             else:
-                tup = (wedstrijd.datum_wanneer, wedstrijd.tijd_begin_wedstrijd, wedstrijd.pk, wedstrijd, score)
+                if score.block_selection:
+                    tup = (1, wedstrijd.datum_wanneer, wedstrijd.tijd_begin_wedstrijd, wedstrijd.pk, wedstrijd, score)
+                else:
+                    tup = (2, wedstrijd.datum_wanneer, wedstrijd.tijd_begin_wedstrijd, wedstrijd.pk, wedstrijd, score)
                 pk = score.schutterboog.pk
                 try:
                     schutterboog2wedstrijdscores[pk].append(tup)
                 except KeyError:
-                    nul_score = Score(waarde=0, pk=0)
-                    schutterboog2wedstrijdscores[pk] = [(early_date, 0, 0, None, nul_score)]     # 0-score
+                    # voeg een "niet geschoten" optie toe
+                    nul_score = Score(waarde=0, pk='geen')
+                    nul_score.block_selection = False
+                    schutterboog2wedstrijdscores[pk] = [(3, early_date, 0, 0, None, nul_score)]     # 0-score
+
                     schutterboog2wedstrijdscores[pk].append(tup)
         # for
 
+        fake_score_pk = 0
         for regel in alle_regels:
             for deelnemer in regel.deelnemers:
                 try:
                     tups = schutterboog2wedstrijdscores[deelnemer.schutterboog_pk]
                 except KeyError:
                     # geen score voor deze sporter
+                    deelnemer.gevonden_scores = list()
                     pass
                 else:
+                    # sorteer de gevonden scores op wedstrijddatum
                     tups.sort()
-                    deelnemer.gevonden_scores = [(wedstrijd, score) for _, _, _, wedstrijd, score in tups]
-                    deelnemer.keuze_nodig = len(tups) > 1
+                    deelnemer.gevonden_scores = [(wedstrijd, score) for _, _, _, _, wedstrijd, score in tups]
+                    aantal = len(tups)
+                    for _, score in deelnemer.gevonden_scores:
+                        if score.block_selection:
+                            aantal -= 1
+                    # for
+                    deelnemer.keuze_nodig = (aantal > 1)
                     if deelnemer.keuze_nodig:
                         deelnemer.id_radio = "id_score_%s" % deelnemer.schutterboog_pk
+                        first_score = None
+                        first_select = True
                         for wedstrijd, score in deelnemer.gevonden_scores:
-                            score.id_radio = "id_score_%s" % score.pk
-                            score.is_selected = False
+                            if not score.block_selection:
+                                if not first_score:
+                                    first_score = score
+                                if wedstrijd:
+                                    score.id_radio = "id_score_%s" % score.pk
+                                else:
+                                    fake_score_pk += 1
+                                    score.id_radio = "id_fake_%s" % fake_score_pk
+                                score.is_selected = (score.pk in regel.score_pks_feitelijk)
+                                if score.is_selected:
+                                    first_select = False
+                        # for
+
+                        # als er geen score gekozen was, kies dan de 'Niet geschoten' optie
+                        if first_select and first_score:
+                            first_score.is_selected = True
             # for
         # for
 
@@ -905,12 +956,53 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         if not deelcomp.regio_organiseert_teamcompetitie:
             raise Http404('Geen teamcompetitie in deze regio')
 
+        alle_regels = self._bepaal_teams_en_scores(deelcomp)
+
         for k, v in request.POST.items():
             print('%s=%s' % (k, repr(v)))
 
+        # verzamel de gewenste keuzes
+        ronde_teams = dict()        # [ronde_team.pk] = (ronde_team, schutterboog_pk2score_pk)
+
+        for regel in alle_regels:
+            # regel = team
+            try:
+                team_scores = ronde_teams[regel.ronde_team.pk]
+            except KeyError:
+                team_scores = list()
+                ronde_teams[regel.ronde_team.pk] = (regel.ronde_team, team_scores)
+
+            for deelnemer in regel.deelnemers:
+                if deelnemer.keuze_nodig:
+                    score_pk_str = request.POST.get(deelnemer.id_radio, '')[:10]       # afkappen voor de veiligheid
+                    if score_pk_str and score_pk_str != 'geen':
+                        try:
+                            score_pk = int(score_pk_str)
+                        except (ValueError, TypeError):
+                            raise Http404('Verkeerde parameter')
+
+                        for wedstrijd, score in deelnemer.gevonden_scores:
+                            if wedstrijd and score.pk == score_pk:
+                                # gevonden!
+                                team_scores.append(score.pk)
+                                break
+                        # for
+                else:
+                    for wedstrijd, score in deelnemer.gevonden_scores:
+                        if wedstrijd:
+                            team_scores.append(score.pk)
+            # for
+        # for
+
+        for ronde_team, score_pks in ronde_teams.values():
+            ronde_team.scores_feitelijk.set(score_pks)
+        # for
+
+        # trigger de achtergrondtaak om de team scores opnieuw te berekenen
+        update_uitslag_teamcompetitie()
+
         url = reverse('Competitie:scores-regio',
                       kwargs={'deelcomp_pk': deelcomp.pk})
-
         return HttpResponseRedirect(url)
 
 

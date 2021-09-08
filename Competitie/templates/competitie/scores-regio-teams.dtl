@@ -82,7 +82,7 @@
                                         {% for wedstrijd, score in deelnemer.gevonden_scores %}
                                             <li>
                                                 <label class="black-text" for="{{ score.id_radio }}">
-                                                    <input class="with-gap" type="radio" name="{{ deelnemer.id_radio }}" value="{{ score.pk }}" id="{{ score.id_radio }}"{%if score.is_selected %} checked{% endif %}>
+                                                    <input class="with-gap" type="radio" name="{{ deelnemer.id_radio }}" value="{{ score.pk }}" id="{{ score.id_radio }}"{% if score.block_selection %}disabled{% endif %}{% if score.is_selected %} checked{% endif %}>
                                                     <span>{{ score.waarde }}</span><br>
                                                 </label>
                                             </li>
@@ -90,7 +90,7 @@
                                     </ul>
                                 {% else %}
                                     {% for wedstrijd, score in deelnemer.gevonden_scores %}
-                                        <span class="">{{ score.waarde }}</span><br>
+                                        <span{% if score.block_selection %} class="grey-text"{% endif %}>{{ score.waarde }}</span><br>
                                     {% empty %}
                                         <span>0</span>
                                     {% endfor %}
@@ -102,14 +102,18 @@
                                     {% for wedstrijd, score in deelnemer.gevonden_scores %}
                                         <!-- TODO: extra class nodig voor line-height compatible met input -->
                                         {% if wedstrijd %}
-                                            <span class="input" style="line-height:25px">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij {{ wedstrijd.vereniging.naam }}</span><br>
+                                            <span class="input{% if score.block_selection %} grey-text{% endif %}" style="line-height:25px">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij {{ wedstrijd.vereniging.naam }}</span><br>
                                         {% else %}
                                             <span class="input" style="line-height:25px"><i>Niet geschoten</i></span><br>
                                         {% endif %}
                                     {% endfor %}
                                 {% else %}
                                     {% for wedstrijd, score in deelnemer.gevonden_scores %}
-                                        <span>{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij {{ wedstrijd.vereniging.naam }}</span><br>
+                                        {% if wedstrijd %}
+                                            <span{% if score.block_selection %} class="grey-text"{% endif %}>{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij {{ wedstrijd.vereniging.naam }}</span><br>
+                                        {% else %}
+                                            <i>Niet geschoten</i>
+                                        {% endif %}
                                     {% empty %}
                                         <i>Niet geschoten</i>
                                     {% endfor %}

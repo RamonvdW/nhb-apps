@@ -221,7 +221,7 @@ class CompetitieMutatieAdmin(admin.ModelAdmin):
 
 class RegiocompetitieRondeTeamAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('team', 'ronde_nr')
+    readonly_fields = ('team', 'ronde_nr', 'feitelijke_scores')
 
     list_filter = ('team__deelcompetitie__competitie',
                    'team__vereniging__regio',
@@ -237,9 +237,18 @@ class RegiocompetitieRondeTeamAdmin(admin.ModelAdmin):
                         'deelnemers_feitelijk',
                         'team_score',
                         'team_punten',
-                        'logboek')
+                        'logboek',
+                        'feitelijke_scores')
              }),
     )
+
+    @staticmethod
+    def feitelijke_scores(obj):     # pragma: no cover
+        msg = "Scores:\n"
+        msg += "\n".join([str(score) for score in obj.scores_feitelijk.all()])
+        msg += "\n\nScoreHist:\n"
+        msg += "\n".join([str(scorehist) for scorehist in obj.scorehist_feitelijk.all()])
+        return msg
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)

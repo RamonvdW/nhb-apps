@@ -390,19 +390,38 @@ class Command(BaseCommand):
                 teams = RegiocompetitieTeam.objects.filter(deelcompetitie=deelcomp).values_list('pk', flat=True)
 
                 # doorloop alle ronde-teams voor de huidige ronde van de deelcompetitie
-                for team in (RegiocompetitieRondeTeam
-                             .objects
-                             .prefetch_related('deelnemers_feitelijk')
-                             .filter(team__in=teams,
-                                     ronde_nr=ronde_nr)):
+                for ronde_team in (RegiocompetitieRondeTeam
+                                   .objects
+                                   .prefetch_related('scores_feitelijk')
+                                   .filter(team__in=teams,
+                                           ronde_nr=ronde_nr)):
 
                     team_scores = list()
-                    for deelnemer in team.deelnemers_feitelijk.all():
-                        score = (deelnemer.score1, deelnemer.score2, deelnemer.score3,
-                                 deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7)[ronde_nr - 1]
-                        team_scores.append(score)
+                    score_pks = list()
+                    for score in ronde_team.scores_feitelijk.all():
+                        team_scores.append(score.waarde)
+                        score_pks.append(score.pk)
                     # for
                     team_scores.sort(reverse=True)      # hoogste eerst
+
+                    # ScoreHist erbij zoeken
+                    hist_pks = list()
+                    for scorehist in (ScoreHist
+                                      .objects
+                                      .select_related('score')
+                                      .filter(score__in=score_pks)
+                                      .order_by('-when')):      # nieuwste eerst
+                        if scorehist.score.pk in score_pks:
+                            hist_pks.append(scorehist.pk)
+                            score_pks.remove(scorehist.score.pk)
+
+                        if len(score_pks) == 0:
+                            # no more scores for which to find a ScoreHist
+                            break       # from the for
+                    # for
+
+                    # sla de ScoreHist op
+                    ronde_team.scorehist_feitelijk.set(hist_pks)
 
                     # de hoogste 3 scores maken de team score
                     team_score = 0
@@ -411,10 +430,10 @@ class Command(BaseCommand):
                     # for
 
                     # is de team score aangepast?
-                    if team.team_score != team_score:
+                    if ronde_team.team_score != team_score:
                         # print('nieuwe team_score voor team %s: %s --> %s' % (team, team.team_score, team_score))
-                        team.team_score = team_score
-                        team.save(update_fields=['team_score'])
+                        ronde_team.team_score = team_score
+                        ronde_team.save(update_fields=['team_score'])
 
                 # for (ronde team)
         # for (deelcomp)

@@ -6,7 +6,7 @@
 
 from django.db import models
 from django.utils import timezone
-from BasisTypen.models import TeamType, IndivWedstrijdklasse, TeamWedstrijdklasse
+from BasisTypen.models import BoogType, TeamType, IndivWedstrijdklasse, TeamWedstrijdklasse
 from Functie.rol import Rollen
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Functie.models import Functie
@@ -635,6 +635,17 @@ class RegiocompetitieRondeTeam(models.Model):
                                                   related_name='teamronde_feitelijk',
                                                   blank=True)
 
+    # gekozen scores van de feitelijke schutters
+    # ingeval van keuze zijn deze specifiek gekozen door de RCL
+    scores_feitelijk = models.ManyToManyField(Score,
+                                              related_name='teamronde_feitelijk',
+                                              blank=True)
+
+    # bevroren scores van de feitelijke schutters op het moment dat de teamronde afgesloten werd
+    scorehist_feitelijk = models.ManyToManyField(ScoreHist,
+                                                 related_name='teamronde_feitelijk',
+                                                 blank=True)
+
     # beste 3 scores van schutters in het team
     team_score = models.PositiveSmallIntegerField(default=0)
 
@@ -810,6 +821,32 @@ class CompetitieTaken(models.Model):
     hoogste_mutatie = models.ForeignKey(CompetitieMutatie,
                                         null=True, blank=True,
                                         on_delete=models.SET_NULL)
+
+
+def update_uitslag_teamcompetitie():
+    # regiocomp_tussenstand moet gekieteld worden
+    # maak daarvoor een ScoreHist record aan, welke verwijst naar een fake Score record
+
+    fake_scores = Score.objects.filter(schutterboog=None)
+    if fake_scores.count() == 0:
+        # fake Score heeft een fake SchutterBoog nodig
+        boogtype = BoogType.objects.all()[0]
+
+        fake_sb = SchutterBoog(boogtype=boogtype)
+        fake_sb.save()
+
+        fake_score = Score(
+                        schutterboog=fake_sb,
+                        waarde=0,
+                        afstand_meter=0)
+        fake_score.save()
+    else:
+        fake_score = fake_scores[0]
+
+    ScoreHist(score=fake_score,
+              oude_waarde=0,
+              nieuwe_waarde=0,
+              notitie="Trigger background task").save()
 
 
 # end of file

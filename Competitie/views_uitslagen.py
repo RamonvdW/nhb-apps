@@ -795,7 +795,8 @@ class UitslagenVerenigingTeamsView(TemplateView):
                        .objects
                        .filter(team__in=teams)
                        .prefetch_related('deelnemers_geselecteerd',
-                                         'deelnemers_feitelijk')
+                                         'deelnemers_feitelijk',
+                                         'scorehist_feitelijk')
                        .order_by('ronde_nr'))
         for ronde_team in ronde_teams:
             team = pk2team[ronde_team.team.pk]
@@ -803,6 +804,16 @@ class UitslagenVerenigingTeamsView(TemplateView):
             team.ronde_scores.append(ronde_team.team_score)
             team.totaal_score += ronde_team.team_score
             team.totaal_punten += ronde_team.team_punten
+
+            # haal de bevroren scores op
+            sb2score = dict()               # [schutterboog.pk] = score_waarde
+            for scorehist in (ronde_team
+                              .scorehist_feitelijk
+                              .select_related('score',
+                                              'score__schutterboog')
+                              .all()):
+                sb2score[scorehist.score.schutterboog.pk] = scorehist.nieuwe_waarde
+            # for
 
             geselecteerd_pks = list()
             for deelnemer in ronde_team.deelnemers_geselecteerd.all():
@@ -817,17 +828,20 @@ class UitslagenVerenigingTeamsView(TemplateView):
             # for
 
             for deelnemer in ronde_team.deelnemers_feitelijk.all():
-                if deelnemer.pk not in team.leden:
+                try:
+                    voorgaand = team.leden[deelnemer.pk]
+                except KeyError:
                     team.leden[deelnemer.pk] = voorgaand = list()
                     while len(voorgaand) < ronde_team.ronde_nr:
                         inzet = SimpleNamespace(tekst='-', score=-1)
                         voorgaand.append(inzet)
                     # while
-                else:
-                    voorgaand = team.leden[deelnemer.pk]
 
-                score = (deelnemer.score1, deelnemer.score2, deelnemer.score3,
-                         deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7)[ronde_team.ronde_nr - 1]
+                try:
+                    score = sb2score[deelnemer.schutterboog.pk]
+                except KeyError:
+                    # geen score van deze sporter
+                    score = 0
 
                 score_str = str(score)
                 if deelnemer.pk not in geselecteerd_pks:
@@ -886,18 +900,19 @@ class UitslagenVerenigingTeamsView(TemplateView):
         # for
 
         for team in teams:
-            # TODO: we kunnen de leden hier nog wat sorteren, bijvoorbeeld op score of aantal keer in team
-
             nieuw = list()
             for pk, voorgaand in team.leden.items():
                 deelnemer = pk2deelnemer[pk]
                 lid = deelnemer.schutterboog.nhblid
                 deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
-                tup = (deelnemer, voorgaand[1:])
+                totaal = sum(inzet.score for inzet in voorgaand)
+                tup = (totaal, deelnemer.pk, deelnemer, voorgaand[1:])
                 nieuw.append(tup)
             # for
 
-            team.leden = nieuw
+            # TODO: sorteren zou eerder moeten zodat de doorgestreepte nul altijd de onderste is
+            nieuw.sort(reverse=True)
+            team.leden = [(deelnemer, voorgaand) for _, _, deelnemer, voorgaand in nieuw]
         # for
 
         # sorteer de teams

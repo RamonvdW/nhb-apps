@@ -11,13 +11,13 @@ from django.utils import timezone
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import TeamType, BoogType
+from BasisTypen.models import TeamType
 from Competitie.models import (CompetitieKlasse, AG_NUL, DeelCompetitie, LAAG_REGIO,
-                               RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
+                               RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
+                               update_uitslag_teamcompetitie)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Schutter.models import SchutterBoog
-from Score.models import Score, ScoreHist, SCORE_TYPE_TEAM_AG
+from Score.models import ScoreHist, SCORE_TYPE_TEAM_AG
 from Score.operations import score_teams_ag_opslaan
 import datetime
 
@@ -29,32 +29,6 @@ TEMPLATE_TEAMS_KOPPELEN = 'vereniging/teams-koppelen.dtl'
 TEMPLATE_TEAMS_INVALLERS = 'vereniging/teams-invallers.dtl'
 TEMPLATE_TEAMS_INVALLERS_KOPPELEN = 'vereniging/teams-invallers-koppelen.dtl'
 TEMPLATE_TEAMS_RK = 'vereniging/teams-rk.dtl'
-
-
-def update_uitslag_teamcompetitie():
-    # regiocomp_tussenstand moet getriggerd worden
-    # maak daarvoor een ScoreHist record aan, welke verwijst naar een fake Score record
-
-    fake_scores = Score.objects.filter(schutterboog=None)
-    if fake_scores.count() == 0:
-        # fake Score heeft een fake SchutterBoog nodig
-        boogtype = BoogType.objects.all()[0]
-
-        fake_sb = SchutterBoog(boogtype=boogtype)
-        fake_sb.save()
-
-        fake_score = Score(
-                        schutterboog=fake_sb,
-                        waarde=0,
-                        afstand_meter=0)
-        fake_score.save()
-    else:
-        fake_score = fake_scores[0]
-
-    ScoreHist(score=fake_score,
-              oude_waarde=0,
-              nieuwe_waarde=0,
-              notitie="Trigger background task").save()
 
 
 def bepaal_team_sterkte_en_klasse(team):
