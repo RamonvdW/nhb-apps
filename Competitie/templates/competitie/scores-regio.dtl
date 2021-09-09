@@ -55,7 +55,7 @@
 
         {% for obj in wedstrijden %}
             <tr>
-                <td>{{ obj.datum_wanneer }} om {{ obj.tijd_begin_wedstrijd }}</td>
+                <td>{{ obj.datum_wanneer|date:"l j F Y" }} om {{ obj.tijd_begin_wedstrijd }}</td>
                 <td>{{ obj.beschrijving }}</td>
                 <!-- knop om uitslagen te zien / in te voeren -->
                 <td>

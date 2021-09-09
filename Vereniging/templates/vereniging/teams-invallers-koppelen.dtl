@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="teams-invallers-koppelen" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-teams-invallers-koppelen" %}
 
     <h4>Koppel invallers</h4>
 

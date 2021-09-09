@@ -9,6 +9,7 @@
 {% block title %}Teams regiocompetitie{% endblock %}
 
 {% block pagina %}
+
     <h4>Teams Regiocompetitie</h4>
 
     {% if not deelcomp.regio_organiseert_teamcompetitie %}
@@ -127,6 +128,6 @@ Zodra de eerste ronde geopend wordt door de RCL is het mogelijk om invallers te 
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="teams-regio" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-teams-regio" %}
 
 {% endblock %}

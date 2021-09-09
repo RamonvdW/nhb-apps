@@ -74,8 +74,22 @@
                     <span class="hide-on-large-only">Gem.</span>
                 </th>
                 <th colspan="7" class="center-align">Scores</th>
+                <th></th>
             </tr>
         </thead>
+
+        <!-- forceer gelijkmatige layout in de Scores kolommen -->
+        <tr style="visibility:collapse">
+            <td colspan="4"><!-- rank, sporter, wedstrijd, gemiddelde --></td>
+            <td class="right-align smal">888</td>
+            <td class="right-align smal">888</td>
+            <td class="right-align smal">888</td>
+            <td class="right-align smal">888</td>
+            <td class="right-align smal">888</td>
+            <td class="right-align smal">888</td>
+            <td class="right-align smal">888</td>
+            <td class="smal">.</td> <!-- spacing from the right side of the table -->
+        </tr>
 
         {% for obj in deelnemers %}
             <tr>
@@ -83,13 +97,14 @@
                 <td>{{ obj.naam_str }}</td>
                 <td>{{ obj.klasse_str }}</td>
                 <td class="center-align">{{ obj.gemiddelde }}</td>
-                <td class="center-align smal">{% if obj.laagste_score_nr == 1 %}<del>{{ obj.score1 }}</del>{% else %}{{ obj.score1 }}{% endif %}</td>
-                <td class="center-align smal">{% if obj.laagste_score_nr == 2 %}<del>{{ obj.score2 }}</del>{% else %}{{ obj.score2 }}{% endif %}</td>
-                <td class="center-align smal">{% if obj.laagste_score_nr == 3 %}<del>{{ obj.score3 }}</del>{% else %}{{ obj.score3 }}{% endif %}</td>
-                <td class="center-align smal">{% if obj.laagste_score_nr == 4 %}<del>{{ obj.score4 }}</del>{% else %}{{ obj.score4 }}{% endif %}</td>
-                <td class="center-align smal">{% if obj.laagste_score_nr == 5 %}<del>{{ obj.score5 }}</del>{% else %}{{ obj.score5 }}{% endif %}</td>
-                <td class="center-align smal">{% if obj.laagste_score_nr == 6 %}<del>{{ obj.score6 }}</del>{% else %}{{ obj.score6 }}{% endif %}</td>
-                <td class="center-align smal">{% if obj.laagste_score_nr == 7 %}<del>{{ obj.score7 }}</del>{% else %}{{ obj.score7 }}{% endif %}</td>
+                <td class="right-align smal">{% if obj.laagste_score_nr == 1 %}<del>{{ obj.score1 }}</del>{% else %}{{ obj.score1 }}{% endif %}</td>
+                <td class="right-align smal">{% if obj.laagste_score_nr == 2 %}<del>{{ obj.score2 }}</del>{% else %}{{ obj.score2 }}{% endif %}</td>
+                <td class="right-align smal">{% if obj.laagste_score_nr == 3 %}<del>{{ obj.score3 }}</del>{% else %}{{ obj.score3 }}{% endif %}</td>
+                <td class="right-align smal">{% if obj.laagste_score_nr == 4 %}<del>{{ obj.score4 }}</del>{% else %}{{ obj.score4 }}{% endif %}</td>
+                <td class="right-align smal">{% if obj.laagste_score_nr == 5 %}<del>{{ obj.score5 }}</del>{% else %}{{ obj.score5 }}{% endif %}</td>
+                <td class="right-align smal">{% if obj.laagste_score_nr == 6 %}<del>{{ obj.score6 }}</del>{% else %}{{ obj.score6 }}{% endif %}</td>
+                <td class="right-align smal">{% if obj.laagste_score_nr == 7 %}<del>{{ obj.score7 }}</del>{% else %}{{ obj.score7 }}{% endif %}</td>
+                <td></td>
             </tr>
 
         {% endfor %}

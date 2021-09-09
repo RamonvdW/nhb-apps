@@ -160,6 +160,22 @@ class UitslagenVerenigingIndivView(TemplateView):
             deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
             deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
             rank += 1
+
+            if False:
+                if deelnemer.score1 == 0:
+                    deelnemer.score1 = '-'
+                if deelnemer.score2 == 0:
+                    deelnemer.score2 = '-'
+                if deelnemer.score3 == 0:
+                    deelnemer.score3 = '-'
+                if deelnemer.score4 == 0:
+                    deelnemer.score4 = '-'
+                if deelnemer.score5 == 0:
+                    deelnemer.score5 = '-'
+                if deelnemer.score6 == 0:
+                    deelnemer.score6 = '-'
+                if deelnemer.score7 == 0:
+                    deelnemer.score7 = '-'
         # for
 
         return deelnemers
@@ -435,6 +451,22 @@ class UitslagenRegioIndivView(TemplateView):
             deelnemer.rank = rank
             deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
+
+            if False:
+                if deelnemer.score1 == 0:
+                    deelnemer.score1 = '-'
+                if deelnemer.score2 == 0:
+                    deelnemer.score2 = '-'
+                if deelnemer.score3 == 0:
+                    deelnemer.score3 = '-'
+                if deelnemer.score4 == 0:
+                    deelnemer.score4 = '-'
+                if deelnemer.score5 == 0:
+                    deelnemer.score5 = '-'
+                if deelnemer.score6 == 0:
+                    deelnemer.score6 = '-'
+                if deelnemer.score7 == 0:
+                    deelnemer.score7 = '-'
 
             if is_asp:
                 asps.append(deelnemer)

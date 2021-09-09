@@ -9,7 +9,7 @@
 {% block title %}Schietmomenten{% endblock %}
 
 {% block pagina %}
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-schietmomenten" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-schietmomenten-methode1" %}
 
     <h4>Schietmomenten</h4>
 

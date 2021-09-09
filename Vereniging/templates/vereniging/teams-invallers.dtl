@@ -93,6 +93,6 @@
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="teams-regio" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-teams-invallers" %}
 
 {% endblock %}

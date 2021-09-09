@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-leden-aanmelden" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-competitie-aanmelden" %}
 
     <script>
         function tel_wedstrijden() {

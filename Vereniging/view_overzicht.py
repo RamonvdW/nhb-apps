@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.urls import reverse
 from django.utils.formats import localize
 from django.views.generic import TemplateView
@@ -178,7 +179,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje.url = reverse('Vereniging:teams-rk', kwargs={'deelcomp_pk': deelcomp_rk.pk})
                         kaartje.icon = 'gamepad'
                         # niet beschikbaar maken tot een paar weken na de eerste regiowedstrijd
-                        vanaf = comp.eerste_wedstrijd + datetime.timedelta(days=4*7)
+                        vanaf = comp.eerste_wedstrijd + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
                         if datetime.date.today() < vanaf:
                             kaartje.beschikbaar_vanaf = localize(vanaf)
                         kaartjes.append(kaartje)

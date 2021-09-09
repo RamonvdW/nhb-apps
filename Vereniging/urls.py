@@ -7,7 +7,7 @@
 from django.urls import path
 from . import (view_accommodatie, view_clusters, view_externe_locaties, view_overzicht, view_ledenlijst,
                view_aanmelden, view_wedstrijden, view_lijst_rk, view_lijst_verenigingen,
-               view_schietmomenten, view_teams)
+               view_schietmomenten, view_teams_regio, view_teams_rk)
 
 app_name = 'Vereniging'
 
@@ -34,41 +34,54 @@ urlpatterns = [
          name='leden-ingeschreven'),
 
     path('leden-ingeschreven/wijzig-aanvangsgemiddelde/<deelnemer_pk>/',
-         view_teams.WijzigTeamAGView.as_view(),
+         view_teams_regio.WijzigTeamAGView.as_view(),
          name='wijzig-ag'),
-
-    path('teams/regio/koppelen/<team_pk>/',
-         view_teams.TeamsRegioKoppelLedenView.as_view(),
-         name='teams-regio-koppelen'),
-
-    path('teams/regio/<deelcomp_pk>/nieuw/',
-         view_teams.WijzigRegioTeamsView.as_view(),
-         name='teams-regio-nieuw'),
-
-    path('teams/regio/<deelcomp_pk>/wijzig/<team_pk>/',
-         view_teams.WijzigRegioTeamsView.as_view(),
-         name='teams-regio-wijzig'),
-
-    path('teams/regio/<deelcomp_pk>/invallers/',
-         view_teams.TeamsRegioInvallersView.as_view(),
-         name='teams-regio-invallers'),
-
-    path('teams/regio/invallers-koppelen/<ronde_team_pk>/',
-         view_teams.TeamsRegioInvallersKoppelLedenView.as_view(),
-         name='teams-regio-invallers-koppelen'),
-
-    path('teams/regio/<deelcomp_pk>/',
-         view_teams.TeamsRegioView.as_view(),
-         name='teams-regio'),
-
-    path('teams/rk/<deelcomp_pk>/',
-         view_teams.TeamsRkView.as_view(),
-         name='teams-rk'),
 
     # TODO: term 'schietmomenten' aanpassen?
     path('leden-ingeschreven/competitie/<deelcomp_pk>/schietmomenten/',
          view_schietmomenten.LedenSchietmomentView.as_view(),
          name='schietmomenten'),
+
+
+    # regio teams
+    path('teams/regio/koppelen/<team_pk>/',
+         view_teams_regio.TeamsRegioKoppelLedenView.as_view(),
+         name='teams-regio-koppelen'),
+
+    path('teams/regio/<deelcomp_pk>/nieuw/',
+         view_teams_regio.WijzigRegioTeamsView.as_view(),
+         name='teams-regio-nieuw'),
+
+    path('teams/regio/<deelcomp_pk>/wijzig/<team_pk>/',
+         view_teams_regio.WijzigRegioTeamsView.as_view(),
+         name='teams-regio-wijzig'),
+
+    path('teams/regio/<deelcomp_pk>/invallers/',
+         view_teams_regio.TeamsRegioInvallersView.as_view(),
+         name='teams-regio-invallers'),
+
+    path('teams/regio/invallers-koppelen/<ronde_team_pk>/',
+         view_teams_regio.TeamsRegioInvallersKoppelLedenView.as_view(),
+         name='teams-regio-invallers-koppelen'),
+
+    path('teams/regio/<deelcomp_pk>/',
+         view_teams_regio.TeamsRegioView.as_view(),
+         name='teams-regio'),
+
+
+    # RK teams
+    path('teams/rk/<deelcomp_pk>/',
+         view_teams_rk.TeamsRkView.as_view(),
+         name='teams-rk'),
+
+    path('teams/rk/<deelcomp_pk>/nieuw/',
+         view_teams_rk.WijzigRKTeamsView.as_view(),
+         name='teams-rk-nieuw'),
+
+    path('teams/rk/<deelcomp_pk>/wijzig/<team_pk>/',
+         view_teams_rk.WijzigRKTeamsView.as_view(),
+         name='teams-rk-wijzig'),
+
 
     path('accommodaties/lijst/',
          view_lijst_verenigingen.LijstVerenigingenView.as_view(),

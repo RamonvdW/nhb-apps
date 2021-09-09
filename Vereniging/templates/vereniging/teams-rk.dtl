@@ -6,13 +6,74 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Teams Rayonkampioenschappen{% endblock %}
+{% block title %}Teams RK{% endblock %}
 
 {% block pagina %}
-    <h4>Teams Rayonkampioenschappen</h4>
+    <h4>Teams RK</h4>
 
-    <p>Dit stuk van de site is nog niet af.</p>
+    <p>Op deze pagina kan je als HWL de teams opgeven voor de <b>Rayonkampioenschappen (RK)</b> van de <b>{{ deelcomp }}</b>.</p>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="teams-rk" %}
+    <p>&nbsp;</p>
+    <table class="white">
+
+        <thead>
+            <tr>
+                <th class="hide-on-small-only">Soort team</th>
+                <th class="hide-on-med-and-up">Soort</th>
+                <th>Naam</th>
+                <th class="hide-on-small-only center-align">Gekoppeld</th>
+                <th class="hide-on-small-only">Sterkte</th>
+                <th>Wedstrijd<wbr/>klasse</th>
+                <th><!-- kolom voor de knoppen --></th>
+            </tr>
+        </thead>
+
+        {% for team in teams %}
+            <tr>
+                <td class="hide-on-small-only">{{ team.team_type.beschrijving }}</td>
+                <td class="hide-on-med-and-up">{{ team.team_type.afkorting }}</td>
+                <td>{{ team.team_naam }}</td>
+                <td class="hide-on-small-only center-align{% if team.aantal < 3 or team.aantal > 4 %} red-text{% endif %}">{{ team.aantal }}</td>
+
+                {% if team.klasse %}
+                    <td class="hide-on-small-only">{{ team.ag_str }}</td>
+                    <td>{{ team.klasse.team.beschrijving }}</td>
+                {% else %}
+                    <td class="hide-on-small-only"></td>
+                    <td><i class="red-text">team is niet compleet</i></td>
+                {% endif %}
+
+                <td>
+                    {% if team.url_wijzig %}
+                        <a class="btn-nhb-blauw" href="{{ team.url_wijzig }}">Wijzig</a>
+                        <span>&nbsp;&nbsp;</span>
+                    {% endif %}
+                    {% if mag_wijzigen %}
+                        <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Koppel</a>
+                    {% else %}
+                        <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Bekijk</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="5"><i>Er zijn nog geen teams</i></td>
+            </tr>
+        {% endfor %}
+
+        <!-- knop om een team toe te voegen -->
+        {% if url_nieuw_team %}
+            <tr>
+                <td colspan="5">
+                    <a class="btn-nhb-blauw" href="{{ url_nieuw_team }}">
+                        <i class="material-icons-round left">add</i>Team toevoegen</a>
+                </td>
+            </tr>
+        {% endif %}
+
+    </table>
+
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-teams-rk" %}
 
 {% endblock %}

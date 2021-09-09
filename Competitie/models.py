@@ -561,6 +561,7 @@ class RegiocompetitieTeam(models.Model):
     # een volgnummer van het team binnen de vereniging
     volg_nr = models.PositiveSmallIntegerField(default=0)
 
+    # team type bepaalt welke boogtypen toegestaan zijn
     team_type = models.ForeignKey(TeamType, on_delete=models.PROTECT)
 
     # de naam van dit team (wordt getoond in plaats van team volgnummer)
@@ -653,7 +654,7 @@ class RegiocompetitieRondeTeam(models.Model):
     team_punten = models.PositiveSmallIntegerField(default=0)
 
     # logboek voor noteren gemiddelde van de invallers
-    logboek = models.TextField(max_length=1024, blank=True)     # TODO: max_length is not enforce, so can be removed
+    logboek = models.TextField(max_length=1024, blank=True)     # TODO: max_length is not enforced, so can be removed
 
     def __str__(self):
         return "Ronde %s, team %s" % (self.ronde_nr, self.team)
@@ -663,8 +664,10 @@ class KampioenschapSchutterBoog(models.Model):
 
     """ Een schutterboog aangemeld bij een rayon- of bondskampioenschap """
 
+    # bij welke deelcompetitie hoort deze inschrijving?
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
+    # om wie gaat het?
     schutterboog = models.ForeignKey(SchutterBoog, on_delete=models.PROTECT)
 
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
@@ -721,7 +724,7 @@ class KampioenschapSchutterBoog(models.Model):
 
 
 class KampioenschapTeam(models.Model):
-    """ Een team zoals aangemaakt door de HWL van de vereniging, voor een RK """
+    """ Een team zoals aangemaakt door de HWL van de vereniging, voor een RK en doorstroming naar BK """
 
     # bij welke seizoen en regio hoort dit team
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
@@ -733,6 +736,9 @@ class KampioenschapTeam(models.Model):
     # een volgnummer van het team binnen de vereniging
     volg_nr = models.PositiveSmallIntegerField(default=0)
 
+    # team type bepaalt welke boogtypen toegestaan zijn
+    team_type = models.ForeignKey(TeamType, on_delete=models.PROTECT, null=True)
+
     # de naam van dit team (wordt getoond in plaats van team volgnummer)
     team_naam = models.CharField(max_length=50, default='')
 
@@ -741,10 +747,12 @@ class KampioenschapTeam(models.Model):
                                        blank=True)    # mag leeg zijn
 
     # het berekende team aanvangsgemiddelde
+    # LET OP: dit is zonder de vermenigvuldiging met aantal pijlen, dus 30,000 voor Indoor ipv 900,0
     aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
 
     # de klasse waarin dit team ingedeeld is
-    klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
+    klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE,
+                               blank=True, null=True)
 
 
 class CompetitieMutatie(models.Model):

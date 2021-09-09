@@ -28,7 +28,6 @@ TEMPLATE_TEAMS_WIJZIG_AG = 'vereniging/teams-wijzig-ag.dtl'
 TEMPLATE_TEAMS_KOPPELEN = 'vereniging/teams-koppelen.dtl'
 TEMPLATE_TEAMS_INVALLERS = 'vereniging/teams-invallers.dtl'
 TEMPLATE_TEAMS_INVALLERS_KOPPELEN = 'vereniging/teams-invallers-koppelen.dtl'
-TEMPLATE_TEAMS_RK = 'vereniging/teams-rk.dtl'
 
 
 def bepaal_team_sterkte_en_klasse(team):
@@ -1173,34 +1172,5 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         return HttpResponseRedirect(url)
 
-
-class TeamsRkView(UserPassesTestMixin, TemplateView):
-
-    """ Laat de HWL de teams beheren die door deze vereniging opgesteld
-        worden voor de rayonkampioenschappen.
-    """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_TEAMS_RK
-    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.rol_nu, self.functie_nu = None, None
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        # rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        # ver = functie_nu.nhb_ver
-
-        menu_dynamics(self.request, context, actief='vereniging')
-        return context
 
 # end of file
