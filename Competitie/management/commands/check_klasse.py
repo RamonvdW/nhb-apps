@@ -24,7 +24,13 @@ class Command(BaseCommand):
         volgorde2klasse = dict()             # [(competitie.pk, volgorde)] = CompetitieKlasse
         volgorde2hogere_klasse = dict()      # [(competitie.pk, volgorde)] = CompetitieKlasse
 
-        for klasse in CompetitieKlasse.objects.exclude(indiv=None).filter(indiv__is_onbekend=False).order_by('indiv__volgorde'):
+        for klasse in (CompetitieKlasse
+                       .objects
+                       .select_related('competitie',
+                                       'indiv')
+                       .exclude(indiv=None)
+                       .filter(indiv__is_onbekend=False)
+                       .order_by('indiv__volgorde')):
 
             comp_pk = klasse.competitie.pk
             volgorde = klasse.indiv.volgorde
@@ -52,7 +58,7 @@ class Command(BaseCommand):
 
         for deelnemer in (RegioCompetitieSchutterBoog
                           .objects
-                          .select_related('klasse',
+                          .select_related('klasse__indiv',
                                           'deelcompetitie__competitie')
                           .all()):
 
