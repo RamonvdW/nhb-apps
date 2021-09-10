@@ -19,7 +19,7 @@ class Command(BaseCommand):
 
         do_save = options['commit']
         if not do_save:
-            print('Let op: gebruik --commit om voorgestelde wijzigingen op te slaan')
+            self.stdout.write('Let op: gebruik --commit om voorgestelde wijzigingen op te slaan')
 
         volgorde2klasse = dict()             # [(competitie.pk, volgorde)] = CompetitieKlasse
         volgorde2hogere_klasse = dict()      # [(competitie.pk, volgorde)] = CompetitieKlasse
@@ -74,11 +74,11 @@ class Command(BaseCommand):
                 klasse_min_ag = hogere_klasse.min_ag
 
                 if indiv_ag >= klasse_min_ag:
-                    print('[WARNING] %s: klasse %s, indiv_ag %s < hogere klasse min_ag %s (%s)' % (deelnemer, deelnemer.klasse, indiv_ag, klasse_min_ag, hogere_klasse))
+                    self.stdout.write('[WARNING] %s: klasse %s, indiv_ag %s < hogere klasse min_ag %s (%s)' % (deelnemer, deelnemer.klasse, indiv_ag, klasse_min_ag, hogere_klasse))
 
                     bepaler = KlasseBepaler(deelnemer.deelcompetitie.competitie)
                     bepaler.bepaal_klasse_deelnemer(deelnemer)
-                    print('          nieuwe klasse: %s' % deelnemer.klasse)
+                    self.stdout.write('          nieuwe klasse: %s' % deelnemer.klasse)
 
                     if do_save:
                         deelnemer.save(update_fields=['klasse'])
