@@ -982,20 +982,20 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.deelcomp_regio101_18.functie)
         self.e2e_check_rol('RCL')
 
-        # maak 10 'handmatige' rondes aan
+        # maak 16 'handmatige' rondes aan
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
-        for _ in range(10):
+        for _ in range(16):
             with self.assert_max_queries(20):
                 resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
             self.assert_is_redirect_not_plein(resp)  # check for success
         # for
-        self.assertEqual(DeelcompetitieRonde.objects.count(), 10)
+        self.assertEqual(DeelcompetitieRonde.objects.count(), 16)
 
         # controleer dat de 11e ronde niet aangemaakt mag worden
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
-        self.assertEqual(DeelcompetitieRonde.objects.count(), 10)
+        self.assertEqual(DeelcompetitieRonde.objects.count(), 16)
 
     def test_rcl_maakt_cluster_planning(self):
         self.e2e_login_and_pass_otp(self.account_rcl101_18)
@@ -1422,14 +1422,14 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # maak het maximum aantal rondes aan plus een beetje meer
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
-        for lp in range(13):
+        for lp in range(19):
             with self.assert_max_queries(20):
                 resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_25.pk)
             self.assert_is_redirect_not_plein(resp)  # check for success
         # for
-        self.assertEqual(DeelcompetitieRonde.objects.count(), 10)
+        self.assertEqual(DeelcompetitieRonde.objects.count(), 16)
 
-        with self.assert_max_queries(33):
+        with self.assert_max_queries(42):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_25.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
