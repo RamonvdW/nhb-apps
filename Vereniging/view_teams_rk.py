@@ -58,7 +58,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
                              laag=LAAG_RK,      # moet RK zijn
                              nhb_rayon=self.functie_nu.nhb_ver.regio.rayon))
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Http404()
+            raise Http404('Competitie niet gevonden')
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
