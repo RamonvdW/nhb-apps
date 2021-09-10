@@ -21,7 +21,7 @@
                 <th class="hide-on-small-only">Soort team</th>
                 <th class="hide-on-med-and-up">Soort</th>
                 <th>Naam</th>
-                <th class="hide-on-small-only center-align">Gekoppeld</th>
+                <th class="hide-on-small-only">Gekoppeld</th>
                 <th class="hide-on-small-only">Sterkte</th>
                 <th>Wedstrijd<wbr/>klasse</th>
                 <th><!-- kolom voor de knoppen --></th>
@@ -33,26 +33,21 @@
                 <td class="hide-on-small-only">{{ team.team_type.beschrijving }}</td>
                 <td class="hide-on-med-and-up">{{ team.team_type.afkorting }}</td>
                 <td>{{ team.team_naam }}</td>
-                <td class="hide-on-small-only center-align{% if team.aantal < 3 or team.aantal > 4 %} red-text{% endif %}">{{ team.aantal }}</td>
 
-                {% if team.klasse %}
-                    <td class="hide-on-small-only">{{ team.ag_str }}</td>
-                    <td>{{ team.klasse.team.beschrijving }}</td>
-                {% else %}
-                    <td class="hide-on-small-only"></td>
-                    <td><i class="red-text">team is niet compleet</i></td>
-                {% endif %}
+                <td colspan="3" class="hide-on-small-only"><i>Koppelen sporters volgt na einde regiocompetitie</i></td>
 
                 <td>
                     {% if team.url_wijzig %}
                         <a class="btn-nhb-blauw" href="{{ team.url_wijzig }}">Wijzig</a>
                         <span>&nbsp;&nbsp;</span>
                     {% endif %}
-                    {% if mag_wijzigen %}
-                        <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Koppel</a>
-                    {% else %}
-                        <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Bekijk</a>
-                    {% endif %}
+                    <!--
+                        {% if mag_wijzigen %}
+                            <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Koppel</a>
+                        {% else %}
+                            <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Bekijk</a>
+                        {% endif %}
+                    -->
                 </td>
             </tr>
         {% empty %}

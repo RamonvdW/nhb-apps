@@ -73,6 +73,37 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
 
         return deelcomp
 
+    def _get_teams(self, deelcomp_rk):
+
+        if deelcomp_rk.competitie.afstand == '18':
+            aantal_pijlen = 30
+        else:
+            aantal_pijlen = 25
+
+        teams = (KampioenschapTeam
+                 .objects
+                 .select_related('vereniging',
+                                 'team_type')
+                 .filter(deelcompetitie=deelcomp_rk,
+                         vereniging=self.functie_nu.nhb_ver)
+                 .annotate(gekoppelde_schutters_count=Count('schutters'))
+                 .order_by('volg_nr'))
+        for obj in teams:
+            obj.aantal = obj.gekoppelde_schutters_count
+            obj.ag_str = "%05.1f" % (obj.aanvangsgemiddelde * aantal_pijlen)
+            obj.ag_str = obj.ag_str.replace('.', ',')
+
+            obj.url_wijzig = reverse('Vereniging:teams-rk-wijzig',
+                                     kwargs={'deelcomp_pk': deelcomp_rk.pk,
+                                             'team_pk': obj.pk})
+
+            # koppelen == bekijken
+            obj.url_koppelen = reverse('Vereniging:teams-regio-koppelen',
+                                       kwargs={'team_pk': obj.pk})
+        # for
+
+        return teams
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -80,10 +111,12 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
         context['ver'] = self.functie_nu.nhb_ver
 
         # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
-        context['deelcomp'] = deelcomp = self._get_deelcomp_rk(kwargs['deelcomp_pk'])
+        context['deelcomp'] = deelcomp_rk = self._get_deelcomp_rk(kwargs['deelcomp_pk'])
+
+        context['teams'] = self._get_teams(deelcomp_rk)
 
         context['url_nieuw_team'] = reverse('Vereniging:teams-rk-nieuw',
-                                            kwargs={'deelcomp_pk': deelcomp.pk})
+                                            kwargs={'deelcomp_pk': deelcomp_rk.pk})
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context
@@ -270,7 +303,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         else:
             team.delete()
 
-        url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
+        url = reverse('Vereniging:teams-rk', kwargs={'deelcomp_pk': deelcomp.pk})
 
         return HttpResponseRedirect(url)
 

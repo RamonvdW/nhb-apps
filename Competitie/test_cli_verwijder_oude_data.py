@@ -23,8 +23,8 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             management.call_command('verwijder_oude_data', stderr=f1, stdout=f2)
 
-        print("f1: %s" % f1.getvalue())
-        print("f2: %s" % f2.getvalue())
+        #print("f1: %s" % f1.getvalue())
+        #print("f2: %s" % f2.getvalue())
 
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue('Searching' in f2.getvalue())
@@ -33,9 +33,6 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(20):
             management.call_command('verwijder_oude_data', '--commit', stderr=f1, stdout=f2)
-
-        print("f1: %s" % f1.getvalue())
-        print("f2: %s" % f2.getvalue())
 
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue('Searching' in f2.getvalue())

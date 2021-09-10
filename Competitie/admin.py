@@ -8,7 +8,7 @@ from django.contrib import admin
 from Wedstrijden.models import CompetitieWedstrijd
 from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet,
-                     RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
+                     RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam,
                      RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                      CompetitieMutatie)
 
@@ -151,7 +151,39 @@ class RegiocompetitieTeamAdmin(admin.ModelAdmin):
             # alleen schutters van de juiste vereniging laten kiezen
             kwargs['queryset'] = (RegioCompetitieSchutterBoog
                                   .objects
-                                  .filter(bij_vereniging=self.obj.vereniging))
+                                  .filter(bij_vereniging=self.obj.vereniging))      # TODO: filter op voorkeur_teamschieten?
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
+
+class KampioenschapTeamAdmin(admin.ModelAdmin):
+    filter_horizontal = ('schutters', )
+
+    list_filter = ('deelcompetitie__competitie',
+                   'vereniging__regio__rayon',)
+
+    list_select_related = ('deelcompetitie',
+                           'deelcompetitie__nhb_rayon',
+                           'deelcompetitie__competitie',
+                           'vereniging',
+                           'klasse',
+                           'klasse__indiv',
+                           'klasse__team')
+
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self.obj = None
+
+    def get_form(self, request, obj=None, **kwargs):
+        if obj:                 # pragma: no branch
+            self.obj = obj      # pragma: no cover
+        return super().get_form(request, obj, **kwargs)
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
+        if db_field.name == 'schutters' and self.obj:
+            # alleen schutters van de juiste vereniging laten kiezen
+            kwargs['queryset'] = (RegioCompetitieSchutterBoog
+                                  .objects
+                                  .filter(bij_vereniging=self.obj.vereniging))      # TODO: filter op voorkeur_teamschieten?
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
@@ -221,6 +253,8 @@ class CompetitieMutatieAdmin(admin.ModelAdmin):
 
 class RegiocompetitieRondeTeamAdmin(admin.ModelAdmin):
 
+    filter_horizontal = ('deelnemers_geselecteerd', 'deelnemers_feitelijk')     # TODO: deze doen het niet...
+
     readonly_fields = ('team', 'ronde_nr', 'feitelijke_scores')
 
     list_filter = ('team__deelcompetitie__competitie',
@@ -280,16 +314,24 @@ class RegiocompetitieRondeTeamAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+class RegiocompetitieTeamPouleAdmin(admin.ModelAdmin):
+
+    filter_horizontal = ('teams',)
+
+    # TODO: filter teams op regio
+
+
 admin.site.register(Competitie)
 admin.site.register(DeelCompetitie, DeelCompetitieAdmin)
 admin.site.register(CompetitieKlasse, CompetitieKlasseAdmin)
 admin.site.register(DeelcompetitieRonde, DeelcompetitieRondeAdmin)
 admin.site.register(RegioCompetitieSchutterBoog, RegioCompetitieSchutterBoogAdmin)
-admin.site.register(KampioenschapSchutterBoog, KampioenschapSchutterBoogAdmin)
 admin.site.register(DeelcompetitieKlasseLimiet)
 admin.site.register(CompetitieMutatie, CompetitieMutatieAdmin)
 admin.site.register(RegiocompetitieTeam, RegiocompetitieTeamAdmin)
-admin.site.register(RegiocompetitieTeamPoule)
+admin.site.register(RegiocompetitieTeamPoule, RegiocompetitieTeamPouleAdmin)
 admin.site.register(RegiocompetitieRondeTeam, RegiocompetitieRondeTeamAdmin)
+admin.site.register(KampioenschapSchutterBoog, KampioenschapSchutterBoogAdmin)
+admin.site.register(KampioenschapTeam, KampioenschapTeamAdmin)
 
 # end of file

@@ -35,7 +35,7 @@ def maak_deelcompetitie_ronde(deelcomp, cluster=None):
         nieuwe_week_nr = objs[0].week_nr + 1
 
         # maximum bereikt?
-        if len(objs) >= 10:
+        if len(objs) >= 16:
             return
     else:
         nieuwe_week_nr = 37
