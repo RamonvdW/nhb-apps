@@ -268,9 +268,8 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
             except KampioenschapTeam.DoesNotExist:
                 raise Http404()
 
-            if self.rol_nu == Rollen.ROL_HWL:
-                if team.vereniging != self.functie_nu.nhb_ver:
-                    raise Http404('Team is niet van jouw vereniging')
+            if team.vereniging != self.functie_nu.nhb_ver:
+                raise Http404('Team is niet van jouw vereniging')
 
             verwijderen = request.POST.get('verwijderen', None) is not None
 
@@ -289,7 +288,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
 
                     # verwijder eventueel gekoppelde sporters bij wijziging team type,
                     # om verkeerde boog typen te voorkomen
-                    team.gekoppelde_schutters.clear()
+                    team.schutters.clear()
 
         if not verwijderen:
             team_naam = request.POST.get('team_naam', '')
