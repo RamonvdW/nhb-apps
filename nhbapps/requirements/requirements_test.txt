@@ -24,7 +24,7 @@ charset-normalizer==2.0.4
     # via
     #   -r requirements.txt
     #   requests
-cryptography==3.4.7
+cryptography==3.4.8
     # via
     #   pyopenssl
     #   pysaml2
@@ -36,15 +36,15 @@ django==3.1.13
     #   djangosaml2idp
 djangosaml2idp==0.7.2
     # via -r requirements_test.in
-elementpath==2.2.3
+elementpath==2.3.1
     # via xmlschema
-google-api-core==2.0.0
+google-api-core==2.0.1
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.17.0
+google-api-python-client==2.20.0
     # via -r requirements.txt
-google-auth==2.0.1
+google-auth==2.0.2
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -128,11 +128,11 @@ six==1.16.0
     #   pyopenssl
     #   pysaml2
     #   python-dateutil
-sqlparse==0.4.1
+sqlparse==0.4.2
     # via
     #   -r requirements.txt
     #   django
-typing-extensions==3.10.0.0
+typing-extensions==3.10.0.2
     # via
     #   -r requirements.txt
     #   arrow
@@ -145,7 +145,7 @@ urllib3==1.26.6
     # via
     #   -r requirements.txt
     #   requests
-xmlschema==1.7.0
+xmlschema==1.7.1
     # via pysaml2
 zipp==3.5.0
     # via importlib-resources
