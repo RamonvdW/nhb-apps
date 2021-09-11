@@ -865,9 +865,10 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
             if len(gekozen) == 0:
                 poule.teams.clear()
             else:
-                tups = [(count, team_type) for team_type, count in type_counts.items()]
+                tups = [(count, team_type.pk, team_type) for team_type, count in type_counts.items()]
                 tups.sort(reverse=True)     # hoogste eerst
-                team_type = tups[0][1]
+                # TODO: wat als er 2 even hoog zijn?
+                team_type = tups[0][2]
 
                 # laat teams toe die binnen dit team type passen
                 goede_teams = [team for team in gekozen if team.team_type == team_type]
