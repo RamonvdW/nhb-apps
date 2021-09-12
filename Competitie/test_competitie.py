@@ -17,6 +17,7 @@ from .operations import (competities_aanmaken, aanvangsgemiddelden_vaststellen_v
                          competitie_klassegrenzen_vaststellen)
 from .test_fase import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -58,15 +59,18 @@ class TestCompetitie(E2EHelpers, TestCase):
     url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'  # comp_pk
     url_klassegrenzen_tonen = '/bondscompetities/%s/klassegrenzen/tonen/'  # comp_pk
 
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        # maak een BB aan, nodig om de competitie defaults in te zien
-        self.account_bb = self.e2e_create_account('bb', 'bb@test.com', 'BB', accepteer_vhpg=True)
-        self.account_bb.is_BB = True
-        self.account_bb.save()
-
         # deze test is afhankelijk van de standaard regio's
         self.regio_101 = regio = NhbRegio.objects.get(regio_nr=101)
 
@@ -347,7 +351,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_instellingen(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
@@ -358,7 +362,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/bb-instellingen-nieuwe-competitie.dtl', 'plein/site_layout.dtl'))
 
     def test_aanmaken(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
@@ -379,7 +383,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assertEqual(1, CompetitieMutatie.objects.count())       # voor achtergrondtaak
 
     def test_dubbel_aanmaken(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
@@ -402,7 +406,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assertEqual(DeelCompetitie.objects.count(), 2*(1 + 4 + 16))
 
     def test_regio_settings_overnemen(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
@@ -462,7 +466,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # for
 
     def test_ag_vaststellen(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
 
         # trigger de permissie check (want: verkeerde rol)
         self.e2e_wisselnaarrol_gebruiker()
@@ -530,7 +534,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assertContains(resp, "voor het laatst gedaan")
 
     def test_ag_vaststellen_cornercases(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
 
         # maak de competities aan - de voorwaarde om AG's vast te stellen
@@ -567,7 +571,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
 
     def test_klassegrenzen_vaststellen(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
@@ -615,7 +619,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assertTrue(str(obj) != "")
 
     def test_klassegrenzen_vaststellen_cornercases(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
@@ -636,7 +640,7 @@ class TestCompetitie(E2EHelpers, TestCase):
 
     def test_klassegrenzen_tonen(self):
         # competitie opstarten
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 

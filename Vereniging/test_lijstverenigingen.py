@@ -20,6 +20,14 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
 
     url_lijst = '/vereniging/accommodaties/lijst/'
 
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
         self._next_nhbnr += 1
@@ -41,8 +49,6 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.account_admin = self.e2e_create_account_admin()
-
         self._next_nhbnr = 100001
 
         self.rayon_2 = NhbRayon.objects.get(rayon_nr=2)
@@ -62,11 +68,6 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
-
-        # maak een BB aan (geen NHB lid)
-        self.account_bb = self.e2e_create_account('bb', 'bko@nhb.test', 'BB', accepteer_vhpg=True)
-        self.account_bb.is_BB = True
-        self.account_bb.save()
 
         # maak test leden aan die we kunnen koppelen aan beheerders functies
         self.account_bko = self._prep_beheerder_lid('BKO')
@@ -110,7 +111,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
 
     def test_it(self):
         # landelijke lijst + leden aantal
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_it()
         self.e2e_check_rol('IT')
         with self.assert_max_queries(9):
@@ -121,7 +122,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
 
     def test_bb(self):
         # landelijke lijst met rayon & regio
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
         with self.assert_max_queries(8):

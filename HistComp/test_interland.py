@@ -8,6 +8,7 @@ from django.test import TestCase
 from NhbStructuur.models import NhbVereniging, NhbRegio, NhbLid
 from .models import HistCompetitie, HistCompetitieIndividueel
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -16,6 +17,12 @@ class TestHistCompInterland(E2EHelpers, TestCase):
 
     url_interland = '/bondscompetities/hist/interland/'
     url_interland_download = '/bondscompetities/hist/interland/als-bestand/%s/'  # klasse_pk
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -194,11 +201,6 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec.gemiddelde = 9.998
         rec.save()
 
-        # maak een BB aan (geen NHB lid)
-        self.account_bb = self.e2e_create_account('bb', 'bko@nhb.test', 'BB', accepteer_vhpg=True)
-        self.account_bb.is_BB = True
-        self.account_bb.save()
-
     def test_interland(self):
         # anon
         with self.assert_max_queries(20):
@@ -206,7 +208,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         self.assert403(resp)
 
         # log in als BB
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
 
         with self.assert_max_queries(20):
@@ -224,7 +226,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         self.assert403(resp)
 
         # log in als BB
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
 
         with self.assert_max_queries(20):
@@ -241,7 +243,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
 
     def test_bad(self):
         # log in als BB
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
 
         # illegale klasse_pk

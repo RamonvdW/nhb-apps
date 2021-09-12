@@ -10,6 +10,7 @@ from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbLid
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -20,9 +21,16 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
 
     url_activiteit = '/overig/activiteit/'
 
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ initialisatie van de test case """
-        self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_100001 = self.e2e_create_account('100001', 'nhb100001@test.com', 'Norma de Schutter')
 
@@ -76,7 +84,7 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
 
     def test_it(self):
         # admin rechten
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_it()
         self.e2e_check_rol('IT')
 
@@ -99,7 +107,7 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
     def test_zoek(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
@@ -189,7 +197,7 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
 
     def test_hulp(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 

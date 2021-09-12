@@ -18,6 +18,7 @@ from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
                      MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
                      KampioenschapSchutterBoog, DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 import io
 
@@ -30,6 +31,14 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
     url_wijzig_status = '/bondscompetities/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
     url_wijzig_cut_rk = '/bondscompetities/planning/rk/%s/limieten/'  # deelcomp_rk.pk
 
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
@@ -37,11 +46,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         self._next_nhb_nr = 200000
 
         self.boogtype = BoogType.objects.get(afkorting='R')
-
-        # maak een BB aan (geen NHB lid)
-        self.account_bb = self.e2e_create_account('bb', 'bko@nhb.test', 'BB', accepteer_vhpg=True)
-        self.account_bb.is_BB = True
-        self.account_bb.save()
 
         self._maak_competitie()
         self._maak_verenigingen_schutters()

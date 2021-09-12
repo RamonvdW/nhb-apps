@@ -18,6 +18,7 @@ from .models import (Competitie, DeelCompetitie, CompetitieKlasse, LAAG_BK, LAAG
                      TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_SOM_SCORES)
 from .operations import competities_aanmaken
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 import io
 
@@ -37,6 +38,14 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
     url_regio_poules = '/bondscompetities/regio/%s/poules/'  # deelcomp_pk
     url_wijzig_poule = '/bondscompetities/regio/poules/%s/wijzig/'  # poule_pk
     url_team_ronde = '/bondscompetities/regio/%s/team-ronde/'  # deelcomp_pk
+
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
 
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
@@ -59,8 +68,6 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.account_admin = self.e2e_create_account_admin()
-
         self._next_nhbnr = 100001
 
         self.rayon_1 = NhbRayon.objects.get(rayon_nr=1)
@@ -103,11 +110,6 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
         self.functie_wl.nhb_ver = ver
         self.functie_wl.save()
 
-        # maak een BB aan (geen NHB lid)
-        self.account_bb = self.e2e_create_account('bb', 'bko@nhb.test', 'BB', accepteer_vhpg=True)
-        self.account_bb.is_BB = True
-        self.account_bb.save()
-
         # maak test leden aan die we kunnen koppelen aan beheerders functies
         self.account_bko_18 = self._prep_beheerder_lid('BKO')
         self.account_rko1_18 = self._prep_beheerder_lid('RKO1')
@@ -135,7 +137,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
         competities_aanmaken(jaar=2020)
 
         # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.url_klassegrenzen_vaststellen_18 = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp_18.pk
         resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
@@ -410,7 +412,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_regio_globaal(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
 
         url = self.url_regio_globaal % self.comp_18.pk
@@ -499,7 +501,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
         # BB
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
 
         url = self.url_regio_teams_alle % (self.comp_18.pk, 'auto')

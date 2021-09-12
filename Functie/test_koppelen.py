@@ -12,6 +12,7 @@ from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Logboek.models import LogboekRegel
 from .models import maak_functie, Functie
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -27,6 +28,14 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
     url_activeer_functie = '/functie/activeer-functie/%s/'
     url_activeer_rol = '/functie/activeer-rol/%s/'
 
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ initialisatie van de test case """
 
@@ -35,7 +44,6 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         #   comp_type: 18/25
         #       rol: BKO, RKO (4x), RCL (16x)
 
-        self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.nhb', 'Normaal')
         self.account_beh1 = self.e2e_create_account('testbeheerder1', 'beh1@test.nhb', 'Beheerder1', accepteer_vhpg=True)
         self.account_beh2 = self.e2e_create_account('testbeheerder2', 'beh2@test.nhb', 'Beheerder2', accepteer_vhpg=True)
@@ -126,7 +134,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.nhblid2 = lid
 
     def test_wijzig_view(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # neem de BB rol aan
         self.e2e_wisselnaarrol_bb()
@@ -210,7 +218,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertContains(resp, 'Verwijder beheerder', count=1)    # kan zichzelf verwijderen
 
     def test_koppel_ontkoppel_bb(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # neem de BB rol aan
         with self.assert_max_queries(20):
@@ -272,7 +280,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assert404(resp)  # 404 = Not allowed
 
     def test_koppel_bko(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # neem de BKO rol aan
         with self.assert_max_queries(25):
@@ -324,7 +332,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         session.set_expiry(-5)      # expiry in -5 seconds
         session.save()
 
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wissel_naar_functie(self.functie_rko3)
         self.e2e_check_rol('RKO')
 
@@ -361,7 +369,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
     def test_koppel_rcl(self):
         # RCL mag HWL en WL koppelen
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # neem de RCL rol aan
         with self.assert_max_queries(25):
@@ -459,7 +467,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
         # poog een niet-NHB lid account te koppelen
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'add': self.account_admin.pk})
+            resp = self.client.post(url, {'add': self.testdata.account_admin.pk})
         self.assert403(resp)
         self.assertEqual(self.functie_hwl.accounts.count(), 2)
 
@@ -559,7 +567,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
     def test_administratieve_regio(self):
         # neem de BB rol aan
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
@@ -587,7 +595,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
     def test_rcl_bad_buiten_regio(self):
         # probeer een HWL te koppelen van een vereniging buiten de regio
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wissel_naar_functie(self.functie_rcl101)
 
         url = self.url_wijzig % self.functie_hwl.pk
@@ -597,7 +605,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
     def test_verwijder_ex_lid(self):
         # maak een gekoppelde beheerder ex-lid
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wissel_naar_functie(self.functie_rcl111)
 
         # koppel een HWL
@@ -660,7 +668,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         session = SessionStore(session_key_beh1)
         self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN], False)
 
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
 
         # koppel beheerder1 aan zijn eerste rol

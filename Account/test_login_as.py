@@ -8,8 +8,9 @@ from django.utils import timezone
 from django.test import TestCase
 from django.http import HttpResponseRedirect
 from Overig.models import SiteTijdelijkeUrl
-from Account.views import account_add_plugin_login
+from .views import account_add_plugin_login
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -20,6 +21,12 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
     url_wissel = '/account/account-wissel/'
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def _login_plugin(self, request, from_ip, account):
         if self._login_plugin_mode == 1:
             return HttpResponseRedirect('/account/activiteit/')
@@ -27,7 +34,6 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
     def setUp(self):
         """ initialisatie van de test case """
-        self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.nhb', 'Normaal')
 
         self._login_plugin_mode = 0
@@ -42,18 +48,18 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.e2e_logout()
 
         # login als admin
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # haal de account-wissel pagina op
         with self.assert_max_queries(20):
-            resp = self.client.get(self.wissel_url)
+            resp = self.client.get(self.url_wissel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login-as-zoek.dtl', 'plein/site_layout.dtl'))
 
         # probeer de zoek functie
         with self.assert_max_queries(20):
-            resp = self.client.get(self.wissel_url + '?zoekterm=normaal')
+            resp = self.client.get(self.url_wissel + '?zoekterm=normaal')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login-as-zoek.dtl', 'plein/site_layout.dtl'))
@@ -67,19 +73,19 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
         # te lange zoekterm (max length = 50)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.wissel_url + '?zoekterm=%s' % '1234567890' * 6)
+            resp = self.client.get(self.url_wissel + '?zoekterm=%s' % '1234567890' * 6)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
     def test_wissel_geen_otp(self):
         # login als admin
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         self.account_normaal.otp_is_actief = False
         self.account_normaal.save()
 
         # selecteer de andere schutter
         with self.assert_max_queries(20):
-            resp = self.client.post(self.wissel_url, {'selecteer': self.account_normaal.pk})
+            resp = self.client.post(self.url_wissel, {'selecteer': self.account_normaal.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
@@ -111,18 +117,18 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
     def test_wissel_met_otp(self):
         # login als admin
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # activeer een rol + vhpg voor de schutter
         self.account_normaal.is_BB = True
         self.account_normaal.save()
         self.e2e_account_accepteert_vhpg(self.account_normaal)
 
-        self.e2e_assert_other_http_commands_not_supported(self.wissel_url, post=False)
+        self.e2e_assert_other_http_commands_not_supported(self.url_wissel, post=False)
 
         # selecteer de andere schutter
         with self.assert_max_queries(20):
-            resp = self.client.post(self.wissel_url, {'selecteer': self.account_normaal.pk})
+            resp = self.client.post(self.url_wissel, {'selecteer': self.account_normaal.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
@@ -157,14 +163,14 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
     def test_wissel_geblokkeerd(self):
         # login als admin
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # activeer de login-as blokkade
         self._login_plugin_mode = 1
 
         # selecteer de andere schutter
         with self.assert_max_queries(20):
-            resp = self.client.post(self.wissel_url, {'selecteer': self.account_normaal.pk})
+            resp = self.client.post(self.url_wissel, {'selecteer': self.account_normaal.pk})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))
@@ -185,7 +191,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
     def test_wissel_bad(self):
         # login als admin
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # kleine tweak
         self.account_normaal.is_staff = True
@@ -193,52 +199,52 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
         # upgrade naar is_staff account mag niet
         with self.assert_max_queries(20):
-            resp = self.client.post(self.wissel_url, {'selecteer': self.account_normaal.pk})
+            resp = self.client.post(self.url_wissel, {'selecteer': self.account_normaal.pk})
         self.assert403(resp)
 
         # niet bestaand account
         with self.assert_max_queries(20):
-            resp = self.client.post(self.wissel_url, {'selecteer': 999999})
+            resp = self.client.post(self.url_wissel, {'selecteer': 999999})
         self.assert404(resp)     # 404 = not allowed
 
     def test_bad_get(self):
         # niet ingelogd
         self.e2e_logout()
         with self.assert_max_queries(20):
-            resp = self.client.get(self.wissel_url)
+            resp = self.client.get(self.url_wissel)
         self.assert403(resp)
 
         # zonder is_staff rechten
         self.e2e_login_and_pass_otp(self.account_normaal)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.wissel_url)
+            resp = self.client.get(self.url_wissel)
         self.assert403(resp)
 
     def test_bad_post(self):
         # niet ingelogd
         self.e2e_logout()
         with self.assert_max_queries(20):
-            resp = self.client.post(self.wissel_url)
+            resp = self.client.post(self.url_wissel)
         self.assert403(resp)
 
         # zonder is_staff rechten
         self.e2e_login_and_pass_otp(self.account_normaal)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.wissel_url)
+            resp = self.client.get(self.url_wissel)
         self.assert403(resp)
 
     def test_wissel_verlopen(self):
         # controleer dat tijdelijke URL na 60 seconden verlopen is
 
         # login als admin
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # wis het tijdelijke urls geheugen zodat we makkelijk het nieuwe record kunnen vinden
         SiteTijdelijkeUrl.objects.all().delete()
 
         # selecteer de andere schutter
         with self.assert_max_queries(20):
-            resp = self.client.post(self.wissel_url, {'selecteer': self.account_normaal.pk})
+            resp = self.client.post(self.url_wissel, {'selecteer': self.account_normaal.pk})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/login-as-go.dtl', 'plein/site_layout.dtl'))

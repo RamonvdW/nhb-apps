@@ -12,6 +12,7 @@ from .models import Competitie, DeelCompetitie, RegioCompetitieSchutterBoog, LAA
 from .operations import competities_aanmaken
 from .test_fase import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -27,6 +28,12 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
     url_aangemeld_alles = '/bondscompetities/%s/lijst-regiocompetitie/alles/'  # comp_pk
     url_aangemeld_rayon = '/bondscompetities/%s/lijst-regiocompetitie/rayon-%s/'  # comp_pk, rayon_pk
     url_aangemeld_regio = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/'  # comp_pk, regio_pk
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
 
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
@@ -49,8 +56,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.account_admin = self.e2e_create_account_admin()
-
         self._next_nhbnr = 100001
 
         self.rayon_1 = NhbRayon.objects.get(rayon_nr=1)
@@ -70,11 +75,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
-
-        # maak een BB aan (geen NHB lid)
-        self.account_bb = self.e2e_create_account('bb', 'bko@nhb.test', 'BB', accepteer_vhpg=True)
-        self.account_bb.is_BB = True
-        self.account_bb.save()
 
         # maak test leden aan die we kunnen koppelen aan beheerders functies
         self.account_bko = self._prep_beheerder_lid('BKO')
@@ -233,7 +233,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_overzicht_it(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_it()
 
         with self.assert_max_queries(20):
@@ -243,7 +243,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
 
     def test_overzicht_bb(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
 
         comp = Competitie.objects.all()[0]
         self._doe_inschrijven(comp)         # wisselt naar HWL rol
@@ -325,7 +325,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         comp = Competitie.objects.get(afstand='18')
         functie_bko = DeelCompetitie.objects.get(competitie=comp, laag=LAAG_BK).functie
 
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self._doe_inschrijven(comp)         # wisselt naar HWL rol
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(functie_bko)
@@ -364,7 +364,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         comp = Competitie.objects.get(afstand='25')
         functie_rko = DeelCompetitie.objects.get(competitie=comp, laag=LAAG_RK, nhb_rayon=self.rayon_2).functie
 
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self._doe_inschrijven(comp)         # wisselt naar HWL rol
         self.e2e_login_and_pass_otp(self.account_rko)
         self.e2e_wissel_naar_functie(functie_rko)
@@ -403,7 +403,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         comp = Competitie.objects.get(afstand='18')
         functie_rcl = DeelCompetitie.objects.get(competitie=comp, laag=LAAG_REGIO, nhb_regio=self.regio_101).functie
 
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self._doe_inschrijven(comp)         # wisselt naar HWL rol
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(functie_rcl)
@@ -441,9 +441,9 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
     def test_overzicht_hwl(self):
         comp = Competitie.objects.get(afstand='18')
 
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self._doe_inschrijven(comp)                       # wisselt naar HWL rol
-        # self.e2e_login_and_pass_otp(self.account_bb)        # geen account_hwl
+        # self.e2e_login_and_pass_otp(self.testdata.account_bb)        # geen account_hwl
         # self.e2e_wissel_naar_functie(self.functie_hwl)
 
         with self.assert_max_queries(20):
@@ -471,7 +471,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assertEqual(datetime.date(year=2019, month=12, day=31), comp.eerste_wedstrijd)
 
         # wordt BB
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
 
         # get
@@ -588,7 +588,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
     def test_verander_vereniging(self):
         # verander 1 schutterboog naar een andere verenigingen
         # en laat zien dat de oude vereniging blijft staan in de inschrijven
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
 
         comp = Competitie.objects.get(afstand='18')
         self._doe_inschrijven(comp)         # wisselt naar HWL rol

@@ -10,13 +10,14 @@ from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Competitie.models import (Competitie, CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
                                DeelcompetitieRonde, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3)
 from Competitie.test_fase import zet_competitie_fase
-from Competitie.test_competitie import maak_competities_en_zet_fase_b, competities_aanmaken
+from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from Functie.models import Functie
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
 from Score.operations import score_indiv_ag_opslaan
 from Wedstrijden.models import CompetitieWedstrijd
 from .models import SchutterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -36,9 +37,16 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
     url_wijzig_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/wijzig/%s/'  # wedstrijd_pk
     url_inschrijven_hwl = '/vereniging/leden-aanmelden/competitie/%s/'              # comp_pk
 
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ initialisatie van de test case """
-        self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_geenlid = self.e2e_create_account('geenlid', 'geenlid@test.com', 'Geen')
         self.account_twee = self.e2e_create_account('twee', 'twee@test.com', 'Twee')
@@ -116,7 +124,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
     def test_inschrijven(self):
         # log in as BB en maak de competitie aan
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self._competitie_aanmaken()
 
@@ -234,7 +242,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assert404(resp)     # 404 = Not found
 
         # log in as BB en maak de competitie aan
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self._competitie_aanmaken()
 
@@ -306,7 +314,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.assert404(resp)     # 404 = Not found
 
         # log in as BB en maak de competitie aan
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self._competitie_aanmaken()
 
@@ -372,7 +380,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
     def test_afmelden_geen_voorkeur_meer(self):
         # log in as BB en maak de competitie aan
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self._competitie_aanmaken()
 
@@ -405,7 +413,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
     def test_inschrijven_team(self):
         # log in as BB en maak de competitie aan
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self._competitie_aanmaken()
 
@@ -459,7 +467,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         # controleer dat het filter voor uiterste datum van lidmaatschap werkt
 
         # log in as BB en maak de competitie aan
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self._competitie_aanmaken()
 
@@ -499,7 +507,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.nhbver.save()
 
         # log in as BB en maak de competitie aan
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self._competitie_aanmaken()
 
@@ -570,7 +578,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.nhbver.save()
 
         # log in as BB en maak de competitie aan
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self._competitie_aanmaken()
 
@@ -623,7 +631,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
     def test_inschrijven_aspirant(self):
         # log in as BB en maak de competitie aan
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self._competitie_aanmaken()
 
@@ -677,7 +685,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         self.nhbver.save()
 
         # log in as BB en maak de competitie aan
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self._competitie_aanmaken()
 
@@ -840,7 +848,7 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
     def test_geen_klasse(self):
         # log in as BB en maak de competitie aan
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self._competitie_aanmaken()
 

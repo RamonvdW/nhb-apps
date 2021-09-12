@@ -12,6 +12,7 @@ from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
 from .models import Account
 from .forms import LoginForm
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -20,9 +21,16 @@ class TestAccountLogin(E2EHelpers, TestCase):
 
     url_login = '/account/login/'
 
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ initialisatie van de test case """
-        self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_metmail = self.e2e_create_account('metmail', 'metmail@test.com', 'MetMail')
 
@@ -138,7 +146,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/bevestig-email.dtl', 'plein/site_layout.dtl'))
 
-        self.e2e_login(self.account_admin)
+        self.e2e_login(self.testdata.account_admin)
         url = reverse('Overig:tijdelijke-url', kwargs={'code': code})
         resp = self.client.post(url)
         self.assertTrue(resp.status_code, 200)
@@ -302,7 +310,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/uitloggen.dtl', 'plein/site_layout.dtl'))
 
     def test_login_next_bad_al_ingelogd(self):
-        self.e2e_login(self.account_admin)
+        self.e2e_login(self.testdata.account_admin)
 
         # test een login met een 'next' parameter die na de login gevolgd wordt
         with self.assert_max_queries(20):
@@ -310,7 +318,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/plein/')
 
     def test_login_al_ingelogd(self):
-        self.e2e_login(self.account_admin)
+        self.e2e_login(self.testdata.account_admin)
 
         # simuleer een redirect naar het login scherm met een 'next' parameter
         with self.assert_max_queries(20):
@@ -321,7 +329,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
     def test_login_next_al_ingelogd(self):
-        self.e2e_login(self.account_admin)
+        self.e2e_login(self.testdata.account_admin)
 
         # simuleer een redirect naar het login scherm met een 'next' parameter
         with self.assert_max_queries(20):

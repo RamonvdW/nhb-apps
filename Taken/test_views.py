@@ -8,6 +8,7 @@ from django.test import TestCase
 from NhbStructuur.models import NhbLid
 from .models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -19,10 +20,15 @@ class TestTakenViews(E2EHelpers, TestCase):
     url_overzicht = '/taken/overzicht/'
     url_details = '/taken/details/%s/'  # taak_pk
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ initialisatie van de test case """
 
-        self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_same = self.e2e_create_account('same', 'same@test.com', 'same')
 
@@ -38,7 +44,7 @@ class TestTakenViews(E2EHelpers, TestCase):
         lid.save()
 
         # maak een taak aan
-        taak = Taak(toegekend_aan=self.account_admin,
+        taak = Taak(toegekend_aan=self.testdata.account_admin,
                     deadline='2020-01-01',
                     beschrijving='Testje',
                     handleiding_pagina='Hoofdpagina')
@@ -66,7 +72,7 @@ class TestTakenViews(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_allowed(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
 
         with self.assert_max_queries(20):
@@ -126,7 +132,7 @@ class TestTakenViews(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('taken/overzicht.dtl', 'plein/site_layout.dtl'))
 
     def test_bad(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
 
         # niet bestaande taak

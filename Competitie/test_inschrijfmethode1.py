@@ -14,6 +14,7 @@ from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
 from .operations import competities_aanmaken
 from .test_fase import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -28,6 +29,14 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
     url_wijzig_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/wijzig/%s/'  # wedstrijd_pk
     url_behoefte1 = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes/'  # comp_pk, regio_pk
     url_behoefte1_bestand = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes-als-bestand/'  # comp_pk, regio_pk
+
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
 
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
@@ -50,8 +59,6 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.account_admin = self.e2e_create_account_admin()
-
         self._next_nhbnr = 100001
 
         self.rayon_1 = NhbRayon.objects.get(rayon_nr=1)
@@ -71,11 +78,6 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
         self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
-
-        # maak een BB aan (geen NHB lid)
-        self.account_bb = self.e2e_create_account('bb', 'bko@nhb.test', 'BB', accepteer_vhpg=True)
-        self.account_bb.is_BB = True
-        self.account_bb.save()
 
         # maak test leden aan die we kunnen koppelen aan beheerders functies
         self.account_bko = self._prep_beheerder_lid('BKO')
@@ -128,7 +130,7 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
         self._maak_wedstrijden()
 
     def _competitie_instellingen(self):
-        self.e2e_login_and_pass_otp(self.account_bb)        # geen account_hwl
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)        # geen account_hwl
         self.e2e_wisselnaarrol_bb()
 
         # klassegrenzen vaststellen
@@ -353,7 +355,7 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
     def test_bad_hwl(self):
         comp = Competitie.objects.get(afstand=18)       # let op: 25 werkt niet
 
-        self.e2e_login_and_pass_otp(self.account_bb)        # geen account_hwl
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)        # geen account_hwl
         self.e2e_wisselnaarrol_bb()
         self._doe_inschrijven(comp)     # wisselt naar HWL functie
 

@@ -15,6 +15,7 @@ from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
                      DeelcompetitieRonde, RegioCompetitieSchutterBoog, AG_NUL, LAAG_REGIO)
 from .operations import competities_aanmaken
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 import json
 
@@ -38,6 +39,14 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
     url_scores_regio = '/bondscompetities/scores/regio/%s/'  # deelcomp_pk
     url_bekijk_uitslag = '/bondscompetities/scores/bekijk-uitslag/%s/'  # wedstrijd_pk
+
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
 
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
@@ -110,8 +119,6 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.account_admin = self.e2e_create_account_admin()
-
         self._next_nhbnr = 100001
 
         self.rayon_2 = NhbRayon.objects.get(rayon_nr=2)
@@ -131,11 +138,6 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
 
-        # maak een BB aan (geen NHB lid)
-        self.account_bb = self.e2e_create_account('bb', 'bko@nhb.test', 'BB', accepteer_vhpg=True)
-        self.account_bb.is_BB = True
-        self.account_bb.save()
-
         # maak test leden aan die we kunnen koppelen aan beheerders functies
         self.account_rcl101_18 = self._prep_beheerder_lid('RCL 101 18m')
         self.account_rcl101_25 = self._prep_beheerder_lid('RCL 101 25m')
@@ -149,7 +151,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
         # klassegrenzen vaststellen
         url_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'  # comp_pk
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         resp = self.client.post(url_vaststellen % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)     # check success

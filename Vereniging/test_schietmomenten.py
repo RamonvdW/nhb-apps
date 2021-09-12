@@ -31,15 +31,18 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
     url_aanmelden = '/vereniging/leden-aanmelden/competitie/%s/'  # comp.pk
     url_sporter_schietmomenten = '/sporter/regiocompetitie/%s/schietmomenten/'  # regiocompetitieschutterboog.pk
 
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        # maak een BB aan, nodig om de competitie aan te maken
-        self.account_bb = self.e2e_create_account('bb', 'bb@test.com', 'BB', accepteer_vhpg=True)
-        self.account_bb.is_BB = True
-        self.account_bb.save()
-
         self.regio_111 = NhbRegio.objects.get(regio_nr=111)
 
         # maak een test vereniging
@@ -191,7 +194,7 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
         self.schutterboog_120001 = schutterboog
 
         # BB worden
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 

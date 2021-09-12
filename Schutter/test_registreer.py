@@ -10,6 +10,7 @@ from Functie.models import Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Overig.models import SiteTijdelijkeUrl
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -20,9 +21,16 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
 
     url_tijdelijk = '/overig/url/%s/'
 
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ initialisatie van de test case """
-        self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
 
         # maak een test vereniging

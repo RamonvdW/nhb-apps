@@ -6,9 +6,8 @@
 
 from django.test import TestCase
 from django.core import management
-from BasisTypen.models import BoogType, IndivWedstrijdklasse
-from Competitie.models import Competitie, CompetitieKlasse, RegioCompetitieSchutterBoog
-from Schutter.models import SchutterBoog
+from BasisTypen.models import IndivWedstrijdklasse
+from Competitie.models import Competitie, CompetitieKlasse
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 import io

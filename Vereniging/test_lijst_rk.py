@@ -24,15 +24,18 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
 
     url_lijst_rk = '/vereniging/lijst-rayonkampioenschappen/%s/'  # deelcomp_pk
 
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        # maak een BB aan, nodig om de competitie aan te maken
-        self.account_bb = self.e2e_create_account('bb', 'bb@test.com', 'BB', accepteer_vhpg=True)
-        self.account_bb.is_BB = True
-        self.account_bb.save()
-
         self._create_competitie()
 
         ver = NhbVereniging()
@@ -146,7 +149,7 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
 
     def _create_competitie(self):
         # BB worden
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
@@ -232,7 +235,7 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assert403(resp)
 
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 

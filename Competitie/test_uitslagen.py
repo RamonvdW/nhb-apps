@@ -9,12 +9,13 @@ from django.utils import timezone
 from BasisTypen.models import BoogType, TeamType
 from Competitie.models import (Competitie, CompetitieKlasse, DeelCompetitie,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam,
-                               LAAG_BK, LAAG_RK, LAAG_REGIO, AG_NUL)
+                               LAAG_BK, LAAG_RK, LAAG_REGIO)
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from Functie.models import maak_functie, Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Schutter.models import SchutterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -35,15 +36,18 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
     url_uitslagen_ver = '/bondscompetities/%s/uitslagen/%s/vereniging/'
     url_uitslagen_ver_n = '/bondscompetities/%s/uitslagen/%s/vereniging/%s/individueel/'
 
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-
-        # maak een BB aan (geen NHB lid)
-        self.account_bb = self.e2e_create_account('bb', 'bko@nhb.test', 'BB', accepteer_vhpg=True)
-        self.account_bb.is_BB = True
-        self.account_bb.save()
 
         # deze test is afhankelijk van de standaard regio's
         self.regio101 = NhbRegio.objects.get(regio_nr=101)
@@ -112,7 +116,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.lid_100003 = lid
 
         # log in as BB en maak de competitie aan
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self._competitie_aanmaken()
 
@@ -547,7 +551,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
     def test_vereniging_hwl(self):
         functie = Functie.objects.get(rol='HWL', nhb_ver=self.ver)
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(functie)
 
         # als je de pagina ophaalt als functie SEC/HWL/WL, dan krijg je die vereniging

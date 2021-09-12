@@ -10,6 +10,7 @@ from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Functie.models import maak_functie
 from .models import SchutterBoog, SchutterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -19,9 +20,16 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
     url_voorkeuren = '/sporter/voorkeuren/'
     url_wijzig = '/account/nieuw-wachtwoord/'
 
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ initialisatie van de test case """
-        self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_hwl = self.e2e_create_account('hwl', 'hwl@test.com', 'Secretaris')
         self.e2e_account_accepteert_vhpg(self.account_hwl)

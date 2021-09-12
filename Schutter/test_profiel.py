@@ -19,6 +19,7 @@ from Score.models import Score, ScoreHist
 from Score.operations import score_indiv_ag_opslaan
 from .models import SchutterVoorkeuren, SchutterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -33,10 +34,17 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
     url_bevestig_inschrijven = '/sporter/regiocompetitie/aanmelden/bevestig/'   # deelcomp_pk, schutterboog_pk
     url_afmelden = '/sporter/regiocompetitie/afmelden/%s/'                      # deelnemer_pk
 
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ initialisatie van de test case """
 
-        self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
 
         # maak een test vereniging
@@ -377,7 +385,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         # toon geen regiocompetities als de schutter geen interesse heeft
 
         # log in as BB en maak de competitie aan
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self._competitie_aanmaken()
         self.client.logout()
@@ -455,7 +463,7 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
 
     def test_inschrijfmethode1(self):
         # log in as BB en maak de competitie aan
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self._competitie_aanmaken()
 

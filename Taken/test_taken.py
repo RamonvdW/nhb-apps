@@ -11,6 +11,7 @@ from Mailer.models import MailQueue
 from Taken import taken
 from .models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -19,10 +20,15 @@ class TestTakenTaken(E2EHelpers, TestCase):
 
     test_after = ('Functie',)
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ initialisatie van de test case """
 
-        self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_same = self.e2e_create_account('same', 'same@test.com', 'same')
 
@@ -156,7 +162,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
                         deadline=deadline,
                         beschrijving="Tekst 2")
 
-        taken.maak_taak(toegekend_aan=self.account_admin,
+        taken.maak_taak(toegekend_aan=self.testdata.account_admin,
                         deadline=deadline,
                         beschrijving="Tekst 3")
 
@@ -164,7 +170,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
         self.assertEqual(3, MailQueue.objects.count())
 
         # vraag nu om herinneringen te sturen
-        email = self.account_admin.accountemail_set.all()[0]
+        email = self.testdata.account_admin.accountemail_set.all()[0]
         email.laatste_email_over_taken = None
         email.save()
 

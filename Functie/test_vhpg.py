@@ -8,6 +8,7 @@ from django.test import TestCase
 from Functie.models import VerklaringHanterenPersoonsgegevens, account_needs_vhpg
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 
 
 class TestFunctieVHPG(E2EHelpers, TestCase):
@@ -19,9 +20,16 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
     url_afspraken = '/functie/vhpg-afspraken/'
     url_overzicht = '/functie/vhpg-overzicht/'
 
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ initialisatie van de test case """
-        self.account_admin = self.e2e_create_account_admin(accepteer_vhpg=False)
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
 
     def test_anon(self):
@@ -52,7 +60,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/plein/')
 
     def test_admin(self):
-        self.e2e_login(self.account_admin)
+        self.e2e_login(self.testdata.account_admin)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_acceptatie, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -60,7 +68,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'verplicht')
 
         self.assertEqual(VerklaringHanterenPersoonsgegevens.objects.count(), 0)
-        needs_vhpg, _ = account_needs_vhpg(self.account_admin)
+        needs_vhpg, _ = account_needs_vhpg(self.testdata.account_admin)
         self.assertTrue(needs_vhpg)
 
         # voer de post uit zonder checkbox (dit gebeurt ook als de checkbox niet gezet wordt)
@@ -81,7 +89,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
 
         self.assertEqual(VerklaringHanterenPersoonsgegevens.objects.count(), 1)
-        needs_vhpg, _ = account_needs_vhpg(self.account_admin)
+        needs_vhpg, _ = account_needs_vhpg(self.testdata.account_admin)
         self.assertFalse(needs_vhpg)
 
         obj = VerklaringHanterenPersoonsgegevens.objects.all()[0]
@@ -90,9 +98,9 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(self.url_acceptatie, post=False)
 
     def test_overzicht(self):
-        account_vhpg_is_geaccepteerd(self.account_admin)
+        account_vhpg_is_geaccepteerd(self.testdata.account_admin)
 
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # is niet BB
         with self.assert_max_queries(20):
@@ -112,7 +120,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(self.url_overzicht)
 
     def test_afspraken(self):
-        self.e2e_login(self.account_admin)
+        self.e2e_login(self.testdata.account_admin)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_afspraken)

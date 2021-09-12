@@ -15,18 +15,26 @@ from .tijdelijke_url import (tijdelijkeurl_dispatcher, set_tijdelijke_url_receiv
                              RECEIVER_WACHTWOORD_VERGETEN, maak_tijdelijke_url_wachtwoord_vergeten,
                              RECEIVER_BEVESTIG_FUNCTIE_EMAIL, maak_tijdelijke_url_functie_email)
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 from datetime import timedelta
 
 
 class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
     """ unit tests voor de Overig applicatie, module Tijdelijke Urls """
 
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ initialisatie van de test case """
         tijdelijkeurl_dispatcher.test_backup()
 
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
-        self.account_admin = self.e2e_create_account_admin()
 
         email, created_new = AccountEmail.objects.get_or_create(account=self.account_normaal)
         email.nieuwe_email = "hoi@gmail.not"

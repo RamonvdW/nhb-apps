@@ -16,6 +16,7 @@ from .models import (Competitie, CompetitieKlasse,
 from .operations import competities_aanmaken
 from .test_fase import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -27,6 +28,14 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
     url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'  # comp_pk
     url_doorzetten_bk = '/bondscompetities/%s/doorzetten/bk/'  # comp_pk
+
+    testdata = None
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
 
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
@@ -49,8 +58,6 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.account_admin = self.e2e_create_account_admin()
-
         self._next_nhbnr = 100001
 
         self.rayon_1 = NhbRayon.objects.get(rayon_nr=1)
@@ -89,11 +96,6 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
 
-        # maak een BB aan (geen NHB lid)
-        self.account_bb = self.e2e_create_account('bb', 'bko@nhb.test', 'BB', accepteer_vhpg=True)
-        self.account_bb.is_BB = True
-        self.account_bb.save()
-
         # maak test leden aan die we kunnen koppelen aan beheerders functies
         self.account_bko_18 = self._prep_beheerder_lid('BKO')
         self.account_rko1_18 = self._prep_beheerder_lid('RKO1')
@@ -121,7 +123,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.comp_25 = Competitie.objects.get(afstand='25')
 
         # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.url_klassegrenzen_vaststellen_18 = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp_18.pk
         resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
@@ -194,7 +196,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
                                     aantal_scores=6).save()
 
     def test_doorzetten_rk(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
         url = self.url_doorzetten_rk % self.comp_18.pk
@@ -241,7 +243,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
     def test_doorzetten_rk_geen_lid(self):
         # variant van doorzetten_rk met een lid dat niet meer bij een vereniging aangesloten is
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
         url = self.url_doorzetten_rk % self.comp_18.pk
@@ -279,7 +281,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # verdere tests in test_planning_rayon.test_geen_vereniging check
 
     def test_doorzetten_bk(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
         url = self.url_doorzetten_bk % self.comp_18.pk
@@ -332,7 +334,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
     def test_doorzetten_bad(self):
         # moet BKO zijn
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
 
         with self.assert_max_queries(20):
