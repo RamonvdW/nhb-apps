@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from .models import account_test_wachtwoord_sterkte, account_email_bevestiging_ontvangen
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestAccountAanmaken(E2EHelpers, TestCase):

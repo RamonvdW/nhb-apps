@@ -8,11 +8,11 @@ from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
 from Functie.models import Functie
-from Overig.e2ehelpers import E2EHelpers
 from Records.models import IndivRecord
 from Schutter.models import SchutterBoog
 from Score.operations import score_indiv_ag_opslaan
 from .models import NhbRegio, NhbVereniging, NhbLid
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 import io
 

@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.conf import settings
 from Handleiding.views import reverse_handleiding
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestHandleiding(E2EHelpers, TestCase):
@@ -22,13 +22,13 @@ class TestHandleiding(E2EHelpers, TestCase):
 
     def test_anon(self):
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url)
+            resp = self.client.get(self.url_top)
         self.assert403(resp)
 
     def test_gebruiker(self):
         self.e2e_login(self.account)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url)
+            resp = self.client.get(self.url_top)
         self.assert403(resp)
 
     def test_beheerder(self):
@@ -37,7 +37,7 @@ class TestHandleiding(E2EHelpers, TestCase):
         self.e2e_login(self.account)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url)
+            resp = self.client.get(self.url_top)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('handleiding/Hoofdpagina.dtl', 'plein/site_layout.dtl'))

@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Account.models import Account
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 import pyotp
 
 

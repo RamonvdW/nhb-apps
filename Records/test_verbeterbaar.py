@@ -9,12 +9,15 @@ from django.utils.dateparse import parse_date
 from .models import (IndivRecord, BesteIndivRecords,
                      LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE)
 from NhbStructuur.models import NhbLid
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 
 class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
     """ unittests voor de Records applicatie, Views """
+
+    url_kies_disc = '/records/indiv/verbeterbaar/'
+    url_verbeterbaar = '/records/indiv/verbeterbaar/%s/'     # disc
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -150,9 +153,6 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
         beste.beste = rec
         beste.save()
         self.beste = beste
-
-        self.url_kies_disc = '/records/indiv/verbeterbaar/'
-        self.url_verbeterbaar = '/records/indiv/verbeterbaar/%s/'     # disc
 
     def test_xtra(self):
         self.assertTrue(str(self.beste) != "")

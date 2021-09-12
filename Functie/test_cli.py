@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.core import management
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 from NhbStructuur.models import NhbVereniging, NhbRegio, NhbLid
 from .models import maak_functie
 import io

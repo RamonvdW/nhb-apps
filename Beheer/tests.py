@@ -7,7 +7,7 @@
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 
 
 # updaten met dit commando:

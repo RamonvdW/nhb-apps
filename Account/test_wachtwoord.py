@@ -5,9 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Overig.e2ehelpers import E2EHelpers
 from Overig.models import SiteTijdelijkeUrl
 from Mailer.models import MailQueue
+from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestAccountWachtwoord(E2EHelpers, TestCase):

@@ -9,7 +9,6 @@ from django.core import management
 from BasisTypen.models import BoogType
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
-from Overig.e2ehelpers import E2EHelpers
 from Schutter.models import SchutterBoog
 from Score.models import Score
 from Wedstrijden.models import WedstrijdLocatie, CompetitieWedstrijdUitslag
@@ -18,6 +17,7 @@ from .models import (Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
                      CompetitieMutatie, DEELNAME_NEE, DEELNAME_JA, INSCHRIJF_METHODE_1,
                      RegioCompetitieSchutterBoog)
 from .operations import competities_aanmaken
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 import time
 import io

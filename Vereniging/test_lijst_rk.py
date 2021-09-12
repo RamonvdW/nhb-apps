@@ -11,7 +11,8 @@ from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Competitie.models import DeelCompetitie, CompetitieKlasse, LAAG_RK, DeelcompetitieKlasseLimiet, KampioenschapSchutterBoog
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from Schutter.models import SchutterBoog
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 

@@ -10,8 +10,8 @@ from Account.models import AccountSessions
 from Functie.rol import SESSIONVAR_ROL_MAG_WISSELEN
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Logboek.models import LogboekRegel
-from Overig.e2ehelpers import E2EHelpers
 from .models import maak_functie, Functie
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

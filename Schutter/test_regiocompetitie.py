@@ -12,11 +12,11 @@ from Competitie.models import (Competitie, CompetitieKlasse, DeelCompetitie, Reg
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.test_competitie import maak_competities_en_zet_fase_b, competities_aanmaken
 from Functie.models import Functie
-from Overig.e2ehelpers import E2EHelpers
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
 from Score.operations import score_indiv_ag_opslaan
 from Wedstrijden.models import CompetitieWedstrijd
 from .models import SchutterBoog
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

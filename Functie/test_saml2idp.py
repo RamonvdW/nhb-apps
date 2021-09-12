@@ -6,7 +6,7 @@
 
 from django.conf import settings
 from django.test import TestCase
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 
 # tests van de SAML2 Identity Provider voor single sign-on ondersteuning
 

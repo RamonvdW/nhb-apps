@@ -10,12 +10,12 @@ from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
 from Schutter.models import SchutterBoog
 from Wedstrijden.models import WedstrijdLocatie
-from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, CompetitieKlasse,
                      DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
 from .operations import competities_aanmaken
 from .test_fase import zet_competitie_fase
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

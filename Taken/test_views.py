@@ -4,11 +4,10 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.test import TestCase
 from NhbStructuur.models import NhbLid
-from Overig.e2ehelpers import E2EHelpers
 from .models import Taak
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

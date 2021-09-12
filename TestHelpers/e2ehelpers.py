@@ -10,7 +10,7 @@ from django.test import TestCase
 from django.db import connection
 from Account.models import Account, account_create
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
-from Overig.e2estatus import validated_templates, included_templates
+from TestHelpers.e2estatus import validated_templates, included_templates
 from contextlib import contextmanager
 from bs4 import BeautifulSoup
 import subprocess

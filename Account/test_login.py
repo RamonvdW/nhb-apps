@@ -8,10 +8,10 @@ from django.utils import timezone
 from django.urls import reverse
 from django.test import TestCase
 from django.conf import settings
-from Overig.e2ehelpers import E2EHelpers
+from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
 from .models import Account
 from .forms import LoginForm
-from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

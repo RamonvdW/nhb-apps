@@ -7,8 +7,8 @@
 from django.test import TestCase
 from django.utils import timezone
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Overig.e2ehelpers import E2EHelpers
 from .leeftijdsklassen import bereken_leeftijdsklassen
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

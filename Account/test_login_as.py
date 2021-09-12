@@ -7,9 +7,9 @@
 from django.utils import timezone
 from django.test import TestCase
 from django.http import HttpResponseRedirect
-from Overig.e2ehelpers import E2EHelpers
 from Overig.models import SiteTijdelijkeUrl
 from Account.views import account_add_plugin_login
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

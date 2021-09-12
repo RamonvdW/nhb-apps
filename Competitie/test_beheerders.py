@@ -8,10 +8,10 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from Overig.e2ehelpers import E2EHelpers
 from .models import Competitie, DeelCompetitie, RegioCompetitieSchutterBoog, LAAG_REGIO, LAAG_RK, LAAG_BK
 from .operations import competities_aanmaken
 from .test_fase import zet_competitie_fase
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

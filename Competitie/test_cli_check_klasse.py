@@ -8,8 +8,8 @@ from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType, IndivWedstrijdklasse
 from Competitie.models import Competitie, CompetitieKlasse, RegioCompetitieSchutterBoog
-from Overig.e2ehelpers import E2EHelpers
 from Schutter.models import SchutterBoog
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 import io
 

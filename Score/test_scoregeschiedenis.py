@@ -7,12 +7,12 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Overig.e2ehelpers import E2EHelpers
 from Functie.models import maak_functie
 from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from .operations import score_indiv_ag_opslaan
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

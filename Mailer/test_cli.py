@@ -7,7 +7,7 @@
 from django.test import TestCase, override_settings
 from django.core import management
 from .models import MailQueue, mailer_queue_email
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 import io
 
 

@@ -17,8 +17,8 @@ from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
 from Score.operations import score_indiv_ag_opslaan
 from Wedstrijden.models import CompetitieWedstrijd
-from Overig.e2ehelpers import E2EHelpers
 from .models import CompetitieKlasse
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 import io
 

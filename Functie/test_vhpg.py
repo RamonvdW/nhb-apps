@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Functie.models import VerklaringHanterenPersoonsgegevens, account_needs_vhpg
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestFunctieVHPG(E2EHelpers, TestCase):

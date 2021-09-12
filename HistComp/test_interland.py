@@ -5,9 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Overig.e2ehelpers import E2EHelpers
 from NhbStructuur.models import NhbVereniging, NhbRegio, NhbLid
 from .models import HistCompetitie, HistCompetitieIndividueel
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

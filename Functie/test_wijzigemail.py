@@ -11,7 +11,7 @@ from Competitie.operations import competities_aanmaken
 from Functie.models import maak_functie, Functie
 from Mailer.models import MailQueue
 from Overig.models import SiteTijdelijkeUrl
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestFunctieWijzigEmail(E2EHelpers, TestCase):

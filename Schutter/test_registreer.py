@@ -8,8 +8,8 @@ from django.test import TestCase
 from Account.models import Account, AccountEmail
 from Functie.models import Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Overig.e2ehelpers import E2EHelpers
 from Overig.models import SiteTijdelijkeUrl
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

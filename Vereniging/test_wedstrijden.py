@@ -15,7 +15,8 @@ from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from Schutter.models import SchutterBoog, SchutterVoorkeuren
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from Score.models import Score
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 

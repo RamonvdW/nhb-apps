@@ -5,11 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Functie.models import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
-from Overig.e2ehelpers import E2EHelpers
 from Competitie.models import DeelCompetitie, LAAG_BK, LAAG_RK, LAAG_REGIO
 from Competitie.operations import competities_aanmaken
+from Functie.models import maak_functie
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
+from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 

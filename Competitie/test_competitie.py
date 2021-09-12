@@ -8,7 +8,6 @@ from django.test import TestCase
 from BasisTypen.models import BoogType, TeamWedstrijdklasse
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Overig.e2ehelpers import E2EHelpers
 from Schutter.models import SchutterBoog
 from Functie.models import maak_functie
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse, CompetitieMutatie,
@@ -17,6 +16,7 @@ from .models import (Competitie, DeelCompetitie, CompetitieKlasse, CompetitieMut
 from .operations import (competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand,
                          competitie_klassegrenzen_vaststellen)
 from .test_fase import zet_competitie_fase
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

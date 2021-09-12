@@ -6,11 +6,20 @@
 
 from django.test import TestCase
 from .models import SiteFeedback
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestOverigFeedback(E2EHelpers, TestCase):
     """ unit tests voor de Overig applicatie, module Feedback """
+
+    url_plein = '/plein/'
+    url_feedback = '/overig/feedback/%s/%s/'  # min/nul/plus, op_pagina
+    url_feedback_min_plein = '/overig/feedback/min/plein/'
+    url_feedback_nul_plein = '/overig/feedback/nul/plein/'
+    url_feedback_plus_plein = '/overig/feedback/plus/plein'
+    url_feedback_formulier = '/overig/feedback/formulier/'
+    url_feedback_bedankt = '/overig/feedback/bedankt/'
+    url_feedback_inzicht = '/overig/feedback/inzicht/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -19,15 +28,6 @@ class TestOverigFeedback(E2EHelpers, TestCase):
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
 
         self.e2e_login(self.account_normaal)
-
-        self.url_plein = '/plein/'
-        self.url_feedback = '/overig/feedback/%s/%s/'       # min/nul/plus, op_pagina
-        self.url_feedback_formulier = '/overig/feedback/formulier/'
-        self.url_feedback_min_plein = self.url_feedback % ('min', 'plein')
-        self.url_feedback_nul_plein = self.url_feedback % ('nul', 'plein')
-        self.url_feedback_plus_plein = self.url_feedback % ('plus', 'plein')
-        self.url_feedback_bedankt = '/overig/feedback/bedankt/'
-        self.url_feedback_inzicht = '/overig/feedback/inzicht/'
 
     def test_anon(self):
         # niet ingelogd --> gebruik smileys niet toegestaan
@@ -53,9 +53,9 @@ class TestOverigFeedback(E2EHelpers, TestCase):
             resp = self.client.get(self.url_plein)
         self.assertContains(resp, 'Wat vind je van deze pagina?')
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=False)
-        self.assertTrue('/overig/feedback/min/plein-bezoeker/' in urls)
-        self.assertTrue('/overig/feedback/nul/plein-bezoeker/' in urls)
-        self.assertTrue('/overig/feedback/plus/plein-bezoeker/' in urls)
+        self.assertTrue(self.url_feedback % ('min', 'plein-bezoeker') in urls)
+        self.assertTrue(self.url_feedback % ('nul', 'plein-bezoeker') in urls)
+        self.assertTrue(self.url_feedback % ('plus', 'plein-bezoeker') in urls)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_feedback_min_plein)

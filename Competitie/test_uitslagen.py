@@ -14,7 +14,7 @@ from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from Functie.models import maak_functie, Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Schutter.models import SchutterBoog
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

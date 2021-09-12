@@ -10,7 +10,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management import execute_from_command_line
-from Overig.e2estatus import validated_templates, included_templates
+from TestHelpers.e2estatus import validated_templates, included_templates
 from pathlib import Path
 import sys
 import os

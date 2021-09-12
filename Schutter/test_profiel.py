@@ -17,8 +17,8 @@ from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Records.models import IndivRecord
 from Score.models import Score, ScoreHist
 from Score.operations import score_indiv_ag_opslaan
-from Overig.e2ehelpers import E2EHelpers
 from .models import SchutterVoorkeuren, SchutterBoog
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

@@ -7,10 +7,10 @@
 from django.test import TestCase
 from django.utils import timezone
 from NhbStructuur.models import NhbLid
-from Overig.e2ehelpers import E2EHelpers
 from Mailer.models import MailQueue
 from Taken import taken
 from .models import Taak
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

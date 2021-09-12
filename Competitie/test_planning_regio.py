@@ -14,12 +14,12 @@ from Schutter.models import SchutterBoog
 from Score.models import Score
 from Taken.models import Taak
 from Wedstrijden.models import WedstrijdLocatie, CompetitieWedstrijd
-from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
                      DeelcompetitieRonde, LAAG_REGIO, LAAG_RK, LAAG_BK,
                      RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_1)
 from .operations import competities_aanmaken
 from .views_planning_regio import competitie_week_nr_to_date
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

@@ -8,7 +8,8 @@ from django.test import TestCase
 from Functie.models import Functie, maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
 from Wedstrijden.models import WedstrijdLocatie
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 

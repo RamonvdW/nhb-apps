@@ -12,7 +12,7 @@ from Functie.rol import (SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN,
                          rol_activeer_rol, rol_activeer_functie)
 from Functie.models import maak_functie, maak_account_vereniging_secretaris
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestFunctieRol(E2EHelpers, TestCase):

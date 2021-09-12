@@ -8,12 +8,15 @@ from django.test import TestCase
 from django.utils.dateparse import parse_date
 from .models import IndivRecord, LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE
 from NhbStructuur.models import NhbLid
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 
 class TestRecordsIndiv(E2EHelpers, TestCase):
     """ unittests voor de Records applicatie, Views """
+
+    url_indiv_all = '/records/indiv/'
+    url_indiv = '/records/indiv/%s/%s/%s/%s/%s/%s/%s/'  # gesl, disc, lcat, makl, verb, para, nummer
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -157,9 +160,6 @@ class TestRecordsIndiv(E2EHelpers, TestCase):
         rec.score = 999
         rec.max_score = 1000
         rec.save()
-
-        self.url_indiv_all = '/records/indiv/'
-        self.url_indiv = '/records/indiv/%s/%s/%s/%s/%s/%s/%s/'    # gesl, disc, lcat, makl, verb, para, nummer
 
     def test_all(self):
         with self.assert_max_queries(20):

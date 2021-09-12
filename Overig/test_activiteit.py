@@ -9,7 +9,7 @@ from Account.models import Account
 from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbLid
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

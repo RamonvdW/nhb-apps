@@ -11,13 +11,13 @@ from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from Schutter.models import SchutterBoog
-from Overig.e2ehelpers import E2EHelpers
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
                      LAAG_REGIO, LAAG_RK, LAAG_BK,
                      RegioCompetitieSchutterBoog, DeelcompetitieKlasseLimiet,
                      CompetitieMutatie, MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AFMELDEN,
                      MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
                      KampioenschapSchutterBoog, DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 import io
 

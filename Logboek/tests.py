@@ -8,9 +8,9 @@ from django.conf import settings
 from django.test import TestCase
 from Logboek.apps import post_migration_callback
 from NhbStructuur.models import NhbLid
-from Overig.e2ehelpers import E2EHelpers
 from .models import LogboekRegel, schrijf_in_logboek
 from .views import RESULTS_PER_PAGE
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

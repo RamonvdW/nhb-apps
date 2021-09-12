@@ -6,9 +6,9 @@
 
 from django.test import TestCase
 from django.core import management
-from Overig.e2ehelpers import E2EHelpers
 from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTeam
 from .views import RESULTS_PER_PAGE
+from TestHelpers.e2ehelpers import E2EHelpers
 import io
 
 

@@ -7,7 +7,7 @@
 from django.test import TestCase
 from .models import maak_functie, Functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 

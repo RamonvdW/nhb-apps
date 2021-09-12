@@ -7,10 +7,9 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Overig.e2ehelpers import E2EHelpers
 from Functie.models import maak_functie
-from Score.operations import score_indiv_ag_opslaan
 from .models import SchutterBoog, SchutterVoorkeuren
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 
