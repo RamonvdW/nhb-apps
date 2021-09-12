@@ -18,6 +18,8 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
 
     test_after = ('Account',)
 
+    url_tijdelijk = '/overig/url/%s/'
+
     def setUp(self):
         """ initialisatie van de test case """
         self.account_admin = self.e2e_create_account_admin()
@@ -202,7 +204,7 @@ class TestSchutterRegistreer(E2EHelpers, TestCase):
         obj = objs[0]
         self.assertEqual(obj.hoortbij_accountemail.nieuwe_email, 'rdetester@gmail.not')
         self.assertFalse(obj.hoortbij_accountemail.email_is_bevestigd)
-        url = '/overig/url/' + obj.url_code + '/'
+        url = self.url_tijdelijk % obj.url_code
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

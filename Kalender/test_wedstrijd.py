@@ -16,6 +16,12 @@ import datetime
 class TestKalenderWedstrijd(E2EHelpers, TestCase):
     """ unit tests voor de Kalender applicatie """
 
+    url_kalender_manager = '/kalender/manager/'
+    url_kalender_vereniging = '/kalender/vereniging/'
+    url_kalender_wijzig_wedstrijd = '/kalender/%s/wijzig/'  # wedstrijd_pk
+    url_kalender_zet_status = '/kalender/%s/zet-status/'  # wedstrijd_pk
+    url_kalender_sessies = '/kalender/%s/sessies/'  # wedstrijd_pk
+
     def setUp(self):
         """ initialisatie van de test case """
 
@@ -49,12 +55,6 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
                             naam="Kleine Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
         self.nhbver2.save()
-
-        self.url_kalender_manager = '/kalender/manager/'
-        self.url_kalender_vereniging = '/kalender/vereniging/'
-        self.url_kalender_wijzig_wedstrijd = '/kalender/%s/wijzig/'          # wedstrijd_pk
-        self.url_kalender_zet_status = '/kalender/%s/zet-status/'            # wedstrijd_pk
-        self.url_kalender_sessies = '/kalender/%s/sessies/'                  # wedstrijd_pk
 
     @staticmethod
     def _maak_externe_locatie(ver):

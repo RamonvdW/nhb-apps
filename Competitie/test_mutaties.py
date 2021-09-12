@@ -26,6 +26,10 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
     """ unit tests voor de Competitie applicatie, mutaties van RK/BK deelnemers lijsten """
 
+    url_lijst_rk = '/bondscompetities/lijst-rayonkampioenschappen/%s/'  # deelcomp_rk.pk
+    url_wijzig_status = '/bondscompetities/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
+    url_wijzig_cut_rk = '/bondscompetities/planning/rk/%s/limieten/'  # deelcomp_rk.pk
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
@@ -52,10 +56,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
         # zet de competitie in fase F
         zet_competitie_fase(self.comp, 'F')
-
-        self.url_lijst_rk = '/bondscompetities/lijst-rayonkampioenschappen/%s/'    # deelcomp_rk.pk
-        self.url_wijzig_status = '/bondscompetities/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
-        self.url_wijzig_cut_rk = '/bondscompetities/planning/rk/%s/limieten/'      # deelcomp_rk.pk
 
         self.url_lijst = self.url_lijst_rk % self.deelcomp_rk.pk
 

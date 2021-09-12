@@ -17,6 +17,9 @@ import datetime
 class TestSchutterVoorkeuren(E2EHelpers, TestCase):
     """ unit tests voor de Schutter applicatie, module Voorkeuren """
 
+    url_voorkeuren = '/sporter/voorkeuren/'
+    url_wijzig = '/account/nieuw-wachtwoord/'
+
     def setUp(self):
         """ initialisatie van de test case """
         self.account_admin = self.e2e_create_account_admin()
@@ -72,9 +75,6 @@ class TestSchutterVoorkeuren(E2EHelpers, TestCase):
         lid.save()
 
         self.boog_R = BoogType.objects.get(afkorting='R')
-
-        self.url_voorkeuren = '/sporter/voorkeuren/'
-        self.url_wijzig = '/account/nieuw-wachtwoord/'
 
     def test_view(self):
         # zonder login --> terug naar het plein

@@ -21,6 +21,13 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
     test_after = ('Functie',)
 
+    url_kies = '/bondscompetities/'
+    url_overzicht = '/bondscompetities/%s/'  # comp_pk
+    url_wijzigdatums = '/bondscompetities/%s/wijzig-datums/'  # comp_pk
+    url_aangemeld_alles = '/bondscompetities/%s/lijst-regiocompetitie/alles/'  # comp_pk
+    url_aangemeld_rayon = '/bondscompetities/%s/lijst-regiocompetitie/rayon-%s/'  # comp_pk, rayon_pk
+    url_aangemeld_regio = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/'  # comp_pk, regio_pk
+
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
         self._next_nhbnr += 1
@@ -107,13 +114,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
         hwl.nhb_ver = ver
         hwl.save()
-
-        self.url_kies = '/bondscompetities/'
-        self.url_overzicht = '/bondscompetities/%s/'                                        # comp_pk
-        self.url_wijzigdatums = '/bondscompetities/%s/wijzig-datums/'                       # comp_pk
-        self.url_aangemeld_alles = '/bondscompetities/%s/lijst-regiocompetitie/alles/'      # comp_pk
-        self.url_aangemeld_rayon = '/bondscompetities/%s/lijst-regiocompetitie/rayon-%s/'   # comp_pk, rayon_pk
-        self.url_aangemeld_regio = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/'   # comp_pk, regio_pk
 
     def _doe_inschrijven(self, comp):
 

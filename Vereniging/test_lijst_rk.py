@@ -21,6 +21,8 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Schutter', 'Competitie')
 
+    url_lijst_rk = '/vereniging/lijst-rayonkampioenschappen/%s/'  # deelcomp_pk
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
@@ -140,8 +142,6 @@ class TestVerenigingLijstRK(E2EHelpers, TestCase):
         DeelcompetitieKlasseLimiet(deelcompetitie=self.deelcomp_r1,
                                    klasse=self.klasse_c,
                                    limiet=20).save()
-
-        self.url_lijst_rk = '/vereniging/lijst-rayonkampioenschappen/%s/'   # deelcomp_pk
 
     def _create_competitie(self):
         # BB worden

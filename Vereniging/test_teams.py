@@ -28,6 +28,16 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Schutter', 'Competitie')
 
+    url_koppelen = '/vereniging/teams/regio/koppelen/%s/'  # team_pk
+    url_maak_team = '/vereniging/teams/regio/%s/nieuw/'  # deelcomp_pk
+    url_wijzig_team = '/vereniging/teams/regio/%s/wijzig/%s/'  # deelcomp_pk, team_pk
+    url_regio_teams = '/vereniging/teams/regio/%s/'  # deelcomp_pk
+    url_rk_teams = '/vereniging/teams/rk/%s/'  # deelcomp_pk
+    url_wijzig_ag = '/vereniging/leden-ingeschreven/wijzig-aanvangsgemiddelde/%s/'  # deelnemer_pk
+    url_team_invallers = '/vereniging/teams/regio/%s/invallers/'  # deelcomp_pk
+    url_team_invallers_koppelen = '/vereniging/teams/regio/invallers-koppelen/%s/'  # ronde_team_pk
+    url_rcl_volgende_ronde = '/bondscompetities/regio/%s/team-ronde/'  # deelcomp_pk
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
@@ -163,16 +173,6 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         # maak de competitie aan die nodig is voor deze tests
         self._create_histcomp()
         self._create_competitie()
-
-        self.url_koppelen = '/vereniging/teams/regio/koppelen/%s/'      # team_pk
-        self.url_maak_team = '/vereniging/teams/regio/%s/nieuw/'        # deelcomp_pk
-        self.url_wijzig_team = '/vereniging/teams/regio/%s/wijzig/%s/'  # deelcomp_pk, team_pk
-        self.url_regio_teams = '/vereniging/teams/regio/%s/'            # deelcomp_pk
-        self.url_rk_teams = '/vereniging/teams/rk/%s/'                  # deelcomp_pk
-        self.url_wijzig_ag = '/vereniging/leden-ingeschreven/wijzig-aanvangsgemiddelde/%s/'   # deelnemer_pk
-        self.url_team_invallers = '/vereniging/teams/regio/%s/invallers/'                     # deelcomp_pk
-        self.url_team_invallers_koppelen = '/vereniging/teams/regio/invallers-koppelen/%s/'   # ronde_team_pk
-        self.url_rcl_volgende_ronde = '/bondscompetities/regio/%s/team-ronde/'                # deelcomp_pk
 
     def _create_histcomp(self):
         # (strategisch gekozen) historische data om klassegrenzen uit te bepalen

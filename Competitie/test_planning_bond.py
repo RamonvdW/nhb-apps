@@ -25,6 +25,9 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
+    url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'  # comp_pk
+    url_doorzetten_bk = '/bondscompetities/%s/doorzetten/bk/'  # comp_pk
+
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
         self._next_nhbnr += 1
@@ -146,9 +149,6 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
-
-        self.url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'     # comp_pk
-        self.url_doorzetten_bk = '/bondscompetities/%s/doorzetten/bk/'     # comp_pk
 
     def _regioschutters_inschrijven(self):
 

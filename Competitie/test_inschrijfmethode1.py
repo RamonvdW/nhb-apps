@@ -23,6 +23,12 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_beheerders',)
 
+    url_planning_regio = '/bondscompetities/planning/regio/%s/'  # deelcomp_pk
+    url_planning_regio_ronde_methode1 = '/bondscompetities/planning/regio/regio-wedstrijden/%s/'  # ronde_pk
+    url_wijzig_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/wijzig/%s/'  # wedstrijd_pk
+    url_behoefte1 = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes/'  # comp_pk, regio_pk
+    url_behoefte1_bestand = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes-als-bestand/'  # comp_pk, regio_pk
+
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
         self._next_nhbnr += 1
@@ -44,12 +50,6 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.url_planning_regio = '/bondscompetities/planning/regio/%s/'                                   # deelcomp_pk
-        self.url_planning_regio_ronde_methode1 = '/bondscompetities/planning/regio/regio-wedstrijden/%s/'  # ronde_pk
-        self.url_wijzig_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/wijzig/%s/'                # wedstrijd_pk
-        self.url_behoefte1 = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes/'                       # comp_pk, regio_pk
-        self.url_behoefte1_bestand = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes-als-bestand/'   # comp_pk, regio_pk
-
         self.account_admin = self.e2e_create_account_admin()
 
         self._next_nhbnr = 100001

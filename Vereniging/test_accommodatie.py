@@ -18,6 +18,13 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie')
 
+    url_lijst = '/vereniging/accommodaties/lijst/'
+    url_accommodatie_details = '/vereniging/accommodaties/details/%s/'           # vereniging_pk
+    url_accommodatie_vereniging = '/vereniging/accommodatie-details/%s/'         # vereniging_pk
+    url_externe_locaties = '/vereniging/externe-locaties/%s/'                    # vereniging_pk
+    url_externe_locatie_details = '/vereniging/externe-locaties/%s/details/%s/'  # vereniging_pk, locatie_pk
+    url_geen_beheerders = '/vereniging/contact-geen-beheerders/'
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
@@ -148,13 +155,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
         ver.secretaris_lid = lid
         ver.save()
-
-        self.url_lijst = '/vereniging/accommodaties/lijst/'
-        self.url_accommodatie_details = '/vereniging/accommodaties/details/%s/'           # vereniging_pk
-        self.url_accommodatie_vereniging = '/vereniging/accommodatie-details/%s/'         # vereniging_pk
-        self.url_externe_locaties = '/vereniging/externe-locaties/%s/'                    # vereniging_pk
-        self.url_externe_locatie_details = '/vereniging/externe-locaties/%s/details/%s/'  # vereniging_pk, locatie_pk
-        self.url_geen_beheerders = '/vereniging/contact-geen-beheerders/'
 
     def test_anon(self):
         # anon

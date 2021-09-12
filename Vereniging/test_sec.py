@@ -23,6 +23,13 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Schutter', 'Competitie')
 
+    url_overzicht = '/vereniging/'
+    url_ledenlijst = '/vereniging/leden-lijst/'
+    url_voorkeuren = '/vereniging/leden-voorkeuren/'
+    url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'  # <comp_pk>
+    url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
+    url_schutter_voorkeuren = '/sporter/voorkeuren/%s/'  # <nhblid_pk>
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
@@ -125,13 +132,6 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # maak de competitie aan die nodig is voor deze tests
         self._create_histcomp()
         self._create_competitie()
-
-        self.url_overzicht = '/vereniging/'
-        self.url_ledenlijst = '/vereniging/leden-lijst/'
-        self.url_voorkeuren = '/vereniging/leden-voorkeuren/'
-        self.url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'      # <comp_pk>
-        self.url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
-        self.url_schutter_voorkeuren = '/sporter/voorkeuren/%s/'                # <nhblid_pk>
 
     def _create_histcomp(self):
         # (strategisch gekozen) historische data om klassegrenzen uit te bepalen

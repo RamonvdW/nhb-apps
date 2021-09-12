@@ -27,6 +27,12 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
 
     test_after = ('NhbStructuur', 'HistComp', 'Competitie', 'Schutter.regiocompetitie', 'Functie')
 
+    url_profiel = '/sporter/'
+    url_voorkeuren = '/sporter/voorkeuren/'
+    url_aanmelden = '/sporter/regiocompetitie/aanmelden/%s/%s/'                 # deelcomp_pk, schutterboog_pk
+    url_bevestig_inschrijven = '/sporter/regiocompetitie/aanmelden/bevestig/'   # deelcomp_pk, schutterboog_pk
+    url_afmelden = '/sporter/regiocompetitie/afmelden/%s/'                      # deelnemer_pk
+
     def setUp(self):
         """ initialisatie van de test case """
 
@@ -152,12 +158,6 @@ class TestSchutterProfiel(E2EHelpers, TestCase):
         indiv.save()
 
         self.boog_R = BoogType.objects.get(afkorting='R')
-
-        self.url_profiel = '/sporter/'
-        self.url_voorkeuren = '/sporter/voorkeuren/'
-        self.url_aanmelden = '/sporter/regiocompetitie/aanmelden/%s/%s/'   # deelcomp_pk, schutterboog_pk
-        self.url_bevestig_inschrijven = self.url_aanmelden + 'bevestig/'
-        self.url_afmelden = '/sporter/regiocompetitie/afmelden/%s/'        # deelnemer_pk
 
     def _prep_voorkeuren(self):
         # haal de voorkeuren op - hiermee worden de SchutterBoog records aangemaakt

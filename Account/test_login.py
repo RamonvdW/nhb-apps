@@ -18,6 +18,8 @@ import datetime
 class TestAccountLogin(E2EHelpers, TestCase):
     """ unit tests voor de Account applicatie; module Login/Logout """
 
+    url_login = '/account/login/'
+
     def setUp(self):
         """ initialisatie van de test case """
         self.account_admin = self.e2e_create_account_admin()
@@ -27,8 +29,6 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.email_normaal = self.account_normaal.accountemail_set.all()[0]
         self.email_metmail = self.account_metmail.accountemail_set.all()[0]
 
-        self.url_login = '/account/login/'
-        
     def test_inlog_form_get(self):
         # test ophalen van het inlog formulier
         with self.assert_max_queries(20):

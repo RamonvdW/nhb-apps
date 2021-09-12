@@ -16,6 +16,8 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Schutter', 'Competitie')
 
+    url_clusters = '/vereniging/regio-clusters/'
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
@@ -66,8 +68,6 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
 
         self.cluster2 = NhbCluster.objects.get(gebruik='18', regio=regio_111, letter='b')     # standaard cluster
         self.nhbver2.clusters.add(self.cluster2)
-
-        self.url_clusters = '/vereniging/regio-clusters/'
 
     def test_anon(self):
         # anon

@@ -17,6 +17,12 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
     test_after = ('Functie.test_rol',)
 
+    url_wissel_van_rol = '/functie/wissel-van-rol/'
+    url_wissel_naar_sec = '/functie/wissel-van-rol/secretaris/'
+    url_activeer_rol = '/functie/activeer-rol/%s/'
+    url_activeer_functie = '/functie/activeer-functie/%s/'
+    url_accountwissel = '/account/account-wissel/'
+
     def setUp(self):
         """ initialisatie van de test case """
 
@@ -76,12 +82,6 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.functie_rko = maak_functie("RKO test", "RKO")
         self.functie_rko.nhb_rayon = NhbRayon.objects.get(rayon_nr=1)
         self.functie_rko.save()
-
-        self.url_wissel_van_rol = '/functie/wissel-van-rol/'
-        self.url_wissel_naar_sec = '/functie/wissel-van-rol/secretaris/'
-        self.url_activeer_rol = '/functie/activeer-rol/%s/'
-        self.url_activeer_functie = '/functie/activeer-functie/%s/'
-        self.url_accountwissel = '/account/account-wissel/'
 
     def _get_wissel_urls(self, resp):
         return [url for url in self.extract_all_urls(resp) if url.startswith('/functie/activeer') or url == self.url_accountwissel]

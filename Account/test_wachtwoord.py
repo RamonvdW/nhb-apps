@@ -13,13 +13,14 @@ from Mailer.models import MailQueue
 class TestAccountWachtwoord(E2EHelpers, TestCase):
     """ unit tests voor de Account applicatie; module Login/Logout """
 
+    url_vergeten = '/account/wachtwoord-vergeten/'
+    url_wijzig = '/account/nieuw-wachtwoord/'
+    url_tijdelijk = '/overig/url/%s/'       # url_code
+
     def setUp(self):
         """ initialisatie van de test case """
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.email_normaal = self.account_normaal.accountemail_set.all()[0]
-
-        self.url_vergeten = '/account/wachtwoord-vergeten/'
-        self.url_wijzig = '/account/nieuw-wachtwoord/'
 
     def test_wijzig_anon(self):
         # niet ingelogd
@@ -106,7 +107,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         obj = SiteTijdelijkeUrl.objects.all()[0]
 
         self.assertEqual(obj.hoortbij_accountemail.bevestigde_email, 'normaal@test.com')
-        url = '/overig/url/' + obj.url_code + '/'
+        url = self.url_tijdelijk % obj.url_code
         self.client.logout()
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -168,7 +169,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         self.assertEqual(SiteTijdelijkeUrl.objects.count(), 1)
         obj = SiteTijdelijkeUrl.objects.all()[0]
-        url = '/overig/url/' + obj.url_code + '/'
+        url = self.url_tijdelijk % obj.url_code
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -205,7 +206,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         obj = SiteTijdelijkeUrl.objects.all()[0]
 
         self.assertEqual(obj.hoortbij_accountemail.bevestigde_email, 'normaal@test.com')
-        url = '/overig/url/' + obj.url_code + '/'
+        url = self.url_tijdelijk % obj.url_code
         self.client.logout()
         with self.assert_max_queries(20):
             resp = self.client.get(url)

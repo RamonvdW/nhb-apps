@@ -19,6 +19,8 @@ import datetime
 class TestScoreGeschiedenis(E2EHelpers, TestCase):
     """ unit tests voor de Schutter applicatie, module Voorkeuren """
 
+    url_geschiedenis = '/score/geschiedenis/'
+
     def _maak_uitslag(self, schutterboog):
         # maak 2x wedstrijd + uitslag + score voor deze schutterboog, met geschiedenis
         uur_00 = datetime.time(hour=0)
@@ -133,8 +135,6 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         score_indiv_ag_opslaan(schutterboog, 25, 9.251, self.account_hwl, 'test melding')
 
         self._maak_uitslag(schutterboog)
-
-        self.url_geschiedenis = '/score/geschiedenis/'
 
     def test_mag_niet(self):
         # moet BB zijn om de geschiedenis in te mogen zien

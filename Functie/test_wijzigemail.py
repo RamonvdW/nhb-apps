@@ -19,6 +19,8 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
 
     test_after = ('Functie.test_2fa', 'Functie.wisselvanrol')
 
+    url_wijzig_email = '/functie/wijzig-email/%s/'  # % functie_pk
+
     def setUp(self):
         """ initialisatie van de test case """
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal', accepteer_vhpg=True)
@@ -57,8 +59,6 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.functie_wl = maak_functie("WL test", "WL")
         self.functie_wl.nhb_ver = ver
         self.functie_wl.save()
-
-        self.url_wijzig_email = '/functie/wijzig-email/%s/'  # % functie_pk
 
     def _check_wijzigbaar(self, functie):
         url = self.url_wijzig_email % functie.pk

@@ -14,6 +14,9 @@ import datetime
 class TestHistCompInterland(E2EHelpers, TestCase):
     """ unittests voor de HistComp applicatie, module Interland """
 
+    url_interland = '/bondscompetities/hist/interland/'
+    url_interland_download = '/bondscompetities/hist/interland/als-bestand/%s/'  # klasse_pk
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
@@ -195,9 +198,6 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         self.account_bb = self.e2e_create_account('bb', 'bko@nhb.test', 'BB', accepteer_vhpg=True)
         self.account_bb.is_BB = True
         self.account_bb.save()
-
-        self.url_interland = '/bondscompetities/hist/interland/'
-        self.url_interland_download = '/bondscompetities/hist/interland/als-bestand/%s/'     # klasse_pk
 
     def test_interland(self):
         # anon

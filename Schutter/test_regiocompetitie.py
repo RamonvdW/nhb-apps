@@ -25,6 +25,17 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
 
     test_after = ('Account', 'NhbStructuur', 'Competitie')
 
+    url_profiel = '/sporter/'
+    url_voorkeuren = '/sporter/voorkeuren/'
+    url_aanmelden = '/sporter/regiocompetitie/aanmelden/%s/%s/'                     # deelcomp_pk, schutterboog_pk
+    url_bevestig_aanmelden = '/sporter/regiocompetitie/aanmelden/%s/%s/bevestig/'   # deelcomp_pk, schutterboog_pk
+    url_afmelden = '/sporter/regiocompetitie/afmelden/%s/'                          # regiocomp_pk
+    url_schietmomenten = '/sporter/regiocompetitie/%s/schietmomenten/'              # deelnemer_pk
+    url_planning_regio = '/bondscompetities/planning/regio/%s/'                     # deelcomp_pk
+    url_planning_regio_ronde_methode1 = '/bondscompetities/planning/regio/regio-wedstrijden/%s/'  # ronde_pk
+    url_wijzig_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/wijzig/%s/'  # wedstrijd_pk
+    url_inschrijven_hwl = '/vereniging/leden-aanmelden/competitie/%s/'              # comp_pk
+
     def setUp(self):
         """ initialisatie van de test case """
         self.account_admin = self.e2e_create_account_admin()
@@ -81,17 +92,6 @@ class TestSchutterRegiocompetitie(E2EHelpers, TestCase):
         lid.account = self.account_geenlid
         lid.email = lid.account.email
         lid.save()
-
-        self.url_profiel = '/sporter/'
-        self.url_voorkeuren = '/sporter/voorkeuren/'
-        self.url_aanmelden = '/sporter/regiocompetitie/aanmelden/%s/%s/'         # deelcomp_pk, schutterboog_pk
-        self.url_bevestig_aanmelden = self.url_aanmelden + 'bevestig/'
-        self.url_afmelden = '/sporter/regiocompetitie/afmelden/%s/'              # regiocomp_pk
-        self.url_schietmomenten = '/sporter/regiocompetitie/%s/schietmomenten/'  # deelnemer_pk
-        self.url_planning_regio = '/bondscompetities/planning/regio/%s/'         # deelcomp_pk
-        self.url_planning_regio_ronde_methode1 = '/bondscompetities/planning/regio/regio-wedstrijden/%s/'  # ronde_pk
-        self.url_wijzig_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/wijzig/%s/'                # wedstrijd_pk
-        self.url_inschrijven_hwl = '/vereniging/leden-aanmelden/competitie/%s/'  # comp_pk
 
     def _prep_voorkeuren(self, nhb_nr):
         # haal de voorkeuren op - hiermee worden de SchutterBoog records aangemaakt

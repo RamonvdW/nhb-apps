@@ -25,6 +25,16 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Schutter', 'Competitie')
 
+    url_overzicht = '/vereniging/'
+    url_ledenlijst = '/vereniging/leden-lijst/'
+    url_voorkeuren = '/vereniging/leden-voorkeuren/'
+    url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'  # comp_pk
+    url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # deelcomp_pk
+    url_schutter_voorkeuren = '/sporter/voorkeuren/%s/'  # nhblid_pk
+    url_wedstrijden = '/vereniging/wedstrijden/'
+    url_uitslag_invoeren = '/vereniging/uitslag-invoeren/'
+    url_waarschijnlijke = '/vereniging/wedstrijden/%s/waarschijnlijke-deelnemers/'  # wedstrijd_pk
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
@@ -134,7 +144,6 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         lid.save()
         self.lid_100003 = lid
 
-
         # maak het lid aan dat SEC wordt
         lid = NhbLid()
         lid.nhb_nr = 100004
@@ -173,16 +182,6 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         self._maak_competitie()
         self._maak_wedstrijden()
         self._maak_inschrijvingen()
-
-        self.url_overzicht = '/vereniging/'
-        self.url_ledenlijst = '/vereniging/leden-lijst/'
-        self.url_voorkeuren = '/vereniging/leden-voorkeuren/'
-        self.url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'      # comp_pk
-        self.url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # deelcomp_pk
-        self.url_schutter_voorkeuren = '/sporter/voorkeuren/%s/'                 # nhblid_pk
-        self.url_wedstrijden = '/vereniging/wedstrijden/'
-        self.url_uitslag_invoeren = '/vereniging/uitslag-invoeren/'
-        self.url_waarschijnlijke = '/vereniging/wedstrijden/%s/waarschijnlijke-deelnemers/'  # wedstrijd_pk
 
     def _maak_competitie(self):
         self.assertEqual(CompetitieKlasse.objects.count(), 0)

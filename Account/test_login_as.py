@@ -18,6 +18,8 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
     test_after = ('Account.test_login.',)
 
+    url_wissel = '/account/account-wissel/'
+
     def _login_plugin(self, request, from_ip, account):
         if self._login_plugin_mode == 1:
             return HttpResponseRedirect('/account/activiteit/')
@@ -27,7 +29,6 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         """ initialisatie van de test case """
         self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.nhb', 'Normaal')
-        self.wissel_url = '/account/account-wissel/'
 
         self._login_plugin_mode = 0
         account_add_plugin_login(10, self._login_plugin, False)

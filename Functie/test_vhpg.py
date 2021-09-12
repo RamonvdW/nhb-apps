@@ -15,14 +15,14 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
 
     test_after = ('Functie.test_2fa', 'Functie.wisselvanrol')
 
+    url_acceptatie = '/functie/vhpg-acceptatie/'
+    url_afspraken = '/functie/vhpg-afspraken/'
+    url_overzicht = '/functie/vhpg-overzicht/'
+
     def setUp(self):
         """ initialisatie van de test case """
         self.account_admin = self.e2e_create_account_admin(accepteer_vhpg=False)
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
-
-        self.url_acceptatie = '/functie/vhpg-acceptatie/'
-        self.url_afspraken = '/functie/vhpg-afspraken/'
-        self.url_overzicht = '/functie/vhpg-overzicht/'
 
     def test_anon(self):
         self.e2e_logout()

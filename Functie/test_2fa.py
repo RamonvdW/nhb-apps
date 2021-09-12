@@ -20,6 +20,11 @@ class TestFunctie2FA(E2EHelpers, TestCase):
 
     test_after = ('Account', 'Functie.test_rol')
 
+    url_koppel_stap1 = '/functie/otp-koppelen-stap1/'
+    url_koppel_stap2 = '/functie/otp-koppelen-stap2/'
+    url_koppel_stap3 = '/functie/otp-koppelen-stap3/'
+    url_controle = '/functie/otp-controle/'
+
     def setUp(self):
         """ initialisatie van de test case """
         self.account_admin = self.e2e_create_account_admin()
@@ -32,11 +37,6 @@ class TestFunctie2FA(E2EHelpers, TestCase):
         self.account_normaal.otp_code = ""
         self.account_normaal.otp_is_actief = False
         self.account_normaal.save()
-
-        self.url_koppel_stap1 = '/functie/otp-koppelen-stap1/'
-        self.url_koppel_stap2 = '/functie/otp-koppelen-stap2/'
-        self.url_koppel_stap3 = '/functie/otp-koppelen-stap3/'
-        self.url_controle = '/functie/otp-controle/'
 
     def test_2fa_koppelen_niet_ingelogd(self):
         self.e2e_logout()

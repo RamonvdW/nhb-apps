@@ -18,6 +18,8 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
 
     test_after = ('Account.test_login',)
 
+    url_activiteit = '/overig/activiteit/'
+
     def setUp(self):
         """ initialisatie van de test case """
         self.account_admin = self.e2e_create_account_admin()
@@ -40,8 +42,6 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
                                  geboorte_datum='1980-01-09',
                                  sinds_datum='2008-01-09')
         self.lid_100002.save()
-
-        self.url_activiteit = '/overig/activiteit/'
 
     def test_anon(self):
         # geen inlog = geen toegang

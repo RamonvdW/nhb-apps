@@ -25,6 +25,11 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Schutter', 'Competitie')
 
+    url_overzicht = '/vereniging/'
+    url_schietmomenten = '/vereniging/leden-ingeschreven/competitie/%s/schietmomenten/'  # deelcomp_pk
+    url_aanmelden = '/vereniging/leden-aanmelden/competitie/%s/'  # comp.pk
+    url_sporter_schietmomenten = '/sporter/regiocompetitie/%s/schietmomenten/'  # regiocompetitieschutterboog.pk
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
@@ -183,11 +188,6 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
                                     voor_wedstrijd=True)
         schutterboog.save()
         self.schutterboog_120001 = schutterboog
-
-        self.url_overzicht = '/vereniging/'
-        self.url_schietmomenten = '/vereniging/leden-ingeschreven/competitie/%s/schietmomenten/'  # deelcomp_pk
-        self.url_aanmelden = '/vereniging/leden-aanmelden/competitie/%s/'                         # comp.pk
-        self.url_sporter_schietmomenten = '/sporter/regiocompetitie/%s/schietmomenten/'           # regiocompetitieschutterboog.pk
 
         # BB worden
         self.e2e_login_and_pass_otp(self.account_bb)

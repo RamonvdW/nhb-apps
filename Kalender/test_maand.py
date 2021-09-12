@@ -15,6 +15,11 @@ from .models import KalenderWedstrijd
 class TestKalenderMaand(E2EHelpers, TestCase):
     """ unit tests voor de Kalender applicatie """
 
+    url_kalender = '/kalender/'
+    url_kalender_maand = '/kalender/pagina-%s-%s/'  # jaar, maand
+    url_kalender_vereniging = '/kalender/vereniging/'
+    url_kalender_info = '/kalender/%s/info/'  # wedstrijd_pk
+
     def setUp(self):
         """ initialisatie van de test case """
 
@@ -48,11 +53,6 @@ class TestKalenderMaand(E2EHelpers, TestCase):
                             naam="Kleine Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
         self.nhbver2.save()
-
-        self.url_kalender = '/kalender/'
-        self.url_kalender_maand = '/kalender/pagina-%s-%s/'                  # jaar, maand
-        self.url_kalender_vereniging = '/kalender/vereniging/'
-        self.url_kalender_info = '/kalender/%s/info/'                        # wedstrijd_pk
 
     @staticmethod
     def _maak_externe_locatie(ver):

@@ -20,6 +20,13 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
     test_after = ('Account', 'Functie.test_2fa', 'Functie.test_overzicht')
 
+    url_overzicht = '/functie/overzicht/'
+    url_overzicht_vereniging = '/functie/overzicht/vereniging/'
+    url_wijzig = '/functie/wijzig/%s/'  # functie_pk
+    url_wijzig_ontvang = '/functie/wijzig/%s/ontvang/'
+    url_activeer_functie = '/functie/activeer-functie/%s/'
+    url_activeer_rol = '/functie/activeer-rol/%s/'
+
     def setUp(self):
         """ initialisatie van de test case """
 
@@ -117,13 +124,6 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         lid.email = lid.account.email
         lid.save()
         self.nhblid2 = lid
-
-        self.url_overzicht = '/functie/overzicht/'
-        self.url_overzicht_vereniging = '/functie/overzicht/vereniging/'
-        self.url_wijzig = '/functie/wijzig/%s/'     # functie_pk
-        self.url_wijzig_ontvang = '/functie/wijzig/%s/ontvang/'
-        self.url_activeer_functie = '/functie/activeer-functie/%s/'
-        self.url_activeer_rol = '/functie/activeer-rol/%s/'
 
     def test_wijzig_view(self):
         self.e2e_login_and_pass_otp(self.account_admin)

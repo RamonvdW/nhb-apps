@@ -17,6 +17,9 @@ class TestTakenViews(E2EHelpers, TestCase):
 
     test_after = ('Functie',)
 
+    url_overzicht = '/taken/overzicht/'
+    url_details = '/taken/details/%s/'  # taak_pk
+
     def setUp(self):
         """ initialisatie van de test case """
 
@@ -50,9 +53,6 @@ class TestTakenViews(E2EHelpers, TestCase):
                     beschrijving='Afgerond testje')
         taak.save()
         self.taak2 = taak
-
-        self.url_overzicht = '/taken/overzicht/'
-        self.url_details = '/taken/details/%s/'     # taak_pk
 
     def test_anon(self):
         # do een get van het taken overzicht zonder ingelogd te zijn

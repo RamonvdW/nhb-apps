@@ -27,6 +27,17 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Schutter', 'Competitie')
 
+    url_overzicht = '/vereniging/'
+    url_ledenlijst = '/vereniging/leden-lijst/'
+    url_voorkeuren = '/vereniging/leden-voorkeuren/'
+    url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'  # <comp_pk>
+    url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
+    url_wijzig_ag = '/vereniging/leden-ingeschreven/wijzig-aanvangsgemiddelde/%s/'  # <deelnemer_pk>
+    url_schutter_voorkeuren = '/sporter/voorkeuren/%s/'  # <nhblid_pk>
+    url_planning_regio = '/bondscompetities/planning/regio/%s/'  # deelcomp_pk
+    url_planning_regio_ronde_methode1 = '/bondscompetities/planning/regio/regio-wedstrijden/%s/'  # ronde_pk
+    url_wijzig_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/wijzig/%s/'  # wedstrijd_pk
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
@@ -163,17 +174,6 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                                                  nhb_rayon=self.regio_111.rayon)
         deelcomp_rk.heeft_deelnemerslijst = True
         deelcomp_rk.save()
-
-        self.url_overzicht = '/vereniging/'
-        self.url_ledenlijst = '/vereniging/leden-lijst/'
-        self.url_voorkeuren = '/vereniging/leden-voorkeuren/'
-        self.url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'      # <comp_pk>
-        self.url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
-        self.url_wijzig_ag = '/vereniging/leden-ingeschreven/wijzig-aanvangsgemiddelde/%s/'  # <deelnemer_pk>
-        self.url_schutter_voorkeuren = '/sporter/voorkeuren/%s/'                 # <nhblid_pk>
-        self.url_planning_regio = '/bondscompetities/planning/regio/%s/'         # deelcomp_pk
-        self.url_planning_regio_ronde_methode1 = '/bondscompetities/planning/regio/regio-wedstrijden/%s/'  # ronde_pk
-        self.url_wijzig_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/wijzig/%s/'                # wedstrijd_pk
 
     def _create_histcomp(self):
         # (strategisch gekozen) historische data om klassegrenzen uit te bepalen

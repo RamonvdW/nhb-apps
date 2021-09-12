@@ -22,6 +22,10 @@ class TestCompetitieInschrijfmethode3(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_beheerders',)
 
+    url_aangemeld_alles = '/bondscompetities/%s/lijst-regiocompetitie/alles/'  # comp_pk
+    url_behoefte3 = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/dagdeel-behoefte/'  # comp_pk, regio_pk
+    url_behoefte3_bestand = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/dagdeel-behoefte-als-bestand/'  # comp_pk, regio_pk
+
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
         self._next_nhbnr += 1
@@ -108,10 +112,6 @@ class TestCompetitieInschrijfmethode3(E2EHelpers, TestCase):
         hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
         hwl.nhb_ver = ver
         hwl.save()
-
-        self.url_aangemeld_alles = '/bondscompetities/%s/lijst-regiocompetitie/alles/'      # comp_pk
-        self.url_behoefte3 = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/dagdeel-behoefte/'                      # comp_pk, regio_pk
-        self.url_behoefte3_bestand = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/dagdeel-behoefte-als-bestand/'  # comp_pk, regio_pk
 
     def _doe_inschrijven(self, comp):
 

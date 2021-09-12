@@ -16,6 +16,11 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
 
     test_after = ('Account', 'Functie.test_2fa')
 
+    url_overzicht = '/functie/overzicht/'
+    url_wijzig = '/functie/wijzig/'
+    url_activeer_functie = '/functie/activeer-functie/%s/'
+    url_activeer_rol = '/functie/activeer-rol/%s/'
+
     def setUp(self):
         """ initialisatie van de test case """
 
@@ -92,11 +97,6 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         lid.email = lid.account.email
         lid.save()
         self.nhblid2 = lid
-
-        self.url_overzicht = '/functie/overzicht/'
-        self.url_wijzig = '/functie/wijzig/'
-        self.url_activeer_functie = '/functie/activeer-functie/%s/'
-        self.url_activeer_rol = '/functie/activeer-rol/%s/'
 
     def test_anon(self):
         self.e2e_logout()

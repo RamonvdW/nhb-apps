@@ -29,6 +29,17 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
+    url_planning_bond = '/bondscompetities/planning/bk/%s/'  # deelcomp_pk
+    url_planning_rayon = '/bondscompetities/planning/rk/%s/'  # deelcomp_pk
+    url_planning_regio = '/bondscompetities/planning/regio/%s/'  # deelcomp_pk
+    url_planning_regio_cluster = '/bondscompetities/planning/regio/%s/cluster/%s/'  # deelcomp_pk, cluster_pk
+    url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'  # ronde_pk
+    url_planning_regio_ronde_methode1 = '/bondscompetities/planning/regio/regio-wedstrijden/%s/'  # ronde_pk
+    url_wijzig_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/wijzig/%s/'  # wedstrijd_pk
+    url_verwijder_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/verwijder/%s/'  # wedstrijd_pk
+    url_score_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'  # wedstrijd_pk
+    url_afsluiten_regio = '/bondscompetities/planning/regio/%s/afsluiten/'  # deelcomp_pk
+
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
         self._next_nhbnr += 1
@@ -182,17 +193,6 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         ver.regio = self.regio_101
         ver.save()
         ver.clusters.add(self.cluster_101e_25)
-
-        self.url_planning_bond = '/bondscompetities/planning/bk/%s/'                               # deelcomp_pk
-        self.url_planning_rayon = '/bondscompetities/planning/rk/%s/'                              # deelcomp_pk
-        self.url_planning_regio = '/bondscompetities/planning/regio/%s/'                           # deelcomp_pk
-        self.url_planning_regio_cluster = '/bondscompetities/planning/regio/%s/cluster/%s/'        # deelcomp_pk, cluster_pk
-        self.url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'               # ronde_pk
-        self.url_planning_regio_ronde_methode1 = '/bondscompetities/planning/regio/regio-wedstrijden/%s/'  # ronde_pk
-        self.url_wijzig_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/wijzig/%s/'        # wedstrijd_pk
-        self.url_verwijder_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/verwijder/%s/'  # wedstrijd_pk
-        self.url_score_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'                  # wedstrijd_pk
-        self.url_afsluiten_regio = '/bondscompetities/planning/regio/%s/afsluiten/'                # deelcomp_pk
 
     def _maak_inschrijving(self, deelcomp):
         RegioCompetitieSchutterBoog(schutterboog=self.schutterboog,

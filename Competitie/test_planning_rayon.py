@@ -31,6 +31,15 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
+    url_planning_rayon = '/bondscompetities/planning/rk/%s/'  # deelcomp_pk
+    url_wijzig_rk_wedstrijd = '/bondscompetities/planning/rk/wedstrijd/wijzig/%s/'  # wedstrijd_pk
+    url_verwijder_rk_wedstrijd = '/bondscompetities/planning/rk/wedstrijd/verwijder/%s/'  # wedstrijd_pk
+    url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'  # comp_pk
+    url_lijst_rk = '/bondscompetities/lijst-rayonkampioenschappen/%s/'  # deelcomp_pk
+    url_lijst_bestand = '/bondscompetities/lijst-rayonkampioenschappen/%s/bestand/'  # deelcomp_pk
+    url_wijzig_status = '/bondscompetities/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
+    url_wijzig_limiet = '/bondscompetities/planning/rk/%s/limieten/'  # deelcomp_pk
+
     def _dummy_sleep(self, duration):
         pass
 
@@ -191,15 +200,6 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
         self.ver_1100 = ver
-
-        self.url_planning_rayon = '/bondscompetities/planning/rk/%s/'                              # deelcomp_pk
-        self.url_wijzig_rk_wedstrijd = '/bondscompetities/planning/rk/wedstrijd/wijzig/%s/'        # wedstrijd_pk
-        self.url_verwijder_rk_wedstrijd = '/bondscompetities/planning/rk/wedstrijd/verwijder/%s/'  # wedstrijd_pk
-        self.url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'                             # comp_pk
-        self.url_lijst_rk = '/bondscompetities/lijst-rayonkampioenschappen/%s/'                    # deelcomp_pk
-        self.url_lijst_bestand = '/bondscompetities/lijst-rayonkampioenschappen/%s/bestand/'       # deelcomp_pk
-        self.url_wijzig_status = '/bondscompetities/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
-        self.url_wijzig_limiet = '/bondscompetities/planning/rk/%s/limieten/'                      # deelcomp_pk
 
     def competitie_sluit_alle_regiocompetities(self, comp):
         # deze functie sluit alle regiocompetities af zodat de competitie in fase G komt

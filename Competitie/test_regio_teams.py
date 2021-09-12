@@ -28,6 +28,16 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
+    url_afsluiten_regio = '/bondscompetities/planning/regio/%s/afsluiten/'  # deelcomp_pk
+    url_regio_instellingen = '/bondscompetities/%s/instellingen/regio-%s/'  # comp_pk, regio-nr
+    url_regio_globaal = '/bondscompetities/%s/instellingen/globaal/'  # comp_pk
+    url_ag_controle = '/bondscompetities/%s/ag-controle/regio-%s/'  # comp_pk, regio-nr
+    url_regio_teams = '/bondscompetities/regio/%s/teams/'  # deelcomp_pk
+    url_regio_teams_alle = '/bondscompetities/regio/%s/teams/%s/'  # comp_pk, subset = auto/alle/rayon_nr
+    url_regio_poules = '/bondscompetities/regio/%s/poules/'  # deelcomp_pk
+    url_wijzig_poule = '/bondscompetities/regio/poules/%s/wijzig/'  # poule_pk
+    url_team_ronde = '/bondscompetities/regio/%s/team-ronde/'  # deelcomp_pk
+
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
         self._next_nhbnr += 1
@@ -181,16 +191,6 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
         ver.regio = self.regio_101
         ver.save()
         ver.clusters.add(self.cluster_101e_25)
-
-        self.url_afsluiten_regio = '/bondscompetities/planning/regio/%s/afsluiten/'     # deelcomp_pk
-        self.url_regio_instellingen = '/bondscompetities/%s/instellingen/regio-%s/'     # comp_pk, regio-nr
-        self.url_regio_globaal = '/bondscompetities/%s/instellingen/globaal/'           # comp_pk
-        self.url_ag_controle = '/bondscompetities/%s/ag-controle/regio-%s/'             # comp_pk, regio-nr
-        self.url_regio_teams = '/bondscompetities/regio/%s/teams/'                      # deelcomp_pk
-        self.url_regio_teams_alle = '/bondscompetities/regio/%s/teams/%s/'              # comp_pk, subset = auto/alle/rayon_nr
-        self.url_regio_poules = '/bondscompetities/regio/%s/poules/'                    # deelcomp_pk
-        self.url_wijzig_poule = '/bondscompetities/regio/poules/%s/wijzig/'             # poule_pk
-        self.url_team_ronde = '/bondscompetities/regio/%s/team-ronde/'                  # deelcomp_pk
 
     def _verwerk_mutaties(self, max_mutaties=20, show_warnings=True, show_all=False):
         # vraag de achtergrond taak om de mutaties te verwerken

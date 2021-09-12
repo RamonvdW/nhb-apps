@@ -14,6 +14,9 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
 
     """ unit tests voor de Competitie applicatie, module Informatie over de Competitie """
 
+    url_info = '/bondscompetities/info/'
+    url_leeftijden = '/bondscompetities/info/leeftijden/'
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
@@ -45,9 +48,6 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
         self.lid_100001 = lid
 
         self.account_geenlid = self.e2e_create_account('geenlid', 'geenlid@gmail.com', 'Testertje')
-
-        self.url_info = '/bondscompetities/info/'
-        self.url_leeftijden = '/bondscompetities/info/leeftijden/'
 
     def test_anon(self):
         with self.assert_max_queries(20):

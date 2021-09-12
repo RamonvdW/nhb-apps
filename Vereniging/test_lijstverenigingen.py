@@ -17,6 +17,8 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
 
     """ unit tests voor de Vereniging applicatie, Lijst Verenigingen """
 
+    url_lijst = '/vereniging/accommodaties/lijst/'
+
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
         self._next_nhbnr += 1
@@ -97,8 +99,6 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         cluster = NhbCluster.objects.filter(regio=ver.regio, gebruik='25').all()[2]
         ver.clusters.add(cluster)
         self.nhb_ver2 = ver
-
-        self.url_lijst = '/vereniging/accommodaties/lijst/'
 
     def test_anon(self):
         self.e2e_logout()

@@ -24,6 +24,17 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
+    url_overzicht = '/bondscompetities/%s/'
+    url_uitslagen_regio = '/bondscompetities/%s/uitslagen/%s/%s/regio-individueel/'
+    url_uitslagen_regio_n = '/bondscompetities/%s/uitslagen/%s/%s/regio-individueel/%s/'
+    url_uitslagen_regio_teams = '/bondscompetities/%s/uitslagen/%s/regio-teams/'
+    url_uitslagen_regio_teams_n = '/bondscompetities/%s/uitslagen/%s/regio-teams/%s/'
+    url_uitslagen_rayon = '/bondscompetities/%s/uitslagen/%s/rayon-individueel/'
+    url_uitslagen_rayon_n = '/bondscompetities/%s/uitslagen/%s/rayon-individueel/%s/'
+    url_uitslagen_bond = '/bondscompetities/%s/uitslagen/%s/bond/'
+    url_uitslagen_ver = '/bondscompetities/%s/uitslagen/%s/vereniging/'
+    url_uitslagen_ver_n = '/bondscompetities/%s/uitslagen/%s/vereniging/%s/individueel/'
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
@@ -99,17 +110,6 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         lid.account = self.account_lid_100003
         lid.save()
         self.lid_100003 = lid
-
-        self.url_overzicht = '/bondscompetities/%s/'
-        self.url_uitslagen_regio = '/bondscompetities/%s/uitslagen/%s/%s/regio-individueel/'
-        self.url_uitslagen_regio_n = '/bondscompetities/%s/uitslagen/%s/%s/regio-individueel/%s/'
-        self.url_uitslagen_regio_teams = '/bondscompetities/%s/uitslagen/%s/regio-teams/'
-        self.url_uitslagen_regio_teams_n = '/bondscompetities/%s/uitslagen/%s/regio-teams/%s/'
-        self.url_uitslagen_rayon = '/bondscompetities/%s/uitslagen/%s/rayon-individueel/'
-        self.url_uitslagen_rayon_n = '/bondscompetities/%s/uitslagen/%s/rayon-individueel/%s/'
-        self.url_uitslagen_bond = '/bondscompetities/%s/uitslagen/%s/bond/'
-        self.url_uitslagen_ver = '/bondscompetities/%s/uitslagen/%s/vereniging/'
-        self.url_uitslagen_ver_n = '/bondscompetities/%s/uitslagen/%s/vereniging/%s/individueel/'
 
         # log in as BB en maak de competitie aan
         self.e2e_login_and_pass_otp(self.account_bb)

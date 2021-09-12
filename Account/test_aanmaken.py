@@ -12,6 +12,8 @@ from Overig.e2ehelpers import E2EHelpers
 class TestAccountAanmaken(E2EHelpers, TestCase):
     """ unit tests voor de Account applicatie; module Aanmaken/Email bevestigen """
 
+    url_aangemaakt = '/account/aangemaakt/'
+
     def setUp(self):
         """ initialisatie van de test case """
         self.account_admin = self.e2e_create_account_admin()
@@ -25,7 +27,7 @@ class TestAccountAanmaken(E2EHelpers, TestCase):
         # test rechtstreeks de 'aangemaakt' pagina ophalen, zonder registratie stappen
         # hierbij ontbreekt er een sessie variabele --> exceptie en redirect naar het plein
         with self.assert_max_queries(20):
-            resp = self.client.get('/account/aangemaakt/')
+            resp = self.client.get(self.url_aangemaakt)
         self.assert403(resp)
 
     def test_account_helpers(self):

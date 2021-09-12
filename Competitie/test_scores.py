@@ -25,6 +25,20 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_fase', 'Competitie.test_planning_regio',)
 
+    url_planning_regio = '/bondscompetities/planning/regio/%s/'  # deelcomp_pk
+    url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'  # ronde_pk
+
+    url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'  # wedstrijd_pk
+    url_uitslag_deelnemers = '/bondscompetities/scores/dynamic/deelnemers-ophalen/'
+    url_uitslag_zoeken = '/bondscompetities/scores/dynamic/check-nhbnr/'
+    url_uitslag_opslaan = '/bondscompetities/scores/dynamic/scores-opslaan/'
+
+    url_uitslag_controleren = '/bondscompetities/scores/uitslag-controleren/%s/'  # wedstrijd_pk
+    url_uitslag_accorderen = '/bondscompetities/scores/uitslag-accorderen/%s/'  # wedstrijd_pk
+
+    url_scores_regio = '/bondscompetities/scores/regio/%s/'  # deelcomp_pk
+    url_bekijk_uitslag = '/bondscompetities/scores/bekijk-uitslag/%s/'  # wedstrijd_pk
+
     def _prep_beheerder_lid(self, voornaam):
         nhb_nr = self._next_nhbnr
         self._next_nhbnr += 1
@@ -160,20 +174,6 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         ver.regio = self.regio_101
         # secretaris kan nog niet ingevuld worden
         ver.save()
-
-        self.url_planning_regio = '/bondscompetities/planning/regio/%s/'                   # deelcomp_pk
-        self.url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'       # ronde_pk
-
-        self.url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'        # wedstrijd_pk
-        self.url_uitslag_deelnemers = '/bondscompetities/scores/dynamic/deelnemers-ophalen/'
-        self.url_uitslag_zoeken = '/bondscompetities/scores/dynamic/check-nhbnr/'
-        self.url_uitslag_opslaan = '/bondscompetities/scores/dynamic/scores-opslaan/'
-
-        self.url_uitslag_controleren = '/bondscompetities/scores/uitslag-controleren/%s/'  # wedstrijd_pk
-        self.url_uitslag_accorderen = '/bondscompetities/scores/uitslag-accorderen/%s/'    # wedstrijd_pk
-
-        self.url_scores_regio = '/bondscompetities/scores/regio/%s/'                       # deelcomp_pk
-        self.url_bekijk_uitslag = '/bondscompetities/scores/bekijk-uitslag/%s/'            # wedstrijd_pk
 
         self.e2e_login_and_pass_otp(self.account_rcl101_18)
         self.e2e_wissel_naar_functie(self.functie_rcl101_18)

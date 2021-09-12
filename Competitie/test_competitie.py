@@ -50,6 +50,14 @@ class TestCompetitie(E2EHelpers, TestCase):
 
     test_after = ('BasisTypen', 'Functie', 'Competitie.test_fase')
 
+    url_kies = '/bondscompetities/'
+    url_overzicht = '/bondscompetities/%s/'
+    url_instellingen = '/bondscompetities/instellingen-volgende-competitie/'
+    url_aanmaken = '/bondscompetities/aanmaken/'
+    url_ag_vaststellen_afstand = '/bondscompetities/ag-vaststellen/%s/'  # afstand
+    url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'  # comp_pk
+    url_klassegrenzen_tonen = '/bondscompetities/%s/klassegrenzen/tonen/'  # comp_pk
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
@@ -270,14 +278,6 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec.totaal = 80
         rec.gemiddelde = 5.321
         rec.save()
-
-        self.url_kies = '/bondscompetities/'
-        self.url_overzicht = '/bondscompetities/%s/'
-        self.url_instellingen = '/bondscompetities/instellingen-volgende-competitie/'
-        self.url_aanmaken = '/bondscompetities/aanmaken/'
-        self.url_ag_vaststellen_afstand = '/bondscompetities/ag-vaststellen/%s/'                # afstand
-        self.url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'  # comp_pk
-        self.url_klassegrenzen_tonen = '/bondscompetities/%s/klassegrenzen/tonen/'              # comp_pk
 
     def _maak_many_histcomp(self):
         # maak veel histcomp records aan
