@@ -60,6 +60,9 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/plein/')
 
     def test_admin(self):
+        # verwijder de VHPG acceptie die aangemaakt is door testdata.maak_accounts
+        VerklaringHanterenPersoonsgegevens.objects.all().delete()
+
         self.e2e_login(self.testdata.account_admin)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_acceptatie, follow=True)

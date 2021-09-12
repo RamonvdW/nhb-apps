@@ -16,7 +16,7 @@ class TestOverigFeedback(E2EHelpers, TestCase):
     url_feedback = '/overig/feedback/%s/%s/'  # min/nul/plus, op_pagina
     url_feedback_min_plein = '/overig/feedback/min/plein/'
     url_feedback_nul_plein = '/overig/feedback/nul/plein/'
-    url_feedback_plus_plein = '/overig/feedback/plus/plein'
+    url_feedback_plus_plein = '/overig/feedback/plus/plein/'
     url_feedback_formulier = '/overig/feedback/formulier/'
     url_feedback_bedankt = '/overig/feedback/bedankt/'
     url_feedback_inzicht = '/overig/feedback/inzicht/'
