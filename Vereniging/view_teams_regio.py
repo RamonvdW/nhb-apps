@@ -1028,16 +1028,17 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
             zoek_checked = True
             for deelnemer in deelnemers:
                 # mag deze persoon invallen?
-                if deelnemer.pk == uitvaller.pk or deelnemer.gemiddelde_begin_team_ronde <= uitvaller.gemiddelde_begin_team_ronde:
-                    is_uitvaller = "1" if deelnemer.origineel_team_lid else "0"
-                    id_invaller = group_str + '_door_%s' % deelnemer.pk
-                    toon_checked = False
-                    if zoek_checked and deelnemer.pk in deelnemers_feitelijk_pks:
-                        toon_checked = True
-                        zoek_checked = False
-                        deelnemers_feitelijk_pks.remove(deelnemer.pk)
-                    tup = (is_uitvaller, deelnemer.invaller_gem_str, id_invaller, deelnemer.pk, deelnemer.naam_str, toon_checked)
-                    invallers.append(tup)
+                if deelnemer.pk not in deelnemers_bezet_pks:
+                    if deelnemer.pk == uitvaller.pk or deelnemer.gemiddelde_begin_team_ronde <= uitvaller.gemiddelde_begin_team_ronde:
+                        is_uitvaller = "1" if deelnemer.origineel_team_lid else "0"
+                        id_invaller = group_str + '_door_%s' % deelnemer.pk
+                        toon_checked = False
+                        if zoek_checked and deelnemer.pk in deelnemers_feitelijk_pks:
+                            toon_checked = True
+                            zoek_checked = False
+                            deelnemers_feitelijk_pks.remove(deelnemer.pk)
+                        tup = (is_uitvaller, deelnemer.invaller_gem_str, id_invaller, deelnemer.pk, deelnemer.naam_str, toon_checked)
+                        invallers.append(tup)
             # for
 
             # voeg de optie "Geen invaller" toe
