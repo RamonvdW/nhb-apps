@@ -10,7 +10,7 @@ from Account.models import account_create
 from Logboek.models import LogboekRegel, schrijf_in_logboek
 from Mailer.models import MailQueue, mailer_queue_email
 from Overig.models import SiteFeedback, save_tijdelijke_url, store_feedback
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 import io
 
