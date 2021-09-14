@@ -777,6 +777,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
             ver_nr = kwargs['ver_nr'][:4]     # afkappen voor veiligheid
             ver_nr = int(ver_nr)
         except KeyError:
+            # TODO: onmogelijk om hier te komen (ivm URL design)
             # zoek de vereniging die bij de huidige gebruiker past
             ver_nr = get_schutter_ver_nr(self.request)
         except ValueError:

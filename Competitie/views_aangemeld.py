@@ -247,6 +247,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
         except (ValueError, NhbRegio.DoesNotExist):
             raise Http404('Regio niet gevonden')
 
+        context['regio'] = regio
         context['inhoud'] = 'in ' + str(regio)
 
         try:
@@ -263,6 +264,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
                                 'deelcompetitie',
                                 'schutterboog',
                                 'schutterboog__nhblid',
+                                'schutterboog__boogtype',
                                 'bij_vereniging')
                 .filter(deelcompetitie=deelcomp)
                 .order_by('klasse__indiv__volgorde',
@@ -300,10 +302,61 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
                                               kwargs={'comp_pk': comp.pk,
                                                       'regio_pk': regio.pk})
 
+        else:
+            # inschrijfmethode 2
+            context['url_download'] = reverse('Competitie:lijst-regiocomp-regio-als-bestand',
+                                              kwargs={'comp_pk': comp.pk,
+                                                      'regio_pk': regio.pk})
+
         maak_regiocomp_zoom_knoppen(context, comp.pk, regio=regio)
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
         return context
+
+
+class LijstAangemeldRegiocompAlsBestandView(LijstAangemeldRegiocompRegioView):
+
+    """ Deze klasse wordt gebruikt om de lijst van aangemelde schutters in een regio
+        te downloaden als csv bestand, inclusief voorkeur voor dagdelen (inschrijfmethode 3)
+    """
+
+    def get(self, request, *args, **kwargs):
+
+        context = self.get_context_data(**kwargs)
+
+        regio = context['regio']
+
+        # schutters met voorkeur voor eigen blazoen (DT of 60cm 4spot)
+        voorkeur_eigen_blazoen = (SchutterVoorkeuren
+                                  .objects
+                                  .select_related('nhblid')
+                                  .filter(voorkeur_eigen_blazoen=True)
+                                  .values_list('nhblid__nhb_nr', flat=True))
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="aanmeldingen-regio-%s.csv"' % regio.regio_nr
+
+        writer = csv.writer(response, delimiter=";")  # ; is good for import with dutch regional settings
+
+        # voorkeur dagdelen per vereniging
+        writer.writerow(['ver_nr', 'Vereniging',
+                         'nhb_nr', 'Naam',
+                         'Boog', 'Voorkeur team', 'Voorkeur eigen blazoen',
+                         'Wedstrijdklasse'])
+
+        for deelnemer in context['object_list']:
+            ver = deelnemer.bij_vereniging
+            lid = deelnemer.schutterboog.nhblid
+            boog = deelnemer.schutterboog.boogtype
+            klasse = deelnemer.klasse.indiv
+            team_str = 'Ja' if deelnemer.inschrijf_voorkeur_team else 'Nee'
+            eigen_str = 'Ja' if lid.nhb_nr in voorkeur_eigen_blazoen else 'Nee'
+
+            tup = (ver.ver_nr, ver.naam, lid.nhb_nr, lid.volledige_naam(), boog.beschrijving, team_str, eigen_str, klasse.beschrijving)
+            writer.writerow(tup)
+        # for
+
+        return response
 
 
 class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):

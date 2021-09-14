@@ -68,6 +68,13 @@
 
     <p>Totaal aantal: {{ object_list.count }}</p>
 
+    {% if url_download %}
+        <p>Je kan onderstaande lijst ook downloaden.</p>
+        <a class="btn-nhb-blauw" href="{{ url_download }}">
+            <i class="material-icons-round left">download</i>Download lijst</a>
+    {% endif %}
+
+
     {% if show_gekozen_wedstrijden %}
         <p>&nbsp;</p>
         <p>
