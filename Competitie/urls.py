@@ -124,6 +124,9 @@ urlpatterns = [
          views_aangemeld.LijstAangemeldRegiocompRegioView.as_view(),
          name='lijst-regiocomp-regio'),
 
+    path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/als-bestand/',
+         views_aangemeld.LijstAangemeldRegiocompAlsBestandView.as_view(),
+         name='lijst-regiocomp-regio-als-bestand'),
 
     # RK selectie
     path('lijst-rayonkampioenschappen/<deelcomp_pk>/',
