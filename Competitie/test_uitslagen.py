@@ -34,7 +34,8 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
     url_uitslagen_rayon_n = '/bondscompetities/%s/uitslagen/%s/rayon-individueel/%s/'
     url_uitslagen_bond = '/bondscompetities/%s/uitslagen/%s/bond/'
     url_uitslagen_ver = '/bondscompetities/%s/uitslagen/%s/vereniging/'
-    url_uitslagen_ver_n = '/bondscompetities/%s/uitslagen/%s/vereniging/%s/individueel/'
+    url_uitslagen_indiv_ver_n = '/bondscompetities/%s/uitslagen/%s/vereniging/%s/individueel/'      # comp_bk, boog_type, ver_nr
+    url_uitslagen_teams_ver_n = '/bondscompetities/%s/uitslagen/%s/vereniging/%s/teams/'            # comp_pk, team_type, ver_nr
 
     testdata = None
 
@@ -513,7 +514,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assert404(resp)
 
-    def test_vereniging(self):
+    def test_ver_indiv(self):
         url = self.url_uitslagen_ver % (self.comp_18.pk, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -521,7 +522,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
-        url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.ver_nr)
+        url = self.url_uitslagen_indiv_ver_n % (self.comp_18.pk, 'R', self.ver.ver_nr)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -549,6 +550,38 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
+    def test_ver_team(self):
+        url = self.url_uitslagen_teams_ver_n % (self.comp_18.pk, 'R', self.ver.ver_nr)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/uitslagen-vereniging-teams.dtl', 'plein/site_layout.dtl'))
+
+        # bad comp_pk
+        url = self.url_uitslagen_teams_ver_n % (999999, 'R', self.ver.ver_nr)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, expected_msg='Competitie niet gevonden')
+
+        # bad ver_nr
+        url = self.url_uitslagen_teams_ver_n % (self.comp_18.pk, 'R', 'xxx')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, expected_msg='Verkeerd verenigingsnummer')
+
+        # niet bestaande ver_nr
+        url = self.url_uitslagen_teams_ver_n % (self.comp_18.pk, 'R', 999999)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, expected_msg='Vereniging niet gevonden')
+
+        # bad team type
+        url = self.url_uitslagen_teams_ver_n % (self.comp_18.pk, 'xxx', self.ver.ver_nr)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, expected_msg='Team type niet bekend')
+
     def test_vereniging_hwl(self):
         functie = Functie.objects.get(rol='HWL', nhb_ver=self.ver)
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
@@ -567,7 +600,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.ver.regio = NhbRegio.objects.get(regio_nr=100)
         self.ver.save()
 
-        url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.ver_nr)
+        url = self.url_uitslagen_indiv_ver_n % (self.comp_18.pk, 'R', self.ver.ver_nr)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -585,12 +618,12 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assert404(resp)
 
-        url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', 999999)
+        url = self.url_uitslagen_indiv_ver_n % (self.comp_18.pk, 'R', 999999)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp)
 
-        url = self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', 'nan')
+        url = self.url_uitslagen_indiv_ver_n % (self.comp_18.pk, 'R', 'nan')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp)
@@ -656,7 +689,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslagen_ver_n % (self.comp_18.pk, 'R', self.ver.ver_nr))
+            resp = self.client.get(self.url_uitslagen_indiv_ver_n % (self.comp_18.pk, 'R', self.ver.ver_nr))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
