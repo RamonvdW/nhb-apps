@@ -233,6 +233,7 @@ class Command(BaseCommand):
                     for score in (uitslag
                                   .scores
                                   .select_related('schutterboog')
+                                  .exclude(waarde=0)                # 0 scores zijn voor team competitie only
                                   .all()):
                         tup = (uitslag.afstand_meter, score)
                         pk = score.schutterboog.pk
