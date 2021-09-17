@@ -22,6 +22,9 @@ OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
 # show all saml2 and djangosaml2idp source files
 #OMIT="--omit=data3/wsgi.py,manage.py,/usr/local/lib64/*,/usr/lib/*,/usr/local/lib/python3.6/site-packages/c*,/usr/local/lib/python3.6/site-packages/da*,/usr/local/lib/python3.6/site-packages/de*,/usr/local/lib/python3.6/site-packages/i*,/usr/local/lib/python3.6/site-packages/p*,/usr/local/lib/python3.6/site-packages/q*,/usr/local/lib/python3.6/site-packages/r*,/usr/local/lib/python3.6/site-packages/si*,/usr/local/lib/python3.6/site-packages/u*,/usr/local/lib/python3.6/site-packages/django/*"
 
+# set high performance
+sudo cpupower frequency-set --governor performance > /dev/null
+
 # start the http simulator in the background
 pgrep -f websim
 if [ $? -eq 0 ]
@@ -145,6 +148,9 @@ then
 
     rm "$COVERAGE_FILE"
 
+    # set normal performance
+    sudo cpupower frequency-set --governor schedutil > /dev/null
+
     echo
     echo -n "Press ENTER to start firefox now, or Ctrl+C to abort"
     read -t 5
@@ -161,6 +167,10 @@ then
 
     echo "Done"
 fi
+
+# set normal performance
+sudo cpupower frequency-set --governor schedutil > /dev/null
+
 
 # end of file
 
