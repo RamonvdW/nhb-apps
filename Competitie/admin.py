@@ -151,7 +151,9 @@ class RegiocompetitieTeamAdmin(admin.ModelAdmin):
             # alleen schutters van de juiste vereniging laten kiezen
             kwargs['queryset'] = (RegioCompetitieSchutterBoog
                                   .objects
-                                  .filter(bij_vereniging=self.obj.vereniging))      # TODO: filter op voorkeur_teamschieten?
+                                  .filter(deelcompetitie=self.obj.deelcompetitie,
+                                          bij_vereniging=self.obj.vereniging,
+                                          inschrijf_voorkeur_team=True))
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
