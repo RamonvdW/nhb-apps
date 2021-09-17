@@ -238,16 +238,15 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
             volg_nrs.append(0)
             next_nr = max(volg_nrs) + 1
 
-            # TODO: elke vereniging maximaal 2 teams per klasse?
-            if len(volg_nrs) > 10:
+            if len(volg_nrs) > 25:
                 # te veel teams
-                raise Http404('Maximum van 10 teams is bereikt')
+                raise Http404('Maximum van 25 teams is bereikt')
 
             afkorting = request.POST.get('team_type', '')
             try:
                 team_type = TeamType.objects.get(afkorting=afkorting)
             except TeamType.DoesNotExist:
-                raise Http404()
+                raise Http404('Onbekend team type')
 
             team = KampioenschapTeam(
                             deelcompetitie=deelcomp,
@@ -266,7 +265,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
                         .get(pk=team_pk,
                              deelcompetitie=deelcomp))
             except KampioenschapTeam.DoesNotExist:
-                raise Http404()
+                raise Http404('Team bestaat niet')
 
             if team.vereniging != self.functie_nu.nhb_ver:
                 raise Http404('Team is niet van jouw vereniging')
@@ -279,7 +278,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
                     try:
                         team_type = TeamType.objects.get(afkorting=afkorting)
                     except TeamType.DoesNotExist:
-                        raise Http404()
+                        raise Http404('Onbekend team type')
 
                     team.team_type = team_type
                     team.aanvangsgemiddelde = 0.0

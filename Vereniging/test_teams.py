@@ -9,9 +9,8 @@ from django.core import management
 from django.utils import timezone
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Competitie.models import (DeelCompetitie, CompetitieKlasse, AG_NUL,
-                               RegiocompetitieTeam, LAAG_REGIO, RegioCompetitieSchutterBoog,
-                               RegiocompetitieRondeTeam)
+from Competitie.models import (DeelCompetitie, CompetitieKlasse, AG_NUL, LAAG_REGIO, LAAG_RK,
+                               RegiocompetitieTeam, RegioCompetitieSchutterBoog, RegiocompetitieRondeTeam)
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -29,15 +28,18 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Schutter', 'Competitie')
 
-    url_koppelen = '/vereniging/teams/regio/koppelen/%s/'  # team_pk
-    url_maak_team = '/vereniging/teams/regio/%s/nieuw/'  # deelcomp_pk
-    url_wijzig_team = '/vereniging/teams/regio/%s/wijzig/%s/'  # deelcomp_pk, team_pk
-    url_regio_teams = '/vereniging/teams/regio/%s/'  # deelcomp_pk
-    url_rk_teams = '/vereniging/teams/rk/%s/'  # deelcomp_pk
+    url_koppelen = '/vereniging/teams/regio/koppelen/%s/'               # team_pk
+    url_maak_team = '/vereniging/teams/regio/%s/nieuw/'                 # deelcomp_pk
+    url_wijzig_team = '/vereniging/teams/regio/%s/wijzig/%s/'           # deelcomp_pk, team_pk
+    url_regio_teams = '/vereniging/teams/regio/%s/'                     # deelcomp_pk
     url_wijzig_ag = '/vereniging/leden-ingeschreven/wijzig-aanvangsgemiddelde/%s/'  # deelnemer_pk
-    url_team_invallers = '/vereniging/teams/regio/%s/invallers/'  # deelcomp_pk
+    url_team_invallers = '/vereniging/teams/regio/%s/invallers/'        # deelcomp_pk
     url_team_invallers_koppelen = '/vereniging/teams/regio/invallers-koppelen/%s/'  # ronde_team_pk
-    url_rcl_volgende_ronde = '/bondscompetities/regio/%s/team-ronde/'  # deelcomp_pk
+    url_rcl_volgende_ronde = '/bondscompetities/regio/%s/team-ronde/'   # deelcomp_pk
+
+    url_rk_teams = '/vereniging/teams/rk/%s/'                           # deelcomp_rk_pk
+    url_rk_teams_nieuw = '/vereniging/teams/rk/%s/nieuw/'               # deelcomp_rk_pk
+    url_rk_teams_wijzig = '/vereniging/teams/rk/%s/wijzig/%s/'          # deelcomp_rk_pk, team_pk
 
     testdata = None
 
@@ -337,10 +339,10 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         if do_25:
             url = url_inschrijven % self.comp_25.pk
             with self.assert_max_queries(23):
-                resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
-                                              'lid_100004_boogtype_1': 'on',    # 1=R
-                                              'lid_100012_boogtype_1': 'on',    # 1=R
-                                              'wil_in_team': 'ja!'})
+                self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
+                                       'lid_100004_boogtype_1': 'on',    # 1=R
+                                       'lid_100012_boogtype_1': 'on',    # 1=R
+                                       'wil_in_team': 'ja!'})
 
             for obj in (RegioCompetitieSchutterBoog
                         .objects
@@ -545,7 +547,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('vereniging/teams-regio.dtl', 'plein/site_layout.dtl'))
 
-        #team = RegiocompetitieTeam.objects.all()[0]
+        # team = RegiocompetitieTeam.objects.all()[0]
 
         # voorbij einddatum aanmaken / wijzigen teams
         self.deelcomp18_regio111.einde_teams_aanmaken -= datetime.timedelta(days=5)
@@ -809,17 +811,87 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assert403(resp)
 
-    def NOT__test_rk_teams(self):       # TODO: faalt omdat competitie niet in juiste fase is
-        # login als HWL
+    def test_rk_teams(self):
+
+        # login als HWL van vereniging 1000 in regio 111
         self.e2e_login_and_pass_otp(self.account_hwl)
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
+        deelcomp_rk3 = (DeelCompetitie
+                        .objects
+                        .get(competitie=self.comp_18,
+                             laag=LAAG_RK,
+                             nhb_rayon__rayon_nr=3))     # regio 111 is in rayon 3
+
+        # competitie in de verkeerde fase
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_rk_teams % 999999)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/teams-rk.dtl', 'plein/site_layout.dtl'))
+            resp = self.client.get(self.url_rk_teams % deelcomp_rk3.pk)
+            self.assert404(resp, 'Competitie is niet in de juiste fase 1')
+
+        # zet competitie in fase E
+        zet_competitie_fase(self.comp_18, 'E')
+
+        # competitie in de verkeerde fase
+        with self.settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=30):
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_rk_teams % deelcomp_rk3.pk)
+                self.assert404(resp, 'Competitie is niet in de juiste fase 2')
+
+        # verplaats het openingstijdstip
+        with self.settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=0):
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_rk_teams % deelcomp_rk3.pk)
+            self.assertEqual(resp.status_code, 200)
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('vereniging/teams-rk.dtl', 'plein/site_layout.dtl'))
+
+            # nieuw team aanmaken
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_rk_teams_nieuw % deelcomp_rk3.pk)
+                self.assertEqual(resp.status_code, 200)
+                self.assert_html_ok(resp)
+                self.assert_template_used(resp, ('vereniging/teams-rk-wijzig.dtl', 'plein/site_layout.dtl'))
+
+            # maak een team aan zonder team nummer
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_rk_teams_nieuw % deelcomp_rk3.pk)
+                self.assert404(resp, 'Slechte parameter')
+
+            # maak een team aan, zonder team type
+            with self.assert_max_queries(20):
+                url = self.url_rk_teams_wijzig % (deelcomp_rk3.pk, 0)       # 0 = nieuw team
+                resp = self.client.post(url)
+                self.assert404(resp, 'Onbekend team type')
+
+            # maak een team aan
+            with self.assert_max_queries(20):
+                url = self.url_rk_teams_wijzig % (deelcomp_rk3.pk, 0)  # 0 = nieuw team
+                resp = self.client.post(url, {'team_type': 'R'})
+                self.assert_is_redirect(resp, self.url_rk_teams % deelcomp_rk3.pk)
+
+        # niet bestaande deelcomp_rk
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_rk_teams % self.deelcomp18_regio111.pk)
+            self.assert404(resp, 'Competitie niet gevonden')
+
+        # repeat voor de 25m
+        deelcomp_rk3 = (DeelCompetitie
+                        .objects
+                        .get(competitie=self.comp_25,
+                             laag=LAAG_RK,
+                             nhb_rayon__rayon_nr=3))     # regio 111 is in rayon 3
+
+        # zet competitie in fase E
+        zet_competitie_fase(self.comp_25, 'E')
+
+        # verplaats het openingstijdstip
+        with self.settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=0):
+            with self.assert_max_queries(20):
+                resp = self.client.get(self.url_rk_teams % deelcomp_rk3.pk)
+            self.assertEqual(resp.status_code, 200)
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('vereniging/teams-rk.dtl', 'plein/site_layout.dtl'))
 
     def test_invallers(self):
         # login als HWL
@@ -990,7 +1062,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         pks2 = list(ronde_team.deelnemers_feitelijk.order_by('pk').values_list('pk', flat=True))
         self.assertEqual(len(pks2), 3)
 
-        pks3 = [self.deelnemer_100003_18.pk, self.deelnemer_100004_18.pk, self.deelnemer_100012_18.pk ]
+        pks3 = [self.deelnemer_100003_18.pk, self.deelnemer_100004_18.pk, self.deelnemer_100012_18.pk]
         pks3.sort()
         # sort pks2?
         self.assertEqual(pks2, pks3)
@@ -1003,7 +1075,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self.deelnemer_100012_18.save(update_fields=['gemiddelde_begin_team_ronde'])
 
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'invaller_1': self.deelnemer_100002_18.pk})
+            self.client.post(url, {'invaller_1': self.deelnemer_100002_18.pk})
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'invaller_1': self.deelnemer_100003_18.pk,
