@@ -958,8 +958,8 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         alle_regels = self._bepaal_teams_en_scores(deelcomp)
 
-        for k, v in request.POST.items():
-            print('%s=%s' % (k, repr(v)))
+        # for k, v in request.POST.items():
+        #     print('%s=%s' % (k, repr(v)))
 
         # verzamel de gewenste keuzes
         ronde_teams = dict()        # [ronde_team.pk] = (ronde_team, schutterboog_pk2score_pk)
