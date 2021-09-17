@@ -71,7 +71,7 @@
             <thead>
                 <tr>
                     <th>Boogtype</th>
-                    <th>Actuele gemiddelde</th>
+                    <th>{% if deelcomp.regio_heeft_vaste_teams %}Aanvangs<wbr>gemiddelde{% else %}Actuele gemiddelde{% endif %}</th>
                     <th>Naam</th>
                     <th>In team</th>
                 </tr>

@@ -586,7 +586,8 @@ class Command(BaseCommand):
                           .filter(deelcompetitie=deelcomp,
                                   inschrijf_voorkeur_team=True)):
 
-            if deelnemer.aantal_scores == 0:
+            # bij vaste teams altijd het AG gebruiken (anders kan invaller op een gegeven moment niet meer invallen)
+            if deelnemer.aantal_scores == 0 or deelcomp.regio_heeft_vaste_teams:
                 vsg = deelnemer.ag_voor_team
             else:
                 vsg = deelnemer.gemiddelde  # individuele voortschrijdend gemiddelde
