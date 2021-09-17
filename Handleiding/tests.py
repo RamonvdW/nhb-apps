@@ -8,6 +8,7 @@ from django.test import TestCase
 from django.conf import settings
 from Handleiding.views import reverse_handleiding
 from TestHelpers.e2ehelpers import E2EHelpers
+from types import SimpleNamespace
 
 
 class TestHandleiding(E2EHelpers, TestCase):
@@ -63,5 +64,37 @@ class TestHandleiding(E2EHelpers, TestCase):
         with self.settings(ENABLE_WIKI=False):
             url = reverse_handleiding(None, settings.HANDLEIDING_TOP)
             self.assertEqual(url, self.url_page % settings.HANDLEIDING_TOP)
+
+        # not authenticated
+        account = SimpleNamespace()
+        request = SimpleNamespace(user=account)
+        account.is_authenticated = False
+
+        with self.settings(ENABLE_WIKI=True, WIKI_URL='https://test.now/wiki/'):
+            url = reverse_handleiding(request, settings.HANDLEIDING_TOP)
+            self.assertEqual(url, self.url_page % settings.HANDLEIDING_TOP)
+
+        # authenticated but not IT/BB
+        account.is_authenticated = True
+        account.is_BB = False
+        account.is_staff = False
+        with self.settings(ENABLE_WIKI=True, WIKI_URL='https://test.now/wiki/'):
+            url = reverse_handleiding(request, settings.HANDLEIDING_TOP)
+            self.assertEqual(url, self.url_page % settings.HANDLEIDING_TOP)
+
+        # authenticated BB
+        account.is_BB = True
+        account.is_staff = False
+        with self.settings(ENABLE_WIKI=True, WIKI_URL='https://test.now/wiki'):
+            url = reverse_handleiding(request, settings.HANDLEIDING_TOP)
+            self.assertEqual(url, 'https://test.now/wiki/' + settings.HANDLEIDING_TOP)
+
+        # authenticated IT
+        account.is_BB = False
+        account.is_staff = True
+        with self.settings(ENABLE_WIKI=True, WIKI_URL='https://test.now/wiki'):
+            url = reverse_handleiding(request, settings.HANDLEIDING_TOP)
+            self.assertEqual(url, 'https://test.now/wiki/' + settings.HANDLEIDING_TOP)
+
 
 # end of file
