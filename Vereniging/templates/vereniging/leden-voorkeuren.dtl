@@ -87,7 +87,7 @@
 
         {% for obj in leden_senior %}
             <tr>
-                <td>{{ obj.volledige_naam }}</td>
+                <td>[{{ obj.nhb_nr }}] {{ obj.volledige_naam }}</td>
                 <td>{{ obj.geslacht }}</td>
 
                 <td>
