@@ -25,7 +25,7 @@ import datetime
 TEMPLATE_TEAMS_REGIO = 'vereniging/teams-regio.dtl'
 TEMPLATE_TEAMS_REGIO_WIJZIG = 'vereniging/teams-regio-wijzig.dtl'
 TEMPLATE_TEAMS_WIJZIG_AG = 'vereniging/teams-wijzig-ag.dtl'
-TEMPLATE_TEAMS_KOPPELEN = 'vereniging/teams-koppelen.dtl'
+TEMPLATE_TEAMS_KOPPELEN = 'vereniging/teams-regio-koppelen.dtl'
 TEMPLATE_TEAMS_INVALLERS = 'vereniging/teams-invallers.dtl'
 TEMPLATE_TEAMS_INVALLERS_KOPPELEN = 'vereniging/teams-invallers-koppelen.dtl'
 
@@ -141,6 +141,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                          vereniging=self.functie_nu.nhb_ver)
                  .annotate(gekoppelde_schutters_count=Count('gekoppelde_schutters'))
                  .order_by('volg_nr'))
+
         for obj in teams:
             obj.aantal = obj.gekoppelde_schutters_count
             obj.ag_str = "%05.1f" % (obj.aanvangsgemiddelde * aantal_pijlen)

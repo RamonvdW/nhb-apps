@@ -11,7 +11,9 @@
 {% block pagina %}
     <h4>Teams RK</h4>
 
-    <p>Op deze pagina kan je als HWL de teams opgeven voor de <b>Rayonkampioenschappen (RK)</b> van de <b>{{ deelcomp }}</b>.</p>
+    <p>Op deze pagina kan je als HWL de teams opgeven voor de <b>Rayonkampioenschappen (RK)</b> van de <b>{{ deelcomp_rk }}</b>.</p>
+
+    <p>Het RK teams kent een open inschrijving. De leden van het team komen uit de regiocompetitie en moeten 6 scores hebben. Deze controle wordt aan het einde van de regiocompetitie gedaan. De berekende team sterkte en team wedstrijdklasse voor het RK zijn daarom <b>onder voorbehoud</b>.</p>
 
     <p>&nbsp;</p>
     <table class="white">
@@ -21,33 +23,37 @@
                 <th class="hide-on-small-only">Soort team</th>
                 <th class="hide-on-med-and-up">Soort</th>
                 <th>Naam</th>
-                <th class="hide-on-small-only">Gekoppeld</th>
-                <th class="hide-on-small-only">Sterkte</th>
-                <th>Wedstrijd<wbr/>klasse</th>
+                <th class="hide-on-small-only center-align">Gekoppeld</th>
+                <th class="hide-on-small-only center-align">Sterkte</th>
+                <th>RK Wedstrijd<wbr/>klasse</th>
                 <th><!-- kolom voor de knoppen --></th>
             </tr>
         </thead>
 
-        {% for team in teams %}
+        {% for rk_team in rk_teams %}
             <tr>
-                <td class="hide-on-small-only">{{ team.team_type.beschrijving }}</td>
-                <td class="hide-on-med-and-up">{{ team.team_type.afkorting }}</td>
-                <td>{{ team.team_naam }}</td>
+                <td class="hide-on-small-only">{{ rk_team.team_type.beschrijving }}</td>
+                <td class="hide-on-med-and-up">{{ rk_team.team_type.afkorting }}</td>
+                <td>{{ rk_team.team_naam }}</td>
 
-                <td colspan="3" class="hide-on-small-only"><i>Koppelen sporters volgt na einde regiocompetitie</i></td>
+                <td class="hide-on-small-only center-align{% if rk_team.aantal < 3 or rk_team.aantal > 4 %} red-text{% endif %}">{{ rk_team.aantal }}</td>
+
+                {% if rk_team.klasse %}
+                    <td class="hide-on-small-only center-align">{{ rk_team.ag_str }}</td>
+                    <td>{{ rk_team.klasse.team.beschrijving }}</td>
+                {% else %}
+                    <td class="hide-on-small-only"></td>
+                    <td><i class="red-text">team is niet compleet</i></td>
+                {% endif %}
 
                 <td>
-                    {% if team.url_wijzig %}
-                        <a class="btn-nhb-blauw" href="{{ team.url_wijzig }}">Wijzig</a>
+                    {% if rk_team.url_wijzig %}
+                        <a class="btn-nhb-blauw" href="{{ rk_team.url_wijzig }}">Wijzig</a>
                         <span>&nbsp;&nbsp;</span>
                     {% endif %}
-                    <!--
-                        {% if mag_wijzigen %}
-                            <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Koppel</a>
-                        {% else %}
-                            <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Bekijk</a>
-                        {% endif %}
-                    -->
+                    {% if rk_team.url_koppelen %}
+                        <a class="btn-nhb-blauw" href="{{ rk_team.url_koppelen }}">Koppel</a>
+                    {% endif %}
                 </td>
             </tr>
         {% empty %}

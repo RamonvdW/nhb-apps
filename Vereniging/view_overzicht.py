@@ -92,7 +92,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         # RK voorbereidende fase
                         deelcomp_rk.text_str = "Schutters van de vereniging aan-/afmelden voor het RK van de %s" % comp.beschrijving
                         deelcomp_rk.url_lijst_rk = reverse('Vereniging:lijst-rk',
-                                                           kwargs={'deelcomp_pk': deelcomp_rk.pk})
+                                                           kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
             # for
 
             pks = (DeelcompetitieRonde
@@ -176,7 +176,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Teams RK"
                         kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen samenstellen voor de %s." % comp.beschrijving
-                        kaartje.url = reverse('Vereniging:teams-rk', kwargs={'deelcomp_pk': deelcomp_rk.pk})
+                        kaartje.url = reverse('Vereniging:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
                         kaartje.icon = 'api'
                         # niet beschikbaar maken tot een paar weken na de eerste regiowedstrijd
                         vanaf = comp.eerste_wedstrijd + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)

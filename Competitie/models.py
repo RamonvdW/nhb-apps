@@ -726,7 +726,7 @@ class KampioenschapSchutterBoog(models.Model):
 class KampioenschapTeam(models.Model):
     """ Een team zoals aangemaakt door de HWL van de vereniging, voor een RK en doorstroming naar BK """
 
-    # bij welke seizoen en regio hoort dit team
+    # bij welke seizoen en RK hoort dit team
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
     # bij welke vereniging hoort dit team
@@ -742,9 +742,20 @@ class KampioenschapTeam(models.Model):
     # de naam van dit team (wordt getoond in plaats van team volgnummer)
     team_naam = models.CharField(max_length=50, default='')
 
-    # schutters in het team (alleen bij vaste teams)
-    schutters = models.ManyToManyField(RegioCompetitieSchutterBoog,
-                                       blank=True)    # mag leeg zijn
+    # preliminaire leden van het team (gekozen tijdens de regiocompetitie)
+    tijdelijke_schutters = models.ManyToManyField(RegioCompetitieSchutterBoog,
+                                                  related_name='kampioenschapteam_tijdelijke_schutters',
+                                                  blank=True)    # mag leeg zijn
+
+    # de voor het kampioenschap geplaatste sporters die ook lid zijn van het team
+    gekoppelde_schutters = models.ManyToManyField(KampioenschapSchutterBoog,
+                                                  related_name='kampioenschapteam_gekoppelde_schutters',
+                                                  blank=True)   # mag leeg zijn
+
+    # de feitelijke sporters die tijdens de kampioenschappen in het team stonden (invallers)
+    feitelijke_schutters = models.ManyToManyField(KampioenschapSchutterBoog,
+                                                  related_name='kampioenschapteam_feitelijke_schutters',
+                                                  blank=True)   # mag leeg zijn
 
     # het berekende team aanvangsgemiddelde
     # LET OP: dit is zonder de vermenigvuldiging met aantal pijlen, dus 30,000 voor Indoor ipv 900,0

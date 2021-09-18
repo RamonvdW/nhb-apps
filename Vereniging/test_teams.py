@@ -635,7 +635,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
             resp = self.client.get(self.url_koppelen % team_18.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/teams-koppelen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/teams-regio-koppelen.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_koppelen % team_25.pk)
@@ -696,14 +696,14 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
             resp = self.client.get(self.url_koppelen % team_18.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/teams-koppelen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/teams-regio-koppelen.dtl', 'plein/site_layout.dtl'))
 
         # haal het teams overzicht op, met geblokkeerde leden
         team_bb = RegiocompetitieTeam.objects.get(team_type__afkorting='BB')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_koppelen % team_bb.pk)
         self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('vereniging/teams-koppelen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/teams-regio-koppelen.dtl', 'plein/site_layout.dtl'))
 
         # koppel-scherm na uiterste datum wijzigen
         self.deelcomp18_regio111.einde_teams_aanmaken -= datetime.timedelta(days=5)
@@ -713,7 +713,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/teams-koppelen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/teams-regio-koppelen.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.post(url)
         self.assert404(resp)

@@ -70,19 +70,24 @@ urlpatterns = [
 
 
     # RK teams
-    path('teams/rk/<deelcomp_pk>/',
+    path('teams/rk/<rk_deelcomp_pk>/',
          view_teams_rk.TeamsRkView.as_view(),
          name='teams-rk'),
 
-    path('teams/rk/<deelcomp_pk>/nieuw/',
+    path('teams/rk/<rk_deelcomp_pk>/nieuw/',
          view_teams_rk.WijzigRKTeamsView.as_view(),
          name='teams-rk-nieuw'),
 
-    path('teams/rk/<deelcomp_pk>/wijzig/<team_pk>/',
+    path('teams/rk/<rk_deelcomp_pk>/wijzig/<rk_team_pk>/',
          view_teams_rk.WijzigRKTeamsView.as_view(),
          name='teams-rk-wijzig'),
 
+    path('teams/rk/koppelen/<rk_team_pk>/',
+         view_teams_rk.RKTeamsKoppelLedenView.as_view(),
+         name='teams-rk-koppelen'),
 
+
+    # Accommodatie
     path('accommodaties/lijst/',
          view_lijst_verenigingen.LijstVerenigingenView.as_view(),
          name='lijst-verenigingen'),
@@ -103,6 +108,7 @@ urlpatterns = [
          view_externe_locaties.ExterneLocatieDetailsView.as_view(),
          name='locatie-details'),
 
+
     path('regio-clusters/',
          view_clusters.WijzigClustersView.as_view(),
          name='clusters'),
@@ -119,11 +125,11 @@ urlpatterns = [
          view_wedstrijden.WedstrijdenUitslagInvoerenView.as_view(),
          name='wedstrijden-uitslag-invoeren'),
 
-    path('lijst-rayonkampioenschappen/<deelcomp_pk>/alles/',
+    path('lijst-rayonkampioenschappen/<rk_deelcomp_pk>/alles/',
          view_lijst_rk.VerenigingLijstRkSelectieAllesView.as_view(),
          name='lijst-rk-alles'),
 
-    path('lijst-rayonkampioenschappen/<deelcomp_pk>/',
+    path('lijst-rayonkampioenschappen/<rk_deelcomp_pk>/',
          view_lijst_rk.VerenigingLijstRkSelectieView.as_view(),
          name='lijst-rk'),
 

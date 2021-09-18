@@ -158,7 +158,7 @@ class RegiocompetitieTeamAdmin(admin.ModelAdmin):
 
 
 class KampioenschapTeamAdmin(admin.ModelAdmin):
-    filter_horizontal = ('schutters', )
+    filter_horizontal = ('tijdelijke_schutters', 'gekoppelde_schutters', 'feitelijke_schutters')
 
     list_filter = ('deelcompetitie__competitie',
                    'vereniging__regio__rayon',)

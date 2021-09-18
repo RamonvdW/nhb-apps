@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-teams-koppelen" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-teams-regio-koppelen" %}
 
     <h4>{% if readonly %}Bekijk{% else %}Koppel{% endif %} teamleden</h4>
 
