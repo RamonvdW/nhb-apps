@@ -26,19 +26,21 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_fase', 'Competitie.test_planning_regio',)
 
-    url_planning_regio = '/bondscompetities/planning/regio/%s/'  # deelcomp_pk
-    url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'  # ronde_pk
+    url_planning_regio = '/bondscompetities/planning/regio/%s/'                     # deelcomp_pk
+    url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'         # ronde_pk
 
-    url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'  # wedstrijd_pk
+    url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'          # wedstrijd_pk
     url_uitslag_deelnemers = '/bondscompetities/scores/dynamic/deelnemers-ophalen/'
     url_uitslag_zoeken = '/bondscompetities/scores/dynamic/check-nhbnr/'
     url_uitslag_opslaan = '/bondscompetities/scores/dynamic/scores-opslaan/'
 
-    url_uitslag_controleren = '/bondscompetities/scores/uitslag-controleren/%s/'  # wedstrijd_pk
-    url_uitslag_accorderen = '/bondscompetities/scores/uitslag-accorderen/%s/'  # wedstrijd_pk
+    url_uitslag_controleren = '/bondscompetities/scores/uitslag-controleren/%s/'    # wedstrijd_pk
+    url_uitslag_accorderen = '/bondscompetities/scores/uitslag-accorderen/%s/'      # wedstrijd_pk
 
-    url_scores_regio = '/bondscompetities/scores/regio/%s/'  # deelcomp_pk
-    url_bekijk_uitslag = '/bondscompetities/scores/bekijk-uitslag/%s/'  # wedstrijd_pk
+    url_scores_regio = '/bondscompetities/scores/regio/%s/'                         # deelcomp_pk
+    url_bekijk_uitslag = '/bondscompetities/scores/bekijk-uitslag/%s/'              # wedstrijd_pk
+
+    url_regio_teams = '/bondscompetities/scores/teams/%s/'                          # deelcomp_pk
 
     testdata = None
 
@@ -250,6 +252,11 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.assert403(resp)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_uitslag_opslaan)
+        self.assert403(resp)
+
+        # team scores
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_regio_teams % self.deelcomp_regio101_18.pk)
         self.assert403(resp)
 
     def test_rcl_get(self):
@@ -789,5 +796,59 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)       # 200 = OK
         self.assert_template_used(resp, ('competitie/scores-bekijken.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
+
+    def test_scores_teams(self):
+        self.e2e_login_and_pass_otp(self.account_rcl101_18)
+        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
+
+        # bad deelcomp_pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_regio_teams % 999999)
+        self.assert404(resp, 'Competitie niet gevonden')
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_regio_teams % 999999)
+        self.assert404(resp, 'Competitie niet gevonden')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_regio_teams % self.deelcomp_regio101_18.pk)
+        self.assertEqual(resp.status_code, 200)       # 200 = OK
+        self.assert_template_used(resp, ('competitie/scores-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # zet ronde > 0
+        self.deelcomp_regio101_18.huidige_team_ronde = 1
+        self.deelcomp_regio101_18.save(update_fields=['huidige_team_ronde'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_regio_teams % self.deelcomp_regio101_18.pk)
+        self.assertEqual(resp.status_code, 200)       # 200 = OK
+        self.assert_template_used(resp, ('competitie/scores-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # do een post
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_regio_teams % self.deelcomp_regio101_18.pk)
+        self.assert_is_redirect(resp, self.url_scores_regio % self.deelcomp_regio101_18.pk)
+
+        # verkeerde deelcomp
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_regio_teams % self.deelcomp_regio101_25.pk)
+        self.assert403(resp)
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_regio_teams % self.deelcomp_regio101_25.pk)
+        self.assert403(resp)
+
+        # regio organiseert geen teamcompetitie
+        self.deelcomp_regio101_18.regio_organiseert_teamcompetitie = False
+        self.deelcomp_regio101_18.save(update_fields=['regio_organiseert_teamcompetitie'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_regio_teams % self.deelcomp_regio101_18.pk)
+        self.assert404(resp, 'Geen teamcompetitie in deze regio')
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_regio_teams % self.deelcomp_regio101_18.pk)
+        self.assert404(resp, 'Geen teamcompetitie in deze regio')
 
 # end of file
