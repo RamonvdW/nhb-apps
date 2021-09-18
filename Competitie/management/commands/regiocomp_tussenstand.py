@@ -382,7 +382,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def _update_team_scores():
-        """ Update alle team scores aan de hand van wie er in de teams zitten en de huidige scores
+        """ Update alle team scores aan de hand van wie er in de teams zitten en de door de RCL geselecteerde scores
         """
         for deelcomp in DeelCompetitie.objects.filter(laag=LAAG_REGIO, is_afgesloten=False):
             ronde_nr = deelcomp.huidige_team_ronde

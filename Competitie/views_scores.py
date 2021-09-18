@@ -989,7 +989,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                         # for
                 else:
                     for wedstrijd, score in deelnemer.gevonden_scores:
-                        if wedstrijd:
+                        if wedstrijd and not score.block_selection:
                             team_scores.append(score.pk)
             # for
         # for
