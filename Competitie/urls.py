@@ -128,12 +128,13 @@ urlpatterns = [
          views_aangemeld.LijstAangemeldRegiocompAlsBestandView.as_view(),
          name='lijst-regiocomp-regio-als-bestand'),
 
+
     # RK selectie
-    path('lijst-rayonkampioenschappen/<deelcomp_pk>/',
+    path('lijst-rayonkampioenschappen/<rk_deelcomp_pk>/',
          views_planning_rayon.LijstRkSelectieView.as_view(),
          name='lijst-rk'),
 
-    path('lijst-rayonkampioenschappen/<deelcomp_pk>/bestand/',
+    path('lijst-rayonkampioenschappen/<rk_deelcomp_pk>/bestand/',
          views_planning_rayon.LijstRkSelectieAlsBestandView.as_view(),
          name='lijst-rk-als-bestand'),
 
@@ -173,11 +174,11 @@ urlpatterns = [
 
 
     # planning rk
-    path('planning/rk/<deelcomp_pk>/limieten/',
+    path('planning/rk/<rk_deelcomp_pk>/limieten/',
          views_planning_rayon.RayonLimietenView.as_view(),
          name='rayon-limieten'),
 
-    path('planning/rk/<deelcomp_pk>/',
+    path('planning/rk/<rk_deelcomp_pk>/',
          views_planning_rayon.RayonPlanningView.as_view(),
          name='rayon-planning'),
 

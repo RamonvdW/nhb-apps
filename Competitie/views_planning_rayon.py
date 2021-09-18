@@ -59,11 +59,11 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor veiligheid
+            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie', 'nhb_rayon')
-                           .get(pk=deelcomp_pk, laag=LAAG_RK))
+                           .get(pk=rk_deelcomp_pk, laag=LAAG_RK))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -131,7 +131,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rollen.ROL_RKO and self.functie_nu.nhb_rayon == deelcomp_rk.nhb_rayon:
             context['url_nieuwe_wedstrijd'] = reverse('Competitie:rayon-planning',
-                                                      kwargs={'deelcomp_pk': deelcomp_rk.pk})
+                                                      kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
             for wedstrijd in context['wedstrijden_rk']:
                 wedstrijd.url_wijzig = reverse('Competitie:rayon-wijzig-wedstrijd',
@@ -185,11 +185,11 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied()
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor veiligheid
+            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie', 'nhb_regio')
-                           .get(pk=deelcomp_pk,
+                           .get(pk=rk_deelcomp_pk,
                                 laag=LAAG_RK,                          # moet voor RK zijn
                                 nhb_rayon=self.functie_nu.nhb_rayon))  # moet juiste rayon zijn
         except (ValueError, DeelCompetitie.DoesNotExist):
@@ -368,7 +368,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['wkl_indiv'], context['wkl_team'] = self._get_wedstrijdklassen(deelcomp_rk, wedstrijd)
 
-        context['url_terug'] = reverse('Competitie:rayon-planning', kwargs={'deelcomp_pk': deelcomp_rk.pk})
+        context['url_terug'] = reverse('Competitie:rayon-planning', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
         context['url_opslaan'] = reverse('Competitie:rayon-wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         context['url_verwijderen'] = reverse('Competitie:rayon-verwijder-wedstrijd',
@@ -475,7 +475,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         if len(gekozen_klassen):
             wedstrijd.indiv_klassen.add(*gekozen_klassen)
 
-        url = reverse('Competitie:rayon-planning', kwargs={'deelcomp_pk': deelcomp_rk.pk})
+        url = reverse('Competitie:rayon-planning', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
         return HttpResponseRedirect(url)
 
 
@@ -533,11 +533,11 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         # 2) deelnemers voor RK zijn vastgesteld --> toon lijst
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor veiligheid
+            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie', 'nhb_rayon')
-                           .get(pk=deelcomp_pk, laag=LAAG_RK))
+                           .get(pk=rk_deelcomp_pk, laag=LAAG_RK))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -572,7 +572,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
                                     '-gemiddelde'))             # aflopend op gemiddelde
 
             context['url_download'] = reverse('Competitie:lijst-rk-als-bestand',
-                                              kwargs={'deelcomp_pk': deelcomp_rk.pk})
+                                              kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
         wkl2limiet = dict()    # [pk] = aantal
         for limiet in (DeelcompetitieKlasseLimiet
@@ -647,11 +647,11 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
     def get(self, request, *args, **kwargs):
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor veiligheid
+            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie', 'nhb_rayon')
-                           .get(pk=deelcomp_pk, laag=LAAG_RK))
+                           .get(pk=rk_deelcomp_pk, laag=LAAG_RK))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -778,12 +778,12 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rollen.ROL_RKO:
             context['url_terug'] = reverse('Competitie:lijst-rk',
-                                           kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+                                           kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk})
             menu_dynamics_competitie(self.request, context, comp_pk=deelnemer.deelcompetitie.competitie.pk)
         else:
             # HWL
             context['url_terug'] = reverse('Vereniging:lijst-rk',
-                                           kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+                                           kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk})
             menu_dynamics(self.request, context, actief='vereniging')
 
         return context
@@ -845,10 +845,10 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu == Rollen.ROL_RKO:
             url = reverse('Competitie:lijst-rk',
-                          kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+                          kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk})
         else:
             url = reverse('Vereniging:lijst-rk',
-                          kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+                          kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk})
 
         return HttpResponseRedirect(url)
 
@@ -875,11 +875,11 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor veiligheid
+            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie')
-                           .get(pk=deelcomp_pk,
+                           .get(pk=rk_deelcomp_pk,
                                 laag=LAAG_RK))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -913,7 +913,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         # for
 
         context['url_opslaan'] = reverse('Competitie:rayon-limieten',
-                                         kwargs={'deelcomp_pk': deelcomp_rk.pk})
+                                         kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
         context['url_terug'] = reverse('Competitie:kies')
 
@@ -926,11 +926,11 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         """ wordt aangeroepen als de gebruik op de knop OPSLAAN druk """
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor veiligheid
+            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie')
-                           .get(pk=deelcomp_pk,
+                           .get(pk=rk_deelcomp_pk,
                                 laag=LAAG_RK))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -1072,7 +1072,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 
         wedstrijd.delete()
 
-        url = reverse('Competitie:rayon-planning', kwargs={'deelcomp_pk': deelcomp.pk})
+        url = reverse('Competitie:rayon-planning', kwargs={'rk_deelcomp_pk': deelcomp.pk})
         return HttpResponseRedirect(url)
 
 

@@ -192,16 +192,16 @@ class CompetitieOverzichtView(View):
                 deelcomp_rk.titel = 'Planning %s' % deelcomp_rk.nhb_rayon.naam
                 deelcomp_rk.tekst = 'Planning voor %s voor deze competitie.' % deelcomp_rk.nhb_rayon.naam
                 deelcomp_rk.url = reverse('Competitie:rayon-planning',
-                                          kwargs={'deelcomp_pk': deelcomp_rk.pk})
+                                          kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
                 context['planning_deelcomp'] = [deelcomp_rk, ]
 
                 # geeft de RKO de mogelijkheid om de deelnemerslijst voor het RK te bewerken
                 context['url_lijst_rk'] = reverse('Competitie:lijst-rk',
-                                                  kwargs={'deelcomp_pk': deelcomp_rk.pk})
+                                                  kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
                 context['url_limieten_rk'] = reverse('Competitie:rayon-limieten',
-                                                     kwargs={'deelcomp_pk': deelcomp_rk.pk})
+                                                     kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
             if 'B' <= comp.fase <= 'E':
                 comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-rayon',

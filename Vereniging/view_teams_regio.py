@@ -144,8 +144,8 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
 
         for obj in teams:
             obj.aantal = obj.gekoppelde_schutters_count
-            obj.ag_str = "%05.1f" % (obj.aanvangsgemiddelde * aantal_pijlen)
-            obj.ag_str = obj.ag_str.replace('.', ',')
+            ag_str = "%05.1f" % (obj.aanvangsgemiddelde * aantal_pijlen)
+            obj.ag_str = ag_str.replace('.', ',')
 
             if mag_wijzigen:
                 obj.url_wijzig = reverse('Vereniging:teams-regio-wijzig',
@@ -176,8 +176,8 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         for obj in deelnemers:
             obj.boog_str = obj.schutterboog.boogtype.beschrijving
             obj.naam_str = "[%s] %s" % (obj.schutterboog.nhblid.nhb_nr, obj.schutterboog.nhblid.volledige_naam())
-            obj.ag_str = "%.3f" % obj.ag_voor_team
-            obj.ag_str = obj.ag_str.replace('.', ',')
+            ag_str = "%.3f" % obj.ag_voor_team
+            obj.ag_str = ag_str.replace('.', ',')
 
             try:
                 team = obj.regiocompetitieteam_set.all()[0]
@@ -480,7 +480,8 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
 
         deelnemer.naam_str = deelnemer.schutterboog.nhblid.volledige_naam()
         deelnemer.boog_str = deelnemer.schutterboog.boogtype.beschrijving
-        deelnemer.ag_str = '%.3f' % deelnemer.ag_voor_team
+        ag_str = '%.3f' % deelnemer.ag_voor_team
+        deelnemer.ag_str = ag_str.replace('.', ',')
 
         ag_hist = (ScoreHist
                    .objects
@@ -635,7 +636,8 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25
-        team.ag_str = "%5.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+        ag_str = "%5.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+        team.ag_str = ag_str.replace('.', ',')
 
         if mag_wijzigen:
             pks = team.gekoppelde_schutters.values_list('pk', flat=True)
@@ -655,7 +657,8 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                 obj.sel_str = "deelnemer_%s" % obj.pk
                 obj.naam_str = "[%s] %s" % (obj.schutterboog.nhblid.nhb_nr, obj.schutterboog.nhblid.volledige_naam())
                 obj.boog_str = obj.schutterboog.boogtype.beschrijving
-                obj.ag_str = "%.3f" % obj.ag_voor_team
+                ag_str = "%.3f" % obj.ag_voor_team
+                obj.ag_str = ag_str.replace('.', ',')
                 obj.blokkeer = (obj.ag_voor_team < 0.001)
                 obj.geselecteerd = (obj.pk in pks)          # vinkje zetten: gekoppeld aan dit team
                 if not obj.geselecteerd:
@@ -676,7 +679,8 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             for obj in gekoppeld:
                 obj.naam_str = "[%s] %s" % (obj.schutterboog.nhblid.nhb_nr, obj.schutterboog.nhblid.volledige_naam())
                 obj.boog_str = obj.schutterboog.boogtype.beschrijving
-                obj.ag_str = "%.3f" % obj.ag_voor_team
+                ag_str = "%.3f" % obj.ag_voor_team
+                obj.ag_str = ag_str.replace('.', ',')
             # for
 
         menu_dynamics(self.request, context, actief='vereniging')
