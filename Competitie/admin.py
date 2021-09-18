@@ -141,9 +141,9 @@ class RegiocompetitieTeamAdmin(admin.ModelAdmin):
         super().__init__(model, admin_site)
         self.obj = None
 
-    def get_form(self, request, obj=None, **kwargs):
-        if obj:                 # pragma: no branch
-            self.obj = obj      # pragma: no cover
+    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        if obj:
+            self.obj = obj
         return super().get_form(request, obj, **kwargs)
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
@@ -175,9 +175,9 @@ class KampioenschapTeamAdmin(admin.ModelAdmin):
         super().__init__(model, admin_site)
         self.obj = None
 
-    def get_form(self, request, obj=None, **kwargs):
-        if obj:                 # pragma: no branch
-            self.obj = obj      # pragma: no cover
+    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        if obj:
+            self.obj = obj
         return super().get_form(request, obj, **kwargs)
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
@@ -291,8 +291,8 @@ class RegiocompetitieRondeTeamAdmin(admin.ModelAdmin):
         self.deelcomp = None
         self.ver = None
 
-    def get_form(self, request, obj=None, **kwargs):
-        if obj:                     # pragma: no cover
+    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        if obj:
             team = obj.team
             self.deelcomp = team.deelcompetitie
             self.ver = team.vereniging

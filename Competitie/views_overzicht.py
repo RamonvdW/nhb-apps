@@ -99,8 +99,8 @@ class CompetitieOverzichtView(View):
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
             context['tekst_regio_teams_alle'] = "Alle teams inzien van de regiocompetitie."
             context['url_regio_teams_alle'] = reverse('Competitie:regio-teams-alle',
-                                                       kwargs={'comp_pk': comp.pk,
-                                                               'subset': 'auto'})
+                                                      kwargs={'comp_pk': comp.pk,
+                                                              'subset': 'auto'})
 
         if self.rol_nu == Rollen.ROL_RCL:
             toon_handmatige_ag = False

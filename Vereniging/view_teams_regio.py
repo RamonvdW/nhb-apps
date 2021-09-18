@@ -15,6 +15,7 @@ from BasisTypen.models import TeamType
 from Competitie.models import (CompetitieKlasse, AG_NUL, DeelCompetitie, LAAG_REGIO,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                update_uitslag_teamcompetitie)
+from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Score.models import ScoreHist, SCORE_TYPE_TEAM_AG
@@ -497,10 +498,18 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         # for
         context['ag_hist'] = ag_hist
 
-        context['url_opslaan'] = reverse('Vereniging:wijzig-ag',
-                                         kwargs={'deelnemer_pk': deelnemer.pk})
+        comp = deelnemer.deelcompetitie.competitie
+        comp.bepaal_fase()
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        if comp.fase < 'E':
+            context['url_opslaan'] = reverse('Vereniging:wijzig-ag',
+                                             kwargs={'deelnemer_pk': deelnemer.pk})
+
+        if self.rol_nu == Rollen.ROL_HWL:
+            menu_dynamics(self.request, context, actief='vereniging')
+        else:
+            menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+
         return context
 
     def post(self, request, *args, **kwargs):
