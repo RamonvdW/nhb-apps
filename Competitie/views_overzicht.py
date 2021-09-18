@@ -97,10 +97,20 @@ class CompetitieOverzichtView(View):
             # for
 
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
-            context['tekst_regio_teams_alle'] = "Alle teams inzien van de regiocompetitie."
-            context['url_regio_teams_alle'] = reverse('Competitie:regio-teams-alle',
-                                                      kwargs={'comp_pk': comp.pk,
-                                                              'subset': 'auto'})
+            # laat alle teams zien, ook de teams die nog niet af zijn of nog niet in een poule zitten
+            # vanaf fase E laten we dit niet meer zien en komen de RK Teams in beeld
+            if comp.fase < 'E':
+                context['tekst_regio_teams_alle'] = "Alle teams inzien van de regiocompetitie."
+                context['url_regio_teams_alle'] = reverse('Competitie:regio-teams-alle',
+                                                          kwargs={'comp_pk': comp.pk,
+                                                                  'subset': 'auto'})
+
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
+            if comp.fase < 'L':
+                context['tekst_rayon_teams_alle'] = "Alle teams inzien van de rayonkampioenschappen"
+                context["url_rayon_teams_alle"] = reverse('Competitie:rayon-teams-alle',
+                                                          kwargs={'comp_pk': comp.pk,
+                                                                  'subset': 'auto'})
 
         if self.rol_nu == Rollen.ROL_RCL:
             toon_handmatige_ag = False
@@ -193,6 +203,10 @@ class CompetitieOverzichtView(View):
                 deelcomp_rk.tekst = 'Planning voor %s voor deze competitie.' % deelcomp_rk.nhb_rayon.naam
                 deelcomp_rk.url = reverse('Competitie:rayon-planning',
                                           kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+
+                deelcomp_rk.tekst_rayon_teams = "Teams voor de rayonkampioenschappen in Rayon %s inzien voor deze competitie." % deelcomp_rk.nhb_rayon.rayon_nr
+                deelcomp_rk.url_rayon_teams = reverse('Competitie:rayon-teams',
+                                                      kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
                 context['planning_deelcomp'] = [deelcomp_rk, ]
 

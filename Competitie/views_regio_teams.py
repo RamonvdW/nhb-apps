@@ -350,7 +350,8 @@ class RegioTeamsView(TemplateView):
             for rayon in NhbRayon.objects.all():
                 rayon.label = 'Rayon %s' % rayon.rayon_nr
                 if str(rayon.rayon_nr) != subset:
-                    rayon.url = reverse('Competitie:regio-teams-alle', kwargs={'comp_pk': comp.pk, 'subset': rayon.rayon_nr})
+                    rayon.url = reverse('Competitie:regio-teams-alle',
+                                        kwargs={'comp_pk': comp.pk, 'subset': rayon.rayon_nr})
                 filters.append(rayon)
             # for
 
@@ -378,8 +379,6 @@ class RegioTeamsView(TemplateView):
             context['deelcomp'] = deelcomp
             context['rayon'] = self.functie_nu.nhb_regio.rayon
             context['regio'] = self.functie_nu.nhb_regio
-
-            subset = 'regio'
 
         if comp.afstand == '18':
             aantal_pijlen = 30
@@ -439,8 +438,8 @@ class RegioTeamsView(TemplateView):
                 prev_klasse = team.klasse
 
             # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
-            team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
-            team.ag_str = team.ag_str.replace('.', ',')
+            ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            team.ag_str = ag_str.replace('.', ',')
 
             if comp.fase <= 'D' and self.rol_nu == Rollen.ROL_RCL:
                 team.url_aanpassen = reverse('Vereniging:teams-regio-koppelen',
@@ -468,8 +467,8 @@ class RegioTeamsView(TemplateView):
         is_eerste = True
         for team in regioteams:
             # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
-            team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
-            team.ag_str = team.ag_str.replace('.', ',')
+            ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            team.ag_str = ag_str.replace('.', ',')
 
             if comp.fase <= 'D' and self.rol_nu == Rollen.ROL_RCL:
                 team.url_aanpassen = reverse('Vereniging:teams-regio-koppelen',

@@ -14,6 +14,7 @@ from . import (views_aangemeld,
                views_planning_bond,
                views_planning_rayon,
                views_regio_teams,
+               views_rayon_teams,
                views_uitslagen,
                views_scores)
 
@@ -142,6 +143,14 @@ urlpatterns = [
          views_planning_rayon.WijzigStatusRkSchutterView.as_view(),
          name='wijzig-status-rk-deelnemer'),
 
+    # RK teams
+    path('rk/<comp_pk>/teams/<subset>/',
+         views_rayon_teams.RayonTeamsAlleView.as_view(),
+         name='rayon-teams-alle'),
+
+    path('rk/<rk_deelcomp_pk>/teams/',
+         views_rayon_teams.RayonTeamsRKOView.as_view(),
+         name='rayon-teams'),
 
     # planning regio
     path('planning/regio/<deelcomp_pk>/',
