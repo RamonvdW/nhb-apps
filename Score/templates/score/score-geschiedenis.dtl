@@ -44,7 +44,7 @@
     {% if niet_gevonden %}
         <p><i>Niets gevonden</i></p>
     {% else %}
-        <p>Gevonden scores voor sporter <b>{{ nhblid }}</b> van {{ nhblid.bij_vereniging }} te {{ nhblid.bij_vereniging.plaats }} in {{ nhblid.bij_vereniging.regio }}</p>
+        <p>Gevonden scores voor sporter <b>{{ sporter }}</b> van {{ sporter.bij_vereniging }} te {{ sporter.bij_vereniging.plaats }} in {{ sporter.bij_vereniging.regio }}</p>
 
         {% for afstand in afstanden %}
 
@@ -60,14 +60,14 @@
                     </tr>
                 </thead>
 
-                {% for schutterboog in schuttersboog %}
-                    {% if schutterboog.scores %}
+                {% for sporterboog in sportersboog %}
+                    {% if sporterboog.scores %}
                         <tr>
-                            <td>{{ schutterboog.boogtype.beschrijving }}</td>
+                            <td>{{ sporterboog.boogtype.beschrijving }}</td>
                             <td colspan="3"></td>
                         </tr>
 
-                        {% for score in schutterboog.scores %}
+                        {% for score in sporterboog.scores %}
                             {% if score.afstand_meter == afstand %}
                                 <tr>
                                     <td></td>   <!-- boog -->
@@ -96,9 +96,9 @@
 
                         {% endfor %} <!-- score -->
 
-                    {% endif %} <!-- schutterboog heeft scores -->
+                    {% endif %} <!-- sporterboog heeft scores -->
 
-                {% endfor %}    <!-- for schutterboog -->
+                {% endfor %}    <!-- for sporterboog -->
             </table>
 
         {% endfor %}

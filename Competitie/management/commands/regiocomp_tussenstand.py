@@ -44,23 +44,23 @@ class Command(BaseCommand):
                 .objects
                 .select_related('bij_vereniging',
                                 'bij_vereniging__regio',
-                                'schutterboog__nhblid',
-                                'schutterboog__nhblid__bij_vereniging',
-                                'schutterboog__nhblid__bij_vereniging__regio')
-                .exclude(bij_vereniging=F('schutterboog__nhblid__bij_vereniging')))   # bevat geen uitstappers
+                                'sporterboog__sporter',
+                                'sporterboog__sporter__bij_vereniging',
+                                'sporterboog__sporter__bij_vereniging__regio')
+                .exclude(bij_vereniging=F('sporterboog__sporter__bij_vereniging')))   # bevat geen uitstappers
         for obj in objs:
-            lid = obj.schutterboog.nhblid
-            if lid.bij_vereniging:
+            sporter = obj.sporterboog.sporter
+            if sporter.bij_vereniging:
                 self.stdout.write('[INFO] Verwerk overstap %s: [%s] %s --> [%s] %s' % (
-                                  lid.nhb_nr,
+                                  sporter.lid_nr,
                                   obj.bij_vereniging.regio.regio_nr, obj.bij_vereniging,
-                                  lid.bij_vereniging.regio.regio_nr, lid.bij_vereniging))
+                                  sporter.bij_vereniging.regio.regio_nr, sporter.bij_vereniging))
 
                 # overschrijven naar andere deelcompetitie
-                if obj.bij_vereniging.regio != lid.bij_vereniging.regio:
+                if obj.bij_vereniging.regio != sporter.bij_vereniging.regio:
                     obj.deelcompetitie = DeelCompetitie.objects.get(competitie=obj.deelcompetitie.competitie,
-                                                                    nhb_regio=lid.bij_vereniging.regio)
-                obj.bij_vereniging = lid.bij_vereniging
+                                                                    nhb_regio=sporter.bij_vereniging.regio)
+                obj.bij_vereniging = sporter.bij_vereniging
                 obj.save()
         # for
 
@@ -70,24 +70,24 @@ class Command(BaseCommand):
         objs = (KampioenschapSchutterBoog
                 .objects
                 .select_related('deelcompetitie__nhb_rayon',
-                                'schutterboog__nhblid',
-                                'schutterboog__nhblid__bij_vereniging',
-                                'schutterboog__nhblid__bij_vereniging__regio__rayon')
+                                'sporterboog__sporter',
+                                'sporterboog__sporter__bij_vereniging',
+                                'sporterboog__sporter__bij_vereniging__regio__rayon')
                 .filter(bij_vereniging__isnull=True))
         for obj in objs:
             # schutter had geen vereniging; nu wel
             # alleen overnemen als de nieuwe vereniging in het juiste rayon zit
-            ver = obj.schutterboog.nhblid.bij_vereniging
+            ver = obj.sporterboog.sporter.bij_vereniging
             if ver:
                 if ver.regio.rayon.rayon_nr != obj.deelcompetitie.nhb_rayon.rayon_nr:
                     self.stdout.write('[WARNING] Verwerk overstap naar ander rayon niet mogelijk voor %s in RK voor rayon %s: GEEN VERENIGING --> [%s] %s' % (
-                                      obj.schutterboog.nhblid.nhb_nr,
+                                      obj.sporterboog.sporter.lid_nr,
                                       obj.deelcompetitie.nhb_rayon.rayon_nr,
                                       ver.regio.regio_nr, ver))
                 else:
                     # pas de 'bij_vereniging' aan
                     self.stdout.write('[INFO] Verwerk overstap %s: GEEN VERENIGING --> [%s] %s' % (
-                                      obj.schutterboog.nhblid.nhb_nr,
+                                      obj.sporterboog.sporter.lid_nr,
                                       ver.regio.regio_nr, ver))
                     obj.bij_vereniging = ver
                     obj.save()
@@ -98,7 +98,7 @@ class Command(BaseCommand):
             Deze worden overgeschreven naar een andere deelcompetitie (regio/RK/BK).
         """
 
-        # 1. NhbLid.bij_vereniging komt overeen met informatie uit CRM
+        # 1. Sporter.bij_vereniging komt overeen met informatie uit CRM
 
         # 2. Schutters in regiocompetitie kunnen elk moment overstappen
         #    RegioCompetitieSchutterBoog.bij_vereniging
@@ -175,15 +175,16 @@ class Command(BaseCommand):
         # bepaal de scorehist objecten die we willen bekijken
         qset = (ScoreHist
                 .objects
-                .select_related('score', 'score__schutterboog')
+                .select_related('score',
+                                'score__sporterboog')
                 .all())
 
         if self.taken.hoogste_scorehist:
             self.stdout.write('[INFO] vorige hoogste ScoreHist pk is %s' % self.taken.hoogste_scorehist.pk)
             qset = qset.filter(pk__gt=self.taken.hoogste_scorehist.pk)
 
-        # bepaal de schutterboog pk's die we bij moeten werken
-        allowed_schutterboog_pks = qset.values_list('score__schutterboog__pk', flat=True)
+        # bepaal de sporterboog pk's die we bij moeten werken
+        allowed_sporterboog_pks = qset.values_list('score__sporterboog__pk', flat=True)
 
         self.taken.hoogste_scorehist = scorehist_latest
         self.taken.save(update_fields=['hoogste_scorehist'])
@@ -195,7 +196,7 @@ class Command(BaseCommand):
         # elke ronde bevat een plan met wedstrijden
         # wedstrijden hebben een datum
         # wedstrijden hebben een uitslag met scores
-        # scores refereren aan een schutterboog
+        # scores refereren aan een sporterboog
         # schutters kunnen in een wedstrijd buiten hun ingeschreven rayon geschoten hebben
         rondes = list()
         for ronde in (DeelcompetitieRonde
@@ -232,12 +233,12 @@ class Command(BaseCommand):
                 if uitslag:
                     for score in (uitslag
                                   .scores
-                                  .select_related('schutterboog')
+                                  .select_related('sporterboog')
                                   .exclude(waarde=0)                # 0 scores zijn voor team competitie only
                                   .all()):
                         tup = (uitslag.afstand_meter, score)
-                        pk = score.schutterboog.pk
-                        if pk in allowed_schutterboog_pks:   # presumed better than huge __in
+                        pk = score.sporterboog.pk
+                        if pk in allowed_sporterboog_pks:   # presumed better than huge __in
                             try:
                                 self.pk2scores[pk].append(tup)
                             except KeyError:
@@ -295,11 +296,11 @@ class Command(BaseCommand):
             for deelnemer in (RegioCompetitieSchutterBoog
                               .objects
                               .filter(deelcompetitie=deelcomp)
-                              .select_related('schutterboog')
+                              .select_related('sporterboog')
                               .prefetch_related('scores')
                               .all()):
 
-                pk = deelnemer.schutterboog.pk
+                pk = deelnemer.sporterboog.pk
                 tups = list()
                 found = False
                 try:
@@ -370,7 +371,7 @@ class Command(BaseCommand):
                                         # dit is de nieuwe klasse
                                         self.stdout.write(
                                             '[INFO] Verplaats %s (%sm) met nieuw AG %.3f naar klasse %s' % (
-                                                deelnemer.schutterboog.nhblid.nhb_nr, klasse.competitie.afstand, new_ag, klasse))
+                                                deelnemer.sporterboog.sporter.lid_nr, klasse.competitie.afstand, new_ag, klasse))
                                         deelnemer.klasse = klasse
                                         break
                                 # for
@@ -462,7 +463,7 @@ class Command(BaseCommand):
             new_count = ScoreHist.objects.count()
             if new_count != hist_count:
                 # verwijder eventuele 'fake records' die gebruikt zijn als trigger van deze dienst
-                fake_objs = ScoreHist.objects.filter(score__schutterboog__nhblid=None)
+                fake_objs = ScoreHist.objects.filter(score__sporterboog__sporter=None)
                 fake_count = fake_objs.count()
                 if fake_count > 0:
                     self.stdout.write('[DEBUG] Verwijder %s fake ScoreHist records' % fake_count)

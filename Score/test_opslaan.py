@@ -6,8 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Schutter.models import SchutterBoog
-from NhbStructuur.models import NhbLid
+from Sporter.models import Sporter, SporterBoog
 from .models import (Score, ScoreHist,
                      SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG, SCORE_TYPE_SCORE)
 from .operations import score_indiv_ag_opslaan, score_teams_ag_opslaan, wanneer_ag_vastgesteld
@@ -23,21 +22,21 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
 
         # maak een test lid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100001
-        lid.geslacht = "M"
-        lid.voornaam = "Ramon"
-        lid.achternaam = "de Tester"
-        lid.email = "rdetester@gmail.not"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 100001
+        sporter.geslacht = "M"
+        sporter.voornaam = "Ramon"
+        sporter.achternaam = "de Tester"
+        sporter.email = "rdetester@gmail.not"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.save()
 
-        # maak een schutterboog aan
-        schutterboog = self.schutterboog = SchutterBoog()
-        schutterboog.boogtype = BoogType.objects.get(afkorting='R')
-        schutterboog.nhblid = lid
-        schutterboog.save()
+        # maak een sporterboog aan
+        self.sporterboog = SporterBoog(
+                                boogtype=BoogType.objects.get(afkorting='R'),
+                                sporter=sporter)
+        self.sporterboog.save()
 
     def test_opslaan(self):
         self.assertEqual(Score.objects.count(), 0)
@@ -50,14 +49,14 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         notitie = "Dit is een notities"
 
         # de eerste keer wordt het Score object aangemaakt
-        res = score_indiv_ag_opslaan(self.schutterboog, afstand, gemiddelde, account, notitie)
+        res = score_indiv_ag_opslaan(self.sporterboog, afstand, gemiddelde, account, notitie)
         self.assertEqual(res, True)
 
         self.assertEqual(Score.objects.count(), 1)
         score = Score.objects.all()[0]
         self.assertEqual(score.afstand_meter, afstand)
         self.assertEqual(score.waarde, waarde)
-        self.assertEqual(score.schutterboog, self.schutterboog)
+        self.assertEqual(score.sporterboog, self.sporterboog)
         self.assertTrue(str(score) != "")
 
         score.type = SCORE_TYPE_INDIV_AG
@@ -78,7 +77,7 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         self.assertTrue(str(scorehist) != "")
 
         # dezelfde score nog een keer opslaan resulteert in een reject
-        res = score_indiv_ag_opslaan(self.schutterboog, afstand, gemiddelde, account, notitie)
+        res = score_indiv_ag_opslaan(self.sporterboog, afstand, gemiddelde, account, notitie)
         self.assertEqual(res, False)
 
         # tweede keer wordt er alleen een ScoreHist object aangemaakt
@@ -86,14 +85,14 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         waarde2 = int(gemiddelde2 * 1000)
         notitie2 = "Dit is de tweede notitie"
 
-        res = score_indiv_ag_opslaan(self.schutterboog, afstand, gemiddelde2, account, notitie2)
+        res = score_indiv_ag_opslaan(self.sporterboog, afstand, gemiddelde2, account, notitie2)
         self.assertEqual(res, True)
 
         self.assertEqual(Score.objects.count(), 1)
         score = Score.objects.all()[0]
         self.assertEqual(score.afstand_meter, afstand)
         self.assertEqual(score.waarde, waarde2)
-        self.assertEqual(score.schutterboog, self.schutterboog)
+        self.assertEqual(score.sporterboog, self.sporterboog)
 
         self.assertEqual(ScoreHist.objects.count(), 2)
         scorehist = ScoreHist.objects.exclude(pk=scorehist.pk).all()[0]
@@ -103,7 +102,7 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         self.assertEqual(scorehist.notitie, notitie2)
 
         gemiddelde = 8.345
-        res = score_teams_ag_opslaan(self.schutterboog, afstand, gemiddelde, account, notitie)
+        res = score_teams_ag_opslaan(self.sporterboog, afstand, gemiddelde, account, notitie)
         self.assertEqual(res, True)
 
         self.assertEqual(ScoreHist.objects.count(), 3)
@@ -111,11 +110,14 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         score = scorehist.score
         self.assertTrue('(team AG)' in str(score))
 
+        score.sporterboog = None
+        self.assertTrue(str(score) != '')
+
     def test_wanneer(self):
         res = wanneer_ag_vastgesteld(18)
         self.assertIsNone(res)
 
-        score_indiv_ag_opslaan(self.schutterboog, 18, 9.123, None, "test")
+        score_indiv_ag_opslaan(self.sporterboog, 18, 9.123, None, "test")
 
         res = wanneer_ag_vastgesteld(18)
         self.assertIsNotNone(res)

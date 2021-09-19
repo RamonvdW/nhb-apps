@@ -14,7 +14,7 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
 
     """ Tests voor de Vereniging applicatie, Wijzig Clusters functies """
 
-    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Schutter', 'Competitie')
+    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 
     url_clusters = '/vereniging/regio-clusters/'
 

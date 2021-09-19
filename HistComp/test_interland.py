@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from NhbStructuur.models import NhbVereniging, NhbRegio, NhbLid
+from NhbStructuur.models import NhbVereniging, NhbRegio
+from Sporter.models import Sporter
 from .models import HistCompetitie, HistCompetitieIndividueel
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -53,22 +54,22 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         self.klasse_pk = obj.pk
 
         # maak een jeugdlid aan (komt in BB jeugd zonder klasse onbekend)
-        lid = NhbLid()
-        lid.nhb_nr = 100002
-        lid.geslacht = "M"
-        lid.voornaam = "Ramon"
-        lid.achternaam = "het Testertje"
-        lid.email = "rdetestertje@gmail.not"
-        lid.geboorte_datum = datetime.date(year=2019-15, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2015, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.account = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 100002
+        sporter.geslacht = "M"
+        sporter.voornaam = "Ramon"
+        sporter.achternaam = "het Testertje"
+        sporter.email = "rdetestertje@gmail.not"
+        sporter.geboorte_datum = datetime.date(year=2019-15, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2015, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
+        sporter.save()
 
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = obj
         rec.rank = 1
-        rec.schutter_nr = lid.nhb_nr
+        rec.schutter_nr = sporter.lid_nr
         rec.schutter_naam = "wordt niet gebruikt"
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"
@@ -86,22 +87,22 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         self.indiv_rec_pk = rec.pk
 
         # maak nog een lid aan, met te weinig scores
-        lid = NhbLid()
-        lid.nhb_nr = 100003
-        lid.geslacht = "V"
-        lid.voornaam = "Ramona"
-        lid.achternaam = "het Tester"
-        lid.email = "mevrdetester@gmail.not"
-        lid.geboorte_datum = datetime.date(year=1969, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.account = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 100003
+        sporter.geslacht = "V"
+        sporter.voornaam = "Ramona"
+        sporter.achternaam = "het Tester"
+        sporter.email = "mevrdetester@gmail.not"
+        sporter.geboorte_datum = datetime.date(year=1969, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
+        sporter.save()
 
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = obj
         rec.rank = 1
-        rec.schutter_nr = lid.nhb_nr
+        rec.schutter_nr = sporter.lid_nr
         rec.schutter_naam = "wordt niet gebruikt"
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"
@@ -118,22 +119,22 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec.save()
 
         # maak nog een inactief lid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100004
-        lid.geslacht = "V"
-        lid.voornaam = "Weg"
-        lid.achternaam = "Is Weg"
-        lid.email = "mevrwegisweg@gmail.not"
-        lid.geboorte_datum = datetime.date(year=1969, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = None
-        lid.account = None
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 100004
+        sporter.geslacht = "V"
+        sporter.voornaam = "Weg"
+        sporter.achternaam = "Is Weg"
+        sporter.email = "mevrwegisweg@gmail.not"
+        sporter.geboorte_datum = datetime.date(year=1969, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = None
+        sporter.account = None
+        sporter.save()
 
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = obj
         rec.rank = 1
-        rec.schutter_nr = lid.nhb_nr
+        rec.schutter_nr = sporter.lid_nr
         rec.schutter_naam = "wordt niet gebruikt"
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"
@@ -170,22 +171,22 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         rec.save()
 
         # maak een aspirant aan (mag niet meedoen)
-        lid = NhbLid()
-        lid.nhb_nr = 100005
-        lid.geslacht = "M"
-        lid.voornaam = "Appie"
-        lid.achternaam = "Rant"
-        lid.email = "aspriant@gmail.not"
-        lid.geboorte_datum = datetime.date(year=2019-12, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2015, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.account = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 100005
+        sporter.geslacht = "M"
+        sporter.voornaam = "Appie"
+        sporter.achternaam = "Rant"
+        sporter.email = "aspriant@gmail.not"
+        sporter.geboorte_datum = datetime.date(year=2019-12, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2015, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
+        sporter.save()
 
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = obj
         rec.rank = 1
-        rec.schutter_nr = lid.nhb_nr
+        rec.schutter_nr = sporter.lid_nr
         rec.schutter_naam = "wordt niet gebruikt"
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = "wordt niet gebruikt"

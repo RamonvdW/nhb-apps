@@ -82,7 +82,7 @@
             <tr>
                 <td>{{ sporter.volg_nr }}</td>
                 <td>[{{ sporter.ver_nr }}]<span class="hide-on-small-only">&nbsp;{{ sporter.ver_naam }}</span></td>
-                <td>[{{ sporter.nhb_nr }}] {{ sporter.volledige_naam }}</td>
+                <td>[{{ sporter.lid_nr }}] {{ sporter.volledige_naam }}</td>
                 <td>{{ sporter.boog }}{% if sporter.vsg %} ({{ sporter.vsg }}){% endif %}</td>
                 <td>
                     {% for blazoen in sporter.blazoen_str_lijst %}

@@ -425,15 +425,15 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
                       .filter(deelcompetitie__competitie=comp,
                               # inschrijf_voorkeur_team=True,
                               bij_vereniging=ver,
-                              schutterboog__boogtype__in=boog_pks)
-                      .select_related('schutterboog',
-                                      'schutterboog__nhblid',
-                                      'schutterboog__boogtype')
+                              sporterboog__boogtype__in=boog_pks)
+                      .select_related('sporterboog',
+                                      'sporterboog__sporter',
+                                      'sporterboog__boogtype')
                       .order_by('-ag_voor_team'))
         for obj in deelnemers:
             obj.sel_str = "deelnemer_%s" % obj.pk
-            obj.naam_str = "[%s] %s" % (obj.schutterboog.nhblid.nhb_nr, obj.schutterboog.nhblid.volledige_naam())
-            obj.boog_str = obj.schutterboog.boogtype.beschrijving
+            obj.naam_str = "[%s] %s" % (obj.sporterboog.sporter.lid_nr, obj.sporterboog.sporter.volledige_naam())
+            obj.boog_str = obj.sporterboog.boogtype.beschrijving
 
             ag, obj.ag_bron = bepaal_regioschutter_gemiddelde_voor_rk_teams(obj)
             ag_str = "%.3f" % ag
@@ -492,7 +492,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
                   .objects
                   .filter(deelcompetitie__competitie=comp,
                           bij_vereniging=ver,
-                          schutterboog__boogtype__in=boog_pks)
+                          sporterboog__boogtype__in=boog_pks)
                   .values_list('pk', flat=True))
 
         pks = list()

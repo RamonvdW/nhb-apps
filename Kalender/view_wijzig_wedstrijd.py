@@ -368,8 +368,8 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                     akkoord = request.POST.get('akkoord_a_status', '')
                     if akkoord:
                         account = request.user
-                        lid = account.nhblid_set.all()[0]
-                        wedstrijd.voorwaarden_a_status_who = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+                        sporter = account.sporter_set.all()[0]
+                        wedstrijd.voorwaarden_a_status_who = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
                         wedstrijd.voorwaarden_a_status_when = timezone.now()
                         wedstrijd.voorwaarden_a_status_acceptatie = True
 

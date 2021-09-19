@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.core import management
 from django.utils.dateparse import parse_date
 from .models import IndivRecord, LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE
-from NhbStructuur.models import NhbLid
+from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 import io
@@ -21,27 +21,27 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         """ initialisatie van de test case """
 
         # NhbLib
-        lid = NhbLid()
-        lid.nhb_nr = 123456
-        lid.voornaam = 'Jan'
-        lid.achternaam = 'Schutter'
-        lid.email = 'jan@test.nl'
-        lid.geboorte_datum = parse_date('1970-03-03')
-        lid.woon_straatnaam = 'Papendal'
-        lid.geslacht = 'M'
-        lid.sinds_datum = parse_date("1991-02-03") # Y-M-D
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 123456
+        sporter.voornaam = 'Jan'
+        sporter.achternaam = 'Schutter'
+        sporter.email = 'jan@test.nl'
+        sporter.geboorte_datum = parse_date('1970-03-03')
+        sporter.woon_straatnaam = 'Papendal'
+        sporter.geslacht = 'M'
+        sporter.sinds_datum = parse_date("1991-02-03")  # Y-M-D
+        sporter.save()
 
-        lid = NhbLid()
-        lid.nhb_nr = 123457
-        lid.voornaam = 'Petra'
-        lid.achternaam = 'Schutter'
-        lid.email = 'petra@test.nl'
-        lid.geboorte_datum = parse_date('1970-01-30')
-        lid.woon_straatnaam = 'Arnhem'
-        lid.geslacht = 'V'
-        lid.sinds_datum = parse_date("1991-02-05") # Y-M-D
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 123457
+        sporter.voornaam = 'Petra'
+        sporter.achternaam = 'Schutter'
+        sporter.email = 'petra@test.nl'
+        sporter.geboorte_datum = parse_date('1970-01-30')
+        sporter.woon_straatnaam = 'Arnhem'
+        sporter.geslacht = 'V'
+        sporter.sinds_datum = parse_date("1991-02-05")  # Y-M-D
+        sporter.save()
 
         # Record 42
         rec = IndivRecord()
@@ -52,7 +52,7 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[0][0]   # M
         rec.materiaalklasse = MATERIAALKLASSE[0][0]     # R
         # rec.materiaalklasse_overig =
-        rec.nhb_lid = lid
+        rec.sporter = sporter
         rec.naam = 'Top Schutter'
         rec.datum = parse_date('2017-08-27')
         rec.plaats = 'Papendal'
@@ -65,6 +65,9 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         # rec.is_world_record =
         rec.save()
 
+        self.assertEqual(rec.score_str(), '1234 (56X)')
+        self.assertEqual(rec.max_score_str(), '5678 (567X)')
+
         # Record 43
         rec = IndivRecord()
         rec.volg_nr = 43
@@ -74,7 +77,7 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[1][0]   # S
         rec.materiaalklasse = 'R'       # Recurve
         rec.para_klasse = 'Open'
-        # rec.nhb_lid =
+        # rec.sporter =
         rec.naam = 'Top Schutter 2'
         rec.datum = datetime.datetime.now()
         rec.plaats = 'Ergens Anders'
@@ -85,6 +88,9 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         # rec.is_world_record =
         rec.save()
 
+        self.assertIsNotNone(str(rec))
+        self.assertEqual(rec.score_str(), '1235')
+
         # Record 44
         rec = IndivRecord()
         rec.volg_nr = 44
@@ -93,7 +99,7 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         rec.geslacht = GESLACHT[1][0]   # V
         rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[3][0]   # C
         rec.materiaalklasse = 'R'       # Recurve
-        rec.nhb_lid = lid
+        rec.sporter = sporter
         rec.naam = 'Petra Schutter'
         rec.datum = parse_date('2017-08-27')
         rec.plaats = 'Nergens'
@@ -103,6 +109,8 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         # rec.is_european_record =
         # rec.is_world_record =
         rec.save()
+
+        self.assertIsNotNone(str(rec))
 
     def test_file_missing(self):
         # afhandelen niet bestaand bestand
@@ -186,7 +194,7 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         self.assertTrue("soort_record: 'Test record' --> '60m'" in f2.getvalue())
         self.assertTrue("para_klasse: '' --> 'W1'" in f2.getvalue())
         self.assertTrue("max_score: 5678 --> 1200" in f2.getvalue())
-        self.assertTrue("nhb_lid: 123457 Petra Schutter [V, 1970] --> 123456 Jan Schutter [M, 1970]" in f2.getvalue())
+        self.assertTrue("sporter: 123457 Petra Schutter [V, 1970] --> 123456 Jan Schutter [M, 1970]" in f2.getvalue())
         self.assertTrue("naam: 'Top Schutter' --> 'Jan Schutter'" in f2.getvalue())
         self.assertTrue("datum: 2017-08-27 --> 1901-01-01" in f2.getvalue())
         self.assertTrue("plaats: 'Papendal' --> 'Elbonia'" in f2.getvalue())

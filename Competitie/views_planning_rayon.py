@@ -362,7 +362,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         pks = [ver.pk for ver in verenigingen]
         for obj in WedstrijdLocatie.objects.filter(verenigingen__pk__in=pks):
             for ver in obj.verenigingen.all():
-                locaties[str(ver.pk)] = obj.adres   # nhb_nr --> adres
+                locaties[str(ver.pk)] = obj.adres   # ver_nr --> adres
             # for
         # for
 
@@ -563,7 +563,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
                           .objects
                           .select_related('deelcompetitie',
                                           'klasse__indiv',
-                                          'schutterboog__nhblid',
+                                          'sporterboog__sporter',
                                           'bij_vereniging')
                           .filter(deelcompetitie=deelcomp_rk,
                                   volgorde__lte=48)             # max 48 schutters per klasse tonen
@@ -601,8 +601,8 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
                 except KeyError:
                     limiet = 24
 
-            lid = deelnemer.schutterboog.nhblid
-            deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+            sporter = deelnemer.sporterboog.sporter
+            deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
 
             if not deelnemer.bij_vereniging:
                 aantal_attentie += 1
@@ -666,7 +666,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
                       .objects
                       .select_related('deelcompetitie',
                                       'klasse__indiv',
-                                      'schutterboog__nhblid',
+                                      'sporterboog__sporter',
                                       'bij_vereniging')
                       .exclude(deelname=DEELNAME_NEE)
                       .filter(deelcompetitie=deelcomp_rk,
@@ -699,7 +699,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
             # database query was voor 48 schutters
             # voor kleinere klassen moeten we minder reservisten tonen
             if deelnemer.rank <= 2*limiet:
-                lid = deelnemer.schutterboog.nhblid
+                sporter = deelnemer.sporterboog.sporter
                 ver = deelnemer.bij_vereniging
                 ver_str = str(ver)
 
@@ -713,8 +713,8 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
                     label += "(deelname onzeker)"
 
                 writer.writerow([deelnemer.rank,
-                                 lid.nhb_nr,
-                                 lid.volledige_naam(),
+                                 sporter.lid_nr,
+                                 sporter.volledige_naam(),
                                  ver_str,                  # [nnnn] Naam
                                  label,
                                  deelnemer.klasse.indiv.beschrijving,
@@ -751,7 +751,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
                          .objects
                          .select_related('deelcompetitie__competitie',
                                          'deelcompetitie__nhb_rayon',
-                                         'schutterboog__nhblid',
+                                         'sporterboog__sporter',
                                          'bij_vereniging')
                          .get(pk=deelnemer_pk))
         except (ValueError, KampioenschapSchutterBoog.DoesNotExist):
@@ -763,8 +763,8 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rollen.ROL_RKO and self.functie_nu != deelnemer.deelcompetitie.functie:
             raise PermissionDenied('Geen toegang tot deze competitie')
 
-        lid = deelnemer.schutterboog.nhblid
-        deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+        sporter = deelnemer.sporterboog.sporter
+        deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
 
         if deelnemer.bij_vereniging:
             deelnemer.ver_str = str(deelnemer.bij_vereniging)

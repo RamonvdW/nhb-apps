@@ -65,7 +65,7 @@
                     <!-- obj is Account -->
                     <li>
                         <div class="collapsible-header white">
-                            <span>[{{ obj.nhb_nr_str|highlight:zoekterm }}] {{ obj.volledige_naam|highlight:zoekterm }}</span>
+                            <span>[{{ obj.lid_nr_str|highlight:zoekterm }}] {{ obj.volledige_naam|highlight:zoekterm }}</span>
                         </div>
                         <div class="collapsible-body white" style="column-count: 2">
                             <div>

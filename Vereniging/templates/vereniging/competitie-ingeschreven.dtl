@@ -107,7 +107,7 @@
 
                 <td>{{ obj.klasse.indiv.beschrijving }}</td>
 
-                <td>{{ obj.nhb_nr }}</td>
+                <td>{{ obj.lid_nr }}</td>
                 <td>{{ obj.naam_str }}</td>
 
                 <td>{{ obj.team_ja_nee }}</td>

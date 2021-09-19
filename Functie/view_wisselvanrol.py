@@ -99,7 +99,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
                 url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
                 objs.append({'titel': 'Manager competitiezaken', 'url': url, 'volgorde': 2})
 
-            elif rol == Rollen.ROL_SCHUTTER:
+            elif rol == Rollen.ROL_SPORTER:
                 url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
                 objs.append({'titel': 'Sporter', 'url': url, 'volgorde': 90000})
 

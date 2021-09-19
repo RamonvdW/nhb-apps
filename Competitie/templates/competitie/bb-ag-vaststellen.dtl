@@ -14,7 +14,7 @@
 
     <h4>Aanvangsgemiddelden vaststellen</h4>
 
-    <p>Als Manager Competitiezaken wil je de aanvangsgemiddelden voor elke schutter-boog vaststellen.</p>
+    <p>Als Manager Competitiezaken wil je de aanvangsgemiddelden voor elke sporter-boog vaststellen.</p>
 
     <p>Deze actie moet tijdens de opstart van een nieuw competitie eenmalig uitgevoerd worden voordat de klassegrenzen vastgesteld worden. Meerdere keren de aanvangsgemiddelden vaststellen kan geen kwaad maar heeft geen effect.</p>
 
@@ -24,7 +24,7 @@
 
     {% else %}
 
-        <p>Alle huidige aanvangsgemiddelden voor de {{ afstand }}m zullen eerst verwijderd worden. De schutters-boog die in het vorige seizoen genoeg scores neergezet hebben krijgen een nieuw aanvangsgemiddelde (AG) toegekend. Schutters-boog met te weinig scores krijgen geen aanvangsgemiddelde en beginnen daarom in klasse Onbekend.</p>
+        <p>Alle huidige aanvangsgemiddelden voor de {{ afstand }}m zullen eerst verwijderd worden. De sporters die in het vorige seizoen genoeg scores neergezet hebben krijgen een nieuw aanvangsgemiddelde (AG) toegekend. Sporters met te weinig scores krijgen geen aanvangsgemiddelde en beginnen daarom in klasse Onbekend.</p>
 
         <div class="container">
             <ul class="collection with-header white">

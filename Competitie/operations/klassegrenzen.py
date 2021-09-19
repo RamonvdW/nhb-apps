@@ -6,9 +6,9 @@
 
 from BasisTypen.models import BoogType, LeeftijdsKlasse
 from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
-from NhbStructuur.models import NhbLid
-from Score.models import Score, SCORE_TYPE_INDIV_AG
 from Competitie.models import AG_NUL, AG_LAAGSTE_NIET_NUL, CompetitieKlasse
+from Score.models import Score, SCORE_TYPE_INDIV_AG
+from Sporter.models import Sporter
 from decimal import Decimal
 
 
@@ -103,12 +103,12 @@ def bepaal_klassegrenzen_indiv(comp, trans_indiv):
     for boogtype in BoogType.objects.all():
         boogtype2ags[boogtype.afkorting] = (Score
                                             .objects
-                                            .select_related('schutterboog',
-                                                            'schutterboog__boogtype',
-                                                            'schutterboog__nhblid')
+                                            .select_related('sporterboog',
+                                                            'sporterboog__boogtype',
+                                                            'sporterboog__sporter')
                                             .filter(type=SCORE_TYPE_INDIV_AG,
                                                     afstand_meter=comp.afstand,
-                                                    schutterboog__boogtype=boogtype))
+                                                    sporterboog__boogtype=boogtype))
     # for
     del boogtype
 
@@ -134,7 +134,7 @@ def bepaal_klassegrenzen_indiv(comp, trans_indiv):
 
     # verdeel de schuttersboog (waar we een AG van hebben) over boogtype-leeftijdsklasse groepjes
     done_nrs = list()
-    boogtype_lkl2schutters = dict()      # [boogtype.afkorting + '_' + leeftijdsklasse.afkorting] = [nhb_nr, nhb_nr, ..]
+    boogtype_lkl2schutters = dict()      # [boogtype.afkorting + '_' + leeftijdsklasse.afkorting] = [lid_nr, lid_nr, ..]
     for boogtype_afkorting in boogtype2ags.keys():
         scores = boogtype2ags[boogtype_afkorting]
 
@@ -143,11 +143,11 @@ def bepaal_klassegrenzen_indiv(comp, trans_indiv):
             boogtype_lkl2schutters[index] = nrs = list()
 
             for score in scores:
-                schutterboog = score.schutterboog
-                nr = schutterboog.pk
+                sporterboog = score.sporterboog
+                nr = sporterboog.pk
                 if nr not in done_nrs:
-                    lid = schutterboog.nhblid
-                    age = lid.bereken_wedstrijdleeftijd(jaar)
+                    sporter = sporterboog.sporter
+                    age = sporter.bereken_wedstrijdleeftijd(jaar)
                     # volgorde lkl is Aspirant .. Senior
                     # pak de eerste de beste klasse die compatible is
                     if lkl.leeftijd_is_compatible(age):
@@ -176,7 +176,7 @@ def bepaal_klassegrenzen_indiv(comp, trans_indiv):
                     index_gehad.append(index)
                     nrs = boogtype_lkl2schutters[index]
                     for score in scores:
-                        if score.schutterboog.pk in nrs:
+                        if score.sporterboog.pk in nrs:
                             gemiddelden.append(score.waarde)        # is AG*1000
                 # for
             # for
@@ -276,9 +276,9 @@ def bepaal_klassegrenzen_teams(comp, trans_team):
     # hiermee kunnen we de aspiranten scores eruit filteren
     jaar = comp.begin_jaar      # gelijk aan tweede jaar vorig seizoen
 
-    was_aspirant = dict()     # [ nhb_nr ] = True/False
-    for lid in NhbLid.objects.all():
-        was_aspirant[lid.nhb_nr] = lid.bereken_wedstrijdleeftijd(jaar) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
+    was_aspirant = dict()     # [ lid_nr ] = True/False
+    for sporter in Sporter.objects.all():
+        was_aspirant[sporter.lid_nr] = sporter.bereken_wedstrijdleeftijd(jaar) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
     # for
 
     # haal de AG's op per boogtype
@@ -286,14 +286,14 @@ def bepaal_klassegrenzen_teams(comp, trans_team):
     for boogtype in BoogType.objects.all():
         boogtype2ags[boogtype.afkorting] = (Score
                                             .objects
-                                            .select_related('schutterboog',
-                                                            'schutterboog__boogtype',
-                                                            'schutterboog__nhblid',
-                                                            'schutterboog__nhblid__bij_vereniging')
-                                            .exclude(schutterboog__nhblid__bij_vereniging=None)
+                                            .select_related('sporterboog',
+                                                            'sporterboog__boogtype',
+                                                            'sporterboog__sporter',
+                                                            'sporterboog__sporter__bij_vereniging')
+                                            .exclude(sporterboog__sporter__bij_vereniging=None)
                                             .filter(type=SCORE_TYPE_INDIV_AG,
                                                     afstand_meter=comp.afstand,
-                                                    schutterboog__boogtype=boogtype))
+                                                    sporterboog__boogtype=boogtype))
     # for
 
     # wedstrijdklassen vs leeftijd + bogen
@@ -307,8 +307,8 @@ def bepaal_klassegrenzen_teams(comp, trans_team):
         # zoek alle schutters-boog die hier in passen (boog, leeftijd)
         per_ver_gemiddelden = dict()    # [ver_nr] = list(gemiddelde, gemiddelde, ...)
         for score in boogtype2ags[boogtype_afkorting]:
-            if not was_aspirant[score.schutterboog.nhblid.nhb_nr]:
-                ver_nr = score.schutterboog.nhblid.bij_vereniging.ver_nr
+            if not was_aspirant[score.sporterboog.sporter.lid_nr]:
+                ver_nr = score.sporterboog.sporter.bij_vereniging.ver_nr
                 try:
                     per_ver_gemiddelden[ver_nr].append(score.waarde)        # is AG*1000
                 except KeyError:
@@ -437,12 +437,12 @@ class KlasseBepaler(object):
         # for
 
     def bepaal_klasse_deelnemer(self, deelnemer):
-        """ deze functie zet deelnemer.klasse aan de hand van de schutterboog """
+        """ deze functie zet deelnemer.klasse aan de hand van de sporterboog """
 
         ag = deelnemer.ag_voor_indiv
-        schutterboog = deelnemer.schutterboog
-        nhblid = schutterboog.nhblid
-        age = nhblid.bereken_wedstrijdleeftijd(self.competitie.begin_jaar + 1)
+        sporterboog = deelnemer.sporterboog
+        sporter = sporterboog.sporter
+        age = sporter.bereken_wedstrijdleeftijd(self.competitie.begin_jaar + 1)
 
         if not isinstance(ag, Decimal):
             raise LookupError('Verkeerde type')
@@ -452,9 +452,9 @@ class KlasseBepaler(object):
         ag += Decimal(0.00005)
 
         mogelijkheden = list()
-        for klasse in self.boogtype2klassen[schutterboog.boogtype.afkorting]:
+        for klasse in self.boogtype2klassen[sporterboog.boogtype.afkorting]:
             if ag >= klasse.min_ag or klasse.indiv.is_onbekend:
-                for lkl in self.lkl_cache[nhblid.geslacht][klasse.pk]:
+                for lkl in self.lkl_cache[sporter.geslacht][klasse.pk]:
                     if lkl.leeftijd_is_compatible(age):
                         tup = (lkl.volgorde, klasse.pk, lkl, klasse)
                         mogelijkheden.append(tup)

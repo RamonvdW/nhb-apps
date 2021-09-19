@@ -7,7 +7,8 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Functie.models import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from Sporter.models import Sporter
 from Wedstrijden.models import CompetitieWedstrijd
 from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
                      INSCHRIJF_METHODE_1, LAAG_REGIO, LAAG_RK, LAAG_BK)
@@ -42,18 +43,18 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
         nhb_nr = self._next_nhbnr
         self._next_nhbnr += 1
 
-        lid = NhbLid()
-        lid.nhb_nr = nhb_nr
-        lid.geslacht = "M"
-        lid.voornaam = voornaam
-        lid.achternaam = "Tester"
-        lid.email = voornaam.lower() + "@nhb.test"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = self._ver
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = nhb_nr
+        sporter.geslacht = "M"
+        sporter.voornaam = voornaam
+        sporter.achternaam = "Tester"
+        sporter.email = voornaam.lower() + "@nhb.test"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = self._ver
+        sporter.save()
 
-        return self.e2e_create_account(nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
+        return self.e2e_create_account(nhb_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -219,19 +220,19 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
             # maak 5 leden aan
             for lp in range(5):
                 nhb_nr += 1
-                lid = NhbLid()
-                lid.nhb_nr = nhb_nr
-                lid.voornaam = "Lid %s" % nhb_nr
-                lid.achternaam = "de Tester"
-                lid.bij_vereniging = nhb_ver
-                lid.is_actief_lid = True
+                sporter = Sporter()
+                sporter.lid_nr = nhb_nr
+                sporter.voornaam = "Lid %s" % nhb_nr
+                sporter.achternaam = "de Tester"
+                sporter.bij_vereniging = nhb_ver
+                sporter.is_actief_lid = True
                 if barebow_boog_pk:
-                    lid.geboorte_datum = datetime.date(2019-12, 1, 1)   # aspirant
+                    sporter.geboorte_datum = datetime.date(2019-12, 1, 1)   # aspirant
                 else:
-                    lid.geboorte_datum = datetime.date(2000, 1, 1)      # senior
-                lid.sinds_datum = datetime.date(2010, 1, 1)
-                lid.geslacht = 'M'
-                lid.save()
+                    sporter.geboorte_datum = datetime.date(2000, 1, 1)      # senior
+                sporter.sinds_datum = datetime.date(2010, 1, 1)
+                sporter.geslacht = 'M'
+                sporter.save()
 
                 # haal de schutter voorkeuren op, zodat de schutterboog records aangemaakt worden
                 url_voorkeuren = '/sporter/voorkeuren/%s/' % nhb_nr
@@ -243,7 +244,7 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
                 if lp == 1:
                     # zet de DT voorkeur aan voor een paar schutters
                     with self.assert_max_queries(20):
-                        resp = self.client.post(url_voorkeuren, {'nhblid_pk': nhb_nr,
+                        resp = self.client.post(url_voorkeuren, {'sporter_pk': nhb_nr,
                                                                  'schiet_R': 'on',
                                                                  'voorkeur_eigen_blazoen': 'on'})
                     # onthoud deze schutterboog om straks in bulk aan te melden
@@ -251,18 +252,18 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
                     post_params['lid_%s_boogtype_%s' % (nhb_nr, recurve_boog_pk)] = 'on'
                 elif lp == 2:
                     with self.assert_max_queries(20):
-                        resp = self.client.post(url_voorkeuren, {'nhblid_pk': nhb_nr,
+                        resp = self.client.post(url_voorkeuren, {'sporter_pk': nhb_nr,
                                                                  'schiet_C': 'on'})
                     post_params['lid_%s_boogtype_%s' % (nhb_nr, compound_boog_pk)] = 'on'
                 elif barebow_boog_pk:
                     with self.assert_max_queries(20):
-                        resp = self.client.post(url_voorkeuren, {'nhblid_pk': nhb_nr,
+                        resp = self.client.post(url_voorkeuren, {'sporter_pk': nhb_nr,
                                                                  'schiet_BB': 'on'})
                     post_params['lid_%s_boogtype_%s' % (nhb_nr, barebow_boog_pk)] = 'on'
                     barebow_boog_pk = None
                 else:
                     with self.assert_max_queries(20):
-                        resp = self.client.post(url_voorkeuren, {'nhblid_pk': nhb_nr,
+                        resp = self.client.post(url_voorkeuren, {'sporter_pk': nhb_nr,
                                                                  'schiet_R': 'on'})
                     post_params['lid_%s_boogtype_%s' % (nhb_nr, recurve_boog_pk)] = 'on'
 

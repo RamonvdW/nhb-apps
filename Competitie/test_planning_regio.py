@@ -9,8 +9,8 @@ from django.test import TestCase
 from BasisTypen.models import BoogType, TeamWedstrijdklasse
 from Competitie.test_fase import zet_competitie_fase
 from Functie.models import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
-from Schutter.models import SchutterBoog
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
+from Sporter.models import Sporter, SporterBoog
 from Taken.models import Taak
 from Wedstrijden.models import WedstrijdLocatie, CompetitieWedstrijd
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
@@ -49,27 +49,27 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         cls.testdata.maak_accounts()
 
     def _prep_beheerder_lid(self, voornaam):
-        nhb_nr = self._next_nhbnr
-        self._next_nhbnr += 1
+        lid_nr = self._next_lid_nr
+        self._next_lid_nr += 1
 
-        lid = NhbLid()
-        lid.nhb_nr = nhb_nr
-        lid.geslacht = "M"
-        lid.voornaam = voornaam
-        lid.achternaam = "Tester"
-        lid.email = voornaam.lower() + "@nhb.test"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = self.nhbver_101
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = lid_nr
+        sporter.geslacht = "M"
+        sporter.voornaam = voornaam
+        sporter.achternaam = "Tester"
+        sporter.email = voornaam.lower() + "@nhb.test"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = self.nhbver_101
+        sporter.save()
 
-        return self.e2e_create_account(nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
+        return self.e2e_create_account(lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
 
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self._next_nhbnr = 100001
+        self._next_lid_nr = 100001
 
         self.rayon_1 = NhbRayon.objects.get(rayon_nr=1)
         self.rayon_2 = NhbRayon.objects.get(rayon_nr=2)
@@ -119,14 +119,14 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         self.account_rcl101_25 = self._prep_beheerder_lid('RCL101-25')
         self.account_rcl112_18 = self._prep_beheerder_lid('RCL112')
         self.account_schutter = self._prep_beheerder_lid('Schutter')
-        self.lid_schutter = NhbLid.objects.get(nhb_nr=self.account_schutter.username)
+        self.lid_sporter = Sporter.objects.get(lid_nr=self.account_schutter.username)
 
         self.boog_r = BoogType.objects.get(afkorting='R')
 
-        self.schutterboog = SchutterBoog(nhblid=self.lid_schutter,
-                                         boogtype=self.boog_r,
-                                         voor_wedstrijd=True)
-        self.schutterboog.save()
+        self.sporterboog = SporterBoog(sporter=self.lid_sporter,
+                                       boogtype=self.boog_r,
+                                       voor_wedstrijd=True)
+        self.sporterboog.save()
 
         # creëer een competitie met deelcompetities
         competities_aanmaken(jaar=2019)
@@ -196,8 +196,8 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         ver.clusters.add(self.cluster_101e_25)
 
     def _maak_inschrijving(self, deelcomp):
-        RegioCompetitieSchutterBoog(schutterboog=self.schutterboog,
-                                    bij_vereniging=self.schutterboog.nhblid.bij_vereniging,
+        RegioCompetitieSchutterBoog(sporterboog=self.sporterboog,
+                                    bij_vereniging=self.sporterboog.sporter.bij_vereniging,
                                     deelcompetitie=deelcomp,
                                     klasse=self.klasse_recurve_onbekend).save()
 
@@ -1546,14 +1546,14 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
         klasse.save()
 
         boog_bb = BoogType.objects.get(afkorting='BB')
-        schutterboog = SchutterBoog(nhblid=self.lid_schutter,
-                                    boogtype=boog_bb,
-                                    voor_wedstrijd=True)
-        schutterboog.save()
+        sporterboog = SporterBoog(sporter=self.lid_sporter,
+                                  boogtype=boog_bb,
+                                  voor_wedstrijd=True)
+        sporterboog.save()
 
         inschrijving = RegioCompetitieSchutterBoog()
-        inschrijving.schutterboog = schutterboog
-        inschrijving.bij_vereniging = schutterboog.nhblid.bij_vereniging
+        inschrijving.sporterboog = sporterboog
+        inschrijving.bij_vereniging = sporterboog.sporter.bij_vereniging
         inschrijving.deelcompetitie = self.deelcomp_regio101_18
         inschrijving.klasse = klasse
         inschrijving.save()

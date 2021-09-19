@@ -24,7 +24,6 @@ from .operations import maak_deelcompetitie_ronde
 from .menu import menu_dynamics_competitie
 from types import SimpleNamespace
 import datetime
-import math
 
 
 TEMPLATE_COMPETITIE_PLANNING_REGIO = 'competitie/planning-regio.dtl'

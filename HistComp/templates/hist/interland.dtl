@@ -56,14 +56,14 @@
             </tr>
         </thead>
 
-        {% for schutter in klasse.schutters %}
+        {% for indiv in klasse.indiv %}
             <tr>
-                <td>{{ schutter.gemiddelde }}</td>
-                <td>{{ schutter.leeftijd_str }}</td>
-                <td>{{ schutter.nhblid.geslacht }}</td>
-                <td>{{ schutter.nhblid.nhb_nr }}</td>
-                <td>{{ schutter.nhblid.volledige_naam }}</td>
-                <td>{{ schutter.nhblid.bij_vereniging }}</td>
+                <td>{{ indiv.gemiddelde }}</td>
+                <td>{{ indiv.leeftijd_str }}</td>
+                <td>{{ indiv.sporter.geslacht }}</td>
+                <td>{{ indiv.sporter.lid_nr }}</td>
+                <td>{{ indiv.sporter.volledige_naam }}</td>
+                <td>{{ indiv.sporter.bij_vereniging }}</td>
             </tr>
         {% endfor %}
     </table>

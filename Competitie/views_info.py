@@ -35,9 +35,9 @@ class InfoCompetitieView(TemplateView):
 
         account = self.request.user
         if account and account.is_authenticated:
-            if account.nhblid_set.count() > 0:
-                nhblid = account.nhblid_set.all()[0]
-                nhb_ver = nhblid.bij_vereniging
+            if account.sporter_set.count() > 0:
+                sporter = account.sporter_set.all()[0]
+                nhb_ver = sporter.bij_vereniging
                 if nhb_ver:
                     context['mijn_vereniging'] = nhb_ver
                     for obj in context['regios']:

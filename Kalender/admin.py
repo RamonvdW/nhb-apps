@@ -54,7 +54,7 @@ class KalenderWedstrijdSessieAdmin(admin.ModelAdmin):             # pragma: no c
 
     search_fields = ('pk',)
 
-    readonly_fields = ('wedstrijdklassen', 'aanmeldingen')
+    readonly_fields = ('wedstrijdklassen', 'sporters')
 
     def get_queryset(self, request):
         """ deze functie is voor prestatieverbetering
@@ -63,7 +63,7 @@ class KalenderWedstrijdSessieAdmin(admin.ModelAdmin):             # pragma: no c
         # qs = super().get_queryset(request)
         return (KalenderWedstrijdSessie
                 .objects
-                .prefetch_related('klassen', 'aanmeldingen')
+                .prefetch_related('klassen', 'sporters')
                 .all())
 
 

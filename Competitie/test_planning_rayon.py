@@ -8,9 +8,9 @@ from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
 from Functie.models import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
-from Schutter.models import SchutterBoog
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Score.models import Score
+from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie, CompetitieWedstrijdUitslag
 from .models import (Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
                      KampioenschapSchutterBoog, CompetitieKlasse, DeelcompetitieKlasseLimiet,
@@ -64,27 +64,27 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             print(f2.getvalue())
 
     def _prep_beheerder_lid(self, voornaam):
-        nhb_nr = self._next_nhbnr
-        self._next_nhbnr += 1
+        lid_nr = self._next_lid_nr
+        self._next_lid_nr += 1
 
-        lid = NhbLid()
-        lid.nhb_nr = nhb_nr
-        lid.geslacht = "M"
-        lid.voornaam = voornaam
-        lid.achternaam = "Tester"
-        lid.email = voornaam.lower() + "@nhb.test"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = self.nhbver_101
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = lid_nr
+        sporter.geslacht = "M"
+        sporter.voornaam = voornaam
+        sporter.achternaam = "Tester"
+        sporter.email = voornaam.lower() + "@nhb.test"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = self.nhbver_101
+        sporter.save()
 
-        return self.e2e_create_account(nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
+        return self.e2e_create_account(lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
 
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self._next_nhbnr = 100001
+        self._next_lid_nr = 100001
 
         self.rayon_1 = NhbRayon.objects.get(rayon_nr=1)
         self.rayon_2 = NhbRayon.objects.get(rayon_nr=2)
@@ -130,14 +130,14 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.account_rcl101_25 = self._prep_beheerder_lid('RCL101-25')
         self.account_rcl112_18 = self._prep_beheerder_lid('RCL112')
         self.account_schutter = self._prep_beheerder_lid('Schutter')
-        self.lid_schutter = NhbLid.objects.get(nhb_nr=self.account_schutter.username)
+        self.lid_sporter = Sporter.objects.get(lid_nr=self.account_schutter.username)
 
         self.boog_r = BoogType.objects.get(afkorting='R')
 
-        self.schutterboog = SchutterBoog(nhblid=self.lid_schutter,
-                                         boogtype=self.boog_r,
-                                         voor_wedstrijd=True)
-        self.schutterboog.save()
+        self.sporterboog = SporterBoog(sporter=self.lid_sporter,
+                                       boogtype=self.boog_r,
+                                       voor_wedstrijd=True)
+        self.sporterboog.save()
 
         # creëer een competitie met deelcompetities
         competities_aanmaken(jaar=2019)
@@ -219,29 +219,29 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
     def _deelnemers_aanmaken(self):
         KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
-                                  schutterboog=self.schutterboog,
+                                  sporterboog=self.sporterboog,
                                   klasse=self.klasse_r,
-                                  bij_vereniging=self.schutterboog.nhblid.bij_vereniging).save()
+                                  bij_vereniging=self.sporterboog.sporter.bij_vereniging).save()
 
         KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
-                                  schutterboog=self.schutterboog,
+                                  sporterboog=self.sporterboog,
                                   klasse=self.klasse_r,
-                                  bij_vereniging=self.schutterboog.nhblid.bij_vereniging).save()
+                                  bij_vereniging=self.sporterboog.sporter.bij_vereniging).save()
 
         KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
-                                  schutterboog=self.schutterboog,
+                                  sporterboog=self.sporterboog,
                                   klasse=self.klasse_r,
-                                  bij_vereniging=self.schutterboog.nhblid.bij_vereniging).save()
+                                  bij_vereniging=self.sporterboog.sporter.bij_vereniging).save()
 
         KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
-                                  schutterboog=self.schutterboog,
+                                  sporterboog=self.sporterboog,
                                   klasse=self.klasse_c,
-                                  bij_vereniging=self.schutterboog.nhblid.bij_vereniging).save()
+                                  bij_vereniging=self.sporterboog.sporter.bij_vereniging).save()
 
         KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
-                                  schutterboog=self.schutterboog,
+                                  sporterboog=self.sporterboog,
                                   klasse=self.klasse_c,
-                                  bij_vereniging=self.schutterboog.nhblid.bij_vereniging).save()
+                                  bij_vereniging=self.sporterboog.sporter.bij_vereniging).save()
 
     def test_buiten_eigen_rayon(self):
         # RKO probeert RK wedstrijd toe te voegen en wijzigen buiten eigen rayon
@@ -657,15 +657,15 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rko1_18)
 
         deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
-                                              schutterboog=self.schutterboog,
-                                              bij_vereniging=self.schutterboog.nhblid.bij_vereniging,
+                                              sporterboog=self.sporterboog,
+                                              bij_vereniging=self.sporterboog.sporter.bij_vereniging,
                                               klasse=self.klasse_r)
         deelnemer.save()
         self.assertTrue(str(deelnemer) != "")      # coverage only
 
         deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
-                                              schutterboog=self.schutterboog,
-                                              bij_vereniging=self.schutterboog.nhblid.bij_vereniging,
+                                              sporterboog=self.sporterboog,
+                                              bij_vereniging=self.sporterboog.sporter.bij_vereniging,
                                               klasse=self.klasse_c)
         deelnemer.save()
 
@@ -780,8 +780,8 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rko2_18)
 
         deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
-                                              schutterboog=self.schutterboog,
-                                              bij_vereniging=self.schutterboog.nhblid.bij_vereniging,
+                                              sporterboog=self.sporterboog,
+                                              bij_vereniging=self.sporterboog.sporter.bij_vereniging,
                                               klasse=self.klasse_r)
         deelnemer.save()
 
@@ -800,8 +800,8 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rko1_18)
 
         deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
-                                              schutterboog=self.schutterboog,
-                                              bij_vereniging=self.schutterboog.nhblid.bij_vereniging,
+                                              sporterboog=self.sporterboog,
+                                              bij_vereniging=self.sporterboog.sporter.bij_vereniging,
                                               klasse=self.klasse_r)
         deelnemer.save()
 
@@ -848,8 +848,8 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
         deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
-                                              schutterboog=self.schutterboog,
-                                              bij_vereniging=self.schutterboog.nhblid.bij_vereniging,
+                                              sporterboog=self.sporterboog,
+                                              bij_vereniging=self.sporterboog.sporter.bij_vereniging,
                                               klasse=self.klasse_r)
         deelnemer.save()
 
@@ -864,12 +864,12 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             resp = self.client.post(url, {})
         self.assertEqual(resp.status_code, 302)     # 302 = redirect
 
-        lid = self.schutterboog.nhblid
-        lid.bij_vereniging = self.ver_1100
-        lid.save()
+        sporter = self.sporterboog.sporter
+        sporter.bij_vereniging = self.ver_1100
+        sporter.save()
 
         deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
-                                              schutterboog=self.schutterboog,
+                                              sporterboog=self.sporterboog,
                                               bij_vereniging=self.ver_1100,
                                               klasse=self.klasse_r)
         deelnemer.save()
@@ -990,8 +990,8 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         # nu met een deelnemer, zodat de mutatie opgestart wordt
         deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
-                                              schutterboog=self.schutterboog,
-                                              bij_vereniging=self.schutterboog.nhblid.bij_vereniging,
+                                              sporterboog=self.sporterboog,
+                                              bij_vereniging=self.sporterboog.sporter.bij_vereniging,
                                               klasse=self.klasse_r)
         deelnemer.save()
 
@@ -1011,7 +1011,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         scores = (200, 200, 200, 200, 200, 200, 200)
         deelnemer = RegioCompetitieSchutterBoog(
                             deelcompetitie=self.deelcomp_regio101_18,
-                            schutterboog=self.schutterboog,     # bij self.nhbver_101
+                            sporterboog=self.sporterboog,     # bij self.nhbver_101
                             bij_vereniging=self.nhbver_101,
                             klasse=self.klasse_r,
                             ag_voor_indiv=8.765,
@@ -1031,7 +1031,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         for waarde in scores:
             score = Score(
-                        schutterboog=self.schutterboog,
+                        sporterboog=self.sporterboog,
                         waarde=waarde,
                         afstand_meter=18)
             score.save()
@@ -1040,9 +1040,9 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
         # lid stapt over naar een andere vereniging
         # noteer: deze situatie ontstaat pas na 15 januari (tot die tijd vast op oude vereniging)
-        lid = self.schutterboog.nhblid
-        lid.bij_vereniging = None           # was: self.ver_101
-        lid.save()
+        sporter = self.sporterboog.sporter
+        sporter.bij_vereniging = None           # was: self.ver_101
+        sporter.save()
 
         # nu doorzetten naar RK fase
         self.competitie_sluit_alle_regiocompetities(self.comp_18)
@@ -1053,7 +1053,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # controleer dat schutterboog opgenomen is in de RK selectie
-        deelnemer = KampioenschapSchutterBoog.objects.get(schutterboog=self.schutterboog)
+        deelnemer = KampioenschapSchutterBoog.objects.get(sporterboog=self.sporterboog)
         self.assertEqual(deelnemer.bij_vereniging, None)
 
         # wissel van rol naar RKO rayon1

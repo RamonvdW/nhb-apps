@@ -43,7 +43,7 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Wie',
             {'fields': ('deelcompetitie',
-                        'schutterboog',
+                        'sporterboog',
                         'bij_vereniging')
              }),
         ('Individueel',
@@ -66,12 +66,11 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = ('deelcompetitie',
-                       'schutterboog',
+                       'sporterboog',
                        'bij_vereniging', 'scores')
 
-    search_fields = ('schutterboog__nhblid__voornaam',
-                     'schutterboog__nhblid__achternaam',
-                     'schutterboog__nhblid__nhb_nr')
+    search_fields = ('sporterboog__sporter__unaccented_name',
+                     'sporterboog__sporter__lid_nr')
 
     #list_filter = ('deelcompetitie',)      # kost veel database accesses (komt door __str__)
 
@@ -82,9 +81,9 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
                            'klasse',
                            'klasse__indiv',
                            'klasse__team',
-                           'schutterboog',
-                           'schutterboog__nhblid',
-                           'schutterboog__boogtype')
+                           'sporterboog',
+                           'sporterboog__sporter',
+                           'sporterboog__boogtype')
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
@@ -194,7 +193,7 @@ class KampioenschapSchutterBoogAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Wie',
             {'fields': ('deelcompetitie',
-                        'schutterboog',
+                        'sporterboog',
                         'bij_vereniging')
              }),
         ('Klasse',
@@ -212,11 +211,10 @@ class KampioenschapSchutterBoogAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = ('deelcompetitie',
-                       'schutterboog')
+                       'sporterboog')
 
-    search_fields = ('schutterboog__nhblid__voornaam',
-                     'schutterboog__nhblid__achternaam',
-                     'schutterboog__nhblid__nhb_nr')
+    search_fields = ('sporterboog__sporter__unaccented_name',
+                     'sporterboog__sporter__lid_nr')
 
     list_select_related = ('deelcompetitie',
                            'deelcompetitie__nhb_rayon',
@@ -224,13 +222,13 @@ class KampioenschapSchutterBoogAdmin(admin.ModelAdmin):
                            'klasse',
                            'klasse__indiv',
                            'klasse__team',
-                           'schutterboog',
-                           'schutterboog__boogtype',
-                           'schutterboog__nhblid')
+                           'sporterboog',
+                           'sporterboog__boogtype',
+                           'sporterboog__sporter')
 
     list_filter = ('deelcompetitie__competitie',
                    'deelcompetitie__nhb_rayon',
-                   'schutterboog__boogtype')
+                   'sporterboog__boogtype')
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
         if db_field.name == 'klasse':
@@ -248,7 +246,7 @@ class CompetitieMutatieAdmin(admin.ModelAdmin):
 
     list_select_related = ('deelnemer__deelcompetitie',
                            'deelnemer__klasse',
-                           'deelnemer__schutterboog__nhblid')
+                           'deelnemer__sporterboog__sporter')
 
     list_filter = ('is_verwerkt', 'mutatie')
 
@@ -306,9 +304,9 @@ class RegiocompetitieRondeTeamAdmin(admin.ModelAdmin):
             if db_field.name in ('deelnemers_geselecteerd', 'deelnemers_feitelijk'):
                 kwargs['queryset'] = (RegioCompetitieSchutterBoog
                                       .objects
-                                      .select_related('schutterboog',
-                                                      'schutterboog__nhblid',
-                                                      'schutterboog__boogtype')
+                                      .select_related('sporterboog',
+                                                      'sporterboog__sporter',
+                                                      'sporterboog__boogtype')
                                       .filter(deelcompetitie=self.deelcomp,
                                               bij_vereniging=self.ver,
                                               inschrijf_voorkeur_team=True))

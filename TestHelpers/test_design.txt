@@ -48,9 +48,10 @@ NhbStructuur:
         Volgens 'Clubs en Leden' bovenaan dit document
 
 
-Schutter:
-    SchutterVoorkeuren voor alle leden
-    SchutterBoog voor alle leden
+Sporter:
+    Sporter
+    SporterVoorkeuren voor alle leden
+    SporterBoog voor alle leden
 
 
 Competitie:
@@ -60,6 +61,11 @@ Competitie:
         Regio 101: inschrijfmethode 1
         Regio 102: inschrijfmethode 2
         Regio 103: inschrijfmethode 3
+
+    Ingeschreven sporters
+    Ingeschreven teams
+    Teams in poules
+    Planning
 
 
 Wedstrijden:

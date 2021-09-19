@@ -8,14 +8,14 @@
 
 from django.core.management.base import BaseCommand
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdenPlan, CompetitieWedstrijdUitslag
-from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist
+from Sporter.models import SporterBoog
 
 """
     CompetitieWedstrijd + CompetitieWedstrijdUitslag
     CompetitieWedstrijdenPlan
     
-    Score (type SCORE) gekoppeld aan SchutterBoog zonder NhbLid
+    Score (type SCORE) gekoppeld aan SporterBoog zonder Sporter
     ScoreHist "Uitslag competitie seizoen 2019/2020" + Score (type SCORE) 
     ScoreHist "Uitslag competitie seizoen 2020/2021" + Score (type SCORE) 
     ScoreHist "Importeer scores van uitslagen.handboogsport.nl voor ronde".. + Score (type SCORE) 
@@ -64,17 +64,17 @@ class Command(BaseCommand):
                     Score.objects.filter(pk__in=blok).delete()
             # while
 
-    def _verwijder_lege_schutterboog(self):
-        sporters = SchutterBoog.objects.filter(nhblid=None)
+    def _verwijder_lege_sporterboog(self):
+        sporters = SporterBoog.objects.filter(sporter=None)
         count = sporters.count()
         if count > 0:
             self._use_commit()
-            self.stdout.write('%s schutterboog zonder nhblid' % count)
+            self.stdout.write('%s sporterboog zonder sporter' % count)
 
-            scores = Score.objects.filter(schutterboog__in=sporters)
+            scores = Score.objects.filter(sporterboog__in=sporters)
             count2 = scores.count()
             if count2 > 0:
-                self.stdout.write('%s scores van schutterboog zonder nhblid' % count2)
+                self.stdout.write('%s scores van sporterboog zonder sporter' % count2)
                 if self._do_save:
                     scores.delete()
 
@@ -167,7 +167,7 @@ class Command(BaseCommand):
         self._verwijder_score_scorehist_met_notitie(
                     "Uitslag competitie seizoen 2020/2021")
 
-        self._verwijder_lege_schutterboog()
+        self._verwijder_lege_sporterboog()
 
         self._verwijder_competitie_wedstrijd()
 

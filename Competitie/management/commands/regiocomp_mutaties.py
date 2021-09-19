@@ -581,8 +581,8 @@ class Command(BaseCommand):
         for deelnemer in (RegioCompetitieSchutterBoog
                           .objects
                           .select_related('bij_vereniging',
-                                          'schutterboog',
-                                          'schutterboog__boogtype')
+                                          'sporterboog',
+                                          'sporterboog__boogtype')
                           .filter(deelcompetitie=deelcomp,
                                   inschrijf_voorkeur_team=True)):
 
@@ -596,7 +596,7 @@ class Command(BaseCommand):
             deelnemer.save(update_fields=['gemiddelde_begin_team_ronde'])
 
             ver_nr = deelnemer.bij_vereniging.ver_nr
-            tup = (-vsg, deelnemer.pk, deelnemer.schutterboog.boogtype.pk)
+            tup = (-vsg, deelnemer.pk, deelnemer.sporterboog.boogtype.pk)
             try:
                 ver_dict[ver_nr].append(tup)
             except KeyError:
@@ -658,9 +658,9 @@ class Command(BaseCommand):
                 ronde_team.logboek += '[%s] Geselecteerde schutters:\n' % now_str
                 for deelnemer in (RegioCompetitieSchutterBoog
                                   .objects
-                                  .select_related('schutterboog__nhblid')
+                                  .select_related('sporterboog__sporter')
                                   .filter(pk__in=schutter_pks)):
-                    ronde_team.logboek += '   ' + str(deelnemer.schutterboog.nhblid) + '\n'
+                    ronde_team.logboek += '   ' + str(deelnemer.sporterboog.sporter) + '\n'
                 # for
                 ronde_team.save(update_fields=['logboek'])
             # for
@@ -738,7 +738,7 @@ class Command(BaseCommand):
                        .objects
                        .select_related('deelnemer',
                                        'deelnemer__deelcompetitie',
-                                       'deelnemer__schutterboog__nhblid',
+                                       'deelnemer__sporterboog__sporter',
                                        'deelnemer__klasse')
                        .get(pk=pk))
             if not mutatie.is_verwerkt:

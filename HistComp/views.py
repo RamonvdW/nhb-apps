@@ -9,11 +9,11 @@ from django.http import HttpResponse, Http404
 from django.views.generic import ListView, TemplateView
 from django.db.models import Q
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige
-from NhbStructuur.models import NhbLid
+from Sporter.models import Sporter
 from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTeam
 from .forms import FilterForm
-from Competitie.menu import menu_dynamics_competitie
 from decimal import Decimal
 from urllib.parse import quote_plus
 import csv
@@ -292,15 +292,14 @@ class InterlandView(UserPassesTestMixin, TemplateView):
 
     def maak_data(self, context):
 
-        # maak een cache aan van nhb leden
-        # we filteren hier niet op inactieve leden
-        nhblid_dict = dict()  # [nhb_nr] = NhbLid
-        for schutter in (NhbLid
-                    .objects
-                    .filter(is_actief_lid=True)
-                    .select_related('bij_vereniging')
-                    .all()):
-            nhblid_dict[schutter.nhb_nr] = schutter
+        # maak een cache aan van leden
+        lid_nr2sporter = dict()  # [lid_nr] = Sporter
+        for sporter in (Sporter
+                        .objects
+                        .filter(is_actief_lid=True)
+                        .select_related('bij_vereniging')
+                        .all()):
+            lid_nr2sporter[sporter.lid_nr] = sporter
         # for
 
         context['jeugd_min'] = MINIMALE_LEEFTIJD_JEUGD_INTERLAND
@@ -326,32 +325,33 @@ class InterlandView(UserPassesTestMixin, TemplateView):
                 klasse.url_download = reverse('HistComp:interland-als-bestand',
                                               kwargs={'klasse_pk': klasse.pk})
 
-                # zoek alle schutters erbij met minimaal 5 scores
-                klasse.schutters = list()
+                # zoek alle records erbij met minimaal 5 scores
+                klasse.indiv = list()
 
-                for schutter in (HistCompetitieIndividueel
-                                 .objects
-                                 .filter(histcompetitie=klasse, gemiddelde__gt=Decimal('0.000'))
-                                 .order_by('-gemiddelde')):
+                for indiv in (HistCompetitieIndividueel
+                              .objects
+                              .filter(histcompetitie=klasse,
+                                      gemiddelde__gt=Decimal('0.000'))
+                              .order_by('-gemiddelde')):
 
-                    if schutter.tel_aantal_scores() >= 5:
+                    if indiv.tel_aantal_scores() >= 5:
 
-                        # zoek het nhb lid erbij
+                        # zoek de sporter erbij
                         try:
-                            nhblid = nhblid_dict[schutter.schutter_nr]
+                            sporter = lid_nr2sporter[indiv.schutter_nr]
                         except KeyError:
-                            nhblid = None
+                            sporter = None
 
-                        if nhblid:
-                            schutter.nhblid = nhblid
-                            schutter.wedstrijd_leeftijd = nhblid.bereken_wedstrijdleeftijd(wedstrijd_jaar)
-                            if schutter.wedstrijd_leeftijd >= MINIMALE_LEEFTIJD_JEUGD_INTERLAND:
-                                if schutter.wedstrijd_leeftijd <= MAXIMALE_LEEFTIJD_JEUGD_INTERLAND:
-                                    schutter.leeftijd_str = "%s (jeugd)" % schutter.wedstrijd_leeftijd
+                        if sporter:
+                            indiv.sporter = sporter
+                            indiv.wedstrijd_leeftijd = sporter.bereken_wedstrijdleeftijd(wedstrijd_jaar)
+                            if indiv.wedstrijd_leeftijd >= MINIMALE_LEEFTIJD_JEUGD_INTERLAND:
+                                if indiv.wedstrijd_leeftijd <= MAXIMALE_LEEFTIJD_JEUGD_INTERLAND:
+                                    indiv.leeftijd_str = "%s (jeugd)" % indiv.wedstrijd_leeftijd
                                 else:
-                                    schutter.leeftijd_str = "Senior"
+                                    indiv.leeftijd_str = "Senior"
 
-                                klasse.schutters.append(schutter)
+                                klasse.indiv.append(indiv)
             # for
 
     def get_context_data(self, **kwargs):
@@ -381,14 +381,14 @@ class InterlandAlsBestandView(InterlandView):
         context = dict()
         self.maak_data(context)
 
-        schutters = None
+        indivs = None
         for context_klasse in context['klassen']:
             if context_klasse.pk == klasse.pk:
-                schutters = context_klasse.schutters
+                indivs = context_klasse.indiv
                 break   # from the for
         # for
 
-        if schutters is None:
+        if indivs is None:
             raise Http404('Geen sporters gevonden')
 
         response = HttpResponse(content_type='text/csv')
@@ -397,13 +397,13 @@ class InterlandAlsBestandView(InterlandView):
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
         writer.writerow(['Gemiddelde', 'Wedstrijdleeftijd', 'Geslacht', 'NHB nummer', 'Naam', 'Vereniging'])
 
-        for schutter in schutters:
-            writer.writerow([schutter.gemiddelde,
-                             schutter.leeftijd_str,
-                             schutter.nhblid.geslacht,
-                             schutter.nhblid.nhb_nr,
-                             schutter.nhblid.volledige_naam(),
-                             schutter.nhblid.bij_vereniging])
+        for indiv in indivs:
+            writer.writerow([indiv.gemiddelde,
+                             indiv.leeftijd_str,
+                             indiv.sporter.geslacht,
+                             indiv.sporter.lid_nr,
+                             indiv.sporter.volledige_naam(),
+                             indiv.sporter.bij_vereniging])
         # for
 
         return response

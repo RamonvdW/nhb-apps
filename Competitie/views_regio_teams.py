@@ -570,21 +570,21 @@ class AGControleView(UserPassesTestMixin, TemplateView):
                             inschrijf_voorkeur_team=True,
                             ag_voor_team_mag_aangepast_worden=True,
                             ag_voor_team__gt=0.0)
-                    .select_related('schutterboog',
-                                    'schutterboog__nhblid',
-                                    'schutterboog__boogtype',
+                    .select_related('sporterboog',
+                                    'sporterboog__sporter',
+                                    'sporterboog__boogtype',
                                     'bij_vereniging')
                     .order_by('bij_vereniging__ver_nr',
-                              'schutterboog__nhblid__nhb_nr',
-                              'schutterboog__boogtype__volgorde')):
+                              'sporterboog__sporter__lid_nr',
+                              'sporterboog__boogtype__volgorde')):
 
             ver = obj.bij_vereniging
             obj.ver_str = "[%s] %s" % (ver.ver_nr, ver.naam)
 
-            lid = obj.schutterboog.nhblid
-            obj.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+            sporter = obj.sporterboog.sporter
+            obj.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
 
-            obj.boog_str = obj.schutterboog.boogtype.beschrijving
+            obj.boog_str = obj.sporterboog.boogtype.beschrijving
 
             obj.ag_str = "%.3f" % obj.ag_voor_team
 

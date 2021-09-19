@@ -7,15 +7,15 @@
 from django.test import TestCase
 from django.utils import timezone
 from Functie.models import maak_functie, Functie
-from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
+from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse, RegioCompetitieSchutterBoog,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, LAAG_REGIO, LAAG_RK,
                                DeelcompetitieRonde)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
-from Schutter.models import SchutterBoog, SchutterVoorkeuren
 from Score.operations import score_indiv_ag_opslaan
+from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Wedstrijden.models import WedstrijdLocatie, CompetitieWedstrijd
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -26,7 +26,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
     """ Tests voor de Vereniging applicatie, functies voor de HWL """
 
-    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Schutter', 'Competitie')
+    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 
     url_overzicht = '/vereniging/'
     url_ledenlijst = '/vereniging/leden-lijst/'
@@ -34,7 +34,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
     url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'  # <comp_pk>
     url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
     url_wijzig_ag = '/vereniging/leden-ingeschreven/wijzig-aanvangsgemiddelde/%s/'  # <deelnemer_pk>
-    url_schutter_voorkeuren = '/sporter/voorkeuren/%s/'  # <nhblid_pk>
+    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'  # <sporter_pk>
     url_planning_regio = '/bondscompetities/planning/regio/%s/'  # deelcomp_pk
     url_planning_regio_ronde_methode1 = '/bondscompetities/planning/regio/regio-wedstrijden/%s/'  # ronde_pk
     url_wijzig_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/wijzig/%s/'  # wedstrijd_pk
@@ -72,78 +72,78 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.functie_wl.save()
 
         # maak het lid aan dat HWL wordt
-        lid = NhbLid()
-        lid.nhb_nr = 100001
-        lid.geslacht = "M"
-        lid.voornaam = "Ramon"
-        lid.achternaam = "de Tester"
-        lid.email = "rdetester@gmail.not"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 100001
+        sporter.geslacht = "M"
+        sporter.voornaam = "Ramon"
+        sporter.achternaam = "de Tester"
+        sporter.email = "rdetester@gmail.not"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.save()
 
-        self.account_hwl = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
+        self.account_hwl = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
         self.functie_hwl.accounts.add(self.account_hwl)
 
-        lid.account = self.account_hwl
-        lid.save()
-        self.nhblid_100001 = lid
+        sporter.account = self.account_hwl
+        sporter.save()
+        self.sporter_100001 = sporter
 
         jaar = timezone.now().year
 
         # maak een jeugdlid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100002
-        lid.geslacht = "V"
-        lid.voornaam = "Ramona"
-        lid.achternaam = "de Jeugdschutter"
-        lid.email = "nietleeg@nhb.not"
-        lid.geboorte_datum = datetime.date(year=jaar-10, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.account = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)  # heeft last_login=None
-        lid.save()
-        self.nhblid_100002 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100002
+        sporter.geslacht = "V"
+        sporter.voornaam = "Ramona"
+        sporter.achternaam = "de Jeugdschutter"
+        sporter.email = "nietleeg@nhb.not"
+        sporter.geboorte_datum = datetime.date(year=jaar-10, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)  # heeft last_login=None
+        sporter.save()
+        self.sporter_100002 = sporter
 
         # maak nog een jeugdlid aan, in dezelfde leeftijdsklasse
-        lid = NhbLid()
-        lid.nhb_nr = 100012
-        lid.geslacht = "V"
-        lid.voornaam = "Andrea"
-        lid.achternaam = "de Jeugdschutter"
-        lid.email = ""
-        lid.geboorte_datum = datetime.date(year=jaar-10, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=jaar-3, month=10, day=10)
-        lid.bij_vereniging = ver
-        lid.save()
-        self.nhblid_100012 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100012
+        sporter.geslacht = "V"
+        sporter.voornaam = "Andrea"
+        sporter.achternaam = "de Jeugdschutter"
+        sporter.email = ""
+        sporter.geboorte_datum = datetime.date(year=jaar-10, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=jaar-3, month=10, day=10)
+        sporter.bij_vereniging = ver
+        sporter.save()
+        self.sporter_100012 = sporter
 
         # maak een jeugd lid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100004
-        lid.geslacht = "M"
-        lid.voornaam = "Cadet"
-        lid.achternaam = "de Jeugd"
-        lid.email = ""
-        lid.geboorte_datum = datetime.date(year=jaar-13, month=3, day=4)    # 13=asp, maar 14 in 2e jaar competitie!
-        lid.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
-        self.nhblid_100004 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100004
+        sporter.geslacht = "M"
+        sporter.voornaam = "Cadet"
+        sporter.achternaam = "de Jeugd"
+        sporter.email = ""
+        sporter.geboorte_datum = datetime.date(year=jaar-13, month=3, day=4)    # 13=asp, maar 14 in 2e jaar competitie!
+        sporter.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.save()
+        self.sporter_100004 = sporter
 
         # maak een senior lid aan, om inactief te maken
-        lid = NhbLid()
-        lid.nhb_nr = 100003
-        lid.geslacht = "V"
-        lid.voornaam = "Ramona"
-        lid.achternaam = "de Testerin"
-        lid.email = ""
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=jaar-4, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
-        self.nhblid_100003 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100003
+        sporter.geslacht = "V"
+        sporter.voornaam = "Ramona"
+        sporter.achternaam = "de Testerin"
+        sporter.email = ""
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=jaar-4, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.save()
+        self.sporter_100003 = sporter
 
         # maak een lid aan van een andere vereniging
         # maak een test vereniging
@@ -156,17 +156,17 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.nhbver2 = ver2
 
         # maak een senior lid aan, om inactief te maken
-        lid = NhbLid()
-        lid.nhb_nr = 102000
-        lid.geslacht = "M"
-        lid.voornaam = "Andre"
-        lid.achternaam = "Club"
-        lid.email = ""
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=jaar-4, month=11, day=12)
-        lid.bij_vereniging = ver2
-        lid.save()
-        self.nhblid_102000 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 102000
+        sporter.geslacht = "M"
+        sporter.voornaam = "Andre"
+        sporter.achternaam = "Club"
+        sporter.email = ""
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=jaar-4, month=11, day=12)
+        sporter.bij_vereniging = ver2
+        sporter.save()
+        self.sporter_102000 = sporter
 
         # maak de competitie aan die nodig is voor deze tests
         self._create_histcomp()
@@ -192,8 +192,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
-        rec.schutter_nr = self.nhblid_100001.nhb_nr
-        rec.schutter_naam = self.nhblid_100001.volledige_naam()
+        rec.schutter_nr = self.sporter_100001.lid_nr
+        rec.schutter_naam = self.sporter_100001.volledige_naam()
         rec.vereniging_nr = self.nhbver1.ver_nr
         rec.vereniging_naam = self.nhbver1.naam
         rec.boogtype = 'R'
@@ -213,8 +213,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
-        rec.schutter_nr = self.nhblid_100002.nhb_nr
-        rec.schutter_naam = self.nhblid_100002.volledige_naam()
+        rec.schutter_nr = self.sporter_100002.lid_nr
+        rec.schutter_naam = self.sporter_100002.volledige_naam()
         rec.vereniging_nr = self.nhbver1.ver_nr
         rec.vereniging_naam = self.nhbver1.naam
         rec.boogtype = 'BB'
@@ -244,49 +244,49 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                                                          nhb_regio=self.regio_111,
                                                          competitie__afstand=18)
 
-    def _zet_schutter_voorkeuren(self, nhb_nr):
+    def _zet_sporter_voorkeuren(self, lid_nr):
         # deze functie kan alleen gebruikt worden als HWL
-        url_schutter_voorkeuren = '/sporter/voorkeuren/'
+        url_sporter_voorkeuren = '/sporter/voorkeuren/'
 
         # haal als HWL de voorkeuren pagina op van een lid van de vereniging
-        # dit maakt ook de SchutterBoog records aan
+        # dit maakt ook de SporterBoog records aan
         with self.assert_max_queries(20):
-            resp = self.client.get(url_schutter_voorkeuren + '%s/' % nhb_nr)
+            resp = self.client.get(self.url_sporter_voorkeuren % lid_nr)
         self.assertEqual(resp.status_code, 200)
 
         # post een wijziging
-        if nhb_nr == 100003:
+        if lid_nr == 100003:
             with self.assert_max_queries(20):
-                resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr,
-                                                                  'schiet_BB': 'on',
-                                                                  'schiet_R': 'on',         # 2 bogen
-                                                                  'info_R': 'on',
-                                                                  'voorkeur_meedoen_competitie': 'on'})
-        elif nhb_nr == 100012:
+                resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                                 'schiet_BB': 'on',
+                                                                 'schiet_R': 'on',         # 2 bogen
+                                                                 'info_R': 'on',
+                                                                 'voorkeur_meedoen_competitie': 'on'})
+        elif lid_nr == 100012:
             # geen voorkeur voor meedoen met de competitie
             with self.assert_max_queries(20):
-                resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr,
-                                                                  'schiet_BB': 'on',
-                                                                  'info_R': 'on'})
+                resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                                 'schiet_BB': 'on',
+                                                                 'info_R': 'on'})
 
             # verwijder de SchutterVoorkeur records
-            SchutterVoorkeuren.objects.filter(nhblid__nhb_nr=100012).delete()
+            SporterVoorkeuren.objects.filter(sporter__lid_nr=100012).delete()
         else:
             with self.assert_max_queries(20):
-                resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr,
-                                                                  'schiet_R': 'on',
-                                                                  'info_C': 'on',
-                                                                  'voorkeur_meedoen_competitie': 'on'})
+                resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                                 'schiet_R': 'on',
+                                                                 'info_C': 'on',
+                                                                 'voorkeur_meedoen_competitie': 'on'})
 
         self.assert_is_redirect(resp, self.url_voorkeuren)
 
-    def _zet_ag(self, nhb_nr, afstand, waarde=7.42):
-        if nhb_nr == 100003:
-            schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=nhb_nr, boogtype__afkorting='BB')
-            score_indiv_ag_opslaan(schutterboog, afstand, waarde, self.account_hwl, 'Test AG %s' % afstand)
+    def _zet_ag(self, lid_nr, afstand, waarde=7.42):
+        if lid_nr == 100003:
+            sporterboog = SporterBoog.objects.get(sporter__lid_nr=lid_nr, boogtype__afkorting='BB')
+            score_indiv_ag_opslaan(sporterboog, afstand, waarde, self.account_hwl, 'Test AG %s' % afstand)
 
-        schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=nhb_nr, boogtype__afkorting='R')
-        score_indiv_ag_opslaan(schutterboog, afstand, waarde, self.account_hwl, 'Test AG %s' % afstand)
+        sporterboog = SporterBoog.objects.get(sporter__lid_nr=lid_nr, boogtype__afkorting='R')
+        score_indiv_ag_opslaan(sporterboog, afstand, waarde, self.account_hwl, 'Test AG %s' % afstand)
 
     def _maak_wedstrijden(self):
         # log in as BB en maak de competitie aan
@@ -379,11 +379,11 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'Inactieve leden')
 
         # maak een lid inactief
-        self.nhblid_100003.is_actief_lid = False
-        self.nhblid_100003.save()
+        self.sporter_100003.is_actief_lid = False
+        self.sporter_100003.save()
 
         # stel ook een paar bogen in
-        self._zet_schutter_voorkeuren(100002)
+        self._zet_sporter_voorkeuren(100002)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_ledenlijst)
@@ -405,7 +405,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # eerste keer, zonder schutterboog records
-        self.assertEqual(SchutterBoog.objects.count(), 0)
+        self.assertEqual(SporterBoog.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -414,18 +414,18 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # nog een keer, nu met schutterboog records aanwezig
         # zowel van de vereniging van de HWL als van andere verenigingen
-        for nhblid in (self.nhblid_100001, self.nhblid_100002, self.nhblid_100003):
+        for sporter in (self.sporter_100001, self.sporter_100002, self.sporter_100003):
             # get operatie maakt de schutterboog records aan
-            url = self.url_schutter_voorkeuren % nhblid.pk
+            url = self.url_sporter_voorkeuren % sporter.pk
             with self.assert_max_queries(20):
                 resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
         # for
-        self.assertEqual(SchutterBoog.objects.count(), 15)
+        self.assertEqual(SporterBoog.objects.count(), 15)
 
         # zet een aantal schutterboog records op gebruik voor wedstrijd
         # dit maakt een schutter-boog
-        for obj in SchutterBoog.objects.all():
+        for obj in SporterBoog.objects.all():
             if obj.pk & 1:  # odd?
                 obj.voor_wedstrijd = True
                 obj.save()
@@ -433,8 +433,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # nu de schutterboog records gemaakt zijn (HWL had toestemming)
         # stoppen we 1 lid in een andere vereniging
-        self.nhblid_100003.bij_vereniging = self.nhbver2
-        self.nhblid_100003.save()
+        self.sporter_100003.bij_vereniging = self.nhbver2
+        self.sporter_100003.save()
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren)
@@ -461,7 +461,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # maakt SchutterBoog aan van andere vereniging
-        self._zet_schutter_voorkeuren(102000)
+        self._zet_sporter_voorkeuren(102000)
 
         # herstel de HWL functie
         self.functie_hwl.nhb_ver = self.nhbver1
@@ -479,7 +479,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_18, 'B')
 
         # stel 1 schutter in die op randje aspirant/cadet zit
-        self._zet_schutter_voorkeuren(100004)
+        self._zet_sporter_voorkeuren(100004)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -498,7 +498,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
         inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
-        self.assertEqual(inschrijving.schutterboog.nhblid.nhb_nr, 100004)
+        self.assertEqual(inschrijving.sporterboog.sporter.lid_nr, 100004)
         self.assertTrue('Cadet' in inschrijving.klasse.indiv.beschrijving)
         inschrijving.delete()
 
@@ -520,9 +520,9 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # for
 
         # stel een paar bogen in
-        self._zet_schutter_voorkeuren(100002)
-        self._zet_schutter_voorkeuren(100003)
-        self._zet_schutter_voorkeuren(100012)
+        self._zet_sporter_voorkeuren(100002)
+        self._zet_sporter_voorkeuren(100003)
+        self._zet_sporter_voorkeuren(100012)
 
         self._zet_ag(100002, 18)
         self._zet_ag(100003, 18)
@@ -547,7 +547,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
-        deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog__nhblid__nhb_nr=100003)
+        deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog__sporter__lid_nr=100003)
         # print('deelnemer:', deelnemer, 'klasse:', deelnemer.klasse)
         self.assertEqual(deelnemer.klasse, klasse_5)
 
@@ -592,8 +592,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # stel een paar bogen in
-        self._zet_schutter_voorkeuren(100002)
-        self._zet_schutter_voorkeuren(100003)
+        self._zet_sporter_voorkeuren(100002)
+        self._zet_sporter_voorkeuren(100003)
 
         self._zet_ag(100002, 18)
         self._zet_ag(100003, 25)
@@ -656,8 +656,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # stel een paar bogen in
-        self._zet_schutter_voorkeuren(100002)
-        self._zet_schutter_voorkeuren(100003)
+        self._zet_sporter_voorkeuren(100002)
+        self._zet_sporter_voorkeuren(100003)
 
         self._zet_ag(100002, 18)
         self._zet_ag(100003, 25)
@@ -671,29 +671,29 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # probeer aan te melden met een niet-wedstrijd boog
-        schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=self.nhblid_100002.nhb_nr,
-                                                boogtype__afkorting='R')
-        schutterboog.voor_wedstrijd = False
-        schutterboog.save()
+        sporterboog = SporterBoog.objects.get(sporter__lid_nr=self.sporter_100002.lid_nr,
+                                               boogtype__afkorting='R')
+        sporterboog.voor_wedstrijd = False
+        sporterboog.save()
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'dagdeel': 'AV'})
         self.assert404(resp)     # 404 = Not allowed
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        schutterboog.voor_wedstrijd = True
-        schutterboog.save()
+        sporterboog.voor_wedstrijd = True
+        sporterboog.save()
 
         # probeer aan te melden met een lid dat niet van de vereniging van de HWL is
-        self.nhblid_100002.bij_vereniging = self.nhbver2
-        self.nhblid_100002.save()
+        self.sporter_100002.bij_vereniging = self.nhbver2
+        self.sporter_100002.save()
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'dagdeel': 'AV'})
         self.assert403(resp)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        self.nhblid_100002.bij_vereniging = self.nhbver1
-        self.nhblid_100002.save()
+        self.sporter_100002.bij_vereniging = self.nhbver1
+        self.sporter_100002.save()
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
@@ -724,8 +724,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # stel een paar bogen in
-        self._zet_schutter_voorkeuren(100002)
-        self._zet_schutter_voorkeuren(100003)
+        self._zet_sporter_voorkeuren(100002)
+        self._zet_sporter_voorkeuren(100003)
 
         url = self.url_inschrijven % self.comp_18.pk
         zet_competitie_fase(self.comp_18, 'B')
@@ -741,7 +741,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)    # 1 schutter, 1 competitie
 
-        deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog__nhblid__nhb_nr=100003)
+        deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog__sporter__lid_nr=100003)
         self.assertEqual(deelnemer.inschrijf_gekozen_wedstrijden.count(), 1)
 
     def test_inschrijven_team(self):
@@ -760,8 +760,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # stel een paar bogen in
-        self._zet_schutter_voorkeuren(100004)
-        self._zet_schutter_voorkeuren(100003)
+        self._zet_sporter_voorkeuren(100004)
+        self._zet_sporter_voorkeuren(100003)
 
         self._zet_ag(100004, 18)
         self._zet_ag(100003, 25)
@@ -791,9 +791,9 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_18, 'B')
 
         # zet de udvl tussen de dvl van de twee schutters in
-        # nhblid_100003.sinds_datum = datetime.date(year=jaar-4, month=11, day=12)
-        # nhblid_100004.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
-        self.comp_18.uiterste_datum_lid = datetime.date(year=self.nhblid_100004.sinds_datum.year, month=1, day=1)
+        # sporter_100003.sinds_datum = datetime.date(year=jaar-4, month=11, day=12)
+        # sporter_100004.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
+        self.comp_18.uiterste_datum_lid = datetime.date(year=self.sporter_100004.sinds_datum.year, month=1, day=1)
         self.comp_18.save()
 
         # login als HWL
@@ -802,8 +802,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # stel een paar bogen in
-        self._zet_schutter_voorkeuren(100004)
-        self._zet_schutter_voorkeuren(100003)
+        self._zet_sporter_voorkeuren(100004)
+        self._zet_sporter_voorkeuren(100003)
 
         self._zet_ag(100004, 18)
         self._zet_ag(100003, 25)
@@ -825,7 +825,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         for obj in RegioCompetitieSchutterBoog.objects.all():
             self.assertEqual(obj.inschrijf_notitie, 'door de hwl')
-            if obj.schutterboog.nhblid.nhb_nr == 100003:
+            if obj.sporterboog.sporter.lid_nr == 100003:
                 self.assertTrue(obj.inschrijf_voorkeur_team)
             else:
                 # 100004 heeft dvl > udvl, dus mag niet mee doen
@@ -839,8 +839,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         # stel een paar bogen in
-        self._zet_schutter_voorkeuren(100004)
-        self._zet_schutter_voorkeuren(100003)
+        self._zet_sporter_voorkeuren(100004)
+        self._zet_sporter_voorkeuren(100003)
 
         self._zet_ag(100004, 18)
         self._zet_ag(100003, 25)
@@ -931,7 +931,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assert404(resp)  # 404 = Not allowed
 
         # extreem: aanmelden zonder passende klasse
-        self._zet_schutter_voorkeuren(100002)
+        self._zet_sporter_voorkeuren(100002)
         self._zet_ag(100002, 18)
         url = self.url_inschrijven % self.comp_18.pk
         zet_competitie_fase(self.comp_18, 'B')
@@ -998,8 +998,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assert404(resp)  # 404 = Not allowed
 
         # stel een paar bogen in
-        self._zet_schutter_voorkeuren(100002)
-        self._zet_schutter_voorkeuren(100003)
+        self._zet_sporter_voorkeuren(100002)
+        self._zet_sporter_voorkeuren(100003)
 
         # beide sporters hebben geen AG
 
@@ -1012,7 +1012,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
-        deelnemer = RegioCompetitieSchutterBoog.objects.get(schutterboog__nhblid__nhb_nr=100003)
+        deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog__sporter__lid_nr=100003)
 
         url = self.url_wijzig_ag % deelnemer.pk
         with self.assert_max_queries(20):

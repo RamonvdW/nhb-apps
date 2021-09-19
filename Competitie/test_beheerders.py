@@ -7,7 +7,8 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Functie.models import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from Sporter.models import Sporter
 from .models import Competitie, DeelCompetitie, RegioCompetitieSchutterBoog, LAAG_REGIO, LAAG_RK, LAAG_BK
 from .operations import competities_aanmaken
 from .test_fase import zet_competitie_fase
@@ -36,27 +37,27 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         cls.testdata.maak_accounts()
 
     def _prep_beheerder_lid(self, voornaam):
-        nhb_nr = self._next_nhbnr
-        self._next_nhbnr += 1
+        lid_nr = self._next_lid_nr
+        self._next_lid_nr += 1
 
-        lid = NhbLid()
-        lid.nhb_nr = nhb_nr
-        lid.geslacht = "M"
-        lid.voornaam = voornaam
-        lid.achternaam = "Tester"
-        lid.email = voornaam.lower() + "@nhb.test"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = self._ver
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = lid_nr
+        sporter.geslacht = "M"
+        sporter.voornaam = voornaam
+        sporter.achternaam = "Tester"
+        sporter.email = voornaam.lower() + "@nhb.test"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = self._ver
+        sporter.save()
 
-        return self.e2e_create_account(nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
+        return self.e2e_create_account(lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
 
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self._next_nhbnr = 100001
+        self._next_lid_nr = 100001
 
         self.rayon_1 = NhbRayon.objects.get(rayon_nr=1)
         self.rayon_2 = NhbRayon.objects.get(rayon_nr=2)
@@ -137,7 +138,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             zet_competitie_fase(comp, 'B')
         # for
 
-        nhb_nr = 110000
+        lid_nr = 110000
         recurve_boog_pk = BoogType.objects.get(afkorting='R').pk
         compound_boog_pk = BoogType.objects.get(afkorting='C').pk
         barebow_boog_pk = BoogType.objects.get(afkorting='BB').pk
@@ -152,53 +153,53 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
             # maak 3 leden aan
             for lp in range(3):
-                nhb_nr += 1
-                lid = NhbLid()
-                lid.nhb_nr = nhb_nr
-                lid.voornaam = "Lid %s" % nhb_nr
-                lid.achternaam = "de Tester"
-                lid.bij_vereniging = nhb_ver
-                lid.is_actief_lid = True
+                lid_nr += 1
+                sporter = Sporter()
+                sporter.lid_nr = lid_nr
+                sporter.voornaam = "Lid %s" % lid_nr
+                sporter.achternaam = "de Tester"
+                sporter.bij_vereniging = nhb_ver
+                sporter.is_actief_lid = True
                 if barebow_boog_pk:
-                    lid.geboorte_datum = datetime.date(2019-12, 1, 1)   # aspirant
+                    sporter.geboorte_datum = datetime.date(2019-12, 1, 1)   # aspirant
                 else:
-                    lid.geboorte_datum = datetime.date(2000, 1, 1)      # senior
-                lid.sinds_datum = datetime.date(2010, 1, 1)
-                lid.geslacht = 'M'
-                lid.save()
+                    sporter.geboorte_datum = datetime.date(2000, 1, 1)      # senior
+                sporter.sinds_datum = datetime.date(2010, 1, 1)
+                sporter.geslacht = 'M'
+                sporter.save()
 
-                # haal de schutter voorkeuren op, zodat de schutterboog records aangemaakt worden
-                url_voorkeuren = '/sporter/voorkeuren/%s/' % nhb_nr
+                # haal de sporter voorkeuren op, zodat de sporterboog records aangemaakt worden
+                url_voorkeuren = '/sporter/voorkeuren/%s/' % lid_nr
                 with self.assert_max_queries(20):
                     resp = self.client.get(url_voorkeuren)
                 self.assertEqual(resp.status_code, 200)     # 200 = OK
 
                 # zet de recurve boog aan
                 if lp == 1:
-                    # zet de DT voorkeur aan voor een paar schutters
+                    # zet de DT voorkeur aan voor een paar sporters
                     with self.assert_max_queries(20):
-                        resp = self.client.post(url_voorkeuren, {'nhblid_pk': nhb_nr,
+                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_R': 'on',
                                                                  'voorkeur_eigen_blazoen': 'on'})
-                    # onthoud deze schutterboog om straks in bulk aan te melden
+                    # onthoud deze sporterboog om straks in bulk aan te melden
                     # 'lid_NNNNNN_boogtype_MM'
-                    post_params['lid_%s_boogtype_%s' % (nhb_nr, recurve_boog_pk)] = 'on'
+                    post_params['lid_%s_boogtype_%s' % (lid_nr, recurve_boog_pk)] = 'on'
                 elif lp == 2:
                     with self.assert_max_queries(20):
-                        resp = self.client.post(url_voorkeuren, {'nhblid_pk': nhb_nr,
+                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_C': 'on'})
-                    post_params['lid_%s_boogtype_%s' % (nhb_nr, compound_boog_pk)] = 'on'
+                    post_params['lid_%s_boogtype_%s' % (lid_nr, compound_boog_pk)] = 'on'
                 elif barebow_boog_pk:
                     with self.assert_max_queries(20):
-                        resp = self.client.post(url_voorkeuren, {'nhblid_pk': nhb_nr,
+                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_BB': 'on'})
-                    post_params['lid_%s_boogtype_%s' % (nhb_nr, barebow_boog_pk)] = 'on'
+                    post_params['lid_%s_boogtype_%s' % (lid_nr, barebow_boog_pk)] = 'on'
                     barebow_boog_pk = None
                 else:
                     with self.assert_max_queries(20):
-                        resp = self.client.post(url_voorkeuren, {'nhblid_pk': nhb_nr,
+                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_R': 'on'})
-                    post_params['lid_%s_boogtype_%s' % (nhb_nr, recurve_boog_pk)] = 'on'
+                    post_params['lid_%s_boogtype_%s' % (lid_nr, recurve_boog_pk)] = 'on'
 
                 self.assert_is_redirect_not_plein(resp)         # check for success
             # for
@@ -586,7 +587,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         return regel
 
     def test_verander_vereniging(self):
-        # verander 1 schutterboog naar een andere verenigingen
+        # verander 1 sporterboog naar een andere verenigingen
         # en laat zien dat de oude vereniging blijft staan in de inschrijven
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
 
@@ -600,7 +601,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(functie_rcl)
 
         inschrijving = RegioCompetitieSchutterBoog.objects.filter(bij_vereniging=self._ver).all()[0]
-        naam_str = "[" + str(inschrijving.schutterboog.nhblid.nhb_nr) + "] " + inschrijving.schutterboog.nhblid.volledige_naam()
+        naam_str = "[" + str(inschrijving.sporterboog.sporter.lid_nr) + "] " + inschrijving.sporterboog.sporter.volledige_naam()
         ver_str = str(self._ver)            # [ver_nr] Vereniging
 
         # controleer dat de schutter bij de juiste vereniging staat
@@ -614,9 +615,9 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assertEqual(None, self._vind_tabel_regel_met(resp, 'dit staat er for sure niet in'))
 
         # schrijf de schutter over naar een andere vereniging
-        lid = inschrijving.schutterboog.nhblid
-        lid.bij_vereniging = self._ver2
-        lid.save()
+        sporter = inschrijving.sporterboog.sporter
+        sporter.bij_vereniging = self._ver2
+        sporter.save()
 
         # controleer dat de schutter nog steeds bij dezelfde vereniging staat
         with self.assert_max_queries(20):

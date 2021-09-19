@@ -7,8 +7,8 @@
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
 
 
-def _score_ag_opslaan(score_type, schutterboog, afstand, gemiddelde, door_account, notitie):
-    """ slaan het aanvangsgemiddelde op voor schutterboog
+def _score_ag_opslaan(score_type, sporterboog, afstand, gemiddelde, door_account, notitie):
+    """ slaan het aanvangsgemiddelde op voor sporterboog
 
         Return value:
             True  = opslagen
@@ -17,12 +17,12 @@ def _score_ag_opslaan(score_type, schutterboog, afstand, gemiddelde, door_accoun
     waarde = int(gemiddelde * 1000)
 
     try:
-        score = Score.objects.get(schutterboog=schutterboog,
+        score = Score.objects.get(sporterboog=sporterboog,
                                   type=score_type,
                                   afstand_meter=afstand)
     except Score.DoesNotExist:
         # eerste aanvangsgemiddelde voor deze afstand
-        score = Score(schutterboog=schutterboog,
+        score = Score(sporterboog=sporterboog,
                       type=score_type,
                       waarde=waarde,
                       afstand_meter=afstand)
@@ -54,14 +54,14 @@ def _score_ag_opslaan(score_type, schutterboog, afstand, gemiddelde, door_accoun
     return False
 
 
-def score_indiv_ag_opslaan(schutterboog, afstand, gemiddelde, door_account, notitie):
-    """ sla een individueel AG op voor een specifieke schutter-boog en afstand """
-    return _score_ag_opslaan(SCORE_TYPE_INDIV_AG, schutterboog, afstand, gemiddelde, door_account, notitie)
+def score_indiv_ag_opslaan(sporterboog, afstand, gemiddelde, door_account, notitie):
+    """ sla een individueel AG op voor een specifieke sporterboog en afstand """
+    return _score_ag_opslaan(SCORE_TYPE_INDIV_AG, sporterboog, afstand, gemiddelde, door_account, notitie)
 
 
-def score_teams_ag_opslaan(schutterboog, afstand, gemiddelde, door_account, notitie):
-    """ sla een team-AG op voor een specifieke schutter-boog en afstand """
-    return _score_ag_opslaan(SCORE_TYPE_TEAM_AG, schutterboog, afstand, gemiddelde, door_account, notitie)
+def score_teams_ag_opslaan(sporterboog, afstand, gemiddelde, door_account, notitie):
+    """ sla een team-AG op voor een specifieke sporterboog en afstand """
+    return _score_ag_opslaan(SCORE_TYPE_TEAM_AG, sporterboog, afstand, gemiddelde, door_account, notitie)
 
 
 def wanneer_ag_vastgesteld(afstand_meter):

@@ -6,7 +6,8 @@
 
 from django.test import TestCase
 from Functie.models import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
+from NhbStructuur.models import NhbRegio, NhbVereniging
+from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
@@ -38,45 +39,45 @@ class TestCompetitieHWL(E2EHelpers, TestCase):
         self.functie_hwl.save()
 
         # maak het lid aan dat HWL wordt
-        lid = NhbLid()
-        lid.nhb_nr = 100001
-        lid.geslacht = "M"
-        lid.voornaam = "Ramon"
-        lid.achternaam = "de Tester"
-        lid.email = "rdetester@gmail.not"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
-        self.nhblid1 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100001
+        sporter.geslacht = "M"
+        sporter.voornaam = "Ramon"
+        sporter.achternaam = "de Tester"
+        sporter.email = "rdetester@gmail.not"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.save()
+        self.sporter_100001 = sporter
 
-        self.account_hwl = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
+        self.account_hwl = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
         self.functie_hwl.accounts.add(self.account_hwl)
 
         # maak een jeugdlid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100002
-        lid.geslacht = "V"
-        lid.voornaam = "Ramona"
-        lid.achternaam = "de Jeugdschutter"
-        lid.email = ""
-        lid.geboorte_datum = datetime.date(year=2010, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 100002
+        sporter.geslacht = "V"
+        sporter.voornaam = "Ramona"
+        sporter.achternaam = "de Jeugdschutter"
+        sporter.email = ""
+        sporter.geboorte_datum = datetime.date(year=2010, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.save()
 
         # maak een senior lid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100003
-        lid.geslacht = "V"
-        lid.voornaam = "Ramona"
-        lid.achternaam = "de Testerin"
-        lid.email = ""
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
-        self.nhblid2 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100003
+        sporter.geslacht = "V"
+        sporter.voornaam = "Ramona"
+        sporter.achternaam = "de Testerin"
+        sporter.email = ""
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.save()
+        self.sporter_100003 = sporter
 
     def test_dummy(self):
         self.assertFalse(False)

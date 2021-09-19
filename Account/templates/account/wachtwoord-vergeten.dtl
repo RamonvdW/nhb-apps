@@ -34,8 +34,8 @@
                 {% csrf_token %}
 
                 <div class="row"><div class="input-field col s12">
-                    <label class="black-text" for="id_nhb_nr">NHB nummer:</label>
-                    <input class="with-gap" autofocus type="text" name="nhb_nr" minlength="6" maxlength="6" value="" required id="id_nhb_nr">
+                    <label class="black-text" for="id_lid_nr">Bondsnummer:</label>
+                    <input class="with-gap" autofocus type="text" name="lid_nr" minlength="6" maxlength="6" value="" required id="id_lid_nr">
                 </div></div>
 
                 <div class="row"><div class="input-field col s12">

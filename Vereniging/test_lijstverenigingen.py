@@ -8,7 +8,8 @@ from django.test import TestCase
 from Competitie.models import DeelCompetitie, LAAG_BK, LAAG_RK, LAAG_REGIO
 from Competitie.operations import competities_aanmaken
 from Functie.models import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
+from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -29,11 +30,11 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         cls.testdata.maak_accounts()
 
     def _prep_beheerder_lid(self, voornaam):
-        nhb_nr = self._next_nhbnr
-        self._next_nhbnr += 1
+        lid_nr = self._next_lid_nr
+        self._next_lid_nr += 1
 
-        lid = NhbLid()
-        lid.nhb_nr = nhb_nr
+        lid = Sporter()
+        lid.lid_nr = lid_nr
         lid.geslacht = "M"
         lid.voornaam = voornaam
         lid.achternaam = "Tester"
@@ -43,13 +44,13 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         lid.bij_vereniging = self._ver
         lid.save()
 
-        return self.e2e_create_account(nhb_nr, lid.email, E2EHelpers.WACHTWOORD, accepteer_vhpg=True)
+        return self.e2e_create_account(lid_nr, lid.email, E2EHelpers.WACHTWOORD, accepteer_vhpg=True)
 
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self._next_nhbnr = 100001
+        self._next_lid_nr = 100001
 
         self.rayon_2 = NhbRayon.objects.get(rayon_nr=2)
         self.regio_101 = NhbRegio.objects.get(regio_nr=101)

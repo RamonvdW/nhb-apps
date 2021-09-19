@@ -14,13 +14,13 @@ from django.views.generic import ListView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
-from NhbStructuur.models import NhbLid
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Overig.tijdelijke_url import maak_tijdelijke_url_functie_email
 from Mailer.models import mailer_queue_email
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_FUNCTIE_EMAIL
 from Overig.helpers import get_safe_from_ip
+from Sporter.models import Sporter
 from .rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving, rol_activeer_wissel_van_rol_menu_voor_account
 from .models import Functie
 from .forms import ZoekBeheerdersForm, WijzigBeheerdersForm, WijzigEmailForm
@@ -28,7 +28,7 @@ from .forms import ZoekBeheerdersForm, WijzigBeheerdersForm, WijzigEmailForm
 
 TEMPLATE_OVERZICHT = 'functie/overzicht.dtl'
 TEMPLATE_OVERZICHT_VERENIGING = 'functie/overzicht-vereniging.dtl'
-TEMPLATE_WIJZIG = 'functie/koppel-beheerders.dtl'
+TEMPLATE_KOPPEL_BEHEERDERS = 'functie/koppel-beheerders.dtl'
 TEMPLATE_WIJZIG_EMAIL = 'functie/wijzig-email.dtl'
 TEMPLATE_BEVESTIG_EMAIL = 'functie/bevestig.dtl'
 TEMPLATE_EMAIL_BEVESTIGD = 'functie/bevestigd.dtl'
@@ -370,18 +370,18 @@ class OntvangBeheerderWijzigingenView(View):
         except Account.DoesNotExist:
             raise Http404('Account niet gevonden')
 
-        if account.nhblid_set.count() > 0:
-            nhblid = account.nhblid_set.all()[0]
-            wie = "NHB lid %s (%s)" % (nhblid.nhb_nr, nhblid.volledige_naam())
+        if account.sporter_set.count() > 0:
+            sporter = account.sporter_set.all()[0]
+            wie = "Sporter %s (%s)" % (sporter.lid_nr, sporter.volledige_naam())
         else:
-            nhblid = None
+            sporter = None
             wie = "Account %s" % account.get_account_full_name()
 
         if add:
             rol_nu, functie_nu = rol_get_huidige_functie(request)
             if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
-                # stel zeker dat nhblid lid is bij de vereniging van functie
-                if not nhblid or nhblid.bij_vereniging != functie.nhb_ver:
+                # stel zeker dat sporter lid is bij de vereniging van functie
+                if not sporter or sporter.bij_vereniging != functie.nhb_ver:
                     raise PermissionDenied('Geen lid van jouw vereniging')
 
             functie.accounts.add(account)
@@ -427,7 +427,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
     """ Via deze view kunnen beheerders voor een functie gekozen worden """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_WIJZIG
+    template_name = TEMPLATE_KOPPEL_BEHEERDERS
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -461,16 +461,16 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
         beheerder_accounts = self._functie.accounts.all()
         for account in beheerder_accounts:
             account.geo_beschrijving = ''
-            if account.nhblid_set.count() > 0:
-                nhblid = account.nhblid_set.all()[0]
-                if nhblid.bij_vereniging:
-                    regio = nhblid.bij_vereniging.regio
+            if account.sporter_set.count() > 0:
+                sporter = account.sporter_set.all()[0]
+                if sporter.bij_vereniging:
+                    regio = sporter.bij_vereniging.regio
                     if not regio.is_administratief:
                         account.geo_beschrijving = "regio %s / rayon %s" % (regio.regio_nr, regio.rayon.rayon_nr)
-                if not nhblid.bij_vereniging:
+                if not sporter.bij_vereniging:
                     # deze melding komt na 15 januari
                     account.let_op = 'LET OP: geen lid meer bij een vereniging'
-                elif self._functie.nhb_ver and nhblid.bij_vereniging != self._functie.nhb_ver:
+                elif self._functie.nhb_ver and sporter.bij_vereniging != self._functie.nhb_ver:
                     # functie voor beheerder van een vereniging
                     # lid is overgestapt
                     account.let_op = 'LET OP: geen lid bij deze vereniging'
@@ -484,19 +484,19 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
 
             # let op: we koppelen een account, maar zoeken een NHB lid,
             #         om te kunnen filteren op vereniging
-            #         accounts die geen NhbLid zijn worden hier niet gevonden
-            qset = (NhbLid
+            #         accounts die geen lid zijn worden hier niet gevonden
+            qset = (Sporter
                     .objects
                     .exclude(account=None)
                     .exclude(is_actief_lid=False)
                     .exclude(account__in=beheerder_accounts)
                     .annotate(hele_reeks=Concat('voornaam', Value(' '), 'achternaam'))
-                    .annotate(nhb_nr_str=Cast('nhb_nr', CharField()))
-                    .filter(Q(nhb_nr_str__contains=zoekterm) |
+                    .annotate(lid_nr_str=Cast('lid_nr', CharField()))
+                    .filter(Q(lid_nr_str__contains=zoekterm) |
                             Q(voornaam__icontains=zoekterm) |
                             Q(achternaam__icontains=zoekterm) |
                             Q(hele_reeks__icontains=zoekterm))
-                    .order_by('nhb_nr'))
+                    .order_by('lid_nr'))
 
             is_vereniging_rol = (self._functie.rol in ('SEC', 'HWL', 'WL'))
             if is_vereniging_rol:
@@ -504,15 +504,15 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
                 qset = qset.filter(bij_vereniging=self._functie.nhb_ver)
 
             objs = list()
-            for nhblid in qset[:50]:
-                account = nhblid.account
+            for sporter in qset[:50]:
+                account = sporter.account
                 account.geo_beschrijving = ''
-                account.nhb_nr_str = str(nhblid.nhb_nr)
+                account.lid_nr_str = str(sporter.lid_nr)
 
                 if is_vereniging_rol:
-                    account.vereniging_naam = str(nhblid.bij_vereniging)    # [1234] Naam
+                    account.vereniging_naam = str(sporter.bij_vereniging)    # [1234] Naam
                 else:
-                    regio = nhblid.bij_vereniging.regio
+                    regio = sporter.bij_vereniging.regio
                     if not regio.is_administratief:
                         account.geo_beschrijving = "regio %s / rayon %s" % (regio.regio_nr, regio.rayon.rayon_nr)
 

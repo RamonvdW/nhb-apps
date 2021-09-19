@@ -6,10 +6,10 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType, TeamWedstrijdklasse
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
-from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Schutter.models import SchutterBoog
 from Functie.models import maak_functie
+from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from NhbStructuur.models import NhbRegio, NhbVereniging
+from Sporter.models import Sporter, SporterBoog
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse, CompetitieMutatie,
                      INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3,
                      DAGDEEL_AFKORTINGEN)
@@ -83,19 +83,19 @@ class TestCompetitie(E2EHelpers, TestCase):
         ver.save()
 
         # maak een volwassen test lid aan (komt in groep met klasse onbekend)
-        lid = NhbLid()
-        lid.nhb_nr = 100001
-        lid.geslacht = "M"
-        lid.voornaam = "Ramon"
-        lid.achternaam = "de Tester"
-        lid.email = "rdetester@gmail.not"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        self.account_lid = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)
-        lid.account = self.account_lid
-        lid.save()
-        self.lid_100001 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100001
+        sporter.geslacht = "M"
+        sporter.voornaam = "Ramon"
+        sporter.achternaam = "de Tester"
+        sporter.email = "rdetester@gmail.not"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = ver
+        self.account_lid = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
+        sporter.account = self.account_lid
+        sporter.save()
+        self.sporter_100001 = sporter
 
         self.functie_hwl = maak_functie('HWL test', 'HWL')
         self.functie_hwl.nhb_ver = ver
@@ -103,48 +103,48 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.functie_hwl.accounts.add(self.account_lid)
 
         # maak een jeugdlid aan (komt in BB jeugd zonder klasse onbekend)
-        lid = NhbLid()
-        lid.nhb_nr = 100002
-        lid.geslacht = "M"
-        lid.voornaam = "Ramon"
-        lid.achternaam = "het Testertje"
-        lid.email = "rdetestertje@gmail.not"
-        lid.geboorte_datum = datetime.date(year=2008, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2015, month=11, day=12)
-        lid.bij_vereniging = ver
-        self.account_jeugdlid = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)
-        lid.account = self.account_jeugdlid
-        lid.save()
-        self.lid_100002 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100002
+        sporter.geslacht = "M"
+        sporter.voornaam = "Ramon"
+        sporter.achternaam = "het Testertje"
+        sporter.email = "rdetestertje@gmail.not"
+        sporter.geboorte_datum = datetime.date(year=2008, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2015, month=11, day=12)
+        sporter.bij_vereniging = ver
+        self.account_jeugdlid = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
+        sporter.account = self.account_jeugdlid
+        sporter.save()
+        self.sporter_100002 = sporter
 
         boog_bb = BoogType.objects.get(afkorting='BB')
         boog_ib = BoogType.objects.get(afkorting='IB')
 
         # maak een schutterboog aan voor het jeugdlid (nodig om aan te melden)
-        schutterboog = SchutterBoog(nhblid=self.lid_100002, boogtype=boog_bb, voor_wedstrijd=False)
-        schutterboog.save()
-        self.schutterboog_100002 = schutterboog
+        sporterboog = SporterBoog(sporter=self.sporter_100002, boogtype=boog_bb, voor_wedstrijd=False)
+        sporterboog.save()
+        self.schutterboog_100002 = sporterboog
 
-        lid = NhbLid()
-        lid.nhb_nr = 100003
-        lid.geslacht = "V"
-        lid.voornaam = "Zus"
-        lid.achternaam = "de Testerin"
-        lid.email = "zus@gmail.not"
-        lid.geboorte_datum = datetime.date(year=2008, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2015, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
-        self.lid_100003 = lid
-
-        # maak een schutterboog aan voor het lid (nodig om aan te melden)
-        schutterboog = SchutterBoog(nhblid=self.lid_100003, boogtype=boog_bb, voor_wedstrijd=True)
-        schutterboog.save()
-        self.schutterboog_100003 = schutterboog
+        sporter = Sporter()
+        sporter.lid_nr = 100003
+        sporter.geslacht = "V"
+        sporter.voornaam = "Zus"
+        sporter.achternaam = "de Testerin"
+        sporter.email = "zus@gmail.not"
+        sporter.geboorte_datum = datetime.date(year=2008, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2015, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.save()
+        self.lid_100003 = sporter
 
         # maak een schutterboog aan voor het lid (nodig om aan te melden)
-        schutterboog = SchutterBoog(nhblid=self.lid_100001, boogtype=boog_ib, voor_wedstrijd=True)
-        schutterboog.save()
+        sporterboog = SporterBoog(sporter=self.lid_100003, boogtype=boog_bb, voor_wedstrijd=True)
+        sporterboog.save()
+        self.schutterboog_100003 = sporterboog
+
+        # maak een schutterboog aan voor het lid (nodig om aan te melden)
+        sporterboog = SporterBoog(sporter=self.sporter_100001, boogtype=boog_ib, voor_wedstrijd=True)
+        sporterboog.save()
 
         # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
         histcomp = HistCompetitie()
@@ -167,8 +167,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
-        rec.schutter_nr = self.lid_100001.nhb_nr
-        rec.schutter_naam = self.lid_100001.volledige_naam()
+        rec.schutter_nr = self.sporter_100001.lid_nr
+        rec.schutter_naam = self.sporter_100001.volledige_naam()
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'R'
@@ -187,8 +187,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp2
         rec.rank = 1
-        rec.schutter_nr = self.lid_100001.nhb_nr
-        rec.schutter_naam = self.lid_100001.volledige_naam()
+        rec.schutter_nr = self.sporter_100001.lid_nr
+        rec.schutter_naam = self.sporter_100001.volledige_naam()
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'R'
@@ -207,8 +207,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 100
-        rec.schutter_nr = self.lid_100001.nhb_nr
-        rec.schutter_naam = self.lid_100001.volledige_naam()
+        rec.schutter_nr = self.sporter_100001.lid_nr
+        rec.schutter_naam = self.sporter_100001.volledige_naam()
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'IB'
@@ -227,8 +227,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
-        rec.schutter_nr = self.lid_100002.nhb_nr
-        rec.schutter_naam = self.lid_100002.volledige_naam()
+        rec.schutter_nr = self.sporter_100002.lid_nr
+        rec.schutter_naam = self.sporter_100002.volledige_naam()
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'C'
@@ -247,8 +247,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
-        rec.schutter_nr = self.lid_100002.nhb_nr
-        rec.schutter_naam = self.lid_100002.volledige_naam()
+        rec.schutter_nr = self.sporter_100002.lid_nr
+        rec.schutter_naam = self.sporter_100002.volledige_naam()
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'BB'
@@ -263,7 +263,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec.gemiddelde = 5.321
         rec.save()
 
-        # maak een record aan voor iemand die geen nhblid meer is
+        # maak een record aan voor iemand die geen lid meer is
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
@@ -287,24 +287,25 @@ class TestCompetitie(E2EHelpers, TestCase):
         # maak veel histcomp records aan
         # zodat de AG-vaststellen bulk-create limiet van 500 gehaald wordt
 
-        nhb_nr = 190000
+        lid_nr = 190000
         records = list()
-        leden = list()
+        sporters = list()
 
         geboorte_datum = datetime.date(year=1970, month=3, day=4)
         sinds_datum = datetime.date(year=2001, month=11, day=12)
 
         for lp in range(550):
-            lid = NhbLid(nhb_nr=nhb_nr + lp,
-                         geslacht='V',
-                         geboorte_datum=geboorte_datum,
-                         sinds_datum=sinds_datum)
-            leden.append(lid)
+            sporter = Sporter(
+                            lid_nr=lid_nr + lp,
+                            geslacht='V',
+                            geboorte_datum=geboorte_datum,
+                            sinds_datum=sinds_datum)
+            sporters.append(sporter)
 
             rec = HistCompetitieIndividueel(histcompetitie=self.histcomp,
                                             boogtype='R',
                                             rank=lp,
-                                            schutter_nr=lid.nhb_nr,
+                                            schutter_nr=sporter.lid_nr,
                                             vereniging_nr=1000,
                                             score1=1,
                                             score2=2,
@@ -318,7 +319,7 @@ class TestCompetitie(E2EHelpers, TestCase):
             records.append(rec)
         # for
 
-        NhbLid.objects.bulk_create(leden)
+        Sporter.objects.bulk_create(sporters)
         HistCompetitieIndividueel.objects.bulk_create(records)
 
     def test_anon(self):
@@ -520,9 +521,9 @@ class TestCompetitie(E2EHelpers, TestCase):
         aanvangsgemiddelden_vaststellen_voor_afstand(25)
 
         # controleer dat er geen dubbele SchutterBoog records aangemaakt zijn
-        self.assertEqual(1, SchutterBoog.objects.filter(nhblid=self.lid_100001, boogtype__afkorting='R').count())
-        self.assertEqual(1, SchutterBoog.objects.filter(nhblid=self.lid_100002, boogtype__afkorting='BB').count())
-        self.assertEqual(554, SchutterBoog.objects.count())
+        self.assertEqual(1, SporterBoog.objects.filter(sporter=self.sporter_100001, boogtype__afkorting='R').count())
+        self.assertEqual(1, SporterBoog.objects.filter(sporter=self.sporter_100002, boogtype__afkorting='BB').count())
+        self.assertEqual(554, SporterBoog.objects.count())
 
         # controleer dat het "ag vaststellen" kaartje er nog steeds is
         # dit keer met de "voor het laatst gedaan" notitie

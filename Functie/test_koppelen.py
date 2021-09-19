@@ -8,8 +8,9 @@ from django.test import TestCase, Client
 from django.contrib.sessions.backends.db import SessionStore
 from Account.models import AccountSessions
 from Functie.rol import SESSIONVAR_ROL_MAG_WISSELEN
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Logboek.models import LogboekRegel
+from Sporter.models import Sporter
 from .models import maak_functie, Functie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -63,31 +64,31 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         ver.save()
         self.nhbver1 = ver
 
-        lid = NhbLid()
-        lid.nhb_nr = 100042
-        lid.geslacht = "M"
-        lid.voornaam = "Beh"
-        lid.achternaam = "eerder"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.account = self.account_beh2
-        lid.email = lid.account.email
-        lid.save()
-        self.nhblid1 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100042
+        sporter.geslacht = "M"
+        sporter.voornaam = "Beh"
+        sporter.achternaam = "eerder"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.account = self.account_beh2
+        sporter.email = sporter.account.email
+        sporter.save()
+        self.sporter_100042 = sporter
 
-        lid = NhbLid()
-        lid.nhb_nr = 10043
-        lid.geslacht = "M"
-        lid.voornaam = "Beh"
-        lid.achternaam = "eerder"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.account = self.account_normaal
-        lid.email = lid.account.email
-        lid.save()
-        self.nhblid3 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100043
+        sporter.geslacht = "M"
+        sporter.voornaam = "Beh"
+        sporter.achternaam = "eerder"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.account = self.account_normaal
+        sporter.email = sporter.account.email
+        sporter.save()
+        self.sporter_100043 = sporter
 
         self.functie_sec = maak_functie("SEC test", "SEC")
         self.functie_sec.nhb_ver = ver
@@ -120,18 +121,18 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.functie_hwl2.nhb_ver = ver2
         self.functie_hwl2.save()
 
-        lid = NhbLid()
-        lid.nhb_nr = 100024
-        lid.geslacht = "V"
-        lid.voornaam = "Ander"
-        lid.achternaam = "Lid"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=5)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=11)
-        lid.bij_vereniging = ver2
-        lid.account = self.account_ander
-        lid.email = lid.account.email
-        lid.save()
-        self.nhblid2 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100024
+        sporter.geslacht = "V"
+        sporter.voornaam = "Ander"
+        sporter.achternaam = "Lid"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=5)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=11)
+        sporter.bij_vereniging = ver2
+        sporter.account = self.account_ander
+        sporter.email = sporter.account.email
+        sporter.save()
+        self.sporter_100024 = sporter
 
     def test_wijzig_view(self):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
@@ -140,14 +141,14 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        self.nhblid1.voornaam = "Test1"
-        self.nhblid1.achternaam = "Beheerder"
-        self.nhblid1.save()
+        self.sporter_100042.voornaam = "Test1"
+        self.sporter_100042.achternaam = "Beheerder"
+        self.sporter_100042.save()
 
-        self.nhblid2.voornaam = "Test2"
-        self.nhblid2.achternaam = "Beheerder"
-        self.nhblid2.account = self.account_beh2
-        self.nhblid2.save()
+        self.sporter_100024.voornaam = "Test2"
+        self.sporter_100024.achternaam = "Beheerder"
+        self.sporter_100024.account = self.account_beh2
+        self.sporter_100024.save()
 
         # probeer een niet-bestaande functie
         with self.assert_max_queries(20):
@@ -301,7 +302,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         # controleer correctheid toevoeging in het logboek
         regel = LogboekRegel.objects.all()[0]
         self.assertEqual(regel.gebruikte_functie, 'Rollen')
-        self.assertEqual(regel.activiteit, 'NHB lid 100042 (Beh eerder) is beheerder gemaakt voor functie RKO Rayon 3 Indoor')
+        self.assertEqual(regel.activiteit, 'Sporter 100042 (Beh eerder) is beheerder gemaakt voor functie RKO Rayon 3 Indoor')
 
         # check dat de BKO geen RCL kan koppelen
         # juiste URL om RCL te koppelen
@@ -620,9 +621,9 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'LET OP:')
 
         # maak de HWL een ex-lid
-        self.assertEqual(self.nhblid1.account, self.account_beh2)
-        self.nhblid1.bij_vereniging = None
-        self.nhblid1.save()
+        self.assertEqual(self.sporter_100042.account, self.account_beh2)
+        self.sporter_100042.bij_vereniging = None
+        self.sporter_100042.save()
 
         # haal de lijst met gekoppelde beheerder op
         url = self.url_wijzig % self.functie_hwl.pk
@@ -633,9 +634,9 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertContains(resp, 'LET OP: geen lid meer bij een vereniging')
 
         # maak de HWL lid bij een andere vereniging
-        self.assertEqual(self.nhblid1.account, self.account_beh2)
-        self.nhblid1.bij_vereniging = self.nhbver2
-        self.nhblid1.save()
+        self.assertEqual(self.sporter_100042.account, self.account_beh2)
+        self.sporter_100042.bij_vereniging = self.nhbver2
+        self.sporter_100042.save()
 
         # haal de lijst met gekoppelde beheerder op
         url = self.url_wijzig % self.functie_hwl.pk

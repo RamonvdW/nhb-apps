@@ -165,18 +165,18 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
 
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
-                      .select_related('schutterboog',
-                                      'schutterboog__nhblid',
-                                      'schutterboog__boogtype')
+                      .select_related('sporterboog',
+                                      'sporterboog__sporter',
+                                      'sporterboog__boogtype')
                       .prefetch_related('regiocompetitieteam_set')
                       .filter(deelcompetitie=deelcomp,
                               bij_vereniging=self.functie_nu.nhb_ver,
                               inschrijf_voorkeur_team=True)
-                      .order_by('schutterboog__boogtype__volgorde',
+                      .order_by('sporterboog__boogtype__volgorde',
                                 '-ag_voor_team'))
         for obj in deelnemers:
-            obj.boog_str = obj.schutterboog.boogtype.beschrijving
-            obj.naam_str = "[%s] %s" % (obj.schutterboog.nhblid.nhb_nr, obj.schutterboog.nhblid.volledige_naam())
+            obj.boog_str = obj.sporterboog.boogtype.beschrijving
+            obj.naam_str = "[%s] %s" % (obj.sporterboog.sporter.lid_nr, obj.sporterboog.sporter.volledige_naam())
             ag_str = "%.3f" % obj.ag_voor_team
             obj.ag_str = ag_str.replace('.', ',')
 
@@ -465,9 +465,9 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
             deelnemer = (RegioCompetitieSchutterBoog
                          .objects
-                         .select_related('schutterboog',
-                                         'schutterboog__nhblid',
-                                         'schutterboog__boogtype',
+                         .select_related('sporterboog',
+                                         'sporterboog__sporter',
+                                         'sporterboog__boogtype',
                                          'bij_vereniging',
                                          'deelcompetitie__competitie')
                          .get(pk=deelnemer_pk))
@@ -479,14 +479,14 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         # controleer dat deze deelnemer bekeken en gewijzigd mag worden
         self._mag_wijzigen_of_404(deelnemer)
 
-        deelnemer.naam_str = deelnemer.schutterboog.nhblid.volledige_naam()
-        deelnemer.boog_str = deelnemer.schutterboog.boogtype.beschrijving
+        deelnemer.naam_str = deelnemer.sporterboog.sporter.volledige_naam()
+        deelnemer.boog_str = deelnemer.sporterboog.boogtype.beschrijving
         ag_str = '%.3f' % deelnemer.ag_voor_team
         deelnemer.ag_str = ag_str.replace('.', ',')
 
         ag_hist = (ScoreHist
                    .objects
-                   .filter(score__schutterboog=deelnemer.schutterboog,
+                   .filter(score__sporterboog=deelnemer.sporterboog,
                            score__afstand_meter=deelnemer.deelcompetitie.competitie.afstand,
                            score__type=SCORE_TYPE_TEAM_AG)
                    .order_by('-when'))
@@ -522,7 +522,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
                          .objects
                          .select_related('deelcompetitie',
                                          'deelcompetitie__competitie',
-                                         'schutterboog',
+                                         'sporterboog',
                                          'bij_vereniging')
                          .get(pk=deelnemer_pk))
         except (ValueError, RegioCompetitieSchutterBoog.DoesNotExist):
@@ -543,7 +543,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
                 raise Http404('Geen goed AG')
 
             score_teams_ag_opslaan(
-                    deelnemer.schutterboog,
+                    deelnemer.sporterboog,
                     deelnemer.deelcompetitie.competitie.afstand,
                     nieuw_ag,
                     request.user,
@@ -656,16 +656,16 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                           .filter(deelcompetitie=deelcomp,
                                   inschrijf_voorkeur_team=True,
                                   bij_vereniging=ver,
-                                  schutterboog__boogtype__in=boog_pks)
+                                  sporterboog__boogtype__in=boog_pks)
                           .annotate(in_team_count=Count('regiocompetitieteam'))
-                          .select_related('schutterboog',
-                                          'schutterboog__nhblid',
-                                          'schutterboog__boogtype')
+                          .select_related('sporterboog',
+                                          'sporterboog__sporter',
+                                          'sporterboog__boogtype')
                           .order_by('-ag_voor_team'))
             for obj in deelnemers:
                 obj.sel_str = "deelnemer_%s" % obj.pk
-                obj.naam_str = "[%s] %s" % (obj.schutterboog.nhblid.nhb_nr, obj.schutterboog.nhblid.volledige_naam())
-                obj.boog_str = obj.schutterboog.boogtype.beschrijving
+                obj.naam_str = "[%s] %s" % (obj.sporterboog.sporter.lid_nr, obj.sporterboog.sporter.volledige_naam())
+                obj.boog_str = obj.sporterboog.boogtype.beschrijving
                 ag_str = "%.3f" % obj.ag_voor_team
                 obj.ag_str = ag_str.replace('.', ',')
                 obj.blokkeer = (obj.ag_voor_team < 0.001)
@@ -681,13 +681,13 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         else:
             context['gekoppeld'] = gekoppeld = (team
                                                 .gekoppelde_schutters
-                                                .select_related('schutterboog',
-                                                                'schutterboog__nhblid',
-                                                                'schutterboog__boogtype')
+                                                .select_related('sporterboog',
+                                                                'sporterboog__sporter',
+                                                                'sporterboog__boogtype')
                                                 .order_by('-ag_voor_team'))
             for obj in gekoppeld:
-                obj.naam_str = "[%s] %s" % (obj.schutterboog.nhblid.nhb_nr, obj.schutterboog.nhblid.volledige_naam())
-                obj.boog_str = obj.schutterboog.boogtype.beschrijving
+                obj.naam_str = "[%s] %s" % (obj.sporterboog.sporter.lid_nr, obj.sporterboog.sporter.volledige_naam())
+                obj.boog_str = obj.sporterboog.boogtype.beschrijving
                 ag_str = "%.3f" % obj.ag_voor_team
                 obj.ag_str = ag_str.replace('.', ',')
             # for
@@ -753,7 +753,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                            inschrijf_voorkeur_team=True,
                            ag_voor_team__gte=1.0,
                            bij_vereniging=ver,
-                           schutterboog__boogtype__in=boog_pks)
+                           sporterboog__boogtype__in=boog_pks)
                    .values_list('pk', flat=True))
 
         # huidige leden mogen blijven ;-)
@@ -883,20 +883,20 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
 
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
-                      .select_related('schutterboog',
-                                      'schutterboog__nhblid',
-                                      'schutterboog__boogtype')
+                      .select_related('sporterboog',
+                                      'sporterboog__sporter',
+                                      'sporterboog__boogtype')
                       .prefetch_related('regiocompetitieteam_set')
                       .filter(deelcompetitie=deelcomp,
                               bij_vereniging=self.functie_nu.nhb_ver,
                               inschrijf_voorkeur_team=True)
-                      .order_by('schutterboog__boogtype__volgorde',
+                      .order_by('sporterboog__boogtype__volgorde',
                                 '-ag_voor_team'))
 
         unsorted_deelnemers = list()
         for deelnemer in deelnemers:
-            deelnemer.boog_str = deelnemer.schutterboog.boogtype.beschrijving
-            deelnemer.naam_str = "[%s] %s" % (deelnemer.schutterboog.nhblid.nhb_nr, deelnemer.schutterboog.nhblid.volledige_naam())
+            deelnemer.boog_str = deelnemer.sporterboog.boogtype.beschrijving
+            deelnemer.naam_str = "[%s] %s" % (deelnemer.sporterboog.sporter.lid_nr, deelnemer.sporterboog.sporter.volledige_naam())
 
             if deelnemer.aantal_scores == 0:
                 vsg = deelnemer.ag_voor_team
@@ -905,7 +905,7 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
             vsg_str = "%.3f" % vsg
             deelnemer.vsg_str = vsg_str.replace('.', ',')
 
-            tup = (-vsg, deelnemer.schutterboog.nhblid.nhb_nr, deelnemer.pk, deelnemer)
+            tup = (-vsg, deelnemer.sporterboog.sporter.lid_nr, deelnemer.pk, deelnemer)
             unsorted_deelnemers.append(tup)
 
             try:
@@ -994,18 +994,18 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                       .filter(deelcompetitie=deelcomp,
                               inschrijf_voorkeur_team=True,
                               bij_vereniging=self.functie_nu.nhb_ver,
-                              schutterboog__boogtype__in=boog_pks)
-                      .select_related('schutterboog',
-                                      'schutterboog__nhblid',
-                                      'schutterboog__boogtype')
-                      .order_by('-gemiddelde_begin_team_ronde', 'schutterboog__pk'))
+                              sporterboog__boogtype__in=boog_pks)
+                      .select_related('sporterboog',
+                                      'sporterboog__sporter',
+                                      'sporterboog__boogtype')
+                      .order_by('-gemiddelde_begin_team_ronde', 'sporterboog__pk'))
 
         unsorted_uitvallers = list()
         unsorted_bezet = list()
         for deelnemer in deelnemers:
             gem_str = "%.3f" % deelnemer.gemiddelde_begin_team_ronde
             deelnemer.invaller_gem_str = gem_str.replace('.', ',')
-            deelnemer.naam_str = "[%s] %s" % (deelnemer.schutterboog.nhblid.nhb_nr, deelnemer.schutterboog.nhblid.volledige_naam())
+            deelnemer.naam_str = "[%s] %s" % (deelnemer.sporterboog.sporter.lid_nr, deelnemer.sporterboog.sporter.volledige_naam())
 
             if deelnemer.pk in deelnemers_geselecteerd_pks:
                 deelnemer.origineel_team_lid = True
@@ -1123,7 +1123,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                       .filter(deelcompetitie=deelcomp,
                               inschrijf_voorkeur_team=True,
                               bij_vereniging=self.functie_nu.nhb_ver,
-                              schutterboog__boogtype__in=boog_pks))
+                              sporterboog__boogtype__in=boog_pks))
 
         for deelnemer in deelnemers:
             if deelnemer.pk not in deelnemers_bezet_pks:
@@ -1170,9 +1170,9 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         for deelnemer in (RegioCompetitieSchutterBoog
                           .objects
-                          .select_related('schutterboog__nhblid')
+                          .select_related('sporterboog__sporter')
                           .filter(pk__in=sel_pks)):
-            ronde_team.logboek += '   ' + str(deelnemer.schutterboog.nhblid) + '\n'
+            ronde_team.logboek += '   ' + str(deelnemer.sporterboog.sporter) + '\n'
         # for
 
         ronde_team.save(update_fields=['logboek'])

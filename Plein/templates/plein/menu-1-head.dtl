@@ -48,9 +48,9 @@
 </li>
 
 
-{% if menu_toon_schutter_profiel %}
-    <li class="menu-level1{% if menu_actief == "schutter-profiel" %} menu-actief{% endif %}">
-        <a href="{% url 'Schutter:profiel' %}" class="white-text">
+{% if menu_toon_sporter_profiel %}
+    <li class="menu-level1{% if menu_actief == "sporter-profiel" %} menu-actief{% endif %}">
+        <a href="{% url 'Sporter:profiel' %}" class="white-text">
            <i class="material-icons-round white-text">portrait</i>Mijn pagina</a>
     </li>
 {% endif %}

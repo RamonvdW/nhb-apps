@@ -17,13 +17,13 @@ from .models import (BoogType, TeamType, LeeftijdsKlasse,
 class BasisTypenReadonlyAdmin(admin.ModelAdmin):
     """ Simpel admin model om alles read-only te maken """
     def has_change_permission(self, request, obj=None):
-        return False
+        return False            # pragma: no cover
 
     def has_add_permission(self, request, obj=None):
-        return False
+        return False            # pragma: no cover
 
     def has_delete_permission(self, request, obj=None):
-        return False
+        return False            # pragma: no cover
 
 
 class BasisTypenReadonlyMetVolgordeAdmin(BasisTypenReadonlyAdmin):

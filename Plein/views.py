@@ -88,7 +88,7 @@ class PleinView(View):
         if request.user.is_authenticated:
             rol_nu = rol_get_huidige(request)
 
-            if rol_nu == Rollen.ROL_SCHUTTER:
+            if rol_nu == Rollen.ROL_SPORTER:
                 template = TEMPLATE_PLEIN_SPORTER
 
             elif rol_nu == Rollen.ROL_NONE or rol_nu is None:

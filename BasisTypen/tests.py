@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from .models import (BoogType, LeeftijdsKlasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
+from .models import (BoogType, TeamType, LeeftijdsKlasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
                      IndivWedstrijdklasse, TeamWedstrijdklasse, KalenderWedstrijdklasse)
 from .admin import BasisTypenIndivWedstrijdklasseAdmin, BasisTypenTeamWedstrijdklasseAdmin
 
@@ -53,6 +53,9 @@ class TestBasisTypen(TestCase):
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
 
         obj = KalenderWedstrijdklasse(beschrijving="Test")
+        self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
+
+        obj = TeamType(beschrijving='Test', afkorting='X')
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
 
     def test_admin(self):

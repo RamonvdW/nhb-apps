@@ -61,7 +61,7 @@ class VerenigingLijstRkSelectieView(UserPassesTestMixin, TemplateView):
                       .objects
                       .select_related('deelcompetitie',
                                       'klasse__indiv',
-                                      'schutterboog__nhblid',
+                                      'sporterboog__sporter',
                                       'bij_vereniging')
                       .filter(deelcompetitie=rk_deelcomp_rk,
                               volgorde__lte=48)             # max 48 schutters per klasse tonen
@@ -103,8 +103,8 @@ class VerenigingLijstRkSelectieView(UserPassesTestMixin, TemplateView):
                 except KeyError:
                     limiet = 24
 
-            lid = deelnemer.schutterboog.nhblid
-            deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+            sporter = deelnemer.sporterboog.sporter
+            deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
 
             if deelnemer.bij_vereniging == functie_nu.nhb_ver:
                 behoud_groepje = True

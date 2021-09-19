@@ -8,13 +8,13 @@ from django.test import TestCase
 from django.core import management
 from django.utils import timezone
 from Functie.models import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
+from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (DeelCompetitie, CompetitieKlasse, AG_NUL, LAAG_REGIO, LAAG_RK,
                                RegiocompetitieTeam, RegioCompetitieSchutterBoog, RegiocompetitieRondeTeam)
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
-from Schutter.models import SchutterBoog
+from Sporter.models import Sporter, SporterBoog
 from Score.operations import score_indiv_ag_opslaan
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -26,7 +26,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
 
     """ Tests voor de Vereniging applicatie, functies voor de HWL """
 
-    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Schutter', 'Competitie')
+    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 
     url_koppelen = '/vereniging/teams/regio/koppelen/%s/'               # team_pk
     url_maak_team = '/vereniging/teams/regio/%s/nieuw/'                 # deelcomp_pk
@@ -74,91 +74,91 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         self.functie_wl.save()
 
         # maak het lid aan dat HWL wordt
-        lid = NhbLid()
-        lid.nhb_nr = 100001
-        lid.geslacht = "M"
-        lid.voornaam = "Ramon"
-        lid.achternaam = "de Tester"
-        lid.email = "rdetester@gmail.not"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 100001
+        sporter.geslacht = "M"
+        sporter.voornaam = "Ramon"
+        sporter.achternaam = "de Tester"
+        sporter.email = "rdetester@gmail.not"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.save()
 
-        self.account_hwl = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
+        self.account_hwl = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
         self.functie_hwl.accounts.add(self.account_hwl)
 
-        lid.account = self.account_hwl
-        lid.save()
-        self.nhblid_100001 = lid
+        sporter.account = self.account_hwl
+        sporter.save()
+        self.sporter_100001 = sporter
 
         jaar = timezone.now().year
 
         # maak een aspirant aan
-        lid = NhbLid()
-        lid.nhb_nr = 100002
-        lid.geslacht = "V"
-        lid.voornaam = "Ramona"
-        lid.achternaam = "de Jeugdschutter"
-        lid.email = "nietleeg@nhb.not"
-        lid.geboorte_datum = datetime.date(year=jaar-12, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.account = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)  # heeft last_login=None
-        lid.save()
-        self.nhblid_100002 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100002
+        sporter.geslacht = "V"
+        sporter.voornaam = "Ramona"
+        sporter.achternaam = "de Jeugdschutter"
+        sporter.email = "nietleeg@nhb.not"
+        sporter.geboorte_datum = datetime.date(year=jaar-12, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)  # heeft last_login=None
+        sporter.save()
+        self.sporter_100002 = sporter
 
         # maak een cadet aan
-        lid = NhbLid()
-        lid.nhb_nr = 100012
-        lid.geslacht = "V"
-        lid.voornaam = "Andrea"
-        lid.achternaam = "de Jeugdschutter"
-        lid.email = ""
-        lid.geboorte_datum = datetime.date(year=jaar-15, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=jaar-3, month=10, day=10)
-        lid.bij_vereniging = ver
-        lid.save()
-        self.nhblid_100012 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100012
+        sporter.geslacht = "V"
+        sporter.voornaam = "Andrea"
+        sporter.achternaam = "de Jeugdschutter"
+        sporter.email = ""
+        sporter.geboorte_datum = datetime.date(year=jaar-15, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=jaar-3, month=10, day=10)
+        sporter.bij_vereniging = ver
+        sporter.save()
+        self.sporter_100012 = sporter
 
         # maak een jeugd lid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100004
-        lid.geslacht = "M"
-        lid.voornaam = "Cadet"
-        lid.achternaam = "de Jeugd"
-        lid.email = ""
-        lid.geboorte_datum = datetime.date(year=jaar-13, month=3, day=4)    # 13=asp, maar 14 in 2e jaar competitie!
-        lid.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
-        self.nhblid_100004 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100004
+        sporter.geslacht = "M"
+        sporter.voornaam = "Cadet"
+        sporter.achternaam = "de Jeugd"
+        sporter.email = ""
+        sporter.geboorte_datum = datetime.date(year=jaar-13, month=3, day=4)    # 13=asp, maar 14 in 2e jaar competitie!
+        sporter.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.save()
+        self.sporter_100004 = sporter
 
         # maak een senior lid aan, om inactief te maken
-        lid = NhbLid()
-        lid.nhb_nr = 100003
-        lid.geslacht = "V"
-        lid.voornaam = "Ramona"
-        lid.achternaam = "de Testerin"
-        lid.email = ""
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=jaar-4, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
-        self.nhblid_100003 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100003
+        sporter.geslacht = "V"
+        sporter.voornaam = "Ramona"
+        sporter.achternaam = "de Testerin"
+        sporter.email = ""
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=jaar-4, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.save()
+        self.sporter_100003 = sporter
 
         # maak een senior lid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100013
-        lid.geslacht = "M"
-        lid.voornaam = "Instinctive"
-        lid.achternaam = "de Bower"
-        lid.email = ""
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=5)
-        lid.sinds_datum = datetime.date(year=jaar-4, month=7, day=1)
-        lid.bij_vereniging = ver
-        lid.save()
-        self.nhblid_100013 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100013
+        sporter.geslacht = "M"
+        sporter.voornaam = "Instinctive"
+        sporter.achternaam = "de Bower"
+        sporter.email = ""
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=5)
+        sporter.sinds_datum = datetime.date(year=jaar-4, month=7, day=1)
+        sporter.bij_vereniging = ver
+        sporter.save()
+        self.sporter_100013 = sporter
 
         # maak een lid aan van een andere vereniging
         # maak een test vereniging
@@ -193,8 +193,8 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
-        rec.schutter_nr = self.nhblid_100001.nhb_nr
-        rec.schutter_naam = self.nhblid_100001.volledige_naam()
+        rec.schutter_nr = self.sporter_100001.lid_nr
+        rec.schutter_naam = self.sporter_100001.volledige_naam()
         rec.vereniging_nr = self.nhbver1.ver_nr
         rec.vereniging_naam = self.nhbver1.naam
         rec.boogtype = 'R'
@@ -214,8 +214,8 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
-        rec.schutter_nr = self.nhblid_100002.nhb_nr
-        rec.schutter_naam = self.nhblid_100002.volledige_naam()
+        rec.schutter_nr = self.sporter_100002.lid_nr
+        rec.schutter_naam = self.sporter_100002.volledige_naam()
         rec.vereniging_nr = self.nhbver1.ver_nr
         rec.vereniging_naam = self.nhbver1.naam
         rec.boogtype = 'BB'
@@ -249,46 +249,46 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
                                                               laag=LAAG_REGIO,
                                                               nhb_regio=self.regio_111)
 
-    def _zet_schutter_voorkeuren(self, nhb_nr):
+    def _zet_schutter_voorkeuren(self, lid_nr):
         # deze functie kan alleen gebruikt worden als HWL
         url_schutter_voorkeuren = '/sporter/voorkeuren/'
 
         # haal als HWL de voorkeuren pagina op van een lid van de vereniging
         # dit maakt ook de SchutterBoog records aan
         with self.assert_max_queries(20):
-            resp = self.client.get(url_schutter_voorkeuren + '%s/' % nhb_nr)
+            resp = self.client.get(url_schutter_voorkeuren + '%s/' % lid_nr)
         self.assertEqual(resp.status_code, 200)
 
         # post een wijziging
-        if nhb_nr == 100003:
+        if lid_nr == 100003:
             with self.assert_max_queries(20):
-                resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr,
+                resp = self.client.post(url_schutter_voorkeuren, {'sporter_pk': lid_nr,
                                                                   'schiet_BB': 'on',
                                                                   'info_R': 'on',
                                                                   'voorkeur_meedoen_competitie': 'on'})
-        elif nhb_nr == 100013:
+        elif lid_nr == 100013:
             with self.assert_max_queries(20):
-                resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr,
+                resp = self.client.post(url_schutter_voorkeuren, {'sporter_pk': lid_nr,
                                                                   'schiet_IB': 'on',
                                                                   'voorkeur_meedoen_competitie': 'on'})
         else:
             with self.assert_max_queries(20):
-                resp = self.client.post(url_schutter_voorkeuren, {'nhblid_pk': nhb_nr,
+                resp = self.client.post(url_schutter_voorkeuren, {'sporter_pk': lid_nr,
                                                                   'schiet_R': 'on',
                                                                   'info_C': 'on',
                                                                   'voorkeur_meedoen_competitie': 'on'})
 
         self.assert_is_redirect(resp, '/vereniging/leden-voorkeuren/')
 
-    def _zet_ag(self, nhb_nr, afstand):
-        if nhb_nr == 100003:
+    def _zet_ag(self, lid_nr, afstand):
+        if lid_nr == 100003:
             afkorting = 'BB'
-        elif nhb_nr == 100013:
+        elif lid_nr == 100013:
             afkorting = 'IB'
         else:
             afkorting = 'R'
-        schutterboog = SchutterBoog.objects.get(nhblid__nhb_nr=nhb_nr, boogtype__afkorting=afkorting)
-        score_indiv_ag_opslaan(schutterboog, afstand, 7.42, self.account_hwl, 'Test AG %s' % afstand)
+        sporterboog = SporterBoog.objects.get(sporter__lid_nr=lid_nr, boogtype__afkorting=afkorting)
+        score_indiv_ag_opslaan(sporterboog, afstand, 7.42, self.account_hwl, 'Test AG %s' % afstand)
 
     def _create_deelnemers(self, do_18=True, do_25=False):
         # moet ingelogd zijn als HWL
@@ -320,10 +320,10 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
 
             for obj in (RegioCompetitieSchutterBoog
                         .objects
-                        .select_related('schutterboog__nhblid')
+                        .select_related('sporterboog__sporter')
                         .filter(deelcompetitie__competitie=self.comp_18)
                         .all()):
-                nr = obj.schutterboog.nhblid.nhb_nr
+                nr = obj.sporterboog.sporter.lid_nr
                 if nr == 100002:
                     self.deelnemer_100002_18 = obj
                 elif nr == 100003:
@@ -346,10 +346,10 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
 
             for obj in (RegioCompetitieSchutterBoog
                         .objects
-                        .select_related('schutterboog__nhblid')
+                        .select_related('sporterboog__sporter')
                         .filter(deelcompetitie__competitie=self.comp_25)
                         .all()):
-                nr = obj.schutterboog.nhblid.nhb_nr
+                nr = obj.sporterboog.sporter.lid_nr
                 if nr == 100002:
                     self.deelnemer_100002_25 = obj
                 elif nr == 100004:

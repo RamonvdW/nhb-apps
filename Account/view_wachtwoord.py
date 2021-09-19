@@ -80,7 +80,7 @@ class WachtwoordVergetenView(TemplateView):
             context['foutmelding'] = 'Voer een valide e-mailadres in van een bestaand account'
 
         if not context['foutmelding']:
-            username = request.POST.get('nhb_nr', '')[:10]  # afkappen voor extra veiligheid
+            username = request.POST.get('lid_nr', '')[:10]  # afkappen voor extra veiligheid
 
             # zoek een account met deze email
             try:
@@ -183,8 +183,8 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
             context['moet_oude_ww_weten'] = True
 
         account = self.request.user
-        if account.nhblid_set.count() > 0:      # FUTURE: ongewenste kennis over op NhbLid.account
-            menu_dynamics(self.request, context, actief="schutter-profiel")
+        if account.sporter_set.count() > 0:      # FUTURE: ongewenste kennis over op Sporter.account
+            menu_dynamics(self.request, context, actief="sporter-profiel")
         else:
             menu_dynamics(self.request, context)
         return context
@@ -227,8 +227,8 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
             except KeyError:
                 context['moet_oude_ww_weten'] = True
 
-            if account.nhblid_set.count() > 0:  # TODO: ongewenste kennis over NhbLid.account
-                menu_dynamics(self.request, context, actief="schutter-profiel")
+            if account.sporter_set.count() > 0:  # FUTURE: ongewenste kennis over Sporter.account
+                menu_dynamics(self.request, context, actief="sporter-profiel")
             else:
                 menu_dynamics(self.request, context)
             return render(request, self.template_name, context)

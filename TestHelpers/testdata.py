@@ -9,7 +9,6 @@
 from django.utils import timezone
 from Account.models import Account, account_create
 from Functie.models import VerklaringHanterenPersoonsgegevens
-from NhbStructuur.models import NhbVereniging, NhbLid
 
 # fixtures zijn overwogen, maar zijn lastig te onderhouden en geven geen recente datums (zoals voor VHPG)
 

@@ -171,6 +171,5 @@ fi
 # set normal performance
 sudo cpupower frequency-set --governor schedutil > /dev/null
 
-
 # end of file
 

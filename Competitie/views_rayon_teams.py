@@ -4,27 +4,15 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
-from django.http import HttpResponseRedirect, Http404
+from django.http import Http404
 from django.urls import reverse
-from django.utils.formats import localize
-from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.operations.poules import maak_poule_schema
 from Functie.rol import Rollen, rol_get_huidige_functie
-from Handleiding.views import reverse_handleiding
-from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbRayon
-from Overig.background_sync import BackgroundSync
-from .models import (LAAG_RK, AG_NUL,
-                     Competitie, CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
-                     KampioenschapTeam)
+from .models import LAAG_RK, AG_NUL, Competitie, CompetitieKlasse, DeelCompetitie, KampioenschapTeam
 from .menu import menu_dynamics_competitie
-from types import SimpleNamespace
-import datetime
-import time
 
 
 TEMPLATE_COMPETITIE_RKO_TEAMS = 'competitie/rko-teams.dtl'

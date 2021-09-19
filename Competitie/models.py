@@ -10,8 +10,8 @@ from BasisTypen.models import BoogType, TeamType, IndivWedstrijdklasse, TeamWeds
 from Functie.rol import Rollen
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Functie.models import Functie
-from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist
+from Sporter.models import SporterBoog
 from Wedstrijden.models import CompetitieWedstrijdenPlan, CompetitieWedstrijd
 from decimal import Decimal
 import datetime
@@ -468,13 +468,13 @@ class DeelcompetitieRonde(models.Model):
 
 
 class RegioCompetitieSchutterBoog(models.Model):
-    """ Een schutterboog aangemeld bij een regiocompetitie """
+    """ Een sporterboog aangemeld bij een regiocompetitie """
 
     # bij welke deelcompetitie hoort deze inschrijving?
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
     # om wie gaat het?
-    schutterboog = models.ForeignKey(SchutterBoog, on_delete=models.PROTECT)
+    sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT, null=True)
 
     # vereniging wordt hier apart bijgehouden omdat de schutter over kan stappen
     # midden in het seizoen
@@ -497,7 +497,7 @@ class RegioCompetitieSchutterBoog(models.Model):
     # individuele klasse
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
 
-    # alle scores van deze schutterboog in deze competitie
+    # alle scores van deze sporterboog in deze competitie
     scores = models.ManyToManyField(Score,
                                     blank=True)  # mag leeg zijn / gemaakt worden
 
@@ -538,8 +538,8 @@ class RegioCompetitieSchutterBoog(models.Model):
 
     def __str__(self):
         # deze naam wordt gebruikt in de admin interface, dus kort houden
-        nhblid = self.schutterboog.nhblid
-        return "[%s] %s (%s)" % (nhblid.nhb_nr,  nhblid.volledige_naam(), self.schutterboog.boogtype.beschrijving)
+        sporter = self.sporterboog.sporter
+        return "[%s] %s (%s)" % (sporter.lid_nr, sporter.volledige_naam(), self.sporterboog.boogtype.beschrijving)
 
     class Meta:
         verbose_name = "Regiocompetitie Schutterboog"
@@ -662,13 +662,13 @@ class RegiocompetitieRondeTeam(models.Model):
 
 class KampioenschapSchutterBoog(models.Model):
 
-    """ Een schutterboog aangemeld bij een rayon- of bondskampioenschap """
+    """ Een sporterboog aangemeld bij een rayon- of bondskampioenschap """
 
     # bij welke deelcompetitie hoort deze inschrijving?
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
     # om wie gaat het?
-    schutterboog = models.ForeignKey(SchutterBoog, on_delete=models.PROTECT)
+    sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT, null=True)
 
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
 
@@ -711,8 +711,8 @@ class KampioenschapSchutterBoog(models.Model):
         return "%s - %s - %s (%s) %s - %s" % (
                     substr,
                     msg,
-                    self.schutterboog,
-                    self.schutterboog.nhblid.volledige_naam(),
+                    self.sporterboog,
+                    self.sporterboog.sporter.volledige_naam(),
                     self.gemiddelde,
                     self.deelcompetitie.competitie.beschrijving)
 
@@ -844,25 +844,8 @@ class CompetitieTaken(models.Model):
 
 def update_uitslag_teamcompetitie():
     # regiocomp_tussenstand moet gekieteld worden
-    # maak daarvoor een ScoreHist record aan, welke verwijst naar een fake Score record
-
-    fake_scores = Score.objects.filter(schutterboog=None)
-    if fake_scores.count() == 0:
-        # fake Score heeft een fake SchutterBoog nodig
-        boogtype = BoogType.objects.all()[0]
-
-        fake_sb = SchutterBoog(boogtype=boogtype)
-        fake_sb.save()
-
-        fake_score = Score(
-                        schutterboog=fake_sb,
-                        waarde=0,
-                        afstand_meter=0)
-        fake_score.save()
-    else:
-        fake_score = fake_scores[0]
-
-    ScoreHist(score=fake_score,
+    # maak daarvoor een ScoreHist record aan
+    ScoreHist(score=None,
               oude_waarde=0,
               nieuwe_waarde=0,
               notitie="Trigger background task").save()

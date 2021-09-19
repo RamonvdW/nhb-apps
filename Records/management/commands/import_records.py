@@ -9,7 +9,7 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from Records.models import IndivRecord
-from NhbStructuur.models import NhbLid
+from Sporter.models import Sporter
 from Logboek.models import schrijf_in_logboek
 import datetime
 import json
@@ -36,7 +36,7 @@ class Command(BaseCommand):
 
     def _import_indiv(self, sheet, blad):
 
-        reported_nhb_nrs = list()
+        reported_lid_nrs = list()
 
         # houd bij welke volg_nrs als in de database zitten
         # als deze niet meer voorkomen, dan moeten we ze verwijderen
@@ -192,26 +192,26 @@ class Command(BaseCommand):
                 if len(val) == 6:
                     # 123456
                     try:
-                        record.nhb_lid = NhbLid.objects.get(nhb_nr=val)
-                    except NhbLid.DoesNotExist:
+                        record.sporter = Sporter.objects.get(lid_nr=val)
+                    except Sporter.DoesNotExist:
                         # toch door, want niet alle oude leden zitten nog in de database
                         naam = row[10]
-                        fout = 'NHB nummer niet bekend: %s (voor schutter %s)' % (repr(val), repr(naam))
-                        if fout not in reported_nhb_nrs:
-                            reported_nhb_nrs.append(fout)
+                        fout = 'NHB nummer niet bekend: %s (voor sporter %s)' % (repr(val), repr(naam))
+                        if fout not in reported_lid_nrs:
+                            reported_lid_nrs.append(fout)
                             self.stderr.write(fout)
                 else:
                     errors.append('Fout NHB nummer: %s' % repr(val))
                     val = None
                 if val and curr_record:
-                    if record.nhb_lid != curr_record.nhb_lid:
-                        wijzigingen.append('nhb_lid: %s --> %s' % (curr_record.nhb_lid, record.nhb_lid))
-                        curr_record.nhb_lid = record.nhb_lid
+                    if record.sporter != curr_record.sporter:
+                        wijzigingen.append('sporter: %s --> %s' % (curr_record.sporter, record.sporter))
+                        curr_record.sporter = record.sporter
 
                 # 10 = Naam
                 val = row[10][:50]
-                if record.nhb_lid:
-                    naam = record.nhb_lid.voornaam + " " + record.nhb_lid.achternaam
+                if record.sporter:
+                    naam = record.sporter.voornaam + " " + record.sporter.achternaam
                     match = 0
                     mis = 0
                     for part in val.replace('.', ' ').replace('/', ' ').replace(' vd ', ' v d ').split(' '):
@@ -222,14 +222,14 @@ class Command(BaseCommand):
                     # for
                     ok = (match >= 4)       # last name can change significantly after marriage
                     if ok:
-                        # neem de officiele naam over uit het nhb_lid
+                        # neem de officiële naam over
                         record.naam = naam
                         if curr_record:
                             if curr_record.naam != record.naam:
                                 wijzigingen.append('naam: %s --> %s' % (repr(curr_record.naam), repr(record.naam)))
                                 curr_record.naam = record.naam
                     else:
-                        errors.append('Foute naam: %s maar nhb lid naam is %s' % (repr(val), repr(naam)))
+                        errors.append('Foute naam: %s maar sporter naam is %s' % (repr(val), repr(naam)))
                 else:
                     record.naam = val
 

@@ -7,9 +7,9 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Functie.models import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
-from Schutter.models import SchutterBoog
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Score.models import Score
+from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
                      DeelcompetitieRonde, RegioCompetitieSchutterBoog, AG_NUL, LAAG_REGIO)
@@ -51,21 +51,21 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         cls.testdata.maak_accounts()
 
     def _prep_beheerder_lid(self, voornaam):
-        nhb_nr = self._next_nhbnr
-        self._next_nhbnr += 1
+        nhb_nr = self._next_lid_nr
+        self._next_lid_nr += 1
 
-        lid = NhbLid()
-        lid.nhb_nr = nhb_nr
-        lid.geslacht = "M"
-        lid.voornaam = voornaam
-        lid.achternaam = "Tester"
-        lid.email = voornaam.replace(' ', '_').lower() + "@nhb.test"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = self.nhbver
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = nhb_nr
+        sporter.geslacht = "M"
+        sporter.voornaam = voornaam
+        sporter.achternaam = "Tester"
+        sporter.email = voornaam.replace(' ', '_').lower() + "@nhb.test"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = self.nhbver
+        sporter.save()
 
-        return self.e2e_create_account(nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
+        return self.e2e_create_account(nhb_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
 
     def _maak_schutters_aan(self, ver, aantal, bogen):
         geslacht = 'MV' * aantal
@@ -73,55 +73,55 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         while aantal:
             aantal -= 1
 
-            # maak een nhblid aan
-            lid = NhbLid(
-                    nhb_nr=self._next_nhbnr,
+            # maak een sporter aan
+            sporter = Sporter(
+                    lid_nr=self._next_lid_nr,
                     geslacht=geslacht[0],
-                    voornaam='Schutter %s' % (len(self._schuttersboog) + 1),
+                    voornaam='Schutter %s' % (len(self._sportersboog) + 1),
                     achternaam='Tester',
                     geboorte_datum=datetime.date(year=1982, month=3, day=31-aantal),
                     sinds_datum=datetime.date(year=2010, month=11, day=12),
                     bij_vereniging=ver)
-            lid.save()
+            sporter.save()
 
-            self._next_nhbnr += 1
+            self._next_lid_nr += 1
             geslacht = geslacht[1:]
 
             # maak er een schutter-boog van
             for boog in bogen:
-                schutterboog = SchutterBoog(
-                                    nhblid=lid,
+                sporterboog = SporterBoog(
+                                    sporter=sporter,
                                     boogtype=boog,
                                     voor_wedstrijd=True)
-                schutterboog.save()
-                self._schuttersboog.append(schutterboog)
+                sporterboog.save()
+                self._sportersboog.append(sporterboog)
             # for
 
         # while
 
     @staticmethod
-    def _schrijf_in_voor_competitie(deelcomp, schuttersboog, skip):
-        while len(schuttersboog):
+    def _schrijf_in_voor_competitie(deelcomp, sportersboog, skip):
+        while len(sportersboog):
             aanmelding = RegioCompetitieSchutterBoog()
             aanmelding.deelcompetitie = deelcomp
-            aanmelding.schutterboog = schuttersboog[0]
-            aanmelding.bij_vereniging = aanmelding.schutterboog.nhblid.bij_vereniging
+            aanmelding.sporterboog = sportersboog[0]
+            aanmelding.bij_vereniging = aanmelding.sporterboog.sporter.bij_vereniging
             aanmelding.aanvangsgemiddelde = AG_NUL
             aanmelding.klasse = (CompetitieKlasse
                                  .objects
                                  .filter(competitie=deelcomp.competitie,
-                                         indiv__boogtype=aanmelding.schutterboog.boogtype,
+                                         indiv__boogtype=aanmelding.sporterboog.boogtype,
                                          indiv__is_onbekend=True)[0])
             aanmelding.save()
 
-            schuttersboog = schuttersboog[skip:]
+            sportersboog = sportersboog[skip:]
         # while
 
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self._next_nhbnr = 100001
+        self._next_lid_nr = 100001
 
         self.rayon_2 = NhbRayon.objects.get(rayon_nr=2)
         self.regio_101 = NhbRegio.objects.get(regio_nr=101)
@@ -210,7 +210,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         boog_c = BoogType.objects.get(afkorting='C')
         boog_bb = BoogType.objects.get(afkorting='BB')
 
-        self._schuttersboog = list()
+        self._sportersboog = list()
         self._maak_schutters_aan(self.nhbver, 5, (boog_r,))
         self._maak_schutters_aan(self.nhbver, 3, (boog_c,))
         self._maak_schutters_aan(self.nhbver, 2, (boog_bb,))
@@ -307,7 +307,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
         # schrijf wat mensen in
         self._schrijf_in_voor_competitie(self.deelcomp_regio101_18,
-                                         self._schuttersboog,
+                                         self._sportersboog,
                                          1)
 
         # haal waarschijnlijke deelnemers op
@@ -359,7 +359,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rcl101_18)
         self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
-        nhb_nr = self._next_nhbnr - 1
+        nhb_nr = self._next_lid_nr - 1
         json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
                      'nhb_nr': nhb_nr}
         with self.assert_max_queries(20):
@@ -373,7 +373,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
         # schrijf wat mensen in
         self._schrijf_in_voor_competitie(self.deelcomp_regio101_18,
-                                         self._schuttersboog,
+                                         self._sportersboog,
                                          1)
 
         # nu kunnen we wel wat vinden
@@ -458,17 +458,17 @@ class TestCompetitieScores(E2EHelpers, TestCase):
                                     content_type='application/json')
         self.assertEqual(resp.status_code, 200)
 
-        # met schutterboog_pk's en scores
+        # met sporterboog_pk's en scores
         json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
-                     self._schuttersboog[0].pk: 123,
-                     self._schuttersboog[1].pk: -1,
-                     self._schuttersboog[2].pk: 999999,
-                     self._schuttersboog[3].pk: 'hoi',
-                     self._schuttersboog[4].pk: 100,
-                     self._schuttersboog[5].pk: 101,
-                     self._schuttersboog[6].pk: '',         # verwijderd maar was niet aanwezig
+                     self._sportersboog[0].pk: 123,
+                     self._sportersboog[1].pk: -1,
+                     self._sportersboog[2].pk: 999999,
+                     self._sportersboog[3].pk: 'hoi',
+                     self._sportersboog[4].pk: 100,
+                     self._sportersboog[5].pk: 101,
+                     self._sportersboog[6].pk: '',  # verwijderd maar was niet aanwezig
                      'hoi': 1,
-                     999999: 111}                           # niet bestaande schutterboog_pk
+                     999999: 111}                           # niet bestaande sporterboog_pk
         # print('json_data for post: %s' % json.dumps(json_data))
         with self.assert_max_queries(25):
             resp = self.client.post(self.url_uitslag_opslaan,
@@ -480,9 +480,9 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
         # nog een keer opslaan - met mutaties
         json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
-                     self._schuttersboog[0].pk: 132,        # aangepaste score
-                     self._schuttersboog[4].pk: 100,        # ongewijzigde score
-                     self._schuttersboog[5].pk: ''}         # verwijderde score
+                     self._sportersboog[0].pk: 132,  # aangepaste score
+                     self._sportersboog[4].pk: 100,  # ongewijzigde score
+                     self._sportersboog[5].pk: ''}         # verwijderde score
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
@@ -505,13 +505,13 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
         # scores aanmaken
         json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
-                     self._schuttersboog[0].pk: 123,
-                     self._schuttersboog[1].pk: 124,
-                     self._schuttersboog[2].pk: 125,
-                     self._schuttersboog[3].pk: 126,
-                     self._schuttersboog[4].pk: 127,
-                     self._schuttersboog[5].pk: 128,
-                     self._schuttersboog[6].pk: 129}
+                     self._sportersboog[0].pk: 123,
+                     self._sportersboog[1].pk: 124,
+                     self._sportersboog[2].pk: 125,
+                     self._sportersboog[3].pk: 126,
+                     self._sportersboog[4].pk: 127,
+                     self._sportersboog[5].pk: 128,
+                     self._sportersboog[6].pk: 129}
         with self.assert_max_queries(40):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
@@ -650,13 +650,13 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
         # scores aanmaken
         json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
-                     self._schuttersboog[0].pk: 123,
-                     self._schuttersboog[1].pk: 124,
-                     self._schuttersboog[2].pk: 125,
-                     self._schuttersboog[3].pk: 126,
-                     self._schuttersboog[4].pk: 127,
-                     self._schuttersboog[5].pk: 128,
-                     self._schuttersboog[6].pk: 129}
+                     self._sportersboog[0].pk: 123,
+                     self._sportersboog[1].pk: 124,
+                     self._sportersboog[2].pk: 125,
+                     self._sportersboog[3].pk: 126,
+                     self._sportersboog[4].pk: 127,
+                     self._sportersboog[5].pk: 128,
+                     self._sportersboog[6].pk: 129}
         with self.assert_max_queries(40):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
@@ -696,8 +696,8 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
-                     self._schuttersboog[0].pk: 123,
-                     self._schuttersboog[6].pk: 129}
+                     self._sportersboog[0].pk: 123,
+                     self._sportersboog[6].pk: 129}
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
@@ -710,13 +710,13 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
         self._schrijf_in_voor_competitie(self.deelcomp_regio101_18,
-                                         self._schuttersboog,
+                                         self._sportersboog,
                                          1)
         # voer een wedstrijd.uitslag in
         json_data = {'wedstrijd_pk': wedstrijd_pk}
         waarde = 100
-        for schutterboog in self._schuttersboog:
-            json_data[schutterboog.pk] = waarde
+        for sporterboog in self._sportersboog:
+            json_data[sporterboog.pk] = waarde
             waarde += 1
         # for
 
@@ -746,7 +746,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # zet de ronde uitslag
-        score = Score(schutterboog=self._schuttersboog[0],
+        score = Score(sporterboog=self._sportersboog[0],
                       afstand_meter=18,
                       waarde=123)
         score.save()

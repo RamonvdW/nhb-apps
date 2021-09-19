@@ -6,7 +6,8 @@
 
 from django.test import TestCase
 from Functie.models import Functie, maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
+from Sporter.models import Sporter, Secretaris
 from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -93,7 +94,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         ver.naam = "Grote Club"
         ver.ver_nr = 1001
         ver.regio = regio_111
-        # secretaris kan nog niet ingevuld worden
         ver.save()
         self.nhbver2 = ver
 
@@ -120,45 +120,44 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.loc2 = loc
 
         # maak het lid aan dat HWL wordt
-        lid = NhbLid()
-        lid.nhb_nr = 100001
-        lid.geslacht = "M"
-        lid.voornaam = "Ramon"
-        lid.achternaam = "de Tester"
-        lid.email = "rdetester@gmail.not"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 100001
+        sporter.geslacht = "M"
+        sporter.voornaam = "Ramon"
+        sporter.achternaam = "de Tester"
+        sporter.email = "rdetester@gmail.not"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.save()
 
-        self.account_hwl = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
+        self.account_hwl = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
         self.functie_hwl.accounts.add(self.account_hwl)
 
-        lid.account = self.account_hwl
-        lid.save()
-        self.nhblid_100001 = lid
+        sporter.account = self.account_hwl
+        sporter.save()
+        self.sporter_100001 = sporter
 
         # maak het lid aan dat SEC wordt
-        lid = NhbLid()
-        lid.nhb_nr = 100002
-        lid.geslacht = "M"
-        lid.voornaam = "Ramon"
-        lid.achternaam = "de Secretaris"
-        lid.email = "rdesecretaris@gmail.not"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 100002
+        sporter.geslacht = "M"
+        sporter.voornaam = "Ramon"
+        sporter.achternaam = "de Secretaris"
+        sporter.email = "rdesecretaris@gmail.not"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.save()
 
-        self.account_sec = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
+        self.account_sec = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
         self.functie_sec.accounts.add(self.account_sec)
 
-        lid.account = self.account_sec
-        lid.save()
-        self.nhblid_100002 = lid
+        sporter.account = self.account_sec
+        sporter.save()
+        self.sporter_100002 = sporter
 
-        ver.secretaris_lid = lid
-        ver.save()
+        Secretaris(vereniging=ver, sporter=sporter).save()
 
     def test_anon(self):
         # anon

@@ -8,7 +8,7 @@ from django.db.models import Q
 from BasisTypen.models import BLAZOEN2STR, BLAZOEN_40CM, BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_DT
 from Competitie.models import (RegioCompetitieSchutterBoog, RegiocompetitieTeam,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3)
-from Schutter.models import SchutterVoorkeuren
+from Sporter.models import SporterVoorkeuren
 from types import SimpleNamespace
 import math
 
@@ -31,10 +31,10 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                             .regiocompetitieschutterboog_set
                             .select_related('klasse',
                                             'klasse__indiv',
-                                            'schutterboog',
-                                            'schutterboog__boogtype',
-                                            'schutterboog__nhblid',
-                                            'schutterboog__nhblid__bij_vereniging'))
+                                            'sporterboog',
+                                            'sporterboog__boogtype',
+                                            'sporterboog__sporter',
+                                            'sporterboog__sporter__bij_vereniging'))
 
         if deelcomp.regio_organiseert_teamcompetitie:
             deelnemers_teams = (RegiocompetitieTeam
@@ -58,10 +58,10 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                         bij_vereniging__in=ver_pks)
                                 .select_related('klasse',
                                                 'klasse__indiv',
-                                                'schutterboog',
-                                                'schutterboog__boogtype',
-                                                'schutterboog__nhblid',
-                                                'schutterboog__nhblid__bij_vereniging'))
+                                                'sporterboog',
+                                                'sporterboog__boogtype',
+                                                'sporterboog__sporter',
+                                                'sporterboog__sporter__bij_vereniging'))
 
             if deelcomp.regio_organiseert_teamcompetitie:
                 deelnemers_teams = (RegiocompetitieTeam
@@ -80,10 +80,10 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                 .filter(deelcompetitie=deelcomp)
                                 .select_related('klasse',
                                                 'klasse__indiv',
-                                                'schutterboog',
-                                                'schutterboog__boogtype',
-                                                'schutterboog__nhblid',
-                                                'schutterboog__nhblid__bij_vereniging'))
+                                                'sporterboog',
+                                                'sporterboog__boogtype',
+                                                'sporterboog__sporter',
+                                                'sporterboog__sporter__bij_vereniging'))
 
             if deelcomp.regio_organiseert_teamcompetitie:
                 deelnemers_teams = (RegiocompetitieTeam
@@ -124,7 +124,7 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
 
     deelnemers_indiv, deelnemers_teams = _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd)
 
-    # bepaal voor elke vereniging en boog afkorting in welke teams een schutterboog uit mag komen
+    # bepaal voor elke vereniging en boog afkorting in welke teams een sporterboog uit mag komen
     ver_teams = dict()      # [ver_nr] = dict[boog afkorting] = list()
     ver_aantal = dict()     # [ver_nr] = dict[team type] = aantal
 
@@ -153,40 +153,40 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
         # for
 
     # maak lijst nhb_nrs van sporters met voorkeur voor eigen blazoen
-    wens_eigen_blazoen = list(SchutterVoorkeuren
+    wens_eigen_blazoen = list(SporterVoorkeuren
                               .objects
-                              .select_related('nhblid')
+                              .select_related('sporter')
                               .filter(voorkeur_eigen_blazoen=True)
-                              .values_list('nhblid__nhb_nr', flat=True))
+                              .values_list('sporter__lid_nr', flat=True))
 
-    nhbnr2para_opmerking = dict()
-    for voorkeur in (SchutterVoorkeuren
+    lid_nr2para_opmerking = dict()
+    for voorkeur in (SporterVoorkeuren
                      .objects
-                     .select_related('nhblid')
+                     .select_related('sporter')
                      .exclude(opmerking_para_sporter='')):
 
-        nhbnr2para_opmerking[voorkeur.nhblid.nhb_nr] = voorkeur.opmerking_para_sporter
+        lid_nr2para_opmerking[voorkeur.sporter.lid_nr] = voorkeur.opmerking_para_sporter
     # for
 
     unsorted_sporters = list()
     for deelnemer in deelnemers_indiv:
-        schutterboog = deelnemer.schutterboog
-        nhblid = schutterboog.nhblid
-        ver = nhblid.bij_vereniging
-        boog = schutterboog.boogtype
+        sporterboog = deelnemer.sporterboog
+        sporter = sporterboog.sporter
+        ver = sporter.bij_vereniging
+        boog = sporterboog.boogtype
 
         sporter = SimpleNamespace(
-                        nhb_nr=nhblid.nhb_nr,
-                        volledige_naam=nhblid.volledige_naam(),
+                        lid_nr=sporter.lid_nr,
+                        volledige_naam=sporter.volledige_naam(),
                         ver_nr=ver.ver_nr,
                         ver_naam=ver.naam,
                         boog=boog.beschrijving,
-                        schutterboog_pk=schutterboog.pk,
+                        sporterboog_pk=sporterboog.pk,
                         deelnemer_pk=deelnemer.pk,
                         schiet_boog_r=(boog.afkorting == 'R'),
                         schiet_boog_c=(boog.afkorting == 'C'),
-                        voorkeur_dt=(nhblid.nhb_nr in wens_eigen_blazoen),
-                        voorkeur_4spot=(nhblid.nhb_nr in wens_eigen_blazoen),
+                        voorkeur_dt=(sporter.lid_nr in wens_eigen_blazoen),
+                        voorkeur_4spot=(sporter.lid_nr in wens_eigen_blazoen),
                         is_aspirant=deelnemer.klasse.indiv.is_aspirant_klasse,
                         wil_team_schieten=deelnemer.inschrijf_voorkeur_team,
                         team_pk=0,
@@ -197,7 +197,7 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
         sporter.voorkeur_4spot &= sporter.schiet_boog_c
 
         try:
-            sporter.notitie = nhbnr2para_opmerking[nhblid.nhb_nr]
+            sporter.notitie = lid_nr2para_opmerking[sporter.lid_nr]
         except KeyError:
             sporter.notitie = ''
 

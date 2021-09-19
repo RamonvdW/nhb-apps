@@ -214,9 +214,9 @@
                     {
                         // zoek het DOM element met deze id
                         let el = document.getElementById(btn.dataset[d])
-                        let nhb_nr = el.value.slice(0,6)
-                        if (nhb_nr === '') return    // hanteer lege input
-                        obj['nhb_nr'] = nhb_nr
+                        let lid_nr = el.value.slice(0,6)
+                        if (lid_nr === '') return    // hanteer lege input
+                        obj['lid_nr'] = lid_nr
                     }
                 } // for
 
@@ -248,7 +248,7 @@
             // voeg de gevonden sporter toe aan de tabel
             // en geef dit door aan de website via een POST
 
-            // als nhb_nr al in de tabel staat, dan niet toevoegen
+            // als lid_nr al in de tabel staat, dan niet toevoegen
             // zet focus op score invoer veld
             // en maak zoekveld weer leeg
 
@@ -257,7 +257,7 @@
             //console.log('toevoegen: rsp:', rsp)
             el_rsp.value = ""
 
-            const nhb_nr = rsp['nhb_nr']
+            const lid_nr = rsp['lid_nr']
             let found_dupe = false
 
             // zoek het plekje in de tabel waar deze toegevoegd moet worden
@@ -270,10 +270,10 @@
                 const filter_cmd = row.dataset["tablefilter"]
                 if (filter_cmd === "stop") break           // from the for
 
-                const row_nhb_nr = row.cells[0].innerText
-                if (row_nhb_nr < nhb_nr) row_smaller = i
+                const row_lid_nr = row.cells[0].innerText
+                if (row_lid_nr < lid_nr) row_smaller = i
 
-                if (row_nhb_nr == nhb_nr)
+                if (row_lid_nr == lid_nr)
                     // sporter zit al in de uitslag - selecteer deze regel en verder niets
                     found_dupe = true
             } // for
@@ -305,7 +305,7 @@
 
                         // pas de nieuwe regel aan met de gevonden data
                         new_row.cells[0].dataset.pk = deelnemer['pk']
-                        new_row.cells[0].innerHTML = nhb_nr
+                        new_row.cells[0].innerHTML = lid_nr
 
                         new_row.cells[1].innerHTML = rsp['naam']
 
@@ -424,7 +424,7 @@
 
             let deelnemers = rsp['deelnemers']
             // sorteer deelnemers op invoeg-volgorde: bondsnummer
-            deelnemers.sort(function(a,b) { return a.nhb_nr - b.nhb_nr })
+            deelnemers.sort(function(a,b) { return a.lid_nr - b.lid_nr })
             //console.log('sorted deelnemers:', deelnemers)
 
             let first_added_row
@@ -432,7 +432,7 @@
             deelnemers.forEach(deelnemer =>
             {
                 const pk = deelnemer['pk']
-                const nhb_nr = deelnemer['nhb_nr']
+                const lid_nr = deelnemer['lid_nr']
                 let skip = false
                 while (row_nr <= body.rows.length)      // stop eerder: op tablefilter=stop
                 {
@@ -446,7 +446,7 @@
                     }
 
                     const row_pk = row.cells[0].dataset.pk
-                    const row_nhb_nr = row.cells[0].innerText
+                    const row_lid_nr = row.cells[0].innerText
 
                     if (pk == row_pk)  // warning: breaks when changed to ===
                     {
@@ -454,9 +454,9 @@
                         skip = true
                         break
                     }
-                    else if (nhb_nr < row_nhb_nr)
+                    else if (lid_nr < row_lid_nr)
                     {
-                        // nhb_nr is minder dan nhb_nr in deze regel
+                        // lid_nr is minder dan lid_nr in deze regel
                         row_nr -= 1     // toevoegen voor deze regel
                         break           // from the while
                     }
@@ -473,7 +473,7 @@
                     const new_row = base_row.cloneNode(true)
 
                     // pas de nieuwe regel aan met de ontvangen data
-                    new_row.cells[0].innerHTML = nhb_nr
+                    new_row.cells[0].innerHTML = lid_nr
                     new_row.cells[0].dataset.pk = deelnemer['pk']
 
                     new_row.cells[1].innerHTML = deelnemer['naam']
@@ -619,13 +619,13 @@
 
         {% for score in scores %}
             <tr>
-                <td data-pk="{{ score.schutterboog.pk }}">{{ score.schutterboog.nhblid.nhb_nr }}</td>
-                <td>{{ score.schutterboog.nhblid.volledige_naam }}</td>
+                <td data-pk="{{ score.sporterboog.pk }}">{{ score.sporterboog.sporter.lid_nr }}</td>
+                <td>{{ score.sporterboog.sporter.volledige_naam }}</td>
                 <td>
-                    <span>[{{ score.schutterboog.nhblid.bij_vereniging.ver_nr }}]</span>
-                    <span class="hide-on-small-only">&nbsp;{{ score.schutterboog.nhblid.bij_vereniging.naam }}</span>
+                    <span>[{{ score.sporterboog.sporter.bij_vereniging.ver_nr }}]</span>
+                    <span class="hide-on-small-only">&nbsp;{{ score.sporterboog.sporter.bij_vereniging.naam }}</span>
                 </td>
-                <td>{{ score.schutterboog.boogtype.beschrijving }}{% if score.vsg %} ({{ score.vsg }}){% endif %}</td>
+                <td>{{ score.sporterboog.boogtype.beschrijving }}{% if score.vsg %} ({{ score.vsg }}){% endif %}</td>
                 <td><input type="text" oninput="controleer_score(this)" placeholder="0" value="{{ score.waarde }}" size="3" maxlength="3" style="width:3em; height:2rem; margin:0"></td>
                 {% if deelcomp.regio_organiseert_teamcompetitie %}
                     <td>{{ score.team_naam }}</td>

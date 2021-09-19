@@ -22,8 +22,8 @@
     <h5>Op deze site</h5>
 
     <div class="row">
-        {% url 'Schutter:profiel' as card_url %}
-        {% include 'plein/card.dtl' with title="Jouw pagina" text="Voorkeuren en informatie toegespitst op jou." icon="portrait" url=card_url %}
+        {% url 'Sporter:profiel' as card_url %}
+        {% include 'plein/card.dtl' with title="Mijn pagina" text="Voorkeuren en informatie toegespitst op jou." icon="portrait" url=card_url %}
 
         {% url 'Competitie:kies' as card_url %}
         {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}

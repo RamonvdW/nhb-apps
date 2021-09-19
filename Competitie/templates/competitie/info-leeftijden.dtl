@@ -16,7 +16,7 @@
 
     {% if persoonlijke_leeftijdsklassen %}
         <p>&nbsp;</p>
-        <p>Een persoonlijk overzicht kan je hier inzien: <a class="btn-nhb-blauw" href="{% url 'Schutter:leeftijdsklassen' %}"><i class="material-icons-round left">grade</i>Mijn leeftijdsklassen</a></p>
+        <p>Een persoonlijk overzicht kan je hier inzien: <a class="btn-nhb-blauw" href="{% url 'Sporter:leeftijdsklassen' %}"><i class="material-icons-round left">grade</i>Mijn leeftijdsklassen</a></p>
     {% endif %}
 
     <p>Wanneer je je inschrijft via deze website gaat dit allemaal automatisch goed.</p>

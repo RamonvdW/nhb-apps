@@ -7,10 +7,10 @@
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
-from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
+from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
-from Schutter.models import SchutterBoog
+from Sporter.models import Sporter, SporterBoog
 from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
                      LAAG_REGIO, LAAG_RK, LAAG_BK,
                      RegioCompetitieSchutterBoog, DeelcompetitieKlasseLimiet,
@@ -43,7 +43,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self._next_nhb_nr = 200000
+        self._next_lid_nr = 200000
 
         self.boogtype = BoogType.objects.get(afkorting='R')
 
@@ -65,28 +65,28 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
     def _maak_lid_schutterboog(self, ver, deelcomp, aantal_scores):
         # lid aanmaken
-        self._next_nhb_nr += 1
-        lid = NhbLid(nhb_nr=self._next_nhb_nr,
-                     geslacht='M',
-                     voornaam='Voornaam',
-                     achternaam='Achternaam',
-                     geboorte_datum=datetime.date(1972, 3, 4),
-                     sinds_datum=datetime.date(2010, 11, 12),
-                     bij_vereniging=ver,
-                     email='lid@vereniging.nl')
-        lid.save()
+        self._next_lid_nr += 1
+        sporter = Sporter(lid_nr=self._next_lid_nr,
+                          geslacht='M',
+                          voornaam='Voornaam',
+                          achternaam='Achternaam',
+                          geboorte_datum=datetime.date(1972, 3, 4),
+                          sinds_datum=datetime.date(2010, 11, 12),
+                          bij_vereniging=ver,
+                          email='lid@vereniging.nl')
+        sporter.save()
 
         # schutterboog aanmaken
-        schutterboog = SchutterBoog(nhblid=lid,
-                                    boogtype=self.boogtype,
-                                    voor_wedstrijd=True)
-        schutterboog.save()
+        sporterboog = SporterBoog(sporter=sporter,
+                                  boogtype=self.boogtype,
+                                  voor_wedstrijd=True)
+        sporterboog.save()
 
         self.gemiddelde += 0.01
 
         # inschrijven voor de competitie
         aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
-                                                 schutterboog=schutterboog,
+                                                 sporterboog=sporterboog,
                                                  bij_vereniging=ver,
                                                  gemiddelde=self.gemiddelde,
                                                  klasse=self.klasse)
@@ -145,20 +145,20 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         self.functie_rko1 = self.deelcomp_rk.functie
 
     def _prep_beheerder_lid(self, voornaam, ver):
-        lid = NhbLid()
-        lid.nhb_nr = self._next_nhb_nr = self._next_nhb_nr + 1
-        lid.geslacht = "V"
-        lid.voornaam = voornaam
-        lid.achternaam = "Tester"
-        lid.email = voornaam.lower() + "@nhb.test"
-        lid.geboorte_datum = datetime.date(1972, 3, 4)
-        lid.sinds_datum = datetime.date(2010, 11, 12)
-        lid.bij_vereniging = ver
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = self._next_lid_nr = self._next_lid_nr + 1
+        sporter.geslacht = "V"
+        sporter.voornaam = voornaam
+        sporter.achternaam = "Tester"
+        sporter.email = voornaam.lower() + "@nhb.test"
+        sporter.geboorte_datum = datetime.date(1972, 3, 4)
+        sporter.sinds_datum = datetime.date(2010, 11, 12)
+        sporter.bij_vereniging = ver
+        sporter.save()
 
-        account = self.e2e_create_account(lid.nhb_nr,
-                                          lid.email,
-                                          lid.voornaam,
+        account = self.e2e_create_account(sporter.lid_nr,
+                                          sporter.email,
+                                          sporter.voornaam,
                                           accepteer_vhpg=True)
         return account
 
@@ -195,7 +195,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         print('Deelnemers:')
         for obj in KampioenschapSchutterBoog.objects.order_by('volgorde'):
             print('  rank=%s, volgorde=%s, nhb_nr=%s, gem=%s, deelname=%s, label=%s' % (
-                obj.rank, obj.volgorde, obj.schutterboog.nhblid.nhb_nr, obj.gemiddelde,
+                obj.rank, obj.volgorde, obj.sporterboog.sporter.lid_nr, obj.gemiddelde,
                 obj.deelname, obj.kampioen_label))
         print('====================================================================')
 

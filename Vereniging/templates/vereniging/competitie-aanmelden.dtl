@@ -162,7 +162,7 @@
                         {% if not obj.wil_competitie %}
                             <!-- sporter wil niet meedoen -->
                             <td><!-- geen checkbox --></td>
-                            <td class="grey-text">{{ obj.nhb_nr }}</td>
+                            <td class="grey-text">{{ obj.lid_nr }}</td>
                             <td class="grey-text">{{ obj.volledige_naam }}</td>
                             <td class="grey-text">{{ obj.leeftijd }}</td>
                             <td class="grey-text hide-on-small-only">{{ obj.leeftijdsklasse.klasse_kort }}</td>
@@ -181,7 +181,7 @@
                                     {% endif %}
                                 {% endif %}
                             </td>
-                            <td>{{ obj.nhb_nr }}</td>
+                            <td>{{ obj.lid_nr }}</td>
                             <td>{{ obj.volledige_naam }}</td>
                             <td>{{ obj.leeftijd }}</td>
                             <td class="hide-on-small-only">{{ obj.leeftijdsklasse.klasse_kort }}</td>
@@ -220,7 +220,7 @@
                     {% if not obj.wil_competitie %}
                         <!-- wil niet meedoen, dus kan niet aanmelden -->
                         <td><!-- geen checkbox --></td>
-                        <td class="grey-text">{{ obj.nhb_nr }}</td>
+                        <td class="grey-text">{{ obj.lid_nr }}</td>
                         <td class="grey-text">{{ obj.volledige_naam }}</td>
                         <td class="grey-text">{{ obj.boogtype }}</td>
                         <td><!-- geen aanvangsgemiddelde --></td>
@@ -237,7 +237,7 @@
                                 {% endif %}
                             {% endif %}
                         </td>
-                        <td>{{ obj.nhb_nr }}</td>
+                        <td>{{ obj.lid_nr }}</td>
                         <td>{{ obj.volledige_naam }}</td>
                         <td>{{ obj.boogtype }}</td>
                         <td>{{ obj.ag|floatformat:3 }}</td>

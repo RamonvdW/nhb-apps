@@ -9,7 +9,7 @@ from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige
-from Schutter.models import SchutterBoog
+from Sporter.models import SporterBoog
 from Score.models import ScoreHist, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
 from .forms import ScoreGeschiedenisForm
 from Plein.menu import menu_dynamics
@@ -47,27 +47,27 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                 zoekterm = ''
 
         if zoekterm:
-            schuttersboog = (SchutterBoog
-                             .objects
-                             .select_related('nhblid',
-                                             'nhblid__bij_vereniging',
-                                             'nhblid__bij_vereniging__regio')
-                             .filter(nhblid__nhb_nr=zoekterm))
-            context['schuttersboog'] = schuttersboog
-            pks = [obj.pk for obj in schuttersboog]
+            sportersboog = (SporterBoog
+                            .objects
+                            .select_related('sporter',
+                                            'sporter__bij_vereniging',
+                                            'sporter__bij_vereniging__regio')
+                            .filter(sporter__lid_nr=zoekterm))
+            context['sportersboog'] = sportersboog
+            pks = [obj.pk for obj in sportersboog]
 
             if len(pks) == 0:
                 context['niet_gevonden'] = True
             else:
-                context['nhblid'] = schuttersboog[0].nhblid
+                context['sporter'] = sportersboog[0].sporter
 
                 hists = (ScoreHist
                          .objects
                          .select_related('score',
-                                         'score__schutterboog',
-                                         'score__schutterboog__boogtype')
+                                         'score__sporterboog',
+                                         'score__sporterboog__boogtype')
                          .prefetch_related('score__competitiewedstrijduitslag_set')
-                         .filter(score__schutterboog__in=pks)
+                         .filter(score__sporterboog__in=pks)
                          .order_by('-when'))
 
                 # splitst de hists op per score
@@ -95,10 +95,10 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
 
                 context['afstanden'] = afstanden = list()
 
-                for obj in schuttersboog:
+                for obj in sportersboog:
                     obj.scores = list()
                     for hist in hists:      # deze volgorde aanhouden
-                        if hist.score.schutterboog == obj:
+                        if hist.score.sporterboog == obj:
                             score = hist.score
                             try:
                                 score.hists = score2hists[score.pk]

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,8 +9,6 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from Records.models import IndivRecord
-from NhbStructuur.models import NhbLid
-import datetime
 import csv
 
 
@@ -28,12 +26,12 @@ class Command(BaseCommand):
     def _cache_records(self):
         self._indiv_indoor = (IndivRecord
                               .objects
-                              .select_related('nhb_lid')
+                              .select_related('sporter')        # TODO: niet nodig
                               .exclude(discipline='OD'))
 
         self._indiv_outdoor = (IndivRecord
                                .objects
-                               .select_related('nhb_lid')
+                               .select_related('sporter')       # TODO: niet nodig
                                .filter(discipline='OD'))
 
         self._cache_nhb = dict()        # [indiv.pk] = IndivRecord
