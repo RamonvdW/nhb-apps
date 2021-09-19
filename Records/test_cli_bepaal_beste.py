@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from django.core import management
 from django.utils.dateparse import parse_date
 from .models import (IndivRecord, BesteIndivRecords,
                      LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE)
-from NhbStructuur.models import NhbLid
+from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 import io
@@ -21,28 +21,28 @@ class TestRecordsCliBepaalBeste(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
 
-        # NhbLib
-        lid = NhbLid()
-        lid.nhb_nr = 123456
-        lid.voornaam = 'Jan'
-        lid.achternaam = 'Schutter'
-        lid.email = 'jan@test.nl'
-        lid.geboorte_datum = parse_date('1970-03-03')
-        lid.woon_straatnaam = 'Papendal'
-        lid.geslacht = 'M'
-        lid.sinds_datum = parse_date("1991-02-03") # Y-M-D
-        lid.save()
+        # leden
+        sporter = Sporter()
+        sporter.lid_nr = 123456
+        sporter.voornaam = 'Jan'
+        sporter.achternaam = 'Schutter'
+        sporter.email = 'jan@test.nl'
+        sporter.geboorte_datum = parse_date('1970-03-03')
+        sporter.woon_straatnaam = 'Papendal'
+        sporter.geslacht = 'M'
+        sporter.sinds_datum = parse_date("1991-02-03") # Y-M-D
+        sporter.save()
 
-        lid = NhbLid()
-        lid.nhb_nr = 123457
-        lid.voornaam = 'Petra'
-        lid.achternaam = 'Schutter'
-        lid.email = 'petra@test.nl'
-        lid.geboorte_datum = parse_date('1970-01-30')
-        lid.woon_straatnaam = 'Arnhem'
-        lid.geslacht = 'V'
-        lid.sinds_datum = parse_date("1991-02-05") # Y-M-D
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 123457
+        sporter.voornaam = 'Petra'
+        sporter.achternaam = 'Schutter'
+        sporter.email = 'petra@test.nl'
+        sporter.geboorte_datum = parse_date('1970-01-30')
+        sporter.woon_straatnaam = 'Arnhem'
+        sporter.geslacht = 'V'
+        sporter.sinds_datum = parse_date("1991-02-05") # Y-M-D
+        sporter.save()
 
         # Record 42
         rec = IndivRecord()
@@ -53,7 +53,7 @@ class TestRecordsCliBepaalBeste(E2EHelpers, TestCase):
         rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[0][0]   # M
         rec.materiaalklasse = MATERIAALKLASSE[0][0]     # R
         # rec.materiaalklasse_overig =
-        rec.nhb_lid = lid
+        rec.sporter = sporter
         rec.naam = 'Top Schutter'
         rec.datum = parse_date('2017-08-27')
         rec.plaats = 'Papendal'
@@ -75,7 +75,7 @@ class TestRecordsCliBepaalBeste(E2EHelpers, TestCase):
         rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[1][0]   # S
         rec.materiaalklasse = 'R'       # Recurve
         rec.para_klasse = 'Open'
-        # rec.nhb_lid =
+        # rec.sporter =
         rec.naam = 'Top Schutter 2'
         rec.datum = datetime.datetime.now()
         rec.plaats = 'Ergens Anders'
@@ -94,7 +94,7 @@ class TestRecordsCliBepaalBeste(E2EHelpers, TestCase):
         rec.geslacht = GESLACHT[1][0]   # V
         rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[3][0]   # C
         rec.materiaalklasse = 'R'       # Recurve
-        rec.nhb_lid = lid
+        rec.sporter = sporter
         rec.naam = 'Petra Schutter'
         rec.datum = parse_date('2017-08-27')
         rec.plaats = 'Nergens'

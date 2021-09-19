@@ -5,8 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from NhbStructuur.models import NhbLid
 from .models import Taak
+from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -32,16 +32,16 @@ class TestTakenViews(E2EHelpers, TestCase):
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_same = self.e2e_create_account('same', 'same@test.com', 'same')
 
-        lid = NhbLid()
-        lid.nhb_nr = 100042
-        lid.geslacht = "M"
-        lid.voornaam = "Beh"
-        lid.achternaam = "eerder"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.account = self.account_normaal
-        lid.email = lid.account.email
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 100042
+        sporter.geslacht = "M"
+        sporter.voornaam = "Beh"
+        sporter.achternaam = "eerder"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.account = self.account_normaal
+        sporter.email = sporter.account.email
+        sporter.save()
 
         # maak een taak aan
         taak = Taak(toegekend_aan=self.testdata.account_admin,

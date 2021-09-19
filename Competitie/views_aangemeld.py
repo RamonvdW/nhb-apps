@@ -68,7 +68,7 @@ def maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=None, regio=None):
 
 class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
 
-    """ Toon een lijst van SchutterBoog die aangemeld zijn voor de regiocompetitie """
+    """ Toon een lijst van SporterBoog die aangemeld zijn voor de regiocompetitie """
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
@@ -136,7 +136,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
 
 class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
 
-    """ Toon een lijst van SchutterBoog die aangemeld zijn voor de regiocompetitie """
+    """ Toon een lijst van SporterBoog die aangemeld zijn voor de regiocompetitie """
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
@@ -212,7 +212,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
 
 class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
-    """ Toon een lijst van SchutterBoog die aangemeld zijn voor de regiocompetitie """
+    """ Toon een lijst van SporterBoog die aangemeld zijn voor de regiocompetitie """
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
@@ -958,7 +958,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
 
         # sporters header
         writer.writerow([])
-        nummers = [nummer for nummer in range(1, nr + 1)]
+        nummers = [str(nummer) for nummer in range(1, nr + 1)]
         writer.writerow(['Bondsnummer', 'Sporter', 'Vereniging', 'Wedstrijdklasse (individueel)'] + nummers)
 
         for deelnemer in (RegioCompetitieSchutterBoog

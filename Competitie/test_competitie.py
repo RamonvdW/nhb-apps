@@ -120,10 +120,10 @@ class TestCompetitie(E2EHelpers, TestCase):
         boog_bb = BoogType.objects.get(afkorting='BB')
         boog_ib = BoogType.objects.get(afkorting='IB')
 
-        # maak een schutterboog aan voor het jeugdlid (nodig om aan te melden)
+        # maak een sporterboog aan voor het jeugdlid (nodig om aan te melden)
         sporterboog = SporterBoog(sporter=self.sporter_100002, boogtype=boog_bb, voor_wedstrijd=False)
         sporterboog.save()
-        self.schutterboog_100002 = sporterboog
+        self.sporterboog_100002 = sporterboog
 
         sporter = Sporter()
         sporter.lid_nr = 100003
@@ -135,14 +135,14 @@ class TestCompetitie(E2EHelpers, TestCase):
         sporter.sinds_datum = datetime.date(year=2015, month=11, day=12)
         sporter.bij_vereniging = ver
         sporter.save()
-        self.lid_100003 = sporter
+        self.sporter_100003 = sporter
 
-        # maak een schutterboog aan voor het lid (nodig om aan te melden)
-        sporterboog = SporterBoog(sporter=self.lid_100003, boogtype=boog_bb, voor_wedstrijd=True)
+        # maak een sporterboog aan voor het lid (nodig om aan te melden)
+        sporterboog = SporterBoog(sporter=self.sporter_100003, boogtype=boog_bb, voor_wedstrijd=True)
         sporterboog.save()
-        self.schutterboog_100003 = sporterboog
+        self.sporterboog_100003 = sporterboog
 
-        # maak een schutterboog aan voor het lid (nodig om aan te melden)
+        # maak een sporterboog aan voor het lid (nodig om aan te melden)
         sporterboog = SporterBoog(sporter=self.sporter_100001, boogtype=boog_ib, voor_wedstrijd=True)
         sporterboog.save()
 
@@ -520,7 +520,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         aanvangsgemiddelden_vaststellen_voor_afstand(18)
         aanvangsgemiddelden_vaststellen_voor_afstand(25)
 
-        # controleer dat er geen dubbele SchutterBoog records aangemaakt zijn
+        # controleer dat er geen dubbele SporterBoog records aangemaakt zijn
         self.assertEqual(1, SporterBoog.objects.filter(sporter=self.sporter_100001, boogtype__afkorting='R').count())
         self.assertEqual(1, SporterBoog.objects.filter(sporter=self.sporter_100002, boogtype__afkorting='BB').count())
         self.assertEqual(554, SporterBoog.objects.count())

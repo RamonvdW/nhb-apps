@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils.dateparse import parse_date
 from .models import (IndivRecord, BesteIndivRecords,
                      LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE)
-from NhbStructuur.models import NhbLid
+from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
@@ -22,32 +22,30 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
 
-        # NhbLib
-        lid = NhbLid()
-        lid.nhb_nr = 123456
-        lid.voornaam = 'Janynke'
-        lid.achternaam = 'Schutter'
-        lid.email = 'janynke@test.nl'
-        lid.geboorte_datum = parse_date('1970-03-03')
-        lid.woon_straatnaam = 'Papendal'
-        lid.geslacht = 'V'
-        lid.sinds_datum = parse_date("1991-02-03") # Y-M-D
-        #lid.bij_vereniging
-        lid.save()
-        self.lid1 = lid
+        # leden
+        sporter = Sporter()
+        sporter.lid_nr = 123456
+        sporter.voornaam = 'Janynke'
+        sporter.achternaam = 'Schutter'
+        sporter.email = 'janynke@test.nl'
+        sporter.geboorte_datum = parse_date('1970-03-03')
+        sporter.woon_straatnaam = 'Papendal'
+        sporter.geslacht = 'V'
+        sporter.sinds_datum = parse_date("1991-02-03") # Y-M-D
+        sporter.save()
+        self.sporter_123456 = sporter
 
-        lid = NhbLid()
-        lid.nhb_nr = 123457
-        lid.voornaam = 'Petra'
-        lid.achternaam = 'Schutter'
-        lid.email = 'petra@test.nl'
-        lid.geboorte_datum = parse_date('1970-01-30')
-        lid.woon_straatnaam = 'Arnhem'
-        lid.geslacht = 'V'
-        lid.sinds_datum = parse_date("1991-02-05") # Y-M-D
-        #lid.bij_vereniging
-        lid.save()
-        self.lid2 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 123457
+        sporter.voornaam = 'Petra'
+        sporter.achternaam = 'Schutter'
+        sporter.email = 'petra@test.nl'
+        sporter.geboorte_datum = parse_date('1970-01-30')
+        sporter.woon_straatnaam = 'Arnhem'
+        sporter.geslacht = 'V'
+        sporter.sinds_datum = parse_date("1991-02-05") # Y-M-D
+        sporter.save()
+        self.sporter_123457 = sporter
 
         # Record 42
         rec = IndivRecord()
@@ -58,7 +56,7 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
         rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[0][0]   # M
         rec.materiaalklasse = MATERIAALKLASSE[0][0]     # R
         # rec.materiaalklasse_overig =
-        rec.nhb_lid = lid
+        rec.sporter = sporter
         rec.naam = 'Top Schutter'
         rec.datum = parse_date('2017-08-27')
         rec.plaats = 'Papendal'
@@ -80,7 +78,7 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
         rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[1][0]   # Senior
         rec.materiaalklasse = 'R'       # Recurve
         rec.para_klasse = 'Open'
-        # rec.nhb_lid =
+        # rec.sporter =
         rec.naam = 'Top Schutter 2'
         rec.datum = datetime.datetime.now()
         rec.plaats = 'Ergens Anders'
@@ -110,8 +108,8 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
         rec.geslacht = GESLACHT[1][0]   # Vrouw
         rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[3][0]   # Cadet
         rec.materiaalklasse = 'R'       # Recurve
-        #rec.para_klasse =
-        rec.nhb_lid = self.lid1
+        # rec.para_klasse =
+        rec.sporter = self.sporter_123456
         rec.naam = 'Petra Schutter'
         rec.datum = parse_date('2017-08-27')
         rec.plaats = 'Nergens'
@@ -130,8 +128,8 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
         rec.geslacht = GESLACHT[1][0]   # Vrouw
         rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[3][0]   # Cadet
         rec.materiaalklasse = 'R'       # Recurve
-        #rec.para_klasse =
-        rec.nhb_lid = self.lid2
+        # rec.para_klasse =
+        rec.sporter = self.sporter_123457
         rec.naam = 'Petra Schutter'
         rec.datum = parse_date('2017-08-30')
         rec.plaats = 'Narguns'

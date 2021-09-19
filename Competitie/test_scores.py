@@ -51,11 +51,11 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         cls.testdata.maak_accounts()
 
     def _prep_beheerder_lid(self, voornaam):
-        nhb_nr = self._next_lid_nr
+        lid_nr = self._next_lid_nr
         self._next_lid_nr += 1
 
         sporter = Sporter()
-        sporter.lid_nr = nhb_nr
+        sporter.lid_nr = lid_nr
         sporter.geslacht = "M"
         sporter.voornaam = voornaam
         sporter.achternaam = "Tester"
@@ -65,7 +65,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         sporter.bij_vereniging = self.nhbver
         sporter.save()
 
-        return self.e2e_create_account(nhb_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
+        return self.e2e_create_account(lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
 
     def _maak_schutters_aan(self, ver, aantal, bogen):
         geslacht = 'MV' * aantal
@@ -75,13 +75,13 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
             # maak een sporter aan
             sporter = Sporter(
-                    lid_nr=self._next_lid_nr,
-                    geslacht=geslacht[0],
-                    voornaam='Schutter %s' % (len(self._sportersboog) + 1),
-                    achternaam='Tester',
-                    geboorte_datum=datetime.date(year=1982, month=3, day=31-aantal),
-                    sinds_datum=datetime.date(year=2010, month=11, day=12),
-                    bij_vereniging=ver)
+                        lid_nr=self._next_lid_nr,
+                        geslacht=geslacht[0],
+                        voornaam='Schutter %s' % (len(self._sportersboog) + 1),
+                        achternaam='Tester',
+                        geboorte_datum=datetime.date(year=1982, month=3, day=31-aantal),
+                        sinds_datum=datetime.date(year=2010, month=11, day=12),
+                        bij_vereniging=ver)
             sporter.save()
 
             self._next_lid_nr += 1
@@ -359,9 +359,9 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rcl101_18)
         self.e2e_wissel_naar_functie(self.functie_rcl101_18)
 
-        nhb_nr = self._next_lid_nr - 1
+        lid_nr = self._next_lid_nr - 1
         json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
-                     'nhb_nr': nhb_nr}
+                     'lid_nr': lid_nr}
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_uitslag_zoeken,
                                     json.dumps(json_data),
@@ -378,7 +378,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
         # nu kunnen we wel wat vinden
         json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
-                     'nhb_nr': nhb_nr}
+                     'lid_nr': lid_nr}
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_uitslag_zoeken,
                                     json.dumps(json_data),
@@ -388,8 +388,8 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         json_data = resp.json()
         # print('test_rcl_zoeken: json_data=%s' % repr(json_data))
         # dit lid als laatste aangemaakte lid heeft 2 bogen
-        self.assertEqual(json_data['nhb_nr'], nhb_nr)
-        self.assertTrue('nhb_nr' in json_data)
+        self.assertEqual(json_data['lid_nr'], lid_nr)
+        self.assertTrue('lid_nr' in json_data)
         self.assertTrue('naam' in json_data)
         self.assertTrue('ver_nr' in json_data)
         self.assertTrue('ver_naam' in json_data)
@@ -416,8 +416,8 @@ class TestCompetitieScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_uitslag_zoeken)
         self.assert404(resp)       # 404 = not found / not allowed
 
-        # post met alleen een nhb_nr
-        json_data = {'nhb_nr': 0}
+        # post met alleen een lid_nr
+        json_data = {'lid_nr': 0}
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_uitslag_zoeken,
                                     json.dumps(json_data),
@@ -434,7 +434,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
         # post niet-bestand wedstrijd_pk
         json_data = {'wedstrijd_pk': 999999,
-                     'nhb_nr': 0}
+                     'lid_nr': 0}
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_uitslag_zoeken,
                                     json.dumps(json_data),

@@ -254,7 +254,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         url_schutter_voorkeuren = '/sporter/voorkeuren/'
 
         # haal als HWL de voorkeuren pagina op van een lid van de vereniging
-        # dit maakt ook de SchutterBoog records aan
+        # dit maakt ook de SporterBoog records aan
         with self.assert_max_queries(20):
             resp = self.client.get(url_schutter_voorkeuren + '%s/' % lid_nr)
         self.assertEqual(resp.status_code, 200)

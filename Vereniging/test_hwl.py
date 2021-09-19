@@ -404,7 +404,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        # eerste keer, zonder schutterboog records
+        # eerste keer, zonder sporterboog records
         self.assertEqual(SporterBoog.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren)
@@ -412,10 +412,10 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
-        # nog een keer, nu met schutterboog records aanwezig
+        # nog een keer, nu met sporterboog records aanwezig
         # zowel van de vereniging van de HWL als van andere verenigingen
         for sporter in (self.sporter_100001, self.sporter_100002, self.sporter_100003):
-            # get operatie maakt de schutterboog records aan
+            # get operatie maakt de sporterboog records aan
             url = self.url_sporter_voorkeuren % sporter.pk
             with self.assert_max_queries(20):
                 resp = self.client.get(url)
@@ -423,15 +423,15 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         # for
         self.assertEqual(SporterBoog.objects.count(), 15)
 
-        # zet een aantal schutterboog records op gebruik voor wedstrijd
-        # dit maakt een schutter-boog
+        # zet een aantal sporterboog records op gebruik voor wedstrijd
+        # dit maakt een sporterboog-boog
         for obj in SporterBoog.objects.all():
             if obj.pk & 1:  # odd?
                 obj.voor_wedstrijd = True
                 obj.save()
         # for
 
-        # nu de schutterboog records gemaakt zijn (HWL had toestemming)
+        # nu de sporterboog records gemaakt zijn (HWL had toestemming)
         # stoppen we 1 lid in een andere vereniging
         self.sporter_100003.bij_vereniging = self.nhbver2
         self.sporter_100003.save()
@@ -460,7 +460,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        # maakt SchutterBoog aan van andere vereniging
+        # maakt sporterboog aan van andere vereniging
         self._zet_sporter_voorkeuren(102000)
 
         # herstel de HWL functie
@@ -672,7 +672,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         # probeer aan te melden met een niet-wedstrijd boog
         sporterboog = SporterBoog.objects.get(sporter__lid_nr=self.sporter_100002.lid_nr,
-                                               boogtype__afkorting='R')
+                                              boogtype__afkorting='R')
         sporterboog.voor_wedstrijd = False
         sporterboog.save()
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)

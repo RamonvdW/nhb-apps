@@ -8,7 +8,7 @@ from django.test import TestCase
 from Account.models import Account
 from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN
 from Functie.models import maak_functie
-from NhbStructuur.models import NhbLid
+from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -34,22 +34,22 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_100001 = self.e2e_create_account('100001', 'nhb100001@test.com', 'Norma de Schutter')
 
-        self.lid_100001 = NhbLid(nhb_nr=100001,
-                                 voornaam='Norma',
-                                 achternaam='de Schutter',
-                                 account=self.account_100001,
-                                 geboorte_datum='1980-01-08',
-                                 sinds_datum='2008-01-08')
-        self.lid_100001.save()
+        self.sporter_100001 = Sporter(lid_nr=100001,
+                                      voornaam='Norma',
+                                      achternaam='de Schutter',
+                                      account=self.account_100001,
+                                      geboorte_datum='1980-01-08',
+                                      sinds_datum='2008-01-08')
+        self.sporter_100001.save()
 
-        # maak nog een nhblid aan dat niet gekoppeld is aan een account
-        self.lid_100002 = NhbLid(nhb_nr=100002,
-                                 voornaam='Andere',
-                                 achternaam='Schutter',
-                                 account=None,
-                                 geboorte_datum='1980-01-09',
-                                 sinds_datum='2008-01-09')
-        self.lid_100002.save()
+        # maak nog een sporter aan die niet gekoppeld is aan een account
+        self.sporter_100002 = Sporter(lid_nr=100002,
+                                      voornaam='Andere',
+                                      achternaam='Schutter',
+                                      account=None,
+                                      geboorte_datum='1980-01-09',
+                                      sinds_datum='2008-01-09')
+        self.sporter_100002.save()
 
     def test_anon(self):
         # geen inlog = geen toegang
@@ -125,7 +125,7 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
 
-        # zoek op naam, 0 hits want geen nhblid
+        # zoek op naam, 0 hits want geen sporter
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit, {'zoekterm': 'normaal'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK

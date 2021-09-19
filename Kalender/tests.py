@@ -6,7 +6,8 @@
 
 from django.test import TestCase
 from Functie.models import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
+from NhbStructuur.models import NhbRegio, NhbVereniging
+from Sporter.models import Sporter
 from Wedstrijden.models import WedstrijdLocatie
 from .models import KalenderWedstrijd
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -27,14 +28,14 @@ class TestKalender(E2EHelpers, TestCase):
         self.account_admin.is_BB = True
         self.account_admin.save()
 
-        lid = NhbLid(
-                    nhb_nr=100000,
+        sporter = Sporter(
+                    lid_nr=100000,
                     voornaam='Ad',
                     achternaam='de Admin',
                     geboorte_datum='1966-06-06',
                     sinds_datum='2020-02-02',
                     account=self.account_admin)
-        lid.save()
+        sporter.save()
 
         # maak een test vereniging
         self.nhbver1 = NhbVereniging(

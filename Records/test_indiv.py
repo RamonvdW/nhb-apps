@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils.dateparse import parse_date
 from .models import IndivRecord, LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE
-from NhbStructuur.models import NhbLid
+from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
@@ -21,28 +21,28 @@ class TestRecordsIndiv(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
 
-        # NhbLib
-        lid = NhbLid()
-        lid.nhb_nr = 123456
-        lid.voornaam = 'Jan'
-        lid.achternaam = 'Schutter'
-        lid.email = 'jan@test.nl'
-        lid.geboorte_datum = parse_date('1970-03-03')
-        lid.woon_straatnaam = 'Papendal'
-        lid.geslacht = 'M'
-        lid.sinds_datum = parse_date("1991-02-03")  # Y-M-D
-        lid.save()
+        # leden
+        sporter = Sporter()
+        sporter.lid_nr = 123456
+        sporter.voornaam = 'Jan'
+        sporter.achternaam = 'Schutter'
+        sporter.email = 'jan@test.nl'
+        sporter.geboorte_datum = parse_date('1970-03-03')
+        sporter.woon_straatnaam = 'Papendal'
+        sporter.geslacht = 'M'
+        sporter.sinds_datum = parse_date("1991-02-03")  # Y-M-D
+        sporter.save()
 
-        lid = NhbLid()
-        lid.nhb_nr = 123457
-        lid.voornaam = 'Petra'
-        lid.achternaam = 'Schutter'
-        lid.email = 'petra@test.nl'
-        lid.geboorte_datum = parse_date('1970-01-30')
-        lid.woon_straatnaam = 'Arnhem'
-        lid.geslacht = 'V'
-        lid.sinds_datum = parse_date("1991-02-05")  # Y-M-D
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 123457
+        sporter.voornaam = 'Petra'
+        sporter.achternaam = 'Schutter'
+        sporter.email = 'petra@test.nl'
+        sporter.geboorte_datum = parse_date('1970-01-30')
+        sporter.woon_straatnaam = 'Arnhem'
+        sporter.geslacht = 'V'
+        sporter.sinds_datum = parse_date("1991-02-05")  # Y-M-D
+        sporter.save()
 
         # Record 42
         rec = IndivRecord()
@@ -84,7 +84,7 @@ class TestRecordsIndiv(E2EHelpers, TestCase):
         rec.geslacht = GESLACHT[1][0]   # V
         rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[3][0]   # C
         rec.materiaalklasse = 'R'       # Recurve
-        rec.nhb_lid = lid
+        rec.sporter = sporter
         rec.naam = 'Petra Schutter'
         rec.datum = parse_date('2017-08-27')
         rec.plaats = 'Nergens'
@@ -117,7 +117,7 @@ class TestRecordsIndiv(E2EHelpers, TestCase):
         rec.geslacht = GESLACHT[0][0]   # M
         rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[0][0]   # M
         rec.materiaalklasse = MATERIAALKLASSE[0][0]     # R
-        rec.nhb_lid = lid
+        rec.sporter = sporter
         rec.naam = 'Top Schutter'
         rec.datum = parse_date('2017-08-27')
         rec.plaats = 'Papendal'
@@ -135,7 +135,7 @@ class TestRecordsIndiv(E2EHelpers, TestCase):
         rec.geslacht = GESLACHT[0][0]   # M
         rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[0][0]   # M
         rec.materiaalklasse = MATERIAALKLASSE[0][0]     # R
-        rec.nhb_lid = lid
+        rec.sporter = sporter
         rec.naam = 'Top Schutter'
         rec.datum = parse_date('2015-08-27')
         rec.plaats = 'Papendal'
@@ -152,7 +152,7 @@ class TestRecordsIndiv(E2EHelpers, TestCase):
         rec.geslacht = GESLACHT[0][0]   # M
         rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[0][0]   # M
         rec.materiaalklasse = MATERIAALKLASSE[0][0]     # R
-        rec.nhb_lid = lid
+        rec.sporter = sporter
         rec.naam = 'Top Schutter'
         rec.datum = parse_date('2014-08-27')
         rec.plaats = 'Papendal'
