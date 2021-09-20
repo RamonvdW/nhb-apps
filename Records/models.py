@@ -61,7 +61,7 @@ class IndivRecord(models.Model):
     # (niet voor alle records beschikbaar)
     sporter = models.ForeignKey(Sporter, on_delete=models.PROTECT, blank=True, null=True)
 
-    # naam van de recordhouden
+    # naam van de recordhouder
     naam = models.CharField(max_length=50)
 
     # wanneer is het record geschoten?

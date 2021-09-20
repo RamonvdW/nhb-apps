@@ -249,11 +249,16 @@ class RecordsZoekView(ListView):
                     # zoek alle records van dit lid
                     return IndivRecord.objects.filter(sporter=sporter)
             else:
-                return IndivRecord.objects.filter(
+                return (IndivRecord
+                        .objects
+                        .filter(
                                 Q(soort_record__icontains=zoekterm) |
                                 Q(naam__icontains=zoekterm) |
                                 Q(plaats__icontains=zoekterm) |
-                                Q(land__icontains=zoekterm)).order_by('-datum', 'soort_record')[:settings.RECORDS_MAX_ZOEKRESULTATEN]
+                                Q(land__icontains=zoekterm) |
+                                Q(sporter__unaccented_naam__icontains=zoekterm))
+                        .order_by('-datum',
+                                  'soort_record'))[:settings.RECORDS_MAX_ZOEKRESULTATEN]
 
         return None
 
