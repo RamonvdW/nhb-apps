@@ -146,7 +146,7 @@ class TestCompetitieInschrijfmethode3(E2EHelpers, TestCase):
             zet_competitie_fase(comp, 'B')
         # for
 
-        nhb_nr = 110000
+        lid_nr = 110000
         recurve_boog_pk = BoogType.objects.get(afkorting='R').pk
         compound_boog_pk = BoogType.objects.get(afkorting='C').pk
         barebow_boog_pk = BoogType.objects.get(afkorting='BB').pk
@@ -161,10 +161,10 @@ class TestCompetitieInschrijfmethode3(E2EHelpers, TestCase):
 
             # maak net zoveel leden aan als er dagdeel afkortingen zijn
             for lp in range(len(dagdelen)):
-                nhb_nr += 1
+                lid_nr += 1
                 sporter = Sporter()
-                sporter.lid_nr = nhb_nr
-                sporter.voornaam = "Lid %s" % nhb_nr
+                sporter.lid_nr = lid_nr
+                sporter.voornaam = "Lid %s" % lid_nr
                 sporter.achternaam = "de Tester"
                 sporter.bij_vereniging = nhb_ver
                 sporter.is_actief_lid = True
@@ -177,7 +177,7 @@ class TestCompetitieInschrijfmethode3(E2EHelpers, TestCase):
                 sporter.save()
 
                 # haal de schutter voorkeuren op, zodat de schutterboog records aangemaakt worden
-                url_voorkeuren = '/sporter/voorkeuren/%s/' % nhb_nr
+                url_voorkeuren = '/sporter/voorkeuren/%s/' % lid_nr
                 with self.assert_max_queries(20):
                     resp = self.client.get(url_voorkeuren)
                 self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -186,28 +186,28 @@ class TestCompetitieInschrijfmethode3(E2EHelpers, TestCase):
                 if lp == 1:
                     # zet de DT voorkeur aan voor een paar schutters
                     with self.assert_max_queries(20):
-                        resp = self.client.post(url_voorkeuren, {'sporter_pk': nhb_nr,
+                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_R': 'on',
                                                                  'voorkeur_eigen_blazoen': 'on'})
                     # onthoud deze schutterboog om straks in bulk aan te melden
                     # 'lid_NNNNNN_boogtype_MM'
-                    post_params['lid_%s_boogtype_%s' % (nhb_nr, recurve_boog_pk)] = 'on'
+                    post_params['lid_%s_boogtype_%s' % (lid_nr, recurve_boog_pk)] = 'on'
                 elif lp == 2:
                     with self.assert_max_queries(20):
-                        resp = self.client.post(url_voorkeuren, {'sporter_pk': nhb_nr,
+                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_C': 'on'})
-                    post_params['lid_%s_boogtype_%s' % (nhb_nr, compound_boog_pk)] = 'on'
+                    post_params['lid_%s_boogtype_%s' % (lid_nr, compound_boog_pk)] = 'on'
                 elif barebow_boog_pk:
                     with self.assert_max_queries(20):
-                        resp = self.client.post(url_voorkeuren, {'sporter_pk': nhb_nr,
+                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_BB': 'on'})
-                    post_params['lid_%s_boogtype_%s' % (nhb_nr, barebow_boog_pk)] = 'on'
+                    post_params['lid_%s_boogtype_%s' % (lid_nr, barebow_boog_pk)] = 'on'
                     barebow_boog_pk = None
                 else:
                     with self.assert_max_queries(20):
-                        resp = self.client.post(url_voorkeuren, {'sporter_pk': nhb_nr,
+                        resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_R': 'on'})
-                    post_params['lid_%s_boogtype_%s' % (nhb_nr, recurve_boog_pk)] = 'on'
+                    post_params['lid_%s_boogtype_%s' % (lid_nr, recurve_boog_pk)] = 'on'
 
                 self.assert_is_redirect_not_plein(resp)         # check for success
             # for

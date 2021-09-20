@@ -152,7 +152,7 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
             # for
         # for
 
-    # maak lijst nhb_nrs van sporters met voorkeur voor eigen blazoen
+    # maak lijst lid_nr's van sporters met voorkeur voor eigen blazoen
     wens_eigen_blazoen = list(SporterVoorkeuren
                               .objects
                               .select_related('sporter')

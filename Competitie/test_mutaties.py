@@ -194,7 +194,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         print('====================================================================')
         print('Deelnemers:')
         for obj in KampioenschapSchutterBoog.objects.order_by('volgorde'):
-            print('  rank=%s, volgorde=%s, nhb_nr=%s, gem=%s, deelname=%s, label=%s' % (
+            print('  rank=%s, volgorde=%s, lid_nr=%s, gem=%s, deelname=%s, label=%s' % (
                 obj.rank, obj.volgorde, obj.sporterboog.sporter.lid_nr, obj.gemiddelde,
                 obj.deelname, obj.kampioen_label))
         print('====================================================================')

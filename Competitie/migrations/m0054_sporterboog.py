@@ -17,7 +17,7 @@ def migrate_sporterboog(apps, _):
     for sporterboog in (sporterboog_klas
                         .objects
                         .select_related('sporter')
-                        .all()):
+                        .all()):                            # pragma: no cover
         cache[sporterboog.sporter.lid_nr] = sporterboog
     # for
 
@@ -25,8 +25,8 @@ def migrate_sporterboog(apps, _):
     for obj in (deelnemer_klas
                 .objects
                 .select_related('schutterboog__nhblid')
-                .all()):
-        obj.sporterboog = cache[obj.sporterboog.nhblid.nhb_nr]
+                .all()):                                    # pragma: no cover
+        obj.sporterboog = cache[obj.schutterboog.nhblid.nhb_nr]
         obj.save(update_fields=['sporterboog'])
     # for
 
@@ -34,8 +34,8 @@ def migrate_sporterboog(apps, _):
     for obj in (kampioen_klas
                 .objects
                 .select_related('schutterboog__nhblid')
-                .all()):
-        obj.sporterboog = cache[obj.sporterboog.nhblid.nhb_nr]
+                .all()):                                    # pragma: no cover
+        obj.sporterboog = cache[obj.schutterboog.nhblid.nhb_nr]
         obj.save(update_fields=['sporterboog'])
     # for
 

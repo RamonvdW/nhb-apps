@@ -27,7 +27,7 @@ def migrate_sporterboog(apps, _):
                   .exclude(schutterboog__nhblid=None)
                   .all()):                                      # pragma: no cover
 
-        score.sporterboog = cache[score.sporterboog.nhblid.nhb_nr]
+        score.sporterboog = cache[score.schutterboog.nhblid.nhb_nr]
         score.save(update_fields=['sporterboog'])
     # for
 

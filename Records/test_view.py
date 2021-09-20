@@ -210,17 +210,17 @@ class TestRecordsView(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_zoek)
 
-    def test_view_zoek_nhb_nr(self):
+    def test_view_zoek_lid_nr(self):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_zoek, {'zoekterm': '123456'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
-    def test_view_zoek_unknown_nhb_nr(self):
+    def test_view_zoek_unknown_lid_nr(self):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_zoek, {'zoekterm': '999999'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
-    def test_view_zoek_not_nhb_nr(self):
+    def test_view_zoek_not_lid_nr(self):
         # let op de zoekterm: mag niet matchen met soort_record, naam, plaats of land
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_zoek, {'zoekterm': 'jaja'})

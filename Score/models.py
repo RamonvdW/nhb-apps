@@ -12,7 +12,7 @@ from Sporter.models import SporterBoog
 
 # als een sporter per ongeluk opgenomen is in de uitslag
 # dan kan de score aangepast wordt tot SCORE_WAARDE_VERWIJDERD
-# om aan te geven dat de schutter eigenlijk toch niet mee deed.
+# om aan te geven dat de sporter eigenlijk toch niet mee deed.
 # via scorehist zijn de wijzigingen dan nog in te zien
 SCORE_WAARDE_VERWIJDERD = 32767
 

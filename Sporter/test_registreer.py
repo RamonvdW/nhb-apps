@@ -103,7 +103,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('sporter/registreer-nhb-account.dtl', 'plein/site_layout.dtl'))
         self.assertFormError(resp, 'form', None, 'De gegevens worden niet geaccepteerd')
 
-    def test_bad_nhb_nr(self):
+    def test_bad_lid_nr(self):
         with self.assert_max_queries(20):
             resp = self.client.post('/sporter/registreer/',
                                     {'nhb_nummer': 'hallo!',
