@@ -928,6 +928,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                                            'team__vereniging')
                            .filter(team__in=team_pks,
                                    ronde_nr=deelcomp.huidige_team_ronde)
+                           .annotate(score_count=Count('scores_feitelijk'))
                            .order_by('-team_score'))        # belangrijke: hoogste score eerst
 
             # common
@@ -962,6 +963,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                     regel.team1_wp = 0
                     regel.ronde_team1 = ronde_team1 = team_pk2ronde_team[team1.pk]
                     regel.team1_score = ronde_team1.team_score
+                    regel.team1_score_count = ronde_team1.score_count
 
                     if ronde_team1.team_score > 0:
                         is_redelijk = True
@@ -979,6 +981,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                         regel.team2_wp = 0
                         regel.ronde_team2 = ronde_team2 = team_pk2ronde_team[team2.pk]
                         regel.team2_score = ronde_team2.team_score
+                        regel.team2_score_count = ronde_team2.score_count
 
                         if ronde_team2.team_score > ronde_team1.team_score:
                             regel.team2_wp = 2
