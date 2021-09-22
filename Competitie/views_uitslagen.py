@@ -678,7 +678,10 @@ class UitslagenRegioTeamsView(TemplateView):
                 # laat deze voorlopig uit de uitslag
                 pass
             else:
-                tup = (poule.pk, team.klasse.team.volgorde, team.totaal_punten, team.totaal_score, team.pk, poule, team)
+                tup = (poule.pk, team.klasse.team.volgorde,
+                       0-team.totaal_punten,        # hoogste WP bovenaan
+                       0-team.totaal_score,         # hoogste score bovenaan
+                       team.pk, poule, team)
 
                 while len(team.ronde_scores) < 7:
                     team.ronde_scores.append('-')
