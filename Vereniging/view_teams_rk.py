@@ -426,6 +426,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
                               # inschrijf_voorkeur_team=True,
                               bij_vereniging=ver,
                               sporterboog__boogtype__in=boog_pks)
+                      .exclude(klasse__indiv__is_aspirant_klasse=True)            # geen aspiranten
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
                                       'sporterboog__boogtype')
