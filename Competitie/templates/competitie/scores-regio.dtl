@@ -48,6 +48,7 @@
         <thead>
             <tr>
                 <th>Wanneer</th>
+                <th class="hide-on-small-only">Bij vereniging</th>
                 <th>Beschrijving</th>
                 <th>Uitslag</th>
             </tr>
@@ -56,6 +57,7 @@
         {% for obj in wedstrijden %}
             <tr>
                 <td>{{ obj.datum_wanneer|date:"l j F Y" }} om {{ obj.tijd_begin_wedstrijd }}</td>
+                <td class="hide-on-small-only">{{ obj.vereniging }}</td>
                 <td>{{ obj.beschrijving }}</td>
                 <!-- knop om uitslagen te zien / in te voeren -->
                 <td>
