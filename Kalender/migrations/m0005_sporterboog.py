@@ -18,9 +18,12 @@ def migrate_sporterboog(apps, _):
     cache = dict()      # [sporter.lid_nr] = SporterBoog
     for sporterboog in (sporterboog_klas
                         .objects
-                        .select_related('sporter')
+                        .select_related('sporter',
+                                        'boogtype')
                         .all()):                            # pragma: no cover
-        cache[sporterboog.sporter.lid_nr] = sporterboog
+
+        tup = (sporterboog.sporter.lid_nr, sporterboog.boogtype.afkorting)
+        cache[tup] = sporterboog
     # for
 
     # vertaal KalenderWedstrijdSessie.aanmeldingen naar sporters
@@ -32,11 +35,13 @@ def migrate_sporterboog(apps, _):
         sporters = list()
         for obj in (sessie
                     .aanmeldingen
-                    .select_related('nhblid')
+                    .select_related('nhblid',
+                                    'boogtype')
                     .all()):
 
-            sporter = cache[obj.nhblid.nhb_nr]
-            sporters.append(sporter)
+            tup = (obj.nhblid.nhb_nr, obj.boogtype.afkorting)
+            sporterboog = cache[tup]
+            sporters.append(sporterboog)
         # for
 
         sessie.sporters.set(sporters)

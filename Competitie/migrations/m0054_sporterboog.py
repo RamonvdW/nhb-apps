@@ -16,17 +16,23 @@ def migrate_sporterboog(apps, _):
     cache = dict()      # [sporter.lid_nr] = SporterBoog
     for sporterboog in (sporterboog_klas
                         .objects
-                        .select_related('sporter')
+                        .select_related('sporter',
+                                        'boogtype')
                         .all()):                            # pragma: no cover
-        cache[sporterboog.sporter.lid_nr] = sporterboog
+
+        tup = (sporterboog.sporter.lid_nr, sporterboog.boogtype.afkorting)
+        cache[tup] = sporterboog
     # for
 
     # voorzie elke deelnemer van sporterboog
     for obj in (deelnemer_klas
                 .objects
-                .select_related('schutterboog__nhblid')
+                .select_related('schutterboog__nhblid',
+                                'schutterboog__boogtype')
                 .all()):                                    # pragma: no cover
-        obj.sporterboog = cache[obj.schutterboog.nhblid.nhb_nr]
+
+        tup = (obj.schutterboog.nhblid.nhb_nr, obj.schutterboog.boogtype.afkorting)
+        obj.sporterboog = cache[tup]
         obj.save(update_fields=['sporterboog'])
     # for
 
@@ -35,7 +41,9 @@ def migrate_sporterboog(apps, _):
                 .objects
                 .select_related('schutterboog__nhblid')
                 .all()):                                    # pragma: no cover
-        obj.sporterboog = cache[obj.schutterboog.nhblid.nhb_nr]
+
+        tup = (obj.schutterboog.nhblid.nhb_nr, obj.schutterboog.boogtype.afkorting)
+        obj.sporterboog = cache[tup]
         obj.save(update_fields=['sporterboog'])
     # for
 

@@ -15,19 +15,24 @@ def migrate_sporterboog(apps, _):
     cache = dict()      # [sporter.lid_nr] = SporterBoog
     for sporterboog in (sporterboog_klas
                         .objects
-                        .select_related('sporter')
+                        .select_related('sporter',
+                                        'boogtype')
                         .all()):                                # pragma: no cover
-        cache[sporterboog.sporter.lid_nr] = sporterboog
+
+        tup = (sporterboog.sporter.lid_nr, sporterboog.boogtype.afkorting)
+        cache[tup] = sporterboog
     # for
 
     # voorzie elke Score van sporterboog
     for score in (score_klas
                   .objects
-                  .select_related('schutterboog__nhblid')
+                  .select_related('schutterboog__nhblid',
+                                  'schutterboog__boogtype')
                   .exclude(schutterboog__nhblid=None)
                   .all()):                                      # pragma: no cover
 
-        score.sporterboog = cache[score.schutterboog.nhblid.nhb_nr]
+        tup = (score.schutterboog.nhblid.nhb_nr, score.schutterboog.boogtype.afkorting)
+        score.sporterboog = cache[tup]
         score.save(update_fields=['sporterboog'])
     # for
 

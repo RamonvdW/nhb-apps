@@ -18,11 +18,11 @@ class Command(BaseCommand):
         super().__init__(stdout, stderr, no_color, force_color)
 
     def add_arguments(self, parser):
-        parser.add_argument('--dryrun', action='store_true')
+        parser.add_argument('--commit', action='store_true')
 
     def handle(self, *args, **options):
 
-        dryrun = options['dryrun']
+        do_commit = options['commit']
 
         gevonden = list()
         dupes = dict()
@@ -40,6 +40,8 @@ class Command(BaseCommand):
                     dupes[tup] = obj
         # for
 
+        uitleggen = False
+
         for obj in dupes.values():
             self.stdout.write('Verwijder alle data voor %s in %s' % (obj.sporterboog, obj.deelcompetitie.competitie))
 
@@ -47,14 +49,21 @@ class Command(BaseCommand):
             # dit zijn er typisch veel te veel
             scores = Score.objects.filter(sporterboog=obj.sporterboog, type=SCORE_TYPE_SCORE)
             self.stdout.write('   %s scores' % scores.count())
-            if not dryrun:
+            if do_commit:
                 scores.delete()
+            else:
+                uitleggen = True
 
             # verwijder alle dubbele deelnemers
             deelnemers = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__competitie=obj.deelcompetitie.competitie, sporterboog=obj.sporterboog)
             self.stdout.write('   %s deelnemers' % deelnemers.count())
-            if not dryrun:
+            if do_commit:
                 deelnemers.delete()
+            else:
+                uitleggen = True
         # for
+
+        if uitleggen:
+            self.stderr.write('Gebruikt --commit om bovenstaande voorstellen echt te verwijderen')
 
 # end of file
