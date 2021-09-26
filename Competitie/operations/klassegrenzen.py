@@ -4,12 +4,14 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.utils import timezone
 from BasisTypen.models import BoogType, LeeftijdsKlasse
 from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from Competitie.models import AG_NUL, AG_LAAGSTE_NIET_NUL, CompetitieKlasse
 from Score.models import Score, SCORE_TYPE_INDIV_AG
 from Sporter.models import Sporter
 from decimal import Decimal
+import datetime
 
 
 def _get_targets_indiv():
@@ -276,8 +278,12 @@ def bepaal_klassegrenzen_teams(comp, trans_team):
     # hiermee kunnen we de aspiranten scores eruit filteren
     jaar = comp.begin_jaar      # gelijk aan tweede jaar vorig seizoen
 
+    # zoek een ongeveer datum zodat we 80% van de leden niet hoeven te analyseren
+    jaar_nu = timezone.now().year
+    geboren_na = datetime.date(year=jaar_nu - MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT - 1, month=1, day=1)
+
     was_aspirant = dict()     # [ lid_nr ] = True/False
-    for sporter in Sporter.objects.all():
+    for sporter in Sporter.objects.filter(geboorte_datum__gte=geboren_na):
         was_aspirant[sporter.lid_nr] = sporter.bereken_wedstrijdleeftijd(jaar) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
     # for
 
@@ -307,7 +313,12 @@ def bepaal_klassegrenzen_teams(comp, trans_team):
         # zoek alle schutters-boog die hier in passen (boog, leeftijd)
         per_ver_gemiddelden = dict()    # [ver_nr] = list(gemiddelde, gemiddelde, ...)
         for score in boogtype2ags[boogtype_afkorting]:
-            if not was_aspirant[score.sporterboog.sporter.lid_nr]:
+            try:
+                lid_was_aspirant = was_aspirant[score.sporterboog.sporter.lid_nr]
+            except KeyError:
+                lid_was_aspirant = False
+
+            if not lid_was_aspirant:
                 ver_nr = score.sporterboog.sporter.bij_vereniging.ver_nr
                 try:
                     per_ver_gemiddelden[ver_nr].append(score.waarde)        # is AG*1000
