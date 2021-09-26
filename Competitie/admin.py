@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from Wedstrijden.models import CompetitieWedstrijd
 from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet,
@@ -253,7 +254,7 @@ class CompetitieMutatieAdmin(admin.ModelAdmin):
 
 class RegiocompetitieRondeTeamAdmin(admin.ModelAdmin):
 
-    filter_horizontal = ('deelnemers_geselecteerd', 'deelnemers_feitelijk')     # TODO: deze doen het niet...
+    filter_horizontal = ('deelnemers_geselecteerd', 'deelnemers_feitelijk')
 
     readonly_fields = ('team', 'ronde_nr', 'feitelijke_scores')
 
@@ -302,6 +303,7 @@ class RegiocompetitieRondeTeamAdmin(admin.ModelAdmin):
     def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
         if self.deelcomp and self.ver:
             if db_field.name in ('deelnemers_geselecteerd', 'deelnemers_feitelijk'):
+                kwargs['widget'] = FilteredSelectMultiple(db_field.verbose_name, False)
                 kwargs['queryset'] = (RegioCompetitieSchutterBoog
                                       .objects
                                       .select_related('sporterboog',
@@ -316,9 +318,30 @@ class RegiocompetitieRondeTeamAdmin(admin.ModelAdmin):
 
 class RegiocompetitieTeamPouleAdmin(admin.ModelAdmin):
 
-    filter_horizontal = ('teams',)
+    list_filter = ('deelcompetitie__competitie',
+                   'deelcompetitie__nhb_regio')
 
-    # TODO: filter teams op regio
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self.deelcomp = None
+
+    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        if obj:
+            self.deelcomp = obj.deelcompetitie
+        else:
+            self.deelcomp = None
+
+        return super().get_form(request, obj, **kwargs)
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
+        if self.deelcomp:
+            if db_field.name == 'teams':
+                kwargs['widget'] = FilteredSelectMultiple(db_field.verbose_name, False)
+                kwargs['queryset'] = (RegiocompetitieTeam
+                                      .objects
+                                      .filter(deelcompetitie=self.deelcomp))
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 admin.site.register(Competitie)
