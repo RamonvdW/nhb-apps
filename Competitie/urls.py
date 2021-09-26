@@ -143,6 +143,7 @@ urlpatterns = [
          views_planning_rayon.WijzigStatusRkSchutterView.as_view(),
          name='wijzig-status-rk-deelnemer'),
 
+
     # RK teams
     path('rk/<comp_pk>/teams/<subset>/',
          views_rayon_teams.RayonTeamsAlleView.as_view(),

@@ -8,7 +8,9 @@
 
 from django.utils import timezone
 from Account.models import Account, account_create
-from BasisTypen.models import LeeftijdsKlasse, BoogType
+from BasisTypen.models import BoogType
+from Competitie.models import Competitie, DeelCompetitie, LAAG_BK, LAAG_RK, LAAG_REGIO
+from Competitie.operations import competities_aanmaken
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from NhbStructuur.models import NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
@@ -33,11 +35,51 @@ class TestData(object):
                     cls.testdata = testdata.TestData()
     """
 
+    OTP_CODE = "test"
     WACHTWOORD = "qewretrytuyi"  # sterk genoeg default wachtwoord
 
     def __init__(self):
         self.account_admin = None
         self.account_bb = None
+
+        # verenigingen
+        self.account_sec = dict()               # [ver_nr] = Account
+        self.account_hwl = dict()               # [ver_nr] = Account
+
+        self.functie_sec = dict()               # [ver_nr] = Functie
+        self.functie_hwl = dict()               # [ver_nr] = Functie
+
+        # competities
+        self.comp18 = None                      # Competitie
+        self.deelcomp18_bk = None               # DeelCompetitie
+        self.deelcomp18_rk = dict()             # [rayon_nr] DeelCompetitie
+        self.deelcomp18_regio = dict()          # [regio_nr] DeelCompetitie
+
+        self.comp25 = None                      # Competitie
+        self.deelcomp25_bk = None               # DeelCompetitie
+        self.deelcomp25_rk = dict()             # [rayon_nr] DeelCompetitie
+        self.deelcomp25_regio = dict()          # [regio_nr] DeelCompetitie
+
+        # competitie accounts
+        self.comp18_account_bko = None          # Account
+        self.comp18_account_rko = dict()        # [rayon_nr] = Account
+        self.comp18_account_rcl = dict()        # [regio_nr] = Account
+
+        self.comp25_account_bko = None          # Account
+        self.comp25_account_rko = dict()        # [rayon_nr] = Account
+        self.comp25_account_rcl = dict()        # [regio_nr] = Account
+
+        # competitie functies
+        self.comp18_functie_bko = None          # Functie
+        self.comp18_functie_rko = dict()        # [rayon_nr] = Functie
+        self.comp18_functie_rcl = dict()        # [regio_nr] = Functie
+
+        self.comp25_functie_bko = None          # Functie
+        self.comp25_functie_rko = dict()        # [rayon_nr] = Functie
+        self.comp25_functie_rcl = dict()        # [regio_nr] = Functie
+
+        self._accounts_beheerders = list()      # 1 per vereniging, voor BKO, RKO, RCL
+
 
     def maak_accounts(self):
         """
@@ -140,7 +182,7 @@ class TestData(object):
         # for
 
         NhbVereniging.objects.bulk_create(bulk)     # 16 x 4 = 64 verenigingen
-        print('TestData: created %sx NhbVereniging' % len(bulk))
+        # print('TestData: created %sx NhbVereniging' % len(bulk))
 
         for regio in cluster_regios:
             cluster = NhbCluster.objects.filter(regio=regio).order_by('letter')[0]
@@ -148,30 +190,6 @@ class TestData(object):
                 ver.clusters.add(cluster)
             # for
         # for
-
-    @staticmethod
-    def _maak_functies_verenigingen():
-        """
-            Maak voor elke verenigingen drie functies aan: SEC, HWL, WL
-        """
-        bulk = list()
-        for ver in NhbVereniging.objects.all():
-            for rol, beschrijving in (('SEC', 'Secretaris vereniging %s'),
-                                      ('HWL', 'Hoofdwedstrijdleider %s'),
-                                      ('WL', 'Wedstrijdleider %s')):
-                func = Functie(
-                            # accounts
-                            beschrijving=beschrijving % ver.ver_nr,
-                            rol=rol,
-                            # bevestigde_email=''
-                            # nieuwe_email=''
-                            nhb_ver=ver)
-                bulk.append(func)
-            # for
-        # for
-
-        Functie.objects.bulk_create(bulk)
-        print('TestData: created %sx Functie' % len(bulk))
 
     @staticmethod
     def _maak_leden():
@@ -221,20 +239,20 @@ class TestData(object):
             (32, 'M', 'Sen32b', 'BB'),
             (33, 'V', 'Sen33', 'R'),
             (33, 'V', 'Sen33b', 'BB'),
-            (34, 'M', 'Sen34', 'C'),
+            (34, 'M', 'Sen34', 'C'),            # Sen34 = HWL
             (35, 'V', 'Sen35', 'R'),
             (36, 'M', 'Sen36', 'C'),
             (36, 'M', 'Sen36b', 'BB'),
             (37, 'V', 'Sen37', 'R'),
             (38, 'M', 'Sen38', 'C'),
-            (39, 'V', 'Sen39', 'R'),
+            (39, 'V', 'Sen39', 'R'),            # Sen39 = BKO/RKO/RCL
             (40, 'M', 'Sen40', 'C'),
             (41, 'V', 'Sen41', 'R'),
             (42, 'M', 'Sen42', 'R'),
             (42, 'M', 'Sen42b', 'C'),
             (49, 'V', 'Sen49', 'R'),
             (49, 'V', 'Sen49b', 'BB'),
-            (50, 'M', 'Mas50', 'R'),
+            (50, 'M', 'Mas50', 'R'),            # Mas50 = SEC
             (51, 'V', 'Mas51', 'R'),
             (51, 'V', 'Mas51b', 'C'),
             (51, 'V', 'Mas52', 'r'),            # kleine letter: geen voorkeur voor de competitie
@@ -285,7 +303,7 @@ class TestData(object):
         # for
 
         Sporter.objects.bulk_create(bulk)
-        print('TestData: Created %sx Sporter' % len(bulk))
+        # print('TestData: Created %sx Sporter' % len(bulk))
         del bulk
 
         # maak voor elke Sporter nu de SporterBoog records aan
@@ -326,19 +344,181 @@ class TestData(object):
         # for
 
         SporterVoorkeuren.objects.bulk_create(bulk_voorkeuren)
-        print('TestData: Created %sx SporterVoorkeuren' % len(bulk_voorkeuren))
+        # print('TestData: Created %sx SporterVoorkeuren' % len(bulk_voorkeuren))
         del bulk_voorkeuren
 
         SporterBoog.objects.bulk_create(bulk_sporter)
-        print('TestData: Created %sx SporterBoog' % len(bulk_sporter))
+        # print('TestData: Created %sx SporterBoog' % len(bulk_sporter))
         del bulk_sporter
 
+    def _maak_accounts_en_functies(self):
+        """
+            Maak voor elke verenigingen drie functies aan: SEC, HWL, WL
+
+            Maak voor bepaalde leden van de vereniging een account aan
+            Koppel deze accounts aan de rollen SEC en HWL
+        """
+
+        # maak voor elke vereniging een paar accounts aan
+        bulk = list()
+        for sporter in Sporter.objects.filter(voornaam__in=('Sen34', 'Sen39', 'Mas50')):
+            account = Account(
+                            username=str(sporter.lid_nr),
+                            otp_code=self.OTP_CODE,
+                            password=self.WACHTWOORD)
+            bulk.append(account)
+        # for
+
+        Account.objects.bulk_create(bulk)
+        # print('TestData: created %sx Accounts' % len(bulk))
+        del bulk
+
+        # koppel de accounts aan de sporters
+        username2account = dict()
+        for account in Account.objects.all():
+            username2account[account.username] = account
+        # for
+
+        for sporter in (Sporter
+                        .objects
+                        .select_related('bij_vereniging')
+                        .filter(voornaam__in=('Sen34', 'Sen39', 'Mas50'))):
+
+            account = username2account[str(sporter.lid_nr)]
+            sporter.account = account
+            sporter.save(update_fields=['account'])
+
+            ver_nr = sporter.bij_vereniging.ver_nr
+            if sporter.voornaam == 'Sen34':
+                self.account_hwl[ver_nr] = account
+            elif sporter.voornaam == 'Mas50':
+                self.account_sec[ver_nr] = account
+            else:
+                self._accounts_beheerders.append(account)
+
+        # for
+
+        # maak de functies aan
+        bulk = list()
+        for ver in NhbVereniging.objects.all():
+            for rol, beschrijving in (('SEC', 'Secretaris vereniging %s'),
+                                      ('HWL', 'Hoofdwedstrijdleider %s'),
+                                      ('WL', 'Wedstrijdleider %s')):
+                func = Functie(
+                            # accounts
+                            beschrijving=beschrijving % ver.ver_nr,
+                            rol=rol,
+                            # bevestigde_email=''
+                            # nieuwe_email=''
+                            nhb_ver=ver)
+                bulk.append(func)
+            # for
+        # for
+
+        Functie.objects.bulk_create(bulk)
+        # print('TestData: created %sx Functie' % len(bulk))
+        del bulk
+
+        # koppel de functies aan de accounts
+        for functie in (Functie
+                        .objects
+                        .select_related('nhb_ver')
+                        .filter(rol__in=('SEC', 'HWL'))):
+            ver_nr = functie.nhb_ver.ver_nr
+            if functie.rol == 'SEC':
+                self.functie_sec[ver_nr] = functie
+                functie.accounts.add(self.account_sec[ver_nr])
+            else:
+                self.functie_hwl[ver_nr] = functie
+                functie.accounts.add(self.account_hwl[ver_nr])
+        # for
+
     def maak_clubs_en_sporters(self):
-        print('TestData: maak_clubs_en_leden. Counters: NhbVereniging=%s, Sporter=%s' % (
-                            NhbVereniging.objects.count(), Sporter.objects.count()))
+        # print('TestData: maak_clubs_en_leden. Counters: NhbVereniging=%s, Sporter=%s' % (
+        #                     NhbVereniging.objects.count(), Sporter.objects.count()))
         self._maak_verenigingen()
-        self._maak_functies_verenigingen()
         self._maak_leden()
+        self._maak_accounts_en_functies()
+
+    def maak_bondscompetities(self, begin_jaar=None):
+        competities_aanmaken(begin_jaar)
+
+        for comp in Competitie.objects.all():
+            if comp.afstand == '18':
+                self.comp18 = comp
+            else:
+                self.comp25 = comp
+        # for
+
+        for deelcomp in (DeelCompetitie
+                         .objects
+                         .select_related('competitie',
+                                         'nhb_rayon',
+                                         'nhb_regio')
+                         .all()):
+            is_18 = deelcomp.competitie.afstand == '18'
+
+            if deelcomp.laag == LAAG_BK:
+                if is_18:
+                    self.deelcomp18_bk = deelcomp
+                else:
+                    self.deelcomp25_bk = deelcomp
+
+            elif deelcomp.laag == LAAG_RK:
+                rayon_nr = deelcomp.nhb_rayon.rayon_nr
+                if is_18:
+                    self.deelcomp18_rk[rayon_nr] = deelcomp
+                else:
+                    self.deelcomp25_rk[rayon_nr] = deelcomp
+
+            else:   # if deelcomp.laag == LAAG_REGIO:
+                regio_nr = deelcomp.nhb_regio.regio_nr
+                if is_18:
+                    self.deelcomp18_regio[regio_nr] = deelcomp
+                else:
+                    self.deelcomp25_regio[regio_nr] = deelcomp
+        # for
+
+        # zorg dat er accounts gekoppeld zijn aan de functies BKO, RKO, RCL
+        accounts = self._accounts_beheerders[:]
+
+        for functie in (Functie
+                        .objects
+                        .select_related('nhb_regio', 'nhb_rayon')
+                        .filter(rol__in=('RCL', 'RKO', 'BKO'))):
+
+            is_18 = functie.comp_type == '18'
+
+            account = accounts.pop(0)
+            functie.accounts.add(account)
+
+            if functie.rol == 'RCL':
+                regio_nr = functie.nhb_regio.regio_nr
+                if is_18:
+                    self.comp18_functie_rcl[regio_nr] = functie
+                    self.comp18_account_rcl[regio_nr] = account
+                else:
+                    self.comp25_functie_rcl[regio_nr] = functie
+                    self.comp25_account_rcl[regio_nr] = account
+
+            elif functie.rol == 'RKO':
+                rayon_nr = functie.nhb_rayon.rayon_nr
+                if is_18:
+                    self.comp18_functie_rko[rayon_nr] = functie
+                    self.comp18_account_rko[rayon_nr] = account
+                else:
+                    self.comp25_functie_rko[rayon_nr] = functie
+                    self.comp25_account_rko[rayon_nr] = account
+
+            else:  # elif functie.rol == 'BKO':
+                if is_18:
+                    self.comp18_functie_bko = functie
+                    self.comp18_account_bko = account
+                else:
+                    self.comp25_functie_bko = functie
+                    self.comp25_account_bko = account
+
+        # for
 
 
 def account_vhpg_is_geaccepteerd(account):

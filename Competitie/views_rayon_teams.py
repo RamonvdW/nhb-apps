@@ -48,10 +48,7 @@ class RayonTeamsView(TemplateView):
 
             subset = kwargs['subset'][:10]
             if subset == 'auto':
-                if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
-                    subset = 'alle'
-                else:
-                    raise Http404('Selectie wordt niet ondersteund')
+                subset = 'alle'
 
             if subset == 'alle':
                 # alle rayons
@@ -64,8 +61,9 @@ class RayonTeamsView(TemplateView):
             else:
                 # alleen het gekozen rayon
                 try:
-                    context['rayon'] = NhbRayon.objects.get(rayon_nr=subset)
-                except NhbRayon.DoesNotExist:
+                    rayon_nr = int(str(subset))      # is al eerder afgekapt op 10
+                    context['rayon'] = NhbRayon.objects.get(rayon_nr=rayon_nr)
+                except (ValueError, NhbRayon.DoesNotExist):
                     raise Http404('Selectie wordt niet ondersteund')
 
                 rk_deelcomp_pks = (DeelCompetitie
@@ -240,7 +238,7 @@ class RayonTeamsRKOView(UserPassesTestMixin, RayonTeamsView):
 
 class RayonTeamsAlleView(UserPassesTestMixin, RayonTeamsView):
 
-    """ Met deze view kan de RCL de aangemaakte teams inzien """
+    """ Met deze view kunnen de BB en BKO de aangemaakte teams inzien, met mogelijkheid tot filteren op een rayon """
 
     # class variables shared by all instances
     subset_filter = True
