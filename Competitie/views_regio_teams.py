@@ -650,9 +650,8 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
 
         team_pk2poule = dict()
         for poule in poules:
-            if not readonly:
-                poule.url_wijzig = reverse('Competitie:wijzig-poule',
-                                           kwargs={'poule_pk': poule.pk})
+            poule.url_wijzig = reverse('Competitie:wijzig-poule',
+                                       kwargs={'poule_pk': poule.pk})
 
             for team in poule.teams.all():
                 team_pk2poule[team.pk] = poule
@@ -764,8 +763,11 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        if comp.fase > 'D':
+
+        if comp.fase > 'E':
             raise Http404('Poules kunnen niet meer aangepast worden')
+
+        context['mag_koppelen'] = (comp.fase <= 'D')
 
         team_pks = list(poule.teams.values_list('pk', flat=True))
 
@@ -819,12 +821,15 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        if comp.fase > 'D':
+        if comp.fase > 'E':
             raise Http404('Poules kunnen niet meer aangepast worden')
 
+        mag_koppelen = comp.fase <= 'D'
+
         if request.POST.get('verwijder_poule', ''):
-            # deze poule is niet meer nodig
-            poule.delete()
+            if mag_koppelen:
+                # deze poule is niet meer nodig
+                poule.delete()
         else:
             beschrijving = request.POST.get('beschrijving', '')[:100]   # afkappen voor de veiligheid
             beschrijving = beschrijving.strip()
@@ -832,49 +837,50 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
                 poule.beschrijving = beschrijving
                 poule.save(update_fields=['beschrijving'])
 
-            gekozen = list()
-            type_counts = dict()
-            for team in (RegiocompetitieTeam
-                         .objects
-                         .prefetch_related('regiocompetitieteampoule_set')
-                         .filter(deelcompetitie=deelcomp)):
+            if mag_koppelen:
+                gekozen = list()
+                type_counts = dict()
+                for team in (RegiocompetitieTeam
+                             .objects
+                             .prefetch_related('regiocompetitieteampoule_set')
+                             .filter(deelcompetitie=deelcomp)):
 
-                sel_str = 'team_%s' % team.pk
-                if request.POST.get(sel_str, ''):
-                    kies = False
+                    sel_str = 'team_%s' % team.pk
+                    if request.POST.get(sel_str, ''):
+                        kies = False
 
-                    if team.regiocompetitieteampoule_set.count() == 0:
-                        # nog niet in te een poule, dus mag gekozen worden
-                        kies = True
-                    else:
-                        if team.regiocompetitieteampoule_set.all()[0].pk == poule.pk:
-                            # herverkozen in dezelfde poule
+                        if team.regiocompetitieteampoule_set.count() == 0:
+                            # nog niet in te een poule, dus mag gekozen worden
                             kies = True
+                        else:
+                            if team.regiocompetitieteampoule_set.all()[0].pk == poule.pk:
+                                # herverkozen in dezelfde poule
+                                kies = True
 
-                    if kies:
-                        gekozen.append(team)
+                        if kies:
+                            gekozen.append(team)
 
-                        try:
-                            type_counts[team.team_type] += 1
-                        except KeyError:
-                            type_counts[team.team_type] = 1
-            # for
+                            try:
+                                type_counts[team.team_type] += 1
+                            except KeyError:
+                                type_counts[team.team_type] = 1
+                # for
 
-            # kijk welk team type dit gaat worden
-            if len(gekozen) == 0:
-                poule.teams.clear()
-            else:
-                tups = [(count, team_type.pk, team_type) for team_type, count in type_counts.items()]
-                tups.sort(reverse=True)     # hoogste eerst
-                # TODO: wat als er 2 even hoog zijn?
-                team_type = tups[0][2]
+                # kijk welk team type dit gaat worden
+                if len(gekozen) == 0:
+                    poule.teams.clear()
+                else:
+                    tups = [(count, team_type.pk, team_type) for team_type, count in type_counts.items()]
+                    tups.sort(reverse=True)     # hoogste eerst
+                    # TODO: wat als er 2 even hoog zijn?
+                    team_type = tups[0][2]
 
-                # laat teams toe die binnen dit team type passen
-                goede_teams = [team for team in gekozen if team.team_type == team_type]
-                goede_teams = goede_teams[:8]       # maximaal 8 teams in een poule
+                    # laat teams toe die binnen dit team type passen
+                    goede_teams = [team for team in gekozen if team.team_type == team_type]
+                    goede_teams = goede_teams[:8]       # maximaal 8 teams in een poule
 
-                # vervang door de overgebleven teams
-                poule.teams.set(goede_teams)
+                    # vervang door de overgebleven teams
+                    poule.teams.set(goede_teams)
 
         url = reverse('Competitie:regio-poules',
                       kwargs={'deelcomp_pk': deelcomp.pk})
