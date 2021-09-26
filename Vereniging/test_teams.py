@@ -472,8 +472,9 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
                                     {'team_type': 'R'})
-        self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assertEqual(1, RegiocompetitieTeam.objects.count())
+        team = RegiocompetitieTeam.objects.all()[0]
+        self.assert_is_redirect(resp, self.url_koppelen % team.pk)
 
         self.nhbver1 = NhbVereniging.objects.get(pk=self.nhbver1.pk)
 
@@ -618,13 +619,13 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
                                     {'team_type': 'R'})
-        self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
+        self.assert_is_redirect_not_plein(resp)
         self.assertEqual(1, RegiocompetitieTeam.objects.count())
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_team % (self.deelcomp25_regio111.pk, 0),
                                     {'team_type': 'R'})
-        self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp25_regio111.pk)
+        self.assert_is_redirect_not_plein(resp)
         self.assertEqual(2, RegiocompetitieTeam.objects.count())
 
         team_18 = RegiocompetitieTeam.objects.filter(deelcompetitie=self.deelcomp18_regio111)[0]
@@ -734,9 +735,9 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
                                     {'team_type': 'R'})
-        self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assertEqual(1, RegiocompetitieTeam.objects.count())
         team_18 = RegiocompetitieTeam.objects.filter(deelcompetitie=self.deelcomp18_regio111)[0]
+        self.assert_is_redirect(resp, self.url_koppelen % team_18.pk)
 
         # haal de wijzig-ag pagina op
         url = self.url_wijzig_ag % self.deelnemer_100002_18.pk
@@ -868,7 +869,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
             with self.assert_max_queries(20):
                 url = self.url_rk_teams_wijzig % (deelcomp_rk3.pk, 0)  # 0 = nieuw team
                 resp = self.client.post(url, {'team_type': 'R'})
-                self.assert_is_redirect(resp, self.url_rk_teams % deelcomp_rk3.pk)
+                self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
 
         # niet bestaande deelcomp_rk
         with self.assert_max_queries(20):
@@ -911,16 +912,15 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
                                     {'team_type': 'R'})
-        self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assertEqual(1, RegiocompetitieTeam.objects.count())
+        team = RegiocompetitieTeam.objects.all()[0]
+        self.assert_is_redirect(resp, self.url_koppelen % team.pk)
 
         self.deelnemer_100003_18.inschrijf_voorkeur_team = True
         self.deelnemer_100003_18.save(update_fields=['inschrijf_voorkeur_team'])
 
         self.deelnemer_100002_18.inschrijf_voorkeur_team = True
         self.deelnemer_100002_18.save(update_fields=['inschrijf_voorkeur_team'])
-
-        team = RegiocompetitieTeam.objects.all()[0]
 
         # koppel leden
         with self.assert_max_queries(20):

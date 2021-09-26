@@ -62,7 +62,8 @@ def menu_dynamics(request, context, actief='hetplein'):
             if rol == Rollen.ROL_SPORTER:
                 context['menu_toon_sporter_profiel'] = True
 
-            if rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_SEC):     # TODO: ook WL uitsluiten?
+            if rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
+                       Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
                 context['toon_kalender'] = False
 
             # taken

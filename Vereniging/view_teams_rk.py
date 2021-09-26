@@ -274,6 +274,10 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         except (ValueError, KeyError):
             raise Http404('Slechte parameter')
 
+        # default = terug naar het overzicht van de Teams RK pagina
+        url = reverse('Vereniging:teams-rk',
+                      kwargs={'rk_deelcomp_pk': deelcomp.pk})
+
         if rk_team_pk == 0:
             # nieuw rk_team
             volg_nrs = (KampioenschapTeam
@@ -304,6 +308,10 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
             rk_team.save()
 
             verwijderen = False
+
+            # na aanmaken meteen door naar de 'koppelen' pagina
+            url = reverse('Vereniging:teams-rk-koppelen',
+                          kwargs={'rk_team_pk': rk_team.pk})
         else:
             try:
                 rk_team = (KampioenschapTeam
@@ -349,8 +357,6 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
                 rk_team.save()
         else:
             rk_team.delete()
-
-        url = reverse('Vereniging:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp.pk})
 
         return HttpResponseRedirect(url)
 

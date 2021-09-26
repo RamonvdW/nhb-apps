@@ -219,12 +219,12 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.functie_nu and self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_RCL)
+        return self.functie_nu and self.rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def _get_deelcomp(self, deelcomp_pk) -> DeelCompetitie:
         # haal de gevraagde deelcompetitie op
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL):
             regio = self.functie_nu.nhb_ver.regio
         else:
             # RCL
@@ -346,6 +346,12 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         except (ValueError, KeyError):
             raise Http404()
 
+        # default pagina om naar toe te gaan
+        if self.rol_nu == Rollen.ROL_HWL:
+            url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
+        else:
+            url = reverse('Competitie:regio-teams', kwargs={'deelcomp_pk': deelcomp.pk})
+
         if team_pk == 0:
             # nieuw team
             volg_nrs = (RegiocompetitieTeam
@@ -376,6 +382,10 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
             team.save()
 
             verwijderen = False
+
+            # meteen doorsturen naar de 'koppelen' pagina
+            url = reverse('Vereniging:teams-regio-koppelen',
+                          kwargs={'team_pk': team.pk})
         else:
             try:
                 team = (RegiocompetitieTeam
@@ -420,11 +430,6 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
                 team.save()
         else:
             team.delete()
-
-        if self.rol_nu == Rollen.ROL_HWL:
-            url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
-        else:
-            url = reverse('Competitie:regio-teams', kwargs={'deelcomp_pk': deelcomp.pk})
 
         return HttpResponseRedirect(url)
 
