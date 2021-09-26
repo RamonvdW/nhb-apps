@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import auth
+from django.utils import timezone
 from django.conf import settings
 from django.test import TestCase
 from django.db import connection
@@ -25,6 +26,7 @@ class MyQueryTracer(object):
     def __init__(self):
         self.trace = list()
         self.started_at = datetime.datetime.now()
+        self.total_duration_us = 0
 
     def __call__(self, execute, sql, params, many, context):
         call = {'sql': sql}
@@ -32,6 +34,8 @@ class MyQueryTracer(object):
         # print('params:', params)      # params for the %s ?
         # print('many:', many)          # true/false
 
+        time_start = timezone.now()
+        call['now'] = time_start
         call['stack'] = stack = list()
         for fname, linenr, base, code in traceback.extract_stack():
             if base != '__call__' and not fname.startswith('/usr/lib') and '/site-packages/' not in fname and 'manage.py' not in fname:
@@ -39,6 +43,13 @@ class MyQueryTracer(object):
             elif base == 'render' and 'template/response.py' in fname:
                 stack.append((fname, linenr, base))
         # for
+
+        time_end = timezone.now()
+        time_delta = time_end - time_start
+        duration_us = (time_delta.seconds * 1000000) + time_delta.microseconds
+        call['duration_us'] = duration_us
+        self.total_duration_us += duration_us
+
         self.trace.append(call)
 
         execute(sql, params, many, context)
@@ -663,22 +674,29 @@ class E2EHelpers(object):
             with connection.execute_wrapper(tracer):
                 yield
         finally:
+            do_dump = False
             if check_duration:
                 duration = datetime.datetime.now() - tracer.started_at
                 duration_seconds = duration.seconds
-                if duration_seconds > 1.5:              # pragma: no cover
-                    self.fail(msg="Operation took suspiciously long: %.2f seconds" % duration_seconds)
+                do_dump = True
+            else:
+                duration_seconds = 0
 
             count = len(tracer.trace)
             if count > num:                     # pragma: no cover
+                do_dump = True
+
+            if do_dump:
                 queries = 'Captured queries:'
                 prefix = '\n       '
                 limit = 200     # begrens aantal queries dat we printen
                 for i, call in enumerate(tracer.trace, start=1):
                     if i > 1:
                         queries += '\n'
+                    queries += prefix + str(call['now'])
                     queries += '\n [%d]  ' % i
                     queries += self._reformat_sql(prefix, call['sql'])
+                    queries += prefix + '%s µs' % call['duration_us']
                     queries += '\n'
                     for fname, linenr, base in call['stack']:
                         queries += prefix + '%s:%s   %s' % (fname, linenr, base)
@@ -687,6 +705,8 @@ class E2EHelpers(object):
                     if limit <= 0:
                         break
                 # for
+
+            if count > num:
                 msg = "Too many queries: %s; maximum %d. " % (count, num)
                 self.fail(msg=msg + queries)
             else:
@@ -695,6 +715,9 @@ class E2EHelpers(object):
                     ongebruikt = num - count
                     if ongebruikt / num > 0.25:        # pragma: no cover
                         self.fail(msg="Maximum (%s) has a lot of margin. Can be set as low as %s" % (num, count))
+
+            if duration_seconds > 1.5:              # pragma: no cover
+                self.fail(msg="Operation took suspiciously long: %.2f seconds (queries: %s µs)" % (duration_seconds, tracer.total_duration_us))
 
     def assert403(self, resp):
         # controleer dat we op de speciale code-403 handler pagina gekomen zijn
