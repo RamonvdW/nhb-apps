@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
 from BasisTypen.models import BoogType, TeamWedstrijdklasse
 from Functie.models import maak_functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -66,6 +67,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         super().setUpClass()
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts()
+        cls.testdata.maak_clubs_en_sporters()
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -523,7 +525,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # controleer dat er geen dubbele SporterBoog records aangemaakt zijn
         self.assertEqual(1, SporterBoog.objects.filter(sporter=self.sporter_100001, boogtype__afkorting='R').count())
         self.assertEqual(1, SporterBoog.objects.filter(sporter=self.sporter_100002, boogtype__afkorting='BB').count())
-        self.assertEqual(554, SporterBoog.objects.count())
+        self.assertEqual(13754, SporterBoog.objects.count())
 
         # controleer dat het "ag vaststellen" kaartje er nog steeds is
         # dit keer met de "voor het laatst gedaan" notitie
@@ -584,7 +586,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         comp18_pk = comp18.pk
         url = self.url_klassegrenzen_vaststellen % comp18_pk
 
-        with self.assert_max_queries(32):
+        with self.assert_max_queries(32, check_duration=False):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -659,8 +661,11 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assertContains(resp, 'De klassegrenzen voor de ')
 
         # klassegrenzen vaststellen (18m en 25m)
+        s1 = timezone.now()
         with self.assert_max_queries(86):
             resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_18.pk)
+        s2 = timezone.now()
+        print('duration:', s2-s1)
         self.assert_is_redirect_not_plein(resp)        # redirect = success
         with self.assert_max_queries(86):
             resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_25.pk)
