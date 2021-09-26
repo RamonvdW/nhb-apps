@@ -690,7 +690,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
                                     {'team_type': 'BB'})
-        self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
+        self.assert_is_redirect_not_plein(resp)
 
         # haal het teams overzicht op, met gekoppelde leden
         with self.assert_max_queries(20):
@@ -934,7 +934,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
                                     {'team_type': 'IB'})
-        self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
+        self.assert_is_redirect_not_plein(resp)
         self.assertEqual(2, RegiocompetitieTeam.objects.count())
         team2 = RegiocompetitieTeam.objects.exclude(pk=team.pk)[0]
 
