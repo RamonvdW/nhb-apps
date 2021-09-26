@@ -31,28 +31,31 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
     template_name = TEMPLATE_OVERZICHT
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        return functie_nu and rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.functie_nu and self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        context['nhb_ver'] = ver = functie_nu.nhb_ver
+        context['nhb_ver'] = ver = self.functie_nu.nhb_ver
 
         context['clusters'] = ver.clusters.all()
 
-        if functie_nu.nhb_ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).filter(zichtbaar=True).count() > 0:
+        if self.functie_nu.nhb_ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).filter(zichtbaar=True).count() > 0:
             context['accommodatie_details_url'] = reverse('Vereniging:vereniging-accommodatie-details',
                                                           kwargs={'vereniging_pk': ver.pk})
 
         context['url_externe_locaties'] = reverse('Vereniging:externe-locaties',
                                                   kwargs={'vereniging_pk': ver.pk})
 
-        if rol_nu == Rollen.ROL_SEC or ver.regio.is_administratief:
+        if self.rol_nu == Rollen.ROL_SEC or ver.regio.is_administratief:
             # SEC
             comps = list()
             deelcomps = list()
@@ -61,8 +64,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             # HWL of WL
             context['toon_competities'] = True
 
-            if rol_nu == Rollen.ROL_HWL:
-                context['toon_wedstrijdkalender'] = True
+            # if rol_nu == Rollen.ROL_HWL:
+            #     context['toon_wedstrijdkalender'] = True
 
             comps = (Competitie
                      .objects
@@ -132,7 +135,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 prev_afstand = comp.afstand
 
             # 1 - leden aanmelden voor de competitie (niet voor de WL)
-            if comp.fase < 'F' and rol_nu != Rollen.ROL_WL:
+            if comp.fase < 'F' and self.rol_nu != Rollen.ROL_WL:
                 kaartje = SimpleNamespace()
                 kaartje.titel = "Aanmelden"
                 kaartje.tekst = 'Leden aanmelden voor de %s.' % comp.beschrijving
@@ -172,7 +175,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             # 3 - teams RK
             for deelcomp_rk in deelcomps_rk:
                 if deelcomp_rk.competitie == comp:
-                    if 'E' <= comp.fase <= 'K':
+                    if 'E' <= comp.fase <= 'K' and self.rol_nu != Rollen.ROL_WL:
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Teams RK"
                         kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen samenstellen voor de %s." % comp.beschrijving
