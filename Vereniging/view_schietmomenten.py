@@ -58,7 +58,8 @@ class LedenSchietmomentView(UserPassesTestMixin, TemplateView):
         objs = (RegioCompetitieSchutterBoog
                 .objects
                 .select_related('sporterboog',
-                                'sporterboog__sporter')
+                                'sporterboog__sporter',
+                                'sporterboog__boogtype')
                 .prefetch_related('inschrijf_gekozen_wedstrijden')
                 .filter(deelcompetitie=deelcomp,
                         bij_vereniging=self.functie_nu.nhb_ver)
@@ -114,6 +115,8 @@ class LedenSchietmomentView(UserPassesTestMixin, TemplateView):
             sporter = obj.sporterboog.sporter
             obj.lid_nr = sporter.lid_nr
             obj.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
+
+            obj.boogtype_str = obj.sporterboog.boogtype.beschrijving
 
             if self.rol_nu == Rollen.ROL_HWL:
                 obj.url_wijzig = reverse('Sporter:schietmomenten',

@@ -32,6 +32,7 @@
         <thead>
             <tr>
                 <th>Sporter</th>
+                <th>Boog</th>
                 {% for nr in kruisjes %}
                     <th class="kruisje">{{ nr }}</th>
                 {% endfor %}
@@ -42,6 +43,7 @@
         {% for deelnemer in object_list %}
             {% if deelnemer.herhaal_header %}
                 <th>Sporter</th>
+                <th>Boog</th>
 
                 {% for nr in kruisjes %}
                     <th class="kruisje">{{ nr }}</th>
@@ -51,6 +53,7 @@
             {% endif %}
             <tr>
                 <td>{{ deelnemer.naam_str }}</td>
+                <td>{{ deelnemer.boogtype_str }}</td>
 
                 {% for kruisje in deelnemer.kruisjes %}
                     <td class="kruisje">{{ kruisje }}</td>
