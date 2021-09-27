@@ -6,15 +6,20 @@
 
 """ Routines om de database te vullen met een test set die gebruikt wordt in vele van de test cases """
 
+from django.test import Client
 from django.utils import timezone
 from Account.models import Account, account_create
 from BasisTypen.models import BoogType
-from Competitie.models import Competitie, DeelCompetitie, LAAG_BK, LAAG_RK, LAAG_REGIO
+from Competitie.models import Competitie, DeelCompetitie, LAAG_BK, LAAG_RK
 from Competitie.operations import competities_aanmaken
+from Competitie.test_competitie import zet_competitie_fase
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from NhbStructuur.models import NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
+from bs4 import BeautifulSoup
 import datetime
+import pyotp
+
 
 # fixtures zijn overwogen, maar zijn lastig te onderhouden en geven geen recente datums (zoals voor VHPG)
 
@@ -37,6 +42,12 @@ class TestData(object):
 
     OTP_CODE = "test"
     WACHTWOORD = "qewretrytuyi"  # sterk genoeg default wachtwoord
+
+    url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'  # comp_pk
+    url_account_login = '/account/login/'
+    url_check_otp = '/functie/otp-controle/'
+    url_activeer_functie = '/functie/activeer-functie/%s/'
+    url_wissel_van_rol = '/functie/wissel-van-rol/'
 
     def __init__(self):
         self.account_admin = None
@@ -80,6 +91,18 @@ class TestData(object):
 
         self._accounts_beheerders = list()      # 1 per vereniging, voor BKO, RKO, RCL
 
+    @staticmethod
+    def _dump_resp(resp):
+        print("status code:", resp.status_code)
+        print(repr(resp))
+        if resp.status_code == 302:
+            print("redirect to url:", resp.url)
+        content = str(resp.content)
+        if len(content) < 50:
+            print("very short content:", content)
+        else:
+            soup = BeautifulSoup(content, features="html.parser")
+            print(soup.prettify())
 
     def maak_accounts(self):
         """
@@ -125,15 +148,23 @@ class TestData(object):
         """
             Accepteer de VHPG voor alle accounts
         """
+
+        bestaande_account_pks = list(VerklaringHanterenPersoonsgegevens
+                                     .objects
+                                     .values_list('account__pk', flat=True))
+
         now = timezone.now()
         bulk = list()
         for account in Account.objects.all():
-            vhpg = VerklaringHanterenPersoonsgegevens(
-                        account=account,
-                        acceptatie_datum=now)
-            bulk.append(vhpg)
+            if account.pk not in bestaande_account_pks:
+                vhpg = VerklaringHanterenPersoonsgegevens(
+                            account=account,
+                            acceptatie_datum=now)
+                bulk.append(vhpg)
         # for
-        VerklaringHanterenPersoonsgegevens.objects.bulk_create(bulk)
+
+        if len(bulk):
+            VerklaringHanterenPersoonsgegevens.objects.bulk_create(bulk)
 
     @staticmethod
     def _maak_verenigingen():
@@ -149,20 +180,16 @@ class TestData(object):
         curr_rayon = 0
 
         bulk = list()
-        for regio in NhbRegio.objects.select_related('rayon').all():
-
-            if regio.regio_nr in (101, 108):
+        for regio in NhbRegio.objects.select_related('rayon').order_by('regio_nr'):
+            if regio.regio_nr in (101, 107):
                 cluster_regios.append(regio)
 
-            if regio.rayon.rayon_nr != curr_rayon:
-                curr_rayon = regio.rayon.rayon_nr
-                if curr_rayon in (3, 4):
-                    aantal = 1
-                else:
-                    aantal = 4
+            aantal = 2
+            if 101 <= regio.regio_nr <= 107:
+                aantal = 4
 
             for nr in range(aantal):
-                ver_nr = regio.regio_nr * 10 + 1 + nr
+                ver_nr = regio.regio_nr * 10 + nr + 1
 
                 # vereniging 0, 1, 2 gaan in een cluster, 3 niet
                 if nr >= 3:
@@ -181,7 +208,7 @@ class TestData(object):
             # for
         # for
 
-        NhbVereniging.objects.bulk_create(bulk)     # 16 x 4 = 64 verenigingen
+        NhbVereniging.objects.bulk_create(bulk)     # 48x
         # print('TestData: created %sx NhbVereniging' % len(bulk))
 
         for regio in cluster_regios:
@@ -273,7 +300,7 @@ class TestData(object):
             except KeyError:
                 geslacht_voornaam2boogtype[geslacht + voornaam] = boogtype
             else:
-                raise IndexError('TestData: combinatie geslacht %s + voornaam %s komt meerdere keren voor' % (geslacht, voornaam))
+                raise IndexError('TestData: combinatie geslacht %s + voornaam %s komt meerdere keren voor' % (geslacht, voornaam))      # pragma: no cover
         # for
 
         lid_nr = 300000
@@ -365,7 +392,8 @@ class TestData(object):
             account = Account(
                             username=str(sporter.lid_nr),
                             otp_code=self.OTP_CODE,
-                            password=self.WACHTWOORD)
+                            otp_is_actief=True)
+            account.set_password(self.WACHTWOORD)
             bulk.append(account)
         # for
 
@@ -439,6 +467,7 @@ class TestData(object):
         self._maak_verenigingen()
         self._maak_leden()
         self._maak_accounts_en_functies()
+        self._accepteer_vhpg_voor_alle_accounts()
 
     def maak_bondscompetities(self, begin_jaar=None):
         competities_aanmaken(begin_jaar)
@@ -519,6 +548,77 @@ class TestData(object):
                     self.comp25_account_bko = account
 
         # for
+
+        obj, created = (VerklaringHanterenPersoonsgegevens
+                        .objects
+                        .update_or_create(account=account,
+                                          defaults={'acceptatie_datum': timezone.now()}))
+
+    def maak_inschrijven_competitie(self, afstand=18, ver_nr=None):
+        """ Schrijf alle leden van de vereniging in voor de competitie, voor een specifieke vereniging
+
+            afstand = 18 / 25
+            ver_nr = regio_nr * 10 + volgnummer
+        """
+
+        comp = self.comp18 if afstand == 18 else self.comp25
+        url = self.url_inschrijven % comp.pk
+
+        # zet competitie fase B zodat we in mogen schrijven
+        zet_competitie_fase(comp, 'B')
+
+        client = Client()
+
+        # log in als HWL van deze vereniging
+        account = self.account_hwl[ver_nr]
+        resp = client.post(self.url_account_login,
+                           {'login_naam': account.username,
+                            'wachtwoord': self.WACHTWOORD})
+        if resp.status_code != 302:
+            raise ValueError('Login as HWL failed')
+
+        # pass OTP
+        resp = client.post(self.url_check_otp,
+                           {'otp_code': pyotp.TOTP(account.otp_code).now()})
+        if resp.status_code != 302 or resp.url != self.url_wissel_van_rol:
+            self._dump_resp(resp)
+            raise ValueError('OTP check voor HWL failed')
+
+        # wissel naar HWL
+        functie = self.functie_hwl[ver_nr]
+        resp = client.post(self.url_activeer_functie % functie.pk)
+        if resp.status_code != 302:
+            self._dump_resp(resp)
+            raise ValueError('Wissel naar functie HWL failed')
+
+        data = dict()
+        data['wil_in_team'] = 1
+        for sporterboog in (SporterBoog
+                            .objects
+                            .select_related('sporter',
+                                            'boogtype')
+                            .filter(sporter__bij_vereniging__ver_nr=ver_nr,
+                                    voor_wedstrijd=True)):
+
+            # lid_100004_boogtype_1
+            pk1 = sporterboog.sporter.pk
+            pk2 = sporterboog.boogtype.pk
+            aanmelding = 'lid_%s_boogtype_%s' % (pk1, pk2)
+            data[aanmelding] = 1
+        # for
+
+        resp = client.post(url, data)
+        if resp.status_code != 302:
+            self._dump_resp(resp)
+            raise ValueError('Inschrijven van sporters failed')
+
+    def maak_inschrijven_teamcompetitie(self, afstand=18, ver_nr=None):
+        """ Schrijf teams in voor de teamcompetitie, voor een specifiek vereniging
+
+            afstand = 18 / 25
+            ver_nr = regio_nr * 10 + volgnummer
+        """
+        comp_pk = self.comp18.pk if afstand == 18 else self.comp25.pk
 
 
 def account_vhpg_is_geaccepteerd(account):
