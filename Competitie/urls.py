@@ -243,7 +243,7 @@ urlpatterns = [
          name='dynamic-deelnemers-ophalen'),
 
     path('scores/dynamic/check-nhbnr/',
-         views_scores.DynamicZoekOpNhbnrView.as_view(),
+         views_scores.DynamicZoekOpBondsnummerView.as_view(),
          name='dynamic-check-nhbnr'),
 
     path('scores/dynamic/scores-opslaan/',

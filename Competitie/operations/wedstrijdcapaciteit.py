@@ -190,7 +190,8 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
                         is_aspirant=deelnemer.klasse.indiv.is_aspirant_klasse,
                         wil_team_schieten=deelnemer.inschrijf_voorkeur_team,
                         team_pk=0,
-                        vsg="")
+                        team_gem="",
+                        vsg="")         # TODO: obsolete this
 
         # wens alleen voor juiste boogtype tonen
         sporter.voorkeur_dt &= sporter.schiet_boog_r

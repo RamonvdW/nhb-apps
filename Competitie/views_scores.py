@@ -217,13 +217,14 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
 
         sporterboog_pk2tup = dict()
         for deelnemer in deelnemers:
-            if deelnemer.aantal_scores == 0:
-                vsg = deelnemer.ag_voor_team
-            else:
-                vsg = deelnemer.gemiddelde  # individuele voortschrijdend gemiddelde
+            team_gem = deelnemer.ag_voor_team
+            if not deelcomp.regio_heeft_vaste_teams:
+                # pak VSG, indien beschikbaar
+                if deelnemer.aantal_scores > 0:
+                    team_gem = deelnemer.gemiddelde
 
             try:
-                sporterboog_pk2tup[deelnemer.sporterboog.pk] = (vsg, deelnemer_pk2teamnaam[deelnemer.pk])
+                sporterboog_pk2tup[deelnemer.sporterboog.pk] = (team_gem, deelnemer_pk2teamnaam[deelnemer.pk])
             except KeyError:
                 # geen teamschutter
                 pass
@@ -231,10 +232,10 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
 
         for score in scores:
             try:
-                score.vsg, score.team_naam = sporterboog_pk2tup[score.sporterboog.pk]
+                score.team_gem, score.team_naam = sporterboog_pk2tup[score.sporterboog.pk]
             except KeyError:
                 score.team_naam = "-"
-                score.vsg = ""
+                score.team_gem = ""
         # for
 
     def get_context_data(self, **kwargs):
@@ -268,7 +269,8 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
                                   'sporterboog__boogtype',
                                   'sporterboog__sporter',
                                   'sporterboog__sporter__bij_vereniging')
-                  .order_by('sporterboog__sporter__lid_nr'))
+                  .order_by('sporterboog__sporter__lid_nr',
+                            'sporterboog__pk'))                 # belangrijk ivm zelfde volgorde by dynamisch toevoegen
         context['scores'] = scores
 
         self._team_naam_toevoegen(scores, deelcomp)
@@ -380,7 +382,7 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
                 'ver_nr': sporter.ver_nr,
                 'ver_naam': sporter.ver_naam,
                 'boog': sporter.boog,
-                'vsg': sporter.vsg,
+                'team_gem': sporter.team_gem,
                 'team_pk': sporter.team_pk,
             })
         # for
@@ -388,7 +390,7 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
         return JsonResponse(out)
 
 
-class DynamicZoekOpNhbnrView(UserPassesTestMixin, View):
+class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
 
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
@@ -467,14 +469,17 @@ class DynamicZoekOpNhbnrView(UserPassesTestMixin, View):
                     'pk': sporterboog.pk,
                     'boog': boog.beschrijving,
                     'team_pk': 0,
-                    'vsg': ''
+                    'team_gem': ''
                 }
 
                 if deelnemer.inschrijf_voorkeur_team:
-                    if deelnemer.aantal_scores == 0:
-                        sub['vsg'] = deelnemer.ag_voor_team
-                    else:
-                        sub['vsg'] = deelnemer.gemiddelde
+                    # TODO: gebruikt ronde team ag!
+                    sub['team_gem'] = deelnemer.ag_voor_team
+                    if not ronde.deelcompetitie.regio_heeft_vaste_teams:
+                        if deelnemer.aantal_scores > 0:
+                            sub['team_gem'] = deelnemer.gemiddelde
+
+                    sub['vsg'] = sub['team_gem']        # TODO: obsolete vsg
 
                     # zoek het huidige team erbij
                     teams = deelnemer.regiocompetitieteam_set.all()
