@@ -694,14 +694,29 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
         self.assert404(resp)
         self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
 
-        # wijzig de poule
+        # fase E: wijzig de poule
         url = self.url_wijzig_poule % poule.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/wijzig-poule.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'beschrijving': 'nieuwe test'})
+        self.assert_is_redirect_not_plein(resp)
+
+        # TODO: controleer dat de teams gekoppeld aan de poule niet meer te wijzigen zijn
+
+        # zet fase F, dan mag niets meer gewijzigd worden
+        zet_competitie_fase(comp, 'F')
+
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp)
 
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'beschrijving': ' hoi test!'})
+            resp = self.client.post(url, {'beschrijving': 'nieuwe test'})
         self.assert404(resp)
 
         # terug naar fase D
