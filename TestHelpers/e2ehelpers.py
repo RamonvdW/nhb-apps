@@ -706,9 +706,9 @@ class E2EHelpers(object):
                         break
                 # for
 
-            if count > num:
-                msg = "Too many queries: %s; maximum %d. " % (count, num)
-                self.fail(msg=msg + queries)
+            if count > num:                                                         # pragma: no branch
+                msg = "Too many queries: %s; maximum %d. " % (count, num)           # pragma: no cover
+                self.fail(msg=msg + queries)                                        # pragma: no cover
             else:
                 # kijk of het wat minder kan
                 if num > 20:
@@ -722,7 +722,7 @@ class E2EHelpers(object):
     def assert403(self, resp):
         # controleer dat we op de speciale code-403 handler pagina gekomen zijn
         if isinstance(resp, str):
-            self.fail(msg='Incorrect invocation: missing resp parameter?')
+            self.fail(msg='Incorrect invocation: missing resp parameter?')          # pragma: no cover
 
         if resp.status_code != 200:     # pragma: no cover
             self.e2e_dump_resp(resp)
@@ -733,7 +733,7 @@ class E2EHelpers(object):
 
     def assert404(self, resp, expected_msg=''):
         if isinstance(resp, str):
-            self.fail(msg='Incorrect invocation: missing resp parameter?')
+            self.fail(msg='Incorrect invocation: missing resp parameter?')          # pragma: no cover
 
         # controleer dat we op de speciale code-404 handler pagina gekomen zijn
         if resp.status_code != 200:     # pragma: no cover
