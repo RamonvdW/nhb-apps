@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.utils import timezone
+# from django.utils import timezone
 from BasisTypen.models import BoogType, TeamWedstrijdklasse
 from Functie.models import maak_functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -661,11 +661,11 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assertContains(resp, 'De klassegrenzen voor de ')
 
         # klassegrenzen vaststellen (18m en 25m)
-        s1 = timezone.now()
+        # s1 = timezone.now()
         with self.assert_max_queries(86):
             resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_18.pk)
-        s2 = timezone.now()
-        print('duration:', s2-s1)
+        # s2 = timezone.now()
+        # print('duration:', s2-s1)
         self.assert_is_redirect_not_plein(resp)        # redirect = success
         with self.assert_max_queries(86):
             resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_25.pk)
