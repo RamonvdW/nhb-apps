@@ -117,6 +117,10 @@ urlpatterns = [
          view_wedstrijden.WaarschijnlijkeDeelnemersView.as_view(),
          name='waarschijnlijke-deelnemers'),
 
+    path('wedstrijden/<wedstrijd_pk>/waarschijnlijke-deelnemers/als-bestand/',
+         view_wedstrijden.WaarschijnlijkeDeelnemersAlsBestandView.as_view(),
+         name='waarschijnlijke-deelnemers-als-bestand'),
+
     path('wedstrijden/',
          view_wedstrijden.WedstrijdenView.as_view(),
          name='wedstrijden'),

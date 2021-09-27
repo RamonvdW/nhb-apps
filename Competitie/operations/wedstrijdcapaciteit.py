@@ -216,13 +216,18 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
         tup = (volgorde_1, volgorde_2, volgorde_3, volgorde_4, sporter)
         unsorted_sporters.append(tup)
 
-        # TODO: ondersteuning VSG toevoegen voor team deelnemers (nu tonen we sporter AG)
-        # TODO: zonder Team-AG kan het geen teamschutter zijn
         if deelnemer.inschrijf_voorkeur_team:
-            if deelnemer.aantal_scores == 0:
-                sporter.vsg = deelnemer.ag_voor_team
-            else:
-                sporter.vsg = deelnemer.gemiddelde
+
+            # TODO: haal dit gemiddelde op het TeamRonde record
+            # bepaal het gemiddelde voor dit teamlid
+            # voor vaste teams is dit altijd het team AG
+            # voor dynamische teams gebruik het VSG, zodra beschikbaar
+            sporter.team_gem = deelnemer.ag_voor_team
+            if not deelcomp.regio_heeft_vaste_teams:
+                if deelnemer.aantal_scores > 0:
+                    sporter.team_gem = deelnemer.gemiddelde
+
+            sporter.vsg = sporter.team_gem      # TODO: obsolete gebruik van .vsg
 
             # zoek het huidige team erbij
             ronde_teams = deelnemer.teamronde_feitelijk.filter(ronde_nr=deelcomp.huidige_team_ronde)
@@ -262,8 +267,7 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
                     parts.append(tup)
                 # for
                 parts.sort()        # controleer volgorde van de teams
-                msg = "[%s] %s heeft " % (sporter.ver_nr, sporter.ver_naam)
-                sporter.vereniging_teams = msg + ", ".join([tup[-1] for tup in parts])
+                sporter.vereniging_teams = ", ".join([tup[-1] for tup in parts])
 
         blazoenen = sporter.blazoen_lijst[:]
         sporter.blazoen_str_lijst = lijst = list()
