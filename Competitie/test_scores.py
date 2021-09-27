@@ -399,7 +399,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         json_deelnemer = json_data['deelnemers'][0]
         self.assertTrue('pk' in json_deelnemer)
         self.assertTrue('boog' in json_deelnemer)
-        self.assertTrue('vsg' in json_deelnemer)
+        self.assertTrue('team_gem' in json_deelnemer)
         self.assertTrue('team_pk' in json_deelnemer)
 
     def test_rcl_bad_zoeken(self):
