@@ -525,7 +525,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # controleer dat er geen dubbele SporterBoog records aangemaakt zijn
         self.assertEqual(1, SporterBoog.objects.filter(sporter=self.sporter_100001, boogtype__afkorting='R').count())
         self.assertEqual(1, SporterBoog.objects.filter(sporter=self.sporter_100002, boogtype__afkorting='BB').count())
-        self.assertEqual(13754, SporterBoog.objects.count())
+        self.assertEqual(14954, SporterBoog.objects.count())
 
         # controleer dat het "ag vaststellen" kaartje er nog steeds is
         # dit keer met de "voor het laatst gedaan" notitie
