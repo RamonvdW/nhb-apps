@@ -7,19 +7,23 @@
 """ Routines om de database te vullen met een test set die gebruikt wordt in vele van de test cases """
 
 from django.test import Client
+from django.core import management
 from django.utils import timezone
 from Account.models import Account, account_create
-from BasisTypen.models import BoogType
-from Competitie.models import Competitie, DeelCompetitie, LAAG_BK, LAAG_RK
+from BasisTypen.models import BoogType, TeamType
+from Competitie.models import (Competitie, CompetitieKlasse, DeelCompetitie, LAAG_BK, LAAG_RK,
+                               RegioCompetitieSchutterBoog,
+                               RegiocompetitieTeam, RegiocompetitieTeamPoule)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_competitie import zet_competitie_fase
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from NhbStructuur.models import NhbRegio, NhbCluster, NhbVereniging
+from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from bs4 import BeautifulSoup
 import datetime
 import pyotp
-
+import io
 
 # fixtures zijn overwogen, maar zijn lastig te onderhouden en geven geen recente datums (zoals voor VHPG)
 
@@ -48,6 +52,7 @@ class TestData(object):
     url_check_otp = '/functie/otp-controle/'
     url_activeer_functie = '/functie/activeer-functie/%s/'
     url_wissel_van_rol = '/functie/wissel-van-rol/'
+    url_volgende_ronde = '/bondscompetities/regio/%s/team-ronde/'   # deelcomp_pk
 
     def __init__(self):
         self.account_admin = None
@@ -89,6 +94,24 @@ class TestData(object):
         self.comp25_functie_rko = dict()        # [rayon_nr] = Functie
         self.comp25_functie_rcl = dict()        # [regio_nr] = Functie
 
+        self.regio_cluster = dict()             # [regio_nr] = NhbCluster (alleen regio 101 en 107)
+
+        # inschrijvingen
+        self.comp18_deelnemers = list()
+        self.comp25_deelnemers = list()
+
+        # inschrijvingen met team voorkeur
+        self.comp18_deelnemers_team = list()
+        self.comp25_deelnemers_team = list()
+
+        # aangemaakte teams
+        self.comp18_regioteams = list()
+        self.comp25_regioteams = list()
+
+        # aangemaakte poules
+        self.comp18_poules = list()
+        self.comp25_poules = list()
+
         self._accounts_beheerders = list()      # 1 per vereniging, voor BKO, RKO, RCL
 
     @staticmethod
@@ -103,6 +126,67 @@ class TestData(object):
         else:
             soup = BeautifulSoup(content, features="html.parser")
             print(soup.prettify())
+
+    def _login(self, client, account):
+        resp = client.post(self.url_account_login,
+                           {'login_naam': account.username,
+                            'wachtwoord': self.WACHTWOORD})
+        if resp.status_code != 302:
+            raise ValueError('Login as HWL failed')
+
+        # pass OTP
+        resp = client.post(self.url_check_otp,
+                           {'otp_code': pyotp.TOTP(account.otp_code).now()})
+        if resp.status_code != 302 or resp.url != self.url_wissel_van_rol:
+            self._dump_resp(resp)
+            raise ValueError('OTP check voor HWL failed')
+
+    def _wissel_naar_functie(self, client, functie):
+        # wissel naar HWL
+        resp = client.post(self.url_activeer_functie % functie.pk)
+        if resp.status_code != 302:
+            self._dump_resp(resp)
+            raise ValueError('Wissel naar functie HWL failed')
+
+    @staticmethod
+    def _verwerk_mutaties(show_warnings=True, show_all=False):
+        # vraag de achtergrond taak om de mutaties te verwerken
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+
+        if show_all:                                    # pragma: no coverage
+            print(f1.getvalue())
+            print(f2.getvalue())
+
+        elif show_warnings:
+            lines = f1.getvalue() + '\n' + f2.getvalue()
+            for line in lines.split('\n'):
+                if line.startswith('[WARNING] '):       # pragma: no coverage
+                    print(line)
+            # for
+
+    def regio_teamcompetitie_ronde_doorzetten(self, deelcomp):
+        """
+            Trigger de site om de team ronde van een specifieke competitie door te zetten naar de volgende ronde
+        """
+        regio_nr = deelcomp.nhb_regio.regio_nr
+        if deelcomp.competitie.afstand == 18:
+            account = self.comp18_account_rcl[regio_nr]
+            functie = self.comp18_functie_rcl[regio_nr]
+        else:
+            account = self.comp25_account_rcl[regio_nr]
+            functie = self.comp25_functie_rcl[regio_nr]
+
+        # wordt RCL van de deelcompetitie
+        client = Client()
+        self._login(client, account)
+        self._wissel_naar_functie(client, functie)
+
+        url = self.url_volgende_ronde % deelcomp.pk
+        client.post(url, {'snel': 1})
+
+        self._verwerk_mutaties()
 
     def maak_accounts(self):
         """
@@ -166,8 +250,7 @@ class TestData(object):
         if len(bulk):
             VerklaringHanterenPersoonsgegevens.objects.bulk_create(bulk)
 
-    @staticmethod
-    def _maak_verenigingen():
+    def _maak_verenigingen(self):
         """
             Maak in elk van de 16 regio's vier verenigingen aan
 
@@ -213,6 +296,7 @@ class TestData(object):
 
         for regio in cluster_regios:
             cluster = NhbCluster.objects.filter(regio=regio).order_by('letter')[0]
+            self.regio_cluster[regio.regio_nr] = cluster
             for ver in NhbVereniging.objects.filter(regio=regio).order_by('ver_nr')[:3]:
                 ver.clusters.add(cluster)
             # for
@@ -255,23 +339,23 @@ class TestData(object):
             (19, 'V', 'Jun19', 'R'),
             (19, 'V', 'Jun19b', 'C'),
             (20, 'M', 'Jun20', 'R'),
-            (20, 'M', 'Jun20b', 'C'),
+            (20, 'M', 'Jun20b', 'LB'),
             (21, 'V', 'Sen21', 'R'),
             (21, 'V', 'Sen21b', 'C'),
             (22, 'M', 'Sen22', 'R'),
             (22, 'M', 'Sen22b', 'C'),
-            (22, 'M', 'Sen23', 'r'),            # klein letter: geen voorkeur voor de competitie
+            (22, 'M', 'Sen23', 'r'),            # kleine letter: geen voorkeur voor de competitie
             (31, 'V', 'Sen31', 'R'),
             (32, 'M', 'Sen32', 'C'),
             (32, 'M', 'Sen32b', 'BB'),
             (33, 'V', 'Sen33', 'R'),
             (33, 'V', 'Sen33b', 'BB'),
-            (34, 'M', 'Sen34', 'C'),            # Sen34 = HWL
+            (34, 'M', 'Sen34', 'LB'),           # Sen34 = HWL
             (35, 'V', 'Sen35', 'R'),
             (36, 'M', 'Sen36', 'C'),
             (36, 'M', 'Sen36b', 'BB'),
             (37, 'V', 'Sen37', 'R'),
-            (38, 'M', 'Sen38', 'C'),
+            (38, 'M', 'Sen38', 'LB'),
             (39, 'V', 'Sen39', 'R'),            # Sen39 = BKO/RKO/RCL
             (40, 'M', 'Sen40', 'C'),
             (41, 'V', 'Sen41', 'R'),
@@ -469,7 +553,33 @@ class TestData(object):
         self._maak_accounts_en_functies()
         self._accepteer_vhpg_voor_alle_accounts()
 
+    @staticmethod
+    def maak_sporterboog_aanvangsgemiddelden(afstand, ver_nr):
+        """ Maak voor de helft van de SporterBoog een AG aan in voorgaand seizoen
+            deze kunnen gebruikt worden voor de klassegrenzen en inschrijven.
+        """
+        ag = 6000       # 6.0
+        ag += ver_nr
+
+        bulk = list()
+        for sporterboog in SporterBoog.objects.filter(sporter__bij_vereniging__ver_nr=ver_nr):
+            # even pk get an AG
+            if sporterboog.pk % 1 == 0:
+                ag = 6000 if ag > 9800 else ag + 25
+                score = Score(type=SCORE_TYPE_INDIV_AG,
+                              sporterboog=sporterboog,
+                              waarde=ag,
+                              afstand_meter=afstand)
+                bulk.append(score)
+        # for
+
+        Score.objects.bulk_create(bulk)
+        # print('Created %sx Score' % len(bulk))
+
+        # TODO: maak ScoreHist records
+
     def maak_bondscompetities(self, begin_jaar=None):
+
         competities_aanmaken(begin_jaar)
 
         for comp in Competitie.objects.all():
@@ -549,11 +659,6 @@ class TestData(object):
 
         # for
 
-        obj, created = (VerklaringHanterenPersoonsgegevens
-                        .objects
-                        .update_or_create(account=account,
-                                          defaults={'acceptatie_datum': timezone.now()}))
-
     def maak_inschrijven_competitie(self, afstand=18, ver_nr=None):
         """ Schrijf alle leden van de vereniging in voor de competitie, voor een specifieke vereniging
 
@@ -561,7 +666,13 @@ class TestData(object):
             ver_nr = regio_nr * 10 + volgnummer
         """
 
-        comp = self.comp18 if afstand == 18 else self.comp25
+        if afstand == 18:
+            comp = self.comp18 if afstand == 18 else self.comp25
+            deelnemers = self.comp18_deelnemers
+        else:
+            comp = self.comp25
+            deelnemers = self.comp25_deelnemers
+
         url = self.url_inschrijven % comp.pk
 
         # zet competitie fase B zodat we in mogen schrijven
@@ -570,29 +681,14 @@ class TestData(object):
         client = Client()
 
         # log in als HWL van deze vereniging
-        account = self.account_hwl[ver_nr]
-        resp = client.post(self.url_account_login,
-                           {'login_naam': account.username,
-                            'wachtwoord': self.WACHTWOORD})
-        if resp.status_code != 302:
-            raise ValueError('Login as HWL failed')
-
-        # pass OTP
-        resp = client.post(self.url_check_otp,
-                           {'otp_code': pyotp.TOTP(account.otp_code).now()})
-        if resp.status_code != 302 or resp.url != self.url_wissel_van_rol:
-            self._dump_resp(resp)
-            raise ValueError('OTP check voor HWL failed')
+        self._login(client, self.account_hwl[ver_nr])
 
         # wissel naar HWL
-        functie = self.functie_hwl[ver_nr]
-        resp = client.post(self.url_activeer_functie % functie.pk)
-        if resp.status_code != 302:
-            self._dump_resp(resp)
-            raise ValueError('Wissel naar functie HWL failed')
+        self._wissel_naar_functie(client, self.functie_hwl[ver_nr])
 
         data = dict()
         data['wil_in_team'] = 1
+        pks = list()
         for sporterboog in (SporterBoog
                             .objects
                             .select_related('sporter',
@@ -605,6 +701,8 @@ class TestData(object):
             pk2 = sporterboog.boogtype.pk
             aanmelding = 'lid_%s_boogtype_%s' % (pk1, pk2)
             data[aanmelding] = 1
+
+            pks.append(sporterboog.pk)
         # for
 
         resp = client.post(url, data)
@@ -612,13 +710,149 @@ class TestData(object):
             self._dump_resp(resp)
             raise ValueError('Inschrijven van sporters failed')
 
-    def maak_inschrijven_teamcompetitie(self, afstand=18, ver_nr=None):
+        new_deelnemers = (RegioCompetitieSchutterBoog
+                          .objects
+                          .select_related('sporterboog',
+                                          'sporterboog__sporter',
+                                          'sporterboog__boogtype',
+                                          'klasse')
+                          .filter(sporterboog__pk__in=pks))
+        deelnemers.extend(new_deelnemers)
+
+    def maak_inschrijven_teamcompetitie(self, afstand, ver_nr):
         """ Schrijf teams in voor de teamcompetitie, voor een specifiek vereniging
 
             afstand = 18 / 25
             ver_nr = regio_nr * 10 + volgnummer
         """
-        comp_pk = self.comp18.pk if afstand == 18 else self.comp25.pk
+
+        ver = NhbVereniging.objects.select_related('regio').get(ver_nr=ver_nr)
+        regio_nr = ver.regio.regio_nr
+
+        if afstand == 18:
+            deelcomp = self.deelcomp18_regio[regio_nr]
+            deelnemers = self.comp18_deelnemers
+            deelnemers_team = self.comp18_deelnemers_team
+            regioteams = self.comp18_regioteams
+        else:
+            deelcomp = self.deelcomp25_regio[regio_nr]
+            deelnemers = self.comp25_deelnemers
+            deelnemers_team = self.comp25_deelnemers_team
+            regioteams = self.comp25_regioteams
+
+        # verdeel de deelnemers per boogtype
+        deelnemers_per_boog = dict()   # [boogtype.afkorting] = list(deelnemer)
+
+        for deelnemer in deelnemers:
+            if deelnemer.inschrijf_voorkeur_team:
+                # print('deelnemer: %s (indiv ag: %s, team ag: %s)' % (deelnemer, deelnemer.ag_voor_indiv, deelnemer.ag_voor_team))
+                afkorting = deelnemer.sporterboog.boogtype.afkorting
+                try:
+                    deelnemers_per_boog[afkorting].append(deelnemer)
+                except KeyError:
+                    deelnemers_per_boog[afkorting] = [deelnemer]
+
+                deelnemers_team.append(deelnemer)
+        # for
+
+        # zet 1x BB en 1x LB in een recurve team
+        deelnemers_per_boog['R'].append(deelnemers_per_boog['BB'].pop(0))
+        deelnemers_per_boog['R'].append(deelnemers_per_boog['LB'].pop(0))
+
+        afkorting2teamtype = dict()
+        for teamtype in TeamType.objects.all():
+            afkorting2teamtype[teamtype.afkorting] = teamtype
+        # for
+
+        bulk = list()
+        for afkorting, deelnemers in deelnemers_per_boog.items():
+            aantal = len(deelnemers)
+            while aantal > 0:
+                aantal -= 4
+                next_nr = len(bulk) + 1
+                team = RegiocompetitieTeam(
+                            deelcompetitie=deelcomp,
+                            vereniging=ver,
+                            volg_nr=next_nr,
+                            team_type=afkorting2teamtype[afkorting],
+                            team_naam='%s-%s-%s' % (ver_nr, next_nr, afkorting))
+                bulk.append(team)
+            # while
+        # for
+
+        RegiocompetitieTeam.objects.bulk_create(bulk)
+
+        # alle teams moeten in een klasse (maakt niet veel uit welke)
+        team_klasse = CompetitieKlasse.objects.exclude(team=None).filter(competitie=deelcomp.competitie)[0]
+
+        # koppel de sporters aan het team
+        for team in (RegiocompetitieTeam
+                     .objects
+                     .select_related('team_type')
+                     .filter(deelcompetitie=deelcomp,
+                             vereniging=ver)):
+
+            # selecteer een aantal deelnemers voor dit team (1, 2, 3 of 4 sporters)
+            afkorting = team.team_type.afkorting
+            deelnemers = deelnemers_per_boog[afkorting][:4]
+            deelnemers_per_boog[afkorting] = deelnemers_per_boog[afkorting][len(deelnemers):]
+
+            # bereken de team sterkte
+            team.aanvangsgemiddelde = sum([deelnemer.ag_voor_team for deelnemer in deelnemers])
+            team.klasse = team_klasse
+            team.save(update_fields=['aanvangsgemiddelde', 'klasse'])
+
+            team.gekoppelde_schutters.set(deelnemers)
+
+            regioteams.append(team)
+        # for
+
+    def maak_poules(self, deelcomp):
+        """ Maak poules en vul deze met teams """
+
+        if deelcomp.competitie.afstand == '18':
+            regioteams = self.comp18_regioteams
+            poules = self.comp18_poules
+        else:
+            regioteams = self.comp25_regioteams
+            poules = self.comp25_poules
+
+        # maak per boogtype 1 poule aan
+        done = list()
+        bulk = list()
+        for team in regioteams:
+            if team.deelcompetitie == deelcomp:
+                afkorting = team.team_type.afkorting
+                if afkorting not in done:
+                    poule = RegiocompetitieTeamPoule(
+                                    deelcompetitie=deelcomp,
+                                    # teams,
+                                    beschrijving="Poule %s team type %s" % (deelcomp, team.team_type.beschrijving))
+
+                    bulk.append(poule)
+                    done.append(afkorting)
+        # for
+
+        RegiocompetitieTeamPoule.objects.bulk_create(bulk)
+
+        for poule in (RegiocompetitieTeamPoule
+                      .objects
+                      .select_related('deelcompetitie',
+                                      'deelcompetitie__competitie')
+                      .filter(deelcompetitie=deelcomp)):
+
+            pks = list()
+            for team in regioteams:
+                if team.deelcompetitie == deelcomp:
+                    if poule.beschrijving.endswith(team.team_type.beschrijving):
+                        pks.append(team.pk)
+            # for
+
+            pks = pks[:8]       # maximaal 8 teams in een poule
+            poule.teams.set(pks)
+
+            poules.append(poule)
+        # for
 
 
 def account_vhpg_is_geaccepteerd(account):

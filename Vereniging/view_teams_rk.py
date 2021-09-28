@@ -402,7 +402,6 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         context['deelcomp_rk'] = deelcomp_rk = rk_team.deelcompetitie
 
         comp = deelcomp_rk.competitie
-        print('comp: %s' % comp)
         #comp.bepaal_fase()
         # TODO: vanaf wanneer wijzigingen blokkeren?
 

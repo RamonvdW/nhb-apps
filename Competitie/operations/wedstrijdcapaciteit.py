@@ -230,8 +230,9 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
 
             sporter.vsg = sporter.team_gem      # TODO: obsolete gebruik van .vsg
 
+            # TODO: onderstaande query optimaliseren (nu 1 query per sporter)
             # zoek het huidige team erbij
-            ronde_teams = deelnemer.teamronde_feitelijk.filter(ronde_nr=deelcomp.huidige_team_ronde)
+            ronde_teams = deelnemer.teamronde_feitelijk.select_related('team').filter(ronde_nr=deelcomp.huidige_team_ronde)
             if ronde_teams.count() > 0:
                 # sporter is gekoppeld aan een team
                 sporter.team_pk = ronde_teams[0].team.pk

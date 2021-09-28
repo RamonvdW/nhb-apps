@@ -203,6 +203,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
 
         ronde_teams = (RegiocompetitieRondeTeam
                        .objects
+                       .select_related('team')
                        .prefetch_related('deelnemers_feitelijk')
                        .filter(team__deelcompetitie=deelcomp,
                                ronde_nr=deelcomp.huidige_team_ronde))
@@ -790,7 +791,11 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                     prev_klasse = klasse_str
 
                 regel.deelnemers = deelnemers = list()
-                for deelnemer in ronde_team.deelnemers_feitelijk.all():
+                for deelnemer in (ronde_team
+                                  .deelnemers_feitelijk
+                                  .select_related('sporterboog',
+                                                  'sporterboog__sporter')
+                                  .all()):
                     sporter = deelnemer.sporterboog.sporter
                     deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
                     deelnemer.sporterboog_pk = deelnemer.sporterboog.pk
