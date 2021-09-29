@@ -27,8 +27,7 @@ class TestFunctie2FA(E2EHelpers, TestCase):
     url_controle = '/functie/otp-controle/'
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
+    def setUpTestData(cls):
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts()
 

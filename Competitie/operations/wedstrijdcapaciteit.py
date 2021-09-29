@@ -219,7 +219,7 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
 
         if deelnemer.inschrijf_voorkeur_team:
 
-            # TODO: haal dit gemiddelde op het TeamRonde record
+            # TODO: haal dit gemiddelde op uit het TeamRonde record
             # bepaal het gemiddelde voor dit teamlid
             # voor vaste teams is dit altijd het team AG
             # voor dynamische teams gebruik het VSG, zodra beschikbaar

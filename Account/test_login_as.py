@@ -22,8 +22,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
     url_wissel = '/account/account-wissel/'
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
+    def setUpTestData(cls):
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts()
 

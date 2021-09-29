@@ -21,8 +21,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
     test_after = ('Functie',)
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
+    def setUpTestData(cls):
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts()
 

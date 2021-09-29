@@ -31,8 +31,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
     url_aangemeld_regio = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/'  # comp_pk, regio_pk
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
+    def setUpTestData(cls):
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts()
 

@@ -20,8 +20,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
     url_interland_download = '/bondscompetities/hist/interland/als-bestand/%s/'  # klasse_pk
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
+    def setUpTestData(cls):
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts()
 

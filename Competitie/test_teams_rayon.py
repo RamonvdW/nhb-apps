@@ -23,8 +23,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
     testdata = None
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
+    def setUpTestData(cls):
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts()
         cls.testdata.maak_clubs_en_sporters()

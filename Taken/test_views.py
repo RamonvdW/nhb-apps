@@ -21,8 +21,7 @@ class TestTakenViews(E2EHelpers, TestCase):
     url_details = '/taken/details/%s/'  # taak_pk
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
+    def setUpTestData(cls):
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts()
 

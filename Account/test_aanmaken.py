@@ -16,8 +16,7 @@ class TestAccountAanmaken(E2EHelpers, TestCase):
     url_aangemaakt = '/account/aangemaakt/'
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
+    def setUpTestData(cls):
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts()
 

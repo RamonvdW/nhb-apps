@@ -3,7 +3,7 @@
 
 # this line + shebang ensures python is taken from the user's PATH
 # python sees this as a string and ignores it
-"exec" "python" "$0" "$@"
+"exec" "python3" "$0" "$@"
 
 #  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.

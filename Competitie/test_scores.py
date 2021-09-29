@@ -5,18 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.models import BoogType
-from Functie.models import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Score.models import Score
-from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
-from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
-                     DeelcompetitieRonde, RegioCompetitieSchutterBoog, AG_NUL, LAAG_REGIO)
-from .operations import competities_aanmaken
+from .models import CompetitieKlasse, DeelcompetitieRonde
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
-import datetime
 import json
 
 
@@ -48,8 +41,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
     testdata = None
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
+    def setUpTestData(cls):
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts()
         cls.testdata.maak_clubs_en_sporters()

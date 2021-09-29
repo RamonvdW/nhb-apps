@@ -518,9 +518,8 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         return wedstrijd
 
     @staticmethod
-    def nieuwe_score(uitslag, sporterboog_pk, waarde, when, door_account):
+    def nieuwe_score(bulk, uitslag, sporterboog_pk, waarde, when, door_account):
         # print('nieuwe score: %s = %s' % (sporterboog_pk, waarde))
-        # TODO: leer om bulk create te gebruiken
         try:
             sporterboog = SporterBoog.objects.get(pk=sporterboog_pk)
         except SporterBoog.DoesNotExist:
@@ -533,25 +532,28 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         score_obj.save()
         uitslag.scores.add(score_obj)
 
-        ScoreHist(score=score_obj,
-                  oude_waarde=0,
-                  nieuwe_waarde=waarde,
-                  when=when,
-                  door_account=door_account,
-                  notitie="Invoer uitslag wedstrijd").save()
+        hist = ScoreHist(
+                    score=score_obj,
+                    oude_waarde=0,
+                    nieuwe_waarde=waarde,
+                    when=when,
+                    door_account=door_account,
+                    notitie="Invoer uitslag wedstrijd")
+        bulk.append(hist)
 
     @staticmethod
-    def bijgewerkte_score(score_obj, waarde, when, door_account):
+    def bijgewerkte_score(bulk, score_obj, waarde, when, door_account):
         if score_obj.waarde != waarde:
             # print('bijgewerkte score: %s --> %s' % (score_obj, waarde))
 
-            # TODO: leer om bulk create te gebruiken
-            ScoreHist(score=score_obj,
-                      oude_waarde=score_obj.waarde,
-                      nieuwe_waarde=waarde,
-                      when=when,
-                      door_account=door_account,
-                      notitie="Invoer uitslag wedstrijd").save()
+            hist = ScoreHist(
+                        score=score_obj,
+                        oude_waarde=score_obj.waarde,
+                        nieuwe_waarde=waarde,
+                        when=when,
+                        door_account=door_account,
+                        notitie="Invoer uitslag wedstrijd")
+            bulk.append(hist)
 
             score_obj.waarde = waarde
             score_obj.save()
@@ -572,6 +574,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         # for
         # print('pk2score_obj: %s' % repr(pk2score_obj))
 
+        bulk = list()
         for key, value in data.items():
             if key == 'wedstrijd_pk':
                 # geen sporterboog
@@ -593,7 +596,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
                 # lege invoer betekent: schutter deed niet mee
                 if score_obj:
                     # verwijder deze score uit de uitslag, maar behoud de geschiedenis
-                    self.bijgewerkte_score(score_obj, SCORE_WAARDE_VERWIJDERD, when, door_account)
+                    self.bijgewerkte_score(bulk, score_obj, SCORE_WAARDE_VERWIJDERD, when, door_account)
                 # laat tegen exceptie hieronder aanlopen
 
             # sla de score op
@@ -608,11 +611,13 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
                 # score opslaan
                 if not score_obj:
                     # het is een nieuwe score
-                    self.nieuwe_score(uitslag, pk, waarde, when, door_account)
+                    self.nieuwe_score(bulk, uitslag, pk, waarde, when, door_account)
                 else:
-                    self.bijgewerkte_score(score_obj, waarde, when, door_account)
+                    self.bijgewerkte_score(bulk, score_obj, waarde, when, door_account)
             # else: illegale score --> ignore
         # for
+
+        ScoreHist.objects.bulk_create(bulk)
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'Opslaan' gebruikt wordt
@@ -740,6 +745,17 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         used_score_pks = list()
 
+        deelnemer2sporter_cache = dict()        # [deelnemer_pk] = (sporterboog_pk, naam_str)
+        for deelnemer in (RegioCompetitieSchutterBoog
+                          .objects
+                          .select_related('sporterboog', 'sporterboog__sporter')
+                          .filter(deelcompetitie=deelcomp)):
+
+            sporter = deelnemer.sporterboog.sporter
+            tup = (deelnemer.sporterboog.pk, "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam()))
+            deelnemer2sporter_cache[deelnemer.pk] = tup
+        # for
+
         for poule in (RegiocompetitieTeamPoule
                       .objects
                       .prefetch_related('teams')
@@ -760,7 +776,8 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
             ronde_teams = (RegiocompetitieRondeTeam
                            .objects
                            .select_related('team',
-                                           'team__vereniging')
+                                           'team__vereniging',
+                                           'team__klasse__team')
                            .prefetch_related('deelnemers_feitelijk',
                                              'scores_feitelijk')
                            .filter(team__in=team_pks,
@@ -768,6 +785,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                            .order_by('team__vereniging__ver_nr',
                                      'team__volg_nr'))
 
+            # TODO: is volgende lus nog wel nodig?
             for ronde_team in ronde_teams:
                 ronde_team.ronde_wp = 0
                 ronde_team.team_str = "[%s] %s" % (ronde_team.team.vereniging.ver_nr,
@@ -793,17 +811,15 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                 regel.deelnemers = deelnemers = list()
                 for deelnemer in (ronde_team
                                   .deelnemers_feitelijk
-                                  .select_related('sporterboog',
-                                                  'sporterboog__sporter')
                                   .all()):
-                    sporter = deelnemer.sporterboog.sporter
-                    deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
-                    deelnemer.sporterboog_pk = deelnemer.sporterboog.pk
+
+                    sporterboog_pk, naam_str = deelnemer2sporter_cache[deelnemer.pk]
+                    sporterboog_pks.append(sporterboog_pk)
+
+                    deelnemer.naam_str = naam_str
+                    deelnemer.sporterboog_pk = sporterboog_pk
                     deelnemer.gevonden_scores = None
                     deelnemer.keuze_nodig = False
-
-                    sporterboog_pks.append(deelnemer.sporterboog.pk)
-
                     regel.deelnemers.append(deelnemer)
                 # for
 
