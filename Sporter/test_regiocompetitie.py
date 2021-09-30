@@ -6,16 +6,16 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (Competitie, CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
                                DeelcompetitieRonde, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3)
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from Functie.models import Functie
+from NhbStructuur.models import NhbRegio, NhbVereniging
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
 from Score.operations import score_indiv_ag_opslaan
 from Wedstrijden.models import CompetitieWedstrijd
-from .models import Sporter, SporterBoog
+from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime

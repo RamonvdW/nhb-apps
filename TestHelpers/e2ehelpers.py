@@ -22,11 +22,16 @@ import vnujar
 import pyotp
 
 
+# debug optie: toon waar in de code de queries vandaan komen
+REPORT_QUERY_ORIGINS = False
+
+
 class MyQueryTracer(object):
     def __init__(self):
         self.trace = list()
         self.started_at = datetime.datetime.now()
         self.total_duration_us = 0
+        self.stack_counts = dict()      # [stack] = count
 
     def __call__(self, execute, sql, params, many, context):
         call = {'sql': sql}
@@ -36,6 +41,7 @@ class MyQueryTracer(object):
 
         time_start = timezone.now()
         call['now'] = time_start
+
         call['stack'] = stack = list()
         for fname, linenr, base, code in traceback.extract_stack():
             if base != '__call__' and not fname.startswith('/usr/lib') and '/site-packages/' not in fname and 'manage.py' not in fname:
@@ -43,6 +49,15 @@ class MyQueryTracer(object):
             elif base == 'render' and 'template/response.py' in fname:
                 stack.append((fname, linenr, base))
         # for
+
+        if REPORT_QUERY_ORIGINS:
+            msg = ''
+            for fname, linenr, base in stack:
+                msg += '\n         %s:%s %s' % (fname[-30:], linenr, base)
+            try:
+                self.stack_counts[msg] += 1
+            except KeyError:
+                self.stack_counts[msg] = 1
 
         time_end = timezone.now()
         time_delta = time_end - time_start
@@ -717,7 +732,26 @@ class E2EHelpers(object):
                         self.fail(msg="Maximum (%s) has a lot of margin. Can be set as low as %s" % (num, count))
 
             if duration_seconds > 1.5:              # pragma: no cover
-                self.fail(msg="Operation took suspiciously long: %.2f seconds (queries: %s µs)" % (duration_seconds, tracer.total_duration_us))
+                print("Operation took suspiciously long: %.2f seconds (%s queries took %.2f ms)" % (duration_seconds, len(tracer.trace), tracer.total_duration_us / 1000.0))
+
+            if len(tracer.trace) > 500:
+                print("Operation required a lot of database interactions: %s queries" % len(tracer.trace))
+
+        if REPORT_QUERY_ORIGINS:
+            # sorteer op aantal aanroepen
+            counts = list()
+            for msg, count in tracer.stack_counts.items():
+                tup = (count, msg)
+                counts.append(tup)
+            # for
+            counts.sort(reverse=True)       # hoogste eerst
+            first = True
+            for count, msg in counts:
+                if count > 1:
+                    if first:
+                        first = False
+                        print('-----')
+                    print('%5s %s' % (count, msg[7:]))
 
     def assert403(self, resp):
         # controleer dat we op de speciale code-403 handler pagina gekomen zijn

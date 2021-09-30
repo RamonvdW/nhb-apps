@@ -7,16 +7,16 @@
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType, TeamType
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse, LAAG_BK, LAAG_RK, LAAG_REGIO,
+                               RegioCompetitieSchutterBoog,
+                               RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
+                               TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_SOM_SCORES)
+from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
-from .models import (Competitie, DeelCompetitie, CompetitieKlasse, LAAG_BK, LAAG_RK, LAAG_REGIO,
-                     RegioCompetitieSchutterBoog,
-                     RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
-                     TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_SOM_SCORES)
-from .operations import competities_aanmaken
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime

@@ -25,8 +25,7 @@ class TestPlein(E2EHelpers, TestCase):
     url_speciale_pagina = '/plein/test-speciale-pagina/%s/'     # code
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
+    def setUpTestData(cls):
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts()
 

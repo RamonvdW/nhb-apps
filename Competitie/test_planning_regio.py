@@ -8,16 +8,16 @@ from django.conf import settings
 from django.test import TestCase
 from BasisTypen.models import BoogType, TeamWedstrijdklasse
 from Competitie.test_fase import zet_competitie_fase
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse,
+                               DeelcompetitieRonde, LAAG_REGIO, LAAG_RK, LAAG_BK,
+                               RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_1)
+from Competitie.operations import competities_aanmaken
+from Competitie.views_planning_regio import competitie_week_nr_to_date
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from Taken.models import Taak
 from Wedstrijden.models import WedstrijdLocatie, CompetitieWedstrijd
-from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
-                     DeelcompetitieRonde, LAAG_REGIO, LAAG_RK, LAAG_BK,
-                     RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_1)
-from .operations import competities_aanmaken
-from .views_planning_regio import competitie_week_nr_to_date
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime

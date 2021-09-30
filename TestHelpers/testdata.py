@@ -18,7 +18,7 @@ from Competitie.operations import competities_aanmaken
 from Competitie.test_competitie import zet_competitie_fase
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from NhbStructuur.models import NhbRegio, NhbCluster, NhbVereniging
-from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
+from Score.models import Score, SCORE_TYPE_INDIV_AG
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from bs4 import BeautifulSoup
 import datetime
@@ -95,9 +95,13 @@ class TestData(object):
 
         self.regio_cluster = dict()             # [regio_nr] = NhbCluster (alleen regio 101 en 107)
 
-        # inschrijvingen
+        # all inschrijvingen
         self.comp18_deelnemers = list()
         self.comp25_deelnemers = list()
+
+        # inschrijvingen zonder team voorkeur
+        self.comp18_deelnemers_geen_team = list()
+        self.comp25_deelnemers_geen_team = list()
 
         # inschrijvingen met team voorkeur
         self.comp18_deelnemers_team = list()
@@ -244,6 +248,9 @@ class TestData(object):
                             account=account,
                             acceptatie_datum=now)
                 bulk.append(vhpg)
+                if len(bulk) > 500:
+                    VerklaringHanterenPersoonsgegevens.objects.bulk_create(bulk)
+                    bulk = list()
         # for
 
         if len(bulk):
@@ -437,6 +444,9 @@ class TestData(object):
                 voorkeuren.voorkeur_eigen_blazoen = True
 
             bulk_voorkeuren.append(voorkeuren)
+            if len(bulk_voorkeuren) > 500:
+                SporterVoorkeuren.objects.bulk_create(bulk_voorkeuren)
+                bulk_voorkeuren = list()
 
             # sporterboog
             for boogtype in boogtypen:
@@ -450,15 +460,19 @@ class TestData(object):
                     sporterboog.voor_wedstrijd = True
 
                 bulk_sporter.append(sporterboog)
+
+                if len(bulk_sporter) > 500:
+                    SporterBoog.objects.bulk_create(bulk_sporter)
+                    bulk_sporter = list()
             # for
         # for
 
-        SporterVoorkeuren.objects.bulk_create(bulk_voorkeuren)
-        # print('TestData: Created %sx SporterVoorkeuren' % len(bulk_voorkeuren))
+        if len(bulk_voorkeuren):
+            SporterVoorkeuren.objects.bulk_create(bulk_voorkeuren)
         del bulk_voorkeuren
 
-        SporterBoog.objects.bulk_create(bulk_sporter)
-        # print('TestData: Created %sx SporterBoog' % len(bulk_sporter))
+        if len(bulk_sporter):
+            SporterBoog.objects.bulk_create(bulk_sporter)
         del bulk_sporter
 
     def _maak_accounts_en_functies(self):
@@ -506,7 +520,6 @@ class TestData(object):
                 self.account_sec[ver_nr] = account
             else:
                 self._accounts_beheerders.append(account)
-
         # for
 
         # maak de functies aan
@@ -570,10 +583,14 @@ class TestData(object):
                               waarde=ag,
                               afstand_meter=afstand)
                 bulk.append(score)
+
+                if len(bulk) > 500:
+                    Score.objects.bulk_create(bulk)
+                    bulk = list()
         # for
 
-        Score.objects.bulk_create(bulk)
-        # print('Created %sx Score' % len(bulk))
+        if len(bulk):
+            Score.objects.bulk_create(bulk)
 
         # TODO: maak ScoreHist records
 
@@ -732,11 +749,13 @@ class TestData(object):
             deelcomp = self.deelcomp18_regio[regio_nr]
             deelnemers = self.comp18_deelnemers
             deelnemers_team = self.comp18_deelnemers_team
+            deelnemers_geen_team = self.comp18_deelnemers_geen_team
             regioteams = self.comp18_regioteams
         else:
             deelcomp = self.deelcomp25_regio[regio_nr]
             deelnemers = self.comp25_deelnemers
             deelnemers_team = self.comp25_deelnemers_team
+            deelnemers_geen_team = self.comp25_deelnemers_geen_team
             regioteams = self.comp25_regioteams
 
         # verdeel de deelnemers per boogtype
@@ -752,6 +771,8 @@ class TestData(object):
                     deelnemers_per_boog[afkorting] = [deelnemer]
 
                 deelnemers_team.append(deelnemer)
+            else:
+                deelnemers_geen_team.append(deelnemer)
         # for
 
         # zet 1x BB en 1x LB in een recurve team

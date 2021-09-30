@@ -6,14 +6,14 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
+from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
+                               INSCHRIJF_METHODE_1, LAAG_REGIO, LAAG_RK, LAAG_BK)
+from Competitie.operations import competities_aanmaken
+from Competitie.test_fase import zet_competitie_fase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
 from Wedstrijden.models import CompetitieWedstrijd
-from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
-                     INSCHRIJF_METHODE_1, LAAG_REGIO, LAAG_RK, LAAG_BK)
-from .operations import competities_aanmaken
-from .test_fase import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -34,8 +34,7 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
     testdata = None
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
+    def setUpTestData(cls):
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts()
 

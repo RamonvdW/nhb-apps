@@ -6,7 +6,7 @@
 
 from django.db.models import Q
 from BasisTypen.models import BLAZOEN2STR, BLAZOEN_40CM, BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_DT
-from Competitie.models import (RegioCompetitieSchutterBoog, RegiocompetitieTeam,
+from Competitie.models import (RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3)
 from Sporter.models import SporterVoorkeuren
 from types import SimpleNamespace
@@ -168,6 +168,21 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
         lid_nr2para_opmerking[voorkeur.sporter.lid_nr] = voorkeur.opmerking_para_sporter
     # for
 
+    # bepaal voor elke deelnemer in welk team hij feitelijk zit in deze ronde
+    # dit is goedkoper dan per deelnemer een reverse query te doen (deelnemer.teamronde_feitelijk...)
+    deelnemer_pk2team_pk = dict()   # [deelnemer.pk] = team.pk
+    for rondeteam in (RegiocompetitieRondeTeam
+                      .objects
+                      .select_related('team')
+                      .prefetch_related('deelnemers_feitelijk')
+                      .filter(team__deelcompetitie=deelcomp,
+                              ronde_nr=deelcomp.huidige_team_ronde)):
+        team_pk = rondeteam.team.pk
+        for deelnemer in rondeteam.deelnemers_feitelijk.all():
+            deelnemer_pk2team_pk[deelnemer.pk] = team_pk
+        # for
+    # for
+
     unsorted_sporters = list()
     for deelnemer in deelnemers_indiv:
         sporterboog = deelnemer.sporterboog
@@ -202,40 +217,33 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
         except KeyError:
             sporter.notitie = ''
 
-        if deelnemer.aantal_scores == 0:
-            vsg = deelnemer.ag_voor_team
-        else:
-            vsg = deelnemer.gemiddelde      # individuele voortschrijdend gemiddelde
+        if deelnemer.inschrijf_voorkeur_team:
+            # het gemiddelde voor dit teamlid
+            #    voor vaste teams is dit altijd het team AG
+            #    voor dynamische teams gebruik het VSG, zodra beschikbaar
+            sporter.team_gem = deelnemer.gemiddelde_begin_team_ronde
 
-        sporter.blazoen_lijst = list()
+            sort_gem = sporter.team_gem
+
+            sporter.vsg = sporter.team_gem      # TODO: obsolete gebruik van .vsg
+
+            # zoek het huidige team erbij
+            try:
+                sporter.team_pk = deelnemer_pk2team_pk[deelnemer.pk]
+            except KeyError:
+                pass
+        else:
+            sort_gem = 0
 
         # voorbereiden voor sorteren
         volgorde_1 = ver.ver_nr
-        volgorde_2 = -vsg     # negatief geeft hoogste bovenaan
+        volgorde_2 = -sort_gem     # negatief geeft hoogste bovenaan
         volgorde_3 = sporter.volledige_naam
         volgorde_4 = deelnemer.pk                # dummy, voorkomt sorteren op Sporter (wat niet kan)
         tup = (volgorde_1, volgorde_2, volgorde_3, volgorde_4, sporter)
         unsorted_sporters.append(tup)
 
-        if deelnemer.inschrijf_voorkeur_team:
-
-            # TODO: haal dit gemiddelde op uit het TeamRonde record
-            # bepaal het gemiddelde voor dit teamlid
-            # voor vaste teams is dit altijd het team AG
-            # voor dynamische teams gebruik het VSG, zodra beschikbaar
-            sporter.team_gem = deelnemer.ag_voor_team
-            if not deelcomp.regio_heeft_vaste_teams:
-                if deelnemer.aantal_scores > 0:
-                    sporter.team_gem = deelnemer.gemiddelde
-
-            sporter.vsg = sporter.team_gem      # TODO: obsolete gebruik van .vsg
-
-            # TODO: onderstaande query optimaliseren (nu 1 query per sporter)
-            # zoek het huidige team erbij
-            ronde_teams = deelnemer.teamronde_feitelijk.select_related('team').filter(ronde_nr=deelcomp.huidige_team_ronde)
-            if ronde_teams.count() > 0:
-                # sporter is gekoppeld aan een team
-                sporter.team_pk = ronde_teams[0].team.pk
+        sporter.blazoen_lijst = list()
 
         if afstand == '18':
             blazoenen = (deelnemer.klasse.indiv.blazoen1_18m_regio, deelnemer.klasse.indiv.blazoen2_18m_regio)

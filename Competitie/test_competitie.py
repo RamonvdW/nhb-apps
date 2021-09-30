@@ -11,12 +11,12 @@ from Functie.models import maak_functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
-from .models import (Competitie, DeelCompetitie, CompetitieKlasse, CompetitieMutatie,
-                     INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3,
-                     DAGDEEL_AFKORTINGEN)
-from .operations import (competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand,
-                         competitie_klassegrenzen_vaststellen)
-from .test_fase import zet_competitie_fase
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse, CompetitieMutatie,
+                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3,
+                               DAGDEEL_AFKORTINGEN)
+from Competitie.operations import (competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand,
+                                   competitie_klassegrenzen_vaststellen)
+from Competitie.test_fase import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime

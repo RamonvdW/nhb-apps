@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
 from Score.models import Score
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from .models import CompetitieKlasse, DeelcompetitieRonde
@@ -24,9 +25,9 @@ class TestCompetitieScores(E2EHelpers, TestCase):
     url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'         # ronde_pk
 
     url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'          # wedstrijd_pk
-    url_uitslag_deelnemers = '/bondscompetities/scores/dynamic/deelnemers-ophalen/'
-    url_uitslag_zoeken = '/bondscompetities/scores/dynamic/check-nhbnr/'
     url_uitslag_opslaan = '/bondscompetities/scores/dynamic/scores-opslaan/'
+    url_deelnemers_ophalen = '/bondscompetities/scores/dynamic/deelnemers-ophalen/'
+    url_deelnemer_zoeken = '/bondscompetities/scores/dynamic/check-nhbnr/'
 
     url_uitslag_controleren = '/bondscompetities/scores/uitslag-controleren/%s/'    # wedstrijd_pk
     url_uitslag_accorderen = '/bondscompetities/scores/uitslag-accorderen/%s/'      # wedstrijd_pk
@@ -42,6 +43,8 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        print('setUpTestData: populating testdata start')
+        s1 = timezone.now()
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts()
         cls.testdata.maak_clubs_en_sporters()
@@ -55,6 +58,9 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         cls.testdata.maak_poules(cls.testdata.deelcomp18_regio[101])
         cls.testdata.maak_poules(cls.testdata.deelcomp25_regio[101])
         cls.testdata.regio_teamcompetitie_ronde_doorzetten(cls.testdata.deelcomp18_regio[101])
+        s2 = timezone.now()
+        d = s2 - s1
+        print('setUpTestData: populating testdata done in %s seconds' % d.seconds)
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -116,18 +122,18 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
         # deelnemers
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslag_deelnemers)
+            resp = self.client.get(self.url_deelnemers_ophalen)
         self.assert403(resp)
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_uitslag_deelnemers)
+            resp = self.client.post(self.url_deelnemers_ophalen)
         self.assert403(resp)
 
         # zoeken
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslag_zoeken)
+            resp = self.client.get(self.url_deelnemer_zoeken)
         self.assert403(resp)
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_uitslag_zoeken)
+            resp = self.client.post(self.url_deelnemer_zoeken)
         self.assert403(resp)
 
         # opslaan
@@ -173,7 +179,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         json_data = {'deelcomp_pk': self.testdata.deelcomp18_regio[101].pk,
                      'wedstrijd_pk': self.wedstrijd18_pk}
         with self.assert_max_queries(123):
-            resp = self.client.post(self.url_uitslag_deelnemers,
+            resp = self.client.post(self.url_deelnemers_ophalen,
                                     json.dumps(json_data),
                                     content_type='application/json')
         self.assertEqual(resp.status_code, 200)       # 200 = OK
@@ -184,18 +190,18 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
         # get (bestaat niet)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslag_deelnemers)
+            resp = self.client.get(self.url_deelnemers_ophalen)
         self.assertEqual(resp.status_code, 405)       # 405 = method not allowed
 
         # post zonder data
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_uitslag_deelnemers)
+            resp = self.client.post(self.url_deelnemers_ophalen)
         self.assert404(resp)       # 404 = not found / not allowed
 
         # post met json data maar zonder inhoud
         json_data = {'testje': 1}
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_uitslag_deelnemers,
+            resp = self.client.post(self.url_deelnemers_ophalen,
                                     json.dumps(json_data),
                                     content_type='application/json')
         self.assert404(resp)       # 404 = not found / not allowed
@@ -203,7 +209,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         # post met niet-bestaande deelcomp_pk
         json_data = {'deelcomp_pk': 999999}
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_uitslag_deelnemers,
+            resp = self.client.post(self.url_deelnemers_ophalen,
                                     json.dumps(json_data),
                                     content_type='application/json')
         self.assert404(resp)       # 404 = not found / not allowed
@@ -212,7 +218,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         json_data = {'deelcomp_pk': self.testdata.deelcomp18_regio[101].pk,
                      'wedstrijd_pk': 999999}
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_uitslag_deelnemers,
+            resp = self.client.post(self.url_deelnemers_ophalen,
                                     json.dumps(json_data),
                                     content_type='application/json')
         self.assert404(resp)       # 404 = not found / not allowed
@@ -224,7 +230,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
                      'lid_nr': 1}
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_uitslag_zoeken,
+            resp = self.client.post(self.url_deelnemer_zoeken,
                                     json.dumps(json_data),
                                     content_type='application/json')
         self.assertEqual(resp.status_code, 200)       # 200 = OK
@@ -232,14 +238,14 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         json_data = resp.json()
         self.assertTrue('fail' in json_data.keys())     # want geen inschrijvingen
 
-        deelnemer = self.testdata.comp18_deelnemers[0]
+        deelnemer = self.testdata.comp18_deelnemers_geen_team[0]
         self.assertFalse(deelnemer.inschrijf_voorkeur_team)
         sporterboog_pk = deelnemer.sporterboog.pk
         lid_nr = deelnemer.sporterboog.sporter.lid_nr
         json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
                      'lid_nr': lid_nr}
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_uitslag_zoeken,
+            resp = self.client.post(self.url_deelnemer_zoeken,
                                     json.dumps(json_data),
                                     content_type='application/json')
         self.assertEqual(resp.status_code, 200)       # 200 = OK
@@ -267,7 +273,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
                      'lid_nr': lid_nr}
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_uitslag_zoeken,
+            resp = self.client.post(self.url_deelnemer_zoeken,
                                     json.dumps(json_data),
                                     content_type='application/json')
         self.assertEqual(resp.status_code, 200)       # 200 = OK
@@ -279,18 +285,18 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
         # get (bestaat niet)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslag_zoeken)
+            resp = self.client.get(self.url_deelnemer_zoeken)
         self.assertEqual(resp.status_code, 405)        # 405 = method not allowed
 
         # post zonder data
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_uitslag_zoeken)
+            resp = self.client.post(self.url_deelnemer_zoeken)
         self.assert404(resp)       # 404 = not found / not allowed
 
         # post met alleen een lid_nr
         json_data = {'lid_nr': 0}
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_uitslag_zoeken,
+            resp = self.client.post(self.url_deelnemer_zoeken,
                                     json.dumps(json_data),
                                     content_type='application/json')
         self.assert404(resp)       # 404 = not found / not allowed
@@ -298,7 +304,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         # post met alleen wedstrijd_pk
         json_data = {'wedstrijd_pk': 0}
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_uitslag_zoeken,
+            resp = self.client.post(self.url_deelnemer_zoeken,
                                     json.dumps(json_data),
                                     content_type='application/json')
         self.assert404(resp)       # 404 = not found / not allowed
@@ -307,7 +313,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         json_data = {'wedstrijd_pk': 999999,
                      'lid_nr': 0}
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_uitslag_zoeken,
+            resp = self.client.post(self.url_deelnemer_zoeken,
                                     json.dumps(json_data),
                                     content_type='application/json')
         self.assert404(resp)       # 404 = not found / not allowed
@@ -395,7 +401,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.assertFalse(wed.uitslag.is_bevroren)
 
         # haal de uitslag op en controleer aanwezigheid 'accorderen' knop
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):       # TODO: 21 of 20??
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -410,7 +416,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         self.assertTrue(wed.uitslag.is_bevroren)
 
         # haal de uitslag op en controleer afwezigheid 'accorderen' knop
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):       # 21 of 20??
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -536,7 +542,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
             json_data[deelnemer.sporterboog.pk] = waarde
             waarde += 1
         # for
-        with self.assert_max_queries(27):
+        with self.assert_max_queries(33):           # TODO: was 39, 27 and 24
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
@@ -691,14 +697,14 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
         deelcomp = self.testdata.deelcomp18_regio[101]
 
-        with self.assert_max_queries(90):      # TODO: reduceer
+        with self.assert_max_queries(44):      # TODO: reduceer
             resp = self.client.get(self.url_regio_teams % deelcomp.pk)
         self.assertEqual(resp.status_code, 200)       # 200 = OK
         self.assert_template_used(resp, ('competitie/scores-regio-teams.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # do een post
-        with self.assert_max_queries(100):
+        with self.assert_max_queries(56):
             resp = self.client.post(self.url_regio_teams % deelcomp.pk)
         self.assert_is_redirect(resp, self.url_scores_regio % deelcomp.pk)
 
