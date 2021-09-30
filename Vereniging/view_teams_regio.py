@@ -859,12 +859,13 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
         team_pks = [team.pk for team in teams]
 
         ronde_nr = deelcomp.huidige_team_ronde
-        team_pk2ronde = dict()
-        deelnemer_pk2in_team = dict()
+        team_pk2ronde = dict()              # [team.pk] = RegiocompetitieRondeTeam
+        deelnemer_pk2in_team = dict()       # [deelnemer.pk] = naam van team waar sporter in zit
 
         for ronde_team in (RegiocompetitieRondeTeam
                            .objects
                            .prefetch_related('deelnemers_feitelijk')
+                           .select_related('team')
                            .annotate(feitelijke_deelnemers_count=Count('deelnemers_feitelijk'))
                            .filter(team__pk__in=team_pks,
                                    ronde_nr=ronde_nr)):
@@ -903,14 +904,11 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
             deelnemer.boog_str = deelnemer.sporterboog.boogtype.beschrijving
             deelnemer.naam_str = "[%s] %s" % (deelnemer.sporterboog.sporter.lid_nr, deelnemer.sporterboog.sporter.volledige_naam())
 
-            if deelnemer.aantal_scores == 0:
-                vsg = deelnemer.ag_voor_team
-            else:
-                vsg = deelnemer.gemiddelde
-            vsg_str = "%.3f" % vsg
-            deelnemer.vsg_str = vsg_str.replace('.', ',')
+            gem = deelnemer.gemiddelde_begin_team_ronde
+            gem_str = "%.3f" % gem
+            deelnemer.gem_str = gem_str.replace('.', ',')
 
-            tup = (-vsg, deelnemer.sporterboog.sporter.lid_nr, deelnemer.pk, deelnemer)
+            tup = (-gem, deelnemer.sporterboog.sporter.lid_nr, deelnemer.pk, deelnemer)
             unsorted_deelnemers.append(tup)
 
             try:
@@ -971,7 +969,8 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         ronde_teams = (RegiocompetitieRondeTeam
                        .objects
-                       .select_related('team')
+                       .select_related('team',
+                                       'team__team_type')
                        .prefetch_related('deelnemers_geselecteerd',
                                          'deelnemers_feitelijk')
                        .filter(team__vereniging=self.functie_nu.nhb_ver,
@@ -994,6 +993,8 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
         deelnemers_geselecteerd_pks = list(ronde_team_nu.deelnemers_geselecteerd.values_list('pk', flat=True))
         deelnemers_feitelijk_pks = list(ronde_team_nu.deelnemers_feitelijk.values_list('pk', flat=True))
 
+        ronde_team_nu_afkorting = ronde_team_nu.team.team_type.afkorting
+
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
                       .filter(deelcompetitie=deelcomp,
@@ -1011,6 +1012,12 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
             gem_str = "%.3f" % deelnemer.gemiddelde_begin_team_ronde
             deelnemer.invaller_gem_str = gem_str.replace('.', ',')
             deelnemer.naam_str = "[%s] %s" % (deelnemer.sporterboog.sporter.lid_nr, deelnemer.sporterboog.sporter.volledige_naam())
+
+            if deelnemer.sporterboog.boogtype.afkorting != ronde_team_nu_afkorting:
+                # vreemde vogel: BB in R team, LB in BB team, etc.
+                # toon expliciet het type boog voor deze sporters
+                # sporters ingeschreven met meerdere bogen worden zo duidelijk onderscheiden
+                deelnemer.naam_str += ' (%s)' % deelnemer.sporterboog.boogtype.beschrijving
 
             if deelnemer.pk in deelnemers_geselecteerd_pks:
                 deelnemer.origineel_team_lid = True
