@@ -20,9 +20,8 @@ html{
 
   font-family: $font-stack;
   font-weight: normal;
-  // need more contrast because of grey background
   // color: $off-black;
-  color: #000;
+  color: #000;      // gives more contrast because of grey background
 }
 h1, h2, h3, h4, h5, h6 {
 	font-weight: 400;
