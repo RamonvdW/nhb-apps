@@ -178,7 +178,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         # haal waarschijnlijke deelnemers op
         json_data = {'deelcomp_pk': self.testdata.deelcomp18_regio[101].pk,
                      'wedstrijd_pk': self.wedstrijd18_pk}
-        with self.assert_max_queries(123):
+        with self.assert_max_queries(20):
             resp = self.client.post(self.url_deelnemers_ophalen,
                                     json.dumps(json_data),
                                     content_type='application/json')

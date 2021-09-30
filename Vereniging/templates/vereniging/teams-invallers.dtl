@@ -80,7 +80,7 @@
             {% for deelnemer in deelnemers %}
                 <tr>
                     <td>{{ deelnemer.boog_str }}</td>
-                    <td>{{ deelnemer.vsg_str }}</td>
+                    <td>{{ deelnemer.gem_str }}</td>
                     <td>{{ deelnemer.naam_str }}</td>
                     <td>{% if deelnemer.in_team_str %}{{ deelnemer.in_team_str }}{% else %}<i>Geen</i>{% endif %}</td>
                 </tr>

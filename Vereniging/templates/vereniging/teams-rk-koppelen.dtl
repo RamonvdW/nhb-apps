@@ -83,7 +83,7 @@
                 <td style="vertical-align: top">Selecteer 3 of 4 sporters</td>
 
                 {% if not deelnemers.count %}
-                    <td colspan="3"><i class="red-text">Geen sporters gevonden met toegestaan boog type</i></td>
+                    <td><i class="red-text">Geen sporters gevonden met toegestaan boog type</i></td>
                 {% else %}
                     <td>
                         <table class="striped">

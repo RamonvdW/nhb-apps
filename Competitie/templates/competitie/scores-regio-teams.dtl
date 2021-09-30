@@ -43,7 +43,7 @@
 
     <p>&nbsp;</p>
 
-    {% if 1 <= deelcomp.huidige_team_ronde <= 7 %}
+    {% if deelcomp.huidige_team_ronde >= 1 and deelcomp.huidige_team_ronde <= 7 %}
 
         <form method="post" action="{{ url_opslaan }}">
             {% csrf_token %}

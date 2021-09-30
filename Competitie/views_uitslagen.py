@@ -380,7 +380,7 @@ class UitslagenRegioIndivView(TemplateView):
             # bepaal welke (initiële) regio bij de huidige gebruiker past
             regio_nr = get_schutter_regio_nr(self.request)
         except ValueError:
-            raise Http404('Verkeer regionummer')
+            raise Http404('Verkeerd regionummer')
 
         # voorkom 404 voor leden in de administratieve regio
         if regio_nr == 100:
@@ -587,7 +587,7 @@ class UitslagenRegioTeamsView(TemplateView):
             # bepaal welke (initiële) regio bij de huidige gebruiker past
             regio_nr = get_schutter_regio_nr(self.request)
         except ValueError:
-            raise Http404('Verkeer regionummer')
+            raise Http404('Verkeerd regionummer')
 
         # voorkom 404 voor leden in de administratieve regio
         if regio_nr == 100:
@@ -1051,7 +1051,7 @@ class UitslagenRayonIndivView(TemplateView):
         except KeyError:
             rayon_nr = 1
         except ValueError:
-            raise Http404('Verkeer rayonnummer')
+            raise Http404('Verkeerd rayonnummer')
 
         self._maak_filter_knoppen(context, comp, rayon_nr, comp_boog)
 
