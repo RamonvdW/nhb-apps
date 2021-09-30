@@ -205,7 +205,7 @@ COMPETITIES_START_WEEK = 37
 COMPETITIE_18M_LAATSTE_WEEK = 50        # week 37 t/m week 50
 COMPETITIE_25M_LAATSTE_WEEK = 11        # week 37 t/m week 11
 
-COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER = 0#4*7      # open 4 weeks after start week
+COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER = 4*7      # open 4 weeks after start week
 
 # maximum aantal resultaten dat een doorzoeking van de records terug geeft
 # dit voorkomt honderden resultaten bij het zoeken naar de letter e
