@@ -101,13 +101,16 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
             if deelcomp.regio_organiseert_teamcompetitie:
                 # team klassen
                 team_pks = wedstrijd.team_klassen.values_list('pk', flat=True)
-                gekoppeld_pks = RegiocompetitieTeam.objects.filter(klasse__team__pk__in=team_pks).values_list('gekoppelde_schutters__pk', flat=True)
+                gekoppeld_pks = RegiocompetitieTeam.objects.filter(klasse__team__pk__in=team_pks).values_list('gekoppelde_schutters__pk', flat=True)    # TODO: moet dit feitelijke sporters zijn??
             else:
                 gekoppeld_pks = list()
 
             # individueel
             indiv_pks = wedstrijd.indiv_klassen.values_list('pk', flat=True)
-            deelnemers_indiv = deelnemers_indiv.filter(Q(klasse__indiv__pk__in=indiv_pks) | Q(pk__in=gekoppeld_pks))
+
+            # alleen filteren als er voor deze wedstrijd keuzes zijn gemaakt, anders alle sporters behouden
+            if len(indiv_pks) + len(gekoppeld_pks) > 0:
+                deelnemers_indiv = deelnemers_indiv.filter(Q(klasse__indiv__pk__in=indiv_pks) | Q(pk__in=gekoppeld_pks))
 
     if not deelcomp.regio_organiseert_teamcompetitie:
         deelnemers_teams = list()
