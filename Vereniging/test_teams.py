@@ -950,61 +950,62 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         # zet competitie in fase E (nodig om een team aan te maken)
         zet_competitie_fase(self.comp_18, 'E')
 
-        # maak een team aan
-        self.assertEqual(KampioenschapTeam.objects.count(), 0)
-        with self.assert_max_queries(20):
-            url = self.url_rk_teams_wijzig % (deelcomp_rk3.pk, 0)  # 0 = nieuw team
-            resp = self.client.post(url, {'team_type': 'R'})
-            self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
-        self.assertEqual(KampioenschapTeam.objects.count(), 1)
+        with self.settings(COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER=0):
+            # maak een team aan
+            self.assertEqual(KampioenschapTeam.objects.count(), 0)
+            with self.assert_max_queries(20):
+                url = self.url_rk_teams_wijzig % (deelcomp_rk3.pk, 0)  # 0 = nieuw team
+                resp = self.client.post(url, {'team_type': 'R'})
+                self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
+            self.assertEqual(KampioenschapTeam.objects.count(), 1)
 
-        team = KampioenschapTeam.objects.all()[0]
-        url = self.url_rk_teams_koppelen % team.pk
+            team = KampioenschapTeam.objects.all()[0]
+            url = self.url_rk_teams_koppelen % team.pk
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/teams-rk-koppelen.dtl', 'plein/site_layout.dtl'))
+            with self.assert_max_queries(20):
+                resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('vereniging/teams-rk-koppelen.dtl', 'plein/site_layout.dtl'))
 
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'deelnemer_999999': 1, 'deelnemer_xyz': 1})
-        self.assert_is_redirect_not_plein(resp)
+            with self.assert_max_queries(20):
+                resp = self.client.post(url, {'deelnemer_999999': 1, 'deelnemer_xyz': 1})
+            self.assert_is_redirect_not_plein(resp)
 
-        # bad team pk
-        resp = self.client.get(self.url_rk_teams_koppelen % 999999)
-        self.assert404(resp, 'Team niet gevonden')
+            # bad team pk
+            resp = self.client.get(self.url_rk_teams_koppelen % 999999)
+            self.assert404(resp, 'Team niet gevonden')
 
-        resp = self.client.post(self.url_rk_teams_koppelen % 999999)
-        self.assert404(resp, 'Team niet gevonden')
+            resp = self.client.post(self.url_rk_teams_koppelen % 999999)
+            self.assert404(resp, 'Team niet gevonden')
 
-        # herhaal voor 25m1p
-        deelcomp_rk3 = (DeelCompetitie
-                        .objects
-                        .get(competitie=self.comp_25,
-                             laag=LAAG_RK,
-                             nhb_rayon__rayon_nr=3))     # regio 111 is in rayon 3
+            # herhaal voor 25m1p
+            deelcomp_rk3 = (DeelCompetitie
+                            .objects
+                            .get(competitie=self.comp_25,
+                                 laag=LAAG_RK,
+                                 nhb_rayon__rayon_nr=3))     # regio 111 is in rayon 3
 
-        # zet competitie in fase E (nodig om een team aan te maken)
-        zet_competitie_fase(self.comp_25, 'E')
+            # zet competitie in fase E (nodig om een team aan te maken)
+            zet_competitie_fase(self.comp_25, 'E')
 
-        # maak een team aan
-        team.delete()
-        self.assertEqual(KampioenschapTeam.objects.count(), 0)
-        with self.assert_max_queries(20):
-            url = self.url_rk_teams_wijzig % (deelcomp_rk3.pk, 0)  # 0 = nieuw team
-            resp = self.client.post(url, {'team_type': 'R'})
-            self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
-        self.assertEqual(KampioenschapTeam.objects.count(), 1)
+            # maak een team aan
+            team.delete()
+            self.assertEqual(KampioenschapTeam.objects.count(), 0)
+            with self.assert_max_queries(20):
+                url = self.url_rk_teams_wijzig % (deelcomp_rk3.pk, 0)  # 0 = nieuw team
+                resp = self.client.post(url, {'team_type': 'R'})
+                self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
+            self.assertEqual(KampioenschapTeam.objects.count(), 1)
 
-        team = KampioenschapTeam.objects.all()[0]
-        url = self.url_rk_teams_koppelen % team.pk
+            team = KampioenschapTeam.objects.all()[0]
+            url = self.url_rk_teams_koppelen % team.pk
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/teams-rk-koppelen.dtl', 'plein/site_layout.dtl'))
+            with self.assert_max_queries(20):
+                resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('vereniging/teams-rk-koppelen.dtl', 'plein/site_layout.dtl'))
 
     def test_invallers(self):
         # login als HWL
