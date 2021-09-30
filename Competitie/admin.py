@@ -16,7 +16,7 @@ from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
 
 class DeelCompetitieAdmin(admin.ModelAdmin):
 
-    list_filter = ('nhb_regio', 'competitie')
+    list_filter = ('competitie', 'nhb_regio')
 
     list_select_related = ('competitie', 'nhb_regio', 'nhb_rayon')
 
@@ -53,7 +53,9 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
              }),
         ('Team',
             {'fields': ('inschrijf_voorkeur_team',
-                        'ag_voor_team', 'ag_voor_team_mag_aangepast_worden'),
+                        'ag_voor_team',
+                        'ag_voor_team_mag_aangepast_worden',
+                        'gemiddelde_begin_team_ronde'),
              }),
         ('Inschrijving',
             {'fields': ('inschrijf_gekozen_wedstrijden',
@@ -70,10 +72,11 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
                        'sporterboog',
                        'bij_vereniging', 'scores')
 
-    search_fields = ('sporterboog__sporter__unaccented_name',
+    search_fields = ('sporterboog__sporter__unaccented_naam',
                      'sporterboog__sporter__lid_nr')
 
-    #list_filter = ('deelcompetitie',)      # kost veel database accesses (komt door __str__)
+    list_filter = ('deelcompetitie__competitie',
+                   'deelcompetitie__nhb_regio',)
 
     list_select_related = ('deelcompetitie',
                            'deelcompetitie__nhb_regio',
