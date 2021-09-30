@@ -7,7 +7,7 @@
 from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 
 
 # updaten met dit commando:
@@ -43,7 +43,6 @@ BEHEER_PAGINAS = (
     '/beheer/Logboek/logboekregel/',
     '/beheer/Mailer/mailqueue/',
     '/beheer/NhbStructuur/nhbcluster/',
-    '/beheer/NhbStructuur/nhblid/',
     '/beheer/NhbStructuur/nhbrayon/',
     '/beheer/NhbStructuur/nhbregio/',
     '/beheer/NhbStructuur/nhbvereniging/',
@@ -52,10 +51,11 @@ BEHEER_PAGINAS = (
     '/beheer/Overig/sitetijdelijkeurl/',
     '/beheer/Records/besteindivrecords/',
     '/beheer/Records/indivrecord/',
-    '/beheer/Schutter/schutterboog/',
-    '/beheer/Schutter/schuttervoorkeuren/',
     '/beheer/Score/score/',
     '/beheer/Score/scorehist/',
+    '/beheer/Sporter/sporter/',
+    '/beheer/Sporter/sporterboog/',
+    '/beheer/Sporter/sportervoorkeuren/',
     '/beheer/Taken/taak/',
     '/beheer/Wedstrijden/competitiewedstrijd/',
     '/beheer/Wedstrijden/competitiewedstrijdenplan/',

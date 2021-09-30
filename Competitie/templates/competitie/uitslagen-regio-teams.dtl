@@ -153,7 +153,7 @@
                             {% if team.poule_str == '??' %}
                                 <h5 class="red-text">Nog niet in een poule geplaatst</h5>
                             {% else %}
-                                <h5>{{ team.poule_str }}</h5>
+                                <h5>Poule: {{ team.poule_str }}</h5>
                             {% endif %}
                         </td>
                     </tr>
@@ -162,7 +162,7 @@
 
             {% if team.break_klasse %}
                 <tr class="nhb-grijs">
-                    <td colspan="12"><h6>{{ team.klasse_str }}</h6></td>
+                    <td colspan="12"><h6>Klasse: {{ team.klasse_str }}</h6></td>
                 </tr>
                 <tr>
                     <th><!-- rank --></th>

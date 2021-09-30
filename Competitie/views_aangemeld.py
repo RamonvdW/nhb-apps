@@ -6,14 +6,14 @@
 
 from django.urls import reverse
 from django.http import HttpResponse, Http404
-from django.utils.formats import localize, date_format
+from django.utils.formats import date_format
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60CM_4SPOT, BLAZOEN_WENS_4SPOT, BLAZOEN_WENS_DT, BLAZOEN2STR, BLAZOEN2STR_COMPACT
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
-from Schutter.models import SchutterVoorkeuren
+from Sporter.models import SporterVoorkeuren
 from Wedstrijden.models import CompetitieWedstrijd
 from .models import (LAAG_REGIO,
                      INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
@@ -68,7 +68,7 @@ def maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=None, regio=None):
 
 class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
 
-    """ Toon een lijst van SchutterBoog die aangemeld zijn voor de regiocompetitie """
+    """ Toon een lijst van SporterBoog die aangemeld zijn voor de regiocompetitie """
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
@@ -100,8 +100,8 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
                                 'klasse__indiv',
                                 'deelcompetitie',
                                 'deelcompetitie__nhb_regio',
-                                'schutterboog',
-                                'schutterboog__nhblid',
+                                'sporterboog',
+                                'sporterboog__sporter',
                                 'bij_vereniging')
                 .filter(deelcompetitie__competitie=comp,
                         deelcompetitie__laag=LAAG_REGIO)
@@ -136,7 +136,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
 
 class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
 
-    """ Toon een lijst van SchutterBoog die aangemeld zijn voor de regiocompetitie """
+    """ Toon een lijst van SporterBoog die aangemeld zijn voor de regiocompetitie """
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
@@ -176,8 +176,8 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
                                 'klasse__indiv',
                                 'deelcompetitie',
                                 'deelcompetitie__nhb_regio__rayon',
-                                'schutterboog',
-                                'schutterboog__nhblid',
+                                'sporterboog',
+                                'sporterboog__sporter',
                                 'bij_vereniging')
                 .filter(deelcompetitie__competitie=comp,
                         deelcompetitie__laag=LAAG_REGIO,
@@ -212,7 +212,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
 
 class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
-    """ Toon een lijst van SchutterBoog die aangemeld zijn voor de regiocompetitie """
+    """ Toon een lijst van SporterBoog die aangemeld zijn voor de regiocompetitie """
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
@@ -262,9 +262,9 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
                 .select_related('klasse',
                                 'klasse__indiv',
                                 'deelcompetitie',
-                                'schutterboog',
-                                'schutterboog__nhblid',
-                                'schutterboog__boogtype',
+                                'sporterboog',
+                                'sporterboog__sporter',
+                                'sporterboog__boogtype',
                                 'bij_vereniging')
                 .filter(deelcompetitie=deelcomp)
                 .order_by('klasse__indiv__volgorde',
@@ -327,11 +327,11 @@ class LijstAangemeldRegiocompAlsBestandView(LijstAangemeldRegiocompRegioView):
         regio = context['regio']
 
         # schutters met voorkeur voor eigen blazoen (DT of 60cm 4spot)
-        voorkeur_eigen_blazoen = (SchutterVoorkeuren
+        voorkeur_eigen_blazoen = (SporterVoorkeuren
                                   .objects
-                                  .select_related('nhblid')
+                                  .select_related('sporter')
                                   .filter(voorkeur_eigen_blazoen=True)
-                                  .values_list('nhblid__nhb_nr', flat=True))
+                                  .values_list('sporter__lid_nr', flat=True))
 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="aanmeldingen-regio-%s.csv"' % regio.regio_nr
@@ -340,19 +340,19 @@ class LijstAangemeldRegiocompAlsBestandView(LijstAangemeldRegiocompRegioView):
 
         # voorkeur dagdelen per vereniging
         writer.writerow(['ver_nr', 'Vereniging',
-                         'nhb_nr', 'Naam',
+                         'lid_nr', 'Naam',
                          'Boog', 'Voorkeur team', 'Voorkeur eigen blazoen',
                          'Wedstrijdklasse'])
 
         for deelnemer in context['object_list']:
             ver = deelnemer.bij_vereniging
-            lid = deelnemer.schutterboog.nhblid
-            boog = deelnemer.schutterboog.boogtype
+            sporter = deelnemer.sporterboog.sporter
+            boog = deelnemer.sporterboog.boogtype
             klasse = deelnemer.klasse.indiv
             team_str = 'Ja' if deelnemer.inschrijf_voorkeur_team else 'Nee'
-            eigen_str = 'Ja' if lid.nhb_nr in voorkeur_eigen_blazoen else 'Nee'
+            eigen_str = 'Ja' if sporter.lid_nr in voorkeur_eigen_blazoen else 'Nee'
 
-            tup = (ver.ver_nr, ver.naam, lid.nhb_nr, lid.volledige_naam(), boog.beschrijving, team_str, eigen_str, klasse.beschrijving)
+            tup = (ver.ver_nr, ver.naam, sporter.lid_nr, sporter.volledige_naam(), boog.beschrijving, team_str, eigen_str, klasse.beschrijving)
             writer.writerow(tup)
         # for
 
@@ -402,12 +402,12 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
             nhb_ver.blazoen_dict = dict()
         # for
 
-        # schutters met voorkeur voor eigen blazoen (DT of 60cm 4spot)
-        voorkeur_eigen_blazoen = (SchutterVoorkeuren
+        # sporter met voorkeur voor eigen blazoen (DT of 60cm 4spot)
+        voorkeur_eigen_blazoen = (SporterVoorkeuren
                                   .objects
-                                  .select_related('nhblid')
+                                  .select_related('sporter')
                                   .filter(voorkeur_eigen_blazoen=True)
-                                  .values_list('nhblid__nhb_nr', flat=True))
+                                  .values_list('sporter__lid_nr', flat=True))
 
         alle_blazoenen = list()
         afstand = deelcomp.competitie.afstand
@@ -427,10 +427,10 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                 blazoen_str = BLAZOEN2STR[blazoenen[0]]     # ga uit van eerste optie bij geen voorkeur
                 # blazoen_str = "%s of %s" % (BLAZOEN2STR[blazoenen[0]], BLAZOEN2STR[blazoenen[1]])
                 if BLAZOEN_DT in blazoenen:
-                    if deelnemer.schutterboog.nhblid.nhb_nr in voorkeur_eigen_blazoen:
+                    if deelnemer.sporterboog.sporter.lid_nr in voorkeur_eigen_blazoen:
                         blazoen_str = BLAZOEN2STR[BLAZOEN_WENS_DT]
                 elif BLAZOEN_60CM_4SPOT in blazoenen:
-                    if deelnemer.schutterboog.nhblid.nhb_nr in voorkeur_eigen_blazoen:
+                    if deelnemer.sporterboog.sporter.lid_nr in voorkeur_eigen_blazoen:
                         blazoen_str = BLAZOEN2STR[BLAZOEN_WENS_4SPOT]
 
             try:
@@ -584,10 +584,10 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                                       'klasse__indiv',
                                       'deelcompetitie',
                                       'bij_vereniging',
-                                      'schutterboog',
-                                      'schutterboog__boogtype',
-                                      'schutterboog__nhblid',
-                                      'schutterboog__nhblid__bij_vereniging')
+                                      'sporterboog',
+                                      'sporterboog__boogtype',
+                                      'sporterboog__sporter',
+                                      'sporterboog__sporter__bij_vereniging')
                       .filter(deelcompetitie=deelcomp)
                       .order_by('klasse__indiv__volgorde',
                                 'ag_voor_indiv'))
@@ -655,9 +655,9 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
                                 'klasse__indiv',
                                 'deelcompetitie',
                                 'bij_vereniging',
-                                'schutterboog',
-                                'schutterboog__nhblid',
-                                'schutterboog__nhblid__bij_vereniging')
+                                'sporterboog',
+                                'sporterboog__sporter',
+                                'sporterboog__sporter__bij_vereniging')
                 .filter(deelcompetitie=deelcomp)
                 .order_by('klasse__indiv__volgorde',
                           'ag_voor_indiv'))
@@ -752,12 +752,12 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
         afstand = deelcomp.competitie.afstand
         context['blazoenen'] = [BLAZOEN2STR_COMPACT[blazoen] for blazoen in COMPETITIE_BLAZOENEN[afstand]]
 
-        # schutters met recurve boog willen mogelijk DT
-        voorkeur_eigen_blazoen = (SchutterVoorkeuren
+        # sporters met recurve boog willen mogelijk DT
+        voorkeur_eigen_blazoen = (SporterVoorkeuren
                                   .objects
-                                  .select_related('nhblid')
+                                  .select_related('sporter')
                                   .filter(voorkeur_eigen_blazoen=True)
-                                  .values_list('nhblid__nhb_nr', flat=True))
+                                  .values_list('sporter__lid_nr', flat=True))
 
         # zoek alle wedstrijdplannen in deze deelcompetitie (1 per cluster + 1 voor de regio)
         plan_pks = list(DeelcompetitieRonde
@@ -791,9 +791,9 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
 
             for deelnemer in (RegioCompetitieSchutterBoog
                               .objects
-                              .select_related('schutterboog',
-                                              'schutterboog__boogtype',
-                                              'schutterboog__nhblid',
+                              .select_related('sporterboog',
+                                              'sporterboog__boogtype',
+                                              'sporterboog__sporter',
                                               'klasse',
                                               'klasse__indiv')
                               .filter(pk__in=deelnemer_pks)):
@@ -808,7 +808,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                 if blazoenen[0] != blazoenen[1]:
                     # meerder mogelijkheden
                     if BLAZOEN_DT in blazoenen_dict:
-                        if deelnemer.schutterboog.nhblid.nhb_nr in voorkeur_eigen_blazoen:
+                        if deelnemer.sporterboog.sporter.lid_nr in voorkeur_eigen_blazoen:
                             blazoen = BLAZOEN_WENS_DT
 
                 blazoenen_dict[blazoen] += 1
@@ -876,12 +876,12 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
 
         afstand = deelcomp.competitie.afstand
 
-        # schutters met recurve boog willen mogelijk DT
-        voorkeur_eigen_blazoen = (SchutterVoorkeuren
+        # sporters met recurve boog willen mogelijk DT
+        voorkeur_eigen_blazoen = (SporterVoorkeuren
                                   .objects
-                                  .select_related('nhblid')
+                                  .select_related('sporter')
                                   .filter(voorkeur_eigen_blazoen=True)
-                                  .values_list('nhblid__nhb_nr', flat=True))
+                                  .values_list('sporter__lid_nr', flat=True))
 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="inschrijf-keuzes-%s.csv"' % regio.regio_nr
@@ -926,9 +926,9 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
 
             for deelnemer in (RegioCompetitieSchutterBoog
                               .objects
-                              .select_related('schutterboog',
-                                              'schutterboog__boogtype',
-                                              'schutterboog__nhblid',
+                              .select_related('sporterboog',
+                                              'sporterboog__boogtype',
+                                              'sporterboog__sporter',
                                               'klasse',
                                               'klasse__indiv')
                               .filter(pk__in=deelnemer_pks)):
@@ -943,7 +943,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
                 if blazoenen[0] != blazoenen[1]:
                     # meerder mogelijkheden
                     if BLAZOEN_DT in blazoenen_dict:
-                        if deelnemer.schutterboog.nhblid.nhb_nr in voorkeur_eigen_blazoen:
+                        if deelnemer.sporterboog.sporter.lid_nr in voorkeur_eigen_blazoen:
                             blazoen = BLAZOEN_WENS_DT
 
                 blazoenen_dict[blazoen] += 1
@@ -958,7 +958,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
 
         # sporters header
         writer.writerow([])
-        nummers = [nummer for nummer in range(1, nr + 1)]
+        nummers = [str(nummer) for nummer in range(1, nr + 1)]
         writer.writerow(['Bondsnummer', 'Sporter', 'Vereniging', 'Wedstrijdklasse (individueel)'] + nummers)
 
         for deelnemer in (RegioCompetitieSchutterBoog
@@ -967,11 +967,11 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
                           .select_related('klasse',
                                           'klasse__indiv',
                                           'bij_vereniging',
-                                          'schutterboog',
-                                          'schutterboog__nhblid')
+                                          'sporterboog',
+                                          'sporterboog__sporter')
                           .filter(deelcompetitie=deelcomp)
                           .order_by('bij_vereniging__ver_nr',
-                                    'schutterboog__nhblid__nhb_nr')):
+                                    'sporterboog__sporter__lid_nr')):
 
             pks = list(deelnemer.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True))        # TODO: 1 query per deelnemer
 
@@ -983,10 +983,10 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
                     kruisjes.append('')
             # for
 
-            lid = deelnemer.schutterboog.nhblid
+            sporter = deelnemer.sporterboog.sporter
             klasse = deelnemer.klasse.indiv
 
-            writer.writerow([lid.nhb_nr, lid.volledige_naam(), lid.bij_vereniging, klasse] + kruisjes)
+            writer.writerow([sporter.lid_nr, sporter.volledige_naam(), sporter.bij_vereniging, klasse] + kruisjes)
         # for
 
         return response

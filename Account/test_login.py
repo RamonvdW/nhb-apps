@@ -8,27 +8,34 @@ from django.utils import timezone
 from django.urls import reverse
 from django.test import TestCase
 from django.conf import settings
-from Overig.e2ehelpers import E2EHelpers
+from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
 from .models import Account
 from .forms import LoginForm
-from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
+from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
 class TestAccountLogin(E2EHelpers, TestCase):
     """ unit tests voor de Account applicatie; module Login/Logout """
 
+    url_login = '/account/login/'
+
+    testdata = None
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ initialisatie van de test case """
-        self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_metmail = self.e2e_create_account('metmail', 'metmail@test.com', 'MetMail')
 
         self.email_normaal = self.account_normaal.accountemail_set.all()[0]
         self.email_metmail = self.account_metmail.accountemail_set.all()[0]
 
-        self.url_login = '/account/login/'
-        
     def test_inlog_form_get(self):
         # test ophalen van het inlog formulier
         with self.assert_max_queries(20):
@@ -138,7 +145,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/bevestig-email.dtl', 'plein/site_layout.dtl'))
 
-        self.e2e_login(self.account_admin)
+        self.e2e_login(self.testdata.account_admin)
         url = reverse('Overig:tijdelijke-url', kwargs={'code': code})
         resp = self.client.post(url)
         self.assertTrue(resp.status_code, 200)
@@ -302,7 +309,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('account/uitloggen.dtl', 'plein/site_layout.dtl'))
 
     def test_login_next_bad_al_ingelogd(self):
-        self.e2e_login(self.account_admin)
+        self.e2e_login(self.testdata.account_admin)
 
         # test een login met een 'next' parameter die na de login gevolgd wordt
         with self.assert_max_queries(20):
@@ -310,7 +317,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, '/plein/')
 
     def test_login_al_ingelogd(self):
-        self.e2e_login(self.account_admin)
+        self.e2e_login(self.testdata.account_admin)
 
         # simuleer een redirect naar het login scherm met een 'next' parameter
         with self.assert_max_queries(20):
@@ -321,7 +328,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
     def test_login_next_al_ingelogd(self):
-        self.e2e_login(self.account_admin)
+        self.e2e_login(self.testdata.account_admin)
 
         # simuleer een redirect naar het login scherm met een 'next' parameter
         with self.assert_max_queries(20):

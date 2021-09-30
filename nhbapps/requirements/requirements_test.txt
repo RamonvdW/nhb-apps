@@ -20,11 +20,11 @@ certifi==2021.5.30
     #   requests
 cffi==1.14.6
     # via cryptography
-charset-normalizer==2.0.3
+charset-normalizer==2.0.4
     # via
     #   -r requirements.txt
     #   requests
-cryptography==3.4.7
+cryptography==3.4.8
     # via
     #   pyopenssl
     #   pysaml2
@@ -36,15 +36,15 @@ django==3.1.13
     #   djangosaml2idp
 djangosaml2idp==0.7.2
     # via -r requirements_test.in
-elementpath==2.2.3
+elementpath==2.3.1
     # via xmlschema
-google-api-core==1.31.0
+google-api-core==2.0.1
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.14.0
+google-api-python-client==2.20.0
     # via -r requirements.txt
-google-auth==1.33.1
+google-auth==2.0.2
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -67,12 +67,8 @@ idna==2.10
     # via
     #   -r requirements.txt
     #   requests
-importlib-resources==5.2.0
+importlib-resources==5.2.2
     # via pysaml2
-packaging==21.0
-    # via
-    #   -r requirements.txt
-    #   google-api-core
 protobuf==3.17.3
     # via
     #   -r requirements.txt
@@ -99,7 +95,6 @@ pyparsing==2.4.7
     # via
     #   -r requirements.txt
     #   httplib2
-    #   packaging
 pysaml2==7.0.1
     # via
     #   -r requirements_test.in
@@ -113,9 +108,8 @@ pytz==2021.1
     #   -r requirements.txt
     #   django
     #   djangosaml2idp
-    #   google-api-core
     #   pysaml2
-qrcode==7.2
+qrcode==7.3
     # via -r requirements.txt
 requests==2.26.0
     # via
@@ -129,19 +123,16 @@ rsa==4.7.2
 six==1.16.0
     # via
     #   -r requirements.txt
-    #   google-api-core
-    #   google-api-python-client
-    #   google-auth
     #   google-auth-httplib2
     #   protobuf
     #   pyopenssl
     #   pysaml2
     #   python-dateutil
-sqlparse==0.4.1
+sqlparse==0.4.2
     # via
     #   -r requirements.txt
     #   django
-typing-extensions==3.10.0.0
+typing-extensions==3.10.0.2
     # via
     #   -r requirements.txt
     #   arrow
@@ -154,7 +145,7 @@ urllib3==1.26.6
     # via
     #   -r requirements.txt
     #   requests
-xmlschema==1.6.4
+xmlschema==1.7.1
     # via pysaml2
 zipp==3.5.0
     # via importlib-resources

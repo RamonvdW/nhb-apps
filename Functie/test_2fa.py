@@ -6,7 +6,8 @@
 
 from django.test import TestCase
 from Account.models import Account
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import pyotp
 
 
@@ -20,23 +21,27 @@ class TestFunctie2FA(E2EHelpers, TestCase):
 
     test_after = ('Account', 'Functie.test_rol')
 
+    url_koppel_stap1 = '/functie/otp-koppelen-stap1/'
+    url_koppel_stap2 = '/functie/otp-koppelen-stap2/'
+    url_koppel_stap3 = '/functie/otp-koppelen-stap3/'
+    url_controle = '/functie/otp-controle/'
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ initialisatie van de test case """
-        self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
 
-        self.account_admin.otp_code = ""
-        self.account_admin.otp_is_actief = False
-        self.account_admin.save()
+        self.testdata.account_admin.otp_code = ""
+        self.testdata.account_admin.otp_is_actief = False
+        self.testdata.account_admin.save()
 
         self.account_normaal.otp_code = ""
         self.account_normaal.otp_is_actief = False
         self.account_normaal.save()
-
-        self.url_koppel_stap1 = '/functie/otp-koppelen-stap1/'
-        self.url_koppel_stap2 = '/functie/otp-koppelen-stap2/'
-        self.url_koppel_stap3 = '/functie/otp-koppelen-stap3/'
-        self.url_controle = '/functie/otp-controle/'
 
     def test_2fa_koppelen_niet_ingelogd(self):
         self.e2e_logout()
@@ -82,7 +87,7 @@ class TestFunctie2FA(E2EHelpers, TestCase):
         # reset OTP koppeling
 
         # log in
-        self.e2e_login(self.account_admin)
+        self.e2e_login(self.testdata.account_admin)
 
         # check mogelijkheid tot koppelen
         with self.assert_max_queries(20):
@@ -98,8 +103,8 @@ class TestFunctie2FA(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # check dat het OTP secret aangemaakt is
-        self.account_admin = Account.objects.get(username='admin')
-        self.assertNotEqual(self.account_admin.otp_code, '')
+        self.testdata.account_admin = Account.objects.get(username='admin')
+        self.assertNotEqual(self.testdata.account_admin.otp_code, '')
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_koppel_stap3)
@@ -114,8 +119,8 @@ class TestFunctie2FA(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/otp-koppelen-stap3-code-invoeren.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'Verkeerde code. Probeer het nog eens')
 
-        self.account_admin = Account.objects.get(username='admin')
-        self.assertFalse(self.account_admin.otp_is_actief)
+        self.testdata.account_admin = Account.objects.get(username='admin')
+        self.assertFalse(self.testdata.account_admin.otp_is_actief)
 
         # geef verkeerde otp code op
         with self.assert_max_queries(20):
@@ -125,19 +130,19 @@ class TestFunctie2FA(E2EHelpers, TestCase):
         self.assertContains(resp, 'Verkeerde code. Probeer het nog eens')
         self.assert_html_ok(resp)
 
-        self.account_admin = Account.objects.get(username='admin')
-        self.assertFalse(self.account_admin.otp_is_actief)
+        self.testdata.account_admin = Account.objects.get(username='admin')
+        self.assertFalse(self.testdata.account_admin.otp_is_actief)
 
         # juiste otp code
-        code = get_otp_code(self.account_admin)
+        code = get_otp_code(self.testdata.account_admin)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_koppel_stap3, {'otp_code': code}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/otp-koppelen-gelukt.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
-        self.account_admin = Account.objects.get(username='admin')
-        self.assertTrue(self.account_admin.otp_is_actief)
+        self.testdata.account_admin = Account.objects.get(username='admin')
+        self.assertTrue(self.testdata.account_admin.otp_is_actief)
 
         self.e2e_assert_other_http_commands_not_supported(self.url_koppel_stap1)
         self.e2e_assert_other_http_commands_not_supported(self.url_koppel_stap2)
@@ -145,12 +150,12 @@ class TestFunctie2FA(E2EHelpers, TestCase):
 
     def test_2fa_koppelen_al_gekoppeld(self):
         # maak OTP koppeling
-        self.account_admin.otp_is_actief = True
-        self.account_admin.otp_code = 'xx'
-        self.account_admin.save()
+        self.testdata.account_admin.otp_is_actief = True
+        self.testdata.account_admin.otp_code = 'xx'
+        self.testdata.account_admin.save()
 
         # login and pass OTP
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         # TODO: e2e manier vinden om te controleren dat account OTP nodig heeft
         #self.assertTrue(account_needs_otp(self.account_admin))
         # TODO: e2e manier vinden om te controleren dat account OTP control gehad heeft
@@ -158,7 +163,7 @@ class TestFunctie2FA(E2EHelpers, TestCase):
 
         # probeer OTP koppelen terwijl al gedaan
         # post
-        code = get_otp_code(self.account_admin)
+        code = get_otp_code(self.testdata.account_admin)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_koppel_stap3, {'otp_code': code})
         self.assert_is_redirect(resp, '/plein/')
@@ -203,11 +208,11 @@ class TestFunctie2FA(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
     def test_2fa_controle(self):
-        self.account_admin.otp_is_actief = True
-        self.account_admin.otp_code = "ABCDEFGHIJKLMNOP"
-        self.account_admin.save()
+        self.testdata.account_admin.otp_is_actief = True
+        self.testdata.account_admin.otp_code = "ABCDEFGHIJKLMNOP"
+        self.testdata.account_admin.save()
 
-        self.e2e_login(self.account_admin)
+        self.e2e_login(self.testdata.account_admin)
 
         # ophalen van de OTP controle pagina
         with self.assert_max_queries(20):
@@ -244,14 +249,14 @@ class TestFunctie2FA(E2EHelpers, TestCase):
         self.assertContains(resp, "Verkeerde code. Probeer het nog eens.")
 
         # juiste otp code
-        code = get_otp_code(self.account_admin)
+        code = get_otp_code(self.testdata.account_admin)
         with self.assert_max_queries(25):       # iets hoger ivm follow=True
             resp = self.client.post(self.url_controle, {'otp_code': code}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
 
         # juiste otp code + next url
-        code = get_otp_code(self.account_admin)
+        code = get_otp_code(self.testdata.account_admin)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_controle, {'otp_code': code, 'next_url': '/records/iets/'})
         self.assertEqual(resp.status_code, 302)
@@ -261,9 +266,9 @@ class TestFunctie2FA(E2EHelpers, TestCase):
 
     def test_qrcode_te_groot(self):
         # log in
-        self.account_admin.username = 'volledige_lengte_gebruikt_van_50_tekens__erg_lange'
-        self.account_admin.save()
-        self.e2e_login(self.account_admin)
+        self.testdata.account_admin.username = 'volledige_lengte_gebruikt_van_50_tekens__erg_lange'
+        self.testdata.account_admin.save()
+        self.e2e_login(self.testdata.account_admin)
 
         with self.settings(OTP_ISSUER_NAME='erg_lange_otp_issuer_naam_van_50_tekens__erg_lange'):
             # check mogelijkheid tot koppelen

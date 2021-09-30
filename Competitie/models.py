@@ -6,12 +6,12 @@
 
 from django.db import models
 from django.utils import timezone
-from BasisTypen.models import TeamType, IndivWedstrijdklasse, TeamWedstrijdklasse
+from BasisTypen.models import BoogType, TeamType, IndivWedstrijdklasse, TeamWedstrijdklasse
 from Functie.rol import Rollen
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Functie.models import Functie
-from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist
+from Sporter.models import SporterBoog
 from Wedstrijden.models import CompetitieWedstrijdenPlan, CompetitieWedstrijd
 from decimal import Decimal
 import datetime
@@ -468,13 +468,13 @@ class DeelcompetitieRonde(models.Model):
 
 
 class RegioCompetitieSchutterBoog(models.Model):
-    """ Een schutterboog aangemeld bij een regiocompetitie """
+    """ Een sporterboog aangemeld bij een regiocompetitie """
 
     # bij welke deelcompetitie hoort deze inschrijving?
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
     # om wie gaat het?
-    schutterboog = models.ForeignKey(SchutterBoog, on_delete=models.PROTECT)
+    sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT, null=True)
 
     # vereniging wordt hier apart bijgehouden omdat de schutter over kan stappen
     # midden in het seizoen
@@ -497,7 +497,7 @@ class RegioCompetitieSchutterBoog(models.Model):
     # individuele klasse
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
 
-    # alle scores van deze schutterboog in deze competitie
+    # alle scores van deze sporterboog in deze competitie
     scores = models.ManyToManyField(Score,
                                     blank=True)  # mag leeg zijn / gemaakt worden
 
@@ -538,8 +538,8 @@ class RegioCompetitieSchutterBoog(models.Model):
 
     def __str__(self):
         # deze naam wordt gebruikt in de admin interface, dus kort houden
-        nhblid = self.schutterboog.nhblid
-        return "[%s] %s (%s)" % (nhblid.nhb_nr,  nhblid.volledige_naam(), self.schutterboog.boogtype.beschrijving)
+        sporter = self.sporterboog.sporter
+        return "[%s] %s (%s)" % (sporter.lid_nr, sporter.volledige_naam(), self.sporterboog.boogtype.beschrijving)
 
     class Meta:
         verbose_name = "Regiocompetitie Schutterboog"
@@ -561,6 +561,7 @@ class RegiocompetitieTeam(models.Model):
     # een volgnummer van het team binnen de vereniging
     volg_nr = models.PositiveSmallIntegerField(default=0)
 
+    # team type bepaalt welke boogtypen toegestaan zijn
     team_type = models.ForeignKey(TeamType, on_delete=models.PROTECT)
 
     # de naam van dit team (wordt getoond in plaats van team volgnummer)
@@ -635,6 +636,17 @@ class RegiocompetitieRondeTeam(models.Model):
                                                   related_name='teamronde_feitelijk',
                                                   blank=True)
 
+    # gekozen scores van de feitelijke schutters
+    # ingeval van keuze zijn deze specifiek gekozen door de RCL
+    scores_feitelijk = models.ManyToManyField(Score,
+                                              related_name='teamronde_feitelijk',
+                                              blank=True)
+
+    # bevroren scores van de feitelijke schutters op het moment dat de teamronde afgesloten werd
+    scorehist_feitelijk = models.ManyToManyField(ScoreHist,
+                                                 related_name='teamronde_feitelijk',
+                                                 blank=True)
+
     # beste 3 scores van schutters in het team
     team_score = models.PositiveSmallIntegerField(default=0)
 
@@ -642,7 +654,7 @@ class RegiocompetitieRondeTeam(models.Model):
     team_punten = models.PositiveSmallIntegerField(default=0)
 
     # logboek voor noteren gemiddelde van de invallers
-    logboek = models.TextField(max_length=1024, blank=True)     # TODO: max_length is not enforce, so can be removed
+    logboek = models.TextField(max_length=1024, blank=True)     # TODO: max_length is not enforced, so can be removed
 
     def __str__(self):
         return "Ronde %s, team %s" % (self.ronde_nr, self.team)
@@ -650,11 +662,13 @@ class RegiocompetitieRondeTeam(models.Model):
 
 class KampioenschapSchutterBoog(models.Model):
 
-    """ Een schutterboog aangemeld bij een rayon- of bondskampioenschap """
+    """ Een sporterboog aangemeld bij een rayon- of bondskampioenschap """
 
+    # bij welke deelcompetitie hoort deze inschrijving?
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
-    schutterboog = models.ForeignKey(SchutterBoog, on_delete=models.PROTECT)
+    # om wie gaat het?
+    sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT, null=True)
 
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
 
@@ -697,8 +711,8 @@ class KampioenschapSchutterBoog(models.Model):
         return "%s - %s - %s (%s) %s - %s" % (
                     substr,
                     msg,
-                    self.schutterboog,
-                    self.schutterboog.nhblid.volledige_naam(),
+                    self.sporterboog,
+                    self.sporterboog.sporter.volledige_naam(),
                     self.gemiddelde,
                     self.deelcompetitie.competitie.beschrijving)
 
@@ -710,9 +724,9 @@ class KampioenschapSchutterBoog(models.Model):
 
 
 class KampioenschapTeam(models.Model):
-    """ Een team zoals aangemaakt door de HWL van de vereniging, voor een RK """
+    """ Een team zoals aangemaakt door de HWL van de vereniging, voor een RK en doorstroming naar BK """
 
-    # bij welke seizoen en regio hoort dit team
+    # bij welke seizoen en RK hoort dit team
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
     # bij welke vereniging hoort dit team
@@ -722,18 +736,34 @@ class KampioenschapTeam(models.Model):
     # een volgnummer van het team binnen de vereniging
     volg_nr = models.PositiveSmallIntegerField(default=0)
 
+    # team type bepaalt welke boogtypen toegestaan zijn
+    team_type = models.ForeignKey(TeamType, on_delete=models.PROTECT, null=True)
+
     # de naam van dit team (wordt getoond in plaats van team volgnummer)
     team_naam = models.CharField(max_length=50, default='')
 
-    # schutters in het team (alleen bij vaste teams)
-    schutters = models.ManyToManyField(RegioCompetitieSchutterBoog,
-                                       blank=True)    # mag leeg zijn
+    # preliminaire leden van het team (gekozen tijdens de regiocompetitie)
+    tijdelijke_schutters = models.ManyToManyField(RegioCompetitieSchutterBoog,
+                                                  related_name='kampioenschapteam_tijdelijke_schutters',
+                                                  blank=True)    # mag leeg zijn
+
+    # de voor het kampioenschap geplaatste sporters die ook lid zijn van het team
+    gekoppelde_schutters = models.ManyToManyField(KampioenschapSchutterBoog,
+                                                  related_name='kampioenschapteam_gekoppelde_schutters',
+                                                  blank=True)   # mag leeg zijn
+
+    # de feitelijke sporters die tijdens de kampioenschappen in het team stonden (invallers)
+    feitelijke_schutters = models.ManyToManyField(KampioenschapSchutterBoog,
+                                                  related_name='kampioenschapteam_feitelijke_schutters',
+                                                  blank=True)   # mag leeg zijn
 
     # het berekende team aanvangsgemiddelde
+    # LET OP: dit is zonder de vermenigvuldiging met aantal pijlen, dus 30,000 voor Indoor ipv 900,0
     aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
 
     # de klasse waarin dit team ingedeeld is
-    klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE)
+    klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE,
+                               blank=True, null=True)
 
 
 class CompetitieMutatie(models.Model):
@@ -810,6 +840,15 @@ class CompetitieTaken(models.Model):
     hoogste_mutatie = models.ForeignKey(CompetitieMutatie,
                                         null=True, blank=True,
                                         on_delete=models.SET_NULL)
+
+
+def update_uitslag_teamcompetitie():
+    # regiocomp_tussenstand moet gekieteld worden
+    # maak daarvoor een ScoreHist record aan
+    ScoreHist(score=None,
+              oude_waarde=0,
+              nieuwe_waarde=0,
+              notitie="Trigger background task").save()
 
 
 # end of file

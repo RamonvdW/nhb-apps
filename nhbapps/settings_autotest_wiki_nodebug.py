@@ -15,6 +15,9 @@ DEBUG = False
 ENABLE_WIKI = True   # test with the wiki logic enabled
 WIKI_URL = SITE_URL
 
+# significant speed up by reducing calculation time for secure password handling
+PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
+
 # single sign-on Identity Provider (IP)
 #   using SAML2 (Security Assertion Markup Language)
 INSTALLED_APPS.append('djangosaml2idp')

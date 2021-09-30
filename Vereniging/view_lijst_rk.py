@@ -42,18 +42,18 @@ class VerenigingLijstRkSelectieView(UserPassesTestMixin, TemplateView):
         # 2) deelnemers voor RK zijn vastgesteld --> toon lijst
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
-            deelcomp_rk = (DeelCompetitie
-                           .objects
-                           .select_related('competitie', 'nhb_rayon')
-                           .get(pk=deelcomp_pk, laag=LAAG_RK))
+            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            rk_deelcomp_rk = (DeelCompetitie
+                              .objects
+                              .select_related('competitie', 'nhb_rayon')
+                              .get(pk=rk_deelcomp_pk, laag=LAAG_RK))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Geen valide competitie')
 
-        if not deelcomp_rk.heeft_deelnemerslijst:
+        if not rk_deelcomp_rk.heeft_deelnemerslijst:
             raise Http404('Geen deelnemerslijst beschikbaar')
 
-        context['deelcomp_rk'] = deelcomp_rk
+        context['deelcomp_rk'] = rk_deelcomp_rk
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
@@ -61,9 +61,9 @@ class VerenigingLijstRkSelectieView(UserPassesTestMixin, TemplateView):
                       .objects
                       .select_related('deelcompetitie',
                                       'klasse__indiv',
-                                      'schutterboog__nhblid',
+                                      'sporterboog__sporter',
                                       'bij_vereniging')
-                      .filter(deelcompetitie=deelcomp_rk,
+                      .filter(deelcompetitie=rk_deelcomp_rk,
                               volgorde__lte=48)             # max 48 schutters per klasse tonen
                       .order_by('klasse__indiv__volgorde',  # groepeer per klasse
                                 'volgorde',                 # oplopend op volgorde (dubbelen mogelijk)
@@ -76,7 +76,7 @@ class VerenigingLijstRkSelectieView(UserPassesTestMixin, TemplateView):
         for limiet in (DeelcompetitieKlasseLimiet
                        .objects
                        .select_related('klasse')
-                       .filter(deelcompetitie=deelcomp_rk)):
+                       .filter(deelcompetitie=rk_deelcomp_rk)):
             wkl2limiet[limiet.klasse.pk] = limiet.limiet
         # for
 
@@ -103,8 +103,8 @@ class VerenigingLijstRkSelectieView(UserPassesTestMixin, TemplateView):
                 except KeyError:
                     limiet = 24
 
-            lid = deelnemer.schutterboog.nhblid
-            deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+            sporter = deelnemer.sporterboog.sporter
+            deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
 
             if deelnemer.bij_vereniging == functie_nu.nhb_ver:
                 behoud_groepje = True
@@ -128,10 +128,10 @@ class VerenigingLijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
         if self.toon_alles:
             context['url_filtered'] = reverse('Vereniging:lijst-rk',
-                                              kwargs={'deelcomp_pk': deelcomp_rk.pk})
+                                              kwargs={'rk_deelcomp_pk': rk_deelcomp_rk.pk})
         else:
             context['url_alles'] = reverse('Vereniging:lijst-rk-alles',
-                                           kwargs={'deelcomp_pk': deelcomp_rk.pk})
+                                           kwargs={'rk_deelcomp_pk': rk_deelcomp_rk.pk})
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context

@@ -7,17 +7,18 @@
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
-from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
-from Schutter.models import SchutterBoog
-from Overig.e2ehelpers import E2EHelpers
-from .models import (Competitie, DeelCompetitie, CompetitieKlasse,
-                     LAAG_REGIO, LAAG_RK, LAAG_BK,
-                     RegioCompetitieSchutterBoog, DeelcompetitieKlasseLimiet,
-                     CompetitieMutatie, MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AFMELDEN,
-                     MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
-                     KampioenschapSchutterBoog, DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse,
+                               LAAG_REGIO, LAAG_RK, LAAG_BK,
+                               RegioCompetitieSchutterBoog, DeelcompetitieKlasseLimiet,
+                               CompetitieMutatie, MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AFMELDEN,
+                               MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
+                               KampioenschapSchutterBoog, DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
+from NhbStructuur.models import NhbRegio, NhbVereniging
+from Sporter.models import Sporter, SporterBoog
+from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 import io
 
@@ -26,18 +27,24 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
     """ unit tests voor de Competitie applicatie, mutaties van RK/BK deelnemers lijsten """
 
+    url_lijst_rk = '/bondscompetities/lijst-rayonkampioenschappen/%s/'  # deelcomp_rk.pk
+    url_wijzig_status = '/bondscompetities/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
+    url_wijzig_cut_rk = '/bondscompetities/planning/rk/%s/limieten/'  # deelcomp_rk.pk
+
+    testdata = None
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self._next_nhb_nr = 200000
+        self._next_lid_nr = 200000
 
         self.boogtype = BoogType.objects.get(afkorting='R')
-
-        # maak een BB aan (geen NHB lid)
-        self.account_bb = self.e2e_create_account('bb', 'bko@nhb.test', 'BB', accepteer_vhpg=True)
-        self.account_bb.is_BB = True
-        self.account_bb.save()
 
         self._maak_competitie()
         self._maak_verenigingen_schutters()
@@ -53,36 +60,32 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # zet de competitie in fase F
         zet_competitie_fase(self.comp, 'F')
 
-        self.url_lijst_rk = '/bondscompetities/lijst-rayonkampioenschappen/%s/'    # deelcomp_rk.pk
-        self.url_wijzig_status = '/bondscompetities/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
-        self.url_wijzig_cut_rk = '/bondscompetities/planning/rk/%s/limieten/'      # deelcomp_rk.pk
-
         self.url_lijst = self.url_lijst_rk % self.deelcomp_rk.pk
 
     def _maak_lid_schutterboog(self, ver, deelcomp, aantal_scores):
         # lid aanmaken
-        self._next_nhb_nr += 1
-        lid = NhbLid(nhb_nr=self._next_nhb_nr,
-                     geslacht='M',
-                     voornaam='Voornaam',
-                     achternaam='Achternaam',
-                     geboorte_datum=datetime.date(1972, 3, 4),
-                     sinds_datum=datetime.date(2010, 11, 12),
-                     bij_vereniging=ver,
-                     email='lid@vereniging.nl')
-        lid.save()
+        self._next_lid_nr += 1
+        sporter = Sporter(lid_nr=self._next_lid_nr,
+                          geslacht='M',
+                          voornaam='Voornaam',
+                          achternaam='Achternaam',
+                          geboorte_datum=datetime.date(1972, 3, 4),
+                          sinds_datum=datetime.date(2010, 11, 12),
+                          bij_vereniging=ver,
+                          email='lid@vereniging.nl')
+        sporter.save()
 
         # schutterboog aanmaken
-        schutterboog = SchutterBoog(nhblid=lid,
-                                    boogtype=self.boogtype,
-                                    voor_wedstrijd=True)
-        schutterboog.save()
+        sporterboog = SporterBoog(sporter=sporter,
+                                  boogtype=self.boogtype,
+                                  voor_wedstrijd=True)
+        sporterboog.save()
 
         self.gemiddelde += 0.01
 
         # inschrijven voor de competitie
         aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
-                                                 schutterboog=schutterboog,
+                                                 sporterboog=sporterboog,
                                                  bij_vereniging=ver,
                                                  gemiddelde=self.gemiddelde,
                                                  klasse=self.klasse)
@@ -141,20 +144,20 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         self.functie_rko1 = self.deelcomp_rk.functie
 
     def _prep_beheerder_lid(self, voornaam, ver):
-        lid = NhbLid()
-        lid.nhb_nr = self._next_nhb_nr = self._next_nhb_nr + 1
-        lid.geslacht = "V"
-        lid.voornaam = voornaam
-        lid.achternaam = "Tester"
-        lid.email = voornaam.lower() + "@nhb.test"
-        lid.geboorte_datum = datetime.date(1972, 3, 4)
-        lid.sinds_datum = datetime.date(2010, 11, 12)
-        lid.bij_vereniging = ver
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = self._next_lid_nr = self._next_lid_nr + 1
+        sporter.geslacht = "V"
+        sporter.voornaam = voornaam
+        sporter.achternaam = "Tester"
+        sporter.email = voornaam.lower() + "@nhb.test"
+        sporter.geboorte_datum = datetime.date(1972, 3, 4)
+        sporter.sinds_datum = datetime.date(2010, 11, 12)
+        sporter.bij_vereniging = ver
+        sporter.save()
 
-        account = self.e2e_create_account(lid.nhb_nr,
-                                          lid.email,
-                                          lid.voornaam,
+        account = self.e2e_create_account(sporter.lid_nr,
+                                          sporter.email,
+                                          sporter.voornaam,
                                           accepteer_vhpg=True)
         return account
 
@@ -190,8 +193,8 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         print('====================================================================')
         print('Deelnemers:')
         for obj in KampioenschapSchutterBoog.objects.order_by('volgorde'):
-            print('  rank=%s, volgorde=%s, nhb_nr=%s, gem=%s, deelname=%s, label=%s' % (
-                obj.rank, obj.volgorde, obj.schutterboog.nhblid.nhb_nr, obj.gemiddelde,
+            print('  rank=%s, volgorde=%s, lid_nr=%s, gem=%s, deelname=%s, label=%s' % (
+                obj.rank, obj.volgorde, obj.sporterboog.sporter.lid_nr, obj.gemiddelde,
                 obj.deelname, obj.kampioen_label))
         print('====================================================================')
 
@@ -241,11 +244,11 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         self.assertEqual(volg, volg_ok)
         self.assertEqual(rank, rank_ok)
 
-    def _verwerk_mutaties(self, max_mutaties=20, show=False):
+    def _verwerk_mutaties(self, max_mutaties=20, show=False, check_duration=True):
         # vraag de achtergrond taak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(max_mutaties):
+        with self.assert_max_queries(max_mutaties, check_duration=check_duration):
             management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
         if show:                    # pragma: no coverage
@@ -781,7 +784,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
             self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
         # for
 
-        self._verwerk_mutaties(556)     # TODO: reduce
+        self._verwerk_mutaties(556, check_duration=False)     # TODO: reduce + re-enable check_duration
 
         self._check_volgorde_en_rank()
 

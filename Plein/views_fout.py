@@ -11,7 +11,6 @@ from django.shortcuts import render
 from django.views.generic import View
 from django.views.defaults import ERROR_PAGE_TEMPLATE
 from django.core.exceptions import PermissionDenied
-from Functie.rol import Rollen
 from Mailer.models import mailer_notify_internal_error
 from nhbapps import urls
 import traceback
@@ -40,6 +39,8 @@ def site_handler403_permission_denied(request, exception=None):
     info = str(exception)
     if len(info):
         context['info'] = info
+
+    context['email_support'] = settings.EMAIL_SUPPORT
     return render(request, TEMPLATE_HANDLER_403, context)
 
 
@@ -84,6 +85,8 @@ def site_handler404_page_not_found(request, exception=None):
         info = str(exception)
     if len(info):
         context['info'] = info
+
+    context['email_support'] = settings.EMAIL_SUPPORT
     return render(request, TEMPLATE_HANDLER_404, context)
 
 
@@ -118,6 +121,7 @@ def site_handler500_internal_server_error(request, exception=None):
         in_500_handler = False
 
     context = dict()
+    context['email_support'] = settings.EMAIL_SUPPORT
     return render(request, TEMPLATE_HANDLER_500, context)
 
 

@@ -6,8 +6,9 @@
 
 from django.test import TestCase
 from .models import maak_functie, Functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from Overig.e2ehelpers import E2EHelpers
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from Sporter.models import Sporter
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 
@@ -15,6 +16,11 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
     """ unit tests voor de Functie applicatie, functionaliteit Koppel bestuurders """
 
     test_after = ('Account', 'Functie.test_2fa')
+
+    url_overzicht = '/functie/overzicht/'
+    url_wijzig = '/functie/wijzig/'
+    url_activeer_functie = '/functie/activeer-functie/%s/'
+    url_activeer_rol = '/functie/activeer-rol/%s/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -43,18 +49,18 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
-        lid = NhbLid()
-        lid.nhb_nr = 100042
-        lid.geslacht = "M"
-        lid.voornaam = "Beh"
-        lid.achternaam = "eerder"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.account = self.account_beh2
-        lid.email = lid.account.email
-        lid.save()
-        self.nhblid1 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100042
+        sporter.geslacht = "M"
+        sporter.voornaam = "Beh"
+        sporter.achternaam = "eerder"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.account = self.account_beh2
+        sporter.email = sporter.account.email
+        sporter.save()
+        self.sporter_100042 = sporter
 
         self.functie_sec = maak_functie("SEC test", "SEC")
         self.functie_sec.nhb_ver = ver
@@ -80,23 +86,18 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         self.functie_hwl2.nhb_ver = ver2
         self.functie_hwl2.save()
 
-        lid = NhbLid()
-        lid.nhb_nr = 100024
-        lid.geslacht = "V"
-        lid.voornaam = "Ander"
-        lid.achternaam = "Lid"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=5)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=11)
-        lid.bij_vereniging = ver2
-        lid.account = self.account_ander
-        lid.email = lid.account.email
-        lid.save()
-        self.nhblid2 = lid
-
-        self.url_overzicht = '/functie/overzicht/'
-        self.url_wijzig = '/functie/wijzig/'
-        self.url_activeer_functie = '/functie/activeer-functie/%s/'
-        self.url_activeer_rol = '/functie/activeer-rol/%s/'
+        sporter = Sporter()
+        sporter.lid_nr = 100024
+        sporter.geslacht = "V"
+        sporter.voornaam = "Ander"
+        sporter.achternaam = "Lid"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=5)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=11)
+        sporter.bij_vereniging = ver2
+        sporter.account = self.account_ander
+        sporter.email = sporter.account.email
+        sporter.save()
+        self.sporter_100024 = sporter
 
     def test_anon(self):
         self.e2e_logout()

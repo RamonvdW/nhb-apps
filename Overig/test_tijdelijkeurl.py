@@ -4,30 +4,36 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.http import HttpResponseRedirect
-from Overig.e2ehelpers import E2EHelpers
+from Account.models import AccountEmail
+from Functie.models import Functie
 from .models import save_tijdelijke_url, SiteTijdelijkeUrl
 from .tijdelijke_url import (tijdelijkeurl_dispatcher, set_tijdelijke_url_receiver,
                              RECEIVER_BEVESTIG_ACCOUNT_EMAIL, maak_tijdelijke_url_account_email,
                              RECEIVER_ACCOUNT_WISSEL, maak_tijdelijke_url_accountwissel,
                              RECEIVER_WACHTWOORD_VERGETEN, maak_tijdelijke_url_wachtwoord_vergeten,
                              RECEIVER_BEVESTIG_FUNCTIE_EMAIL, maak_tijdelijke_url_functie_email)
-from Account.models import AccountEmail
-from Functie.models import Functie
+from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 from datetime import timedelta
 
 
 class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
     """ unit tests voor de Overig applicatie, module Tijdelijke Urls """
 
+    testdata = None
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ initialisatie van de test case """
         tijdelijkeurl_dispatcher.test_backup()
 
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
-        self.account_admin = self.e2e_create_account_admin()
 
         email, created_new = AccountEmail.objects.get_or_create(account=self.account_normaal)
         email.nieuwe_email = "hoi@gmail.not"

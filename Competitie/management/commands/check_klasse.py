@@ -13,16 +13,24 @@ class Command(BaseCommand):
     help = "Controleer AG tegen klasse waarin sporter geplaatst is"
 
     def add_arguments(self, parser):
-        parser.add_argument('--commit', action='store_true')
+        parser.add_argument('--commit', action='store_true', help='Voorgestelde wijzigingen opslaan')
 
     def handle(self, *args, **options):
 
         do_save = options['commit']
+        if not do_save:
+            self.stdout.write('Let op: gebruik --commit om voorgestelde wijzigingen op te slaan')
 
         volgorde2klasse = dict()             # [(competitie.pk, volgorde)] = CompetitieKlasse
         volgorde2hogere_klasse = dict()      # [(competitie.pk, volgorde)] = CompetitieKlasse
 
-        for klasse in CompetitieKlasse.objects.exclude(indiv=None).filter(indiv__is_onbekend=False).order_by('indiv__volgorde'):
+        for klasse in (CompetitieKlasse
+                       .objects
+                       .select_related('competitie',
+                                       'indiv')
+                       .exclude(indiv=None)
+                       .filter(indiv__is_onbekend=False)
+                       .order_by('indiv__volgorde')):
 
             comp_pk = klasse.competitie.pk
             volgorde = klasse.indiv.volgorde
@@ -50,7 +58,7 @@ class Command(BaseCommand):
 
         for deelnemer in (RegioCompetitieSchutterBoog
                           .objects
-                          .select_related('klasse',
+                          .select_related('klasse__indiv',
                                           'deelcompetitie__competitie')
                           .all()):
 
@@ -66,11 +74,11 @@ class Command(BaseCommand):
                 klasse_min_ag = hogere_klasse.min_ag
 
                 if indiv_ag >= klasse_min_ag:
-                    print('[WARNING] %s: klasse %s, indiv_ag %s < hogere klasse min_ag %s (%s)' % (deelnemer, deelnemer.klasse, indiv_ag, klasse_min_ag, hogere_klasse))
+                    self.stdout.write('[WARNING] %s: klasse %s, indiv_ag %s < hogere klasse min_ag %s (%s)' % (deelnemer, deelnemer.klasse, indiv_ag, klasse_min_ag, hogere_klasse))
 
                     bepaler = KlasseBepaler(deelnemer.deelcompetitie.competitie)
                     bepaler.bepaal_klasse_deelnemer(deelnemer)
-                    print('          nieuwe klasse: %s' % deelnemer.klasse)
+                    self.stdout.write('          nieuwe klasse: %s' % deelnemer.klasse)
 
                     if do_save:
                         deelnemer.save(update_fields=['klasse'])

@@ -6,18 +6,17 @@
 
 from django.contrib.sessions.backends.db import SessionStore
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.db.models.functions import Concat
 from django.utils.timezone import make_aware, get_default_timezone
 from django.views.generic import TemplateView
-from django.utils.formats import localize, date_format
-from django.db.models import F, Q, Value, Count
+from django.utils.formats import date_format
+from django.db.models import F, Count
 from django.utils import timezone
 from django.urls import reverse
+from Account.models import Account, AccountEmail, AccountSessions
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN, rol2url, rol_get_huidige, Rollen
-from NhbStructuur.models import NhbLid
 from Plein.menu import menu_dynamics
-from Account.models import Account, AccountEmail, AccountSessions
+from Sporter.models import Sporter
 from .forms import ZoekAccountForm
 import datetime
 
@@ -174,71 +173,69 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
             zoekterm = ""
         context['zoekterm'] = zoekterm
 
-        leden = list()
+        sporters = list()
         if len(zoekterm) >= 2:  # minimaal twee tekens van de naam/nummer
             try:
-                nhb_nr = int(zoekterm[:6])
-                lid = (NhbLid
-                       .objects
-                       .select_related('account')
-                       .prefetch_related('account__functie_set',
-                                         'account__vhpg')
-                       .get(nhb_nr=nhb_nr))
-                leden.append(lid)
-            except (ValueError, NhbLid.DoesNotExist):
-                leden = (NhbLid
-                         .objects
-                         .annotate(volledige_naam=Concat('voornaam', Value(' '), 'achternaam'))
-                         .select_related('account')
-                         .prefetch_related('account__functie_set',
-                                           'account__vhpg')
-                         .filter(Q(volledige_naam__icontains=zoekterm) |
-                                 Q(account__unaccented_naam__icontains=zoekterm))
-                         .order_by('account__unaccented_naam', 'achternaam', 'voornaam'))[:50]
+                lid_nr = int(zoekterm[:6])
+                sporter = (Sporter
+                           .objects
+                           .select_related('account')
+                           .prefetch_related('account__functie_set',
+                                             'account__vhpg')
+                           .get(lid_nr=lid_nr))
+                sporters.append(sporter)
+            except (ValueError, Sporter.DoesNotExist):
+                sporters = (Sporter
+                            .objects
+                            .select_related('account')
+                            .prefetch_related('account__functie_set',
+                                              'account__vhpg')
+                            .filter(unaccented_naam__icontains=zoekterm)
+                            .order_by('unaccented_naam'))[:50]
 
         to_tz = get_default_timezone()
-        context['zoek_leden'] = list(leden)
-        for lid in leden:
-            lid.nhb_nr_str = str(lid.nhb_nr)
-            lid.inlog_naam_str = 'Nog geen account aangemaakt'
-            lid.email_is_bevestigd_str = '-'
-            lid.tweede_factor_str = '-'
-            lid.vhpg_str = '-'
-            lid.laatste_inlog_str = '-'
+        context['zoek_leden'] = list(sporters)
+        for sporter in sporters:
+            sporter.lid_nr_str = str(sporter.lid_nr)
+            sporter.inlog_naam_str = 'Nog geen account aangemaakt'
+            sporter.email_is_bevestigd_str = '-'
+            sporter.tweede_factor_str = '-'
+            sporter.vhpg_str = '-'
+            sporter.laatste_inlog_str = '-'
 
-            if lid.bij_vereniging:
-                lid.ver_str = str(lid.bij_vereniging)
+            if sporter.bij_vereniging:
+                sporter.ver_str = str(sporter.bij_vereniging)
             else:
-                lid.ver_str = 'Geen'
+                sporter.ver_str = 'Geen'
 
-            if lid.account:
-                account = lid.account
-                lid.inlog_naam_str = account.username
+            if sporter.account:
+                account = sporter.account
+                sporter.inlog_naam_str = account.username
 
                 email = account.accountemail_set.all()[0]
                 if email.email_is_bevestigd:
-                    lid.email_is_bevestigd_str = 'Ja'
+                    sporter.email_is_bevestigd_str = 'Ja'
                 else:
-                    lid.email_is_bevestigd_str = 'Nee'
+                    sporter.email_is_bevestigd_str = 'Nee'
 
                 if account.last_login:
-                    lid.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz), 'j F H:i')
+                    sporter.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz), 'j F H:i')
 
                 do_vhpg = True
                 if account.otp_is_actief:
-                    lid.tweede_factor_str = 'Ja'
+                    sporter.tweede_factor_str = 'Ja'
                 elif account.functie_set.count() == 0:
-                    lid.tweede_factor_str = 'n.v.t.'
+                    sporter.tweede_factor_str = 'n.v.t.'
                     do_vhpg = False
                 else:
-                    lid.tweede_factor_str = 'Nee'
+                    sporter.tweede_factor_str = 'Nee'
 
                 if do_vhpg:
-                    lid.vhpg_str = 'Nee'
+                    sporter.vhpg_str = 'Nee'
                     try:
                         vhpg = account.vhpg
                     except VerklaringHanterenPersoonsgegevens.DoesNotExist:
-                        lid.vhpg_str = 'n.v.t.'
+                        sporter.vhpg_str = 'n.v.t.'
                     else:
                         # elke 11 maanden moet de verklaring afgelegd worden
                         # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
@@ -246,11 +243,11 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                         opnieuw = opnieuw.astimezone(to_tz)
                         now = timezone.now()
                         if opnieuw < now:
-                            lid.vhpg_str = 'Verlopen (geaccepteerd op %s)' % date_format(vhpg.acceptatie_datum, 'j F H:i')
+                            sporter.vhpg_str = 'Verlopen (geaccepteerd op %s)' % date_format(vhpg.acceptatie_datum, 'j F H:i')
                         else:
-                            lid.vhpg_str = 'Ja (op %s)' % date_format(vhpg.acceptatie_datum.astimezone(to_tz), 'j F H:i')
+                            sporter.vhpg_str = 'Ja (op %s)' % date_format(vhpg.acceptatie_datum.astimezone(to_tz), 'j F H:i')
 
-                lid.functies = account.functie_set.order_by('beschrijving')
+                sporter.functies = account.functie_set.order_by('beschrijving')
         # for
 
         # toon sessies

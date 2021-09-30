@@ -350,7 +350,8 @@ class RegioTeamsView(TemplateView):
             for rayon in NhbRayon.objects.all():
                 rayon.label = 'Rayon %s' % rayon.rayon_nr
                 if str(rayon.rayon_nr) != subset:
-                    rayon.url = reverse('Competitie:regio-teams-alle', kwargs={'comp_pk': comp.pk, 'subset': rayon.rayon_nr})
+                    rayon.url = reverse('Competitie:regio-teams-alle',
+                                        kwargs={'comp_pk': comp.pk, 'subset': rayon.rayon_nr})
                 filters.append(rayon)
             # for
 
@@ -378,8 +379,6 @@ class RegioTeamsView(TemplateView):
             context['deelcomp'] = deelcomp
             context['rayon'] = self.functie_nu.nhb_regio.rayon
             context['regio'] = self.functie_nu.nhb_regio
-
-            subset = 'regio'
 
         if comp.afstand == '18':
             aantal_pijlen = 30
@@ -439,8 +438,8 @@ class RegioTeamsView(TemplateView):
                 prev_klasse = team.klasse
 
             # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
-            team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
-            team.ag_str = team.ag_str.replace('.', ',')
+            ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            team.ag_str = ag_str.replace('.', ',')
 
             if comp.fase <= 'D' and self.rol_nu == Rollen.ROL_RCL:
                 team.url_aanpassen = reverse('Vereniging:teams-regio-koppelen',
@@ -468,8 +467,8 @@ class RegioTeamsView(TemplateView):
         is_eerste = True
         for team in regioteams:
             # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
-            team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
-            team.ag_str = team.ag_str.replace('.', ',')
+            ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            team.ag_str = ag_str.replace('.', ',')
 
             if comp.fase <= 'D' and self.rol_nu == Rollen.ROL_RCL:
                 team.url_aanpassen = reverse('Vereniging:teams-regio-koppelen',
@@ -571,21 +570,21 @@ class AGControleView(UserPassesTestMixin, TemplateView):
                             inschrijf_voorkeur_team=True,
                             ag_voor_team_mag_aangepast_worden=True,
                             ag_voor_team__gt=0.0)
-                    .select_related('schutterboog',
-                                    'schutterboog__nhblid',
-                                    'schutterboog__boogtype',
+                    .select_related('sporterboog',
+                                    'sporterboog__sporter',
+                                    'sporterboog__boogtype',
                                     'bij_vereniging')
                     .order_by('bij_vereniging__ver_nr',
-                              'schutterboog__nhblid__nhb_nr',
-                              'schutterboog__boogtype__volgorde')):
+                              'sporterboog__sporter__lid_nr',
+                              'sporterboog__boogtype__volgorde')):
 
             ver = obj.bij_vereniging
             obj.ver_str = "[%s] %s" % (ver.ver_nr, ver.naam)
 
-            lid = obj.schutterboog.nhblid
-            obj.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+            sporter = obj.sporterboog.sporter
+            obj.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
 
-            obj.boog_str = obj.schutterboog.boogtype.beschrijving
+            obj.boog_str = obj.sporterboog.boogtype.beschrijving
 
             obj.ag_str = "%.3f" % obj.ag_voor_team
 
@@ -651,9 +650,8 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
 
         team_pk2poule = dict()
         for poule in poules:
-            if not readonly:
-                poule.url_wijzig = reverse('Competitie:wijzig-poule',
-                                           kwargs={'poule_pk': poule.pk})
+            poule.url_wijzig = reverse('Competitie:wijzig-poule',
+                                       kwargs={'poule_pk': poule.pk})
 
             for team in poule.teams.all():
                 team_pk2poule[team.pk] = poule
@@ -765,8 +763,11 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        if comp.fase > 'D':
+
+        if comp.fase > 'E':
             raise Http404('Poules kunnen niet meer aangepast worden')
+
+        context['mag_koppelen'] = (comp.fase <= 'D')
 
         team_pks = list(poule.teams.values_list('pk', flat=True))
 
@@ -820,12 +821,15 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        if comp.fase > 'D':
+        if comp.fase > 'E':
             raise Http404('Poules kunnen niet meer aangepast worden')
 
+        mag_koppelen = comp.fase <= 'D'
+
         if request.POST.get('verwijder_poule', ''):
-            # deze poule is niet meer nodig
-            poule.delete()
+            if mag_koppelen:
+                # deze poule is niet meer nodig
+                poule.delete()
         else:
             beschrijving = request.POST.get('beschrijving', '')[:100]   # afkappen voor de veiligheid
             beschrijving = beschrijving.strip()
@@ -833,49 +837,50 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
                 poule.beschrijving = beschrijving
                 poule.save(update_fields=['beschrijving'])
 
-            gekozen = list()
-            type_counts = dict()
-            for team in (RegiocompetitieTeam
-                         .objects
-                         .prefetch_related('regiocompetitieteampoule_set')
-                         .filter(deelcompetitie=deelcomp)):
+            if mag_koppelen:
+                gekozen = list()
+                type_counts = dict()
+                for team in (RegiocompetitieTeam
+                             .objects
+                             .prefetch_related('regiocompetitieteampoule_set')
+                             .filter(deelcompetitie=deelcomp)):
 
-                sel_str = 'team_%s' % team.pk
-                if request.POST.get(sel_str, ''):
-                    kies = False
+                    sel_str = 'team_%s' % team.pk
+                    if request.POST.get(sel_str, ''):
+                        kies = False
 
-                    if team.regiocompetitieteampoule_set.count() == 0:
-                        # nog niet in te een poule, dus mag gekozen worden
-                        kies = True
-                    else:
-                        if team.regiocompetitieteampoule_set.all()[0].pk == poule.pk:
-                            # herverkozen in dezelfde poule
+                        if team.regiocompetitieteampoule_set.count() == 0:
+                            # nog niet in te een poule, dus mag gekozen worden
                             kies = True
+                        else:
+                            if team.regiocompetitieteampoule_set.all()[0].pk == poule.pk:
+                                # herverkozen in dezelfde poule
+                                kies = True
 
-                    if kies:
-                        gekozen.append(team)
+                        if kies:
+                            gekozen.append(team)
 
-                        try:
-                            type_counts[team.team_type] += 1
-                        except KeyError:
-                            type_counts[team.team_type] = 1
-            # for
+                            try:
+                                type_counts[team.team_type] += 1
+                            except KeyError:
+                                type_counts[team.team_type] = 1
+                # for
 
-            # kijk welk team type dit gaat worden
-            if len(gekozen) == 0:
-                poule.teams.clear()
-            else:
-                tups = [(count, team_type.pk, team_type) for team_type, count in type_counts.items()]
-                tups.sort(reverse=True)     # hoogste eerst
-                # TODO: wat als er 2 even hoog zijn?
-                team_type = tups[0][2]
+                # kijk welk team type dit gaat worden
+                if len(gekozen) == 0:
+                    poule.teams.clear()
+                else:
+                    tups = [(count, team_type.pk, team_type) for team_type, count in type_counts.items()]
+                    tups.sort(reverse=True)     # hoogste eerst
+                    # TODO: wat als er 2 even hoog zijn?
+                    team_type = tups[0][2]
 
-                # laat teams toe die binnen dit team type passen
-                goede_teams = [team for team in gekozen if team.team_type == team_type]
-                goede_teams = goede_teams[:8]       # maximaal 8 teams in een poule
+                    # laat teams toe die binnen dit team type passen
+                    goede_teams = [team for team in gekozen if team.team_type == team_type]
+                    goede_teams = goede_teams[:8]       # maximaal 8 teams in een poule
 
-                # vervang door de overgebleven teams
-                poule.teams.set(goede_teams)
+                    # vervang door de overgebleven teams
+                    poule.teams.set(goede_teams)
 
         url = reverse('Competitie:regio-poules',
                       kwargs={'deelcomp_pk': deelcomp.pk})
@@ -929,6 +934,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                                            'team__vereniging')
                            .filter(team__in=team_pks,
                                    ronde_nr=deelcomp.huidige_team_ronde)
+                           .annotate(score_count=Count('scores_feitelijk'))
                            .order_by('-team_score'))        # belangrijke: hoogste score eerst
 
             # common
@@ -963,6 +969,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                     regel.team1_wp = 0
                     regel.ronde_team1 = ronde_team1 = team_pk2ronde_team[team1.pk]
                     regel.team1_score = ronde_team1.team_score
+                    regel.team1_score_count = ronde_team1.score_count
 
                     if ronde_team1.team_score > 0:
                         is_redelijk = True
@@ -980,6 +987,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                         regel.team2_wp = 0
                         regel.ronde_team2 = ronde_team2 = team_pk2ronde_team[team2.pk]
                         regel.team2_score = ronde_team2.team_score
+                        regel.team2_score_count = ronde_team2.score_count
 
                         if ronde_team2.team_score > ronde_team1.team_score:
                             regel.team2_wp = 2

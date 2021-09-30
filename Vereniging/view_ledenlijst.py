@@ -11,8 +11,7 @@ from django.utils import timezone
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie
 from BasisTypen.models import LeeftijdsKlasse, MAXIMALE_LEEFTIJD_JEUGD
-from NhbStructuur.models import NhbLid
-from Schutter.models import SchutterBoog
+from Sporter.models import Sporter, SporterBoog
 
 
 TEMPLATE_LEDENLIJST = 'vereniging/ledenlijst.dtl'
@@ -44,15 +43,13 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         self._huidige_jaar = huidige_jaar
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        qset = NhbLid.objects.filter(bij_vereniging=functie_nu.nhb_ver)     # TODO: niet gebruikt?!
-
-        objs = list()
 
         prev_lkl = None
         prev_wedstrijdleeftijd = 0
+        objs = list()
 
         # sorteer op geboorte jaar en daarna naam
-        for obj in (NhbLid
+        for obj in (Sporter
                     .objects
                     .filter(bij_vereniging=functie_nu.nhb_ver)
                     .filter(geboorte_datum__year__gte=jeugdgrens)
@@ -88,7 +85,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         # volwassenen: sorteer op naam
         prev_lkl = None
         prev_wedstrijdleeftijd = 0
-        for obj in (NhbLid
+        for obj in (Sporter
                     .objects
                     .filter(bij_vereniging=functie_nu.nhb_ver)
                     .filter(geboorte_datum__year__lt=jeugdgrens)
@@ -122,18 +119,18 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         # for
 
         # zoek de laatste-inlog bij elk lid
-        for nhblid in objs:
-            # HWL mag de voorkeuren van de schutters aanpassen
+        for sporter in objs:
+            # HWL mag de voorkeuren van de sporters aanpassen
             if rol_nu == Rollen.ROL_HWL:
-                nhblid.wijzig_url = reverse('Schutter:voorkeuren-nhblid', kwargs={'nhblid_pk': nhblid.pk})
+                sporter.wijzig_url = reverse('Sporter:voorkeuren-sporter', kwargs={'sporter_pk': sporter.pk})
 
-            if nhblid.account:
-                if nhblid.account.last_login:
-                    nhblid.laatste_inlog = nhblid.account.last_login
+            if sporter.account:
+                if sporter.account.last_login:
+                    sporter.laatste_inlog = sporter.account.last_login
                 else:
-                    nhblid.geen_inlog = 2
+                    sporter.geen_inlog = 2
             else:
-                nhblid.geen_inlog = 1
+                sporter.geen_inlog = 1
         # for
 
         return objs
@@ -182,25 +179,27 @@ class LedenVoorkeurenView(LedenLijstView):
     def get_queryset(self):
         objs = super().get_queryset()
 
-        nhblid_dict = dict()
-        for nhblid in objs:
-            nhblid.wedstrijdbogen = list()
-            nhblid_dict[nhblid.nhb_nr] = nhblid
+        sporter_dict = dict()
+        for sporter in objs:
+            sporter.wedstrijdbogen = list()
+            sporter_dict[sporter.lid_nr] = sporter
         # for
 
         # zoek de bogen informatie bij elk lid
-        for schutterboog in (SchutterBoog
-                             .objects
-                             .filter(voor_wedstrijd=True)
-                             .select_related('nhblid', 'boogtype')
-                             .only('nhblid__nhb_nr', 'boogtype__beschrijving')):
+        for sporterboog in (SporterBoog
+                            .objects
+                            .filter(voor_wedstrijd=True)
+                            .select_related('sporter',
+                                            'boogtype')
+                            .only('sporter__lid_nr',
+                                  'boogtype__beschrijving')):
             try:
-                nhblid = nhblid_dict[schutterboog.nhblid.nhb_nr]
+                sporter = sporter_dict[sporterboog.sporter.lid_nr]
             except KeyError:
-                # nhblid niet van deze vereniging
+                # sporter is niet van deze vereniging
                 pass
             else:
-                nhblid.wedstrijdbogen.append(schutterboog.boogtype.beschrijving)
+                sporter.wedstrijdbogen.append(sporterboog.boogtype.beschrijving)
         # for
 
         return objs

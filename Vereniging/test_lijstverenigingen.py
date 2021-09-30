@@ -5,11 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Functie.models import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging, NhbLid
-from Overig.e2ehelpers import E2EHelpers
 from Competitie.models import DeelCompetitie, LAAG_BK, LAAG_RK, LAAG_REGIO
 from Competitie.operations import competities_aanmaken
+from Functie.models import maak_functie
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
+from Sporter.models import Sporter
+from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -17,12 +19,21 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
 
     """ unit tests voor de Vereniging applicatie, Lijst Verenigingen """
 
-    def _prep_beheerder_lid(self, voornaam):
-        nhb_nr = self._next_nhbnr
-        self._next_nhbnr += 1
+    url_lijst = '/vereniging/accommodaties/lijst/'
 
-        lid = NhbLid()
-        lid.nhb_nr = nhb_nr
+    testdata = None
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
+    def _prep_beheerder_lid(self, voornaam):
+        lid_nr = self._next_lid_nr
+        self._next_lid_nr += 1
+
+        lid = Sporter()
+        lid.lid_nr = lid_nr
         lid.geslacht = "M"
         lid.voornaam = voornaam
         lid.achternaam = "Tester"
@@ -32,15 +43,13 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         lid.bij_vereniging = self._ver
         lid.save()
 
-        return self.e2e_create_account(nhb_nr, lid.email, E2EHelpers.WACHTWOORD, accepteer_vhpg=True)
+        return self.e2e_create_account(lid_nr, lid.email, E2EHelpers.WACHTWOORD, accepteer_vhpg=True)
 
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.account_admin = self.e2e_create_account_admin()
-
-        self._next_nhbnr = 100001
+        self._next_lid_nr = 100001
 
         self.rayon_2 = NhbRayon.objects.get(rayon_nr=2)
         self.regio_101 = NhbRegio.objects.get(regio_nr=101)
@@ -59,11 +68,6 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
-
-        # maak een BB aan (geen NHB lid)
-        self.account_bb = self.e2e_create_account('bb', 'bko@nhb.test', 'BB', accepteer_vhpg=True)
-        self.account_bb.is_BB = True
-        self.account_bb.save()
 
         # maak test leden aan die we kunnen koppelen aan beheerders functies
         self.account_bko = self._prep_beheerder_lid('BKO')
@@ -98,8 +102,6 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         ver.clusters.add(cluster)
         self.nhb_ver2 = ver
 
-        self.url_lijst = '/vereniging/accommodaties/lijst/'
-
     def test_anon(self):
         self.e2e_logout()
         with self.assert_max_queries(20):
@@ -109,7 +111,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
 
     def test_it(self):
         # landelijke lijst + leden aantal
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_it()
         self.e2e_check_rol('IT')
         with self.assert_max_queries(9):
@@ -120,7 +122,7 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
 
     def test_bb(self):
         # landelijke lijst met rayon & regio
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
         with self.assert_max_queries(8):

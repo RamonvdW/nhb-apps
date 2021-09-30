@@ -38,7 +38,7 @@
 
         {% for obj in leden_jeugd %}
             <tr>
-                <td>{{ obj.nhb_nr }}</td>
+                <td>{{ obj.lid_nr }}</td>
                 <td>{{ obj.geslacht }}</td>
                 <td>{{ obj.voornaam }}</td>
                 <td>{{ obj.achternaam }}</td>
@@ -80,7 +80,7 @@
 
     {% for obj in leden_senior %}
         <tr>
-            <td>{{ obj.nhb_nr }}</td>
+            <td>{{ obj.lid_nr }}</td>
             <td>{{ obj.geslacht }}</td>
             <td>{{ obj.voornaam }}</td>
             <td>{{ obj.achternaam }}</td>
@@ -117,7 +117,7 @@
 
         {% for obj in leden_inactief %}
             <tr>
-                <td>{{ obj.nhb_nr }}</td>
+                <td>{{ obj.lid_nr }}</td>
                 <td>{{ obj.geslacht }}</td>
                 <td>{{ obj.voornaam }}</td>
                 <td>{{ obj.achternaam }}</td>

@@ -1,6 +1,6 @@
 /*!
- * Materialize v1.0.0 (http://materializecss.com)
- * Copyright 2014-2017 Materialize
+ * Materialize v1.1.0-alpha (https://materializecss.github.io/materialize)
+ * Copyright 2014-2021 Materialize
  * MIT License (https://raw.githubusercontent.com/materializecss/materialize/master/LICENSE)
  */
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
@@ -6902,7 +6902,7 @@ $jscomp.polyfill = function (e, r, p, m) {
         this.el.setAttribute('data-target', this.container.id);
 
         // Initialize dropdown
-        var dropdownOptions = $.extend(Autocomplete.defaults.dropdownOptions, this.options.dropdownOptions);
+        var dropdownOptions = $.extend({}, Autocomplete.defaults.dropdownOptions, this.options.dropdownOptions);
         var userOnItemClick = dropdownOptions.onItemClick;
 
         // Ensuring the selectOption call when user passes custom onItemClick function to dropdown
@@ -7015,6 +7015,13 @@ $jscomp.polyfill = function (e, r, p, m) {
           if (this.activeIndex >= 0) {
             this.$active = $(this.container).children('li').eq(this.activeIndex);
             this.$active.addClass('active');
+
+            // Focus selected
+            this.container.children[this.activeIndex].scrollIntoView({
+              behavior: 'smooth',
+              block: 'nearest',
+              inline: 'nearest'
+            });
           }
         }
       }
@@ -7158,7 +7165,7 @@ $jscomp.polyfill = function (e, r, p, m) {
           var item = document.createElement('li');
           if (!!_entry.data) {
             var img = document.createElement('img');
-            img.classList.add("right", "circle");
+            img.classList.add('right', 'circle');
             img.src = _entry.data;
             item.appendChild(img);
           }
@@ -7172,7 +7179,7 @@ $jscomp.polyfill = function (e, r, p, m) {
             if (!!parts[1]) {
               var highlight = document.createElement('span');
               highlight.textContent = parts[1];
-              highlight.classList.add("highlight");
+              highlight.classList.add('highlight');
               s.appendChild(highlight);
               s.appendChild(document.createTextNode(parts[2]));
             }

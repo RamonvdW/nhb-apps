@@ -6,9 +6,9 @@
 
 from django.db.models import Q
 from BasisTypen.models import BLAZOEN2STR, BLAZOEN_40CM, BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_DT
-from Competitie.models import (RegioCompetitieSchutterBoog, RegiocompetitieTeam,
+from Competitie.models import (RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3)
-from Schutter.models import SchutterVoorkeuren
+from Sporter.models import SporterVoorkeuren
 from types import SimpleNamespace
 import math
 
@@ -31,10 +31,10 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                             .regiocompetitieschutterboog_set
                             .select_related('klasse',
                                             'klasse__indiv',
-                                            'schutterboog',
-                                            'schutterboog__boogtype',
-                                            'schutterboog__nhblid',
-                                            'schutterboog__nhblid__bij_vereniging'))
+                                            'sporterboog',
+                                            'sporterboog__boogtype',
+                                            'sporterboog__sporter',
+                                            'sporterboog__sporter__bij_vereniging'))
 
         if deelcomp.regio_organiseert_teamcompetitie:
             deelnemers_teams = (RegiocompetitieTeam
@@ -58,10 +58,10 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                         bij_vereniging__in=ver_pks)
                                 .select_related('klasse',
                                                 'klasse__indiv',
-                                                'schutterboog',
-                                                'schutterboog__boogtype',
-                                                'schutterboog__nhblid',
-                                                'schutterboog__nhblid__bij_vereniging'))
+                                                'sporterboog',
+                                                'sporterboog__boogtype',
+                                                'sporterboog__sporter',
+                                                'sporterboog__sporter__bij_vereniging'))
 
             if deelcomp.regio_organiseert_teamcompetitie:
                 deelnemers_teams = (RegiocompetitieTeam
@@ -80,10 +80,10 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                 .filter(deelcompetitie=deelcomp)
                                 .select_related('klasse',
                                                 'klasse__indiv',
-                                                'schutterboog',
-                                                'schutterboog__boogtype',
-                                                'schutterboog__nhblid',
-                                                'schutterboog__nhblid__bij_vereniging'))
+                                                'sporterboog',
+                                                'sporterboog__boogtype',
+                                                'sporterboog__sporter',
+                                                'sporterboog__sporter__bij_vereniging'))
 
             if deelcomp.regio_organiseert_teamcompetitie:
                 deelnemers_teams = (RegiocompetitieTeam
@@ -101,13 +101,16 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
             if deelcomp.regio_organiseert_teamcompetitie:
                 # team klassen
                 team_pks = wedstrijd.team_klassen.values_list('pk', flat=True)
-                gekoppeld_pks = RegiocompetitieTeam.objects.filter(klasse__team__pk__in=team_pks).values_list('gekoppelde_schutters__pk', flat=True)
+                gekoppeld_pks = RegiocompetitieTeam.objects.filter(klasse__team__pk__in=team_pks).values_list('gekoppelde_schutters__pk', flat=True)    # TODO: moet dit feitelijke sporters zijn??
             else:
                 gekoppeld_pks = list()
 
             # individueel
             indiv_pks = wedstrijd.indiv_klassen.values_list('pk', flat=True)
-            deelnemers_indiv = deelnemers_indiv.filter(Q(klasse__indiv__pk__in=indiv_pks) | Q(pk__in=gekoppeld_pks))
+
+            # alleen filteren als er voor deze wedstrijd keuzes zijn gemaakt, anders alle sporters behouden
+            if len(indiv_pks) + len(gekoppeld_pks) > 0:
+                deelnemers_indiv = deelnemers_indiv.filter(Q(klasse__indiv__pk__in=indiv_pks) | Q(pk__in=gekoppeld_pks))
 
     if not deelcomp.regio_organiseert_teamcompetitie:
         deelnemers_teams = list()
@@ -124,7 +127,7 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
 
     deelnemers_indiv, deelnemers_teams = _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd)
 
-    # bepaal voor elke vereniging en boog afkorting in welke teams een schutterboog uit mag komen
+    # bepaal voor elke vereniging en boog afkorting in welke teams een sporterboog uit mag komen
     ver_teams = dict()      # [ver_nr] = dict[boog afkorting] = list()
     ver_aantal = dict()     # [ver_nr] = dict[team type] = aantal
 
@@ -152,83 +155,98 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
             # for
         # for
 
-    # maak lijst nhb_nrs van sporters met voorkeur voor eigen blazoen
-    wens_eigen_blazoen = list(SchutterVoorkeuren
+    # maak lijst lid_nr's van sporters met voorkeur voor eigen blazoen
+    wens_eigen_blazoen = list(SporterVoorkeuren
                               .objects
-                              .select_related('nhblid')
+                              .select_related('sporter')
                               .filter(voorkeur_eigen_blazoen=True)
-                              .values_list('nhblid__nhb_nr', flat=True))
+                              .values_list('sporter__lid_nr', flat=True))
 
-    nhbnr2para_opmerking = dict()
-    for voorkeur in (SchutterVoorkeuren
+    lid_nr2para_opmerking = dict()
+    for voorkeur in (SporterVoorkeuren
                      .objects
-                     .select_related('nhblid')
+                     .select_related('sporter')
                      .exclude(opmerking_para_sporter='')):
 
-        nhbnr2para_opmerking[voorkeur.nhblid.nhb_nr] = voorkeur.opmerking_para_sporter
+        lid_nr2para_opmerking[voorkeur.sporter.lid_nr] = voorkeur.opmerking_para_sporter
+    # for
+
+    # bepaal voor elke deelnemer in welk team hij feitelijk zit in deze ronde
+    # dit is goedkoper dan per deelnemer een reverse query te doen (deelnemer.teamronde_feitelijk...)
+    deelnemer_pk2team_pk = dict()   # [deelnemer.pk] = team.pk
+    for rondeteam in (RegiocompetitieRondeTeam
+                      .objects
+                      .select_related('team')
+                      .prefetch_related('deelnemers_feitelijk')
+                      .filter(team__deelcompetitie=deelcomp,
+                              ronde_nr=deelcomp.huidige_team_ronde)):
+        team_pk = rondeteam.team.pk
+        for deelnemer in rondeteam.deelnemers_feitelijk.all():
+            deelnemer_pk2team_pk[deelnemer.pk] = team_pk
+        # for
     # for
 
     unsorted_sporters = list()
     for deelnemer in deelnemers_indiv:
-        schutterboog = deelnemer.schutterboog
-        nhblid = schutterboog.nhblid
-        ver = nhblid.bij_vereniging
-        boog = schutterboog.boogtype
+        sporterboog = deelnemer.sporterboog
+        sporter = sporterboog.sporter
+        ver = sporter.bij_vereniging
+        boog = sporterboog.boogtype
 
         sporter = SimpleNamespace(
-                        nhb_nr=nhblid.nhb_nr,
-                        volledige_naam=nhblid.volledige_naam(),
+                        lid_nr=sporter.lid_nr,
+                        volledige_naam=sporter.volledige_naam(),
                         ver_nr=ver.ver_nr,
                         ver_naam=ver.naam,
                         boog=boog.beschrijving,
-                        schutterboog_pk=schutterboog.pk,
+                        sporterboog_pk=sporterboog.pk,
                         deelnemer_pk=deelnemer.pk,
                         schiet_boog_r=(boog.afkorting == 'R'),
                         schiet_boog_c=(boog.afkorting == 'C'),
-                        voorkeur_dt=(nhblid.nhb_nr in wens_eigen_blazoen),
-                        voorkeur_4spot=(nhblid.nhb_nr in wens_eigen_blazoen),
+                        voorkeur_dt=(sporter.lid_nr in wens_eigen_blazoen),
+                        voorkeur_4spot=(sporter.lid_nr in wens_eigen_blazoen),
                         is_aspirant=deelnemer.klasse.indiv.is_aspirant_klasse,
                         wil_team_schieten=deelnemer.inschrijf_voorkeur_team,
                         team_pk=0,
-                        vsg="")
+                        team_gem="",
+                        vsg="")         # TODO: obsolete this
 
         # wens alleen voor juiste boogtype tonen
         sporter.voorkeur_dt &= sporter.schiet_boog_r
         sporter.voorkeur_4spot &= sporter.schiet_boog_c
 
         try:
-            sporter.notitie = nhbnr2para_opmerking[nhblid.nhb_nr]
+            sporter.notitie = lid_nr2para_opmerking[sporter.lid_nr]
         except KeyError:
             sporter.notitie = ''
 
-        if deelnemer.aantal_scores == 0:
-            vsg = deelnemer.ag_voor_team
-        else:
-            vsg = deelnemer.gemiddelde      # individuele voortschrijdend gemiddelde
+        if deelnemer.inschrijf_voorkeur_team:
+            # het gemiddelde voor dit teamlid
+            #    voor vaste teams is dit altijd het team AG
+            #    voor dynamische teams gebruik het VSG, zodra beschikbaar
+            sporter.team_gem = deelnemer.gemiddelde_begin_team_ronde
 
-        sporter.blazoen_lijst = list()
+            sort_gem = sporter.team_gem
+
+            sporter.vsg = sporter.team_gem      # TODO: obsolete gebruik van .vsg
+
+            # zoek het huidige team erbij
+            try:
+                sporter.team_pk = deelnemer_pk2team_pk[deelnemer.pk]
+            except KeyError:
+                pass
+        else:
+            sort_gem = 0
 
         # voorbereiden voor sorteren
         volgorde_1 = ver.ver_nr
-        volgorde_2 = -vsg     # negatief geeft hoogste bovenaan
+        volgorde_2 = -sort_gem     # negatief geeft hoogste bovenaan
         volgorde_3 = sporter.volledige_naam
         volgorde_4 = deelnemer.pk                # dummy, voorkomt sorteren op Sporter (wat niet kan)
         tup = (volgorde_1, volgorde_2, volgorde_3, volgorde_4, sporter)
         unsorted_sporters.append(tup)
 
-        # TODO: ondersteuning VSG toevoegen voor team deelnemers (nu tonen we sporter AG)
-        # TODO: zonder Team-AG kan het geen teamschutter zijn
-        if deelnemer.inschrijf_voorkeur_team:
-            if deelnemer.aantal_scores == 0:
-                sporter.vsg = deelnemer.ag_voor_team
-            else:
-                sporter.vsg = deelnemer.gemiddelde
-
-            # zoek het huidige team erbij
-            ronde_teams = deelnemer.teamronde_feitelijk.filter(ronde_nr=deelcomp.huidige_team_ronde)
-            if ronde_teams.count() > 0:
-                # sporter is gekoppeld aan een team
-                sporter.team_pk = ronde_teams[0].team.pk
+        sporter.blazoen_lijst = list()
 
         if afstand == '18':
             blazoenen = (deelnemer.klasse.indiv.blazoen1_18m_regio, deelnemer.klasse.indiv.blazoen2_18m_regio)
@@ -262,8 +280,7 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
                     parts.append(tup)
                 # for
                 parts.sort()        # controleer volgorde van de teams
-                msg = "[%s] %s heeft " % (sporter.ver_nr, sporter.ver_naam)
-                sporter.vereniging_teams = msg + ", ".join([tup[-1] for tup in parts])
+                sporter.vereniging_teams = ", ".join([tup[-1] for tup in parts])
 
         blazoenen = sporter.blazoen_lijst[:]
         sporter.blazoen_str_lijst = lijst = list()
@@ -379,18 +396,24 @@ def bepaal_blazoen_behoefte(afstand, sporters, deelnemers_teams):
             # for
     # for
 
+    # 4 = een team bestaat uit 4 sporters
     blazoenen.sporters_60cm_excl_teams = blazoenen.sporters_60cm - blazoenen.teams_60cm * 4
     blazoenen.sporters_60cm_4spot_excl_teams = blazoenen.sporters_60cm_4spot - blazoenen.teams_60cm_4spot * 4
     blazoenen.sporters_40cm_excl_teams = max(0, blazoenen.sporters_40cm - blazoenen.teams_40cm * 4)
     blazoenen.sporters_dt_excl_teams = blazoenen.sporters_dt - blazoenen.teams_dt * 4
 
+    # 4.0 = aantal sporters per 60cm blazoen
     blazoenen.banen_aspiranten_60cm = math.ceil(blazoenen.sporters_aspirant_60cm / 4.0)
     blazoenen.banen_aspiranten_wens_60cm_4spot = math.ceil(blazoenen.sporters_aspirant_wens_60cm_4spot__anders_60cm / 4.0)
 
     blazoenen.banen_60cm_excl_teams = math.ceil(blazoenen.sporters_60cm_excl_teams / 4.0)
     blazoenen.banen_60cm_4spot_excl_teams = math.ceil(blazoenen.sporters_60cm_4spot_excl_teams / 4.0)
-    blazoenen.banen_40cm_excl_teams = math.ceil(blazoenen.sporters_40cm_excl_teams / 4.0)
-    blazoenen.banen_dt_excl_teams = math.ceil(blazoenen.sporters_dt_excl_teams / 4.0)
+
+    # een baan met 40cm = 2 blazoenen
+    # een baan met DT = 4 blazoenen
+    # mixen van 40cm en DT op 1 baan wordt hier niet overwogen
+    blazoenen.banen_40cm_excl_teams = math.ceil(blazoenen.sporters_40cm_excl_teams / 4.0)   # 4 sporters per baan
+    blazoenen.banen_dt_excl_teams = math.ceil(blazoenen.sporters_dt_excl_teams / 4.0)       # 4 sporters per baan
 
     blazoenen.plekjes_over_60cm = (blazoenen.banen_60cm_excl_teams * 4) - blazoenen.sporters_60cm_excl_teams
     blazoenen.plekjes_over_60cm_4spot = (blazoenen.banen_60cm_4spot_excl_teams * 4) - blazoenen.sporters_60cm_4spot_excl_teams

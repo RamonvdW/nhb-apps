@@ -19,10 +19,9 @@ from Competitie.models import (AG_NUL, DAGDELEN, DAGDEEL_AFKORTINGEN,
                                RegioCompetitieSchutterBoog)
 from Competitie.operations import KlasseBepaler
 from Functie.rol import Rollen, rol_get_huidige_functie
-from NhbStructuur.models import NhbLid, NhbVereniging, NhbCluster
 from Plein.menu import menu_dynamics
-from Schutter.models import SchutterBoog, SchutterVoorkeuren
 from Score.models import Score, SCORE_TYPE_INDIV_AG
+from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Wedstrijden.models import CompetitieWedstrijd
 from decimal import Decimal
 import copy
@@ -82,7 +81,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         jeugdgrens = comp.begin_jaar - MAXIMALE_LEEFTIJD_JEUGD
 
         # sorteer jeugd op geboorte jaar en daarna naam
-        for obj in (NhbLid
+        for obj in (Sporter
                     .objects
                     .filter(bij_vereniging=functie_nu.nhb_ver)
                     .filter(geboorte_datum__year__gte=jeugdgrens)
@@ -115,7 +114,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         # for
 
         # sorteer volwassenen op naam
-        for obj in (NhbLid
+        for obj in (Sporter
                     .objects
                     .filter(bij_vereniging=functie_nu.nhb_ver)
                     .filter(geboorte_datum__year__lt=jeugdgrens)
@@ -125,37 +124,38 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         # for
 
         # maak een paar tabellen om database toegangen te verminderen
-        nhblid_dict = dict()    # [nhb_nr] = NhbLid
-        for nhblid in objs:
-            nhblid.wedstrijdbogen = list()
-            nhblid_dict[nhblid.nhb_nr] = nhblid
+        sporter_dict = dict()    # [lid_nr] = Sporter
+        for sporter in objs:
+            sporter.wedstrijdbogen = list()
+            sporter_dict[sporter.lid_nr] = sporter
         # for
 
-        ag_dict = dict()        # [schutterboog_pk] = Score
+        ag_dict = dict()        # [sporterboog_pk] = Score
         for score in (Score
                       .objects
-                      .select_related('schutterboog')
+                      .select_related('sporterboog')
                       .filter(type=SCORE_TYPE_INDIV_AG,
                               afstand_meter=comp.afstand)):
             ag = Decimal(score.waarde) / 1000
-            ag_dict[score.schutterboog.pk] = ag
+            ag_dict[score.sporterboog.pk] = ag
         # for
 
-        wil_competitie = dict()     # [nhb_nr] = True/False
-        for voorkeuren in (SchutterVoorkeuren
+        wil_competitie = dict()     # [lid_nr] = True/False
+        for voorkeuren in (SporterVoorkeuren
                            .objects
-                           .select_related('nhblid')
-                           .filter(nhblid__bij_vereniging=functie_nu.nhb_ver)):
-            wil_competitie[voorkeuren.nhblid.nhb_nr] = voorkeuren.voorkeur_meedoen_competitie
+                           .select_related('sporter')
+                           .filter(sporter__bij_vereniging=functie_nu.nhb_ver)):
+            wil_competitie[voorkeuren.sporter.lid_nr] = voorkeuren.voorkeur_meedoen_competitie
         # for
 
-        is_aangemeld_dict = dict()   # [schutterboog.pk] = True/False
+        is_aangemeld_dict = dict()   # [sporterboog.pk] = True/False
         for deelnemer in (RegioCompetitieSchutterBoog
                           .objects
-                          .select_related('schutterboog', 'deelcompetitie')
+                          .select_related('sporterboog',
+                                          'deelcompetitie')
                           .filter(bij_vereniging=functie_nu.nhb_ver,
                                   deelcompetitie__competitie=comp)):
-            is_aangemeld_dict[deelnemer.schutterboog.pk] = True
+            is_aangemeld_dict[deelnemer.sporterboog.pk] = True
         # for
 
         for nr, obj in enumerate(objs):
@@ -165,50 +165,53 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         # zoek de bogen informatie bij elk lid
         # split per schutter-boog
         objs2 = list()
-        for schutterboog in (SchutterBoog
-                             .objects
-                             .filter(voor_wedstrijd=True)
-                             .select_related('nhblid', 'boogtype')
-                             .order_by('boogtype__volgorde',                # groepeer op boogtype
-                                       '-nhblid__geboorte_datum__year',     # jongste eerst
-                                       'nhblid__achternaam',                # binnen de leeftijd op achternaam
-                                       'nhblid__voornaam')
-                             .only('nhblid__nhb_nr', 'boogtype__afkorting', 'boogtype__beschrijving')):
+        for sporterboog in (SporterBoog
+                            .objects
+                            .filter(voor_wedstrijd=True)
+                            .select_related('sporter',
+                                            'boogtype')
+                            .order_by('boogtype__volgorde',                # groepeer op boogtype
+                                      '-sporter__geboorte_datum__year',    # jongste eerst
+                                      'sporter__achternaam',               # binnen de leeftijd op achternaam
+                                      'sporter__voornaam')
+                            .only('sporter__lid_nr',
+                                  'boogtype__afkorting',
+                                  'boogtype__beschrijving')):
             try:
-                nhblid = nhblid_dict[schutterboog.nhblid.nhb_nr]
+                sporter = sporter_dict[sporterboog.sporter.lid_nr]
             except KeyError:
-                # schutterboog niet van deze vereniging
+                # sporterboog niet van deze vereniging
                 pass
             else:
                 # maak een kopie van het nhblid en maak het uniek voor dit boogtype
-                obj = copy.copy(nhblid)
-                obj.afkorting = schutterboog.boogtype.afkorting
-                obj.boogtype = schutterboog.boogtype.beschrijving
-                obj.check = "lid_%s_boogtype_%s" % (nhblid.nhb_nr, schutterboog.boogtype.pk)
+                obj = copy.copy(sporter)
+                obj.afkorting = sporterboog.boogtype.afkorting
+                obj.boogtype = sporterboog.boogtype.beschrijving
+                obj.check = "lid_%s_boogtype_%s" % (sporter.lid_nr, sporterboog.boogtype.pk)
                 obj.mag_teamschieten = True
                 if obj.leeftijdsklasse and obj.leeftijdsklasse.is_aspirant_klasse():
                     obj.mag_teamschieten = False
 
                 try:
-                    obj.ag = ag_dict[schutterboog.pk]
+                    obj.ag = ag_dict[sporterboog.pk]
                 except KeyError:
                     obj.ag = AG_NUL
 
                 # kijk of de schutter al aangemeld is
                 try:
-                    obj.is_aangemeld = is_aangemeld_dict[schutterboog.pk]
+                    obj.is_aangemeld = is_aangemeld_dict[sporterboog.pk]
                 except KeyError:
                     obj.is_aangemeld = False
 
                 # kijk of de schutter wel mee wil doen met de competitie
                 try:
-                    obj.wil_competitie = wil_competitie[schutterboog.nhblid.nhb_nr]
+                    obj.wil_competitie = wil_competitie[sporterboog.sporter.lid_nr]
                 except KeyError:
                     # schutter had geen voorkeuren
                     # dit is een opt-out, dus standaard True
                     obj.wil_competitie = True
 
-                tup = (nhblid.volgorde, schutterboog.boogtype.volgorde, obj)
+                tup = (sporter.volgorde, sporterboog.boogtype.volgorde, obj)
                 objs2.append(tup)
         # for
 
@@ -408,30 +411,30 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             if len(spl) == 4 and spl[0] == 'lid' and spl[2] == 'boogtype':
                 # dit lijkt ergens op - converteer de getallen (geeft ook input bescherming)
                 try:
-                    nhblid_pk = int(spl[1])
+                    sporter_pk = int(spl[1])
                     boogtype_pk = int(spl[3])
                 except (TypeError, ValueError):
                     # iemand loopt te klooien
                     raise Http404('Verkeerde parameters')
 
-                # SchutterBoog record met voor_wedstrijd==True moet bestaan
+                # SporterBoog record met voor_wedstrijd==True moet bestaan
                 try:
-                    schutterboog = (SchutterBoog
-                                    .objects
-                                    .select_related('nhblid',
-                                                    'boogtype')
-                                    .get(nhblid=nhblid_pk,
-                                         boogtype=boogtype_pk))
-                except SchutterBoog.DoesNotExist:
+                    sporterboog = (SporterBoog
+                                   .objects
+                                   .select_related('sporter',
+                                                   'boogtype')
+                                   .get(sporter=sporter_pk,
+                                        boogtype=boogtype_pk))
+                except SporterBoog.DoesNotExist:
                     # iemand loopt te klooien
                     raise Http404('Sporter niet gevonden')
 
-                if not schutterboog.voor_wedstrijd:
+                if not sporterboog.voor_wedstrijd:
                     # iemand loopt te klooien
                     raise Http404('Sporter heeft geen voorkeur voor wedstrijden opgegeven')
 
                 # controleer lid bij vereniging HWL
-                if schutterboog.nhblid.bij_vereniging != self.functie_nu.nhb_ver:
+                if sporterboog.sporter.bij_vereniging != self.functie_nu.nhb_ver:
                     # iemand loopt te klooien
                     raise PermissionDenied('Geen lid bij jouw vereniging')
 
@@ -439,25 +442,25 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 if (RegioCompetitieSchutterBoog
                         .objects
                         .filter(deelcompetitie=deelcomp,
-                                schutterboog=schutterboog)
+                                sporterboog=sporterboog)
                         .count() > 0):
                     # al aangemeld - zou niet hier moeten zijn gekomen
                     raise Http404('Sporter is al ingeschreven')
 
                 # bepaal in welke wedstrijdklasse de schutter komt
-                age = schutterboog.nhblid.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar + 1)
-                dvl = schutterboog.nhblid.sinds_datum
+                age = sporterboog.sporter.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar + 1)
+                dvl = sporterboog.sporter.sinds_datum
 
                 aanmelding = RegioCompetitieSchutterBoog()
                 aanmelding.deelcompetitie = deelcomp
-                aanmelding.schutterboog = schutterboog
-                aanmelding.bij_vereniging = schutterboog.nhblid.bij_vereniging
+                aanmelding.sporterboog = sporterboog
+                aanmelding.bij_vereniging = sporterboog.sporter.bij_vereniging
                 aanmelding.ag_voor_indiv = AG_NUL
                 aanmelding.ag_voor_team = AG_NUL
                 aanmelding.ag_voor_team_mag_aangepast_worden = True
 
                 # zoek de aanvangsgemiddelden er bij, indien beschikbaar
-                for score in Score.objects.filter(schutterboog=schutterboog,
+                for score in Score.objects.filter(sporterboog=sporterboog,
                                                   afstand_meter=comp.afstand,
                                                   type=SCORE_TYPE_INDIV_AG):
                     ag = Decimal(score.waarde) / 1000
@@ -487,7 +490,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             # else: silently ignore
         # for
 
-        return HttpResponseRedirect(reverse('Vereniging:leden-ingeschreven', kwargs={'deelcomp_pk': deelcomp.pk}))
+        url = reverse('Vereniging:leden-ingeschreven', kwargs={'deelcomp_pk': deelcomp.pk})
+        return HttpResponseRedirect(url)
 
 
 class LedenIngeschrevenView(UserPassesTestMixin, ListView):
@@ -531,29 +535,29 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         # for
         dagdeel_str[''] = ''
 
-        # maak lijst nhb_nrs van sporters met voorkeur voor eigen blazoen
-        wens_eigen_blazoen = list(SchutterVoorkeuren
+        # maak lijst lid_nrs van sporters met voorkeur voor eigen blazoen
+        wens_eigen_blazoen = list(SporterVoorkeuren
                                   .objects
-                                  .select_related('nhblid')
+                                  .select_related('sporter')
                                   .filter(voorkeur_eigen_blazoen=True)
-                                  .values_list('nhblid__nhb_nr', flat=True))
+                                  .values_list('sporter__lid_nr', flat=True))
 
         objs = (RegioCompetitieSchutterBoog
                 .objects
-                .select_related('schutterboog',
-                                'schutterboog__nhblid',
+                .select_related('sporterboog',
+                                'sporterboog__sporter',
                                 'bij_vereniging',
                                 'klasse',
                                 'klasse__indiv')
                 .filter(deelcompetitie=deelcomp,
                         bij_vereniging=self.functie_nu.nhb_ver)
                 .order_by('klasse__indiv__volgorde',
-                          'schutterboog__nhblid__voornaam',
-                          'schutterboog__nhblid__achternaam'))
+                          'sporterboog__sporter__voornaam',
+                          'sporterboog__sporter__achternaam'))
 
         for obj in objs:
             obj.eigen_blazoen_ja_nee = '-'
-            if obj.schutterboog.nhblid.nhb_nr in wens_eigen_blazoen:
+            if obj.sporterboog.sporter.lid_nr in wens_eigen_blazoen:
                 wkl = obj.klasse.indiv
                 if comp.afstand == '18':
                     # Indoor
@@ -571,9 +575,9 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
             obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]
             obj.dagdeel_str = dagdeel_str[obj.inschrijf_voorkeur_dagdeel]
             obj.check = "pk_%s" % obj.pk
-            lid = obj.schutterboog.nhblid
-            obj.nhb_nr = lid.nhb_nr
-            obj.naam_str = lid.volledige_naam()
+            sporter = obj.sporterboog.sporter
+            obj.lid_nr = sporter.lid_nr
+            obj.naam_str = sporter.volledige_naam()
 
             if obj.inschrijf_voorkeur_team:
                 if mag_toggle:

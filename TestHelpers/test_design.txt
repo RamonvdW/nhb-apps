@@ -1,0 +1,75 @@
+
+Deze folder bevat de test data voor de hele applicatie, zodat deze met een 'fixture' ingeladen kan worden en voor veel
+tests herbruikbaar is.
+
+
+Clubs en Leden
+    Club A, ver_nr 1000, regio 101
+        Lid A1
+
+    Club B, ver_nr 1001, regio 102
+
+    Club C, ver_nr 1003, regio 103
+
+
+
+Account:
+    [onafhankelijk]
+    Account:
+        Admin (heeft is_staff=True) username=admin
+        Bondsbureau (is_BB=True)    username=BB
+
+    Account + AccountEmail voor alle leden (zie NhbStructuur)
+
+
+BasisTypen:
+    Alleen de standaard typen die door de migratie tool aangemaakt worden
+        Leeftijdsklassen (cadetten, junioren, senioren, etc.)
+        Boogtypen (R, C, etc.)
+        Team typen (R, C, etc.)
+        Kalender wedstrijdklassen
+
+
+Functie:
+    Voor elke vereniging (zie 'Clubs en Leden' bovenaan) de SEC, HWL en WL functie
+    Voor de competitie: BKO, RKO, RCL
+
+    VHPG
+        Voor elk Account
+
+
+NhbStructuur:
+    De standaard typen die door de migratie tool aangemaakt worden
+        Rayons 1..4
+        Regio's 100..116
+        Voor elke regio, voor 18m en 25m: 4 clusters elk
+
+    Verenigingen en Leden:
+        Volgens 'Clubs en Leden' bovenaan dit document
+
+
+Sporter:
+    Sporter
+    SporterVoorkeuren voor alle leden
+    SporterBoog voor alle leden
+
+
+Competitie:
+    Competitie seizoen 2019/2020 in fase A
+
+    Inschrijfvoorkeuren:
+        Regio 101: inschrijfmethode 1
+        Regio 102: inschrijfmethode 2
+        Regio 103: inschrijfmethode 3
+
+    Ingeschreven sporters
+    Ingeschreven teams
+    Teams in poules
+    Planning
+
+
+Wedstrijden:
+    CompetitieWedstrijdenPlan voor elke Deelcompetitie
+
+    WedstrijdLocatie
+        Club A:

@@ -5,21 +5,22 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Overig.e2ehelpers import E2EHelpers
 from Overig.models import SiteTijdelijkeUrl
 from Mailer.models import MailQueue
+from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestAccountWachtwoord(E2EHelpers, TestCase):
     """ unit tests voor de Account applicatie; module Login/Logout """
 
+    url_vergeten = '/account/wachtwoord-vergeten/'
+    url_wijzig = '/account/nieuw-wachtwoord/'
+    url_tijdelijk = '/overig/url/%s/'       # url_code
+
     def setUp(self):
         """ initialisatie van de test case """
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.email_normaal = self.account_normaal.accountemail_set.all()[0]
-
-        self.url_vergeten = '/account/wachtwoord-vergeten/'
-        self.url_wijzig = '/account/nieuw-wachtwoord/'
 
     def test_wijzig_anon(self):
         # niet ingelogd
@@ -94,7 +95,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         # gebruiker moet valide e-mailadres invoeren via POST
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_vergeten, {'nhb_nr': 'normaal',
+            resp = self.client.post(self.url_vergeten, {'lid_nr': 'normaal',
                                                         'email': 'normaal@test.com'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -106,7 +107,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         obj = SiteTijdelijkeUrl.objects.all()[0]
 
         self.assertEqual(obj.hoortbij_accountemail.bevestigde_email, 'normaal@test.com')
-        url = '/overig/url/' + obj.url_code + '/'
+        url = self.url_tijdelijk % obj.url_code
         self.client.logout()
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -145,7 +146,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         account_twee = self.e2e_create_account('twee', 'normaal@test.com', 'Twee')  # dupe email
         self.assertTrue(str(account_twee) != '')    # coverage for __str__
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_vergeten, {'nhb_nr': 'twee',
+            resp = self.client.post(self.url_vergeten, {'lid_nr': 'twee',
                                                         'email': 'normaal@test.com'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -160,7 +161,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         # gebruiker moet valide e-mailadres invoeren via POST
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_vergeten, {'nhb_nr': 'normaal',
+            resp = self.client.post(self.url_vergeten, {'lid_nr': 'normaal',
                                                         'email': 'normaal@test.com'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -168,7 +169,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         self.assertEqual(SiteTijdelijkeUrl.objects.count(), 1)
         obj = SiteTijdelijkeUrl.objects.all()[0]
-        url = '/overig/url/' + obj.url_code + '/'
+        url = self.url_tijdelijk % obj.url_code
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -193,7 +194,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         # gebruiker moet valide e-mailadres invoeren via POST
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_vergeten, {'nhb_nr': 'normaal',
+            resp = self.client.post(self.url_vergeten, {'lid_nr': 'normaal',
                                                         'email': 'normaal@test.com'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -205,7 +206,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         obj = SiteTijdelijkeUrl.objects.all()[0]
 
         self.assertEqual(obj.hoortbij_accountemail.bevestigde_email, 'normaal@test.com')
-        url = '/overig/url/' + obj.url_code + '/'
+        url = self.url_tijdelijk % obj.url_code
         self.client.logout()
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -259,7 +260,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         # niet bestaand valide e-mailadres
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_vergeten, {'nhb_nr': '123456',
+            resp = self.client.post(self.url_vergeten, {'lid_nr': '123456',
                                                         'email': 'als.het.maar@test.org'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

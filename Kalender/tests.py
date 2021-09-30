@@ -6,14 +6,20 @@
 
 from django.test import TestCase
 from Functie.models import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Overig.e2ehelpers import E2EHelpers
+from NhbStructuur.models import NhbRegio, NhbVereniging
+from Sporter.models import Sporter
 from Wedstrijden.models import WedstrijdLocatie
 from .models import KalenderWedstrijd
+from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestKalender(E2EHelpers, TestCase):
     """ unit tests voor de Kalender applicatie """
+
+    url_kalender = '/kalender/'
+    url_kalender_manager = '/kalender/manager/'
+    url_kalender_vereniging = '/kalender/vereniging/'
+    url_kalender_wijzig_wedstrijd = '/kalender/%s/wijzig/'  # wedstrijd_pk
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -22,14 +28,14 @@ class TestKalender(E2EHelpers, TestCase):
         self.account_admin.is_BB = True
         self.account_admin.save()
 
-        lid = NhbLid(
-                    nhb_nr=100000,
+        sporter = Sporter(
+                    lid_nr=100000,
                     voornaam='Ad',
                     achternaam='de Admin',
                     geboorte_datum='1966-06-06',
                     sinds_datum='2020-02-02',
                     account=self.account_admin)
-        lid.save()
+        sporter.save()
 
         # maak een test vereniging
         self.nhbver1 = NhbVereniging(
@@ -48,11 +54,6 @@ class TestKalender(E2EHelpers, TestCase):
                             naam="Kleine Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
         self.nhbver2.save()
-
-        self.url_kalender = '/kalender/'
-        self.url_kalender_manager = '/kalender/manager/'
-        self.url_kalender_vereniging = '/kalender/vereniging/'
-        self.url_kalender_wijzig_wedstrijd = '/kalender/%s/wijzig/'          # wedstrijd_pk
 
     @staticmethod
     def _maak_externe_locatie(ver):

@@ -6,15 +6,22 @@
 
 from django.test import TestCase
 from .models import account_test_wachtwoord_sterkte, account_email_bevestiging_ontvangen
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 
 
 class TestAccountAanmaken(E2EHelpers, TestCase):
     """ unit tests voor de Account applicatie; module Aanmaken/Email bevestigen """
 
+    url_aangemaakt = '/account/aangemaakt/'
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ initialisatie van de test case """
-        self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_metmail = self.e2e_create_account('metmail', 'metmail@test.com', 'MetMail')
 
@@ -25,7 +32,7 @@ class TestAccountAanmaken(E2EHelpers, TestCase):
         # test rechtstreeks de 'aangemaakt' pagina ophalen, zonder registratie stappen
         # hierbij ontbreekt er een sessie variabele --> exceptie en redirect naar het plein
         with self.assert_max_queries(20):
-            resp = self.client.get('/account/aangemaakt/')
+            resp = self.client.get(self.url_aangemaakt)
         self.assert403(resp)
 
     def test_account_helpers(self):

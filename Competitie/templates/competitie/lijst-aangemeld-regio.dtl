@@ -114,7 +114,7 @@
             <tr>
                 <td>[{{ obj.bij_vereniging.ver_nr }}] {{ obj.bij_vereniging.naam }}</td>
                 <td>{{ obj.ag_voor_indiv }}</td>
-                <td>[{{ obj.schutterboog.nhblid.nhb_nr }}] {{ obj.schutterboog.nhblid.volledige_naam }}</td>
+                <td>[{{ obj.sporterboog.sporter.lid_nr }}] {{ obj.sporterboog.sporter.volledige_naam }}</td>
             </tr>
 
         {% endfor %}

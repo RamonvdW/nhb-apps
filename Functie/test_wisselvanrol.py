@@ -5,10 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Functie.models import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from Functie.models import Functie
-from Overig.e2ehelpers import E2EHelpers
+from Functie.models import Functie, maak_functie
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from Sporter.models import Sporter
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 
@@ -16,6 +16,12 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
     """ unit tests voor de Functie applicatie, module Wissel van Rol """
 
     test_after = ('Functie.test_rol',)
+
+    url_wissel_van_rol = '/functie/wissel-van-rol/'
+    url_wissel_naar_sec = '/functie/wissel-van-rol/secretaris/'
+    url_activeer_rol = '/functie/activeer-rol/%s/'
+    url_activeer_functie = '/functie/activeer-functie/%s/'
+    url_accountwissel = '/account/account-wissel/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -51,17 +57,17 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.functie_wl.save()
 
         # maak een test lid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100001
-        lid.geslacht = "M"
-        lid.voornaam = "Ramon"
-        lid.achternaam = "de Tester"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.account = self.account_normaal
-        lid.email = lid.account.email
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 100001
+        sporter.geslacht = "M"
+        sporter.voornaam = "Ramon"
+        sporter.achternaam = "de Tester"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.account = self.account_normaal
+        sporter.email = sporter.account.email
+        sporter.save()
 
         # maak een test vereniging zonder HWL rol
         ver2 = NhbVereniging()
@@ -76,12 +82,6 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.functie_rko = maak_functie("RKO test", "RKO")
         self.functie_rko.nhb_rayon = NhbRayon.objects.get(rayon_nr=1)
         self.functie_rko.save()
-
-        self.url_wissel_van_rol = '/functie/wissel-van-rol/'
-        self.url_wissel_naar_sec = '/functie/wissel-van-rol/secretaris/'
-        self.url_activeer_rol = '/functie/activeer-rol/%s/'
-        self.url_activeer_functie = '/functie/activeer-functie/%s/'
-        self.url_accountwissel = '/account/account-wissel/'
 
     def _get_wissel_urls(self, resp):
         return [url for url in self.extract_all_urls(resp) if url.startswith('/functie/activeer') or url == self.url_accountwissel]

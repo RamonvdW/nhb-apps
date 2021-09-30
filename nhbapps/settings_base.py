@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2021-09-17'
+SITE_VERSIE = '2021-09-30'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -44,8 +44,9 @@ INSTALLED_APPS = [
     'Overig.apps.OverigConfig',
     'Plein.apps.PleinConfig',
     'Records.apps.RecordsConfig',
-    'Schutter.apps.SchutterConfig',
+    'Schutter.apps.SchutterConfig',         # verwijder na volgende squash
     'Score.apps.ScoreConfig',
+    'Sporter.apps.SporterConfig',
     'Taken.apps.TakenConfig',
     'Vereniging.apps.VerenigingConfig',
     'Wedstrijden.apps.WedstrijdenConfig',
@@ -180,6 +181,8 @@ INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
+# globale keuze voor automatische primary keys
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # interface naar achtergrondtaken
 BACKGROUND_SYNC_POORT = 3000
@@ -201,6 +204,8 @@ COMPETITIE_25M_MINIMUM_SCORES_VOOR_AG = 6
 COMPETITIES_START_WEEK = 37
 COMPETITIE_18M_LAATSTE_WEEK = 50        # week 37 t/m week 50
 COMPETITIE_25M_LAATSTE_WEEK = 11        # week 37 t/m week 11
+
+COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER = 4*7      # open 4 weeks after start week
 
 # maximum aantal resultaten dat een doorzoeking van de records terug geeft
 # dit voorkomt honderden resultaten bij het zoeken naar de letter e

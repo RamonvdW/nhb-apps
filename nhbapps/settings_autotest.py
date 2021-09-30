@@ -15,6 +15,9 @@ ENABLE_DEBUG_TOOLBAR = False
 ENABLE_DJANGO_EXTENSIONS = False
 SAML_IDP_CONFIG['debug'] = DEBUG
 
+# significant speed up by reducing calculation time for secure password handling
+PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
+
 # enable html validation using v.Nu (warning: triples test duration)
 # warning: increases test run duration significantly
 #TEST_VALIDATE_HTML = True

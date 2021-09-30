@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,14 +9,16 @@ from .models import IndivRecord, BesteIndivRecords
 
 
 class IndivRecordAdmin(admin.ModelAdmin):
-    """ Admin configuratie voor NhbLid klasse """
+
+    """ Admin configuratie voor Records.IndivRecord klasse """
+
     search_fields = ('naam', 'plaats', 'score', 'volg_nr')
 
     # filter mogelijkheid
     list_filter = ('discipline', 'soort_record', 'geslacht', 'leeftijdscategorie', 'materiaalklasse',
                    'is_european_record', 'is_world_record')
 
-    autocomplete_fields = ('nhb_lid',)
+    autocomplete_fields = ('sporter',)
 
 
 class BesteIndivRecordsAdmin(admin.ModelAdmin):

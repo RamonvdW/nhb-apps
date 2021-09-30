@@ -6,11 +6,12 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from NhbStructuur.models import NhbLid
-from Overig.e2ehelpers import E2EHelpers
 from Mailer.models import MailQueue
+from Sporter.models import Sporter
 from Taken import taken
 from .models import Taak
+from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -19,23 +20,27 @@ class TestTakenTaken(E2EHelpers, TestCase):
 
     test_after = ('Functie',)
 
+    @classmethod
+    def setUpTestData(cls):
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ initialisatie van de test case """
 
-        self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_same = self.e2e_create_account('same', 'same@test.com', 'same')
 
-        lid = NhbLid()
-        lid.nhb_nr = 100042
-        lid.geslacht = "M"
-        lid.voornaam = "Beh"
-        lid.achternaam = "eerder"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.account = self.account_normaal
-        lid.email = lid.account.email
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 100042
+        sporter.geslacht = "M"
+        sporter.voornaam = "Beh"
+        sporter.achternaam = "eerder"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.account = self.account_normaal
+        sporter.email = sporter.account.email
+        sporter.save()
 
     def test_aantal_open_taken(self):
         # standaard sessie heeft nog geen opgeslagen aantal taken
@@ -156,7 +161,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
                         deadline=deadline,
                         beschrijving="Tekst 2")
 
-        taken.maak_taak(toegekend_aan=self.account_admin,
+        taken.maak_taak(toegekend_aan=self.testdata.account_admin,
                         deadline=deadline,
                         beschrijving="Tekst 3")
 
@@ -164,7 +169,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
         self.assertEqual(3, MailQueue.objects.count())
 
         # vraag nu om herinneringen te sturen
-        email = self.account_admin.accountemail_set.all()[0]
+        email = self.testdata.account_admin.accountemail_set.all()[0]
         email.laatste_email_over_taken = None
         email.save()
 

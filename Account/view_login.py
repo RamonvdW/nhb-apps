@@ -52,9 +52,9 @@ def account_check_nieuwe_email(request, from_ip, account):
                      + "Dit is een verzoek vanuit " + settings.NAAM_SITE + " om toegang tot je email te bevestigen.\n"
                      + "Klik op onderstaande link om dit te bevestigen.\n\n"
                      + ack_url + "\n\n"
-                     + "Als je dit verzoek onverwacht ontvangen hebt, neem dan contact met ons op via " + settings.EMAIL_BONDSBURO + "\n\n"
+                     + "Als je dit verzoek onverwacht ontvangen hebt, neem dan contact met ons op via " + settings.EMAIL_BONDSBUREAU + "\n\n"
                      + "Veel plezier met de site!\n"
-                     + "Het bondsburo\n")
+                     + "Het bondsbureau\n")
 
         mailer_queue_email(mailadres,
                            'Email adres bevestigen',

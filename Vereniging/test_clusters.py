@@ -7,14 +7,16 @@
 from django.test import TestCase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbCluster, NhbVereniging
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestVerenigingClusters(E2EHelpers, TestCase):
 
     """ Tests voor de Vereniging applicatie, Wijzig Clusters functies """
 
-    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Schutter', 'Competitie')
+    test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
+
+    url_clusters = '/vereniging/regio-clusters/'
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -66,8 +68,6 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
 
         self.cluster2 = NhbCluster.objects.get(gebruik='18', regio=regio_111, letter='b')     # standaard cluster
         self.nhbver2.clusters.add(self.cluster2)
-
-        self.url_clusters = '/vereniging/regio-clusters/'
 
     def test_anon(self):
         # anon

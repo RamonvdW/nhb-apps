@@ -88,7 +88,7 @@ class PleinView(View):
         if request.user.is_authenticated:
             rol_nu = rol_get_huidige(request)
 
-            if rol_nu == Rollen.ROL_SCHUTTER:
+            if rol_nu == Rollen.ROL_SPORTER:
                 template = TEMPLATE_PLEIN_SPORTER
 
             elif rol_nu == Rollen.ROL_NONE or rol_nu is None:
@@ -132,6 +132,7 @@ class PleinView(View):
                 eval_open_taken(request)
 
         context['naam_site'] = settings.NAAM_SITE
+        context['email_support'] = settings.EMAIL_SUPPORT
 
         menu_dynamics(self.request, context)
         return render(request, template, context)
@@ -148,7 +149,7 @@ class PrivacyView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
         context['url_privacyverklaring'] = settings.PRIVACYVERKLARING_URL
-        context['email_bondsburo'] = settings.EMAIL_BONDSBURO
+        context['email_bondsbureau'] = settings.EMAIL_BONDSBUREAU
         menu_dynamics(self.request, context)
         return context
 
@@ -157,8 +158,10 @@ class NietOndersteundView(View):
 
     """ Django class-based om te rapporteren dat de browser niet ondersteund wordt """
 
-    def get(self, request, *args, **kwargs):
+    @staticmethod
+    def get(request, *args, **kwargs):
         context = dict()
+        context['email_support'] = settings.EMAIL_SUPPORT
         return render(request, TEMPLATE_NIET_ONDERSTEUND, context)
 
 

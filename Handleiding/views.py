@@ -23,7 +23,7 @@ def reverse_handleiding(request, pagina):
         if request:
             account = request.user
             if account.is_authenticated:
-                if account.is_BB:
+                if account.is_BB or account.is_staff:
                     mag_op_wiki = True
         else:
             # test only

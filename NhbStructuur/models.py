@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from django.core.exceptions import ValidationError
 from django.contrib.auth.models import Group
 from django.conf import settings
 from Account.models import Account
@@ -31,9 +30,6 @@ class NhbRayon(models.Model):
 
     # korte naam van het rayon (Rayon 1)
     naam = models.CharField(max_length=20)      # Rayon 3
-
-    # beschrijving van het gebied dat dit rayon dekt
-    geografisch_gebied = models.CharField(max_length=50)        # FUTURE: verwijderen
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
@@ -142,6 +138,7 @@ class NhbVereniging(models.Model):
                                       blank=True)   # mag leeg zijn / gemaakt worden
 
     # wie is de secretaris van de vereniging
+    # TODO: remove (replaced by Sporter.Secretaris)
     secretaris_lid = models.ForeignKey('NhbLid', on_delete=models.SET_NULL,
                                        blank=True,  # allow access input in form
                                        null=True)   # allow NULL relation in database
@@ -152,7 +149,7 @@ class NhbVereniging(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        # selectie in de admin interface gaat op deze string, dus nhb_nr eerst
+        # selectie in de admin interface gaat op deze string, dus ver_nr eerst
         return "[%s] %s" % (self.ver_nr, self.naam)
 
     class Meta:
@@ -164,132 +161,44 @@ class NhbVereniging(models.Model):
 
 
 def validate_geboorte_datum(datum):
-    """ controleer of het geboortejaar redelijk is
-        wordt alleen aangeroepen om de input op een formulier te checken
-        jaar: Moet tussen 1900 en 5 jaar geleden liggen (jongste lid = 5 jaar)
-        raises ValidationError als het jaartal niet goed is
-    """
-    global maximum_geboortejaar
-    if datum.year < 1900 or datum.year > maximum_geboortejaar:
-        raise ValidationError(
-                'geboortejaar %(jaar)s is niet valide (min=1900, max=%(max)s)',
-                params={'jaar': datum.year,
-                        'max': maximum_geboortejaar}
-                )
+    """ OBSOLETE """
+    return True
 
 
 def validate_sinds_datum(datum):
-    """ controleer of de sinds_datum redelijk is
-        wordt alleen aangeroepen om de input op een formulier te checken
-        datum: moet datetime.date() zijn, dus is al een gevalideerde jaar/maand/dag combinatie
-               mag niet in de toekomst liggen
-               moet 5 jaar ná het geboortejaar liggen --> geen toegang tot deze info hier
-        raises ValidationError als de datum niet goed is
-    """
-    now = datetime.datetime.now()
-    date_now = datetime.date(year=now.year, month=now.month, day=now.day)
-    if datum > date_now:
-        raise ValidationError('datum van lidmaatschap mag niet in de toekomst liggen')
+    """ OBSOLETE """
+    return True
 
 
-class NhbLid(models.Model):
-    """ Tabel om gegevens van een lid van de NHB bij te houden """
-
-    # het unieke NHB nummer
+class NhbLid(models.Model):     # TODO: needed for migration/datacopy - remove later
+    """ OBSOLETE - gebruik Sporter """
     nhb_nr = models.PositiveIntegerField(primary_key=True)
-
-    # volledige naam
-    # let op: voornaam kan ook een afkorting zijn
     voornaam = models.CharField(max_length=100)
     achternaam = models.CharField(max_length=100)
-
-    # voor zoekfunctie: de namen aan elkaar; speciale tekens vervangen
     unaccented_naam = models.CharField(max_length=200, default='', blank=True)
-
-    # het e-mailadres van dit lid
     email = models.CharField(max_length=150)
-
     geboorte_datum = models.DateField(validators=[validate_geboorte_datum])
     geslacht = models.CharField(max_length=1, choices=GESLACHT)
-
-    # officieel geregistreerde para classificatie
     para_classificatie = models.CharField(max_length=30, blank=True)
-
-    # mag gebruik maken van NHB faciliteiten?
     is_actief_lid = models.BooleanField(default=True)   # False = niet meer in import dataset
-
-    # datum van lidmaatschap NHB
     sinds_datum = models.DateField(validators=[validate_sinds_datum])
-
-    # lid bij vereniging
-    bij_vereniging = models.ForeignKey(
-                                NhbVereniging,
-                                on_delete=models.PROTECT,
-                                blank=True,  # allow access input in form
-                                null=True)   # allow NULL relation in database
-
-    # indien CRM aangeeft dat lid uitgeschreven is bij vereniging, toch op die vereniging
-    # houden tot het einde van het jaar zodat de diensten (waarvoor betaald is) nog gebruikt kunnen worden.
-    # dit voorkomt een gat bij overschrijvingen.
+    bij_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT, blank=True, null=True)
     lid_tot_einde_jaar = models.PositiveSmallIntegerField(default=0)
-
-    # koppeling met een account (indien aangemaakt)
     account = models.ForeignKey(Account, on_delete=models.SET_NULL, blank=True, null=True)
 
-    def __str__(self):
-        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        # selectie in de admin interface gaat op deze string, dus nhb_nr eerst
-        return '%s %s %s [%s, %s]' % (self.nhb_nr, self.voornaam, self.achternaam, self.geslacht, self.geboorte_datum.year)
-
-    def clean(self):
-        """ controleer of alle velden een redelijke combinatie zijn
-            wordt alleen aangeroepen om de input op een formulier te checken
-            raises ValidationError als er problemen gevonden zijn
-        """
-        # sinds_datum moet 5 jaar ná het geboortejaar liggen
-        if self.sinds_datum.year - self.geboorte_datum.year < 5:
-            raise ValidationError('datum van lidmaatschap moet minimaal 5 jaar na geboortejaar zijn')
-
-    def bereken_wedstrijdleeftijd(self, jaar):
-        """ Bereken de wedstrijdleeftijd voor dit lid in het opgegeven jaar
-            De wedstrijdleeftijd is de leeftijd die je bereikt in dat jaar
-        """
-        # voorbeeld: geboren 2001, huidig jaar = 2019 --> leeftijd 18 wordt bereikt
-        return jaar - self.geboorte_datum.year
-
-    def volledige_naam(self):
-        return self.voornaam + " " + self.achternaam
-
     class Meta:
-        """ meta data voor de admin interface """
         verbose_name = 'Nhb lid'
         verbose_name_plural = 'Nhb leden'
 
-    objects = models.Manager()      # for the editor only
 
-
-class Speelsterkte(models.Model):
-    """ Deze tabel houdt de behaalde spelden/veren/schilden bij """
-
+class Speelsterkte(models.Model):       # TODO: needed for migration/datacopy - remove later
+    """ OBSOLETE - vervangen door Sporter.Speelsterkte """
     lid = models.ForeignKey(NhbLid, on_delete=models.CASCADE)
-
     datum = models.DateField()
-
-    # beschrijving van de specifieke prestatiespeld (WA: 'award'): "Recurve 1000" of "NHB Graadspelden Schutter"
     beschrijving = models.CharField(max_length=50)
-
-    # beschrijving van de discipline, zoals "Recurve" en "Compound"
-    # maar ook "World Archery Target Awards" en "NHB tussenspelden"
     discipline = models.CharField(max_length=50)
-
-    # Senior / Master / Cadet
-    # sommige spelden zijn apart te behalen in verschillende categorieën
     category = models.CharField(max_length=50)
-
-    # sorteer volgorde (lager = eerder tonen)
     volgorde = models.PositiveSmallIntegerField()
 
-    def __str__(self):
-        return "[%s] %s - %s - %s - %s (%s) " % (self.datum, self.lid.volledige_naam(), self.category, self.discipline, self.beschrijving, self.volgorde)
 
 # end of file

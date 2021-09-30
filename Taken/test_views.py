@@ -4,11 +4,11 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.test import TestCase
-from NhbStructuur.models import NhbLid
-from Overig.e2ehelpers import E2EHelpers
 from .models import Taak
+from Sporter.models import Sporter
+from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -17,26 +17,33 @@ class TestTakenViews(E2EHelpers, TestCase):
 
     test_after = ('Functie',)
 
+    url_overzicht = '/taken/overzicht/'
+    url_details = '/taken/details/%s/'  # taak_pk
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def setUp(self):
         """ initialisatie van de test case """
 
-        self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_same = self.e2e_create_account('same', 'same@test.com', 'same')
 
-        lid = NhbLid()
-        lid.nhb_nr = 100042
-        lid.geslacht = "M"
-        lid.voornaam = "Beh"
-        lid.achternaam = "eerder"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.account = self.account_normaal
-        lid.email = lid.account.email
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 100042
+        sporter.geslacht = "M"
+        sporter.voornaam = "Beh"
+        sporter.achternaam = "eerder"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.account = self.account_normaal
+        sporter.email = sporter.account.email
+        sporter.save()
 
         # maak een taak aan
-        taak = Taak(toegekend_aan=self.account_admin,
+        taak = Taak(toegekend_aan=self.testdata.account_admin,
                     deadline='2020-01-01',
                     beschrijving='Testje',
                     handleiding_pagina='Hoofdpagina')
@@ -51,9 +58,6 @@ class TestTakenViews(E2EHelpers, TestCase):
         taak.save()
         self.taak2 = taak
 
-        self.url_overzicht = '/taken/overzicht/'
-        self.url_details = '/taken/details/%s/'     # taak_pk
-
     def test_anon(self):
         # do een get van het taken overzicht zonder ingelogd te zijn
         # resulteert in een redirect naar het plein
@@ -67,7 +71,7 @@ class TestTakenViews(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_allowed(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
 
         with self.assert_max_queries(20):
@@ -127,7 +131,7 @@ class TestTakenViews(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('taken/overzicht.dtl', 'plein/site_layout.dtl'))
 
     def test_bad(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
 
         # niet bestaande taak

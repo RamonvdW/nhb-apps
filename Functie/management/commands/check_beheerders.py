@@ -22,15 +22,15 @@ class Command(BaseCommand):
             for account in functie.accounts.all():
                 let_op = ''
                 try:
-                    nhblid = account.nhblid_set.all()[0]
+                    sporter = account.sporter_set.all()[0]
                 except IndexError:
-                    nhblid = None
+                    sporter = None
                     let_op = 'LET OP: geen koppeling met NHB lid'
                 else:
-                    if not nhblid.bij_vereniging or not nhblid.is_actief_lid:
+                    if not sporter.bij_vereniging or not sporter.is_actief_lid:
                         # deze melding komt na 15 januari
                         let_op = 'LET OP: geen lid meer bij een vereniging'
-                    elif functie.nhb_ver and nhblid.bij_vereniging != functie.nhb_ver:
+                    elif functie.nhb_ver and sporter.bij_vereniging != functie.nhb_ver:
                         # functie voor beheerder van een vereniging
                         # lid is overgestapt
                         let_op = 'LET OP: geen lid bij deze vereniging'

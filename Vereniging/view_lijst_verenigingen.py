@@ -83,11 +83,11 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                     .prefetch_related('wedstrijdlocatie_set',
                                       'functie_set',
                                       'clusters')
-                    .annotate(nhblid_set_count=Count('nhblid'))
+                    .annotate(sporter_set_count=Count('sporter'))
                     .order_by('regio__regio_nr', 'ver_nr'))
 
             for obj in objs:
-                obj.aantal_leden = obj.nhblid_set_count
+                obj.aantal_leden = obj.sporter_set_count
                 obj.aantal_beheerders = 0
                 for functie in obj.functie_set.all():
                     obj.aantal_beheerders += functie2count[functie.pk]

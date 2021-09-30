@@ -83,14 +83,19 @@
             <!-- planning deelcomp -->
             {% include 'plein/card.dtl' with title=deelcomp.titel text=deelcomp.tekst icon="pending_actions" url=deelcomp.url %}
 
-            <!-- regio teams -->
+            <!-- regio ingeschreven teams -->
             {% if deelcomp.url_regio_teams %}
-                {% include 'plein/card.dtl' with title="Regio Teams" text=deelcomp.tekst_regio_teams icon="gamepad" url=deelcomp.url_regio_teams %}
+                {% include 'plein/card.dtl' with title="Ingeschreven Teams" text=deelcomp.tekst_regio_teams icon="gamepad" url=deelcomp.url_regio_teams %}
             {% endif %}
 
             <!-- regio poules -->
             {% if deelcomp.url_poules %}
                 {% include 'plein/card.dtl' with title="Team Poules" text=deelcomp.tekst_poules icon="grid_4x4" url=deelcomp.url_poules %}
+            {% endif %}
+
+            <!-- rayon teams -->
+            {% if deelcomp.url_rayon_teams %}
+                {% include 'plein/card.dtl' with title="RK Teams" text=deelcomp.tekst_rayon_teams icon="api" url=deelcomp.url_rayon_teams %}
             {% endif %}
 
             <!-- scores -->
@@ -109,7 +114,7 @@
         {% endif %}
 
         {% if tekst_regio_teams_alle %}
-            {% include 'plein/card.dtl' with title="Regio Teams" text=tekst_regio_teams_alle icon="gamepad" url=url_regio_teams_alle %}
+            {% include 'plein/card.dtl' with title="Ingeschreven Teams" text=tekst_regio_teams_alle icon="gamepad" url=url_regio_teams_alle %}
         {% endif %}
 
         {% if comp.fase >= 'E' %}
@@ -122,6 +127,11 @@
             <!-- limieten RK -->
             {% if url_limieten_rk %}
                 {% include 'plein/card.dtl' with title="RK limieten" text="Maximum aantal deelnemers in elke wedstrijdklasse van jouw RK instellen." icon="accessibility_new" url=url_limieten_rk %}
+            {% endif %}
+
+            <!-- RK teams -->
+            {% if url_rayon_teams_alle %}
+                {% include 'plein/card.dtl' with title="RK Teams" text=tekst_rayon_teams_alle icon="api" url=url_rayon_teams_alle %}
             {% endif %}
 
         {% endif %}

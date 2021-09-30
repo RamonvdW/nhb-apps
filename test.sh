@@ -22,6 +22,9 @@ OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
 # show all saml2 and djangosaml2idp source files
 #OMIT="--omit=data3/wsgi.py,manage.py,/usr/local/lib64/*,/usr/lib/*,/usr/local/lib/python3.6/site-packages/c*,/usr/local/lib/python3.6/site-packages/da*,/usr/local/lib/python3.6/site-packages/de*,/usr/local/lib/python3.6/site-packages/i*,/usr/local/lib/python3.6/site-packages/p*,/usr/local/lib/python3.6/site-packages/q*,/usr/local/lib/python3.6/site-packages/r*,/usr/local/lib/python3.6/site-packages/si*,/usr/local/lib/python3.6/site-packages/u*,/usr/local/lib/python3.6/site-packages/django/*"
 
+# set high performance
+sudo cpupower frequency-set --governor performance > /dev/null
+
 # start the http simulator in the background
 pgrep -f websim
 if [ $? -eq 0 ]
@@ -76,22 +79,21 @@ export COVERAGE_FILE="/tmp/.coverage.$$"
 
 python3 -m coverage erase
 
-# note: double quotes not supported around $*
 echo "[INFO] Capturing output in $LOG"
 tail -f "$LOG" &
 PID_TAIL=$!
 
-python3 -u $PYCOV ./manage.py test --settings=nhbapps.settings_autotest --noinput $* >>"$LOG" 2>&1
-#python3 $PYCOV ./manage.py test --settings=nhbapps.settings_autotest --noinput $* 2>>"$LOG" >>"$LOG1"
-#python3 ./manage.py test --settings=nhbapps.settings_autotest --noinput $* 2>>"$LOG" >>"$LOG1"
+# -u = unbuffered stdin/stdout
+# -v = verbose
+# note: double quotes not supported around $*
+python3 -u $PYCOV ./manage.py test --settings=nhbapps.settings_autotest -v 2 --noinput $* >>"$LOG" 2>&1
 RES=$?
+echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
 [ $RES -eq 3 ] && ABORTED=1
-#echo "[DEBUG] Coverage run result: $RES --> ABORTED=$ABORTED"
 
 echo >> "$LOG"
-#cat "$LOG1" >> "$LOG"
-#rm "$LOG1"
 
+# use bash construct to prevent the Terminated message on the console
 kill $PID_TAIL
 wait $PID_TAIL 2>/dev/null
 
@@ -99,11 +101,10 @@ if [ $RES -eq 0 -a $# -eq 0 ]
 then
     # add coverage with debug and wiki enabled
     echo "[INFO] Performing run with debug + wiki run"
-    python3 -u $PYCOV ./manage.py test --settings=nhbapps.settings_autotest_wiki_nodebug Plein.tests.TestPlein.test_quick Functie.test_saml2idp >>"$LOG" 2>&1
-    #python3 $PYCOV ./manage.py test --settings=nhbapps.settings_autotest_wiki_nodebug Plein.tests.TestPlein.test_quick Functie.test_saml2idp >>"$LOG" 2>>"$LOG"
+    python3 -u $PYCOV ./manage.py test --settings=nhbapps.settings_autotest_wiki_nodebug -v 2 Plein.tests.TestPlein.test_quick Functie.test_saml2idp >>"$LOG" 2>&1
     RES=$?
+    echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
     [ $RES -eq 3 ] && ABORTED=1
-    #echo "[DEBUG] Debug coverage run result: $RES --> ABORTED=$ABORTED"
 fi
 
 # stop the websim tool
@@ -145,6 +146,9 @@ then
 
     rm "$COVERAGE_FILE"
 
+    # set normal performance
+    sudo cpupower frequency-set --governor schedutil > /dev/null
+
     echo
     echo -n "Press ENTER to start firefox now, or Ctrl+C to abort"
     read -t 5
@@ -161,6 +165,9 @@ then
 
     echo "Done"
 fi
+
+# set normal performance
+sudo cpupower frequency-set --governor schedutil > /dev/null
 
 # end of file
 

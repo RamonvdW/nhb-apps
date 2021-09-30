@@ -6,8 +6,8 @@
 
 from django.db import models
 from BasisTypen.models import IndivWedstrijdklasse, BoogType, KalenderWedstrijdklasse
-from NhbStructuur.models import NhbVereniging, NhbLid
-from Schutter.models import SchutterBoog
+from NhbStructuur.models import NhbVereniging
+from Sporter.models import SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
 
 
@@ -123,15 +123,13 @@ class KalenderWedstrijdSessie(models.Model):
     tijd_einde = models.TimeField()
 
     # toegestane wedstrijdklassen
-    wedstrijdklassen = models.ManyToManyField(KalenderWedstrijdklasse,
-                                              blank=True)        # mag leeg zijn / gemaakt worden
+    wedstrijdklassen = models.ManyToManyField(KalenderWedstrijdklasse, blank=True)
 
     # maximum aantal deelnemers
     max_sporters = models.PositiveSmallIntegerField(default=1)
 
     # aangemelde sporters
-    aanmeldingen = models.ManyToManyField(SchutterBoog,
-                                          blank=True)  # mag leeg zijn / gemaakt worden
+    sporters = models.ManyToManyField(SporterBoog, blank=True)
 
     class Meta:
         verbose_name = "Kalender wedstrijd sessie"

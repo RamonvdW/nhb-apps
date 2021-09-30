@@ -6,14 +6,11 @@
 
 from django.http import Http404
 from django.urls import reverse
-from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie
-from Competitie.models import (INSCHRIJF_METHODE_1,
-                               DeelCompetitie, DeelcompetitieRonde,
-                               RegioCompetitieSchutterBoog)
+from Competitie.models import INSCHRIJF_METHODE_1, DeelCompetitie, RegioCompetitieSchutterBoog
 from Wedstrijden.models import CompetitieWedstrijd
 
 
@@ -60,13 +57,14 @@ class LedenSchietmomentView(UserPassesTestMixin, TemplateView):
 
         objs = (RegioCompetitieSchutterBoog
                 .objects
-                .select_related('schutterboog',
-                                'schutterboog__nhblid')
+                .select_related('sporterboog',
+                                'sporterboog__sporter',
+                                'sporterboog__boogtype')
                 .prefetch_related('inschrijf_gekozen_wedstrijden')
                 .filter(deelcompetitie=deelcomp,
                         bij_vereniging=self.functie_nu.nhb_ver)
-                .order_by('schutterboog__nhblid__voornaam',
-                          'schutterboog__nhblid__achternaam'))
+                .order_by('sporterboog__sporter__voornaam',
+                          'sporterboog__sporter__achternaam'))
 
         context['object_list'] = objs
 
@@ -114,12 +112,14 @@ class LedenSchietmomentView(UserPassesTestMixin, TemplateView):
             if herhaal == (10+1):
                 herhaal -= 10
                 obj.herhaal_header = True
-            lid = obj.schutterboog.nhblid
-            obj.nhb_nr = lid.nhb_nr
-            obj.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+            sporter = obj.sporterboog.sporter
+            obj.lid_nr = sporter.lid_nr
+            obj.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
+
+            obj.boogtype_str = obj.sporterboog.boogtype.beschrijving
 
             if self.rol_nu == Rollen.ROL_HWL:
-                obj.url_wijzig = reverse('Schutter:schietmomenten',
+                obj.url_wijzig = reverse('Sporter:schietmomenten',
                                          kwargs={'deelnemer_pk': obj.pk})
 
             obj.kruisjes = list()

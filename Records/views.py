@@ -11,7 +11,7 @@ from django.db.models import Q
 from django.views.generic import ListView, TemplateView
 from django.templatetags.static import static
 from Plein.menu import menu_dynamics
-from NhbStructuur.models import NhbLid
+from Sporter.models import Sporter
 from .models import IndivRecord, BesteIndivRecords
 from .forms import ZoekForm
 from types import SimpleNamespace
@@ -240,20 +240,25 @@ class RecordsZoekView(ListView):
             if filter_nr and len(str(filter_nr)) == 6:
                 # zoek het NHB lid met dit nummer
                 try:
-                    lid = NhbLid.objects.get(nhb_nr=filter_nr)
-                except NhbLid.DoesNotExist:
+                    sporter = Sporter.objects.get(lid_nr=filter_nr)
+                except Sporter.DoesNotExist:
                     # geen lid met dit nummer
                     # of slecht getal
                     pass
                 else:
                     # zoek alle records van dit lid
-                    return IndivRecord.objects.filter(nhb_lid=lid)
+                    return IndivRecord.objects.filter(sporter=sporter)
             else:
-                return IndivRecord.objects.filter(
+                return (IndivRecord
+                        .objects
+                        .filter(
                                 Q(soort_record__icontains=zoekterm) |
                                 Q(naam__icontains=zoekterm) |
                                 Q(plaats__icontains=zoekterm) |
-                                Q(land__icontains=zoekterm)).order_by('-datum', 'soort_record')[:settings.RECORDS_MAX_ZOEKRESULTATEN]
+                                Q(land__icontains=zoekterm) |
+                                Q(sporter__unaccented_naam__icontains=zoekterm))
+                        .order_by('-datum',
+                                  'soort_record'))[:settings.RECORDS_MAX_ZOEKRESULTATEN]
 
         return None
 

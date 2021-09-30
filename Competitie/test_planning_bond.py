@@ -6,16 +6,17 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
+from Competitie.models import (Competitie, CompetitieKlasse,
+                               DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
+                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
+from Competitie.operations import competities_aanmaken
+from Competitie.test_fase import zet_competitie_fase
 from Functie.models import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
-from Schutter.models import SchutterBoog
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
-from Overig.e2ehelpers import E2EHelpers
-from .models import (Competitie, CompetitieKlasse,
-                     DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
-                     RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
-from .operations import competities_aanmaken
-from .test_fase import zet_competitie_fase
+from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -25,30 +26,38 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
+    url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'  # comp_pk
+    url_doorzetten_bk = '/bondscompetities/%s/doorzetten/bk/'  # comp_pk
+
+    testdata = None
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+
     def _prep_beheerder_lid(self, voornaam):
-        nhb_nr = self._next_nhbnr
-        self._next_nhbnr += 1
+        lid_nr = self._next_lid_nr
+        self._next_lid_nr += 1
 
-        lid = NhbLid()
-        lid.nhb_nr = nhb_nr
-        lid.geslacht = "M"
-        lid.voornaam = voornaam
-        lid.achternaam = "Tester"
-        lid.email = voornaam.lower() + "@nhb.test"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = self.nhbver_101
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = lid_nr
+        sporter.geslacht = "M"
+        sporter.voornaam = voornaam
+        sporter.achternaam = "Tester"
+        sporter.email = voornaam.lower() + "@nhb.test"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = self.nhbver_101
+        sporter.save()
 
-        return self.e2e_create_account(nhb_nr, lid.email, lid.voornaam, accepteer_vhpg=True)
+        return self.e2e_create_account(lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
 
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        self.account_admin = self.e2e_create_account_admin()
-
-        self._next_nhbnr = 100001
+        self._next_lid_nr = 100001
 
         self.rayon_1 = NhbRayon.objects.get(rayon_nr=1)
         self.rayon_2 = NhbRayon.objects.get(rayon_nr=2)
@@ -86,11 +95,6 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
 
-        # maak een BB aan (geen NHB lid)
-        self.account_bb = self.e2e_create_account('bb', 'bko@nhb.test', 'BB', accepteer_vhpg=True)
-        self.account_bb.is_BB = True
-        self.account_bb.save()
-
         # maak test leden aan die we kunnen koppelen aan beheerders functies
         self.account_bko_18 = self._prep_beheerder_lid('BKO')
         self.account_rko1_18 = self._prep_beheerder_lid('RKO1')
@@ -99,17 +103,17 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.account_rcl101_25 = self._prep_beheerder_lid('RCL101-25')
         self.account_rcl112_18 = self._prep_beheerder_lid('RCL112')
         self.account_schutter = self._prep_beheerder_lid('Schutter')
-        self.lid_schutter = NhbLid.objects.get(nhb_nr=self.account_schutter.username)
+        self.lid_sporter_1 = Sporter.objects.get(lid_nr=self.account_schutter.username)
 
         self.account_schutter2 = self._prep_beheerder_lid('Schutter2')
-        self.lid_schutter2 = NhbLid.objects.get(nhb_nr=self.account_schutter2.username)
+        self.lid_sporter_2 = Sporter.objects.get(lid_nr=self.account_schutter2.username)
 
         self.boog_r = BoogType.objects.get(afkorting='R')
 
-        self.schutterboog = SchutterBoog(nhblid=self.lid_schutter,
-                                         boogtype=self.boog_r,
-                                         voor_wedstrijd=True)
-        self.schutterboog.save()
+        self.sporterboog = SporterBoog(sporter=self.lid_sporter_1,
+                                       boogtype=self.boog_r,
+                                       voor_wedstrijd=True)
+        self.sporterboog.save()
 
         # creëer een competitie met deelcompetities
         competities_aanmaken(jaar=2019)
@@ -118,7 +122,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.comp_25 = Competitie.objects.get(afstand='25')
 
         # klassengrenzen vaststellen om de competitie voorbij fase A te krijgen
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.url_klassegrenzen_vaststellen_18 = '/bondscompetities/%s/klassegrenzen/vaststellen/' % self.comp_18.pk
         resp = self.client.post(self.url_klassegrenzen_vaststellen_18)
@@ -147,9 +151,6 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
-        self.url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'     # comp_pk
-        self.url_doorzetten_bk = '/bondscompetities/%s/doorzetten/bk/'     # comp_pk
-
     def _regioschutters_inschrijven(self):
 
         boog_c = BoogType.objects.get(afkorting='C')
@@ -164,37 +165,37 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         # recurve, lid 1
         RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_101,
-                                    schutterboog=self.schutterboog,
-                                    bij_vereniging=self.schutterboog.nhblid.bij_vereniging,
+                                    sporterboog=self.sporterboog,
+                                    bij_vereniging=self.sporterboog.sporter.bij_vereniging,
                                     klasse=klasse_r,
                                     aantal_scores=7).save()
 
         # compound, lid 1
-        schutterboog = SchutterBoog(nhblid=self.lid_schutter,
-                                    boogtype=boog_c,
-                                    voor_wedstrijd=True)
-        schutterboog.save()
+        sporterboog = SporterBoog(sporter=self.lid_sporter_1,
+                                  boogtype=boog_c,
+                                  voor_wedstrijd=True)
+        sporterboog.save()
 
         RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_101,
-                                    schutterboog=schutterboog,
-                                    bij_vereniging=schutterboog.nhblid.bij_vereniging,
+                                    sporterboog=sporterboog,
+                                    bij_vereniging=sporterboog.sporter.bij_vereniging,
                                     klasse=klasse_c,
                                     aantal_scores=6).save()
 
         # compound, lid2
-        schutterboog = SchutterBoog(nhblid=self.lid_schutter2,
-                                    boogtype=boog_c,
-                                    voor_wedstrijd=True)
-        schutterboog.save()
+        sporterboog = SporterBoog(sporter=self.lid_sporter_2,
+                                  boogtype=boog_c,
+                                  voor_wedstrijd=True)
+        sporterboog.save()
 
         RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_101,
-                                    schutterboog=schutterboog,
-                                    bij_vereniging=schutterboog.nhblid.bij_vereniging,
+                                    sporterboog=sporterboog,
+                                    bij_vereniging=sporterboog.sporter.bij_vereniging,
                                     klasse=klasse_c,
                                     aantal_scores=6).save()
 
     def test_doorzetten_rk(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
         url = self.url_doorzetten_rk % self.comp_18.pk
@@ -241,7 +242,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
     def test_doorzetten_rk_geen_lid(self):
         # variant van doorzetten_rk met een lid dat niet meer bij een vereniging aangesloten is
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
         url = self.url_doorzetten_rk % self.comp_18.pk
@@ -266,8 +267,8 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assertEqual(3, RegioCompetitieSchutterBoog.objects.count())
         self.assertEqual(0, KampioenschapSchutterBoog.objects.count())
 
-        self.lid_schutter2.bij_vereniging = None
-        self.lid_schutter2.save()
+        self.lid_sporter_2.bij_vereniging = None
+        self.lid_sporter_2.save()
 
         with self.assert_max_queries(54):
             resp = self.client.post(url)
@@ -279,7 +280,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # verdere tests in test_planning_rayon.test_geen_vereniging check
 
     def test_doorzetten_bk(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
         url = self.url_doorzetten_bk % self.comp_18.pk
@@ -326,13 +327,13 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         team_klasse = CompetitieKlasse.objects.filter(indiv=None)[0]
         deeln_bk = KampioenschapSchutterBoog(deelcompetitie=deelcomp_bk_18,
-                                             schutterboog=self.schutterboog,
+                                             sporterboog=self.sporterboog,
                                              klasse=team_klasse)
         self.assertTrue(str(deeln_bk) != '')
 
     def test_doorzetten_bad(self):
         # moet BKO zijn
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
 
         with self.assert_max_queries(20):

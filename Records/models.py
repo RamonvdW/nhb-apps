@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from NhbStructuur.models import NhbLid
+from Sporter.models import Sporter
 
 
 DISCIPLINE = [('OD', 'Outdoor'),
@@ -33,44 +33,56 @@ LEEFTIJDSCATEGORIE = [('M', 'Master'),
 class IndivRecord(models.Model):
     """ een individueel record """
 
-    discipline = models.CharField(max_length=2, choices=DISCIPLINE)
+    # een uniek volgnummer (komt uit de administratie van de records)
+    # moet uniek zijn binnen elke discipline
+    # wordt ook gebruikt voor de permanente url
+    volg_nr = models.PositiveIntegerField()
 
-    volg_nr = models.PositiveIntegerField()         # uniek binnen elke discipline
+    # indoor, outdoor, 25m1p
+    discipline = models.CharField(max_length=2, choices=DISCIPLINE)
 
     soort_record = models.CharField(max_length=40)
 
+    # man of vrouw
     geslacht = models.CharField(max_length=1, choices=GESLACHT)
 
+    # cadet, junior, senior, etc.
     leeftijdscategorie = models.CharField(max_length=1, choices=LEEFTIJDSCATEGORIE)
 
+    # compound, recurve, etc.
     materiaalklasse = models.CharField(max_length=2, choices=MATERIAALKLASSE)
 
     para_klasse = models.CharField(max_length=20, blank=True)
 
+    # is het record verbeterbaar?
     verbeterbaar = models.BooleanField(default=True)
 
-    nhb_lid = models.ForeignKey(NhbLid, on_delete=models.PROTECT,
-                                blank=True,  # allow access input in form
-                                null=True)   # allow NULL relation in database
+    # sporter waar dit record bij hoort
+    # (niet voor alle records beschikbaar)
+    sporter = models.ForeignKey(Sporter, on_delete=models.PROTECT, blank=True, null=True)
 
+    # naam van de recordhouder
     naam = models.CharField(max_length=50)
 
+    # wanneer is het record geschoten?
     datum = models.DateField()               # dates before 1950 mean "no date known"
 
+    # waar is het record geschoten?
     plaats = models.CharField(max_length=50)
-
     land = models.CharField(max_length=50, blank=True)
 
+    # wat was de score?
     score = models.PositiveIntegerField()
-
     x_count = models.PositiveIntegerField(default=0)
 
+    # wat is het maximum?
     max_score = models.PositiveIntegerField(default=0)
 
+    # eventuele notities
     score_notitie = models.CharField(max_length=30, blank=True)
 
+    # was het toen een europeesch of wereld record?
     is_european_record = models.BooleanField(default=False)
-
     is_world_record = models.BooleanField(default=False)
 
     def __str__(self):

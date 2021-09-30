@@ -117,8 +117,10 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
                 qset = (Account
                         .objects
                         .exclude(is_staff=True)
-                        .filter(Q(username__icontains=zoekterm) |       # dekt zoeken op bondsnummer
-                                Q(unaccented_naam__icontains=zoekterm))
+                        .filter(Q(username__icontains=zoekterm) |           # dekt zoeken op bondsnummer
+                                Q(unaccented_naam__icontains=zoekterm) |
+                                Q(first_name__icontains=zoekterm) |         # dekt zoeken mét accenten
+                                Q(last_name__icontains=zoekterm))           # dekt zoeken mét accenten
                         .order_by('username'))
                 return qset[:50]
         except KeyError:

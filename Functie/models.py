@@ -112,8 +112,8 @@ def maak_functie(beschrijving, rol):
 
 
 def maak_account_vereniging_secretaris(nhb_ver, account):
-    """ Maak het NHB lid de secretaris van de NHB vereniging
-        Retourneert True als het NHB lid aan de SEC functie toegevoegd is
+    """ Geeft het account rechten om als secretaris van de vereniging de site te gebruiken
+        Retourneert True als het account aan de SEC functie toegevoegd is
     """
 
     # zoek de SEC functie van de vereniging erbij

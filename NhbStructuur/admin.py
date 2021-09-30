@@ -5,18 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import NhbRayon, NhbRegio, NhbCluster, NhbLid, NhbVereniging, Speelsterkte
-
-
-class NhbLidAdmin(admin.ModelAdmin):
-    """ Admin configuratie voor NhbLid klasse """
-    ordering = ('nhb_nr',)
-    search_fields = ('unaccented_naam', 'voornaam', 'achternaam', 'nhb_nr')
-
-    # filter mogelijkheid
-    list_filter = ('geslacht', 'para_classificatie', 'is_actief_lid')
-
-    list_select_related = True
+from .models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 
 
 class NhbVerenigingAdmin(admin.ModelAdmin):
@@ -28,6 +17,10 @@ class NhbVerenigingAdmin(admin.ModelAdmin):
     list_filter = ('regio',)
 
     list_select_related = True
+
+    filter_horizontal = ('clusters',)
+
+    readonly_fields = ('secretaris_lid',)
 
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
@@ -84,22 +77,8 @@ class NhbClusterAdmin(admin.ModelAdmin):
     list_select_related = ('regio',)
 
 
-class SpeelsterkteAdmin(admin.ModelAdmin):
-    """ Admin configuratie voor Speelsterkte klasse """
-
-    search_fields = ('beschrijving', 'category', 'discipline', 'lid__unaccented_naam')
-
-    list_filter = ('discipline', 'beschrijving', 'category')
-
-    readonly_fields = ('lid',)
-
-    list_select_related = True
-
-
-admin.site.register(NhbLid, NhbLidAdmin)
 admin.site.register(NhbVereniging, NhbVerenigingAdmin)
 admin.site.register(NhbCluster, NhbClusterAdmin)
-admin.site.register(Speelsterkte, SpeelsterkteAdmin)
 
 # NhbRayon en NhbRegio zijn hard-coded, dus geen admin interface
 # hard-coded data: zie NhbStructuur/migrations/m00??_nhbstructuur_20??

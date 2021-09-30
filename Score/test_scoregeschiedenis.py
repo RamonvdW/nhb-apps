@@ -6,20 +6,22 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Overig.e2ehelpers import E2EHelpers
+from NhbStructuur.models import NhbRegio, NhbVereniging
 from Functie.models import maak_functie
-from Schutter.models import SchutterBoog
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
+from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from .operations import score_indiv_ag_opslaan
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 
 class TestScoreGeschiedenis(E2EHelpers, TestCase):
     """ unit tests voor de Schutter applicatie, module Voorkeuren """
 
-    def _maak_uitslag(self, schutterboog):
+    url_geschiedenis = '/score/geschiedenis/'
+
+    def _maak_uitslag(self, sporterboog):
         # maak 2x wedstrijd + uitslag + score voor deze schutterboog, met geschiedenis
         uur_00 = datetime.time(hour=0)
         uur_18 = datetime.time(hour=18)
@@ -49,7 +51,7 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
                             tijd_einde_wedstrijd=uur_00,
                             uitslag=uitslag25).save()
 
-        score = Score(schutterboog=schutterboog,
+        score = Score(sporterboog=sporterboog,
                       afstand_meter=18,
                       waarde=260)
         score.save()
@@ -63,7 +65,7 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
                   door_account=self.account_hwl).save()
         uitslag18.scores.add(score)
 
-        score = Score(schutterboog=schutterboog,
+        score = Score(sporterboog=sporterboog,
                       afstand_meter=25,
                       waarde=234)
         score.save()
@@ -102,39 +104,37 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.functie_hwl.accounts.add(self.account_hwl)
 
         # maak een test lid aan
-        lid = NhbLid()
-        lid.nhb_nr = 100001
-        lid.geslacht = "M"
-        lid.voornaam = "Ramon"
-        lid.achternaam = "de Tester"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.account = self.account_normaal
-        lid.email = lid.account.email
-        lid.save()
-        self.nhblid1 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100001
+        sporter.geslacht = "M"
+        sporter.voornaam = "Ramon"
+        sporter.achternaam = "de Tester"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.account = self.account_normaal
+        sporter.email = sporter.account.email
+        sporter.save()
+        self.sporter_100001 = sporter
 
         self.boog_r = BoogType.objects.get(afkorting='R')
         self.boog_c = BoogType.objects.get(afkorting='C')
 
         # maak 2 schutterboog aan
-        schutterboog = SchutterBoog(nhblid=lid, boogtype=self.boog_c, voor_wedstrijd=True)
-        schutterboog.save()
-        self.schutterboog_100001c = schutterboog
+        sporterboog = SporterBoog(sporter=sporter, boogtype=self.boog_c, voor_wedstrijd=True)
+        sporterboog.save()
+        self.sporterboog_100001c = sporterboog
 
-        schutterboog = SchutterBoog(nhblid=lid, boogtype=self.boog_r, voor_wedstrijd=True)
-        schutterboog.save()
-        self.schutterboog_100001r = schutterboog
+        sporterboog = SporterBoog(sporter=sporter, boogtype=self.boog_r, voor_wedstrijd=True)
+        sporterboog.save()
+        self.sporterboog_100001r = sporterboog
 
         # maak een AG aan
-        score_indiv_ag_opslaan(schutterboog, 18, 9.123, None, 'test melding')
+        score_indiv_ag_opslaan(sporterboog, 18, 9.123, None, 'test melding')
 
-        score_indiv_ag_opslaan(schutterboog, 25, 9.251, self.account_hwl, 'test melding')
+        score_indiv_ag_opslaan(sporterboog, 25, 9.251, self.account_hwl, 'test melding')
 
-        self._maak_uitslag(schutterboog)
-
-        self.url_geschiedenis = '/score/geschiedenis/'
+        self._maak_uitslag(sporterboog)
 
     def test_mag_niet(self):
         # moet BB zijn om de geschiedenis in te mogen zien
@@ -159,14 +159,14 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wisselnaarrol_bb()
 
-        url = self.url_geschiedenis + '?zoekterm=%s' % self.nhblid1.nhb_nr
+        url = self.url_geschiedenis + '?zoekterm=%s' % self.sporter_100001.lid_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'plein/site_layout.dtl'))
 
-        self.assertContains(resp, self.nhblid1.volledige_naam())
+        self.assertContains(resp, self.sporter_100001.volledige_naam())
         self.assertContains(resp, 'Recurve')
         self.assertContains(resp, 'Aanvangsgemiddelde')
         self.assertContains(resp, 'test melding')

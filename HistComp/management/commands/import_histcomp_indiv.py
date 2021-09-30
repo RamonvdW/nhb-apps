@@ -6,10 +6,11 @@
 
 # importeer individuele competitie historie
 
-import argparse
 from django.core.management.base import BaseCommand
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
-from NhbStructuur.models import NhbLid, NhbVereniging
+from NhbStructuur.models import NhbVereniging
+from Sporter.models import Sporter
+import argparse
 
 
 TOEGESTANE_KLASSEN = ('Recurve', 'Compound', 'Barebow', 'Longbow', 'Instinctive Bow')
@@ -111,9 +112,9 @@ class Command(BaseCommand):
         for line in lines:
             line_nr += 1
             spl = line.strip().split(";")
-            # spl = [nhb_nr, klasse, score1..7, gemiddelde]
+            # spl = [lid_nr, klasse, score1..7, gemiddelde]
 
-            nhb_nr = spl[0]
+            lid_nr = spl[0]
 
             ver_nr = spl[1]
 
@@ -147,11 +148,11 @@ class Command(BaseCommand):
 
             # naam van het lid erbij zoeken (spelling in CRM is leidend)
             try:
-                lid = NhbLid.objects.get(nhb_nr=nhb_nr)
-            except NhbLid.DoesNotExist:
+                sporter = Sporter.objects.get(lid_nr=lid_nr)
+            except Sporter.DoesNotExist:
                 # kan naam nu niet vonden - toch importeren en later aanvullen
-                print("[WARNING] Kan naam niet vinden bij nhb nummer %s" % repr(nhb_nr))
-                lid = None
+                print("[WARNING] Kan naam niet vinden bij NHB nummer %s" % repr(lid_nr))
+                sporter = None
                 self._count_noname += 1
 
             # naam van de vereniging opzoeken en opslaan
@@ -185,9 +186,9 @@ class Command(BaseCommand):
             hist = HistCompetitieIndividueel()
             hist.histcompetitie = histcompetitie
             hist.rank = 0
-            hist.schutter_nr = nhb_nr
-            if lid:
-                hist.schutter_naam = " ".join([lid.voornaam, lid.achternaam])
+            hist.schutter_nr = lid_nr
+            if sporter:
+                hist.schutter_naam = " ".join([sporter.voornaam, sporter.achternaam])
             hist.boogtype = boogtype
             hist.vereniging_nr = ver_nr
             hist.vereniging_naam = ver_naam
@@ -298,7 +299,7 @@ class Command(BaseCommand):
                             # hierdoor valt helaas een gat in de ranking
                             self._count_dupe_bow += 1
                             robj.delete()
-                            # print("nhb_nr:%s, hout:%s, totaal_1:%s, totaal_2:%s" % (houtobj.schutter_nr, houtobj.boogtype, houtobj.totaal, robj.totaal))
+                            # print("lid_nr:%s, hout:%s, totaal_1:%s, totaal_2:%s" % (houtobj.schutter_nr, houtobj.boogtype, houtobj.totaal, robj.totaal))
                         # if
             # for
         # for

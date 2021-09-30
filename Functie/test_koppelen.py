@@ -8,10 +8,12 @@ from django.test import TestCase, Client
 from django.contrib.sessions.backends.db import SessionStore
 from Account.models import AccountSessions
 from Functie.rol import SESSIONVAR_ROL_MAG_WISSELEN
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging, NhbLid
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Logboek.models import LogboekRegel
-from Overig.e2ehelpers import E2EHelpers
+from Sporter.models import Sporter
 from .models import maak_functie, Functie
+from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -19,6 +21,20 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
     """ unit tests voor de Functie applicatie, functionaliteit Koppel bestuurders """
 
     test_after = ('Account', 'Functie.test_2fa', 'Functie.test_overzicht')
+
+    url_overzicht = '/functie/overzicht/'
+    url_overzicht_vereniging = '/functie/overzicht/vereniging/'
+    url_wijzig = '/functie/wijzig/%s/'  # functie_pk
+    url_wijzig_ontvang = '/functie/wijzig/%s/ontvang/'
+    url_activeer_functie = '/functie/activeer-functie/%s/'
+    url_activeer_rol = '/functie/activeer-rol/%s/'
+
+    testdata = None
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -28,7 +44,6 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         #   comp_type: 18/25
         #       rol: BKO, RKO (4x), RCL (16x)
 
-        self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.nhb', 'Normaal')
         self.account_beh1 = self.e2e_create_account('testbeheerder1', 'beh1@test.nhb', 'Beheerder1', accepteer_vhpg=True)
         self.account_beh2 = self.e2e_create_account('testbeheerder2', 'beh2@test.nhb', 'Beheerder2', accepteer_vhpg=True)
@@ -48,31 +63,31 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         ver.save()
         self.nhbver1 = ver
 
-        lid = NhbLid()
-        lid.nhb_nr = 100042
-        lid.geslacht = "M"
-        lid.voornaam = "Beh"
-        lid.achternaam = "eerder"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.account = self.account_beh2
-        lid.email = lid.account.email
-        lid.save()
-        self.nhblid1 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100042
+        sporter.geslacht = "M"
+        sporter.voornaam = "Beh"
+        sporter.achternaam = "eerder"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.account = self.account_beh2
+        sporter.email = sporter.account.email
+        sporter.save()
+        self.sporter_100042 = sporter
 
-        lid = NhbLid()
-        lid.nhb_nr = 10043
-        lid.geslacht = "M"
-        lid.voornaam = "Beh"
-        lid.achternaam = "eerder"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.account = self.account_normaal
-        lid.email = lid.account.email
-        lid.save()
-        self.nhblid3 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100043
+        sporter.geslacht = "M"
+        sporter.voornaam = "Beh"
+        sporter.achternaam = "eerder"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.account = self.account_normaal
+        sporter.email = sporter.account.email
+        sporter.save()
+        self.sporter_100043 = sporter
 
         self.functie_sec = maak_functie("SEC test", "SEC")
         self.functie_sec.nhb_ver = ver
@@ -105,41 +120,34 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.functie_hwl2.nhb_ver = ver2
         self.functie_hwl2.save()
 
-        lid = NhbLid()
-        lid.nhb_nr = 100024
-        lid.geslacht = "V"
-        lid.voornaam = "Ander"
-        lid.achternaam = "Lid"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=5)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=11)
-        lid.bij_vereniging = ver2
-        lid.account = self.account_ander
-        lid.email = lid.account.email
-        lid.save()
-        self.nhblid2 = lid
-
-        self.url_overzicht = '/functie/overzicht/'
-        self.url_overzicht_vereniging = '/functie/overzicht/vereniging/'
-        self.url_wijzig = '/functie/wijzig/%s/'     # functie_pk
-        self.url_wijzig_ontvang = '/functie/wijzig/%s/ontvang/'
-        self.url_activeer_functie = '/functie/activeer-functie/%s/'
-        self.url_activeer_rol = '/functie/activeer-rol/%s/'
+        sporter = Sporter()
+        sporter.lid_nr = 100024
+        sporter.geslacht = "V"
+        sporter.voornaam = "Ander"
+        sporter.achternaam = "Lid"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=5)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=11)
+        sporter.bij_vereniging = ver2
+        sporter.account = self.account_ander
+        sporter.email = sporter.account.email
+        sporter.save()
+        self.sporter_100024 = sporter
 
     def test_wijzig_view(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # neem de BB rol aan
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        self.nhblid1.voornaam = "Test1"
-        self.nhblid1.achternaam = "Beheerder"
-        self.nhblid1.save()
+        self.sporter_100042.voornaam = "Test1"
+        self.sporter_100042.achternaam = "Beheerder"
+        self.sporter_100042.save()
 
-        self.nhblid2.voornaam = "Test2"
-        self.nhblid2.achternaam = "Beheerder"
-        self.nhblid2.account = self.account_beh2
-        self.nhblid2.save()
+        self.sporter_100024.voornaam = "Test2"
+        self.sporter_100024.achternaam = "Beheerder"
+        self.sporter_100024.account = self.account_beh2
+        self.sporter_100024.save()
 
         # probeer een niet-bestaande functie
         with self.assert_max_queries(20):
@@ -210,7 +218,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertContains(resp, 'Verwijder beheerder', count=1)    # kan zichzelf verwijderen
 
     def test_koppel_ontkoppel_bb(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # neem de BB rol aan
         with self.assert_max_queries(20):
@@ -272,7 +280,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assert404(resp)  # 404 = Not allowed
 
     def test_koppel_bko(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # neem de BKO rol aan
         with self.assert_max_queries(25):
@@ -293,7 +301,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         # controleer correctheid toevoeging in het logboek
         regel = LogboekRegel.objects.all()[0]
         self.assertEqual(regel.gebruikte_functie, 'Rollen')
-        self.assertEqual(regel.activiteit, 'NHB lid 100042 (Beh eerder) is beheerder gemaakt voor functie RKO Rayon 3 Indoor')
+        self.assertEqual(regel.activiteit, 'Sporter 100042 (Beh eerder) is beheerder gemaakt voor functie RKO Rayon 3 Indoor')
 
         # check dat de BKO geen RCL kan koppelen
         # juiste URL om RCL te koppelen
@@ -324,7 +332,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         session.set_expiry(-5)      # expiry in -5 seconds
         session.save()
 
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wissel_naar_functie(self.functie_rko3)
         self.e2e_check_rol('RKO')
 
@@ -361,7 +369,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
     def test_koppel_rcl(self):
         # RCL mag HWL en WL koppelen
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # neem de RCL rol aan
         with self.assert_max_queries(25):
@@ -459,7 +467,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
         # poog een niet-NHB lid account te koppelen
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'add': self.account_admin.pk})
+            resp = self.client.post(url, {'add': self.testdata.account_admin.pk})
         self.assert403(resp)
         self.assertEqual(self.functie_hwl.accounts.count(), 2)
 
@@ -559,7 +567,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
     def test_administratieve_regio(self):
         # neem de BB rol aan
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
@@ -587,7 +595,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
     def test_rcl_bad_buiten_regio(self):
         # probeer een HWL te koppelen van een vereniging buiten de regio
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wissel_naar_functie(self.functie_rcl101)
 
         url = self.url_wijzig % self.functie_hwl.pk
@@ -597,7 +605,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
     def test_verwijder_ex_lid(self):
         # maak een gekoppelde beheerder ex-lid
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wissel_naar_functie(self.functie_rcl111)
 
         # koppel een HWL
@@ -612,9 +620,9 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'LET OP:')
 
         # maak de HWL een ex-lid
-        self.assertEqual(self.nhblid1.account, self.account_beh2)
-        self.nhblid1.bij_vereniging = None
-        self.nhblid1.save()
+        self.assertEqual(self.sporter_100042.account, self.account_beh2)
+        self.sporter_100042.bij_vereniging = None
+        self.sporter_100042.save()
 
         # haal de lijst met gekoppelde beheerder op
         url = self.url_wijzig % self.functie_hwl.pk
@@ -625,9 +633,9 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertContains(resp, 'LET OP: geen lid meer bij een vereniging')
 
         # maak de HWL lid bij een andere vereniging
-        self.assertEqual(self.nhblid1.account, self.account_beh2)
-        self.nhblid1.bij_vereniging = self.nhbver2
-        self.nhblid1.save()
+        self.assertEqual(self.sporter_100042.account, self.account_beh2)
+        self.sporter_100042.bij_vereniging = self.nhbver2
+        self.sporter_100042.save()
 
         # haal de lijst met gekoppelde beheerder op
         url = self.url_wijzig % self.functie_hwl.pk
@@ -660,7 +668,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         session = SessionStore(session_key_beh1)
         self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN], False)
 
-        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
 
         # koppel beheerder1 aan zijn eerste rol

@@ -33,7 +33,7 @@
     <p>&nbsp;</p>
     <h5>Account aanmaken</h5>
     <p>Ben je lid van de NHB (heb je een bondsnummer?) maak dan een account aan en log in, dan tonen we informatie die voor jou relevant is.</p>
-    <p><a class="btn-nhb-blauw" href="{% url 'Schutter:registreer' %}">
+    <p><a class="btn-nhb-blauw" href="{% url 'Sporter:registreer' %}">
         <i class="material-icons-round left">add</i>Account aanmaken</a></p>
 
 

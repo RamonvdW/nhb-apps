@@ -11,13 +11,15 @@ from Competitie.operations import competities_aanmaken
 from Functie.models import maak_functie, Functie
 from Mailer.models import MailQueue
 from Overig.models import SiteTijdelijkeUrl
-from Overig.e2ehelpers import E2EHelpers
+from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestFunctieWijzigEmail(E2EHelpers, TestCase):
     """ unit tests voor de Functie applicatie; module VHPG """
 
     test_after = ('Functie.test_2fa', 'Functie.wisselvanrol')
+
+    url_wijzig_email = '/functie/wijzig-email/%s/'  # % functie_pk
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -57,8 +59,6 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.functie_wl = maak_functie("WL test", "WL")
         self.functie_wl.nhb_ver = ver
         self.functie_wl.save()
-
-        self.url_wijzig_email = '/functie/wijzig-email/%s/'  # % functie_pk
 
     def _check_wijzigbaar(self, functie):
         url = self.url_wijzig_email % functie.pk

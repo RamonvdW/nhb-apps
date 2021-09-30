@@ -3,14 +3,14 @@
 
 # this line + shebang ensures python is taken from the user's PATH
 # python sees this as a string and ignores it
-"exec" "python" "$0" "$@"
+"exec" "python3" "$0" "$@"
 
 #  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management import execute_from_command_line
-from Overig.e2estatus import validated_templates, included_templates
+from TestHelpers.e2estatus import validated_templates, included_templates
 from pathlib import Path
 import sys
 import os

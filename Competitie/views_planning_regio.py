@@ -24,7 +24,6 @@ from .operations import maak_deelcompetitie_ronde
 from .menu import menu_dynamics_competitie
 from types import SimpleNamespace
 import datetime
-import math
 
 
 TEMPLATE_COMPETITIE_PLANNING_REGIO = 'competitie/planning-regio.dtl'
@@ -234,7 +233,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                                                competitie=deelcomp.competitie,
                                                nhb_rayon=deelcomp.nhb_regio.rayon)
             context['url_rayon'] = reverse('Competitie:rayon-planning',
-                                           kwargs={'deelcomp_pk': rayon.pk})
+                                           kwargs={'rk_deelcomp_pk': rayon.pk})
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context

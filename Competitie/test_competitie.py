@@ -5,18 +5,20 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+# from django.utils import timezone
 from BasisTypen.models import BoogType, TeamWedstrijdklasse
-from HistComp.models import HistCompetitie, HistCompetitieIndividueel
-from NhbStructuur.models import NhbRegio, NhbVereniging, NhbLid
-from Overig.e2ehelpers import E2EHelpers
-from Schutter.models import SchutterBoog
 from Functie.models import maak_functie
-from .models import (Competitie, DeelCompetitie, CompetitieKlasse, CompetitieMutatie,
-                     INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3,
-                     DAGDEEL_AFKORTINGEN)
-from .operations import (competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand,
-                         competitie_klassegrenzen_vaststellen)
-from .test_fase import zet_competitie_fase
+from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from NhbStructuur.models import NhbRegio, NhbVereniging
+from Sporter.models import Sporter, SporterBoog
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse, CompetitieMutatie,
+                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3,
+                               DAGDEEL_AFKORTINGEN)
+from Competitie.operations import (competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand,
+                                   competitie_klassegrenzen_vaststellen)
+from Competitie.test_fase import zet_competitie_fase
+from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 import datetime
 
 
@@ -50,15 +52,26 @@ class TestCompetitie(E2EHelpers, TestCase):
 
     test_after = ('BasisTypen', 'Functie', 'Competitie.test_fase')
 
+    url_kies = '/bondscompetities/'
+    url_overzicht = '/bondscompetities/%s/'
+    url_instellingen = '/bondscompetities/instellingen-volgende-competitie/'
+    url_aanmaken = '/bondscompetities/aanmaken/'
+    url_ag_vaststellen_afstand = '/bondscompetities/ag-vaststellen/%s/'  # afstand
+    url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'  # comp_pk
+    url_klassegrenzen_tonen = '/bondscompetities/%s/klassegrenzen/tonen/'  # comp_pk
+
+    testdata = None
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
+        cls.testdata.maak_clubs_en_sporters()
+
     def setUp(self):
         """ eenmalige setup voor alle tests
             wordt als eerste aangeroepen
         """
-        # maak een BB aan, nodig om de competitie defaults in te zien
-        self.account_bb = self.e2e_create_account('bb', 'bb@test.com', 'BB', accepteer_vhpg=True)
-        self.account_bb.is_BB = True
-        self.account_bb.save()
-
         # deze test is afhankelijk van de standaard regio's
         self.regio_101 = regio = NhbRegio.objects.get(regio_nr=101)
 
@@ -71,19 +84,19 @@ class TestCompetitie(E2EHelpers, TestCase):
         ver.save()
 
         # maak een volwassen test lid aan (komt in groep met klasse onbekend)
-        lid = NhbLid()
-        lid.nhb_nr = 100001
-        lid.geslacht = "M"
-        lid.voornaam = "Ramon"
-        lid.achternaam = "de Tester"
-        lid.email = "rdetester@gmail.not"
-        lid.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        lid.bij_vereniging = ver
-        self.account_lid = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)
-        lid.account = self.account_lid
-        lid.save()
-        self.lid_100001 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100001
+        sporter.geslacht = "M"
+        sporter.voornaam = "Ramon"
+        sporter.achternaam = "de Tester"
+        sporter.email = "rdetester@gmail.not"
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = ver
+        self.account_lid = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
+        sporter.account = self.account_lid
+        sporter.save()
+        self.sporter_100001 = sporter
 
         self.functie_hwl = maak_functie('HWL test', 'HWL')
         self.functie_hwl.nhb_ver = ver
@@ -91,48 +104,48 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.functie_hwl.accounts.add(self.account_lid)
 
         # maak een jeugdlid aan (komt in BB jeugd zonder klasse onbekend)
-        lid = NhbLid()
-        lid.nhb_nr = 100002
-        lid.geslacht = "M"
-        lid.voornaam = "Ramon"
-        lid.achternaam = "het Testertje"
-        lid.email = "rdetestertje@gmail.not"
-        lid.geboorte_datum = datetime.date(year=2008, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2015, month=11, day=12)
-        lid.bij_vereniging = ver
-        self.account_jeugdlid = self.e2e_create_account(lid.nhb_nr, lid.email, lid.voornaam)
-        lid.account = self.account_jeugdlid
-        lid.save()
-        self.lid_100002 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100002
+        sporter.geslacht = "M"
+        sporter.voornaam = "Ramon"
+        sporter.achternaam = "het Testertje"
+        sporter.email = "rdetestertje@gmail.not"
+        sporter.geboorte_datum = datetime.date(year=2008, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2015, month=11, day=12)
+        sporter.bij_vereniging = ver
+        self.account_jeugdlid = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
+        sporter.account = self.account_jeugdlid
+        sporter.save()
+        self.sporter_100002 = sporter
 
         boog_bb = BoogType.objects.get(afkorting='BB')
         boog_ib = BoogType.objects.get(afkorting='IB')
 
-        # maak een schutterboog aan voor het jeugdlid (nodig om aan te melden)
-        schutterboog = SchutterBoog(nhblid=self.lid_100002, boogtype=boog_bb, voor_wedstrijd=False)
-        schutterboog.save()
-        self.schutterboog_100002 = schutterboog
+        # maak een sporterboog aan voor het jeugdlid (nodig om aan te melden)
+        sporterboog = SporterBoog(sporter=self.sporter_100002, boogtype=boog_bb, voor_wedstrijd=False)
+        sporterboog.save()
+        self.sporterboog_100002 = sporterboog
 
-        lid = NhbLid()
-        lid.nhb_nr = 100003
-        lid.geslacht = "V"
-        lid.voornaam = "Zus"
-        lid.achternaam = "de Testerin"
-        lid.email = "zus@gmail.not"
-        lid.geboorte_datum = datetime.date(year=2008, month=3, day=4)
-        lid.sinds_datum = datetime.date(year=2015, month=11, day=12)
-        lid.bij_vereniging = ver
-        lid.save()
-        self.lid_100003 = lid
+        sporter = Sporter()
+        sporter.lid_nr = 100003
+        sporter.geslacht = "V"
+        sporter.voornaam = "Zus"
+        sporter.achternaam = "de Testerin"
+        sporter.email = "zus@gmail.not"
+        sporter.geboorte_datum = datetime.date(year=2008, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2015, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.save()
+        self.sporter_100003 = sporter
 
-        # maak een schutterboog aan voor het lid (nodig om aan te melden)
-        schutterboog = SchutterBoog(nhblid=self.lid_100003, boogtype=boog_bb, voor_wedstrijd=True)
-        schutterboog.save()
-        self.schutterboog_100003 = schutterboog
+        # maak een sporterboog aan voor het lid (nodig om aan te melden)
+        sporterboog = SporterBoog(sporter=self.sporter_100003, boogtype=boog_bb, voor_wedstrijd=True)
+        sporterboog.save()
+        self.sporterboog_100003 = sporterboog
 
-        # maak een schutterboog aan voor het lid (nodig om aan te melden)
-        schutterboog = SchutterBoog(nhblid=self.lid_100001, boogtype=boog_ib, voor_wedstrijd=True)
-        schutterboog.save()
+        # maak een sporterboog aan voor het lid (nodig om aan te melden)
+        sporterboog = SporterBoog(sporter=self.sporter_100001, boogtype=boog_ib, voor_wedstrijd=True)
+        sporterboog.save()
 
         # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
         histcomp = HistCompetitie()
@@ -155,8 +168,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
-        rec.schutter_nr = self.lid_100001.nhb_nr
-        rec.schutter_naam = self.lid_100001.volledige_naam()
+        rec.schutter_nr = self.sporter_100001.lid_nr
+        rec.schutter_naam = self.sporter_100001.volledige_naam()
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'R'
@@ -175,8 +188,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp2
         rec.rank = 1
-        rec.schutter_nr = self.lid_100001.nhb_nr
-        rec.schutter_naam = self.lid_100001.volledige_naam()
+        rec.schutter_nr = self.sporter_100001.lid_nr
+        rec.schutter_naam = self.sporter_100001.volledige_naam()
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'R'
@@ -195,8 +208,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 100
-        rec.schutter_nr = self.lid_100001.nhb_nr
-        rec.schutter_naam = self.lid_100001.volledige_naam()
+        rec.schutter_nr = self.sporter_100001.lid_nr
+        rec.schutter_naam = self.sporter_100001.volledige_naam()
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'IB'
@@ -215,8 +228,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
-        rec.schutter_nr = self.lid_100002.nhb_nr
-        rec.schutter_naam = self.lid_100002.volledige_naam()
+        rec.schutter_nr = self.sporter_100002.lid_nr
+        rec.schutter_naam = self.sporter_100002.volledige_naam()
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'C'
@@ -235,8 +248,8 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
-        rec.schutter_nr = self.lid_100002.nhb_nr
-        rec.schutter_naam = self.lid_100002.volledige_naam()
+        rec.schutter_nr = self.sporter_100002.lid_nr
+        rec.schutter_naam = self.sporter_100002.volledige_naam()
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
         rec.boogtype = 'BB'
@@ -251,7 +264,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec.gemiddelde = 5.321
         rec.save()
 
-        # maak een record aan voor iemand die geen nhblid meer is
+        # maak een record aan voor iemand die geen lid meer is
         rec = HistCompetitieIndividueel()
         rec.histcompetitie = histcomp
         rec.rank = 1
@@ -271,36 +284,29 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec.gemiddelde = 5.321
         rec.save()
 
-        self.url_kies = '/bondscompetities/'
-        self.url_overzicht = '/bondscompetities/%s/'
-        self.url_instellingen = '/bondscompetities/instellingen-volgende-competitie/'
-        self.url_aanmaken = '/bondscompetities/aanmaken/'
-        self.url_ag_vaststellen_afstand = '/bondscompetities/ag-vaststellen/%s/'                # afstand
-        self.url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'  # comp_pk
-        self.url_klassegrenzen_tonen = '/bondscompetities/%s/klassegrenzen/tonen/'              # comp_pk
-
     def _maak_many_histcomp(self):
         # maak veel histcomp records aan
         # zodat de AG-vaststellen bulk-create limiet van 500 gehaald wordt
 
-        nhb_nr = 190000
+        lid_nr = 190000
         records = list()
-        leden = list()
+        sporters = list()
 
         geboorte_datum = datetime.date(year=1970, month=3, day=4)
         sinds_datum = datetime.date(year=2001, month=11, day=12)
 
         for lp in range(550):
-            lid = NhbLid(nhb_nr=nhb_nr + lp,
-                         geslacht='V',
-                         geboorte_datum=geboorte_datum,
-                         sinds_datum=sinds_datum)
-            leden.append(lid)
+            sporter = Sporter(
+                            lid_nr=lid_nr + lp,
+                            geslacht='V',
+                            geboorte_datum=geboorte_datum,
+                            sinds_datum=sinds_datum)
+            sporters.append(sporter)
 
             rec = HistCompetitieIndividueel(histcompetitie=self.histcomp,
                                             boogtype='R',
                                             rank=lp,
-                                            schutter_nr=lid.nhb_nr,
+                                            schutter_nr=sporter.lid_nr,
                                             vereniging_nr=1000,
                                             score1=1,
                                             score2=2,
@@ -314,7 +320,7 @@ class TestCompetitie(E2EHelpers, TestCase):
             records.append(rec)
         # for
 
-        NhbLid.objects.bulk_create(leden)
+        Sporter.objects.bulk_create(sporters)
         HistCompetitieIndividueel.objects.bulk_create(records)
 
     def test_anon(self):
@@ -347,7 +353,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_instellingen(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
@@ -358,7 +364,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/bb-instellingen-nieuwe-competitie.dtl', 'plein/site_layout.dtl'))
 
     def test_aanmaken(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
@@ -379,7 +385,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assertEqual(1, CompetitieMutatie.objects.count())       # voor achtergrondtaak
 
     def test_dubbel_aanmaken(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
@@ -402,7 +408,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assertEqual(DeelCompetitie.objects.count(), 2*(1 + 4 + 16))
 
     def test_regio_settings_overnemen(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
@@ -462,7 +468,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # for
 
     def test_ag_vaststellen(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
 
         # trigger de permissie check (want: verkeerde rol)
         self.e2e_wisselnaarrol_gebruiker()
@@ -515,10 +521,10 @@ class TestCompetitie(E2EHelpers, TestCase):
         aanvangsgemiddelden_vaststellen_voor_afstand(18)
         aanvangsgemiddelden_vaststellen_voor_afstand(25)
 
-        # controleer dat er geen dubbele SchutterBoog records aangemaakt zijn
-        self.assertEqual(1, SchutterBoog.objects.filter(nhblid=self.lid_100001, boogtype__afkorting='R').count())
-        self.assertEqual(1, SchutterBoog.objects.filter(nhblid=self.lid_100002, boogtype__afkorting='BB').count())
-        self.assertEqual(554, SchutterBoog.objects.count())
+        # controleer dat er geen dubbele SporterBoog records aangemaakt zijn
+        self.assertEqual(1, SporterBoog.objects.filter(sporter=self.sporter_100001, boogtype__afkorting='R').count())
+        self.assertEqual(1, SporterBoog.objects.filter(sporter=self.sporter_100002, boogtype__afkorting='BB').count())
+        self.assertEqual(14954, SporterBoog.objects.count())
 
         # controleer dat het "ag vaststellen" kaartje er nog steeds is
         # dit keer met de "voor het laatst gedaan" notitie
@@ -530,7 +536,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assertContains(resp, "voor het laatst gedaan")
 
     def test_ag_vaststellen_cornercases(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
 
         # maak de competities aan - de voorwaarde om AG's vast te stellen
@@ -567,7 +573,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
 
     def test_klassegrenzen_vaststellen(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
@@ -579,7 +585,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         comp18_pk = comp18.pk
         url = self.url_klassegrenzen_vaststellen % comp18_pk
 
-        with self.assert_max_queries(32):
+        with self.assert_max_queries(32, check_duration=False):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -615,7 +621,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assertTrue(str(obj) != "")
 
     def test_klassegrenzen_vaststellen_cornercases(self):
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
@@ -636,7 +642,7 @@ class TestCompetitie(E2EHelpers, TestCase):
 
     def test_klassegrenzen_tonen(self):
         # competitie opstarten
-        self.e2e_login_and_pass_otp(self.account_bb)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
@@ -654,8 +660,11 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assertContains(resp, 'De klassegrenzen voor de ')
 
         # klassegrenzen vaststellen (18m en 25m)
+        # s1 = timezone.now()
         with self.assert_max_queries(86):
             resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_18.pk)
+        # s2 = timezone.now()
+        # print('duration:', s2-s1)
         self.assert_is_redirect_not_plein(resp)        # redirect = success
         with self.assert_max_queries(86):
             resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_25.pk)

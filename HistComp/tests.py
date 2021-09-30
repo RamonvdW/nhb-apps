@@ -6,14 +6,18 @@
 
 from django.test import TestCase
 from django.core import management
-from Overig.e2ehelpers import E2EHelpers
 from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTeam
 from .views import RESULTS_PER_PAGE
+from TestHelpers.e2ehelpers import E2EHelpers
 import io
 
 
 class TestHistComp(E2EHelpers, TestCase):
     """ unittests voor de HistComp applicatie """
+
+    url_hist_top = '/bondscompetities/hist/'
+    url_hist_team = '/bondscompetities/hist/team/%s/'  # team_pk
+    url_hist_indiv = '/bondscompetities/hist/indiv/%s/'  # indiv_pk
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -85,10 +89,6 @@ class TestHistComp(E2EHelpers, TestCase):
         obj.klasse = 'Too old'
         obj.is_team = False
         obj.save()
-
-        self.url_hist_top = '/bondscompetities/hist/'
-        self.url_hist_team = '/bondscompetities/hist/team/%s/'      # team_pk
-        self.url_hist_indiv = '/bondscompetities/hist/indiv/%s/'    # indiv_pk
 
     def _add_many_records(self, pages):
         # paginator laat 100 entries per pagina zien, dus voeg er 100 toe

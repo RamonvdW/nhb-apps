@@ -342,7 +342,11 @@
                     <tr>
                         <td>Maximum aantal sporters op 18 meter:</td>
                         <td colspan="2">
-                            <input type="number" min="0" max="99" name="max_sporters_18m" value="{{ locatie.max_sporters_18m }}" onchange="gewijzigd()">
+                            {% if readonly %}
+                                <span>{{ locatie.max_sporters_18m }} sporters</span>
+                            {% else %}
+                                <input type="number" min="0" max="99" name="max_sporters_18m" value="{{ locatie.max_sporters_18m }}" onchange="gewijzigd()">
+                            {% endif %}
                         </td>
                         {% if not readonly %}
                             <td><!-- kolom voor de wijzig knoppen --></td>
@@ -352,7 +356,11 @@
                     <tr>
                         <td>Maximum aantal sporters op 25 meter:</td>
                         <td colspan="2">
-                            <input type="number" min="0" max="99" name="max_sporters_25m" value="{{ locatie.max_sporters_25m }}" onchange="gewijzigd()">
+                            {% if readonly %}
+                                <span>{{ locatie.max_sporters_25m }} sporters</span>
+                            {% else %}
+                                <input type="number" min="0" max="99" name="max_sporters_25m" value="{{ locatie.max_sporters_25m }}" onchange="gewijzigd()">
+                            {% endif %}
                         </td>
                         {% if not readonly %}
                             <td><!-- kolom voor de wijzig knoppen --></td>

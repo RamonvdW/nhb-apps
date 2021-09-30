@@ -27,7 +27,7 @@ SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK = 'gebruiker_rol_functie_pk'
 SESSIONVAR_ROL_BESCHRIJVING = 'gebruiker_rol_beschrijving'
 
 
-# FUTURE: overweeg verwijderen ROL_NONE (nodig voor accounts die geen nhblid zijn?)
+# FUTURE: overweeg verwijderen ROL_NONE (nodig voor accounts die geen NHB lid zijn?)
 
 class Rollen(enum.IntEnum):
     """ definitie van de rollen met codes
@@ -44,7 +44,7 @@ class Rollen(enum.IntEnum):
     ROL_HWL = 6         # Hoofdwedstrijdleider van een vereniging, alle competities
     ROL_WL = 7          # Wedstrijdleider van een vereniging, alle competities
     ROL_SEC = 10        # Secretaris van een vereniging
-    ROL_SCHUTTER = 20   # Individuele schutter en NHB lid
+    ROL_SPORTER = 20    # Individuele schutter en NHB lid
     ROL_NONE = 99       # geen rol
 
     """ LET OP!
@@ -64,7 +64,7 @@ url2rol = {
     'HWL': Rollen.ROL_HWL,
     'WL': Rollen.ROL_WL,
     'SEC': Rollen.ROL_SEC,
-    'sporter': Rollen.ROL_SCHUTTER,
+    'sporter': Rollen.ROL_SPORTER,
     'geen': Rollen.ROL_NONE
 }
 
@@ -77,7 +77,7 @@ rol2url = {
     Rollen.ROL_HWL: 'HWL',
     Rollen.ROL_WL: 'WL',
     Rollen.ROL_SEC: 'SEC',
-    Rollen.ROL_SCHUTTER: 'sporter',
+    Rollen.ROL_SPORTER: 'sporter',
     Rollen.ROL_NONE: 'geen',
 }
 
@@ -227,10 +227,10 @@ def rol_zet_sessionvars(account, request):
 
     rol = Rollen.ROL_NONE
     if account.is_authenticated:
-        if account.nhblid_set.count():
-            # koppeling met NhbLid, dus dit is een (potentiële) Schutter
-            rollen_vast.append(Rollen.ROL_SCHUTTER)
-            rol = Rollen.ROL_SCHUTTER
+        if account.sporter_set.count():
+            # koppeling met Sporter, dus dit is een (potentiële) Schutter
+            rollen_vast.append(Rollen.ROL_SPORTER)
+            rol = Rollen.ROL_SPORTER
         else:
             if account.is_staff:
                 # admin maar geen NHB lid koppeling
@@ -333,10 +333,10 @@ def rol_bepaal_beschrijving(rol, functie_pk=None):
         beschr = 'Manager competitiezaken'
     elif rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC):
         beschr = functie.beschrijving
-    elif rol == Rollen.ROL_SCHUTTER:
+    elif rol == Rollen.ROL_SPORTER:
         beschr = 'Sporter'
     else:   # ook rol == None
-        # dit komt alleen voor als account geen nhblid is maar wel OTP mag koppelen (is_staff of is_BB)
+        # dit komt alleen voor als account geen lid is maar wel OTP mag koppelen (is_staff of is_BB)
         beschr = 'Gebruiker'
     return beschr
 

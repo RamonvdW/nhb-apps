@@ -14,6 +14,7 @@ from . import (views_aangemeld,
                views_planning_bond,
                views_planning_rayon,
                views_regio_teams,
+               views_rayon_teams,
                views_uitslagen,
                views_scores)
 
@@ -128,12 +129,13 @@ urlpatterns = [
          views_aangemeld.LijstAangemeldRegiocompAlsBestandView.as_view(),
          name='lijst-regiocomp-regio-als-bestand'),
 
+
     # RK selectie
-    path('lijst-rayonkampioenschappen/<deelcomp_pk>/',
+    path('lijst-rayonkampioenschappen/<rk_deelcomp_pk>/',
          views_planning_rayon.LijstRkSelectieView.as_view(),
          name='lijst-rk'),
 
-    path('lijst-rayonkampioenschappen/<deelcomp_pk>/bestand/',
+    path('lijst-rayonkampioenschappen/<rk_deelcomp_pk>/bestand/',
          views_planning_rayon.LijstRkSelectieAlsBestandView.as_view(),
          name='lijst-rk-als-bestand'),
 
@@ -141,6 +143,15 @@ urlpatterns = [
          views_planning_rayon.WijzigStatusRkSchutterView.as_view(),
          name='wijzig-status-rk-deelnemer'),
 
+
+    # RK teams
+    path('rk/<comp_pk>/teams/<subset>/',
+         views_rayon_teams.RayonTeamsAlleView.as_view(),
+         name='rayon-teams-alle'),
+
+    path('rk/<rk_deelcomp_pk>/teams/',
+         views_rayon_teams.RayonTeamsRKOView.as_view(),
+         name='rayon-teams'),
 
     # planning regio
     path('planning/regio/<deelcomp_pk>/',
@@ -173,11 +184,11 @@ urlpatterns = [
 
 
     # planning rk
-    path('planning/rk/<deelcomp_pk>/limieten/',
+    path('planning/rk/<rk_deelcomp_pk>/limieten/',
          views_planning_rayon.RayonLimietenView.as_view(),
          name='rayon-limieten'),
 
-    path('planning/rk/<deelcomp_pk>/',
+    path('planning/rk/<rk_deelcomp_pk>/',
          views_planning_rayon.RayonPlanningView.as_view(),
          name='rayon-planning'),
 
@@ -205,6 +216,10 @@ urlpatterns = [
          views_scores.ScoresRegioView.as_view(),
          name='scores-regio'),
 
+    path('scores/teams/<deelcomp_pk>/',
+         views_scores.ScoresRegioTeamsView.as_view(),
+         name='scores-regio-teams'),
+
 
     # uitslag invoeren
     path('scores/uitslag-invoeren/<wedstrijd_pk>/',
@@ -228,7 +243,7 @@ urlpatterns = [
          name='dynamic-deelnemers-ophalen'),
 
     path('scores/dynamic/check-nhbnr/',
-         views_scores.DynamicZoekOpNhbnrView.as_view(),
+         views_scores.DynamicZoekOpBondsnummerView.as_view(),
          name='dynamic-check-nhbnr'),
 
     path('scores/dynamic/scores-opslaan/',

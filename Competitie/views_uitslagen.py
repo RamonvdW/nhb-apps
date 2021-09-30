@@ -51,13 +51,13 @@ def get_schutter_regio_nr(request):
                              is_administratief=False)
                      .order_by('regio_nr'))[0]
             regio_nr = regio.regio_nr
-    elif rol_nu == Rollen.ROL_SCHUTTER:
+    elif rol_nu == Rollen.ROL_SPORTER:
         # schutter
         account = request.user
-        if account.nhblid_set.count() > 0:
-            nhblid = account.nhblid_set.all()[0]
-            if nhblid.is_actief_lid and nhblid.bij_vereniging:
-                nhb_ver = nhblid.bij_vereniging
+        if account.sporter_set.count() > 0:
+            sporter = account.sporter_set.all()[0]
+            if sporter.is_actief_lid and sporter.bij_vereniging:
+                nhb_ver = sporter.bij_vereniging
                 regio_nr = nhb_ver.regio.regio_nr
 
     return regio_nr
@@ -80,10 +80,10 @@ def get_schutter_ver_nr(request):
         if ver_nr < 0:
             # pak de vereniging van de ingelogde gebruiker
             account = request.user
-            if account.nhblid_set.count() > 0:
-                nhblid = account.nhblid_set.all()[0]
-                if nhblid.is_actief_lid and nhblid.bij_vereniging:
-                    ver_nr = nhblid.bij_vereniging.ver_nr
+            if account.sporter_set.count() > 0:
+                sporter = account.sporter_set.all()[0]
+                if sporter.is_actief_lid and sporter.bij_vereniging:
+                    ver_nr = sporter.bij_vereniging.ver_nr
 
     ver_nrs = list(NhbVereniging.objects.order_by('ver_nr').values_list('ver_nr', flat=True))
     if ver_nr not in ver_nrs:
@@ -143,8 +143,8 @@ class UitslagenVerenigingIndivView(TemplateView):
     def _get_deelnemers(deelcomp, boogtype, ver_nr):
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
-                      .select_related('schutterboog',
-                                      'schutterboog__nhblid',
+                      .select_related('sporterboog',
+                                      'sporterboog__sporter',
                                       'klasse',
                                       'klasse__indiv',
                                       'klasse__indiv__boogtype')
@@ -155,11 +155,27 @@ class UitslagenVerenigingIndivView(TemplateView):
 
         rank = 1
         for deelnemer in deelnemers:
-            lid = deelnemer.schutterboog.nhblid
+            sporter = deelnemer.sporterboog.sporter
             deelnemer.rank = rank
-            deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+            deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
             deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
             rank += 1
+
+            if False:
+                if deelnemer.score1 == 0:
+                    deelnemer.score1 = '-'
+                if deelnemer.score2 == 0:
+                    deelnemer.score2 = '-'
+                if deelnemer.score3 == 0:
+                    deelnemer.score3 = '-'
+                if deelnemer.score4 == 0:
+                    deelnemer.score4 = '-'
+                if deelnemer.score5 == 0:
+                    deelnemer.score5 = '-'
+                if deelnemer.score6 == 0:
+                    deelnemer.score6 = '-'
+                if deelnemer.score7 == 0:
+                    deelnemer.score7 = '-'
         # for
 
         return deelnemers
@@ -317,7 +333,7 @@ class UitslagenRegioIndivView(TemplateView):
         rank_v = 0
         asps_v = list()
         for deelnemer in asps:
-            if deelnemer.schutterboog.nhblid.geslacht == 'V':
+            if deelnemer.sporterboog.sporter.geslacht == 'V':
                 if rank_v == 0:
                     deelnemer.klasse_str = klasse_str + ', meisjes'
                     deelnemer.break_klasse = True
@@ -364,7 +380,7 @@ class UitslagenRegioIndivView(TemplateView):
             # bepaal welke (initiële) regio bij de huidige gebruiker past
             regio_nr = get_schutter_regio_nr(self.request)
         except ValueError:
-            raise Http404('Verkeer regionummer')
+            raise Http404('Verkeerd regionummer')
 
         # voorkom 404 voor leden in de administratieve regio
         if regio_nr == 100:
@@ -392,8 +408,8 @@ class UitslagenRegioIndivView(TemplateView):
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
                       .filter(deelcompetitie=deelcomp)
-                      .select_related('schutterboog',
-                                      'schutterboog__nhblid',
+                      .select_related('sporterboog',
+                                      'sporterboog__sporter',
                                       'bij_vereniging',
                                       'klasse',
                                       'klasse__indiv',
@@ -431,10 +447,26 @@ class UitslagenRegioIndivView(TemplateView):
             klasse = deelnemer.klasse.indiv.volgorde
 
             rank += 1
-            lid = deelnemer.schutterboog.nhblid
+            sporter = deelnemer.sporterboog.sporter
             deelnemer.rank = rank
-            deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+            deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
+
+            if False:
+                if deelnemer.score1 == 0:
+                    deelnemer.score1 = '-'
+                if deelnemer.score2 == 0:
+                    deelnemer.score2 = '-'
+                if deelnemer.score3 == 0:
+                    deelnemer.score3 = '-'
+                if deelnemer.score4 == 0:
+                    deelnemer.score4 = '-'
+                if deelnemer.score5 == 0:
+                    deelnemer.score5 = '-'
+                if deelnemer.score6 == 0:
+                    deelnemer.score6 = '-'
+                if deelnemer.score7 == 0:
+                    deelnemer.score7 = '-'
 
             if is_asp:
                 asps.append(deelnemer)
@@ -555,7 +587,7 @@ class UitslagenRegioTeamsView(TemplateView):
             # bepaal welke (initiële) regio bij de huidige gebruiker past
             regio_nr = get_schutter_regio_nr(self.request)
         except ValueError:
-            raise Http404('Verkeer regionummer')
+            raise Http404('Verkeerd regionummer')
 
         # voorkom 404 voor leden in de administratieve regio
         if regio_nr == 100:
@@ -646,7 +678,10 @@ class UitslagenRegioTeamsView(TemplateView):
                 # laat deze voorlopig uit de uitslag
                 pass
             else:
-                tup = (poule.pk, team.klasse.team.volgorde, team.totaal_punten, team.totaal_score, team.pk, poule, team)
+                tup = (poule.pk, team.klasse.team.volgorde,
+                       0-team.totaal_punten,        # hoogste WP bovenaan
+                       0-team.totaal_score,         # hoogste score bovenaan
+                       team.pk, poule, team)
 
                 while len(team.ronde_scores) < 7:
                     team.ronde_scores.append('-')
@@ -745,6 +780,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
             ver_nr = kwargs['ver_nr'][:4]     # afkappen voor veiligheid
             ver_nr = int(ver_nr)
         except KeyError:
+            # TODO: onmogelijk om hier te komen (ivm URL design)
             # zoek de vereniging die bij de huidige gebruiker past
             ver_nr = get_schutter_ver_nr(self.request)
         except ValueError:
@@ -795,7 +831,8 @@ class UitslagenVerenigingTeamsView(TemplateView):
                        .objects
                        .filter(team__in=teams)
                        .prefetch_related('deelnemers_geselecteerd',
-                                         'deelnemers_feitelijk')
+                                         'deelnemers_feitelijk',
+                                         'scorehist_feitelijk')
                        .order_by('ronde_nr'))
         for ronde_team in ronde_teams:
             team = pk2team[ronde_team.team.pk]
@@ -803,6 +840,16 @@ class UitslagenVerenigingTeamsView(TemplateView):
             team.ronde_scores.append(ronde_team.team_score)
             team.totaal_score += ronde_team.team_score
             team.totaal_punten += ronde_team.team_punten
+
+            # haal de bevroren scores op
+            sb2score = dict()               # [sporterboog.pk] = score_waarde
+            for scorehist in (ronde_team
+                              .scorehist_feitelijk
+                              .select_related('score',
+                                              'score__sporterboog')
+                              .all()):
+                sb2score[scorehist.score.sporterboog.pk] = scorehist.nieuwe_waarde
+            # for
 
             geselecteerd_pks = list()
             for deelnemer in ronde_team.deelnemers_geselecteerd.all():
@@ -817,17 +864,20 @@ class UitslagenVerenigingTeamsView(TemplateView):
             # for
 
             for deelnemer in ronde_team.deelnemers_feitelijk.all():
-                if deelnemer.pk not in team.leden:
+                try:
+                    voorgaand = team.leden[deelnemer.pk]
+                except KeyError:
                     team.leden[deelnemer.pk] = voorgaand = list()
                     while len(voorgaand) < ronde_team.ronde_nr:
                         inzet = SimpleNamespace(tekst='-', score=-1)
                         voorgaand.append(inzet)
                     # while
-                else:
-                    voorgaand = team.leden[deelnemer.pk]
 
-                score = (deelnemer.score1, deelnemer.score2, deelnemer.score3,
-                         deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7)[ronde_team.ronde_nr - 1]
+                try:
+                    score = sb2score[deelnemer.sporterboog.pk]
+                except KeyError:
+                    # geen score van deze sporter
+                    score = 0
 
                 score_str = str(score)
                 if deelnemer.pk not in geselecteerd_pks:
@@ -879,25 +929,26 @@ class UitslagenVerenigingTeamsView(TemplateView):
         pk2deelnemer = dict()
         for deelnemer in (RegioCompetitieSchutterBoog
                           .objects
-                          .select_related('schutterboog',
-                                          'schutterboog__nhblid')
+                          .select_related('sporterboog',
+                                          'sporterboog__sporter')
                           .filter(pk__in=pks)):
             pk2deelnemer[deelnemer.pk] = deelnemer
         # for
 
         for team in teams:
-            # TODO: we kunnen de leden hier nog wat sorteren, bijvoorbeeld op score of aantal keer in team
-
             nieuw = list()
             for pk, voorgaand in team.leden.items():
                 deelnemer = pk2deelnemer[pk]
-                lid = deelnemer.schutterboog.nhblid
-                deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
-                tup = (deelnemer, voorgaand[1:])
+                sporter = deelnemer.sporterboog.sporter
+                deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
+                totaal = sum(inzet.score for inzet in voorgaand)
+                tup = (totaal, deelnemer.pk, deelnemer, voorgaand[1:])
                 nieuw.append(tup)
             # for
 
-            team.leden = nieuw
+            # TODO: sorteren zou eerder moeten zodat de doorgestreepte nul altijd de onderste is
+            nieuw.sort(reverse=True)
+            team.leden = [(deelnemer, voorgaand) for _, _, deelnemer, voorgaand in nieuw]
         # for
 
         # sorteer de teams
@@ -1000,7 +1051,7 @@ class UitslagenRayonIndivView(TemplateView):
         except KeyError:
             rayon_nr = 1
         except ValueError:
-            raise Http404('Verkeer rayonnummer')
+            raise Http404('Verkeerd rayonnummer')
 
         self._maak_filter_knoppen(context, comp, rayon_nr, comp_boog)
 
@@ -1034,7 +1085,7 @@ class UitslagenRayonIndivView(TemplateView):
                                   klasse__indiv__boogtype=boogtype,
                                   volgorde__lte=48)                 # toon tot 48 schutters per klasse
                           .select_related('klasse__indiv',
-                                          'schutterboog__nhblid',
+                                          'sporterboog__sporter',
                                           'bij_vereniging')
                           .order_by('klasse__indiv__volgorde',
                                     'volgorde'))
@@ -1066,8 +1117,8 @@ class UitslagenRayonIndivView(TemplateView):
                                   klasse__indiv__boogtype=boogtype,
                                   aantal_scores__gte=6)
                           .select_related('klasse__indiv',
-                                          'schutterboog__nhblid',
-                                          'schutterboog__nhblid__bij_vereniging',
+                                          'sporterboog__sporter',
+                                          'sporterboog__sporter__bij_vereniging',
                                           'bij_vereniging')
                           .order_by('klasse__indiv__volgorde', '-gemiddelde'))
 
@@ -1085,11 +1136,11 @@ class UitslagenRayonIndivView(TemplateView):
                     limiet = 24
             klasse = deelnemer.klasse.indiv.volgorde
 
-            lid = deelnemer.schutterboog.nhblid
-            deelnemer.naam_str = "[%s] %s" % (lid.nhb_nr, lid.volledige_naam())
+            sporter = deelnemer.sporterboog.sporter
+            deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
 
-            deelnemer.geen_deelname_risico = deelnemer.schutterboog.nhblid.bij_vereniging != deelnemer.bij_vereniging
+            deelnemer.geen_deelname_risico = deelnemer.sporterboog.sporter.bij_vereniging != deelnemer.bij_vereniging
 
             if deelcomp.heeft_deelnemerslijst:
                 if deelnemer.rank > limiet:

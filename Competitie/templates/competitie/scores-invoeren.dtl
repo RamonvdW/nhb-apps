@@ -214,9 +214,9 @@
                     {
                         // zoek het DOM element met deze id
                         let el = document.getElementById(btn.dataset[d])
-                        let nhb_nr = el.value.slice(0,6)
-                        if (nhb_nr === '') return    // hanteer lege input
-                        obj['nhb_nr'] = nhb_nr
+                        let lid_nr = el.value.slice(0,6)
+                        if (lid_nr === '') return    // hanteer lege input
+                        obj['lid_nr'] = lid_nr
                     }
                 } // for
 
@@ -248,7 +248,7 @@
             // voeg de gevonden sporter toe aan de tabel
             // en geef dit door aan de website via een POST
 
-            // als nhb_nr al in de tabel staat, dan niet toevoegen
+            // als lid_nr al in de tabel staat, dan niet toevoegen
             // zet focus op score invoer veld
             // en maak zoekveld weer leeg
 
@@ -257,7 +257,7 @@
             //console.log('toevoegen: rsp:', rsp)
             el_rsp.value = ""
 
-            const nhb_nr = rsp['nhb_nr']
+            const lid_nr = rsp['lid_nr']
             let found_dupe = false
 
             // zoek het plekje in de tabel waar deze toegevoegd moet worden
@@ -270,27 +270,38 @@
                 const filter_cmd = row.dataset["tablefilter"]
                 if (filter_cmd === "stop") break           // from the for
 
-                const row_nhb_nr = row.cells[0].innerText
-                if (row_nhb_nr < nhb_nr) row_smaller = i
-
-                if (row_nhb_nr == nhb_nr)
-                    // sporter zit al in de uitslag - selecteer deze regel en verder niets
-                    found_dupe = true
+                const row_lid_nr = row.cells[0].innerText
+                if (row_lid_nr < lid_nr) row_smaller = i
             } // for
 
-            if (!found_dupe) {
-                // table filter uitzetten zodat de nieuwe regel getoond kan worden
-                // maak zoekveld leeg; dit triggert myTableFilter()
-                const el_filter = document.getElementById("table1_zoeken_input")
-                el_filter.value = ""
-                myTableFilter(el_filter, 'table1')
+            // table filter uitzetten zodat de nieuwe regel getoond kan worden
+            // maak zoekveld leeg; dit triggert myTableFilter()
+            const el_filter = document.getElementById("table1_zoeken_input")
+            el_filter.value = ""
+            myTableFilter(el_filter, 'table1')
 
-                // voeg een regel(s) toe aan de tabel, op de juiste positie
-                // doe dit door een kopie te maken
-                const base_row = body.rows[0]       // regel om te clonen
-                let row = body.rows[row_smaller]
-                rsp['deelnemers'].forEach(deelnemer =>
-                    {
+            // voeg een regel(s) toe aan de tabel, op de juiste positie
+            // doe dit door een kopie te maken
+            const base_row = body.rows[0]       // regel om te clonen
+            let insert_after_row = body.rows[row_smaller]
+            let focus_row = null
+            let added_new = false
+
+            rsp['deelnemers'].forEach(deelnemer =>
+                {
+                    // het is mogelijk dat de deelnemer al in de uitslag met 1 van meerdere bogen
+                    // kijk of de volgende regel toevallig van dit lid is, dan slaan we deze over
+                    let peek_row = body.rows[row_smaller + 1]
+                    let peek_pk = peek_row.cells[0].dataset.pk
+                    if (peek_pk == deelnemer['pk']) {
+                        // sla deze deelnemer en regel over
+                        row_smaller = row_smaller + 1
+                        insert_after_row = peek_row
+
+                        // geef deze regel focus als we een deelnemer met 1 boog nog een keer toevoegen
+                        if (!focus_row) focus_row = peek_row
+                    } else {
+                        // deze deelnemer toevoegen
                         const new_row = base_row.cloneNode(true)
 
                         // verwijder attributen van de template die toegevoegd zijn door de tabel filter
@@ -301,11 +312,11 @@
                         // volgende statement is gelijk aan insertAfter, welke niet bestaat
                         // werkt ook aan het einde van de tabel
                         // zie https://stackoverflow.com/questions/4793604/how-to-insert-an-element-after-another-element-in-javascript-without-using-a-lib
-                        row.parentNode.insertBefore(new_row, row.nextSibling)
+                        insert_after_row.parentNode.insertBefore(new_row, insert_after_row.nextSibling)
 
                         // pas de nieuwe regel aan met de gevonden data
                         new_row.cells[0].dataset.pk = deelnemer['pk']
-                        new_row.cells[0].innerHTML = nhb_nr
+                        new_row.cells[0].innerHTML = lid_nr
 
                         new_row.cells[1].innerHTML = rsp['naam']
 
@@ -314,8 +325,8 @@
                         span.nextSibling.innerHTML = " " + rsp['ver_naam']    // hidden on small
 
                         new_row.cells[3].innerHTML = deelnemer['boog']
-                        let vsg = deelnemer['vsg']
-                        if (vsg !== '') new_row.cells[3].innerHTML += ' (' + vsg + ')'
+                        let team_gem = deelnemer['team_gem']
+                        if (team_gem !== '') new_row.cells[3].innerHTML += ' (' + team_gem + ')'
 
                         {% if deelcomp.regio_organiseert_teamcompetitie %}
                             let team_pk = deelnemer['team_pk']
@@ -325,13 +336,20 @@
 
                         // maak de nieuwe row zichtbaar
                         new_row.classList.remove('hide')
+                        if (!added_new) {
+                            added_new = true
+                            focus_row = new_row
+                        }
 
-                        row = new_row
-                    })
-            }
+                        row_smaller = row_smaller + 1
+                        insert_after_row = new_row
+                    }
+                })
 
             // scroll nieuwe regel into view + zet focus op invoer score
-            body.rows[row_smaller + 1].cells[4].firstChild.focus()
+            //body.rows[row_smaller + 1].cells[4].firstChild.focus()
+            if (focus_row)
+                focus_row.cells[4].firstChild.focus()
 
             // zoekveld weer leeg maken
             document.getElementById('id_nhbnr').value = ""
@@ -424,7 +442,7 @@
 
             let deelnemers = rsp['deelnemers']
             // sorteer deelnemers op invoeg-volgorde: bondsnummer
-            deelnemers.sort(function(a,b) { return a.nhb_nr - b.nhb_nr })
+            deelnemers.sort(function(a,b) { return a.lid_nr - b.lid_nr })
             //console.log('sorted deelnemers:', deelnemers)
 
             let first_added_row
@@ -432,7 +450,7 @@
             deelnemers.forEach(deelnemer =>
             {
                 const pk = deelnemer['pk']
-                const nhb_nr = deelnemer['nhb_nr']
+                const lid_nr = deelnemer['lid_nr']
                 let skip = false
                 while (row_nr <= body.rows.length)      // stop eerder: op tablefilter=stop
                 {
@@ -446,7 +464,7 @@
                     }
 
                     const row_pk = row.cells[0].dataset.pk
-                    const row_nhb_nr = row.cells[0].innerText
+                    const row_lid_nr = row.cells[0].innerText
 
                     if (pk == row_pk)  // warning: breaks when changed to ===
                     {
@@ -454,9 +472,9 @@
                         skip = true
                         break
                     }
-                    else if (nhb_nr < row_nhb_nr)
+                    else if (lid_nr < row_lid_nr)
                     {
-                        // nhb_nr is minder dan nhb_nr in deze regel
+                        // lid_nr is minder dan lid_nr in deze regel
                         row_nr -= 1     // toevoegen voor deze regel
                         break           // from the while
                     }
@@ -473,7 +491,7 @@
                     const new_row = base_row.cloneNode(true)
 
                     // pas de nieuwe regel aan met de ontvangen data
-                    new_row.cells[0].innerHTML = nhb_nr
+                    new_row.cells[0].innerHTML = lid_nr
                     new_row.cells[0].dataset.pk = deelnemer['pk']
 
                     new_row.cells[1].innerHTML = deelnemer['naam']
@@ -483,8 +501,8 @@
                     span.nextSibling.innerHTML = " " + deelnemer['ver_naam']
 
                     new_row.cells[3].innerHTML = deelnemer['boog']
-                    const vsg = deelnemer['vsg']
-                    if (vsg !== '') new_row.cells[3].innerHTML += ' (' + vsg + ')'
+                    const team_gem = deelnemer['team_gem']
+                    if (team_gem !== '') new_row.cells[3].innerHTML += ' (' + team_gem + ')'
 
                     {% if deelcomp.regio_organiseert_teamcompetitie %}
                     const team_pk = deelnemer['team_pk']
@@ -619,13 +637,13 @@
 
         {% for score in scores %}
             <tr>
-                <td data-pk="{{ score.schutterboog.pk }}">{{ score.schutterboog.nhblid.nhb_nr }}</td>
-                <td>{{ score.schutterboog.nhblid.volledige_naam }}</td>
+                <td data-pk="{{ score.sporterboog.pk }}">{{ score.sporterboog.sporter.lid_nr }}</td>
+                <td>{{ score.sporterboog.sporter.volledige_naam }}</td>
                 <td>
-                    <span>[{{ score.schutterboog.nhblid.bij_vereniging.ver_nr }}]</span>
-                    <span class="hide-on-small-only">&nbsp;{{ score.schutterboog.nhblid.bij_vereniging.naam }}</span>
+                    <span>[{{ score.sporterboog.sporter.bij_vereniging.ver_nr }}]</span>
+                    <span class="hide-on-small-only">&nbsp;{{ score.sporterboog.sporter.bij_vereniging.naam }}</span>
                 </td>
-                <td>{{ score.schutterboog.boogtype.beschrijving }}{% if score.vsg %} ({{ score.vsg }}){% endif %}</td>
+                <td>{{ score.sporterboog.boogtype.beschrijving }}{% if score.team_gem %} ({{ score.team_gem }}){% endif %}</td>
                 <td><input type="text" oninput="controleer_score(this)" placeholder="0" value="{{ score.waarde }}" size="3" maxlength="3" style="width:3em; height:2rem; margin:0"></td>
                 {% if deelcomp.regio_organiseert_teamcompetitie %}
                     <td>{{ score.team_naam }}</td>

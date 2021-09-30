@@ -24,8 +24,10 @@
         }
     </script>
 
+    {% if url_opslaan %}
     <form action="{{ url_opslaan }}" method="post">
         {% csrf_token %}
+    {% endif %}
 
         <table class="white">
             <tr>
@@ -48,22 +50,30 @@
                     <td colspan="2"><i class="red-text">Het aanvangsgemiddelde is automatisch vastgesteld en kan niet gewijzigd worden</i></td>
                 </tr>
             {% else %}
-                <tr>
-                    <td>Nieuw aanvangsgemiddelde</td>
-                    <td>
-                        <input id="id_ag" name="nieuw_ag" type="number" placeholder="1.234" min="1.000" max="9.999" step="0.001" oninput="invoer()">
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <button id="opslaan_knop" class="btn-nhb-rood" type="submit" disabled>
-                            <i class="material-icons-round left">check</i>Opslaan</button>
-                    </td>
-                </tr>
+                {% if url_opslaan %}
+                    <tr>
+                        <td>Nieuw aanvangsgemiddelde</td>
+                        <td>
+                            <input id="id_ag" name="nieuw_ag" type="number" placeholder="1.234" min="1.000" max="9.999" step="0.001" oninput="invoer()">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <button id="opslaan_knop" class="btn-nhb-rood" type="submit" disabled>
+                                <i class="material-icons-round left">check</i>Opslaan</button>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td></td><td><i>Aanvangsgemiddelde kan niet meer aangepast worden</i></td></tr>
+                {% endif %}
             {% endif %}
 
         </table>
+
+    {% if url_opslaan %}
     </form>
+    {% endif %}
 
     <p>&nbsp;</p>
     <h5>Wijzigingsgeschiedenis</h5>
@@ -93,4 +103,8 @@
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="teams-wijzig-ag" %}
 
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
 {% endblock %}

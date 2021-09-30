@@ -8,9 +8,9 @@ from django.test import TestCase
 from .models import Account
 from .otp import account_otp_is_gekoppeld, account_otp_prepare_koppelen, account_otp_controleer, account_otp_koppel
 from .rechten import account_rechten_is_otp_verified
-from Overig.e2ehelpers import E2EHelpers
 from types import SimpleNamespace
 import pyotp
+from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestAccountOTP(E2EHelpers, TestCase):

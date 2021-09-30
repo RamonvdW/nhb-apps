@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.utils.dateparse import parse_date
 from .models import IndivRecord, LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE
-from NhbStructuur.models import NhbLid
+from Sporter.models import Sporter
 
 
 class TestRecordsRest(TestCase):
@@ -17,16 +17,16 @@ class TestRecordsRest(TestCase):
         """ initialisatie van de test case """
 
         # NhbLib
-        lid = NhbLid()
-        lid.nhb_nr = 123457
-        lid.voornaam = 'Petra'
-        lid.achternaam = 'Schutter'
-        lid.email = 'petra@test.nl'
-        lid.geboorte_datum = parse_date('1970-01-30')
-        lid.woon_straatnaam = 'Arnhem'
-        lid.geslacht = 'V'
-        lid.sinds_datum = parse_date("1991-02-05") # Y-M-D
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 123457
+        sporter.voornaam = 'Petra'
+        sporter.achternaam = 'Schutter'
+        sporter.email = 'petra@test.nl'
+        sporter.geboorte_datum = parse_date('1970-01-30')
+        sporter.woon_straatnaam = 'Arnhem'
+        sporter.geslacht = 'V'
+        sporter.sinds_datum = parse_date("1991-02-05") # Y-M-D
+        sporter.save()
 
         # Record 42
         rec = IndivRecord()
@@ -36,7 +36,7 @@ class TestRecordsRest(TestCase):
         rec.geslacht = GESLACHT[0][0]   # M
         rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[0][0]   # M
         rec.materiaalklasse = MATERIAALKLASSE[0][0]     # R
-        rec.nhb_lid = lid
+        rec.sporter = sporter
         rec.naam = 'Top Schutter'
         rec.datum = parse_date('2017-08-27')
         rec.plaats = 'Papendal'

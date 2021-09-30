@@ -140,7 +140,7 @@ class CompetitieWedstrijdUitslag(models.Model):
     # 18, 25, 70, etc.
     afstand_meter = models.PositiveSmallIntegerField()
 
-    # scores bevat SchutterBoog en komt met ScoreHist
+    # scores bevat SporterBoog en komt met ScoreHist
     scores = models.ManyToManyField(Score, blank=True)  # mag leeg zijn / gemaakt worden
 
     # False = uitslag mag door WL ingevoerd worden

@@ -60,7 +60,7 @@ class KalenderWedstrijdSessiesView(UserPassesTestMixin, View):
         sessies = (wedstrijd
                    .sessies
                    .prefetch_related('wedstrijdklassen')
-                   .annotate(aanmeldingen_count=Count('aanmeldingen'))
+                   .annotate(aanmeldingen_count=Count('sporters'))
                    .order_by('datum',
                              'tijd_begin'))
         for sessie in sessies:

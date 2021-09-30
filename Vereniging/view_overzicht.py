@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.urls import reverse
 from django.utils.formats import localize
 from django.views.generic import TemplateView
@@ -30,28 +31,31 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
     template_name = TEMPLATE_OVERZICHT
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        return functie_nu and rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.functie_nu and self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        context['nhb_ver'] = ver = functie_nu.nhb_ver
+        context['nhb_ver'] = ver = self.functie_nu.nhb_ver
 
         context['clusters'] = ver.clusters.all()
 
-        if functie_nu.nhb_ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).filter(zichtbaar=True).count() > 0:
+        if self.functie_nu.nhb_ver.wedstrijdlocatie_set.exclude(baan_type=BAAN_TYPE_EXTERN).filter(zichtbaar=True).count() > 0:
             context['accommodatie_details_url'] = reverse('Vereniging:vereniging-accommodatie-details',
                                                           kwargs={'vereniging_pk': ver.pk})
 
         context['url_externe_locaties'] = reverse('Vereniging:externe-locaties',
                                                   kwargs={'vereniging_pk': ver.pk})
 
-        if rol_nu == Rollen.ROL_SEC or ver.regio.is_administratief:
+        if self.rol_nu == Rollen.ROL_SEC or ver.regio.is_administratief:
             # SEC
             comps = list()
             deelcomps = list()
@@ -60,8 +64,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             # HWL of WL
             context['toon_competities'] = True
 
-            if rol_nu == Rollen.ROL_HWL:
-                context['toon_wedstrijdkalender'] = True
+            # if rol_nu == Rollen.ROL_HWL:
+            #     context['toon_wedstrijdkalender'] = True
 
             comps = (Competitie
                      .objects
@@ -91,7 +95,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         # RK voorbereidende fase
                         deelcomp_rk.text_str = "Schutters van de vereniging aan-/afmelden voor het RK van de %s" % comp.beschrijving
                         deelcomp_rk.url_lijst_rk = reverse('Vereniging:lijst-rk',
-                                                           kwargs={'deelcomp_pk': deelcomp_rk.pk})
+                                                           kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
             # for
 
             pks = (DeelcompetitieRonde
@@ -131,7 +135,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 prev_afstand = comp.afstand
 
             # 1 - leden aanmelden voor de competitie (niet voor de WL)
-            if comp.fase < 'F' and rol_nu != Rollen.ROL_WL:
+            if comp.fase < 'F' and self.rol_nu != Rollen.ROL_WL:
                 kaartje = SimpleNamespace()
                 kaartje.titel = "Aanmelden"
                 kaartje.tekst = 'Leden aanmelden voor de %s.' % comp.beschrijving
@@ -171,17 +175,17 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             # 3 - teams RK
             for deelcomp_rk in deelcomps_rk:
                 if deelcomp_rk.competitie == comp:
-                    if comp.fase <= 'K':
+                    if 'E' <= comp.fase <= 'K' and self.rol_nu != Rollen.ROL_WL:
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Teams RK"
                         kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen samenstellen voor de %s." % comp.beschrijving
-                        kaartje.url = reverse('Vereniging:teams-rk', kwargs={'deelcomp_pk': deelcomp_rk.pk})
-                        kaartje.icon = 'gamepad'
+                        kaartje.url = reverse('Vereniging:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+                        kaartje.icon = 'api'
                         # niet beschikbaar maken tot een paar weken na de eerste regiowedstrijd
-                        vanaf = comp.eerste_wedstrijd + datetime.timedelta(days=4*7)
+                        vanaf = comp.eerste_wedstrijd + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
                         if datetime.date.today() < vanaf:
                             kaartje.beschikbaar_vanaf = localize(vanaf)
-                        # kaartjes.append(kaartje)        # TODO: enable na goedkeuring bondsraad
+                        kaartjes.append(kaartje)
             # for
             del deelcomp_rk
 

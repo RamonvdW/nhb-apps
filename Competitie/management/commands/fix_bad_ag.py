@@ -22,7 +22,7 @@ class Command(BaseCommand):
         for deelnemer in RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__competitie=comp):
 
             try:
-                score = Score.objects.get(schutterboog=deelnemer.schutterboog,
+                score = Score.objects.get(sporterboog=deelnemer.sporterboog,
                                           type=SCORE_TYPE_INDIV_AG,
                                           afstand_meter=afstand)
                 ag = score.waarde / 1000.0

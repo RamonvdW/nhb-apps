@@ -6,8 +6,9 @@
 
 from django.test import TestCase
 from django.core import management
-from Overig.e2ehelpers import E2EHelpers
-from NhbStructuur.models import NhbVereniging, NhbRegio, NhbLid
+from TestHelpers.e2ehelpers import E2EHelpers
+from NhbStructuur.models import NhbVereniging, NhbRegio
+from Sporter.models import Sporter
 from .models import maak_functie
 import io
 
@@ -155,7 +156,7 @@ class TestAccountCLI(E2EHelpers, TestCase):
             management.call_command('check_beheerders', stderr=f1, stdout=f2)
         self.assertTrue(f1.getvalue() == '')        # geen foutmeldingen
 
-        # koppel een account aan een functie, maar geen nhblid
+        # koppel een account aan een functie, maar geen sporter
         self.functie_hwl.accounts.add(self.account_normaal)
 
         f1 = io.StringIO()
@@ -166,8 +167,8 @@ class TestAccountCLI(E2EHelpers, TestCase):
         self.assertTrue("LET OP: geen koppeling met NHB lid" in f2.getvalue())
 
         # maak account ook nhblid
-        lid = NhbLid(
-                    nhb_nr=100042,
+        sporter = Sporter(
+                    lid_nr=100042,
                     voornaam='Kees',
                     achternaam='Pijlpunt',
                     email='kees@pijlpunt.nl',
@@ -179,7 +180,7 @@ class TestAccountCLI(E2EHelpers, TestCase):
                     bij_vereniging=None,
                     lid_tot_einde_jaar=0,
                     account=self.account_normaal)
-        lid.save()
+        sporter.save()
 
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -195,9 +196,9 @@ class TestAccountCLI(E2EHelpers, TestCase):
                     plaats="Overkantje",
                     regio=self.nhbver1.regio)
         ver.save()
-        lid.is_actief_lid = True
-        lid.bij_vereniging = ver
-        lid.save()
+        sporter.is_actief_lid = True
+        sporter.bij_vereniging = ver
+        sporter.save()
 
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -207,8 +208,8 @@ class TestAccountCLI(E2EHelpers, TestCase):
         self.assertTrue("LET OP: geen lid bij deze vereniging" in f2.getvalue())
 
         # nu alles goed zetten
-        lid.bij_vereniging = self.nhbver1
-        lid.save()
+        sporter.bij_vereniging = self.nhbver1
+        sporter.save()
 
         f1 = io.StringIO()
         f2 = io.StringIO()

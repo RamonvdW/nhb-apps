@@ -7,39 +7,45 @@
 from django.test import TestCase
 from django.utils.dateparse import parse_date
 from .models import IndivRecord, LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE
-from NhbStructuur.models import NhbLid
-from Overig.e2ehelpers import E2EHelpers
+from Sporter.models import Sporter
+from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 
 class TestRecordsView(E2EHelpers, TestCase):
     """ unittests voor de Records applicatie, Views """
 
+    url_overzicht = '/records/'
+    url_specifiek = '/records/record-%s-%s/'  # discipline (18/25/OD), volg_nr
+    url_zoek = '/records/zoek/'
+    url_lijst_er = '/records/lijst-er/'
+    url_lijst_wr = '/records/lijst-wr/'
+
     def setUp(self):
         """ initialisatie van de test case """
 
         # NhbLib
-        lid = NhbLid()
-        lid.nhb_nr = 123456
-        lid.voornaam = 'Jan'
-        lid.achternaam = 'Schutter'
-        lid.email = 'jan@test.nl'
-        lid.geboorte_datum = parse_date('1970-03-03')
-        lid.woon_straatnaam = 'Papendal'
-        lid.geslacht = 'M'
-        lid.sinds_datum = parse_date("1991-02-03")  # Y-M-D
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 123456
+        sporter.voornaam = 'Jan'
+        sporter.achternaam = 'Schutter'
+        sporter.email = 'jan@test.nl'
+        sporter.geboorte_datum = parse_date('1970-03-03')
+        sporter.woon_straatnaam = 'Papendal'
+        sporter.geslacht = 'M'
+        sporter.sinds_datum = parse_date("1991-02-03")  # Y-M-D
+        sporter.save()
 
-        lid = NhbLid()
-        lid.nhb_nr = 123457
-        lid.voornaam = 'Petra'
-        lid.achternaam = 'Schutter'
-        lid.email = 'petra@test.nl'
-        lid.geboorte_datum = parse_date('1970-01-30')
-        lid.woon_straatnaam = 'Arnhem'
-        lid.geslacht = 'V'
-        lid.sinds_datum = parse_date("1991-02-05")  # Y-M-D
-        lid.save()
+        sporter = Sporter()
+        sporter.lid_nr = 123457
+        sporter.voornaam = 'Petra'
+        sporter.achternaam = 'Schutter'
+        sporter.email = 'petra@test.nl'
+        sporter.geboorte_datum = parse_date('1970-01-30')
+        sporter.woon_straatnaam = 'Arnhem'
+        sporter.geslacht = 'V'
+        sporter.sinds_datum = parse_date("1991-02-05")  # Y-M-D
+        sporter.save()
 
         # Record 42
         rec = IndivRecord()
@@ -49,7 +55,7 @@ class TestRecordsView(E2EHelpers, TestCase):
         rec.geslacht = GESLACHT[0][0]   # M
         rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[0][0]   # M
         rec.materiaalklasse = MATERIAALKLASSE[0][0]     # R
-        rec.nhb_lid = lid
+        rec.sporter = sporter
         rec.naam = 'Top Schutter'
         rec.datum = parse_date('2017-08-27')
         rec.plaats = 'Papendal'
@@ -71,7 +77,7 @@ class TestRecordsView(E2EHelpers, TestCase):
         rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[1][0]   # S
         rec.materiaalklasse = 'R'       # Recurve
         rec.para_klasse = 'Open'
-        # rec.nhb_lid =
+        # rec.sporter =
         rec.naam = 'Top Schutter 2'
         rec.datum = datetime.datetime.now()
         rec.plaats = 'Ergens Anders'
@@ -90,7 +96,7 @@ class TestRecordsView(E2EHelpers, TestCase):
         rec.geslacht = GESLACHT[1][0]   # V
         rec.leeftijdscategorie = LEEFTIJDSCATEGORIE[3][0]   # C
         rec.materiaalklasse = 'R'       # Recurve
-        rec.nhb_lid = lid
+        rec.sporter = sporter
         rec.naam = 'Petra Schutter'
         rec.datum = parse_date('2017-08-27')
         rec.plaats = 'Nergens'
@@ -109,7 +115,7 @@ class TestRecordsView(E2EHelpers, TestCase):
         rec.geslacht = 'V'
         rec.leeftijdscategorie = 'S'
         rec.materiaalklasse = 'R'       # Recurve
-        rec.nhb_lid = lid
+        rec.sporter = sporter
         rec.naam = 'Petra Schutter'
         rec.datum = parse_date('2020-02-02')
         rec.plaats = 'Bullseye'
@@ -128,7 +134,7 @@ class TestRecordsView(E2EHelpers, TestCase):
         rec.geslacht = 'V'
         rec.leeftijdscategorie = 'S'
         rec.materiaalklasse = 'R'       # Recurve
-        rec.nhb_lid = lid
+        rec.sporter = sporter
         rec.naam = 'Petra Schutter'
         rec.datum = parse_date('2020-03-03')
         rec.plaats = 'Bullseye'
@@ -140,12 +146,6 @@ class TestRecordsView(E2EHelpers, TestCase):
         rec.save()
 
         self.rec = rec
-
-        self.url_overzicht = '/records/'
-        self.url_specifiek = '/records/record-%s-%s/'   # discipline (18/25/OD), volg_nr
-        self.url_zoek = '/records/zoek/'
-        self.url_lijst_er = '/records/lijst-er/'
-        self.url_lijst_wr = '/records/lijst-wr/'
 
     def test_create(self):
         rec = IndivRecord.objects.all()[0]
@@ -210,17 +210,17 @@ class TestRecordsView(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_zoek)
 
-    def test_view_zoek_nhb_nr(self):
+    def test_view_zoek_lid_nr(self):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_zoek, {'zoekterm': '123456'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
-    def test_view_zoek_unknown_nhb_nr(self):
+    def test_view_zoek_unknown_lid_nr(self):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_zoek, {'zoekterm': '999999'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
-    def test_view_zoek_not_nhb_nr(self):
+    def test_view_zoek_not_lid_nr(self):
         # let op de zoekterm: mag niet matchen met soort_record, naam, plaats of land
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_zoek, {'zoekterm': 'jaja'})

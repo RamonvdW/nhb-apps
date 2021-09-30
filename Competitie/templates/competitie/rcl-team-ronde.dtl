@@ -104,6 +104,7 @@
             <p>Het is niet nodig om wedstrijdpunten toe te kennen.</p>
         {% else %}
             <p>Hieronder staan de team scores en voorgestelde wedstrijdpunten.</p>
+            <p>Eventuele scores <span class="red-text">in rood</span> geven aan dat deze uit minder dan 3 scores opgebouwd is.</p>
         {% endif %}
 
         <table class="white">
@@ -126,7 +127,11 @@
                     <tr>
                         <td>{{ regel.team1_str }}</td>
                         <td>{% if regel.team2_is_bye %}<i class="grey-text">Bye</i>{% else %}{{ regel.team2_str }}{% endif %}</td>
-                        <td>{{ regel.team1_score }} - {{ regel.team2_score }}</td>
+                        <td>
+                            <span{% if regel.team1_score_count < 3 %} class="red-text"{% endif %}>{{ regel.team1_score }}</span>
+                            <span> - </span>
+                            <span{% if regel.team2_score_count < 3 %} class="red-text"{% endif %}>{{ regel.team2_score }}</span>
+                        </td>
                         <td>{{ regel.team1_wp }} - {{ regel.team2_wp }}</td>
                     </tr>
                 {% endfor %}

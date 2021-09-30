@@ -15,17 +15,18 @@ from Account.models import Account
 from Functie.models import Functie, maak_functie, maak_account_vereniging_secretaris
 from Logboek.models import schrijf_in_logboek
 from Mailer.models import mailer_email_is_valide
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbLid, NhbVereniging, Speelsterkte
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord
+from Sporter.models import Sporter, Secretaris, Speelsterkte
 from Wedstrijden.models import WedstrijdLocatie, BAAN_TYPE_EXTERN, BAAN_TYPE_BUITEN
 import datetime
 import json
 
 
-def get_secretaris_str(lid):
-    if lid:
-        return "%s %s %s" % (lid.nhb_nr, lid.voornaam, lid.achternaam)
+def get_secretaris_str(sporter):
+    if sporter:
+        return "%s %s" % (sporter.lid_nr, sporter.volledige_naam())
     return "geen"
 
 
@@ -82,7 +83,7 @@ class Command(BaseCommand):
         self._count_uitgeschreven = 0
 
         self._nieuwe_clubs = list()
-        self._recordhouder_nhb_nrs = list()
+        self._recordhouder_lid_nrs = list()
 
         self.lidmaatschap_jaar = 0
         self.zet_lidmaatschap_jaar(timezone.now())
@@ -92,9 +93,10 @@ class Command(BaseCommand):
         self._cache_rayon = dict()      # [rayon_nr] = NhbRayon()
         self._cache_regio = dict()      # [regio_nr] = NhbRegio()
         self._cache_ver = dict()        # [ver_nr] = NhbVereniging()
-        self._cache_lid = dict()        # [nhb_nr] = NhbLid()
+        self._cache_sec = dict()        # [ver_nr] = Secretaris()
+        self._cache_sporter = dict()    # [lid_nr] = Sporter()
         self._cache_functie = dict()    # [(rol, beschrijving)] = Functie()
-        self._cache_sterk = dict()      # [nhb_nr] = [SpeelSterkte(), ...]
+        self._cache_sterk = dict()      # [lid_nr] = [SpeelSterkte(), ...]
 
         self._speelsterkte2volgorde = dict()    # [(discipline, beschrijving)] = volgorde
 
@@ -109,17 +111,22 @@ class Command(BaseCommand):
 
         for ver in (NhbVereniging
                     .objects
-                    .select_related('secretaris_lid',
-                                    'regio')
+                    .select_related('regio')
                     .prefetch_related('wedstrijdlocatie_set')
                     .all()):
             self._cache_ver[ver.ver_nr] = ver
         # for
 
-        for lid in (NhbLid
+        for sec in (Secretaris
                     .objects
+                    .select_related('vereniging',
+                                    'sporter')
                     .all()):
-            self._cache_lid[lid.nhb_nr] = lid
+            self._cache_sec[sec.vereniging.ver_nr] = sec
+        # for
+
+        for sporter in Sporter.objects.all():
+            self._cache_sporter[sporter.lid_nr] = sporter
         # for
 
         for functie in (Functie
@@ -130,11 +137,11 @@ class Command(BaseCommand):
             self._cache_functie[tup] = functie
         # for
 
-        for sterkte in Speelsterkte.objects.select_related('lid').all():
+        for sterkte in Speelsterkte.objects.select_related('sporter').all():
             try:
-                self._cache_sterk[sterkte.lid.nhb_nr].append(sterkte)
+                self._cache_sterk[sterkte.sporter.lid_nr].append(sterkte)
             except KeyError:
-                self._cache_sterk[sterkte.lid.nhb_nr] = [sterkte]
+                self._cache_sterk[sterkte.sporter.lid_nr] = [sterkte]
         # for
 
         for disc, beschr, volgorde in settings.SPEELSTERKTE_VOLGORDE:
@@ -173,21 +180,32 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Foutief verenigingsnummer: %s (geen getal)' % repr(ver_nr))
         else:
             try:
-                ver = self._cache_ver[ver_nr]
-                return ver
+                return self._cache_ver[ver_nr]
             except KeyError:
                 pass
         return None
 
-    def _vind_lid(self, nhb_nr):
+    def _vind_sec(self, ver_nr):
         try:
-            nhb_nr = int(nhb_nr)
+            ver_nr = int(ver_nr)
         except ValueError:
-            self.stderr.write('[ERROR] Foutief bondsnummer: %s (geen getal)' % (nhb_nr))
+            self.stderr.write('[ERROR] Foutief verenigingsnummer: %s (geen getal)' % repr(ver_nr))
+        else:
+            try:
+                return self._cache_sec[ver_nr]
+            except KeyError:
+                pass
+        return None
+
+    def _vind_sporter(self, lid_nr):
+        try:
+            lid_nr = int(lid_nr)
+        except ValueError:
+            self.stderr.write('[ERROR] Foutief bondsnummer: %s (geen getal)' % lid_nr)
             pass
         else:
             try:
-                return self._cache_lid[nhb_nr]
+                return self._cache_sporter[lid_nr]
             except KeyError:
                 pass
         return None
@@ -230,11 +248,11 @@ class Command(BaseCommand):
         """ Sporters met een NL record op hun naam worden niet verwijderd.
             Zoek deze op zodat we niet eens een poging gaan doen om ze te verwijderen.
         """
-        self._recordhouder_nhb_nrs = list(IndivRecord
+        self._recordhouder_lid_nrs = list(IndivRecord
                                           .objects
-                                          .distinct('nhb_lid')
-                                          .values_list('nhb_lid__nhb_nr', flat=True))
-        # self.stdout.write('[DEBUG] Record houders: %s' % repr(self._recordhouder_nhb_nrs))
+                                          .distinct('sporter')
+                                          .values_list('sporter__lid_nr', flat=True))
+        # self.stdout.write('[DEBUG] Record houders: %s' % repr(self._recordhouder_lid_nrs))
 
     def _import_rayons(self, data):
         """ Importeert data van alle rayons """
@@ -428,7 +446,6 @@ class Command(BaseCommand):
             # maak de functies aan voor deze vereniging
             if obj:
                 # let op: in sync houden met migratie m0012_migrate_cwz_hwl
-                bulk = list()
                 for rol, beschr in (('WL', 'Wedstrijdleider %s'),
                                     ('HWL', 'Hoofdwedstrijdleider %s'),
                                     ('SEC', 'Secretaris vereniging %s')):
@@ -479,7 +496,7 @@ class Command(BaseCommand):
         # while
 
     def _import_clubs_secretaris(self, data):
-        """ voor elke club, koppel de secretaris aan een NhbLid """
+        """ voor elke club, koppel de secretaris aan een Sporter """
 
         if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, "club"):
             return
@@ -495,11 +512,11 @@ class Command(BaseCommand):
             ver_naam = club['name']
 
             if len(club['secretaris']) < 1:
-                ver_secretaris_nhblid = None
+                ver_secretaris = None
             else:
                 ver_secretaris_nr = club['secretaris'][0]['member_number']
-                ver_secretaris_nhblid = self._vind_lid(ver_secretaris_nr)
-                if ver_secretaris_nhblid is None:
+                ver_secretaris = self._vind_sporter(ver_secretaris_nr)
+                if ver_secretaris is None:
                     self.stderr.write('[ERROR] Kan secretaris %s van vereniging %s niet vinden' % (ver_secretaris_nr, ver_nr))
                     self._count_errors += 1
 
@@ -510,34 +527,41 @@ class Command(BaseCommand):
                 self.stderr.write('[ERROR] Kan vereniging %s niet terugvinden' % ver_nr)
                 self._count_errors += 1
             else:
-                if obj.secretaris_lid != ver_secretaris_nhblid:
+                # zoek het secretaris record op
+                sec = self._vind_sec(ver_nr)
+                if not sec:
+                    # maak een nieuw record aan
+                    sec = Secretaris(vereniging=obj, sporter=None)
+                    sec.save()
+                    self._cache_sec[obj.ver_nr] = sec
+
+                if sec.sporter != ver_secretaris:
                     if ver_nr not in self._nieuwe_clubs:
-                        old_secr_str = get_secretaris_str(obj.secretaris_lid)
-                        new_secr_str = get_secretaris_str(ver_secretaris_nhblid)
-                        self.stdout.write('[INFO] Wijziging van secretaris voor vereniging %s: %s --> %s' % (ver_nr, old_secr_str, new_secr_str))
+                        old_sec_str = get_secretaris_str(sec.sporter)
+                        new_sec_str = get_secretaris_str(ver_secretaris)
+                        self.stdout.write('[INFO] Wijziging van secretaris voor vereniging %s: %s --> %s' % (ver_nr, old_sec_str, new_sec_str))
                         self._count_wijzigingen += 1
 
-                    obj.secretaris_lid = ver_secretaris_nhblid
+                    sec.sporter = ver_secretaris
                     if not self.dryrun:
-                        obj.save(update_fields=['secretaris_lid'])
+                        sec.save(update_fields=['sporter'])
 
-                if not ver_secretaris_nhblid:
+                if not ver_secretaris:
                     if ver_nr not in GEEN_SECRETARIS_NODIG:
-                        self.stderr.write(
-                            '[WARNING] Vereniging %s (%s) heeft geen secretaris!' % (ver_nr, ver_naam))
+                        self.stderr.write('[WARNING] Vereniging %s (%s) heeft geen secretaris!' % (ver_nr, ver_naam))
                         self._count_warnings += 1
 
                 # forceer de secretaris in de SEC groep
-                if ver_secretaris_nhblid:
+                if ver_secretaris:
                     try:
-                        account = Account.objects.get(nhblid=ver_secretaris_nhblid)
+                        account = Account.objects.get(sporter=ver_secretaris)
                     except Account.DoesNotExist:
                         # SEC heeft nog geen account
-                        self.stdout.write("[INFO] Secretaris %s van vereniging %s heeft nog geen account" % (ver_secretaris_nhblid.nhb_nr, obj.ver_nr))
+                        self.stdout.write("[INFO] Secretaris %s van vereniging %s heeft nog geen account" % (ver_secretaris.lid_nr, obj.ver_nr))
                         self._count_sec_no_account += 1
                     else:
                         if maak_account_vereniging_secretaris(obj, account):
-                            self.stdout.write("[INFO] Secretaris %s van vereniging %s is gekoppeld aan SEC functie" % (ver_secretaris_nhblid.nhb_nr, obj.ver_nr))
+                            self.stdout.write("[INFO] Secretaris %s van vereniging %s is gekoppeld aan SEC functie" % (ver_secretaris.lid_nr, obj.ver_nr))
         # for
 
     def _import_members(self, data):
@@ -546,9 +570,9 @@ class Command(BaseCommand):
         if self._check_keys(data[0].keys(), EXPECTED_MEMBER_KEYS, "member"):
             return
 
-        # houd bij welke leden nhb_nrs in de database zitten
+        # houd bij welke leden lid_nrs in de database zitten
         # als deze niet meer voorkomen, dan zijn ze verwijderd
-        nhb_nrs = list(self._cache_lid.keys())
+        lid_nrs = list(self._cache_sporter.keys())
 
         """ JSON velden (string, except):
              'club_number':         int,
@@ -573,36 +597,36 @@ class Command(BaseCommand):
         for member in data:
             is_valid = True
 
-            lid_nhb_nr = member['member_number']
+            lid_nr = member['member_number']
 
             # silently skip some numbers
-            if lid_nhb_nr in SKIP_MEMBERS:
+            if lid_nr in SKIP_MEMBERS:
                 continue
 
             try:
-                lid_nhb_nr = int(lid_nhb_nr)
+                lid_nr = int(lid_nr)
             except ValueError:
-                self.stderr.write('[ERROR] Foutief bondsnummer: %s (geen getal)' % (lid_nhb_nr))
+                self.stderr.write('[ERROR] Foutief bondsnummer: %s (geen getal)' % lid_nr)
                 continue
 
             lid_voornaam = member['first_name']
             if not lid_voornaam:
                 lid_voornaam = member['initials']
                 if not lid_voornaam:
-                    self.stderr.write('[ERROR] Lid %s heeft geen voornaam of initials' % lid_nhb_nr)
+                    self.stderr.write('[ERROR] Lid %s heeft geen voornaam of initials' % lid_nr)
                     self._count_errors += 1
                     continue
 
             lid_achternaam = member['name']
             if not lid_achternaam:
-                self.stderr.write("[ERROR] Lid %s heeft geen achternaam" % lid_nhb_nr)
+                self.stderr.write("[ERROR] Lid %s heeft geen achternaam" % lid_nr)
                 self._count_errors += 1
                 continue        # data niet compleet voor dit lid
 
             pos = lid_achternaam.find('(')
             if pos > 0:
                 new_achternaam = lid_achternaam[:pos].strip()
-                self.stdout.write("[WARNING] Lid %s: verwijder toevoeging achternaam: %s --> %s" % (lid_nhb_nr, repr(lid_achternaam), repr(new_achternaam)))
+                self.stdout.write("[WARNING] Lid %s: verwijder toevoeging achternaam: %s --> %s" % (lid_nr, repr(lid_achternaam), repr(new_achternaam)))
                 self._count_warnings += 1
                 lid_achternaam = new_achternaam
 
@@ -612,12 +636,12 @@ class Command(BaseCommand):
             naam = lid_voornaam + ' ' + lid_achternaam
             lid_unaccented_naam = maak_unaccented(naam)
             if naam.count('(') != naam.count(')'):
-                self.stdout.write('[WARNING] Lid %s: onbalans in haakjes in %s' % (lid_nhb_nr, repr(naam)))
+                self.stdout.write('[WARNING] Lid %s: onbalans in haakjes in %s' % (lid_nr, repr(naam)))
                 self._count_warnings += 1
 
             for letter in "!@#$%^&*[]{}=_+\\|\":;,<>/?~`":
                 if letter in naam:
-                    self.stdout.write("[WARNING] Lid %s: rare tekens in naam %s" % (lid_nhb_nr, repr(naam)))
+                    self.stdout.write("[WARNING] Lid %s: rare tekens in naam %s" % (lid_nr, repr(naam)))
                     self._count_warnings += 1
             # for
 
@@ -630,7 +654,7 @@ class Command(BaseCommand):
                 lid_ver = self._vind_vereniging(member['club_number'])
                 if not lid_ver:
                     lid_blocked = True
-                    self.stderr.write('[ERROR] Kan vereniging %s voor lid %s niet vinden' % (repr(member['club_number']), lid_nhb_nr))
+                    self.stderr.write('[ERROR] Kan vereniging %s voor lid %s niet vinden' % (repr(member['club_number']), lid_nr))
                     self._count_errors += 1
 
             if not lid_blocked:
@@ -643,11 +667,11 @@ class Command(BaseCommand):
                             member['birthday'] = '20' + old_birthday[2:]
                         else:
                             member['birthday'] = '19' + old_birthday[2:]
-                        self.stderr.write('[WARNING] Lid %s geboortedatum gecorrigeerd van %s naar %s' % (lid_nhb_nr, old_birthday, member['birthday']))
+                        self.stderr.write('[WARNING] Lid %s geboortedatum gecorrigeerd van %s naar %s' % (lid_nr, old_birthday, member['birthday']))
                         self._count_warnings += 1
                     else:
                         is_valid = False
-                        self.stderr.write('[ERROR] Lid %s heeft geen valide geboortedatum: %s' % (lid_nhb_nr, member['birthday']))
+                        self.stderr.write('[ERROR] Lid %s heeft geen valide geboortedatum: %s' % (lid_nr, member['birthday']))
                         self._count_errors += 1
             try:
                 lid_geboorte_datum = datetime.datetime.strptime(member['birthday'], "%Y-%m-%d").date()  # YYYY-MM-DD
@@ -655,12 +679,12 @@ class Command(BaseCommand):
                 lid_geboorte_datum = None
                 is_valid = False
                 if not lid_blocked:         # pragma: no branch
-                    self.stderr.write('[ERROR] Lid %s heeft geen valide geboortedatum' % lid_nhb_nr)
+                    self.stderr.write('[ERROR] Lid %s heeft geen valide geboortedatum' % lid_nr)
                     self._count_errors += 1
 
             lid_geslacht = member['gender']
             if lid_geslacht not in ('M', 'F'):
-                self.stderr.write('[ERROR] Lid %s heeft onbekend geslacht: %s (moet zijn: M of F)' % (lid_nhb_nr, lid_geslacht))
+                self.stderr.write('[ERROR] Lid %s heeft onbekend geslacht: %s (moet zijn: M of F)' % (lid_nr, lid_geslacht))
                 self._count_errors += 1
                 lid_geslacht = 'M'  # forceer naar iets valides
             if lid_geslacht == 'F':
@@ -671,14 +695,14 @@ class Command(BaseCommand):
                 lid_para = ""      # converts None to string
 
             if member['member_from'] and member['member_from'][0:0+2] not in ("19", "20"):
-                self.stderr.write('[ERROR] Lid %s heeft geen valide datum lidmaatschap: %s' % (lid_nhb_nr, member['member_from']))
+                self.stderr.write('[ERROR] Lid %s heeft geen valide datum lidmaatschap: %s' % (lid_nr, member['member_from']))
                 self._count_errors += 1
             try:
                 lid_sinds = datetime.datetime.strptime(member['member_from'], "%Y-%m-%d").date()  # YYYY-MM-DD
             except (ValueError, TypeError):
                 lid_sinds = None
                 is_valid = False
-                self.stderr.write('[ERROR] Lid %s heeft geen valide lidmaatschapsdatum' % lid_nhb_nr)
+                self.stderr.write('[ERROR] Lid %s heeft geen valide lidmaatschapsdatum' % lid_nr)
                 self._count_errors += 1
 
             lid_email = member['email']
@@ -690,7 +714,7 @@ class Command(BaseCommand):
 
             # try:
             #     lid_edu = member['educations']
-            #     print('lid: %s, edu: %s' % (lid_nhb_nr, repr(lid_edu)))
+            #     print('lid: %s, edu: %s' % (lid_nr, repr(lid_edu)))
             #     #"educations": [
             #     #    {"code": "011", "name": "HANDBOOGTRAINER A", "date_start": "1990-01-01", "date_stop": "1990-01-01"},
             #     #    {"code": "031", "name": "WEDSTRIJDLEIDER INDOOR\/OUTDOOR", "date_start": "1990-01-01", "date_stop": "1990-01-01"}]
@@ -705,16 +729,16 @@ class Command(BaseCommand):
             self._count_members += 1
 
             is_nieuw = False
-            obj = self._vind_lid(lid_nhb_nr)
+            obj = self._vind_sporter(lid_nr)
             if not obj:
                 # nieuw lid
                 is_nieuw = True
             else:
                 try:
                     # krimp de lijst zodat verwijderde leden over blijven
-                    nhb_nrs.remove(lid_nhb_nr)
+                    lid_nrs.remove(lid_nr)
                 except ValueError:
-                    self.stderr.write("[ERROR] Unexpected: nhb_nr %s onverwacht niet in lijst bestaande nhb nrs" % (repr(lid_nhb_nr)))
+                    self.stderr.write("[ERROR] Unexpected: lid_nr %s onverwacht niet in lijst bestaande nhb nrs" % (repr(lid_nr)))
                     self._count_errors += 1
                 else:
                     updated = list()
@@ -731,14 +755,14 @@ class Command(BaseCommand):
                         if not lid_blocked:
                             self._count_lid_no_email += 1
                     elif not mailer_email_is_valide(lid_email):     # check alle email adressen
-                        self.stderr.write('[ERROR] Lid %s heeft geen valide e-mail (%s)' % (lid_nhb_nr, lid_email))
+                        self.stderr.write('[ERROR] Lid %s heeft geen valide e-mail (%s)' % (lid_nr, lid_email))
                         self._count_errors += 1
                         self._count_lid_no_email += 1
                         lid_email = ""  # convert invalid email to no email
 
                     if obj.bij_vereniging != lid_ver:
                         if lid_ver:
-                            self.stdout.write('[INFO] Lid %s: vereniging %s --> %s' % (lid_nhb_nr, get_vereniging_str(obj.bij_vereniging), get_vereniging_str(lid_ver)))
+                            self.stdout.write('[INFO] Lid %s: vereniging %s --> %s' % (lid_nr, get_vereniging_str(obj.bij_vereniging), get_vereniging_str(lid_ver)))
                             self._count_wijzigingen += 1
                             obj.bij_vereniging = lid_ver
                             updated.append('bij_vereniging')
@@ -747,7 +771,7 @@ class Command(BaseCommand):
                             # vast, tot het einde van het lidmaatschap jaar.
                             # dit voorkomt blokkeren en geen toegang tot de diensten tijdens een overschrijving
                             if obj.lid_tot_einde_jaar < self.lidmaatschap_jaar:
-                                self.stdout.write('[INFO] Lid %s: vereniging %s --> geen (einde lidmaatschap jaar)' % (lid_nhb_nr, get_vereniging_str(obj.bij_vereniging)))
+                                self.stdout.write('[INFO] Lid %s: vereniging %s --> geen (einde lidmaatschap jaar)' % (lid_nr, get_vereniging_str(obj.bij_vereniging)))
                                 self._count_wijzigingen += 1
                                 obj.bij_vereniging = None
                                 updated.append('bij_vereniging')
@@ -757,19 +781,19 @@ class Command(BaseCommand):
 
                     if lid_blocked:
                         if obj.is_actief_lid:
-                            self.stdout.write('[INFO] Lid %s: is_actief_lid ja --> nee (want blocked)' % lid_nhb_nr)
+                            self.stdout.write('[INFO] Lid %s: is_actief_lid ja --> nee (want blocked)' % lid_nr)
                             self._count_wijzigingen += 1
                             obj.is_actief_lid = False
                             updated.append('is_actief_lid')
                     else:
                         if not obj.is_actief_lid:
-                            self.stdout.write('[INFO] Lid %s: is_actief_lid nee --> ja' % lid_nhb_nr)
+                            self.stdout.write('[INFO] Lid %s: is_actief_lid nee --> ja' % lid_nr)
                             self._count_wijzigingen += 1
                             obj.is_actief_lid = True
                             updated.append('is_actief_lid')
 
                     if obj.voornaam != lid_voornaam or obj.achternaam != lid_achternaam:
-                        self.stdout.write('[INFO] Lid %s: naam %s %s --> %s %s' % (lid_nhb_nr, obj.voornaam, obj.achternaam, lid_voornaam, lid_achternaam))
+                        self.stdout.write('[INFO] Lid %s: naam %s %s --> %s %s' % (lid_nr, obj.voornaam, obj.achternaam, lid_voornaam, lid_achternaam))
                         obj.voornaam = lid_voornaam
                         obj.achternaam = lid_achternaam
                         updated.extend(['voornaam', 'achternaam'])
@@ -781,38 +805,38 @@ class Command(BaseCommand):
                         # niet nodig om rapporteren want gekoppeld aan naam
 
                     if obj.email != lid_email:
-                        self.stdout.write('[INFO] Lid %s e-mail: %s --> %s' % (lid_nhb_nr, repr(obj.email), repr(lid_email)))
+                        self.stdout.write('[INFO] Lid %s e-mail: %s --> %s' % (lid_nr, repr(obj.email), repr(lid_email)))
                         obj.email = lid_email
                         updated.append('email')
                         self._count_wijzigingen += 1
 
                     if obj.geslacht != lid_geslacht:
-                        self.stdout.write('[INFO] Lid %s geslacht: %s --> %s' % (lid_nhb_nr, obj.geslacht, lid_geslacht))
+                        self.stdout.write('[INFO] Lid %s geslacht: %s --> %s' % (lid_nr, obj.geslacht, lid_geslacht))
                         obj.geslacht = lid_geslacht
                         updated.append('geslacht')
                         self._count_wijzigingen += 1
 
                     if obj.geboorte_datum != lid_geboorte_datum:
-                        self.stdout.write('[INFO] Lid %s geboortedatum: %s --> %s' % (lid_nhb_nr, obj.geboorte_datum, lid_geboorte_datum))
+                        self.stdout.write('[INFO] Lid %s geboortedatum: %s --> %s' % (lid_nr, obj.geboorte_datum, lid_geboorte_datum))
                         obj.geboorte_datum = lid_geboorte_datum
                         updated.append('geboorte_datum')
                         self._count_wijzigingen += 1
 
                     if obj.sinds_datum != lid_sinds:
-                        self.stdout.write('[INFO] Lid %s: sinds_datum: %s --> %s' % (lid_nhb_nr, obj.sinds_datum, lid_sinds))
+                        self.stdout.write('[INFO] Lid %s: sinds_datum: %s --> %s' % (lid_nr, obj.sinds_datum, lid_sinds))
                         obj.sinds_datum = lid_sinds
                         updated.append('sinds_datum')
                         self._count_wijzigingen += 1
 
                     if obj.para_classificatie != lid_para:
-                        self.stdout.write('[INFO] Lid %s: para_classificatie: %s --> %s' % (lid_nhb_nr, repr(obj.para_classificatie), repr(lid_para)))
+                        self.stdout.write('[INFO] Lid %s: para_classificatie: %s --> %s' % (lid_nr, repr(obj.para_classificatie), repr(lid_para)))
                         obj.para_classificatie = lid_para
                         updated.append('para_classificatie')
                         self._count_wijzigingen += 1
 
                     if not self.dryrun:
                         obj.save(update_fields=updated)
-                        self._cache_lid[obj.pk] = obj
+                        self._cache_sporter[obj.pk] = obj
 
                 # else
             # else
@@ -825,13 +849,13 @@ class Command(BaseCommand):
                 if not lid_email:
                     self._count_lid_no_email += 1
                 elif not mailer_email_is_valide(lid_email):  # check alle email adressen
-                    self.stderr.write('[ERROR] Lid %s heeft geen valide e-mail (%s)' % (lid_nhb_nr, lid_email))
+                    self.stderr.write('[ERROR] Lid %s heeft geen valide e-mail (%s)' % (lid_nr, lid_email))
                     self._count_errors += 1
                     self._count_lid_no_email += 1
                     lid_email = ""  # convert invalid email to no email
 
-                obj = NhbLid()
-                obj.nhb_nr = lid_nhb_nr
+                obj = Sporter()
+                obj.lid_nr = lid_nr
                 obj.voornaam = lid_voornaam
                 obj.achternaam = lid_achternaam
                 obj.email = lid_email
@@ -845,13 +869,13 @@ class Command(BaseCommand):
                     obj.is_actief_lid = False
                 if not self.dryrun:
                     obj.save()
-                    self._cache_lid[obj.pk] = obj
+                    self._cache_sporter[obj.pk] = obj
                 self._count_toevoegingen += 1
 
             # speel sterkte verwerken
             nieuwe_lijst = list()
             try:
-                huidige_lijst = self._cache_sterk[lid_nhb_nr]
+                huidige_lijst = self._cache_sterk[lid_nr]
             except KeyError:
                 huidige_lijst = list()
 
@@ -878,7 +902,7 @@ class Command(BaseCommand):
                     huidige_lijst.remove(found)
                 else:
                     # toevoegen
-                    self.stdout.write('[INFO] Lid %s: nieuwe speelsterkte %s, %s, %s' % (lid_nhb_nr, datum, disc, beschr))
+                    self.stdout.write('[INFO] Lid %s: nieuwe speelsterkte %s, %s, %s' % (lid_nr, datum, disc, beschr))
 
                     try:
                         volgorde = self._speelsterkte2volgorde[(disc, beschr)]
@@ -899,19 +923,19 @@ class Command(BaseCommand):
 
             if len(huidige_lijst):
                 # TODO: verwijder oude speelsterktes
-                self.stderr.write('[WARNING] Kan speelsterktes nog niet verwijderen: lid=%s, te verwijderen: %s' % (lid_nhb_nr, repr(huidige_lijst)))
+                self.stderr.write('[WARNING] Kan speelsterktes nog niet verwijderen: lid=%s, te verwijderen: %s' % (lid_nr, repr(huidige_lijst)))
                 # self._count_verwijderingen += 1
 
             if len(nieuwe_lijst):
                 Speelsterkte.objects.bulk_create(nieuwe_lijst)
         # for
 
-        # self.stdout.write('[DEBUG] Volgende %s NHB nummers moeten verwijderd worden: %s' % (len(nhb_nrs), repr(nhb_nrs)))
-        while len(nhb_nrs) > 0:
-            lid_nhb_nr = nhb_nrs.pop(0)
-            obj = self._vind_lid(lid_nhb_nr)
+        # self.stdout.write('[DEBUG] Volgende %s NHB nummers moeten verwijderd worden: %s' % (len(lid_nrs), repr(lid_nrs)))
+        while len(lid_nrs) > 0:
+            lid_nr = lid_nrs.pop(0)
+            obj = self._vind_sporter(lid_nr)
             if obj.is_actief_lid:
-                self.stdout.write('[INFO] Lid %s: is_actief_lid: ja --> nee' % repr(lid_nhb_nr))
+                self.stdout.write('[INFO] Lid %s: is_actief_lid: ja --> nee' % repr(lid_nr))
                 obj.is_actief_lid = False
                 self._count_wijzigingen += 1
                 self.stdout.write('               vereniging %s --> geen' % get_vereniging_str(obj.bij_vereniging))
@@ -919,12 +943,13 @@ class Command(BaseCommand):
                 self._count_wijzigingen += 1
                 if not self.dryrun:
                     obj.save()
-                    self._cache_lid[obj.pk] = obj
+                    self._cache_sporter[obj.pk] = obj
                 # TODO: afhandelen van het inactiveren/verwijderen van een lid dat in een team zit in een competitie
-            elif obj.nhb_nr in self._recordhouder_nhb_nrs:
+                # TODO: afhandelen van het inactiveren/verwijderen van een lid dat secretaris is
+            elif obj.lid_nr in self._recordhouder_lid_nrs:
                 # lid heeft een record op zijn/haar naam --> behoud het hele record
                 # de CRM applicatie heeft hier nog geen veld voor
-                self.stdout.write('[INFO] Lid %s is recordhouder en wordt daarom niet verwijderd' % obj.nhb_nr)
+                self.stdout.write('[INFO] Lid %s is recordhouder en wordt daarom niet verwijderd' % obj.lid_nr)
             else:
                 # lid echt verwijderen
                 #
@@ -938,7 +963,7 @@ class Command(BaseCommand):
                 self.stdout.write('[INFO] Lid %s wordt nu verwijderd' % str(obj))
                 if not self.dryrun:
                     try:
-                        del self._cache_lid[obj.pk]
+                        del self._cache_sporter[obj.pk]
                         obj.delete()
                         self._count_verwijderingen += 1
                     except ProtectedError as exc:

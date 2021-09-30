@@ -192,9 +192,9 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
 
                 deelnemer = KampioenschapSchutterBoog(
                                 deelcompetitie=deelcomp_rk,
-                                schutterboog=obj.schutterboog,
+                                sporterboog=obj.sporterboog,
                                 klasse=obj.klasse,
-                                bij_vereniging=obj.schutterboog.nhblid.bij_vereniging,  # nieuwste
+                                bij_vereniging=obj.sporterboog.sporter.bij_vereniging,  # nieuwste
                                 gemiddelde=obj.gemiddelde,
                                 kampioen_label=obj.kampioen_label)
 
@@ -262,7 +262,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
                       .objects
                       .select_related('klasse__indiv',
                                       'bij_vereniging__regio',
-                                      'schutterboog__nhblid')
+                                      'sporterboog__sporter')
                       .filter(deelcompetitie__in=pks,
                               aantal_scores__gte=6,
                               klasse__indiv__niet_voor_rk_bk=False)         # skip aspiranten
@@ -355,7 +355,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
 
             deelnemers = (RegioCompetitieSchutterBoog
                           .objects
-                          .select_related('schutterboog__nhblid',
+                          .select_related('sporterboog__sporter',
                                           'bij_vereniging')
                           .filter(deelcompetitie__competitie=comp,
                                   klasse__in=klassen_pks)
@@ -366,13 +366,13 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
                 # skip sporters met helemaal geen scores
                 if deelnemer.totaal > 0:
                     rank += 1
-                    lid = deelnemer.schutterboog.nhblid
+                    sporter = deelnemer.sporterboog.sporter
                     ver = deelnemer.bij_vereniging
                     hist = HistCompetitieIndividueel(
                                 histcompetitie=histcomp,
                                 rank=rank,
-                                schutter_nr=lid.nhb_nr,
-                                schutter_naam=lid.volledige_naam(),
+                                schutter_nr=sporter.lid_nr,
+                                schutter_naam=sporter.volledige_naam(),
                                 boogtype=boogtype.afkorting,
                                 vereniging_nr=ver.ver_nr,
                                 vereniging_naam=ver.naam,
