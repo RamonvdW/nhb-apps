@@ -6,22 +6,40 @@
 
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from Sporter.models import SporterBoog
 from Wedstrijden.models import CompetitieWedstrijd
-from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
+from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde, LAAG_REGIO,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam,
                      RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                      CompetitieMutatie)
 
 
-class DeelCompetitieAdmin(admin.ModelAdmin):
+class CreateOnlyAdmin(admin.ModelAdmin):
+    """
+        Extend the ModelAdmin with createonly_fields,
+        which act like readonly_fields except when creating a new object
+    """
+
+    createonly_fields = ()
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = list(super().get_readonly_fields(request, obj))
+        createonly_fields = list(getattr(self, 'createonly_fields', []))
+        if obj:
+            # editing an existing object
+            readonly_fields.extend(createonly_fields)
+        return readonly_fields
+
+
+class DeelCompetitieAdmin(CreateOnlyAdmin):
 
     list_filter = ('competitie', 'nhb_regio')
 
     list_select_related = ('competitie', 'nhb_regio', 'nhb_rayon')
 
 
-class DeelcompetitieRondeAdmin(admin.ModelAdmin):
+class DeelcompetitieRondeAdmin(CreateOnlyAdmin):
 
     list_filter = ('deelcompetitie__is_afgesloten', 'deelcompetitie__nhb_regio')
 
@@ -30,7 +48,7 @@ class DeelcompetitieRondeAdmin(admin.ModelAdmin):
     readonly_fields = ('deelcompetitie', 'cluster', 'plan')
 
 
-class CompetitieKlasseAdmin(admin.ModelAdmin):
+class CompetitieKlasseAdmin(CreateOnlyAdmin):
 
     list_filter = ('competitie', 'team__team_type')
 
@@ -39,13 +57,13 @@ class CompetitieKlasseAdmin(admin.ModelAdmin):
     ordering = ('team__volgorde', 'indiv__volgorde')
 
 
-class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
+class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
 
     fieldsets = (
         ('Wie',
             {'fields': ('deelcompetitie',
-                        'sporterboog',
-                        'bij_vereniging')
+                        'bij_vereniging',
+                        'sporterboog')
              }),
         ('Individueel',
             {'fields': (('ag_voor_indiv',),
@@ -68,9 +86,13 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
              }),
     )
 
-    readonly_fields = ('deelcompetitie',
-                       'sporterboog',
-                       'bij_vereniging', 'scores')
+    createonly_fields = ('deelcompetitie',
+                         'sporterboog',
+                         'bij_vereniging')
+
+    autocomplete_fields = ('bij_vereniging',)
+
+    readonly_fields = ('scores', )
 
     search_fields = ('sporterboog__sporter__unaccented_naam',
                      'sporterboog__sporter__lid_nr')
@@ -104,6 +126,14 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
                                   .objects
                                   .select_related('indiv', 'team')
                                   .all())
+        elif db_field.name == 'deelcompetitie':
+            kwargs['queryset'] = (DeelCompetitie
+                                  .objects
+                                  .select_related('competitie',
+                                                  'nhb_regio')
+                                  .filter(laag=LAAG_REGIO)
+                                  .order_by('competitie__afstand',
+                                            'nhb_regio__regio_nr'))
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
@@ -125,7 +155,8 @@ class RegioCompetitieSchutterBoogAdmin(admin.ModelAdmin):
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
-class RegiocompetitieTeamAdmin(admin.ModelAdmin):
+class RegiocompetitieTeamAdmin(CreateOnlyAdmin):
+
     filter_horizontal = ('gekoppelde_schutters', )
 
     list_filter = ('deelcompetitie__competitie',
@@ -160,7 +191,8 @@ class RegiocompetitieTeamAdmin(admin.ModelAdmin):
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
-class KampioenschapTeamAdmin(admin.ModelAdmin):
+class KampioenschapTeamAdmin(CreateOnlyAdmin):
+
     filter_horizontal = ('tijdelijke_schutters', 'gekoppelde_schutters', 'feitelijke_schutters')
 
     list_filter = ('deelcompetitie__competitie',
@@ -192,7 +224,7 @@ class KampioenschapTeamAdmin(admin.ModelAdmin):
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
-class KampioenschapSchutterBoogAdmin(admin.ModelAdmin):
+class KampioenschapSchutterBoogAdmin(CreateOnlyAdmin):
 
     fieldsets = (
         ('Wie',
@@ -244,7 +276,7 @@ class KampioenschapSchutterBoogAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
-class CompetitieMutatieAdmin(admin.ModelAdmin):
+class CompetitieMutatieAdmin(CreateOnlyAdmin):
 
     readonly_fields = ('mutatie', 'when', 'deelnemer', 'door')
 
@@ -255,7 +287,7 @@ class CompetitieMutatieAdmin(admin.ModelAdmin):
     list_filter = ('is_verwerkt', 'mutatie')
 
 
-class RegiocompetitieRondeTeamAdmin(admin.ModelAdmin):
+class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
 
     filter_horizontal = ('deelnemers_geselecteerd', 'deelnemers_feitelijk')
 
@@ -319,7 +351,7 @@ class RegiocompetitieRondeTeamAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
-class RegiocompetitieTeamPouleAdmin(admin.ModelAdmin):
+class RegiocompetitieTeamPouleAdmin(CreateOnlyAdmin):
 
     list_filter = ('deelcompetitie__competitie',
                    'deelcompetitie__nhb_regio')
