@@ -48,10 +48,12 @@
                             if (status === "aanwezig") {
                                 // reload om bondspas te krijgen
                                 window.location.reload()
-                            }  else if (status == "fail")
-                            {
+                                retry = false
+
+                            }  else if (status === "fail") {
+                                // niet op kunnen halen en gaat ook niet meer gebeuren
                                 toon_fout()
-                                retry = False
+                                retry = false
                             }
                         }
                     }
