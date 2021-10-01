@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" Kleine http server om echte transacties vanuit de NHB IT applicaties
-    af te kunnen handelen tijdens een test.
+""" Kleine http server om echte transacties vanuit de NHB applicaties af te handelen tijdens een test.
 
     Luistert op localhost poort 8123
 
@@ -50,7 +49,7 @@ class MyServer(BaseHTTPRequestHandler):
 
 
 def main():
-    print('[INFO] Starting test http server on port 8123')
+    print('[INFO] Starting test mailer http server on port 8123')
     httpd = HTTPServer(('localhost', 8123), MyServer)
 
     try:
@@ -58,7 +57,7 @@ def main():
     except KeyboardInterrupt:
         print("")
 
-    print('[INFO] Stopping test http server')
+    print('[INFO] Stopping test mailer http server')
     httpd.server_close()
 
 
@@ -66,7 +65,7 @@ if __name__ == '__main__':          # pragma: no branch
     main()
 else:
     import inspect
-    print("Unexpected websim.py import. Stack: %s" % inspect.stack(0))
+    print("Unsupported websim_mailer.py import. Stack: %s" % inspect.stack(0))
 
 # end of file
 

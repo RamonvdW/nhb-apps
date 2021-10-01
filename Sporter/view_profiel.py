@@ -384,6 +384,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         context['sporter'] = sporter
         context['records'], context['show_loc'] = self._find_records(sporter)
         context['histcomp'] = self._find_histcomp_scores(sporter, alle_bogen)
+        context['url_bondspas'] = reverse('Bondspas:toon-bondspas')
 
         context['toon_bondscompetities'] = False
         if sporter.bij_vereniging and not sporter.bij_vereniging.geen_wedstrijden:

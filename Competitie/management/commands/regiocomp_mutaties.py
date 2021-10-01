@@ -534,13 +534,6 @@ class Command(BaseCommand):
         if Competitie.objects.filter(begin_jaar=jaar).count() == 0:
             competities_aanmaken(jaar)
 
-    @staticmethod
-    def _check_redelijkheid_volgende_team_ronde(deelcomp):
-        """ Als alle teams nog geen scores hebben gekregen, dan is het niet redelijk om door te gaan naar
-            de volgende ronde.
-            Oftewel: als er minimaal 1 team is met een team_score > 0 dan is het redelijk.
-        """
-
     def _verwerk_mutatie_team_ronde(self, deelcomp):
 
         ronde_nr = deelcomp.huidige_team_ronde + 1

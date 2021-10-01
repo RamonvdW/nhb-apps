@@ -39,7 +39,7 @@ class TestMailerBase(object):
         self.assertEqual(1, MailQueue.objects.count())
 
     def test_send_mail_deliver(self):
-        # requires websim.py running in the background
+        # requires websim_mailer.py running in the background
         assert isinstance(self, TestCase)
 
         # stop een mail in de queue
@@ -58,7 +58,7 @@ class TestMailerBase(object):
         self.assertTrue(obj.is_verstuurd)
 
     def test_send_mail_deliver_faal(self):
-        # requires websim.py running in the background
+        # requires websim_mailer.py running in the background
         assert isinstance(self, TestCase)
 
         # stop een mail in de queue

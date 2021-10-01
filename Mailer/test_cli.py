@@ -11,6 +11,9 @@ from TestHelpers.e2ehelpers import E2EHelpers
 import io
 
 
+# TODO: test van status_mail_queue toevoegen
+
+
 class TestMailerCliBase(E2EHelpers, object):
     """ unit tests voor de Mailer applicatie """
 
@@ -24,7 +27,7 @@ class TestMailerCliBase(E2EHelpers, object):
         self.assertEqual(f1.getvalue(), '')
 
     def test_deliver_faal(self):
-        # requires websim.py running in the background
+        # requires websim_mailer.py running in the background
 
         # stop een mail in de queue
         objs = MailQueue.objects.all()
@@ -47,7 +50,7 @@ class TestMailerCliBase(E2EHelpers, object):
         self.assertTrue('[WARNING] ' in f2.getvalue())
 
     def test_oud(self):
-        # requires websim.py running in the background
+        # requires websim_mailer.py running in the background
 
         # stop een mail in de queue
         objs = MailQueue.objects.all()
@@ -71,7 +74,7 @@ class TestMailerCliBase(E2EHelpers, object):
         self.assertTrue('(verstuurd)' in str(obj))
 
     def test_nieuw(self):
-        # requires websim.py running in the background
+        # requires websim_mailer.py running in the background
         # om geen multi-threaded test te hoeven maken kunnen we het management commando
         # vragen om geen oude mails te sturen
 
@@ -96,7 +99,7 @@ class TestMailerCliBase(E2EHelpers, object):
         self.assertTrue('(verstuurd)' in str(obj))
 
     def test_stuur_mail_vertraag(self):
-        # requires websim.py running in the background
+        # requires websim_mailer.py running in the background
 
         # stop een mail in de queue
         objs = MailQueue.objects.all()

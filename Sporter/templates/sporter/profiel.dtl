@@ -148,6 +148,13 @@
 
 
     <p>&nbsp;</p>
+    <h5>Je bondspas</h5>
+    <p>De digital bondspas is je bewijs van lidmaatschap. Op wedstrijden kan gevraagd worden om deze te tonen.</p>
+
+    {% include 'plein/card.dtl' with title="Bondspas" text="Bekijk je digitale bondspas." icon="card_membership" url=url_bondspas %}
+
+
+    <p>&nbsp;</p>
     <h5>Je leeftijdsklasse</h5>
     <p>Op wedstrijden en in de bondscompetities word je aan de hand van je leeftijd ingedeeld in een wedstrijdklasse.</p>
 
