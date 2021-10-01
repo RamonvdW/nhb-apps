@@ -73,7 +73,7 @@ def menu_dynamics(request, context, actief='hetplein'):
                 context['menu_show_taken'] = True
                 context['menu_aantal_open_taken'] = aantal_open_taken(request)
         else:
-            context['menu_toon_schutter_profiel'] = True
+            context['menu_toon_sporter_profiel'] = True
 
     # het label met de scherm grootte boven aan het scherm
     context['toon_schermgrootte'] = settings.DEBUG
