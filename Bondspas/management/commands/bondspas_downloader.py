@@ -26,7 +26,7 @@ class Command(BaseCommand):
         super().__init__(stdout, stderr, no_color, force_color)
 
         self._stop_at = datetime.datetime.now()
-        self._sync = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
+        self._sync = BackgroundSync(settings.BACKGROUND_SYNC__BONDSPAS_DOWNLOADER)
         self._count_ping = 0
 
     def add_arguments(self, parser):
