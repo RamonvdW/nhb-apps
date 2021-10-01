@@ -52,8 +52,8 @@ class ToonBondspasView(UserPassesTestMixin, View):
         bondspas, _ = Bondspas.objects.get_or_create(lid_nr=lid_nr)
         if bondspas.status == BONDSPAS_STATUS_AANWEZIG:
             # meteen downloaden
-            bondspas.aantal_keer_opgehaald += 1
-            bondspas.save(update_fields=['aantal_keer_opgehaald'])
+            bondspas.aantal_keer_bekeken += 1
+            bondspas.save(update_fields=['aantal_keer_bekeken'])
 
             fpath = os.path.join(settings.BONDSPAS_CACHE_PATH, bondspas.filename)
             try:
