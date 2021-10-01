@@ -17,11 +17,21 @@
     <script type="application/javascript">
 
         function toon_fout() {
+            // verstop de progress bar en toon een foutmelding + terug knop
             const el_toon_fout = document.getElementById('id_toon_fout')
             const el_progress = document.getElementById('id_progressbar')
 
             el_progress.classList.add('hide')
             el_toon_fout.classList.remove('hide')
+        }
+
+        function toon_klaar() {
+            // verstop de progress bar en toon een succes melding + terug knop
+            const el_toon_klaar = document.getElementById('id_toon_klaar')
+            const el_progress = document.getElementById('id_progressbar')
+
+            el_progress.classList.add('hide')
+            el_toon_klaar.classList.remove('hide')
         }
 
         function status_ophalen_klaar(xhr)
@@ -48,6 +58,9 @@
                             if (status === "aanwezig") {
                                 // reload om bondspas te krijgen
                                 window.location.reload()
+
+                                // aangezien dit een bestand terug geeft blijft de huidige pagina staan
+                                toon_klaar()
                                 retry = false
 
                             }  else if (status === "fail") {
@@ -122,6 +135,11 @@
 
             <div id="id_toon_fout" class="hide">
                 <p class="red-text">Het is helaas niet gelukt om je bondspas op te halen. Probeer het over een paar minuten opnieuw</p>
+                <a class="btn-nhb-blauw" href="{{ url_terug }}">Terug</a>
+            </div>
+
+            <div id="id_toon_klaar" class="hide">
+                <p class="red-text">Je bondspas is beschikbaar als bestand.</p>
                 <a class="btn-nhb-blauw" href="{{ url_terug }}">Terug</a>
             </div>
 
