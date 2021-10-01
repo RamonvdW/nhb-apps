@@ -8,6 +8,7 @@
 # bij elke opstart wordt de cache opgeschoond
 
 from django.conf import settings
+from django.utils import timezone
 from django.db.models import F
 from django.core.management.base import BaseCommand
 from Bondspas.models import (Bondspas, BONDSPAS_STATUS_OPHALEN,  BONDSPAS_STATUS_BEZIG,
@@ -117,12 +118,12 @@ class Command(BaseCommand):
         while now < self._stop_at:                   # pragma: no branch
             self.stdout.write('tick')
 
+            now = timezone.now()                # timezone-aware
             for bondspas in Bondspas.objects.filter(status=BONDSPAS_STATUS_OPHALEN):
                 if bondspas.opnieuw_proberen_na is None or now > bondspas.opnieuw_proberen_na:
                     self._bondspas_ophalen(bondspas)
-
-                now = datetime.datetime.now()
             # for
+            now = datetime.datetime.now()       # naive
 
             # wacht 5 seconden voordat we opnieuw in de database kijken
             # het wachten kan onderbroken worden door een ping, als er een nieuwe mutatie toegevoegd is

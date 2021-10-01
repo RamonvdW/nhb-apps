@@ -128,9 +128,11 @@
             <p>Over een paar minuten kan je dit opnieuw proberen (vanaf {{ ophalen_na|date:"H:i" }}).</p>
         {% else %}
 
-            <p>Je bondspas wordt opgehaald.</p>
-            <div id="id_progressbar" class="progress" style="width:250px">
-                <div class="determinate" id="id_progress" style="width: 0%" data-pogingen=10 data-procent=0 data-step=10></div>
+            <div id="id_progressbar">
+                <p>Je bondspas wordt opgehaald.</p>
+                <div class="progress" style="width:250px">
+                    <div class="determinate" id="id_progress" style="width: 0%" data-pogingen=10 data-procent=0 data-step=10></div>
+                </div>
             </div>
 
             <div id="id_toon_fout" class="hide">
@@ -139,7 +141,7 @@
             </div>
 
             <div id="id_toon_klaar" class="hide">
-                <p class="red-text">Je bondspas is beschikbaar als bestand.</p>
+                <p>Je bondspas is beschikbaar als bestand.</p>
                 <a class="btn-nhb-blauw" href="{{ url_terug }}">Terug</a>
             </div>
 
