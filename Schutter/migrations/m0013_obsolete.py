@@ -9,6 +9,8 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
+    """ Migratie class voor dit deel van de applicatie """
+
     # volgorde afdwingen
     dependencies = [
         ('Schutter', 'm0012_delete_migrated_data'),

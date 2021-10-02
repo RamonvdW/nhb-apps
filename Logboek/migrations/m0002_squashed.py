@@ -9,6 +9,7 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
+
     """ Migratie class voor dit deel van de applicatie """
 
     # dit is de eerste
@@ -28,7 +29,7 @@ class Migration(migrations.Migration):
                 ('toegevoegd_op', models.DateTimeField()),
                 ('gebruikte_functie', models.CharField(max_length=100)),
                 ('activiteit', models.CharField(max_length=500)),
-                ('actie_door_account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Account.Account', blank=True, null=True)),
+                ('actie_door_account', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='Account.Account')),
             ],
             options={
                 'verbose_name': 'Logboek regel',
