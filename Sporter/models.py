@@ -141,6 +141,8 @@ class Secretaris(models.Model):
 
     # deze constructie voorkomt een circulaire dependency
 
+    # TODO: dupe met Functie SEC? (gekoppeld aan Account)
+
     vereniging = models.ForeignKey(NhbVereniging, on_delete=models.CASCADE)
 
     sporter = models.ForeignKey(Sporter, on_delete=models.SET_NULL, null=True)

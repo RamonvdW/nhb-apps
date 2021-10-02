@@ -13,6 +13,7 @@ from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Functie.models import Functie
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
+from Sporter.models import Secretaris
 from Wedstrijden.models import WedstrijdLocatie, BAANTYPE2STR
 from Logboek.models import schrijf_in_logboek
 from .forms import AccommodatieDetailsForm
@@ -115,8 +116,13 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         context['sec_names'] = self.get_all_names(functie_sec)
         context['sec_email'] = functie_sec.bevestigde_email
 
-        if len(context['sec_names']) == 0 and nhbver.secretaris_lid:
-            context['sec_names'] = [nhbver.secretaris_lid.volledige_naam()]
+        if len(context['sec_names']) == 0:
+            try:
+                sec = Secretaris.objects.get(vereniging=functie_sec.nhb_ver)
+            except Secretaris.DoesNotExist:
+                pass
+            else:
+                context['sec_names'] = [sec.sporter.volledige_naam()]
 
         context['hwl_names'] = self.get_all_names(functie_hwl)
         context['hwl_email'] = functie_hwl.bevestigde_email

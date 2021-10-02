@@ -8,7 +8,6 @@ from django.db import models
 from django.contrib.auth.models import Group
 from django.conf import settings
 from Account.models import Account
-from BasisTypen.models import GESLACHT
 import datetime
 
 
@@ -128,20 +127,12 @@ class NhbVereniging(models.Model):
     # locatie van het doel van de vereniging
     plaats = models.CharField(max_length=100, blank=True)
 
-    contact_email = models.CharField(max_length=150, blank=True)    # FUTURE: not used, can be removed
-
     # de regio waarin de vereniging zit
     regio = models.ForeignKey(NhbRegio, on_delete=models.PROTECT)
 
     # de optionele clusters waar deze vereniging bij hoort
     clusters = models.ManyToManyField(NhbCluster,
                                       blank=True)   # mag leeg zijn / gemaakt worden
-
-    # wie is de secretaris van de vereniging
-    # TODO: remove (replaced by Sporter.Secretaris)
-    secretaris_lid = models.ForeignKey('NhbLid', on_delete=models.SET_NULL,
-                                       blank=True,  # allow access input in form
-                                       null=True)   # allow NULL relation in database
 
     # er is een vereniging voor persoonlijk lidmaatschap
     # deze leden mogen geen wedstrijden schieten
@@ -168,37 +159,6 @@ def validate_geboorte_datum(datum):
 def validate_sinds_datum(datum):
     """ OBSOLETE """
     return True
-
-
-class NhbLid(models.Model):     # TODO: needed for migration/datacopy - remove later
-    """ OBSOLETE - gebruik Sporter """
-    nhb_nr = models.PositiveIntegerField(primary_key=True)
-    voornaam = models.CharField(max_length=100)
-    achternaam = models.CharField(max_length=100)
-    unaccented_naam = models.CharField(max_length=200, default='', blank=True)
-    email = models.CharField(max_length=150)
-    geboorte_datum = models.DateField(validators=[validate_geboorte_datum])
-    geslacht = models.CharField(max_length=1, choices=GESLACHT)
-    para_classificatie = models.CharField(max_length=30, blank=True)
-    is_actief_lid = models.BooleanField(default=True)   # False = niet meer in import dataset
-    sinds_datum = models.DateField(validators=[validate_sinds_datum])
-    bij_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT, blank=True, null=True)
-    lid_tot_einde_jaar = models.PositiveSmallIntegerField(default=0)
-    account = models.ForeignKey(Account, on_delete=models.SET_NULL, blank=True, null=True)
-
-    class Meta:
-        verbose_name = 'Nhb lid'
-        verbose_name_plural = 'Nhb leden'
-
-
-class Speelsterkte(models.Model):       # TODO: needed for migration/datacopy - remove later
-    """ OBSOLETE - vervangen door Sporter.Speelsterkte """
-    lid = models.ForeignKey(NhbLid, on_delete=models.CASCADE)
-    datum = models.DateField()
-    beschrijving = models.CharField(max_length=50)
-    discipline = models.CharField(max_length=50)
-    category = models.CharField(max_length=50)
-    volgorde = models.PositiveSmallIntegerField()
 
 
 # end of file
