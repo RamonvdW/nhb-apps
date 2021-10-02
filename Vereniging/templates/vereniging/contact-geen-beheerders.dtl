@@ -24,7 +24,7 @@
         <tr>
             <td>{% for ver in geen_beheerders %}{{ ver.nr_geen_beheerders }}<br>{% endfor %}</td>
             <td>{% for ver in geen_beheerders %}{{ ver }}<br>{% endfor %}</td>
-            <td>{% for ver in geen_beheerders %}{{ ver.contact_email }}<br>{% endfor %}</td>
+            <td>{% for ver in geen_beheerders %}{{ ver.functie_sec_email }}<br>{% endfor %}</td>
         </tr>
     </table>
 
@@ -36,7 +36,7 @@
         <tr>
             <td>{% for ver in geen_sec %}{{ ver.nr_geen_sec }}<br>{% endfor %}</td>
             <td>{% for ver in geen_sec %}{{ ver }}<br>{% endfor %}</td>
-            <td>{% for ver in geen_sec %}{{ ver.contact_email }}<br>{% endfor %}</td>
+            <td>{% for ver in geen_sec %}{{ ver.functie_sec_email }}<br>{% endfor %}</td>
         </tr>
     </table>
 

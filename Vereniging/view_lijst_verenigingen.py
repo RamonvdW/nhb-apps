@@ -203,6 +203,7 @@ class GeenBeheerdersView(UserPassesTestMixin, TemplateView):
         sec_count = dict()
         hwl_count = dict()
         alle_ver = list()
+        sec_email = dict()      # [ver_nr] = email
         for func in (Functie
                      .objects
                      .select_related('nhb_ver')
@@ -215,6 +216,8 @@ class GeenBeheerdersView(UserPassesTestMixin, TemplateView):
             ver_nr = ver.ver_nr
             if func.rol == 'SEC':
                 sec_count[ver_nr] = func.aantal_accounts
+                if func.bevestigde_email:
+                    sec_email[ver_nr] = func.bevestigde_email
             else:
                 hwl_count[ver_nr] = func.aantal_accounts
 
@@ -227,6 +230,11 @@ class GeenBeheerdersView(UserPassesTestMixin, TemplateView):
 
         for ver in alle_ver:
             ver_nr = ver.ver_nr
+
+            try:
+                ver.functie_sec_email = sec_email[ver_nr]
+            except KeyError:
+                ver.functie_sec_email = '??'
 
             count = sec_count[ver_nr]
             if count == 0:

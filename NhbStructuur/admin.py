@@ -20,8 +20,6 @@ class NhbVerenigingAdmin(admin.ModelAdmin):
 
     filter_horizontal = ('clusters',)
 
-    readonly_fields = ('secretaris_lid',)
-
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
         self._nhbver_regio = None

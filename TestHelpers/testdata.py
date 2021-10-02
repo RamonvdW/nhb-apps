@@ -288,7 +288,6 @@ class TestData(object):
                             ver_nr=ver_nr,
                             naam="Club %s" % ver_nr,
                             plaats="Regio %s dorp %s" % (regio.regio_nr, nr+1),
-                            contact_email='club%s@testdata.zz' % ver_nr,
                             regio=regio,
                             # geen secretaris lid
                             geen_wedstrijden=regio.is_administratief)
@@ -535,6 +534,10 @@ class TestData(object):
                             # bevestigde_email=''
                             # nieuwe_email=''
                             nhb_ver=ver)
+
+                if rol == 'SEC':
+                    func.bevestigde_email = 'secretaris.club%s@testdata.zz' % ver.ver_nr
+
                 bulk.append(func)
             # for
         # for
