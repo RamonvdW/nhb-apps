@@ -72,8 +72,17 @@ fi
 ABORTED=0
 
 # start the simulator (for the mailer)
-python3 ./Mailer/test_tools/websim.py &
+python3 ./Mailer/test_tools/websim_mailer.py &
 PID_WEBSIM=$!
+sleep 0.5               # give python some time to load everything
+kill -0 $PID_WEBSIM     # check the simulator is running
+RES=$?
+#echo "RES=$RES"
+if [ $RES -ne 0 ]
+then
+    echo "[ERROR] Simulator failed to start"
+    exit
+fi
 
 export COVERAGE_FILE="/tmp/.coverage.$$"
 
