@@ -108,12 +108,12 @@ def init_boogtype(apps, _):
     boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
 
     # maak de standaard boogtypen aan
-    boogtype_klas(afkorting='R',  volgorde='A', beschrijving='Recurve').save()
-    boogtype_klas(afkorting='C',  volgorde='D', beschrijving='Compound').save()
-    boogtype_klas(afkorting='BB', volgorde='I', beschrijving='Barebow').save()
-    boogtype_klas(afkorting='IB', volgorde='M', beschrijving='Instinctive bow').save()
-    boogtype_klas(afkorting='LB', volgorde='S', beschrijving='Longbow').save()
-
+    bulk = [boogtype_klas(afkorting='R',  volgorde='A', beschrijving='Recurve'),
+            boogtype_klas(afkorting='C',  volgorde='D', beschrijving='Compound'),
+            boogtype_klas(afkorting='BB', volgorde='I', beschrijving='Barebow'),
+            boogtype_klas(afkorting='IB', volgorde='M', beschrijving='Instinctive bow'),
+            boogtype_klas(afkorting='LB', volgorde='S', beschrijving='Longbow')]
+    boogtype_klas.objects.bulk_create(bulk)
 
 def init_leeftijdsklasse(apps, _):
     """ Maak de leeftijdsklassen aan """
@@ -126,125 +126,128 @@ def init_leeftijdsklasse(apps, _):
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
 
-    # >= 60
-    leeftijdsklasse_klas(
-        afkorting='VH', geslacht='M',
-        klasse_kort='Veteraan',
-        beschrijving='Veteranen, mannen',
-        volgorde=60,
-        min_wedstrijdleeftijd=60,
-        max_wedstrijdleeftijd=0,
-        volgens_wa=False).save()
-    leeftijdsklasse_klas(
-        afkorting='VV', geslacht='V',
-        klasse_kort='Veteraan',
-        beschrijving='Veteranen, vrouwen',
-        volgorde=60,
-        min_wedstrijdleeftijd=60,
-        max_wedstrijdleeftijd=0,
-        volgens_wa=False).save()
+    bulk = [
+        # >= 60
+        leeftijdsklasse_klas(
+            afkorting='VH', geslacht='M',
+            klasse_kort='Veteraan',
+            beschrijving='Veteranen, mannen',
+            volgorde=60,
+            min_wedstrijdleeftijd=60,
+            max_wedstrijdleeftijd=0,
+            volgens_wa=False),
+        leeftijdsklasse_klas(
+            afkorting='VV', geslacht='V',
+            klasse_kort='Veteraan',
+            beschrijving='Veteranen, vrouwen',
+            volgorde=60,
+            min_wedstrijdleeftijd=60,
+            max_wedstrijdleeftijd=0,
+            volgens_wa=False),
 
-    # >= 50
-    leeftijdsklasse_klas(
-        afkorting='MH', geslacht='M',
-        klasse_kort='Master',
-        beschrijving='Masters, mannen',
-        volgorde=50,
-        min_wedstrijdleeftijd=50,
-        max_wedstrijdleeftijd=0,
-        volgens_wa=True).save()
-    leeftijdsklasse_klas(
-        afkorting='MV', geslacht='V',
-        klasse_kort='Master',
-        beschrijving='Masters, vrouwen',
-        volgorde=50,
-        min_wedstrijdleeftijd=50,
-        max_wedstrijdleeftijd=0,
-        volgens_wa=True).save()
+        # >= 50
+        leeftijdsklasse_klas(
+            afkorting='MH', geslacht='M',
+            klasse_kort='Master',
+            beschrijving='Masters, mannen',
+            volgorde=50,
+            min_wedstrijdleeftijd=50,
+            max_wedstrijdleeftijd=0,
+            volgens_wa=True),
+        leeftijdsklasse_klas(
+            afkorting='MV', geslacht='V',
+            klasse_kort='Master',
+            beschrijving='Masters, vrouwen',
+            volgorde=50,
+            min_wedstrijdleeftijd=50,
+            max_wedstrijdleeftijd=0,
+            volgens_wa=True),
 
-    # open klasse
-    leeftijdsklasse_klas(
-        afkorting='SH', geslacht='M',
-        klasse_kort='Senior',
-        beschrijving='Senioren, mannen',
-        volgorde=40,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=0).save()
-    leeftijdsklasse_klas(
-        afkorting='SV', geslacht='V',
-        klasse_kort='Senior',
-        beschrijving='Senioren, vrouwen',
-        volgorde=40,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=0).save()
+        # open klasse
+        leeftijdsklasse_klas(
+            afkorting='SH', geslacht='M',
+            klasse_kort='Senior',
+            beschrijving='Senioren, mannen',
+            volgorde=40,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=0),
+        leeftijdsklasse_klas(
+            afkorting='SV', geslacht='V',
+            klasse_kort='Senior',
+            beschrijving='Senioren, vrouwen',
+            volgorde=40,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=0),
 
-    # <= 20
-    leeftijdsklasse_klas(
-        afkorting='JH', geslacht='M',
-        klasse_kort='Junior',
-        beschrijving='Junioren, mannen',
-        volgorde=30,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=20).save()
-    leeftijdsklasse_klas(
-        afkorting='JV', geslacht='V',
-        klasse_kort='Junior',
-        beschrijving='Junioren, vrouwen',
-        volgorde=30,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=20).save()
+        # <= 20
+        leeftijdsklasse_klas(
+            afkorting='JH', geslacht='M',
+            klasse_kort='Junior',
+            beschrijving='Junioren, mannen',
+            volgorde=30,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=20),
+        leeftijdsklasse_klas(
+            afkorting='JV', geslacht='V',
+            klasse_kort='Junior',
+            beschrijving='Junioren, vrouwen',
+            volgorde=30,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=20),
 
-    # <= 17
-    leeftijdsklasse_klas(
-        afkorting='CH', geslacht='M',
-        klasse_kort='Cadet',
-        beschrijving='Cadetten, jongens',
-        volgorde=20,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=17).save()
-    leeftijdsklasse_klas(
-        afkorting='CV', geslacht='V',
-        klasse_kort='Cadet',
-        beschrijving='Cadetten, meisjes',
-        volgorde=20,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=17).save()
+        # <= 17
+        leeftijdsklasse_klas(
+            afkorting='CH', geslacht='M',
+            klasse_kort='Cadet',
+            beschrijving='Cadetten, jongens',
+            volgorde=20,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=17),
+        leeftijdsklasse_klas(
+            afkorting='CV', geslacht='V',
+            klasse_kort='Cadet',
+            beschrijving='Cadetten, meisjes',
+            volgorde=20,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=17),
 
-    # <= 13
-    leeftijdsklasse_klas(
-        afkorting='AH2', geslacht='M',
-        klasse_kort='Aspirant',
-        beschrijving='Aspiranten 11-12, jongens',   # heet 11-12 ivm leeftijd in 1e jaar competitie..
-        volgorde=15,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=13,
-        volgens_wa=False).save()
-    leeftijdsklasse_klas(
-        afkorting='AV2', geslacht='V',
-        klasse_kort='Aspirant',
-        beschrijving='Aspiranten 11-12, meisjes',
-        volgorde=15,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=13,
-        volgens_wa=False).save()
+        # <= 13
+        leeftijdsklasse_klas(
+            afkorting='AH2', geslacht='M',
+            klasse_kort='Aspirant',
+            beschrijving='Aspiranten 11-12, jongens',   # heet 11-12 ivm leeftijd in 1e jaar competitie..
+            volgorde=15,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=13,
+            volgens_wa=False),
+        leeftijdsklasse_klas(
+            afkorting='AV2', geslacht='V',
+            klasse_kort='Aspirant',
+            beschrijving='Aspiranten 11-12, meisjes',
+            volgorde=15,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=13,
+            volgens_wa=False),
 
-    # <= 11
-    leeftijdsklasse_klas(
-        afkorting='AH1', geslacht='M',
-        klasse_kort='Aspirant',
-        beschrijving='Aspiranten <11, jongens',
-        volgorde=10,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=11,
-        volgens_wa=False).save()
-    leeftijdsklasse_klas(
-        afkorting='AV1', geslacht='V',
-        klasse_kort='Aspirant',
-        beschrijving='Aspiranten <11, meisjes',
-        volgorde=10,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=11,
-        volgens_wa=False).save()
+        # <= 11
+        leeftijdsklasse_klas(
+            afkorting='AH1', geslacht='M',
+            klasse_kort='Aspirant',
+            beschrijving='Aspiranten <11, jongens',
+            volgorde=10,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=11,
+            volgens_wa=False),
+        leeftijdsklasse_klas(
+            afkorting='AV1', geslacht='V',
+            klasse_kort='Aspirant',
+            beschrijving='Aspiranten <11, meisjes',
+            volgorde=10,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=11,
+            volgens_wa=False),
+    ]
+    leeftijdsklasse_klas.objects.bulk_create(bulk)
 
 
 def init_team_typen(apps, _):
@@ -256,32 +259,29 @@ def init_team_typen(apps, _):
     team_type_klas = apps.get_model('BasisTypen', 'TeamType')
     boog_type_klas = apps.get_model('BasisTypen', 'BoogType')
 
-    boog_r = boog_type_klas.objects.get(afkorting='R')
-    boog_c = boog_type_klas.objects.get(afkorting='C')
-    boog_bb = boog_type_klas.objects.get(afkorting='BB')
-    boog_ib = boog_type_klas.objects.get(afkorting='IB')
-    boog_lb = boog_type_klas.objects.get(afkorting='LB')
+    boog_r = boog_c = boog_bb = boog_ib = boog_lb = None
+    for boog in boog_type_klas.objects.all():
+        if boog.afkorting == 'R':  boog_r = boog
+        if boog.afkorting == 'C':  boog_c = boog
+        if boog.afkorting == 'BB': boog_bb = boog
+        if boog.afkorting == 'IB': boog_ib = boog
+        if boog.afkorting == 'LB': boog_lb = boog
+    # for
 
     # maak de standaard team typen aan
-    team = team_type_klas(afkorting='R',  volgorde='1', beschrijving='Recurve team')
-    team.save()
-    team.boog_typen.add(boog_r, boog_bb, boog_ib, boog_lb)
+    team_r = team_type_klas(afkorting='R',  volgorde='1', beschrijving='Recurve team')
+    team_c = team_type_klas(afkorting='C',  volgorde='2', beschrijving='Compound team')
+    team_bb = team_type_klas(afkorting='BB', volgorde='3', beschrijving='Barebow team')
+    team_ib = team_type_klas(afkorting='IB', volgorde='4', beschrijving='Instinctive Bow team')
+    team_lb = team_type_klas(afkorting='LB', volgorde='5', beschrijving='Longbow team')
 
-    team = team_type_klas(afkorting='C',  volgorde='2', beschrijving='Compound team')
-    team.save()
-    team.boog_typen.add(boog_c)
+    team_type_klas.objects.bulk_create([team_r, team_c, team_bb, team_ib, team_lb])
 
-    team = team_type_klas(afkorting='BB', volgorde='3', beschrijving='Barebow team')
-    team.save()
-    team.boog_typen.add(boog_bb, boog_ib, boog_lb)
-
-    team = team_type_klas(afkorting='IB', volgorde='4', beschrijving='Instinctive Bow team')
-    team.save()
-    team.boog_typen.add(boog_ib, boog_lb)
-
-    team = team_type_klas(afkorting='LB', volgorde='5', beschrijving='Longbow team')
-    team.save()
-    team.boog_typen.add(boog_lb)
+    team_r.boog_typen.add(boog_r, boog_bb, boog_ib, boog_lb)
+    team_c.boog_typen.add(boog_c)
+    team_bb.boog_typen.add(boog_bb, boog_ib, boog_lb)
+    team_ib.boog_typen.add(boog_ib, boog_lb)
+    team_lb.boog_typen.add(boog_lb)
 
 
 def init_wedstrijdklassen_individueel(apps, _):
@@ -298,6 +298,7 @@ def init_wedstrijdklassen_individueel(apps, _):
         afkorting2boogtype[obj.afkorting] = obj
     # for
 
+    # TODO: add bulk-create
     for tup in WKL_INDIV:
         if len(tup) == 6:
             volgorde, beschrijving, boog_afkorting, leeftijdsklassen, blazoenen_18m, blazoenen_25m = tup
