@@ -5,51 +5,70 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import views_scores
+from . import view_scores, view_wedstrijden
 
 app_name = 'CompScores'
 
 urlpatterns = [
 
-    # RCL schermen
+    # HWL: wedstrijden kaartje
+    path('wedstrijden-bij-de-vereniging/',
+         view_wedstrijden.WedstrijdenView.as_view(),
+         name='wedstrijden'),
+
+    path('waarschijnlijke-deelnemers/<wedstrijd_pk>/',
+         view_wedstrijden.WaarschijnlijkeDeelnemersView.as_view(),
+         name='waarschijnlijke-deelnemers'),
+
+    path('waarschijnlijke-deelnemers/<wedstrijd_pk>/als-bestand/',
+         view_wedstrijden.WaarschijnlijkeDeelnemersAlsBestandView.as_view(),
+         name='waarschijnlijke-deelnemers-als-bestand'),
+
+    # HWL: scores kaartje
+    path('bij-de-vereniging/',
+         view_wedstrijden.WedstrijdenScoresView.as_view(),
+         name='wedstrijden-scores'),
+
+    # RCL: scores
     path('regio/<deelcomp_pk>/',
-         views_scores.ScoresRegioView.as_view(),
-         name='scores-regio'),
+         view_scores.ScoresRegioView.as_view(),
+         name='scores-rcl'),
 
+    # RCL: team scores uitkiezen
     path('teams/<deelcomp_pk>/',
-         views_scores.ScoresRegioTeamsView.as_view(),
-         name='scores-regio-teams'),
+         view_scores.ScoresRegioTeamsView.as_view(),
+         name='selecteer-team-scores'),
 
 
-    # HWL/RCL schermen
+    # HWL/RCL: scores invoeren/bekijken/accorderen voor specifieke wedstrijd
     path('uitslag-invoeren/<wedstrijd_pk>/',
-         views_scores.WedstrijdUitslagInvoerenView.as_view(),
-         name='wedstrijd-uitslag-invoeren'),
+         view_scores.WedstrijdUitslagInvoerenView.as_view(),
+         name='uitslag-invoeren'),
 
     path('uitslag-controleren/<wedstrijd_pk>/',
-         views_scores.WedstrijdUitslagControlerenView.as_view(),
-         name='wedstrijd-uitslag-controleren'),
+         view_scores.WedstrijdUitslagControlerenView.as_view(),
+         name='uitslag-controleren'),
 
     path('uitslag-accorderen/<wedstrijd_pk>/',
-         views_scores.WedstrijdUitslagControlerenView.as_view(),
-         name='wedstrijd-geef-akkoord'),
+         view_scores.WedstrijdUitslagControlerenView.as_view(),
+         name='uitslag-accorderen'),
 
     path('bekijk-uitslag/<wedstrijd_pk>/',
-         views_scores.WedstrijdUitslagBekijkenView.as_view(),
-         name='wedstrijd-bekijk-uitslag'),
+         view_scores.WedstrijdUitslagBekijkenView.as_view(),
+         name='uitslag-bekijken'),
+
 
     path('dynamic/deelnemers-ophalen/',
-         views_scores.DynamicDeelnemersOphalenView.as_view(),
+         view_scores.DynamicDeelnemersOphalenView.as_view(),
          name='dynamic-deelnemers-ophalen'),
 
     path('dynamic/check-nhbnr/',
-         views_scores.DynamicZoekOpBondsnummerView.as_view(),
+         view_scores.DynamicZoekOpBondsnummerView.as_view(),
          name='dynamic-check-nhbnr'),
 
     path('dynamic/scores-opslaan/',
-         views_scores.DynamicScoresOpslaanView.as_view(),
+         view_scores.DynamicScoresOpslaanView.as_view(),
          name='dynamic-scores-opslaan'),
-
 ]
 
 # end of file

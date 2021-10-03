@@ -72,6 +72,6 @@
 
     {% endif %}
 
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-wedstrijden" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compscores-wedstrijden" %}
 
 {% endblock %}

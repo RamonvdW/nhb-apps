@@ -251,6 +251,6 @@
 
     </table>
 
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-waarschijnlijke-deelnemers" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compscores-waarschijnlijke-deelnemers" %}
 
 {% endblock %}

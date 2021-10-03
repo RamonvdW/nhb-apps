@@ -16,8 +16,8 @@ from Plein.menu import menu_dynamics
 from Wedstrijden.models import CompetitieWedstrijd
 import csv
 
-TEMPLATE_WEDSTRIJDEN = 'vereniging/wedstrijden.dtl'
-TEMPLATE_WAARSCHIJNLIJKE_DEELNEMERS = 'vereniging/waarschijnlijke-deelnemers.dtl'
+TEMPLATE_WEDSTRIJDEN = 'compscores/wedstrijden.dtl'
+TEMPLATE_WAARSCHIJNLIJKE_DEELNEMERS = 'compscores/waarschijnlijke-deelnemers.dtl'
 
 
 class WedstrijdenView(UserPassesTestMixin, TemplateView):
@@ -83,7 +83,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             mag_wijzigen = self.uitslag_invoeren and not (wedstrijd.uitslag and wedstrijd.uitslag.is_bevroren)
             if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and mag_wijzigen:
                 # mag uitslag wijzigen
-                url = reverse('CompScores:wedstrijd-uitslag-invoeren',
+                url = reverse('CompScores:uitslag-invoeren',
                               kwargs={'wedstrijd_pk': wedstrijd.pk})
                 if heeft_uitslag:
                     wedstrijd.url_uitslag_aanpassen = url
@@ -92,13 +92,13 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                 wedstrijd.toon_geen_uitslag = False
             else:
                 if heeft_uitslag:
-                    wedstrijd.url_uitslag_bekijken = reverse('CompScores:wedstrijd-bekijk-uitslag',
+                    wedstrijd.url_uitslag_bekijken = reverse('CompScores:uitslag-bekijken',
                                                              kwargs={'wedstrijd_pk': wedstrijd.pk})
                     wedstrijd.toon_geen_uitslag = False
 
             # link naar de waarschijnlijke deelnemerslijst
             if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and not (wedstrijd.uitslag and wedstrijd.uitslag.is_bevroren):
-                wedstrijd.url_waarschijnlijke_deelnemers = reverse('Vereniging:waarschijnlijke-deelnemers',
+                wedstrijd.url_waarschijnlijke_deelnemers = reverse('CompScores:waarschijnlijke-deelnemers',
                                                                    kwargs={'wedstrijd_pk': wedstrijd.pk})
 
             context['geen_wedstrijden'] = False
@@ -113,7 +113,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
         return context
 
 
-class WedstrijdenUitslagInvoerenView(WedstrijdenView):
+class WedstrijdenScoresView(WedstrijdenView):
 
     uitslag_invoeren = True
 
@@ -183,7 +183,7 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
 
         context['blazoenen'] = bepaal_blazoen_behoefte(afstand, sporters, teams)
 
-        context['url_download'] = reverse('Vereniging:waarschijnlijke-deelnemers-als-bestand',
+        context['url_download'] = reverse('CompScores:waarschijnlijke-deelnemers-als-bestand',
                                           kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         # prep de view

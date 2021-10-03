@@ -26,15 +26,9 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 
-    url_overzicht = '/vereniging/'
-    url_ledenlijst = '/vereniging/leden-lijst/'
-    url_voorkeuren = '/vereniging/leden-voorkeuren/'
-    url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'  # comp_pk
-    url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # deelcomp_pk
-    url_schutter_voorkeuren = '/sporter/voorkeuren/%s/'  # sporter_pk
-    url_wedstrijden = '/vereniging/wedstrijden/'
-    url_uitslag_invoeren = '/vereniging/uitslag-invoeren/'
-    url_waarschijnlijke = '/vereniging/wedstrijden/%s/waarschijnlijke-deelnemers/'  # wedstrijd_pk
+    url_scores = '/bondscompetities/scores/bij-de-vereniging/'
+    url_wedstrijden = '/bondscompetities/scores/wedstrijden-bij-de-vereniging/'
+    url_waarschijnlijke = '/bondscompetities/scores/waarschijnlijke-deelnemers/%s/'  # wedstrijd_pk
 
     testdata = None
 
@@ -374,16 +368,16 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wedstrijden)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/wedstrijden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden)
 
         # haal de lijst van wedstrijden waarvan de uitslag ingevoerd mag worden
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslag_invoeren)
+            resp = self.client.get(self.url_scores)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/wedstrijden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'plein/site_layout.dtl'))
 
         urls2 = self.extract_all_urls(resp, skip_menu=True)
         for url in urls2:
@@ -395,7 +389,7 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/waarschijnlijke-deelnemers.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(url)
 
@@ -410,7 +404,7 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wedstrijden)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/wedstrijden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden)
 
@@ -419,7 +413,7 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/waarschijnlijke-deelnemers.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers.dtl', 'plein/site_layout.dtl'))
 
     def test_wedstrijden_sec(self):
         # login als SEC
@@ -432,14 +426,14 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wedstrijden)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/wedstrijden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_waarschijnlijke % self.wedstrijden[2].pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/waarschijnlijke-deelnemers.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers.dtl', 'plein/site_layout.dtl'))
 
     def test_bad(self):
         # geen toegang tot de pagina
@@ -475,7 +469,7 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/waarschijnlijke-deelnemers.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers.dtl', 'plein/site_layout.dtl'))
 
         # inschrijfmethode 1
         self.deelcomp_regio_18.inschrijf_methode = INSCHRIJF_METHODE_1
@@ -486,7 +480,7 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/waarschijnlijke-deelnemers.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers.dtl', 'plein/site_layout.dtl'))
 
         # 25m1pijl wedstrijd
         self.ronde.plan.wedstrijden.clear()
@@ -501,7 +495,7 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/waarschijnlijke-deelnemers.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers.dtl', 'plein/site_layout.dtl'))
 
 
 # end of file

@@ -62,7 +62,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
 
         if deelcomp.regio_organiseert_teamcompetitie:
-            context['url_team_scores'] = reverse('CompScores:scores-regio-teams',
+            context['url_team_scores'] = reverse('CompScores:selecteer-team-scores',
                                                  kwargs={'deelcomp_pk': deelcomp.pk})
 
         # deelcompetitie bestaat uit rondes
@@ -106,11 +106,11 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
             # geef RCL de mogelijkheid om te scores aan te passen
             # de HWL/WL krijgen deze link vanuit Vereniging::Wedstrijden
             if heeft_uitslag:
-                wedstrijd.url_uitslag_controleren = reverse('CompScores:wedstrijd-uitslag-controleren',
+                wedstrijd.url_uitslag_controleren = reverse('CompScores:uitslag-controleren',
                                                             kwargs={'wedstrijd_pk': wedstrijd.pk})
             else:
                 # TODO: knop pas beschikbaar maken op wedstrijddatum tot datum+N
-                wedstrijd.url_uitslag_invoeren = reverse('CompScores:wedstrijd-uitslag-invoeren',
+                wedstrijd.url_uitslag_invoeren = reverse('CompScores:uitslag-invoeren',
                                                          kwargs={'wedstrijd_pk': wedstrijd.pk})
         # for
 
@@ -257,7 +257,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         context['is_akkoord'] = wedstrijd.uitslag.is_bevroren
 
         if self.is_controle:
-            context['url_geef_akkoord'] = reverse('CompScores:wedstrijd-geef-akkoord',
+            context['url_geef_akkoord'] = reverse('CompScores:uitslag-accorderen',
                                                   kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         scores = (wedstrijd
@@ -291,10 +291,10 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         # ronde = DeelcompetitieRonde.objects.get(plan=plan)
 
         if rol_nu == Rollen.ROL_RCL:
-            context['url_terug'] = reverse('CompScores:scores-regio',
+            context['url_terug'] = reverse('CompScores:scores-rcl',
                                            kwargs={'deelcomp_pk': deelcomp.pk})
         else:
-            context['url_terug'] = reverse('Vereniging:wedstrijden-uitslag-invoeren')
+            context['url_terug'] = reverse('CompScores:wedstrijden-scores')
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context
@@ -324,7 +324,7 @@ class WedstrijdUitslagControlerenView(WedstrijdUitslagInvoerenView):
             uitslag.is_bevroren = True
             uitslag.save()
 
-        url = reverse('CompScores:wedstrijd-uitslag-controleren',
+        url = reverse('CompScores:uitslag-controleren',
                       kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         return HttpResponseRedirect(url)
@@ -958,7 +958,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         if 1 <= deelcomp.huidige_team_ronde <= 7:
             context['alle_regels'] = self._bepaal_teams_en_scores(deelcomp)
-            context['url_opslaan'] = reverse('CompScores:scores-regio-teams',
+            context['url_opslaan'] = reverse('CompScores:selecteer-team-scores',
                                              kwargs={'deelcomp_pk': deelcomp.pk})
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
@@ -1026,8 +1026,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         # trigger de achtergrondtaak om de team scores opnieuw te berekenen
         update_uitslag_teamcompetitie()
 
-        url = reverse('CompScores:scores-regio',
-                      kwargs={'deelcomp_pk': deelcomp.pk})
+        url = reverse('CompScores:scores-rcl', kwargs={'deelcomp_pk': deelcomp.pk})
         return HttpResponseRedirect(url)
 
 

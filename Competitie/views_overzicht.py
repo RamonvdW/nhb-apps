@@ -136,7 +136,7 @@ class CompetitieOverzichtView(View):
                                                  kwargs={'deelcomp_pk': obj.pk})
 
                 obj.tekst_scores = "Scores invoeren en aanpassen voor %s voor deze competitie." % obj.nhb_regio.naam
-                obj.url_scores = reverse('CompScores:scores-regio',
+                obj.url_scores = reverse('CompScores:scores-rcl',
                                          kwargs={'deelcomp_pk': obj.pk})
 
                 if obj.regio_organiseert_teamcompetitie:
