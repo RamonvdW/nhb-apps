@@ -32,9 +32,9 @@ class TestSporterRegiocompetitie(E2EHelpers, TestCase):
     url_bevestig_aanmelden = '/sporter/regiocompetitie/aanmelden/%s/%s/bevestig/'   # deelcomp_pk, sporterboog_pk
     url_afmelden = '/sporter/regiocompetitie/afmelden/%s/'                          # regiocomp_pk
     url_schietmomenten = '/sporter/regiocompetitie/%s/schietmomenten/'              # deelnemer_pk
-    url_planning_regio = '/bondscompetities/planning/regio/%s/'                     # deelcomp_pk
-    url_planning_regio_ronde_methode1 = '/bondscompetities/planning/regio/regio-wedstrijden/%s/'  # ronde_pk
-    url_wijzig_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/wijzig/%s/'  # wedstrijd_pk
+    url_planning_regio = '/bondscompetities/regio/planning/%s/'                     # deelcomp_pk
+    url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'  # ronde_pk
+    url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'  # wedstrijd_pk
     url_inschrijven_hwl = '/vereniging/leden-aanmelden/competitie/%s/'              # comp_pk
 
     testdata = None
