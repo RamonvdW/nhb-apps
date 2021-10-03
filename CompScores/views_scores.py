@@ -11,24 +11,23 @@ from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers
-from Competitie.models import (RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieTeamPoule,
+from Competitie.models import (LAAG_REGIO, DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog,
+                               RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieTeamPoule,
                                update_uitslag_teamcompetitie)
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE
 from Sporter.models import SporterBoog
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
-from .models import (LAAG_REGIO, DeelCompetitie,
-                     DeelcompetitieRonde, RegioCompetitieSchutterBoog)
 from types import SimpleNamespace
 import datetime
 import json
 
 
-TEMPLATE_COMPETITIE_SCORES_REGIO = 'competitie/scores-regio.dtl'
-TEMPLATE_COMPETITIE_SCORES_INVOEREN = 'competitie/scores-invoeren.dtl'
-TEMPLATE_COMPETITIE_SCORES_BEKIJKEN = 'competitie/scores-bekijken.dtl'
-TEMPLATE_COMPETITIE_SCORES_TEAMS = 'competitie/scores-regio-teams.dtl'
+TEMPLATE_COMPSCORES_REGIO = 'compscores/scores-regio.dtl'
+TEMPLATE_COMPSCORES_INVOEREN = 'compscores/scores-invoeren.dtl'
+TEMPLATE_COMPSCORES_BEKIJKEN = 'compscores/scores-bekijken.dtl'
+TEMPLATE_COMPSCORES_TEAMS = 'compscores/scores-regio-teams.dtl'
 
 
 class ScoresRegioView(UserPassesTestMixin, TemplateView):
@@ -36,7 +35,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
     """ Deze view geeft de planning voor een competitie in een regio """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_SCORES_REGIO
+    template_name = TEMPLATE_COMPSCORES_REGIO
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
@@ -63,7 +62,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
 
         if deelcomp.regio_organiseert_teamcompetitie:
-            context['url_team_scores'] = reverse('Competitie:scores-regio-teams',
+            context['url_team_scores'] = reverse('CompScores:scores-regio-teams',
                                                  kwargs={'deelcomp_pk': deelcomp.pk})
 
         # deelcompetitie bestaat uit rondes
@@ -107,11 +106,11 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
             # geef RCL de mogelijkheid om te scores aan te passen
             # de HWL/WL krijgen deze link vanuit Vereniging::Wedstrijden
             if heeft_uitslag:
-                wedstrijd.url_uitslag_controleren = reverse('Competitie:wedstrijd-uitslag-controleren',
+                wedstrijd.url_uitslag_controleren = reverse('CompScores:wedstrijd-uitslag-controleren',
                                                             kwargs={'wedstrijd_pk': wedstrijd.pk})
             else:
                 # TODO: knop pas beschikbaar maken op wedstrijddatum tot datum+N
-                wedstrijd.url_uitslag_invoeren = reverse('Competitie:wedstrijd-uitslag-invoeren',
+                wedstrijd.url_uitslag_invoeren = reverse('CompScores:wedstrijd-uitslag-invoeren',
                                                          kwargs={'wedstrijd_pk': wedstrijd.pk})
         # for
 
@@ -181,7 +180,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
     """ Deze view laat de RCL, HWL en WL de uitslag van een wedstrijd invoeren """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_SCORES_INVOEREN
+    template_name = TEMPLATE_COMPSCORES_INVOEREN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     is_controle = False
 
@@ -258,7 +257,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         context['is_akkoord'] = wedstrijd.uitslag.is_bevroren
 
         if self.is_controle:
-            context['url_geef_akkoord'] = reverse('Competitie:wedstrijd-geef-akkoord',
+            context['url_geef_akkoord'] = reverse('CompScores:wedstrijd-geef-akkoord',
                                                   kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         scores = (wedstrijd
@@ -276,9 +275,9 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
 
         self._team_naam_toevoegen(scores, deelcomp)
 
-        context['url_check_nhbnr'] = reverse('Competitie:dynamic-check-nhbnr')
-        context['url_opslaan'] = reverse('Competitie:dynamic-scores-opslaan')
-        context['url_deelnemers_ophalen'] = reverse('Competitie:dynamic-deelnemers-ophalen')
+        context['url_check_nhbnr'] = reverse('CompScores:dynamic-check-nhbnr')
+        context['url_opslaan'] = reverse('CompScores:dynamic-scores-opslaan')
+        context['url_deelnemers_ophalen'] = reverse('CompScores:dynamic-deelnemers-ophalen')
 
         teams = (RegiocompetitieTeam
                  .objects
@@ -292,7 +291,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         # ronde = DeelcompetitieRonde.objects.get(plan=plan)
 
         if rol_nu == Rollen.ROL_RCL:
-            context['url_terug'] = reverse('Competitie:scores-regio',
+            context['url_terug'] = reverse('CompScores:scores-regio',
                                            kwargs={'deelcomp_pk': deelcomp.pk})
         else:
             context['url_terug'] = reverse('Vereniging:wedstrijden-uitslag-invoeren')
@@ -325,7 +324,7 @@ class WedstrijdUitslagControlerenView(WedstrijdUitslagInvoerenView):
             uitslag.is_bevroren = True
             uitslag.save()
 
-        url = reverse('Competitie:wedstrijd-uitslag-controleren',
+        url = reverse('CompScores:wedstrijd-uitslag-controleren',
                       kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         return HttpResponseRedirect(url)
@@ -667,7 +666,7 @@ class WedstrijdUitslagBekijkenView(TemplateView):
     """ Deze view toont de uitslag van een wedstrijd """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_SCORES_BEKIJKEN
+    template_name = TEMPLATE_COMPSCORES_BEKIJKEN
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -728,7 +727,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
     """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_SCORES_TEAMS
+    template_name = TEMPLATE_COMPSCORES_TEAMS
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
@@ -959,7 +958,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         if 1 <= deelcomp.huidige_team_ronde <= 7:
             context['alle_regels'] = self._bepaal_teams_en_scores(deelcomp)
-            context['url_opslaan'] = reverse('Competitie:scores-regio-teams',
+            context['url_opslaan'] = reverse('CompScores:scores-regio-teams',
                                              kwargs={'deelcomp_pk': deelcomp.pk})
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
@@ -1027,7 +1026,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         # trigger de achtergrondtaak om de team scores opnieuw te berekenen
         update_uitslag_teamcompetitie()
 
-        url = reverse('Competitie:scores-regio',
+        url = reverse('CompScores:scores-regio',
                       kwargs={'deelcomp_pk': deelcomp.pk})
         return HttpResponseRedirect(url)
 

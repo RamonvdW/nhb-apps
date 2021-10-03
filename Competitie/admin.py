@@ -6,7 +6,6 @@
 
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from Sporter.models import SporterBoog
 from Wedstrijden.models import CompetitieWedstrijd
 from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde, LAAG_REGIO,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet,
@@ -26,7 +25,7 @@ class CreateOnlyAdmin(admin.ModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = list(super().get_readonly_fields(request, obj))
         createonly_fields = list(getattr(self, 'createonly_fields', []))
-        if obj:
+        if obj:                                     # pragma: no cover
             # editing an existing object
             readonly_fields.extend(createonly_fields)
         return readonly_fields

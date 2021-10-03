@@ -28,6 +28,7 @@ urlpatterns = [
     path('account/',                        include('Account.urls')),
     path('beheer/',                         admin.site.urls),
     path('bondscompetities/hist/',          include('HistComp.urls')),
+    path('bondscompetities/scores/',        include('CompScores.urls')),
     path('bondscompetities/uitslagen/',     include('CompUitslagen.urls')),
     path('bondscompetities/',               include('Competitie.urls')),
     path('functie/',                        include('Functie.urls')),

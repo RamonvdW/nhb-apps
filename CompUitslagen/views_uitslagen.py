@@ -19,12 +19,12 @@ from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_huidige
 from types import SimpleNamespace
 
 
-TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING_INDIV = 'compuitslagen/uitslagen-vereniging-indiv.dtl'
-TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING_TEAMS = 'compuitslagen/uitslagen-vereniging-teams.dtl'
-TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_INDIV = 'compuitslagen/uitslagen-regio-indiv.dtl'
-TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_TEAMS = 'compuitslagen/uitslagen-regio-teams.dtl'
-TEMPLATE_COMPETITIE_UITSLAGEN_RAYON_INDIV = 'compuitslagen/uitslagen-rayon-indiv.dtl'
-TEMPLATE_COMPETITIE_UITSLAGEN_BOND = 'compuitslagen/uitslagen-bond.dtl'
+TEMPLATE_COMPUITSLAGEN_VERENIGING_INDIV = 'compuitslagen/uitslagen-vereniging-indiv.dtl'
+TEMPLATE_COMPUITSLAGEN_VERENIGING_TEAMS = 'compuitslagen/uitslagen-vereniging-teams.dtl'
+TEMPLATE_COMPUITSLAGEN_REGIO_INDIV = 'compuitslagen/uitslagen-regio-indiv.dtl'
+TEMPLATE_COMPUITSLAGEN_REGIO_TEAMS = 'compuitslagen/uitslagen-regio-teams.dtl'
+TEMPLATE_COMPUITSLAGEN_RAYON_INDIV = 'compuitslagen/uitslagen-rayon-indiv.dtl'
+TEMPLATE_COMPUITSLAGEN_BOND = 'compuitslagen/uitslagen-bond.dtl'
 
 
 def get_schutter_regio_nr(request):
@@ -96,7 +96,7 @@ class UitslagenVerenigingIndivView(TemplateView):
     """ Django class-based view voor de de uitslagen van de competitie """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING_INDIV
+    template_name = TEMPLATE_COMPUITSLAGEN_VERENIGING_INDIV
 
     @staticmethod
     def _maak_filter_knoppen(context, comp, ver_nr, comp_boog):
@@ -240,7 +240,7 @@ class UitslagenRegioIndivView(TemplateView):
     """ Django class-based view voor de de individuele uitslagen van de competitie in 1 regio """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_INDIV
+    template_name = TEMPLATE_COMPUITSLAGEN_REGIO_INDIV
     url_name = 'CompUitslagen:uitslagen-regio-indiv-n'
     order_gemiddelde = '-gemiddelde'
 
@@ -488,7 +488,7 @@ class UitslagenRegioTeamsView(TemplateView):
     """ Django class-based view voor de de team uitslagen van de competitie in 1 regio """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_TEAMS
+    template_name = TEMPLATE_COMPUITSLAGEN_REGIO_TEAMS
     url_name = 'CompUitslagen:uitslagen-regio-teams-n'
 
     def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, teamtype_afkorting):
@@ -734,7 +734,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
     """ Django class-based view voor de de uitslagen van de teamcompetitie voor een specifieke vereniging """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING_TEAMS
+    template_name = TEMPLATE_COMPUITSLAGEN_VERENIGING_TEAMS
 
     @staticmethod
     def _maak_filter_knoppen(context, comp, ver_nr, teamtype_afkorting):
@@ -981,7 +981,7 @@ class UitslagenRayonIndivView(TemplateView):
     """ Django class-based view voor de de uitslagen van de rayonkampioenschappen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_RAYON_INDIV
+    template_name = TEMPLATE_COMPUITSLAGEN_RAYON_INDIV
 
     @staticmethod
     def _maak_filter_knoppen(context, comp, gekozen_rayon_nr, comp_boog):
@@ -1160,7 +1160,7 @@ class UitslagenBondView(TemplateView):
     """ Django class-based view voor de de uitslagen van de bondskampioenschappen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_UITSLAGEN_BOND
+    template_name = TEMPLATE_COMPUITSLAGEN_BOND
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

@@ -14,8 +14,7 @@ from . import (views_aangemeld,
                views_planning_bond,
                views_planning_rayon,
                views_regio_teams,
-               views_rayon_teams,
-               views_scores)
+               views_rayon_teams)
 
 app_name = 'Competitie'
 
@@ -208,46 +207,6 @@ urlpatterns = [
     path('planning/bk/wedstrijd/verwijder/<wedstrijd_pk>/',
          views_planning_bond.VerwijderWedstrijdView.as_view(),
          name='bond-verwijder-wedstrijd'),
-
-
-    # scores regio
-    path('scores/regio/<deelcomp_pk>/',
-         views_scores.ScoresRegioView.as_view(),
-         name='scores-regio'),
-
-    path('scores/teams/<deelcomp_pk>/',
-         views_scores.ScoresRegioTeamsView.as_view(),
-         name='scores-regio-teams'),
-
-
-    # uitslag invoeren
-    path('scores/uitslag-invoeren/<wedstrijd_pk>/',
-         views_scores.WedstrijdUitslagInvoerenView.as_view(),
-         name='wedstrijd-uitslag-invoeren'),
-
-    path('scores/uitslag-controleren/<wedstrijd_pk>/',
-         views_scores.WedstrijdUitslagControlerenView.as_view(),
-         name='wedstrijd-uitslag-controleren'),
-
-    path('scores/uitslag-accorderen/<wedstrijd_pk>/',
-         views_scores.WedstrijdUitslagControlerenView.as_view(),
-         name='wedstrijd-geef-akkoord'),
-
-    path('scores/bekijk-uitslag/<wedstrijd_pk>/',
-         views_scores.WedstrijdUitslagBekijkenView.as_view(),
-         name='wedstrijd-bekijk-uitslag'),
-
-    path('scores/dynamic/deelnemers-ophalen/',
-         views_scores.DynamicDeelnemersOphalenView.as_view(),
-         name='dynamic-deelnemers-ophalen'),
-
-    path('scores/dynamic/check-nhbnr/',
-         views_scores.DynamicZoekOpBondsnummerView.as_view(),
-         name='dynamic-check-nhbnr'),
-
-    path('scores/dynamic/scores-opslaan/',
-         views_scores.DynamicScoresOpslaanView.as_view(),
-         name='dynamic-scores-opslaan'),
 
 
     path('<comp_pk>/doorzetten/rk/',

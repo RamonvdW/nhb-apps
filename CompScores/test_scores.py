@@ -7,8 +7,8 @@
 from django.test import TestCase
 from django.utils import timezone
 from Score.models import Score
+from Competitie.models import CompetitieKlasse, DeelcompetitieRonde
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
-from .models import CompetitieKlasse, DeelcompetitieRonde
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import json
@@ -156,14 +156,14 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('competitie/scores-invoeren.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/scores-invoeren.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # nog een keer, dan bestaat de WedstrijdUitslag al
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('competitie/scores-invoeren.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/scores-invoeren.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # niet bestaande wedstrijd
@@ -676,7 +676,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)       # 200 = OK
-        self.assert_template_used(resp, ('competitie/scores-bekijken.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/scores-bekijken.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
     def test_scores_teams(self):
@@ -701,7 +701,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         with self.assert_max_queries(44):      # TODO: reduceer
             resp = self.client.get(self.url_regio_teams % deelcomp.pk)
         self.assertEqual(resp.status_code, 200)       # 200 = OK
-        self.assert_template_used(resp, ('competitie/scores-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/scores-regio-teams.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # do een post
@@ -726,7 +726,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_regio_teams % deelcomp.pk)
         self.assertEqual(resp.status_code, 200)       # 200 = OK
-        self.assert_template_used(resp, ('competitie/scores-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/scores-regio-teams.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # regio organiseert geen teamcompetitie
