@@ -304,17 +304,17 @@ class CompetitieOverzichtView(View):
         # kijk of de uitslagen klaar zijn om te tonen
         context['toon_uitslagen'] = (comp.fase >= 'B')      # inschrijving is open
 
-        context['url_regio_indiv'] = reverse('Competitie:uitslagen-regio-indiv',
+        context['url_regio_indiv'] = reverse('CompUitslagen:uitslagen-regio-indiv',
                                              kwargs={'comp_pk': comp.pk,
                                                      'zes_scores': 'alle',
                                                      'comp_boog': 'r'})
-        context['url_regio_teams'] = reverse('Competitie:uitslagen-regio-teams',
+        context['url_regio_teams'] = reverse('CompUitslagen:uitslagen-regio-teams',
                                              kwargs={'comp_pk': comp.pk,
                                                      'team_type': 'r'})
-        context['url_rayon_indiv'] = reverse('Competitie:uitslagen-rayon-indiv',
+        context['url_rayon_indiv'] = reverse('CompUitslagen:uitslagen-rayon-indiv',
                                              kwargs={'comp_pk': comp.pk,
                                                      'comp_boog': 'r'})
-        context['url_bond'] = reverse('Competitie:uitslagen-bond',
+        context['url_bond'] = reverse('CompUitslagen:uitslagen-bond',
                                       kwargs={'comp_pk': comp.pk,
                                               'comp_boog': 'r'})
 

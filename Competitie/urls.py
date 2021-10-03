@@ -15,7 +15,6 @@ from . import (views_aangemeld,
                views_planning_rayon,
                views_regio_teams,
                views_rayon_teams,
-               views_uitslagen,
                views_scores)
 
 app_name = 'Competitie'
@@ -249,49 +248,6 @@ urlpatterns = [
     path('scores/dynamic/scores-opslaan/',
          views_scores.DynamicScoresOpslaanView.as_view(),
          name='dynamic-scores-opslaan'),
-
-
-    # competitie uitslagen
-    path('<comp_pk>/uitslagen/<comp_boog>/vereniging/<ver_nr>/individueel/',
-         views_uitslagen.UitslagenVerenigingIndivView.as_view(),
-         name='uitslagen-vereniging-indiv-n'),
-
-    path('<comp_pk>/uitslagen/<team_type>/vereniging/<ver_nr>/teams/',
-         views_uitslagen.UitslagenVerenigingTeamsView.as_view(),
-         name='uitslagen-vereniging-teams-n'),
-
-    # TODO: wordt deze gebruikt?
-    path('<comp_pk>/uitslagen/<comp_boog>/vereniging/',
-         views_uitslagen.UitslagenVerenigingIndivView.as_view(),
-         name='uitslagen-vereniging-indiv'),
-
-    path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio-individueel/<regio_nr>/',
-         views_uitslagen.UitslagenRegioIndivView.as_view(),
-         name='uitslagen-regio-indiv-n'),
-
-    path('<comp_pk>/uitslagen/<comp_boog>/<zes_scores>/regio-individueel/',
-         views_uitslagen.UitslagenRegioIndivView.as_view(),
-         name='uitslagen-regio-indiv'),
-
-    path('<comp_pk>/uitslagen/<team_type>/regio-teams/',
-         views_uitslagen.UitslagenRegioTeamsView.as_view(),
-         name='uitslagen-regio-teams'),
-
-    path('<comp_pk>/uitslagen/<team_type>/regio-teams/<regio_nr>/',
-         views_uitslagen.UitslagenRegioTeamsView.as_view(),
-         name='uitslagen-regio-teams-n'),
-
-    path('<comp_pk>/uitslagen/<comp_boog>/rayon-individueel/',
-         views_uitslagen.UitslagenRayonIndivView.as_view(),
-         name='uitslagen-rayon-indiv'),
-
-    path('<comp_pk>/uitslagen/<comp_boog>/rayon-individueel/<rayon_nr>/',
-         views_uitslagen.UitslagenRayonIndivView.as_view(),
-         name='uitslagen-rayon-indiv-n'),
-
-    path('<comp_pk>/uitslagen/<comp_boog>/bond/',
-         views_uitslagen.UitslagenBondView.as_view(),
-         name='uitslagen-bond'),
 
 
     path('<comp_pk>/doorzetten/rk/',

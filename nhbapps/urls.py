@@ -24,23 +24,24 @@ handler404 = site_handler404_page_not_found
 handler500 = site_handler500_internal_server_error
 
 urlpatterns = [
-    path('',                        site_root_view),
-    path('account/',                include('Account.urls')),
-    path('beheer/',                 admin.site.urls),
-    path('bondscompetities/hist/',  include('HistComp.urls')),
-    path('bondscompetities/',       include('Competitie.urls')),
-    path('functie/',                include('Functie.urls')),
-    path('handleiding/',            include('Handleiding.urls')),
-    path('kalender/',               include('Kalender.urls')),
-    path('logboek/',                include('Logboek.urls')),
-    path('overig/',                 include('Overig.urls')),
-    path('plein/',                  include('Plein.urls')),
-    path('records/',                include('Records.urls')),
-    path('sporter/',                include('Sporter.urls')),
-    path('sporter/bondspas/',       include('Bondspas.urls')),
-    path('score/',                  include('Score.urls')),
-    path('taken/',                  include('Taken.urls')),
-    path('vereniging/',             include('Vereniging.urls'))
+    path('',                                site_root_view),
+    path('account/',                        include('Account.urls')),
+    path('beheer/',                         admin.site.urls),
+    path('bondscompetities/hist/',          include('HistComp.urls')),
+    path('bondscompetities/uitslagen/',     include('CompUitslagen.urls')),
+    path('bondscompetities/',               include('Competitie.urls')),
+    path('functie/',                        include('Functie.urls')),
+    path('handleiding/',                    include('Handleiding.urls')),
+    path('kalender/',                       include('Kalender.urls')),
+    path('logboek/',                        include('Logboek.urls')),
+    path('overig/',                         include('Overig.urls')),
+    path('plein/',                          include('Plein.urls')),
+    path('records/',                        include('Records.urls')),
+    path('sporter/',                        include('Sporter.urls')),
+    path('sporter/bondspas/',               include('Bondspas.urls')),
+    path('score/',                          include('Score.urls')),
+    path('taken/',                          include('Taken.urls')),
+    path('vereniging/',                     include('Vereniging.urls'))
 ]
 
 if settings.ENABLE_WIKI:    # pragma: no cover

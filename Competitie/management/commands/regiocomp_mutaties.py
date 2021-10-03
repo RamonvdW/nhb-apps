@@ -768,7 +768,7 @@ class Command(BaseCommand):
                     self._count_ping += 1                   # pragma: no cover
             else:
                 # near the end
-                break       # from the while
+                break       # from the while                # pragma: no cover
 
             now = datetime.datetime.now()
         # while

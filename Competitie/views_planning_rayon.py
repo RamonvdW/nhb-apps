@@ -552,7 +552,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
         if not deelcomp_rk.heeft_deelnemerslijst:
             # situatie 1)
-            context['url_uitslagen'] = reverse('Competitie:uitslagen-rayon-indiv-n',
+            context['url_uitslagen'] = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
                                                kwargs={'comp_pk': deelcomp_rk.competitie.pk,
                                                        'comp_boog': 'r',
                                                        'rayon_nr': deelcomp_rk.nhb_rayon.rayon_nr})

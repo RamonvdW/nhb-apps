@@ -43,7 +43,7 @@ class Command(BaseCommand):
                 # geen hogere klasse
                 pass
             else:
-                if not hogere_klasse.indiv.is_onbekend:
+                if not hogere_klasse.indiv.is_onbekend:         # pragma: no branch
                     volgorde2hogere_klasse[(comp_pk, volgorde)] = hogere_klasse
         # for
 
@@ -60,7 +60,7 @@ class Command(BaseCommand):
                           .objects
                           .select_related('klasse__indiv',
                                           'deelcompetitie__competitie')
-                          .all()):
+                          .all()):                                          # pragma: no cover
 
             comp_pk = deelnemer.deelcompetitie.competitie.pk
             volgorde = deelnemer.klasse.indiv.volgorde

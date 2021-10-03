@@ -10,22 +10,21 @@ from django.http import Http404
 from BasisTypen.models import BoogType, TeamType
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DEELNAME_NEE, TEAM_PUNTEN_MODEL_TWEE,
-                               DeelCompetitie, DeelcompetitieKlasseLimiet,
+                               Competitie, DeelCompetitie, DeelcompetitieKlasseLimiet,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
 from Competitie.operations.poules import maak_poule_schema
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_huidige
-from .models import Competitie
 from types import SimpleNamespace
 
 
-TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING_INDIV = 'competitie/uitslagen-vereniging-indiv.dtl'
-TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING_TEAMS = 'competitie/uitslagen-vereniging-teams.dtl'
-TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_INDIV = 'competitie/uitslagen-regio-indiv.dtl'
-TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_TEAMS = 'competitie/uitslagen-regio-teams.dtl'
-TEMPLATE_COMPETITIE_UITSLAGEN_RAYON_INDIV = 'competitie/uitslagen-rayon-indiv.dtl'
-TEMPLATE_COMPETITIE_UITSLAGEN_BOND = 'competitie/uitslagen-bond.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING_INDIV = 'compuitslagen/uitslagen-vereniging-indiv.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_VERENIGING_TEAMS = 'compuitslagen/uitslagen-vereniging-teams.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_INDIV = 'compuitslagen/uitslagen-regio-indiv.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_TEAMS = 'compuitslagen/uitslagen-regio-teams.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_RAYON_INDIV = 'compuitslagen/uitslagen-rayon-indiv.dtl'
+TEMPLATE_COMPETITIE_UITSLAGEN_BOND = 'compuitslagen/uitslagen-bond.dtl'
 
 
 def get_schutter_regio_nr(request):
@@ -115,7 +114,7 @@ class UitslagenVerenigingIndivView(TemplateView):
                 comp_boog = boogtype.afkorting.lower()
                 # geen url --> knop disabled
             else:
-                boogtype.zoom_url = reverse('Competitie:uitslagen-vereniging-indiv-n',
+                boogtype.zoom_url = reverse('CompUitslagen:uitslagen-vereniging-indiv-n',
                                             kwargs={'comp_pk': comp.pk,
                                                     'comp_boog': boogtype.afkorting.lower(),
                                                     'ver_nr': ver_nr})
@@ -221,7 +220,7 @@ class UitslagenVerenigingIndivView(TemplateView):
             raise Http404('Boogtype niet bekend')
 
         regio_nr = ver.regio.regio_nr
-        context['url_terug'] = reverse('Competitie:uitslagen-regio-indiv-n',
+        context['url_terug'] = reverse('CompUitslagen:uitslagen-regio-indiv-n',
                                        kwargs={'comp_pk': comp.pk,
                                                'zes_scores': 'alle',
                                                'comp_boog': comp_boog,
@@ -242,7 +241,7 @@ class UitslagenRegioIndivView(TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_INDIV
-    url_name = 'Competitie:uitslagen-regio-indiv-n'
+    url_name = 'CompUitslagen:uitslagen-regio-indiv-n'
     order_gemiddelde = '-gemiddelde'
 
     def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, comp_boog, zes_scores):
@@ -303,7 +302,7 @@ class UitslagenRegioIndivView(TemplateView):
                     .order_by('ver_nr'))
 
             for ver in vers:
-                ver.zoom_url = reverse('Competitie:uitslagen-vereniging-indiv-n',
+                ver.zoom_url = reverse('CompUitslagen:uitslagen-vereniging-indiv-n',
                                        kwargs={'comp_pk': comp.pk,
                                                'comp_boog': comp_boog,
                                                'ver_nr': ver.ver_nr})
@@ -490,7 +489,7 @@ class UitslagenRegioTeamsView(TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_UITSLAGEN_REGIO_TEAMS
-    url_name = 'Competitie:uitslagen-regio-teams-n'
+    url_name = 'CompUitslagen:uitslagen-regio-teams-n'
 
     def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, teamtype_afkorting):
         """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
@@ -554,7 +553,7 @@ class UitslagenRegioTeamsView(TemplateView):
 
             if len(vers):
                 for ver in vers:
-                    ver.zoom_url = reverse('Competitie:uitslagen-vereniging-teams-n',
+                    ver.zoom_url = reverse('CompUitslagen:uitslagen-vereniging-teams-n',
                                            kwargs={'comp_pk': comp.pk,
                                                    'team_type': context['teamtype'].afkorting.lower(),
                                                    'ver_nr': ver.ver_nr})
@@ -752,7 +751,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
                 teamtype_afkorting = team.afkorting.lower()
                 # geen url --> knop disabled
             else:
-                team.zoom_url = reverse('Competitie:uitslagen-vereniging-teams-n',
+                team.zoom_url = reverse('CompUitslagen:uitslagen-vereniging-teams-n',
                                         kwargs={'comp_pk': comp.pk,
                                                 'team_type': team.afkorting.lower(),
                                                 'ver_nr': ver_nr})
@@ -800,7 +799,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
             raise Http404('Team type niet bekend')
 
         regio_nr = ver.regio.regio_nr
-        context['url_terug'] = reverse('Competitie:uitslagen-regio-teams-n',
+        context['url_terug'] = reverse('CompUitslagen:uitslagen-regio-teams-n',
                                        kwargs={'comp_pk': comp.pk,
                                                'team_type': teamtype.afkorting.lower(),
                                                'regio_nr': regio_nr})
@@ -1000,7 +999,7 @@ class UitslagenRayonIndivView(TemplateView):
                 comp_boog = boogtype.afkorting.lower()
                 # geen url --> knop disabled
             else:
-                boogtype.zoom_url = reverse('Competitie:uitslagen-rayon-indiv-n',
+                boogtype.zoom_url = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
                                             kwargs={'comp_pk': comp.pk,
                                                     'comp_boog': boogtype.afkorting.lower(),
                                                     'rayon_nr': gekozen_rayon_nr})
@@ -1018,7 +1017,7 @@ class UitslagenRayonIndivView(TemplateView):
             for rayon in rayons:
                 rayon.title_str = 'Rayon %s' % rayon.rayon_nr
                 if rayon.rayon_nr != gekozen_rayon_nr:
-                    rayon.zoom_url = reverse('Competitie:uitslagen-rayon-indiv-n',
+                    rayon.zoom_url = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
                                              kwargs={'comp_pk': comp.pk,
                                                      'comp_boog': comp_boog,
                                                      'rayon_nr': rayon.rayon_nr})

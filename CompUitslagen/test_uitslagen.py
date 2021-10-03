@@ -26,16 +26,16 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
     url_overzicht = '/bondscompetities/%s/'
-    url_uitslagen_regio = '/bondscompetities/%s/uitslagen/%s/%s/regio-individueel/'
-    url_uitslagen_regio_n = '/bondscompetities/%s/uitslagen/%s/%s/regio-individueel/%s/'
-    url_uitslagen_regio_teams = '/bondscompetities/%s/uitslagen/%s/regio-teams/'
-    url_uitslagen_regio_teams_n = '/bondscompetities/%s/uitslagen/%s/regio-teams/%s/'
-    url_uitslagen_rayon = '/bondscompetities/%s/uitslagen/%s/rayon-individueel/'
-    url_uitslagen_rayon_n = '/bondscompetities/%s/uitslagen/%s/rayon-individueel/%s/'
-    url_uitslagen_bond = '/bondscompetities/%s/uitslagen/%s/bond/'
-    url_uitslagen_ver = '/bondscompetities/%s/uitslagen/%s/vereniging/'
-    url_uitslagen_indiv_ver_n = '/bondscompetities/%s/uitslagen/%s/vereniging/%s/individueel/'      # comp_bk, boog_type, ver_nr
-    url_uitslagen_teams_ver_n = '/bondscompetities/%s/uitslagen/%s/vereniging/%s/teams/'            # comp_pk, team_type, ver_nr
+    url_uitslagen_regio = '/bondscompetities/uitslagen/%s/%s/%s/regio-individueel/'
+    url_uitslagen_regio_n = '/bondscompetities/uitslagen/%s/%s/%s/regio-individueel/%s/'
+    url_uitslagen_regio_teams = '/bondscompetities/uitslagen/%s/%s/regio-teams/'
+    url_uitslagen_regio_teams_n = '/bondscompetities/uitslagen/%s/%s/regio-teams/%s/'
+    url_uitslagen_rayon = '/bondscompetities/uitslagen/%s/%s/rayon-individueel/'
+    url_uitslagen_rayon_n = '/bondscompetities/uitslagen/%s/%s/rayon-individueel/%s/'
+    url_uitslagen_bond = '/bondscompetities/uitslagen/%s/%s/bond/'
+    url_uitslagen_ver = '/bondscompetities/uitslagen/%s/%s/vereniging/'
+    url_uitslagen_indiv_ver_n = '/bondscompetities/uitslagen/%s/%s/vereniging/%s/individueel/'      # comp_bk, boog_type, ver_nr
+    url_uitslagen_teams_ver_n = '/bondscompetities/uitslagen/%s/%s/vereniging/%s/teams/'            # comp_pk, team_type, ver_nr
 
     testdata = None
 
@@ -280,7 +280,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         # lijst met onze deelnemers
         url = self.url_uitslagen_regio_n % (self.comp_18.pk, 'IB', 'alle', 101)
@@ -288,14 +288,14 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_uitslagen_regio_teams % (self.comp_18.pk, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
 
         # lijst met onze deelnemers
         url = self.url_uitslagen_regio_teams_n % (self.comp_18.pk, 'IB', 101)
@@ -303,7 +303,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
 
         # als BKO
         self.e2e_wissel_naar_functie(self.functie_bko)
@@ -312,7 +312,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         # als RKO
         self.e2e_wissel_naar_functie(self.functie_rko)
@@ -321,7 +321,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         # als RCL
         self.e2e_wissel_naar_functie(self.functie_rcl)
@@ -330,7 +330,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         # als HWL
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -339,7 +339,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         # als WL
         self.e2e_wissel_naar_functie(self.functie_wl)
@@ -348,7 +348,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         # als bezoeker
         self.client.logout()
@@ -357,7 +357,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         # als Schutter
         self.e2e_login(self.account_lid)
@@ -366,7 +366,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         # als 'kapotte' Schutter
         self.sporter_100001.is_actief_lid = False
@@ -376,7 +376,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         # als 'kapotte' Schutter
         self.sporter_100001.account = None
@@ -386,7 +386,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
     def test_regio_n(self):
         url = self.url_uitslagen_regio_n % (self.comp_18.pk, 'R', 'alle', 101)
@@ -394,14 +394,14 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_uitslagen_regio_n % (self.comp_25.pk, 'LB', 'alle', 116)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         # regio 100 is valide maar heeft geen deelcompetitie
         url = self.url_uitslagen_regio_n % (self.comp_18.pk, 'R', 'alle', 100)
@@ -409,7 +409,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
     def test_regio_bad(self):
         # slecht boog type
@@ -449,7 +449,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-rayon-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-rayon-indiv.dtl', 'plein/site_layout.dtl'))
 
     def test_rayon_n(self):
         url = self.url_uitslagen_rayon_n % (self.comp_18.pk, 'IB', 1)      # bevat onze enige deelnemer met 6 scores
@@ -457,7 +457,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-rayon-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-rayon-indiv.dtl', 'plein/site_layout.dtl'))
 
     def test_rayon_bad(self):
         # slecht boogtype
@@ -492,7 +492,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-bond.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-bond.dtl', 'plein/site_layout.dtl'))
 
     def test_bond_bad(self):
         url = self.url_uitslagen_bond % ('x', 'R')
@@ -519,14 +519,14 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_uitslagen_indiv_ver_n % (self.comp_18.pk, 'R', self.ver.ver_nr)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
         # als je de pagina ophaalt als een ingelogd lid, dan krijg je je eigen vereniging
         self.e2e_login(self.account_lid_100002)
@@ -537,7 +537,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, '[1000] Grote Club')
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
         # tenzij je geen lid meer bent bij een vereniging
         sporter = self.account_lid_100002.sporter_set.all()[0]
@@ -547,7 +547,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
     def test_ver_team(self):
         url = self.url_uitslagen_teams_ver_n % (self.comp_18.pk, 'R', self.ver.ver_nr)
@@ -555,7 +555,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-vereniging-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-teams.dtl', 'plein/site_layout.dtl'))
 
         # bad comp_pk
         url = self.url_uitslagen_teams_ver_n % (999999, 'R', self.ver.ver_nr)
@@ -592,7 +592,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, '[1000] Grote Club')
 
     def test_vereniging_regio_100(self):
@@ -604,7 +604,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
     def test_vereniging_bad(self):
         url = self.url_uitslagen_ver % ('x', 'R')
@@ -640,20 +640,20 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(self.url_uitslagen_regio % (self.comp_18.pk, 'R', 'alle'))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslagen_regio_n % (self.comp_18.pk, 'R', 'alle', 111))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_uitslagen_regio_teams % (self.comp_18.pk, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
 
         # lijst met onze deelnemers
         url = self.url_uitslagen_regio_teams_n % (self.comp_18.pk, 'IB', 101)
@@ -661,37 +661,37 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslagen_rayon % (self.comp_18.pk, 'R'))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-rayon-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-rayon-indiv.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslagen_rayon_n % (self.comp_18.pk, 'R', 2))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-rayon-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-rayon-indiv.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslagen_bond % (self.comp_18.pk, 'R'))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-bond.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-bond.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslagen_ver % (self.comp_18.pk, 'R'))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslagen_indiv_ver_n % (self.comp_18.pk, 'R', self.ver.ver_nr))
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
     def test_teams(self):
         url = self.url_uitslagen_regio_teams % (self.comp_18.pk, 'R')
@@ -699,7 +699,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-teams.dtl', 'plein/site_layout.dtl'))
 
 
 # end of file

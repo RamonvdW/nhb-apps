@@ -476,11 +476,11 @@ class Command(BaseCommand):
 
             # sleep at least 2 seconds, then check again
             secs = (self.stop_at - now).total_seconds()
-            if secs > 2:                    # pragma: no branch
+            if secs > 2:                          # pragma: no branch
                 secs = min(secs, 2.0)
                 time.sleep(secs)
             else:
-                break       # from the while
+                break       # from the while      # pragma: no cover
 
             now = datetime.datetime.now()
         # while
