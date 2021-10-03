@@ -5,17 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_planning, view_teams, view_clusters
+from . import view_clusters, view_planning, view_instellingen, view_teams, view_poules
 
 app_name = 'CompRegio'
 
 urlpatterns = [
 
-    path('clusters/',
-         view_clusters.WijzigClustersView.as_view(),
-         name='clusters'),
-
-    # planning regio
+    # RCL:planning regio
     path('planning/<deelcomp_pk>/',
          view_planning.RegioPlanningView.as_view(),
          name='regio-planning'),
@@ -45,15 +41,23 @@ urlpatterns = [
          name='regio-verwijder-wedstrijd'),
 
 
-    # RCL schermen
-    path('<comp_pk>/instellingen/regio-<regio_nr>/',
-         view_teams.RegioInstellingenView.as_view(),
+    # RCL: clusters
+    path('clusters/',
+         view_clusters.WijzigClustersView.as_view(),
+         name='clusters'),
+
+
+    # RCL: instellingen
+    path('instellingen/<comp_pk>/regio-<regio_nr>/',
+         view_instellingen.RegioInstellingenView.as_view(),
          name='regio-instellingen'),
 
-    path('<comp_pk>/instellingen/globaal/',
-         view_teams.RegioInstellingenGlobaalView.as_view(),
+    path('instellingen/<comp_pk>/globaal/',
+         view_instellingen.RegioInstellingenGlobaalView.as_view(),
          name='regio-instellingen-globaal'),
 
+
+    # RCL: teams
     path('<comp_pk>/ag-controle/regio-<regio_nr>/',
          view_teams.AGControleView.as_view(),
          name='regio-ag-controle'),
@@ -66,12 +70,14 @@ urlpatterns = [
          view_teams.RegioTeamsRCLView.as_view(),
          name='regio-teams'),
 
-    path('<deelcomp_pk>/poules/',
-         view_teams.RegioPoulesView.as_view(),
+
+    # RCL: poules
+    path('poules/<deelcomp_pk>/',
+         view_poules.RegioPoulesView.as_view(),
          name='regio-poules'),
 
-    path('poules/<poule_pk>/wijzig/',
-         view_teams.WijzigPouleView.as_view(),
+    path('poules/wijzig/<poule_pk>/',
+         view_poules.WijzigPouleView.as_view(),
          name='wijzig-poule'),
 
     path('<deelcomp_pk>/team-ronde/',
