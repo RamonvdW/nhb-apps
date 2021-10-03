@@ -18,9 +18,9 @@ from Plein.menu import menu_dynamics
 import datetime
 
 
-TEMPLATE_COMPRAYON_VERTEAMS = 'comprayon/ver-teams.dtl'
-TEMPLATE_COMPRAYON_VERTEAMS_WIJZIG = 'comprayon/ver-teams-wijzig.dtl'
-TEMPLATE_COMPRAYON_VERTEAMS_KOPPELEN = 'comprayon/ver-teams-koppelen.dtl'
+TEMPLATE_COMPRAYON_VERTEAMS = 'comprayon/hwl-teams.dtl'
+TEMPLATE_COMPRAYON_VERTEAMS_WIJZIG = 'comprayon/hwl-teams-wijzig.dtl'
+TEMPLATE_COMPRAYON_VERTEAMS_KOPPELEN = 'comprayon/hwl-teams-koppelen.dtl'
 
 
 def bepaal_regioschutter_gemiddelde_voor_rk_teams(deelnemer):

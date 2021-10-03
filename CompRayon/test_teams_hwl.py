@@ -396,14 +396,14 @@ class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
                 resp = self.client.get(self.url_rk_teams % deelcomp_rk3.pk)
             self.assertEqual(resp.status_code, 200)
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('comprayon/ver-teams.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('comprayon/hwl-teams.dtl', 'plein/site_layout.dtl'))
 
             # team aanmaken pagina
             with self.assert_max_queries(20):
                 resp = self.client.get(self.url_rk_teams_nieuw % deelcomp_rk3.pk)
                 self.assertEqual(resp.status_code, 200)
                 self.assert_html_ok(resp)
-                self.assert_template_used(resp, ('comprayon/ver-teams-wijzig.dtl', 'plein/site_layout.dtl'))
+                self.assert_template_used(resp, ('comprayon/hwl-teams-wijzig.dtl', 'plein/site_layout.dtl'))
 
             # maak een team aan zonder team nummer
             with self.assert_max_queries(20):
@@ -438,7 +438,7 @@ class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
                 resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('comprayon/ver-teams-wijzig.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('comprayon/hwl-teams-wijzig.dtl', 'plein/site_layout.dtl'))
 
             # team does not exist
             resp = self.client.get(self.url_rk_teams_wijzig % (deelcomp_rk3.pk, 999999))
@@ -481,7 +481,7 @@ class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
                 resp = self.client.get(self.url_rk_teams % deelcomp_rk3.pk)
             self.assertEqual(resp.status_code, 200)
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('comprayon/ver-teams.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('comprayon/hwl-teams.dtl', 'plein/site_layout.dtl'))
 
     def test_rk_teams_koppelen(self):
 
@@ -517,7 +517,7 @@ class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
                 resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('comprayon/ver-teams-koppelen.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('comprayon/hwl-teams-koppelen.dtl', 'plein/site_layout.dtl'))
 
             with self.assert_max_queries(20):
                 resp = self.client.post(url, {'deelnemer_999999': 1, 'deelnemer_xyz': 1})
@@ -556,6 +556,6 @@ class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
                 resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('comprayon/ver-teams-koppelen.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('comprayon/hwl-teams-koppelen.dtl', 'plein/site_layout.dtl'))
 
 # end of file

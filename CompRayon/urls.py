@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_planning, view_teams, view_verteams
+from . import view_planning, view_teams_rko, view_teams_hwl
 
 app_name = 'CompRayon'
 
@@ -45,29 +45,29 @@ urlpatterns = [
 
     # RKO: RK teams
     path('ingeschreven-teams/<comp_pk>/<subset>/',
-         view_teams.RayonTeamsAlleView.as_view(),
+         view_teams_rko.RayonTeamsAlleView.as_view(),
          name='rayon-teams-alle'),
 
     path('ingeschreven-teams/<rk_deelcomp_pk>/',
-         view_teams.RayonTeamsRKOView.as_view(),
+         view_teams_rko.RayonTeamsRKOView.as_view(),
          name='rayon-teams'),
 
 
     # HWL: RK teams
     path('teams-vereniging/<rk_deelcomp_pk>/nieuw/',
-         view_verteams.WijzigRKTeamsView.as_view(),
+         view_teams_hwl.WijzigRKTeamsView.as_view(),
          name='teams-rk-nieuw'),
 
     path('teams-vereniging/<rk_deelcomp_pk>/wijzig/<rk_team_pk>/',
-         view_verteams.WijzigRKTeamsView.as_view(),
+         view_teams_hwl.WijzigRKTeamsView.as_view(),
          name='teams-rk-wijzig'),
 
     path('teams-vereniging/<rk_deelcomp_pk>/',
-         view_verteams.TeamsRkView.as_view(),
+         view_teams_hwl.TeamsRkView.as_view(),
          name='teams-rk'),
 
     path('teams-vereniging/koppelen/<rk_team_pk>/',
-         view_verteams.RKTeamsKoppelLedenView.as_view(),
+         view_teams_hwl.RKTeamsKoppelLedenView.as_view(),
          name='teams-rk-koppelen'),
 
 ]
