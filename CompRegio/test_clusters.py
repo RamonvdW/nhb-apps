@@ -16,7 +16,7 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 
-    url_clusters = '/vereniging/regio-clusters/'
+    url_clusters = '/bondscompetities/regio/clusters/'
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -83,7 +83,7 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
         self.e2e_check_rol('RCL')
 
         # haal het overzicht op
-        with self.assert_max_queries(7):
+        with self.assert_max_queries(8):
             resp = self.client.get(self.url_clusters)
         self.assertTrue(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -92,12 +92,12 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
         # plaats nhbver1 in een ander cluster
         # haal nhbver2 uit zijn cluster
         # stop nhbver3 in een cluster
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(23):
             resp = self.client.post(self.url_clusters, {'naam_%s' % self.cluster1.pk: 'Hallo!',
                                                         'ver_1001': self.cluster2.pk,
                                                         'ver_1002': '0',
                                                         'ver_1003': self.cluster1.pk})
-        self.assert_is_redirect(resp, '/plein/')    # redirect = success
+        self.assert_is_redirect_not_plein(resp)    # redirect = success
 
         cluster = NhbCluster.objects.get(pk=self.cluster1.pk)
         self.assertEqual(cluster.naam, 'Hallo!')
@@ -109,7 +109,7 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
                                                         'ver_1001': self.cluster2.pk,
                                                         'ver_1002': '0',
                                                         'ver_1003': self.cluster1.pk})
-        self.assert_is_redirect(resp, '/plein/')    # redirect = success
+        self.assert_is_redirect_not_plein(resp)    # redirect = success
 
         # stuur nog wat illegale parameters
         lange_tekst = 'Dit is een veel te lange tekst die ergens afgekapt gaat worden maar wel opgeslagen wordt.'
@@ -117,7 +117,7 @@ class TestVerenigingClusters(E2EHelpers, TestCase):
             resp = self.client.post(self.url_clusters, {'ver_1001': 'x',
                                                         'naam_%s' % self.cluster1.pk: lange_tekst})
         # foute parameters are silently ignored
-        self.assert_is_redirect(resp, '/plein/')    # redirect = success
+        self.assert_is_redirect_not_plein(resp)    # redirect = success
 
         cluster = NhbCluster.objects.get(pk=self.cluster1.pk)
         self.assertEqual(cluster.naam, lange_tekst[:50])

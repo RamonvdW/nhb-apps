@@ -160,6 +160,12 @@
             {% include 'plein/card.dtl' with title="Regio keuzes" text="Overzicht van de keuzes gemaakt per regio" icon="flaky" url=card_url %}
         {% endif %}
 
+        <!-- clusters RCL -->
+        {% if toon_clusters %}
+            {% url 'CompRegio:clusters' as card_url %}
+            {% include 'plein/card.dtl' with title="Clusters" text="Mogelijkheden om in jouw regio de verenigingen in geografische clusters te groeperen." icon="group_work" url=card_url %}
+        {% endif %}
+
         {% if rol_is_bb %}
             <!-- datums wijzigen (lage prio) -->
             {% if comp.fase >= 'B' %}

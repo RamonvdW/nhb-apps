@@ -5,73 +5,77 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import views_planning_regio, views_regio_teams
+from . import view_planning_regio, view_regio_teams, view_clusters
 
 app_name = 'CompRegio'
 
 urlpatterns = [
 
+    path('clusters/',
+         view_clusters.WijzigClustersView.as_view(),
+         name='clusters'),
+
     # planning regio
     path('planning/<deelcomp_pk>/',
-         views_planning_regio.RegioPlanningView.as_view(),
+         view_planning_regio.RegioPlanningView.as_view(),
          name='regio-planning'),
 
     path('planning/<deelcomp_pk>/afsluiten/',
-         views_planning_regio.AfsluitenRegiocompView.as_view(),
+         view_planning_regio.AfsluitenRegiocompView.as_view(),
          name='afsluiten-regiocomp'),
 
     path('planning/<deelcomp_pk>/cluster/<cluster_pk>/',
-         views_planning_regio.RegioClusterPlanningView.as_view(),
+         view_planning_regio.RegioClusterPlanningView.as_view(),
          name='regio-cluster-planning'),
 
     path('planning/ronde/<ronde_pk>/',
-         views_planning_regio.RegioRondePlanningView.as_view(),
+         view_planning_regio.RegioRondePlanningView.as_view(),
          name='regio-ronde-planning'),
 
     path('planning/regio-wedstrijden/<ronde_pk>/',
-         views_planning_regio.RegioRondePlanningMethode1View.as_view(),
+         view_planning_regio.RegioRondePlanningMethode1View.as_view(),
          name='regio-methode1-planning'),
 
     path('planning/wedstrijd/wijzig/<wedstrijd_pk>/',
-         views_planning_regio.WijzigWedstrijdView.as_view(),
+         view_planning_regio.WijzigWedstrijdView.as_view(),
          name='regio-wijzig-wedstrijd'),
 
     path('planning/wedstrijd/verwijder/<wedstrijd_pk>/',
-         views_planning_regio.VerwijderWedstrijdView.as_view(),
+         view_planning_regio.VerwijderWedstrijdView.as_view(),
          name='regio-verwijder-wedstrijd'),
 
 
     # RCL schermen
     path('<comp_pk>/instellingen/regio-<regio_nr>/',
-         views_regio_teams.RegioInstellingenView.as_view(),
+         view_regio_teams.RegioInstellingenView.as_view(),
          name='regio-instellingen'),
 
     path('<comp_pk>/instellingen/globaal/',
-         views_regio_teams.RegioInstellingenGlobaalView.as_view(),
+         view_regio_teams.RegioInstellingenGlobaalView.as_view(),
          name='regio-instellingen-globaal'),
 
     path('<comp_pk>/ag-controle/regio-<regio_nr>/',
-         views_regio_teams.AGControleView.as_view(),
+         view_regio_teams.AGControleView.as_view(),
          name='regio-ag-controle'),
 
     path('<comp_pk>/teams/<subset>/',
-         views_regio_teams.RegioTeamsAlleView.as_view(),
+         view_regio_teams.RegioTeamsAlleView.as_view(),
          name='regio-teams-alle'),
 
     path('<deelcomp_pk>/teams/',
-         views_regio_teams.RegioTeamsRCLView.as_view(),
+         view_regio_teams.RegioTeamsRCLView.as_view(),
          name='regio-teams'),
 
     path('<deelcomp_pk>/poules/',
-         views_regio_teams.RegioPoulesView.as_view(),
+         view_regio_teams.RegioPoulesView.as_view(),
          name='regio-poules'),
 
     path('poules/<poule_pk>/wijzig/',
-         views_regio_teams.WijzigPouleView.as_view(),
+         view_regio_teams.WijzigPouleView.as_view(),
          name='wijzig-poule'),
 
     path('<deelcomp_pk>/team-ronde/',
-         views_regio_teams.StartVolgendeTeamRondeView.as_view(),
+         view_regio_teams.StartVolgendeTeamRondeView.as_view(),
          name='start-volgende-team-ronde'),
 ]
 

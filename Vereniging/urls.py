@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import (view_accommodatie, view_clusters, view_externe_locaties, view_overzicht, view_ledenlijst,
+from . import (view_accommodatie, view_externe_locaties, view_overzicht, view_ledenlijst,
                view_aanmelden, view_wedstrijden, view_lijst_rk, view_lijst_verenigingen,
                view_schietmomenten, view_teams_regio, view_teams_rk)
 
@@ -108,10 +108,6 @@ urlpatterns = [
          view_externe_locaties.ExterneLocatieDetailsView.as_view(),
          name='locatie-details'),
 
-
-    path('regio-clusters/',
-         view_clusters.WijzigClustersView.as_view(),
-         name='clusters'),
 
     path('wedstrijden/<wedstrijd_pk>/waarschijnlijke-deelnemers/',
          view_wedstrijden.WaarschijnlijkeDeelnemersView.as_view(),

@@ -115,3 +115,7 @@
 
 
 {% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

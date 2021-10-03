@@ -114,6 +114,7 @@ class CompetitieOverzichtView(View):
 
         if self.rol_nu == Rollen.ROL_RCL:
             toon_handmatige_ag = False
+            context['toon_clusters'] = True
             context['planning_deelcomp'] = (DeelCompetitie
                                             .objects
                                             .filter(competitie=comp,

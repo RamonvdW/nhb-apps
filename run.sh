@@ -4,6 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+# set high performance
+sudo cpupower frequency-set --governor performance > /dev/null
+
 export PYTHONDONTWRITEBYTECODE=1
 
 DEBUG=1
@@ -36,5 +39,8 @@ fi
 echo "[INFO] Stopping background tasks"
 pkill -f regiocomp_mutaties
 pkill -f regiocomp_tussenstand
+
+# set normal performance
+sudo cpupower frequency-set --governor schedutil > /dev/null
 
 # end of file

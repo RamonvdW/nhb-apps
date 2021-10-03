@@ -9,6 +9,8 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Competitie.models import DeelCompetitie
+from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from NhbStructuur.models import NhbCluster, NhbVereniging
 from Plein.menu import menu_dynamics
@@ -16,7 +18,7 @@ from Logboek.models import schrijf_in_logboek
 import copy
 
 
-TEMPLATE_WIJZIG_CLUSTERS = 'vereniging/wijzig-clusters.dtl'
+TEMPLATE_COMPREGIO_WIJZIG_CLUSTERS = 'compregio/wijzig-clusters.dtl'
 
 
 class WijzigClustersView(UserPassesTestMixin, TemplateView):
@@ -24,7 +26,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
     """ Via deze view kunnen verenigingen in de clusters geplaatst worden """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_WIJZIG_CLUSTERS
+    template_name = TEMPLATE_COMPREGIO_WIJZIG_CLUSTERS
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -43,9 +45,21 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
+        context['terug_url'] = reverse('Competitie:kies')
+
         # filter clusters die aangepast mogen worden op competitie type
         # waarvan de definitie heel handig overeen komt met cluster.gebruik
         context['gebruik'] = gebruik_filter = functie_nu.comp_type
+
+        # probeer een competitie te vinden om te tonen in het menu
+        try:
+            deelcomp = DeelCompetitie.objects.get(competitie__afstand=gebruik_filter,
+                                                  nhb_regio=functie_nu.nhb_regio)
+        except DeelCompetitie.DoesNotExist:
+            comp_pk = None
+        else:
+            comp_pk = deelcomp.competitie.pk
+            context['terug_url'] = reverse('Competitie:overzicht', kwargs={'comp_pk': comp_pk})
 
         # cluster namen
         objs = (NhbCluster
@@ -55,7 +69,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
                 .order_by('letter'))
         context['cluster_list'] = objs
         context['regio_heeft_clusters'] = objs.count() > 0
-        context['opslaan_url'] = reverse('Vereniging:clusters')
+        context['opslaan_url'] = reverse('CompRegio:clusters')
 
         for obj in objs:
             obj.veld_naam = "naam_%s" % obj.pk
@@ -99,12 +113,14 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
             # for
         # for
 
-        context['terug_url'] = reverse('Plein:plein')
-
         context['handleiding_clusters_url'] = reverse('Handleiding:Clusters')
         context['email_bondsbureau'] = settings.EMAIL_BONDSBUREAU
 
-        menu_dynamics(self.request, context, actief='hetplein')
+        if comp_pk:
+            menu_dynamics_competitie(self.request, context, comp_pk=comp_pk)
+        else:
+            menu_dynamics(self.request, context, actief='competitie')
+
         return context
 
     def _swap_cluster(self, nhbver, gebruik):
@@ -177,7 +193,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
             if naam != obj.naam:
                 # wijziging opslaan
                 obj.naam = naam[:50]        # te lang kan anders niet opgeslagen worden
-                obj.save()
+                obj.save(update_fields=['naam'])
         # for
 
         # neem de cluster keuzes voor de verenigingen over
@@ -189,7 +205,16 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
             self._swap_cluster(obj, gebruik_filter)
         # for
 
-        url = reverse('Plein:plein')
+        # probeer een competitie te vinden om te tonen in het menu
+        try:
+            deelcomp = DeelCompetitie.objects.get(competitie__afstand=gebruik_filter,
+                                                  nhb_regio=functie_nu.nhb_regio)
+        except DeelCompetitie.DoesNotExist:
+            url = reverse('Competitie:kies')
+        else:
+            comp_pk = deelcomp.competitie.pk
+            url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp_pk})
+
         return HttpResponseRedirect(url)
 
 
