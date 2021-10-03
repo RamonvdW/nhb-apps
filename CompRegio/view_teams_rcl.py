@@ -339,7 +339,7 @@ class AGControleView(UserPassesTestMixin, TemplateView):
 
             obj.ag_str = "%.3f" % obj.ag_voor_team
 
-            obj.url_details = reverse('Vereniging:wijzig-ag',
+            obj.url_details = reverse('CompRegio:wijzig-ag',
                                       kwargs={'deelnemer_pk': obj.pk})
 
             ag_lijst.append(obj)

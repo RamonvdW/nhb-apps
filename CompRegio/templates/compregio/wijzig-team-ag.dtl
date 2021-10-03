@@ -101,7 +101,7 @@
         {% endfor %}
     </table>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="teams-wijzig-ag" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-wijzig-team-ag" %}
 
 {% endblock %}
 

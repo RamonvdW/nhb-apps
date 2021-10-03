@@ -128,6 +128,6 @@ Zodra de eerste ronde geopend wordt door de RCL is het mogelijk om invallers te 
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-teams-regio" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-hwl-teams-regio" %}
 
 {% endblock %}

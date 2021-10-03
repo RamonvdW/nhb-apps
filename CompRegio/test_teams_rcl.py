@@ -30,8 +30,8 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
     url_afsluiten_regio = '/bondscompetities/regio/planning/%s/afsluiten/'  # deelcomp_pk
-    url_regio_instellingen = '/bondscompetities/regio/%s/instellingen/regio-%s/'  # comp_pk, regio-nr
-    url_regio_globaal = '/bondscompetities/regio/%s/instellingen/globaal/'  # comp_pk
+    url_regio_instellingen = '/bondscompetities/regio/instellingen/%s/regio-%s/'  # comp_pk, regio-nr
+    url_regio_globaal = '/bondscompetities/regio/instellingen/%s/globaal/'  # comp_pk
     url_ag_controle = '/bondscompetities/regio/%s/ag-controle/regio-%s/'  # comp_pk, regio-nr
     url_regio_teams = '/bondscompetities/regio/%s/teams/'  # deelcomp_pk
     url_regio_teams_alle = '/bondscompetities/regio/%s/teams/%s/'  # comp_pk, subset = auto/alle/rayon_nr

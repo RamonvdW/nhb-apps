@@ -23,12 +23,12 @@ from Score.operations import score_teams_ag_opslaan
 import datetime
 
 
-TEMPLATE_TEAMS_REGIO = 'vereniging/teams-regio.dtl'
-TEMPLATE_TEAMS_REGIO_WIJZIG = 'vereniging/teams-regio-wijzig.dtl'
-TEMPLATE_TEAMS_WIJZIG_AG = 'vereniging/teams-wijzig-ag.dtl'
-TEMPLATE_TEAMS_KOPPELEN = 'vereniging/teams-regio-koppelen.dtl'
-TEMPLATE_TEAMS_INVALLERS = 'vereniging/teams-invallers.dtl'
-TEMPLATE_TEAMS_INVALLERS_KOPPELEN = 'vereniging/teams-invallers-koppelen.dtl'
+TEMPLATE_TEAMS_REGIO = 'compregio/hwl-teams.dtl'
+TEMPLATE_TEAMS_REGIO_WIJZIG = 'compregio/hwl-teams-wijzig.dtl'
+TEMPLATE_TEAMS_WIJZIG_AG = 'compregio/wijzig-team-ag.dtl'
+TEMPLATE_TEAMS_KOPPELEN = 'compregio/hwl-teams-koppelen.dtl'
+TEMPLATE_TEAMS_INVALLERS = 'compregio/hwl-teams-invallers.dtl'
+TEMPLATE_TEAMS_INVALLERS_KOPPELEN = 'compregio/hwl-teams-invallers-koppelen.dtl'
 
 
 def bepaal_team_sterkte_en_klasse(team):
@@ -149,18 +149,18 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
             obj.ag_str = ag_str.replace('.', ',')
 
             if mag_wijzigen:
-                obj.url_wijzig = reverse('Vereniging:teams-regio-wijzig',
+                obj.url_wijzig = reverse('CompRegio:teams-regio-wijzig',
                                          kwargs={'deelcomp_pk': deelcomp.pk,
                                                  'team_pk': obj.pk})
 
             # koppelen == bekijken
-            obj.url_koppelen = reverse('Vereniging:teams-regio-koppelen',
+            obj.url_koppelen = reverse('CompRegio:teams-regio-koppelen',
                                        kwargs={'team_pk': obj.pk})
         # for
         context['teams'] = teams
 
         if mag_wijzigen:
-            context['url_nieuw_team'] = reverse('Vereniging:teams-regio-nieuw',
+            context['url_nieuw_team'] = reverse('CompRegio:teams-regio-nieuw',
                                                 kwargs={'deelcomp_pk': deelcomp.pk})
 
         deelnemers = (RegioCompetitieSchutterBoog
@@ -193,7 +193,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
             if obj.ag_voor_team_mag_aangepast_worden:
                 obj.ag_str += " (handmatig)"
                 if mag_wijzigen:
-                    obj.url_wijzig_ag = reverse('Vereniging:wijzig-ag',
+                    obj.url_wijzig_ag = reverse('CompRegio:wijzig-ag',
                                                 kwargs={'deelnemer_pk': obj.pk})
         # for
         context['deelnemers'] = deelnemers
@@ -308,7 +308,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         # for
 
         if mag_wijzigen:
-            context['url_opslaan'] = reverse('Vereniging:teams-regio-wijzig',
+            context['url_opslaan'] = reverse('CompRegio:teams-regio-wijzig',
                                              kwargs={'deelcomp_pk': deelcomp.pk,
                                                      'team_pk': team.pk})
 
@@ -348,7 +348,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         # default pagina om naar toe te gaan
         if self.rol_nu == Rollen.ROL_HWL:
-            url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
+            url = reverse('CompRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
         else:
             url = reverse('CompRegio:regio-teams', kwargs={'deelcomp_pk': deelcomp.pk})
 
@@ -384,7 +384,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
             verwijderen = False
 
             # meteen doorsturen naar de 'koppelen' pagina
-            url = reverse('Vereniging:teams-regio-koppelen',
+            url = reverse('CompRegio:teams-regio-koppelen',
                           kwargs={'team_pk': team.pk})
         else:
             try:
@@ -507,7 +507,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         comp.bepaal_fase()
 
         if comp.fase < 'E':
-            context['url_opslaan'] = reverse('Vereniging:wijzig-ag',
+            context['url_opslaan'] = reverse('CompRegio:wijzig-ag',
                                              kwargs={'deelnemer_pk': deelnemer.pk})
 
         if self.rol_nu == Rollen.ROL_HWL:
@@ -566,7 +566,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
                 bepaal_team_sterkte_en_klasse(team)
 
         if self.rol_nu == Rollen.ROL_HWL:
-            url = reverse('Vereniging:teams-regio',
+            url = reverse('CompRegio:teams-regio',
                           kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
         else:
             url = reverse('CompRegio:regio-ag-controle',
@@ -681,7 +681,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             # for
             context['deelnemers'] = deelnemers
 
-            context['url_opslaan'] = reverse('Vereniging:teams-regio-koppelen',
+            context['url_opslaan'] = reverse('CompRegio:teams-regio-koppelen',
                                              kwargs={'team_pk': team.pk})
         else:
             context['gekoppeld'] = gekoppeld = (team
@@ -785,7 +785,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         bepaal_team_sterkte_en_klasse(team)
 
         if self.rol_nu == Rollen.ROL_HWL:
-            url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
+            url = reverse('CompRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
         else:
             url = reverse('CompRegio:regio-teams', kwargs={'deelcomp_pk': deelcomp.pk})
         return HttpResponseRedirect(url)
@@ -882,7 +882,7 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
             team.aantal = ronde_team.feitelijke_deelnemers_count
 
             if not self.readonly:
-                team.url_koppelen = reverse('Vereniging:teams-regio-invallers-koppelen',
+                team.url_koppelen = reverse('CompRegio:teams-regio-invallers-koppelen',
                                             kwargs={'ronde_team_pk': ronde_team.pk})
         # for
         context['teams'] = teams
@@ -1073,7 +1073,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
             invallers.append(tup)
         # while
 
-        context['url_opslaan'] = reverse('Vereniging:teams-regio-invallers-koppelen',
+        context['url_opslaan'] = reverse('CompRegio:teams-regio-invallers-koppelen',
                                          kwargs={'ronde_team_pk': ronde_team_nu.pk})
 
         menu_dynamics(self.request, context, actief='vereniging')
@@ -1194,7 +1194,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
         # trigger een update van de team scores
         update_uitslag_teamcompetitie()
 
-        url = reverse('Vereniging:teams-regio-invallers',
+        url = reverse('CompRegio:teams-regio-invallers',
                       kwargs={'deelcomp_pk': deelcomp.pk})
 
         return HttpResponseRedirect(url)

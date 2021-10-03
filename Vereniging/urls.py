@@ -7,7 +7,7 @@
 from django.urls import path
 from . import (view_accommodatie, view_externe_locaties, view_overzicht, view_ledenlijst,
                view_aanmelden, view_wedstrijden, view_lijst_rk, view_lijst_verenigingen,
-               view_schietmomenten, view_teams_regio)
+               view_schietmomenten)
 
 app_name = 'Vereniging'
 
@@ -33,40 +33,10 @@ urlpatterns = [
          view_aanmelden.LedenIngeschrevenView.as_view(),
          name='leden-ingeschreven'),
 
-    path('leden-ingeschreven/wijzig-aanvangsgemiddelde/<deelnemer_pk>/',
-         view_teams_regio.WijzigTeamAGView.as_view(),
-         name='wijzig-ag'),
-
     # TODO: term 'schietmomenten' aanpassen?
     path('leden-ingeschreven/competitie/<deelcomp_pk>/schietmomenten/',
          view_schietmomenten.LedenSchietmomentView.as_view(),
          name='schietmomenten'),
-
-
-    # regio teams
-    path('teams/regio/koppelen/<team_pk>/',
-         view_teams_regio.TeamsRegioKoppelLedenView.as_view(),
-         name='teams-regio-koppelen'),
-
-    path('teams/regio/<deelcomp_pk>/nieuw/',
-         view_teams_regio.WijzigRegioTeamsView.as_view(),
-         name='teams-regio-nieuw'),
-
-    path('teams/regio/<deelcomp_pk>/wijzig/<team_pk>/',
-         view_teams_regio.WijzigRegioTeamsView.as_view(),
-         name='teams-regio-wijzig'),
-
-    path('teams/regio/<deelcomp_pk>/invallers/',
-         view_teams_regio.TeamsRegioInvallersView.as_view(),
-         name='teams-regio-invallers'),
-
-    path('teams/regio/invallers-koppelen/<ronde_team_pk>/',
-         view_teams_regio.TeamsRegioInvallersKoppelLedenView.as_view(),
-         name='teams-regio-invallers-koppelen'),
-
-    path('teams/regio/<deelcomp_pk>/',
-         view_teams_regio.TeamsRegioView.as_view(),
-         name='teams-regio'),
 
 
     # Accommodatie

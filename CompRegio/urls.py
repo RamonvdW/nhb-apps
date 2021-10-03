@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_clusters, view_planning, view_instellingen, view_teams, view_poules
+from . import view_clusters, view_planning, view_instellingen, view_teams_rcl, view_poules, view_teams_hwl
 
 app_name = 'CompRegio'
 
@@ -59,15 +59,15 @@ urlpatterns = [
 
     # RCL: teams
     path('<comp_pk>/ag-controle/regio-<regio_nr>/',
-         view_teams.AGControleView.as_view(),
+         view_teams_rcl.AGControleView.as_view(),
          name='regio-ag-controle'),
 
     path('<comp_pk>/teams/<subset>/',
-         view_teams.RegioTeamsAlleView.as_view(),
+         view_teams_rcl.RegioTeamsAlleView.as_view(),
          name='regio-teams-alle'),
 
     path('<deelcomp_pk>/teams/',
-         view_teams.RegioTeamsRCLView.as_view(),
+         view_teams_rcl.RegioTeamsRCLView.as_view(),
          name='regio-teams'),
 
 
@@ -81,8 +81,39 @@ urlpatterns = [
          name='wijzig-poule'),
 
     path('<deelcomp_pk>/team-ronde/',
-         view_teams.StartVolgendeTeamRondeView.as_view(),
+         view_teams_rcl.StartVolgendeTeamRondeView.as_view(),
          name='start-volgende-team-ronde'),
+
+
+    # HWL: teams
+    path('teams-vereniging/wijzig-aanvangsgemiddelde/<deelnemer_pk>/',
+         view_teams_hwl.WijzigTeamAGView.as_view(),
+         name='wijzig-ag'),
+
+    path('teams-vereniging/koppelen/<team_pk>/',
+         view_teams_hwl.TeamsRegioKoppelLedenView.as_view(),
+         name='teams-regio-koppelen'),
+
+    path('teams-vereniging/<deelcomp_pk>/nieuw/',
+         view_teams_hwl.WijzigRegioTeamsView.as_view(),
+         name='teams-regio-nieuw'),
+
+    path('teams-vereniging/<deelcomp_pk>/wijzig/<team_pk>/',
+         view_teams_hwl.WijzigRegioTeamsView.as_view(),
+         name='teams-regio-wijzig'),
+
+    path('teams-vereniging/<deelcomp_pk>/invallers/',
+         view_teams_hwl.TeamsRegioInvallersView.as_view(),
+         name='teams-regio-invallers'),
+
+    path('teams-vereniging/invallers-koppelen/<ronde_team_pk>/',
+         view_teams_hwl.TeamsRegioInvallersKoppelLedenView.as_view(),
+         name='teams-regio-invallers-koppelen'),
+
+    path('teams-vereniging/<deelcomp_pk>/',
+         view_teams_hwl.TeamsRegioView.as_view(),
+         name='teams-regio'),
+
 ]
 
 
