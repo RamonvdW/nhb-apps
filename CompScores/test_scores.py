@@ -20,9 +20,9 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_fase', 'Competitie.test_planning_regio',)
 
-    url_planning_regio = '/bondscompetities/planning/regio/%s/'                     # deelcomp_pk
-    url_planning_cluster = '/bondscompetities/planning/regio/%s/cluster/%s/'        # deelcomp_pk, cluster_pk
-    url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'         # ronde_pk
+    url_planning_regio = '/bondscompetities/regio/planning/%s/'                     # deelcomp_pk
+    url_planning_cluster = '/bondscompetities/regio/planning/%s/cluster/%s/'        # deelcomp_pk, cluster_pk
+    url_planning_regio_ronde = '/bondscompetities/regio/planning/ronde/%s/'         # ronde_pk
 
     url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'          # wedstrijd_pk
     url_uitslag_opslaan = '/bondscompetities/scores/dynamic/scores-opslaan/'

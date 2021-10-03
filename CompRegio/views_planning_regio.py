@@ -12,27 +12,27 @@ from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
+from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
+                               DeelCompetitie, DeelcompetitieRonde,
+                               CompetitieKlasse, RegioCompetitieSchutterBoog, RegiocompetitieTeam)
+from Competitie.operations import maak_deelcompetitie_ronde
+from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbCluster, NhbVereniging
 from Taken.taken import maak_taak
 from Wedstrijden.models import CompetitieWedstrijd, WedstrijdLocatie
-from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
-                     DeelCompetitie, DeelcompetitieRonde,
-                     CompetitieKlasse, RegioCompetitieSchutterBoog, RegiocompetitieTeam)
-from .operations import maak_deelcompetitie_ronde
-from .menu import menu_dynamics_competitie
 from types import SimpleNamespace
 import datetime
 
 
-TEMPLATE_COMPETITIE_PLANNING_REGIO = 'competitie/planning-regio.dtl'
-TEMPLATE_COMPETITIE_PLANNING_REGIO_METHODE1 = 'competitie/planning-regio-methode1.dtl'
-TEMPLATE_COMPETITIE_PLANNING_REGIO_CLUSTER = 'competitie/planning-regio-cluster.dtl'
-TEMPLATE_COMPETITIE_PLANNING_REGIO_RONDE = 'competitie/planning-regio-ronde.dtl'
-TEMPLATE_COMPETITIE_PLANNING_REGIO_RONDE_METHODE1 = 'competitie/planning-regio-ronde-methode1.dtl'
-TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD = 'competitie/wijzig-wedstrijd.dtl'
-TEMPLATE_COMPETITIE_AFSLUITEN_REGIOCOMP = 'competitie/rcl-afsluiten-regiocomp.dtl'
+TEMPLATE_COMPREGIO_PLANNING = 'compregio/planning-regio.dtl'
+TEMPLATE_COMPREGIO_PLANNING_METHODE1 = 'compregio/planning-regio-methode1.dtl'
+TEMPLATE_COMPREGIO_PLANNING_CLUSTER = 'compregio/planning-regio-cluster.dtl'
+TEMPLATE_COMPREGIO_PLANNING_RONDE = 'compregio/planning-regio-ronde.dtl'
+TEMPLATE_COMPREGIO_PLANNING_RONDE_METHODE1 = 'compregio/planning-regio-ronde-methode1.dtl'
+TEMPLATE_COMPREGIO_WIJZIG_WEDSTRIJD = 'compregio/wijzig-wedstrijd.dtl'
+TEMPLATE_COMPREGIO_AFSLUITEN_REGIOCOMP = 'compregio/rcl-afsluiten-regiocomp.dtl'
 
 
 # python strftime: 0=sunday, 6=saturday
@@ -77,8 +77,8 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
     """ Deze view geeft de planning voor een competitie in een regio """
 
     # class variables shared by all instances
-    template1 = TEMPLATE_COMPETITIE_PLANNING_REGIO
-    template2 = TEMPLATE_COMPETITIE_PLANNING_REGIO_METHODE1
+    template1 = TEMPLATE_COMPREGIO_PLANNING
+    template2 = TEMPLATE_COMPREGIO_PLANNING_METHODE1
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -114,7 +114,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             regio_ronde.save()
 
         regio_ronde.wedstrijden_count = regio_ronde.plan.wedstrijden.count()
-        regio_ronde.url = reverse('Competitie:regio-methode1-planning',
+        regio_ronde.url = reverse('CompRegio:regio-methode1-planning',
                                   kwargs={'ronde_pk': regio_ronde.pk})
         context['regio_ronde'] = regio_ronde
 
@@ -148,7 +148,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             if cluster.nhbvereniging_set.count() > 0:
                 ronde = cluster.deelcompetitieronde_set.all()[0]
                 cluster.wedstrijden_count = ronde.plan.wedstrijden.count()
-                cluster.ronde_url = reverse('Competitie:regio-methode1-planning',
+                cluster.ronde_url = reverse('CompRegio:regio-methode1-planning',
                                             kwargs={'ronde_pk': ronde.pk})
 
                 clusters.append(cluster)
@@ -172,7 +172,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         # for
 
         if mag_wijzigen and len(context['rondes']) < 16:
-            context['url_nieuwe_week'] = reverse('Competitie:regio-planning',
+            context['url_nieuwe_week'] = reverse('CompRegio:regio-planning',
                                                  kwargs={'deelcomp_pk': deelcomp.pk})
 
         # zoek de bruikbare clusters
@@ -189,7 +189,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                 context['clusters'].append(cluster)
                 # tel het aantal rondes voor dit cluster
                 cluster.ronde_count = cluster.deelcompetitieronde_set.count()
-                cluster.url_bekijk = reverse('Competitie:regio-cluster-planning',
+                cluster.url_bekijk = reverse('CompRegio:regio-cluster-planning',
                                              kwargs={'cluster_pk': cluster.pk,
                                                      'deelcomp_pk': deelcomp.pk})
         # for
@@ -262,11 +262,11 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         ronde = maak_deelcompetitie_ronde(deelcomp=deelcomp)  # checkt ook maximum aantal toegestaan
         if ronde:
             # nieuwe ronde is aangemaakt
-            next_url = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
+            next_url = reverse('CompRegio:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
         else:
             # er kan geen ronde meer bij
             # TODO: nette melding geven
-            next_url = reverse('Competitie:regio-planning', kwargs={'deelcomp_pk': deelcomp.pk})
+            next_url = reverse('CompRegio:regio-planning', kwargs={'deelcomp_pk': deelcomp.pk})
 
         return HttpResponseRedirect(next_url)
 
@@ -276,7 +276,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
     """ Deze view geeft de planning voor een competitie in een regio """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_PLANNING_REGIO_CLUSTER
+    template_name = TEMPLATE_COMPREGIO_PLANNING_CLUSTER
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -327,11 +327,11 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
 
         # alleen de RCL mag de planning uitbreiden
         if self.rol_nu == Rollen.ROL_RCL and len(context['rondes']) < 16:
-            context['url_nieuwe_week'] = reverse('Competitie:regio-cluster-planning',
+            context['url_nieuwe_week'] = reverse('CompRegio:regio-cluster-planning',
                                                  kwargs={'deelcomp_pk': deelcomp.pk,
                                                          'cluster_pk': cluster.pk})
 
-        context['terug_url'] = reverse('Competitie:regio-planning',
+        context['terug_url'] = reverse('CompRegio:regio-planning',
                                        kwargs={'deelcomp_pk': deelcomp.pk})
 
         context['handleiding_planning_regio_url'] = reverse('Handleiding:Planning_Regio')
@@ -367,7 +367,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
 
         ronde = maak_deelcompetitie_ronde(deelcomp=deelcomp, cluster=cluster)
 
-        next_url = reverse('Competitie:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
+        next_url = reverse('CompRegio:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
 
         return HttpResponseRedirect(next_url)
 
@@ -393,7 +393,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
     """ Deze view geeft de planning van een ronde in een regio of cluster in de regio """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_PLANNING_REGIO_RONDE
+    template_name = TEMPLATE_COMPREGIO_PLANNING_RONDE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -422,7 +422,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
         context['ronde'] = ronde
 
-        context['ronde_opslaan_url'] = reverse('Competitie:regio-ronde-planning',
+        context['ronde_opslaan_url'] = reverse('CompRegio:regio-ronde-planning',
                                                kwargs={'ronde_pk': ronde.pk})
 
         context['wedstrijden'] = (ronde.plan.wedstrijden
@@ -433,12 +433,12 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                                             'tijd_begin_wedstrijd'))
 
         if self.rol_nu == Rollen.ROL_RCL:
-            context['url_nieuwe_wedstrijd'] = reverse('Competitie:regio-ronde-planning',
+            context['url_nieuwe_wedstrijd'] = reverse('CompRegio:regio-ronde-planning',
                                                       kwargs={'ronde_pk': ronde.pk})
 
             for wedstrijd in context['wedstrijden']:
                 # TODO: vanaf welke datum dit niet meer aan laten passen?
-                wedstrijd.url_wijzig = reverse('Competitie:regio-wijzig-wedstrijd',
+                wedstrijd.url_wijzig = reverse('CompRegio:regio-wijzig-wedstrijd',
                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
             # for
 
@@ -478,11 +478,11 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         # while
 
         if ronde.cluster:
-            terug_url = reverse('Competitie:regio-cluster-planning',
+            terug_url = reverse('CompRegio:regio-cluster-planning',
                                 kwargs={'cluster_pk': ronde.cluster.pk,
                                         'deelcomp_pk': ronde.deelcompetitie.pk})
         else:
-            terug_url = reverse('Competitie:regio-planning',
+            terug_url = reverse('CompRegio:regio-planning',
                                 kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
         context['terug_url'] = terug_url
 
@@ -587,7 +587,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             if ronde.plan.wedstrijden.count() > 0:
                 raise Http404('Wedstrijden aanwezig')
 
-            next_url = reverse('Competitie:regio-planning',
+            next_url = reverse('CompRegio:regio-planning',
                                kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
 
             ronde.delete()
@@ -653,11 +653,11 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             # for
 
             if ronde.cluster:
-                next_url = reverse('Competitie:regio-cluster-planning',
+                next_url = reverse('CompRegio:regio-cluster-planning',
                                    kwargs={'cluster_pk': ronde.cluster.pk,
                                            'deelcomp_pk': ronde.deelcompetitie.pk})
             else:
-                next_url = reverse('Competitie:regio-planning',
+                next_url = reverse('CompRegio:regio-planning',
                                    kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
         else:
             # voeg een wedstrijd toe
@@ -672,7 +672,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             ronde.plan.wedstrijden.add(wedstrijd)
 
             # laat de nieuwe wedstrijd meteen wijzigen
-            next_url = reverse('Competitie:regio-wijzig-wedstrijd',
+            next_url = reverse('CompRegio:regio-wijzig-wedstrijd',
                                kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         return HttpResponseRedirect(next_url)
@@ -683,7 +683,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
     """ Deze view geeft de Methode 1 planning weer van een regio of cluster in de regio """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_PLANNING_REGIO_RONDE_METHODE1
+    template_name = TEMPLATE_COMPREGIO_PLANNING_RONDE_METHODE1
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -725,16 +725,16 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
 
         rol_nu = rol_get_huidige(self.request)
         if rol_nu == Rollen.ROL_RCL:
-            context['url_nieuwe_wedstrijd'] = reverse('Competitie:regio-methode1-planning',
+            context['url_nieuwe_wedstrijd'] = reverse('CompRegio:regio-methode1-planning',
                                                       kwargs={'ronde_pk': ronde.pk})
 
             for wedstrijd in wedstrijden:
                 # TODO: vanaf welke datum dit niet meer aan laten passen?
-                wedstrijd.url_wijzig = reverse('Competitie:regio-wijzig-wedstrijd',
+                wedstrijd.url_wijzig = reverse('CompRegio:regio-wijzig-wedstrijd',
                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
             # for
 
-        terug_url = reverse('Competitie:regio-planning',
+        terug_url = reverse('CompRegio:regio-planning',
                             kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
         context['terug_url'] = terug_url
 
@@ -774,7 +774,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
         ronde.plan.wedstrijden.add(wedstrijd)
 
         # laat de nieuwe wedstrijd meteen wijzigen
-        next_url = reverse('Competitie:regio-wijzig-wedstrijd',
+        next_url = reverse('CompRegio:regio-wijzig-wedstrijd',
                            kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         return HttpResponseRedirect(next_url)
@@ -785,7 +785,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
     """ Deze view laat de planning van een wedstrijd aanpassen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD
+    template_name = TEMPLATE_COMPREGIO_WIJZIG_WEDSTRIJD
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
@@ -1011,20 +1011,20 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         if heeft_wkl:
             context['wkl_indiv'], context['wkl_team'] = self._get_wedstrijdklassen(ronde.deelcompetitie, wedstrijd)
 
-        context['url_opslaan'] = reverse('Competitie:regio-wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
+        context['url_opslaan'] = reverse('CompRegio:regio-wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         if ronde.deelcompetitie.inschrijf_methode == INSCHRIJF_METHODE_1:
-            context['url_terug'] = reverse('Competitie:regio-methode1-planning',
+            context['url_terug'] = reverse('CompRegio:regio-methode1-planning',
                                            kwargs={'ronde_pk': ronde.pk})
         else:
-            context['url_terug'] = reverse('Competitie:regio-ronde-planning',
+            context['url_terug'] = reverse('CompRegio:regio-ronde-planning',
                                            kwargs={'ronde_pk': ronde.pk})
 
         uitslag = wedstrijd.uitslag
         if uitslag and (uitslag.is_bevroren or uitslag.scores.count()):
             context['kan_niet_verwijderen'] = True
         else:
-            context['url_verwijderen'] = reverse('Competitie:regio-verwijder-wedstrijd',
+            context['url_verwijderen'] = reverse('CompRegio:regio-verwijder-wedstrijd',
                                                  kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         menu_dynamics_competitie(self.request, context, comp_pk=context['competitie'].pk)
@@ -1191,10 +1191,10 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             wedstrijd.team_klassen.add(*gekozen_klassen)
 
         if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
-            url = reverse('Competitie:regio-methode1-planning',
+            url = reverse('CompRegio:regio-methode1-planning',
                           kwargs={'ronde_pk': ronde.pk})
         else:
-            url = reverse('Competitie:regio-ronde-planning',
+            url = reverse('CompRegio:regio-ronde-planning',
                           kwargs={'ronde_pk': ronde.pk})
 
         return HttpResponseRedirect(url)
@@ -1250,10 +1250,10 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         wedstrijd.delete()
 
         if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
-            url = reverse('Competitie:regio-methode1-planning',
+            url = reverse('CompRegio:regio-methode1-planning',
                           kwargs={'ronde_pk': ronde.pk})
         else:
-            url = reverse('Competitie:regio-ronde-planning',
+            url = reverse('CompRegio:regio-ronde-planning',
                           kwargs={'ronde_pk': ronde.pk})
 
         return HttpResponseRedirect(url)
@@ -1264,7 +1264,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
     """ Deze view kan de RCL een regiocompetitie afsluiten """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_AFSLUITEN_REGIOCOMP
+    template_name = TEMPLATE_COMPREGIO_AFSLUITEN_REGIOCOMP
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -1297,7 +1297,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
         if not deelcomp.is_afgesloten:
             deelcomp.competitie.bepaal_fase()
             if deelcomp.competitie.fase == 'F':
-                context['url_afsluiten'] = reverse('Competitie:afsluiten-regiocomp',
+                context['url_afsluiten'] = reverse('CompRegio:afsluiten-regiocomp',
                                                    kwargs={'deelcomp_pk': deelcomp.pk})
 
         context['url_terug'] = reverse('Competitie:overzicht',

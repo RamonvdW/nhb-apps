@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse,
                                DeelcompetitieRonde, LAAG_REGIO, LAAG_RK, LAAG_BK,
                                RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_1)
 from Competitie.operations import competities_aanmaken
-from Competitie.views_planning_regio import competitie_week_nr_to_date
+from CompRegio.views_planning_regio import competitie_week_nr_to_date
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -29,16 +29,16 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
-    url_planning_bond = '/bondscompetities/planning/bk/%s/'  # deelcomp_pk
-    url_planning_rayon = '/bondscompetities/rk/planning/%s/'  # deelcomp_pk
-    url_planning_regio = '/bondscompetities/planning/regio/%s/'  # deelcomp_pk
-    url_planning_regio_cluster = '/bondscompetities/planning/regio/%s/cluster/%s/'  # deelcomp_pk, cluster_pk
-    url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'  # ronde_pk
-    url_planning_regio_ronde_methode1 = '/bondscompetities/planning/regio/regio-wedstrijden/%s/'  # ronde_pk
-    url_wijzig_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/wijzig/%s/'  # wedstrijd_pk
-    url_verwijder_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/verwijder/%s/'  # wedstrijd_pk
-    url_score_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'  # wedstrijd_pk
-    url_afsluiten_regio = '/bondscompetities/planning/regio/%s/afsluiten/'  # deelcomp_pk
+    url_planning_bond = '/bondscompetities/planning/bk/%s/'                                 # deelcomp_pk
+    url_planning_rayon = '/bondscompetities/rk/planning/%s/'                                # deelcomp_pk
+    url_planning_regio = '/bondscompetities/regio/planning/%s/'                             # deelcomp_pk
+    url_planning_regio_cluster = '/bondscompetities/regio/planning/%s/cluster/%s/'          # deelcomp_pk, cluster_pk
+    url_planning_regio_ronde = '/bondscompetities/regio/planning/ronde/%s/'                 # ronde_pk
+    url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'  # ronde_pk
+    url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'          # wedstrijd_pk
+    url_verwijder_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/verwijder/%s/'    # wedstrijd_pk
+    url_score_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'                    # wedstrijd_pk
+    url_afsluiten_regio = '/bondscompetities/regio/planning/%s/afsluiten/'                  # deelcomp_pk
 
     testdata = None
     
@@ -275,13 +275,13 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_25.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio_cluster % (self.deelcomp_regio101_18.pk, self.cluster_101a_18.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
 
     def test_overzicht_bko(self):
         self.e2e_login_and_pass_otp(self.account_bko_18)
@@ -310,7 +310,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio.dtl', 'plein/site_layout.dtl'))
 
         # controleer dat de URL naar de rayoncompetitie er in zit
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -322,7 +322,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio_cluster % (self.deelcomp_regio101_18.pk, self.cluster_101a_18.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
 
         # check dat de BKO geen wijzigingen mag maken
         with self.assert_max_queries(20):
@@ -351,7 +351,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio.dtl', 'plein/site_layout.dtl'))
 
         # controleer dat de URL naar de rayoncompetitie er in zit
         urls = self.extract_all_urls(resp, skip_menu=True)
@@ -363,7 +363,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio_cluster % (self.deelcomp_regio101_18.pk, self.cluster_101a_18.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
 
         # check dat de RKO geen wijzigingen mag maken
         with self.assert_max_queries(20):
@@ -390,14 +390,14 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_planning_regio_cluster % (self.deelcomp_regio101_18.pk, self.cluster_101a_18.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
 
         # maak een planning aan
         with self.assert_max_queries(20):
@@ -448,13 +448,13 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio_cluster % (self.deelcomp_regio101_18.pk, self.cluster_101a_18.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio-cluster.dtl', 'plein/site_layout.dtl'))
 
         # check dat de HWL geen wijzigingen mag maken
         with self.assert_max_queries(20):
@@ -575,7 +575,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio_ronde % ronde_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio-ronde.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio-ronde.dtl', 'plein/site_layout.dtl'))
 
         # pas de instellingen aan
         with self.assert_max_queries(20):
@@ -665,7 +665,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wijzig_wedstrijd % wedstrijd_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # niet bestaande wedstrijd
         with self.assert_max_queries(20):
@@ -684,7 +684,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio_ronde % ronde_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio-ronde.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio-ronde.dtl', 'plein/site_layout.dtl'))
 
         # probeer een wijziging te doen als HWL
         with self.assert_max_queries(20):
@@ -715,7 +715,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio_ronde % ronde_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio-ronde.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio-ronde.dtl', 'plein/site_layout.dtl'))
 
         # pas de instellingen aan
         with self.assert_max_queries(20):
@@ -786,7 +786,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wijzig_wedstrijd % wedstrijd_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
     def test_rcl_maakt_planning_25_methode1(self):
         self.e2e_login_and_pass_otp(self.account_rcl101_25)
@@ -804,7 +804,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
         self.assertEqual(DeelcompetitieRonde.objects.count(), 2)        # TODO: als het de enige ronde is, waarom dan van 0 naar 2?
 
         # probeer een ronde aan te maken
@@ -822,7 +822,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
 
         ronde_oud.delete()
         ronde_pk = DeelcompetitieRonde.objects.filter(deelcompetitie=self.deelcomp_regio101_25)[0].pk
@@ -832,7 +832,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
 
         # haal de ronde planning op
         url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk
@@ -840,7 +840,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(url_ronde)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio-ronde-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio-ronde-methode1.dtl', 'plein/site_layout.dtl'))
 
         # maak een wedstrijd aan
         self.assertEqual(CompetitieWedstrijd.objects.count(), 0)
@@ -863,7 +863,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(url_wed)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # wijzig de datum van deze wedstrijd
         with self.assert_max_queries(20):
@@ -915,7 +915,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
 
         ronde_pk = DeelcompetitieRonde.objects.filter(deelcompetitie=self.deelcomp_regio101_18)[0].pk
         url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk
@@ -936,7 +936,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(url_wed)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
     def test_methode1_bad(self):
         # anon
@@ -1017,7 +1017,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio_ronde % ronde_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio-ronde.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio-ronde.dtl', 'plein/site_layout.dtl'))
 
         # pas de instellingen van de ronde (van een cluster) aan
         with self.assert_max_queries(20):
@@ -1041,7 +1041,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wijzig_wedstrijd % wedstrijd_pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # stop een vereniging in het cluster
         self.nhbver_101.clusters.add(self.cluster_101a_18)
@@ -1514,7 +1514,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio.dtl', 'plein/site_layout.dtl'))
 
         # zoek alle weeknummers op
         parts = list()
@@ -1616,7 +1616,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
         hrefs = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(hrefs, ['/bondscompetities/%s/' % self.comp_18.pk])  # alleen de terug knop
 
@@ -1632,7 +1632,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
         hrefs = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(hrefs[0], url)
 
@@ -1650,7 +1650,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
         hrefs = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(hrefs, ['/bondscompetities/%s/' % self.comp_18.pk])  # alleen de terug knop
 

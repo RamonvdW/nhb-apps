@@ -46,7 +46,7 @@
 
         <!-- planning regiocompetities -->
         {% for deelcomp in planning_deelcomp %}
-            {% url 'Competitie:regio-planning' deelcomp.pk as card_url %}
+            {% url 'CompRegio:regio-planning' deelcomp.pk as card_url %}
             {% include 'plein/card.dtl' with title="Planning" text="Planning voor de "|add:deelcomp.competitie.beschrijving|add:" in "|add:deelcomp.nhb_regio.naam icon="date_range" url=card_url %}
         {% endfor %}
     </div>

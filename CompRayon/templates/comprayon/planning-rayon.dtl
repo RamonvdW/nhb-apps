@@ -153,7 +153,7 @@
 
                 <!-- knop naar de details van de regioplanning -->
                 <td>
-                    <a class="btn-nhb-blauw btn-small" href="{% url 'Competitie:regio-planning' deelcomp.pk %}">
+                    <a class="btn-nhb-blauw btn-small" href="{% url 'CompRegio:regio-planning' deelcomp.pk %}">
                         <i class="material-icons-round left">arrow_forward</i>Bekijk</a>
                 </td>
             </tr>

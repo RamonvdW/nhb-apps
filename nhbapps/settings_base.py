@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'Bondspas.apps.BondspasConfig',
     'Competitie.apps.CompetitieConfig',
     'CompRayon.apps.CompRayonConfig',
+    'CompRegio.apps.CompRegioConfig',
     'CompScores.apps.CompScoresConfig',
     'CompUitslagen.apps.CompUitslagenConfig',
     'Functie.apps.FunctieConfig',

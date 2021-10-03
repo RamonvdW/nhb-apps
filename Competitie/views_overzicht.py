@@ -101,7 +101,7 @@ class CompetitieOverzichtView(View):
             # vanaf fase E laten we dit niet meer zien en komen de RK Teams in beeld
             if comp.fase < 'E':
                 context['tekst_regio_teams_alle'] = "Alle teams inzien van de regiocompetitie."
-                context['url_regio_teams_alle'] = reverse('Competitie:regio-teams-alle',
+                context['url_regio_teams_alle'] = reverse('CompRegio:regio-teams-alle',
                                                           kwargs={'comp_pk': comp.pk,
                                                                   'subset': 'auto'})
 
@@ -125,13 +125,13 @@ class CompetitieOverzichtView(View):
 
                 obj.titel = 'Planning Regio %s' % obj.nhb_regio.regio_nr
                 obj.tekst = 'Planning van de wedstrijden in %s voor deze competitie.' % obj.nhb_regio.naam
-                obj.url = reverse('Competitie:regio-planning',
+                obj.url = reverse('CompRegio:regio-planning',
                                   kwargs={'deelcomp_pk': obj.pk})
 
                 if obj.regio_organiseert_teamcompetitie and comp.fase == 'E':
                     obj.titel_team_ronde = "Team Ronde"
                     obj.tekst_team_ronde = "Stel de team punten vast en zet de teamcompetitie door naar de volgende ronde."
-                    obj.url_team_ronde = reverse('Competitie:start-volgende-team-ronde',
+                    obj.url_team_ronde = reverse('CompRegio:start-volgende-team-ronde',
                                                  kwargs={'deelcomp_pk': obj.pk})
 
                 obj.tekst_scores = "Scores invoeren en aanpassen voor %s voor deze competitie." % obj.nhb_regio.naam
@@ -140,13 +140,13 @@ class CompetitieOverzichtView(View):
 
                 if obj.regio_organiseert_teamcompetitie:
                     obj.tekst_regio_teams = "Teams voor de regiocompetitie in %s inzien voor deze competitie." % obj.nhb_regio.naam
-                    obj.url_regio_teams = reverse('Competitie:regio-teams',
+                    obj.url_regio_teams = reverse('CompRegio:regio-teams',
                                                   kwargs={'deelcomp_pk': obj.pk})
 
                     # poules kaartje alleen het head-to-head puntenmodel gekozen is
                     if obj.heeft_poules_nodig():
                         obj.tekst_poules = "Poules voor directe teamwedstrijden tussen teams in deze regiocompetitie."
-                        obj.url_poules = reverse('Competitie:regio-poules',
+                        obj.url_poules = reverse('CompRegio:regio-poules',
                                                  kwargs={'deelcomp_pk': obj.pk})
 
                     toon_handmatige_ag = True
@@ -155,12 +155,12 @@ class CompetitieOverzichtView(View):
             # for
 
             if comp.fase <= 'F':
-                comp.url_regio_instellingen = reverse('Competitie:regio-instellingen',
+                comp.url_regio_instellingen = reverse('CompRegio:regio-instellingen',
                                                       kwargs={'comp_pk': comp.pk,
                                                               'regio_nr': self.functie_nu.nhb_regio.regio_nr})
 
                 if toon_handmatige_ag:
-                    comp.url_regio_handmatige_ag = reverse('Competitie:regio-ag-controle',
+                    comp.url_regio_handmatige_ag = reverse('CompRegio:regio-ag-controle',
                                                            kwargs={'comp_pk': comp.pk,
                                                                    'regio_nr': self.functie_nu.nhb_regio.regio_nr})
 
@@ -181,7 +181,7 @@ class CompetitieOverzichtView(View):
 
                     obj.titel = 'Sluit Regiocompetitie'
                     obj.tekst = 'Bevestig eindstand %s voor de %s.' % (obj.nhb_regio.naam, obj.competitie.beschrijving)
-                    obj.url_afsluiten = reverse('Competitie:afsluiten-regiocomp',
+                    obj.url_afsluiten = reverse('CompRegio:afsluiten-regiocomp',
                                                 kwargs={'deelcomp_pk': obj.pk})
                 # for
 

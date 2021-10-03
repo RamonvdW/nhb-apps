@@ -203,8 +203,8 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
 
-        self.url_planning_regio = '/bondscompetities/planning/regio/%s/'                  # deelcomp_pk
-        self.url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'      # ronde_pk
+        self.url_planning_regio = '/bondscompetities/regio/planning/%s/'                  # deelcomp_pk
+        self.url_planning_regio_ronde = '/bondscompetities/regio/planning/ronde/%s/'      # ronde_pk
         self.url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'       # wedstrijd_pk
         self.url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'               # comp_pk       # TODO: ongewenste dependency op Vereniging
 

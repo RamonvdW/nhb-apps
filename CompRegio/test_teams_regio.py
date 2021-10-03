@@ -29,10 +29,10 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
-    url_afsluiten_regio = '/bondscompetities/planning/regio/%s/afsluiten/'  # deelcomp_pk
-    url_regio_instellingen = '/bondscompetities/%s/instellingen/regio-%s/'  # comp_pk, regio-nr
-    url_regio_globaal = '/bondscompetities/%s/instellingen/globaal/'  # comp_pk
-    url_ag_controle = '/bondscompetities/%s/ag-controle/regio-%s/'  # comp_pk, regio-nr
+    url_afsluiten_regio = '/bondscompetities/regio/planning/%s/afsluiten/'  # deelcomp_pk
+    url_regio_instellingen = '/bondscompetities/regio/%s/instellingen/regio-%s/'  # comp_pk, regio-nr
+    url_regio_globaal = '/bondscompetities/regio/%s/instellingen/globaal/'  # comp_pk
+    url_ag_controle = '/bondscompetities/regio/%s/ag-controle/regio-%s/'  # comp_pk, regio-nr
     url_regio_teams = '/bondscompetities/regio/%s/teams/'  # deelcomp_pk
     url_regio_teams_alle = '/bondscompetities/regio/%s/teams/%s/'  # comp_pk, subset = auto/alle/rayon_nr
     url_regio_poules = '/bondscompetities/regio/%s/poules/'  # deelcomp_pk
@@ -288,7 +288,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/rcl-instellingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/rcl-instellingen.dtl', 'plein/site_layout.dtl'))
 
         # all params missing
         with self.assert_max_queries(20):
@@ -339,7 +339,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
                 resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)  # 200 = OK
             self.assert_html_ok(resp)
-            self.assert_template_used(resp, ('competitie/rcl-instellingen.dtl', 'plein/site_layout.dtl'))
+            self.assert_template_used(resp, ('compregio/rcl-instellingen.dtl', 'plein/site_layout.dtl'))
 
             deelcomp_pre = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
             self.assertTrue(deelcomp_pre.regio_organiseert_teamcompetitie)
@@ -372,7 +372,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/rcl-instellingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/rcl-instellingen.dtl', 'plein/site_layout.dtl'))
 
     def test_regio_instellingen_bad(self):
         # bad cases
@@ -419,7 +419,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/rcl-instellingen-globaal.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/rcl-instellingen-globaal.dtl', 'plein/site_layout.dtl'))
 
     def test_regio_teams(self):
         # RCL ziet teams
@@ -473,7 +473,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/rcl-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/rcl-teams.dtl', 'plein/site_layout.dtl'))
 
         # verkeerde deelcomp
         resp = self.client.get(self.url_regio_teams % self.deelcomp_regio101_18.pk)
@@ -508,21 +508,21 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/rcl-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/rcl-teams.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_regio_teams_alle % (self.comp_18.pk, 'alle')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/rcl-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/rcl-teams.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_regio_teams_alle % (self.comp_18.pk, '3')        # rayon_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/rcl-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/rcl-teams.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_wissel_naar_functie(self.functie_rko1_18)
 
@@ -531,7 +531,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/rcl-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/rcl-teams.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_regio_teams_alle % (999999, 'auto')
         with self.assert_max_queries(20):
@@ -560,7 +560,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/rcl-ag-controle.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/rcl-ag-controle.dtl', 'plein/site_layout.dtl'))
 
         # maak een inschrijving met handmatig AG
         RegioCompetitieSchutterBoog(
@@ -604,7 +604,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/rcl-teams-poules.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/rcl-teams-poules.dtl', 'plein/site_layout.dtl'))
 
         # tot en met fase D mag alles nog
         comp = deelcomp.competitie
@@ -638,7 +638,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/wijzig-poule.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/wijzig-poule.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'beschrijving': ' hoi test!'})
@@ -684,7 +684,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/rcl-teams-poules.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/rcl-teams-poules.dtl', 'plein/site_layout.dtl'))
 
         # maak een poule aan
         self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
@@ -699,7 +699,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/wijzig-poule.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/wijzig-poule.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'beschrijving': 'nieuwe test'})
@@ -790,7 +790,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/wijzig-poule.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/wijzig-poule.dtl', 'plein/site_layout.dtl'))
 
         # compound team bij recurve-meerderheid wordt niet geaccepteerd (silently ignored)
         params['team_%s' % team_c.pk] = 1
@@ -834,7 +834,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls: %s' % repr(urls))
         self.assertTrue(len(urls) == 1)
@@ -889,7 +889,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
 
         # nog een rondje, dan komen in het schema met head-to-head wedstrijden
 
@@ -926,7 +926,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
 
         # start de eerste ronde op
         with self.assert_max_queries(20):
@@ -983,7 +983,7 @@ class TestCompetitieRegioTeams(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/rcl-team-ronde.dtl', 'plein/site_layout.dtl'))
 
         # start de eerste ronde op
         with self.assert_max_queries(20):

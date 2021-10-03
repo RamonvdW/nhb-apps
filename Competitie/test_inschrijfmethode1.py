@@ -25,9 +25,9 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_beheerders',)
 
-    url_planning_regio = '/bondscompetities/planning/regio/%s/'  # deelcomp_pk
-    url_planning_regio_ronde_methode1 = '/bondscompetities/planning/regio/regio-wedstrijden/%s/'  # ronde_pk
-    url_wijzig_wedstrijd = '/bondscompetities/planning/regio/wedstrijd/wijzig/%s/'  # wedstrijd_pk
+    url_planning_regio = '/bondscompetities/regio/planning/%s/'  # deelcomp_pk
+    url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'  # ronde_pk
+    url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'  # wedstrijd_pk
     url_behoefte1 = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes/'  # comp_pk, regio_pk
     url_behoefte1_bestand = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes-als-bestand/'  # comp_pk, regio_pk
 
@@ -162,7 +162,7 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio % self.deelcomp.pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
 
         ronde_pk = DeelcompetitieRonde.objects.filter(deelcompetitie=self.deelcomp)[0].pk
         url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk

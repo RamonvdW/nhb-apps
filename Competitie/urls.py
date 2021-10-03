@@ -10,9 +10,7 @@ from . import (views_aangemeld,
                views_info,
                views_klassegrenzen,
                views_overzicht,
-               views_planning_regio,
-               views_planning_bond,
-               views_regio_teams)
+               views_planning_bond)
 
 app_name = 'Competitie'
 
@@ -58,39 +56,6 @@ urlpatterns = [
          name='wijzig-datums'),
 
 
-    # RCL schermen
-    path('<comp_pk>/instellingen/regio-<regio_nr>/',
-         views_regio_teams.RegioInstellingenView.as_view(),
-         name='regio-instellingen'),
-
-    path('<comp_pk>/instellingen/globaal/',
-         views_regio_teams.RegioInstellingenGlobaalView.as_view(),
-         name='regio-instellingen-globaal'),
-
-    path('<comp_pk>/ag-controle/regio-<regio_nr>/',
-         views_regio_teams.AGControleView.as_view(),
-         name='regio-ag-controle'),
-
-    path('regio/<comp_pk>/teams/<subset>/',
-         views_regio_teams.RegioTeamsAlleView.as_view(),
-         name='regio-teams-alle'),
-
-    path('regio/<deelcomp_pk>/teams/',
-         views_regio_teams.RegioTeamsRCLView.as_view(),
-         name='regio-teams'),
-
-    path('regio/<deelcomp_pk>/poules/',
-         views_regio_teams.RegioPoulesView.as_view(),
-         name='regio-poules'),
-
-    path('regio/poules/<poule_pk>/wijzig/',
-         views_regio_teams.WijzigPouleView.as_view(),
-         name='wijzig-poule'),
-
-    path('regio/<deelcomp_pk>/team-ronde/',
-         views_regio_teams.StartVolgendeTeamRondeView.as_view(),
-         name='start-volgende-team-ronde'),
-
 
     # ingeschreven
     path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/dagdeel-behoefte/',
@@ -125,35 +90,6 @@ urlpatterns = [
          views_aangemeld.LijstAangemeldRegiocompAlsBestandView.as_view(),
          name='lijst-regiocomp-regio-als-bestand'),
 
-
-    # planning regio
-    path('planning/regio/<deelcomp_pk>/',
-         views_planning_regio.RegioPlanningView.as_view(),
-         name='regio-planning'),
-
-    path('planning/regio/<deelcomp_pk>/afsluiten/',
-         views_planning_regio.AfsluitenRegiocompView.as_view(),
-         name='afsluiten-regiocomp'),
-
-    path('planning/regio/<deelcomp_pk>/cluster/<cluster_pk>/',
-         views_planning_regio.RegioClusterPlanningView.as_view(),
-         name='regio-cluster-planning'),
-
-    path('planning/regio/ronde/<ronde_pk>/',
-         views_planning_regio.RegioRondePlanningView.as_view(),
-         name='regio-ronde-planning'),
-
-    path('planning/regio/regio-wedstrijden/<ronde_pk>/',
-         views_planning_regio.RegioRondePlanningMethode1View.as_view(),
-         name='regio-methode1-planning'),
-
-    path('planning/regio/wedstrijd/wijzig/<wedstrijd_pk>/',
-         views_planning_regio.WijzigWedstrijdView.as_view(),
-         name='regio-wijzig-wedstrijd'),
-
-    path('planning/regio/wedstrijd/verwijder/<wedstrijd_pk>/',
-         views_planning_regio.VerwijderWedstrijdView.as_view(),
-         name='regio-verwijder-wedstrijd'),
 
 
     # planning bk

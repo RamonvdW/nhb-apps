@@ -350,7 +350,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rollen.ROL_HWL:
             url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
         else:
-            url = reverse('Competitie:regio-teams', kwargs={'deelcomp_pk': deelcomp.pk})
+            url = reverse('CompRegio:regio-teams', kwargs={'deelcomp_pk': deelcomp.pk})
 
         if team_pk == 0:
             # nieuw team
@@ -569,7 +569,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
             url = reverse('Vereniging:teams-regio',
                           kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
         else:
-            url = reverse('Competitie:regio-ag-controle',
+            url = reverse('CompRegio:regio-ag-controle',
                           kwargs={'comp_pk': deelnemer.deelcompetitie.competitie.pk,
                                   'regio_nr': deelnemer.deelcompetitie.nhb_regio.regio_nr})
 
@@ -787,7 +787,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rollen.ROL_HWL:
             url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
         else:
-            url = reverse('Competitie:regio-teams', kwargs={'deelcomp_pk': deelcomp.pk})
+            url = reverse('CompRegio:regio-teams', kwargs={'deelcomp_pk': deelcomp.pk})
         return HttpResponseRedirect(url)
 
 

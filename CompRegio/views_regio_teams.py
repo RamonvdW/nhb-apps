@@ -12,31 +12,31 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Competitie.models import (LAAG_REGIO, AG_NUL,
+                               TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES, TEAM_PUNTEN,
+                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3, TEAM_PUNTEN_F1,
+                               Competitie, CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
+                               RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
+                               CompetitieMutatie, MUTATIE_TEAM_RONDE)
+from Competitie.menu import menu_dynamics_competitie
 from Competitie.operations.poules import maak_poule_schema
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Handleiding.views import reverse_handleiding
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbRayon
 from Overig.background_sync import BackgroundSync
-from .models import (LAAG_REGIO, AG_NUL,
-                     TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES, TEAM_PUNTEN,
-                     INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3, TEAM_PUNTEN_F1,
-                     Competitie, CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
-                     RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
-                     CompetitieMutatie, MUTATIE_TEAM_RONDE)
-from .menu import menu_dynamics_competitie
 from types import SimpleNamespace
 import datetime
 import time
 
 
-TEMPLATE_COMPETITIE_RCL_INSTELLINGEN = 'competitie/rcl-instellingen.dtl'
-TEMPLATE_COMPETITIE_INSTELLINGEN_REGIO_GLOBAAL = 'competitie/rcl-instellingen-globaal.dtl'
-TEMPLATE_COMPETITIE_RCL_TEAMS = 'competitie/rcl-teams.dtl'
-TEMPLATE_COMPETITIE_RCL_TEAMS_POULES = 'competitie/rcl-teams-poules.dtl'
-TEMPLATE_COMPETITIE_RCL_WIJZIG_POULE = 'competitie/wijzig-poule.dtl'
-TEMPLATE_COMPETITIE_RCL_AG_CONTROLE = 'competitie/rcl-ag-controle.dtl'
-TEMPLATE_COMPETITIE_RCL_TEAM_RONDE = 'competitie/rcl-team-ronde.dtl'
+TEMPLATE_COMPREGIO_RCL_INSTELLINGEN = 'compregio/rcl-instellingen.dtl'
+TEMPLATE_COMPREGIO_INSTELLINGEN_REGIO_GLOBAAL = 'compregio/rcl-instellingen-globaal.dtl'
+TEMPLATE_COMPREGIO_RCL_TEAMS = 'compregio/rcl-teams.dtl'
+TEMPLATE_COMPREGIO_RCL_TEAMS_POULES = 'compregio/rcl-teams-poules.dtl'
+TEMPLATE_COMPREGIO_RCL_WIJZIG_POULE = 'compregio/wijzig-poule.dtl'
+TEMPLATE_COMPREGIO_RCL_AG_CONTROLE = 'compregio/rcl-ag-controle.dtl'
+TEMPLATE_COMPREGIO_RCL_TEAM_RONDE = 'compregio/rcl-team-ronde.dtl'
 
 mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
@@ -46,7 +46,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
     """ Deze view kan de RCL instellingen voor de regiocompetitie aanpassen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_RCL_INSTELLINGEN
+    template_name = TEMPLATE_COMPREGIO_RCL_INSTELLINGEN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -124,7 +124,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         obj.actief = deelcomp.regio_team_punten_model == TEAM_PUNTEN_MODEL_SOM_SCORES
         opts.append(obj)
 
-        context['url_opslaan'] = reverse('Competitie:regio-instellingen',
+        context['url_opslaan'] = reverse('CompRegio:regio-instellingen',
                                          kwargs={'comp_pk': deelcomp.competitie.pk,
                                                  'regio_nr': deelcomp.nhb_regio.regio_nr})
 
@@ -207,7 +207,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
     """ Deze view geeft een overzicht van de regio keuzes """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_INSTELLINGEN_REGIO_GLOBAAL
+    template_name = TEMPLATE_COMPREGIO_INSTELLINGEN_REGIO_GLOBAAL
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -287,7 +287,7 @@ class RegioTeamsView(TemplateView):
 
     """ Met deze view kan een lijst van teams getoond worden, zowel landelijk, rayon als regio """
 
-    template_name = TEMPLATE_COMPETITIE_RCL_TEAMS
+    template_name = TEMPLATE_COMPREGIO_RCL_TEAMS
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -342,7 +342,7 @@ class RegioTeamsView(TemplateView):
             context['filters'] = filters = list()
             alle_filter = {'label': 'Alles'}
             if subset != 'alle':
-                alle_filter['url'] = reverse('Competitie:regio-teams-alle',
+                alle_filter['url'] = reverse('CompRegio:regio-teams-alle',
                                              kwargs={'comp_pk': comp.pk,
                                                      'subset': 'alle'})
             filters.append(alle_filter)
@@ -350,7 +350,7 @@ class RegioTeamsView(TemplateView):
             for rayon in NhbRayon.objects.all():
                 rayon.label = 'Rayon %s' % rayon.rayon_nr
                 if str(rayon.rayon_nr) != subset:
-                    rayon.url = reverse('Competitie:regio-teams-alle',
+                    rayon.url = reverse('CompRegio:regio-teams-alle',
                                         kwargs={'comp_pk': comp.pk, 'subset': rayon.rayon_nr})
                 filters.append(rayon)
             # for
@@ -523,7 +523,7 @@ class AGControleView(UserPassesTestMixin, TemplateView):
     """ Met deze view kan de RCL de handmatig ingevoerde aanvangsgemiddelden zien """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_RCL_AG_CONTROLE
+    template_name = TEMPLATE_COMPREGIO_RCL_AG_CONTROLE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -603,7 +603,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
     """ Met deze view kan de RCL de poules hanteren """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_RCL_TEAMS_POULES
+    template_name = TEMPLATE_COMPREGIO_RCL_TEAMS_POULES
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -650,7 +650,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
 
         team_pk2poule = dict()
         for poule in poules:
-            poule.url_wijzig = reverse('Competitie:wijzig-poule',
+            poule.url_wijzig = reverse('CompRegio:wijzig-poule',
                                        kwargs={'poule_pk': poule.pk})
 
             for team in poule.teams.all():
@@ -678,7 +678,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
         context['teams'] = teams
 
         if not readonly:
-            context['url_nieuwe_poule'] = reverse('Competitie:regio-poules',
+            context['url_nieuwe_poule'] = reverse('CompRegio:regio-poules',
                                                   kwargs={'deelcomp_pk': deelcomp.pk})
 
         context['wiki_rcl_poules_url'] = reverse_handleiding(self.request, settings.HANDLEIDING_POULES)
@@ -719,7 +719,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
                 deelcompetitie=deelcomp,
                 beschrijving='poule %s' % nummer).save()
 
-        url = reverse('Competitie:regio-poules',
+        url = reverse('CompRegio:regio-poules',
                       kwargs={'deelcomp_pk': deelcomp.pk})
         return HttpResponseRedirect(url)
 
@@ -729,7 +729,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
     """ Met deze view kan de RCL een poule beheren """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_RCL_WIJZIG_POULE
+    template_name = TEMPLATE_COMPREGIO_RCL_WIJZIG_POULE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -794,9 +794,9 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
         context['teams'] = teams
 
         context['poule'] = poule
-        context['url_opslaan'] = reverse('Competitie:wijzig-poule',
+        context['url_opslaan'] = reverse('CompRegio:wijzig-poule',
                                          kwargs={'poule_pk': poule.pk})
-        context['url_terug'] = reverse('Competitie:regio-poules',
+        context['url_terug'] = reverse('CompRegio:regio-poules',
                                        kwargs={'deelcomp_pk': deelcomp.pk})
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
@@ -882,7 +882,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
                     # vervang door de overgebleven teams
                     poule.teams.set(goede_teams)
 
-        url = reverse('Competitie:regio-poules',
+        url = reverse('CompRegio:regio-poules',
                       kwargs={'deelcomp_pk': deelcomp.pk})
         return HttpResponseRedirect(url)
 
@@ -893,7 +893,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
     """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_RCL_TEAM_RONDE
+    template_name = TEMPLATE_COMPREGIO_RCL_TEAM_RONDE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -1121,7 +1121,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                 context['wp_model_str'] = 'Som van de scores'
 
             if deelcomp.huidige_team_ronde <= 7:
-                context['url_volgende_ronde'] = reverse('Competitie:start-volgende-team-ronde',
+                context['url_volgende_ronde'] = reverse('CompRegio:start-volgende-team-ronde',
                                                         kwargs={'deelcomp_pk': deelcomp.pk})
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
