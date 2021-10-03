@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-rcl-team-ronde" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-rcl-team-ronde" %}
 
     <h4>Team Ronde</h4>
 

@@ -318,7 +318,7 @@
             })
     </script>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-wijzig-wedstrijd" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-wijzig-wedstrijd" %}
 
 {% endblock %}
 

@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-planning-regio-methode1" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-planning-regio-methode1" %}
 
     <h4>Planning Regio</h4>
 

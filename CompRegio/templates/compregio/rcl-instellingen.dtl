@@ -171,7 +171,7 @@
     <p>Handleiding over deze keuzes: <a class="btn-small btn-nhb-blauw" href="{{ wiki_rcl_regio_instellingen_url }}" target="_blank" rel="noopener noreferrer">
             <i class="material-icons-round">help_outline</i></a></p>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-rcl-instellingen" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-rcl-instellingen" %}
 
 {% endblock %}
 

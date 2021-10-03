@@ -23,9 +23,9 @@ import datetime
 import io
 
 
-class TestCompetitieRegioTeams(E2EHelpers, TestCase):
+class TestCompRegioTeams(E2EHelpers, TestCase):
 
-    """ unit tests voor de Competitie applicatie, Koppel Beheerders functie """
+    """ unit tests voor de CompRegio applicatie, Teams functie """
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 

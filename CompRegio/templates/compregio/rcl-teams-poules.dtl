@@ -115,7 +115,7 @@
 
     </table>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-rcl-teams-poules" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-rcl-teams-poules" %}
 
 {% endblock %}
 

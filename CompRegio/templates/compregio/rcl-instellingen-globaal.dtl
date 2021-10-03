@@ -40,7 +40,7 @@
         {% endfor %}
     </table>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-rcl-instellingen-globaal" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-rcl-instellingen-globaal" %}
 
 {% endblock %}
 

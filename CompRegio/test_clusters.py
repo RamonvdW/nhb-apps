@@ -10,9 +10,9 @@ from NhbStructuur.models import NhbRegio, NhbCluster, NhbVereniging
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
-class TestVerenigingClusters(E2EHelpers, TestCase):
+class TestCompRegioClusters(E2EHelpers, TestCase):
 
-    """ Tests voor de Vereniging applicatie, Wijzig Clusters functies """
+    """ Tests voor de CompRegio applicatie, Wijzig Clusters functies """
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 

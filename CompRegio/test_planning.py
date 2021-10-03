@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse,
                                DeelcompetitieRonde, LAAG_REGIO, LAAG_RK, LAAG_BK,
                                RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_1)
 from Competitie.operations import competities_aanmaken
-from CompRegio.views_planning_regio import competitie_week_nr_to_date
+from CompRegio.view_planning import competitie_week_nr_to_date
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -23,9 +23,9 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
+class TestCompRegioPlanning(E2EHelpers, TestCase):
 
-    """ unit tests voor de Competitie applicatie, Koppel Beheerders functie """
+    """ unit tests voor de CompRegio applicatie, Planning functie """
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 

@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-rcl-teams" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-rcl-teams" %}
 
     <h4>Regio Teams</h4>
 
