@@ -11,14 +11,14 @@ from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
 
-class TestCompetitieRegioTeams(E2EHelpers, TestCase):
+class TestCompRayonTeams(E2EHelpers, TestCase):
 
-    """ unit tests voor de Competitie applicatie, Koppel Beheerders functie """
+    """ unit tests voor de CompRayon applicatie, RK Teams functie """
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
-    url_rko_teams = '/bondscompetities/rk/%s/teams/'            # rk_deelcomp_pk
-    url_rk_teams_alle = '/bondscompetities/rk/%s/teams/%s/'     # comp_pk, subset
+    url_rko_teams = '/bondscompetities/rk/ingeschreven-teams/%s/'            # rk_deelcomp_pk
+    url_rk_teams_alle = '/bondscompetities/rk/ingeschreven-teams/%s/%s/'     # comp_pk, subset
 
     testdata = None
 

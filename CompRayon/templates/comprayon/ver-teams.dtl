@@ -9,6 +9,7 @@
 {% block title %}Teams RK{% endblock %}
 
 {% block pagina %}
+
     <h4>Teams RK</h4>
 
     <p>Op deze pagina kan je als HWL de teams opgeven voor de <b>Rayonkampioenschappen (RK)</b> van de <b>{{ deelcomp_rk }}</b>.</p>
@@ -75,6 +76,6 @@
     </table>
 
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-teams-rk" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-ver-teams" %}
 
 {% endblock %}

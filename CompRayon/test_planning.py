@@ -26,9 +26,9 @@ import io
 sleep_oud = time.sleep
 
 
-class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
+class TestCompRayonPlanning(E2EHelpers, TestCase):
 
-    """ unit tests voor de Competitie applicatie, Koppel Beheerders functie """
+    """ unit tests voor de CompRayon applicatie, Planning functie """
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 

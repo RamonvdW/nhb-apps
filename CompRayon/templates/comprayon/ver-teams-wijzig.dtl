@@ -82,6 +82,6 @@
         </form>
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-teams-rk-wijzig" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-verteams-wijzig" %}
 
 {% endblock %}

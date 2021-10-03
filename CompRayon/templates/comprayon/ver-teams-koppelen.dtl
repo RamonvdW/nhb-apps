@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-teams-rk-koppelen" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-ver-teams-koppelen" %}
 
     <h4>Koppel teamleden</h4>
 

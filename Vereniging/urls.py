@@ -7,7 +7,7 @@
 from django.urls import path
 from . import (view_accommodatie, view_externe_locaties, view_overzicht, view_ledenlijst,
                view_aanmelden, view_wedstrijden, view_lijst_rk, view_lijst_verenigingen,
-               view_schietmomenten, view_teams_regio, view_teams_rk)
+               view_schietmomenten, view_teams_regio)
 
 app_name = 'Vereniging'
 
@@ -67,24 +67,6 @@ urlpatterns = [
     path('teams/regio/<deelcomp_pk>/',
          view_teams_regio.TeamsRegioView.as_view(),
          name='teams-regio'),
-
-
-    # RK teams
-    path('teams/rk/<rk_deelcomp_pk>/',
-         view_teams_rk.TeamsRkView.as_view(),
-         name='teams-rk'),
-
-    path('teams/rk/<rk_deelcomp_pk>/nieuw/',
-         view_teams_rk.WijzigRKTeamsView.as_view(),
-         name='teams-rk-nieuw'),
-
-    path('teams/rk/<rk_deelcomp_pk>/wijzig/<rk_team_pk>/',
-         view_teams_rk.WijzigRKTeamsView.as_view(),
-         name='teams-rk-wijzig'),
-
-    path('teams/rk/koppelen/<rk_team_pk>/',
-         view_teams_rk.RKTeamsKoppelLedenView.as_view(),
-         name='teams-rk-koppelen'),
 
 
     # Accommodatie

@@ -18,9 +18,9 @@ from Plein.menu import menu_dynamics
 import datetime
 
 
-TEMPLATE_TEAMS_RK = 'vereniging/teams-rk.dtl'
-TEMPLATE_TEAMS_RK_WIJZIG = 'vereniging/teams-rk-wijzig.dtl'
-TEMPLATE_TEAMS_RK_KOPPELEN = 'vereniging/teams-rk-koppelen.dtl'
+TEMPLATE_COMPRAYON_VERTEAMS = 'comprayon/ver-teams.dtl'
+TEMPLATE_COMPRAYON_VERTEAMS_WIJZIG = 'comprayon/ver-teams-wijzig.dtl'
+TEMPLATE_COMPRAYON_VERTEAMS_KOPPELEN = 'comprayon/ver-teams-koppelen.dtl'
 
 
 def bepaal_regioschutter_gemiddelde_voor_rk_teams(deelnemer):
@@ -79,7 +79,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
     """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_TEAMS_RK
+    template_name = TEMPLATE_COMPRAYON_VERTEAMS
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -140,12 +140,12 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
             rk_team.ag_str = "%05.1f" % (rk_team.aanvangsgemiddelde * aantal_pijlen)
             rk_team.ag_str = rk_team.ag_str.replace('.', ',')
 
-            rk_team.url_wijzig = reverse('Vereniging:teams-rk-wijzig',
+            rk_team.url_wijzig = reverse('CompRayon:teams-rk-wijzig',
                                          kwargs={'rk_deelcomp_pk': deelcomp_rk.pk,
                                                  'rk_team_pk': rk_team.pk})
 
             # koppelen == bekijken
-            rk_team.url_koppelen = reverse('Vereniging:teams-rk-koppelen',
+            rk_team.url_koppelen = reverse('CompRayon:teams-rk-koppelen',
                                            kwargs={'rk_team_pk': rk_team.pk})
         # for
 
@@ -162,7 +162,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
 
         context['rk_teams'] = self._get_rk_teams(deelcomp_rk)
 
-        context['url_nieuw_team'] = reverse('Vereniging:teams-rk-nieuw',
+        context['url_nieuw_team'] = reverse('CompRayon:teams-rk-nieuw',
                                             kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
         menu_dynamics(self.request, context, actief='vereniging')
@@ -175,7 +175,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
     """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_TEAMS_RK_WIJZIG
+    template_name = TEMPLATE_COMPRAYON_VERTEAMS_WIJZIG
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -254,7 +254,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
             obj.actief = rk_team.team_type == obj
         # for
 
-        context['url_opslaan'] = reverse('Vereniging:teams-rk-wijzig',
+        context['url_opslaan'] = reverse('CompRayon:teams-rk-wijzig',
                                          kwargs={'rk_deelcomp_pk': deelcomp_rk.pk,
                                                  'rk_team_pk': rk_team.pk})
 
@@ -275,7 +275,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
             raise Http404('Slechte parameter')
 
         # default = terug naar het overzicht van de Teams RK pagina
-        url = reverse('Vereniging:teams-rk',
+        url = reverse('CompRayon:teams-rk',
                       kwargs={'rk_deelcomp_pk': deelcomp.pk})
 
         if rk_team_pk == 0:
@@ -310,7 +310,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
             verwijderen = False
 
             # na aanmaken meteen door naar de 'koppelen' pagina
-            url = reverse('Vereniging:teams-rk-koppelen',
+            url = reverse('CompRayon:teams-rk-koppelen',
                           kwargs={'rk_team_pk': rk_team.pk})
         else:
             try:
@@ -364,7 +364,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
 class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
     """ Via deze view kan de HWL leden van zijn vereniging koppelen aan een team """
 
-    template_name = TEMPLATE_TEAMS_RK_KOPPELEN
+    template_name = TEMPLATE_COMPRAYON_VERTEAMS_KOPPELEN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -453,7 +453,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         # for
         context['deelnemers'] = deelnemers
 
-        context['url_opslaan'] = reverse('Vereniging:teams-rk-koppelen',
+        context['url_opslaan'] = reverse('CompRayon:teams-rk-koppelen',
                                          kwargs={'rk_team_pk': rk_team.pk})
 
         menu_dynamics(self.request, context, actief='vereniging')
@@ -519,7 +519,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         bepaal_rk_team_tijdelijke_sterkte_en_klasse(comp, rk_team)
 
-        url = reverse('Vereniging:teams-rk', kwargs={'rk_deelcomp_pk': rk_deelcomp.pk})
+        url = reverse('CompRayon:teams-rk', kwargs={'rk_deelcomp_pk': rk_deelcomp.pk})
         return HttpResponseRedirect(url)
 
 

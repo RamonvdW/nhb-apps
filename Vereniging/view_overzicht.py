@@ -179,7 +179,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Teams RK"
                         kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen samenstellen voor de %s." % comp.beschrijving
-                        kaartje.url = reverse('Vereniging:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+                        kaartje.url = reverse('CompRayon:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
                         kaartje.icon = 'api'
                         # niet beschikbaar maken tot een paar weken na de eerste regiowedstrijd
                         vanaf = comp.eerste_wedstrijd + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
