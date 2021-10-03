@@ -27,9 +27,9 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
     """ unit tests voor de Competitie applicatie, mutaties van RK/BK deelnemers lijsten """
 
-    url_lijst_rk = '/bondscompetities/lijst-rayonkampioenschappen/%s/'  # deelcomp_rk.pk
-    url_wijzig_status = '/bondscompetities/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
-    url_wijzig_cut_rk = '/bondscompetities/planning/rk/%s/limieten/'  # deelcomp_rk.pk
+    url_lijst_rk = '/bondscompetities/rk/lijst-rayonkampioenschappen/%s/'  # deelcomp_rk.pk
+    url_wijzig_status = '/bondscompetities/rk/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
+    url_wijzig_cut_rk = '/bondscompetities/rk/planning/%s/limieten/'  # deelcomp_rk.pk
 
     testdata = None
 

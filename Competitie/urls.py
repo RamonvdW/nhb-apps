@@ -12,9 +12,7 @@ from . import (views_aangemeld,
                views_overzicht,
                views_planning_regio,
                views_planning_bond,
-               views_planning_rayon,
-               views_regio_teams,
-               views_rayon_teams)
+               views_regio_teams)
 
 app_name = 'Competitie'
 
@@ -128,29 +126,6 @@ urlpatterns = [
          name='lijst-regiocomp-regio-als-bestand'),
 
 
-    # RK selectie
-    path('lijst-rayonkampioenschappen/<rk_deelcomp_pk>/',
-         views_planning_rayon.LijstRkSelectieView.as_view(),
-         name='lijst-rk'),
-
-    path('lijst-rayonkampioenschappen/<rk_deelcomp_pk>/bestand/',
-         views_planning_rayon.LijstRkSelectieAlsBestandView.as_view(),
-         name='lijst-rk-als-bestand'),
-
-    path('lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/<deelnemer_pk>/',
-         views_planning_rayon.WijzigStatusRkSchutterView.as_view(),
-         name='wijzig-status-rk-deelnemer'),
-
-
-    # RK teams
-    path('rk/<comp_pk>/teams/<subset>/',
-         views_rayon_teams.RayonTeamsAlleView.as_view(),
-         name='rayon-teams-alle'),
-
-    path('rk/<rk_deelcomp_pk>/teams/',
-         views_rayon_teams.RayonTeamsRKOView.as_view(),
-         name='rayon-teams'),
-
     # planning regio
     path('planning/regio/<deelcomp_pk>/',
          views_planning_regio.RegioPlanningView.as_view(),
@@ -179,24 +154,6 @@ urlpatterns = [
     path('planning/regio/wedstrijd/verwijder/<wedstrijd_pk>/',
          views_planning_regio.VerwijderWedstrijdView.as_view(),
          name='regio-verwijder-wedstrijd'),
-
-
-    # planning rk
-    path('planning/rk/<rk_deelcomp_pk>/limieten/',
-         views_planning_rayon.RayonLimietenView.as_view(),
-         name='rayon-limieten'),
-
-    path('planning/rk/<rk_deelcomp_pk>/',
-         views_planning_rayon.RayonPlanningView.as_view(),
-         name='rayon-planning'),
-
-    path('planning/rk/wedstrijd/wijzig/<wedstrijd_pk>/',
-         views_planning_rayon.WijzigRayonWedstrijdView.as_view(),
-         name='rayon-wijzig-wedstrijd'),
-
-    path('planning/rk/wedstrijd/verwijder/<wedstrijd_pk>/',
-         views_planning_rayon.VerwijderWedstrijdView.as_view(),
-         name='rayon-verwijder-wedstrijd'),
 
 
     # planning bk

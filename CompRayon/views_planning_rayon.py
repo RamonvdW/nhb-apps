@@ -10,6 +10,11 @@ from django.urls import reverse
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, DeelCompetitie,
+                               CompetitieKlasse, DeelcompetitieKlasseLimiet, DeelcompetitieRonde,
+                               KampioenschapSchutterBoog, CompetitieMutatie,
+                               MUTATIE_CUT, MUTATIE_AFMELDEN, MUTATIE_AANMELDEN, DEELNAME_JA, DEELNAME_NEE)
+from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Handleiding.views import reverse_handleiding
 from Logboek.models import schrijf_in_logboek
@@ -17,22 +22,17 @@ from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdenPlan, WedstrijdLocatie
-from .models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, DeelCompetitie,
-                     CompetitieKlasse, DeelcompetitieKlasseLimiet, DeelcompetitieRonde,
-                     KampioenschapSchutterBoog, CompetitieMutatie,
-                     MUTATIE_CUT, MUTATIE_AFMELDEN, MUTATIE_AANMELDEN, DEELNAME_JA, DEELNAME_NEE)
-from .menu import menu_dynamics_competitie
 from types import SimpleNamespace
 import datetime
 import time
 import csv
 
 
-TEMPLATE_COMPETITIE_PLANNING_RAYON = 'competitie/planning-rayon.dtl'
-TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD_RAYON = 'competitie/wijzig-wedstrijd-rk.dtl'
-TEMPLATE_COMPETITIE_LIJST_RK = 'competitie/lijst-rk-selectie.dtl'
-TEMPLATE_COMPETITIE_WIJZIG_STATUS_RK_SCHUTTER = 'competitie/wijzig-status-rk-deelnemer.dtl'
-TEMPLATE_COMPETITIE_WIJZIG_LIMIETEN_RK = 'competitie/wijzig-limieten-rk.dtl'
+TEMPLATE_COMPRAYON_PLANNING = 'comprayon/planning-rayon.dtl'
+TEMPLATE_COMPRAYON_WIJZIG_WEDSTRIJD = 'comprayon/wijzig-wedstrijd-rk.dtl'
+TEMPLATE_COMPRAYON_LIJST_RK = 'comprayon/lijst-rk-selectie.dtl'
+TEMPLATE_COMPRAYON_WIJZIG_STATUS_RK_SCHUTTER = 'comprayon/wijzig-status-rk-deelnemer.dtl'
+TEMPLATE_COMPRAYON_WIJZIG_LIMIETEN_RK = 'comprayon/wijzig-limieten-rk.dtl'
 
 mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
@@ -42,7 +42,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
     """ Deze view geeft de planning voor een competitie in een rayon """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_PLANNING_RAYON
+    template_name = TEMPLATE_COMPRAYON_PLANNING
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -130,11 +130,11 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             del context['wkl_niet_gebruikt']
 
         if self.rol_nu == Rollen.ROL_RKO and self.functie_nu.nhb_rayon == deelcomp_rk.nhb_rayon:
-            context['url_nieuwe_wedstrijd'] = reverse('Competitie:rayon-planning',
+            context['url_nieuwe_wedstrijd'] = reverse('CompRayon:rayon-planning',
                                                       kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
             for wedstrijd in context['wedstrijden_rk']:
-                wedstrijd.url_wijzig = reverse('Competitie:rayon-wijzig-wedstrijd',
+                wedstrijd.url_wijzig = reverse('CompRayon:rayon-wijzig-wedstrijd',
                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
             # for
 
@@ -210,7 +210,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         deelcomp_rk.plan.wedstrijden.add(wedstrijd)
 
-        return HttpResponseRedirect(reverse('Competitie:rayon-wijzig-wedstrijd',
+        return HttpResponseRedirect(reverse('CompRayon:rayon-wijzig-wedstrijd',
                                             kwargs={'wedstrijd_pk': wedstrijd.pk}))
 
 
@@ -219,7 +219,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
     """ Deze view laat de planning van een wedstrijd aanpassen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_WIJZIG_WEDSTRIJD_RAYON
+    template_name = TEMPLATE_COMPRAYON_WIJZIG_WEDSTRIJD
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -368,10 +368,10 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['wkl_indiv'], context['wkl_team'] = self._get_wedstrijdklassen(deelcomp_rk, wedstrijd)
 
-        context['url_terug'] = reverse('Competitie:rayon-planning', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
-        context['url_opslaan'] = reverse('Competitie:rayon-wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
+        context['url_terug'] = reverse('CompRayon:rayon-planning', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+        context['url_opslaan'] = reverse('CompRayon:rayon-wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-        context['url_verwijderen'] = reverse('Competitie:rayon-verwijder-wedstrijd',
+        context['url_verwijderen'] = reverse('CompRayon:rayon-verwijder-wedstrijd',
                                              kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
@@ -475,7 +475,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         if len(gekozen_klassen):
             wedstrijd.indiv_klassen.add(*gekozen_klassen)
 
-        url = reverse('Competitie:rayon-planning', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+        url = reverse('CompRayon:rayon-planning', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
         return HttpResponseRedirect(url)
 
 
@@ -486,7 +486,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
     """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_LIJST_RK
+    template_name = TEMPLATE_COMPRAYON_LIJST_RK
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -571,7 +571,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
                                     'volgorde',                 # oplopend op volgorde (dubbelen mogelijk)
                                     '-gemiddelde'))             # aflopend op gemiddelde
 
-            context['url_download'] = reverse('Competitie:lijst-rk-als-bestand',
+            context['url_download'] = reverse('CompRayon:lijst-rk-als-bestand',
                                               kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
         wkl2limiet = dict()    # [pk] = aantal
@@ -607,7 +607,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
             if not deelnemer.bij_vereniging:
                 aantal_attentie += 1
 
-            deelnemer.url_wijzig = reverse('Competitie:wijzig-status-rk-deelnemer',
+            deelnemer.url_wijzig = reverse('CompRayon:wijzig-status-rk-deelnemer',
                                            kwargs={'deelnemer_pk': deelnemer.pk})
 
             if deelnemer.rank > limiet:
@@ -729,7 +729,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
     """ Deze view laat de RKO de status van een RK selectie aanpassen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_WIJZIG_STATUS_RK_SCHUTTER
+    template_name = TEMPLATE_COMPRAYON_WIJZIG_STATUS_RK_SCHUTTER
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -773,11 +773,11 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
 
         context['deelnemer'] = deelnemer
 
-        context['url_wijzig'] = reverse('Competitie:wijzig-status-rk-deelnemer',
+        context['url_wijzig'] = reverse('CompRayon:wijzig-status-rk-deelnemer',
                                         kwargs={'deelnemer_pk': deelnemer.pk})
 
         if self.rol_nu == Rollen.ROL_RKO:
-            context['url_terug'] = reverse('Competitie:lijst-rk',
+            context['url_terug'] = reverse('CompRayon:lijst-rk',
                                            kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk})
             menu_dynamics_competitie(self.request, context, comp_pk=deelnemer.deelcompetitie.competitie.pk)
         else:
@@ -844,7 +844,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
                 # while
 
         if self.rol_nu == Rollen.ROL_RKO:
-            url = reverse('Competitie:lijst-rk',
+            url = reverse('CompRayon:lijst-rk',
                           kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk})
         else:
             url = reverse('Vereniging:lijst-rk',
@@ -858,7 +858,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
     """ Deze view laat de RKO de status van een RK selectie aanpassen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_WIJZIG_LIMIETEN_RK
+    template_name = TEMPLATE_COMPRAYON_WIJZIG_LIMIETEN_RK
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -912,7 +912,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
             wkl.limiet = limiet.limiet
         # for
 
-        context['url_opslaan'] = reverse('Competitie:rayon-limieten',
+        context['url_opslaan'] = reverse('CompRayon:rayon-limieten',
                                          kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
         context['url_terug'] = reverse('Competitie:kies')
@@ -1072,7 +1072,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 
         wedstrijd.delete()
 
-        url = reverse('Competitie:rayon-planning', kwargs={'rk_deelcomp_pk': deelcomp.pk})
+        url = reverse('CompRayon:rayon-planning', kwargs={'rk_deelcomp_pk': deelcomp.pk})
         return HttpResponseRedirect(url)
 
 

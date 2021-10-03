@@ -232,7 +232,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             rayon = DeelCompetitie.objects.get(laag=LAAG_RK,
                                                competitie=deelcomp.competitie,
                                                nhb_rayon=deelcomp.nhb_regio.rayon)
-            context['url_rayon'] = reverse('Competitie:rayon-planning',
+            context['url_rayon'] = reverse('CompRayon:rayon-planning',
                                            kwargs={'rk_deelcomp_pk': rayon.pk})
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)

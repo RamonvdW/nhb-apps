@@ -108,7 +108,7 @@ class CompetitieOverzichtView(View):
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
             if comp.fase < 'L':
                 context['tekst_rayon_teams_alle'] = "Alle teams inzien van de rayonkampioenschappen"
-                context["url_rayon_teams_alle"] = reverse('Competitie:rayon-teams-alle',
+                context["url_rayon_teams_alle"] = reverse('CompRayon:rayon-teams-alle',
                                                           kwargs={'comp_pk': comp.pk,
                                                                   'subset': 'auto'})
 
@@ -201,20 +201,20 @@ class CompetitieOverzichtView(View):
 
                 deelcomp_rk.titel = 'Planning %s' % deelcomp_rk.nhb_rayon.naam
                 deelcomp_rk.tekst = 'Planning voor %s voor deze competitie.' % deelcomp_rk.nhb_rayon.naam
-                deelcomp_rk.url = reverse('Competitie:rayon-planning',
+                deelcomp_rk.url = reverse('CompRayon:rayon-planning',
                                           kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
                 deelcomp_rk.tekst_rayon_teams = "Teams voor de rayonkampioenschappen in Rayon %s inzien voor deze competitie." % deelcomp_rk.nhb_rayon.rayon_nr
-                deelcomp_rk.url_rayon_teams = reverse('Competitie:rayon-teams',
+                deelcomp_rk.url_rayon_teams = reverse('CompRayon:rayon-teams',
                                                       kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
                 context['planning_deelcomp'] = [deelcomp_rk, ]
 
                 # geeft de RKO de mogelijkheid om de deelnemerslijst voor het RK te bewerken
-                context['url_lijst_rk'] = reverse('Competitie:lijst-rk',
+                context['url_lijst_rk'] = reverse('CompRayon:lijst-rk',
                                                   kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
-                context['url_limieten_rk'] = reverse('Competitie:rayon-limieten',
+                context['url_limieten_rk'] = reverse('CompRayon:rayon-limieten',
                                                      kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
             if 'B' <= comp.fase <= 'E':

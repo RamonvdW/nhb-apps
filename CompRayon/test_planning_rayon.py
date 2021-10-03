@@ -32,14 +32,14 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
-    url_planning_rayon = '/bondscompetities/planning/rk/%s/'  # deelcomp_pk
-    url_wijzig_rk_wedstrijd = '/bondscompetities/planning/rk/wedstrijd/wijzig/%s/'  # wedstrijd_pk
-    url_verwijder_rk_wedstrijd = '/bondscompetities/planning/rk/wedstrijd/verwijder/%s/'  # wedstrijd_pk
+    url_planning_rayon = '/bondscompetities/rk/planning/%s/'  # deelcomp_pk
+    url_wijzig_rk_wedstrijd = '/bondscompetities/rk/planning/wedstrijd/wijzig/%s/'  # wedstrijd_pk
+    url_verwijder_rk_wedstrijd = '/bondscompetities/rk/planning/wedstrijd/verwijder/%s/'  # wedstrijd_pk
+    url_lijst_rk = '/bondscompetities/rk/lijst-rayonkampioenschappen/%s/'  # deelcomp_pk
+    url_lijst_bestand = '/bondscompetities/rk/lijst-rayonkampioenschappen/%s/bestand/'  # deelcomp_pk
+    url_wijzig_status = '/bondscompetities/rk/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
+    url_wijzig_limiet = '/bondscompetities/rk/planning/%s/limieten/'  # deelcomp_pk
     url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'  # comp_pk
-    url_lijst_rk = '/bondscompetities/lijst-rayonkampioenschappen/%s/'  # deelcomp_pk
-    url_lijst_bestand = '/bondscompetities/lijst-rayonkampioenschappen/%s/bestand/'  # deelcomp_pk
-    url_wijzig_status = '/bondscompetities/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
-    url_wijzig_limiet = '/bondscompetities/planning/rk/%s/limieten/'  # deelcomp_pk
 
     testdata = None
 
@@ -314,7 +314,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-rayon.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('comprayon/planning-rayon.dtl', 'plein/site_layout.dtl'))
 
         # haal de wedstrijd op
         wedstrijd_r1 = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0]
@@ -323,7 +323,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             resp = self.client.get(url_w)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/wijzig-wedstrijd-rk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('comprayon/wijzig-wedstrijd-rk.dtl', 'plein/site_layout.dtl'))
 
         # nog een keer ophalen, want dan zijn wedstrijd.vereniging en wedstrijd.locatie al gezet
         with self.assert_max_queries(40):
@@ -471,7 +471,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/wijzig-wedstrijd-rk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('comprayon/wijzig-wedstrijd-rk.dtl', 'plein/site_layout.dtl'))
 
         # nu met een vereniging zonder accommodatie
         ver = self.nhbver_112       # heeft geen locatie
@@ -635,7 +635,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('comprayon/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
         # nu doorzetten naar RK fase
         self.competitie_sluit_alle_regiocompetities(self.comp_18)
@@ -672,7 +672,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('comprayon/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
         deelnemer.deelname = DEELNAME_JA
         deelnemer.save()
@@ -681,7 +681,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('comprayon/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
         deelnemer.rank = 100
         deelnemer.save()
@@ -690,7 +690,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('comprayon/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
         deelnemer.bij_vereniging = None
         deelnemer.rank = 1
@@ -705,7 +705,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('comprayon/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_lijst_bestand % self.deelcomp_rayon1_18.pk
         with self.assert_max_queries(20):
@@ -809,7 +809,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/wijzig-status-rk-deelnemer.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('comprayon/wijzig-status-rk-deelnemer.dtl', 'plein/site_layout.dtl'))
 
         # geen vereniging
         deelnemer.bij_vereniging = None
@@ -938,7 +938,7 @@ class TestCompetitiePlanningRayon(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/wijzig-limieten-rk.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('comprayon/wijzig-limieten-rk.dtl', 'plein/site_layout.dtl'))
 
         sel = 'sel_%s' % self.klasse_r.pk
 

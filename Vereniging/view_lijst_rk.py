@@ -110,7 +110,7 @@ class VerenigingLijstRkSelectieView(UserPassesTestMixin, TemplateView):
                 behoud_groepje = True
                 deelnemer.mijn_vereniging = True
                 if kan_wijzigen:
-                    deelnemer.url_wijzig = reverse('Competitie:wijzig-status-rk-deelnemer',
+                    deelnemer.url_wijzig = reverse('CompRayon:wijzig-status-rk-deelnemer',
                                                    kwargs={'deelnemer_pk': deelnemer.pk})
 
             if deelnemer.rank > limiet:

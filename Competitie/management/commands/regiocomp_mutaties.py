@@ -709,7 +709,7 @@ class Command(BaseCommand):
 
         if self.taken.hoogste_mutatie:
             # gebruik deze informatie om te filteren
-            self.stdout.write('[INFO] vorige hoogste KampioenschapMutatie pk is %s' % self.taken.hoogste_mutatie.pk)
+            self.stdout.write('[INFO] vorige hoogste CompetitieMutatie pk is %s' % self.taken.hoogste_mutatie.pk)
             qset = (CompetitieMutatie
                     .objects
                     .filter(pk__gt=self.taken.hoogste_mutatie.pk))

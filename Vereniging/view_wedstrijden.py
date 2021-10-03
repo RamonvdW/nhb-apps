@@ -83,7 +83,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             mag_wijzigen = self.uitslag_invoeren and not (wedstrijd.uitslag and wedstrijd.uitslag.is_bevroren)
             if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and mag_wijzigen:
                 # mag uitslag wijzigen
-                url = reverse('Competitie:wedstrijd-uitslag-invoeren',
+                url = reverse('CompScores:wedstrijd-uitslag-invoeren',
                               kwargs={'wedstrijd_pk': wedstrijd.pk})
                 if heeft_uitslag:
                     wedstrijd.url_uitslag_aanpassen = url
@@ -92,7 +92,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
                 wedstrijd.toon_geen_uitslag = False
             else:
                 if heeft_uitslag:
-                    wedstrijd.url_uitslag_bekijken = reverse('Competitie:wedstrijd-bekijk-uitslag',
+                    wedstrijd.url_uitslag_bekijken = reverse('CompScores:wedstrijd-bekijk-uitslag',
                                                              kwargs={'wedstrijd_pk': wedstrijd.pk})
                     wedstrijd.toon_geen_uitslag = False
 

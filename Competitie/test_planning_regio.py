@@ -30,7 +30,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
     url_planning_bond = '/bondscompetities/planning/bk/%s/'  # deelcomp_pk
-    url_planning_rayon = '/bondscompetities/planning/rk/%s/'  # deelcomp_pk
+    url_planning_rayon = '/bondscompetities/rk/planning/%s/'  # deelcomp_pk
     url_planning_regio = '/bondscompetities/planning/regio/%s/'  # deelcomp_pk
     url_planning_regio_cluster = '/bondscompetities/planning/regio/%s/cluster/%s/'  # deelcomp_pk, cluster_pk
     url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'  # ronde_pk
@@ -268,7 +268,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-rayon.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('comprayon/planning-rayon.dtl', 'plein/site_layout.dtl'))
         # TODO: check geen knoppen 'wedstrijd toevoegen' of 'aanpassen wedstrijd'
 
         with self.assert_max_queries(20):
@@ -297,7 +297,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-rayon.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('comprayon/planning-rayon.dtl', 'plein/site_layout.dtl'))
         # TODO: check geen knoppen 'wedstrijd toevoegen' of 'aanpassen wedstrijd'
 
         # controleer dat de URL naar de bondscompetitie er in zit
@@ -314,7 +314,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # controleer dat de URL naar de rayoncompetitie er in zit
         urls = self.extract_all_urls(resp, skip_menu=True)
-        urls2 = [url for url in urls if url.startswith('/bondscompetities/planning/rk/')]
+        urls2 = [url for url in urls if url.startswith('/bondscompetities/rk/planning/')]
         if len(urls2) != 1:     # pragma: no cover
             self.fail(msg='Link naar rayoncompetitie planning ontbreekt. Urls on page: %s' % repr(urls))
 
@@ -345,7 +345,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/planning-rayon.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('comprayon/planning-rayon.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
@@ -355,7 +355,7 @@ class TestCompetitiePlanningRegio(E2EHelpers, TestCase):
 
         # controleer dat de URL naar de rayoncompetitie er in zit
         urls = self.extract_all_urls(resp, skip_menu=True)
-        urls2 = [url for url in urls if url.startswith('/bondscompetities/planning/rk/')]
+        urls2 = [url for url in urls if url.startswith('/bondscompetities/rk/planning/')]
         if len(urls2) != 1:     # pragma: no cover
             self.fail(msg='Link naar rayoncompetitie planning ontbreekt. Urls on page: %s' % repr(urls))
 

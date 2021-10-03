@@ -9,20 +9,20 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Competitie.models import LAAG_RK, AG_NUL, Competitie, CompetitieKlasse, DeelCompetitie, KampioenschapTeam
+from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from NhbStructuur.models import NhbRayon
-from .models import LAAG_RK, AG_NUL, Competitie, CompetitieKlasse, DeelCompetitie, KampioenschapTeam
-from .menu import menu_dynamics_competitie
 
 
-TEMPLATE_COMPETITIE_RKO_TEAMS = 'competitie/rko-teams.dtl'
+TEMPLATE_COMPRAYON_RKO_TEAMS = 'comprayon/rko-teams.dtl'
 
 
 class RayonTeamsView(TemplateView):
 
     """ Met deze view kan een lijst van teams getoond worden, zowel landelijk, rayon als regio """
 
-    template_name = TEMPLATE_COMPETITIE_RKO_TEAMS
+    template_name = TEMPLATE_COMPRAYON_RKO_TEAMS
     subset_filter = False
 
     def __init__(self, **kwargs):
@@ -75,7 +75,7 @@ class RayonTeamsView(TemplateView):
             context['filters'] = filters = list()
             alle_filter = {'label': 'Alles'}
             if subset != 'alle':
-                alle_filter['url'] = reverse('Competitie:rayon-teams-alle',
+                alle_filter['url'] = reverse('CompRayon:rayon-teams-alle',
                                              kwargs={'comp_pk': comp.pk,
                                                      'subset': 'alle'})
             filters.append(alle_filter)
@@ -83,7 +83,7 @@ class RayonTeamsView(TemplateView):
             for rayon in NhbRayon.objects.all():
                 rayon.label = 'Rayon %s' % rayon.rayon_nr
                 if str(rayon.rayon_nr) != subset:
-                    rayon.url = reverse('Competitie:rayon-teams-alle',
+                    rayon.url = reverse('CompRayon:rayon-teams-alle',
                                         kwargs={'comp_pk': comp.pk, 'subset': rayon.rayon_nr})
                 filters.append(rayon)
             # for
