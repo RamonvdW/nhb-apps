@@ -81,7 +81,7 @@ class Command(BaseCommand):
             if self._do_save:
                 sporters.delete()
 
-    def _verwijder_competitie_wedstrijd(self):
+    def _verwijder_orphan_wedstrijd_plan(self):
         # zoek alle plannen die niet meer aan een deelcompetitie hangen
         plans = (CompetitieWedstrijdenPlan
                  .objects
@@ -164,12 +164,13 @@ class Command(BaseCommand):
         self._verwijder_score_scorehist_met_notitie(
                     "Uitslag competitie seizoen 2019/2020")
 
-        self._verwijder_score_scorehist_met_notitie(
-                    "Uitslag competitie seizoen 2020/2021")
+        # behouden, want dit is de basis voor seizoen 2021/2022!
+        # self._verwijder_score_scorehist_met_notitie(
+        #             "Uitslag competitie seizoen 2020/2021")
 
         self._verwijder_lege_sporterboog()
 
-        self._verwijder_competitie_wedstrijd()
+        self._verwijder_orphan_wedstrijd_plan()
 
         self._verwijder_orphan_wedstrijden()
 
