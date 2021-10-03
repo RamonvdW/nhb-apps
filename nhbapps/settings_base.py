@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2021-10-02'
+SITE_VERSIE = '2021-10-03'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'Overig.apps.OverigConfig',
     'Plein.apps.PleinConfig',
     'Records.apps.RecordsConfig',
-    'Schutter.apps.SchutterConfig',         # verwijder na volgende squash
     'Score.apps.ScoreConfig',
     'Sporter.apps.SporterConfig',
     'Taken.apps.TakenConfig',

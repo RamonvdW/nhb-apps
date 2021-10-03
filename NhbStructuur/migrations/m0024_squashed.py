@@ -5,16 +5,14 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-from django.conf import settings
 import django.db.models.deletion
-import NhbStructuur.models
 
 
 RAYONS = (
-    (1, "Rayon 1", "Noord Nederland"),
-    (2, "Rayon 2", "Zuid-West Nederland"),
-    (3, "Rayon 3", "Oost Brabant en Noord Limburg"),
-    (4, "Rayon 4", "Zuid- en Midden-Limburg")
+    (1, "Rayon 1"),     # Noord Nederland
+    (2, "Rayon 2"),     # Zuid-West Nederland
+    (3, "Rayon 3"),     # Oost Brabant en Noord Limburg
+    (4, "Rayon 4"),     # Zuid- en Midden-Limburg
 )
 
 
@@ -25,11 +23,10 @@ def init_rayons(apps, _):
     rayon_klas = apps.get_model('NhbStructuur', 'NhbRayon')
 
     bulk = list()
-    for nummer, naam, geo in RAYONS:
+    for nummer, naam in RAYONS:
         rayon = rayon_klas(
                     rayon_nr=nummer,    # ook PK
-                    naam=naam,
-                    geografisch_gebied=geo)
+                    naam=naam)
         bulk.append(rayon)
     # for
 
@@ -119,9 +116,7 @@ class Migration(migrations.Migration):
     initial = True
 
     # volgorde afdwingen
-    dependencies = [
-        ('Account', 'm0019_squashed'),
-    ]
+    dependencies = []
 
     # migratie functies
     operations = [
@@ -130,7 +125,6 @@ class Migration(migrations.Migration):
             fields=[
                 ('rayon_nr', models.PositiveIntegerField(primary_key=True, serialize=False)),
                 ('naam', models.CharField(max_length=20)),
-                ('geografisch_gebied', models.CharField(max_length=50)),
             ],
             options={
                 'verbose_name': 'Nhb rayon',
@@ -166,54 +160,29 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='NhbLid',
-            fields=[
-                ('nhb_nr', models.PositiveIntegerField(primary_key=True, serialize=False)),
-                ('voornaam', models.CharField(max_length=100)),
-                ('achternaam', models.CharField(max_length=100)),
-                ('email', models.CharField(max_length=150)),
-                ('geboorte_datum', models.DateField(validators=[NhbStructuur.models.validate_geboorte_datum])),
-                ('geslacht', models.CharField(choices=[('M', 'Man'), ('V', 'Vrouw')], max_length=1)),
-                ('para_classificatie', models.CharField(blank=True, max_length=30)),
-                ('is_actief_lid', models.BooleanField(default=True)),
-                ('sinds_datum', models.DateField(validators=[NhbStructuur.models.validate_sinds_datum])),
-                ('account', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('lid_tot_einde_jaar', models.PositiveSmallIntegerField(default=0)),
-                ('unaccented_naam', models.CharField(blank=True, default='', max_length=200)),
-            ],
-            options={
-                'verbose_name': 'Nhb lid',
-                'verbose_name_plural': 'Nhb leden',
-            },
-        ),
-        migrations.CreateModel(
             name='NhbVereniging',
             fields=[
                 ('ver_nr', models.PositiveIntegerField(primary_key=True, serialize=False)),
                 ('naam', models.CharField(max_length=200)),
                 ('regio', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='NhbStructuur.nhbregio')),
                 ('plaats', models.CharField(blank=True, max_length=100)),
-                ('contact_email', models.CharField(blank=True, max_length=150)),
                 ('clusters', models.ManyToManyField(blank=True, to='NhbStructuur.NhbCluster')),
                 ('geen_wedstrijden', models.BooleanField(default=False)),
-                ('secretaris_lid', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='NhbStructuur.nhblid')),
             ],
             options={
                 'verbose_name': 'Nhb vereniging',
                 'verbose_name_plural': 'Nhb verenigingen',
             },
         ),
-        # losse AddField ivm circulaire dependency
-        migrations.AddField(
-            model_name='nhblid',
-            name='bij_vereniging',
-            field=models.ForeignKey(blank=True, null=True,
-                                    on_delete=django.db.models.deletion.PROTECT,
-                                    to='NhbStructuur.NhbVereniging'),
+        migrations.RunPython(
+            code=init_rayons,
         ),
-        migrations.RunPython(init_rayons),
-        migrations.RunPython(init_regios),
-        migrations.RunPython(init_clusters),
+        migrations.RunPython(
+            code=init_regios,
+        ),
+        migrations.RunPython(
+            code=init_clusters,
+        ),
     ]
 
 # end of file

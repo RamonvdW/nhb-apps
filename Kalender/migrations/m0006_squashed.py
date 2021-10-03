@@ -18,9 +18,9 @@ class Migration(migrations.Migration):
     # volgorde afdwingen
     dependencies = [
         ('BasisTypen', 'm0020_squashed'),
-        ('NhbStructuur', 'm0019_squashed'),
-        ('Schutter', 'm0010_squashed'),
-        ('Wedstrijden', 'm0018_squashed'),
+        ('NhbStructuur', 'm0024_squashed'),
+        ('Sporter', 'm0003_squashed'),
+        ('Wedstrijden', 'm0020_squashed'),
     ]
 
     # migratie functies
@@ -33,8 +33,10 @@ class Migration(migrations.Migration):
                 ('bestandsnaam', models.CharField(blank=True, default='', max_length=100)),
                 ('toegevoegd_op', models.DateTimeField(auto_now=True)),
             ],
-            options={'verbose_name': 'Kalender wedstrijd deeluitslag',
-                     'verbose_name_plural': 'Kalender wedstrijd deeluitslagen'},
+            options={
+                'verbose_name': 'Kalender wedstrijd deeluitslag',
+                'verbose_name_plural': 'Kalender wedstrijd deeluitslagen',
+            },
         ),
         migrations.CreateModel(
             name='KalenderWedstrijdSessie',
@@ -44,11 +46,13 @@ class Migration(migrations.Migration):
                 ('tijd_begin', models.TimeField()),
                 ('tijd_einde', models.TimeField()),
                 ('max_sporters', models.PositiveSmallIntegerField(default=1)),
-                ('aanmeldingen', models.ManyToManyField(blank=True, to='Schutter.SchutterBoog')),
                 ('wedstrijdklassen', models.ManyToManyField(blank=True, to='BasisTypen.KalenderWedstrijdklasse')),
+                ('sporters', models.ManyToManyField(blank=True, to='Sporter.SporterBoog')),
             ],
-            options={'verbose_name': 'Kalender wedstrijd sessie',
-                     'verbose_name_plural': 'Kalender wedstrijd sessies'},
+            options={
+                'verbose_name': 'Kalender wedstrijd sessie',
+                'verbose_name_plural': 'Kalender wedstrijd sessies',
+            },
         ),
         migrations.CreateModel(
             name='KalenderWedstrijd',
@@ -80,8 +84,10 @@ class Migration(migrations.Migration):
                 ('begrenzing', models.CharField(choices=[('L', 'Landelijk'), ('Y', 'Rayon'), ('G', 'Regio'), ('V', 'Vereniging')], default='L', max_length=1)),
                 ('bijzonderheden', models.TextField(blank=True, default='', max_length=1000)),
             ],
-            options={'verbose_name': 'Kalender wedstrijd',
-                     'verbose_name_plural': 'Kalender wedstrijden'},
+            options={
+                'verbose_name': 'Kalender wedstrijd',
+                'verbose_name_plural': 'Kalender wedstrijden',
+            },
         ),
     ]
 

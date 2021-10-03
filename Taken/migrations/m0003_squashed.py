@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 
@@ -18,8 +17,8 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('Competitie', 'm0044_squashed'),
+        ('Account', 'm0019_squashed'),
+        ('Competitie', 'm0055_squashed'),
     ]
 
     # migratie functies
@@ -33,9 +32,9 @@ class Migration(migrations.Migration):
                 ('beschrijving', models.TextField(max_length=1000)),
                 ('handleiding_pagina', models.CharField(max_length=75, blank=True)),
                 ('log', models.TextField(max_length=50000, blank=True)),
-                ('aangemaakt_door', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='account_taken_aangemaakt', to=settings.AUTH_USER_MODEL)),
+                ('aangemaakt_door', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='account_taken_aangemaakt', to='Account.Account')),
                 ('deelcompetitie', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='Competitie.DeelCompetitie')),
-                ('toegekend_aan', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='account_taken_toegekend', to=settings.AUTH_USER_MODEL)),
+                ('toegekend_aan', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='account_taken_toegekend', to='Account.Account')),
             ],
             options={
                 'verbose_name': 'Taak',
