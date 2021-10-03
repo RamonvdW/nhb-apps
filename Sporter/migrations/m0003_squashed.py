@@ -4,10 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-import Sporter.models
+from Sporter.models import validate_geboorte_datum, validate_sinds_datum
 
 
 class Migration(migrations.Migration):
@@ -21,7 +20,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('Account', 'm0019_squashed'),
         ('BasisTypen', 'm0020_squashed'),
-        ('NhbStructuur', 'm0019_squashed'),
+        ('NhbStructuur', 'm0024_squashed'),
     ]
 
     # migratie functies
@@ -34,13 +33,13 @@ class Migration(migrations.Migration):
                 ('achternaam', models.CharField(max_length=100)),
                 ('unaccented_naam', models.CharField(blank=True, default='', max_length=200)),
                 ('email', models.CharField(max_length=150)),
-                ('geboorte_datum', models.DateField(validators=[Sporter.models.validate_geboorte_datum])),
+                ('geboorte_datum', models.DateField(validators=[validate_geboorte_datum])),
                 ('geslacht', models.CharField(choices=[('M', 'Man'), ('V', 'Vrouw')], max_length=1)),
                 ('para_classificatie', models.CharField(blank=True, max_length=30)),
                 ('is_actief_lid', models.BooleanField(default=True)),
-                ('sinds_datum', models.DateField(validators=[Sporter.models.validate_sinds_datum])),
+                ('sinds_datum', models.DateField(validators=[validate_sinds_datum])),
                 ('lid_tot_einde_jaar', models.PositiveSmallIntegerField(default=0)),
-                ('account', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
+                ('account', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='Account.Account')),
                 ('bij_vereniging', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='NhbStructuur.nhbvereniging')),
             ],
             options={
@@ -86,10 +85,8 @@ class Migration(migrations.Migration):
             name='Secretaris',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('sporter',
-                 models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='Sporter.sporter')),
-                ('vereniging',
-                 models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='NhbStructuur.nhbvereniging')),
+                ('sporter', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='Sporter.sporter')),
+                ('vereniging', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='NhbStructuur.nhbvereniging')),
             ],
             options={
                 'verbose_name': 'Secretaris Vereniging',

@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
 
@@ -63,7 +62,7 @@ class Migration(migrations.Migration):
     # volgorde afdwingen
     dependencies = [
         ('Account', 'm0019_squashed'),
-        ('NhbStructuur', 'm0019_squashed'),
+        ('NhbStructuur', 'm0024_squashed'),
     ]
 
     # migratie functies
@@ -75,9 +74,9 @@ class Migration(migrations.Migration):
                 ('beschrijving', models.CharField(max_length=50)),
                 ('rol', models.CharField(max_length=5)),
                 ('comp_type', models.CharField(blank=True, default='', max_length=2)),
-                ('nhb_rayon', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='NhbStructuur.NhbRayon')),
-                ('nhb_regio', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='NhbStructuur.NhbRegio')),
-                ('nhb_ver', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='NhbStructuur.NhbVereniging')),
+                ('nhb_rayon', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='NhbStructuur.nhbrayon')),
+                ('nhb_regio', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='NhbStructuur.nhbregio')),
+                ('nhb_ver', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='NhbStructuur.nhbvereniging')),
                 ('accounts', models.ManyToManyField(blank=True, to='Account.Account')),
                 ('bevestigde_email', models.EmailField(blank=True, max_length=254)),
                 ('nieuwe_email', models.EmailField(blank=True, max_length=254)),
@@ -88,8 +87,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('acceptatie_datum', models.DateTimeField()),
-                ('account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='vhpg',
-                                              to=settings.AUTH_USER_MODEL)),
+                ('account', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='vhpg', to='Account.Account')),
             ],
             options={
                 'verbose_name': 'Verklaring Hanteren Persoonsgegevens',

@@ -481,15 +481,13 @@ def init_kalenderwedstrijdklassen(apps, _):
 
 class Migration(migrations.Migration):
 
-    """ Migratie class voor dit deel van de applicatie """
+    replaces = [('BasisTypen', 'm0020_squashed'), ('BasisTypen', 'm0021_is_aspirant__blazoenen')]
 
-    # dit is de eerste
     initial = True
 
-    # volgorde afdwingen
-    dependencies = []
+    dependencies = [
+    ]
 
-    # migratie functies
     operations = [
         migrations.CreateModel(
             name='BoogType',
@@ -547,6 +545,25 @@ class Migration(migrations.Migration):
                 ('is_onbekend', models.BooleanField(default=False)),
                 ('boogtype', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='BasisTypen.boogtype')),
                 ('leeftijdsklassen', models.ManyToManyField(to='BasisTypen.LeeftijdsKlasse')),
+                ('blazoen1_18m_regio', models.CharField(
+                        choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')],
+                        default='40', max_length=2)),
+                ('blazoen1_25m_regio', models.CharField(
+                        choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')],
+                        default='60', max_length=2)),
+                ('blazoen2_18m_regio', models.CharField(
+                        choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')],
+                        default='40', max_length=2)),
+                ('blazoen2_25m_regio', models.CharField(
+                        choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')],
+                        default='60', max_length=2)),
+                ('blazoen_18m_rk_bk', models.CharField(
+                        choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')],
+                        default='40', max_length=2)),
+                ('blazoen_25m_rk_bk', models.CharField(
+                        choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')],
+                        default='60', max_length=2)),
+                ('is_aspirant_klasse', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'Indiv Wedstrijdklasse',
@@ -561,6 +578,27 @@ class Migration(migrations.Migration):
                 ('beschrijving', models.CharField(max_length=80)),
                 ('volgorde', models.PositiveIntegerField()),
                 ('team_type', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='BasisTypen.teamtype')),
+                ('blazoen1_25m_regio', models.CharField(
+                        choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')],
+                        default='60', max_length=2)),
+                ('blazoen2_25m_regio', models.CharField(
+                        choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')],
+                        default='60', max_length=2)),
+                ('blazoen1_18m_regio', models.CharField(
+                        choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')],
+                        default='40', max_length=2)),
+                ('blazoen2_18m_regio', models.CharField(
+                        choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')],
+                        default='40', max_length=2)),
+                ('blazoen1_18m_rk_bk', models.CharField(
+                        choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')],
+                        default='40', max_length=2)),
+                ('blazoen2_18m_rk_bk', models.CharField(
+                        choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')],
+                        default='40', max_length=2)),
+                ('blazoen_25m_rk_bk', models.CharField(
+                        choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')],
+                        default='60', max_length=2)),
             ],
             options={
                 'verbose_name': 'Team Wedstrijdklasse',

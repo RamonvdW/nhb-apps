@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -17,20 +17,19 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('NhbStructuur', 'm0019_squashed'),
-        ('Score', 'm0009_squashed'),
         ('BasisTypen', 'm0020_squashed'),
+        ('NhbStructuur', 'm0024_squashed'),
+        ('Score', 'm0011_squashed'),
     ]
 
+    # migratie functies
     operations = [
         migrations.CreateModel(
             name='WedstrijdLocatie',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('zichtbaar', models.BooleanField(default=True)),
-                ('baan_type', models.CharField(
-                    choices=[('X', 'Onbekend'), ('O', 'Volledig overdekte binnenbaan'), ('H', 'Binnen-buiten schieten'),
-                             ('B', 'Buitenbaan'), ('E', 'Extern')], default='X', max_length=1)),
+                ('baan_type', models.CharField(choices=[('X', 'Onbekend'), ('O', 'Volledig overdekte binnenbaan'), ('H', 'Binnen-buiten schieten'), ('B', 'Buitenbaan'), ('E', 'Extern')], default='X', max_length=1)),
                 ('verenigingen', models.ManyToManyField(blank=True, to='NhbStructuur.NhbVereniging')),
                 ('banen_18m', models.PositiveSmallIntegerField(default=0)),
                 ('banen_25m', models.PositiveSmallIntegerField(default=0)),
@@ -49,6 +48,8 @@ class Migration(migrations.Migration):
                 ('discipline_run', models.BooleanField(default=False)),
                 ('discipline_veld', models.BooleanField(default=False)),
                 ('naam', models.CharField(blank=True, max_length=50)),
+                ('max_sporters_18m', models.PositiveSmallIntegerField(default=0)),
+                ('max_sporters_25m', models.PositiveSmallIntegerField(default=0)),
             ],
             options={
                 'verbose_name': 'Wedstrijd locatie',
@@ -80,13 +81,10 @@ class Migration(migrations.Migration):
                 ('tijd_begin_wedstrijd', models.TimeField()),
                 ('tijd_einde_wedstrijd', models.TimeField()),
                 ('indiv_klassen', models.ManyToManyField(blank=True, to='BasisTypen.IndivWedstrijdklasse')),
-                ('locatie', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT,
-                                              to='Wedstrijden.wedstrijdlocatie')),
+                ('locatie', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='Wedstrijden.wedstrijdlocatie')),
                 ('team_klassen', models.ManyToManyField(blank=True, to='BasisTypen.TeamWedstrijdklasse')),
-                ('uitslag', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT,
-                                              to='Wedstrijden.competitiewedstrijduitslag')),
-                ('vereniging', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT,
-                                                 to='NhbStructuur.nhbvereniging')),
+                ('uitslag', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='Wedstrijden.competitiewedstrijduitslag')),
+                ('vereniging', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='NhbStructuur.nhbvereniging')),
             ],
             options={
                 'verbose_name': 'Competitie Wedstrijd',

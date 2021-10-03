@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('NhbStructuur', 'm0019_squashed'),
+        ('Sporter', 'm0003_squashed'),
     ]
 
     # migratie functies
@@ -41,10 +41,10 @@ class Migration(migrations.Migration):
                 ('score_notitie', models.CharField(blank=True, max_length=30)),
                 ('is_european_record', models.BooleanField(default=False)),
                 ('is_world_record', models.BooleanField(default=False)),
-                ('nhb_lid', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='NhbStructuur.nhblid')),
                 ('max_score', models.PositiveIntegerField(default=0)),
                 ('x_count', models.PositiveIntegerField(default=0)),
                 ('verbeterbaar', models.BooleanField(default=True)),
+                ('sporter', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='Sporter.sporter')),
             ],
             options={
                 'verbose_name': 'Individueel record',
