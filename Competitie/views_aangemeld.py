@@ -941,7 +941,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
 
                 blazoen = blazoenen[0]
                 if blazoenen[0] != blazoenen[1]:
-                    # meerder mogelijkheden
+                    # meerdere mogelijkheden
                     if BLAZOEN_DT in blazoenen_dict:
                         if deelnemer.sporterboog.sporter.lid_nr in voorkeur_eigen_blazoen:
                             blazoen = BLAZOEN_WENS_DT

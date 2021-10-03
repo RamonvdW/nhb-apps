@@ -235,6 +235,7 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
 
                 # haal de schutter voorkeuren op, zodat de schutterboog records aangemaakt worden
                 url_voorkeuren = '/sporter/voorkeuren/%s/' % lid_nr
+                url_success = '/vereniging/leden-voorkeuren/'
                 with self.assert_max_queries(20):
                     resp = self.client.get(url_voorkeuren)
                 self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -266,7 +267,7 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
                                                                  'schiet_R': 'on'})
                     post_params['lid_%s_boogtype_%s' % (lid_nr, recurve_boog_pk)] = 'on'
 
-                self.assert_is_redirect_not_plein(resp)         # check for success
+                self.assert_is_redirect(resp, url_success)  # redirect = succes
 
             # for
 
