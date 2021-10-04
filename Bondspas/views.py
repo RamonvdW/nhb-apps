@@ -62,12 +62,13 @@ class ToonBondspasView(UserPassesTestMixin, View):
                 # we hebben een probleem: pas hoort er wel te zijn, maar is niet op te halen?
                 my_logger.error('Kan bondspas niet openen: %s' % str(exc))
 
-            context['has_error'] = True
-
             # laat de pas opnieuw ophalen
             bondspas.status = BONDSPAS_STATUS_OPHALEN
             bondspas.aantal_keer_bekeken -= 1
             bondspas.save(update_fields=['aantal_keer_bekeken', 'status'])
+
+            # ping het achtergrondproces
+            bondspas_downloader_ping.ping()
 
         elif bondspas.status in (BONDSPAS_STATUS_NIEUW, BONDSPAS_STATUS_VERWIJDERD):
             # laat de pas ophalen

@@ -180,7 +180,6 @@ class TestBondspas(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bondspas/bondspas-ophalen.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Er is een onverwacht probleem opgetreden')
         bondspas = Bondspas.objects.get(lid_nr=self.lid_nr)
         self.assertEqual(bondspas.status, 'O')      # Ophalen
         self.assertEqual(bondspas.aantal_keer_bekeken, 0)
