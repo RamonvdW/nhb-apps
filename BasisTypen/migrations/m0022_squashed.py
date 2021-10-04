@@ -99,6 +99,103 @@ WKL_INDIV = (
 )
 
 
+KALENDERWEDSTRIJDENKLASSEN = (
+    (100, 'R', 'VH', 'Recurve veteraan mannen'),
+    (101, 'R', 'VV', 'Recurve veteraan vrouwen'),
+
+    (110, 'R', 'MH', 'Recurve master mannen'),
+    (111, 'R', 'MV', 'Recurve master vrouwen'),
+
+    (120, 'R', 'SH', 'Recurve senior mannen'),
+    (121, 'R', 'SV', 'Recurve senior vrouwen'),
+
+    (130, 'R', 'JH', 'Recurve junior mannen'),
+    (131, 'R', 'JV', 'Recurve junior vrouwen'),
+
+    (140, 'R', 'CH', 'Recurve cadet jongens'),
+    (141, 'R', 'CV', 'Recurve cadet meisjes'),
+
+    (150, 'R', 'AH2', 'Recurve aspirant jongens'),
+    (151, 'R', 'AV2', 'Recurve aspirant meisjes'),
+
+
+    (200, 'C', 'VH', 'Compound veteraan mannen'),
+    (201, 'C', 'VV', 'Compound veteraan vrouwen'),
+
+    (210, 'C', 'MH', 'Compound master mannen'),
+    (211, 'C', 'MV', 'Compound master vrouwen'),
+
+    (220, 'C', 'SH', 'Compound senior mannen'),
+    (221, 'C', 'SV', 'Compound senior vrouwen'),
+
+    (230, 'C', 'JH', 'Compound junior mannen'),
+    (231, 'C', 'JV', 'Compound junior vrouwen'),
+
+    (240, 'C', 'CH', 'Compound cadet jongens'),
+    (241, 'C', 'CV', 'Compound cadet meisjes'),
+
+    (250, 'C', 'AH2', 'Compound aspirant jongens'),
+    (251, 'C', 'AV2', 'Compound aspirant meisjes'),
+
+
+    (300, 'BB', 'VH', 'Barebow veteraan mannen'),
+    (301, 'BB', 'VV', 'Barebow veteraan vrouwen'),
+
+    (310, 'BB', 'MH', 'Barebow master mannen'),
+    (311, 'BB', 'MV', 'Barebow master vrouwen'),
+
+    (320, 'BB', 'SH', 'Barebow senior mannen'),
+    (321, 'BB', 'SV', 'Barebow senior vrouwen'),
+
+    (330, 'BB', 'JH', 'Barebow junior mannen'),
+    (331, 'BB', 'JV', 'Barebow junior vrouwen'),
+
+    (340, 'BB', 'CH', 'Barebow cadet jongens'),
+    (341, 'BB', 'CV', 'Barebow cadet meisjes'),
+
+    (350, 'BB', 'AH2', 'Barebow aspirant jongens'),
+    (351, 'BB', 'AV2', 'Barebow aspirant meisjes'),
+
+
+    (400, 'IB', 'VH', 'Instinctive Bow veteraan mannen'),
+    (401, 'IB', 'VV', 'Instinctive Bow veteraan vrouwen'),
+
+    (410, 'IB', 'MH', 'Instinctive Bow master mannen'),
+    (411, 'IB', 'MV', 'Instinctive Bow master vrouwen'),
+
+    (420, 'IB', 'SH', 'Instinctive Bow senior mannen'),
+    (421, 'IB', 'SV', 'Instinctive Bow senior vrouwen'),
+
+    (430, 'IB', 'JH', 'Instinctive Bow junior mannen'),
+    (431, 'IB', 'JV', 'Instinctive Bow junior vrouwen'),
+
+    (440, 'IB', 'CH', 'Instinctive Bow cadet jongens'),
+    (441, 'IB', 'CV', 'Instinctive Bow cadet meisjes'),
+
+    (450, 'IB', 'AH2', 'Instinctive Bow aspirant jongens'),
+    (451, 'IB', 'AV2', 'Instinctive Bow aspirant meisjes'),
+
+
+    (500, 'LB', 'VH', 'Longbow veteraan mannen'),
+    (501, 'LB', 'VV', 'Longbow veteraan vrouwen'),
+
+    (510, 'LB', 'MH', 'Longbow master mannen'),
+    (511, 'LB', 'MV', 'Longbow master vrouwen'),
+
+    (520, 'LB', 'SH', 'Longbow senior mannen'),
+    (521, 'LB', 'SV', 'Longbow senior vrouwen'),
+
+    (530, 'LB', 'JH', 'Longbow junior mannen'),
+    (531, 'LB', 'JV', 'Longbow junior vrouwen'),
+
+    (540, 'LB', 'CH', 'Longbow cadet jongens'),
+    (541, 'LB', 'CV', 'Longbow cadet meisjes'),
+
+    (550, 'LB', 'AH2', 'Longbow aspirant jongens'),
+    (551, 'LB', 'AV2', 'Longbow aspirant meisjes'),
+)
+
+
 def init_boogtype(apps, _):
     """ Maak de boog typen aan """
 
@@ -114,6 +211,7 @@ def init_boogtype(apps, _):
             boogtype_klas(afkorting='IB', volgorde='M', beschrijving='Instinctive bow'),
             boogtype_klas(afkorting='LB', volgorde='S', beschrijving='Longbow')]
     boogtype_klas.objects.bulk_create(bulk)
+
 
 def init_leeftijdsklasse(apps, _):
     """ Maak de leeftijdsklassen aan """
@@ -293,24 +391,31 @@ def init_wedstrijdklassen_individueel(apps, _):
     boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
 
     # maak een look-up table voor de boog afkortingen
-    afkorting2boogtype = dict()
-    for obj in boogtype_klas.objects.all():
-        afkorting2boogtype[obj.afkorting] = obj
+    boog_afkorting2boogtype = dict()
+    for lkl_obj in boogtype_klas.objects.all():
+        boog_afkorting2boogtype[lkl_obj.afkorting] = lkl_obj
     # for
 
-    # TODO: add bulk-create
+    lkl_afkorting2leeftijdsklasse = dict()
+    for lkl in leeftijdsklasse_klas.objects.all():
+        lkl_afkorting2leeftijdsklasse[lkl.afkorting] = lkl
+    # for
+
+    volgorde2lkl = dict()
+
+    bulk = list()
     for tup in WKL_INDIV:
         if len(tup) == 6:
-            volgorde, beschrijving, boog_afkorting, leeftijdsklassen, blazoenen_18m, blazoenen_25m = tup
+            volgorde, beschrijving, boog_afkorting, leeftijdsklassen_afkortingen, blazoenen_18m, blazoenen_25m = tup
             niet_voor_rk_bk = False
         else:
-            volgorde, beschrijving, boog_afkorting, leeftijdsklassen, blazoenen_18m, blazoenen_25m, niet_voor_rk_bk = tup
+            volgorde, beschrijving, boog_afkorting, leeftijdsklassen_afkortingen, blazoenen_18m, blazoenen_25m, niet_voor_rk_bk = tup
 
         is_onbekend = 'onbekend' in beschrijving
         if is_onbekend:
             niet_voor_rk_bk = True
 
-        boogtype_obj = afkorting2boogtype[boog_afkorting]
+        boogtype_obj = boog_afkorting2boogtype[boog_afkorting]
 
         # blazoen is 1 of 3 lang
         blazoenen_18m = list(blazoenen_18m)
@@ -338,18 +443,26 @@ def init_wedstrijdklassen_individueel(apps, _):
 
         # koppel de gewenste leeftijdsklassen aan de wedstrijdklasse
         # en vlag de aspirant klassen
-        lkl = list()
-        for obj in leeftijdsklasse_klas.objects.all():
-            if obj.afkorting in leeftijdsklassen:
-                lkl.append(obj)
+        volgorde2lkl[volgorde] = lkl_lijst = list()
+        for lkl_afkorting in leeftijdsklassen_afkortingen:
+            lkl = lkl_afkorting2leeftijdsklasse[lkl_afkorting]
 
-                # vlag aspirant klassen
-                if obj.max_wedstrijdleeftijd <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT:
-                    wkl.is_aspirant_klasse = True
+            # vlag aspirant klassen
+            if lkl.max_wedstrijdleeftijd <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT:
+                wkl.is_aspirant_klasse = True
+
+            lkl_lijst.append(lkl)
         # for
 
-        wkl.save()
-        wkl.leeftijdsklassen.set(lkl)
+        bulk.append(wkl)
+    # for
+
+    indiv_wedstrijdklasse_klas.objects.bulk_create(bulk)
+
+    # koppel nu de leeftijdsklassen aan elke wedstrijdklasse
+    for wkl in indiv_wedstrijdklasse_klas.objects.all():
+        lkl_lijst = volgorde2lkl[wkl.volgorde]
+        wkl.leeftijdsklassen.set(lkl_lijst)
     # for
 
 
@@ -361,15 +474,15 @@ def init_wedstrijdklassen_team(apps, _):
     team_wedstrijdklasse_klas = apps.get_model('BasisTypen', 'TeamWedstrijdklasse')
 
     # maak een look-up table voor de team type afkortingen
-    afkorting2teamtype = dict()
+    boog_afkorting2teamtype = dict()
     for team_type in team_type_klas.objects.all():
-        afkorting2teamtype[team_type.afkorting] = team_type
+        boog_afkorting2teamtype[team_type.afkorting] = team_type
     # for
 
     bulk = list()
     for volgorde, beschrijving, teamtype_afkorting, blazoenen_18m, blazoenen_25m in WKL_TEAM:
 
-        teamtype = afkorting2teamtype[teamtype_afkorting]
+        teamtype = boog_afkorting2teamtype[teamtype_afkorting]
 
         # blazoenen_18m is 1 of 2 lang; dezelfde toepassing voor regio en RK/BK
         blazoenen_18m = list(blazoenen_18m)
@@ -398,103 +511,6 @@ def init_wedstrijdklassen_team(apps, _):
     # for
 
     team_wedstrijdklasse_klas.objects.bulk_create(bulk)
-
-
-KALENDERWEDSTRIJDENKLASSEN = (
-    (100, 'R', 'VH', 'Recurve veteraan mannen'),
-    (101, 'R', 'VV', 'Recurve veteraan vrouwen'),
-
-    (110, 'R', 'MH', 'Recurve master mannen'),
-    (111, 'R', 'MV', 'Recurve master vrouwen'),
-
-    (120, 'R', 'SH', 'Recurve senior mannen'),
-    (121, 'R', 'SV', 'Recurve senior vrouwen'),
-
-    (130, 'R', 'JH', 'Recurve junior mannen'),
-    (131, 'R', 'JV', 'Recurve junior vrouwen'),
-
-    (140, 'R', 'CH', 'Recurve cadet jongens'),
-    (141, 'R', 'CV', 'Recurve cadet meisjes'),
-
-    (150, 'R', 'AH2', 'Recurve aspirant jongens'),
-    (151, 'R', 'AV2', 'Recurve aspirant meisjes'),
-
-
-    (200, 'C', 'VH', 'Compound veteraan mannen'),
-    (201, 'C', 'VV', 'Compound veteraan vrouwen'),
-
-    (210, 'C', 'MH', 'Compound master mannen'),
-    (211, 'C', 'MV', 'Compound master vrouwen'),
-
-    (220, 'C', 'SH', 'Compound senior mannen'),
-    (221, 'C', 'SV', 'Compound senior vrouwen'),
-
-    (230, 'C', 'JH', 'Compound junior mannen'),
-    (231, 'C', 'JV', 'Compound junior vrouwen'),
-
-    (240, 'C', 'CH', 'Compound cadet jongens'),
-    (241, 'C', 'CV', 'Compound cadet meisjes'),
-
-    (250, 'C', 'AH2', 'Compound aspirant jongens'),
-    (251, 'C', 'AV2', 'Compound aspirant meisjes'),
-
-
-    (300, 'BB', 'VH', 'Barebow veteraan mannen'),
-    (301, 'BB', 'VV', 'Barebow veteraan vrouwen'),
-
-    (310, 'BB', 'MH', 'Barebow master mannen'),
-    (311, 'BB', 'MV', 'Barebow master vrouwen'),
-
-    (320, 'BB', 'SH', 'Barebow senior mannen'),
-    (321, 'BB', 'SV', 'Barebow senior vrouwen'),
-
-    (330, 'BB', 'JH', 'Barebow junior mannen'),
-    (331, 'BB', 'JV', 'Barebow junior vrouwen'),
-
-    (340, 'BB', 'CH', 'Barebow cadet jongens'),
-    (341, 'BB', 'CV', 'Barebow cadet meisjes'),
-
-    (350, 'BB', 'AH2', 'Barebow aspirant jongens'),
-    (351, 'BB', 'AV2', 'Barebow aspirant meisjes'),
-
-
-    (400, 'IB', 'VH', 'Instinctive Bow veteraan mannen'),
-    (401, 'IB', 'VV', 'Instinctive Bow veteraan vrouwen'),
-
-    (410, 'IB', 'MH', 'Instinctive Bow master mannen'),
-    (411, 'IB', 'MV', 'Instinctive Bow master vrouwen'),
-
-    (420, 'IB', 'SH', 'Instinctive Bow senior mannen'),
-    (421, 'IB', 'SV', 'Instinctive Bow senior vrouwen'),
-
-    (430, 'IB', 'JH', 'Instinctive Bow junior mannen'),
-    (431, 'IB', 'JV', 'Instinctive Bow junior vrouwen'),
-
-    (440, 'IB', 'CH', 'Instinctive Bow cadet jongens'),
-    (441, 'IB', 'CV', 'Instinctive Bow cadet meisjes'),
-
-    (450, 'IB', 'AH2', 'Instinctive Bow aspirant jongens'),
-    (451, 'IB', 'AV2', 'Instinctive Bow aspirant meisjes'),
-
-
-    (500, 'LB', 'VH', 'Longbow veteraan mannen'),
-    (501, 'LB', 'VV', 'Longbow veteraan vrouwen'),
-
-    (510, 'LB', 'MH', 'Longbow master mannen'),
-    (511, 'LB', 'MV', 'Longbow master vrouwen'),
-
-    (520, 'LB', 'SH', 'Longbow senior mannen'),
-    (521, 'LB', 'SV', 'Longbow senior vrouwen'),
-
-    (530, 'LB', 'JH', 'Longbow junior mannen'),
-    (531, 'LB', 'JV', 'Longbow junior vrouwen'),
-
-    (540, 'LB', 'CH', 'Longbow cadet jongens'),
-    (541, 'LB', 'CV', 'Longbow cadet meisjes'),
-
-    (550, 'LB', 'AH2', 'Longbow aspirant jongens'),
-    (551, 'LB', 'AV2', 'Longbow aspirant meisjes'),
-)
 
 
 def init_kalenderwedstrijdklassen(apps, _):
