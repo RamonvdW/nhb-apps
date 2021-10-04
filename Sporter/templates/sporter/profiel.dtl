@@ -149,7 +149,7 @@
 
     <p>&nbsp;</p>
     <h5>Je bondspas</h5>
-    <p>De digital bondspas is je bewijs van lidmaatschap. Op wedstrijden kan gevraagd worden om deze te tonen.</p>
+    <p>De digitale bondspas is je bewijs van lidmaatschap. Op wedstrijden kan gevraagd worden om deze te tonen.</p>
 
     {% include 'plein/card.dtl' with title="Bondspas" text="Bekijk je digitale bondspas." icon="card_membership" url=url_bondspas %}
 
