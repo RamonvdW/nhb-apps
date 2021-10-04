@@ -16,7 +16,7 @@ import datetime
 
 class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
-    """ Tests voor de Verenigingen applicatie, ondersteuning WedstrijdLocatie """
+    """ tests voor de Vereniging applicatie, functie Accommodaties """
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie')
 

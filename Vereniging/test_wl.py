@@ -19,7 +19,7 @@ import datetime
 
 class TestVerenigingWL(E2EHelpers, TestCase):
 
-    """ Tests voor de Vereniging applicatie, functies voor de WL """
+    """ tests voor de Vereniging applicatie, functies voor de WL """
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 

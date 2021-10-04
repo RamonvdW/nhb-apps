@@ -10,7 +10,8 @@ from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestOverigFeedback(E2EHelpers, TestCase):
-    """ unit tests voor de Overig applicatie, module Feedback """
+
+    """ tests voor de Overig applicatie, module Feedback """
 
     url_plein = '/plein/'
     url_feedback = '/overig/feedback/%s/%s/'  # min/nul/plus, op_pagina

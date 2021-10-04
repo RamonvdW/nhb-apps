@@ -13,7 +13,8 @@ from TestHelpers.e2ehelpers import E2EHelpers
 if settings.ENABLE_WIKI:
 
     class TestSingleSignOn(E2EHelpers, TestCase):
-        """ unit tests voor de het SSO deel van de Beheer applicatie """
+
+        """ tests voor de het SSO deel van de Beheer applicatie """
 
         def test_saml2idp(self):
             resp = self.client.get('/idp/metadata/')

@@ -15,7 +15,8 @@ import datetime
 
 
 class TestLogboek(E2EHelpers, TestCase):
-    """ unit tests voor de Logboek applicatie """
+
+    """ tests voor de Logboek applicatie """
 
     test_after = ('Functie',)
 

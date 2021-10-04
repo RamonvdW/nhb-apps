@@ -25,7 +25,7 @@ import io
 
 class TestCompetitieMutaties(E2EHelpers, TestCase):
 
-    """ unit tests voor de Competitie applicatie, mutaties van RK/BK deelnemers lijsten """
+    """ tests voor de CompRayon applicatie, mutaties van RK/BK deelnemers lijsten """
 
     url_lijst_rk = '/bondscompetities/rk/lijst-rayonkampioenschappen/%s/'  # deelcomp_rk.pk
     url_wijzig_status = '/bondscompetities/rk/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk

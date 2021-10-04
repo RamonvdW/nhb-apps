@@ -12,7 +12,8 @@ from TestHelpers import testdata
 
 
 class TestFunctieVHPG(E2EHelpers, TestCase):
-    """ unit tests voor de Functie applicatie; module VHPG """
+
+    """ tests voor de Functie applicatie; module VHPG """
 
     test_after = ('Functie.test_2fa', 'Functie.wisselvanrol')
 

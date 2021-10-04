@@ -122,6 +122,8 @@ def zet_competitie_fase(comp, fase):
 
 class TestCompetitieFase(TestCase):
 
+    """ tests voor de Competitie applicatie, hanteren van de competitie fases """
+
     def test_zet_fase(self):
         now = timezone.now()
         now = datetime.date(year=now.year, month=now.month, day=now.day)

@@ -11,7 +11,8 @@ from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestAccountWachtwoord(E2EHelpers, TestCase):
-    """ unit tests voor de Account applicatie; module Login/Logout """
+
+    """ tests voor de Account applicatie; module Login/Logout """
 
     url_vergeten = '/account/wachtwoord-vergeten/'
     url_wijzig = '/account/nieuw-wachtwoord/'

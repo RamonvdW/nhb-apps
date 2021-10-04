@@ -15,7 +15,8 @@ import io
 
 
 class TestAccountCLI(E2EHelpers, TestCase):
-    """ unit tests voor de Account command line interface (CLI) applicatie """
+
+    """ tests voor de Account command line interface (CLI) applicatie """
 
     def setUp(self):
         """ initialisatie van de test case """

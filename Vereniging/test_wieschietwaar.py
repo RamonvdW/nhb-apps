@@ -22,7 +22,7 @@ import datetime
 
 class TestVerenigingWieSchietWaar(E2EHelpers, TestCase):
 
-    """ Tests voor de Vereniging applicatie, functies voor Wie schiet waar """
+    """ tests voor de Vereniging applicatie, functies voor Wie schiet waar """
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 

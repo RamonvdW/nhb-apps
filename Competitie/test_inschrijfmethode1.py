@@ -21,7 +21,7 @@ import datetime
 
 class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
 
-    """ unit tests voor de Competitie applicatie, Koppel Beheerders functie """
+    """ tests voor de Competitie applicatie, inschrijfmethode 1 """
 
     test_after = ('Competitie.test_beheerders',)
 

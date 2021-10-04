@@ -10,7 +10,8 @@ from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestPleinFout(E2EHelpers, TestCase):
-    """ unit tests voor de Plein applicatie """
+
+    """ tests voor de Plein applicatie """
 
     url_speciale_pagina = '/plein/test-speciale-pagina/%s/'     # code
 

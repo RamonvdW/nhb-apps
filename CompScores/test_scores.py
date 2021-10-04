@@ -16,7 +16,7 @@ import json
 
 class TestCompetitieScores(E2EHelpers, TestCase):
 
-    """ unit tests voor de Competitie applicatie, module Scores """
+    """ tests voor de CompScores applicatie, module Scores """
 
     test_after = ('Competitie.test_fase', 'Competitie.test_planning_regio',)
 

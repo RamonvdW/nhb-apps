@@ -20,7 +20,8 @@ from datetime import timedelta
 
 
 class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
-    """ unit tests voor de Overig applicatie, module Tijdelijke Urls """
+
+    """ tests voor de Overig applicatie, module Tijdelijke Urls """
 
     testdata = None
 

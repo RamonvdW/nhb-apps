@@ -48,7 +48,8 @@ def maak_competities_en_zet_fase_b(startjaar=None):
 
 
 class TestCompetitie(E2EHelpers, TestCase):
-    """ unit tests voor de Competitie applicatie """
+
+    """ tests voor de Competitie applicatie """
 
     test_after = ('BasisTypen', 'Functie', 'Competitie.test_fase')
 

@@ -17,7 +17,8 @@ import datetime
 
 
 class TestScoreGeschiedenis(E2EHelpers, TestCase):
-    """ unit tests voor de Schutter applicatie, module Voorkeuren """
+
+    """ tests voor de Score applicatie, functie Score Geschiedenis """
 
     url_geschiedenis = '/score/geschiedenis/'
 

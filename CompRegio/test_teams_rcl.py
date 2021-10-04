@@ -25,7 +25,7 @@ import io
 
 class TestCompRegioTeams(E2EHelpers, TestCase):
 
-    """ unit tests voor de CompRegio applicatie, Teams functie """
+    """ tests voor de CompRegio applicatie, Teams functies voor de RCL """
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 

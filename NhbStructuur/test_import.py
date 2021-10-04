@@ -18,7 +18,8 @@ import io
 
 
 class TestNhbStructuurImport(E2EHelpers, TestCase):
-    """ unit tests voor de NhbStructuur applicatie """
+
+    """ tests voor de NhbStructuur applicatie, functie Import uit CRM """
 
     def setUp(self):
         """ initialisatie van de test case """

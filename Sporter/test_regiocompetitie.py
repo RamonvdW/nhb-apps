@@ -23,7 +23,7 @@ import datetime
 
 class TestSporterRegiocompetitie(E2EHelpers, TestCase):
 
-    """ unit tests voor de Schutter applicatie; module Aanmelden/Afmelden Regiocompetitie """
+    """ tests voor de Sporter applicatie; module Aanmelden/Afmelden Regiocompetitie """
 
     test_after = ('Account', 'NhbStructuur', 'Competitie')
 

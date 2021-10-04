@@ -25,7 +25,7 @@ import datetime
 
 class TestCompRegioPlanning(E2EHelpers, TestCase):
 
-    """ unit tests voor de CompRegio applicatie, Planning functie """
+    """ tests voor de CompRegio applicatie, Planning functie """
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 

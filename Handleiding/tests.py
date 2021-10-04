@@ -12,7 +12,8 @@ from types import SimpleNamespace
 
 
 class TestHandleiding(E2EHelpers, TestCase):
-    """ unit tests voor de Handleiding applicatie """
+
+    """ tests voor de Handleiding applicatie """
 
     url_top = '/handleiding/'
     url_page = '/handleiding/%s/'

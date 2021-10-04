@@ -21,7 +21,7 @@ import datetime
 
 class TestCompetitieUitslagen(E2EHelpers, TestCase):
 
-    """ unit tests voor de Competitie applicatie, module Uitslagen """
+    """ tests voor de CompUitslagen applicatie, module Uitslagen """
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 

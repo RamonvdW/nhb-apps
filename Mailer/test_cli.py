@@ -15,7 +15,8 @@ import io
 
 
 class TestMailerCliBase(E2EHelpers, object):
-    """ unit tests voor de Mailer applicatie """
+
+    """ tests voor de Mailer applicatie """
 
     def test_leeg(self):
         f1 = io.StringIO()
@@ -120,7 +121,8 @@ class TestMailerCliBase(E2EHelpers, object):
 
 
 class TestMailerCliBadBase(E2EHelpers, object):
-    """ unit tests voor de Mailer applicatie """
+
+    """ tests voor de Mailer applicatie """
 
     def test_stuur_mails_bad_duration(self):
         f1 = io.StringIO()

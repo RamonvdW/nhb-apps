@@ -22,7 +22,7 @@ import datetime
 
 class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
-    """ unit tests voor de Competitie applicatie, Koppel Beheerders functie """
+    """ tests voor de Competitie applicatie, planning voor het BK """
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 

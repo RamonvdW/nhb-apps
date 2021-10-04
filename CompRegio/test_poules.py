@@ -23,7 +23,7 @@ import io
 
 class TestCompRegioPoules(E2EHelpers, TestCase):
 
-    """ unit tests voor de CompRegio applicatie, Teams functie """
+    """ tests voor de CompRegio applicatie, Poules functie """
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 

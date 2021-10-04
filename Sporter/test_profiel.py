@@ -24,7 +24,8 @@ import datetime
 
 
 class TestSporterProfiel(E2EHelpers, TestCase):
-    """ unit tests voor de Sporter applicatie, module Profiel """
+
+    """ tests voor de Sporter applicatie, module Profiel """
 
     test_after = ('NhbStructuur', 'HistComp', 'Competitie', 'Sporter.regiocompetitie', 'Functie')
 

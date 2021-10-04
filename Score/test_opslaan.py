@@ -15,7 +15,8 @@ import datetime
 
 
 class TestScoreOpslaan(E2EHelpers, TestCase):
-    """ unit tests voor de Score applicatie, functie Opslaan """
+
+    """ tests voor de Score applicatie, functie Opslaan """
 
     def setUp(self):
         """ initialisatie van de test case """

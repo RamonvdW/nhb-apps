@@ -14,7 +14,7 @@ import datetime
 
 class TestCompetitieHWL(E2EHelpers, TestCase):
 
-    """ Tests voor de Competitie applicatie, functies voor de HWL """
+    """ tests voor de Competitie applicatie, functies voor de HWL """
 
     test_after = ('BasisTypen', 'Functie', 'Competitie.test_competitie', 'Competitie.test_beheerders')
 

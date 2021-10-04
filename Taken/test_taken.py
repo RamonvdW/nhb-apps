@@ -16,7 +16,8 @@ import datetime
 
 
 class TestTakenTaken(E2EHelpers, TestCase):
-    """ unit tests voor de Taken applicatie """
+
+    """ tests voor de Taken applicatie """
 
     test_after = ('Functie',)
 

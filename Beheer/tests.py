@@ -70,7 +70,8 @@ BEHEER_PAGINAS = (
 
 
 class TestBeheer(E2EHelpers, TestCase):
-    """ unit tests voor de Beheer applicatie """
+
+    """ tests voor de Beheer applicatie """
 
     def setUp(self):
         """ initialisatie van de test case """

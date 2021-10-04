@@ -19,7 +19,7 @@ import datetime
 
 class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
-    """ unit tests voor de Competitie applicatie, Koppel Beheerders functie """
+    """ tests voor de Competitie applicatie, Koppel Beheerders functie """
 
     test_after = ('Functie',)
 

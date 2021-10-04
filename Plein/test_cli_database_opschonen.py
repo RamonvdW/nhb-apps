@@ -16,7 +16,8 @@ import io
 
 
 class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
-    """ unittests voor de Plein applicatie, management command database_opschonen """
+
+    """ tests voor de Plein applicatie, management command database_opschonen """
 
     maxDiff = None
     

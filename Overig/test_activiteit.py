@@ -15,7 +15,8 @@ import datetime
 
 
 class TestAccountActiviteit(E2EHelpers, TestCase):
-    """ unit tests voor de Account applicatie; module Account Activiteit """
+
+    """ tests voor de Overig applicatie; module Account Activiteit """
 
     test_after = ('Account.test_login',)
 

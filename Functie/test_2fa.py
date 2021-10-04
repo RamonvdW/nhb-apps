@@ -17,7 +17,8 @@ def get_otp_code(account):
 
 
 class TestFunctie2FA(E2EHelpers, TestCase):
-    """ unit tests voor de Functie applicatie, module OTP / 2FA """
+
+    """ tests voor de Functie applicatie, module OTP / 2FA """
 
     test_after = ('Account', 'Functie.test_rol')
 

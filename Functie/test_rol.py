@@ -16,7 +16,8 @@ from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestFunctieRol(E2EHelpers, TestCase):
-    """ unit tests voor de Functie applicatie, diverse corner-cases """
+
+    """ tests voor de Functie applicatie, diverse corner-cases """
 
     def setUp(self):
         """ initialisatie van de test case """

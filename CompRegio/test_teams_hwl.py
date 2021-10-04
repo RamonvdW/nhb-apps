@@ -24,7 +24,7 @@ import io
 
 class TestVerenigingTeams(E2EHelpers, TestCase):
 
-    """ Tests voor de Vereniging applicatie, functies voor de HWL """
+    """ tests voor de CompRegio applicatie, Teams functies voor de HWL """
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 

@@ -11,7 +11,8 @@ from .admin import BasisTypenIndivWedstrijdklasseAdmin, BasisTypenTeamWedstrijdk
 
 
 class TestBasisTypen(TestCase):
-    """ unit tests voor de BasisTypen applicatie """
+
+    """ tests voor de BasisTypen applicatie """
 
     def setUp(self):
         """ eenmalige setup voor alle tests

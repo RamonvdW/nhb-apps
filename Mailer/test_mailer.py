@@ -10,7 +10,8 @@ from .mailer import send_mail
 
 
 class TestMailerBase(object):
-    """ unit tests voor de Mailer applicatie """
+
+    """ tests voor de Mailer applicatie """
 
     def test_queue_mail(self):
         assert isinstance(self, TestCase)
@@ -120,7 +121,8 @@ class TestMailerBase(object):
 
 
 class TestMailerBadBase(object):
-    """ unit tests voor de Mailer applicatie """
+
+    """ tests voor de Mailer applicatie """
 
     def test_no_api_key(self):
         assert isinstance(self, TestCase)

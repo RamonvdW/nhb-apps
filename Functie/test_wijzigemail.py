@@ -15,7 +15,8 @@ from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestFunctieWijzigEmail(E2EHelpers, TestCase):
-    """ unit tests voor de Functie applicatie; module VHPG """
+
+    """ tests voor de Functie applicatie; module wijzig functie e-mail """
 
     test_after = ('Functie.test_2fa', 'Functie.wisselvanrol')
 

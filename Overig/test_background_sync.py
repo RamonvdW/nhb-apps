@@ -10,7 +10,8 @@ from Overig.background_sync import BackgroundSync
 
 
 class TestOverigFeedback(TestCase):
-    """ unit tests voor de Overig applicatie, module Feedback """
+
+    """ unit tests voor de Overig applicatie, module Background Sync """
 
     def test(self):
         sync = BackgroundSync(settings.BACKGROUND_SYNC_POORT)

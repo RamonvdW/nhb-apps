@@ -13,7 +13,8 @@ import datetime
 
 
 class TestTakenViews(E2EHelpers, TestCase):
-    """ unit tests voor de Taken applicatie """
+
+    """ tests voor de Taken applicatie """
 
     test_after = ('Functie',)
 

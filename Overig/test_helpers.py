@@ -9,7 +9,8 @@ from .helpers import get_safe_from_ip
 
 
 class TestOverigHelpers(TestCase):
-    """ unit tests voor de Overig applicatie, module Helpers """
+
+    """ tests voor de Overig applicatie, module Helpers """
 
     def setUp(self):
         """ initialisatie van de test case """

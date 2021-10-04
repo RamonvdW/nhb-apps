@@ -18,7 +18,8 @@ import datetime
 
 
 class TestFunctieKoppelen(E2EHelpers, TestCase):
-    """ unit tests voor de Functie applicatie, functionaliteit Koppel bestuurders """
+
+    """ tests voor de Functie applicatie, functionaliteit Koppel bestuurders """
 
     test_after = ('Account', 'Functie.test_2fa', 'Functie.test_overzicht')
 

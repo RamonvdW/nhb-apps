@@ -28,7 +28,7 @@ sleep_oud = time.sleep
 
 class TestCompRayonPlanning(E2EHelpers, TestCase):
 
-    """ unit tests voor de CompRayon applicatie, Planning functie """
+    """ tests voor de CompRayon applicatie, Planning functie """
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 

@@ -13,7 +13,8 @@ import datetime
 
 
 class TestSporterLogin(E2EHelpers, TestCase):
-    """ unit tests voor de Sporter applicatie; module Login plugin """
+
+    """ tests voor de Sporter applicatie; module Login plugin """
 
     test_after = ('Account',)
 

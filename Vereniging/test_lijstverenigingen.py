@@ -17,7 +17,7 @@ import datetime
 
 class TestVerenigingenLijst(E2EHelpers, TestCase):
 
-    """ unit tests voor de Vereniging applicatie, Lijst Verenigingen """
+    """ tests voor de Vereniging applicatie, Lijst Verenigingen """
 
     url_lijst = '/vereniging/accommodaties/lijst/'
 

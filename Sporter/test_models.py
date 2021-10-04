@@ -16,7 +16,8 @@ import datetime
 
 
 class TestSporterModels(TestCase):
-    """ unit tests voor de Sporter applicatie """
+
+    """ tests voor de Sporter applicatie """
 
     def setUp(self):
         """ initialisatie van de test case """

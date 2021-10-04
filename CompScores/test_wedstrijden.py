@@ -22,7 +22,7 @@ import datetime
 
 class TestVerenigingWedstrijden(E2EHelpers, TestCase):
 
-    """ Tests voor de Vereniging applicatie, functies voor Wedstrijden """
+    """ tests voor de CompScores applicatie, functies voor Wedstrijden """
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 

@@ -14,7 +14,8 @@ from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestAccountOTP(E2EHelpers, TestCase):
-    """ unit tests voor de Account applicatie; module OTP """
+
+    """ tests voor de Account applicatie; module OTP """
 
     @staticmethod
     def _get_otp_code(account):

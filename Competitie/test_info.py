@@ -13,7 +13,7 @@ import datetime
 
 class TestCompetitieInfo(E2EHelpers, TestCase):
 
-    """ unit tests voor de Competitie applicatie, module Informatie over de Competitie """
+    """ tests voor de Competitie applicatie, module Informatie over de Competitie """
 
     url_info = '/bondscompetities/info/'
     url_leeftijden = '/bondscompetities/info/leeftijden/'
