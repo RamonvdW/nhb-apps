@@ -25,7 +25,7 @@ OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
 # set high performance
 sudo cpupower frequency-set --governor performance > /dev/null
 
-# start the http simulator in the background
+# kill the http simulator if still running in the background
 pgrep -f websim
 if [ $? -eq 0 ]
 then
@@ -71,16 +71,29 @@ fi
 
 ABORTED=0
 
-# start the simulator (for the mailer)
+# start the simulator for the mailer
 python3 ./Mailer/test_tools/websim_mailer.py &
-PID_WEBSIM=$!
+PID_WEBSIM1=$!
 sleep 0.5               # give python some time to load everything
-kill -0 $PID_WEBSIM     # check the simulator is running
+kill -0 $PID_WEBSIM1    # check the simulator is running
 RES=$?
 #echo "RES=$RES"
 if [ $RES -ne 0 ]
 then
-    echo "[ERROR] Simulator failed to start"
+    echo "[ERROR] Mail server simulator failed to start"
+    exit
+fi
+
+# start the simulator for the bondspas downloader
+python3 ./Bondspas/test-tools/websim_bondspas.py &
+PID_WEBSIM2=$!
+sleep 0.5               # give python some time to load everything
+kill -0 $PID_WEBSIM2    # check the simulator is running
+RES=$?
+#echo "RES=$RES"
+if [ $RES -ne 0 ]
+then
+    echo "[ERROR] Bondspas server simulator failed to start"
     exit
 fi
 
@@ -116,10 +129,12 @@ then
     [ $RES -eq 3 ] && ABORTED=1
 fi
 
-# stop the websim tool
+# stop the websim tools
 # use bash construct to prevent the Terminated message on the console
-kill $PID_WEBSIM
-wait $PID_WEBSIM 2>/dev/null
+kill $PID_WEBSIM1
+wait $PID_WEBSIM1 2>/dev/null
+kill $PID_WEBSIM2
+wait $PID_WEBSIM2 2>/dev/null
 
 if [ $ABORTED -eq 0 -o $FORCE_REPORT -eq 1 ]
 then
