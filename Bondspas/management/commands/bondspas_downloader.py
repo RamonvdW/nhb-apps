@@ -58,56 +58,54 @@ class Command(BaseCommand):
 
         headers = {'User-Agent': 'NHBApps-bondspas-downloader'}
         url = settings.BONDSPAS_DOWNLOAD_URL % bondspas.lid_nr
+        fout = ''
         try:
             with requests.get(url, headers=headers, stream=True) as req:        # with = automatisch vrij geven
-                # header zijn nu ontvangen
-                self.stdout.write('[DEBUG] Headers: %s' % req.headers)
-
-                # controleer de lengte
-                try:
-                    pdf_len = int(req.headers['Content-length'])
-                except (KeyError, ValueError):
-                    self.stderr.write('[ERROR] Missing header: Content-length')
-                    now = datetime.datetime.now()
-                    bondspas.status = BONDSPAS_STATUS_FAIL
-                    bondspas.opnieuw_proberen_na = now + datetime.timedelta(minutes=settings.BONDSPAS_RETRY_MINUTES)
-                    bondspas.log += '[%s] Fout tijdens ophalen  (geen content-length)\n' % now
-                    bondspas.save(update_fields=['status', 'log', 'opnieuw_proberen_na'])
+                # controleer de status code
+                if req.status_code != 200:
+                    self.stdout.write('[WARNING] Unexpected status_code: %s' % req.status_code)
+                    fout = 'Fout tijdens het ophalen: status_code %s' % req.status_code
                 else:
-                    if pdf_len > (settings.BONDSPAS_MAX_SIZE_PDF_KB * 1024):
-                        now = datetime.datetime.now()
-                        bondspas.status = BONDSPAS_STATUS_FAIL
-                        bondspas.opnieuw_proberen_na = now + datetime.timedelta(minutes=settings.BONDSPAS_RETRY_MINUTES)
-                        bondspas.log += '[%s] Fout tijdens ophalen: pas is te groot (%s bytes)\n' % (now, pdf_len)
-                        bondspas.save(update_fields=['status', 'log', 'opnieuw_proberen_na'])
+                    # header zijn nu ontvangen
+                    # self.stdout.write('[DEBUG] Headers: %s' % req.headers)
+
+                    # controleer de lengte
+                    try:
+                        pdf_len = int(req.headers['Content-length'])
+                    except (KeyError, ValueError):
+                        self.stdout.write('[WARNING] Missing header: Content-length')
+                        fout = 'Fout tijdens het ophalen (geen content-length)'
                     else:
-                        # maak het bestand aan en ontvang deze
-                        fpath = os.path.join(settings.BONDSPAS_CACHE_PATH, bondspas.filename)
-                        try:
-                            with open(fpath, 'wb') as dest:                     # with = automatisch sluiten
-                                # in 1x ophalen en opslaan
-                                dest.write(req.content)
-                            # with
-                        except IOError as exc:
-                            self.stderr.write('[ERROR] Can bestand niet opslaan: %s' % str(exc))
-                            now = datetime.datetime.now()
-                            bondspas.status = BONDSPAS_STATUS_FAIL
-                            bondspas.opnieuw_proberen_na = now + datetime.timedelta(minutes=settings.BONDSPAS_RETRY_MINUTES)
-                            bondspas.log += '[%s] Fout tijdens ophalen (zie logfile)\n' % now
-                            bondspas.save(update_fields=['status', 'log', 'opnieuw_proberen_na'])
+                        if pdf_len < 5 * 1024 or pdf_len > (settings.BONDSPAS_MAX_SIZE_PDF_KB * 1024):
+                            self.stdout.write('[WARNING] Unreasonable length (%s bytes)' % pdf_len)
+                            fout = 'Fout tijdens ophalen: bestandslengte is onredelijk (%s bytes)' % pdf_len
                         else:
-                            # ophalen is gelukt
-                            bondspas.status = BONDSPAS_STATUS_AANWEZIG
-                            bondspas.log += '[%s] Ophalen is gelukt\n' % datetime.datetime.now()
-                            bondspas.aantal_keer_opgehaald += 1
-                            bondspas.save(update_fields=['status', 'log', 'aantal_keer_opgehaald'])
+                            # maak het bestand aan en ontvang deze
+                            fpath = os.path.join(settings.BONDSPAS_CACHE_PATH, bondspas.filename)
+                            try:
+                                with open(fpath, 'wb') as dest:                 # with = automatisch sluiten
+                                    # in 1x ophalen en opslaan
+                                    dest.write(req.content)
+                                # with
+                            except IOError as exc:
+                                self.stdout.write('[WARNING] Can bestand niet opslaan: %s' % str(exc))
+                                fout = 'Fout tijdens ophalen (zie logfile)'
+                            else:
+                                # ophalen is gelukt
+                                bondspas.status = BONDSPAS_STATUS_AANWEZIG
+                                bondspas.log += '[%s] Ophalen is gelukt\n' % datetime.datetime.now()
+                                bondspas.aantal_keer_opgehaald += 1
+                                bondspas.save(update_fields=['status', 'log', 'aantal_keer_opgehaald'])
             # with
         except requests.exceptions.RequestException as exc:
-            self.stderr.write('[ERROR] Onverwachte fout: %s' % str(exc))
-            now = datetime.datetime.now()
+            self.stdout.write('[WARNING] Onverwachte fout: %s' % str(exc))
+            fout = 'Onverwachte fout (zie logfile)'
+
+        if fout:
+            now = timezone.now()
             bondspas.status = BONDSPAS_STATUS_FAIL
             bondspas.opnieuw_proberen_na = now + datetime.timedelta(minutes=settings.BONDSPAS_RETRY_MINUTES)
-            bondspas.log += '[%s] Onverwachte fout (zie logfile)\n' % now
+            bondspas.log += '[%s] %s\n' % (now, fout)
             bondspas.save(update_fields=['status', 'log', 'opnieuw_proberen_na'])
 
     def _monitor_ophaal_verzoeken(self):
@@ -134,7 +132,7 @@ class Command(BaseCommand):
                     self._count_ping += 1                   # pragma: no cover
             else:
                 # near the end
-                break       # from the while
+                break       # from the while                # pragma: no cover
 
             now = datetime.datetime.now()
         # while

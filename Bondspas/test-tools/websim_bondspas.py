@@ -14,7 +14,6 @@
 # used example: https://gist.github.com/mdonkers/63e115cc0c79b4f6b8b3a6b797e485c7
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import time
 
 
 class MyServer(BaseHTTPRequestHandler):
@@ -24,18 +23,48 @@ class MyServer(BaseHTTPRequestHandler):
         pass
 
     def do_GET(self):
-        print("GET request,\nPath: %s\nHeaders:\n%s" % (str(self.path), str(self.headers)))
+        # print("[DEBUG] {websim} GET request,\nPath: %s\nHeaders:\n%s" % (str(self.path), str(self.headers)))
         # self.path is the url
 
         if self.path.startswith('/bondspas/'):
             bondsnummer = self.path.split('/')[-1]
+            # print('[DEBUG] {websim} spl=%s, bondsnummer=%s' % (self.path.split('/'), bondsnummer))
             try:
                 bondsnummer = int(bondsnummer)
             except ValueError:
                 # geen valide bondsnummer
                 self.send_response(404)
+                # dit is geen volledige response maar triggert wel mooi een exception handler
             else:
-                if 100000 < bondsnummer < 199999:
+                special = self.path.split('/')[-2]
+                # print('[DEBUG] {websim} spl=%s, special=%s' % (self.path.split('/'), repr(special)))
+                if special in ('404', '500'):
+                    # /bondspas/404/<bondsnummer>
+                    special = int(special)
+                    self.send_response(special)
+                    self.send_header('Content-length', 0)
+                    self.end_headers()
+
+                elif special == '42':
+                    data = "abcdefghijklmnopqrstuvwxyz_0123456789_ABCDEFGHIJKLMNOPQRSTUVWXYZ\n"[:42]
+                    datalen = len(data)
+
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/pdf')
+                    self.send_header('Content-length', datalen)
+                    self.end_headers()
+
+                    # stuur het bestand zelf
+                    self.wfile.write(data.encode())      # convert string to bytes
+
+                elif special == '43':
+
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/pdf')
+                    # skip content-type header
+                    self.end_headers()
+
+                elif 100000 < bondsnummer < 199999:
                     data = "abcdefghijklmnopqrstuvwxyz_0123456789_ABCDEFGHIJKLMNOPQRSTUVWXYZ\n"
                     data *= int((150 * 1024) / len(data))  # make 150kByte
                     datalen = len(data)
@@ -47,13 +76,16 @@ class MyServer(BaseHTTPRequestHandler):
 
                     # stuur het bestand zelf
                     self.wfile.write(data.encode())      # convert string to bytes
+
                 else:
                     # geen valide bondsnummer
                     self.send_response(404)
+                    self.end_headers()
 
         else:
             # internal server error
             self.send_response(500)
+            # dit is onvolledig, maar triggert wel mooi een exception handler
 
 
 def main():

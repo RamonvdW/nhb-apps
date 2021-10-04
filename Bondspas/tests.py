@@ -5,214 +5,370 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
+from django.core import management
+from django.conf import settings
+from django.utils import timezone
+from Bondspas.models import Bondspas
+from Sporter.models import Sporter
+from TestHelpers.e2ehelpers import E2EHelpers
+import tempfile
+import datetime
+import json
+import stat
+import os
+import io
 
 
-class TestBondspas(object):
+class TestBondspas(E2EHelpers, TestCase):
 
     """ tests voor de Bondspas applicatie """
 
-    def test_queue_mail(self):
-        assert isinstance(self, TestCase)
+    url_check_status = '/sporter/bondspas/check-status/'
+    url_toon = '/sporter/bondspas/toon/'
 
-        objs = MailQueue.objects.all()
-        self.assertEqual(len(objs), 0)
+    def setUp(self):
 
-        mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
+        self.lid_nr = 123456
 
-        # valideer dat de mail nu in de queue staat
-        objs = MailQueue.objects.all()
-        self.assertEqual(len(objs), 1)
-        obj = objs[0]
+        now = datetime.datetime.now()
 
-        # validate de velden van de mail
-        self.assertFalse(obj.is_verstuurd)
-        self.assertEqual(obj.aantal_pogingen, 0)
-        self.assertEqual(obj.mail_to, 'schutter@nhb.test')
-        self.assertEqual(obj.mail_subj, 'onderwerp')
-        self.assertEqual(obj.mail_text, 'body\ndoei!\n')
-        self.assertTrue("onderwerp" in str(obj))
+        self.sporter = sporter = Sporter(
+                                    lid_nr=self.lid_nr,
+                                    voornaam='Tester',
+                                    achternaam='De tester',
+                                    unaccented_naam='test',
+                                    email='tester@mail.not',
+                                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                                    geslacht='M',
+                                    # bij_vereniging
+                                    lid_tot_einde_jaar=now.year)
+        self.account = self.e2e_create_account(self.lid_nr, sporter.email, sporter.voornaam)
+        sporter.account = self.account
+        sporter.save()
 
-        # controleer dat een leeg to-adres niet in de queue beland
-        self.assertEqual(1, MailQueue.objects.count())
-        mailer_queue_email('', 'onderwerp', 'body\ndoei!\n')
-        self.assertEqual(1, MailQueue.objects.count())
+    def test_check_status(self):
+        # anon
+        resp = self.client.post(self.url_check_status, {})
+        self.assert403(resp)
 
-    def test_send_mail_deliver(self):
-        # requires websim_mailer.py running in the background
-        assert isinstance(self, TestCase)
+        # sporter
+        self.e2e_login(self.account)
 
-        # stop een mail in de queue
-        self.assertEqual(0, MailQueue.objects.count())
-        mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
+        # post zonder data
+        resp = self.client.post(self.url_check_status, {})
+        self.assert404(resp)
 
-        # probeer te versturen
-        obj = MailQueue.objects.all()[0]
-        self.assertFalse(obj.is_verstuurd)
-        self.assertEqual(obj.aantal_pogingen, 0)
+        # get is not implemented
+        resp = self.client.get(self.url_check_status)
+        self.assertEqual(resp.status_code, 405)
 
-        send_mail(obj)
+        # corrupte json
+        data = "hallo daar"
+        resp = self.client.post(self.url_check_status, data=data, content_type="application/json")
+        self.assert404(resp, 'Geen valide verzoek')
 
-        obj = MailQueue.objects.all()[0]
-        self.assertEqual(obj.aantal_pogingen, 1)
-        self.assertTrue(obj.is_verstuurd)
+        # ontbrekend veld
+        data = '{"daar": "1"}'
+        resp = self.client.post(self.url_check_status, data=data, content_type="application/json")
+        self.assert404(resp, 'Niet gevonden')
 
-    def test_send_mail_deliver_faal(self):
-        # requires websim_mailer.py running in the background
-        assert isinstance(self, TestCase)
+        # geen valide lid_nr
+        data = '{"lid_nr": "blablabla"}'
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_check_status, data=data, content_type="application/json")
+        self.assert404(resp, 'Niet gevonden')
 
-        # stop een mail in de queue
-        objs = MailQueue.objects.all()
-        self.assertEqual(len(objs), 0)
-        mailer_queue_email('schutter@nhb.test', 'onderwerp faal', 'body\ndoei!\n')
+        # wel valide lid_nr, maar nog geen record in de database
+        data = '{"lid_nr": %s}' % self.lid_nr
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_check_status, data=data, content_type="application/json")
+        self.assert404(resp, 'Niet gevonden')
 
-        # probeer te versturen
-        obj = MailQueue.objects.all()[0]
-        self.assertFalse(obj.is_verstuurd)
-        self.assertEqual(obj.aantal_pogingen, 0)
+        # maak een record aan en check the status
+        bondspas = Bondspas(
+                        lid_nr=self.lid_nr,
+                        status='N')     # nieuw
+        bondspas.save()
 
-        send_mail(obj)
+        for status_code, expected_status in (('N', "onbekend"),     # nieuw
+                                             ('O', "bezig"),        # ophalen
+                                             ('B', "bezig"),
+                                             ('A', "aanwezig"),
+                                             ('F', "fail"),
+                                             ('V', "onbekend"),     # verwijderd
+                                             ('N', "onbekend")):    # nieuw
+            bondspas.status = status_code
+            bondspas.save(update_fields=['status'])
 
-        obj = MailQueue.objects.all()[0]
-        self.assertEqual(obj.aantal_pogingen, 1)
-        self.assertFalse(obj.is_verstuurd)
+            with self.assert_max_queries(20):
+                resp = self.client.post(self.url_check_status, data=data, content_type="application/json")
+            self.assertEqual(resp.status_code, 200)
+            reply = json.loads(resp.content)
+            self.assertEqual(reply['status'], expected_status)
+        # for
 
-    def test_obfuscate_email(self):
-        assert isinstance(self, TestCase)
-        self.assertEqual(mailer_obfuscate_email(''), '')
-        self.assertEqual(mailer_obfuscate_email('x'), 'x')
-        self.assertEqual(mailer_obfuscate_email('x@test.nhb'), 'x@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('do@test.nhb'), 'd#@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('tre@test.nhb'), 't#e@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('vier@test.nhb'), 'v##r@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('zeven@test.nhb'), 'ze##n@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('hele.lange@maaktnietuit.nl'), 'he#######e@maaktnietuit.nl')
+        self.e2e_assert_other_http_commands_not_supported(self.url_check_status, post=False)
 
-    def test_email_is_valide(self):
-        assert isinstance(self, TestCase)
-        self.assertTrue(mailer_email_is_valide('test@nhb.nl'))
-        self.assertTrue(mailer_email_is_valide('jan.de.tester@nhb.nl'))
-        self.assertTrue(mailer_email_is_valide('jan.de.tester@hb.nl'))
-        self.assertTrue(mailer_email_is_valide('r@hb.nl'))
-        self.assertFalse(mailer_email_is_valide('tester@nhb'))
-        self.assertFalse(mailer_email_is_valide('test er@nhb.nl'))
-        self.assertFalse(mailer_email_is_valide('test\ter@nhb.nl'))
-        self.assertFalse(mailer_email_is_valide('test\ner@nhb.nl'))
+    def test_toon(self):
+        # anon
+        resp = self.client.get(self.url_toon)
+        self.assert403(resp)
 
-    def test_whitelist(self):
-        # controleer dat de whitelist zijn werk doet
-        assert isinstance(self, TestCase)
+        # sporter
+        self.e2e_login(self.account)
 
-        self.assertEqual(0, MailQueue.objects.count())
+        # eerste keer --> ophalen
+        self.assertEqual(Bondspas.objects.count(), 0)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_toon)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bondspas/bondspas-ophalen.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, "Je bondspas wordt opgehaald.")
 
-        with self.settings(EMAIL_ADDRESS_WHITELIST=('een.test@nhb.not',)):
-            mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
-            self.assertEqual(1, MailQueue.objects.count())
-            mail = MailQueue.objects.all()[0]
-            self.assertTrue(mail.is_blocked)
-            mail.delete()
+        self.assertEqual(Bondspas.objects.count(), 1)
+        bondspas = Bondspas.objects.get(lid_nr=self.lid_nr)
+        self.assertEqual(bondspas.status, 'O')      # ophalen
+        self.assertTrue(str(bondspas) != '')
 
-            mailer_queue_email('een.test@nhb.not', 'onderwerp', 'body\ndoei!\n')
-            self.assertEqual(1, MailQueue.objects.count())
-            mail = MailQueue.objects.all()[0]
-            self.assertFalse(mail.is_blocked)
+        # verwijderd --> ophalen
+        bondspas.status = 'V'
+        bondspas.save(update_fields=['status'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_toon)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('bondspas/bondspas-ophalen.dtl', 'plein/site_layout.dtl'))
+
+        bondspas = Bondspas.objects.get(lid_nr=self.lid_nr)
+        self.assertEqual(bondspas.status, 'O')      # ophalen
+
+        # fail + nog niet tijd om opnieuw op te halen
+        when = timezone.now() + datetime.timedelta(days=1)
+        bondspas.status = 'F'
+        bondspas.opnieuw_proberen_na = when
+        bondspas.save(update_fields=['status', 'opnieuw_proberen_na'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_toon)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bondspas/bondspas-ophalen.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Over een paar minuten')
+        bondspas = Bondspas.objects.get(lid_nr=self.lid_nr)
+        self.assertEqual(bondspas.status, 'F')      # nog steeds Fail
+
+        # fail + opnieuw proberen
+        bondspas.opnieuw_proberen_na = timezone.now() - datetime.timedelta(minutes=1)
+        bondspas.save(update_fields=['status', 'opnieuw_proberen_na'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_toon)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bondspas/bondspas-ophalen.dtl', 'plein/site_layout.dtl'))
+        self.assertNotContains(resp, 'Over een paar minuten')
+        bondspas = Bondspas.objects.get(lid_nr=self.lid_nr)
+        self.assertEqual(bondspas.status, 'O')      # Ophalen
+
+        # aanwezig, maar geen bestand --> fallback naar ophalen
+        bondspas.status = 'A'
+        bondspas.aanwezig_sinds = timezone.now()
+        bondspas.save(update_fields=['status', 'aanwezig_sinds'])
+        self.assertTrue(str(bondspas) != '')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_toon)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bondspas/bondspas-ophalen.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Er is een onverwacht probleem opgetreden')
+        bondspas = Bondspas.objects.get(lid_nr=self.lid_nr)
+        self.assertEqual(bondspas.status, 'O')      # Ophalen
+        self.assertEqual(bondspas.aantal_keer_bekeken, 0)
+
+        # create bondspas bestand
+        fname = "bondspas_%s.pdf" % self.lid_nr
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_file = os.path.join(tmp_dir, fname)
+            with open(tmp_file, 'wb') as w:
+                w.write(b'bondspas testje\n')
+            # with
+            bondspas.status = 'A'
+            bondspas.filename = fname
+            bondspas.save(update_fields=['status', 'filename'])
+
+            # aanwezig
+            with override_settings(BONDSPAS_CACHE_PATH=tmp_dir):
+                with self.assert_max_queries(20):
+                    resp = self.client.get(self.url_toon)
+            self.assertEqual(resp.get('content-type'), 'application/pdf')
+            self.assertEqual(resp.get('content-disposition'), 'inline; filename="bondspas_123456.pdf"')
         # with
 
+        bondspas = Bondspas.objects.get(lid_nr=self.lid_nr)
+        self.assertEqual(bondspas.status, 'A')      # Ophalen
+        self.assertEqual(bondspas.aantal_keer_bekeken, 1)
 
-class TestMailerBadBase(object):
-    """ tests voor de Mailer applicatie """
+        # weird status
+        bondspas.status = 'X'
+        bondspas.save(update_fields=['status'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_toon)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bondspas/bondspas-ophalen.dtl', 'plein/site_layout.dtl'))
 
-    def test_no_api_key(self):
-        assert isinstance(self, TestCase)
-        with self.settings(POSTMARK_API_KEY=''):
-            send_mail(None)
+        self.e2e_assert_other_http_commands_not_supported(self.url_toon)
 
-        # als we hier komen is het goed, want geen exception
-        self.assertTrue(True)
+    def test_cli(self):
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
 
-    def test_send_mail_no_connect(self):
-        # deze test eist dat de URL wijst naar een poort waar niet op gereageerd wordt
-        # zoals http://localhost:9999
-        assert isinstance(self, TestCase)
+        # maak nog een bondspas records aan, om de for-loop bezig te houden
+        Bondspas(
+                lid_nr=100042,
+                status='O',
+                opnieuw_proberen_na=timezone.now() + datetime.timedelta(days=5)).save()
 
-        # stop een mail in de queue
-        objs = MailQueue.objects.all()
-        self.assertEqual(len(objs), 0)
-        mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with override_settings(BONDSPAS_CACHE_PATH='garbage'):
+            management.call_command('bondspas_downloader', '1', '--quick', stderr=f1, stdout=f2)
+        self.assertTrue('[ERROR] Bondspas cache directory bestaat niet: garbage' in f1.getvalue())
 
-        # probeer te versturen
-        obj = MailQueue.objects.all()[0]
-        self.assertFalse(obj.is_verstuurd)
-        self.assertEqual(obj.aantal_pogingen, 0)
-        send_mail(obj)
-        obj = MailQueue.objects.all()[0]
-        self.assertEqual(obj.aantal_pogingen, 1)
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20, check_duration=False):
+            management.call_command('bondspas_downloader', '2', '--quick', stderr=f1, stdout=f2)
+        self.assertTrue('[TODO] Implement bondspas cache scrubbing' in f1.getvalue())
+        # self.assertEqual(f1.getvalue(), '')
+        self.assertTrue('[INFO] Taak loopt tot ' in f2.getvalue())
 
-    def test_send_mail_limit(self):
-        # deze test eist dat de URL wijst naar een poort waar niet op gereageerd wordt
-        # zoals http://localhost:9999
-        assert isinstance(self, TestCase)
+        # maak een ophaal verzoek aan, maar kan niet verbinden met server
+        bondspas = Bondspas(lid_nr=self.lid_nr, status='O')
+        bondspas.save()
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with override_settings(BONDSPAS_DOWNLOAD_URL='http://localhost:9999/%s'):
+            management.call_command('bondspas_downloader', '1', '--quick', stderr=f1, stdout=f2)
+        self.assertTrue('[WARNING] Onverwachte fout:' in f2.getvalue())
+        bondspas = Bondspas.objects.get(lid_nr=self.lid_nr)
+        self.assertEqual(bondspas.status, 'F')
+        self.assertIsNotNone(bondspas.opnieuw_proberen_na)
+        self.assertTrue('Onverwachte fout (zie logfile)' in bondspas.log)
 
-        # stop een mail in de queue
-        objs = MailQueue.objects.all()
-        self.assertEqual(len(objs), 0)
-        mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
+        # maak een ophaal verzoek aan, maar de server geeft status 500
+        bondspas.status = 'O'
+        bondspas.opnieuw_proberen_na = None
+        bondspas.save(update_fields=['log', 'status', 'opnieuw_proberen_na'])
+        with override_settings(BONDSPAS_DOWNLOAD_URL=settings.BONDSPAS_DOWNLOAD_URL + '/werkt-niet-meer'):
+            f1 = io.StringIO()
+            f2 = io.StringIO()
+            management.call_command('bondspas_downloader', '1', '--quick', stderr=f1, stdout=f2)
+            self.assertTrue('[WARNING] Onverwachte fout:' in f2.getvalue())
+            self.assertTrue('Connection aborted' in f2.getvalue())
+            bondspas = Bondspas.objects.get(lid_nr=self.lid_nr)
+            self.assertEqual(bondspas.status, 'F')  # failed
+            self.assertIsNotNone(bondspas.opnieuw_proberen_na)
+        # with
 
-        # controleer dat we ophouden te proberen na 25 pogingen
-        obj = MailQueue.objects.all()[0]
-        self.assertFalse(obj.is_verstuurd)
-        self.assertEqual(obj.aantal_pogingen, 0)
-        # 24 naar 25
-        obj.aantal_pogingen = 24
-        obj.save()
-        send_mail(obj)
+        # maak een ophaal verzoek aan, maar de server geeft status 404
+        bondspas.status = 'O'
+        bondspas.opnieuw_proberen_na = None
+        bondspas.save(update_fields=['status', 'opnieuw_proberen_na'])
+        url = settings.BONDSPAS_DOWNLOAD_URL % 404
+        url += '/%s'
+        with override_settings(BONDSPAS_DOWNLOAD_URL=url):
+            f1 = io.StringIO()
+            f2 = io.StringIO()
+            management.call_command('bondspas_downloader', '1', '--quick', stderr=f1, stdout=f2)
+            self.assertTrue('[WARNING] Unexpected status_code: 404' in f2.getvalue())
+            bondspas = Bondspas.objects.get(lid_nr=self.lid_nr)
+            self.assertEqual(bondspas.status, 'F')  # failed
+            self.assertIsNotNone(bondspas.opnieuw_proberen_na)
 
-        obj = MailQueue.objects.all()[0]
-        self.assertEqual(obj.aantal_pogingen, 25)
-        old_log = obj.log
-        # 25 blijft 25
-        send_mail(obj)
-        obj = MailQueue.objects.all()[0]
-        self.assertEqual(obj.aantal_pogingen, 25)
-        self.assertEqual(obj.log, old_log)
+        # maak een ophaal verzoek aan, maar de server geeft status 500
+        bondspas.status = 'O'
+        bondspas.opnieuw_proberen_na = None
+        bondspas.save(update_fields=['status', 'opnieuw_proberen_na'])
+        url = settings.BONDSPAS_DOWNLOAD_URL % 500
+        url += '/%s'
+        with override_settings(BONDSPAS_DOWNLOAD_URL=url):
+            f1 = io.StringIO()
+            f2 = io.StringIO()
+            management.call_command('bondspas_downloader', '1', '--quick', stderr=f1, stdout=f2)
+            self.assertTrue('[WARNING] Unexpected status_code: 500' in f2.getvalue())
+            bondspas = Bondspas.objects.get(lid_nr=self.lid_nr)
+            self.assertEqual(bondspas.status, 'F')  # failed
+            self.assertIsNotNone(bondspas.opnieuw_proberen_na)
 
-    def test_obfuscate_email(self):
-        assert isinstance(self, TestCase)
-        self.assertEqual(mailer_obfuscate_email(''), '')
-        self.assertEqual(mailer_obfuscate_email('x'), 'x')
-        self.assertEqual(mailer_obfuscate_email('x@test.nhb'), 'x@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('do@test.nhb'), 'd#@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('tre@test.nhb'), 't#e@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('vier@test.nhb'), 'v##r@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('zeven@test.nhb'), 'ze##n@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('hele.lange@maaktnietuit.nl'), 'he#######e@maaktnietuit.nl')
+        # doe een echte download, maar het bestand is te klein
+        bondspas.status = 'O'
+        bondspas.opnieuw_proberen_na = None
+        bondspas.save(update_fields=['status', 'opnieuw_proberen_na'])
+        url = settings.BONDSPAS_DOWNLOAD_URL % 42
+        url += '/%s'
+        with override_settings(BONDSPAS_DOWNLOAD_URL=url):
+            f1 = io.StringIO()
+            f2 = io.StringIO()
+            management.call_command('bondspas_downloader', '1', '--quick', stderr=f1, stdout=f2)
+            self.assertTrue('[WARNING] Unreasonable length (42 bytes)' in f2.getvalue())
+            bondspas = Bondspas.objects.get(lid_nr=self.lid_nr)
+            self.assertEqual(bondspas.status, 'F')  # failed
+            self.assertIsNotNone(bondspas.opnieuw_proberen_na)
 
-    def test_email_is_valide(self):
-        assert isinstance(self, TestCase)
-        self.assertTrue(mailer_email_is_valide('test@nhb.nl'))
-        self.assertTrue(mailer_email_is_valide('jan.de.tester@nhb.nl'))
-        self.assertTrue(mailer_email_is_valide('jan.de.tester@hb.nl'))
-        self.assertTrue(mailer_email_is_valide('r@hb.nl'))
-        self.assertFalse(mailer_email_is_valide('tester@nhb'))
-        self.assertFalse(mailer_email_is_valide('test er@nhb.nl'))
-        self.assertFalse(mailer_email_is_valide('test\ter@nhb.nl'))
-        self.assertFalse(mailer_email_is_valide('test\ner@nhb.nl'))
+        # doe een echte download, maar geen content-length header
+        bondspas.status = 'O'
+        bondspas.opnieuw_proberen_na = timezone.now() - datetime.timedelta(days=2)   # zet in het verleden
+        bondspas.save(update_fields=['status', 'opnieuw_proberen_na'])
+        url = settings.BONDSPAS_DOWNLOAD_URL % '43'
+        url += '/%s'
+        with override_settings(BONDSPAS_DOWNLOAD_URL=url):
+            f1 = io.StringIO()
+            f2 = io.StringIO()
+            management.call_command('bondspas_downloader', '1', '--quick', stderr=f1, stdout=f2)
+            self.assertTrue('[WARNING] Missing header: Content-length' in f2.getvalue())
+            bondspas = Bondspas.objects.get(lid_nr=self.lid_nr)
+            self.assertEqual(bondspas.status, 'F')  # failed
+            self.assertIsNotNone(bondspas.opnieuw_proberen_na)
 
+        # ga echt een download down
+        bondspas.status = 'O'
+        bondspas.opnieuw_proberen_na = None
+        bondspas.log = 'regel niet af'  # triggert toevoegen van \n
+        bondspas.save(update_fields=['log', 'status', 'opnieuw_proberen_na'])
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with override_settings(BONDSPAS_CACHE_PATH=tmp_dir):
+                f1 = io.StringIO()
+                f2 = io.StringIO()
+                with self.assert_max_queries(20):
+                    management.call_command('bondspas_downloader', '1', '--quick', stderr=f1, stdout=f2)
+                self.assertTrue('[INFO] Bondspas ophalen voor lid 123456' in f2.getvalue())
+                bondspas = Bondspas.objects.get(lid_nr=self.lid_nr)
+                self.assertEqual(bondspas.status, 'A')      # aanwezig
 
-@override_settings(POSTMARK_URL='http://localhost:8123/postmark',
-                   POSTMARK_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
-                   EMAIL_ADDRESS_WHITELIST=())
-class TestMailerPostmark(TestMailerBase, TestCase):
-    pass
-
-
-# use a port with no service responding to it
-@override_settings(POSTMARK_URL='http://localhost:9999',
-                   POSTMARK_API_KEY='the-api-key',
-                   EMAIL_FROM_ADDRESS='noreply@nhb.test',
-                   EMAIL_ADDRESS_WHITELIST=())
-class TestMailerBadPostmark(TestMailerBadBase, TestCase):
-    pass
+        # doe nog een download die niet op te slaan is
+        tmp_dir = '/tmp/nhb-apps-autotest-bondspas/'
+        try:
+            os.mkdir(tmp_dir)
+        except FileExistsError:     # pragma: no cover
+            pass
+        os.chmod(tmp_dir, stat.S_IRUSR | stat.S_IXUSR)  # maak directory r-x
+        # st = os.stat(tmp_dir)
+        # print('mode:', st.st_mode)     # 40500 = IFDIR + R + X
+        with override_settings(BONDSPAS_CACHE_PATH=tmp_dir):
+            bondspas.status = 'O'
+            bondspas.log = 'regel niet af'          # triggert toevoegen van \n
+            bondspas.save(update_fields=['log', 'status'])
+            f1 = io.StringIO()
+            f2 = io.StringIO()
+            with self.assert_max_queries(20):
+                management.call_command('bondspas_downloader', '1', '--quick', stderr=f1, stdout=f2)
+            self.assertTrue('[WARNING] Can bestand niet opslaan: [Errno 13] Permission denied:' in f2.getvalue())
+            bondspas = Bondspas.objects.get(lid_nr=self.lid_nr)
+            self.assertEqual(bondspas.status, 'F')
+            self.assertIsNotNone(bondspas.opnieuw_proberen_na)
+        # with
+        os.rmdir(tmp_dir)
 
 
 # end of file
