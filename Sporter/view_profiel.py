@@ -208,8 +208,8 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                             gebruik_knoppen = True
 
                         if obj.inschrijf_methode == INSCHRIJF_METHODE_1 and comp.fase <= 'E':
-                            obj.url_schietmomenten = reverse('Sporter:schietmomenten',
-                                                             kwargs={'deelnemer_pk': inschrijving.pk})
+                            obj.url_wieschietwaar = reverse('Sporter:keuze-zeven-wedstrijden',
+                                                            kwargs={'deelnemer_pk': inschrijving.pk})
                             gebruik_knoppen = True
                         break
                 # for

@@ -14,17 +14,17 @@ from Competitie.models import INSCHRIJF_METHODE_1, DeelCompetitie, RegioCompetit
 from Wedstrijden.models import CompetitieWedstrijd
 
 
-TEMPLATE_LEDEN_SCHIETMOMENT = 'vereniging/competitie-schietmomenten-methode1.dtl'
+TEMPLATE_VERENIGING_WIESCHIETWAAR = 'vereniging/competitie-wieschietwaar-methode1.dtl'
 
 
-class LedenSchietmomentView(UserPassesTestMixin, TemplateView):
+class WieSchietWaarView(UserPassesTestMixin, TemplateView):
 
     """ Deze view laat de HWL/WL zien wanneer de leden willen schieten
         en geeft ze de mogelijkheid dit aan te passen voor het lid.
     """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_LEDEN_SCHIETMOMENT
+    template_name = TEMPLATE_VERENIGING_WIESCHIETWAAR
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -119,7 +119,7 @@ class LedenSchietmomentView(UserPassesTestMixin, TemplateView):
             obj.boogtype_str = obj.sporterboog.boogtype.beschrijving
 
             if self.rol_nu == Rollen.ROL_HWL:
-                obj.url_wijzig = reverse('Sporter:schietmomenten',
+                obj.url_wijzig = reverse('Sporter:keuze-zeven-wedstrijden',
                                          kwargs={'deelnemer_pk': obj.pk})
 
             obj.kruisjes = list()

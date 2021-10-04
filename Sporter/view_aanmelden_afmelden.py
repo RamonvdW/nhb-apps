@@ -23,15 +23,15 @@ from .models import SporterVoorkeuren, SporterBoog
 from decimal import Decimal
 
 
-TEMPLATE_AANMELDEN = 'sporter/bevestig-aanmelden.dtl'
-TEMPLATE_SCHIETMOMENTEN = 'sporter/schietmomenten.dtl'
+TEMPLATE_SPORTER_AANMELDEN = 'sporter/bevestig-aanmelden.dtl'
+TEMPLATE_SPORTER_KEUZE7WEDSTRIJDEN = 'sporter/keuze-zeven-wedstrijden-methode1.dtl'
 
 
 class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
 
     """ Via deze view kan een sporter zich aanmelden voor een competitie """
 
-    template_name = TEMPLATE_AANMELDEN
+    template_name = TEMPLATE_SPORTER_AANMELDEN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
@@ -409,11 +409,11 @@ class RegiocompetitieAfmeldenView(View):
         return HttpResponseRedirect(reverse('Sporter:profiel'))
 
 
-class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
+class SporterKeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
 
-    """ Via deze view kunnen sporters hun gekozen schietmomenten aanpassen (inschrijfmethode 1)"""
+    """ Via deze view kunnen sporters hun gekozen zeven wedstrijden kiezen (inschrijfmethode 1)"""
 
-    template_name = TEMPLATE_SCHIETMOMENTEN
+    template_name = TEMPLATE_SPORTER_KEUZE7WEDSTRIJDEN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
@@ -508,13 +508,13 @@ class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
         else:
             context['wedstrijden_1'] = wedstrijden2
 
-        context['url_opslaan'] = reverse('Sporter:schietmomenten',
+        context['url_opslaan'] = reverse('Sporter:keuze-zeven-wedstrijden',
                                          kwargs={'deelnemer_pk': deelnemer.pk})
 
         if rol_nu == Rollen.ROL_SPORTER:
             context['url_terug'] = reverse('Sporter:profiel')
         else:
-            context['url_terug'] = reverse('Vereniging:schietmomenten',
+            context['url_terug'] = reverse('Vereniging:wie-schiet-waar',
                                            kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
 
         menu_dynamics(self.request, context, actief='sporter-profiel')
@@ -522,8 +522,8 @@ class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def post(request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de sporter op zijn
-            schietmomenten-pagina de knop Opslaan gebruikt.
+        """ Deze functie wordt aangeroepen als de sporter de knop 'Opslaan' gebruikt
+            op de pagina waar zijn 7 wedstrijden te kiezen zijn,
         """
 
         try:
@@ -597,7 +597,7 @@ class SchutterSchietmomentenView(UserPassesTestMixin, TemplateView):
         if rol_nu == Rollen.ROL_SPORTER:
             url = reverse('Sporter:profiel')
         else:
-            url = reverse('Vereniging:schietmomenten',
+            url = reverse('Vereniging:wie-schiet-waar',
                           kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
 
         return HttpResponseRedirect(url)

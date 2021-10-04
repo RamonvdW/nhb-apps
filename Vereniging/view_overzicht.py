@@ -207,8 +207,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                     if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1 and 'B' <= comp.fase <= 'F':
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Wie schiet waar?"
-                        kaartje.tekst = 'Overzicht gekozen schietmomenten voor de %s.' % comp.beschrijving
-                        kaartje.url = reverse('Vereniging:schietmomenten', kwargs={'deelcomp_pk': deelcomp.pk})
+                        kaartje.tekst = 'Overzicht gekozen wedstrijden voor de %s.' % comp.beschrijving
+                        kaartje.url = reverse('Vereniging:wie-schiet-waar', kwargs={'deelcomp_pk': deelcomp.pk})
                         kaartje.icon = 'gamepad'
                         if comp.fase < 'B':
                             kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)

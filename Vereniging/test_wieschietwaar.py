@@ -20,16 +20,16 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
+class TestVerenigingWieSchietWaar(E2EHelpers, TestCase):
 
-    """ Tests voor de Vereniging applicatie, functies voor Schietmomenten """
+    """ Tests voor de Vereniging applicatie, functies voor Wie schiet waar """
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 
     url_overzicht = '/vereniging/'
-    url_schietmomenten = '/vereniging/leden-ingeschreven/competitie/%s/schietmomenten/'  # deelcomp_pk
-    url_aanmelden = '/vereniging/leden-aanmelden/competitie/%s/'  # comp.pk
-    url_sporter_schietmomenten = '/sporter/regiocompetitie/%s/schietmomenten/'  # regiocompetitieschutterboog.pk
+    url_aanmelden = '/vereniging/leden-aanmelden/competitie/%s/'                            # comp.pk
+    url_wieschietwaar = '/vereniging/competitie/%s/wie-schiet-waar/'                        # deelcomp_pk
+    url_sporter_zeven_wedstrijden = '/sporter/regiocompetitie/%s/keuze-zeven-wedstrijden/'  # deelnemer_pk
 
     testdata = None
 
@@ -287,7 +287,7 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
         self.deelnemer_120001 = RegioCompetitieSchutterBoog.objects.get(sporterboog=self.sporterboog_120001)
 
     def test_anon(self):
-        url = self.url_schietmomenten % self.deelcomp_regio.pk
+        url = self.url_wieschietwaar % self.deelcomp_regio.pk
         resp = self.client.get(url)
         self.assert403(resp)      # redirect = access denied
 
@@ -296,7 +296,7 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
         # zolang de competitie in fase B..F is
         # en alleen voor een regio met inschrijfmethode 1
 
-        url = self.url_schietmomenten % self.deelcomp_regio.pk
+        url = self.url_wieschietwaar % self.deelcomp_regio.pk
         urls_expected = [url]
 
         # login als HWL
@@ -305,7 +305,7 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         resp = self.client.get(self.url_overzicht)
-        urls = [url for url in self.extract_all_urls(resp, skip_menu=True) if '/schietmomenten/' in url]
+        urls = [url for url in self.extract_all_urls(resp, skip_menu=True) if '/wie-schiet-waar/' in url]
         # print('urls als HWL: %s' % urls)
         self.assertEqual(urls, urls_expected)
 
@@ -314,7 +314,7 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
         self.e2e_check_rol('WL')
 
         resp = self.client.get(self.url_overzicht)
-        urls = [url for url in self.extract_all_urls(resp, skip_menu=True) if '/schietmomenten/' in url]
+        urls = [url for url in self.extract_all_urls(resp, skip_menu=True) if '/wie-schiet-waar/' in url]
         # print('urls als WL: %s' % urls)
         self.assertEqual(urls, urls_expected)
 
@@ -324,7 +324,7 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
         self.e2e_check_rol('SEC')
 
         resp = self.client.get(self.url_overzicht)
-        urls = [url for url in self.extract_all_urls(resp, skip_menu=True) if '/schietmomenten/' in url]
+        urls = [url for url in self.extract_all_urls(resp, skip_menu=True) if '/wie-schiet-waar/' in url]
         # print('urls als SEC: %s' % urls)
         self.assertEqual(urls, [])
 
@@ -334,17 +334,17 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        url = self.url_schietmomenten % self.deelcomp_regio.pk
+        url = self.url_wieschietwaar % self.deelcomp_regio.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/competitie-schietmomenten-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/competitie-wieschietwaar-methode1.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(url)
 
         urls = self.extract_all_urls(resp, skip_menu=True)
-        url = self.url_sporter_schietmomenten % self.deelnemer_100001.pk
+        url = self.url_sporter_zeven_wedstrijden % self.deelnemer_100001.pk
         self.assertEqual(urls, [url])
 
         # gebruiker de sporter pagina om de schietmomenten aan te passen
@@ -352,14 +352,14 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/schietmomenten.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/keuze-zeven-wedstrijden-methode1.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
 
         # probeer schietmomenten van lid andere verenigingen aan te passen
-        url = self.url_sporter_schietmomenten % self.deelnemer_120001.pk
+        url = self.url_sporter_zeven_wedstrijden % self.deelnemer_120001.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert403(resp)
@@ -374,12 +374,12 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol('WL')
 
-        url = self.url_schietmomenten % self.deelcomp_regio.pk
+        url = self.url_wieschietwaar % self.deelcomp_regio.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/competitie-schietmomenten-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('vereniging/competitie-wieschietwaar-methode1.dtl', 'plein/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(urls, [])
@@ -390,7 +390,7 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        resp = self.client.get(self.url_schietmomenten % 999999)
+        resp = self.client.get(self.url_wieschietwaar % 999999)
         self.assert404(resp)     # 404 = Not found
 
         # maak een hoop extra schutters aan
@@ -400,7 +400,7 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
             basis.save()
         # for
 
-        url = self.url_schietmomenten % self.deelcomp_regio.pk
+        url = self.url_wieschietwaar % self.deelcomp_regio.pk
 
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -408,7 +408,7 @@ class TestVerenigingSchietmomenten(E2EHelpers, TestCase):
         # verbouw de deelcompetitieronde zodat deze niet meer meegenomen wordt
         self.ronde.beschrijving = 'Ronde 0 oude programma'
         self.ronde.save()
-        resp = self.client.get(self.url_schietmomenten % self.deelcomp_regio.pk)
+        resp = self.client.get(self.url_wieschietwaar % self.deelcomp_regio.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
 # end of file

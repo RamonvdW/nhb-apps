@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="sporter-schietmomenten" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="sporter-keuze-zeven-wedstrijden-methode1" %}
 
     <h4>Wanneer wil je schieten?</h4>
 

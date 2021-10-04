@@ -22,6 +22,7 @@ import datetime
 
 
 class TestSporterRegiocompetitie(E2EHelpers, TestCase):
+
     """ unit tests voor de Schutter applicatie; module Aanmelden/Afmelden Regiocompetitie """
 
     test_after = ('Account', 'NhbStructuur', 'Competitie')
@@ -31,7 +32,7 @@ class TestSporterRegiocompetitie(E2EHelpers, TestCase):
     url_aanmelden = '/sporter/regiocompetitie/aanmelden/%s/%s/'                     # deelcomp_pk, sporterboog_pk
     url_bevestig_aanmelden = '/sporter/regiocompetitie/aanmelden/%s/%s/bevestig/'   # deelcomp_pk, sporterboog_pk
     url_afmelden = '/sporter/regiocompetitie/afmelden/%s/'                          # regiocomp_pk
-    url_schietmomenten = '/sporter/regiocompetitie/%s/schietmomenten/'              # deelnemer_pk
+    url_zeven_wedstrijden = '/sporter/regiocompetitie/%s/keuze-zeven-wedstrijden/'  # deelnemer_pk
     url_planning_regio = '/bondscompetities/regio/planning/%s/'                     # deelcomp_pk
     url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'  # ronde_pk
     url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'  # wedstrijd_pk
@@ -301,7 +302,7 @@ class TestSporterRegiocompetitie(E2EHelpers, TestCase):
         self.assert404(resp)     # 404 = Not found
 
         # schietmomenten
-        url = self.url_schietmomenten % 999999
+        url = self.url_zeven_wedstrijden % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp)     # 404 = Not found
@@ -446,7 +447,7 @@ class TestSporterRegiocompetitie(E2EHelpers, TestCase):
         self.assertEqual(inschrijving.inschrijf_notitie, 'Hallo daar!')
         self.assertEqual(inschrijving.inschrijf_voorkeur_dagdeel, 'GN')
 
-        # schrijf in voor de 25m BB, zonder AG, als aspriant
+        # schrijf in voor de 25m BB, zonder AG, als aspirant
         self.sporter1.geboorte_datum = datetime.date(year=timezone.now().year - 12, month=1, day=1)
         self.sporter1.save()
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
@@ -792,7 +793,7 @@ class TestSporterRegiocompetitie(E2EHelpers, TestCase):
         self.e2e_login(self.account_normaal)
 
         # probeer de schietmomenten van een andere schutter aan te passen
-        url = self.url_schietmomenten % aanmelding2.pk
+        url = self.url_zeven_wedstrijden % aanmelding2.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert403(resp)
@@ -802,12 +803,12 @@ class TestSporterRegiocompetitie(E2EHelpers, TestCase):
         self.assert403(resp)
 
         # pas de schietmomenten aan
-        url = self.url_schietmomenten % aanmelding.pk
+        url = self.url_zeven_wedstrijden % aanmelding.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/schietmomenten.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/keuze-zeven-wedstrijden-methode1.dtl', 'plein/site_layout.dtl'))
 
         # wedstrijd behouden
         with self.assert_max_queries(20):
@@ -835,7 +836,7 @@ class TestSporterRegiocompetitie(E2EHelpers, TestCase):
 
         # bad deelnemer_pk
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_schietmomenten % 999999)
+            resp = self.client.post(self.url_zeven_wedstrijden % 999999)
         self.assert404(resp)
 
         # special: probeer inschrijving met competitie in verkeerde fase

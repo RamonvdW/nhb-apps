@@ -6,12 +6,12 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Schietmomenten{% endblock %}
+{% block title %}Wie schiet waar{% endblock %}
 
 {% block pagina %}
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-schietmomenten-methode1" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-wieschietwaar-methode1" %}
 
-    <h4>Schietmomenten</h4>
+    <h4>Wie schiet waar?</h4>
 
     <p>In jouw regio mogen de sporters aangeven wanneer ze kunnen schieten.</p>
     <p>Hieronder krijg je het overzicht voor leden van jouw vereniging en kan je je leden helpen deze keuzes aan te passen.</p>
