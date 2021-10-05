@@ -779,6 +779,13 @@ class E2EHelpers(object):
         self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
         if expected_msg:
             assert isinstance(self, TestCase)
-            self.assertContains(resp, expected_msg)
+            pagina = str(resp.content)
+            if expected_msg not in pagina:
+                # haal de nuttige regel informatie uit de 404 pagina en toon die
+                pos = pagina.find('<code>')
+                pagina = pagina[pos+6:]
+                pos = pagina.find('</code>')
+                pagina = pagina[:pos]
+                self.fail(msg='404 pagina contained %s instead of %s' % (repr(pagina), repr(expected_msg)))
 
 # end of file
