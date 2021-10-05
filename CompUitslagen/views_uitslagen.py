@@ -27,8 +27,8 @@ TEMPLATE_COMPUITSLAGEN_RAYON_INDIV = 'compuitslagen/uitslagen-rayon-indiv.dtl'
 TEMPLATE_COMPUITSLAGEN_BOND = 'compuitslagen/uitslagen-bond.dtl'
 
 
-def get_schutter_regio_nr(request):
-    """ Geeft het regio nummer van de ingelogde schutter terug,
+def get_sporter_regio_nr(request):
+    """ Geeft het regio nummer van de ingelogde sporter terug,
         of 101 als er geen regio vastgesteld kan worden
     """
     regio_nr = 101
@@ -51,7 +51,7 @@ def get_schutter_regio_nr(request):
                      .order_by('regio_nr'))[0]
             regio_nr = regio.regio_nr
     elif rol_nu == Rollen.ROL_SPORTER:
-        # schutter
+        # sporter
         account = request.user
         if account.sporter_set.count() > 0:
             sporter = account.sporter_set.all()[0]
@@ -62,7 +62,7 @@ def get_schutter_regio_nr(request):
     return regio_nr
 
 
-def get_schutter_ver_nr(request):
+def get_sporter_ver_nr(request):
 
     """ Geeft het vereniging nhb nummer van de ingelogde schutter terug,
         of 101 als er geen regio vastgesteld kan worden
@@ -202,7 +202,7 @@ class UitslagenVerenigingIndivView(TemplateView):
             ver_nr = int(ver_nr)
         except KeyError:
             # zoek de vereniging die bij de huidige gebruiker past
-            ver_nr = get_schutter_ver_nr(self.request)
+            ver_nr = get_sporter_ver_nr(self.request)
         except ValueError:
             raise Http404('Verkeerd verenigingsnummer')
 
@@ -377,7 +377,7 @@ class UitslagenRegioIndivView(TemplateView):
             regio_nr = int(regio_nr)
         except KeyError:
             # bepaal welke (initiële) regio bij de huidige gebruiker past
-            regio_nr = get_schutter_regio_nr(self.request)
+            regio_nr = get_sporter_regio_nr(self.request)
         except ValueError:
             raise Http404('Verkeerd regionummer')
 
@@ -584,7 +584,7 @@ class UitslagenRegioTeamsView(TemplateView):
             regio_nr = int(regio_nr)
         except KeyError:
             # bepaal welke (initiële) regio bij de huidige gebruiker past
-            regio_nr = get_schutter_regio_nr(self.request)
+            regio_nr = get_sporter_regio_nr(self.request)
         except ValueError:
             raise Http404('Verkeerd regionummer')
 
@@ -774,14 +774,14 @@ class UitslagenVerenigingTeamsView(TemplateView):
 
         teamtype_afkorting = kwargs['team_type'][:2]     # afkappen voor veiligheid
 
-        # ver_nr is optioneel en resulteert in het nummer van de schutter
+        # ver_nr is optioneel en resulteert in het nummer van de sporter
         try:
             ver_nr = kwargs['ver_nr'][:4]     # afkappen voor veiligheid
             ver_nr = int(ver_nr)
         except KeyError:
             # TODO: onmogelijk om hier te komen (ivm URL design)
             # zoek de vereniging die bij de huidige gebruiker past
-            ver_nr = get_schutter_ver_nr(self.request)
+            ver_nr = get_sporter_ver_nr(self.request)
         except ValueError:
             raise Http404('Verkeerd verenigingsnummer')
 
@@ -1079,10 +1079,10 @@ class UitslagenRayonIndivView(TemplateView):
             deelnemers = (KampioenschapSchutterBoog
                           .objects
                           .exclude(bij_vereniging__isnull=True,      # attentie gevallen
-                                   deelname=DEELNAME_NEE)            # geen schutters die zicht afgemeld hebben
+                                   deelname=DEELNAME_NEE)            # geen sporters die zich afgemeld hebben
                           .filter(deelcompetitie=deelcomp,
                                   klasse__indiv__boogtype=boogtype,
-                                  volgorde__lte=48)                 # toon tot 48 schutters per klasse
+                                  volgorde__lte=48)                  # toon tot 48 sporters per klasse
                           .select_related('klasse__indiv',
                                           'sporterboog__sporter',
                                           'bij_vereniging')
@@ -1101,7 +1101,7 @@ class UitslagenRayonIndivView(TemplateView):
             # competitie is nog in de regiocompetitie fase
             context['regiocomp_nog_actief'] = True
 
-            # schutter moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
+            # sporters moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
             deelcomp_pks = (DeelCompetitie
                             .objects
                             .filter(laag=LAAG_REGIO,

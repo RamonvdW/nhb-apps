@@ -64,6 +64,9 @@ class TestData(object):
         self.functie_sec = dict()               # [ver_nr] = Functie
         self.functie_hwl = dict()               # [ver_nr] = Functie
 
+        # leden
+        self.ver_sporters = dict()              # [ver_nr] = list(Sporter)
+
         # competities
         self.comp18 = None                      # Competitie
         self.deelcomp18_bk = None               # DeelCompetitie
@@ -258,7 +261,9 @@ class TestData(object):
 
     def _maak_verenigingen(self):
         """
-            Maak in elk van de 16 regio's vier verenigingen aan
+            Maak in regios 101..107 elk vier verenigingen aan
+            Maak in regios 108..116 elk twee verenigingen aan
+            Maak in regio 100 twee verenigingen aan
 
             ver_nr = regio_nr * 10 + volgnummer
                      1053 is dus 3e vereniging in regio 105
@@ -307,8 +312,7 @@ class TestData(object):
             # for
         # for
 
-    @staticmethod
-    def _maak_leden():
+    def _maak_leden(self):
         """
             Maak voor elke vereniging een aantal leden aan: een mix van alle wedstrijdklassen en boogtypen.
 
@@ -334,7 +338,7 @@ class TestData(object):
             (16, 'M', 'Cad16', 'R'),
             (16, 'M', 'Cad16b', 'C'),
             (16, 'M', 'Cad16c', 'BB'),
-            (17, 'V', 'Cad17', 'R'),
+            (17, 'V', 'Cad17', 'R'),            # account
             (17, 'V', 'Cad17b', 'C'),
             (17, 'V', 'Cad17c', 'BB'),
             (18, 'M', 'Jun18', 'R'),
@@ -342,7 +346,7 @@ class TestData(object):
             (18, 'M', 'Jun18c', 'BB'),
             (18, 'V', 'Jun18', 'BB'),
             (19, 'V', 'Jun19', 'R'),
-            (19, 'V', 'Jun19b', 'C'),
+            (19, 'V', 'Jun19b', 'C'),           # account
             (20, 'M', 'Jun20', 'R'),
             (20, 'M', 'Jun20b', 'LB'),
             (21, 'V', 'Sen21', 'R'),
@@ -352,7 +356,7 @@ class TestData(object):
             (22, 'M', 'Sen23', 'r'),            # kleine letter: geen voorkeur voor de competitie
             (31, 'V', 'Sen31', 'R'),
             (32, 'M', 'Sen32', 'C'),
-            (32, 'M', 'Sen32b', 'BB'),
+            (32, 'M', 'Sen32b', 'BB'),          # account
             (33, 'V', 'Sen33', 'R'),
             (33, 'V', 'Sen33b', 'BB'),
             (34, 'M', 'Sen34', 'LB'),           # Sen34 = HWL
@@ -369,14 +373,14 @@ class TestData(object):
             (49, 'V', 'Sen49', 'R'),
             (49, 'V', 'Sen49b', 'BB'),
             (50, 'M', 'Mas50', 'R'),            # Mas50 = SEC
-            (51, 'V', 'Mas51', 'R'),
+            (51, 'V', 'Mas51', 'R'),            # account
             (51, 'V', 'Mas51b', 'C'),
             (51, 'V', 'Mas52', 'r'),            # kleine letter: geen voorkeur voor de competitie
             (59, 'M', 'Mas59', 'R'),
             (59, 'M', 'Mas59b', 'LB'),
             (60, 'V', 'Vet60', 'R'),
             (60, 'V', 'Vet60b', 'C'),
-            (60, 'V', 'Vet60c', 'LB'),
+            (60, 'V', 'Vet60c', 'LB'),          # account
             (61, 'M', 'Vet61', 'C'),
             (61, 'M', 'Vet61b', 'C'),
             (80, 'V', 'Vet80', 'R'),
@@ -395,6 +399,8 @@ class TestData(object):
         lid_nr = 300000
         bulk = list()
         for ver in NhbVereniging.objects.all():
+            self.ver_sporters[ver.ver_nr] = list()
+
             for wleeftijd, geslacht, voornaam, _ in soorten:
                 lid_nr += 1
                 achternaam = "Lid%s van Club%s" % (ver.ver_nr, lid_nr)
@@ -427,7 +433,12 @@ class TestData(object):
 
         bulk_voorkeuren = list()
         bulk_sporter = list()
-        for sporter in Sporter.objects.all():
+        for sporter in (Sporter
+                        .objects
+                        .select_related('account',
+                                        'bij_vereniging')
+                        .all()):
+
             gewenst_boogtype = geslacht_voornaam2boogtype[sporter.geslacht + sporter.voornaam]
 
             # voorkeuren
@@ -482,9 +493,12 @@ class TestData(object):
             Koppel deze accounts aan de rollen SEC en HWL
         """
 
+        voornamen = ('Sen34', 'Sen39', 'Mas50',                         # Beheerders: SEC, HWL, WL
+                     'Cad17', 'Jun19b', 'Sen32b', 'Mas51', 'Vet60c')    # Sporter accounts
+
         # maak voor elke vereniging een paar accounts aan
         bulk = list()
-        for sporter in Sporter.objects.filter(voornaam__in=('Sen34', 'Sen39', 'Mas50')):
+        for sporter in Sporter.objects.filter(voornaam__in=voornamen):
             account = Account(
                             username=str(sporter.lid_nr),
                             otp_code=self.OTP_CODE,
@@ -506,7 +520,7 @@ class TestData(object):
         for sporter in (Sporter
                         .objects
                         .select_related('bij_vereniging')
-                        .filter(voornaam__in=('Sen34', 'Sen39', 'Mas50'))):
+                        .filter(voornaam__in=voornamen)):
 
             account = username2account[str(sporter.lid_nr)]
             sporter.account = account
@@ -517,8 +531,10 @@ class TestData(object):
                 self.account_hwl[ver_nr] = account
             elif sporter.voornaam == 'Mas50':
                 self.account_sec[ver_nr] = account
-            else:
+            elif sporter.voornaam == 'Sen39':
                 self._accounts_beheerders.append(account)
+            else:
+                self.ver_sporters[ver_nr].append(sporter)
         # for
 
         # maak de functies aan

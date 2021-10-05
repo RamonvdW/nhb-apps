@@ -5,10 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
 from Competitie.models import DeelCompetitie, LAAG_RK
 from Competitie.operations import competities_aanmaken
 from TestHelpers.e2ehelpers import E2EHelpers
-from TestHelpers import testdata
+from TestHelpers.testdata import TestData
 
 
 class TestCompRayonTeams(E2EHelpers, TestCase):
@@ -24,10 +25,15 @@ class TestCompRayonTeams(E2EHelpers, TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.testdata = testdata.TestData()
+        print('CompRayon: populating testdata start')
+        s1 = timezone.now()
+        cls.testdata = TestData()
         cls.testdata.maak_accounts()
         cls.testdata.maak_clubs_en_sporters()
         cls.testdata.maak_bondscompetities()
+        s2 = timezone.now()
+        d = s2 - s1
+        print('CompRayon: populating testdata took %s seconds' % d.seconds)
 
     def setUp(self):
         """ eenmalige setup voor alle tests
