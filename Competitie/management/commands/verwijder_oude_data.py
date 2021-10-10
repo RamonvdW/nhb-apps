@@ -158,13 +158,12 @@ class Command(BaseCommand):
         """ ScoreHist.notitie bevat de opmerking
             door ScoreHist.score te verwijderen, wordt ScoreHist ook verwijderd
         """
-        self._verwijder_score_scorehist_met_notitie(
-                    "Importeer scores van uitslagen.handboogsport.nl voor ronde")
 
+        # al overal verwijderd
         self._verwijder_score_scorehist_met_notitie(
                     "Uitslag competitie seizoen 2019/2020")
 
-        # behouden, want dit is de basis voor seizoen 2021/2022!
+        # behouden, want dit zijn de AG's voor seizoen 2021/2022!
         # self._verwijder_score_scorehist_met_notitie(
         #             "Uitslag competitie seizoen 2020/2021")
 
