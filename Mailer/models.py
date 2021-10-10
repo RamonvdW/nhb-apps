@@ -45,31 +45,29 @@ def mailer_queue_email(to_address, onderwerp, text_body, enforce_whitelist=True)
         Het feitelijk versturen van de email wordt door een achtergrondtaak gedaan
     """
 
-    if not to_address:
-        # geen e-mailadres opgegeven --> jammer dan
-        return
+    # e-mailadres is verplicht
+    if to_address:
+        now = timezone.now()    # in utc
 
-    now = timezone.now()    # in utc
+        # maak de date: header voor in de mail, in lokale tijdzone
+        # formaat: Tue, 01 Jan 2020 20:00:03 +0100
+        mail_date = timezone.localtime(now).strftime("%a, %d %b %Y %H:%M:%S %z")
 
-    # maak de date: header voor in de mail, in lokale tijdzone
-    # formaat: Tue, 01 Jan 2020 20:00:03 +0100
-    mail_date = timezone.localtime(now).strftime("%a, %d %b %Y %H:%M:%S %z")
+        obj = MailQueue(toegevoegd_op=now,
+                        laatste_poging=now,
+                        mail_to=to_address,
+                        mail_subj=onderwerp,
+                        mail_date=mail_date,
+                        mail_text=text_body)
 
-    obj = MailQueue(toegevoegd_op=now,
-                    laatste_poging=now,
-                    mail_to=to_address,
-                    mail_subj=onderwerp,
-                    mail_date=mail_date,
-                    mail_text=text_body)
+        # als er een whitelist is, dan moet het e-mailadres er in voorkomen
+        if enforce_whitelist and len(settings.EMAIL_ADDRESS_WHITELIST) > 0:
+            if to_address not in settings.EMAIL_ADDRESS_WHITELIST:
+                # blokkeer het versturen
+                # op deze manier kunnen we wel zien dat het bericht aangemaakt is
+                obj.is_blocked = True
 
-    # als er een whitelist is, dan moet het e-mailadres er in voorkomen
-    if enforce_whitelist and len(settings.EMAIL_ADDRESS_WHITELIST) > 0:
-        if to_address not in settings.EMAIL_ADDRESS_WHITELIST:
-            # blokkeer het versturen
-            # op deze manier kunnen we wel zien dat het bericht aangemaakt is
-            obj.is_blocked = True
-
-    obj.save()
+        obj.save()
 
 
 def mailer_obfuscate_email(email):

@@ -22,10 +22,10 @@ class CreateOnlyAdmin(admin.ModelAdmin):
 
     createonly_fields = ()
 
-    def get_readonly_fields(self, request, obj=None):
+    def get_readonly_fields(self, request, obj=None):                       # pragma: no cover
         readonly_fields = list(super().get_readonly_fields(request, obj))
         createonly_fields = list(getattr(self, 'createonly_fields', []))
-        if obj:                                     # pragma: no cover
+        if obj:
             # editing an existing object
             readonly_fields.extend(createonly_fields)
         return readonly_fields
@@ -114,9 +114,9 @@ class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
         super().__init__(model, admin_site)
         self.obj = None
 
-    def get_form(self, request, obj=None, **kwargs):
-        if obj:                 # pragma: no branch
-            self.obj = obj      # pragma: no cover
+    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        if obj:
+            self.obj = obj
         return super().get_form(request, obj, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover

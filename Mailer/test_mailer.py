@@ -9,13 +9,11 @@ from .models import MailQueue, mailer_queue_email, mailer_obfuscate_email, maile
 from .mailer import send_mail
 
 
-class TestMailerBase(object):
+class TestMailerBase(TestCase):
 
     """ tests voor de Mailer applicatie """
 
     def test_queue_mail(self):
-        assert isinstance(self, TestCase)
-
         objs = MailQueue.objects.all()
         self.assertEqual(len(objs), 0)
 
@@ -41,7 +39,6 @@ class TestMailerBase(object):
 
     def test_send_mail_deliver(self):
         # requires websim_mailer.py running in the background
-        assert isinstance(self, TestCase)
 
         # stop een mail in de queue
         self.assertEqual(0, MailQueue.objects.count())
@@ -60,7 +57,6 @@ class TestMailerBase(object):
 
     def test_send_mail_deliver_faal(self):
         # requires websim_mailer.py running in the background
-        assert isinstance(self, TestCase)
 
         # stop een mail in de queue
         objs = MailQueue.objects.all()
@@ -79,7 +75,6 @@ class TestMailerBase(object):
         self.assertFalse(obj.is_verstuurd)
 
     def test_obfuscate_email(self):
-        assert isinstance(self, TestCase)
         self.assertEqual(mailer_obfuscate_email(''), '')
         self.assertEqual(mailer_obfuscate_email('x'), 'x')
         self.assertEqual(mailer_obfuscate_email('x@test.nhb'), 'x@test.nhb')
@@ -90,7 +85,6 @@ class TestMailerBase(object):
         self.assertEqual(mailer_obfuscate_email('hele.lange@maaktnietuit.nl'), 'he#######e@maaktnietuit.nl')
 
     def test_email_is_valide(self):
-        assert isinstance(self, TestCase)
         self.assertTrue(mailer_email_is_valide('test@nhb.nl'))
         self.assertTrue(mailer_email_is_valide('jan.de.tester@nhb.nl'))
         self.assertTrue(mailer_email_is_valide('jan.de.tester@hb.nl'))
@@ -102,8 +96,6 @@ class TestMailerBase(object):
 
     def test_whitelist(self):
         # controleer dat de whitelist zijn werk doet
-        assert isinstance(self, TestCase)
-
         self.assertEqual(0, MailQueue.objects.count())
 
         with self.settings(EMAIL_ADDRESS_WHITELIST=('een.test@nhb.not',)):
@@ -120,22 +112,13 @@ class TestMailerBase(object):
         # with
 
 
-class TestMailerBadBase(object):
+class TestMailerBadBase(TestCase):
 
     """ tests voor de Mailer applicatie """
-
-    def test_no_api_key(self):
-        assert isinstance(self, TestCase)
-        with self.settings(POSTMARK_API_KEY=''):
-            send_mail(None)
-
-        # als we hier komen is het goed, want geen exception
-        self.assertTrue(True)
 
     def test_send_mail_no_connect(self):
         # deze test eist dat de URL wijst naar een poort waar niet op gereageerd wordt
         # zoals http://localhost:9999
-        assert isinstance(self, TestCase)
 
         # stop een mail in de queue
         objs = MailQueue.objects.all()
@@ -153,7 +136,6 @@ class TestMailerBadBase(object):
     def test_send_mail_limit(self):
         # deze test eist dat de URL wijst naar een poort waar niet op gereageerd wordt
         # zoals http://localhost:9999
-        assert isinstance(self, TestCase)
 
         # stop een mail in de queue
         objs = MailQueue.objects.all()
@@ -179,7 +161,6 @@ class TestMailerBadBase(object):
         self.assertEqual(obj.log, old_log)
 
     def test_obfuscate_email(self):
-        assert isinstance(self, TestCase)
         self.assertEqual(mailer_obfuscate_email(''), '')
         self.assertEqual(mailer_obfuscate_email('x'), 'x')
         self.assertEqual(mailer_obfuscate_email('x@test.nhb'), 'x@test.nhb')
@@ -190,7 +171,6 @@ class TestMailerBadBase(object):
         self.assertEqual(mailer_obfuscate_email('hele.lange@maaktnietuit.nl'), 'he#######e@maaktnietuit.nl')
 
     def test_email_is_valide(self):
-        assert isinstance(self, TestCase)
         self.assertTrue(mailer_email_is_valide('test@nhb.nl'))
         self.assertTrue(mailer_email_is_valide('jan.de.tester@nhb.nl'))
         self.assertTrue(mailer_email_is_valide('jan.de.tester@hb.nl'))
@@ -205,7 +185,7 @@ class TestMailerBadBase(object):
                    POSTMARK_API_KEY='the-api-key',
                    EMAIL_FROM_ADDRESS='noreply@nhb.test',
                    EMAIL_ADDRESS_WHITELIST=())
-class TestMailerPostmark(TestMailerBase, TestCase):
+class TestMailerPostmark(TestMailerBase):
     pass
 
 
@@ -214,8 +194,13 @@ class TestMailerPostmark(TestMailerBase, TestCase):
                    POSTMARK_API_KEY='the-api-key',
                    EMAIL_FROM_ADDRESS='noreply@nhb.test',
                    EMAIL_ADDRESS_WHITELIST=())
-class TestMailerBadPostmark(TestMailerBadBase, TestCase):
+class TestMailerBadPostmark(TestMailerBadBase):
     pass
+
+
+# voorkom uitvoeren van tests in de base class
+del TestMailerBase
+del TestMailerBadBase
 
 
 # end of file
