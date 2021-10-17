@@ -30,7 +30,7 @@
                         {% if obj.comp_type == '18' %}
                             {% if obj.is_team is False %}
                                 <li class="collection-item">
-                                    <a href="{{ obj.url }}" class="nhb-klikbare-balk">
+                                    <a href="{{ obj.url }}" class="btn-nhb-blauw">
                                         <div>{{ obj.klasse }}</div>
                                     </a>
                                 </li>
@@ -54,7 +54,7 @@
                         {% if obj.comp_type == '25' %}
                             {% if obj.is_team is False %}
                                 <li class="collection-item">
-                                    <a href="{{ obj.url }}" class="nhb-klikbare-balk">
+                                    <a href="{{ obj.url }}" class="btn-nhb-blauw">
                                         <div>{{ obj.klasse }}</div>
                                     </a>
                                 </li>

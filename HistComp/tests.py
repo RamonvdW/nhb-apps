@@ -227,9 +227,16 @@ class TestHistComp(E2EHelpers, TestCase):
         self.assertContains(resp, 'Blazoengatenmaker')
         # TODO: check correct records was returned
 
-        # filter on a number
+        # filter on a ver_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url, {'filter': rec.vereniging_nr})
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        # filter on a lid_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url, {'filter': rec.schutter_nr})
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)

@@ -118,7 +118,7 @@
 
                 <tr>
                     <td class="center-align">{{ obj.rank }}</td>
-                    <td>{{ obj.schutter_naam|highlight:zoekterm }}</td>
+                    <td>[{{ obj.schutter_nr_str|highlight:zoekterm }}] {{ obj.schutter_naam|highlight:zoekterm }}</td>
                     <td>[{{ obj.vereniging_nr }}] {{ obj.vereniging_naam|highlight:zoekterm }}</td>
                     <td class="center-align">{{ obj.gemiddelde }}</td>
 

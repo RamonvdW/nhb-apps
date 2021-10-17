@@ -165,17 +165,22 @@ class HistCompBaseView(ListView):
                 if self.is_team:
                     if filter_is_nr:
                         return self.query_class.objects.filter(
-                            vereniging_nr__exact=self.get_filter,
-                            histcompetitie=histcomp).order_by('rank')
+                                    schutter_nr__exact=filter_nr,
+                                    histcompetitie=histcomp).order_by('rank')
                     else:
                         return self.query_class.objects.filter(
                             vereniging_naam__icontains=self.get_filter,
                             histcompetitie=histcomp).order_by('rank')
                 else:
                     if filter_is_nr:
-                        return self.query_class.objects.filter(
-                                            vereniging_nr__exact=self.get_filter,
-                                            histcompetitie=histcomp).order_by('rank')
+                        if filter_nr < 100000:
+                            return self.query_class.objects.filter(
+                                                vereniging_nr__exact=filter_nr,
+                                                histcompetitie=histcomp).order_by('rank')
+                        else:
+                            return self.query_class.objects.filter(
+                                                schutter_nr__exact=filter_nr,
+                                                histcompetitie=histcomp).order_by('rank')
                     else:
                         return self.query_class.objects.filter(
                                             Q(schutter_naam__icontains=self.get_filter) |
@@ -254,6 +259,11 @@ class HistCompBaseView(ListView):
             context['all_url'] = self.base_url + '?all=1'
             context['all_count'] = self.all_count
         # else: we laten de 'all' lijst zien dus laat de 'all' knop weg
+
+        if not self.is_team:
+            for obj in context['object_list']:
+                obj.schutter_nr_str = str(obj.schutter_nr)
+            # for
 
         menu_dynamics_competitie(self.request, context, actief='histcomp')
         return context
