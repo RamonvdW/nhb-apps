@@ -246,7 +246,10 @@
                         {% endfor %}
                     </table>
                 </div>
-                <br>
+
+                <p>Kijk op <code>www.handboogsport.nl</code> onder Procedures hoe je een presetatiespeld aan kan vragen:
+                    <a class="btn-nhb-blauw" href="https://www.handboogsport.nl/de-nhb/#procedures" target="_blank" rel="noopener noreferrer">
+                        <i class="material-icons-round left">open_in_new</i>Link</a></p>
             </div>
         </div>
     {% endif %}
