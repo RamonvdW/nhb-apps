@@ -366,6 +366,36 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             sterktes = None
         return sterktes
 
+    @staticmethod
+    def _find_scores(sporter):
+        scores = list()
+
+        for deelnemer in (RegioCompetitieSchutterBoog
+                          .objects
+                          .select_related('deelcompetitie',
+                                          'deelcompetitie__competitie',
+                                          'sporterboog',
+                                          'sporterboog__boogtype')
+                          .filter(sporterboog__sporter=sporter)
+                          .order_by('deelcompetitie__competitie__afstand')):
+
+            comp = deelnemer.deelcompetitie.competitie
+
+            if comp.afstand == '18':
+                deelnemer.competitie_str = "18m Indoor"
+            else:
+                deelnemer.competitie_str = "25m 1pijl"
+
+            deelnemer.seizoen_str = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
+
+            deelnemer.scores_str = "%s, %s, %s, %s, %s, %s, %s" % (deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7)
+
+            deelnemer.boog_str = deelnemer.sporterboog.boogtype.beschrijving
+
+            scores.append(deelnemer)
+        # for
+        return scores
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -396,6 +426,8 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             context['regiocompetities'] = regiocomps
             context['moet_bogen_kiezen'] = moet_bogen_kiezen
             context['gebruik_knoppen'] = gebruik_knoppen
+
+            context['regiocomp_scores'] = self._find_scores(sporter)
 
             context['gemiddelden'], context['heeft_ags'] = self._find_gemiddelden(sporter, alle_bogen)
 
