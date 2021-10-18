@@ -29,6 +29,7 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
     url_scores = '/bondscompetities/scores/bij-de-vereniging/'
     url_wedstrijden = '/bondscompetities/scores/wedstrijden-bij-de-vereniging/'
     url_waarschijnlijke = '/bondscompetities/scores/waarschijnlijke-deelnemers/%s/'  # wedstrijd_pk
+    url_waarschijnlijke_bestand = '/bondscompetities/scores/waarschijnlijke-deelnemers/%s/als-bestand/' # wedstrijd_pk
 
     testdata = None
 
@@ -399,6 +400,10 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol('WL')
 
+        wedstrijd = CompetitieWedstrijd.objects.all()[0]
+        wedstrijd.beschrijving = 'Hallo'
+        wedstrijd.save(update_fields=['beschrijving'])
+
         # haal de lijst van wedstrijden
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wedstrijden)
@@ -414,6 +419,26 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers.dtl', 'plein/site_layout.dtl'))
+
+        # als bestand
+        url = self.url_waarschijnlijke_bestand % self.wedstrijden[1].pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_is_bestand(resp)
+
+        # zet teamcompetitie uit
+        self.deelcomp_regio_18.regio_organiseert_teamcompetitie = False
+        self.deelcomp_regio_18.save(update_fields=['regio_organiseert_teamcompetitie'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_is_bestand(resp)
+
+        # niet bestaande wedstrijd
+        url = self.url_waarschijnlijke_bestand % 999999
+        resp = self.client.get(url)
+        self.assert404(resp, 'Wedstrijd niet gevonden')
 
     def test_wedstrijden_sec(self):
         # login als SEC
