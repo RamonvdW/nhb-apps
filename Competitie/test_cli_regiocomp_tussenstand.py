@@ -9,7 +9,7 @@ from django.core import management
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, CompetitieKlasse, DeelCompetitie, DeelcompetitieRonde,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
-                               LAAG_REGIO, LAAG_BK)
+                               LAAG_REGIO, LAAG_BK, update_uitslag_teamcompetitie)
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.operations import competities_aanmaken, competitie_klassegrenzen_vaststellen
 from NhbStructuur.models import NhbRegio, NhbVereniging
@@ -458,6 +458,17 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog=self.sporterboog_100001)
         self.assertEqual(deelnemer.bij_vereniging.ver_nr, self.ver.ver_nr)
+        sporter = self.sporterboog_100001.sporter
+
+        # zet de sporter tijdelijk 'zwevend', ook al voorkomt de CRM import deze situatie tegenwoordig
+        sporter.bij_vereniging = None
+        sporter.save(update_fields=['bij_vereniging'])
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(165):
+            management.call_command('regiocomp_tussenstand', '2', '--all', '--quick', stderr=f1, stdout=f2)
+        self.assertFalse("[INFO] Verwerk overstap" in f2.getvalue())
 
         # maak een tweede vereniging aan
         regio_116 = NhbRegio.objects.get(regio_nr=116)
@@ -469,9 +480,8 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
-        sporter = deelnemer.sporterboog.sporter
         sporter.bij_vereniging = ver
-        sporter.save()
+        sporter.save(update_fields=['bij_vereniging'])
 
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -483,7 +493,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         self.ver.regio = regio_116
         self.ver.save()
         sporter.bij_vereniging = self.ver
-        sporter.save()
+        sporter.save(update_fields=['bij_vereniging'])
 
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -616,6 +626,9 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(135):
             management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
+
+        # maak een fake ScoreHist record aan
+        update_uitslag_teamcompetitie()
 
         # corner case
         zet_competitie_fase(self.comp, 'L')

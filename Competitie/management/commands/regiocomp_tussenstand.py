@@ -8,7 +8,7 @@
 # voor zowel individueel als team score aspecten
 
 from django.core.management.base import BaseCommand
-from django.db.models import F
+from django.db.models import F, Q
 import django.db.utils
 from Competitie.models import (CompetitieTaken, CompetitieKlasse,
                                LAAG_REGIO, Competitie, DeelCompetitie, DeelcompetitieRonde,
@@ -39,7 +39,7 @@ class Command(BaseCommand):
         parser.add_argument('--all', action='store_true')       # alles opnieuw vaststellen
         parser.add_argument('--quick', action='store_true')     # for testing
 
-    def _verwerk_overstappers_regio(self, comp):
+    def _verwerk_overstappers_regio(self, regio_comp_pks):
         objs = (RegioCompetitieSchutterBoog
                 .objects
                 .select_related('bij_vereniging',
@@ -47,7 +47,9 @@ class Command(BaseCommand):
                                 'sporterboog__sporter',
                                 'sporterboog__sporter__bij_vereniging',
                                 'sporterboog__sporter__bij_vereniging__regio')
-                .exclude(bij_vereniging=F('sporterboog__sporter__bij_vereniging')))   # bevat geen uitstappers
+                .filter(deelcompetitie__competitie__pk__in=regio_comp_pks)
+                .filter((~Q(bij_vereniging=F('sporterboog__sporter__bij_vereniging')) |     # bevat geen uitstappers
+                         Q(sporterboog__sporter__bij_vereniging=None))))                    # bevat de uitstappers
         for obj in objs:
             sporter = obj.sporterboog.sporter
             if sporter.bij_vereniging:
@@ -64,7 +66,7 @@ class Command(BaseCommand):
                 obj.save()
         # for
 
-    def _verwerk_overstappers_rk(self, comp):
+    def _verwerk_overstappers_rk(self, rk_comp_pks):
         # ondersteuning om een overschrijving af te ronden
         # schutters die eerder geen vereniging hebben en wel een vereniging
         objs = (KampioenschapSchutterBoog
@@ -73,7 +75,8 @@ class Command(BaseCommand):
                                 'sporterboog__sporter',
                                 'sporterboog__sporter__bij_vereniging',
                                 'sporterboog__sporter__bij_vereniging__regio__rayon')
-                .filter(bij_vereniging__isnull=True))
+                .filter(deelcompetitie__competitie__pk__in=rk_comp_pks,
+                        bij_vereniging__isnull=True))
         for obj in objs:
             # schutter had geen vereniging; nu wel
             # alleen overnemen als de nieuwe vereniging in het juiste rayon zit
@@ -107,14 +110,20 @@ class Command(BaseCommand):
         # 3. Bij vaststellen RK/BK deelname/reserve wordt vereniging bevroren
         #    KampioenschapSchutterBoog.bij_vereniging
 
+        regio_comp_pks = list()
+        rk_comp_pks = list()
         for comp in Competitie.objects.filter(is_afgesloten=False):
             comp.bepaal_fase()
-            if comp.fase <= 'F':        # Regiocompetitie
-                self._verwerk_overstappers_regio(comp)
-                # uitstappers kijken we niet meer naar -> gewoon op oude vereniging houden
-            elif comp.fase == 'K':      # RK
-                self._verwerk_overstappers_rk(comp)
+            if comp.fase <= 'F':
+                # in fase van de regiocompetitie
+                regio_comp_pks.append(comp.pk)
+            elif comp.fase == 'K':
+                # in fase van de rayonkampioenschappen
+                rk_comp_pks.append(comp.pk)
         # for
+
+        self._verwerk_overstappers_regio(regio_comp_pks)
+        self._verwerk_overstappers_rk(rk_comp_pks)
 
     def _prep_caches(self):
         # maak een structuur om gerelateerde IndivWedstrijdklassen te vinden
@@ -463,7 +472,7 @@ class Command(BaseCommand):
             new_count = ScoreHist.objects.count()
             if new_count != hist_count:
                 # verwijder eventuele 'fake records' die gebruikt zijn als trigger van deze dienst
-                fake_objs = ScoreHist.objects.filter(score__sporterboog__sporter=None)
+                fake_objs = ScoreHist.objects.filter(score=None)
                 fake_count = fake_objs.count()
                 if fake_count > 0:
                     self.stdout.write('[DEBUG] Verwijder %s fake ScoreHist records' % fake_count)
