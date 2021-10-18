@@ -74,7 +74,7 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
             obj.pks = obj.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True)
 
             for pk in obj.pks:
-                if pk not in wedstrijd_pks:
+                if pk not in wedstrijd_pks:         # pragma: no branch
                     wedstrijd_pks.append(pk)
         # for
 

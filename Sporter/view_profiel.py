@@ -362,7 +362,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _find_speelsterktes(sporter):
         sterktes = Speelsterkte.objects.filter(sporter=sporter).order_by('volgorde')
-        if sterktes.count() == 0:
+        if sterktes.count() == 0:           # pragma: no branch
             sterktes = None
         return sterktes
 

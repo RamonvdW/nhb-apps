@@ -251,7 +251,7 @@ class TestData(object):
                             account=account,
                             acceptatie_datum=now)
                 bulk.append(vhpg)
-                if len(bulk) > 500:
+                if len(bulk) > 500:         # pragma: no cover
                     VerklaringHanterenPersoonsgegevens.objects.bulk_create(bulk)
                     bulk = list()
         # for
@@ -603,7 +603,7 @@ class TestData(object):
                               afstand_meter=afstand)
                 bulk.append(score)
 
-                if len(bulk) > 500:
+                if len(bulk) > 500:                 # pragma: no cover
                     Score.objects.bulk_create(bulk)
                     bulk = list()
         # for
@@ -741,7 +741,7 @@ class TestData(object):
         # for
 
         resp = client.post(url, data)
-        if resp.status_code != 302:
+        if resp.status_code != 302:             # pragma: no cover
             self._dump_resp(resp)
             raise ValueError('Inschrijven van sporters failed')
 
