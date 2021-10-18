@@ -281,7 +281,7 @@ class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
         sporterboog = SporterBoog.objects.get(sporter__lid_nr=lid_nr, boogtype__afkorting=afkorting)
         score_indiv_ag_opslaan(sporterboog, afstand, 7.42, self.account_hwl, 'Test AG %s' % afstand)
 
-    def _create_deelnemers(self, do_18=True, do_25=False):
+    def _create_deelnemers(self):
         # moet ingelogd zijn als HWL
         url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'      # <comp_pk>
 
@@ -291,74 +291,40 @@ class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
         self._zet_schutter_voorkeuren(100012)       # R
         self._zet_schutter_voorkeuren(100013)       # IB
 
-        if do_18:           # pragma: no branch
-            self._zet_ag(100002, 18)
-            self._zet_ag(100003, 18)
-            self._zet_ag(100004, 18)
-            self._zet_ag(100013, 18)
+        self._zet_ag(100002, 18)
+        self._zet_ag(100003, 18)
+        self._zet_ag(100004, 18)
+        self._zet_ag(100013, 18)
 
-            url = url_inschrijven % self.comp_18.pk
-            with self.assert_max_queries(33):
-                resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
-                                              'lid_100003_boogtype_3': 'on',    # 3=BB
-                                              'lid_100004_boogtype_1': 'on',    # 1=R
-                                              'lid_100012_boogtype_1': 'on',    # 1=R
-                                              'lid_100013_boogtype_4': 'on',    # 4=IB
-                                              'wil_in_team': 'ja!'})
-            self.assert_is_redirect_not_plein(resp)     # check success
+        url = url_inschrijven % self.comp_18.pk
+        with self.assert_max_queries(33):
+            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
+                                          'lid_100003_boogtype_3': 'on',    # 3=BB
+                                          'lid_100004_boogtype_1': 'on',    # 1=R
+                                          'lid_100012_boogtype_1': 'on',    # 1=R
+                                          'lid_100013_boogtype_4': 'on',    # 4=IB
+                                          'wil_in_team': 'ja!'})
+        self.assert_is_redirect_not_plein(resp)     # check success
 
-            # print('aantal ingeschreven deelnemers:', RegioCompetitieSchutterBoog.objects.count())
+        # print('aantal ingeschreven deelnemers:', RegioCompetitieSchutterBoog.objects.count())
 
-            for obj in (RegioCompetitieSchutterBoog
-                        .objects
-                        .select_related('sporterboog__sporter')
-                        .filter(deelcompetitie__competitie=self.comp_18)
-                        .all()):
-                nr = obj.sporterboog.sporter.lid_nr
-                if nr == 100002:
-                    self.deelnemer_100002_18 = obj
-                elif nr == 100003:
-                    self.deelnemer_100003_18 = obj
-                elif nr == 100004:
-                    self.deelnemer_100004_18 = obj
-                elif nr == 100012:
-                    self.deelnemer_100012_18 = obj
-                elif nr == 100013:  # pragma: no branch
-                    self.deelnemer_100013_18 = obj
-            # for
-
-        if do_25:
-            url = url_inschrijven % self.comp_25.pk
-            with self.assert_max_queries(23):
-                self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
-                                       'lid_100004_boogtype_1': 'on',    # 1=R
-                                       'lid_100012_boogtype_1': 'on',    # 1=R
-                                       'wil_in_team': 'ja!'})
-
-            for obj in (RegioCompetitieSchutterBoog
-                        .objects
-                        .select_related('sporterboog__sporter')
-                        .filter(deelcompetitie__competitie=self.comp_25)
-                        .all()):
-                nr = obj.sporterboog.sporter.lid_nr
-                if nr == 100002:
-                    self.deelnemer_100002_25 = obj
-                elif nr == 100004:
-                    self.deelnemer_100004_25 = obj
-                elif nr == 100012:      # pragma: no branch
-                    self.deelnemer_100012_25 = obj
-            # for
-
-    def _verwerk_mutaties(self, max_mutaties=20, show=False):
-        # vraag de achtergrond taak om de mutaties te verwerken
-        f1 = io.StringIO()
-        f2 = io.StringIO()
-        with self.assert_max_queries(max_mutaties):
-            management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
-
-        if show:                    # pragma: no coverage
-            print(f1.getvalue())
-            print(f2.getvalue())
+        for obj in (RegioCompetitieSchutterBoog
+                    .objects
+                    .select_related('sporterboog__sporter')
+                    .filter(deelcompetitie__competitie=self.comp_18)
+                    .all()):
+            nr = obj.sporterboog.sporter.lid_nr
+            if nr == 100002:
+                self.deelnemer_100002_18 = obj
+            elif nr == 100003:
+                self.deelnemer_100003_18 = obj
+            elif nr == 100004:
+                self.deelnemer_100004_18 = obj
+            elif nr == 100012:
+                self.deelnemer_100012_18 = obj
+            elif nr == 100013:  # pragma: no branch
+                self.deelnemer_100013_18 = obj
+        # for
 
     def test_rk_teams(self):
         self.client.logout()

@@ -121,7 +121,7 @@ class TestData(object):
         self._accounts_beheerders = list()      # 1 per vereniging, voor BKO, RKO, RCL
 
     @staticmethod
-    def _dump_resp(resp):
+    def _dump_resp(resp):                                                       # pragma: no cover
         print("status code:", resp.status_code)
         print(repr(resp))
         if resp.status_code == 302:
@@ -138,19 +138,19 @@ class TestData(object):
                            {'login_naam': account.username,
                             'wachtwoord': self.WACHTWOORD})
         if resp.status_code != 302:
-            raise ValueError('Login as HWL failed')
+            raise ValueError('Login as HWL failed')                             # pragma: no cover
 
         # pass OTP
         resp = client.post(self.url_check_otp,
                            {'otp_code': pyotp.TOTP(account.otp_code).now()})
-        if resp.status_code != 302 or resp.url != self.url_wissel_van_rol:
+        if resp.status_code != 302 or resp.url != self.url_wissel_van_rol:      # pragma: no cover
             self._dump_resp(resp)
             raise ValueError('OTP check voor HWL failed')
 
     def _wissel_naar_functie(self, client, functie):
         # wissel naar HWL
         resp = client.post(self.url_activeer_functie % functie.pk)
-        if resp.status_code != 302:
+        if resp.status_code != 302:                                             # pragma: no cover
             self._dump_resp(resp)
             raise ValueError('Wissel naar functie HWL failed')
 

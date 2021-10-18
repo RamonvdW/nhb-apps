@@ -22,7 +22,7 @@ import datetime
 import io
 
 
-class TestVerenigingTeams(E2EHelpers, TestCase):
+class CompRegioTestTeamsHWL(E2EHelpers, TestCase):
 
     """ tests voor de CompRegio applicatie, Teams functies voor de HWL """
 
@@ -360,7 +360,7 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(max_mutaties):
             management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
-        if show:                    # pragma: no coverage
+        if show:                    # pragma: no cover
             print(f1.getvalue())
             print(f2.getvalue())
 
@@ -590,6 +590,26 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_regio_teams % self.deelcomp25_regio111.pk)
 
+    def test_wl(self):
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        zet_competitie_fase(self.comp_18, 'B')
+        self.deelcomp18_regio111.einde_teams_aanmaken = self.deelcomp18_regio111.competitie.einde_aanmeldingen
+        self.deelcomp18_regio111.save()
+
+        self._create_deelnemers()
+
+        self.e2e_wissel_naar_functie(self.functie_wl)
+        self.e2e_check_rol('WL')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_regio_teams % self.deelcomp18_regio111.pk)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compregio/hwl-teams.dtl', 'plein/site_layout.dtl'))
+
     def test_koppel(self):
         # login als HWL
         self.e2e_login_and_pass_otp(self.account_hwl)
@@ -697,6 +717,24 @@ class TestVerenigingTeams(E2EHelpers, TestCase):
             resp = self.client.get(self.url_koppelen % team_bb.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('compregio/hwl-teams-koppelen.dtl', 'plein/site_layout.dtl'))
+
+        # probeer te koppelen van andere vereniging
+        pks = list(RegiocompetitieTeam.objects.values_list('pk', flat=True))
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
+                                    {'team_type': 'C'})
+        self.assert_is_redirect_not_plein(resp)
+        team = RegiocompetitieTeam.objects.exclude(pk__in=pks).all()[0]
+        team.vereniging = self.nhbver2
+        team.save(update_fields=['vereniging'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_koppelen % team.pk)
+        self.assert404(resp, 'Team is niet van jouw vereniging')
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_koppelen % team.pk, {})
+        self.assert404(resp, 'Team is niet van jouw vereniging')
 
         # koppel-scherm na uiterste datum wijzigen
         self.deelcomp18_regio111.einde_teams_aanmaken -= datetime.timedelta(days=5)
