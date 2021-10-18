@@ -188,7 +188,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rko1)
 
     @staticmethod
-    def _dump_deelnemers():                 # pragma: no coverage
+    def _dump_deelnemers():                 # pragma: no cover
         print('')
         print('====================================================================')
         print('Deelnemers:')
@@ -208,7 +208,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
             objs = KampioenschapSchutterBoog.objects.all()
         else:
             # verwijder de kampioenen
-            objs = KampioenschapSchutterBoog.objects.filter(kampioen_label='')      # pragma: no coverage
+            objs = KampioenschapSchutterBoog.objects.filter(kampioen_label='')      # pragma: no cover
 
         objs = objs.order_by('volgorde')
 
@@ -251,7 +251,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         with self.assert_max_queries(max_mutaties, check_duration=check_duration):
             management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
-        if show:                    # pragma: no coverage
+        if show:                    # pragma: no cover
             print(f1.getvalue())
             print(f2.getvalue())
 

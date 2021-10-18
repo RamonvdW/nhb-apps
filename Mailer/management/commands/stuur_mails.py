@@ -115,9 +115,9 @@ class Command(BaseCommand):
             if not options['skip_old']:
                 self._stuur_oude_mails()
             self._stuur_nieuwe_mails()
-        except DataError as exc:                        # pragma: no coverage
+        except DataError as exc:                        # pragma: no cover
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
-        except KeyboardInterrupt:                       # pragma: no coverage
+        except KeyboardInterrupt:                       # pragma: no cover
             pass
 
         self.stdout.write('Klaar')

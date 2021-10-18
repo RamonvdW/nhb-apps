@@ -72,7 +72,7 @@ class Command(BaseCommand):
                 except IndivRecord.DoesNotExist:
                     # new record
                     pass
-                except IndivRecord.MultipleObjectsReturned:     # pragma: no coverage
+                except IndivRecord.MultipleObjectsReturned:     # pragma: no cover
                     errors.append('Meerdere records voor %s-%s' % (blad, val))
                 else:
                     # gevonden, dus voorkom verwijderen

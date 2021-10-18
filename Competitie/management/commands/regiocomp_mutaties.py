@@ -800,9 +800,9 @@ class Command(BaseCommand):
         # vang generieke fouten af
         try:
             self._monitor_nieuwe_mutaties()
-        except django.db.utils.DataError as exc:        # pragma: no coverage
+        except django.db.utils.DataError as exc:        # pragma: no cover
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
-        except KeyboardInterrupt:                       # pragma: no coverage
+        except KeyboardInterrupt:                       # pragma: no cover
             pass
 
         self.stdout.write('[DEBUG] Aantal pings ontvangen: %s' % self._count_ping)

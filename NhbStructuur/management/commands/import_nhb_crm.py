@@ -490,7 +490,7 @@ class Command(BaseCommand):
                     del self._cache_ver[obj.pk]
                     obj.delete()
                     self._count_verwijderingen += 1
-                except ProtectedError as exc:       # pragma: no coverage
+                except ProtectedError as exc:       # pragma: no cover
                     self._count_errors += 1
                     self.stderr.write('[ERROR] Onverwachte fout bij het verwijderen van een vereniging: %s' % str(exc))
         # while
@@ -1140,7 +1140,7 @@ class Command(BaseCommand):
             self._import_members(data['members'])
             self._import_clubs_secretaris(data['clubs'])
             self._import_wedstrijdlocaties(data['clubs'])
-        except DataError as exc:        # pragma: no coverage
+        except DataError as exc:        # pragma: no cover
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
 
         self.stdout.write('Import van CRM data is klaar')
