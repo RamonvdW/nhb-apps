@@ -188,7 +188,7 @@ class Command(BaseCommand):
     def _vind_sec(self, ver_nr):
         try:
             ver_nr = int(ver_nr)
-        except ValueError:
+        except ValueError:          # pragma: no cover
             self.stderr.write('[ERROR] Foutief verenigingsnummer: %s (geen getal)' % repr(ver_nr))
         else:
             try:
@@ -911,7 +911,7 @@ class Command(BaseCommand):
                         self.stderr.write('[WARNING] Kan speelsterkte volgorde niet vaststellen voor: (%s, %s)' % (repr(disc), repr(beschr)))
 
                     sterk = Speelsterkte(
-                                 lid=obj,
+                                 sporter=obj,
                                  beschrijving=beschr,
                                  discipline=disc,
                                  category=cat,
