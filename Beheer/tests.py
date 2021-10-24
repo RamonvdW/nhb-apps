@@ -21,6 +21,7 @@ BEHEER_PAGINAS = (
     '/beheer/BasisTypen/leeftijdsklasse/',
     '/beheer/BasisTypen/teamtype/',
     '/beheer/BasisTypen/teamwedstrijdklasse/',
+    '/beheer/Bondspas/bondspas/',
     '/beheer/Competitie/competitie/',
     '/beheer/Competitie/competitieklasse/',
     '/beheer/Competitie/competitiemutatie/',
@@ -28,6 +29,7 @@ BEHEER_PAGINAS = (
     '/beheer/Competitie/deelcompetitieklasselimiet/',
     '/beheer/Competitie/deelcompetitieronde/',
     '/beheer/Competitie/kampioenschapschutterboog/',
+    '/beheer/Competitie/kampioenschapteam/',
     '/beheer/Competitie/regiocompetitierondeteam/',
     '/beheer/Competitie/regiocompetitieschutterboog/',
     '/beheer/Competitie/regiocompetitieteam/',
@@ -46,13 +48,14 @@ BEHEER_PAGINAS = (
     '/beheer/NhbStructuur/nhbrayon/',
     '/beheer/NhbStructuur/nhbregio/',
     '/beheer/NhbStructuur/nhbvereniging/',
-    '/beheer/NhbStructuur/speelsterkte/',
     '/beheer/Overig/sitefeedback/',
     '/beheer/Overig/sitetijdelijkeurl/',
     '/beheer/Records/besteindivrecords/',
     '/beheer/Records/indivrecord/',
     '/beheer/Score/score/',
     '/beheer/Score/scorehist/',
+    '/beheer/Sporter/secretaris/',
+    '/beheer/Sporter/speelsterkte/',
     '/beheer/Sporter/sporter/',
     '/beheer/Sporter/sporterboog/',
     '/beheer/Sporter/sportervoorkeuren/',
@@ -65,7 +68,7 @@ BEHEER_PAGINAS = (
     '/beheer/jsi18n/',
     '/beheer/login/',
     '/beheer/logout/',
-    '/beheer/password_change/',
+    '/beheer/password_change/'
 )
 
 
