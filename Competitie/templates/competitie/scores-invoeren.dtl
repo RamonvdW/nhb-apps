@@ -442,7 +442,7 @@
 
             let deelnemers = rsp['deelnemers']
             // sorteer deelnemers op invoeg-volgorde: bondsnummer
-            deelnemers.sort(function(a,b) { return a.lid_nr - b.lid_nr })
+            deelnemers.sort(function(a,b) { if (a.lid_nr !== b.lid_nr) { return a.lid_nr - b.lid_nr } else { return a.pk - b.pk } })
             //console.log('sorted deelnemers:', deelnemers)
 
             let first_added_row
@@ -472,7 +472,7 @@
                         skip = true
                         break
                     }
-                    else if (lid_nr < row_lid_nr)
+                    else if (lid_nr < row_lid_nr || (lid_nr == row_lid_nr && pk < row_pk))      // warning: breaks when changing to ===
                     {
                         // lid_nr is minder dan lid_nr in deze regel
                         row_nr -= 1     // toevoegen voor deze regel
