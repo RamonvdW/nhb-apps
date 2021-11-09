@@ -4,7 +4,7 @@
 #
 #    pip-compile requirements_dev.in
 #
-arrow==1.2.0
+arrow==1.2.1
     # via
     #   -r requirements_test.txt
     #   djangosaml2idp
@@ -22,15 +22,15 @@ certifi==2021.10.8
     # via
     #   -r requirements_test.txt
     #   requests
-cffi==1.14.6
+cffi==1.15.0
     # via
     #   -r requirements_test.txt
     #   cryptography
-charset-normalizer==2.0.6
+charset-normalizer==2.0.7
     # via
     #   -r requirements_test.txt
     #   requests
-coverage==6.0.1
+coverage==6.1.1
     # via -r requirements_dev.in
 cryptography==35.0.0
     # via
@@ -57,13 +57,13 @@ elementpath==2.3.2
     # via
     #   -r requirements_test.txt
     #   xmlschema
-google-api-core==2.1.0
+google-api-core==2.2.2
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-google-api-python-client==2.24.0
+google-api-python-client==2.29.0
     # via -r requirements_test.txt
-google-auth==2.3.0
+google-auth==2.3.3
     # via
     #   -r requirements_test.txt
     #   google-api-core
@@ -79,26 +79,26 @@ googleapis-common-protos==1.53.0
     #   google-api-core
 html5validator==0.4.0
     # via -r requirements_dev.in
-httplib2==0.20.1
+httplib2==0.20.2
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
     #   google-auth-httplib2
-idna==2.10
+idna==3.3
     # via
     #   -r requirements_test.txt
     #   requests
-importlib-resources==5.2.2
+importlib-resources==5.4.0
     # via
     #   -r requirements_test.txt
     #   pysaml2
-packaging==21.0
+packaging==21.2
     # via pip-review
-pip-licenses==3.5.2
+pip-licenses==3.5.3
     # via -r requirements_dev.in
 pip-review==1.1.0
     # via -r requirements_dev.in
-protobuf==3.18.1
+protobuf==3.19.1
     # via
     #   -r requirements_test.txt
     #   google-api-core
@@ -116,7 +116,7 @@ pyasn1-modules==0.2.8
     # via
     #   -r requirements_test.txt
     #   google-auth
-pycparser==2.20
+pycparser==2.21
     # via
     #   -r requirements_test.txt
     #   cffi
@@ -146,7 +146,7 @@ pytz==2021.3
     #   django
     #   djangosaml2idp
     #   pysaml2
-pyyaml==5.4.1
+pyyaml==6.0
     # via html5validator
 qrcode==7.3.1
     # via -r requirements_test.txt
@@ -162,18 +162,19 @@ rsa==4.7.2
 six==1.16.0
     # via
     #   -r requirements_test.txt
+    #   google-auth
     #   google-auth-httplib2
     #   pyopenssl
     #   pysaml2
     #   python-dateutil
-soupsieve==2.2.1
+soupsieve==2.3
     # via beautifulsoup4
 sqlparse==0.4.2
     # via
     #   -r requirements_test.txt
     #   django
     #   django-debug-toolbar
-uritemplate==3.0.1
+uritemplate==4.1.1
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
@@ -181,7 +182,7 @@ urllib3==1.26.7
     # via
     #   -r requirements_test.txt
     #   requests
-xmlschema==1.8.0
+xmlschema==1.8.1
     # via
     #   -r requirements_test.txt
     #   pysaml2
