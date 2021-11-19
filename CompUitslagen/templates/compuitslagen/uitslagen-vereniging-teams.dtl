@@ -74,9 +74,21 @@
                 <thead>
                     <tr>
                         <th>Team</th>
-                        <th class="center-align" colspan="7">Scores</th>
+                        <th class="center-align" colspan="7">Ronde</th>
                         <th><!-- spacing --></th>
                         <th>Klasse</th>
+                    </tr>
+
+                    <tr>
+                        <th><!-- team --></th>
+                        <th class="right-align smal">1</th>
+                        <th class="right-align smal">2</th>
+                        <th class="right-align smal">3</th>
+                        <th class="right-align smal">4</th>
+                        <th class="right-align smal">5</th>
+                        <th class="right-align smal">6</th>
+                        <th class="right-align smal">7</th>
+                        <th colspan="2"></th>
                     </tr>
                 </thead>
 
@@ -116,13 +128,23 @@
                     {% endfor %}
 
                     <tr>
-                        <td class="right-align">Ronde score:</td>
+                        <td class="right-align">Team score:</td>
                         {% for score in team.ronde_scores %}
                             <!--{% if score != '-' %} style="text-decoration:overline"{% endif %}-->
                             <td class="right-align smal">{{ score }}</td>
                         {% endfor %}
                         <td colspan="2"><!-- spacing, klasse --></td>
                     </tr>
+
+                    {% if toon_punten %}
+                        <tr>
+                            <td class="right-align">Punten:</td>
+                            {% for punten in team.ronde_punten %}
+                                <td class="right-align smal">{% if punten >= 0 %}{{ punten }}{% endif %}</td>
+                            {% endfor %}
+                            <td colspan="2"><!-- spacing, klasse --></td>
+                        </tr>
+                    {% endif %}
 
                 {% endfor %}
             </table>

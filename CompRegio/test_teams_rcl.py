@@ -537,7 +537,6 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
 
         self.deelcomp_regio112_18.regio_team_punten_model = TEAM_PUNTEN_MODEL_FORMULE1
         self.deelcomp_regio112_18.save(update_fields=['regio_team_punten_model'])
-        # TEAM_PUNTEN_MODEL_SOM_SCORES
 
         # maak een paar teams aan
         self._maak_teams(self.deelcomp_regio112_18)
@@ -572,9 +571,14 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
         self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
 
-        # voor een paar scores in
+        # voer een paar scores in
+        top_teams = list(RegiocompetitieRondeTeam.objects.values_list('pk', flat=True))
+        top_teams = top_teams[-2:]
         for ronde_team in RegiocompetitieRondeTeam.objects.all():
-            ronde_team.team_score = 100 + ronde_team.pk
+            if ronde_team.pk in top_teams:
+                ronde_team.team_score = 999
+            else:
+                ronde_team.team_score = 100 + ronde_team.pk
             ronde_team.save(update_fields=['team_score'])
         # for
 
@@ -586,6 +590,10 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
 
         self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 2)
+
+        # controleer de wp verdeling: de twee top teams hebben dezelfde score, dus dezelfde wp
+        wps = list(RegiocompetitieRondeTeam.objects.filter(pk__in=top_teams).values_list('team_punten', flat=True))
+        self.assertEqual(wps, [10, 10])
 
     def test_team_ronde_som(self):
         self.e2e_login_and_pass_otp(self.account_rcl112_18)

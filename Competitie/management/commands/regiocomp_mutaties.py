@@ -14,8 +14,7 @@ from django.core.management.base import BaseCommand
 from BasisTypen.models import TeamType
 from Competitie.models import (Competitie, CompetitieTaken, DeelCompetitie, DeelcompetitieKlasseLimiet,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE,
-                               CompetitieMutatie, RegiocompetitieTeamPoule,
+                               KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE, CompetitieMutatie,
                                MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M, MUTATIE_COMPETITIE_OPSTARTEN,
                                MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AANMELDEN, MUTATIE_AFMELDEN, MUTATIE_TEAM_RONDE)
 from Competitie.operations import (competities_aanmaken, bepaal_startjaar_nieuwe_competitie,

@@ -9,7 +9,8 @@ from django.urls import reverse
 from django.http import Http404
 from BasisTypen.models import BoogType, TeamType
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
-from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DEELNAME_NEE, TEAM_PUNTEN_MODEL_TWEE,
+from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DEELNAME_NEE,
+                               TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES,
                                Competitie, DeelCompetitie, DeelcompetitieKlasseLimiet,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
@@ -605,6 +606,8 @@ class UitslagenRegioTeamsView(TemplateView):
 
         context['deelcomp'] = deelcomp
 
+        context['toon_punten'] = (deelcomp.regio_team_punten_model != TEAM_PUNTEN_MODEL_SOM_SCORES)
+
         self._maak_filter_knoppen(context, comp, regio_nr, teamtype_afkorting)
         if not context['teamtype']:
             raise Http404('Verkeerd team type')
@@ -662,7 +665,13 @@ class UitslagenRegioTeamsView(TemplateView):
         for ronde_team in ronde_teams:
             team = pk2team[ronde_team.team.pk]
             team.rondes.append(ronde_team)
-            team.ronde_scores.append(ronde_team.team_score)
+
+            if ronde_team.ronde_nr < deelcomp.huidige_team_ronde:
+                tup = (ronde_team.team_score, ronde_team.team_punten)
+            else:
+                tup = (ronde_team.team_score, -1)
+
+            team.ronde_scores.append(tup)
             team.totaal_score += ronde_team.team_score
             team.totaal_punten += ronde_team.team_punten
         # for
@@ -682,8 +691,9 @@ class UitslagenRegioTeamsView(TemplateView):
                        0-team.totaal_score,         # hoogste score bovenaan
                        team.pk, poule, team)
 
+                filler = ('-', -1)
                 while len(team.ronde_scores) < 7:
-                    team.ronde_scores.append('-')
+                    team.ronde_scores.append(filler)
 
                 unsorted_teams.append(tup)
         # for
@@ -804,13 +814,15 @@ class UitslagenVerenigingTeamsView(TemplateView):
                                                'team_type': teamtype.afkorting.lower(),
                                                'regio_nr': regio_nr})
 
-        context['deelcomp'] = DeelCompetitie.objects.get(competitie=comp, nhb_regio=ver.regio)
+        context['deelcomp'] = deelcomp = DeelCompetitie.objects.get(competitie=comp, nhb_regio=ver.regio)
+
+        context['toon_punten'] = (deelcomp.regio_team_punten_model != TEAM_PUNTEN_MODEL_SOM_SCORES)
 
         # zoek alle verenigingsteams erbij
         teams = (RegiocompetitieTeam
                  .objects
                  .exclude(klasse=None)
-                 .filter(deelcompetitie__competitie=comp,
+                 .filter(deelcompetitie=deelcomp,
                          team_type=context['teamtype'],
                          vereniging=ver)
                  .order_by('klasse__team__volgorde'))
@@ -820,6 +832,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
             pk2team[team.pk] = team
             team.rondes = list()
             team.ronde_scores = list()
+            team.ronde_punten = list()
             team.naam_str = "[%s] %s" % (team.vereniging.ver_nr, team.team_naam)
             team.totaal_score = 0
             team.totaal_punten = 0
@@ -837,6 +850,12 @@ class UitslagenVerenigingTeamsView(TemplateView):
             team = pk2team[ronde_team.team.pk]
             team.rondes.append(ronde_team)
             team.ronde_scores.append(ronde_team.team_score)
+
+            if ronde_team.ronde_nr < deelcomp.huidige_team_ronde:
+                team.ronde_punten.append(ronde_team.team_punten)
+            else:
+                team.ronde_punten.append(-1)
+
             team.totaal_score += ronde_team.team_score
             team.totaal_punten += ronde_team.team_punten
 
@@ -958,6 +977,9 @@ class UitslagenVerenigingTeamsView(TemplateView):
 
             while len(team.ronde_scores) < 7:
                 team.ronde_scores.append('-')
+
+            while len(team.ronde_punten) < 7:
+                team.ronde_punten.append(-1)
 
             unsorted_teams.append(tup)
         # for

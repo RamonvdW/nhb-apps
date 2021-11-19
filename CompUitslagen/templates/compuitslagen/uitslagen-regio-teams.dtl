@@ -101,27 +101,34 @@
                 <tr style="visibility: collapse">
                     <td colspan="2"><!-- rank, naam --></td>
                     <td class="right-align smal">888</td>
+                    <td class="left-align smal">{% if toon_punten %}(10){% else %}-{% endif %}</td>
                     <td class="right-align smal">888</td>
+                    <td class="left-align smal">{% if toon_punten %}(10){% else %}-{% endif %}</td>
                     <td class="right-align smal">888</td>
+                    <td class="left-align smal">{% if toon_punten %}(10){% else %}-{% endif %}</td>
                     <td class="right-align smal">888</td>
+                    <td class="left-align smal">{% if toon_punten %}(10){% else %}-{% endif %}</td>
                     <td class="right-align smal">888</td>
+                    <td class="left-align smal">{% if toon_punten %}(10){% else %}-{% endif %}</td>
                     <td class="right-align smal">888</td>
+                    <td class="left-align smal">{% if toon_punten %}(10){% else %}-{% endif %}</td>
                     <td class="right-align smal">888</td>
+                    <td class="left-align smal">{% if toon_punten %}(10){% else %}-{% endif %}</td>
                     <td class="right-align hide-on-small-only">8888</td>
-                    <td class="right-align">88</td>
+                    <td class="right-align">{% if toon_punten %}88{% else %}-{% endif %}</td>
                 </tr>
             {% endif %}
 
             {% if team.break_poule %}
                 {% if team.schema %}
                     <tr class="nhb-grijs">
-                        <td colspan="12">
+                        <td colspan="19">
                             <h6>Wedstrijdschema</h6>
                         </td>
                     </tr>
 
                     <tr>
-                        <td colspan="12" style="padding:0">
+                        <td colspan="19" style="padding:0">
                             <table>
                                 <thead>
                                     <tr>
@@ -148,7 +155,7 @@
 
                 {% if not team.is_afsluiter %}
                     <tr class="nhb-grijs">
-                        <td colspan="12">
+                        <td colspan="19">
                             <br>
                             {% if team.poule_str == '??' %}
                                 <h5 class="red-text">Nog niet in een poule geplaatst</h5>
@@ -162,14 +169,14 @@
 
             {% if team.break_klasse %}
                 <tr class="nhb-grijs">
-                    <td colspan="12"><h6>Klasse: {{ team.klasse_str }}</h6></td>
+                    <td colspan="19"><h6>Klasse: {{ team.klasse_str }}</h6></td>
                 </tr>
                 <tr>
                     <th><!-- rank --></th>
                     <th>Team</th>
-                    <th class="center-align" colspan="7">Scores</th>
+                    <th class="center-align" colspan="14">{% if toon_punten %}Scores / Punten{% else %}Scores{% endif %}</th>
                     <th class="right-align hide-on-small-only">Totaal</th>
-                    <th class="right-align">Punten</th>
+                    <th class="right-align">{% if toon_punten %}Punten{% endif %}</th>
                 </tr>
             {% endif %}
 
@@ -177,11 +184,12 @@
                 <tr>
                     <td class="center-align smal">{{ team.rank }}</td>
                     <td class="smal">{{ team.naam_str }}</td>
-                    {% for score in team.ronde_scores %}
+                    {% for score, punten in team.ronde_scores %}
                         <td class="right-align smal">{{ score }}</td>
+                        <td class="left-align smal">{% if toon_punten %}{% if punten >= 0 %}/ {{ punten }}{% endif %}{% endif %}</td>
                     {% endfor %}
                     <td class="right-align hide-on-small-only">{{ team.totaal_score }}</td>
-                    <td class="right-align">{{ team.totaal_punten }}</td>
+                    <td class="right-align">{% if toon_punten %}{{ team.totaal_punten }}{% endif %}</td>
                 </tr>
             {% endif %}
 
