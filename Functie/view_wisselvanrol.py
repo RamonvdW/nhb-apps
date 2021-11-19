@@ -43,16 +43,22 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu, self.functie_nu = None, None
+        self.account = None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+
+        if not self.request.user.is_authenticated:
+            return False
+
+        self.account = self.request.user
 
         # evalueer opnieuw welke rechten de gebruiker heeft
         rol_evalueer_opnieuw(self.request)
 
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
 
-        return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
+        return rol_mag_wisselen(self.request)
 
     def dispatch(self, request, *args, **kwargs):
         """ wegsturen naar tweede factor koppelen uitleg """
@@ -91,11 +97,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
             rol, functie_pk = child_tup
 
             # rollen die je altijd aan moet kunnen nemen als je ze hebt
-            if rol == Rollen.ROL_IT:
-                url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
-                objs.append({'titel': 'IT beheerder', 'url': url, 'volgorde': 1})
-
-            elif rol == Rollen.ROL_BB:
+            if rol == Rollen.ROL_BB:
                 url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
                 objs.append({'titel': 'Manager competitiezaken', 'url': url, 'volgorde': 2})
 
@@ -237,6 +239,10 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         context['show_vhpg'], context['vhpg'] = account_needs_vhpg(self.request.user)
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
+        if self.account.is_staff:
+            context['url_admin_site'] = reverse('admin:index')
+            context['url_login_as'] = reverse('Account:account-wissel')
+
         # als we hier komen weten is de tweede factor gekoppeld is
         # de controle van de tweede factor moet misschien nog uitgevoerd worden
         context['show_otp_controle'] = not account_rechten_is_otp_verified(self.request)
@@ -248,12 +254,8 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         context['wiki_rollen'] = reverse_handleiding(self.request, settings.HANDLEIDING_ROLLEN)
         context['wiki_intro_nieuwe_beheerders'] = reverse_handleiding(self.request, settings.HANDLEIDING_INTRO_NIEUWE_BEHEERDERS)
 
-        # login-as functie voor IT beheerder
-        if self.rol_nu == Rollen.ROL_IT:
-            context['url_login_as'] = reverse('Account:account-wissel')
-
-        # snel wissel kaartje voor IT en BB
-        if self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
+        # snel wissel kaartje voor BB
+        if self.rol_nu == Rollen.ROL_BB:
             context['heeft_alle_rollen'] = self._maak_alle_rollen()
             context['url_wissel_naar_sec'] = reverse('Functie:wissel-naar-sec')
 
@@ -279,7 +281,7 @@ class WisselNaarSecretarisView(UserPassesTestMixin, TemplateView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_get_huidige(self.request) in (Rollen.ROL_IT, Rollen.ROL_BB)
+        return rol_get_huidige(self.request) == Rollen.ROL_BB
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

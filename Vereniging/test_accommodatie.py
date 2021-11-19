@@ -170,19 +170,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assert403(resp)
 
-    def test_it(self):
-        # login als IT
-        self.e2e_login_and_pass_otp(self.testdata.account_admin)
-        self.e2e_wisselnaarrol_it()
-        self.e2e_check_rol('IT')
-
-        # grote lijst - alle locaties
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_lijst)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
-
     def test_bb(self):
         # login als BB
         self.e2e_login_and_pass_otp(self.testdata.account_bb)

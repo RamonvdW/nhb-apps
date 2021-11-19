@@ -140,18 +140,6 @@ class TestPlein(E2EHelpers, TestCase):
         urls = [url for url in self.extract_all_urls(resp) if "beheer" in url]
         self.assertEqual(0, len(urls))  # komt pas in beeld na kiezen rol IT
 
-        # wissel naar IT beheerder
-        self.e2e_wisselnaarrol_it()
-        self.e2e_check_rol('IT')
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_plein)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, 'Wissel van rol')
-        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
-        urls = [url for url in self.extract_all_urls(resp) if "beheer" in url]
-        self.assertEqual(1, len(urls))
-
         # wissel naar elk van de functies
 
         # bb

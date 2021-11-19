@@ -34,7 +34,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_SEC)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_SEC)
 
     def _get_verenigingen(self):
 
@@ -74,7 +74,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                                       'clusters')
                     .order_by('regio__regio_nr', 'ver_nr'))
 
-        if self.rol_nu == Rollen.ROL_IT:
+        if self.rol_nu == Rollen.ROL_BB:
             # landelijke lijst + telling aantal leden
             objs = (NhbVereniging
                     .objects
@@ -132,12 +132,10 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
 
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
-        context['landelijk'] = self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO)
-
-        if self.rol_nu == Rollen.ROL_IT:
-            context['toon_ledental'] = True
+        context['landelijk'] = self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO)
 
         if self.rol_nu == Rollen.ROL_BB:
+            context['toon_ledental'] = True
             context['contact_geen_beheerders'] = reverse('Vereniging:contact-geen-beheerders')
 
         if self.rol_nu == Rollen.ROL_RKO:

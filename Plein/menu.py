@@ -52,10 +52,6 @@ def menu_dynamics(request, context, actief='hetplein'):
             # activeer menu 'wissel van rol'
             context['menu_show_wisselvanrol'] = True
 
-            # admin menu
-            if rol == Rollen.ROL_IT:
-                context['menu_show_admin'] = True
-
             if rol in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
                 context['menu_toon_vereniging'] = True
 
@@ -67,7 +63,7 @@ def menu_dynamics(request, context, actief='hetplein'):
                 context['toon_kalender'] = False
 
             # taken
-            if rol in (Rollen.ROL_IT, Rollen.ROL_BB,
+            if rol in (Rollen.ROL_BB,
                        Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
                        Rollen.ROL_HWL):
                 context['menu_show_taken'] = True

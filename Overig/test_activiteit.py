@@ -82,30 +82,6 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_activiteit)
 
-    def test_it(self):
-        # admin rechten
-        self.e2e_login_and_pass_otp(self.testdata.account_admin)
-        self.e2e_wisselnaarrol_it()
-        self.e2e_check_rol('IT')
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_activiteit)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
-
-        # manipuleer de sessie variabelen voor de corner-cases
-        session = self.client.session
-        del session[SESSIONVAR_ROL_MAG_WISSELEN]
-        # del session[SESSIONVAR_ROL_HUIDIGE]
-        session[SESSIONVAR_ROL_HUIDIGE] = 'bad'
-        session.save()
-        # TODO: waarom heeft bovenstaande geen effect?
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_activiteit)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
     def test_zoek(self):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()

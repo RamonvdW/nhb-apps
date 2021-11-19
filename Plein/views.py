@@ -106,9 +106,7 @@ class PleinView(View):
 
                 context['handleiding_url'] = reverse_handleiding(request, handleiding_pagina)
 
-                if rol_nu == Rollen.ROL_IT:
-                    context['rol_is_it'] = True
-                elif rol_nu == Rollen.ROL_BB:
+                if rol_nu == Rollen.ROL_BB:
                     context['rol_is_bb'] = True
                 elif rol_nu == Rollen.ROL_BKO:
                     context['rol_is_bko'] = True

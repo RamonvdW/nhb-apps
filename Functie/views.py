@@ -661,7 +661,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # alle competitie beheerders + HWL
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     @staticmethod
     def _sorteer_functies(objs):
@@ -795,7 +795,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
         if self.rol_nu == Rollen.ROL_HWL:
             context['rol_is_hwl'] = True
 
-        if self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
+        if self.rol_nu == Rollen.ROL_BB:
             context['accounts_it'] = (Account
                                       .objects
                                       .filter(is_staff=True)

@@ -505,7 +505,7 @@ def competitie_klassegrenzen_vaststellen(comp):
     # for
 
     comp.klassegrenzen_vastgesteld = True
-    comp.save()
+    comp.save(update_fields=['klassegrenzen_vastgesteld'])
 
 
 # end of file

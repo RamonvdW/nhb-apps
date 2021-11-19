@@ -366,7 +366,7 @@ class CompetitieOverzichtView(View):
                 template = self._get_competitie_overzicht_beheerder(request, context, comp)
                 eval_open_taken(request)
 
-        elif self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
+        elif self.rol_nu == Rollen.ROL_BB:
             template = self._get_competitie_overzicht_beheerder(request, context, comp)
             eval_open_taken(request)
 
@@ -426,7 +426,7 @@ class CompetitieKiesView(TemplateView):
             context['nieuwe_seizoen'] = "%s/%s" % (beginjaar, beginjaar+1)
             context['bb_kan_competitie_aanmaken'] = (0 == Competitie.objects.filter(begin_jaar=beginjaar).count())
 
-        if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
+        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
             context['toon_beheerders'] = True
 
         menu_dynamics_competitie(self.request, context)

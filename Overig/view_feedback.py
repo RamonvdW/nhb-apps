@@ -111,7 +111,7 @@ class SiteFeedbackInzichtView(UserPassesTestMixin, ListView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_get_huidige(self.request) in (Rollen.ROL_IT, Rollen.ROL_BB)
+        return rol_get_huidige(self.request) == Rollen.ROL_BB
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """

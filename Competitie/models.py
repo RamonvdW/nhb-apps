@@ -271,7 +271,7 @@ class Competitie(models.Model):
         """
         self.is_openbaar = False
 
-        if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO):
+        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
             # IT, BB en BKO zien alles
             self.is_openbaar = True
         else:

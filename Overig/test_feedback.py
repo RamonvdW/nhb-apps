@@ -170,20 +170,6 @@ class TestOverigFeedback(E2EHelpers, TestCase):
             resp = self.client.get(self.url_feedback_inzicht)
         self.assert403(resp)
 
-    def test_inzicht_admin(self):
-        # do een get van alle feedback als IT beheerder
-        self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_wisselnaarrol_it()
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_feedback_inzicht)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('overig/site-feedback-inzicht.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
-        self.assertContains(resp, "door de ontwikkelaar afgehandeld")
-
-        self.e2e_assert_other_http_commands_not_supported(self.url_feedback_inzicht)
-
     def test_inzicht_bb(self):
         # do een get van alle feedback als BB
         self.account_normaal.is_BB = True

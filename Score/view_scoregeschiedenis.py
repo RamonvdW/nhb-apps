@@ -28,7 +28,7 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_get_huidige(self.request) in (Rollen.ROL_IT, Rollen.ROL_BB)
+        return rol_get_huidige(self.request) == Rollen.ROL_BB
 
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """

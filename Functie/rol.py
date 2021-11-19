@@ -36,7 +36,6 @@ class Rollen(enum.IntEnum):
 
     # rollen staan in prio volgorde
     # dus als je 3 hebt mag je kiezen uit 3 of hoger
-    ROL_IT = 1          # IT beheerder
     ROL_BB = 2          # Manager competitiezaken
     ROL_BKO = 3         # BK organisator, specifieke competitie
     ROL_RKO = 4         # RK organisator, specifieke competitie en rayon
@@ -56,7 +55,6 @@ class Rollen(enum.IntEnum):
 
 
 url2rol = {
-    'IT': Rollen.ROL_IT,
     'BB': Rollen.ROL_BB,
     'BKO': Rollen.ROL_BKO,
     'RKO': Rollen.ROL_RKO,
@@ -69,7 +67,6 @@ url2rol = {
 }
 
 rol2url = {
-    Rollen.ROL_IT: 'IT',
     Rollen.ROL_BB: 'BB',
     Rollen.ROL_BKO: 'BKO',
     Rollen.ROL_RKO: 'RKO',
@@ -160,9 +157,6 @@ def rol_zet_sessionvars(account, request):
     if account.is_authenticated:
         show_vhpg, _ = account_needs_vhpg(account)
         if account_rechten_is_otp_verified(request) and not show_vhpg:
-            if account.is_staff:
-                rollen_vast.append(Rollen.ROL_IT)
-
             if account.is_staff or account.is_BB:
                 rollen_vast.append(Rollen.ROL_BB)
 
@@ -327,9 +321,7 @@ def rol_bepaal_beschrijving(rol, functie_pk=None):
     else:
         functie_naam = ""
 
-    if rol == Rollen.ROL_IT:
-        beschr = 'IT beheerder'
-    elif rol == Rollen.ROL_BB:
+    if rol == Rollen.ROL_BB:
         beschr = 'Manager competitiezaken'
     elif rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC):
         beschr = functie.beschrijving

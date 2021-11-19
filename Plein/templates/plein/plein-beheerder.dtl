@@ -42,7 +42,7 @@
         {% endif %}
 
         <!-- verenigingen/accommodaties overzicht IT/BB/BKO -->
-        {% if rol_is_bko or rol_is_bb or rol_is_it %}
+        {% if rol_is_bko or rol_is_bb %}
             {% url 'Vereniging:lijst-verenigingen' as card_url %}
             {% include 'plein/card.dtl' with title="Verenigingen" text="Toon landelijk overzicht van de verenigingen, accommodaties en indeling in clusters." icon="view_list" url=card_url %}
         {% endif %}
@@ -77,7 +77,7 @@
         {% endif %}
     </div>
 
-    {% if rol_is_bb or rol_is_it %}
+    {% if rol_is_bb %}
         <h5>Voor de Manager Competitiezaken</h5>
 
         <div class="row">

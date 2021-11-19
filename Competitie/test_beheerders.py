@@ -232,16 +232,6 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             resp = self.client.get(self.url_aangemeld_regio % (comp.pk, self.regio_101.pk))
         self.assert403(resp)
 
-    def test_overzicht_it(self):
-        self.e2e_login_and_pass_otp(self.testdata.account_admin)
-        self.e2e_wisselnaarrol_it()
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht % self.comp_18.pk)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/overzicht.dtl', 'plein/site_layout.dtl'))
-
     def test_overzicht_bb(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
 

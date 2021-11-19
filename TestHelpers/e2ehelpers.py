@@ -149,11 +149,7 @@ class E2EHelpers(TestCase):
         resp = self.client.post('/functie/activeer-rol/%s/' % rol)
         self.assert_is_redirect(resp, expected_redirect)
 
-    def e2e_wisselnaarrol_it(self):
-        self._wissel_naar_rol('IT', '/functie/wissel-van-rol/')
-
     def e2e_wisselnaarrol_bb(self):
-        # self._wissel_naar_rol('BB', '/competitie/')
         self._wissel_naar_rol('BB', '/functie/wissel-van-rol/')
 
     def e2e_wisselnaarrol_sporter(self):

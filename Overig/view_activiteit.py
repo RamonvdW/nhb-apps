@@ -43,7 +43,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         account = self.request.user
         if account.is_authenticated:
             self.rol_nu = rol_get_huidige(self.request)
-            if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_IT):
+            if self.rol_nu == Rollen.ROL_BB:
                 return True
 
         return False
@@ -251,7 +251,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         # for
 
         # toon sessies
-        if self.rol_nu == Rollen.ROL_IT:
+        if False:
             accses = (AccountSessions
                       .objects
                       .select_related('account', 'session')

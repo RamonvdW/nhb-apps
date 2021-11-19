@@ -229,31 +229,6 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.post(self.url_verwijder_wedstrijd % 0)
         self.assert403(resp)      # not allowed
 
-    def test_overzicht_it(self):
-        self.e2e_login_and_pass_otp(self.testdata.account_admin)
-        self.e2e_wisselnaarrol_it()
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
-        self.assert403(resp)      # not allowed
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
-        self.assert403(resp)      # not allowed
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
-        self.assert403(resp)      # not allowed
-        self.assert403(resp)      # not allowed
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_regio_cluster % (self.deelcomp_regio101_18.pk, self.cluster_101a_18.pk))
-        self.assert403(resp)      # not allowed
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_planning_regio_ronde % 0)
-        self.assert403(resp)      # not allowed
-
     def test_overzicht_bb(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
