@@ -36,13 +36,13 @@ django==3.1.13
     #   djangosaml2idp
 djangosaml2idp==0.7.2
     # via -r requirements_test.in
-elementpath==2.3.2
+elementpath==2.4.0
     # via xmlschema
 google-api-core==2.2.2
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.29.0
+google-api-python-client==2.31.0
     # via -r requirements.txt
 google-auth==2.3.3
     # via
@@ -67,14 +67,12 @@ idna==3.3
     # via
     #   -r requirements.txt
     #   requests
-importlib-resources==5.4.0
-    # via pysaml2
 protobuf==3.19.1
     # via
     #   -r requirements.txt
     #   google-api-core
     #   googleapis-common-protos
-psycopg2-binary==2.9.1
+psycopg2-binary==2.9.2
     # via -r requirements.txt
 pyasn1==0.4.8
     # via
@@ -95,7 +93,7 @@ pyparsing==2.4.7
     # via
     #   -r requirements.txt
     #   httplib2
-pysaml2==7.0.1
+pysaml2==7.1.0
     # via
     #   -r requirements_test.in
     #   djangosaml2idp
@@ -140,10 +138,8 @@ urllib3==1.26.7
     # via
     #   -r requirements.txt
     #   requests
-xmlschema==1.8.1
+xmlschema==1.8.2
     # via pysaml2
-zipp==3.6.0
-    # via importlib-resources
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
