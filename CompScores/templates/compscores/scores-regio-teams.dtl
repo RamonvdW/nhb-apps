@@ -75,6 +75,8 @@
                     {% for deelnemer in regel.deelnemers %}
                         <tr>
                             <td style="padding-left: 50px">{{ deelnemer.naam_str }}</td>
+
+                            <!-- scores -->
                             <td>
                                 {% if deelnemer.keuze_nodig %}
                                     <span class="red-text">Keuze nodig:</span><br>
@@ -96,6 +98,8 @@
                                     {% endfor %}
                                 {% endif %}
                             </td>
+
+                            <!-- datums -->
                             <td>
                                 {% if deelnemer.keuze_nodig %}
                                     <!-- Keuze maken: --><br>

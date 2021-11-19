@@ -874,10 +874,15 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                 # niet relevante score
                 pass
             else:
-                if score.block_selection:
-                    tup = (1, wedstrijd.datum_wanneer, wedstrijd.tijd_begin_wedstrijd, wedstrijd.pk, wedstrijd, score)
-                else:
-                    tup = (2, wedstrijd.datum_wanneer, wedstrijd.tijd_begin_wedstrijd, wedstrijd.pk, wedstrijd, score)
+                # optie A: eerst alle geblokkeerde opties, dan pas de keuzes
+                # if score.block_selection:
+                #    tup = (1, wedstrijd.datum_wanneer, wedstrijd.tijd_begin_wedstrijd, wedstrijd.pk, wedstrijd, score)
+                # else:
+                #    tup = (2, wedstrijd.datum_wanneer, wedstrijd.tijd_begin_wedstrijd, wedstrijd.pk, wedstrijd, score)
+
+                # optie B: scores op datum houden
+                tup = (1, wedstrijd.datum_wanneer, wedstrijd.tijd_begin_wedstrijd, wedstrijd.pk, wedstrijd, score)
+
                 pk = score.sporterboog.pk
                 try:
                     sporterboog2wedstrijdscores[pk].append(tup)
