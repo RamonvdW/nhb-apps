@@ -128,10 +128,13 @@ def rol_zet_sessionvars(account, request):
     # lees de functie tabel eenmalig in en kopieer alle informatie
     # om verdere queries te voorkomen
     functie_cache = dict()
+    functie_rcl = dict()        # [regio nummer] = (functie_pk, functie_pk)
+
     for obj in (Functie
                 .objects
                 .select_related('nhb_rayon', 'nhb_regio', 'nhb_regio__rayon', 'nhb_ver')
                 .only('rol', 'comp_type',
+                      'nhb_regio__regio_nr',
                       'nhb_rayon__rayon_nr',
                       'nhb_regio__rayon__rayon_nr',
                       'nhb_ver__ver_nr')):
@@ -145,8 +148,13 @@ def rol_zet_sessionvars(account, request):
             func.rayon_nr = obj.nhb_rayon.rayon_nr
             func.comp_type = obj.comp_type
         elif func.rol == "RCL":
+            func.regio_nr = obj.nhb_regio.regio_nr
             func.regio_rayon_nr = obj.nhb_regio.rayon.rayon_nr
             func.comp_type = obj.comp_type
+            try:
+                functie_rcl[func.regio_nr].append(func.pk)
+            except KeyError:
+                functie_rcl[func.regio_nr] = [func.pk]
         elif func.rol in ("HWL", "WL", "SEC"):
             func.ver_nr = obj.nhb_ver.ver_nr
         functie_cache[obj.pk] = func
@@ -188,6 +196,17 @@ def rol_zet_sessionvars(account, request):
                     child_tup = (rol, functie.pk)
                     tup = (child_tup, parent_tup)
                     rollen_functies.append(tup)
+
+                    if rol == Rollen.ROL_RCL:
+                        # zoek de andere RCL functie van deze regio erbij
+                        func = functie_cache[functie.pk]
+                        rcl_pks = functie_rcl[func.regio_nr]
+                        for pk in rcl_pks:
+                            if pk != functie.pk:
+                                buur_tup = (rol, pk)
+                                tup = (buur_tup, child_tup)
+                                rollen_functies.append(tup)
+                        # for
             # for
 
             # probeer elke rol nog verder te expanderen
