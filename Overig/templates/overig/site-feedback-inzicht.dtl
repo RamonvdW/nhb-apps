@@ -12,6 +12,13 @@
 
     <h4>Site feedback</h4>
 
+    {% if url_admin_site %}
+        <p>
+            <a class="btn-nhb-rood" href="{{ url_admin_site }}">
+                <i class="material-icons-round left">build</i>Admin site</a>
+        </p>
+    {% endif %}
+
     <p>De nieuwste feedback op de site (maximaal 50) volgen hieronder.</p>
 
     <ul class="collapsible white">

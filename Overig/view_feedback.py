@@ -125,6 +125,10 @@ class SiteFeedbackInzichtView(UserPassesTestMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['count_aanwezig'] = self.count_aanwezig
         context['count_afgehandeld'] = self.count_aanwezig - self.count_niet_afgehandeld
+
+        if self.request.user.is_staff:
+            context['url_admin_site'] = '/beheer/Overig/sitefeedback/'  # TODO: kan dit met reverse?
+
         menu_dynamics(self.request, context)
         return context
 

@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
+from Account.models import AccountEmail
 from .models import SiteFeedback, SiteTijdelijkeUrl
 
 
@@ -56,10 +57,23 @@ class SiteFeedbackAdmin(admin.ModelAdmin):
     # filter mogelijkheid
     list_filter = (IsAfgehandeldListFilter,)
 
-    readonly_fields = ('toegevoegd_op', 'op_pagina', 'site_versie', )
+    readonly_fields = ('toegevoegd_op', 'bevinding', 'gebruiker', 'op_pagina', 'site_versie', 'email_adres')
 
     # volgorde van de velden
-    fields = ('toegevoegd_op', 'bevinding', 'is_afgehandeld', 'feedback', 'gebruiker', 'op_pagina', 'site_versie')
+    fields = ('toegevoegd_op', 'bevinding', 'is_afgehandeld', 'feedback', 'gebruiker', 'email_adres', 'op_pagina', 'site_versie')
+
+    def email_adres(self, obj):
+        print('obj: %s' % repr(obj))
+
+        # obj.gebruiker = "Volledige Naam (username)"
+        pos = obj.gebruiker.find('(')
+        if pos > 0:
+            username = obj.gebruiker[pos+1:-1]
+            email = AccountEmail.objects.get(account__username=username)
+            if email.email_is_bevestigd:
+                return email.bevestigde_email
+
+        return "?"
 
 
 class SiteTijdelijkeUrlAdmin(admin.ModelAdmin):
