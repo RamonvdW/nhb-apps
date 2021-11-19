@@ -472,6 +472,8 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
 
                 f1_scores = list(TEAM_PUNTEN_F1)
                 rank = 0
+                prev_team_score = 0
+                prev_team_wp = 0
                 for ronde_team in ronde_teams:
                     if rank == 0:
                         ronde_team.break_poule = True
@@ -482,7 +484,15 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
 
                     # geen score dan geen wedstrijdpunten
                     if ronde_team.team_score > 0 and len(f1_scores):
-                        ronde_team.ronde_wp = f1_scores[0]
+                        # gelijke score, gelijke punten
+                        if ronde_team.team_score == prev_team_score:
+                            ronde_team.ronde_wp = prev_team_wp
+                        else:
+                            ronde_team.ronde_wp = f1_scores[0]
+
+                        prev_team_score = ronde_team.team_score
+                        prev_team_wp = ronde_team.ronde_wp
+
                         f1_scores.pop(0)
                         is_redelijk = True
 
