@@ -103,9 +103,19 @@ class TestOverigFeedback(E2EHelpers, TestCase):
                                     {'bevinding': '4',
                                      'feedback': 20*'Just testing '})   # 20x makes it >80 chars long
         self.assert_is_redirect(resp, self.url_feedback_bedankt)
+
+        self.assertEqual(SiteFeedback.objects.count(), 1)
         obj = SiteFeedback.objects.all()[0]
         descr = str(obj)
         self.assertGreater(len(descr), 0)
+
+        # probeer dezelfde feedback nog een keer te posten (wordt voorkomen)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_feedback_formulier,
+                                    {'bevinding': '4',
+                                     'feedback': 20*'Just testing '})   # 20x makes it >80 chars long
+        self.assert_is_redirect(resp, self.url_feedback_bedankt)
+        self.assertEqual(SiteFeedback.objects.count(), 1)
 
     def test_form_bad(self):
         with self.assert_max_queries(20):
