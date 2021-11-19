@@ -70,7 +70,8 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
                   .objects
                   .prefetch_related('teams')
                   .filter(deelcompetitie=deelcomp)
-                  .annotate(team_count=Count('teams')))
+                  .annotate(team_count=Count('teams'))
+                  .order_by('beschrijving', 'pk'))
 
         team_pk2poule = dict()
         for poule in poules:
