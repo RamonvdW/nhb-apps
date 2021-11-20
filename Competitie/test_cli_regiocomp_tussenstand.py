@@ -570,6 +570,8 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_bko)
         url = '/bondscompetities/%s/doorzetten/rk/' % self.comp.pk
         self.client.post(url)
+        # laat de mutatie verwerken
+        management.call_command('regiocomp_mutaties', '1', '--quick', stderr=io.StringIO(), stdout=io.StringIO())
 
         # standaard vereniging is regio 101
         # maak een tweede vereniging aan in regio 102

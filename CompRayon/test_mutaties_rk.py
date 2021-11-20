@@ -184,6 +184,9 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         url = '/bondscompetities/%s/doorzetten/rk/' % self.comp.pk
         self.client.post(url)
 
+        # wacht op het uitvoeren van de achtergrondactiviteit
+        self._verwerk_mutaties(135)
+
         self.comp = Competitie.objects.get(pk=self.comp.pk)
         self.e2e_wissel_naar_functie(self.functie_rko1)
 
@@ -248,7 +251,11 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # vraag de achtergrond taak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(max_mutaties, check_duration=check_duration):
+
+        if max_mutaties > 0:
+            with self.assert_max_queries(max_mutaties, check_duration=check_duration):
+                management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+        else:
             management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
         if show:                    # pragma: no cover
@@ -263,7 +270,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         self._begin_rk()        # BB met rol RKO1
         self.assertEqual(4*5, KampioenschapSchutterBoog.objects.count())
 
-        self._verwerk_mutaties(151)
         self._check_volgorde_en_rank()
 
         # controleer dat de regiokampioenen boven de cut staan
@@ -281,7 +287,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # met de MUTATIE_INITIEEL kunnen we ook een 'reset' uitvoeren
         # daarbij wordt rekening gehouden met schutters die afgemeld zijn
         self._begin_rk()
-        self._verwerk_mutaties(151)
 
         # self._dump_deelnemers()
 
@@ -322,7 +327,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
     def test_rko_bevestigen(self):
         # bevestig deelname door een schutter en een reserve
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties(151)
 
         deelnemer = KampioenschapSchutterBoog.objects.get(volgorde=4)
         self.assertEqual(deelnemer.rank, 4)
@@ -344,7 +348,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # een reserve-schutter meldt zich af
         # dit heeft geen invloed op de deelnemers-lijst
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties(151)
 
         # self._dump_deelnemers()
         deelnemer = KampioenschapSchutterBoog.objects.get(volgorde=10)
@@ -367,7 +370,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # kandidaat-schutter (boven de cut) meldt zich af
         # reserve-schutter wordt opgeroepen
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties(151)
 
         reserve = KampioenschapSchutterBoog.objects.get(volgorde=9)  # cut ligt op 8
         self.assertEqual(reserve.deelname, DEELNAME_ONBEKEND)
@@ -400,7 +402,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # een reserve-schutter meldt zich af en weer aan
         # dit heeft geen invloed op de deelnemers-lijst
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties(151)
 
         # self._dump_deelnemers()
         reserve = KampioenschapSchutterBoog.objects.get(rank=10)    # cut ligt op 8
@@ -436,7 +437,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
     def test_rko_opnieuw_aanmelden_einde_lijst(self):
         # opnieuw aangemelde schutter komt helemaal aan het einde van de reserve-lijst
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties(151)
 
         # self._dump_deelnemers()
         pk = KampioenschapSchutterBoog.objects.order_by('-rank')[0].pk
@@ -458,7 +458,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # schutter meldt zichzelf daarna weer aan en komt in de lijst met reserve-schutters
         # gesorteerd op gemiddelde
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties(151)
         # self._dump_deelnemers()
 
         deelnemer = KampioenschapSchutterBoog.objects.get(rank=3)    # cut ligt op 8
@@ -496,7 +495,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # na afmelden van een deelnemer wordt de eerste reserve opgeroepen
         # de lijst met deelnemers wordt gesorteerd op gemiddelde
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties(151)
 
         # bereik dit effect door nr 3 af te melden en daarna weer aan te melden
         deelnemer = KampioenschapSchutterBoog.objects.get(rank=3)    # cut ligt op 8
@@ -539,7 +537,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
         # regiokampioen meldt zich af en daarna weer aan
         # komt in de lijst met reserve-schutters
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties(151)
 
         # bereik dit effect door nr 8 af te melden en daarna weer aan te melden
         # dit is een regiokampioen met behoorlijk lage gemiddelde
@@ -565,7 +562,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
     def test_rko_drie_kampioenen_opnieuw_aanmelden(self):
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties(151)
 
         pks = (KampioenschapSchutterBoog
                .objects
@@ -625,7 +621,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
     def test_rko_cut24_drie_kampioenen_opnieuw_aanmelden(self):
         self.cut.delete()       # verwijder de cut van 8
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties(151)
         # self._dump_deelnemers()
 
         pks = (KampioenschapSchutterBoog
@@ -686,7 +681,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
     def test_verlaag_cut(self):
         # verplaats de cut en controleer de inhoud na de update
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties(151)
 
         # self._dump_deelnemers()
         rank, volg = self._get_rank_volg(alleen_kampioenen=True)
@@ -740,7 +734,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
     def test_verhoog_cut(self):
         # verplaats de cut en controleer de inhoud na de update
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties(151)
 
         # default cut is 8
         # verhoog de cut naar 16
@@ -774,7 +767,6 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
 
     def test_rko_allemaal_afmelden(self):
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties(151)
 
         pks = list(KampioenschapSchutterBoog.objects.values_list('pk', flat=True))
         for pk in pks:
@@ -784,13 +776,12 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
             self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
         # for
 
-        self._verwerk_mutaties(556, check_duration=False)     # TODO: reduce + re-enable check_duration
+        self._verwerk_mutaties(-1)      # actual = 556 but that just because of many queued-up operations
 
         self._check_volgorde_en_rank()
 
     def test_dubbel(self):
         self._begin_rk()        # BB met rol RKO1
-        self._verwerk_mutaties(151)
 
         # dubbel afmelden
         url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.get(rank=2).pk
@@ -864,7 +855,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
                           cut_nieuw=24,
                           door='Tester').save()
 
-        self._verwerk_mutaties(212)
+        self._verwerk_mutaties(69)
 
     def test_verwerk_all(self):
         # vraag de achtergrond taak om de mutaties te verwerken

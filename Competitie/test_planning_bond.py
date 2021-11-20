@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.core import management
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, CompetitieKlasse,
                                DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
@@ -18,6 +19,7 @@ from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
+import io
 
 
 class TestCompetitiePlanningBond(E2EHelpers, TestCase):
@@ -40,15 +42,15 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         lid_nr = self._next_lid_nr
         self._next_lid_nr += 1
 
-        sporter = Sporter()
-        sporter.lid_nr = lid_nr
-        sporter.geslacht = "M"
-        sporter.voornaam = voornaam
-        sporter.achternaam = "Tester"
-        sporter.email = voornaam.lower() + "@nhb.test"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.bij_vereniging = self.nhbver_101
+        sporter = Sporter(
+                    lid_nr=lid_nr,
+                    geslacht="M",
+                    voornaam=voornaam,
+                    achternaam="Tester",
+                    email=voornaam.lower() + "@nhb.test",
+                    geboorte_datum=datetime.date(year=1972, month=3, day=4),
+                    sinds_datum=datetime.date(year=2010, month=11, day=12),
+                    bij_vereniging=self.nhbver_101)
         sporter.save()
 
         return self.e2e_create_account(lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
@@ -234,9 +236,12 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.assertEqual(3, RegioCompetitieSchutterBoog.objects.count())
         self.assertEqual(0, KampioenschapSchutterBoog.objects.count())
 
-        with self.assert_max_queries(55):
+        with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
+
+        # laat de mutatie verwerken
+        management.call_command('regiocomp_mutaties', '1', '--quick', stderr=io.StringIO(), stdout=io.StringIO())
 
         self.assertEqual(3, KampioenschapSchutterBoog.objects.count())
 
@@ -244,8 +249,6 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # variant van doorzetten_rk met een lid dat niet meer bij een vereniging aangesloten is
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
-
-        url = self.url_doorzetten_rk % self.comp_18.pk
 
         # fase F: pagina zonder knop 'doorzetten'
         zet_competitie_fase(self.comp_18, 'F')
@@ -270,12 +273,16 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.lid_sporter_2.bij_vereniging = None
         self.lid_sporter_2.save()
 
-        with self.assert_max_queries(54):
+        url = self.url_doorzetten_rk % self.comp_18.pk
+        with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, '/bondscompetities/')       # redirect = Success
 
-        # het lid zonder vereniging komt toch gewoon in de RK selectie
-        self.assertEqual(3, KampioenschapSchutterBoog.objects.count())
+        # laat de mutatie verwerken
+        management.call_command('regiocomp_mutaties', '1', '--quick', stderr=io.StringIO(), stdout=io.StringIO())
+
+        # het lid zonder vereniging komt NIET in de RK selectie
+        self.assertEqual(2, KampioenschapSchutterBoog.objects.count())
 
         # verdere tests in test_planning_rayon.test_geen_vereniging check
 

@@ -774,6 +774,7 @@ class Command(BaseCommand):
                       .select_related('klasse__indiv',
                                       'bij_vereniging__regio',
                                       'sporterboog__sporter',
+                                      'sporterboog__sporter__bij_vereniging',
                                       'sporterboog__sporter__bij_vereniging__regio__rayon')
                       .filter(deelcompetitie__in=pks,
                               aantal_scores__gte=6,
@@ -879,6 +880,8 @@ class Command(BaseCommand):
                     if len(bulk_lijst) > 150:       # pragma: no cover
                         KampioenschapSchutterBoog.objects.bulk_create(bulk_lijst)
                         bulk_lijst = list()
+                else:
+                    self.stdout.write('[WARNING] Sporter %s is geen RK deelnemer want heeft geen vereniging' % obj.sporterboog)
             # for
 
             if len(bulk_lijst) > 0:
