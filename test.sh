@@ -104,7 +104,7 @@ python3 -m coverage erase
 echo "[INFO] Capturing output in $LOG"
 COLOR_DEFAULT=$(tput sgr0)
 COLOR_RED=$(tput setaf 1)
-tail -f "$LOG" | grep --color -E " FAIL|" &
+tail -f "$LOG" | grep --color -E "FAIL$|ERROR$|" &
 PID_TAIL=$!
 
 # -u = unbuffered stdin/stdout

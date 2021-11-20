@@ -227,7 +227,7 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
                                   .filter(bij_vereniging=self.obj.vereniging,
                                           sporterboog__boogtype__pk__in=self.boog_pks))
 
-        elif db_field.name in ('gekoppelde_schutters', 'feitelijke_schutters'):
+        elif db_field.name in ('gekoppelde_schutters', 'feitelijke_schutters') and self.obj:
             kwargs['queryset'] = (KampioenschapSchutterBoog
                                   .objects
                                   .filter(bij_vereniging=self.obj.vereniging,
