@@ -686,7 +686,7 @@ class Command(BaseCommand):
             if lid_geslacht not in ('M', 'F'):
                 self.stderr.write('[ERROR] Lid %s heeft onbekend geslacht: %s (moet zijn: M of F)' % (lid_nr, lid_geslacht))
                 self._count_errors += 1
-                lid_geslacht = 'M'  # forceer naar iets valides
+                lid_geslacht = 'M'  # forceer naar iets valide
             if lid_geslacht == 'F':
                 lid_geslacht = 'V'
 
@@ -762,7 +762,8 @@ class Command(BaseCommand):
 
                     if obj.bij_vereniging != lid_ver:
                         if lid_ver:
-                            self.stdout.write('[INFO] Lid %s: vereniging %s --> %s' % (lid_nr, get_vereniging_str(obj.bij_vereniging), get_vereniging_str(lid_ver)))
+                            self.stdout.write('[INFO] Lid %s: vereniging %s --> %s' % (
+                                        lid_nr, get_vereniging_str(obj.bij_vereniging), get_vereniging_str(lid_ver)))
                             self._count_wijzigingen += 1
                             obj.bij_vereniging = lid_ver
                             updated.append('bij_vereniging')
@@ -771,13 +772,19 @@ class Command(BaseCommand):
                             # vast, tot het einde van het lidmaatschap jaar.
                             # dit voorkomt blokkeren en geen toegang tot de diensten tijdens een overschrijving
                             if obj.lid_tot_einde_jaar < self.lidmaatschap_jaar:
-                                self.stdout.write('[INFO] Lid %s: vereniging %s --> geen (einde lidmaatschap jaar)' % (lid_nr, get_vereniging_str(obj.bij_vereniging)))
+                                self.stdout.write('[INFO] Lid %s: vereniging %s --> geen (einde lidmaatschap jaar)' % (
+                                            lid_nr, get_vereniging_str(obj.bij_vereniging)))
                                 self._count_wijzigingen += 1
                                 obj.bij_vereniging = None
                                 updated.append('bij_vereniging')
                                 lid_blocked = True
                             else:
                                 self._count_uitgeschreven += 1
+
+                        # TODO: overschrijven tijdens regiocompetitie, bij afsluiten team ronde
+
+                        # let op: tijdens fase G van de competitie wordt de vereniging bevroren en moet de sporter
+                        #         uitkomen op het RK van het rayon waarin die vereniging valt
 
                     if lid_blocked:
                         if obj.is_actief_lid:

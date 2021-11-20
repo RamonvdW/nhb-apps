@@ -126,7 +126,7 @@
 
     <tr>
         <td {% if comp.fase == 'K' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>K</td>
-        <td>Deelnemers en reserveschutters oproepen / bevestigen</td>
+        <td>Deelnemers en reserveschutters oproepen / bevestigen<br>Vaststellen klassegrenzen RK/BK (BKO)</td>
         <td>
             {% if comp.fase > 'K' %}
                 <span class="green-text">Afgerond</span>

@@ -13,7 +13,15 @@
     <h4>Competitie doorzetten</h4>
 
     <p>Als BKO wil je de competitie doorzetten naar de volgende fase: van regiocompetitie naar rayonkampioenschappen.</p>
-    <p>Dit is een eenmalige maar belangrijke actie, waardoor de sporters die voldoen aan de vereisten doorgezet worden naar de RKs.</p>
+    <p>Dit is een eenmalige maar belangrijke actie, waardoor:</p>
+    <p>&bull; De sporters die voldoen aan de vereisten worden doorgezet worden naar de RK deelnemerslijsten.</p>
+    <p>&bull; De sporters gekoppeld aan de RK teams worden gecontroleerd en eventueel verwijderd: nog steeds lid van de vereniging + gerechtigd voor RK?</p>
+    <p>&bull; De RKO's een seintje krijgen (via een taak) dat de deelnemerslijsten voor de RK's opgesteld zijn.</p>
+    <p>&bull; De nieuwste historische uitslag aangemaakt wordt waaruit de AG's voor een nieuwe competitie vastgesteld kunnen worden.</p>
+
+    <p>&nbsp;</p>
+    <p class="red-text">Na deze actie moeten de HWL's geïnformeerd worden dat ze de RK teams weer compleet moeten maken.</p>
+    <p>&nbsp;</p>
 
     {% if url_doorzetten %}
 

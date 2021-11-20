@@ -27,6 +27,16 @@
     <p>Op deze pagina kan je de rol kiezen die je aan wilt nemen.</p>
     <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
 
+    {% if url_admin_site or url_login_as %}
+        <div class="selectie-knoppen">
+            <a class="btn-nhb-rood" href="{{ url_admin_site }}">
+                <i class="material-icons-round left">build</i>Admin site</a>
+            <span>&nbsp;</span>
+            <a class="btn-nhb-rood" href="{{ url_login_as }}">
+                <i class="material-icons-round left">switch_access_shortcut</i>Account wissel</a>
+        </div>
+    {% endif %}
+
     {% if show_beheerder_intro %}
         <p>&nbsp;</p>
         <h5>Introductie Beheerder</h5>
@@ -57,15 +67,6 @@
         <a class="btn-nhb-rood" href="{% url 'Functie:otp-controle' %}">Nu controleren</a>
     {% endif %}
 
-    {% if url_admin_site or url_login_as %}
-        <div class="selectie-knoppen">
-            <a class="btn-nhb-rood" href="{{ url_admin_site }}">
-                <i class="material-icons-round left">build</i>Admin site</a>
-            <span>&nbsp;</span>
-            <a class="btn-nhb-rood" href="{{ url_login_as }}">
-                <i class="material-icons-round left">switch_access_shortcut</i>Account wissel</a>
-        </div>
-    {% endif %}
 
     {% if heeft_alle_rollen %}
         <p>&nbsp;</p>

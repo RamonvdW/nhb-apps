@@ -27,6 +27,7 @@ class Taak(models.Model):
     deadline = models.DateField()
 
     # wie heeft hier om gevraagd
+    # null/None = Systeem
     aangemaakt_door = models.ForeignKey(Account, on_delete=models.SET_NULL,
                                         null=True, blank=True,
                                         related_name='account_taken_aangemaakt')

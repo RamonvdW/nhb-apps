@@ -208,18 +208,31 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
         self.obj = None
+        self.boog_pks = list()
 
     def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
         if obj:
             self.obj = obj
+            # bepaal welke bogen gebruik mogen worden voor dit team type
+            self.boog_pks = list(obj.team_type.boog_typen.values_list('pk', flat=True))
+
         return super().get_form(request, obj, **kwargs)
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
-        if db_field.name == 'schutters' and self.obj:
-            # alleen schutters van de juiste vereniging laten kiezen
+
+        if db_field.name == 'tijdelijke_schutters' and self.obj:
+            # alleen schutters van de juiste vereniging en boogtype laten kiezen
             kwargs['queryset'] = (RegioCompetitieSchutterBoog
                                   .objects
-                                  .filter(bij_vereniging=self.obj.vereniging))      # TODO: filter op voorkeur_teamschieten?
+                                  .filter(bij_vereniging=self.obj.vereniging,
+                                          sporterboog__boogtype__pk__in=self.boog_pks))
+
+        elif db_field.name in ('gekoppelde_schutters', 'feitelijke_schutters'):
+            kwargs['queryset'] = (KampioenschapSchutterBoog
+                                  .objects
+                                  .filter(bij_vereniging=self.obj.vereniging,
+                                          sporterboog__boogtype__pk__in=self.boog_pks))
+
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
