@@ -643,6 +643,8 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_bko_18)
         resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
+        # laat de mutaties verwerken
+        management.call_command('regiocomp_mutaties', '1', '--quick', stderr=io.StringIO(), stdout=io.StringIO())
 
         # zet een limiet
         limiet = DeelcompetitieKlasseLimiet(deelcompetitie=self.deelcomp_rayon1_18,
@@ -1001,73 +1003,5 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         self._verwerk_mutaties()
         self.assertEqual(CompetitieMutatie.objects.count(), aantal + 1)
 
-    def test_geen_vereniging(self):
-        # deelnemer regiocompetitie is nu zonder vereniging
-        # wordt wel opgenomen in de RK selectie
-        # kan geen deelnemer status krijgen
-        # wordt daarna weer lid en kan deelnemer worden
-
-        scores = (200, 200, 200, 200, 200, 200, 200)
-        deelnemer = RegioCompetitieSchutterBoog(
-                            deelcompetitie=self.deelcomp_regio101_18,
-                            sporterboog=self.sporterboog,     # bij self.nhbver_101
-                            bij_vereniging=self.nhbver_101,
-                            klasse=self.klasse_r,
-                            ag_voor_indiv=8.765,
-                            ag_voor_team=8.765,
-                            ag_voor_team_mag_aangepast_worden=True,
-                            score1=scores[0],
-                            score2=scores[1],
-                            score3=scores[2],
-                            score4=scores[3],
-                            score5=scores[4],
-                            score6=scores[5],
-                            score7=scores[6],
-                            aantal_scores=7,
-                            totaal=sum(scores),
-                            laagste_score_nr=3)
-        deelnemer.save()
-
-        for waarde in scores:
-            score = Score(
-                        sporterboog=self.sporterboog,
-                        waarde=waarde,
-                        afstand_meter=18)
-            score.save()
-            deelnemer.scores.add(score)
-        # for
-
-        # lid stapt over naar een andere vereniging
-        # noteer: deze situatie ontstaat pas na 15 januari (tot die tijd vast op oude vereniging)
-        sporter = self.sporterboog.sporter
-        sporter.bij_vereniging = None           # was: self.ver_101
-        sporter.save()
-
-        # nu doorzetten naar RK fase
-        self.competitie_sluit_alle_regiocompetities(self.comp_18)
-        self.e2e_login_and_pass_otp(self.account_bko_18)
-        self.e2e_wissel_naar_functie(self.functie_bko_18)
-        with self.assert_max_queries(58):
-            resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
-        self.assert_is_redirect_not_plein(resp)  # check for success
-
-        # controleer dat schutterboog opgenomen is in de RK selectie
-        deelnemer = KampioenschapSchutterBoog.objects.get(sporterboog=self.sporterboog)
-        self.assertEqual(deelnemer.bij_vereniging, None)
-
-        # wissel van rol naar RKO rayon1
-        self.e2e_login_and_pass_otp(self.account_rko1_18)
-        self.e2e_wissel_naar_functie(self.functie_rko1_18)
-
-        # status op "deelnemer" zetten terwijl bij_vereniging=None moet niet kunnen
-        url = self.url_wijzig_status % deelnemer.pk
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
-        self.assert404(resp)     # 404 = not allowed
-
-        # TODO: deze test is nog niet af!
-
-        # sluit het lid aan bij een andere vereniging
-        # wat als dit in een ander rayon is?
 
 # end of file
