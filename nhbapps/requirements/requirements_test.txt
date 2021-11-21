@@ -4,8 +4,6 @@
 #
 #    pip-compile requirements_test.in
 #
-arrow==1.2.1
-    # via djangosaml2idp
 asgiref==3.4.1
     # via
     #   -r requirements.txt
@@ -18,26 +16,12 @@ certifi==2021.10.8
     # via
     #   -r requirements.txt
     #   requests
-cffi==1.15.0
-    # via cryptography
 charset-normalizer==2.0.7
     # via
     #   -r requirements.txt
     #   requests
-cryptography==35.0.0
-    # via
-    #   pyopenssl
-    #   pysaml2
-defusedxml==0.7.1
-    # via pysaml2
 django==3.1.13
-    # via
-    #   -r requirements.txt
-    #   djangosaml2idp
-djangosaml2idp==0.7.2
-    # via -r requirements_test.in
-elementpath==2.4.0
-    # via xmlschema
+    # via -r requirements.txt
 google-api-core==2.2.2
     # via
     #   -r requirements.txt
@@ -83,37 +67,22 @@ pyasn1-modules==0.2.8
     # via
     #   -r requirements.txt
     #   google-auth
-pycparser==2.21
-    # via cffi
-pyopenssl==21.0.0
-    # via pysaml2
 pyotp==2.6.0
     # via -r requirements.txt
 pyparsing==2.4.7
     # via
     #   -r requirements.txt
     #   httplib2
-pysaml2==7.1.0
-    # via
-    #   -r requirements_test.in
-    #   djangosaml2idp
-python-dateutil==2.8.2
-    # via
-    #   arrow
-    #   pysaml2
 pytz==2021.3
     # via
     #   -r requirements.txt
     #   django
-    #   djangosaml2idp
-    #   pysaml2
 qrcode==7.3.1
     # via -r requirements.txt
 requests==2.26.0
     # via
     #   -r requirements.txt
     #   google-api-core
-    #   pysaml2
 rsa==4.7.2
     # via
     #   -r requirements.txt
@@ -123,9 +92,6 @@ six==1.16.0
     #   -r requirements.txt
     #   google-auth
     #   google-auth-httplib2
-    #   pyopenssl
-    #   pysaml2
-    #   python-dateutil
 sqlparse==0.4.2
     # via
     #   -r requirements.txt
@@ -138,8 +104,6 @@ urllib3==1.26.7
     # via
     #   -r requirements.txt
     #   requests
-xmlschema==1.8.2
-    # via pysaml2
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

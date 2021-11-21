@@ -18,10 +18,4 @@
 # that is easy to replace as part of the deployment process
 from nhbapps.settings_base import *
 
-
-if ENABLE_WIKI:
-    # single sign-on Identity Provider (IP)
-    #   using SAML2 (Security Assertion Markup Language)
-    INSTALLED_APPS.append('djangosaml2idp')
-
 # end of file

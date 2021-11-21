@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2021-11-20'
+SITE_VERSIE = '2021-11-21'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -368,61 +368,6 @@ SPEELSTERKTE_VOLGORDE = (
 )
 
 
-# definitions taken from saml2.saml to avoid importing saml2
-# because it replaces ElementTree with cElementTree, which gives problems with QR code generation
-NAMEID_FORMAT_UNSPECIFIED = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
-# NAMEID_FORMAT_EMAILADDRESS = 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
-BINDING_HTTP_REDIRECT = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
-BINDING_HTTP_POST = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
-
-SAML_BASE_URL = SITE_URL + '/idp'
-
-SAML_IDP_CONFIG = {
-    'debug': False,
-    'xmlsec_binary': '/usr/bin/xmlsec1',
-
-    # the SAML entity id of this side, the Identity Provider
-    # just a globally unique string
-    'entityid': 'NHB IT applications SAML2 Identity Provider',
-
-    # our service description (the identity provider)
-    'service': {
-         'idp': {
-             'name': 'NHB IT applications IdP',
-             'endpoints': {
-                 'single_sign_on_service': [
-                     (SAML_BASE_URL + '/sso/post',     BINDING_HTTP_POST),
-                     (SAML_BASE_URL + '/sso/redirect', BINDING_HTTP_REDIRECT)
-                 ]
-             },
-             'name_id_format': [NAMEID_FORMAT_UNSPECIFIED],
-             # signing assertion and responses is mandatory in SAML 2.0
-             'sign_response': True,
-             'sign_assertion': True
-         }
-    },
-
-    # signing keys
-    'key_file': os.path.join(BASE_DIR, 'nhbapps/data_private/saml2/private.key'),
-    'cert_file': os.path.join(BASE_DIR, 'nhbapps/data_private/saml2/cert.crt'),
-    'valid_for': 100*24
-}
-
-# SP to be entered into the database using admin interface
-# details:
-#   EntityId  https://wiki.handboogsport.st-visir.nl/saml/module.php/saml/sp/metadata.php/default-sp
-#   processor Functie.idp_accesscheck.WikiAccessCheck
-#   Attribute-mapping (JSON)
-#       (Account.field_name: expose as)
-#       (Account.method_name: expose as)
-"""
-{
-"username": "username",
-"get_email": "emailAddress",
-"volledige_naam": "real_name"
-}
-"""
-
 # pagina's van de handleiding
 HANDLEIDING_TOP = 'Hoofdpagina'
 HANDLEIDING_SEC = 'Handleiding_Secretaris'
@@ -465,7 +410,7 @@ HANDLEIDING_PAGINAS = [
     HANDLEIDING_POULES,
     HANDLEIDING_WEDSTRIJDKALENDER_HWL,
     # pagina's van de handleiding die intern gerefereerd worden
-    'Tips_voor_wiki_gebruik',
+    'Tips_voor_wiki_gebruik',       # TODO: opruimen
     'Koppelen_beheerders'
 ]
 

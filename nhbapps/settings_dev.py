@@ -37,6 +37,4 @@ if ENABLE_DEBUG_TOOLBAR:                            # pragma: no cover
     INSTALLED_APPS.append('debug_toolbar')
     MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 
-SAML_IDP_CONFIG['debug'] = DEBUG
-
 # end of file

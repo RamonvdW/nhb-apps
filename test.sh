@@ -123,9 +123,9 @@ wait $PID_TAIL 2>/dev/null
 
 if [ $RES -eq 0 -a $# -eq 0 ]
 then
-    # add coverage with debug and wiki enabled
-    echo "[INFO] Performing run with debug + wiki run"
-    python3 -u $PYCOV ./manage.py test --settings=nhbapps.settings_autotest_wiki_nodebug -v 2 Plein.tests.TestPlein.test_quick Functie.test_saml2idp >>"$LOG" 2>&1
+    # add coverage with nodebug
+    echo "[INFO] Performing run with nodebug"
+    python3 -u $PYCOV ./manage.py test --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.TestPlein.test_quick >>"$LOG" 2>&1
     RES=$?
     echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
     [ $RES -eq 3 ] && ABORTED=1
