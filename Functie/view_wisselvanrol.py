@@ -221,8 +221,9 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
 
             if obj.rol == 'BKO':
                 obj.knop_tekst = 'BKO'
+                obj.horizontal_spacing = True
             elif obj.rol == 'RKO':
-                obj.knop_tekst = str(obj.nhb_rayon.rayon_nr)
+                obj.knop_tekst = "RKO%s" % obj.nhb_rayon.rayon_nr
             else:
                 obj.knop_tekst = str(obj.nhb_regio.regio_nr)
                 if obj.nhb_regio.regio_nr in (101, 109):

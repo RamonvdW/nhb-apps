@@ -83,6 +83,7 @@
                 <form style="display: inline-block" method="post" action="{{ obj.url }}">{% csrf_token %}
                     <input class="btn-nhb-blauw" type="submit" value="{{ obj.knop_tekst }}">
                 </form>
+                {% if obj.horizontal_spacing %}<span style="margin-left:40px"></span>{% endif %}
             {% endfor %}
         </div>
     {% endif %}
