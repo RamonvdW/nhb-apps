@@ -184,10 +184,14 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     is_controle = False
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     @staticmethod
     def _team_naam_toevoegen(scores, deelcomp):
@@ -242,15 +246,13 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-
         wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
         wedstrijd, deelcomp, ronde = bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk)
 
         context['wedstrijd'] = wedstrijd
         context['deelcomp'] = deelcomp
 
-        if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
+        if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, self.functie_nu, deelcomp):
             raise PermissionDenied()
 
         context['is_controle'] = self.is_controle
@@ -290,7 +292,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         # plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
         # ronde = DeelcompetitieRonde.objects.get(plan=plan)
 
-        if rol_nu == Rollen.ROL_RCL:
+        if self.rol_nu == Rollen.ROL_RCL:
             context['url_terug'] = reverse('CompScores:scores-rcl',
                                            kwargs={'deelcomp_pk': deelcomp.pk})
         else:
@@ -633,20 +635,20 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         wedstrijd = self.laad_wedstrijd_of_404(data)
         uitslag = wedstrijd.uitslag
         if not uitslag:
-            raise Http404()
+            raise Http404('Geen wedstrijduitslag')
 
         # controleer toestemming om scores op te slaan voor deze wedstrijd
 
         plannen = wedstrijd.competitiewedstrijdenplan_set.all()
         if plannen.count() < 1:
             # wedstrijd met andere bedoeling
-            raise Http404()
+            raise Http404('Geen wedstrijdenplan')
 
         ronde = DeelcompetitieRonde.objects.get(plan=plannen[0])
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)
         if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, ronde.deelcompetitie):
-            raise PermissionDenied()
+            raise PermissionDenied('Geen toegang')
 
         # voorkom wijzigingen bevroren wedstrijduitslag
         if rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and uitslag.is_bevroren:
