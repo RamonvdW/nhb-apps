@@ -410,7 +410,6 @@ HANDLEIDING_PAGINAS = [
     HANDLEIDING_POULES,
     HANDLEIDING_WEDSTRIJDKALENDER_HWL,
     # pagina's van de handleiding die intern gerefereerd worden
-    'Tips_voor_wiki_gebruik',       # TODO: opruimen
     'Koppelen_beheerders'
 ]
 
