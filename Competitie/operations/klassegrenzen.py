@@ -399,7 +399,8 @@ def get_mappings_wedstrijdklasse_to_competitieklasse(comp):
 
     for klasse in (CompetitieKlasse
                    .objects
-                   .filter(competitie=comp)
+                   .filter(competitie=comp,
+                           is_voor_teams_rk_bk=False)       # deze volgen later
                    .prefetch_related('indiv', 'team')):
         if klasse.indiv:
             trans_indiv[klasse.indiv.pk] = klasse
@@ -421,7 +422,7 @@ class KlasseBepaler(object):
         self.lkl_cache = {'M': self.lkl_cache_mannen,
                           'V': self.lkl_cache_vrouwen}
 
-        # vul de caches
+        # vul de caches met individuele wedstrijdklassen
         for klasse in (CompetitieKlasse
                        .objects
                        .filter(competitie=competitie)
@@ -497,7 +498,7 @@ def competitie_klassegrenzen_vaststellen(comp):
         klasse.save(update_fields=['min_ag'])
     # for
 
-    # team
+    # team (regio)
     for obj in bepaal_klassegrenzen_teams(comp, trans_team):
         klasse = obj['klasse']
         klasse.min_ag = obj['ag']
@@ -506,6 +507,9 @@ def competitie_klassegrenzen_vaststellen(comp):
 
     comp.klassegrenzen_vastgesteld = True
     comp.save(update_fields=['klassegrenzen_vastgesteld'])
+
+
+# TODO: klassegrenzen vaststellen voor RK/BK teams
 
 
 # end of file

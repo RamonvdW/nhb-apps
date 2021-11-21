@@ -119,6 +119,7 @@ class RayonTeamsView(TemplateView):
 
         totaal_teams = 0
 
+        # TODO: is_voor_teams_rk_bk gebruiken. Klassen niet tonen zolang de klassegrenzen niet vastgesteld zijn
         klassen = (CompetitieKlasse
                    .objects
                    .filter(competitie=comp,

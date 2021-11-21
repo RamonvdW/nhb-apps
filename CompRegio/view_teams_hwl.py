@@ -50,8 +50,10 @@ def bepaal_team_sterkte_en_klasse(team):
         for klasse in (CompetitieKlasse
                        .objects
                        .filter(competitie=comp,
-                               team__team_type=team.team_type)
-                       .order_by('min_ag', '-team__volgorde')):  # oplopend AG (=hogere klasse later)
+                               team__team_type=team.team_type,
+                               is_voor_teams_rk_bk=False)
+                       .order_by('min_ag',
+                                 '-team__volgorde')):  # oplopend AG (=hogere klasse later)
             if ag >= klasse.min_ag:
                 team.klasse = klasse
         # for
@@ -59,7 +61,7 @@ def bepaal_team_sterkte_en_klasse(team):
         ag = AG_NUL
 
     team.aanvangsgemiddelde = ag
-    team.save()
+    team.save(update_fields=['klasse', 'aanvangsgemiddelde'])
 
 
 class TeamsRegioView(UserPassesTestMixin, TemplateView):

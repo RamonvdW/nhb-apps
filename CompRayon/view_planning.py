@@ -97,7 +97,8 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             if wkl.indiv:
                 niet_gebruikt[100000 + wkl.indiv.pk] = wkl.indiv.beschrijving
             if wkl.team:
-                niet_gebruikt[200000 + wkl.team.pk] = wkl.team.beschrijving
+                if wkl.is_voor_teams_rk_bk:
+                    niet_gebruikt[200000 + wkl.team.pk] = wkl.team.beschrijving
         # for
 
         # haal de RK wedstrijden op
@@ -453,6 +454,8 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
             wedstrijd.locatie = None
 
         wedstrijd.save()
+
+        # TODO: ondersteuning voor koppelen van RK team klassen aan een wedstrijd toevoegen
 
         gekozen_klassen = list()
         for key, value in request.POST.items():

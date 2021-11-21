@@ -141,7 +141,8 @@ class RegioTeamsView(TemplateView):
         klassen = (CompetitieKlasse
                    .objects
                    .filter(competitie=comp,
-                           indiv=None)
+                           indiv=None,
+                           is_voor_teams_rk_bk=False)
                    .select_related('team',
                                    'team__team_type')
                    .order_by('team__volgorde'))

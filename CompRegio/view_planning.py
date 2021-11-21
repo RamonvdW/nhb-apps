@@ -505,8 +505,10 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
             for wkl in (CompetitieKlasse
                         .objects
-                        .select_related('indiv', 'team')
-                        .filter(competitie=ronde.deelcompetitie.competitie)):
+                        .select_related('indiv',
+                                        'team')
+                        .filter(competitie=ronde.deelcompetitie.competitie,
+                                is_voor_teams_rk_bk=False)):
                 if wkl.indiv:
                     niet_gebruikt[200000 + wkl.indiv.pk] = (2000 + wkl.indiv.volgorde, wkl.indiv.beschrijving)
                 if wkl.team and teams_tonen:
@@ -849,7 +851,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             wkl_team = (CompetitieKlasse
                         .objects
                         .filter(competitie=deelcomp.competitie,
-                                indiv=None)
+                                indiv=None,
+                                is_voor_teams_rk_bk=False)
                         .select_related('team')
                         .order_by('team__volgorde')
                         .all())

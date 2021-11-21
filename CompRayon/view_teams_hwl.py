@@ -11,7 +11,7 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.models import (CompetitieKlasse, AG_NUL, DeelCompetitie, LAAG_RK,
+from Competitie.models import (AG_NUL, DeelCompetitie, LAAG_RK,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
