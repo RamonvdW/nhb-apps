@@ -28,7 +28,7 @@
 
             <tr class="nhb-grijs">
                 <td colspan="{% if toon_aantal %}3{% else %}2{% endif %}">
-                    <h5>Individuele wedstrijdklassen</h5>
+                    <h5>Wedstrijdklassen individuele competitie (Regio + RK + BK)</h5>
                 </td>
                 <td colspan="2" class="hide-on-small-only"></td>
             </tr>
@@ -62,11 +62,11 @@
                 </tr>
             {% endfor %}
 
-            <!-- Team wedstrijdklassen -->
+            <!-- Team wedstrijdklassen regio -->
 
             <tr class="nhb-grijs">
                 <td colspan="{% if toon_aantal %}3{% else %}2{% endif %}">
-                    <h5>Team wedstrijdklassen</h5>
+                    <h5>Wedstrijdklassen teamcompetitie (regio)</h5>
                 </td>
                 <td colspan="2" class="hide-on-small-only"></td>
             </tr>
@@ -82,22 +82,68 @@
             </tr>
 
             {% for klasse in team_klassen %}
-                <tr>
-                    <td>{{ klasse.team.beschrijving }}</td>
+                {% if not klasse.is_voor_teams_rk_bk %}
+                    <tr>
+                        <td>{{ klasse.team.beschrijving }}</td>
 
-                    {% if klasse.min_ag_str %}
-                        <td>{{ klasse.min_ag_str }}</td>
-                    {% else %}
-                        <td><i class="grey-text">n.v.t.</i></td>
-                    {% endif %}
+                        {% if klasse.min_ag_str %}
+                            <td>{{ klasse.min_ag_str }}</td>
+                        {% else %}
+                            <td><i class="grey-text">n.v.t.</i></td>
+                        {% endif %}
 
-                    {% if toon_aantal %}
-                        <td></td>
-                    {% endif %}
+                        {% if toon_aantal %}
+                            <td></td>
+                        {% endif %}
 
-                    <td class="hide-on-small-only">{{ klasse.blazoen_regio_str }}</td>
-                    <td class="hide-on-small-only">{{ klasse.blazoen_rk_bk_str }}</td>
-                </tr>
+                        <td class="hide-on-small-only">{{ klasse.blazoen_regio_str }}</td>
+                        <td class="hide-on-small-only">{{ klasse.blazoen_rk_bk_str }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+
+            <!-- Wedstrijdklassen RK/BK teams -->
+
+            <tr class="nhb-grijs">
+                <td colspan="{% if toon_aantal %}3{% else %}2{% endif %}">
+                    <h5>Wedstrijdklassen RK teams en BK teams</h5>
+                </td>
+                <td colspan="2" class="hide-on-small-only"></td>
+            </tr>
+
+            <tr>
+                <th>Materiaalklasse</th>
+                <th>Minimale team<wbr/>sterkte</th>
+                {% if toon_aantal %}
+                    <th></th>
+                {% endif %}
+                <th class="hide-on-small-only"></th>
+                <th class="hide-on-small-only">Blazoen RK/BK</th>
+            </tr>
+
+            {% for klasse in team_klassen %}
+                {% if klasse.is_voor_teams_rk_bk %}
+                    <tr>
+                        <td>{{ klasse.team.beschrijving }}</td>
+
+                        {% if klasse.min_ag_str %}
+                            <td>{{ klasse.min_ag_str }}</td>
+                        {% else %}
+                            {% if rk_bk_klassen_vastgesteld %}
+                                <td><i class="grey-text">n.v.t.</i></td>
+                            {% else %}
+                                <td><i class="grey-text">Nog niet vastgesteld</i></td>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if toon_aantal %}
+                            <td></td>
+                        {% endif %}
+
+                        <td class="hide-on-small-only"></td>
+                        <td class="hide-on-small-only">{{ klasse.blazoen_rk_bk_str }}</td>
+                    </tr>
+                {% endif %}
             {% endfor %}
         </table>
 

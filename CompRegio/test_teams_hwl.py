@@ -481,7 +481,8 @@ class CompRegioTestTeamsHWL(E2EHelpers, TestCase):
 
         # zet het team handmatig in een klasse en koppel een schutter
         klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=10)           # Recurve klasse ERE
+                                              team__volgorde=10,           # Recurve klasse ERE
+                                              is_voor_teams_rk_bk=False)
         team.klasse = klasse
         team.aanvangsgemiddelde = 8.8
         team.save()
@@ -677,12 +678,14 @@ class CompRegioTestTeamsHWL(E2EHelpers, TestCase):
         deelnemer.save()
 
         obj = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                           team__volgorde=10)           # Recurve klasse ERE
+                                           team__volgorde=10,           # Recurve klasse ERE
+                                           is_voor_teams_rk_bk=False)
         obj.min_ag = 29.5
         obj.save()
 
         obj = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                           team__volgorde=11)           # Recurve klasse A
+                                           team__volgorde=11,           # Recurve klasse A
+                                           is_voor_teams_rk_bk=False)
         obj.min_ag = 21.340     # ondergrens = precies wat het team zal hebben
         obj.save()
 

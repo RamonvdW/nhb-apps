@@ -134,12 +134,14 @@ class TestCompRegioPoules(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=10)
+                                              team__volgorde=10,
+                                              is_voor_teams_rk_bk=False)
         klasse.min_ag = 29.0
         klasse.save()
 
         klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=11)
+                                              team__volgorde=11,
+                                              is_voor_teams_rk_bk=False)
         klasse.min_ag = 25.0
         klasse.save()
 

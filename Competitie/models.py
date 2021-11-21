@@ -147,7 +147,9 @@ class Competitie(models.Model):
     #         stuur emails uitnodiging deelname + bevestig deelname
     #         HWL's kunnen RK teams te repareren (tot 2 weken voor deadline)
     # fase K1: stuur email herinnering bevestig deelname
-    rk_eerste_wedstrijd = models.DateField()
+    klassegrenzen_vastgesteld_rk_bk = models.BooleanField(default=False)
+
+    rk_eerste_wedstrijd = models.DateField()        # einde fast K moet 2 weken voor de eerste wedstrijd zijn
     # fase L: wedstrijden
     rk_laatste_wedstrijd = models.DateField()
     # fase M: vaststellen en publiceren uitslag
@@ -311,6 +313,10 @@ class CompetitieKlasse(models.Model):
     # team som van de 3 beste = 0.003 - 30.000
     min_ag = models.DecimalField(max_digits=5, decimal_places=3)    # 10.000
 
+    # voor de RK/BK teams worden nieuwe klassegrenzen vastgesteld, dus houd ze uit elkaar
+    # niet van toepassing op individuele klassen
+    is_voor_teams_rk_bk = models.BooleanField(default=False)
+
     def __str__(self):
         msg = "?"
         if self.indiv:
@@ -318,6 +324,11 @@ class CompetitieKlasse(models.Model):
         if self.team:
             msg = self.team.beschrijving
         msg += " (%.3f)" % self.min_ag
+
+        if self.is_voor_teams_rk_bk:
+            msg += ' (RK/BK)'
+        elif self.team:
+            msg += ' (regio)'
         return msg
 
     class Meta:

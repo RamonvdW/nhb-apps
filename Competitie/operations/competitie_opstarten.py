@@ -143,13 +143,27 @@ def _maak_competitieklassen(comp):
         bulk.append(klasse)
     # for
 
+    # team klassen voor de regiocompetitie
     for team in (TeamWedstrijdklasse
                  .objects
                  .exclude(buiten_gebruik=True)):
         klasse = CompetitieKlasse(
                         competitie=comp,
                         team=team,
-                        min_ag=AG_NUL)
+                        min_ag=AG_NUL,
+                        is_voor_teams_rk_bk=False)
+        bulk.append(klasse)
+    # for
+
+    # team klassen voor RK/BK
+    for team in (TeamWedstrijdklasse
+                 .objects
+                 .exclude(buiten_gebruik=True)):
+        klasse = CompetitieKlasse(
+                        competitie=comp,
+                        team=team,
+                        min_ag=AG_NUL,
+                        is_voor_teams_rk_bk=True)
         bulk.append(klasse)
     # for
 

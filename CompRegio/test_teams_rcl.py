@@ -141,12 +141,14 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=10)
+                                              team__volgorde=10,
+                                              is_voor_teams_rk_bk=False)
         klasse.min_ag = 29.0
         klasse.save()
 
         klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=11)
+                                              team__volgorde=11,
+                                              is_voor_teams_rk_bk=False)
         klasse.min_ag = 25.0
         klasse.save()
 
@@ -215,7 +217,8 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
         teamtype_r = TeamType.objects.get(afkorting='R')
         klasse_r_ere = CompetitieKlasse.objects.get(
                                     competitie=deelcomp.competitie,
-                                    team__volgorde=10)        # zie WKL_TEAM in BasisTypen migrations
+                                    team__volgorde=10,
+                                    is_voor_teams_rk_bk=False)        # zie WKL_TEAM in BasisTypen migrations
 
         team1 = RegiocompetitieTeam(
                     deelcompetitie=deelcomp,
@@ -268,7 +271,8 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
         team_r = TeamType.objects.get(afkorting='R')
         klasse_r_ere = CompetitieKlasse.objects.get(
                                     competitie=self.comp_18,
-                                    team__volgorde=10)
+                                    team__volgorde=10,
+                                    is_voor_teams_rk_bk=False)
         # create two complete teams
         RegiocompetitieTeam(
                 deelcompetitie=self.deelcomp_regio112_18,

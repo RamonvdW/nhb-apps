@@ -128,6 +128,7 @@ class KlassegrenzenTonenView(View):
             context['indiv_klassen'] = self._get_indiv_klassen(comp, toon_aantal)
             context['team_klassen'] = self._get_team_klassen(comp, aantal_pijlen)
             context['aantal_pijlen'] = aantal_pijlen
+            context['rk_bk_klassen_vastgesteld'] = comp.klassegrenzen_vastgesteld_rk_bk
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return render(request, self.template_name, context)

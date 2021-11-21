@@ -872,7 +872,7 @@ class TestCompetitieMutaties(E2EHelpers, TestCase):
                           door='Tester').save()
         CompetitieMutatie(mutatie=MUTATIE_COMPETITIE_OPSTARTEN,  # triggered "al opgestart" pad
                           door='Tester').save()
-        self._verwerk_mutaties(30)
+        self._verwerk_mutaties(32)
 
         # AG vaststellen
         CompetitieMutatie(mutatie=MUTATIE_AG_VASTSTELLEN_18M,

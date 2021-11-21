@@ -12,7 +12,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
 from Competitie.models import (CompetitieKlasse, AG_NUL, DeelCompetitie, LAAG_RK,
-                               RegioCompetitieSchutterBoog, KampioenschapTeam)
+                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 import datetime
@@ -38,37 +38,31 @@ def bepaal_regioschutter_gemiddelde_voor_rk_teams(deelnemer):
     return ag, bron
 
 
-def bepaal_rk_team_tijdelijke_sterkte_en_klasse(comp, rk_team):
+def bepaal_rk_team_tijdelijke_sterkte_en_klasse(comp, rk_team, open_inschrijving):
     """ gebruik AG/VSG van gekoppelde schutters om team aanvangsgemiddelde te berekenen
         en bepaal aan de hand daarvan de team wedstrijdklasse
     """
 
     ags = list()
-    for deelnemer in rk_team.tijdelijke_schutters.all():
-        ag, _ = bepaal_regioschutter_gemiddelde_voor_rk_teams(deelnemer)
-        ags.append(ag)
-    # for
+    if open_inschrijving:
+        for deelnemer in rk_team.tijdelijke_schutters.all():
+            ag, _ = bepaal_regioschutter_gemiddelde_voor_rk_teams(deelnemer)
+            ags.append(ag)
+        # for
+    else:
+        for deelnemer in rk_team.gekoppelde_schutters.all():
+            ags.append(deelnemer.gemiddelde)
+        # for
 
-    rk_team.klasse = None
+    rk_team.klasse = None       # wordt later bepaald, als de teams al bevroren zijn
 
     if len(ags) >= 3:
         # bereken de team sterkte: de som van de 3 sterkste sporters
         ags.sort(reverse=True)
-        ag = sum(ags[:3])
-
-        # bepaal de wedstrijdklasse
-        for klasse in (CompetitieKlasse
-                       .objects
-                       .filter(competitie=comp,
-                               team__team_type=rk_team.team_type)
-                       .order_by('min_ag', '-team__volgorde')):  # oplopend AG (=hogere klasse later)
-            if ag >= klasse.min_ag:
-                rk_team.klasse = klasse
-        # for
+        rk_team.aanvangsgemiddelde =  sum(ags[:3])
     else:
-        ag = AG_NUL
+        rk_team.aanvangsgemiddelde = AG_NUL
 
-    rk_team.aanvangsgemiddelde = ag
     rk_team.save(update_fields=['aanvangsgemiddelde', 'klasse'])
 
 
@@ -117,6 +111,8 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
         if datetime.date.today() < vanaf:
             raise Http404('Competitie is niet in de juiste fase 2')
 
+        deelcomp.open_inschrijving = comp.fase < 'K'
+
         return deelcomp
 
     def _get_rk_teams(self, deelcomp_rk):
@@ -126,17 +122,30 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
         else:
             aantal_pijlen = 25
 
-        rk_teams = (KampioenschapTeam
-                    .objects
-                    .select_related('vereniging',
-                                    'team_type')
-                    .filter(deelcompetitie=deelcomp_rk,
-                            vereniging=self.functie_nu.nhb_ver)
-                    .annotate(tijdelijke_schutters_count=Count('tijdelijke_schutters'))
-                    .order_by('volg_nr'))
+        if deelcomp_rk.open_inschrijving:
+            # open inschrijving RK
+            rk_teams = (KampioenschapTeam
+                        .objects
+                        .select_related('vereniging',
+                                        'team_type')
+                        .filter(deelcompetitie=deelcomp_rk,
+                                vereniging=self.functie_nu.nhb_ver)
+                        .annotate(schutters_count=Count('tijdelijke_schutters'))
+                        .order_by('volg_nr'))
+
+        else:
+            # team deelnemers bestaat uit gerechtigde RK deelnemers
+            rk_teams = (KampioenschapTeam
+                        .objects
+                        .select_related('vereniging',
+                                        'team_type')
+                        .filter(deelcompetitie=deelcomp_rk,
+                                vereniging=self.functie_nu.nhb_ver)
+                        .annotate(schutters_count=Count('gekoppelde_schutters'))
+                        .order_by('volg_nr'))
 
         for rk_team in rk_teams:
-            rk_team.aantal = rk_team.tijdelijke_schutters_count
+            rk_team.aantal = rk_team.schutters_count
             rk_team.ag_str = "%05.1f" % (rk_team.aanvangsgemiddelde * aantal_pijlen)
             rk_team.ag_str = rk_team.ag_str.replace('.', ',')
 
@@ -161,6 +170,8 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
         context['deelcomp_rk'] = deelcomp_rk = self._get_deelcomp_rk(kwargs['rk_deelcomp_pk'])
 
         context['rk_teams'] = self._get_rk_teams(deelcomp_rk)
+
+        context['rk_bk_klassen_vastgesteld'] = deelcomp_rk.competitie.klassegrenzen_vastgesteld_rk_bk
 
         context['url_nieuw_team'] = reverse('CompRayon:teams-rk-nieuw',
                                             kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
@@ -207,11 +218,13 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
 
         if not ('E' <= comp.fase <= 'K'):
             # staat niet meer open voor instellen RK teams
-            raise Http404('Competitie is niet in de juiste fase')
+            raise Http404('Competitie is niet in de juiste fase 1')
 
         vanaf = comp.eerste_wedstrijd + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
         if datetime.date.today() < vanaf:
-            raise Http404('Competitie is niet in de juiste fase')
+            raise Http404('Competitie is niet in de juiste fase 2')
+
+        deelcomp.open_inschrijving = comp.fase < 'K'
 
         return deelcomp
 
@@ -387,6 +400,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
             rk_team = (KampioenschapTeam
                        .objects
                        .select_related('deelcompetitie',
+                                       'deelcompetitie__competitie',
                                        'team_type')
                        .prefetch_related('team_type__boog_typen')
                        .get(pk=rk_team_pk))
@@ -402,8 +416,11 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         context['deelcomp_rk'] = deelcomp_rk = rk_team.deelcompetitie
 
         comp = deelcomp_rk.competitie
-        #comp.bepaal_fase()
-        # TODO: vanaf wanneer wijzigingen blokkeren?
+        comp.bepaal_fase()
+        if not ('E' <= comp.fase <= 'K'):
+            raise Http404('Competitie is niet in de juiste fase')
+
+        context['open_inschrijving'] = open_inschrijving = comp.fase < 'K'
 
         boog_typen = rk_team.team_type.boog_typen.all()
         boog_pks = boog_typen.values_list('pk', flat=True)
@@ -416,41 +433,82 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         ag_str = "%5.1f" % (rk_team.aanvangsgemiddelde * aantal_pijlen)
         rk_team.ag_str = ag_str.replace('.', ',')
 
-        pks = rk_team.tijdelijke_schutters.values_list('pk', flat=True)
+        if open_inschrijving:
+            # alle leden van de vereniging die meedoen aan de regiocompetitie mogen gekozen worden
+            pks = rk_team.tijdelijke_schutters.values_list('pk', flat=True)
 
-        bezet_pks = (KampioenschapTeam
-                     .objects
-                     .filter(vereniging=ver)
-                     .exclude(pk=rk_team_pk)
-                     .prefetch_related('tijdelijke_schutters')
-                     .values_list('tijdelijke_schutters__pk', flat=True))
+            bezet_pks = (KampioenschapTeam
+                         .objects
+                         .filter(vereniging=ver)
+                         .exclude(pk=rk_team_pk)
+                         .prefetch_related('tijdelijke_schutters')
+                         .values_list('tijdelijke_schutters__pk', flat=True))
 
-        deelnemers = (RegioCompetitieSchutterBoog
-                      .objects
-                      .filter(deelcompetitie__competitie=comp,
-                              # inschrijf_voorkeur_team=True,
-                              bij_vereniging=ver,
-                              sporterboog__boogtype__in=boog_pks)
-                      .exclude(klasse__indiv__is_aspirant_klasse=True)            # geen aspiranten
-                      .select_related('sporterboog',
-                                      'sporterboog__sporter',
-                                      'sporterboog__boogtype')
-                      .order_by('-ag_voor_team'))
-        for obj in deelnemers:
-            obj.sel_str = "deelnemer_%s" % obj.pk
-            obj.naam_str = "[%s] %s" % (obj.sporterboog.sporter.lid_nr, obj.sporterboog.sporter.volledige_naam())
-            obj.boog_str = obj.sporterboog.boogtype.beschrijving
+            deelnemers = (RegioCompetitieSchutterBoog
+                          .objects
+                          .filter(deelcompetitie__competitie=comp,
+                                  # inschrijf_voorkeur_team=True,
+                                  bij_vereniging=ver,
+                                  sporterboog__boogtype__in=boog_pks)
+                          .exclude(klasse__indiv__is_aspirant_klasse=True)            # geen aspiranten
+                          .select_related('sporterboog',
+                                          'sporterboog__sporter',
+                                          'sporterboog__boogtype')
+                          .order_by('-ag_voor_team'))
 
-            ag, obj.ag_bron = bepaal_regioschutter_gemiddelde_voor_rk_teams(obj)
-            ag_str = "%.3f" % ag
-            obj.ag_str = ag_str.replace('.', ',')
+            for obj in deelnemers:
+                obj.sel_str = "deelnemer_%s" % obj.pk
+                obj.naam_str = "[%s] %s" % (obj.sporterboog.sporter.lid_nr, obj.sporterboog.sporter.volledige_naam())
+                obj.boog_str = obj.sporterboog.boogtype.beschrijving
 
-            obj.blokkeer = False
-            obj.geselecteerd = (obj.pk in pks)          # vinkje zetten: gekoppeld aan dit rk_team
-            if not obj.geselecteerd:
-                if obj.pk in bezet_pks:
-                    obj.blokkeer = True                 # niet te selecteren: gekoppeld aan een ander rk_team
-        # for
+                ag, obj.ag_bron = bepaal_regioschutter_gemiddelde_voor_rk_teams(obj)
+                ag_str = "%.3f" % ag
+                obj.ag_str = ag_str.replace('.', ',')
+
+                obj.blokkeer = False
+                obj.geselecteerd = (obj.pk in pks)          # vinkje zetten: gekoppeld aan dit rk_team
+                if not obj.geselecteerd:
+                    if obj.pk in bezet_pks:
+                        obj.blokkeer = True                 # niet te selecteren: gekoppeld aan een ander rk_team
+            # for
+        else:
+            # alleen gerechtigde RK deelnemers mogen gekozen worden
+            pks = rk_team.gekoppelde_schutters.values_list('pk', flat=True)
+
+            bezet_pks = (KampioenschapTeam
+                         .objects
+                         .filter(deelcompetitie=deelcomp_rk,
+                                 vereniging=ver)
+                         .exclude(pk=rk_team_pk)
+                         .prefetch_related('gekoppelde_schutters')
+                         .values_list('gekoppelde_schutters__pk', flat=True))
+
+            deelnemers = (KampioenschapSchutterBoog
+                          .objects
+                          .filter(deelcompetitie=deelcomp_rk,
+                                  bij_vereniging=ver,
+                                  sporterboog__boogtype__in=boog_pks)
+                          .select_related('sporterboog',
+                                          'sporterboog__sporter',
+                                          'sporterboog__boogtype')
+                          .order_by('-gemiddelde'))
+
+            for obj in deelnemers:
+                obj.sel_str = "deelnemer_%s" % obj.pk
+                obj.naam_str = "[%s] %s" % (obj.sporterboog.sporter.lid_nr, obj.sporterboog.sporter.volledige_naam())
+                obj.boog_str = obj.sporterboog.boogtype.beschrijving
+
+                ag, obj.ag_bron = obj.gemiddelde, "Eindgemiddelde regiocompetitie"
+                ag_str = "%.3f" % ag
+                obj.ag_str = ag_str.replace('.', ',')
+
+                obj.blokkeer = False
+                obj.geselecteerd = (obj.pk in pks)          # vinkje zetten: gekoppeld aan dit rk_team
+                if not obj.geselecteerd:
+                    if obj.pk in bezet_pks:
+                        obj.blokkeer = True                 # niet te selecteren: gekoppeld aan een ander rk_team
+            # for
+
         context['deelnemers'] = deelnemers
 
         context['url_opslaan'] = reverse('CompRayon:teams-rk-koppelen',
@@ -478,28 +536,49 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         if rk_team.vereniging != ver:
             raise Http404('Team is niet van jouw vereniging')
 
-        rk_deelcomp = rk_team.deelcompetitie
+        deelcomp_rk = rk_team.deelcompetitie
 
-        comp = rk_deelcomp.competitie
-        #comp.bepaal_fase()
-        # TODO: vanaf wanneer wijzigingen blokkeren?
+        comp = deelcomp_rk.competitie
+        comp.bepaal_fase()
+        if not ('E' <= comp.fase <= 'K'):
+            raise Http404('Competitie is niet in de juiste fase')
+
+        open_inschrijving = comp.fase < 'K'
 
         # toegestane boogtypen en schutters
         boog_pks = rk_team.team_type.boog_typen.values_list('pk', flat=True)
 
-        bezet_pks = (KampioenschapTeam
-                     .objects
-                     .filter(vereniging=ver)
-                     .exclude(pk=rk_team_pk)
-                     .prefetch_related('tijdelijke_schutters')
-                     .values_list('tijdelijke_schutters__pk', flat=True))
+        if open_inschrijving:
+            bezet_pks = (KampioenschapTeam
+                         .objects
+                         .filter(deelcompetitie=deelcomp_rk,
+                                 vereniging=ver)
+                         .exclude(pk=rk_team_pk)
+                         .prefetch_related('tijdelijke_schutters')
+                         .values_list('tijdelijke_schutters__pk', flat=True))
 
-        ok_pks = (RegioCompetitieSchutterBoog
-                  .objects
-                  .filter(deelcompetitie__competitie=comp,
-                          bij_vereniging=ver,
-                          sporterboog__boogtype__in=boog_pks)
-                  .values_list('pk', flat=True))
+            ok_pks = (RegioCompetitieSchutterBoog
+                      .objects
+                      .filter(deelcompetitie__competitie=comp,
+                              bij_vereniging=ver,
+                              sporterboog__boogtype__in=boog_pks)
+                      .values_list('pk', flat=True))
+
+        else:
+            bezet_pks = (KampioenschapTeam
+                         .objects
+                         .filter(deelcompetitie=deelcomp_rk,
+                                 vereniging=ver)
+                         .exclude(pk=rk_team_pk)
+                         .prefetch_related('gekoppelde_schutters')
+                         .values_list('gekoppelde_schutters__pk', flat=True))
+
+            ok_pks = (KampioenschapSchutterBoog
+                      .objects
+                      .filter(deelcompetitie=deelcomp_rk,
+                              bij_vereniging=ver,
+                              sporterboog__boogtype__in=boog_pks)
+                      .values_list('pk', flat=True))
 
         pks = list()
         for key in request.POST.keys():
@@ -509,17 +588,21 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
                 except ValueError:
                     pass
                 else:
-                    if pk in ok_pks:
+                    if pk in ok_pks and pk not in bezet_pks:
                         pks.append(pk)
                     # silently ignore bad pks
         # for
 
-        rk_team.tijdelijke_schutters.clear()
-        rk_team.tijdelijke_schutters.add(*pks)
+        if open_inschrijving:
+            rk_team.tijdelijke_schutters.clear()
+            rk_team.tijdelijke_schutters.add(*pks)
+        else:
+            rk_team.gekoppelde_schutters.clear()
+            rk_team.gekoppelde_schutters.add(*pks)
 
-        bepaal_rk_team_tijdelijke_sterkte_en_klasse(comp, rk_team)
+        bepaal_rk_team_tijdelijke_sterkte_en_klasse(comp, rk_team, open_inschrijving)
 
-        url = reverse('CompRayon:teams-rk', kwargs={'rk_deelcomp_pk': rk_deelcomp.pk})
+        url = reverse('CompRayon:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
         return HttpResponseRedirect(url)
 
 

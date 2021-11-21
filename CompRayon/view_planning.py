@@ -238,7 +238,8 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                     .objects
                     .exclude(deelname=DEELNAME_NEE)         # afgemelde schutters niet tellen
                     .filter(deelcompetitie=deelcomp_rk)
-                    .select_related('klasse')):
+                    .select_related('klasse',
+                                    'klasse__indiv')):
             try:
                 klasse2schutters[obj.klasse.indiv.pk] += 1
             except KeyError:
@@ -252,7 +253,8 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                      .exclude(indiv__niet_voor_rk_bk=True)      # verwijder regio-only klassen
                      .filter(competitie=deelcomp_rk.competitie,
                              team=None)
-                     .select_related('indiv__boogtype')
+                     .select_related('indiv',
+                                     'indiv__boogtype')
                      .order_by('indiv__volgorde')
                      .all())
         prev_boogtype = -1
@@ -276,9 +278,10 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         wkl_team = (CompetitieKlasse
                     .objects
                     .filter(competitie=deelcomp_rk.competitie,
-                            indiv=None)
-                    .order_by('indiv__volgorde')
-                    .all())
+                            indiv=None,
+                            is_voor_teams_rk_bk=True)
+                    .select_related('team')
+                    .order_by('indiv__volgorde'))
         for obj in wkl_team:
             obj.short_str = obj.team.beschrijving
             obj.sel_str = "wkl_team_%s" % obj.team.pk

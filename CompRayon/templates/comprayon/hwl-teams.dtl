@@ -14,7 +14,7 @@
 
     <p>Op deze pagina kan je als HWL de teams opgeven voor de <b>Rayonkampioenschappen (RK)</b> van de <b>{{ deelcomp_rk }}</b>.</p>
 
-    <p>Het RK teams kent een open inschrijving. De leden van het team komen uit de regiocompetitie en moeten 6 scores hebben. Deze controle wordt aan het einde van de regiocompetitie gedaan. De berekende team sterkte en team wedstrijdklasse voor het RK zijn daarom <b>onder voorbehoud</b>.</p>
+    <p>Het RK teams kent een open inschrijving. De leden van het team komen uit de regiocompetitie en moeten 6 scores hebben.<br>Deze controle wordt aan het einde van de regiocompetitie gedaan. De berekende team sterkte is daarom <b>onder voorbehoud</b>.</p>
 
     <p>&nbsp;</p>
     <table class="white">
@@ -24,9 +24,9 @@
                 <th class="hide-on-small-only">Soort team</th>
                 <th class="hide-on-med-and-up">Soort</th>
                 <th>Naam</th>
-                <th class="hide-on-small-only center-align">Gekoppeld</th>
+                <th class="hide-on-small-only center-align">Aantal sporters</th>
                 <th class="hide-on-small-only center-align">Sterkte</th>
-                <th>RK Wedstrijd<wbr/>klasse</th>
+                <th>Wedstrijd<wbr/>klasse RK/BK</th>
                 <th><!-- kolom voor de knoppen --></th>
             </tr>
         </thead>
@@ -39,13 +39,8 @@
 
                 <td class="hide-on-small-only center-align{% if rk_team.aantal < 3 or rk_team.aantal > 4 %} red-text{% endif %}">{{ rk_team.aantal }}</td>
 
-                {% if rk_team.klasse %}
-                    <td class="hide-on-small-only center-align">{{ rk_team.ag_str }}</td>
-                    <td>{{ rk_team.klasse.team.beschrijving }}</td>
-                {% else %}
-                    <td class="hide-on-small-only"></td>
-                    <td><i class="red-text">team is niet compleet</i></td>
-                {% endif %}
+                <td class="hide-on-small-only center-align">{{ rk_team.ag_str }}</td>
+                <td>{% if rk_bk_klassen_vastgesteld %}{{ rk_team.klasse.team.beschrijving }}{% else %}<i class="grey-text">Nog niet vastgesteld</i>{% endif %}</td>
 
                 <td>
                     {% if rk_team.url_wijzig %}
