@@ -319,11 +319,14 @@ class CompetitieOverzichtView(View):
                                       kwargs={'comp_pk': comp.pk,
                                               'comp_boog': 'r'})
 
-        # TODO: tussenstand --> eindstand
-        context['text_regio_indiv'] = 'Tussenstand voor de regiocompetitie individueel'
-        context['text_regio_teams'] = 'Tussenstand voor de regiocompetitie teams'
-        context['text_rayon_indiv'] = 'Tussenstand voor de rayonkampioenschappen individueel'
-        context['text_rayon_teams'] = 'Tussenstand voor de rayonkampioenschappen teams'
+        tussen_eind = "Tussen" if comp.fase < 'G' else "Eind"
+        context['text_regio_indiv'] = tussen_eind + 'stand voor de regiocompetitie individueel'
+        context['text_regio_teams'] = tussen_eind + 'stand voor de regiocompetitie teams'
+
+        tussen_eind = "Tussen" if comp.fase <= 'N' else "Eind"
+        context['text_rayon_indiv'] = tussen_eind + 'stand voor de rayonkampioenschappen individueel'
+        context['text_rayon_teams'] = tussen_eind + 'stand voor de rayonkampioenschappen teams'
+
         context['text_bond'] = 'Tussenstand voor de bondskampioenschappen'
 
     def get(self, request, *args, **kwargs):
