@@ -77,9 +77,7 @@
                     <br><span class="red-text">Incomplete teams moeten verwijderd worden!</span>
                 </caption>
                 <tr>
-                    {% if subset_filter %}
-                        <th>Regio</th>
-                    {% endif %}
+                    <th>Regio</th>
                     <th>Vereniging</th>
                     <th>Naam</th>
                     <th>Sporters</th>
@@ -90,13 +88,11 @@
             {% endif %}
 
             <tr>
-                {% if subset_filter %}
-                    <td>{{ team.vereniging.regio.regio_nr }}</td>
-                {% endif %}
+                <td>{{ team.vereniging.regio.regio_nr }}</td>
                 <td>{{ team.vereniging }}</td>
                 <td>{{ team.team_naam }}</td>
-                <td>{{ team.sporter_count }}</td>
-                <td>{{ team.ag_str }}</td>
+                <td{% if team.sporter_count < 3 %} class="red-text"{% endif %}>{{ team.sporter_count }}</td>
+                <td{% if team.ag_str == "000,0" %} class="red-text"{% endif %}>{{ team.ag_str }}</td>
                 <td>{{ team.team_type.beschrijving }}</td>
                 <td>
                     {% if team.url_aanpassen %}
@@ -116,9 +112,9 @@
 
         {% if toon_klassen %}
             {% for klasse, teams in rk_teams.items %}
-                <tr class="nhb-grijs">
-                    <td colspan="{% if subset_filter %}7{% else %}6{% endif %}"><h5>{{ klasse.team.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
-                </tr>
+                <caption class="nhb-grijs left-align">
+                    <h5>{{ klasse.team.beschrijving }}</h5>{{ klasse.sterkte_str }}
+                </caption>
                 <tr>
                     {% if subset_filter %}
                         <th>Regio</th>
@@ -132,11 +128,10 @@
 
                 {% for team in teams %}
                     <tr>
-                        {% if subset_filter %}
-                            <td>{{ team.vereniging.regio.regio_nr }}</td>
-                        {% endif %}
+                        <td>{{ team.vereniging.regio.regio_nr }}</td>
                         <td>{{ team.vereniging }}</td>
                         <td>{{ team.team_naam }}</td>
+                        <td>{{ team.sporter_count }}</td>
                         <td>{{ team.ag_str }}</td>
                         <td></td>
                         <td>
@@ -146,9 +141,9 @@
                         </td>
                     </tr>
                 {% empty %}
-                    <tr>
-                        <td colspan="{% if subset_filter %}7{% else %}6{% endif %}"><i>Nog geen teams</i></td>
-                    </tr>
+                    <caption>
+                        <i>Nog geen teams</i>
+                    </caption>
                 {% endfor %}
             {% endfor %}
         {% endif %}
