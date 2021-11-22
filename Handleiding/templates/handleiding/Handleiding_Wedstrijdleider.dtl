@@ -8,15 +8,19 @@
 {% block title %}Handleiding Wedstrijdleider{% endblock %}
 
 {% block pagina %}
-<div class="white" style="padding:10px 30px 10px 30px">
-<h4>Handleiding Wedstrijdleider</h4>
-<p>Dit wordt de handleiding voor de WL</p>
-<p></p>
-<p></p>
-<hr><h5>Verder</h5>
-<p>Terug naar de <a class="btn-nhb-blauw" href="/handleiding/Hoofdpagina/">Hoofdpagina</a>.</p>
 
-</div>
+    <div class="white" style="padding:10px 30px 10px 30px">
+
+        <h4>Handleiding Wedstrijdleider</h4>
+
+        <p>De wedstrijdleider (WL) kan een wedstrijd 'draaien': deelnemerslijst inzien en scores invoeren.</p>
+
+        <p>&nbsp;</p>
+        <hr>
+        <h5>Verder</h5>
+        <p>Terug naar de <a class="btn-nhb-blauw" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
+
+    </div>
 
 {% endblock %}
 

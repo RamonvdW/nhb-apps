@@ -8,65 +8,52 @@
 {% block title %}Hoofdpagina{% endblock %}
 
 {% block pagina %}
-<div class="white" style="padding:10px 30px 10px 30px">
-<h4>Hoofdpagina</h4>
-<p>Deze pagina is de inhoudsopgave voor de handleiding van de NHB applicaties. Per applicatie en functie staan hieronder links naar andere pagina's.</p>
-<p></p>
-<h5>Algemeen</h5>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/Intro_nieuwe_beheerders/">Intro nieuwe beheerders</a></p>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/Rollen/">Rollen</a></p>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/Koppelen_beheerders/">Koppelen beheerders</a></p>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/Twee-factor_authenticatie/">Twee-factor authenticatie</a></p>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/Schutter-boog/">Schutter-boog</a></p>
-<p></p>
-<h5>Regiocompetitieleider (RCL)</h5>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_RCL/">Handleiding RCL</a></p>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/Clusters/">Clusters</a></p>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/Inschrijfmethodes_Regiocompetitie/">Inschrijfmethodes Regiocompetitie</a></p>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/RCL_instellingen_regio/">RCL instellingen regio</a></p>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/Planning_Regio/">Planning Regio</a></p>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/Poules/">Poules</a></p>
-<p></p>
-<h5>Hoofdwedstrijdleider (HWL)</h5>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_Hoofdwedstrijdleider/">Handleiding Hoofdwedstrijdleider</a></p>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/Wedstrijdkalender_HWL/">Wedstrijdkalender HWL</a></p>
-<p></p>
-<h5>Wedstrijdleider (WL)</h5>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_Wedstrijdleider/">Handleiding Wedstrijdleider</a></p>
-<p></p>
-<h5>Rayonkampioenschappen Organisator (RKO)</h5>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_RKO/">Handleiding RKO</a></p>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/RK_selectie/">RK selectie</a></p>
-<p></p>
-<h5>Bondskampioenschappen Organisator (BKO)</h5>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_BKO/">Handleiding BKO</a></p>
-<p></p>
-<h5>Manager Competitiezaken (BB)</h5>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_BB/">Handleiding BB</a></p>
-<p></p>
-<h5>Secretaris (SEC)</h5>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_Secretaris/">Handleiding Secretaris</a></p>
 
-</div>
+    <div class="white" style="padding:10px 30px 10px 30px">
+        <h4>Hoofdpagina</h4>
+        <p>Deze pagina is de inhoudsopgave voor de handleiding van de NHB applicaties. Per applicatie en functie staan hieronder links naar andere pagina's.</p>
+        <h5>Algemeen</h5>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Intro_nieuwe_beheerders/">Intro nieuwe beheerders</a></p>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Rollen/">Rollen</a></p>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Koppelen_beheerders/">Koppelen beheerders</a></p>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Twee-factor_authenticatie/">Twee-factor authenticatie</a></p>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Sporter-boog/">Sporter-boog</a></p>
+
+        <p>&nbsp;</p>
+        <h5>Regiocompetitieleider (RCL)</h5>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_RCL/">Handleiding RCL</a></p>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Clusters/">Clusters</a></p>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Inschrijfmethodes_Regiocompetitie/">Inschrijfmethodes Regiocompetitie</a></p>
+        <p><a class="btn-nhb-blauw" href="/handleiding/RCL_instellingen_regio/">RCL instellingen regio</a></p>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Planning_Regio/">Planning Regio</a></p>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Poules/">Poules</a></p>
+
+        <p>&nbsp;</p>
+        <h5>Hoofdwedstrijdleider (HWL)</h5>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_Hoofdwedstrijdleider/">Handleiding Hoofdwedstrijdleider</a></p>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Wedstrijdkalender_HWL/">Wedstrijdkalender HWL</a></p>
+
+        <p>&nbsp;</p>
+        <h5>Wedstrijdleider (WL)</h5>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_Wedstrijdleider/">Handleiding Wedstrijdleider</a></p>
+
+        <p>&nbsp;</p>
+        <h5>Rayonkampioenschappen Organisator (RKO)</h5>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_RKO/">Handleiding RKO</a></p>
+        <p><a class="btn-nhb-blauw" href="/handleiding/RK_selectie/">RK selectie</a></p>
+
+        <p>&nbsp;</p>
+        <h5>Bondskampioenschappen Organisator (BKO)</h5>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_BKO/">Handleiding BKO</a></p>
+
+        <p>&nbsp;</p>
+        <h5>Manager Competitiezaken (BB)</h5>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_BB/">Handleiding BB</a></p>
+
+        <p>&nbsp;</p>
+        <h5>Secretaris (SEC)</h5>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_Secretaris/">Handleiding Secretaris</a></p>
+    </div>
 
 {% endblock %}
 
