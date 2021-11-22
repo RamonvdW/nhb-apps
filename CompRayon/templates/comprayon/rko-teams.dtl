@@ -49,7 +49,11 @@
 
     {% else %}
         <p>&nbsp;</p>
-        <p>Op deze pagina kan de RCL de verenigingsteams inzien voor de regiocompetitie.</p>
+        <p>Op deze pagina kan de RKO de verenigingsteams inzien voor de rayonkampioenschappen.</p>
+    {% endif %}
+
+    {% if not toon_klassen %}
+        <p><b>De teams worden in een wedstrijdklasse geplaatst zodra de BKO de klassegrenzen heeft vastgesteld.</b></p>
     {% endif %}
 
     <p>&nbsp;</p>
@@ -65,15 +69,20 @@
 
         {% for team in rk_teams_niet_af %}
             {% if team.break_before %}
-                <tr class="nhb-grijs">
-                    <td colspan="{% if subset_filter %}6{% else %}5{% endif %}"><h5 class="red-text">Nog niet geplaatste teams</h5></td>
-                </tr>
+                <caption class="nhb-grijs left-align">
+                    {% if toon_klassen %}
+                        <h5 class="red-text">Nog niet geplaatste teams</h5>
+                    {% endif %}
+                    <span>Vraag de HWL's om de teams compleet te maken met sporters die mee mogen doen met het RK.</span>
+                    <br><span class="red-text">Incomplete teams moeten verwijderd worden!</span>
+                </caption>
                 <tr>
                     {% if subset_filter %}
                         <th>Regio</th>
                     {% endif %}
                     <th>Vereniging</th>
                     <th>Naam</th>
+                    <th>Sporters</th>
                     <th>Team sterkte</th>
                     <th>Soort team</th>
                     <th><!-- kolom voor de knoppen --></th>
@@ -86,6 +95,7 @@
                 {% endif %}
                 <td>{{ team.vereniging }}</td>
                 <td>{{ team.team_naam }}</td>
+                <td>{{ team.sporter_count }}</td>
                 <td>{{ team.ag_str }}</td>
                 <td>{{ team.team_type.beschrijving }}</td>
                 <td>
@@ -104,42 +114,44 @@
             </tr>
         {% endfor %}
 
-        {% for klasse, teams in rk_teams.items %}
-            <tr class="nhb-grijs">
-                <td colspan="{% if subset_filter %}6{% else %}5{% endif %}"><h5>{{ klasse.team.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
-            </tr>
-            <tr>
-                {% if subset_filter %}
-                    <th>Regio</th>
-                {% endif %}
-                <th>Vereniging</th>
-                <th>Naam</th>
-                <th>Team sterkte</th>
-                <th></th>
-                <th><!-- kolom voor knoppen --></th>
-            </tr>
-
-            {% for team in teams %}
+        {% if toon_klassen %}
+            {% for klasse, teams in rk_teams.items %}
+                <tr class="nhb-grijs">
+                    <td colspan="{% if subset_filter %}7{% else %}6{% endif %}"><h5>{{ klasse.team.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
+                </tr>
                 <tr>
                     {% if subset_filter %}
-                        <td>{{ team.vereniging.regio.regio_nr }}</td>
+                        <th>Regio</th>
                     {% endif %}
-                    <td>{{ team.vereniging }}</td>
-                    <td>{{ team.team_naam }}</td>
-                    <td>{{ team.ag_str }}</td>
-                    <td></td>
-                    <td>
-                        {% if team.url_aanpassen %}
-                            <a class="btn-nhb-blauw" href="{{ team.url_aanpassen }}">Aanpassen</a>
+                    <th>Vereniging</th>
+                    <th>Naam</th>
+                    <th>Team sterkte</th>
+                    <th></th>
+                    <th><!-- kolom voor knoppen --></th>
+                </tr>
+
+                {% for team in teams %}
+                    <tr>
+                        {% if subset_filter %}
+                            <td>{{ team.vereniging.regio.regio_nr }}</td>
                         {% endif %}
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="{% if subset_filter %}6{% else %}5{% endif %}"><i>Nog geen teams</i></td>
-                </tr>
+                        <td>{{ team.vereniging }}</td>
+                        <td>{{ team.team_naam }}</td>
+                        <td>{{ team.ag_str }}</td>
+                        <td></td>
+                        <td>
+                            {% if team.url_aanpassen %}
+                                <a class="btn-nhb-blauw" href="{{ team.url_aanpassen }}">Aanpassen</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="{% if subset_filter %}7{% else %}6{% endif %}"><i>Nog geen teams</i></td>
+                    </tr>
+                {% endfor %}
             {% endfor %}
-        {% endfor %}
+        {% endif %}
     </table>
 
 {% endblock %}

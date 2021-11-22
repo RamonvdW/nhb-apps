@@ -6,6 +6,7 @@
 
 from django.http import Http404
 from django.urls import reverse
+from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -45,6 +46,8 @@ class RayonTeamsView(TemplateView):
 
             context['comp'] = comp
             comp.bepaal_fase()
+
+            open_inschrijving = comp.fase < 'K'
 
             subset = kwargs['subset'][:10]
             if subset == 'auto':
@@ -109,6 +112,8 @@ class RayonTeamsView(TemplateView):
             context['comp'] = comp = deelcomp_rk.competitie
             comp.bepaal_fase()
 
+            open_inschrijving = comp.fase < 'K'
+
             context['deelcomp'] = deelcomp_rk
             context['rayon'] = self.functie_nu.nhb_rayon
 
@@ -119,11 +124,11 @@ class RayonTeamsView(TemplateView):
 
         totaal_teams = 0
 
-        # TODO: is_voor_teams_rk_bk gebruiken. Klassen niet tonen zolang de klassegrenzen niet vastgesteld zijn
         klassen = (CompetitieKlasse
                    .objects
                    .filter(competitie=comp,
-                           indiv=None)
+                           indiv=None,
+                           is_voor_teams_rk_bk=True)
                    .select_related('team',
                                    'team__team_type')
                    .order_by('team__volgorde'))
@@ -151,6 +156,11 @@ class RayonTeamsView(TemplateView):
             prev_sterkte = min_ag_str
         # for
 
+        if open_inschrijving:
+            tel_dit = 'tijdelijke_schutters'
+        else:
+            tel_dit = 'gekoppelde_schutters'
+
         rk_teams = (KampioenschapTeam
                     .objects
                     .select_related('vereniging',
@@ -160,6 +170,7 @@ class RayonTeamsView(TemplateView):
                                     'klasse__team')
                     .exclude(klasse=None)
                     .filter(deelcompetitie__in=rk_deelcomp_pks)
+                    .annotate(sporter_count=Count(tel_dit))
                     .order_by('klasse__team__volgorde',
                               '-aanvangsgemiddelde',
                               'vereniging__ver_nr'))
@@ -174,9 +185,6 @@ class RayonTeamsView(TemplateView):
             ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = ag_str.replace('.', ',')
 
-            if comp.fase <= 'D' and self.rol_nu == Rollen.ROL_RKO:
-                team.url_aanpassen = reverse('Vereniging:teams-rayon-koppelen',
-                                             kwargs={'team_pk': team.pk})
             totaal_teams += 1
 
             klasse2teams[team.klasse].append(team)
@@ -193,6 +201,7 @@ class RayonTeamsView(TemplateView):
                                     'deelcompetitie')
                     .filter(deelcompetitie__in=rk_deelcomp_pks,
                             klasse=None)
+                    .annotate(sporter_count=Count(tel_dit))
                     .order_by('team_type__volgorde',
                               '-aanvangsgemiddelde',
                               'vereniging__ver_nr'))
@@ -203,13 +212,13 @@ class RayonTeamsView(TemplateView):
             ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = ag_str.replace('.', ',')
 
-            if comp.fase <= 'D' and self.rol_nu == Rollen.ROL_RKO:
-                team.url_aanpassen = reverse('Vereniging:teams-rayon-koppelen',
-                                             kwargs={'team_pk': team.pk})
+            if comp.fase <= 'K' and self.rol_nu == Rollen.ROL_RKO:
+                team.url_aanpassen = reverse('CompRayon:teams-rk-koppelen',
+                                             kwargs={'rk_team_pk': team.pk})
 
-                team.url_verwijder = reverse('Vereniging:teams-rayon-wijzig',
-                                             kwargs={'rk_deelcomp_pk': team.deelcompetitie.pk,
-                                                     'team_pk': team.pk})
+                #team.url_verwijder = reverse('CompRayon:teams-rk-wijzig',
+                #                             kwargs={'rk_deelcomp_pk': team.deelcompetitie.pk,
+                #                                     'rk_team_pk': team.pk})
             totaal_teams += 1
 
             team.break_before = is_eerste
@@ -218,6 +227,7 @@ class RayonTeamsView(TemplateView):
 
         context['rk_teams_niet_af'] = rk_teams
         context['totaal_teams'] = totaal_teams
+        context['toon_klassen'] = comp.klassegrenzen_vastgesteld_rk_bk
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context

@@ -388,7 +388,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_HWL
+        return self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_RKO)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -407,9 +407,12 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         except (ValueError, KampioenschapTeam.DoesNotExist):
             raise Http404('Team niet gevonden')
 
-        ver = self.functie_nu.nhb_ver
-        if rk_team.vereniging != ver:
-            raise Http404('Team is niet van jouw vereniging')
+        if self.rol_nu == Rollen.ROL_HWL:
+            ver = self.functie_nu.nhb_ver
+            if rk_team.vereniging != ver:
+                raise Http404('Team is niet van jouw vereniging')
+        else:
+            ver = rk_team.vereniging
 
         context['rk_team'] = rk_team
 
@@ -532,9 +535,12 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         except (ValueError, KampioenschapTeam.DoesNotExist):
             raise Http404('Team niet gevonden')
 
-        ver = self.functie_nu.nhb_ver
-        if rk_team.vereniging != ver:
-            raise Http404('Team is niet van jouw vereniging')
+        if self.rol_nu == Rollen.ROL_HWL:
+            ver = self.functie_nu.nhb_ver
+            if rk_team.vereniging != ver:
+                raise Http404('Team is niet van jouw vereniging')
+        else:
+            ver = rk_team.vereniging
 
         deelcomp_rk = rk_team.deelcompetitie
 
@@ -602,7 +608,11 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         bepaal_rk_team_tijdelijke_sterkte_en_klasse(comp, rk_team, open_inschrijving)
 
-        url = reverse('CompRayon:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+        if self.rol_nu == Rollen.ROL_HWL:
+            url = reverse('CompRayon:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+        else:
+            url = reverse('CompRayon:rayon-teams', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+
         return HttpResponseRedirect(url)
 
 
