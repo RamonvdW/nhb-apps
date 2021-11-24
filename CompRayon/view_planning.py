@@ -12,7 +12,7 @@ from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, DeelCompetitie,
                                CompetitieKlasse, DeelcompetitieKlasseLimiet, DeelcompetitieRonde,
-                               KampioenschapSchutterBoog, CompetitieMutatie,
+                               KampioenschapSchutterBoog, KampioenschapTeam, CompetitieMutatie,
                                MUTATIE_CUT, MUTATIE_AFMELDEN, MUTATIE_AANMELDEN, DEELNAME_JA, DEELNAME_NEE)
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
@@ -109,21 +109,30 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                                      .order_by('datum_wanneer',
                                                'tijd_begin_wedstrijd'))
         for obj in context['wedstrijden_rk']:
+
+            obj.schutters_count = 0
+
             obj.wkl_namen = list()
             for wkl in obj.indiv_klassen.order_by('volgorde'):
                 obj.wkl_namen.append(wkl.beschrijving)
                 niet_gebruikt[100000 + wkl.pk] = None
-            # for
-            # FUTURE: obj.team_klassen toevoegen
-            obj.schutters_count = 0
 
-            for klasse in obj.indiv_klassen.all():
                 try:
-                    obj.schutters_count += klasse2schutters[klasse.pk]
+                    obj.schutters_count += klasse2schutters[wkl.pk]
                 except KeyError:
                     # geen schutters in deze klasse
                     pass
             # for
+
+            for wkl in obj.team_klassen.order_by('volgorde'):
+                obj.wkl_namen.append(wkl.beschrijving)
+                niet_gebruikt[200000 + wkl.pk] = None
+
+                # TODO: aantal teams vaststellen per klasse
+                aantal_teams = 0
+                obj.schutters_count += 4 * aantal_teams
+            # for
+
         # for
 
         context['wkl_niet_gebruikt'] = [beschrijving for beschrijving in niet_gebruikt.values() if beschrijving]
@@ -275,6 +284,17 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
             obj.geselecteerd = (obj.indiv.pk in wedstrijd_indiv_pks)
         # for
 
+        klasse_count = dict()   # [klasse.pk] = count
+        for klasse_pk in (KampioenschapTeam
+                          .objects
+                          .filter(deelcompetitie=deelcomp_rk)
+                          .values_list('klasse__pk', flat=True)):
+            try:
+                klasse_count[klasse_pk] += 1
+            except KeyError:
+                klasse_count[klasse_pk] = 1
+        # for
+
         wedstrijd_team_pks = [obj.pk for obj in wedstrijd.team_klassen.all()]
         wkl_team = (CompetitieKlasse
                     .objects
@@ -282,11 +302,17 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                             indiv=None,
                             is_voor_teams_rk_bk=True)
                     .select_related('team')
-                    .order_by('indiv__volgorde'))
+                    .order_by('team__volgorde'))
+
         for obj in wkl_team:
             obj.short_str = obj.team.beschrijving
             obj.sel_str = "wkl_team_%s" % obj.team.pk
             obj.geselecteerd = (obj.team.pk in wedstrijd_team_pks)
+
+            try:
+                obj.teams_count = klasse_count[obj.pk]
+            except KeyError:
+                obj.teams_count = "?"
         # for
 
         return wkl_indiv, wkl_team
@@ -455,9 +481,9 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         wedstrijd.save()
 
-        # TODO: ondersteuning voor koppelen van RK team klassen aan een wedstrijd toevoegen
+        gekozen_indiv_klassen = list()
+        gekozen_team_klassen = list()
 
-        gekozen_klassen = list()
         for key, value in request.POST.items():
             if key[:10] == "wkl_indiv_":
                 try:
@@ -465,21 +491,41 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                 except (IndexError, TypeError, ValueError):
                     pass
                 else:
-                    gekozen_klassen.append(pk)
+                    gekozen_indiv_klassen.append(pk)
+
+            if key[:9] == "wkl_team_":
+                try:
+                    pk = int(key[9:9+6])            # afkappen voor veiligheid
+                except (IndexError, TypeError, ValueError):
+                    pass
+                else:
+                    gekozen_team_klassen.append(pk)
         # for
 
         for obj in wedstrijd.indiv_klassen.all():
-            if obj.pk in gekozen_klassen:
+            if obj.pk in gekozen_indiv_klassen:
                 # was al gekozen
-                gekozen_klassen.remove(obj.pk)
+                gekozen_indiv_klassen.remove(obj.pk)
             else:
                 # moet uitgezet worden
                 wedstrijd.indiv_klassen.remove(obj)
         # for
 
+        for obj in wedstrijd.team_klassen.all():
+            if obj.pk in gekozen_team_klassen:
+                # was al gekozen
+                gekozen_team_klassen.remove(obj.pk)
+            else:
+                # moet uitgezet worden
+                wedstrijd.team_klassen.remove(obj)
+        # for
+
         # alle nieuwe klassen toevoegen
-        if len(gekozen_klassen):
-            wedstrijd.indiv_klassen.add(*gekozen_klassen)
+        if len(gekozen_indiv_klassen):
+            wedstrijd.indiv_klassen.add(*gekozen_indiv_klassen)
+
+        if len(gekozen_team_klassen):
+            wedstrijd.team_klassen.add(*gekozen_team_klassen)
 
         url = reverse('CompRayon:rayon-planning', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
         return HttpResponseRedirect(url)

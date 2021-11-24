@@ -187,7 +187,13 @@ class RayonTeamsView(TemplateView):
 
             totaal_teams += 1
 
-            klasse2teams[team.klasse].append(team)
+            try:
+                klasse2teams[team.klasse].append(team)
+            except KeyError:
+                # dit is geen acceptabele klasse (waarschijnlijk een regio klasse)
+                # pas dit meteen even aan
+                team.klasse = None
+                team.save(update_fields=['klasse'])
         # for
 
         context['rk_teams'] = klasse2teams

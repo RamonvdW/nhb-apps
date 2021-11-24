@@ -8,6 +8,19 @@ from django.db import migrations, models
 from Competitie.models import AG_NUL
 
 
+def clear_kampioenschapteam_klasse(apps, _):
+    """ kampioenschap team klasse kan al ingesteld staan,
+        maar moet leeg blijven totdat de RK/BK klassegrenzen vastgesteld zijn.
+    """
+
+    team_klas = apps.get_model('Competitie', 'KampioenschapTeam')
+
+    for team in team_klas.objects.all():
+        team.klasse = None
+        team.save(update_fields=['klasse'])
+    # for
+
+
 def klassen_toevoegen(apps, _):
     """ voeg mid-flight de team wedstrijdklassen toe voor het RK/BK teams """
 
@@ -49,6 +62,7 @@ class Migration(migrations.Migration):
             name='is_voor_teams_rk_bk',
             field=models.BooleanField(default=False),
         ),
+        migrations.RunPython(clear_kampioenschapteam_klasse),
         migrations.RunPython(klassen_toevoegen)
     ]
 
