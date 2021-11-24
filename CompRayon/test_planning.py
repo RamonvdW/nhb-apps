@@ -326,7 +326,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('comprayon/wijzig-wedstrijd-rk.dtl', 'plein/site_layout.dtl'))
 
         # nog een keer ophalen, want dan zijn wedstrijd.vereniging en wedstrijd.locatie al gezet
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.get(url_w)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
@@ -348,7 +348,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         # wissel naar BKO en haal de planning op
         self.e2e_login_and_pass_otp(self.account_bko_18)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(26):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 

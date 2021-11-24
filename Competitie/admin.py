@@ -6,6 +6,7 @@
 
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from BasisTypen.models import TeamWedstrijdklasse
 from Wedstrijden.models import CompetitieWedstrijd
 from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde, LAAG_REGIO,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet,
@@ -190,12 +191,40 @@ class RegiocompetitieTeamAdmin(CreateOnlyAdmin):
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
+class GebruikteKlassenFilter(admin.SimpleListFilter):
+
+    title = "Team Wedstrijdklasse"
+
+    parameter_name = 'klasse'
+
+    default_value = None
+
+    def lookups(self, request, model_admin):
+        """ Return list of tuples for the sidebar """
+        return [
+            ('leeg', 'Geen klasse'),
+            ('regio', 'Regio klasse'),
+            ('rk_bk', 'RK/BK klasse')
+        ]
+
+    def queryset(self, request, queryset):
+        selection = self.value()
+        if selection == 'leeg':
+            queryset = queryset.filter(klasse__team=None)
+        elif selection == 'regio':
+            queryset = queryset.filter(klasse__is_voor_teams_rk_bk=False)
+        elif selection == 'rk_bk':
+            queryset = queryset.filter(klasse__is_voor_teams_rk_bk=True)
+        return queryset
+
+
 class KampioenschapTeamAdmin(CreateOnlyAdmin):
 
     filter_horizontal = ('tijdelijke_schutters', 'gekoppelde_schutters', 'feitelijke_schutters')
 
     list_filter = ('deelcompetitie__competitie',
-                   'vereniging__regio__rayon',)
+                   'vereniging__regio__rayon',
+                   GebruikteKlassenFilter)
 
     list_select_related = ('deelcompetitie',
                            'deelcompetitie__nhb_rayon',
