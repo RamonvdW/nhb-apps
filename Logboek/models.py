@@ -64,7 +64,7 @@ def logboek_opschonen(stdout):
     """
 
     now = timezone.now()
-    max_age = now - datetime.timedelta(days=365)
+    max_age = now - datetime.timedelta(days=548)        # requirement 18 months --> 365*1.5=548
 
     objs = (LogboekRegel
             .objects
