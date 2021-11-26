@@ -21,7 +21,7 @@ class IsAfgehandeldListFilter(admin.SimpleListFilter):      # pragma: no cover
 
     def lookups(self, request, model_admin):
         """ geeft de filter mogelijkheden terug """
-        return ((0, 'Nog niet'), (1, 'Ja'), (-1, 'Alles'))
+        return (0, 'Nog niet'), (1, 'Ja'), (-1, 'Alles')
 
     def queryset(self, request, queryset):
         """ geef een gefilterde lijst met records terug """
@@ -62,9 +62,8 @@ class SiteFeedbackAdmin(admin.ModelAdmin):
     # volgorde van de velden
     fields = ('toegevoegd_op', 'bevinding', 'is_afgehandeld', 'feedback', 'gebruiker', 'email_adres', 'op_pagina', 'site_versie')
 
-    def email_adres(self, obj):
-        print('obj: %s' % repr(obj))
-
+    @staticmethod
+    def email_adres(obj):                             # pragma: no cover
         # obj.gebruiker = "Volledige Naam (username)"
         pos = obj.gebruiker.find('(')
         if pos > 0:

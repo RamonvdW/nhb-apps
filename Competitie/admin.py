@@ -6,7 +6,6 @@
 
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from BasisTypen.models import TeamWedstrijdklasse
 from Wedstrijden.models import CompetitieWedstrijd
 from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde, LAAG_REGIO,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet,

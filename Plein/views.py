@@ -99,10 +99,7 @@ class PleinView(View):
                 # beheerder
                 template = TEMPLATE_PLEIN_BEHEERDER
 
-                try:
-                    handleiding_pagina = ROL2HANDLEIDING_PAGINA[rol_nu]
-                except KeyError:
-                    handleiding_pagina = settings.HANDLEIDING_TOP
+                handleiding_pagina = ROL2HANDLEIDING_PAGINA[rol_nu]
 
                 context['handleiding_url'] = reverse_handleiding(request, handleiding_pagina)
 
