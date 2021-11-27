@@ -154,7 +154,7 @@
     {% endif %}
 
     <p>&nbsp;</p>
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-wijzig-status-rk-deelnemer" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-wijzig-status-rk-deelnemer" %}
 
 {% endblock %}
 

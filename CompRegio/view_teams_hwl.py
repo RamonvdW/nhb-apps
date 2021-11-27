@@ -652,7 +652,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             aantal_pijlen = 30
         else:
             aantal_pijlen = 25
-        ag_str = "%5.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+        ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
         team.ag_str = ag_str.replace('.', ',')
 
         if mag_wijzigen:

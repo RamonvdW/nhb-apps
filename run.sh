@@ -16,12 +16,12 @@ DEBUG=1
 echo "[INFO] Starting regiocomp_mutaties (runtime: 60 minutes)"
 pkill -f regiocomp_mutaties
 ./manage.py regiocomp_mutaties 60 &
-sleep 1
+# sleep 1
 
 echo "[INFO] Starting regiocomp_tussenstand (runtime: 60 minutes)"
 pkill -f regiocomp_tussenstand
 ./manage.py regiocomp_tussenstand 60 &
-sleep 1
+# sleep 1
 
 # start the development webserver
 if [ $DEBUG -eq 1 ]

@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import Http404
+from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.db.models import Count
 from django.views.generic import TemplateView
@@ -14,9 +14,11 @@ from Competitie.models import LAAG_RK, AG_NUL, Competitie, CompetitieKlasse, Dee
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from NhbStructuur.models import NhbRayon
+from Logboek.models import schrijf_in_logboek
 
 
 TEMPLATE_COMPRAYON_RKO_TEAMS = 'comprayon/rko-teams.dtl'
+TEMPLATE_COMPRAYON_VERWIJDER_TEAM = 'comprayon/rko-verwijder-team.dtl'
 
 
 class RayonTeamsView(TemplateView):
@@ -30,14 +32,18 @@ class RayonTeamsView(TemplateView):
         super().__init__(**kwargs)
         self.rol_nu, self.functie_nu = None, None
 
+    def test_func(self):
+        raise NotImplementedError("test_func is mandatory")     # pragma: no cover
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
         if self.subset_filter:
+            # BB/BKO mode
+
             context['subset_filter'] = True
 
-            # BB/BKO mode
             try:
                 comp_pk = int(str(kwargs['comp_pk'][:6]))       # afkappen geeft veiligheid
                 comp = Competitie.objects.get(pk=comp_pk)
@@ -47,7 +53,7 @@ class RayonTeamsView(TemplateView):
             context['comp'] = comp
             comp.bepaal_fase()
 
-            open_inschrijving = comp.fase < 'K'
+            open_inschrijving = comp.fase <= 'G'
 
             subset = kwargs['subset'][:10]
             if subset == 'auto':
@@ -112,7 +118,7 @@ class RayonTeamsView(TemplateView):
             context['comp'] = comp = deelcomp_rk.competitie
             comp.bepaal_fase()
 
-            open_inschrijving = comp.fase < 'K'
+            open_inschrijving = comp.fase <= 'G'
 
             context['deelcomp'] = deelcomp_rk
             context['rayon'] = self.functie_nu.nhb_rayon
@@ -222,9 +228,9 @@ class RayonTeamsView(TemplateView):
                 team.url_aanpassen = reverse('CompRayon:teams-rk-koppelen',
                                              kwargs={'rk_team_pk': team.pk})
 
-                #team.url_verwijder = reverse('CompRayon:teams-rk-wijzig',
-                #                             kwargs={'rk_deelcomp_pk': team.deelcompetitie.pk,
-                #                                     'rk_team_pk': team.pk})
+                team.url_verwijder = reverse('CompRayon:rayon-verwijder-team',
+                                             kwargs={'rk_deelcomp_pk': deelcomp_rk.pk,
+                                                     'rk_team_pk': team.pk})
             totaal_teams += 1
 
             team.break_before = is_eerste
@@ -265,6 +271,127 @@ class RayonTeamsAlleView(UserPassesTestMixin, RayonTeamsView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO)
+
+
+class RayonTeamsVerwijder(UserPassesTestMixin, TemplateView):
+
+    """ Met deze view kan de RKO een onvolledige team verwijderen """
+
+    # class variables shared by all instances
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    template_name = TEMPLATE_COMPRAYON_VERWIJDER_TEAM
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu == Rollen.ROL_RKO
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            rk_deelcomp_pk = int(str(kwargs['rk_deelcomp_pk'][:6]))  # afkappen geeft veiligheid
+            deelcomp_rk = (DeelCompetitie
+                           .objects
+                           .select_related('competitie')
+                           .get(pk=rk_deelcomp_pk,
+                                laag=LAAG_RK,
+                                nhb_rayon=self.functie_nu.nhb_rayon))
+        except (ValueError, Competitie.DoesNotExist):
+            raise Http404('Competitie niet gevonden')
+
+        context['comp'] = comp = deelcomp_rk.competitie
+        comp.bepaal_fase()
+
+        context['rayon'] = deelcomp_rk.nhb_rayon
+
+        if not ('E' <= comp.fase <= 'K'):
+            raise Http404('Competitie is niet in de juiste fase')
+
+        if comp.afstand == '18':
+            aantal_pijlen = 30
+        else:
+            aantal_pijlen = 25
+
+        if comp.fase <= 'G':
+            tel_dit = 'tijdelijke_schutters'
+        else:
+            tel_dit = 'gekoppelde_schutters'
+
+        try:
+            team_pk = int(str(kwargs['rk_team_pk'][:6]))  # afkappen geeft veiligheid
+            team = (KampioenschapTeam
+                    .objects
+                    .select_related('team_type',
+                                    'vereniging')
+                    .annotate(sporter_count=Count(tel_dit))
+                    .get(pk=team_pk,
+                         deelcompetitie__nhb_rayon=self.functie_nu.nhb_rayon,
+                         deelcompetitie__competitie=comp))
+        except (ValueError, Competitie.DoesNotExist):
+            raise Http404('Competitie niet gevonden')
+
+        team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+        team.ag_str = team.ag_str.replace('.', ',')
+
+        context['rk_team'] = team
+
+        context['url_verwijder'] = reverse('CompRayon:rayon-verwijder-team',
+                                           kwargs={'rk_deelcomp_pk': deelcomp_rk.pk,
+                                                   'rk_team_pk': team.pk})
+
+        context['url_terug'] = reverse('CompRayon:rayon-teams',
+                                       kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+
+        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        return context
+
+    def post(self, request, *args, **kwargs):
+
+        """ de RKO weet zeker dat hij het team wil verwijderen """
+
+        try:
+            rk_deelcomp_pk = int(str(kwargs['rk_deelcomp_pk'][:6]))  # afkappen geeft veiligheid
+            deelcomp_rk = (DeelCompetitie
+                           .objects
+                           .select_related('competitie')
+                           .get(pk=rk_deelcomp_pk,
+                                laag=LAAG_RK,
+                                nhb_rayon=self.functie_nu.nhb_rayon))
+        except (ValueError, Competitie.DoesNotExist):
+            raise Http404('Competitie niet gevonden')
+
+        comp = deelcomp_rk.competitie
+        comp.bepaal_fase()
+
+        if not ('E' <= comp.fase <= 'K'):
+            raise Http404('Competitie is niet in de juiste fase')
+
+        try:
+            team_pk = int(str(kwargs['rk_team_pk'][:6]))  # afkappen geeft veiligheid
+            team = (KampioenschapTeam
+                    .objects
+                    .select_related('team_type',
+                                    'vereniging')
+                    .get(pk=team_pk,
+                         deelcompetitie__nhb_rayon=self.functie_nu.nhb_rayon,
+                         deelcompetitie__competitie=comp))
+        except (ValueError, Competitie.DoesNotExist):
+            raise Http404('Competitie niet gevonden')
+
+        activiteit = "Verwijder RK team '%s' van vereniging %s" % (team.team_naam, team.vereniging)
+        schrijf_in_logboek(request.user, 'Competitie', activiteit)
+
+        team.delete()
+
+        url = reverse('CompRayon:rayon-teams', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+
+        return HttpResponseRedirect(url)
 
 
 # end of file

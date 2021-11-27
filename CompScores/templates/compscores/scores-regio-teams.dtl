@@ -9,7 +9,7 @@
 {% block title %}Scores koppelen aan team{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-scores-regio-teams" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compscores-scores-regio-teams" %}
 
     <h4>Scores koppelen aan team</h4>
 

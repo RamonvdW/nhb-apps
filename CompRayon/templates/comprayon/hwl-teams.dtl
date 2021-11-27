@@ -16,6 +16,8 @@
 
     <p>Het RK teams kent een open inschrijving. De leden van het team komen uit de regiocompetitie en moeten 6 scores hebben.<br>Deze controle wordt aan het einde van de regiocompetitie gedaan. De berekende team sterkte is daarom <b>onder voorbehoud</b>.</p>
 
+    <p>Aanmelden en aanpassen van de RK teams is mogelijk tot <b>{{ deelcomp_rk.datum_einde_knutselen_teams_rk_bk }}</b>.</p>
+
     <p>&nbsp;</p>
     <table class="white">
 

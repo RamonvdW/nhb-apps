@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-rko-teams" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-rko-teams" %}
 
     <h4>RK Teams</h4>
 
@@ -69,13 +69,15 @@
 
         {% for team in rk_teams_niet_af %}
             {% if team.break_before %}
-                <caption class="nhb-grijs left-align">
-                    {% if toon_klassen %}
-                        <h5 class="red-text">Nog niet geplaatste teams</h5>
-                    {% endif %}
-                    <span>Vraag de HWL's om de teams compleet te maken met sporters die mee mogen doen met het RK.</span>
-                    <br><span class="red-text">Incomplete teams moeten verwijderd worden!</span>
-                </caption>
+                <tr class="nhb-grijs">
+                    <td colspan="7">
+                        {% if toon_klassen %}
+                            <h5 class="red-text">Nog niet geplaatste teams</h5>
+                        {% endif %}
+                        <span>Vraag de HWL's om de teams compleet te maken met sporters die mee mogen doen met het RK.</span>
+                        <br><span class="red-text">Incomplete teams moeten verwijderd worden!</span>
+                    </td>
+                </tr>
                 <tr>
                     <th>Regio</th>
                     <th>Vereniging</th>
@@ -100,11 +102,7 @@
                     {% endif %}
                     {% if team.url_verwijder %}
                         <span>&nbsp;&nbsp;</span>
-                        <form action="{{ team.url_verwijder }}" method="post" style="display: inline">
-                            {% csrf_token %}
-                            <input type="hidden" name="verwijderen" value="1">
-                            <button class="btn-nhb-rood" type="submit">Verwijder</button>
-                        </form>
+                        <a class="btn-nhb-rood" href="{{ team.url_verwijder }}">Verwijder</a>
                     {% endif %}
                 </td>
             </tr>
@@ -112,9 +110,11 @@
 
         {% if toon_klassen %}
             {% for klasse, teams in rk_teams.items %}
-                <caption class="nhb-grijs left-align">
-                    <h5>{{ klasse.team.beschrijving }}</h5>{{ klasse.sterkte_str }}
-                </caption>
+                <tr class="nhb-grijs">
+                    <td colspan="7">
+                        <h5>{{ klasse.team.beschrijving }}</h5>{{ klasse.sterkte_str }}
+                    </td>
+                </tr>
                 <tr>
                     {% if subset_filter %}
                         <th>Regio</th>
@@ -141,9 +141,11 @@
                         </td>
                     </tr>
                 {% empty %}
-                    <caption>
-                        <i>Nog geen teams</i>
-                    </caption>
+                    <tr>
+                        <td colspan="7">
+                            <i>Nog geen teams</i>
+                        </td>
+                    </tr>
                 {% endfor %}
             {% endfor %}
         {% endif %}

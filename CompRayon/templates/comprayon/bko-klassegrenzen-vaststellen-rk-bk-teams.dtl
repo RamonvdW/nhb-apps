@@ -1,0 +1,60 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}RK Teams{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-bko-klassengrenzen-vaststellen-rk-bk-teams" %}
+
+    <h4>Teams klassegrenzen vaststellen</h4>
+
+    <p>Via dit scherm kan de BKO de klassengrenzen vaststellen voor de RK/BK teams wedstrijdklassen van de <b>{{ comp.beschrijving }}</b>.</p>
+    <p>Dit is een eenmalig actie welke ook de open inschrijving voor RK teams afsluit.</p>
+
+    <p>Dit is het automatisch berekende voorstel voor de klassegrenzen:</p>
+
+    <table class="white">
+        <thead>
+            <tr>
+                <th>Team type</th>
+                <th>Totaal teams</th>
+                <th>Team wedstrijdklasse</th>
+                <th>Aantal teams</th>
+                <th>Klassegrens</th>
+            </tr>
+        </thead>
+
+        {% for rows, teamtype, count, klassen in grenzen %}
+            <tr>
+                <td rowspan="{{ rows }}">{{ teamtype }}</td>
+                <td rowspan="{{ rows }}">{{ count }}</td>
+            </tr>
+
+            {% for klasse, count, grens in klassen %}
+                <tr>
+                    <td>{{ klasse }}</td>
+                    <td>{{ count }}</td>
+                    <td>{% if grens == "" %}<i class="grey-text">n.v.t.</i>{% else %}{{ grens }}{% endif %}</td>
+                </tr>
+            {% endfor %}
+
+        {% endfor %}
+    </table>
+
+    <p>&nbsp;</p>
+    <form method="post" action="{{ url_vaststellen }}">
+        {% csrf_token %}
+        <input class="btn-nhb-rood" name="button_vaststellen" type="submit" value="Ja, stel deze teams klassegrenzen vast">
+    </form>
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

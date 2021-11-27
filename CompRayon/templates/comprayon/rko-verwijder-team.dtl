@@ -1,0 +1,103 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}RK Teams{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-rko-verwijder-team" %}
+
+    <h4>RK Team verwijderen</h4>
+
+    <div class="row">
+
+        <!-- toon gegevens van de regio en competitie in een blauwe box -->
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
+
+                <div class="row small-row">
+                    <div class="col s3">Competitie:</div>
+                    <div class="col s7">{{ comp.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Rayon:</div>
+                    <div class="col s7">{{ rayon }}</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <p>&nbsp;</p>
+    <p>Op deze pagina kan de RKO een team voor het RK verwijderen.</p>
+
+    {% if comp.fase > 'J' %}
+        <p class="red-text">LET OP: verwijderen is definitief! De HWL kan het team niet meer opnieuw aanmaken!</p>
+    {% else %}
+        <p><b>Advies: vraag de HWL om het zelf op te lossen - de verenigingen kunnen het nog zelf.</b></p>
+    {% endif %}
+
+    <p>
+        <a class="btn-nhb-blauw" href="{{ url_terug }}">
+            <i class="material-icons-round left">arrow_back</i>Terug</a>
+    </p>
+    <p>&nbsp;</p>
+
+
+    <form action="{{ url_verwijder }}" method="post">
+        {% csrf_token %}
+
+        <table class="white">
+
+            <tr>
+                <td>Vereniging</td>
+                <td>{{ rk_team.vereniging }}</td>
+            </tr>
+
+            <tr>
+                <td>Team nummer</td>
+                <td>{{ rk_team.volg_nr }}</td>
+            </tr>
+
+            <tr>
+                <td>Soort team</td>
+                <td>{{ rk_team.team_type.beschrijving }}</td>
+            </tr>
+
+            <tr>
+                <td>Team naam</td>
+                <td>{{ rk_team.team_naam }}</td>
+            </tr>
+
+            <tr>
+                <td>Aantal sporters gekoppeld</td>
+                <td{% if rk_team.sporter_count < 3 %} class="red-text"{% endif %}>{{ rk_team.sporter_count }}</td>
+            </tr>
+
+            <tr>
+                <td>Team sterkte</td>
+                <td{% if rk_team.sporter_count < 3 %} class="red-text"{% endif %}>{{ rk_team.ag_str }}</td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+                    <button class="btn-nhb-rood" type="submit">
+                        <i class="material-icons-round left">check</i>Ja, ik weet zeker dat ik team wil verwijderen</button>
+                </td>
+            </tr>
+
+        </table>
+    </form>
+
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

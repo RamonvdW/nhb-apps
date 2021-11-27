@@ -44,6 +44,10 @@ urlpatterns = [
 
 
     # RKO: RK teams
+    path('ingeschreven-teams/<rk_deelcomp_pk>/verwijder/<rk_team_pk>/',
+         view_teams_rko.RayonTeamsVerwijder.as_view(),
+         name='rayon-verwijder-team'),
+
     path('ingeschreven-teams/<comp_pk>/<subset>/',
          view_teams_rko.RayonTeamsAlleView.as_view(),
          name='rayon-teams-alle'),
@@ -70,6 +74,10 @@ urlpatterns = [
          view_teams_hwl.RKTeamsKoppelLedenView.as_view(),
          name='teams-rk-koppelen'),
 
+    # BKO
+    path('<comp_pk>/rk-bk-teams-klassegrenzen/vaststellen/',
+         view_planning.KlassegrenzenTeamsVaststellenView.as_view(),
+         name='klassegrenzen-vaststellen-rk-bk-teams'),
 ]
 
 # end of file

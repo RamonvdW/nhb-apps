@@ -9,7 +9,7 @@
 {% block title %}Scores regiocompetitie{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-scores-regio" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compscores-scores-regio" %}
 
     <h4>Scores regiocompetitie</h4>
 

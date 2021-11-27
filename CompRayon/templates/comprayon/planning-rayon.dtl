@@ -161,7 +161,7 @@
 
     </table>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-planning-rayon" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-planning-rayon" %}
 
 {% endblock %}
 

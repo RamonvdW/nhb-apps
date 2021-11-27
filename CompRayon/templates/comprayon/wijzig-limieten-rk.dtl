@@ -57,7 +57,7 @@
         </p>
     </form>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-limieten-rk" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-wijzig-limieten-rk" %}
 
 {% endblock %}
 

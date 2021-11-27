@@ -91,7 +91,6 @@ urlpatterns = [
          name='lijst-regiocomp-regio-als-bestand'),
 
 
-
     # planning bk
     path('planning/bk/<deelcomp_pk>/',
          views_planning_bond.BondPlanningView.as_view(),

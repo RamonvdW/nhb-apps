@@ -161,7 +161,7 @@
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-lijst-rk-schutters" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-lijst-rk-selectie" %}
 
 {% endblock %}
 

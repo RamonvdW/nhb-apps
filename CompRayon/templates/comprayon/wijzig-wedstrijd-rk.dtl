@@ -210,7 +210,7 @@
         })
     </script>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-wijzig-wedstrijd-rk" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-wijzig-wedstrijd-rk" %}
 
 {% endblock %}
 
