@@ -348,6 +348,8 @@ class CompetitieOverzichtView(View):
         comp.bepaal_openbaar(self.rol_nu)      # zet comp.is_openbaar
 
         comp.einde_fase_F = comp.laatst_mogelijke_wedstrijd + datetime.timedelta(days=7)
+        comp.einde_fase_G = comp.einde_fase_F + datetime.timedelta(days=1)
+        comp.einde_fase_K = comp.rk_eerste_wedstrijd - datetime.timedelta(days=14)
         comp.einde_fase_M = comp.rk_laatste_wedstrijd + datetime.timedelta(days=7)
 
         if 'B' <= comp.fase <= 'E':

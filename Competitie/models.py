@@ -128,7 +128,10 @@ class Competitie(models.Model):
     # fase A: aanmaken competitie, vaststellen klassen
     klassegrenzen_vastgesteld = models.BooleanField(default=False)
 
+    # ----
     # fases en datums regiocompetitie
+    # ----
+
     begin_aanmeldingen = models.DateField()
     # fase B: aanmelden schutters
     einde_aanmeldingen = models.DateField()
@@ -138,25 +141,39 @@ class Competitie(models.Model):
     eerste_wedstrijd = models.DateField()
     # fase E: wedstrijden
     laatst_mogelijke_wedstrijd = models.DateField()
-    # fase F: vaststellen uitslagen in elke regio
+    # fase F: vaststellen uitslagen in elke regio (vaste duur: 1 week)
     # fase G: afsluiten regiocompetitie (BKO)
+    #         verstuur RK uitnodigingen + vraag bevestigen deelname
+    #         vertaal regio teams naar RK teams
     alle_regiocompetities_afgesloten = models.BooleanField(default=False)
 
+    # ----
     # fases en datums rayonkampioenschappen
-    # fase K: bevestig deelnemers; oproepen reserves
-    #         stuur emails uitnodiging deelname + bevestig deelname
-    #         HWL's kunnen RK teams te repareren (tot 2 weken voor deadline)
-    # fase K1: stuur email herinnering bevestig deelname
+    # ----
+
+    # fase J: RK deelnemers bevestigen deelname
+    #         HWL's kunnen RK teams te repareren
+    #         einde fase J: BKO bevestigd klassegrenzen RK/BK teams
+    datum_klassegrenzen_rk_bk_teams = models.DateField()
+
     klassegrenzen_vastgesteld_rk_bk = models.BooleanField(default=False)
 
+    # fase K: einde: 2 weken voor begin fase L
+    #         RK deelnemers bevestigen deelname
+    #         HWL's kunnen invallers koppelen voor RK teams
+    #         RKO's moeten planning wedstrijden afronden
     rk_eerste_wedstrijd = models.DateField()        # einde fast K moet 2 weken voor de eerste wedstrijd zijn
     # fase L: wedstrijden
+    #         stuur emails uitnodiging deelname + locatie details
     rk_laatste_wedstrijd = models.DateField()
     # fase M: vaststellen en publiceren uitslag
     # fase N: afsluiten rayonkampioenschappen
     alle_rks_afgesloten = models.BooleanField(default=False)
 
+    # ----
     # fases en datums bondskampioenschappen
+    # ----
+
     # fase P: bevestig deelnemers; oproepen reserves
     bk_eerste_wedstrijd = models.DateField()
     # fase Q: wedstrijden
@@ -216,7 +233,15 @@ class Competitie(models.Model):
 
         if self.alle_regiocompetities_afgesloten:
             # in RK fase
-            if now < self.rk_eerste_wedstrijd:
+
+            if not self.klassegrenzen_vastgesteld_rk_bk:
+                # fase J, tot de BKO deze handmatig doorzet
+                # datum_klassegrenzen_rk_bk_teams is indicatief
+                self.fase = 'J'
+                return
+
+            # fase K tot 2 weken voor fase L
+            if now < self.rk_eerste_wedstrijd - datetime.timedelta(days=14):
                 # fase K: bevestig deelnemers; oproepen reserves
                 self.fase = 'K'
                 return

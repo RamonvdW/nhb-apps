@@ -66,36 +66,6 @@ class Command(BaseCommand):
                 obj.save()
         # for
 
-    def _verwerk_overstappers_rk(self, rk_comp_pks):
-        # ondersteuning om een overschrijving af te ronden
-        # schutters die eerder geen vereniging hebben en wel een vereniging
-        objs = (KampioenschapSchutterBoog
-                .objects
-                .select_related('deelcompetitie__nhb_rayon',
-                                'sporterboog__sporter',
-                                'sporterboog__sporter__bij_vereniging',
-                                'sporterboog__sporter__bij_vereniging__regio__rayon')
-                .filter(deelcompetitie__competitie__pk__in=rk_comp_pks,
-                        bij_vereniging__isnull=True))
-        for obj in objs:
-            # schutter had geen vereniging; nu wel
-            # alleen overnemen als de nieuwe vereniging in het juiste rayon zit
-            ver = obj.sporterboog.sporter.bij_vereniging
-            if ver:
-                if ver.regio.rayon.rayon_nr != obj.deelcompetitie.nhb_rayon.rayon_nr:
-                    self.stdout.write('[WARNING] Verwerk overstap naar ander rayon niet mogelijk voor %s in RK voor rayon %s: GEEN VERENIGING --> [%s] %s' % (
-                                      obj.sporterboog.sporter.lid_nr,
-                                      obj.deelcompetitie.nhb_rayon.rayon_nr,
-                                      ver.regio.regio_nr, ver))
-                else:
-                    # pas de 'bij_vereniging' aan
-                    self.stdout.write('[INFO] Verwerk overstap %s: GEEN VERENIGING --> [%s] %s' % (
-                                      obj.sporterboog.sporter.lid_nr,
-                                      ver.regio.regio_nr, ver))
-                    obj.bij_vereniging = ver
-                    obj.save()
-        # for
-
     def _verwerk_overstappers(self):
         """ Deze functie verwerkt schutters die overgestapt zijn naar een andere vereniging
             Deze worden overgeschreven naar een andere deelcompetitie (regio/RK/BK).
@@ -107,8 +77,9 @@ class Command(BaseCommand):
         #    RegioCompetitieSchutterBoog.bij_vereniging
         # TODO: voor de teamcompetitie moet dit pas gebeuren nadat de teamscores vastgesteld zijn
 
-        # 3. Bij vaststellen RK/BK deelname/reserve wordt vereniging bevroren
+        # 3. Bij vaststellen RK/BK deelname/reserve wordt vereniging bevroren (afsluiten fase G)
         #    KampioenschapSchutterBoog.bij_vereniging
+        #    overstappen is daarna niet meer mogelijk
 
         regio_comp_pks = list()
         rk_comp_pks = list()
@@ -117,13 +88,9 @@ class Command(BaseCommand):
             if comp.fase <= 'F':
                 # in fase van de regiocompetitie
                 regio_comp_pks.append(comp.pk)
-            elif comp.fase == 'K':
-                # in fase van de rayonkampioenschappen
-                rk_comp_pks.append(comp.pk)
         # for
 
         self._verwerk_overstappers_regio(regio_comp_pks)
-        self._verwerk_overstappers_rk(rk_comp_pks)
 
     def _prep_caches(self):
         # maak een structuur om gerelateerde IndivWedstrijdklassen te vinden
