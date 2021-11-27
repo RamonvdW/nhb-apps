@@ -14,7 +14,7 @@
 
     <h4>Uitslagen rayonkampioenschappen</h4>
 
-    <p>Deze pagina toont de tussenstand/eindstand van de rayonkampioenschappen.</p>
+    <p>Deze pagina toont de tussenstand/eindstand van de individuele rayonkampioenschappen.</p>
 
     <p>Kies een wedstrijdboog:</p>
 
@@ -82,6 +82,7 @@
                     <th class="hide-on-small-only">Vereniging</th>
                     <th class="center-align">Gemiddelde</th>
                     <th></th>   <!-- label -->
+                    <th>RK scores</th>
                 </tr>
             {% endif %}
 
@@ -97,6 +98,7 @@
                 {% else %}
                     <td></td>
                 {% endif %}
+                <td><i class="grey-text">komt later</i><!-- RK scores --></td>
             </tr>
 
         {% endfor %}

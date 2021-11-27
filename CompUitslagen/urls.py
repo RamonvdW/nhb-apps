@@ -49,6 +49,14 @@ urlpatterns = [
          views_uitslagen.UitslagenRayonIndivView.as_view(),
          name='uitslagen-rayon-indiv-n'),
 
+    path('<comp_pk>/<team_type>/rayon-teams/',
+         views_uitslagen.UitslagenRayonTeamsView.as_view(),
+         name='uitslagen-rayon-teams'),
+
+    path('<comp_pk>/<team_type>/rayon-teams/<rayon_nr>/',
+         views_uitslagen.UitslagenRayonTeamsView.as_view(),
+         name='uitslagen-rayon-teams-n'),
+
     path('<comp_pk>/<comp_boog>/bond/',
          views_uitslagen.UitslagenBondView.as_view(),
          name='uitslagen-bond'),

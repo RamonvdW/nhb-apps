@@ -1,0 +1,103 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Uitslagen{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-rayon-teams" %}
+
+    <h4>Uitslagen rayonkampioenschappen teams</h4>
+
+    <p>Deze pagina toont de tussenstand/eindstand van de rayonkampioenschappen voor teams.</p>
+
+    <p>Kies een team type:</p>
+
+    <div class="white shrink-wrap-5">
+        {% for teamtype in teamtype_filters %}
+            {% if teamtype.zoom_url %}
+                <a class="margin-5 btn-outline" href="{{ teamtype.zoom_url }}">{{ teamtype.beschrijving }}</a>
+            {% else %}
+                <a class="margin-5 btn-nhb-blauw" href="#">{{ teamtype.beschrijving }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <p>Kies een rayon:</p>
+
+    <div class="white shrink-wrap-5">
+        {% for rayon in rayon_filters %}
+            {% if rayon.zoom_url %}
+                <a class="margin-5 btn-outline" href="{{ rayon.zoom_url }}">{{ rayon.title_str }}</a>
+            {% else %}
+                <a class="margin-5 btn-nhb-blauw" href="#">{{ rayon.title_str }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <p>&nbsp;</p>
+    <div class="row">
+
+        <!-- toon gegevens van het rayon en competitie in een blauwe box -->
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
+
+                <div class="row small-row">
+                    <div class="col s3">Competitie:</div>
+                    <div class="col s7">{{ deelcomp_rk.competitie.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Team type:</div>
+                    <div class="col s7">{{ teamtype.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Rayon:</div>
+                    <div class="col s7">{{ deelcomp_rk.nhb_rayon }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if geen_teams %}
+        <p>&nbsp;</p>
+        <p>Aantal teams ingeschreven: 0.</p>
+    {% else %}
+        <table class="white">
+            {% for team in rk_teams %}
+                {% if team.break_klasse %}
+                    <tr class="nhb-grijs">
+                        <td colspan="5"><h5>{{ team.klasse_str }}</h5></td>
+                    </tr>
+                    <tr>
+                        <th></th>   <!-- rank -->
+                        <th>Vereniging</th>
+                        <th>Team</th>
+                        <th>Team sterkte</th>
+                        <th>RK scores</th>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <td class="center-align">{% if not team.is_reserve %}{{ team.rank }}{% endif %}</td>
+                    <td>{{ team.ver_str }}</td>
+                    <td>{{ team.team_naam }}</td>
+                    <td>{{ team.ag_str }}</td>
+                    <td><i class="grey-text">komt later</i><!-- RK scores --></td>
+                </tr>
+
+            {% endfor %}
+        </table>
+    {% endif %}
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}
