@@ -890,42 +890,50 @@ class Command(BaseCommand):
                 # sterk = {"date": "1990-01-01", "skill_level_code": "R1000", "skill_level_name": "Recurve 1000", "discipline_code": "REC", "discipline_name": "Recurve", "category_name": "Senior"}
                 cat = sterk['category_name']
                 disc = sterk['discipline_name']
-                datum = sterk['date']
+                datum_raw = sterk['date']
                 beschr = sterk['skill_level_name']
 
-                # kijk of deze al bestaat
-                found = None
-                for huidig in huidige_lijst:
-                    if huidig.beschrijving == beschr and huidig.discipline == disc and huidig.category == cat:
-                        # bestaat al
-                        found = huidig
-                        break   # from the for
-                # for
-
-                if found:
-                    # TODO: datum kunnen corrigeren
-
-                    # verwijderen uit de lijst zodat echt verwijderde speelsterktes kunnen vinden
-                    huidige_lijst.remove(found)
+                try:
+                    datum = datetime.datetime.strptime(datum_raw, "%Y-%m-%d").date()  # YYYY-MM-DD
+                except (ValueError, TypeError):
+                    datum = None
+                    self.stderr.write('[ERROR] Lid %s heeft skill level met slechte datum: %s' % (lid_nr, repr(datum_raw)))
+                    self._count_errors += 1
                 else:
-                    # toevoegen
-                    self.stdout.write('[INFO] Lid %s: nieuwe speelsterkte %s, %s, %s' % (lid_nr, datum, disc, beschr))
+                    # kijk of deze al bestaat
+                    found = None
+                    for huidig in huidige_lijst:
+                        if huidig.beschrijving == beschr and huidig.discipline == disc and huidig.category == cat:
+                            # bestaat al
+                            found = huidig
+                            break   # from the for
+                    # for
 
-                    try:
-                        volgorde = self._speelsterkte2volgorde[(disc, beschr)]
-                    except KeyError:
-                        volgorde = 9999
-                        self.stderr.write('[WARNING] Kan speelsterkte volgorde niet vaststellen voor: (%s, %s)' % (repr(disc), repr(beschr)))
+                    if found:
+                        # TODO: datum kunnen corrigeren
 
-                    sterk = Speelsterkte(
-                                 sporter=obj,
-                                 beschrijving=beschr,
-                                 discipline=disc,
-                                 category=cat,
-                                 volgorde=volgorde,
-                                 datum=datum)
-                    nieuwe_lijst.append(sterk)
-                    self._count_toevoegingen += 1
+                        # verwijderen uit de lijst zodat echt verwijderde speelsterktes kunnen vinden
+                        huidige_lijst.remove(found)
+                    else:
+                        # toevoegen
+                        self.stdout.write('[INFO] Lid %s: nieuwe speelsterkte %s, %s, %s' % (lid_nr, datum, disc, beschr))
+
+                        try:
+                            volgorde = self._speelsterkte2volgorde[(disc, beschr)]
+                        except KeyError:
+                            volgorde = 9999
+                            self.stderr.write('[WARNING] Kan speelsterkte volgorde niet vaststellen voor: (%s, %s)' % (repr(disc), repr(beschr)))
+                            self._count_errors += 1
+
+                        sterk = Speelsterkte(
+                                     sporter=obj,
+                                     beschrijving=beschr,
+                                     discipline=disc,
+                                     category=cat,
+                                     volgorde=volgorde,
+                                     datum=datum)
+                        nieuwe_lijst.append(sterk)
+                        self._count_toevoegingen += 1
             # for
 
             if len(huidige_lijst):

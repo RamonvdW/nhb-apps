@@ -111,6 +111,37 @@
       "latitude": null,
       "longitude": null,
       "blocked": true
+    },
+    {"member_number": 100025,
+      "club_number": 1000,
+      "name": "Achternaam",
+      "prefix": "van der",
+      "first_name": "Voornaam",
+      "initials": "V.",
+      "gender": "F",
+      "email": "",
+      "birthday": "2000-02-01",
+      "member_from": "2000-01-01",
+      "para_code": null,
+      "address": null,
+      "postal_code": null,
+      "location_name": null,
+      "iso_abbr": null,
+      "latitude": null,
+      "longitude": null,
+      "blocked": false,
+      "skill_levels": [
+        {"category_name":  "Senior",
+          "discipline_name": "Recurve",
+          "skill_level_name": "Recurve 1000",
+          "date": "1990-01-xx"
+        },
+        {"category_name":  "Senior",
+          "discipline_name": "Huh",
+          "skill_level_name": "Recurve 1100",
+          "date": "1991-01-01"
+        }
+      ]
     }
   ]
 }
