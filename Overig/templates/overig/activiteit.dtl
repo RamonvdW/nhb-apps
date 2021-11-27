@@ -20,15 +20,20 @@
     <p>Sinds {{ deze_maand|date }} zijn er {{ deze_maand_count }} nieuwe accounts aangemaakt.</p>
 
     <p>Focus:<br>
-        <a class="btn-nhb-blauw btn-small margin-5" href="#hulp">Mogelijk hulp nodig</a>
-        <a class="btn-nhb-blauw btn-small margin-5" href="#nieuwe">Nieuwe accounts</a>
-        <a class="btn-nhb-blauw btn-small margin-5" href="#recent">Recente activiteit</a>
-        <a class="btn-nhb-blauw btn-small margin-5" href="#poging">Mislukte inlog pogingen</a>
-        {% if accses %}
-            <a class="btn-nhb-blauw btn-small margin-5" href="#sessies">Sessies (experimenteel)</a>
-        {% endif %}
-    </p>
+        <div class="white shrink-wrap-5">
 
+            <a class="btn-nhb-blauw btn-small margin-5" href="#hulp">Mogelijk hulp nodig</a>
+            <a class="btn-nhb-blauw btn-small margin-5" href="#nieuwe">Nieuwe accounts</a>
+            <a class="btn-nhb-blauw btn-small margin-5" href="#recent">Recente activiteit</a>
+            <a class="btn-nhb-blauw btn-small margin-5" href="#poging">Mislukte inlog pogingen</a>
+            {% if accses %}
+                <a class="btn-nhb-blauw btn-small margin-5" href="#sessies">Sessies (experimenteel)</a>
+            {% endif %}
+            {% if age_groups %}
+                <a class="btn-nhb-blauw btn-small margin-5" href="#leeftijdsgroepen">Leeftijd gebruikers</a>
+            {% endif %}
+        </div>
+    </p>
 
     <!-- zoekformulier -->
     <p>&nbsp;</p>
@@ -286,16 +291,16 @@
 
     {% if age_groups %}
         <p>&nbsp;</p>
-        <h5 id="sessies">Leeftijdsgroepen (experimenteel)</h5>
+        <h5 id="leeftijdsgroepen">Leeftijd van de gebruikers (experimenteel)</h5>
 
         <div class="row white">
             <div class="col s12">
-                <p>Leeftijdsgroep van de gebruikers over de afgelopen 30 dagen.</p>
+                <p>Leeftijd van de gebruikers (inlog de afgelopen 30 dagen), gegroepeerd per 10 jaar.</p>
 
                 <table class="white">
                     <thead>
                         <tr>
-                            <th>Leeftijd</th>
+                            <th>Leeftijdsgroep</th>
                             <th>Aantal</th>
                             <th>Aandeel</th>
                             <th style="width:40%"><!-- chart --></th>
