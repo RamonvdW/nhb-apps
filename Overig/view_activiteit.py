@@ -86,6 +86,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                                      .order_by('-account__laatste_inlog_poging')[:50])
 
         # hulp nodig
+        now = timezone.now()
         account_pks = list()
         for functie in (Functie
                         .objects
@@ -103,7 +104,6 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                     # elke 11 maanden moet de verklaring afgelegd worden
                     # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
                     opnieuw = vhpg.acceptatie_datum + datetime.timedelta(days=334)
-                    now = timezone.now()
                     add = (opnieuw < now)
 
                 if not account.otp_is_actief:
@@ -132,7 +132,6 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                 # elke 11 maanden moet de verklaring afgelegd worden
                 # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
                 opnieuw = vhpg.acceptatie_datum + datetime.timedelta(days=334)
-                now = timezone.now()
                 if opnieuw < now:
                     account.vhpg_str = 'Verlopen'
                 else:
@@ -251,26 +250,50 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         # for
 
         # toon sessies
-        if False:
-            accses = (AccountSessions
-                      .objects
-                      .select_related('account', 'session')
-                      .order_by('account', 'session__expire_date'))
-            for obj in accses:
-                # TODO: onderstaande zorgt voor losse database hits voor elke sessie
-                session = SessionStore(session_key=obj.session.session_key)
+        # accses = (AccountSessions
+        #           .objects
+        #           .select_related('account', 'session')
+        #           .order_by('account', 'session__expire_date'))
+        # for obj in accses:
+        #     # niet goed: onderstaande zorgt voor losse database hits voor elke sessie
+        #     session = SessionStore(session_key=obj.session.session_key)
+        #
+        #     try:
+        #         obj.mag_wisselen_str = session[SESSIONVAR_ROL_MAG_WISSELEN]
+        #     except KeyError:        # pragma: no cover
+        #         obj.mag_wisselen_str = '?'
+        #
+        #     try:
+        #         obj.laatste_rol_str = rol2url[session[SESSIONVAR_ROL_HUIDIGE]]
+        #     except KeyError:        # pragma: no cover
+        #         obj.laatste_rol_str = '?'
+        # # for
+        # context['accses'] = accses
 
-                try:
-                    obj.mag_wisselen_str = session[SESSIONVAR_ROL_MAG_WISSELEN]
-                except KeyError:        # pragma: no cover
-                    obj.mag_wisselen_str = '?'
+        age_group_counts = dict()       # [groep] = aantal
+        for group in (1, 10, 20, 30, 40, 50, 60, 70, 80):
+            age_group_counts[int(group/10)] = 0
+        # for
 
-                try:
-                    obj.laatste_rol_str = rol2url[session[SESSIONVAR_ROL_HUIDIGE]]
-                except KeyError:        # pragma: no cover
-                    obj.laatste_rol_str = '?'
-            # for
-            context['accses'] = accses
+        afgelopen_maand = timezone.now() - datetime.timedelta(days=30)
+        jaar = timezone.now().year
+        total = 0
+        for geboorte_datum in (Sporter
+                               .objects
+                               .exclude(account=None)
+                               .filter(account__last_login__gte=afgelopen_maand)
+                               .values_list('geboorte_datum', flat=True)):
+            leeftijd = jaar - geboorte_datum.year
+            leeftijd = min(leeftijd, 89)
+            group = int(leeftijd / 10)
+            age_group_counts[group] += 1
+            total += 1
+        # for
+
+        if total > 0:
+            age_groups = [((age * 10), (age * 10)+9, count, int((count * 100) / total)) for age, count in age_group_counts.items()]
+            age_groups.sort()
+            context['age_groups'] = age_groups
 
         menu_dynamics(self.request, context)
         return context

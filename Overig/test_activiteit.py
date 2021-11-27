@@ -145,7 +145,7 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
         functie.accounts.add(self.account_100001)
 
         # zoek op nhb nummer --> wel functie, dus wel 2FA nodig
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_activiteit, {'zoekterm': '100001'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -166,7 +166,7 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
         vhpg.delete()
 
         # zoek op nhb nummer --> geen VHPG record
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_activiteit, {'zoekterm': '100001'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)

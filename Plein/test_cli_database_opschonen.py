@@ -38,7 +38,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         # maak een oude logboek regel aan
         schrijf_in_logboek(None, 'Test', 'Just testing')
         regel = LogboekRegel.objects.get(gebruikte_functie='Test')
-        regel.toegevoegd_op -= datetime.timedelta(days=366)
+        regel.toegevoegd_op -= datetime.timedelta(days=549)
         regel.save()
 
         # maak een mail aan die lang geleden verstuurd is

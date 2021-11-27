@@ -112,7 +112,7 @@ PID_TAIL=$!
 # note: double quotes not supported around $*
 python3 -u $PYCOV ./manage.py test --settings=nhbapps.settings_autotest -v 2 --noinput $* >>"$LOG" 2>&1
 RES=$?
-echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
+#echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
 [ $RES -eq 3 ] && ABORTED=1
 
 echo >> "$LOG"
@@ -127,7 +127,7 @@ then
     echo "[INFO] Performing run with nodebug"
     python3 -u $PYCOV ./manage.py test --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.TestPlein.test_quick >>"$LOG" 2>&1
     RES=$?
-    echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
+    #echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
     [ $RES -eq 3 ] && ABORTED=1
 fi
 
