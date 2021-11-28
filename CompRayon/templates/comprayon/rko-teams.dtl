@@ -111,9 +111,7 @@
         {% if toon_klassen %}
             {% for klasse, teams in rk_teams.items %}
                 <tr class="nhb-grijs">
-                    <td colspan="7">
-                        <h5>{{ klasse.team.beschrijving }}</h5>{{ klasse.sterkte_str }}
-                    </td>
+                    <td colspan="7"><h5>{{ klasse.team.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
                 </tr>
                 <tr>
                     {% if subset_filter %}
@@ -121,6 +119,7 @@
                     {% endif %}
                     <th>Vereniging</th>
                     <th>Naam</th>
+                    <th>Aantal sporters</th>
                     <th>Team sterkte</th>
                     <th></th>
                     <th><!-- kolom voor knoppen --></th>

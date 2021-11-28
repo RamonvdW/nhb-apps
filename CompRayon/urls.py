@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_planning, view_teams_rko, view_teams_hwl
+from . import view_planning, view_teams_bko, view_teams_rko, view_teams_hwl
 
 app_name = 'CompRayon'
 
@@ -74,9 +74,10 @@ urlpatterns = [
          view_teams_hwl.RKTeamsKoppelLedenView.as_view(),
          name='teams-rk-koppelen'),
 
+
     # BKO
     path('<comp_pk>/rk-bk-teams-klassegrenzen/vaststellen/',
-         view_planning.KlassegrenzenTeamsVaststellenView.as_view(),
+         view_teams_bko.KlassegrenzenTeamsVaststellenView.as_view(),
          name='klassegrenzen-vaststellen-rk-bk-teams'),
 ]
 

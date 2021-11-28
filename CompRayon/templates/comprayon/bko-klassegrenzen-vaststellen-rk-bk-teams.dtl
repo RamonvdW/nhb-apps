@@ -36,11 +36,11 @@
                 <td rowspan="{{ rows }}">{{ count }}</td>
             </tr>
 
-            {% for klasse, count, grens in klassen %}
+            {% for klasse, count, min_ag, grens_str in klassen %}
                 <tr>
                     <td>{{ klasse }}</td>
                     <td>{{ count }}</td>
-                    <td>{% if grens == "" %}<i class="grey-text">n.v.t.</i>{% else %}{{ grens }}{% endif %}</td>
+                    <td>{% if grens_str == "" %}<i class="grey-text">n.v.t.</i>{% else %}{{ grens_str }}{% endif %}</td>
                 </tr>
             {% endfor %}
 
