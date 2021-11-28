@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import views_uitslagen
+from . import view_uitslagen_bond, view_uitslagen_rayon, view_uitslagen_regio, view_uitslagen_vereniging
 
 app_name = 'CompUitslagen'
 
@@ -13,52 +13,55 @@ urlpatterns = [
 
     # competitie uitslagen
     path('<comp_pk>/<comp_boog>/vereniging/<ver_nr>/individueel/',
-         views_uitslagen.UitslagenVerenigingIndivView.as_view(),
+         view_uitslagen_vereniging.UitslagenVerenigingIndivView.as_view(),
          name='uitslagen-vereniging-indiv-n'),
 
     path('<comp_pk>/<team_type>/vereniging/<ver_nr>/teams/',
-         views_uitslagen.UitslagenVerenigingTeamsView.as_view(),
+         view_uitslagen_vereniging.UitslagenVerenigingTeamsView.as_view(),
          name='uitslagen-vereniging-teams-n'),
 
     # TODO: wordt deze gebruikt?
     path('<comp_pk>/<comp_boog>/vereniging/',
-         views_uitslagen.UitslagenVerenigingIndivView.as_view(),
+         view_uitslagen_vereniging.UitslagenVerenigingIndivView.as_view(),
          name='uitslagen-vereniging-indiv'),
 
+    # regio
     path('<comp_pk>/<comp_boog>/<zes_scores>/regio-individueel/<regio_nr>/',
-         views_uitslagen.UitslagenRegioIndivView.as_view(),
+         view_uitslagen_regio.UitslagenRegioIndivView.as_view(),
          name='uitslagen-regio-indiv-n'),
 
     path('<comp_pk>/<comp_boog>/<zes_scores>/regio-individueel/',
-         views_uitslagen.UitslagenRegioIndivView.as_view(),
+         view_uitslagen_regio.UitslagenRegioIndivView.as_view(),
          name='uitslagen-regio-indiv'),
 
     path('<comp_pk>/<team_type>/regio-teams/',
-         views_uitslagen.UitslagenRegioTeamsView.as_view(),
+         view_uitslagen_regio.UitslagenRegioTeamsView.as_view(),
          name='uitslagen-regio-teams'),
 
     path('<comp_pk>/<team_type>/regio-teams/<regio_nr>/',
-         views_uitslagen.UitslagenRegioTeamsView.as_view(),
+         view_uitslagen_regio.UitslagenRegioTeamsView.as_view(),
          name='uitslagen-regio-teams-n'),
 
+    # rayon
     path('<comp_pk>/<comp_boog>/rayon-individueel/',
-         views_uitslagen.UitslagenRayonIndivView.as_view(),
+         view_uitslagen_rayon.UitslagenRayonIndivView.as_view(),
          name='uitslagen-rayon-indiv'),
 
     path('<comp_pk>/<comp_boog>/rayon-individueel/<rayon_nr>/',
-         views_uitslagen.UitslagenRayonIndivView.as_view(),
+         view_uitslagen_rayon.UitslagenRayonIndivView.as_view(),
          name='uitslagen-rayon-indiv-n'),
 
     path('<comp_pk>/<team_type>/rayon-teams/',
-         views_uitslagen.UitslagenRayonTeamsView.as_view(),
+         view_uitslagen_rayon.UitslagenRayonTeamsView.as_view(),
          name='uitslagen-rayon-teams'),
 
     path('<comp_pk>/<team_type>/rayon-teams/<rayon_nr>/',
-         views_uitslagen.UitslagenRayonTeamsView.as_view(),
+         view_uitslagen_rayon.UitslagenRayonTeamsView.as_view(),
          name='uitslagen-rayon-teams-n'),
 
+    # bond
     path('<comp_pk>/<comp_boog>/bond/',
-         views_uitslagen.UitslagenBondView.as_view(),
+         view_uitslagen_bond.UitslagenBondView.as_view(),
          name='uitslagen-bond'),
 ]
 
