@@ -15,34 +15,51 @@
 
     <h4>Account activiteit</h4>
 
-    <p>Er zijn {{ totaal }} accounts aangemaakt op deze server.</p>
+    <p>Spring naar een sectie op deze pagina:</p>
+    <div class="white shrink-wrap-5">
 
-    <p>Sinds {{ deze_maand|date }} zijn er {{ deze_maand_count }} nieuwe accounts aangemaakt.</p>
+        <a class="btn-nhb-blauw btn-small margin-5" href="#hulp">Mogelijk hulp nodig</a>
+        <a class="btn-nhb-blauw btn-small margin-5" href="#nieuwe">Nieuwe accounts</a>
+        <a class="btn-nhb-blauw btn-small margin-5" href="#recent">Recente activiteit</a>
+        <a class="btn-nhb-blauw btn-small margin-5" href="#poging">Mislukte inlog pogingen</a>
+        {% if accses %}
+            <a class="btn-nhb-blauw btn-small margin-5" href="#sessies">Sessies (experimenteel)</a>
+        {% endif %}
+        {% if age_groups %}
+            <a class="btn-nhb-blauw btn-small margin-5" href="#leeftijdsgroepen">Leeftijd gebruikers</a>
+        {% endif %}
+    </div>
 
-    <p>Focus:<br>
-        <div class="white shrink-wrap-5">
+    <p>&nbsp;</p>
+    <div class="row">
+        <!-- toon gegevens in een blauwe box -->
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
 
-            <a class="btn-nhb-blauw btn-small margin-5" href="#hulp">Mogelijk hulp nodig</a>
-            <a class="btn-nhb-blauw btn-small margin-5" href="#nieuwe">Nieuwe accounts</a>
-            <a class="btn-nhb-blauw btn-small margin-5" href="#recent">Recente activiteit</a>
-            <a class="btn-nhb-blauw btn-small margin-5" href="#poging">Mislukte inlog pogingen</a>
-            {% if accses %}
-                <a class="btn-nhb-blauw btn-small margin-5" href="#sessies">Sessies (experimenteel)</a>
-            {% endif %}
-            {% if age_groups %}
-                <a class="btn-nhb-blauw btn-small margin-5" href="#leeftijdsgroepen">Leeftijd gebruikers</a>
-            {% endif %}
+                <div class="row small-row">
+                    <div class="col s5">Totaal accounts aangemaakt:</div>
+                    <div class="col s3">{{ totaal }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s5">Sinds {{ deze_maand|date }}:</div>
+                    <div class="col s3">{{ deze_maand_count }}</div>
+                </div>
+
+            </div>
         </div>
-    </p>
+    </div>
 
     <!-- zoekformulier -->
     <p>&nbsp;</p>
+    <h5>Details specifieke gebruiker</h5>
+    <p>Gebruik het formulier om details op te vragen over een specifieke gebruiker:</p>
 
     <div class="container z-depth-2 white">
         <div class="row nhb-blauw white-text">
             <div class="col s12 center-align">
                 <h5>Zoek gebruiker</h5>
-                <p>Zoek op username of gebruiker naam</p>
+                <p>Zoek op inlog naam of (deel van) volledige naam</p>
             </div>
         </div>
 
@@ -243,7 +260,7 @@
 
                 {% for obj in inlog_pogingen %}
                     <tr>
-                        <td>{{ obj.account.laatste_inlog_poging|date:"j b H:i" }}</td>
+                        <td>{{ obj.account.laatste_inlog_poging|date:"j b Y H:i" }}</td>
                         <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
                         <td>{{ obj.account.username }}</td>
                         <td>{{ obj.account.volledige_naam }}</td>
