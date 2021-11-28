@@ -482,6 +482,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
                                           'datum7': '2019-02-12',
                                           'datum8': '2020-05-01',
                                           'datum9': '2020-05-12',
+                                          'datum10': '2020-06-12',
                                           })
         self.assert_is_redirect(resp, self.url_overzicht % comp.pk)
 

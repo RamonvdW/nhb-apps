@@ -351,10 +351,11 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         comp.datum3 = comp.einde_teamvorming
         comp.datum4 = comp.eerste_wedstrijd
         comp.datum5 = comp.laatst_mogelijke_wedstrijd
-        comp.datum6 = comp.rk_eerste_wedstrijd
-        comp.datum7 = comp.rk_laatste_wedstrijd
-        comp.datum8 = comp.bk_eerste_wedstrijd
-        comp.datum9 = comp.bk_laatste_wedstrijd
+        comp.datum6 = comp.datum_klassegrenzen_rk_bk_teams
+        comp.datum7 = comp.rk_eerste_wedstrijd
+        comp.datum8 = comp.rk_laatste_wedstrijd
+        comp.datum9 = comp.bk_eerste_wedstrijd
+        comp.datum10 = comp.bk_laatste_wedstrijd
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context
@@ -371,7 +372,7 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         datums = list()
-        for datum_nr in range(9):
+        for datum_nr in range(10):
             datum_s = request.POST.get('datum%s' % (datum_nr + 1), None)
             if not datum_s:
                 # alle datums zijn verplicht
@@ -393,10 +394,11 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         comp.einde_teamvorming = datums[3]
         comp.eerste_wedstrijd = datums[4]
         comp.laatst_mogelijke_wedstrijd = datums[5]
-        comp.rk_eerste_wedstrijd = datums[6]
-        comp.rk_laatste_wedstrijd = datums[7]
-        comp.bk_eerste_wedstrijd = datums[8]
-        comp.bk_laatste_wedstrijd = datums[9]
+        comp.datum_klassegrenzen_rk_bk_teams = datums[6]
+        comp.rk_eerste_wedstrijd = datums[7]
+        comp.rk_laatste_wedstrijd = datums[8]
+        comp.bk_eerste_wedstrijd = datums[9]
+        comp.bk_laatste_wedstrijd = datums[10]
         comp.save()
 
         # pas ook de deelcompetities aan
