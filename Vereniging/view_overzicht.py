@@ -87,17 +87,6 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                     nhb_rayon=ver.regio.rayon)
                             .select_related('competitie'))
 
-            for deelcomp_rk in deelcomps_rk:
-                if deelcomp_rk.heeft_deelnemerslijst:
-                    comp = deelcomp_rk.competitie
-                    comp.bepaal_fase()
-                    if comp.fase == 'K':
-                        # RK voorbereidende fase
-                        deelcomp_rk.text_str = "Schutters van de vereniging aan-/afmelden voor het RK van de %s" % comp.beschrijving
-                        deelcomp_rk.url_lijst_rk = reverse('Vereniging:lijst-rk',
-                                                           kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
-            # for
-
             pks = (DeelcompetitieRonde
                    .objects
                    .filter(deelcompetitie__is_afgesloten=False,
@@ -175,6 +164,17 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             # 3 - teams RK
             for deelcomp_rk in deelcomps_rk:
                 if deelcomp_rk.competitie == comp:
+                    if deelcomp_rk.heeft_deelnemerslijst:
+                        if 'J' <= comp.fase <= 'K':
+                            # RK voorbereidende fase
+                            kaartje = SimpleNamespace()
+                            kaartje.titel = "Deelnemers RK"
+                            kaartje.tekst = "Sporters van de vereniging aan-/afmelden voor het RK van de %s" % comp.beschrijving
+                            kaartje.url = reverse('CompRayon:lijst-rk-ver',
+                                                  kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+                            kaartje.icon = 'rule'
+                            kaartjes.append(kaartje)
+
                     if 'E' <= comp.fase <= 'K' and self.rol_nu != Rollen.ROL_WL:
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Teams RK"

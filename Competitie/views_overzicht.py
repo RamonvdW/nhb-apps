@@ -328,7 +328,6 @@ class CompetitieOverzichtView(View):
             # TODO: zoek ook het team type van het team waarin hij geplaatst is
             team_type = wed_boog
 
-
         context['url_regio_indiv'] = reverse('CompUitslagen:uitslagen-regio-indiv',
                                              kwargs={'comp_pk': comp.pk,
                                                      'zes_scores': 'alle',

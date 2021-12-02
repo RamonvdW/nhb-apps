@@ -122,7 +122,7 @@
 
             <!-- RK selectie -->
             {% if url_lijst_rk %}
-                {% include 'plein/card.dtl' with title="RK selectie" text="Selectie van sporters voor de Rayonkampioenschappen." icon="receipt" url=url_lijst_rk %}
+                {% include 'plein/card.dtl' with title="RK selectie" text="Selectie van sporters voor de Rayonkampioenschappen." icon="rule" url=url_lijst_rk %}
             {% endif %}
 
             <!-- limieten RK -->

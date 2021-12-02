@@ -635,7 +635,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('comprayon/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('comprayon/rko-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
         # nu doorzetten naar RK fase
         self.competitie_sluit_alle_regiocompetities(self.comp_18)
@@ -674,7 +674,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('comprayon/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('comprayon/rko-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
         deelnemer.deelname = DEELNAME_JA
         deelnemer.save()
@@ -683,7 +683,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('comprayon/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('comprayon/rko-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
         deelnemer.rank = 100
         deelnemer.save()
@@ -692,7 +692,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('comprayon/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('comprayon/rko-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
         deelnemer.bij_vereniging = None
         deelnemer.rank = 1
@@ -707,7 +707,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('comprayon/lijst-rk-selectie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('comprayon/rko-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_lijst_bestand % self.deelcomp_rayon1_18.pk
         with self.assert_max_queries(20):

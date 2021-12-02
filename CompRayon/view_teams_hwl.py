@@ -117,7 +117,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
 
         return deelcomp
 
-    def _get_rk_teams(self, deelcomp_rk):
+    def _get_rk_teams(self, deelcomp_rk, is_vastgesteld):
 
         if deelcomp_rk.competitie.afstand == '18':
             aantal_pijlen = 30
@@ -151,9 +151,10 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
             rk_team.ag_str = "%05.1f" % (rk_team.aanvangsgemiddelde * aantal_pijlen)
             rk_team.ag_str = rk_team.ag_str.replace('.', ',')
 
-            rk_team.url_wijzig = reverse('CompRayon:teams-rk-wijzig',
-                                         kwargs={'rk_deelcomp_pk': deelcomp_rk.pk,
-                                                 'rk_team_pk': rk_team.pk})
+            if not is_vastgesteld:
+                rk_team.url_wijzig = reverse('CompRayon:teams-rk-wijzig',
+                                             kwargs={'rk_deelcomp_pk': deelcomp_rk.pk,
+                                                     'rk_team_pk': rk_team.pk})
 
             # koppelen == bekijken
             rk_team.url_koppelen = reverse('CompRayon:teams-rk-koppelen',
@@ -171,12 +172,13 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
         # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
         context['deelcomp_rk'] = deelcomp_rk = self._get_deelcomp_rk(kwargs['rk_deelcomp_pk'])
 
-        context['rk_teams'] = self._get_rk_teams(deelcomp_rk)
+        context['rk_bk_klassen_vastgesteld'] = is_vastgesteld = deelcomp_rk.competitie.klassegrenzen_vastgesteld_rk_bk
 
-        context['rk_bk_klassen_vastgesteld'] = deelcomp_rk.competitie.klassegrenzen_vastgesteld_rk_bk
+        context['rk_teams'] = self._get_rk_teams(deelcomp_rk, is_vastgesteld)
 
-        context['url_nieuw_team'] = reverse('CompRayon:teams-rk-nieuw',
-                                            kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+        if not is_vastgesteld:
+            context['url_nieuw_team'] = reverse('CompRayon:teams-rk-nieuw',
+                                                kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context
@@ -375,7 +377,8 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
 
 
 class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
-    """ Via deze view kan de HWL leden van zijn vereniging koppelen aan een team """
+
+    """ Via deze view kan de HWL leden van zijn vereniging koppelen aan een team (of alleen bekijken) """
 
     template_name = TEMPLATE_COMPRAYON_VERTEAMS_KOPPELEN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
@@ -420,7 +423,10 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp_rk.competitie
         comp.bepaal_fase()
-        if not ('E' <= comp.fase <= 'J'):       # vanaf fase K kunnen invallers gekoppeld worden
+
+        context['alleen_bekijken'] = alleen_bekijken = (comp.fase >= 'K')
+
+        if not ('E' <= comp.fase <= 'L'):       # vanaf fase K kunnen invallers gekoppeld worden
             raise Http404('Competitie is niet in de juiste fase')
 
         boog_typen = rk_team.team_type.boog_typen.all()
@@ -512,8 +518,9 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         context['deelnemers'] = deelnemers
 
-        context['url_opslaan'] = reverse('CompRayon:teams-rk-koppelen',
-                                         kwargs={'rk_team_pk': rk_team.pk})
+        if not alleen_bekijken:
+            context['url_opslaan'] = reverse('CompRayon:teams-rk-koppelen',
+                                             kwargs={'rk_team_pk': rk_team.pk})
 
         menu_dynamics(self.request, context, actief='vereniging')
         return context

@@ -161,7 +161,7 @@
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-lijst-rk-selectie" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-rko-rk-selectie" %}
 
 {% endblock %}
 

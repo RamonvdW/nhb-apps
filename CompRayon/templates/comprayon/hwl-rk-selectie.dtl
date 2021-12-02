@@ -1,0 +1,101 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}RK selectie{% endblock %}
+
+{% block pagina %}
+
+    <h4>RK selectie</h4>
+
+    <p>Op deze pagina kan je de lijst met kandidaat-deelnemers voor de <b>Rayonkampioenschappen in {{ deelcomp_rk.nhb_rayon }}</b> inzien en bewerken.</p>
+
+    <p>De individuele sporters stromen door uit de regiocompetitie. Deelname aan het RK moet bevestigd worden. Afmelden wordt op prijs gesteld zodat reserves alvast opgeroepen kunnen worden.</p>
+
+    <p>&nbsp;</p>
+    <p>Deelname-status voor de sporters:</p>
+    <div class="row">
+        <div class="col offset-s1 s7 offset-m2 m6 offset-xl2 xl4">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th><!--icon--></th>
+                        <th>Status</th>
+                        <th>Aantal</th>
+                    </tr>
+                </thead>
+
+                <tr>
+                    <td class="center-align"><i class="nhb-blauw-text in-table-icon material-icons-round">help</i></td>
+                    <td class="nhb-blauw-text">Onbekend</td>
+                    <td>{{ aantal_onbekend }}</td>
+                </tr>
+
+                <tr>
+                    <td class="center-align"><i class="green-text in-table-icon material-icons-round">check</i></td>
+                    <td class="green-text">Deelname bevestigd</td>
+                    <td>{{ aantal_bevestigd }}</td>
+                </tr>
+
+                <tr>
+                    <td class="center-align"><i class="grey-text in-table-icon material-icons-round">block</i></td>
+                    <td class="grey-text">Afgemeld</td>
+                    <td>{{ aantal_afgemeld }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <table class="white">
+
+        {% for obj in deelnemers %}
+
+            {% if obj.break_klasse %}
+                <tr class="nhb-grijs">
+                    <td colspan="5" style="padding-bottom: 0px"><h5>{{ obj.klasse_str }}</h5></td>
+                </tr>
+
+                <tr>
+                    <th>Sporter</th>
+                    <th class="hide-on-small-only">Gemiddelde</th>
+                    <th>Notitie</th>
+                    <th class="center-align">Status</th>
+                    <th><!-- knop --></th>
+                </tr>
+
+            {% endif %}
+
+            <tr{% if obj.deelname == 'N' %} class="grey-text"{% endif %}>
+                <td>{{ obj.naam_str }}</td>
+
+                <td>{{ obj.gemiddelde }}</td>
+
+                <td class="hide-on-small-only">{{ obj.kampioen_label }}</td>
+
+                {% if obj.deelname == 'J' %}
+                    <td class="center-align"><i class="green-text in-table-icon material-icons-round">check</i></td>
+                {% elif obj.deelname == 'N' %}
+                    <td class="center-align"><i class="grey-text in-table-icon material-icons-round">block</i></td>
+                {% else %}
+                    <!-- onbekend -->
+                    <td class="center-align"><i class="nhb-blauw-text in-table-icon material-icons-round">help</i></td>
+                {% endif %}
+
+                <td><a class="btn-nhb-blauw btn-small" href="{{ obj.url_wijzig }}">Wijzig</a></td>
+            </tr>
+
+        {% endfor %}
+
+    </table>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-hwl-rk-selectie" %}
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

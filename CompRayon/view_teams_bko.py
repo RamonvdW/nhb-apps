@@ -49,7 +49,7 @@ class KlassegrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
                                is_voor_teams_rk_bk=True)
                        .select_related('team',
                                        'team__team_type')
-                       .order_by('team__team_type__volgorde')):
+                       .order_by('team__volgorde')):
 
             teamtype_pk = rk_wkl.team.team_type.pk
             if teamtype_pk not in teamtype_pks:
