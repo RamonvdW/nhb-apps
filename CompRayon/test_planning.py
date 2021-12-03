@@ -12,6 +12,7 @@ from Competitie.models import (Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK, 
                                CompetitieMutatie, DEELNAME_NEE, DEELNAME_JA, INSCHRIJF_METHODE_1,
                                RegioCompetitieSchutterBoog)
 from Competitie.operations import competities_aanmaken
+from Competitie.test_fase import zet_competitie_fase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Score.models import Score
@@ -799,6 +800,8 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         # RKO
         self.e2e_login_and_pass_otp(self.account_rko1_18)
         self.e2e_wissel_naar_functie(self.functie_rko1_18)
+
+        zet_competitie_fase(self.comp_18, 'J')
 
         deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
                                               sporterboog=self.sporterboog,

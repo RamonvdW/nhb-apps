@@ -56,7 +56,9 @@ def zet_competitie_fase(comp, fase):
         comp.alle_regiocompetities_afgesloten = True
 
         if fase == 'J':
-            comp.datum_klassegrenzen_rk_bk_teams = False
+            comp.klassegrenzen_vastgesteld_rk_bk = False
+            comp.datum_klassegrenzen_rk_bk_teams = morgen
+            comp.save()
             return
 
         comp.klassegrenzen_vastgesteld_rk_bk = True

@@ -315,7 +315,10 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
 
         comp = deelnemer.deelcompetitie.competitie
         comp.bepaal_fase()
-        if not ('J' <= comp.fase <= 'K'):
+        if comp.fase < 'J':
+            raise Http404('Mag nog niet wijzigen')
+
+        if comp.fase > 'K':
             raise Http404('Mag niet meer wijzigen')
 
         sporter = deelnemer.sporterboog.sporter
@@ -401,7 +404,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
             url = reverse('CompRayon:lijst-rk',
                           kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk})
         else:
-            url = reverse('Vereniging:lijst-rk',
+            url = reverse('CompRayon:lijst-rk-ver',
                           kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk})
 
         return HttpResponseRedirect(url)
