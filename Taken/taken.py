@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -58,9 +58,16 @@ def stuur_taak_email_herinnering(email, aantal_open):
     """ Stuur een e-mail ter herinnering dat er een taak te wachten staat.
     """
 
+    if aantal_open == 1:
+        aantal_str = "stond er 1 taak open"
+        taken_str = "is een taak die jouw aandacht nodig heeft"
+    else:
+        aantal_str = "stonden er %s taken open" % aantal_open
+        taken_str = "zijn taken die jouw aandacht nodig hebben"
+
     text_body = ("Hallo %s!\n\n" % email.account.get_first_name()
-                 + "Er zijn taken die jouw aandacht nodig hebben op %s\n" % settings.SITE_URL
-                 + "Op het moment van sturen stonden er %s taken open.\n\n" % aantal_open
+                 + "Er %s op %s\n" % (taken_str, settings.SITE_URL)
+                 + "Op het moment van sturen %s.\n\n" % aantal_str
                  + "Bedankt voor je aandacht!\n"
                  + "Het bondsbureau\n")
 
@@ -70,12 +77,17 @@ def stuur_taak_email_herinnering(email, aantal_open):
 
 
 def stuur_nieuwe_taak_email(email, aantal_open):
-    """ Stuur een e-mail ter herinnering dat er een taak te wachten staat.
+    """ Stuur een e-mail dat er een nieuwe taak te wachten staat.
     """
+
+    if aantal_open == 1:
+        aantal_str = "stond er 1 taak open"
+    else:
+        aantal_str = "stonden er %s taken open" % aantal_open
 
     text_body = ("Hallo %s!\n\n" % email.account.get_first_name()
                  + "Er is zojuist een nieuwe taak voor jou aangemaakt op %s\n" % settings.SITE_URL
-                 + "Op het moment van sturen stonden er %s taken open.\n\n" % aantal_open
+                 + "Op het moment van sturen %s.\n\n" % aantal_str
                  + "Bedankt voor je aandacht!\n"
                  + "Het bondsbureau\n")
 
