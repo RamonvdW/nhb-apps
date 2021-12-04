@@ -113,6 +113,9 @@
     <div class="row white">
         <div class="col s12">
             <p>De volgende {{ hulp|length }} accounts zijn aangemaakt en gekoppeld aan een rol, maar hebben nog geen 2FA gekoppeld of VHPG geaccepteerd.</p>
+            {% if hulp_testserver %}
+                <p><i>(dit getal is hoger dan op de live server als er VHPG verlopen zijn sinds het kopi&euml;ren van de data)</i></p>
+            {% endif %}
 
             <table class="white" id="tabel_hulp">
                 <thead>
