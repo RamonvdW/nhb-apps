@@ -11,8 +11,10 @@ from Account.rechten import account_rechten_is_otp_verified
 from collections import OrderedDict
 
 # aanpassingen van de ingebouwde Admin site
-# hiermee kunnen we 2FA checks doen
-# hiermee verwijderen we de default login/logout/password change views
+# hiermee
+# - verwijderen we de default login/logout/password change views
+# - kunnen we 2FA checks forceren
+# - kunnen we de volgorde van modellen sturen
 
 # django.contrib.admin.sites levert de urls en views
 # maak een aangepaste versie
@@ -76,6 +78,9 @@ class BeheerAdminSite(AdminSite):
 
         # Sort the apps alphabetically.
         app_list = sorted(app_dict.values(), key=lambda x: x['name'].lower())
+
+        # don't show unused apps
+        app_list = [elem for elem in app_list if elem['app_label'] != 'auth']
 
         return app_list
 

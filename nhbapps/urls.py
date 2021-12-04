@@ -6,18 +6,14 @@
 
 # Top level URL configuration
 
-from django.conf import settings
-from django.conf.urls import include
 from django.urls import path
+from django.conf import settings
 from django.contrib import admin
+from django.conf.urls import include
 from Plein.views import site_root_view
 from Plein.views_fout import (site_handler403_permission_denied,
                               site_handler404_page_not_found,
                               site_handler500_internal_server_error)
-from Beheer.views import BeheerAdminSite
-
-# replace the admin site
-admin.site.__class__ = BeheerAdminSite
 
 handler403 = site_handler403_permission_denied
 handler404 = site_handler404_page_not_found

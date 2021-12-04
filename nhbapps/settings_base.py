@@ -57,7 +57,6 @@ INSTALLED_APPS = [
     'Wedstrijden.apps.WedstrijdenConfig',
     'django.contrib.staticfiles',   # gather static files from modules helper
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user
-    'django.contrib.admin',         # see-all/fix-all admin pages
     'django.contrib.auth',          # authenticatie framework
     'django.contrib.contenttypes',  # permission association to models
     'django.contrib.messages',
