@@ -67,7 +67,7 @@
 
     {% if regiocomp_nog_actief %}
         <p class="red-text">De regiocompetitie is nog niet afgesloten, dus onderstaande lijst kan nog wijzigingen.</p>
-        <p>Sporters worden in de lijst opgenomen als ze 6 of meer scores hebben.</p>
+        <p>Sporters worden in de lijst opgenomen als ze {{ comp.aantal_scores_voor_rk_deelname }} of meer scores hebben.</p>
     {% endif %}
 
     <table class="white">

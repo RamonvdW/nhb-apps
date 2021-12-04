@@ -777,7 +777,7 @@ class Command(BaseCommand):
                                       'sporterboog__sporter__bij_vereniging',
                                       'sporterboog__sporter__bij_vereniging__regio__rayon')
                       .filter(deelcompetitie__in=pks,
-                              aantal_scores__gte=6,
+                              aantal_scores__gte=competitie.aantal_scores_voor_rk_deelname,
                               klasse__indiv__niet_voor_rk_bk=False)     # skip aspiranten
                       .order_by('klasse__indiv__volgorde',              # groepeer per klasse
                                 '-gemiddelde'))                         # aflopend gemiddelde
@@ -1005,7 +1005,7 @@ class Command(BaseCommand):
             else:
                 team.aanvangsgemiddelde = 0.0
 
-            # de klasse wordt later bepaald als de klassegrenzen vastgesteld zijn
+            # de klasse wordt later bepaald als de klassengrenzen vastgesteld zijn
             team.klasse = None
 
             team.save(update_fields=['aanvangsgemiddelde', 'klasse'])

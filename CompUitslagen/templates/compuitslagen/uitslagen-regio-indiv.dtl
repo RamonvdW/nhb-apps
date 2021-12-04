@@ -110,6 +110,12 @@
 
     <p>&nbsp;</p>
 
+    {% if comp.aantal_scores_voor_rk_deelname != 6 %}
+    <div class="white shrink-wrap-5 z-depth-2">
+        <p class="red-text">Er is besloten een uitzondering te maken voor de {{ comp }}. Om deel te mogen nemen aan de Rayonkampioenschappen moeten <b>{{ comp.aantal_scores_voor_rk_deelname }} scores</b> neergezet zijn.<br>Het totaal en gemiddelde hieronder is daarom berekend over de <b>beste {{ comp.aantal_scores_voor_rk_deelname }} scores</b>.</p>
+    </div>
+    {% endif %}
+
     <table class="white">
         {% for obj in deelnemers %}
             {% if forloop.first %}      <!-- alleen toevoegen als er deelnemers zijn, anders probleem met colspan=2 -->

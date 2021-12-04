@@ -257,7 +257,7 @@ class UitslagenRayonIndivView(TemplateView):
                           .objects
                           .filter(deelcompetitie__pk__in=deelcomp_pks,
                                   klasse__indiv__boogtype=boogtype,
-                                  aantal_scores__gte=6)
+                                  aantal_scores__gte=comp.aantal_scores_voor_rk_deelname)
                           .select_related('klasse__indiv',
                                           'sporterboog__sporter',
                                           'sporterboog__sporter__bij_vereniging',

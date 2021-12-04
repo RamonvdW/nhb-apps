@@ -240,16 +240,26 @@ class Command(BaseCommand):
         return 7 - nr, laagste          # 1..7
 
     @staticmethod
-    def _bepaal_gemiddelde_en_totaal(waardes, laagste, pijlen_per_ronde):
-        aantal_niet_nul = len([waarde for waarde in waardes if waarde != 0])
-        if aantal_niet_nul:
-            totaal = sum(waardes) - laagste
-            if laagste > 0:     # ga er vanuit dat er meer dan 1 score is
-                aantal_niet_nul -= 1
-            # afronden op 3 decimalen (anders gebeurt dat tijdens opslaan in database)
-            gem = round(totaal / (aantal_niet_nul * pijlen_per_ronde), 3)
-            return gem, totaal
-        return 0.0, 0
+    def _bepaal_gemiddelde_en_totaal(waardes_in, aantal_voor_gem, pijlen_per_ronde):
+        # only consider non-zero values as scores
+        scores = [waarde for waarde in waardes_in if waarde != 0]
+
+        # limit number of scores evaluated
+        scores.sort(reverse=True)
+        scores = scores[:aantal_voor_gem]
+
+        if len(scores) < 1:
+            # kan geen gemiddelde berekenen
+            return 0.0, 0
+
+        # bereken het gemiddelde
+        totaal = sum(scores)
+        gem = totaal / (len(scores) * pijlen_per_ronde)
+
+        # afronden op 3 decimalen (anders gebeurt dat tijdens opslaan in database)
+        gem = round(gem, 3)
+
+        return gem, totaal
 
     def _update_regiocompetitieschuttersboog(self):
         count = 0
@@ -259,7 +269,9 @@ class Command(BaseCommand):
                          .select_related('competitie')
                          .all()):
 
-            if deelcomp.competitie.afstand == '18':
+            comp = deelcomp.competitie
+
+            if comp.afstand == '18':
                 pijlen_per_ronde = 30
                 max_score = 300
                 comp_afstand = 18
@@ -322,7 +334,7 @@ class Command(BaseCommand):
                     deelnemer.score7 = waardes[6]
                     deelnemer.aantal_scores = len(waardes) - waardes.count(0)
                     deelnemer.laagste_score_nr, laagste = self._bepaal_laagste_nr(waardes)
-                    deelnemer.gemiddelde, deelnemer.totaal = self._bepaal_gemiddelde_en_totaal(waardes, laagste, pijlen_per_ronde)
+                    deelnemer.gemiddelde, deelnemer.totaal = self._bepaal_gemiddelde_en_totaal(waardes, comp.aantal_scores_voor_rk_deelname, pijlen_per_ronde)
 
                     # kijk of verplaatsing uit klasse onbekend van toepassing is
                     if deelnemer.ag_voor_indiv < 0.001:
