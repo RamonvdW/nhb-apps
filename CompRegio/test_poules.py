@@ -209,6 +209,9 @@ class TestCompRegioPoules(E2EHelpers, TestCase):
         self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
         poule = RegiocompetitieTeamPoule.objects.all()[0]
 
+        # coverage
+        self.assertTrue(str(poule) != "")
+
         # bad deelcomp
         bad_url = self.url_regio_poules % 999999
         resp = self.client.get(bad_url)

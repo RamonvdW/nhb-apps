@@ -15,7 +15,7 @@ def clear_kampioenschapteam_klasse(apps, _):
 
     team_klas = apps.get_model('Competitie', 'KampioenschapTeam')
 
-    for team in team_klas.objects.all():
+    for team in team_klas.objects.all():        # pragma: no cover
         team.klasse = None
         team.save(update_fields=['klasse'])
     # for
@@ -29,7 +29,7 @@ def klassen_toevoegen(apps, _):
 
     # dupliceer alle team klassen voor RK/BK
     bulk = list()
-    for klas in comp_klas.objects.exclude(team=None):
+    for klas in comp_klas.objects.exclude(team=None):       # pragma: no cover
         klasse = comp_klas(
                         competitie=klas.competitie,
                         team=klas.team,

@@ -206,7 +206,7 @@ class GebruikteKlassenFilter(admin.SimpleListFilter):
             ('rk_bk', 'RK/BK klasse')
         ]
 
-    def queryset(self, request, queryset):
+    def queryset(self, request, queryset):      # pragma: no cover
         selection = self.value()
         if selection == 'leeg':
             queryset = queryset.filter(klasse__team=None)

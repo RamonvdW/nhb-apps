@@ -9,7 +9,7 @@ from django.db import migrations, models
 
 def zet_nieuwe_datum(apps, _):
     comp_klas = apps.get_model('Competitie', 'Competitie')
-    for comp in comp_klas.objects.all():
+    for comp in comp_klas.objects.all():            # pragma: no cover
         if comp.afstand == '18':
             # maandag week 2 = 10 januari 2022
             comp.datum_klassegrenzen_rk_bk_teams = '2022-01-10'

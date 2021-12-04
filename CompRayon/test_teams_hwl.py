@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.core import management
 from django.utils import timezone
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
@@ -19,7 +18,6 @@ from Score.operations import score_indiv_ag_opslaan
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
-import io
 
 
 class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
@@ -397,6 +395,9 @@ class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assertEqual(KampioenschapTeam.objects.count(), 1)
 
             team = KampioenschapTeam.objects.all()[0]
+
+            # coverage
+            self.assertTrue(str(team) != "")
 
             # wijzig een team
             url = self.url_rk_teams_wijzig % (deelcomp_rk3.pk, team.pk)
