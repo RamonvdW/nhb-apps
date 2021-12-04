@@ -186,27 +186,13 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
             sportersboog = sportersboog[skip:]
         # while
 
-    def _sluit_alle_regiocompetities(self, comp):
-        # deze functie sluit alle regiocompetities af zodat de competitie in fase G komt
-        comp.bepaal_fase()
-        # print(comp.fase)
-        self.assertTrue('B' < comp.fase < 'G')
-        for deelcomp in DeelCompetitie.objects.filter(competitie=comp, laag=LAAG_REGIO):
-            if not deelcomp.is_afgesloten:      # pragma: no branch
-                deelcomp.is_afgesloten = True
-                deelcomp.save()
-        # for
-
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'G')
-
     def setUp(self):
         """ initialisatie van de test case """
 
         self.url_planning_regio = '/bondscompetities/regio/planning/%s/'                  # deelcomp_pk
         self.url_planning_regio_ronde = '/bondscompetities/regio/planning/ronde/%s/'      # ronde_pk
         self.url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'       # wedstrijd_pk
-        self.url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'               # comp_pk       # TODO: ongewenste dependency op Vereniging
+        self.url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'          # comp_pk
 
         # deze test is afhankelijk van de standaard regio's
         self.regio_101 = NhbRegio.objects.get(regio_nr=101)

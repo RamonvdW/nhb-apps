@@ -128,7 +128,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 kaartje = SimpleNamespace()
                 kaartje.titel = "Aanmelden"
                 kaartje.tekst = 'Leden aanmelden voor de %s.' % comp.beschrijving
-                kaartje.url = reverse('Vereniging:leden-aanmelden', kwargs={'comp_pk': comp.pk})
+                kaartje.url = reverse('CompInschrijven:leden-aanmelden', kwargs={'comp_pk': comp.pk})
                 if comp.afstand == '18':
                     kaartje.img = static('plein/badge_nhb_indoor.png')
                 else:
@@ -196,7 +196,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Ingeschreven"
                         kaartje.tekst = "Overzicht ingeschreven leden voor de %s." % comp.beschrijving
-                        kaartje.url = reverse('Vereniging:leden-ingeschreven', kwargs={'deelcomp_pk': deelcomp.pk})
+                        kaartje.url = reverse('CompInschrijven:leden-ingeschreven', kwargs={'deelcomp_pk': deelcomp.pk})
                         if comp.afstand == '18':
                             kaartje.img = static('plein/badge_nhb_indoor.png')
                         else:
@@ -208,7 +208,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Wie schiet waar?"
                         kaartje.tekst = 'Overzicht gekozen wedstrijden voor de %s.' % comp.beschrijving
-                        kaartje.url = reverse('Vereniging:wie-schiet-waar', kwargs={'deelcomp_pk': deelcomp.pk})
+                        kaartje.url = reverse('CompRegio:wie-schiet-waar', kwargs={'deelcomp_pk': deelcomp.pk})
                         kaartje.icon = 'gamepad'
                         if comp.fase < 'B':
                             kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)

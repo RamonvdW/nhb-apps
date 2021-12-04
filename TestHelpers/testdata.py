@@ -46,7 +46,7 @@ class TestData(object):
     OTP_CODE = "test"
     WACHTWOORD = "qewretrytuyi"  # sterk genoeg default wachtwoord
 
-    url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'  # comp_pk
+    url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'  # comp_pk
     url_account_login = '/account/login/'
     url_check_otp = '/functie/otp-controle/'
     url_activeer_functie = '/functie/activeer-functie/%s/'

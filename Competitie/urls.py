@@ -5,12 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import (views_aangemeld,
-               views_bb,
-               views_info,
-               views_klassengrenzen,
-               views_overzicht,
-               views_planning_bond)
+from . import views_bb, views_info, views_klassengrenzen, views_overzicht, views_planning_bond
 
 app_name = 'Competitie'
 
@@ -54,41 +49,6 @@ urlpatterns = [
     path('<comp_pk>/wijzig-datums/',
          views_bb.WijzigDatumsView.as_view(),
          name='wijzig-datums'),
-
-
-
-    # ingeschreven
-    path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/dagdeel-behoefte/',
-         views_aangemeld.Inschrijfmethode3BehoefteView.as_view(),
-         name='inschrijfmethode3-behoefte'),
-
-    path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/dagdeel-behoefte-als-bestand/',
-         views_aangemeld.Inschrijfmethode3BehoefteAlsBestandView.as_view(),
-         name='inschrijfmethode3-behoefte-als-bestand'),
-
-    path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/gemaakte-keuzes/',
-         views_aangemeld.Inschrijfmethode1BehoefteView.as_view(),
-         name='inschrijfmethode1-behoefte'),
-
-    path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/gemaakte-keuzes-als-bestand/',
-         views_aangemeld.Inschrijfmethode1BehoefteAlsBestandView.as_view(),
-         name='inschrijfmethode1-behoefte-als-bestand'),
-
-    path('<comp_pk>/lijst-regiocompetitie/alles/',
-         views_aangemeld.LijstAangemeldRegiocompAllesView.as_view(),
-         name='lijst-regiocomp-alles'),
-
-    path('<comp_pk>/lijst-regiocompetitie/rayon-<rayon_pk>/',
-         views_aangemeld.LijstAangemeldRegiocompRayonView.as_view(),
-         name='lijst-regiocomp-rayon'),
-
-    path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/',
-         views_aangemeld.LijstAangemeldRegiocompRegioView.as_view(),
-         name='lijst-regiocomp-regio'),
-
-    path('<comp_pk>/lijst-regiocompetitie/regio-<regio_pk>/als-bestand/',
-         views_aangemeld.LijstAangemeldRegiocompAlsBestandView.as_view(),
-         name='lijst-regiocomp-regio-als-bestand'),
 
 
     # planning bk

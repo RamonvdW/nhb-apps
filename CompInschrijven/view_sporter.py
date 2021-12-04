@@ -10,7 +10,7 @@ from django.views.generic import View, TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Functie.rol import Rollen, rol_get_huidige
 from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog,
                                LAAG_REGIO, AG_NUL,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
@@ -19,12 +19,11 @@ from Competitie.operations import KlasseBepaler
 from Plein.menu import menu_dynamics
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
 from Wedstrijden.models import CompetitieWedstrijd
-from .models import SporterVoorkeuren, SporterBoog
+from Sporter.models import SporterVoorkeuren, SporterBoog
 from decimal import Decimal
 
 
-TEMPLATE_SPORTER_AANMELDEN = 'sporter/bevestig-aanmelden.dtl'
-TEMPLATE_SPORTER_KEUZE7WEDSTRIJDEN = 'sporter/keuze-zeven-wedstrijden-methode1.dtl'
+TEMPLATE_SPORTER_AANMELDEN = 'compinschrijven/sporter-bevestig-aanmelden.dtl'
 
 
 class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
@@ -138,7 +137,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
         context['sporterboog'] = sporterboog
         context['voorkeuren'], _ = SporterVoorkeuren.objects.get_or_create(sporter=sporter)
-        context['bevestig_url'] = reverse('Sporter:aanmelden',
+        context['bevestig_url'] = reverse('CompInschrijven:aanmelden',
                                           kwargs={'sporterboog_pk': sporterboog.pk,
                                                   'deelcomp_pk': deelcomp.pk})
 
@@ -389,7 +388,11 @@ class RegiocompetitieAfmeldenView(View):
         # converteer en doe eerste controle op de parameters
         try:
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])     # afkappen geeft bescherming
-            inschrijving = RegioCompetitieSchutterBoog.objects.get(pk=deelnemer_pk)
+            deelnemer = (RegioCompetitieSchutterBoog
+                         .objects
+                         .select_related('deelcompetitie__competitie',
+                                         'sporterboog__sporter')
+                         .get(pk=deelnemer_pk))
         except (ValueError, KeyError):
             # vuilnis
             raise Http404()
@@ -398,208 +401,19 @@ class RegiocompetitieAfmeldenView(View):
             raise Http404('Inschrijving niet gevonden')
 
         # controleer dat deze inschrijving bij het nhblid hoort
-        if inschrijving.sporterboog.sporter != sporter:
-            raise PermissionDenied()
+        if deelnemer.sporterboog.sporter != sporter:
+            raise PermissionDenied('Je kan alleen jezelf uitschrijven')
 
-        # TODO: controleer de fase van de competitie. Na bepaalde datum niet meer uit kunnen schrijven??
+        # controleer de fase van de competitie
+        comp = deelnemer.deelcompetitie.competitie
+        comp.bepaal_fase()
+        if comp.fase != 'B':
+            raise Http404('Competitie is in de verkeerde fase')
 
         # schrijf de sporter uit
-        inschrijving.delete()
+        deelnemer.delete()
 
         return HttpResponseRedirect(reverse('Sporter:profiel'))
 
-
-class SporterKeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
-
-    """ Via deze view kunnen sporters hun gekozen zeven wedstrijden kiezen (inschrijfmethode 1)"""
-
-    template_name = TEMPLATE_SPORTER_KEUZE7WEDSTRIJDEN
-    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        # gebruiker moet ingelogd zijn en rol Sporter gekozen hebben
-        return rol_get_huidige(self.request) in (Rollen.ROL_SPORTER, Rollen.ROL_HWL)
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        try:
-            deelnemer_pk = int(self.kwargs['deelnemer_pk'][:6])       # afkappen geeft veiligheid
-            deelnemer = (RegioCompetitieSchutterBoog
-                         .objects
-                         .select_related('deelcompetitie',
-                                         'deelcompetitie__competitie')
-                         .get(pk=deelnemer_pk,
-                              deelcompetitie__inschrijf_methode=INSCHRIJF_METHODE_1))
-        except (ValueError, TypeError, RegioCompetitieSchutterBoog.DoesNotExist):
-            raise Http404('Inschrijving niet gevonden')
-
-        context['deelnemer'] = deelnemer
-
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-
-        if rol_nu == Rollen.ROL_SPORTER:
-            if self.request.user != deelnemer.sporterboog.sporter.account:
-                raise PermissionDenied()
-        else:
-            # HWL: sporter moet lid zijn van zijn vereniging
-            if deelnemer.bij_vereniging != functie_nu.nhb_ver:
-                raise PermissionDenied('Sporter is niet van jouw vereniging')
-
-        # zoek alle dagdelen erbij
-        pks = list()
-        for ronde in (DeelcompetitieRonde
-                      .objects
-                      .select_related('deelcompetitie',
-                                      'plan')
-                      .prefetch_related('plan__wedstrijden')
-                      .filter(deelcompetitie=deelnemer.deelcompetitie)):
-            pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
-        # for
-
-        wedstrijden = (CompetitieWedstrijd
-                       .objects
-                       .filter(pk__in=pks)
-                       .exclude(vereniging__isnull=True)  # voorkom wedstrijd niet toegekend aan vereniging
-                       .select_related('vereniging')
-                       .order_by('datum_wanneer',
-                                 'tijd_begin_wedstrijd'))
-
-        keuze = list(deelnemer.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True))
-
-        # splits de wedstrijden op naar in-cluster en out-of-cluster
-        ver = deelnemer.sporterboog.sporter.bij_vereniging
-        ver_in_hwl_cluster = dict()  # [ver_nr] = True/False
-        for cluster in (ver
-                        .clusters
-                        .prefetch_related('nhbvereniging_set')
-                        .filter(gebruik=deelnemer.deelcompetitie.competitie.afstand)
-                        .all()):
-            ver_nrs = list(cluster.nhbvereniging_set.values_list('ver_nr', flat=True))
-            for ver_nr in ver_nrs:
-                ver_in_hwl_cluster[ver_nr] = True
-            # for
-        # for
-
-        wedstrijden1 = list()
-        wedstrijden2 = list()
-        for wedstrijd in wedstrijden:
-            wedstrijd.is_gekozen = (wedstrijd.pk in keuze)
-
-            if wedstrijd.is_gekozen:
-                wedstrijden1.append(wedstrijd)
-            else:
-                try:
-                    in_cluster = ver_in_hwl_cluster[wedstrijd.vereniging.ver_nr]
-                except KeyError:
-                    in_cluster = False
-
-                if in_cluster:
-                    wedstrijden1.append(wedstrijd)
-                else:
-                    wedstrijden2.append(wedstrijd)
-        # for
-
-        if len(wedstrijden1):
-            context['wedstrijden_1'] = wedstrijden1
-            context['wedstrijden_2'] = wedstrijden2
-        else:
-            context['wedstrijden_1'] = wedstrijden2
-
-        context['url_opslaan'] = reverse('Sporter:keuze-zeven-wedstrijden',
-                                         kwargs={'deelnemer_pk': deelnemer.pk})
-
-        if rol_nu == Rollen.ROL_SPORTER:
-            context['url_terug'] = reverse('Sporter:profiel')
-        else:
-            context['url_terug'] = reverse('Vereniging:wie-schiet-waar',
-                                           kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
-
-        menu_dynamics(self.request, context, actief='sporter-profiel')
-        return context
-
-    @staticmethod
-    def post(request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de sporter de knop 'Opslaan' gebruikt
-            op de pagina waar zijn 7 wedstrijden te kiezen zijn,
-        """
-
-        try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])       # afkappen geeft veiligheid
-            deelnemer = (RegioCompetitieSchutterBoog
-                         .objects
-                         .select_related('deelcompetitie',
-                                         'deelcompetitie__competitie')
-                         .get(pk=deelnemer_pk,
-                              deelcompetitie__inschrijf_methode=INSCHRIJF_METHODE_1))
-        except (ValueError, TypeError, RegioCompetitieSchutterBoog.DoesNotExist):
-            raise Http404('Inschrijving niet gevonden')
-
-        rol_nu, functie_nu = rol_get_huidige_functie(request)
-
-        # controleer dat ingelogde gebruiker deze wijziging mag maken
-        if rol_nu == Rollen.ROL_SPORTER:
-            if request.user != deelnemer.sporterboog.sporter.account:
-                raise PermissionDenied()
-        else:
-            # HWL: sporter moet lid zijn van zijn vereniging
-            if deelnemer.bij_vereniging != functie_nu.nhb_ver:
-                raise PermissionDenied('Sporter is niet van jouw vereniging')
-
-        # zoek alle wedstrijden erbij
-        pks = list()
-        for ronde in (DeelcompetitieRonde
-                      .objects
-                      .select_related('deelcompetitie',
-                                      'plan')
-                      .prefetch_related('plan__wedstrijden')
-                      .filter(deelcompetitie=deelnemer.deelcompetitie)):
-            pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
-        # for
-
-        # zoek alle wedstrijden erbij
-        wedstrijden = (CompetitieWedstrijd
-                       .objects
-                       .filter(pk__in=pks)
-                       .select_related('vereniging')
-                       .order_by('datum_wanneer',
-                                 'tijd_begin_wedstrijd'))
-
-        keuze = list(deelnemer.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True))
-        keuze_add = list()
-        aanwezig = len(keuze)
-
-        for wedstrijd in wedstrijden:
-            param = 'wedstrijd_%s' % wedstrijd.pk
-            if request.POST.get(param, '') != '':
-                # deze wedstrijd is gekozen
-                if wedstrijd.pk in keuze:
-                    # al gekozen, dus behouden
-                    keuze.remove(wedstrijd.pk)
-                else:
-                    # toevoegen
-                    keuze_add.append(wedstrijd.pk)
-        # for
-
-        # alle overgebleven wedstrijden zijn ongewenst
-        aanwezig -= len(keuze)
-        deelnemer.inschrijf_gekozen_wedstrijden.remove(*keuze)
-
-        # controleer dat er maximaal 7 momenten gekozen worden
-        if aanwezig + len(keuze_add) > 7:
-            # begrens het aantal toe te voegen wedstrijden
-            keuze_add = keuze_add[:7 - aanwezig]
-
-        deelnemer.inschrijf_gekozen_wedstrijden.add(*keuze_add)
-
-        if rol_nu == Rollen.ROL_SPORTER:
-            url = reverse('Sporter:profiel')
-        else:
-            url = reverse('Vereniging:wie-schiet-waar',
-                          kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
-
-        return HttpResponseRedirect(url)
 
 # end of file

@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="sporter-bevestig-aanmelden-competitie" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compinschrijven-sporter-bevestig-aanmelden" %}
 
     <script type="application/javascript">
         function tel_wedstrijden() {

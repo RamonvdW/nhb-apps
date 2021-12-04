@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_clusters, view_planning, view_instellingen, view_teams_rcl, view_poules, view_teams_hwl
+from . import (view_clusters, view_planning, view_instellingen, view_teams_rcl, view_poules, view_teams_hwl,
+               view_keuze_zeven_wedstrijden, view_wieschietwaar)
 
 app_name = 'CompRegio'
 
@@ -85,6 +86,11 @@ urlpatterns = [
          name='start-volgende-team-ronde'),
 
 
+    # HWL
+    path('wie-schiet-waar/<deelcomp_pk>/',
+         view_wieschietwaar.WieSchietWaarView.as_view(),
+         name='wie-schiet-waar'),
+
     # HWL: teams
     path('teams-vereniging/wijzig-aanvangsgemiddelde/<deelnemer_pk>/',
          view_teams_hwl.WijzigTeamAGView.as_view(),
@@ -114,6 +120,10 @@ urlpatterns = [
          view_teams_hwl.TeamsRegioView.as_view(),
          name='teams-regio'),
 
+    # sporter / HWL
+    path('keuze-zeven-wedstrijden/<deelnemer_pk>/',
+         view_keuze_zeven_wedstrijden.KeuzeZevenWedstrijdenView.as_view(),
+         name='keuze-zeven-wedstrijden'),
 ]
 
 

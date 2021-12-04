@@ -31,9 +31,9 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
     url_profiel = '/sporter/'
     url_voorkeuren = '/sporter/voorkeuren/'
-    url_aanmelden = '/sporter/regiocompetitie/aanmelden/%s/%s/'                 # deelcomp_pk, sporterboog_pk
-    url_bevestig_inschrijven = '/sporter/regiocompetitie/aanmelden/bevestig/'   # deelcomp_pk, sporterboog_pk
-    url_afmelden = '/sporter/regiocompetitie/afmelden/%s/'                      # deelnemer_pk
+    url_aanmelden = '/bondscompetities/deelnemen/aanmelden/%s/%s/'                 # deelcomp_pk, sporterboog_pk
+    url_bevestig_inschrijven = '/bondscompetities/deelnemen/aanmelden/bevestig/'   # deelcomp_pk, sporterboog_pk
+    url_afmelden = '/bondscompetities/deelnemen/afmelden/%s/'                      # deelnemer_pk
 
     testdata = None
 
@@ -225,7 +225,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assertContains(resp, 'De volgende competities passen bij de bogen waar jij mee schiet:')
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
-        urls = [url for url in urls if '/sporter/regiocompetitie/aanmelden/' in url]
+        urls = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
         self.assertEqual(len(urls), 2)
 
         # schrijf de schutter in voor de 18m Recurve
@@ -250,9 +250,9 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assertContains(resp, 'De inschrijving is open tot ')     # 18m
         self.assertContains(resp, 'Aanmelden kan nog tot 1 februari 20')      # 25m
         urls = self.extract_all_urls(resp, skip_menu=True)
-        urls2 = [url for url in urls if '/sporter/regiocompetitie/aanmelden/' in url]
+        urls2 = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
         self.assertEqual(len(urls2), 1)
-        urls2 = [url for url in urls if '/sporter/regiocompetitie/afmelden/' in url]
+        urls2 = [url for url in urls if '/bondscompetities/deelnemen/afmelden/' in url]
         self.assertEqual(len(urls2), 1)
 
         # afmelden moet nog kunnen als de wedstrijdboog weer uitgezet is
@@ -263,9 +263,9 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.get(self.url_profiel)
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
-        urls2 = [url for url in urls if '/sporter/regiocompetitie/aanmelden/' in url]
+        urls2 = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
         self.assertEqual(len(urls2), 0)
-        urls2 = [url for url in urls if '/sporter/regiocompetitie/afmelden/' in url]
+        urls2 = [url for url in urls if '/bondscompetities/deelnemen/afmelden/' in url]
         self.assertEqual(len(urls2), 1)
         sporterboog_bb.voor_wedstrijd = True
         sporterboog_bb.save()

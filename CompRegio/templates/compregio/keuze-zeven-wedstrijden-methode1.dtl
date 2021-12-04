@@ -10,12 +10,17 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="sporter-keuze-zeven-wedstrijden-methode1" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-keuze-zeven-wedstrijden-methode1" %}
 
     <h4>Wanneer wil je schieten?</h4>
 
-    <p>In jouw regio mag je zelf aangeven wanneer je kan schieten.</p>
-    <p>Hieronder staat je huidige keuze voor de <b>{{ deelnemer.deelcompetitie.competitie.beschrijving }}</b>.</p>
+    {% if is_hwl %}
+        <p>Als HWL kan je via scherm de keuzes voor lid <b>{{ deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam }}</b> van jouw vereniging aanpassen voor de <b>{{ deelnemer.deelcompetitie.competitie.beschrijving }}</b>.</p>
+    {% else %}
+        <p>In jouw regio mag je zelf aangeven wanneer je kan schieten.</p>
+        <p>Hieronder staat je huidige keuze voor de <b>{{ deelnemer.deelcompetitie.competitie.beschrijving }}</b>.</p>
+    {% endif %}
+
     <p>Indien nodig, verander de vinkjes en druk op Opslaan.</p>
 
     <script type="application/javascript">

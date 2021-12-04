@@ -24,7 +24,6 @@ TEMPLATE_COMPETITIE_KIES_SEIZOEN = 'competitie/kies.dtl'
 TEMPLATE_COMPETITIE_OVERZICHT = 'competitie/overzicht.dtl'
 TEMPLATE_COMPETITIE_OVERZICHT_HWL = 'competitie/overzicht-hwl.dtl'
 TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER = 'competitie/overzicht-beheerder.dtl'
-TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
 
@@ -172,7 +171,7 @@ class CompetitieOverzichtView(View):
                                                                    'regio_nr': self.functie_nu.nhb_regio.regio_nr})
 
             if 'B' <= comp.fase <= 'E':
-                comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
+                comp.url_inschrijvingen = reverse('CompInschrijven:lijst-regiocomp-regio',
                                                   kwargs={'comp_pk': comp.pk,
                                                           'regio_pk': self.functie_nu.nhb_regio.pk})
 
@@ -225,7 +224,7 @@ class CompetitieOverzichtView(View):
                                                      kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
             if 'B' <= comp.fase <= 'E':
-                comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-rayon',
+                comp.url_inschrijvingen = reverse('CompInschrijven:lijst-regiocomp-rayon',
                                                   kwargs={'comp_pk': comp.pk,
                                                           'rayon_pk': self.functie_nu.nhb_rayon.pk})
 
@@ -287,7 +286,7 @@ class CompetitieOverzichtView(View):
             comp.regio_einde_teams_aanmaken = deelcomp.einde_teams_aanmaken
         # for
 
-        comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
+        comp.url_inschrijvingen = reverse('CompInschrijven:lijst-regiocomp-regio',
                                           kwargs={'comp_pk': comp.pk,
                                                   'regio_pk': self.functie_nu.nhb_ver.regio.pk})
 
@@ -379,7 +378,7 @@ class CompetitieOverzichtView(View):
         comp.einde_fase_M = comp.rk_laatste_wedstrijd + datetime.timedelta(days=7)
 
         if 'B' <= comp.fase <= 'E':
-            comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-alles',
+            comp.url_inschrijvingen = reverse('CompInschrijven:lijst-regiocomp-alles',
                                               kwargs={'comp_pk': comp.pk})
 
         context['comp'] = comp

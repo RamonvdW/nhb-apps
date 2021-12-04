@@ -14,7 +14,7 @@ from Competitie.models import INSCHRIJF_METHODE_1, DeelCompetitie, RegioCompetit
 from Wedstrijden.models import CompetitieWedstrijd
 
 
-TEMPLATE_VERENIGING_WIESCHIETWAAR = 'vereniging/competitie-wieschietwaar-methode1.dtl'
+TEMPLATE_COMPREGIO_WIESCHIETWAAR = 'compregio/wieschietwaar-methode1.dtl'
 
 
 class WieSchietWaarView(UserPassesTestMixin, TemplateView):
@@ -24,7 +24,7 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
     """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_VERENIGING_WIESCHIETWAAR
+    template_name = TEMPLATE_COMPREGIO_WIESCHIETWAAR
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -119,7 +119,7 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
             obj.boogtype_str = obj.sporterboog.boogtype.beschrijving
 
             if self.rol_nu == Rollen.ROL_HWL:
-                obj.url_wijzig = reverse('Sporter:keuze-zeven-wedstrijden',
+                obj.url_wijzig = reverse('CompRegio:keuze-zeven-wedstrijden',
                                          kwargs={'deelnemer_pk': obj.pk})
 
             obj.kruisjes = list()
@@ -132,9 +132,10 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
         # for
 
         if self.rol_nu == Rollen.ROL_HWL:
-            context['afmelden_url'] = reverse('Vereniging:leden-ingeschreven', kwargs={'deelcomp_pk': deelcomp.pk})
+            context['afmelden_url'] = reverse('CompInschrijven:leden-ingeschreven',
+                                              kwargs={'deelcomp_pk': deelcomp.pk})
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        menu_dynamics(self.request, context, actief='vereniging')   # TODO: veranderen in competitie
         return context
 
 # end of file

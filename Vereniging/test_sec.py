@@ -27,9 +27,9 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
     url_overzicht = '/vereniging/'
     url_ledenlijst = '/vereniging/leden-lijst/'
     url_voorkeuren = '/vereniging/leden-voorkeuren/'
-    url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'  # <comp_pk>
-    url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
-    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'  # <sporter_pk>
+    url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'      # <comp_pk>
+    url_ingeschreven = '/bondscompetities/deelnemen/leden-ingeschreven/%s/'  # <deelcomp_pk>
+    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                       # <sporter_pk>
 
     testdata = None
 

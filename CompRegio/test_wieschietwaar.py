@@ -26,10 +26,9 @@ class TestVerenigingWieSchietWaar(E2EHelpers, TestCase):
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 
-    url_overzicht = '/vereniging/'
-    url_aanmelden = '/vereniging/leden-aanmelden/competitie/%s/'                            # comp.pk
-    url_wieschietwaar = '/vereniging/competitie/%s/wie-schiet-waar/'                        # deelcomp_pk
-    url_sporter_zeven_wedstrijden = '/sporter/regiocompetitie/%s/keuze-zeven-wedstrijden/'  # deelnemer_pk
+    url_aanmelden = '/bondscompetities/deelnemen/leden-aanmelden/%s/'                      # comp.pk
+    url_wieschietwaar = '/bondscompetities/regio/wie-schiet-waar/%s/'                      # deelcomp_pk
+    url_sporter_zeven_wedstrijden = '/bondscompetities/regio/keuze-zeven-wedstrijden/%s/'  # deelnemer_pk
 
     testdata = None
 
@@ -291,43 +290,6 @@ class TestVerenigingWieSchietWaar(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assert403(resp)      # redirect = access denied
 
-    def test_kaartjes(self):
-        # kaartje "Wie schiet waar?" moet getoond worden aan de HWL en WL
-        # zolang de competitie in fase B..F is
-        # en alleen voor een regio met inschrijfmethode 1
-
-        url = self.url_wieschietwaar % self.deelcomp_regio.pk
-        urls_expected = [url]
-
-        # login als HWL
-        self.e2e_login_and_pass_otp(self.account_hwl)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
-
-        resp = self.client.get(self.url_overzicht)
-        urls = [url for url in self.extract_all_urls(resp, skip_menu=True) if '/wie-schiet-waar/' in url]
-        # print('urls als HWL: %s' % urls)
-        self.assertEqual(urls, urls_expected)
-
-        # wissel naar WL rol
-        self.e2e_wissel_naar_functie(self.functie_wl)
-        self.e2e_check_rol('WL')
-
-        resp = self.client.get(self.url_overzicht)
-        urls = [url for url in self.extract_all_urls(resp, skip_menu=True) if '/wie-schiet-waar/' in url]
-        # print('urls als WL: %s' % urls)
-        self.assertEqual(urls, urls_expected)
-
-        # login als SEC
-        self.e2e_login_and_pass_otp(self.account_sec)
-        self.e2e_wissel_naar_functie(self.functie_sec)
-        self.e2e_check_rol('SEC')
-
-        resp = self.client.get(self.url_overzicht)
-        urls = [url for url in self.extract_all_urls(resp, skip_menu=True) if '/wie-schiet-waar/' in url]
-        # print('urls als SEC: %s' % urls)
-        self.assertEqual(urls, [])
-
     def test_hwl(self):
         # login als HWL
         self.e2e_login_and_pass_otp(self.account_hwl)
@@ -339,7 +301,7 @@ class TestVerenigingWieSchietWaar(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/competitie-wieschietwaar-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/wieschietwaar-methode1.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(url)
 
@@ -352,7 +314,7 @@ class TestVerenigingWieSchietWaar(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/keuze-zeven-wedstrijden-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/keuze-zeven-wedstrijden-methode1.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(url)
@@ -379,7 +341,7 @@ class TestVerenigingWieSchietWaar(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/competitie-wieschietwaar-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/wieschietwaar-methode1.dtl', 'plein/site_layout.dtl'))
 
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertEqual(urls, [])

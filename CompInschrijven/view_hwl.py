@@ -27,8 +27,8 @@ from decimal import Decimal
 import copy
 
 
-TEMPLATE_LEDEN_AANMELDEN = 'vereniging/competitie-aanmelden.dtl'
-TEMPLATE_LEDEN_INGESCHREVEN = 'vereniging/competitie-ingeschreven.dtl'
+TEMPLATE_LEDEN_AANMELDEN = 'compinschrijven/hwl-leden-aanmelden.dtl'
+TEMPLATE_LEDEN_INGESCHREVEN = 'compinschrijven/hwl-leden-ingeschreven.dtl'
 
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
@@ -246,7 +246,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         context['comp'] = self.comp
         context['seizoen'] = '%s/%s' % (self.comp.begin_jaar, self.comp.begin_jaar + 1)
         context['tweede_jaar'] = self.comp.begin_jaar + 1
-        context['aanmelden_url'] = reverse('Vereniging:leden-aanmelden', kwargs={'comp_pk': self.comp.pk})
+        context['url_aanmelden'] = reverse('CompInschrijven:leden-aanmelden', kwargs={'comp_pk': self.comp.pk})
         context['mag_aanmelden'] = True
         context['mag_team_schieten'] = (self.comp.fase == 'B')
 
@@ -490,7 +490,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             # else: silently ignore
         # for
 
-        url = reverse('Vereniging:leden-ingeschreven', kwargs={'deelcomp_pk': deelcomp.pk})
+        url = reverse('CompInschrijven:leden-ingeschreven', kwargs={'deelcomp_pk': deelcomp.pk})
         return HttpResponseRedirect(url)
 
 
@@ -600,7 +600,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         context['mag_afmelden'] = False
 
         if self.rol_nu == Rollen.ROL_HWL:
-            context['afmelden_url'] = reverse('Vereniging:leden-ingeschreven',
+            context['afmelden_url'] = reverse('CompInschrijven:leden-ingeschreven',
                                               kwargs={'deelcomp_pk': self.deelcomp.pk})
             comp = self.deelcomp.competitie
             comp.bepaal_fase()
@@ -611,7 +611,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         if methode == INSCHRIJF_METHODE_3:
             context['toon_dagdeel'] = DAGDELEN
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        menu_dynamics(self.request, context, actief='vereniging')       # TODO: competitie
         return context
 
     def post(self, request, *args, **kwargs):
@@ -638,7 +638,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
             deelnemer.inschrijf_voorkeur_team = not deelnemer.inschrijf_voorkeur_team
             deelnemer.save(update_fields=['inschrijf_voorkeur_team'])
 
-            url = reverse('Vereniging:leden-ingeschreven',
+            url = reverse('CompInschrijven:leden-ingeschreven',
                           kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
             return HttpResponseRedirect(url)
 

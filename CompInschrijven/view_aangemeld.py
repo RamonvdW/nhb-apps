@@ -9,22 +9,23 @@ from django.http import HttpResponse, Http404
 from django.utils.formats import date_format
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60CM_4SPOT, BLAZOEN_WENS_4SPOT, BLAZOEN_WENS_DT, BLAZOEN2STR, BLAZOEN2STR_COMPACT
+from BasisTypen.models import (COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60CM_4SPOT,
+                               BLAZOEN_WENS_4SPOT, BLAZOEN_WENS_DT,
+                               BLAZOEN2STR, BLAZOEN2STR_COMPACT)
 from Competitie.menu import menu_dynamics_competitie
+from Competitie.models import (LAAG_REGIO, Competitie, DeelCompetitie, DeelcompetitieRonde,
+                               RegioCompetitieSchutterBoog,
+                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN)
 from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import SporterVoorkeuren
 from Wedstrijden.models import CompetitieWedstrijd
-from .models import (LAAG_REGIO,
-                     INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
-                     DAGDELEN, DAGDEEL_AFKORTINGEN,
-                     Competitie, DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog)
 import csv
 
 
-TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
-TEMPLATE_COMPETITIE_INSCHRIJFMETHODE1_BEHOEFTE = 'competitie/inschrijfmethode1-behoefte.dtl'
-TEMPLATE_COMPETITIE_INSCHRIJFMETHODE3_BEHOEFTE = 'competitie/inschrijfmethode3-behoefte.dtl'
+TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'compinschrijven/lijst-aangemeld-regio.dtl'
+TEMPLATE_COMPETITIE_INSCHRIJFMETHODE1_BEHOEFTE = 'compinschrijven/inschrijfmethode1-behoefte.dtl'
+TEMPLATE_COMPETITIE_INSCHRIJFMETHODE3_BEHOEFTE = 'compinschrijven/inschrijfmethode3-behoefte.dtl'
 
 JA_NEE = {
     False: 'Nee',
@@ -37,7 +38,7 @@ def maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=None, regio=None):
     """ Maak de zoom knoppen structuur voor de regiocompetitie deelnemers lijst """
 
     if rayon != regio:
-        context['zoom_alles_url'] = reverse('Competitie:lijst-regiocomp-alles', kwargs={'comp_pk': comp_pk})
+        context['zoom_alles_url'] = reverse('CompInschrijven:lijst-regiocomp-alles', kwargs={'comp_pk': comp_pk})
 
     regios = (NhbRegio
               .objects
@@ -52,7 +53,7 @@ def maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=None, regio=None):
 
         obj.title_str = 'Rayon %s' % obj.rayon_nr
         if obj != rayon:
-            obj.zoom_url = reverse('Competitie:lijst-regiocomp-rayon',
+            obj.zoom_url = reverse('CompInschrijven:lijst-regiocomp-rayon',
                                    kwargs={'comp_pk': comp_pk, 'rayon_pk': obj.pk})
 
         obj.regios = list()
@@ -61,7 +62,7 @@ def maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=None, regio=None):
                 obj.regios.append(obj2)
                 obj2.title_str = 'Regio %s' % obj2.regio_nr
                 if obj2 != regio:
-                    obj2.zoom_url = reverse('Competitie:lijst-regiocomp-regio',
+                    obj2.zoom_url = reverse('CompInschrijven:lijst-regiocomp-regio',
                                             kwargs={'comp_pk': comp_pk, 'regio_pk': obj2.pk})
     # for
 
@@ -292,19 +293,19 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
         if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
             context['show_gekozen_wedstrijden'] = True
-            context['url_behoefte'] = reverse('Competitie:inschrijfmethode1-behoefte',
+            context['url_behoefte'] = reverse('CompInschrijven:inschrijfmethode1-behoefte',
                                               kwargs={'comp_pk': comp.pk,
                                                       'regio_pk': regio.pk})
 
         elif deelcomp.inschrijf_methode == INSCHRIJF_METHODE_3:
             context['show_dagdeel_telling'] = True
-            context['url_behoefte'] = reverse('Competitie:inschrijfmethode3-behoefte',
+            context['url_behoefte'] = reverse('CompInschrijven:inschrijfmethode3-behoefte',
                                               kwargs={'comp_pk': comp.pk,
                                                       'regio_pk': regio.pk})
 
         else:
             # inschrijfmethode 2
-            context['url_download'] = reverse('Competitie:lijst-regiocomp-regio-als-bestand',
+            context['url_download'] = reverse('CompInschrijven:lijst-regiocomp-regio-als-bestand',
                                               kwargs={'comp_pk': comp.pk,
                                                       'regio_pk': regio.pk})
 
@@ -503,13 +504,10 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         totalen.append(som)
 
     @staticmethod
-    def _maak_data_blazoen_behoefte(context, deelcomp, deelnemers):
-        """ maak het overzicht hoeveel blazoenen er nodig zijn
-            voor elk dagdeel
-        """
+    def _maak_data_blazoen_behoefte(context):
+        """ maak het overzicht hoeveel blazoenen er nodig zijn voor elk dagdeel """
 
         alle_blazoenen = list()
-
         blazoen_count = dict()
         for nhb_ver in context['regio_verenigingen']:
             for blazoen_str, counts_list in nhb_ver.blazoen_list:
@@ -594,9 +592,9 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
 
         # voeg de tabel met dagdeel-behoefte toe
         self._maak_data_dagdeel_behoefte(context, deelcomp, deelnemers, regio)
-        self._maak_data_blazoen_behoefte(context, deelcomp, deelnemers)
+        self._maak_data_blazoen_behoefte(context)
 
-        context['url_download'] = reverse('Competitie:inschrijfmethode3-behoefte-als-bestand',
+        context['url_download'] = reverse('CompInschrijven:inschrijfmethode3-behoefte-als-bestand',
                                           kwargs={'comp_pk': comp.pk,
                                                   'regio_pk': regio.pk})
 
@@ -668,7 +666,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         # dict(nhb_ver) = dict("dagdeel_afkorting") = count
         # list[nhb_ver, ..] =
         self._maak_data_dagdeel_behoefte(context, deelcomp, objs, regio)
-        self._maak_data_blazoen_behoefte(context, deelcomp, objs)
+        self._maak_data_blazoen_behoefte(context)
 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="behoefte-%s.csv"' % regio.regio_nr
@@ -819,7 +817,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
 
         # for  wedstrijd
 
-        context['url_download'] = reverse('Competitie:inschrijfmethode1-behoefte-als-bestand',
+        context['url_download'] = reverse('CompInschrijven:inschrijfmethode1-behoefte-als-bestand',
                                           kwargs={'comp_pk': comp.pk,
                                                   'regio_pk': regio.pk})
 

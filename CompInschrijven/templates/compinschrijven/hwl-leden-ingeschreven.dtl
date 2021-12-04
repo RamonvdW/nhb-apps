@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-competitie-ingeschreven" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compinschrijven-leden-ingeschreven" %}
 
     <h4>Ingeschreven</h4>
 

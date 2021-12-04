@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-competitie-aanmelden" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compinschrijven-leden-aanmelden" %}
 
     <script>
         function tel_wedstrijden() {
@@ -36,7 +36,7 @@
 
     <h4>Aanmelden</h4>
 
-    <form method="post" action="{{ aanmelden_url }}">
+    <form method="post" action="{{ url_aanmelden }}">
         {% csrf_token %}
 
         {% if mag_aanmelden %}

@@ -10,23 +10,22 @@ from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import Competitie, CompetitieKlasse, LAAG_REGIO, DeelCompetitie
 from Competitie.operations import competities_aanmaken
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
-from Sporter.models import Sporter, SporterBoog
-from Wedstrijden.models import WedstrijdLocatie
+from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
 
 
-class TestVerenigingWL(E2EHelpers, TestCase):
+class TestCompInschrijvenWL(E2EHelpers, TestCase):
 
-    """ tests voor de Vereniging applicatie, functies voor de WL """
+    """ tests voor de CompInschrijven applicatie, functies voor de WL """
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 
+    url_aanmelden = '/bondscompetities/deelnemen/leden-aanmelden/%s/'        # <comp_pk>
+    url_ingeschreven = '/bondscompetities/deelnemen/leden-ingeschreven/%s/'  # <deelcomp_pk>
+    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'  # <sporter_pk>
     url_overzicht = '/vereniging/'
-    url_ledenlijst = '/vereniging/leden-lijst/'
-    url_voorkeuren = '/vereniging/leden-voorkeuren/'
-    url_schutter_voorkeuren = '/sporter/voorkeuren/%s/'  # <sporter_pk>
 
     testdata = None
 
@@ -197,85 +196,43 @@ class TestVerenigingWL(E2EHelpers, TestCase):
                                                          nhb_regio=self.regio_111,
                                                          competitie__afstand=18)
 
-    def test_overzicht(self):
+    def test_inschrijven(self):
+        url = self.url_aanmelden % self.comp_18.pk
+
         # login als WL
         self.e2e_login_and_pass_otp(self.account_wl)
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol('WL')
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
+            resp = self.client.get(url)
+        self.assert403(resp)       # WL mag dit niet
 
-    def test_ledenlijst(self):
-        # anon
-        self.e2e_logout()
+    def test_ingeschreven(self):
+        # login als WL
+        self.e2e_login_and_pass_otp(self.account_wl)
+        self.e2e_wissel_naar_functie(self.functie_wl)
+        self.e2e_check_rol('WL')
+
+        url = self.url_ingeschreven % self.deelcomp_regio.pk
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_ledenlijst)
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('compinschrijven/hwl-leden-ingeschreven.dtl', 'plein/site_layout.dtl'))
+
+        # probeer in te schrijven (mag niet)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url)
         self.assert403(resp)
 
+    def test_cornercase(self):
         # login als WL
         self.e2e_login_and_pass_otp(self.account_wl)
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol('WL')
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_ledenlijst)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/ledenlijst.dtl', 'plein/site_layout.dtl'))
-
-        self.assertContains(resp, 'Jeugd')
-        self.assertContains(resp, 'Senioren')
-        self.assertNotContains(resp, 'Inactieve leden')
-
-    def test_voorkeuren(self):
-        # haal de lijst met leden voorkeuren op
-        # view is gebaseerd op ledenlijst, dus niet veel te testen
-
-        # login als WL
-        self.e2e_login_and_pass_otp(self.account_wl)
-        self.e2e_wissel_naar_functie(self.functie_wl)
-        self.e2e_check_rol('WL')
-
-        # het overzicht mag de WL ophalen
-        self.assertEqual(SporterBoog.objects.count(), 0)
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_voorkeuren)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
-
-        # probeer de schutterboog instellingen van schutters te veranderen
-        # maar dat mag de WL niet, dus gebeurt er niets
-        for nhblid in (self.sporter_100001, self.sporter_100002, self.sporter_100003):
-            url = self.url_schutter_voorkeuren % nhblid.pk
-            with self.assert_max_queries(20):
-                resp = self.client.get(url)
-            self.assert403(resp)   # naar Plein, want mag niet
-        # for
-        self.assertEqual(SporterBoog.objects.count(), 0)
-
-    def test_wedstrijdlocatie(self):
-        # maak een locatie en koppel aan de vereniging
-        loc = WedstrijdLocatie()
-        # loc.adres = "Dubbelbaan 16\n1234AB Schietbuurt"
-        loc.save()
-        loc.verenigingen.add(self.nhbver1)
-
-        # login als WL
-        self.e2e_login_and_pass_otp(self.account_wl)
-        self.e2e_wissel_naar_functie(self.functie_wl)
-        self.e2e_check_rol('WL')
-
-        # check dat het kaartje er is om de accommodatie details op te vragen
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_overzicht)
-        urls = self.extract_all_urls(resp)
-        urls2 = [url for url in urls if url.startswith('/vereniging/accommodatie-details/')]
-        self.assertEqual(len(urls2), 1)
-
-        # ophalen en aanpassen: zie test_accommodatie
+            resp = self.client.get(self.url_ingeschreven % 9999999)
+        self.assert404(resp)         # 404 = Not found
 
 # end of file

@@ -19,17 +19,17 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
+class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
 
-    """ tests voor de Competitie applicatie, inschrijfmethode 1 """
+    """ tests voor de CompInschrijven applicatie, inschrijfmethode 1 """
 
     test_after = ('Competitie.test_beheerders',)
 
     url_planning_regio = '/bondscompetities/regio/planning/%s/'  # deelcomp_pk
     url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'  # ronde_pk
     url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'  # wedstrijd_pk
-    url_behoefte1 = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes/'  # comp_pk, regio_pk
-    url_behoefte1_bestand = '/bondscompetities/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes-als-bestand/'  # comp_pk, regio_pk
+    url_behoefte1 = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes/'  # comp_pk, regio_pk
+    url_behoefte1_bestand = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes-als-bestand/'  # comp_pk, regio_pk
 
     testdata = None
 
@@ -198,7 +198,7 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
 
     def _doe_inschrijven(self, comp):
         # maak leden aan voor de tests
-        url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/' % comp.pk
+        url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/' % comp.pk
 
         # wissel naar HWL
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -301,7 +301,7 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
             resp = self.client.get(self.url_behoefte1 % (self.comp_18.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/inschrijfmethode1-behoefte.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/inschrijfmethode1-behoefte.dtl', 'plein/site_layout.dtl'))
 
         self.assertContains(resp, 'Nog geen keuzes gemaakt')
 
@@ -314,7 +314,7 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
             resp = self.client.get(self.url_behoefte1 % (self.comp_18.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/inschrijfmethode1-behoefte.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/inschrijfmethode1-behoefte.dtl', 'plein/site_layout.dtl'))
 
         # schrijf een aantal sporters in
         self.e2e_wisselnaarrol_bb()
@@ -325,7 +325,7 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
             resp = self.client.get(self.url_behoefte1 % (self.comp_18.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/inschrijfmethode1-behoefte.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/inschrijfmethode1-behoefte.dtl', 'plein/site_layout.dtl'))
         # 0 keer de eerste keuze
         self.assertContains(resp, '<td>maandag 15 juli 2019 om 19:00</td><td>[1000] Grote Club</td><td>0</td>')
         # 10 keer de tweede (en overige) keuzes

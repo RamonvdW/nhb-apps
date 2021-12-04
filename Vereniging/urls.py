@@ -5,8 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import (view_accommodatie, view_externe_locaties, view_overzicht, view_ledenlijst,
-               view_aanmelden, view_lijst_verenigingen, view_wieschietwaar)
+from . import view_accommodatie, view_externe_locaties, view_overzicht, view_ledenlijst, view_lijst_verenigingen
 
 app_name = 'Vereniging'
 
@@ -23,18 +22,6 @@ urlpatterns = [
     path('leden-voorkeuren/',
          view_ledenlijst.LedenVoorkeurenView.as_view(),
          name='leden-voorkeuren'),
-
-    path('leden-aanmelden/competitie/<comp_pk>/',
-         view_aanmelden.LedenAanmeldenView.as_view(),
-         name='leden-aanmelden'),
-
-    path('leden-ingeschreven/competitie/<deelcomp_pk>/',
-         view_aanmelden.LedenIngeschrevenView.as_view(),
-         name='leden-ingeschreven'),
-
-    path('competitie/<deelcomp_pk>/wie-schiet-waar/',
-         view_wieschietwaar.WieSchietWaarView.as_view(),
-         name='wie-schiet-waar'),
 
 
     # Accommodatie

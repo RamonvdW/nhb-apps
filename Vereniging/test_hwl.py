@@ -8,9 +8,8 @@ from django.test import TestCase
 from django.utils import timezone
 from Functie.models import maak_functie, Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse, RegioCompetitieSchutterBoog,
-                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, LAAG_REGIO, LAAG_RK,
-                               DeelcompetitieRonde)
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse, DeelcompetitieRonde,
+                               LAAG_REGIO, LAAG_RK,  INSCHRIJF_METHODE_1)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -31,12 +30,11 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
     url_overzicht = '/vereniging/'
     url_ledenlijst = '/vereniging/leden-lijst/'
     url_voorkeuren = '/vereniging/leden-voorkeuren/'
-    url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'  # <comp_pk>
-    url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
     url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'  # <sporter_pk>
     url_planning_regio = '/bondscompetities/regio/planning/%s/'  # deelcomp_pk
     url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'  # ronde_pk
     url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'  # wedstrijd_pk
+    url_wieschietwaar = '/bondscompetities/regio/wie-schiet-waar/%s/'                      # deelcomp_pk
 
     testdata = None
 
@@ -68,6 +66,11 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.functie_wl = maak_functie("WL test", "WL")
         self.functie_wl.nhb_ver = ver
         self.functie_wl.save()
+
+        # maak de SEC functie
+        self.functie_sec = maak_functie("SEC test", "SEC")
+        self.functie_sec.nhb_ver = ver
+        self.functie_sec.save()
 
         # maak het lid aan dat HWL wordt
         sporter = Sporter()
@@ -159,12 +162,15 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         sporter.geslacht = "M"
         sporter.voornaam = "Andre"
         sporter.achternaam = "Club"
-        sporter.email = ""
+        sporter.email = "andre@nhn.not"
         sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
         sporter.sinds_datum = datetime.date(year=jaar-4, month=11, day=12)
         sporter.bij_vereniging = ver2
         sporter.save()
         self.sporter_102000 = sporter
+
+        self.account_sec = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam, accepteer_vhpg=True)
+        self.functie_sec.accounts.add(self.account_sec)
 
         # maak de competitie aan die nodig is voor deze tests
         self._create_histcomp()
@@ -241,6 +247,11 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.deelcomp_regio = DeelCompetitie.objects.get(laag=LAAG_REGIO,
                                                          nhb_regio=self.regio_111,
                                                          competitie__afstand=18)
+
+        self.deelcomp_regio.inschrijf_methode = INSCHRIJF_METHODE_1
+        self.deelcomp_regio.save()
+
+        zet_competitie_fase(self.comp_18, 'B')
 
     def _zet_sporter_voorkeuren(self, lid_nr):
         # deze functie kan alleen gebruikt worden als HWL
@@ -354,6 +365,43 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_overzicht)
 
+    def test_kaartjes(self):
+        # kaartje "Wie schiet waar?" moet getoond worden aan de HWL en WL
+        # zolang de competitie in fase B..F is
+        # en alleen voor een regio met inschrijfmethode 1
+
+        url = self.url_wieschietwaar % self.deelcomp_regio.pk
+        urls_expected = [url]
+
+        # login als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        resp = self.client.get(self.url_overzicht)
+        urls = [url for url in self.extract_all_urls(resp, skip_menu=True) if '/wie-schiet-waar/' in url]
+        # print('urls als HWL: %s' % urls)
+        self.assertEqual(urls_expected, urls)
+
+        # wissel naar WL rol
+        self.e2e_wissel_naar_functie(self.functie_wl)
+        self.e2e_check_rol('WL')
+
+        resp = self.client.get(self.url_overzicht)
+        urls = [url for url in self.extract_all_urls(resp, skip_menu=True) if '/wie-schiet-waar/' in url]
+        # print('urls als WL: %s' % urls)
+        self.assertEqual(urls_expected, urls)
+
+        # login als SEC
+        self.e2e_login_and_pass_otp(self.account_sec)
+        self.e2e_wissel_naar_functie(self.functie_sec)
+        self.e2e_check_rol('SEC')
+
+        resp = self.client.get(self.url_overzicht)
+        urls = [url for url in self.extract_all_urls(resp, skip_menu=True) if '/wie-schiet-waar/' in url]
+        # print('urls als SEC: %s' % urls)
+        self.assertEqual([], urls)
+
     def test_ledenlijst(self):
         # anon
         self.e2e_logout()
@@ -440,516 +488,6 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('vereniging/leden-voorkeuren.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
-    def test_inschrijven(self):
-        url = self.url_inschrijven % self.comp_18.pk
-
-        # anon
-        self.e2e_logout()
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert403(resp)
-
-        # login als HWL
-        self.e2e_login_and_pass_otp(self.account_hwl)
-
-        # pas de HWL aan naar de andere club
-        self.functie_hwl.nhb_ver = self.nhbver2
-        self.functie_hwl.save()
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
-
-        # maakt sporterboog aan van andere vereniging
-        self._zet_sporter_voorkeuren(102000)
-
-        # herstel de HWL functie
-        self.functie_hwl.nhb_ver = self.nhbver1
-        self.functie_hwl.save()
-
-        # wordt HWL
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
-
-        # verkeerde competitie fase
-        zet_competitie_fase(self.comp_18, 'A')
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)
-        zet_competitie_fase(self.comp_18, 'B')
-
-        # stel 1 schutter in die op randje aspirant/cadet zit
-        self._zet_sporter_voorkeuren(100004)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
-
-        self.assertContains(resp, '<td>Cadet de Jeugd</td>')
-        self.assertContains(resp, '<td>14</td>')            # leeftijd 2021
-        self.assertContains(resp, '<td class="hide-on-small-only">Cadet</td>')  # leeftijdsklasse competitie
-
-        # schrijf het jonge lid in en controleer de wedstrijdklasse
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_100004_boogtype_1': 'on'})       # 1=R
-        self.assert_is_redirect_not_plein(resp)     # check success
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
-
-        inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
-        self.assertEqual(inschrijving.sporterboog.sporter.lid_nr, 100004)
-        self.assertTrue('Cadet' in inschrijving.klasse.indiv.beschrijving)
-        inschrijving.delete()
-
-        # zet het min_ag voor Recurve klassen
-        klasse_5 = None
-        for klasse in (CompetitieKlasse
-                       .objects
-                       .filter(competitie=self.comp_18,
-                               indiv__volgorde__in=(100, 101, 102, 103, 104, 105))):
-            if klasse.indiv.volgorde == 105:
-                klasse.min_ag = 0.001
-            elif klasse.indiv.volgorde == 104:
-                klasse.min_ag = 7.420
-                klasse_5 = klasse
-            else:
-                klasse.min_ag = 9.000
-
-            klasse.save(update_fields=['min_ag'])
-        # for
-
-        # stel een paar bogen in
-        self._zet_sporter_voorkeuren(100002)
-        self._zet_sporter_voorkeuren(100003)
-        self._zet_sporter_voorkeuren(100012)
-
-        self._zet_ag(100002, 18)
-        self._zet_ag(100003, 18)
-        self._zet_ag(100003, 25)
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
-
-        # nu de POST om een paar leden aan te melden
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_100012_boogtype_1': 'on'})      # heeft geen voorkeuren
-        self.assert404(resp, 'Sporter heeft geen voorkeur voor wedstrijden opgegeven')
-
-        # nu de POST om een paar leden aan te melden
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',       # 1=R
-                                          'lid_100003_boogtype_1': 'on'})      # 3=BB
-        self.assert_is_redirect_not_plein(resp)     # check success
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
-
-        deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog__sporter__lid_nr=100003)
-        # print('deelnemer:', deelnemer, 'klasse:', deelnemer.klasse)
-        self.assertEqual(deelnemer.klasse, klasse_5)
-
-        # dubbele inschrijving
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on'})
-        self.assert404(resp)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
-
-        # POST met garbage
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_10xxx2_boogtype_1': 'on'})
-        self.assert404(resp)
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_999999_boogtype_1': 'on'})
-        self.assert404(resp)
-
-        # haal het aanmeld-scherm op zodat er al ingeschreven leden bij staan
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
-
-        # haal de lijst met ingeschreven schutters op
-        url = self.url_ingeschreven % self.deelcomp_regio.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/competitie-ingeschreven.dtl', 'plein/site_layout.dtl'))
-
-    def test_inschrijven_methode3_twee_dagdelen(self):
-        self.deelcomp_regio.inschrijf_methode = INSCHRIJF_METHODE_3
-        self.deelcomp_regio.toegestane_dagdelen = 'AV,ZO'
-        self.deelcomp_regio.save()
-
-        # login als HWL
-        self.e2e_login_and_pass_otp(self.account_hwl)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
-
-        # stel een paar bogen in
-        self._zet_sporter_voorkeuren(100002)
-        self._zet_sporter_voorkeuren(100003)
-
-        self._zet_ag(100002, 18)
-        self._zet_ag(100003, 25)
-
-        url = self.url_inschrijven % self.comp_18.pk
-        zet_competitie_fase(self.comp_18, 'B')
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
-
-        # nu de POST om een paar leden aan te melden met een verkeer dagdeel
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
-                                          'dagdeel': 'ZA'})
-        self.assert404(resp)     # 404 = Not allowed
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-
-        # nu de POST om een paar leden aan te melden met een verkeer dagdeel
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
-                                          'dagdeel': 'xx'})
-        self.assert404(resp)     # 404 = Not allowed
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-
-        # nu de POST om een paar leden aan te melden
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
-                                          'lid_100003_boogtype_3': 'on',        # 3=BB
-                                          'dagdeel': 'AV',
-                                          'opmerking': 'methode 3'})
-        self.assert_is_redirect_not_plein(resp)     # check success
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
-
-        for obj in RegioCompetitieSchutterBoog.objects.all():
-            self.assertEqual(obj.inschrijf_notitie, 'methode 3')
-            self.assertTrue(obj.inschrijf_voorkeur_dagdeel, 'AV')
-        # for
-
-        # haal de lijst met ingeschreven schutters op
-        url = self.url_ingeschreven % self.deelcomp_regio.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/competitie-ingeschreven.dtl', 'plein/site_layout.dtl'))
-
-    def test_inschrijven_methode3_alle_dagdelen(self):
-        self.deelcomp_regio.inschrijf_methode = INSCHRIJF_METHODE_3
-        self.deelcomp_regio.toegestane_dagdelen = ''    # alles toegestaan
-        self.deelcomp_regio.save()
-
-        # login als HWL
-        self.e2e_login_and_pass_otp(self.account_hwl)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
-
-        # stel een paar bogen in
-        self._zet_sporter_voorkeuren(100002)
-        self._zet_sporter_voorkeuren(100003)
-
-        self._zet_ag(100002, 18)
-        self._zet_ag(100003, 25)
-
-        url = self.url_inschrijven % self.comp_18.pk
-        zet_competitie_fase(self.comp_18, 'B')
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
-
-        # probeer aan te melden met een niet-wedstrijd boog
-        sporterboog = SporterBoog.objects.get(sporter__lid_nr=self.sporter_100002.lid_nr,
-                                              boogtype__afkorting='R')
-        sporterboog.voor_wedstrijd = False
-        sporterboog.save()
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
-                                          'dagdeel': 'AV'})
-        self.assert404(resp)     # 404 = Not allowed
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        sporterboog.voor_wedstrijd = True
-        sporterboog.save()
-
-        # probeer aan te melden met een lid dat niet van de vereniging van de HWL is
-        self.sporter_100002.bij_vereniging = self.nhbver2
-        self.sporter_100002.save()
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
-                                          'dagdeel': 'AV'})
-        self.assert403(resp)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        self.sporter_100002.bij_vereniging = self.nhbver1
-        self.sporter_100002.save()
-
-        # nu de POST om een paar leden aan te melden
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
-                                          'lid_100003_boogtype_3': 'on',        # 3=BB
-                                          'dagdeel': 'AV',
-                                          'opmerking': 'methode 3' * 60})
-        self.assert_is_redirect_not_plein(resp)     # check success
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)
-
-        for obj in RegioCompetitieSchutterBoog.objects.all():
-            self.assertTrue(obj.inschrijf_notitie.startswith('methode 3'))
-            self.assertTrue(obj.inschrijf_voorkeur_dagdeel, 'AV')
-            self.assertTrue(480 < len(obj.inschrijf_notitie) <= 500)
-        # for
-
-    def test_inschrijven_methode1(self):
-        self.deelcomp_regio.inschrijf_methode = INSCHRIJF_METHODE_1
-        self.deelcomp_regio.toegestane_dagdelen = ''    # alles toegestaan
-        self.deelcomp_regio.save()
-
-        wedstrijd_pks = self._maak_wedstrijden()
-
-        # login als HWL
-        self.e2e_login_and_pass_otp(self.account_hwl)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
-
-        # stel een paar bogen in
-        self._zet_sporter_voorkeuren(100002)
-        self._zet_sporter_voorkeuren(100003)
-
-        url = self.url_inschrijven % self.comp_18.pk
-        zet_competitie_fase(self.comp_18, 'B')
-
-        with self.assert_max_queries(21):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'wedstrijd_%s' % wedstrijd_pks[0]: 'on',
-                                          'lid_100003_boogtype_3': 'on'})
-        self.assert_is_redirect_not_plein(resp)     # check success
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)    # 1 schutter, 1 competitie
-
-        deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog__sporter__lid_nr=100003)
-        self.assertEqual(deelnemer.inschrijf_gekozen_wedstrijden.count(), 1)
-
-    def test_inschrijven_team(self):
-        url = self.url_inschrijven % self.comp_18.pk
-        zet_competitie_fase(self.comp_18, 'B')
-
-        # anon
-        self.e2e_logout()
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert403(resp)
-
-        # login als HWL
-        self.e2e_login_and_pass_otp(self.account_hwl)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
-
-        # stel een paar bogen in
-        self._zet_sporter_voorkeuren(100004)
-        self._zet_sporter_voorkeuren(100003)
-
-        self._zet_ag(100004, 18)
-        self._zet_ag(100003, 25)
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
-
-        # nu de POST om een paar leden aan te melden
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
-                                          'lid_100003_boogtype_3': 'on',        # 3=BB
-                                          'wil_in_team': 'ja',
-                                          'opmerking': 'door de hwl'})
-        self.assert_is_redirect_not_plein(resp)     # check success
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
-
-        for obj in RegioCompetitieSchutterBoog.objects.all():
-            self.assertEqual(obj.inschrijf_notitie, 'door de hwl')
-            self.assertTrue(obj.inschrijf_voorkeur_team)
-        # for
-
-    def test_inschrijven_team_udvl(self):
-        url = self.url_inschrijven % self.comp_18.pk
-        zet_competitie_fase(self.comp_18, 'B')
-
-        # zet de udvl tussen de dvl van de twee schutters in
-        # sporter_100003.sinds_datum = datetime.date(year=jaar-4, month=11, day=12)
-        # sporter_100004.sinds_datum = datetime.date(year=jaar-3, month=11, day=12)
-        self.comp_18.uiterste_datum_lid = datetime.date(year=self.sporter_100004.sinds_datum.year, month=1, day=1)
-        self.comp_18.save()
-
-        # login als HWL
-        self.e2e_login_and_pass_otp(self.account_hwl)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
-
-        # stel een paar bogen in
-        self._zet_sporter_voorkeuren(100004)
-        self._zet_sporter_voorkeuren(100003)
-
-        self._zet_ag(100004, 18)
-        self._zet_ag(100003, 25)
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
-
-        # nu de POST om een paar leden aan te melden
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(22):
-            resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
-                                          'lid_100003_boogtype_3': 'on',        # 3=BB
-                                          'wil_in_team': 'ja',
-                                          'opmerking': 'door de hwl'})
-        self.assert_is_redirect_not_plein(resp)     # check success
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
-
-        for obj in RegioCompetitieSchutterBoog.objects.all():
-            self.assertEqual(obj.inschrijf_notitie, 'door de hwl')
-            if obj.sporterboog.sporter.lid_nr == 100003:
-                self.assertTrue(obj.inschrijf_voorkeur_team)
-            else:
-                # 100004 heeft dvl > udvl, dus mag niet mee doen
-                self.assertFalse(obj.inschrijf_voorkeur_team)
-        # for
-
-    def test_afmelden(self):
-        # login als HWL
-        self.e2e_login_and_pass_otp(self.account_hwl)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
-
-        # stel een paar bogen in
-        self._zet_sporter_voorkeuren(100004)
-        self._zet_sporter_voorkeuren(100003)
-
-        self._zet_ag(100004, 18)
-        self._zet_ag(100003, 25)
-
-        zet_competitie_fase(self.comp_18, 'B')
-
-        url = self.url_inschrijven % self.comp_18.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('vereniging/competitie-aanmelden.dtl', 'plein/site_layout.dtl'))
-
-        # nu de POST om een paar leden aan te melden
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
-                                          'lid_100003_boogtype_3': 'on',        # 3=BB
-                                          'wil_in_team': 'ja',
-                                          'opmerking': 'door de hwl'})
-        self.assert_is_redirect_not_plein(resp)     # check success
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
-
-        # schrijf de schutters weer uit
-        pk = RegioCompetitieSchutterBoog.objects.all()[0].pk
-        url = self.url_ingeschreven % 0
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'pk_%s' % pk: 'on'})
-        self.assert_is_redirect(resp, self.url_overzicht)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)    # 1 schutter
-
-        # schrijf een schutter uit van een andere vereniging
-        inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
-        inschrijving.bij_vereniging = self.nhbver2
-        inschrijving.save()
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'pk_%s' % inschrijving.pk: 'on'})
-        self.assert403(resp)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)    # 1 schutter
-
-    def test_cornercases(self):
-        # login als HWL
-        self.e2e_login_and_pass_otp(self.account_hwl)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_inschrijven % 9999999)
-        self.assert404(resp)         # 404 = Not allowed
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_inschrijven % 9999999)
-        self.assert404(resp)         # 404 = Not allowed
-
-        url = self.url_inschrijven % self.comp_18.pk
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'garbage': 'oh',
-                                          'lid_GEENGETAL_boogtype_3': 'on'})
-        self.assert404(resp)     # 404 = Not allowed
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'garbage': 'oh',
-                                          'lid_999999_boogtype_GEENGETAL': 'on'})
-        self.assert404(resp)     # 404 = Not allowed
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_999999_boogtype_3': 'on'})       # 3=BB
-        self.assert404(resp)     # 404 = Not allowed
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_100003_boogtype_1': 'on'})       # 1=R = geen wedstrijdboog
-        self.assert404(resp)     # 404 = Not allowed
-
-        url = self.url_ingeschreven % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not allowed
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
-        self.assertEqual(resp.status_code, 302)     # redirect want POST kijkt niet naar deelcomp_pk
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'pk_hallo': 'on'})
-        self.assert404(resp)     # 404 = Not allowed
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'ignore': 'jaja', 'pk_null': 'on'})
-        self.assert404(resp)  # 404 = Not allowed
-
-        # extreem: aanmelden zonder passende klasse
-        self._zet_sporter_voorkeuren(100002)
-        self._zet_ag(100002, 18)
-        url = self.url_inschrijven % self.comp_18.pk
-        zet_competitie_fase(self.comp_18, 'B')
-        # zet het min_ag te hoog
-        for klasse in CompetitieKlasse.objects.filter(competitie=self.comp_18, indiv__boogtype__afkorting='R', min_ag__lt=8.0):
-            klasse.min_ag = 8.0     # > 7.42 van zet_ag
-            klasse.save(update_fields=['min_ag'])
-        # for
-        # verwijder alle klassen 'onbekend'
-        for klasse in CompetitieKlasse.objects.filter(indiv__is_onbekend=True):
-            indiv = klasse.indiv
-            indiv.is_onbekend = False
-            indiv.save(update_fields=['is_onbekend'])
-        # for
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'lid_100002_boogtype_1': 'on'})
-        self.assert404(resp)
-        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-
     def test_wedstrijdlocatie(self):
         # maak een locatie en koppel aan de vereniging
         loc = WedstrijdLocatie()
@@ -970,29 +508,6 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(len(urls2), 1)
 
         # ophalen en aanpassen: zie test_accommodatie
-
-    def test_administratief(self):
-        # log in als HWL
-        self.e2e_login_and_pass_otp(self.account_hwl)
-        self.e2e_wissel_naar_functie(self.functie_hwl)
-        self.e2e_check_rol('HWL')
-
-        # maak dit een administratieve regio waarvan de leden geen wedstrijden mogen schieten
-        regio = self.nhbver1.regio
-        regio.is_administratief = True
-        regio.save()
-
-        url = self.url_inschrijven % self.comp_18.pk
-        zet_competitie_fase(self.comp_18, 'B')
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
-        self.assert404(resp, 'Geen wedstrijden in deze regio')
 
 
 # end of file

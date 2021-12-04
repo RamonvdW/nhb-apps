@@ -203,13 +203,13 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                         obj.is_ingeschreven = True
                         inschrijvingen.remove(inschrijving)
                         if comp.fase <= 'B':
-                            obj.url_afmelden = reverse('Sporter:afmelden',
+                            obj.url_afmelden = reverse('CompInschrijven:afmelden',
                                                        kwargs={'deelnemer_pk': inschrijving.pk})
                             gebruik_knoppen = True
 
                         if obj.inschrijf_methode == INSCHRIJF_METHODE_1 and comp.fase <= 'E':
-                            obj.url_wieschietwaar = reverse('Sporter:keuze-zeven-wedstrijden',
-                                                            kwargs={'deelnemer_pk': inschrijving.pk})
+                            obj.url_schietmomenten = reverse('CompRegio:keuze-zeven-wedstrijden',
+                                                             kwargs={'deelnemer_pk': inschrijving.pk})
                             gebruik_knoppen = True
                         break
                 # for
@@ -217,7 +217,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                 if not obj.is_ingeschreven:
                     # niet ingeschreven
                     if 'B' <= comp.fase < 'F':
-                        obj.url_aanmelden = reverse('Sporter:bevestig-aanmelden',
+                        obj.url_aanmelden = reverse('CompInschrijven:bevestig-aanmelden',
                                                     kwargs={'sporterboog_pk': sporterboog.pk,
                                                             'deelcomp_pk': obj.pk})
                         gebruik_knoppen = True
@@ -238,7 +238,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             comp = obj.competitie
             comp.bepaal_fase()
             if comp.fase <= 'B':
-                obj.url_afmelden = reverse('Sporter:afmelden',
+                obj.url_afmelden = reverse('CompInschrijven:afmelden',
                                            kwargs={'deelnemer_pk': inschrijving.pk})
                 gebruik_knoppen = True
         # for

@@ -287,7 +287,7 @@ class CompRegioTestTeamsHWL(E2EHelpers, TestCase):
 
     def _create_deelnemers(self, do_18=True, do_25=False):
         # moet ingelogd zijn als HWL
-        url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'      # <comp_pk>
+        url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'      # <comp_pk>
 
         self._zet_schutter_voorkeuren(100002)       # R
         self._zet_schutter_voorkeuren(100003)       # BB

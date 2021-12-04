@@ -9,7 +9,7 @@
 {% block title %}Wie schiet waar{% endblock %}
 
 {% block pagina %}
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-wieschietwaar-methode1" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-wieschietwaar-methode1" %}
 
     <h4>Wie schiet waar?</h4>
 

@@ -21,22 +21,22 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestSporterRegiocompetitie(E2EHelpers, TestCase):
+class TestCompInschrijvenSporter(E2EHelpers, TestCase):
 
-    """ tests voor de Sporter applicatie; module Aanmelden/Afmelden Regiocompetitie """
+    """ tests voor de CompInschrijven applicatie; module Aanmelden/Afmelden sporter """
 
     test_after = ('Account', 'NhbStructuur', 'Competitie')
 
     url_profiel = '/sporter/'
     url_voorkeuren = '/sporter/voorkeuren/'
-    url_aanmelden = '/sporter/regiocompetitie/aanmelden/%s/%s/'                     # deelcomp_pk, sporterboog_pk
-    url_bevestig_aanmelden = '/sporter/regiocompetitie/aanmelden/%s/%s/bevestig/'   # deelcomp_pk, sporterboog_pk
-    url_afmelden = '/sporter/regiocompetitie/afmelden/%s/'                          # regiocomp_pk
-    url_zeven_wedstrijden = '/sporter/regiocompetitie/%s/keuze-zeven-wedstrijden/'  # deelnemer_pk
-    url_planning_regio = '/bondscompetities/regio/planning/%s/'                     # deelcomp_pk
+    url_aanmelden = '/bondscompetities/deelnemen/aanmelden/%s/%s/'                     # deelcomp_pk, sporterboog_pk
+    url_bevestig_aanmelden = '/bondscompetities/deelnemen/aanmelden/%s/%s/bevestig/'   # deelcomp_pk, sporterboog_pk
+    url_afmelden = '/bondscompetities/deelnemen/afmelden/%s/'                          # regiocomp_pk
+    url_zeven_wedstrijden = '/bondscompetities/regio/keuze-zeven-wedstrijden/%s/'      # deelnemer_pk
+    url_planning_regio = '/bondscompetities/regio/planning/%s/'                        # deelcomp_pk
     url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'  # ronde_pk
-    url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'  # wedstrijd_pk
-    url_inschrijven_hwl = '/vereniging/leden-aanmelden/competitie/%s/'              # comp_pk
+    url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'     # wedstrijd_pk
+    url_inschrijven_hwl = '/bondscompetities/deelnemen/leden-aanmelden//%s/'           # comp_pk
 
     testdata = None
 
@@ -146,7 +146,7 @@ class TestSporterRegiocompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'eigen blazoen')
 
         with self.assert_max_queries(20):
@@ -182,7 +182,7 @@ class TestSporterRegiocompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'eigen blazoen')
 
         # uitzondering: AG score zonder hist
@@ -196,7 +196,7 @@ class TestSporterRegiocompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # schakel over naar de 25m1pijl, barebow
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='BB')
@@ -208,7 +208,7 @@ class TestSporterRegiocompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'eigen blazoen')
 
         # schrijf in voor de 25m BB, zonder AG
@@ -531,7 +531,7 @@ class TestSporterRegiocompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'eigen blazoen')
         self.assertContains(resp, 'Zaterdag')
         self.assertContains(resp, 'Zondagmiddag')
@@ -602,7 +602,7 @@ class TestSporterRegiocompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'eigen blazoen')
         self.assertContains(resp, 'Zaterdag')
         self.assertContains(resp, 'Zondag')
@@ -657,7 +657,7 @@ class TestSporterRegiocompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, 'Aspirant')
         self.assertContains(resp, 'Cadet')
 
@@ -755,7 +755,7 @@ class TestSporterRegiocompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'eigen blazoen')
         self.assertContains(resp, 'Kies wanneer je wilt schieten')
         self.assertContains(resp, '11 december 2020 om 12:34')
@@ -808,7 +808,7 @@ class TestSporterRegiocompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/keuze-zeven-wedstrijden-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/keuze-zeven-wedstrijden-methode1.dtl', 'plein/site_layout.dtl'))
 
         # wedstrijd behouden
         with self.assert_max_queries(20):

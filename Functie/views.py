@@ -335,10 +335,6 @@ class WijzigEmailView(UserPassesTestMixin, View):
 
 class OntvangBeheerderWijzigingenView(View):
 
-    def get(self, request, *args, **kwargs):
-        """ called by the template system to get the context data for the template """
-        raise Http404()
-
     def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de knop om een beheerder te koppelen
@@ -363,7 +359,7 @@ class OntvangBeheerderWijzigingenView(View):
         elif drop:
             account_pk = drop
         else:
-            raise Http404()
+            raise Http404('Verkeerd gebruik')
 
         try:
             account = Account.objects.get(pk=account_pk)

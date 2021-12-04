@@ -292,7 +292,7 @@ class TestCompetitieFase(TestCase):
         comp.bepaal_fase()
         self.assertEqual(comp.fase, 'A')
 
-        sequence = 'BCDEGKLNPQSQPNLKGEDCBKSEBZLQC'  # let op! F en R kunnen niet
+        sequence = 'BCDEGJKLNPQSQPNLKJGEDCBKSEBZLQC'  # let op! F en R kunnen niet
         for fase in sequence:
             zet_competitie_fase(comp, fase)
             comp.bepaal_fase()
