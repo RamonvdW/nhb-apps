@@ -6,7 +6,7 @@
 
 from django.core.management.base import BaseCommand
 from Competitie.models import Competitie, RegioCompetitieSchutterBoog
-from Competitie.operations.klassegrenzen import KlasseBepaler
+from Competitie.operations.klassengrenzen import KlasseBepaler
 from Score.models import Score, SCORE_TYPE_INDIV_AG
 
 

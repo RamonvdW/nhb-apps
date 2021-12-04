@@ -31,7 +31,6 @@ TEMPLATE_COMPRAYON_WIJZIG_WEDSTRIJD = 'comprayon/wijzig-wedstrijd-rk.dtl'
 TEMPLATE_COMPRAYON_LIJST_RK = 'comprayon/rko-rk-selectie.dtl'
 TEMPLATE_COMPRAYON_WIJZIG_STATUS_RK_SCHUTTER = 'comprayon/wijzig-status-rk-deelnemer.dtl'
 TEMPLATE_COMPRAYON_WIJZIG_LIMIETEN_RK = 'comprayon/wijzig-limieten-rk.dtl'
-TEMPLATE_COMPRAYON_KLASSEGRENZEN_TEAMS_VASTSTELLEN = 'comprayon/bko-klassegrenzen-vaststellen-rk-bk-teams.dtl'
 
 mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 

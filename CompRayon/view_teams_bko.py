@@ -14,15 +14,15 @@ from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 
 
-TEMPLATE_COMPRAYON_KLASSEGRENZEN_TEAMS_VASTSTELLEN = 'comprayon/bko-klassegrenzen-vaststellen-rk-bk-teams.dtl'
+TEMPLATE_COMPRAYON_KLASSENGRENZEN_TEAMS_VASTSTELLEN = 'comprayon/bko-klassengrenzen-vaststellen-rk-bk-teams.dtl'
 
 
-class KlassegrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
+class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
 
     """ Deze view laat de RKO de status van een RK selectie aanpassen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPRAYON_KLASSEGRENZEN_TEAMS_VASTSTELLEN
+    template_name = TEMPLATE_COMPRAYON_KLASSENGRENZEN_TEAMS_VASTSTELLEN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -84,7 +84,7 @@ class KlassegrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
 
         return teamtypes, teamtype2wkl, teamtype2sterktes
 
-    def _bepaal_klassegrenzen(self, comp):
+    def _bepaal_klassengrenzen(self, comp):
         tts, tt2wkl, tt2sterktes = self._tel_rk_teams(comp)
 
         if comp.afstand == '18':
@@ -150,19 +150,19 @@ class KlassegrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         if comp.fase != 'J':
             raise Http404('Competitie niet in de juist fase')
 
-        if comp.klassegrenzen_vastgesteld_rk_bk:
-            raise Http404('De klassegrenzen zijn al vastgesteld')
+        if comp.klassengrenzen_vastgesteld_rk_bk:
+            raise Http404('De klassengrenzen zijn al vastgesteld')
 
-        context['grenzen'] = self._bepaal_klassegrenzen(comp)
+        context['grenzen'] = self._bepaal_klassengrenzen(comp)
 
-        context['url_vaststellen'] = reverse('CompRayon:klassegrenzen-vaststellen-rk-bk-teams',
+        context['url_vaststellen'] = reverse('CompRayon:klassengrenzen-vaststellen-rk-bk-teams',
                                              kwargs={'comp_pk': comp.pk})
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context
 
     def post(self, request, *args, **kwargs):
-        """ hanteer de bevestiging van de BKO om de klassegrenzen voor de RK/BK teams vast te stellen
+        """ hanteer de bevestiging van de BKO om de klassengrenzen voor de RK/BK teams vast te stellen
             volgens het voorstel dat gepresenteerd was.
         """
 
@@ -179,12 +179,12 @@ class KlassegrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         if comp.fase != 'J':
             raise Http404('Competitie niet in de juist fase')
 
-        if comp.klassegrenzen_vastgesteld_rk_bk:
-            raise Http404('De klassegrenzen zijn al vastgesteld')
+        if comp.klassengrenzen_vastgesteld_rk_bk:
+            raise Http404('De klassengrenzen zijn al vastgesteld')
 
-        # vul de klassegrenzen in voor RK/BK  teams
+        # vul de klassengrenzen in voor RK/BK  teams
 
-        grenzen = self._bepaal_klassegrenzen(comp)
+        grenzen = self._bepaal_klassengrenzen(comp)
 
         beschrijving2klasse = dict()
 
@@ -199,7 +199,7 @@ class KlassegrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
 
         teamtype_pk2klassen = dict()        # hoogste klasse eerst
 
-        # neem de voorgestelde klassegrenzen over
+        # neem de voorgestelde klassengrenzen over
         for _, _, _, klassen_lijst in grenzen:
             for beschrijving, _, min_ag, _ in klassen_lijst:
                 try:
@@ -240,8 +240,8 @@ class KlassegrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         # for
 
         # zet de competitie door naar fase K
-        comp.klassegrenzen_vastgesteld_rk_bk = True
-        comp.save(update_fields=['klassegrenzen_vastgesteld_rk_bk'])
+        comp.klassengrenzen_vastgesteld_rk_bk = True
+        comp.save(update_fields=['klassengrenzen_vastgesteld_rk_bk'])
 
         url = reverse('Competitie:overzicht',
                       kwargs={'comp_pk': comp.pk})

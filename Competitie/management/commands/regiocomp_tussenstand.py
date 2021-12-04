@@ -12,8 +12,7 @@ from django.db.models import F, Q
 import django.db.utils
 from Competitie.models import (CompetitieTaken, CompetitieKlasse,
                                LAAG_REGIO, Competitie, DeelCompetitie, DeelcompetitieRonde,
-                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
-                               RegiocompetitieTeam, RegiocompetitieRondeTeam)
+                               RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Score.models import ScoreHist, SCORE_WAARDE_VERWIJDERD
 import datetime
 import time

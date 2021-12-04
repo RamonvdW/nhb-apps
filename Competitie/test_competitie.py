@@ -15,7 +15,7 @@ from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse, Com
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3,
                                DAGDEEL_AFKORTINGEN)
 from Competitie.operations import (competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand,
-                                   competitie_klassegrenzen_vaststellen)
+                                   competitie_klassengrenzen_vaststellen)
 from Competitie.test_fase import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -23,7 +23,7 @@ import datetime
 
 
 def maak_competities_en_zet_fase_b(startjaar=None):
-    """ Competities 18m en 25m aanmaken, AG vaststellen, klassegrenzen vaststelen, instellen op fase B """
+    """ Competities 18m en 25m aanmaken, AG vaststellen, klassengrenzen vaststelen, instellen op fase B """
 
     # dit voorkomt kennis en afhandelen van achtergrondtaken in alle applicatie test suites
 
@@ -37,9 +37,9 @@ def maak_competities_en_zet_fase_b(startjaar=None):
     aanvangsgemiddelden_vaststellen_voor_afstand(18)
     aanvangsgemiddelden_vaststellen_voor_afstand(25)
 
-    # klassegrenzen vaststellen
-    competitie_klassegrenzen_vaststellen(comp_18)
-    competitie_klassegrenzen_vaststellen(comp_25)
+    # klassengrenzen vaststellen
+    competitie_klassengrenzen_vaststellen(comp_18)
+    competitie_klassengrenzen_vaststellen(comp_25)
 
     zet_competitie_fase(comp_18, 'B')
     zet_competitie_fase(comp_25, 'B')
@@ -58,8 +58,8 @@ class TestCompetitie(E2EHelpers, TestCase):
     url_instellingen = '/bondscompetities/instellingen-volgende-competitie/'
     url_aanmaken = '/bondscompetities/aanmaken/'
     url_ag_vaststellen_afstand = '/bondscompetities/ag-vaststellen/%s/'  # afstand
-    url_klassegrenzen_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'  # comp_pk
-    url_klassegrenzen_tonen = '/bondscompetities/%s/klassegrenzen/tonen/'  # comp_pk
+    url_klassengrenzen_vaststellen = '/bondscompetities/%s/klassengrenzen/vaststellen/'  # comp_pk
+    url_klassengrenzen_tonen = '/bondscompetities/%s/klassengrenzen/tonen/'  # comp_pk
 
     testdata = None
 
@@ -148,7 +148,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         sporterboog = SporterBoog(sporter=self.sporter_100001, boogtype=boog_ib, voor_wedstrijd=True)
         sporterboog.save()
 
-        # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
+        # (strategisch gekozen) historische data om klassengrenzen uit te bepalen
         histcomp = HistCompetitie()
         histcomp.seizoen = '2018/2019'
         histcomp.comp_type = '18'
@@ -350,7 +350,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assert403(resp)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_klassegrenzen_vaststellen % 999999)
+            resp = self.client.get(self.url_klassengrenzen_vaststellen % 999999)
         self.assert403(resp)
 
     def test_instellingen(self):
@@ -501,7 +501,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # verander de fase van de 25m competitie zodat we verschillen hebben
         comp = Competitie.objects.get(afstand=25, is_afgesloten=False)
         CompetitieKlasse(competitie=comp, min_ag=25.0).save()
-        comp.klassegrenzen_vastgesteld = True
+        comp.klassengrenzen_vastgesteld = True
         comp.save()
 
         # maak nog een hele bak AG's aan
@@ -573,7 +573,7 @@ class TestCompetitie(E2EHelpers, TestCase):
                                     {'snel': 1})
         self.assert_is_redirect_not_plein(resp)
 
-    def test_klassegrenzen_vaststellen(self):
+    def test_klassengrenzen_vaststellen(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
@@ -584,15 +584,15 @@ class TestCompetitie(E2EHelpers, TestCase):
         # 18m competitie
         comp18 = Competitie.objects.filter(afstand='18')[0]
         comp18_pk = comp18.pk
-        url = self.url_klassegrenzen_vaststellen % comp18_pk
+        url = self.url_klassengrenzen_vaststellen % comp18_pk
 
         with self.assert_max_queries(32, check_duration=False):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/bb-klassegrenzen-vaststellen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/bb-klassengrenzen-vaststellen.dtl', 'plein/site_layout.dtl'))
 
-        # nu kunnen we met een POST de klassegrenzen vaststellen
+        # nu kunnen we met een POST de klassengrenzen vaststellen
         count = CompetitieKlasse.objects.filter(competitie=comp18, min_ag__gt=0).count()
         self.assertEqual(count, 0)
         with self.assert_max_queries(86):
@@ -621,7 +621,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         obj.team = TeamWedstrijdklasse.objects.all()[0]
         self.assertTrue(str(obj) != "")
 
-    def test_klassegrenzen_vaststellen_cornercases(self):
+    def test_klassengrenzen_vaststellen_cornercases(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
@@ -630,18 +630,18 @@ class TestCompetitie(E2EHelpers, TestCase):
 
         # illegale competitie
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_klassegrenzen_vaststellen % 'xx')
+            resp = self.client.get(self.url_klassengrenzen_vaststellen % 'xx')
         self.assert404(resp)
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_klassegrenzen_vaststellen % 'xx')
+            resp = self.client.post(self.url_klassengrenzen_vaststellen % 'xx')
         self.assert404(resp)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_klassegrenzen_tonen % 999999)
+            resp = self.client.get(self.url_klassengrenzen_tonen % 999999)
         self.assert404(resp)
 
-    def test_klassegrenzen_tonen(self):
+    def test_klassengrenzen_tonen(self):
         # competitie opstarten
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
@@ -653,22 +653,22 @@ class TestCompetitie(E2EHelpers, TestCase):
         comp_25 = Competitie.objects.filter(afstand=25).all()[0]
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_klassegrenzen_tonen % comp_18.pk)
+            resp = self.client.get(self.url_klassengrenzen_tonen % comp_18.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/klassegrenzen-tonen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/klassengrenzen-tonen.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, ' zijn nog niet vastgesteld')
-        self.assertContains(resp, 'De klassegrenzen voor de ')
+        self.assertContains(resp, 'De klassengrenzen voor de ')
 
-        # klassegrenzen vaststellen (18m en 25m)
+        # klassengrenzen vaststellen (18m en 25m)
         # s1 = timezone.now()
         with self.assert_max_queries(86):
-            resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_18.pk)
+            resp = self.client.post(self.url_klassengrenzen_vaststellen % comp_18.pk)
         # s2 = timezone.now()
         # print('duration:', s2-s1)
         self.assert_is_redirect_not_plein(resp)        # redirect = success
         with self.assert_max_queries(86):
-            resp = self.client.post(self.url_klassegrenzen_vaststellen % comp_25.pk)
+            resp = self.client.post(self.url_klassengrenzen_vaststellen % comp_25.pk)
         self.assert_is_redirect_not_plein(resp)        # redirect = success
 
         # kies pagina ophalen als BB, dan worden alle competities getoond
@@ -690,20 +690,20 @@ class TestCompetitie(E2EHelpers, TestCase):
 
         # nog een keer
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_klassegrenzen_tonen % comp_25.pk)
+            resp = self.client.get(self.url_klassengrenzen_tonen % comp_25.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/klassegrenzen-tonen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/klassengrenzen-tonen.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, ' zijn nog niet vastgesteld')
-        self.assertNotContains(resp, 'De klassegrenzen voor de ')
+        self.assertNotContains(resp, 'De klassengrenzen voor de ')
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_klassegrenzen_tonen % comp_18.pk)
+            resp = self.client.get(self.url_klassengrenzen_tonen % comp_18.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/klassegrenzen-tonen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/klassengrenzen-tonen.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, ' zijn nog niet vastgesteld')
-        self.assertNotContains(resp, 'De klassegrenzen voor de ')
+        self.assertNotContains(resp, 'De klassengrenzen voor de ')
 
     def test_team(self):
         # slechts een test van een CompetitieKlasse() gekoppeld aan een TeamWedstrijdKlasse
@@ -715,7 +715,7 @@ class TestCompetitie(E2EHelpers, TestCase):
                           einde_teamvorming=datum,
                           eerste_wedstrijd=datum,
                           laatst_mogelijke_wedstrijd=datum,
-                          datum_klassegrenzen_rk_bk_teams=datum,
+                          datum_klassengrenzen_rk_bk_teams=datum,
                           rk_eerste_wedstrijd=datum,
                           rk_laatste_wedstrijd=datum,
                           bk_eerste_wedstrijd=datum,

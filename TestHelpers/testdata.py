@@ -587,7 +587,7 @@ class TestData(object):
     @staticmethod
     def maak_sporterboog_aanvangsgemiddelden(afstand, ver_nr):
         """ Maak voor de helft van de SporterBoog een AG aan in voorgaand seizoen
-            deze kunnen gebruikt worden voor de klassegrenzen en inschrijven.
+            deze kunnen gebruikt worden voor de klassengrenzen en inschrijven.
         """
         ag = 6000       # 6.0
         ag += ver_nr

@@ -11,7 +11,7 @@ from Competitie.models import (Competitie, CompetitieKlasse, DeelCompetitie, Dee
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
                                LAAG_REGIO, LAAG_BK, update_uitslag_teamcompetitie)
 from Competitie.test_fase import zet_competitie_fase
-from Competitie.operations import competities_aanmaken, competitie_klassegrenzen_vaststellen
+from Competitie.operations import competities_aanmaken, competitie_klassengrenzen_vaststellen
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
 from Score.operations import score_indiv_ag_opslaan
@@ -34,9 +34,9 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
 
         score_indiv_ag_opslaan(self.sporterboog_100005, 18, 9.500, None, "Test")
 
-        # klassegrenzen vaststellen
-        competitie_klassegrenzen_vaststellen(comp_18)
-        competitie_klassegrenzen_vaststellen(comp_25)
+        # klassengrenzen vaststellen
+        competitie_klassengrenzen_vaststellen(comp_18)
+        competitie_klassengrenzen_vaststellen(comp_25)
 
         self.deelcomp_r101 = DeelCompetitie.objects.filter(laag=LAAG_REGIO,
                                                            competitie=self.comp,

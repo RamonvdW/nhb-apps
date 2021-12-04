@@ -60,8 +60,8 @@
 
         <!-- toon klassen info -->
         {% if comp.fase >= 'A2' %}
-            {% url 'Competitie:klassegrenzen-tonen' comp_pk=comp.pk as card_url %}
-            {% include 'plein/card.dtl' with title="Wedstrijdklassen" text="Toon de wedstrijdklassen, klassegrenzen en blazoenen voor de competitie." icon="equalizer" url=card_url %}
+            {% url 'Competitie:klassengrenzen-tonen' comp_pk=comp.pk as card_url %}
+            {% include 'plein/card.dtl' with title="Wedstrijdklassen" text="Toon de wedstrijdklassen, klassengrenzen en blazoenen voor de competitie." icon="equalizer" url=card_url %}
         {% endif %}
 
         <!-- algemene informatie over de competities -->

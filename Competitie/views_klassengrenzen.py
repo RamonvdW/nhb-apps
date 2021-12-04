@@ -13,15 +13,15 @@ from .models import (AG_NUL, Competitie, CompetitieKlasse)
 from .menu import menu_dynamics_competitie
 
 
-TEMPLATE_COMPETITIE_KLASSEGRENZEN_TONEN = 'competitie/klassegrenzen-tonen.dtl'
+TEMPLATE_COMPETITIE_KLASSENGRENZEN_TONEN = 'competitie/klassengrenzen-tonen.dtl'
 
 
-class KlassegrenzenTonenView(View):
+class KlassengrenzenTonenView(View):
 
     """ deze view laat de vastgestelde aanvangsgemiddelden voor de volgende competitie zien """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_KLASSEGRENZEN_TONEN
+    template_name = TEMPLATE_COMPETITIE_KLASSENGRENZEN_TONEN
 
     @staticmethod
     def _get_indiv_klassen(comp, toon_aantal):
@@ -116,7 +116,7 @@ class KlassegrenzenTonenView(View):
 
         context['comp'] = comp
 
-        if comp.klassegrenzen_vastgesteld:
+        if comp.klassengrenzen_vastgesteld:
             if comp.afstand == '18':
                 aantal_pijlen = 30
             else:
@@ -128,7 +128,7 @@ class KlassegrenzenTonenView(View):
             context['indiv_klassen'] = self._get_indiv_klassen(comp, toon_aantal)
             context['team_klassen'] = self._get_team_klassen(comp, aantal_pijlen)
             context['aantal_pijlen'] = aantal_pijlen
-            context['rk_bk_klassen_vastgesteld'] = comp.klassegrenzen_vastgesteld_rk_bk
+            context['rk_bk_klassen_vastgesteld'] = comp.klassengrenzen_vastgesteld_rk_bk
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return render(request, self.template_name, context)

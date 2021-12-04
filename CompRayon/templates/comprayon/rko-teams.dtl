@@ -53,7 +53,7 @@
     {% endif %}
 
     {% if not toon_klassen %}
-        <p><b>De teams worden in een wedstrijdklasse geplaatst zodra de BKO de klassegrenzen heeft vastgesteld.</b></p>
+        <p><b>De teams worden in een wedstrijdklasse geplaatst zodra de BKO de klassengrenzen heeft vastgesteld.</b></p>
     {% endif %}
 
     <p>&nbsp;</p>

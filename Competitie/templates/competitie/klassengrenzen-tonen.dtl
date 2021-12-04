@@ -10,17 +10,17 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="klassegrenzen-tonen" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="klassengrenzen-tonen" %}
 
     <h4>Klassen bondscompetitie</h4>
 
-    {% if not comp.klassegrenzen_vastgesteld %}
+    {% if not comp.klassengrenzen_vastgesteld %}
 
-        <p>De klassegrenzen voor de <b>{{ comp.beschrijving }}</b> zijn nog niet vastgesteld.</p>
+        <p>De klassengrenzen voor de <b>{{ comp.beschrijving }}</b> zijn nog niet vastgesteld.</p>
 
     {% else %}
 
-        <p>Hieronder staan de wedstrijdklassen, vastgestelde klassegrenzen en te gebruiken blazoenen, voor individuele sporters en teams, voor de <b>{{ comp.beschrijving }}</b>.</p>
+        <p>Hieronder staan de wedstrijdklassen, vastgestelde klassengrenzen en te gebruiken blazoenen, voor individuele sporters en teams, voor de <b>{{ comp.beschrijving }}</b>.</p>
 
         <table class="white">
 

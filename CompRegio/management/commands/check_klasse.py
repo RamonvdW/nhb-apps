@@ -6,7 +6,7 @@
 
 from django.core.management.base import BaseCommand
 from Competitie.models import CompetitieKlasse, RegioCompetitieSchutterBoog
-from Competitie.operations.klassegrenzen import KlasseBepaler
+from Competitie.operations.klassengrenzen import KlasseBepaler
 
 
 class Command(BaseCommand):

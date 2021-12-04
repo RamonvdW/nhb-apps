@@ -12,12 +12,12 @@
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-bko-klassengrenzen-vaststellen-rk-bk-teams" %}
 
-    <h4>Teams klassegrenzen vaststellen</h4>
+    <h4>Teams klassengrenzen vaststellen</h4>
 
     <p>Via dit scherm kan de BKO de klassengrenzen vaststellen voor de RK/BK teams wedstrijdklassen van de <b>{{ comp.beschrijving }}</b>.</p>
     <p>Dit is een eenmalig actie welke ook de open inschrijving voor RK teams afsluit.</p>
 
-    <p>Dit is het automatisch berekende voorstel voor de klassegrenzen:</p>
+    <p>Dit is het automatisch berekende voorstel voor de klassengrenzen:</p>
 
     <table class="white">
         <thead>
@@ -26,7 +26,7 @@
                 <th>Totaal teams</th>
                 <th>Team wedstrijdklasse</th>
                 <th>Aantal teams</th>
-                <th>Klassegrens</th>
+                <th>Klassengrens</th>
             </tr>
         </thead>
 
@@ -50,7 +50,7 @@
     <p>&nbsp;</p>
     <form method="post" action="{{ url_vaststellen }}">
         {% csrf_token %}
-        <input class="btn-nhb-rood" name="button_vaststellen" type="submit" value="Ja, stel deze teams klassegrenzen vast">
+        <input class="btn-nhb-rood" name="button_vaststellen" type="submit" value="Ja, stel deze teams klassengrenzen vast">
     </form>
 
 {% endblock %}

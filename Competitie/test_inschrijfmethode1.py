@@ -133,13 +133,13 @@ class TestCompetitieInschrijfmethode1(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)        # geen account_hwl
         self.e2e_wisselnaarrol_bb()
 
-        # klassegrenzen vaststellen
-        url_klassegrenzen = '/bondscompetities/%s/klassegrenzen/vaststellen/'
+        # klassengrenzen vaststellen
+        url_klassengrenzen = '/bondscompetities/%s/klassengrenzen/vaststellen/'
         with self.assert_max_queries(86):
-            resp = self.client.post(url_klassegrenzen % self.comp_18.pk)
+            resp = self.client.post(url_klassengrenzen % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         with self.assert_max_queries(86):
-            resp = self.client.post(url_klassegrenzen % self.comp_25.pk)
+            resp = self.client.post(url_klassengrenzen % self.comp_25.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2
 

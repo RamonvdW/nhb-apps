@@ -22,7 +22,7 @@ from django.utils.formats import localize
 from .models import (Competitie, DeelCompetitie, CompetitieMutatie, LAAG_REGIO,
                      MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
 from .operations import (bepaal_startjaar_nieuwe_competitie, get_mappings_wedstrijdklasse_to_competitieklasse,
-                         bepaal_klassegrenzen_indiv, bepaal_klassegrenzen_teams, competitie_klassegrenzen_vaststellen)
+                         bepaal_klassengrenzen_indiv, bepaal_klassengrenzen_teams, competitie_klassengrenzen_vaststellen)
 from .menu import menu_dynamics_competitie
 import datetime
 import time
@@ -30,7 +30,7 @@ import time
 
 TEMPLATE_COMPETITIE_INSTELLINGEN = 'competitie/bb-instellingen-nieuwe-competitie.dtl'
 TEMPLATE_COMPETITIE_AANMAKEN = 'competitie/bb-competities-aanmaken.dtl'
-TEMPLATE_COMPETITIE_KLASSEGRENZEN_VASTSTELLEN = 'competitie/bb-klassegrenzen-vaststellen.dtl'
+TEMPLATE_COMPETITIE_KLASSENGRENZEN_VASTSTELLEN = 'competitie/bb-klassengrenzen-vaststellen.dtl'
 TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
 TEMPLATE_COMPETITIE_AG_VASTSTELLEN = 'competitie/bb-ag-vaststellen.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_DATUMS = 'competitie/bb-wijzig-datums.dtl'
@@ -186,7 +186,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
             raise Http404('Onbekende afstand')
 
         # alleen toestaan als de competities in fase A is
-        comps = Competitie.objects.filter(is_afgesloten=False, afstand=afstand, klassegrenzen_vastgesteld=False)
+        comps = Competitie.objects.filter(is_afgesloten=False, afstand=afstand, klassengrenzen_vastgesteld=False)
         if len(comps) != 1:
             raise Http404('Geen competitie in de juiste fase')
         comp = comps[0]
@@ -223,7 +223,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
             raise Http404('Onbekende afstand')
 
         # alleen toestaan als de competities in fase A is
-        comps = Competitie.objects.filter(is_afgesloten=False, afstand=afstand, klassegrenzen_vastgesteld=False)
+        comps = Competitie.objects.filter(is_afgesloten=False, afstand=afstand, klassengrenzen_vastgesteld=False)
         if len(comps) != 1:
             raise Http404('Geen competitie in de juiste fase')
         comp = comps[0]
@@ -251,7 +251,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
         return redirect('Competitie:overzicht', comp_pk=comp.pk)
 
 
-class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
+class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
     """ deze view laat de klassengrenzen voor de volgende competitie zien,
         aan de hand van de al vastgestelde aanvangsgemiddelden
@@ -259,7 +259,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
     """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_KLASSEGRENZEN_VASTSTELLEN
+    template_name = TEMPLATE_COMPETITIE_KLASSENGRENZEN_VASTSTELLEN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
@@ -282,11 +282,11 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
         trans_indiv, trans_team = get_mappings_wedstrijdklasse_to_competitieklasse(comp)
 
-        if comp.klassegrenzen_vastgesteld:
+        if comp.klassengrenzen_vastgesteld:
             context['al_vastgesteld'] = True
         else:
-            context['klassegrenzen_indiv'] = bepaal_klassegrenzen_indiv(comp, trans_indiv)
-            context['klassegrenzen_teams'] = bepaal_klassegrenzen_teams(comp, trans_team)
+            context['klassengrenzen_indiv'] = bepaal_klassengrenzen_indiv(comp, trans_indiv)
+            context['klassengrenzen_teams'] = bepaal_klassengrenzen_teams(comp, trans_team)
             context['wedstrijdjaar'] = comp.begin_jaar + 1
 
         datum = wanneer_ag_vastgesteld(comp.afstand)
@@ -299,7 +299,7 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def post(request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
-            --> de beheerder wil deze klassegrenzen vaststellen
+            --> de beheerder wil deze klassengrenzen vaststellen
         """
 
         try:
@@ -308,12 +308,12 @@ class KlassegrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
-        if not comp.klassegrenzen_vastgesteld:
-            competitie_klassegrenzen_vaststellen(comp)
+        if not comp.klassengrenzen_vastgesteld:
+            competitie_klassengrenzen_vaststellen(comp)
 
             schrijf_in_logboek(request.user,
                                'Competitie',
-                               'Klassegrenzen vastgesteld voor %s' % comp.beschrijving)
+                               'Klassengrenzen vastgesteld voor %s' % comp.beschrijving)
 
         return redirect('Competitie:overzicht', comp_pk=comp.pk)
 
@@ -351,7 +351,7 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         comp.datum3 = comp.einde_teamvorming
         comp.datum4 = comp.eerste_wedstrijd
         comp.datum5 = comp.laatst_mogelijke_wedstrijd
-        comp.datum6 = comp.datum_klassegrenzen_rk_bk_teams
+        comp.datum6 = comp.datum_klassengrenzen_rk_bk_teams
         comp.datum7 = comp.rk_eerste_wedstrijd
         comp.datum8 = comp.rk_laatste_wedstrijd
         comp.datum9 = comp.bk_eerste_wedstrijd
@@ -363,7 +363,7 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def post(request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
-            --> de beheerder wil deze klassegrenzen vaststellen
+            --> de beheerder wil deze klassengrenzen vaststellen
         """
         try:
             comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
@@ -394,7 +394,7 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         comp.einde_teamvorming = datums[3]
         comp.eerste_wedstrijd = datums[4]
         comp.laatst_mogelijke_wedstrijd = datums[5]
-        comp.datum_klassegrenzen_rk_bk_teams = datums[6]
+        comp.datum_klassengrenzen_rk_bk_teams = datums[6]
         comp.rk_eerste_wedstrijd = datums[7]
         comp.rk_laatste_wedstrijd = datums[8]
         comp.bk_eerste_wedstrijd = datums[9]

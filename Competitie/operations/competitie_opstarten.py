@@ -221,7 +221,7 @@ def competities_aanmaken(jaar=None):
                     einde_teamvorming=yearend,
                     eerste_wedstrijd=yearend,
                     laatst_mogelijke_wedstrijd=begin_rk,
-                    datum_klassegrenzen_rk_bk_teams=begin_rk,
+                    datum_klassengrenzen_rk_bk_teams=begin_rk,
                     rk_eerste_wedstrijd=begin_rk,
                     rk_laatste_wedstrijd=begin_rk + datetime.timedelta(days=7),
                     bk_eerste_wedstrijd=begin_bk,

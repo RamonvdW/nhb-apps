@@ -126,7 +126,7 @@ class Competitie(models.Model):
     uiterste_datum_lid = models.DateField()
 
     # fase A: aanmaken competitie, vaststellen klassen
-    klassegrenzen_vastgesteld = models.BooleanField(default=False)
+    klassengrenzen_vastgesteld = models.BooleanField(default=False)
 
     # ----
     # fases en datums regiocompetitie
@@ -151,12 +151,15 @@ class Competitie(models.Model):
     # fases en datums rayonkampioenschappen
     # ----
 
+    # aantal scores dat een individuele sporter neergezet moet hebben om gerechtigd te zijn voor deelname aan het RK
+    aantal_scores_voor_rk_deelname = models.PositiveSmallIntegerField(default=6)
+
     # fase J: RK deelnemers bevestigen deelname
     #         HWL's kunnen RK teams te repareren
-    #         einde fase J: BKO bevestigd klassegrenzen RK/BK teams
-    datum_klassegrenzen_rk_bk_teams = models.DateField()
+    #         einde fase J: BKO bevestigd klassengrenzen RK/BK teams
+    datum_klassengrenzen_rk_bk_teams = models.DateField()
 
-    klassegrenzen_vastgesteld_rk_bk = models.BooleanField(default=False)
+    klassengrenzen_vastgesteld_rk_bk = models.BooleanField(default=False)
 
     # fase K: einde: 2 weken voor begin fase L
     #         RK deelnemers bevestigen deelname
@@ -234,9 +237,9 @@ class Competitie(models.Model):
         if self.alle_regiocompetities_afgesloten:
             # in RK fase
 
-            if not self.klassegrenzen_vastgesteld_rk_bk:
+            if not self.klassengrenzen_vastgesteld_rk_bk:
                 # fase J, tot de BKO deze handmatig doorzet
-                # datum_klassegrenzen_rk_bk_teams is indicatief
+                # datum_klassengrenzen_rk_bk_teams is indicatief
                 self.fase = 'J'
                 return
 
@@ -262,8 +265,8 @@ class Competitie(models.Model):
             return
 
         # regiocompetitie fases
-        if not self.klassegrenzen_vastgesteld or now < self.begin_aanmeldingen:
-            # A = vaststellen klassegrenzen, instellingen regio en planning regiocompetitie wedstrijden
+        if not self.klassengrenzen_vastgesteld or now < self.begin_aanmeldingen:
+            # A = vaststellen klassengrenzen, instellingen regio en planning regiocompetitie wedstrijden
             #     tot aanmeldingen beginnen; nog niet open voor aanmelden
             self.fase = 'A'
             return
@@ -333,12 +336,12 @@ class CompetitieKlasse(models.Model):
     indiv = models.ForeignKey(IndivWedstrijdklasse, on_delete=models.PROTECT, null=True, blank=True)
     team = models.ForeignKey(TeamWedstrijdklasse, on_delete=models.PROTECT, null=True, blank=True)
 
-    # klassegrens voor deze competitie
+    # klassengrens voor deze competitie
     # individueel: 0.000 - 10.000
     # team som van de 3 beste = 0.003 - 30.000
     min_ag = models.DecimalField(max_digits=5, decimal_places=3)    # 10.000
 
-    # voor de RK/BK teams worden nieuwe klassegrenzen vastgesteld, dus houd ze uit elkaar
+    # voor de RK/BK teams worden nieuwe klassengrenzen vastgesteld, dus houd ze uit elkaar
     # niet van toepassing op individuele klassen
     is_voor_teams_rk_bk = models.BooleanField(default=False)
 
@@ -802,7 +805,7 @@ class KampioenschapTeam(models.Model):
     # de klasse waarin dit team ingedeeld is
     # dit is preliminair tijdens het inschrijven van de teams tijdens de regiocompetitie
     # wordt op None gezet tijdens het doorzetten van de RK deelnemers (fase G)
-    # wordt ingevuld na het vaststellen van de RK/BK klassegrenzen (einde fase K)
+    # wordt ingevuld na het vaststellen van de RK/BK klassengrenzen (einde fase K)
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE,
                                blank=True, null=True)
 

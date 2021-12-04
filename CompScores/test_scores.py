@@ -67,8 +67,8 @@ class TestCompetitieScores(E2EHelpers, TestCase):
             wordt als eerste aangeroepen
         """
 
-        # klassegrenzen vaststellen
-        url_vaststellen = '/bondscompetities/%s/klassegrenzen/vaststellen/'  # comp_pk
+        # klassengrenzen vaststellen
+        url_vaststellen = '/bondscompetities/%s/klassengrenzen/vaststellen/'  # comp_pk
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         resp = self.client.post(url_vaststellen % self.testdata.comp18.pk)

@@ -73,7 +73,7 @@ class CompetitieOverzichtView(View):
             context['rol_is_bb'] = True
             kan_beheren = True
 
-            if not comp.klassegrenzen_vastgesteld:
+            if not comp.klassengrenzen_vastgesteld:
                 afstand_meter = int(comp.afstand)
                 datum = wanneer_ag_vastgesteld(afstand_meter)
                 if datum:
@@ -106,10 +106,10 @@ class CompetitieOverzichtView(View):
                                                           kwargs={'comp_pk': comp.pk,
                                                                   'subset': 'auto'})
 
-        if comp.fase == 'J' and not comp.klassegrenzen_vastgesteld_rk_bk and self.rol_nu == Rollen.ROL_BKO:
-            context['tekst_klassegrenzen_rk_bk_vaststellen'] = "Open inschrijving RK teams sluiten en de klassegrenzen voor het RK teams en BK teams vaststellen."
-            context['url_klassegrenzen_rk_bk_vaststellen'] = reverse('CompRayon:klassegrenzen-vaststellen-rk-bk-teams',
-                                                                     kwargs={'comp_pk': comp.pk})
+        if comp.fase == 'J' and not comp.klassengrenzen_vastgesteld_rk_bk and self.rol_nu == Rollen.ROL_BKO:
+            context['tekst_klassengrenzen_rk_bk_vaststellen'] = "Open inschrijving RK teams sluiten en de klassengrenzen voor het RK teams en BK teams vaststellen."
+            context['url_klassengrenzen_rk_bk_vaststellen'] = reverse('CompRayon:klassengrenzen-vaststellen-rk-bk-teams',
+                                                                      kwargs={'comp_pk': comp.pk})
 
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
             if comp.fase < 'L':

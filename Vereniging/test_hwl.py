@@ -178,7 +178,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         deelcomp_rk.save()
 
     def _create_histcomp(self):
-        # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
+        # (strategisch gekozen) historische data om klassengrenzen uit te bepalen
         histcomp = HistCompetitie()
         histcomp.seizoen = '2018/2019'
         histcomp.comp_type = '18'

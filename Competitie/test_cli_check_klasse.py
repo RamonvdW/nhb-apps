@@ -13,7 +13,7 @@ import datetime
 import io
 
 
-class TestCompetitieCliCheckKlasse(E2EHelpers, TestCase):
+class TestCompetitieCliCheckKlassen(E2EHelpers, TestCase):
     """ unittests voor de Competitie applicatie, management command check_klasse """
 
     def setUp(self):
@@ -29,7 +29,7 @@ class TestCompetitieCliCheckKlasse(E2EHelpers, TestCase):
                     einde_teamvorming=datum,
                     eerste_wedstrijd=datum,
                     laatst_mogelijke_wedstrijd=datum,
-                    datum_klassegrenzen_rk_bk_teams=datum,
+                    datum_klassengrenzen_rk_bk_teams=datum,
                     rk_eerste_wedstrijd=datum,
                     rk_laatste_wedstrijd=datum,
                     bk_eerste_wedstrijd=datum,

@@ -6,24 +6,24 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Klassegrenzen vaststellen{% endblock %}
+{% block title %}Klassengrenzen vaststellen{% endblock %}
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="klassegrenzen-vaststellen" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="klassengrenzen-vaststellen" %}
 
-    <h4>Klassegrenzen vaststellen</h4>
+    <h4>Klassengrenzen vaststellen</h4>
 
     {% if al_vastgesteld %}
 
-        <p>De klassegrenzen voor de <b>{{ comp.beschrijving }}</b> zijn al vastgesteld. Wat doe je hier?</p>
+        <p>De klassengrenzen voor de <b>{{ comp.beschrijving }}</b> zijn al vastgesteld. Wat doe je hier?</p>
 
         <a class="btn-nhb-blauw" href="{% url 'Plein:plein' %}">
             <i class="material-icons-round left">close</i>Sluiten</a>
 
     {% else %}
 
-        <p>Hieronder volgende de automatisch berekende klassegrenzen voor de individuele en teams wedstrijdklassen voor de <b>{{ comp.beschrijving }}</b>.</p>
+        <p>Hieronder volgende de automatisch berekende klassengrenzen voor de individuele en teams wedstrijdklassen voor de <b>{{ comp.beschrijving }}</b>.</p>
 
         <div class="container">
             <ul class="collection with-header white">
@@ -34,8 +34,8 @@
             </ul>
         </div>
 
-        <p>Hieronder volgen de berekende klassegrenzen voor de individuele en team klassen.</p>
-        <p>Onder aan deze pagina vindt je een knop om de klassegrenzen vast te leggen. Dit is een eenmalige actie voor elke competitie.</p>
+        <p>Hieronder volgen de berekende klassengrenzen voor de individuele en team klassen.</p>
+        <p>Onder aan deze pagina vindt je een knop om de klassengrenzen vast te leggen. Dit is een eenmalige actie voor elke competitie.</p>
 
         <h5>Individuele wedstrijdklassen</h5>
         <div class="row">
@@ -47,7 +47,7 @@
                         <th>Minimaal AG</th>
                     </tr>
                 </thead>
-                {% for obj in klassegrenzen_indiv %}
+                {% for obj in klassengrenzen_indiv %}
                     <tr>
                         <td>{{ obj.beschrijving }}</td>
                         <td>{{ obj.count }}</td>
@@ -67,7 +67,7 @@
                         <th>Minimaal Team-AG</th>
                     </tr>
                 </thead>
-                {% for obj in klassegrenzen_teams %}
+                {% for obj in klassengrenzen_teams %}
                     <tr>
                         <td>{{ obj.beschrijving }}</td>
                         <td>{{ obj.count }}</td>
@@ -78,9 +78,9 @@
         </div>
 
         <div class="row">
-            <form method="post" action="{% url 'Competitie:klassegrenzen-vaststellen' comp_pk=comp.pk %}">
+            <form method="post" action="{% url 'Competitie:klassengrenzen-vaststellen' comp_pk=comp.pk %}">
                 {% csrf_token %}
-                <input class="btn-nhb-rood" name="button_aanmaken" type="submit" value="Deze klassegrenzen vaststellen">
+                <input class="btn-nhb-rood" name="button_aanmaken" type="submit" value="Deze klassengrenzen vaststellen">
             </form>
         </div>
 

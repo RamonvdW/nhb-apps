@@ -50,7 +50,7 @@ class TestLogboek(E2EHelpers, TestCase):
         schrijf_in_logboek(None, 'Uitrol', 'Rollen met die hap')
         schrijf_in_logboek(self.account_normaal, 'OTP controle', 'alweer verkeerd')
         schrijf_in_logboek(self.account_same, 'Testafdeling', 'Afdeling gesloten')
-        schrijf_in_logboek(self.account_same, 'Competitie', 'Klassegrenzen vastgesteld')
+        schrijf_in_logboek(self.account_same, 'Competitie', 'Klassengrenzen vastgesteld')
         schrijf_in_logboek(self.account_same, 'Accommodaties', 'Weer een clubhuis')
         schrijf_in_logboek(self.account_same, 'Clusters', 'Groepeer ze maar')
         schrijf_in_logboek(None, 'Iets anders', 'Valt onder Rest')
@@ -136,7 +136,7 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('logboek/competitie.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
-        self.assertContains(resp, 'Klassegrenzen vastgesteld')
+        self.assertContains(resp, 'Klassengrenzen vastgesteld')
 
         # accommodaties
         with self.assert_max_queries(4):

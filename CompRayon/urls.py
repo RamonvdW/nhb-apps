@@ -80,9 +80,9 @@ urlpatterns = [
 
 
     # BKO
-    path('<comp_pk>/rk-bk-teams-klassegrenzen/vaststellen/',
-         view_teams_bko.KlassegrenzenTeamsVaststellenView.as_view(),
-         name='klassegrenzen-vaststellen-rk-bk-teams'),
+    path('<comp_pk>/rk-bk-teams-klassengrenzen/vaststellen/',
+         view_teams_bko.KlassengrenzenTeamsVaststellenView.as_view(),
+         name='klassengrenzen-vaststellen-rk-bk-teams'),
 ]
 
 # end of file

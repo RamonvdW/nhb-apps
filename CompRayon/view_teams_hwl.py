@@ -113,7 +113,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
 
         deelcomp.open_inschrijving = comp.fase <= 'G'       # regio vs RK fase
 
-        deelcomp.datum_einde_knutselen_teams_rk_bk = comp.datum_klassegrenzen_rk_bk_teams
+        deelcomp.datum_einde_knutselen_teams_rk_bk = comp.datum_klassengrenzen_rk_bk_teams
 
         return deelcomp
 
@@ -172,7 +172,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
         # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
         context['deelcomp_rk'] = deelcomp_rk = self._get_deelcomp_rk(kwargs['rk_deelcomp_pk'])
 
-        context['rk_bk_klassen_vastgesteld'] = is_vastgesteld = deelcomp_rk.competitie.klassegrenzen_vastgesteld_rk_bk
+        context['rk_bk_klassen_vastgesteld'] = is_vastgesteld = deelcomp_rk.competitie.klassengrenzen_vastgesteld_rk_bk
 
         context['rk_teams'] = self._get_rk_teams(deelcomp_rk, is_vastgesteld)
 

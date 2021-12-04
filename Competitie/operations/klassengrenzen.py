@@ -81,7 +81,7 @@ def _get_targets_teams():
     return targets
 
 
-def bepaal_klassegrenzen_indiv(comp, trans_indiv):
+def bepaal_klassengrenzen_indiv(comp, trans_indiv):
 
     """ retourneert een lijst van individuele wedstrijdenklassen, elk bestaande uit een dictionary:
             'beschrijving': tekst
@@ -249,7 +249,7 @@ def bepaal_klassegrenzen_indiv(comp, trans_indiv):
     return objs2
 
 
-def bepaal_klassegrenzen_teams(comp, trans_team):
+def bepaal_klassengrenzen_teams(comp, trans_team):
 
     """ retourneert een lijst van team wedstrijdenklassen, elk bestaande uit een dictionary:
             'beschrijving': tekst
@@ -486,30 +486,30 @@ class KlasseBepaler(object):
             raise LookupError("Geen passende wedstrijdklasse")
 
 
-def competitie_klassegrenzen_vaststellen(comp):
-    """ stel voor een specifieke Competitie alle klassegrenzen vast """
+def competitie_klassengrenzen_vaststellen(comp):
+    """ stel voor een specifieke Competitie alle klassengrenzen vast """
 
     trans_indiv, trans_team = get_mappings_wedstrijdklasse_to_competitieklasse(comp)
 
     # individueel
-    for obj in bepaal_klassegrenzen_indiv(comp, trans_indiv):
+    for obj in bepaal_klassengrenzen_indiv(comp, trans_indiv):
         klasse = obj['klasse']
         klasse.min_ag = obj['ag']
         klasse.save(update_fields=['min_ag'])
     # for
 
     # team (regio)
-    for obj in bepaal_klassegrenzen_teams(comp, trans_team):
+    for obj in bepaal_klassengrenzen_teams(comp, trans_team):
         klasse = obj['klasse']
         klasse.min_ag = obj['ag']
         klasse.save(update_fields=['min_ag'])
     # for
 
-    comp.klassegrenzen_vastgesteld = True
-    comp.save(update_fields=['klassegrenzen_vastgesteld'])
+    comp.klassengrenzen_vastgesteld = True
+    comp.save(update_fields=['klassengrenzen_vastgesteld'])
 
 
-# TODO: klassegrenzen vaststellen voor RK/BK teams
+# klassengrenzen vaststellen voor RK/BK teams staat in CompRayon/view_teams_bko.py
 
 
 # end of file

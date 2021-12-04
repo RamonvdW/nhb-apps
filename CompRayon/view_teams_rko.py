@@ -239,7 +239,7 @@ class RayonTeamsView(TemplateView):
 
         context['rk_teams_niet_af'] = rk_teams
         context['totaal_teams'] = totaal_teams
-        context['toon_klassen'] = comp.klassegrenzen_vastgesteld_rk_bk
+        context['toon_klassen'] = comp.klassengrenzen_vastgesteld_rk_bk
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context

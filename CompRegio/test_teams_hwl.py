@@ -176,7 +176,7 @@ class CompRegioTestTeamsHWL(E2EHelpers, TestCase):
         self._create_competitie()
 
     def _create_histcomp(self):
-        # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
+        # (strategisch gekozen) historische data om klassengrenzen uit te bepalen
         histcomp = HistCompetitie()
         histcomp.seizoen = '2018/2019'
         histcomp.comp_type = '18'

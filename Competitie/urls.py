@@ -8,7 +8,7 @@ from django.urls import path
 from . import (views_aangemeld,
                views_bb,
                views_info,
-               views_klassegrenzen,
+               views_klassengrenzen,
                views_overzicht,
                views_planning_bond)
 
@@ -29,9 +29,9 @@ urlpatterns = [
          views_info.InfoLeeftijdenView.as_view(),
          name='info-leeftijden'),
 
-    path('<comp_pk>/klassegrenzen/tonen/',
-         views_klassegrenzen.KlassegrenzenTonenView.as_view(),
-         name='klassegrenzen-tonen'),
+    path('<comp_pk>/klassengrenzen/tonen/',
+         views_klassengrenzen.KlassengrenzenTonenView.as_view(),
+         name='klassengrenzen-tonen'),
 
 
     # BB schermen
@@ -47,9 +47,9 @@ urlpatterns = [
          views_bb.AGVaststellenView.as_view(),
          name='ag-vaststellen-afstand'),
 
-    path('<comp_pk>/klassegrenzen/vaststellen/',
-         views_bb.KlassegrenzenVaststellenView.as_view(),
-         name='klassegrenzen-vaststellen'),
+    path('<comp_pk>/klassengrenzen/vaststellen/',
+         views_bb.KlassengrenzenVaststellenView.as_view(),
+         name='klassengrenzen-vaststellen'),
 
     path('<comp_pk>/wijzig-datums/',
          views_bb.WijzigDatumsView.as_view(),
