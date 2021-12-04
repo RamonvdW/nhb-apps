@@ -8,6 +8,7 @@ from django.contrib.admin.sites import AdminSite
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from Account.rechten import account_rechten_is_otp_verified
+from collections import OrderedDict
 
 # aanpassingen van de ingebouwde Admin site
 # hiermee kunnen we 2FA checks doen
@@ -20,6 +21,10 @@ from Account.rechten import account_rechten_is_otp_verified
 class BeheerAdminSite(AdminSite):
 
     """ Replace all the functions that handle the urls for login/logout/password-change """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._registry = OrderedDict()
 
     def password_change(self, request, extra_context=None):
         return HttpResponseRedirect(reverse('Account:nieuw-wachtwoord'))
@@ -64,5 +69,14 @@ class BeheerAdminSite(AdminSite):
                 and request.user.is_staff
                 and request.user.is_authenticated
                 and account_rechten_is_otp_verified(request))
+
+    def get_app_list(self, request):
+        """ kopie van contrib/admin/sites.py aangepast om de modellen niet meer te sorteren """
+        app_dict = self._build_app_dict(request)
+
+        # Sort the apps alphabetically.
+        app_list = sorted(app_dict.values(), key=lambda x: x['name'].lower())
+
+        return app_list
 
 # end of file
