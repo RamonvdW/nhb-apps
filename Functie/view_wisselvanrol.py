@@ -268,7 +268,7 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
         else:
             context['meta_functie'] = ""
 
-        eval_open_taken(self.request)
+        eval_open_taken(self.request, forceer=True)
 
         menu_dynamics(self.request, context, actief='wissel-van-rol')
         return context

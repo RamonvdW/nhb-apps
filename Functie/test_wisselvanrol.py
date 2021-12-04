@@ -120,7 +120,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         # controleer dat de complete keuzemogelijkheden op de pagina staan
         self.client.session.save()      # in session aanwezige cache data (over taken) opslaan
-        with self.assert_max_queries(11):
+        with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

@@ -84,8 +84,52 @@ def stuur_nieuwe_taak_email(email, aantal_open):
                        text_body)
 
 
+def check_taak_bestaat(**kwargs):
+    """ Kijk of een taak al bestaat. Gebruikt dit om niet onnodig dubbele taken aan te maken.
+
+        Kies uit de volgende argumenten om op te filteren:
+
+            toegekend_aan = <Account>
+
+            deadline = <DateField>
+
+            aangemaakt_door = <Account> (of None voor 'systeem')
+
+            beschrijving = "beschrijving van de taak - call for action of informatie"
+
+            handleiding_pagina = Een van de settings.HANDLEIDING_xxx (of "")
+
+            deelcompetitie = <DeelCompetitie> waar deze taak bij hoort, of None
+    """
+    aantal = (Taak
+              .objects
+              .exclude(is_afgerond=True)
+              .filter(**kwargs)
+              .count())
+    return aantal > 0
+
+
 def maak_taak(**kwargs):
-    """ Maak een nieuwe taak aan en stuur een e-mail ter herinnering """
+    """
+        Maak een nieuwe taak aan en stuur een e-mail ter herinnering
+
+        De benodigde argumenten (kwargs) zijn:
+
+            toegekend_aan = <Account>
+
+            deadline = <DateField>
+
+            aangemaakt_door = <Account> (of None voor 'systeem')
+
+            beschrijving = "beschrijving van de taak - call for action of informatie"
+
+            handleiding_pagina = Een van de settings.HANDLEIDING_xxx (of "")
+
+            log = begin van het logboek, typisch "[%s] Taak aangemaakt" % now
+
+            deelcompetitie = <DeelCompetitie> waar deze taak bij hoort, of None
+    """
+
     taak = Taak(**kwargs)
     taak.save()
 

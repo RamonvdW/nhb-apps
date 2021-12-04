@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
 from Account.models import AccountEmail
@@ -60,25 +59,6 @@ class SiteFeedback(models.Model):
         verbose_name = verbose_name_plural = "Site feedback"
 
     objects = models.Manager()      # for the editor only
-
-
-def store_feedback(gebruiker, op_pagina, bevinding, feedback):
-    """ Deze functie wordt aangeroepen vanuit de view waarin de feedback van de gebruiker
-        verzameld is. Deze functie slaat de feedback op in een database tabel.
-    """
-
-    # prevent double creation (double/triple-click button)
-    obj, is_new = SiteFeedback.objects.get_or_create(
-                        site_versie=settings.SITE_VERSIE,
-                        gebruiker=gebruiker,
-                        op_pagina=op_pagina,
-                        feedback=feedback,
-                        is_afgehandeld=False,
-                        bevinding=bevinding)
-
-    if is_new:
-        obj.toegevoegd_op = timezone.now()
-        obj.save()
 
 
 class SiteTijdelijkeUrl(models.Model):
