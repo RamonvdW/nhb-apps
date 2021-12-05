@@ -11,7 +11,6 @@ from Account.models import Account
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from .models import Sporter, SporterBoog, Speelsterkte, Secretaris
-from dateutil.relativedelta import relativedelta
 import datetime
 
 
@@ -59,23 +58,31 @@ class TestSporterModels(TestCase):
         sporter.clean_fields()      # run field validators
         sporter.clean()             # run model validator
 
-        # test: geboortejaar in de toekomst
+        # test validate_geboorte_datum, de field validator voor geboorte_datum
+
+        # geboortejaar in de toekomst
         now = datetime.datetime.now()
-        sporter.geboorte_datum = now - relativedelta(years=1)   # avoid leap-year issue
+        sporter.geboorte_datum = now + datetime.timedelta(days=10)
         with self.assertRaises(ValidationError):
             sporter.clean_fields()
 
-        # test: geboortejaar te ver in het verleden
+        # geboortejaar te ver in het verleden (max is 1900)
         sporter.geboorte_datum = datetime.date(year=1890, month=1, day=1)
         with self.assertRaises(ValidationError):
             sporter.clean_fields()
 
-        # test: sinds_datum (2010) te dicht op geboortejaar
+        # test de clean methode op het Sporter object
+        # deze controleert dat de geboorte_datum en [lid] sinds_datum niet te dicht op elkaar liggen
+
+        # sinds_datum (2010) te dicht op geboortejaar (moet 5 jaar tussen zitten)
         sporter.geboorte_datum = datetime.date(year=2009, month=1, day=1)
         with self.assertRaises(ValidationError):
             sporter.clean()
 
-        sporter.sinds_datum = datetime.date(year=2100, month=11, day=12)
+        # test validate_sinds_datum, de field validator voor sinds_datum
+
+        # mag niet lid worden in de toekomst
+        sporter.sinds_datum = datetime.date(year=now.year + 1, month=11, day=12)
         with self.assertRaises(ValidationError):
             sporter.clean_fields()
 

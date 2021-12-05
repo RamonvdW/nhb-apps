@@ -12,6 +12,9 @@ psycopg2-binary
 # 2FA support
 pyotp
 
+# Excel read/write support
+openpyxl
+
 # QR code generation for 2FA
 qrcode
 
