@@ -15,12 +15,17 @@
         {
             const locaties = {{ locaties|safe }};   // nhb_ver.ver_nr --> adres
             const el_sel = document.getElementById('id_ver_sel')
-            let adres = locaties[el_sel.value];     // gekozen vereniging
-            if (adres === undefined)
-                adres = '<i class="red-text">Niet beschikbaar!</i>';
-            adres = adres.replace(/\n/g, '<br>')    // vervang newlines door breaks
             const el_loc = document.getElementById('id_loc')
-            el_loc.innerHTML = adres
+
+            if (el_sel.value === 'geen') {
+                el_loc.innerHTML = '<i class="grey-text">n.v.t.</i>'
+            } else {
+                let adres = locaties[el_sel.value];     // gekozen vereniging
+                if (adres === undefined)
+                    adres = '<i class="red-text">Niet beschikbaar!</i>';
+                adres = adres.replace(/\n/g, '<br>')    // vervang newlines door breaks
+                el_loc.innerHTML = adres
+            }
         }
     </script>
 
@@ -75,6 +80,7 @@
                 <td>Bij vereniging:</td>
                 <td>
                     <select name="nhbver_pk" onchange="locatie_aanpassen()" id="id_ver_sel">
+                        <option value="geen"{% if not wedstrijd.vereniging %} selected{% endif %}>-- nog niet afgesproken --</option>
                         {% for opt in verenigingen %}
                             <option value="{{ opt.pk }}"{% if opt.pk == wedstrijd.vereniging.pk %} selected{% endif %}>{{ opt }}</option>
                         {% endfor %}

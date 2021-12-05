@@ -211,7 +211,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         wedstrijd = CompetitieWedstrijd()
         wedstrijd.datum_wanneer = deelcomp_rk.competitie.rk_eerste_wedstrijd
-        wedstrijd.tijd_begin_aanmelden = datetime.time(hour=0, minute=0, second=0)
+        wedstrijd.tijd_begin_aanmelden = datetime.time(hour=10, minute=0, second=0)
         wedstrijd.tijd_begin_wedstrijd = wedstrijd.tijd_begin_aanmelden
         wedstrijd.tijd_einde_wedstrijd = wedstrijd.tijd_begin_aanmelden
         wedstrijd.save()
@@ -374,11 +374,13 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                                                     regio__is_administratief=False)
         context['verenigingen'] = verenigingen
 
-        if not wedstrijd.vereniging:
-            if verenigingen.count() > 0:
-                wedstrijd.vereniging = verenigingen[0]
-                wedstrijd.save()
+        # forceer een eerste vereniging
+        # if not wedstrijd.vereniging:
+        #     if verenigingen.count() > 0:
+        #         wedstrijd.vereniging = verenigingen[0]
+        #         wedstrijd.save()
 
+        # zet de wedstrijdlocatie indien nog niet gezet en nu beschikbaar gekomen
         if not wedstrijd.locatie:
             if wedstrijd.vereniging:
                 locaties = wedstrijd.vereniging.wedstrijdlocatie_set.all()
@@ -460,22 +462,26 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         wedstrijd.tijd_begin_wedstrijd = datetime.time(hour=uur, minute=minuut)
 
-        try:
-            nhbver = NhbVereniging.objects.get(pk=nhbver_pk)
-        except NhbVereniging.DoesNotExist:
-            raise Http404('Vereniging niet gevonden')
-
-        # check dat nhbver een van de aangeboden verenigingen is
-        if nhbver.regio.rayon != deelcomp_rk.nhb_rayon or nhbver.regio.is_administratief:
-            raise Http404('Geen valide rayon')
-
-        wedstrijd.vereniging = nhbver
-
-        locaties = nhbver.wedstrijdlocatie_set.all()
-        if locaties.count() > 0:
-            wedstrijd.locatie = locaties[0]
-        else:
+        if nhbver_pk == 'geen':
+            wedstrijd.vereniging = None
             wedstrijd.locatie = None
+        else:
+            try:
+                nhbver = NhbVereniging.objects.get(pk=nhbver_pk)
+            except (NhbVereniging.DoesNotExist, ValueError):
+                raise Http404('Vereniging niet gevonden')
+
+            # check dat nhbver een van de aangeboden verenigingen is
+            if nhbver.regio.rayon != deelcomp_rk.nhb_rayon or nhbver.regio.is_administratief:
+                raise Http404('Geen valide rayon')
+
+            wedstrijd.vereniging = nhbver
+
+            locaties = nhbver.wedstrijdlocatie_set.all()
+            if locaties.count() > 0:
+                wedstrijd.locatie = locaties[0]
+            else:
+                wedstrijd.locatie = None
 
         wedstrijd.save()
 
