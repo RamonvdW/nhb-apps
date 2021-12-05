@@ -9,11 +9,11 @@
 {% block title %}Scores koppelen aan team{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compscores-scores-regio-teams" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compscores-rcl-scores-regio-teams" %}
 
     <h4>Scores koppelen aan team</h4>
 
-    <p>Via deze pagina kan de RCL de individuele scores koppelen aan een team voor een specifieke ronde.</p>
+    <p>Via deze pagina kan de RCL de individuele scores koppelen aan een team voor de huidige ronde.</p>
 
     <p>&nbsp;</p>
     <div class="row">
@@ -42,6 +42,14 @@
     </div>
 
     <p>&nbsp;</p>
+
+    {% if aantal_keuzes_nodig > 0 %}
+        <p class="red-text">Je moet nog {{ aantal_keuzes_nodig }} keuzes maken. Klik daarna op Opslaan.</p>
+        {% if anchor %}<p><a class="btn-nhb-rood" href="#{{ anchor }}">Spring naar de eerste</a>{% endif %}</p>
+    {% else %}
+        <p>Alle keuzes zijn al gemaakt. Je kan nog aanpassingen doen - vergeet niet om op te staan!</p>
+    {% endif %}
+
 
     {% if deelcomp.huidige_team_ronde >= 1 and deelcomp.huidige_team_ronde <= 7 %}
 
@@ -73,18 +81,20 @@
                     </tr>
 
                     {% for deelnemer in regel.deelnemers %}
-                        <tr>
+                        <tr{% if deelnemer.anchor %} id="{{ deelnemer.anchor }}"{% endif %}>
                             <td style="padding-left: 50px">{{ deelnemer.naam_str }}</td>
 
                             <!-- scores -->
                             <td>
-                                {% if deelnemer.keuze_nodig %}
-                                    <span class="red-text">Keuze nodig:</span><br>
+                                {% if deelnemer.kan_kiezen %}
+                                    {% if deelnemer.keuze_nodig %}
+                                        <span class="red-text">Keuze nodig:</span><br>
+                                    {% endif %}
                                     <ul id="{{ deelnemer.id_radio }}">
                                         {% for wedstrijd, score in deelnemer.gevonden_scores %}
                                             <li>
                                                 <label class="black-text" for="{{ score.id_radio }}">
-                                                    <input class="with-gap" type="radio" name="{{ deelnemer.id_radio }}" value="{{ score.pk }}" id="{{ score.id_radio }}"{% if score.block_selection %}disabled{% endif %}{% if score.is_selected %} checked{% endif %}>
+                                                    <input class="with-gap" type="radio" name="{{ deelnemer.id_radio }}" value="{{ score.pk }}" {% if score.block_selection %}disabled{% else %}id="{{ score.id_radio }}"{% endif %}{% if score.is_selected %} checked{% endif %}>
                                                     <span>{{ score.waarde }}</span><br>
                                                 </label>
                                             </li>
@@ -101,8 +111,10 @@
 
                             <!-- datums -->
                             <td>
-                                {% if deelnemer.keuze_nodig %}
-                                    <!-- Keuze maken: --><br>
+                                {% if deelnemer.kan_kiezen %}
+                                    {% if deelnemer.keuze_nodig %}
+                                        <!-- Keuze maken: --><br>
+                                    {% endif %}
                                     {% for wedstrijd, score in deelnemer.gevonden_scores %}
                                         <!-- TODO: extra class nodig voor line-height compatible met input -->
                                         {% if wedstrijd %}

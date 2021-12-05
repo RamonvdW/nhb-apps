@@ -16,7 +16,7 @@ from Competitie.models import (LAAG_REGIO, DeelCompetitie, DeelcompetitieRonde, 
                                update_uitslag_teamcompetitie)
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
-from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE
+from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
 from Sporter.models import SporterBoog
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from types import SimpleNamespace
@@ -24,15 +24,15 @@ import datetime
 import json
 
 
-TEMPLATE_COMPSCORES_REGIO = 'compscores/scores-regio.dtl'
+TEMPLATE_COMPSCORES_TEAMS = 'compscores/rcl-scores-regio-teams.dtl'
+TEMPLATE_COMPSCORES_REGIO = 'compscores/rcl-scores-regio.dtl'
 TEMPLATE_COMPSCORES_INVOEREN = 'compscores/scores-invoeren.dtl'
 TEMPLATE_COMPSCORES_BEKIJKEN = 'compscores/scores-bekijken.dtl'
-TEMPLATE_COMPSCORES_TEAMS = 'compscores/scores-regio-teams.dtl'
 
 
 class ScoresRegioView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view geeft de planning voor een competitie in een regio """
+    """ Deze view geeft de RCL een lijst met wedstrijden en toegang tot scores/accorderen """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPSCORES_REGIO
@@ -740,6 +740,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _bepaal_teams_en_scores(deelcomp):
         alle_regels = list()
+        aantal_keuzes_nodig = 0
 
         # sporters waarvan we de scores op moeten zoeken
         sporterboog_pks = list()
@@ -747,15 +748,23 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         used_score_pks = list()
 
         deelnemer2sporter_cache = dict()        # [deelnemer_pk] = (sporterboog_pk, naam_str)
+        sporterboog_cache = dict()              # [sporterboog_pk] = SporterBoog
         for deelnemer in (RegioCompetitieSchutterBoog
                           .objects
-                          .select_related('sporterboog', 'sporterboog__sporter')
+                          .select_related('sporterboog',
+                                          'sporterboog__sporter')
                           .filter(deelcompetitie=deelcomp)):
 
-            sporter = deelnemer.sporterboog.sporter
-            tup = (deelnemer.sporterboog.pk, "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam()))
+            sporterboog = deelnemer.sporterboog
+            sporterboog_cache[sporterboog.pk] = sporterboog
+
+            sporter = sporterboog.sporter
+            tup = (sporterboog.pk, "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam()))
             deelnemer2sporter_cache[deelnemer.pk] = tup
         # for
+
+        alle_sporterboog_pks = list()
+        afstand = deelcomp.competitie.afstand
 
         for poule in (RegiocompetitieTeamPoule
                       .objects
@@ -796,6 +805,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
             break_poule = poule.beschrijving
             prev_klasse = None
             for ronde_team in ronde_teams:
+
                 regel = SimpleNamespace()
 
                 regel.poule_str = break_poule
@@ -817,9 +827,13 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                     sporterboog_pk, naam_str = deelnemer2sporter_cache[deelnemer.pk]
                     sporterboog_pks.append(sporterboog_pk)
 
+                    if sporterboog.pk not in alle_sporterboog_pks:  # want deelnemer kan in meerdere teams voorkomen
+                        alle_sporterboog_pks.append(sporterboog_pk)
+
                     deelnemer.naam_str = naam_str
                     deelnemer.sporterboog_pk = sporterboog_pk
                     deelnemer.gevonden_scores = None
+                    deelnemer.kan_kiezen = False
                     deelnemer.keuze_nodig = False
                     regel.deelnemers.append(deelnemer)
                 # for
@@ -858,6 +872,40 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
             # for
         # for
 
+        # zorg dat er 'geen score' records zijn voor alle relevante sporters
+        nieuwe_pks = alle_sporterboog_pks[:]
+        nieuwe_pks.sort()
+        for score in (Score.objects
+                      .select_related('sporterboog')
+                      .filter(sporterboog__pk__in=nieuwe_pks,
+                              type=SCORE_TYPE_GEEN)):
+            sporterboog_pk = score.sporterboog.pk
+            nieuwe_pks.remove(sporterboog_pk)
+        # for
+
+        # maak een 'geen score' record aan voor alle nieuwe_pks
+        bulk = list()
+        for sporterboog_pk in nieuwe_pks:
+            sporterboog = sporterboog_cache[sporterboog_pk]
+            score = Score(type=SCORE_TYPE_GEEN,
+                          afstand_meter=0,
+                          waarde=0,
+                          sporterboog=sporterboog)
+            bulk.append(score)
+        # for
+        Score.objects.bulk_create(bulk)
+        del bulk
+        del nieuwe_pks
+
+        sporterboog_pk2score_geen = dict()
+        for score in (Score.objects
+                      .select_related('sporterboog')
+                      .filter(sporterboog__pk__in=alle_sporterboog_pks,
+                              type=SCORE_TYPE_GEEN)):
+            sporterboog_pk = score.sporterboog.pk
+            sporterboog_pk2score_geen[sporterboog_pk] = score
+        # for
+
         sporterboog2wedstrijdscores = dict()        # [sporterboog_pk] = [(score, wedstrijd), ...]
         early_date = datetime.date(year=2000, month=1, day=1)
 
@@ -866,9 +914,12 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                       .objects
                       .select_related('sporterboog')
                       .exclude(waarde=SCORE_WAARDE_VERWIJDERD)
-                      .filter(sporterboog__pk__in=sporterboog_pks)):
+                      .filter(type=SCORE_TYPE_SCORE,
+                              sporterboog__pk__in=sporterboog_pks,
+                              afstand_meter=afstand)):
 
             score.block_selection = (score.pk in used_score_pks)
+            sporterboog_pk = score.sporterboog.pk
 
             try:
                 wedstrijd = score2wedstrijd[score.pk]
@@ -885,19 +936,20 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                 # optie B: scores op datum houden
                 tup = (1, wedstrijd.datum_wanneer, wedstrijd.tijd_begin_wedstrijd, wedstrijd.pk, wedstrijd, score)
 
-                pk = score.sporterboog.pk
                 try:
-                    sporterboog2wedstrijdscores[pk].append(tup)
+                    sporterboog2wedstrijdscores[sporterboog_pk].append(tup)
                 except KeyError:
-                    # voeg een "niet geschoten" optie toe
-                    nul_score = Score(waarde=0, pk='geen')
-                    nul_score.block_selection = False
-                    sporterboog2wedstrijdscores[pk] = [(3, early_date, 0, 0, None, nul_score)]     # 0-score
+                    # dit is de eerste entry
+                    sporterboog2wedstrijdscores[sporterboog_pk] = [tup]
 
-                    sporterboog2wedstrijdscores[pk].append(tup)
+                    # voeg een "niet geschoten" optie toe
+                    niet_geschoten = sporterboog_pk2score_geen[sporterboog_pk]
+                    niet_geschoten.block_selection = False
+                    tup = (3, early_date, 0, 0, None, niet_geschoten)   # None = wedstrijd
+                    sporterboog2wedstrijdscores[sporterboog_pk].append(tup)
         # for
 
-        fake_score_pk = 0
+        eerste_anchor = None
         for regel in alle_regels:
             for deelnemer in regel.deelnemers:
                 try:
@@ -905,7 +957,6 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                 except KeyError:
                     # geen score voor deze sporter
                     deelnemer.gevonden_scores = list()
-                    pass
                 else:
                     # sorteer de gevonden scores op wedstrijddatum
                     tups.sort()
@@ -915,32 +966,25 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                         if score.block_selection:
                             aantal -= 1
                     # for
-                    deelnemer.keuze_nodig = (aantal > 1)
-                    if deelnemer.keuze_nodig:
+                    deelnemer.kan_kiezen = deelnemer.keuze_nodig = (aantal > 1)
+                    if deelnemer.kan_kiezen:
                         deelnemer.id_radio = "id_score_%s" % deelnemer.sporterboog_pk
-                        first_score = None
-                        first_select = True
                         for wedstrijd, score in deelnemer.gevonden_scores:
                             if not score.block_selection:
-                                if not first_score:
-                                    first_score = score
-                                if wedstrijd:
-                                    score.id_radio = "id_score_%s" % score.pk
-                                else:
-                                    fake_score_pk += 1
-                                    score.id_radio = "id_fake_%s" % fake_score_pk
+                                score.id_radio = "id_score_%s" % score.pk
                                 score.is_selected = (score.pk in regel.score_pks_feitelijk)
                                 if score.is_selected:
-                                    first_select = False
+                                    deelnemer.keuze_nodig = False
                         # for
 
-                        # als er geen score gekozen was, kies dan de 'Niet geschoten' optie
-                        if first_select and first_score:
-                            first_score.is_selected = True
+                    if deelnemer.keuze_nodig:
+                        if eerste_anchor is None:
+                            deelnemer.anchor = eerste_anchor = "anchor_%s" % deelnemer.sporterboog.pk
+                        aantal_keuzes_nodig += 1
             # for
         # for
 
-        return alle_regels
+        return alle_regels, aantal_keuzes_nodig, eerste_anchor
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -964,7 +1008,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
 
         if 1 <= deelcomp.huidige_team_ronde <= 7:
-            context['alle_regels'] = self._bepaal_teams_en_scores(deelcomp)
+            context['alle_regels'], context['aantal_keuzes_nodig'], context['anchor'] = self._bepaal_teams_en_scores(deelcomp)
             context['url_opslaan'] = reverse('CompScores:selecteer-team-scores',
                                              kwargs={'deelcomp_pk': deelcomp.pk})
 
@@ -988,7 +1032,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         if not deelcomp.regio_organiseert_teamcompetitie:
             raise Http404('Geen teamcompetitie in deze regio')
 
-        alle_regels = self._bepaal_teams_en_scores(deelcomp)
+        alle_regels, _, _ = self._bepaal_teams_en_scores(deelcomp)
 
         # for k, v in request.POST.items():
         #     print('%s=%s' % (k, repr(v)))
@@ -1005,17 +1049,18 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                 ronde_teams[regel.ronde_team.pk] = (regel.ronde_team, team_scores)
 
             for deelnemer in regel.deelnemers:
-                if deelnemer.keuze_nodig:
+                if deelnemer.kan_kiezen:
                     score_pk_str = request.POST.get(deelnemer.id_radio, '')[:10]       # afkappen voor de veiligheid
-                    if score_pk_str and score_pk_str != 'geen':
+                    if score_pk_str:
+                        # er is een keuze gemaakt
                         try:
                             score_pk = int(score_pk_str)
                         except (ValueError, TypeError):
                             raise Http404('Verkeerde parameter')
 
                         for wedstrijd, score in deelnemer.gevonden_scores:
-                            if wedstrijd and score.pk == score_pk:
-                                # gevonden!
+                            if score.pk == score_pk:
+                                # het is echt een score van deze deelnemer
                                 team_scores.append(score.pk)
                                 break
                         # for

@@ -107,6 +107,11 @@
             <p>Eventuele scores <span class="red-text">in rood</span> geven aan dat deze uit minder dan 3 scores opgebouwd is.</p>
         {% endif %}
 
+        {% if url_team_scores %}
+            <p>Besluit welke individuele scores deze team ronde horen: <a class="btn-nhb-blauw" href="{{ url_team_scores }}"><i class="material-icons-round left">gavel</i>Team scores selecteren</a>
+            </p>
+        {% endif %}
+
         <table class="white">
             {% if toon_h2h %}
 

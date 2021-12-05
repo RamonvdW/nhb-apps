@@ -594,6 +594,9 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                 context['wp_model_str'] = 'Som van de scores'
 
             if deelcomp.huidige_team_ronde <= 7:
+                context['url_team_scores'] = reverse('CompScores:selecteer-team-scores',
+                                                     kwargs={'deelcomp_pk': deelcomp.pk})
+
                 context['url_volgende_ronde'] = reverse('CompRegio:start-volgende-team-ronde',
                                                         kwargs={'deelcomp_pk': deelcomp.pk})
 

@@ -701,7 +701,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         with self.assert_max_queries(44):      # TODO: reduceer
             resp = self.client.get(self.url_regio_teams % deelcomp.pk)
         self.assertEqual(resp.status_code, 200)       # 200 = OK
-        self.assert_template_used(resp, ('compscores/scores-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/rcl-scores-regio-teams.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # do een post
@@ -726,7 +726,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_regio_teams % deelcomp.pk)
         self.assertEqual(resp.status_code, 200)       # 200 = OK
-        self.assert_template_used(resp, ('compscores/scores-regio-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compscores/rcl-scores-regio-teams.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # regio organiseert geen teamcompetitie

@@ -39,7 +39,7 @@
 
     {% if url_team_scores %}
         <p>
-            <a class="btn-nhb-blauw" href="{{ url_team_scores }}">Team scores</a>
+            <a class="btn-nhb-blauw" href="{{ url_team_scores }}"><i class="material-icons-round left">gavel</i>Team scores selecteren</a>
         </p>
         <p>&nbsp;</p>
     {% endif %}
@@ -62,7 +62,7 @@
                 <!-- knop om uitslagen te zien / in te voeren -->
                 <td>
                     {% if obj.url_uitslag_controleren %}
-                        <a {% if obj.uitslag.is_bevroren %}class="btn-nhb-blauw btn-small"{% else %}class="btn-nhb-rood"{% endif %} href="{{ obj.url_uitslag_controleren }}">
+                        <a class="{% if obj.uitslag.is_bevroren %}btn-nhb-blauw btn-small{% else %}btn-nhb-rood{% endif %}" href="{{ obj.url_uitslag_controleren }}">
                             <i class="material-icons-round left">arrow_forward</i>Controleer</a>
                     {% elif obj.url_uitslag_invoeren %}
                         <a class="btn-nhb-blauw btn-small" href="{{ obj.url_uitslag_invoeren }}">

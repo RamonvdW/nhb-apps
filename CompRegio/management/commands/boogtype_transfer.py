@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand
 from Competitie.models import Competitie, RegioCompetitieSchutterBoog, AG_NUL
 from Competitie.operations.klassengrenzen import KlasseBepaler
 from Sporter.models import Sporter, SporterBoog
-from Score.models import ScoreHist, Score, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
+from Score.models import ScoreHist, Score, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG, SCORE_TYPE_GEEN
 from decimal import Decimal
 
 
@@ -122,7 +122,7 @@ class Command(BaseCommand):
             ag = Decimal(score.waarde) / Decimal(1000)
             if score.type == SCORE_TYPE_INDIV_AG:
                 self.stdout.write("[INFO] Boog %s: Individueel AG: %1.3f" % (huidige_boog_afk, float(ag)))
-            elif score.type == SCORE_TYPE_TEAM_AG:
+            elif score.type in (SCORE_TYPE_TEAM_AG, SCORE_TYPE_GEEN):
                 pass
             else:
                 # echte score
@@ -142,7 +142,7 @@ class Command(BaseCommand):
             if score.type == SCORE_TYPE_INDIV_AG:
                 self.stdout.write("[INFO] Boog %s: Individueel AG: %1.3f" % (boog_afk, float(ag)))
                 juiste_ag = ag
-            elif score.type == SCORE_TYPE_TEAM_AG:
+            elif score.type in (SCORE_TYPE_TEAM_AG, SCORE_TYPE_GEEN):
                 pass
             else:
                 # echte score
