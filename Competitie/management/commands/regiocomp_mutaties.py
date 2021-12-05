@@ -50,8 +50,6 @@ class Command(BaseCommand):
         self.pk2scores = dict()         # [RegioCompetitieSchutterBoog.pk] = [tup, ..] with tup = (afstand, score)
         self.pk2scores_alt = dict()
 
-        self._onbekend2beter = dict()   # [competitieklasse.pk] = [klasse, ..] met oplopend AG
-
         self._sync = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
         self._count_ping = 0
 
