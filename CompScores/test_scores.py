@@ -388,7 +388,7 @@ class TestCompetitieScores(E2EHelpers, TestCase):
             json_data[sporterboog.pk] = waarde
             waarde += 1
         # for
-        with self.assert_max_queries(40):
+        with self.assert_max_queries(34):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
@@ -698,14 +698,14 @@ class TestCompetitieScores(E2EHelpers, TestCase):
 
         deelcomp = self.testdata.deelcomp18_regio[101]
 
-        with self.assert_max_queries(44):      # TODO: reduceer
+        with self.assert_max_queries(47):      # TODO: reduceer
             resp = self.client.get(self.url_regio_teams % deelcomp.pk)
         self.assertEqual(resp.status_code, 200)       # 200 = OK
         self.assert_template_used(resp, ('compscores/rcl-scores-regio-teams.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # do een post
-        with self.assert_max_queries(56):
+        with self.assert_max_queries(59):
             resp = self.client.post(self.url_regio_teams % deelcomp.pk)
         self.assert_is_redirect(resp, self.url_scores_regio % deelcomp.pk)
 

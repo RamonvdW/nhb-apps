@@ -430,7 +430,8 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                                                   'locatie')
                                   .prefetch_related('indiv_klassen')
                                   .order_by('datum_wanneer',
-                                            'tijd_begin_wedstrijd'))
+                                            'tijd_begin_wedstrijd',
+                                            'vereniging'))
 
         if self.rol_nu == Rollen.ROL_RCL:
             context['url_nieuwe_wedstrijd'] = reverse('CompRegio:regio-ronde-planning',
