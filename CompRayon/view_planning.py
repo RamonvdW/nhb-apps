@@ -390,7 +390,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['locaties'] = locaties = dict()
         pks = [ver.pk for ver in verenigingen]
-        for obj in WedstrijdLocatie.objects.filter(verenigingen__pk__in=pks):
+        for obj in WedstrijdLocatie.objects.prefetch_related('verenigingen').filter(verenigingen__pk__in=pks):
             for ver in obj.verenigingen.all():
                 locaties[str(ver.pk)] = obj.adres   # ver_nr --> adres
             # for
