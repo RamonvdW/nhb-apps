@@ -11,6 +11,20 @@
 {% block pagina %}
 
     <script type="application/javascript">
+
+        let ignore_changes = true
+
+        function gewijzigd() {
+            // het formulier is aangepast en moet opgeslagen worden
+
+            if (!ignore_changes) {
+                // enable de 'opslaan' knop
+                const el = document.getElementById("opslaan_knop")
+                el.disabled = false
+                el.parentElement.style.display = "block"
+            }
+        }
+
         function locatie_aanpassen(sel)
         {
             const locaties = {{ locaties|safe }};   // nhb_ver.ver_nr --> adres
@@ -26,6 +40,8 @@
                 adres = adres.replace(/\n/g, '<br>')    // vervang newlines door breaks
                 el_loc.innerHTML = adres
             }
+
+            gewijzigd()
         }
     </script>
 
@@ -61,7 +77,7 @@
             <tr>
                 <td>Datum wedstrijd:</td>
                 <td>
-                    <select name="weekdag">
+                    <select name="weekdag" onchange="gewijzigd()">
                         {% for opt in opt_weekdagen %}
                             <option value="{{ opt.weekdag_nr }}"{% if opt.actief %} selected{% endif %}>{{ opt.datum|date:"l j F Y" }}</option>
                         {% endfor %}
@@ -72,7 +88,7 @@
             <tr>
                 <td>Aanvang wedstrijd:</td>
                 <td>
-                    <input id="tijd1" name="aanvang" type="text" class="timepicker">
+                    <input id="tijd1" name="aanvang" type="text" class="timepicker" onchange="gewijzigd()">
                 </td>
             </tr>
 
@@ -110,7 +126,7 @@
                             <tr>
                                 <!-- {% if obj.break_before %}<br>{% endif %} -->
                                 <td><label>
-                                    <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}>
+                                    <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %} onchange="gewijzigd()">
                                     <span>&nbsp;</span>
                                     </label>
                                 </td>
@@ -143,7 +159,7 @@
 
                                 <td>
                                     <label>
-                                        <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}" {% if obj.geselecteerd %}checked{% endif %}>
+                                        <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}" {% if obj.geselecteerd %}checked{% endif %} onchange="gewijzigd()">
                                         <span>&nbsp;</span>
                                     </label>
                                 </td>
@@ -160,12 +176,12 @@
         <p>
             <a class="btn-nhb-blauw" href="{{ url_terug }}">
                 <i class="material-icons-round left">close</i>Terug</a>
-
-            <span>&nbsp;&nbsp;</span>
-
-            <button class="btn-nhb-rood" type="submit">
-                <i class="material-icons-round left">check</i>Opslaan</button>
         </p>
+
+        <div class="fixed-action-btn" style="display: none">
+            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                <i class="material-icons-round left">check</i>Opslaan</button>
+        </div>
 
     </form>
 
@@ -213,6 +229,8 @@
             inst.done();
 
             locatie_aanpassen()
+
+            ignore_changes = false
         })
     </script>
 
