@@ -24,7 +24,7 @@ class SporterAdmin(admin.ModelAdmin):
 class SporterBoogAdmin(admin.ModelAdmin):
     """ Admin configuratie voor SporterBoog klasse """
 
-    search_fields = ('sporter__lid_nr', 'sporter__unaccented_name')
+    search_fields = ('sporter__lid_nr', 'sporter__unaccented_naam')
 
     list_select_related = True
 
@@ -34,7 +34,7 @@ class SporterBoogAdmin(admin.ModelAdmin):
 class SporterVoorkeurenAdmin(admin.ModelAdmin):
     """ Admin configuratie voor SporterVoorkeuren klasse """
 
-    search_fields = ('sporter__lid_nr', 'sporter__unaccented_name')
+    search_fields = ('sporter__lid_nr', 'sporter__unaccented_naam')
 
     list_select_related = True
 
