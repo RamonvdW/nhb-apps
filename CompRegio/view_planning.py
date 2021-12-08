@@ -627,6 +627,10 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
             ronde.beschrijving = beschrijving[:40]  # afkappen, anders werkt save niet
 
+            # voorkom gebruik van speciale namen
+            if ronde.beschrijving.lower() in ('rayonkampioenschappen', 'bondskampioenschappen', 'RK', 'BK'):
+                ronde.beschrijving = '?'
+
             if ronde.week_nr != week_nr:
                 # nieuw week nummer
                 # reken uit hoeveel het verschil is
@@ -652,7 +656,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                 new_str = "%s - %s" % (comp_str, ronde.beschrijving)
                 if obj.beschrijving != new_str:
                     obj.beschrijving = new_str
-                    obj.save()
+                    obj.save(update_fields=['beschrijving'])
             # for
 
             if ronde.cluster:

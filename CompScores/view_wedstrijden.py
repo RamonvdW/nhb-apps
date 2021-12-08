@@ -9,7 +9,7 @@ from django.http import Http404, HttpResponse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import DeelcompetitieRonde, RegiocompetitieTeam
+from Competitie.models import DeelcompetitieRonde, RegiocompetitieTeam, DeelCompetitie, LAAG_RK, LAAG_BK
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers, bepaal_blazoen_behoefte
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
@@ -22,8 +22,7 @@ TEMPLATE_WAARSCHIJNLIJKE_DEELNEMERS = 'compscores/waarschijnlijke-deelnemers.dtl
 
 class WedstrijdenView(UserPassesTestMixin, TemplateView):
 
-    """ Toon de SEC, HWL, WL de wedstrijden die aan deze vereniging toegekend zijn
-        of door deze vereniging georganiseerd worden.
+    """ Toon de SEC, HWL, WL de competitiewedstrijden die aan deze vereniging toegekend zijn.
     """
 
     # class variables shared by all instances
@@ -44,39 +43,60 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        pks = (DeelcompetitieRonde
-               .objects
-               .filter(deelcompetitie__is_afgesloten=False,
-                       plan__wedstrijden__vereniging=self.functie_nu.nhb_ver)
-               .values_list('plan__wedstrijden', flat=True))
+        context['geen_wedstrijden'] = True
+
+        pks1 = list(DeelcompetitieRonde
+                    .objects
+                    .filter(deelcompetitie__is_afgesloten=False,
+                            plan__wedstrijden__vereniging=self.functie_nu.nhb_ver)
+                    .values_list('plan__wedstrijden', flat=True))
+
+        pks2 = list(DeelCompetitie
+                    .objects
+                    .filter(laag__in=(LAAG_RK, LAAG_BK))
+                    .exclude(plan__wedstrijden=None)                # excludes when ManyToMany is empty
+                    .values_list('plan__wedstrijden', flat=True))
+
+        pks = list(pks1) + list(pks2)
 
         wedstrijden = (CompetitieWedstrijd
                        .objects
                        .filter(pk__in=pks)
                        .order_by('datum_wanneer', 'tijd_begin_wedstrijd'))
 
-        context['geen_wedstrijden'] = True
         for wedstrijd in wedstrijden:
             # voor competitiewedstrijden wordt de beschrijving ingevuld
             # als de instellingen van de ronde opgeslagen worden
             # dit is slechts fall-back
             if wedstrijd.beschrijving == "":
                 # als deze wedstrijd bij een competitieronde hoort,
-                # maak er dan een passende beschrijving voor
+                # maak een passende beschrijving voor
 
-                # CompetitieWedstrijd --> CompetitieWedstrijdenPlan --> DeelcompetitieRonde
+                # CompetitieWedstrijd --> CompetitieWedstrijdenPlan --> DeelcompetitieRonde / DeelCompetitie
                 plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
-                ronde = plan.deelcompetitieronde_set.all()[0]
-                wedstrijd.beschrijving = "%s - %s" % (ronde.deelcompetitie.competitie.beschrijving, ronde.beschrijving)
-
-            msg = wedstrijd.beschrijving
-            pos = msg.find(' - ')
-            if pos > 0:
-                wedstrijd.beschrijving1 = msg[:pos].strip()
-                wedstrijd.beschrijving2 = msg[pos+3:].strip()
+                if plan.deelcompetitieronde_set.count() > 0:
+                    ronde = plan.deelcompetitieronde_set.select_related('deelcompetitie', 'deelcompetitie__competitie').all()[0]
+                    wedstrijd.beschrijving1 = ronde.deelcompetitie.competitie.beschrijving
+                    wedstrijd.beschrijving2 = ronde.beschrijving
+                else:
+                    deelcomp = plan.deelcompetitie_set.select_related('competitie').all()[0]
+                    wedstrijd.beschrijving1 = deelcomp.competitie.beschrijving
+                    if deelcomp.laag == LAAG_RK:
+                        wedstrijd.beschrijving2 = "Rayonkampioenschappen"
+                    else:
+                        wedstrijd.beschrijving2 = "Bondskampioenschappen"
             else:
-                wedstrijd.beschrijving1 = msg
-                wedstrijd.beschrijving2 = ''
+                msg = wedstrijd.beschrijving
+                pos = msg.find(' - ')
+                if pos > 0:
+                    wedstrijd.beschrijving1 = msg[:pos].strip()
+                    wedstrijd.beschrijving2 = msg[pos+3:].strip()
+                else:
+                    wedstrijd.beschrijving1 = msg
+                    wedstrijd.beschrijving2 = ''
+
+            wedstrijd.is_rk = (wedstrijd.beschrijving2 == 'Rayonkampioenschappen')
+            wedstrijd.is_bk = (wedstrijd.beschrijving2 == 'Bondskampioenschappen')
 
             wedstrijd.toon_geen_uitslag = True
             heeft_uitslag = (wedstrijd.uitslag and wedstrijd.uitslag.scores.count() > 0)
