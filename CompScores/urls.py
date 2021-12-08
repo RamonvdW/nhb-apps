@@ -24,6 +24,10 @@ urlpatterns = [
          view_wedstrijden.WaarschijnlijkeDeelnemersAlsBestandView.as_view(),
          name='waarschijnlijke-deelnemers-als-bestand'),
 
+    path('waarschijnlijke-deelnemers-kampioenschap/<wedstrijd_pk>/',
+         view_wedstrijden.WaarschijnlijkeDeelnemersKampioenschapView.as_view(),
+         name='waarschijnlijke-deelnemers-rk-bk'),
+
     # HWL: scores kaartje
     path('bij-de-vereniging/',
          view_wedstrijden.WedstrijdenScoresView.as_view(),

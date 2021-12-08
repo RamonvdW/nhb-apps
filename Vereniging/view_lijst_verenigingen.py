@@ -160,7 +160,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                                          kwargs={'vereniging_pk': nhbver.pk})
 
             for loc in (nhbver
-                        .wedstrijdlocatie_set
+                        .wedstrijdlocatie_set           # TODO: kost een query -> aparte ophalen in dict
                         .filter(zichtbaar=True)):
                 if loc.baan_type == 'E':
                     nhbver.heeft_externe_locaties = True

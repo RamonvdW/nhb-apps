@@ -38,7 +38,7 @@
             {% for obj in wedstrijden %}
                 <tr>
                     <td>{{ obj.datum_wanneer }} om {{ obj.tijd_begin_wedstrijd }}</td>
-                    <td>{{ obj.beschrijving1 }}<br>{{ obj.beschrijving2 }}</td>
+                    <td>{{ obj.beschrijving1 }}<br>{% if obj.opvallen %}<b>{{ obj.beschrijving2 }}</b>{% else %}{{ obj.beschrijving2 }}{% endif %}</td>
 
                     <!-- knop om de waarschijnlijke deelnemerslijst te zien -->
                     {% if not uitslag_invoeren %}
