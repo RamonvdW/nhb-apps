@@ -241,6 +241,10 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _get_wedstrijdklassen(deelcomp_rk, wedstrijd):
+        """ Geef een lijst van individuele en team wedstrijdklassen terug.
+            Elke klasse bevat een telling van het aantal sporters / teams
+        """
+
         klasse2schutters = dict()
         for obj in (KampioenschapSchutterBoog
                     .objects
@@ -310,7 +314,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
             try:
                 obj.teams_count = klasse_count[obj.pk]
             except KeyError:
-                obj.teams_count = "?"
+                obj.teams_count = 0
         # for
 
         return wkl_indiv, wkl_team

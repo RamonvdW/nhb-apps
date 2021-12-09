@@ -228,6 +228,7 @@ class UitslagenRayonIndivView(TemplateView):
                                   volgorde__lte=48)                  # toon tot 48 sporters per klasse
                           .select_related('klasse__indiv',
                                           'sporterboog__sporter',
+                                          'sporterboog__sporter__bij_vereniging',
                                           'bij_vereniging')
                           .order_by('klasse__indiv__volgorde',
                                     'volgorde'))
