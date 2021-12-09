@@ -20,34 +20,34 @@
             <div class="white-text nhb-blauw z-depth-2">
 
                 <div class="row small-row">
-                    <div class="col s3">Competitie:</div>
+                    <div class="col s4">Competitie:</div>
                     <div class="col s8">{{ deelcomp.competitie.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s4">Wedstrijd:</div>
+                    <div class="col s8">{{ beschrijving }}</div>
                 </div>
 
                 {% if wedstrijd.is_rk %}
                     <div class="row small-row">
-                        <div class="col s3">Rayon:</div>
+                        <div class="col s4">Rayon:</div>
                         <div class="col s8">{{ deelcomp.nhb_rayon }}</div>
                     </div>
                 {% endif %}
 
                 <div class="row small-row">
-                    <div class="col s3">Bij vereniging:</div>
-                    <div class="col s8">{{ wedstrijd.vereniging }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3">Wedstrijd:</div>
-                    <div class="col s8">{{ beschrijving }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3">Wedstrijdklassen:</div>
+                    <div class="col s4">Wedstrijdklassen:</div>
                     <div class="col s8">{% for klasse in wedstrijd.klassen_lijst %}{{ klasse }}<br>{% endfor %}</div>
                 </div>
 
                 <div class="row small-row">
-                    <div class="col s3">Wanneer:</div>
+                    <div class="col s4">Bij vereniging:</div>
+                    <div class="col s8">{{ wedstrijd.vereniging }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s4">Wanneer:</div>
                     <div class="col s8">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }}</div>
                 </div>
             </div>
@@ -66,10 +66,13 @@
 
     {% if heeft_indiv %}
         <table class="white">
+            <tr>
+                <td colspan="6" class="nhb-blauw white-text center-align"><h5>Individueel</h5></td>
+            </tr>
             {% for deelnemer in deelnemers_indiv %}
                 {% if deelnemer.break_before %}
                     <tr class="nhb-grijs">
-                        <td colspan="7"><h5>{{ deelnemer.klasse.indiv.beschrijving }}</h5></td>
+                        <td colspan="6"><h5>{{ deelnemer.klasse.indiv.beschrijving }}</h5></td>
                     </tr>
 
                     <tr>
@@ -111,6 +114,10 @@
 
     {% if heeft_teams %}
         <table class="white">
+            <tr>
+                <td colspan="6" class="nhb-blauw white-text center-align"><h5>Teams</h5></td>
+            </tr>
+
             {% for team in deelnemers_teams %}
                 {% if team.break_before %}
                     <tr class="nhb-grijs">
@@ -119,27 +126,41 @@
                     <tr>
                         <th><span class="hide-on-small-only">Nummer</span><span class="hide-unless-small">Nr</span></th>
                         <th>Vereniging</th>
-                        <th>Sporter</th>
-                        <th>Boog (gem)<sup>*1</sup></th>
-                        <th>Blazoen<br>individueel</th>
-                        {% if deelcomp.regio_organiseert_teamcompetitie %}
-                            <th>In team</th>
-                        {% endif %}
-                        <th>Notitie</th>
+                        <th>Team / Sporters</th>
+                        <th>Gemiddelde<sup>*1</sup></th>
+                        <th>Team sterkte</th>
+                        <th class="center-align">Status</th>
                     </tr>
                 {% endif %}
 
                 <tr>
                     <td>{{ team.volg_nr }}</td>
                     <td>[{{ team.ver_nr }}] {{ team.ver_naam }}</td>
-                    <td>{{ team }}</td>
+                    <td colspan="2">{{ team.team_naam }}</td>
+                    <td>{{ team.sterkte_str }}</td>
+                    <td></td>
                 </tr>
+
+                {% for deelnemer in team.gekoppelde_schutters.all %}
+                    <tr>
+                        <td colspan="2"></td>
+                        <td style="padding-left: 30px">{{ deelnemer.naam_str }}</td>
+                        <td>{{ deelnemer.gem_str }}</td>
+                        <td></td>
+                        <td class="center-align">
+                            {% if deelnemer.deelname == 'J' %}<i class="material-icons-round green-text">check</i>
+                            {% elif deelnemer.deelname == 'N' %}<i class="material-icons-round black-text">block</i>
+                            {% else %}<i class="material-icons-round nhb-blauw-text">help</i>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
             {% endfor %}
         </table>
     {% endif %}
 
     {% if deelcomp.regio_organiseert_teamcompetitie %}
-        <p>*1: Gemiddelde voor deze sporter. Een invaller mag geen hoger gemiddelde hebben.</p>
+        <p>*1: Een invaller mag geen hoger gemiddelde hebben.</p>
     {% endif %}
 
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compscores-waarschijnlijke-deelnemers-rk-bk" %}

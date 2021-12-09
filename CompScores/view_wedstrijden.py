@@ -351,6 +351,10 @@ class WaarschijnlijkeDeelnemersKampioenschapView(UserPassesTestMixin, TemplateVi
         plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
         deelcomp = plan.deelcompetitie_set.select_related('competitie').all()[0]
         comp = deelcomp.competitie
+        if comp.afstand == '18':
+            aantal_pijlen = 30
+        else:
+            aantal_pijlen = 25
 
         if deelcomp.laag == LAAG_RK:
             wedstrijd.is_rk = True
@@ -411,7 +415,7 @@ class WaarschijnlijkeDeelnemersKampioenschapView(UserPassesTestMixin, TemplateVi
                 deelnemer.lid_nr = deelnemer.sporterboog.sporter.lid_nr
                 deelnemer.volledige_naam = deelnemer.sporterboog.sporter.volledige_naam()
                 deelnemer.gemiddelde_str = "%.3f" % deelnemer.gemiddelde
-                deelnemer.gemiddelde_str.replace('.', ',')
+                deelnemer.gemiddelde_str = deelnemer.gemiddelde_str.replace('.', ',')
             # for
 
         if heeft_teams:
@@ -420,6 +424,7 @@ class WaarschijnlijkeDeelnemersKampioenschapView(UserPassesTestMixin, TemplateVi
                      .filter(deelcompetitie=deelcomp,
                              klasse__team__pk__in=klasse_team_pks)
                      .select_related('vereniging')
+                     .prefetch_related('gekoppelde_schutters')
                      .all())
             context['deelnemers_teams'] = teams
 
@@ -433,6 +438,14 @@ class WaarschijnlijkeDeelnemersKampioenschapView(UserPassesTestMixin, TemplateVi
                 team.volg_nr = volg_nr
                 team.ver_nr = team.vereniging.ver_nr
                 team.ver_naam = team.vereniging.naam
+                team.sterkte_str = "%.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+                team.sterkte_str = team.sterkte_str.replace('.', ',')
+
+                for lid in team.gekoppelde_schutters.all():
+                    sporter = lid.sporterboog.sporter
+                    lid.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
+                    lid.gem_str = lid.gemiddelde
+                # for
             # for
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
