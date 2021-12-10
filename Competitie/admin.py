@@ -419,12 +419,28 @@ class RegiocompetitieTeamPouleAdmin(CreateOnlyAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+class DeelcompetitieKlasseLimietAdmin(CreateOnlyAdmin):
+
+    list_filter = ('deelcompetitie__competitie', 'deelcompetitie__nhb_rayon', 'klasse__indiv__boogtype', 'klasse__team__team_type')
+
+    list_select_related = ('deelcompetitie',
+                           'deelcompetitie__competitie',
+                           'deelcompetitie__nhb_rayon',
+                           'klasse',
+                           'klasse__indiv',
+                           'klasse__team')
+
+    readonly_fields = ('deelcompetitie', 'klasse')
+
+    ordering = ('klasse__indiv__volgorde', 'klasse__team__volgorde')
+
+
 admin.site.register(Competitie)
 admin.site.register(DeelCompetitie, DeelCompetitieAdmin)
 admin.site.register(CompetitieKlasse, CompetitieKlasseAdmin)
 admin.site.register(DeelcompetitieRonde, DeelcompetitieRondeAdmin)
 admin.site.register(RegioCompetitieSchutterBoog, RegioCompetitieSchutterBoogAdmin)
-admin.site.register(DeelcompetitieKlasseLimiet)
+admin.site.register(DeelcompetitieKlasseLimiet, DeelcompetitieKlasseLimietAdmin)
 admin.site.register(CompetitieMutatie, CompetitieMutatieAdmin)
 admin.site.register(RegiocompetitieTeam, RegiocompetitieTeamAdmin)
 admin.site.register(RegiocompetitieTeamPoule, RegiocompetitieTeamPouleAdmin)

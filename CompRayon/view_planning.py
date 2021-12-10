@@ -574,21 +574,38 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         if self.functie_nu != deelcomp_rk.functie:
             raise PermissionDenied()     # niet de juiste RKO
 
-        context['wkl'] = wkl = (CompetitieKlasse
-                                .objects
-                                .exclude(indiv__niet_voor_rk_bk=True)
-                                .filter(competitie=deelcomp_rk.competitie,
-                                        team=None)
-                                .select_related('indiv__boogtype')
-                                .order_by('indiv__volgorde'))
+        context['wkl_indiv'] = wkl_indiv = (CompetitieKlasse
+                                            .objects
+                                            .exclude(indiv__niet_voor_rk_bk=True)
+                                            .filter(competitie=deelcomp_rk.competitie,
+                                                    team=None)
+                                            .select_related('indiv__boogtype')
+                                            .order_by('indiv__volgorde'))
 
+        context['wkl_teams'] = wkl_teams = (CompetitieKlasse
+                                            .objects
+                                            .filter(competitie=deelcomp_rk.competitie,
+                                                    is_voor_teams_rk_bk=True,
+                                                    indiv=None)
+                                            .order_by('team__volgorde'))
+
+        # zet de default limieten
         pk2wkl = dict()
-        for obj in wkl:
-            obj.limiet = 24     # default limiet
-            obj.sel = 'sel_%s' % obj.pk
-            pk2wkl[obj.pk] = obj
+        for wkl in wkl_indiv:
+            wkl.limiet = 24     # default limiet
+            wkl.sel = 'sel_%s' % wkl.pk
+            pk2wkl[wkl.pk] = wkl
         # for
 
+        for wkl in wkl_teams:
+            # ERE klasse: 12 teams
+            # overige: 8 teams
+            wkl.limiet = 12 if "ERE" in wkl.team.beschrijving else 8
+            wkl.sel = 'sel_%s' % wkl.pk
+            pk2wkl[wkl.pk] = wkl
+        # for
+
+        # aanvullen met de opgeslagen limieten
         for limiet in (DeelcompetitieKlasseLimiet
                        .objects
                        .select_related('klasse')
@@ -647,6 +664,25 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                         raise Http404('Geen valide keuze')
         # for
 
+        for ckl in (CompetitieKlasse
+                    .objects
+                    .filter(competitie=deelcomp_rk.competitie,
+                            is_voor_teams_rk_bk=True,
+                            indiv=None)):
+
+            sel = 'sel_%s' % ckl.pk
+            keuze = request.POST.get(sel, None)
+            if keuze:
+                try:
+                    pk2keuze[ckl.pk] = int(keuze[:2])   # afkappen voor veiligheid
+                    pk2ckl[ckl.pk] = ckl
+                except ValueError:
+                    pass
+                else:
+                    if pk2keuze[ckl.pk] not in (12, 10, 8, 6, 4):
+                        raise Http404('Geen valide keuze')
+        # for
+
         wijzig_limiet = list()     # list of tup(klasse, nieuwe_limiet, oude_limiet)
 
         for limiet in (DeelcompetitieKlasseLimiet
@@ -658,17 +694,22 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
             keuze = pk2keuze[pk]
             del pk2keuze[pk]
 
-            if keuze != limiet.limiet:
-                tup = (limiet.klasse, keuze, limiet.limiet)
-                wijzig_limiet.append(tup)
+            tup = (limiet.klasse, keuze, limiet.limiet)
+            wijzig_limiet.append(tup)
         # for
 
         # verwerk de overgebleven keuzes waar nog geen limiet voor was
         for pk, keuze in pk2keuze.items():
-            if keuze != 24:
-                # verandering van 24 naar een andere instelling
-                klasse = pk2ckl[pk]
-                tup = (klasse, keuze, 24)
+            klasse = pk2ckl[pk]
+            if klasse.indiv:
+                default = 24
+                tup = (klasse, keuze, default)
+                wijzig_limiet.append(tup)
+            else:
+                # ERE klasse: 12 teams
+                # overige: 8 teams
+                default = 12 if "ERE" in klasse.team.beschrijving else 8
+                tup = (klasse, keuze, default)
                 wijzig_limiet.append(tup)
         # for
 
@@ -679,17 +720,18 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         mutatie = None
         for klasse, nieuwe_limiet, oude_limiet in wijzig_limiet:
             # schrijf in het logboek
-            msg = "De limiet (cut) voor klasse %s van de %s is aangepast van %s naar %s." % (
-                    str(klasse), str(deelcomp_rk), oude_limiet, nieuwe_limiet)
-            schrijf_in_logboek(self.request.user, "Competitie", msg)
+            if oude_limiet != nieuwe_limiet:
+                msg = "De limiet (cut) voor klasse %s van de %s is aangepast van %s naar %s." % (
+                        str(klasse), str(deelcomp_rk), oude_limiet, nieuwe_limiet)
+                schrijf_in_logboek(self.request.user, "Competitie", msg)
 
-            mutatie = CompetitieMutatie(mutatie=MUTATIE_CUT,
-                                        door=door_str,
-                                        deelcompetitie=deelcomp_rk,
-                                        klasse=klasse,
-                                        cut_oud=oude_limiet,
-                                        cut_nieuw=nieuwe_limiet)
-            mutatie.save()
+                mutatie = CompetitieMutatie(mutatie=MUTATIE_CUT,
+                                            door=door_str,
+                                            deelcompetitie=deelcomp_rk,
+                                            klasse=klasse,
+                                            cut_oud=oude_limiet,
+                                            cut_nieuw=nieuwe_limiet)
+                mutatie.save()
         # for
 
         if mutatie:

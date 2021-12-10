@@ -23,24 +23,51 @@
         {% csrf_token %}
 
         <table class="white">
-            <thead>
-                <tr>
-                    <th>Klasse</th>
-                    <th>Limiet</th>
-                </tr>
-            </thead>
+            <tr>
+                <td colspan="6" class="nhb-blauw white-text center-align"><h5>Individueel</h5></td>
+            </tr>
+            <tr>
+                <th>Klasse</th>
+                <th>Limiet</th>
+            </tr>
 
-            {% for obj in wkl %}
+            {% for wkl in wkl_indiv %}
                 <tr>
-                    <td>{{ obj.indiv.beschrijving }}</td>
+                    <td>{{ wkl.indiv.beschrijving }}</td>
                     <td>
-                        <select name="{{ obj.sel }}">
-                            <option value="24"{%if obj.limiet == 24 %} selected{% endif %}>24 sporters (standaard)</option>
-                            <option value="20"{%if obj.limiet == 20 %} selected{% endif %}>20 sporters</option>
-                            <option value="16"{%if obj.limiet == 16 %} selected{% endif %}>16 sporters</option>
-                            <option value="12"{%if obj.limiet == 12 %} selected{% endif %}>12 sporters</option>
-                            <option value="8"{%if obj.limiet == 8 %} selected{% endif %}>8 sporters</option>
-                            <option value="4"{%if obj.limiet == 4 %} selected{% endif %}>4 sporters</option>
+                        <select name="{{ wkl.sel }}">
+                            <option value="24"{%if wkl.limiet == 24 %} selected{% endif %}>24 sporters (standaard)</option>
+                            <option value="20"{%if wkl.limiet == 20 %} selected{% endif %}>20 sporters</option>
+                            <option value="16"{%if wkl.limiet == 16 %} selected{% endif %}>16 sporters</option>
+                            <option value="12"{%if wkl.limiet == 12 %} selected{% endif %}>12 sporters</option>
+                            <option value="8"{%if wkl.limiet == 8 %} selected{% endif %}>8 sporters</option>
+                            <option value="4"{%if wkl.limiet == 4 %} selected{% endif %}>4 sporters</option>
+                        </select>
+                    </td>
+                </tr>
+            {% endfor %}
+
+            <tr>
+                <td colspan="6" class="nhb-grijs"></td>
+            </tr>
+            <tr>
+                <td colspan="6" class="nhb-blauw white-text center-align"><h5>Teams</h5></td>
+            </tr>
+            <tr>
+                <th>Klasse</th>
+                <th>Limiet</th>
+            </tr>
+
+            {% for wkl in wkl_teams %}
+                <tr>
+                    <td>{{ wkl.team.beschrijving }}</td>
+                    <td>
+                        <select name="{{ wkl.sel }}">
+                            <option value="12"{%if wkl.limiet == 12 %} selected{% endif %}>12 teams</option>
+                            <option value="10"{%if wkl.limiet == 10 %} selected{% endif %}>10 teams</option>
+                            <option value="8"{%if wkl.limiet == 8 %} selected{% endif %}>8 teams</option>
+                            <option value="6"{%if wkl.limiet == 6 %} selected{% endif %}>6 teams</option>
+                            <option value="4"{%if wkl.limiet == 4 %} selected{% endif %}>4 teams</option>
                         </select>
                     </td>
                 </tr>
