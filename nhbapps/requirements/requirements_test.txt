@@ -20,17 +20,17 @@ charset-normalizer==2.0.9
     # via
     #   -r requirements.txt
     #   requests
-django==3.1.13
+django==3.1.14
     # via -r requirements.txt
 et-xmlfile==1.1.0
     # via
     #   -r requirements.txt
     #   openpyxl
-google-api-core==2.2.2
+google-api-core==2.3.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.32.0
+google-api-python-client==2.33.0
     # via -r requirements.txt
 google-auth==2.3.3
     # via
@@ -42,7 +42,7 @@ google-auth-httplib2==0.1.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-googleapis-common-protos==1.53.0
+googleapis-common-protos==1.54.0
     # via
     #   -r requirements.txt
     #   google-api-core
