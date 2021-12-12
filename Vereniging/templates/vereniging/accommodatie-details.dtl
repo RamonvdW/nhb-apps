@@ -93,11 +93,15 @@
                 <tr>
                     <td style="vertical-align: top">Secretaris:</td>
                     <td style="vertical-align: top" colspan="2">
-                        {% for name in sec_names %}
-                            <span>{{ name }}</span><br>
-                        {% empty %}
-                            <i class="grey-text">Nog geen account</i>
-                        {% endfor %}
+                        {% if geen_sec %}
+                            <i class="grey-text">Geen secretaris bekend</i>
+                        {% else %}
+                            {% for name in sec_names %}
+                                <span>{{ name }}</span><br>
+                            {% empty %}
+                                <i class="grey-text">Nog geen account</i>
+                            {% endfor %}
+                        {% endif %}
                     </td>
                     {% if not readonly %}
                         <td>

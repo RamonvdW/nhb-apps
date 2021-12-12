@@ -38,7 +38,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _get_locaties_nhbver_or_404(**kwargs):
         try:
-            nhbver_pk = int(kwargs['vereniging_pk'][:6])    # afkappen voor veiligheid
+            nhbver_pk = int(kwargs['vereniging_pk'][:6])    # afkappen voor de veiligheid
             nhbver = NhbVereniging.objects.get(pk=nhbver_pk)
         except NhbVereniging.DoesNotExist:
             raise Http404('Geen valide vereniging')
@@ -110,19 +110,21 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             functie_wl = qset.filter(rol='WL')[0]
         except IndexError:                  # pragma: no cover
             # only in autotest environment
-            print("Vereniging.views.AccommodatieDetailsView: autotest ontbreekt rol SEC, HWL of WL")
-            raise Http404()
+            raise Http404('Rol ontbreekt')
 
         context['sec_names'] = self.get_all_names(functie_sec)
         context['sec_email'] = functie_sec.bevestigde_email
 
         if len(context['sec_names']) == 0:
+            context['geen_sec'] = True
             try:
-                sec = Secretaris.objects.get(vereniging=functie_sec.nhb_ver)
+                sec = Secretaris.objects.select_related('sporter').get(vereniging=functie_sec.nhb_ver)
             except Secretaris.DoesNotExist:
                 pass
             else:
-                context['sec_names'] = [sec.sporter.volledige_naam()]
+                if sec.sporter:
+                    context['sec_names'] = [sec.sporter.volledige_naam()]
+                    context['geen_sec'] = False
 
         context['hwl_names'] = self.get_all_names(functie_hwl)
         context['hwl_email'] = functie_hwl.bevestigde_email
