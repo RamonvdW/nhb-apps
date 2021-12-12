@@ -6,7 +6,7 @@
 
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
-from django.views.generic import  TemplateView
+from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
@@ -35,7 +35,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelnemer_pk = int(self.kwargs['deelnemer_pk'][:6])       # afkappen geeft veiligheid
+            deelnemer_pk = int(self.kwargs['deelnemer_pk'][:6])       # afkappen voor de veiligheid
             deelnemer = (RegioCompetitieSchutterBoog
                          .objects
                          .select_related('deelcompetitie',
@@ -138,7 +138,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
         """
 
         try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])       # afkappen geeft veiligheid
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])       # afkappen voor de veiligheid
             deelnemer = (RegioCompetitieSchutterBoog
                          .objects
                          .select_related('deelcompetitie',

@@ -56,7 +56,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         """ called by the template system to get the queryset or list of objects for the template """
 
         try:
-            comp_pk = int(self.kwargs['comp_pk'][:10])
+            comp_pk = int(self.kwargs['comp_pk'][:10])      # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, TypeError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -335,7 +335,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             het csrf token is al gecontroleerd
         """
         try:
-            comp_pk = int(self.kwargs['comp_pk'][:10])
+            comp_pk = int(self.kwargs['comp_pk'][:10])      # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, TypeError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -516,7 +516,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         """ called by the template system to get the queryset or list of objects for the template """
 
         try:
-            deelcomp_pk = int(self.kwargs['deelcomp_pk'][:6])       # afkappen geeft veiligheid
+            deelcomp_pk = int(self.kwargs['deelcomp_pk'][:6])       # afkappen voor de veiligheid
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie')

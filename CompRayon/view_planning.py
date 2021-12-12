@@ -57,7 +57,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor veiligheid
+            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor de veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie', 'nhb_rayon')
@@ -193,7 +193,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             raise PermissionDenied()
 
         try:
-            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor veiligheid
+            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor de veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie', 'nhb_regio')
@@ -345,7 +345,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])     # afkappen voor veiligheid
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])     # afkappen voor de veiligheid
             wedstrijd = (CompetitieWedstrijd
                          .objects
                          .select_related('uitslag')
@@ -416,7 +416,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         """
 
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])     # afkappen voor veiligheid
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])     # afkappen voor de veiligheid
             wedstrijd = (CompetitieWedstrijd
                          .objects
                          .select_related('uitslag')
@@ -436,7 +436,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         # weekdag is een cijfer van 0 tm 6
         # aanvang bestaat uit vier cijfers, zoals 0830
-        weekdag = request.POST.get('weekdag', '')[:2]     # afkappen = veiligheid
+        weekdag = request.POST.get('weekdag', '')[:2]     # afkappen voor de veiligheid
         aanvang = request.POST.get('aanvang', '')[:5]
         nhbver_pk = request.POST.get('nhbver_pk', '')[:6]
         if weekdag == "" or nhbver_pk == "" or len(aanvang) != 5 or aanvang[2] != ':':
@@ -495,7 +495,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         for key, value in request.POST.items():
             if key[:10] == "wkl_indiv_":
                 try:
-                    pk = int(key[10:10+6])          # afkappen voor veiligheid
+                    pk = int(key[10:10+6])          # afkappen voor de veiligheid
                 except (IndexError, TypeError, ValueError):
                     pass
                 else:
@@ -503,7 +503,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
             if key[:9] == "wkl_team_":
                 try:
-                    pk = int(key[9:9+6])            # afkappen voor veiligheid
+                    pk = int(key[9:9+6])            # afkappen voor de veiligheid
                 except (IndexError, TypeError, ValueError):
                     pass
                 else:
@@ -561,7 +561,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor veiligheid
+            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor de veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie')
@@ -629,7 +629,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         """ wordt aangeroepen als de gebruik op de knop OPSLAAN druk """
 
         try:
-            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor veiligheid
+            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor de veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie')
@@ -655,7 +655,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
             keuze = request.POST.get(sel, None)
             if keuze:
                 try:
-                    pk2keuze[ckl.pk] = int(keuze[:2])   # afkappen voor veiligheid
+                    pk2keuze[ckl.pk] = int(keuze[:2])   # afkappen voor de veiligheid
                     pk2ckl[ckl.pk] = ckl
                 except ValueError:
                     pass
@@ -674,7 +674,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
             keuze = request.POST.get(sel, None)
             if keuze:
                 try:
-                    pk2keuze[ckl.pk] = int(keuze[:2])   # afkappen voor veiligheid
+                    pk2keuze[ckl.pk] = int(keuze[:2])   # afkappen voor de veiligheid
                     pk2ckl[ckl.pk] = ckl
                 except ValueError:
                     pass
@@ -773,7 +773,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         """ Deze functie wordt aangeroepen als de knop 'Verwijder' gebruikt wordt
         """
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen voor veiligheid
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen voor de veiligheid
             wedstrijd = (CompetitieWedstrijd
                          .objects
                          .select_related('uitslag')

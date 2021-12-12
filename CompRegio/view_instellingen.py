@@ -47,8 +47,8 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            regio_nr = int(kwargs['regio_nr'][:6])  # afkappen voor veiligheid
-            comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor veiligheid
+            regio_nr = int(kwargs['regio_nr'][:6])  # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor de veiligheid
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie', 'nhb_regio')
@@ -121,8 +121,8 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         """ Deze functie wordt aangeroepen als de knop 'Opslaan' gebruikt wordt door de RCL """
 
         try:
-            regio_nr = int(kwargs['regio_nr'][:6])  # afkappen voor veiligheid
-            comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor veiligheid
+            regio_nr = int(kwargs['regio_nr'][:6])  # afkappen voor de veiligheid
+            comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor de veiligheid
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie', 'nhb_regio')
@@ -208,7 +208,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor veiligheid
+            comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404()

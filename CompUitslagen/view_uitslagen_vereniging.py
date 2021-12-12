@@ -215,7 +215,7 @@ class UitslagenVerenigingIndivView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))
@@ -225,11 +225,11 @@ class UitslagenVerenigingIndivView(TemplateView):
         comp.bepaal_fase()
         context['comp'] = comp
 
-        comp_boog = kwargs['comp_boog'][:2]     # afkappen voor veiligheid
+        comp_boog = kwargs['comp_boog'][:2]     # afkappen voor de veiligheid
 
         # ver_nr is optioneel en resulteert in het nummer van de schutter
         try:
-            ver_nr = kwargs['ver_nr'][:4]     # afkappen voor veiligheid
+            ver_nr = kwargs['ver_nr'][:4]     # afkappen voor de veiligheid
             ver_nr = int(ver_nr)
         except KeyError:
             # zoek de vereniging die bij de huidige gebruiker past
@@ -299,7 +299,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))
@@ -309,11 +309,11 @@ class UitslagenVerenigingTeamsView(TemplateView):
         comp.bepaal_fase()
         context['comp'] = comp
 
-        teamtype_afkorting = kwargs['team_type'][:2]     # afkappen voor veiligheid
+        teamtype_afkorting = kwargs['team_type'][:2]     # afkappen voor de veiligheid
 
         # ver_nr is optioneel en resulteert in het nummer van de sporter
         try:
-            ver_nr = kwargs['ver_nr'][:4]     # afkappen voor veiligheid
+            ver_nr = kwargs['ver_nr'][:4]     # afkappen voor de veiligheid
             ver_nr = int(ver_nr)
         except KeyError:
             # TODO: onmogelijk om hier te komen (ivm URL design)

@@ -285,7 +285,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         context['opt_team_type'] = teams
 
         try:
-            team_pk = int(kwargs['team_pk'][:6])
+            team_pk = int(kwargs['team_pk'][:6])        # afkappen voor de veiligheid
             team = (RegiocompetitieTeam
                     .objects
                     .get(pk=team_pk,
@@ -601,7 +601,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         # zoek het team erbij en controleer dat deze bij de vereniging van de beheerder hoort
         try:
-            team_pk = int(kwargs['team_pk'][:6])
+            team_pk = int(kwargs['team_pk'][:6])        # afkappen voor de veiligheid
             team = (RegiocompetitieTeam
                     .objects
                     .select_related('deelcompetitie',
@@ -707,7 +707,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         # zoek het team erbij en controleer dat deze bij de vereniging van de beheerder hoort
         try:
-            team_pk = int(kwargs['team_pk'][:6])
+            team_pk = int(kwargs['team_pk'][:6])        # afkappen voor de veiligheid
             team = (RegiocompetitieTeam
                     .objects
                     .select_related('deelcompetitie',
@@ -948,7 +948,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         # zoek het team erbij en controleer dat deze bij de vereniging van de beheerder hoort
         try:
-            ronde_team_pk = int(kwargs['ronde_team_pk'][:6])
+            ronde_team_pk = int(kwargs['ronde_team_pk'][:6])        # afkappen voor de veiligheid
             ronde_team = (RegiocompetitieRondeTeam
                           .objects
                           .select_related('team',
@@ -1086,7 +1086,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         # zoek het team erbij en controleer dat deze bij de vereniging van de beheerder hoort
         try:
-            ronde_team_pk = int(kwargs['ronde_team_pk'][:6])
+            ronde_team_pk = int(kwargs['ronde_team_pk'][:6])        # afkappen voor de veiligheid
             ronde_team = (RegiocompetitieRondeTeam
                           .objects
                           .select_related('team')

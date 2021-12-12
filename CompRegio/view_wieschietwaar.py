@@ -42,7 +42,7 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(self.kwargs['deelcomp_pk'][:6])       # afkappen geeft veiligheid
+            deelcomp_pk = int(self.kwargs['deelcomp_pk'][:6])       # afkappen voor de veiligheid
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie')

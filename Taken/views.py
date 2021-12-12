@@ -87,7 +87,7 @@ class DetailsView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            taak_pk = int(kwargs['taak_pk'][:6])        # afkappen geeft veiligheid
+            taak_pk = int(kwargs['taak_pk'][:6])        # afkappen voor de veiligheid
             taak = (Taak
                     .objects
                     .select_related('deelcompetitie',
@@ -117,7 +117,7 @@ class DetailsView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
 
         try:
-            taak_pk = int(kwargs['taak_pk'][:6])    # afkappen geeft veiligheid
+            taak_pk = int(kwargs['taak_pk'][:6])    # afkappen voor de veiligheid
             taak = Taak.objects.get(pk=taak_pk)
         except (ValueError, Taak.DoesNotExist):
             raise Http404('Geen valide taak')

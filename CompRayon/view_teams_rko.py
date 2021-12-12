@@ -45,7 +45,7 @@ class RayonTeamsView(TemplateView):
             context['subset_filter'] = True
 
             try:
-                comp_pk = int(str(kwargs['comp_pk'][:6]))       # afkappen geeft veiligheid
+                comp_pk = int(str(kwargs['comp_pk'][:6]))       # afkappen voor de veiligheid
                 comp = Competitie.objects.get(pk=comp_pk)
             except (ValueError, Competitie.DoesNotExist):
                 raise Http404('Competitie niet gevonden')
@@ -55,7 +55,7 @@ class RayonTeamsView(TemplateView):
 
             open_inschrijving = comp.fase <= 'G'
 
-            subset = kwargs['subset'][:10]
+            subset = kwargs['subset'][:10]      # afkappen voor de veiligheid
             if subset == 'auto':
                 subset = 'alle'
 
@@ -100,7 +100,7 @@ class RayonTeamsView(TemplateView):
         else:
             # RKO mode
             try:
-                rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])    # afkappen geeft veiligheid
+                rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])    # afkappen voor de veiligheid
                 deelcomp_rk = (DeelCompetitie
                                .objects
                                .select_related('competitie')
@@ -295,7 +295,7 @@ class RayonTeamsVerwijder(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            rk_deelcomp_pk = int(str(kwargs['rk_deelcomp_pk'][:6]))  # afkappen geeft veiligheid
+            rk_deelcomp_pk = int(str(kwargs['rk_deelcomp_pk'][:6]))  # afkappen voor de veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie')
@@ -324,7 +324,7 @@ class RayonTeamsVerwijder(UserPassesTestMixin, TemplateView):
             tel_dit = 'gekoppelde_schutters'
 
         try:
-            team_pk = int(str(kwargs['rk_team_pk'][:6]))  # afkappen geeft veiligheid
+            team_pk = int(str(kwargs['rk_team_pk'][:6]))  # afkappen voor de veiligheid
             team = (KampioenschapTeam
                     .objects
                     .select_related('team_type',
@@ -356,7 +356,7 @@ class RayonTeamsVerwijder(UserPassesTestMixin, TemplateView):
         """ de RKO weet zeker dat hij het team wil verwijderen """
 
         try:
-            rk_deelcomp_pk = int(str(kwargs['rk_deelcomp_pk'][:6]))  # afkappen geeft veiligheid
+            rk_deelcomp_pk = int(str(kwargs['rk_deelcomp_pk'][:6]))  # afkappen voor de veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie')
@@ -373,7 +373,7 @@ class RayonTeamsVerwijder(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie is niet in de juiste fase')
 
         try:
-            team_pk = int(str(kwargs['rk_team_pk'][:6]))  # afkappen geeft veiligheid
+            team_pk = int(str(kwargs['rk_team_pk'][:6]))  # afkappen voor de veiligheid
             team = (KampioenschapTeam
                     .objects
                     .select_related('team_type',

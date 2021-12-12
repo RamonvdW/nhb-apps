@@ -15,7 +15,6 @@ from Competitie.models import LAAG_REGIO, DeelCompetitie, RegiocompetitieTeam, R
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Handleiding.views import reverse_handleiding
-from Overig.background_sync import BackgroundSync
 
 
 TEMPLATE_COMPREGIO_RCL_TEAMS_POULES = 'compregio/rcl-teams-poules.dtl'
@@ -44,7 +43,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])    # afkappen voor veiligheid
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])    # afkappen voor de veiligheid
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie',
@@ -114,7 +113,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         """ maak een nieuwe poule aan """
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])    # afkappen voor veiligheid
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])    # afkappen voor de veiligheid
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie',

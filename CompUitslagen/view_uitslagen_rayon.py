@@ -174,7 +174,7 @@ class UitslagenRayonIndivView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))
@@ -184,11 +184,11 @@ class UitslagenRayonIndivView(TemplateView):
         comp.bepaal_fase()
         context['comp'] = comp
 
-        comp_boog = kwargs['comp_boog'][:2]          # afkappen voor veiligheid
+        comp_boog = kwargs['comp_boog'][:2]          # afkappen voor de veiligheid
 
         # rayon_nr is optioneel (eerste binnenkomst zonder rayon nummer)
         try:
-            rayon_nr = kwargs['rayon_nr'][:2]        # afkappen voor veiligheid
+            rayon_nr = kwargs['rayon_nr'][:2]        # afkappen voor de veiligheid
             rayon_nr = int(rayon_nr)
         except KeyError:
             rayon_nr = get_sporter_rayon_nr(self.request)
@@ -355,7 +355,7 @@ class UitslagenRayonTeamsView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))
@@ -365,11 +365,11 @@ class UitslagenRayonTeamsView(TemplateView):
         comp.bepaal_fase()
         context['comp'] = comp
 
-        teamtype_afkorting = kwargs['team_type'][:2]     # afkappen voor veiligheid
+        teamtype_afkorting = kwargs['team_type'][:2]     # afkappen voor de veiligheid
 
         # rayon_nr is optioneel (eerste binnenkomst zonder rayon nummer)
         try:
-            rayon_nr = kwargs['rayon_nr'][:2]        # afkappen voor veiligheid
+            rayon_nr = kwargs['rayon_nr'][:2]        # afkappen voor de veiligheid
             rayon_nr = int(rayon_nr)
         except KeyError:
             rayon_nr = get_sporter_rayon_nr(self.request)

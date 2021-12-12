@@ -38,7 +38,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _get_locaties_nhbver_or_404(**kwargs):
         try:
-            nhbver_pk = int(kwargs['vereniging_pk'][:6])    # afkappen voor veiligheid
+            nhbver_pk = int(kwargs['vereniging_pk'][:6])    # afkappen voor de veiligheid
             nhbver = NhbVereniging.objects.get(pk=nhbver_pk)
         except NhbVereniging.DoesNotExist:
             raise Http404('Geen valide vereniging')

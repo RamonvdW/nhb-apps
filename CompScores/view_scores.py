@@ -49,7 +49,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])            # afkappen voor de veiligheid
             deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk,
                                                   laag=LAAG_REGIO)
         except (ValueError, DeelCompetitie.DoesNotExist):
@@ -249,7 +249,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
+        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen voor de veiligheid
         wedstrijd, deelcomp, ronde = bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk)
 
         context['wedstrijd'] = wedstrijd
@@ -318,7 +318,7 @@ class WedstrijdUitslagControlerenView(WedstrijdUitslagInvoerenView):
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
-        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
+        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen voor de veiligheid
         wedstrijd, deelcomp, _ = bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk)
 
         if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
@@ -510,7 +510,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
     @staticmethod
     def laad_wedstrijd_of_404(data):
         try:
-            wedstrijd_pk = int(str(data['wedstrijd_pk'])[:6])   # afkappen geeft beveiliging
+            wedstrijd_pk = int(str(data['wedstrijd_pk'])[:6])   # afkappen voor de veiligheid
             wedstrijd = (CompetitieWedstrijd
                          .objects
                          .select_related('uitslag')
@@ -585,7 +585,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
                 continue
 
             try:
-                pk = int(str(key)[:6])     # afkappen geeft beveiliging
+                pk = int(str(key)[:6])     # afkappen voor de veiligheid
             except ValueError:
                 # fout pk: ignore
                 continue        # met de for-loop
@@ -605,7 +605,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
 
             # sla de score op
             try:
-                waarde = int(str(value)[:4])   # afkappen geeft beveiliging
+                waarde = int(str(value)[:4])   # afkappen voor de veiligheid
             except ValueError:
                 # foute score: ignore
                 continue
@@ -677,7 +677,7 @@ class WedstrijdUitslagBekijkenView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen geeft beveiliging
+        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen voor de veiligheid
         wedstrijd, deelcomp, ronde = bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk)
 
         scores = (wedstrijd
@@ -995,7 +995,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor de veiligheid
             deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk,
                                                   laag=LAAG_REGIO)
         except (ValueError, DeelCompetitie.DoesNotExist):
@@ -1022,7 +1022,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor de veiligheid
             deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk,
                                                   laag=LAAG_REGIO)
         except (ValueError, DeelCompetitie.DoesNotExist):

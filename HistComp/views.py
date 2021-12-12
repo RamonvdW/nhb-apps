@@ -383,7 +383,7 @@ class InterlandAlsBestandView(InterlandView):
     def get(self, request, *args, **kwargs):
 
         try:
-            klasse_pk = int(kwargs['klasse_pk'][:6])  # afkappen geeft beveiliging
+            klasse_pk = int(kwargs['klasse_pk'][:6])            # afkappen voor de veiligheid
             klasse = HistCompetitie.objects.get(pk=klasse_pk)
         except (ValueError, HistCompetitie.DoesNotExist):
             raise Http404('Klasse niet gevonden')

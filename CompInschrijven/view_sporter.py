@@ -44,8 +44,8 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
 
         # converteer en doe eerste controle op de parameters
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:10])
-            sporterboog_pk = int(kwargs['sporterboog_pk'][:10])
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:10])           # afkappen voor de veiligheid
+            sporterboog_pk = int(kwargs['sporterboog_pk'][:10])     # afkappen voor de veiligheid
 
             sporterboog = (SporterBoog
                            .objects
@@ -238,8 +238,8 @@ class RegiocompetitieAanmeldenView(View):
 
         # converteer en doe eerste controle op de parameters
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:10])
-            sporterboog_pk = int(kwargs['sporterboog_pk'][:10])
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:10])           # afkappen voor de veiligheid
+            sporterboog_pk = int(kwargs['sporterboog_pk'][:10])     # afkappen voor de veiligheid
 
             sporterboog = (SporterBoog
                            .objects
@@ -387,7 +387,7 @@ class RegiocompetitieAfmeldenView(View):
 
         # converteer en doe eerste controle op de parameters
         try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])     # afkappen geeft bescherming
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])     # afkappen voor de veiligheid
             deelnemer = (RegioCompetitieSchutterBoog
                          .objects
                          .select_related('deelcompetitie__competitie',

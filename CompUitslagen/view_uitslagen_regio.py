@@ -243,7 +243,7 @@ class UitslagenRegioIndivView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))
@@ -257,11 +257,11 @@ class UitslagenRegioIndivView(TemplateView):
         if zes_scores not in ('alle', 'zes'):
             zes_scores = 'alle'
 
-        comp_boog = kwargs['comp_boog'][:2]     # afkappen voor veiligheid
+        comp_boog = kwargs['comp_boog'][:2]     # afkappen voor de veiligheid
 
         # regio_nr is optioneel (eerste binnenkomst zonder regio nummer)
         try:
-            regio_nr = kwargs['regio_nr'][:3]   # afkappen voor veiligheid
+            regio_nr = kwargs['regio_nr'][:3]   # afkappen voor de veiligheid
             regio_nr = int(regio_nr)
         except KeyError:
             # bepaal welke (initiële) regio bij de huidige gebruiker past
@@ -453,7 +453,7 @@ class UitslagenRegioTeamsView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))
@@ -463,11 +463,11 @@ class UitslagenRegioTeamsView(TemplateView):
         comp.bepaal_fase()
         context['comp'] = comp
 
-        teamtype_afkorting = kwargs['team_type'][:2]     # afkappen voor veiligheid
+        teamtype_afkorting = kwargs['team_type'][:2]     # afkappen voor de veiligheid
 
         # regio_nr is optioneel (eerste binnenkomst zonder regio nummer)
         try:
-            regio_nr = kwargs['regio_nr'][:3]   # afkappen voor veiligheid
+            regio_nr = kwargs['regio_nr'][:3]   # afkappen voor de veiligheid
             regio_nr = int(regio_nr)
         except KeyError:
             # bepaal welke (initiële) regio bij de huidige gebruiker past

@@ -45,7 +45,7 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])      # afkappen voor de veiligheid
             wedstrijd = (CompetitieWedstrijd
                          .objects
                          .select_related('vereniging')
@@ -123,7 +123,7 @@ class WaarschijnlijkeDeelnemersAlsBestandView(UserPassesTestMixin, TemplateView)
         """ Afhandelen van de GET request waarmee we een bestand terug geven. """
 
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])      # afkappen voor de veiligheid
             wedstrijd = (CompetitieWedstrijd
                          .objects
                          .select_related('vereniging')

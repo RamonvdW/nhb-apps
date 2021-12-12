@@ -248,7 +248,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         context['opt_team_type'] = teams
 
         try:
-            rk_team_pk = int(kwargs['rk_team_pk'][:6])
+            rk_team_pk = int(kwargs['rk_team_pk'][:6])      # afkappen voor de veiligheid
             rk_team = (KampioenschapTeam
                        .objects
                        .get(pk=rk_team_pk,
@@ -399,7 +399,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         # zoek het rk_team erbij en controleer dat deze bij de vereniging van de beheerder hoort
         try:
-            rk_team_pk = int(kwargs['rk_team_pk'][:6])
+            rk_team_pk = int(kwargs['rk_team_pk'][:6])      # afkappen voor de veiligheid
             rk_team = (KampioenschapTeam
                        .objects
                        .select_related('deelcompetitie',
@@ -530,7 +530,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         # zoek het team erbij en controleer dat deze bij de vereniging van de beheerder hoort
         try:
-            rk_team_pk = int(kwargs['rk_team_pk'][:6])
+            rk_team_pk = int(kwargs['rk_team_pk'][:6])      # afkappen voor de veiligheid
             rk_team = (KampioenschapTeam
                        .objects
                        .select_related('deelcompetitie',
@@ -595,7 +595,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         for key in request.POST.keys():
             if key.startswith('deelnemer_'):
                 try:
-                    pk = int(key[10:])
+                    pk = int(key[10:10+6])      # afkappen voor de veiligheid
                 except ValueError:
                     pass
                 else:

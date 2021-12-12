@@ -40,7 +40,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
 
     def get_vereniging(self):
         try:
-            ver_pk = int(self.kwargs['vereniging_pk'][:6])        # afkappen voor veiligheid
+            ver_pk = int(self.kwargs['vereniging_pk'][:6])        # afkappen voor de veiligheid
             ver = NhbVereniging.objects.get(pk=ver_pk)
         except (ValueError, NhbVereniging.DoesNotExist):
             raise Http404('Vereniging niet gevonden')
@@ -120,7 +120,7 @@ class ExterneLocatieDetailsView(TemplateView):
 
     def get_vereniging(self):
         try:
-            ver_pk = int(self.kwargs['vereniging_pk'][:6])          # afkappen voor veiligheid
+            ver_pk = int(self.kwargs['vereniging_pk'][:6])          # afkappen voor de veiligheid
             ver = NhbVereniging.objects.get(pk=ver_pk)
         except (ValueError, NhbVereniging.DoesNotExist):
             raise Http404('Vereniging niet gevonden')

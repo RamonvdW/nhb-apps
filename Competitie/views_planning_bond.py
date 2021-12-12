@@ -42,7 +42,7 @@ class BondPlanningView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen geeft beveiliging
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor de veiligheid
             deelcomp_bk = (DeelCompetitie
                            .objects
                            .select_related('competitie')
@@ -111,7 +111,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen geeft beveiliging
+            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk,
@@ -143,7 +143,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
             om de competitie door te zetten naar de RK fase
         """
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen geeft beveiliging
+            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk,
@@ -187,7 +187,7 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen geeft beveiliging
+            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk,
@@ -215,7 +215,7 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
         """
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen geeft beveiliging
+            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk,
@@ -251,7 +251,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         """ Deze functie wordt aangeroepen als de knop 'Verwijder' gebruikt wordt
         """
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen geeft beveiliging
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen voor de veiligheid
             wedstrijd = (CompetitieWedstrijd
                          .objects
                          .select_related('uitslag')
@@ -300,7 +300,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 #         context = super().get_context_data(**kwargs)
 #
 #         try:
-#             comp_pk = int(kwargs['comp_pk'][:6])  # afkappen geeft beveiliging
+#             comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
 #             comp = (Competitie
 #                     .objects
 #                     .get(pk=comp_pk,
@@ -320,7 +320,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 #             in de RK planning, om een nieuwe wedstrijd toe te voegen.
 #         """
 #         try:
-#             comp_pk = int(kwargs['comp_pk'][:6])  # afkappen geeft beveiliging
+#             comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
 #             comp = (Competitie
 #                     .objects
 #                     .get(pk=comp_pk,

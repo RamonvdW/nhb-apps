@@ -116,7 +116,7 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
         account = request.user
         jaar = bepaal_startjaar_nieuwe_competitie()
 
-        # beveiliging tegen dubbel aanmaken
+        # bescherm tegen dubbel aanmaken
         if Competitie.objects.filter(begin_jaar=jaar).count() == 0:
             seizoen = "%s/%s" % (jaar, jaar+1)
             schrijf_in_logboek(account, 'Competitie', 'Aanmaken competities %s' % seizoen)
@@ -273,7 +273,7 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -303,7 +303,7 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         """
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -336,7 +336,7 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -366,7 +366,7 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
             --> de beheerder wil deze klassengrenzen vaststellen
         """
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')

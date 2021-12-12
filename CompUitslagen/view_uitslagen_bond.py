@@ -25,7 +25,7 @@ class UitslagenBondView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))
@@ -35,7 +35,7 @@ class UitslagenBondView(TemplateView):
         comp.bepaal_fase()
         context['comp'] = comp
 
-        comp_boog = kwargs['comp_boog'][:2]          # afkappen voor veiligheid
+        comp_boog = kwargs['comp_boog'][:2]          # afkappen voor de veiligheid
 
         try:
            deelcomp = (DeelCompetitie

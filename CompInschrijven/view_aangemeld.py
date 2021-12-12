@@ -84,7 +84,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
+            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -152,7 +152,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor veiligheid
+            comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -164,7 +164,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
         context['competitie'] = comp
 
         try:
-            rayon_pk = int(kwargs['rayon_pk'][:6])  # afkappen voor veiligheid
+            rayon_pk = int(kwargs['rayon_pk'][:6])  # afkappen voor de veiligheid
             rayon = NhbRayon.objects.get(pk=rayon_pk)
         except (ValueError, NhbRayon.DoesNotExist):
             raise Http404('Rayon niet gevonden')
@@ -228,7 +228,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
+            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -240,7 +240,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
         context['competitie'] = comp
 
         try:
-            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor veiligheid
+            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor de veiligheid
             regio = (NhbRegio
                      .objects
                      .select_related('rayon')
@@ -540,7 +540,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
+            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -552,7 +552,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         context['competitie'] = comp
 
         try:
-            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor veiligheid
+            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor de veiligheid
             regio = (NhbRegio
                      .objects
                      .select_related('rayon')
@@ -613,7 +613,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         context = dict()
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
+            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -625,7 +625,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         context['competitie'] = comp
 
         try:
-            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor veiligheid
+            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor de veiligheid
             regio = (NhbRegio
                      .objects
                      .select_related('rayon')
@@ -711,7 +711,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
+            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -723,7 +723,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
         context['competitie'] = comp
 
         try:
-            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor veiligheid
+            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor de veiligheid
             regio = (NhbRegio
                      .objects
                      .select_related('rayon')
@@ -838,7 +838,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
         context = dict()
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor veiligheid
+            comp_pk = int(kwargs['comp_pk'][:6])        # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
@@ -850,7 +850,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
         context['competitie'] = comp
 
         try:
-            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor veiligheid
+            regio_pk = int(kwargs['regio_pk'][:6])      # afkappen voor de veiligheid
             regio = (NhbRegio
                      .objects
                      .select_related('rayon')
