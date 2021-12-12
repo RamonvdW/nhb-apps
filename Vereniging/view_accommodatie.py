@@ -117,12 +117,17 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         context['sec_email'] = functie_sec.bevestigde_email
 
         if len(context['sec_names']) == 0:
+            context['geen_sec'] = True
             try:
-                sec = Secretaris.objects.get(vereniging=functie_sec.nhb_ver)
+                sec = Secretaris.objects.select_related('sporter').get(vereniging=functie_sec.nhb_ver)
             except Secretaris.DoesNotExist:
                 pass
             else:
-                context['sec_names'] = [sec.sporter.volledige_naam()]
+                if sec.sporter:
+                    context['sec_names'] = [sec.sporter.volledige_naam()]
+                    context['geen_sec'] = False
+
+        print('geen_sec: %s' % context['geen_sec'])
 
         context['hwl_names'] = self.get_all_names(functie_hwl)
         context['hwl_email'] = functie_hwl.bevestigde_email
