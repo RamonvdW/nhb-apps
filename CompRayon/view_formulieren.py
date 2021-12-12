@@ -201,7 +201,8 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             wedstrijd = (CompetitieWedstrijd
                          .objects
                          .select_related('vereniging')
-                         .get(pk=wedstrijd_pk))     # TODO filter op HWL vereniging?
+                         .get(pk=wedstrijd_pk,
+                              vereniging=self.functie_nu.nhb_ver))
         except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
@@ -320,7 +321,8 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
                          .objects
                          .select_related('vereniging',
                                          'locatie')
-                         .get(pk=wedstrijd_pk))     # TODO filter op HWL vereniging?
+                         .get(pk=wedstrijd_pk,
+                              vereniging=self.functie_nu.nhb_ver))
         except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
@@ -340,6 +342,11 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
         # TODO: check fase
+
+        if comp.afstand == '18':
+            aantal_pijlen = 30
+        else:
+            aantal_pijlen = 25
 
         vastgesteld = timezone.now()
 
@@ -394,9 +401,10 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
             # team naam
             ws['F' + row] = team.team_naam
 
-            # TODO: team sterkte ook noemen?
-            # sterkte_str = "%.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
-            # sterkte_str = sterkte_str.replace('.', ',')
+            # team sterkte
+            sterkte_str = "%.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            sterkte_str = sterkte_str.replace('.', ',')
+            ws['G' + row] = sterkte_str
 
             # vul de 4 sporters in
             aantal = 0
@@ -425,6 +433,8 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
                 ws['E' + row] = '-'         # bondsnummer
                 ws['F' + row] = 'n.v.t.'    # naam
                 ws['G' + row] = ''          # gemiddelde
+                ws['H' + row] = ''          # score 1
+                ws['I' + row] = ''          # score 2
                 aantal += 1
             # while
 
@@ -436,9 +446,10 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
             row = str(row_nr)
 
             # vereniging leeg maken
-            ws['C' + row] = '-'     # regio
-            ws['D' + row] = '-'     # vereniging
-            ws['F' + row] = '-'     # team naam
+            ws['C' + row] = '-'          # regio
+            ws['D' + row] = 'n.v.t.'     # vereniging
+            ws['F' + row] = 'n.v.t.'     # team naam
+            ws['G' + row] = ''           # team sterkte
 
             # sporters leegmaken
             aantal = 0
@@ -446,8 +457,10 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
                 row_nr += 1
                 row = str(row_nr)
                 ws['E' + row] = '-'         # bondsnummer
-                ws['F' + row] = 'n.v.t.'    # naam
+                ws['F' + row] = '-'         # naam
                 ws['G' + row] = ''          # gemiddelde
+                ws['H' + row] = ''          # score 1
+                ws['I' + row] = ''          # score 2
                 aantal += 1
             # while
 
