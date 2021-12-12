@@ -110,8 +110,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             functie_wl = qset.filter(rol='WL')[0]
         except IndexError:                  # pragma: no cover
             # only in autotest environment
-            print("Vereniging.views.AccommodatieDetailsView: autotest ontbreekt rol SEC, HWL of WL")
-            raise Http404()
+            raise Http404('Rol ontbreekt')
 
         context['sec_names'] = self.get_all_names(functie_sec)
         context['sec_email'] = functie_sec.bevestigde_email
@@ -126,8 +125,6 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                 if sec.sporter:
                     context['sec_names'] = [sec.sporter.volledige_naam()]
                     context['geen_sec'] = False
-
-        print('geen_sec: %s' % context['geen_sec'])
 
         context['hwl_names'] = self.get_all_names(functie_hwl)
         context['hwl_email'] = functie_hwl.bevestigde_email
