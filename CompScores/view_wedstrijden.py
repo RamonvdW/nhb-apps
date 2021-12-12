@@ -127,7 +127,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             # link naar de waarschijnlijke deelnemerslijst
             if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and not (wedstrijd.uitslag and wedstrijd.uitslag.is_bevroren):
                 if wedstrijd.is_rk or wedstrijd.is_bk:
-                    wedstrijd.url_waarschijnlijke_deelnemers = reverse('CompRayon:waarschijnlijke-deelnemers',
+                    wedstrijd.url_waarschijnlijke_deelnemers = reverse('CompRayon:download-formulier',
                                                                        kwargs={'wedstrijd_pk': wedstrijd.pk})
                 else:
                     wedstrijd.url_waarschijnlijke_deelnemers = reverse('CompRegio:waarschijnlijke-deelnemers',

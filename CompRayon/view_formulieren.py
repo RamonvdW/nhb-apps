@@ -4,31 +4,33 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.urls import reverse
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, FileResponse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (DeelcompetitieRonde, RegiocompetitieTeam, DeelCompetitie,
-                               KampioenschapSchutterBoog, KampioenschapTeam,
-                               LAAG_REGIO, LAAG_RK, LAAG_BK)
-from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers, bepaal_blazoen_behoefte
+from Competitie.models import (CompetitieKlasse, LAAG_RK,
+                               RegiocompetitieTeam, KampioenschapSchutterBoog, KampioenschapTeam)
 from Competitie.menu import menu_dynamics_competitie
-from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
-from Plein.menu import menu_dynamics
+from Functie.rol import Rollen, rol_get_huidige_functie
 from Wedstrijden.models import CompetitieWedstrijd
-import csv
+from tempfile import NamedTemporaryFile
+import openpyxl
+import shutil
+import os
 
-TEMPLATE_WAARSCHIJNLIJKE_DEELNEMERS_RK_BK = 'comprayon/waarschijnlijke-deelnemers-rk-bk.dtl'
+
+TEMPLATE_DOWNLOAD_RK_FORMULIER = 'comprayon/hwl-download-rk-formulier.dtl'
 
 
-class WaarschijnlijkeDeelnemersKampioenschapView(UserPassesTestMixin, TemplateView):
+class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
 
     """ Toon de HWL of WL de waarschijnlijke deelnemerslijst voor een wedstrijd bij deze vereniging
     """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_WAARSCHIJNLIJKE_DEELNEMERS_RK_BK
+    template_name = TEMPLATE_DOWNLOAD_RK_FORMULIER
     raise_exception = True  # genereer PermissionDefined als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -45,7 +47,7 @@ class WaarschijnlijkeDeelnemersKampioenschapView(UserPassesTestMixin, TemplateVi
         context = super().get_context_data(**kwargs)
 
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])      # afkappen voor de veiligheid
             wedstrijd = (CompetitieWedstrijd
                          .objects
                          .select_related('vereniging')
@@ -56,8 +58,12 @@ class WaarschijnlijkeDeelnemersKampioenschapView(UserPassesTestMixin, TemplateVi
             raise Http404('Wedstrijd niet gevonden')
 
         plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
-        deelcomp = plan.deelcompetitie_set.select_related('competitie').all()[0]
+        deelcomp = plan.deelcompetitie_set.select_related('competitie', 'nhb_rayon').all()[0]
+        if deelcomp.laag != LAAG_RK:
+            raise Http404('Verkeerde competitie')
+
         comp = deelcomp.competitie
+        # TODO: check fase
         if comp.afstand == '18':
             aantal_pijlen = 30
         else:
@@ -66,9 +72,9 @@ class WaarschijnlijkeDeelnemersKampioenschapView(UserPassesTestMixin, TemplateVi
         if deelcomp.laag == LAAG_RK:
             wedstrijd.is_rk = True
             wedstrijd.beschrijving = "Rayonkampioenschap"
-        else:
-            wedstrijd.is_bk = True
-            wedstrijd.beschrijving = "Bondskampioenschap"
+        # else:
+        #     wedstrijd.is_bk = True
+        #     wedstrijd.beschrijving = "Bondskampioenschap"
 
         heeft_indiv = heeft_teams = False
         beschr = list()
@@ -116,7 +122,11 @@ class WaarschijnlijkeDeelnemersKampioenschapView(UserPassesTestMixin, TemplateVi
             for deelnemer in deelnemers:
                 if deelnemer.klasse != prev_klasse:
                     deelnemer.break_before = True
+                    deelnemer.url_download_indiv = reverse('CompRayon:formulier-indiv-als-bestand',
+                                                           kwargs={'wedstrijd_pk': wedstrijd.pk,
+                                                                   'klasse_pk': deelnemer.klasse.pk})
                     prev_klasse = deelnemer.klasse
+
                 deelnemer.ver_nr = deelnemer.bij_vereniging.ver_nr
                 deelnemer.ver_naam = deelnemer.bij_vereniging.naam
                 deelnemer.lid_nr = deelnemer.sporterboog.sporter.lid_nr
@@ -135,12 +145,20 @@ class WaarschijnlijkeDeelnemersKampioenschapView(UserPassesTestMixin, TemplateVi
                      .all())
             context['deelnemers_teams'] = teams
 
+            if not comp.klassengrenzen_vastgesteld_rk_bk:
+                context['geen_klassengrenzen'] = True
+
             volg_nr = 0
             prev_klasse = None
             for team in teams:
                 if team.klasse != prev_klasse:
                     team.break_before = True
+                    team.url_download_teams = reverse('CompRayon:formulier-teams-als-bestand',
+                                                      kwargs={'wedstrijd_pk': wedstrijd.pk,
+                                                              'klasse_pk': team.klasse.pk})
+
                     prev_klasse = team.klasse
+
                 volg_nr += 1
                 team.volg_nr = volg_nr
                 team.ver_nr = team.vereniging.ver_nr
@@ -157,6 +175,295 @@ class WaarschijnlijkeDeelnemersKampioenschapView(UserPassesTestMixin, TemplateVi
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context
+
+
+class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
+
+    """ Geef de HWL het ingevulde wedstrijdformulier voor een RK wedstrijd bij deze vereniging """
+
+    # class variables shared by all instances
+    raise_exception = True  # genereer PermissionDefined als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.functie_nu and self.rol_nu == Rollen.ROL_HWL
+
+    def get(self, request, *args, **kwargs):
+        """ Afhandelen van de GET request waarmee we een bestand terug geven. """
+
+        try:
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])      # afkappen voor de veiligheid
+            wedstrijd = (CompetitieWedstrijd
+                         .objects
+                         .select_related('vereniging')
+                         .get(pk=wedstrijd_pk))     # TODO filter op HWL vereniging?
+        except (ValueError, CompetitieWedstrijd.DoesNotExist):
+            raise Http404('Wedstrijd niet gevonden')
+
+        try:
+            klasse_pk = int(kwargs['klasse_pk'][:6])            # afkappen voor de veiligheid
+            klasse = (CompetitieKlasse
+                      .objects
+                      .exclude(indiv=None)
+                      .get(pk=klasse_pk))
+        except (ValueError, CompetitieKlasse.DoesNotExist):
+            raise Http404('Klasse niet gevonden')
+
+        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
+        deelcomp = plan.deelcompetitie_set.select_related('competitie', 'nhb_rayon').all()[0]
+        if deelcomp.laag != LAAG_RK:
+            raise Http404('Verkeerde competitie')
+
+        comp = deelcomp.competitie
+        # TODO: check fase
+
+        vastgesteld = timezone.now()
+
+        klasse_str = klasse.indiv.beschrijving
+
+        # bepaal de naam van het terug te geven bestand
+        fname = "rk-programma_individueel-rayon%s_" % deelcomp.nhb_rayon.rayon_nr
+        fname += klasse_str.lower().replace(' ', '-')
+        fname += '.xlsm'
+
+        # make een kopie van het RK programma in een tijdelijk bestand
+        fpath = os.path.join(settings.INSTALL_PATH, 'CompRayon', 'files', 'template-excel-rk-indiv.xlsm')
+        tmp_file = NamedTemporaryFile()
+        shutil.copyfile(fpath, tmp_file.name)
+
+        # open de kopie, zodat we die aan kunnen passen
+        try:
+            prg = openpyxl.open(tmp_file, keep_vba=True)
+        except OSError:
+            raise Http404('Kan RK programma niet openen')
+
+        # maak wijzigingen in het RK programma
+        ws = prg['Voorronde']
+
+        ws['C4'] = 'Rayonkampioenschappen %s, Rayon %s, %s' % (comp.beschrijving, deelcomp.nhb_rayon.rayon_nr, klasse.indiv.beschrijving)
+
+        deelnemers = (KampioenschapSchutterBoog
+                      .objects
+                      .filter(deelcompetitie=deelcomp,
+                              klasse=klasse.pk)
+                      .select_related('sporterboog',
+                                      'sporterboog__sporter',
+                                      'bij_vereniging',
+                                      'bij_vereniging__regio',
+                                      'klasse')
+                      .order_by('klasse',
+                                'rank'))
+
+        row_nr = 6
+        for deelnemer in deelnemers:
+            row_nr += 1
+            row = str(row_nr)
+
+            # bondsnummer
+            ws['D' + row] = deelnemer.sporterboog.sporter.lid_nr
+
+            # volledige naam
+            ws['E' + row] = deelnemer.sporterboog.sporter.volledige_naam()
+
+            # vereniging
+            ver = deelnemer.bij_vereniging
+            ws['F' + row] = '%s %s' % (ver.ver_nr, ver.naam)
+
+            # regio
+            ws['G' + row] = ver.regio.regio_nr
+
+            # klasse
+            ws['H' + row] = klasse_str
+
+            # gemiddelde
+            ws['I' + row] = deelnemer.gemiddelde
+        # for
+
+        row_nr += 2
+        ws['A' + str(row_nr)] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
+
+        # geef het aangepaste RK programma aan de client
+        response = HttpResponse(content_type='application/vnd.ms-excel.sheet.macroEnabled.12')
+        response['Content-Disposition'] = 'attachment; filename="%s"' % fname
+        prg.save(response)
+
+        return response
+
+
+class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
+
+    """ Geef de HWL het ingevulde wedstrijdformulier voor een RK wedstrijd bij deze vereniging """
+
+    # class variables shared by all instances
+    raise_exception = True  # genereer PermissionDefined als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.functie_nu and self.rol_nu == Rollen.ROL_HWL
+
+    def get(self, request, *args, **kwargs):
+        """ Afhandelen van de GET request waarmee we een bestand terug geven. """
+
+        try:
+            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])      # afkappen voor de veiligheid
+            wedstrijd = (CompetitieWedstrijd
+                         .objects
+                         .select_related('vereniging',
+                                         'locatie')
+                         .get(pk=wedstrijd_pk))     # TODO filter op HWL vereniging?
+        except (ValueError, CompetitieWedstrijd.DoesNotExist):
+            raise Http404('Wedstrijd niet gevonden')
+
+        try:
+            klasse_pk = int(kwargs['klasse_pk'][:6])            # afkappen voor de veiligheid
+            klasse = (CompetitieKlasse
+                      .objects
+                      .exclude(team=None)
+                      .get(pk=klasse_pk))
+        except (ValueError, CompetitieKlasse.DoesNotExist):
+            raise Http404('Klasse niet gevonden')
+
+        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
+        deelcomp = plan.deelcompetitie_set.select_related('competitie', 'nhb_rayon').all()[0]
+        if deelcomp.laag != LAAG_RK:
+            raise Http404('Verkeerde competitie')
+
+        comp = deelcomp.competitie
+        # TODO: check fase
+
+        vastgesteld = timezone.now()
+
+        klasse_str = klasse.team.beschrijving
+
+        # bepaal de naam van het terug te geven bestand
+        fname = "rk-programma_teams-rayon%s_" % deelcomp.nhb_rayon.rayon_nr
+        fname += klasse_str.lower().replace(' ', '-')
+        fname += '.xlsm'
+
+        # make een kopie van het RK programma in een tijdelijk bestand
+        fpath = os.path.join(settings.INSTALL_PATH, 'CompRayon', 'files', 'template-excel-rk-teams.xlsm')
+        tmp_file = NamedTemporaryFile()
+        shutil.copyfile(fpath, tmp_file.name)
+
+        # open de kopie, zodat we die aan kunnen passen
+        try:
+            prg = openpyxl.open(tmp_file, keep_vba=True)
+        except OSError:
+            raise Http404('Kan RK programma niet openen')
+
+        # maak wijzigingen in het RK programma
+        ws = prg['scores']
+
+        ws['B1'] = 'Rayonkampioenschappen Teams Rayon %s, %s' % (deelcomp.nhb_rayon.rayon_nr, comp.beschrijving)
+        ws['B4'] = 'Klasse: ' + klasse_str
+        ws['D3'] = wedstrijd.datum_wanneer.strftime('%Y-%m-%d')
+        ws['E3'] = wedstrijd.vereniging.naam     # organisatie
+        ws['H3'] = wedstrijd.locatie.adres       # adres van de wedstrijdlocatie
+
+        teams = (KampioenschapTeam
+                 .objects
+                 .filter(deelcompetitie=deelcomp,
+                         klasse=klasse.pk)
+                 .select_related('vereniging',
+                                 'vereniging__regio')
+                 .prefetch_related('gekoppelde_schutters')
+                 .order_by('aanvangsgemiddelde'))
+
+        volg_nr = 0
+        for team in teams:
+            row_nr = 9 + volg_nr * 6
+            row = str(row_nr)
+
+            # regio
+            ver = team.vereniging
+            ws['C' + row] = ver.regio.regio_nr
+
+            # vereniging
+            ws['D' + row] = '[%s] %s' % (ver.ver_nr, ver.naam)
+
+            # team naam
+            ws['F' + row] = team.team_naam
+
+            # TODO: team sterkte ook noemen?
+            # sterkte_str = "%.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            # sterkte_str = sterkte_str.replace('.', ',')
+
+            # vul de 4 sporters in
+            aantal = 0
+            for deelnemer in team.gekoppelde_schutters.all():
+                row_nr += 1
+                row = str(row_nr)
+
+                sporter = deelnemer.sporterboog.sporter
+
+                # bondsnummer
+                ws['E' + row] = sporter.lid_nr
+
+                # volledige naam
+                ws['F' + row] = sporter.volledige_naam()
+
+                # regio gemiddelde
+                ws['G' + row] = deelnemer.gemiddelde
+
+                aantal += 1
+            # for
+
+            # bij minder dan 4 sporters de overgebleven regels leegmaken
+            while aantal < 4:
+                row_nr += 1
+                row = str(row_nr)
+                ws['E' + row] = '-'         # bondsnummer
+                ws['F' + row] = 'n.v.t.'    # naam
+                ws['G' + row] = ''          # gemiddelde
+                aantal += 1
+            # while
+
+            volg_nr += 1
+        # for
+
+        while volg_nr < 12:
+            row_nr = 9 + volg_nr * 6
+            row = str(row_nr)
+
+            # vereniging leeg maken
+            ws['C' + row] = '-'     # regio
+            ws['D' + row] = '-'     # vereniging
+            ws['F' + row] = '-'     # team naam
+
+            # sporters leegmaken
+            aantal = 0
+            while aantal < 4:
+                row_nr += 1
+                row = str(row_nr)
+                ws['E' + row] = '-'         # bondsnummer
+                ws['F' + row] = 'n.v.t.'    # naam
+                ws['G' + row] = ''          # gemiddelde
+                aantal += 1
+            # while
+
+            volg_nr += 1
+        # while
+
+        ws['B82'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
+
+        # TODO: all invallers opnemen op een apart tabblad, met gemiddelde
+
+        # geef het aangepaste RK programma aan de client
+        response = HttpResponse(content_type='application/vnd.ms-excel.sheet.macroEnabled.12')
+        response['Content-Disposition'] = 'attachment; filename="%s"' % fname
+        prg.save(response)
+
+        return response
 
 
 # end of file

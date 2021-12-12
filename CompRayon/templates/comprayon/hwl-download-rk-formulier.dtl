@@ -6,13 +6,13 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Waarschijnlijke deelnemers{% endblock %}
+{% block title %}RK programma{% endblock %}
 
 {% block pagina %}
 
-    <h4>Waarschijnlijke deelnemers</h4>
+    <h4>RK programma</h4>
 
-    <p>Op deze pagina tonen we de <i>waarschijnlijke</i> deelnemers van de volgende bondscompetitie wedstrijd:</p>
+    <p>Op deze pagina tonen we de deelnemerslijst voor de volgende bondscompetitie wedstrijd:</p>
 
     <!-- toon gegevens van de wedstrijd in een blauw box -->
     <div class="row">
@@ -55,12 +55,6 @@
     </div>
 
 
-    <!--
-    <p>Je kan onderstaande lijst ook downloaden:</p>
-    <a class="btn-nhb-blauw" href="{{ url_download }}">
-        <i class="material-icons-round left">download</i>Download lijst</a>
-    -->
-
     <p>&nbsp;</p>
     <p>Deze lijst is gebaseerd op de gegevens van: <b>{{ vastgesteld }}</b>.</p>
 
@@ -75,7 +69,15 @@
             {% for deelnemer in deelnemers_indiv %}
                 {% if deelnemer.break_before %}
                     <tr class="nhb-grijs">
-                        <td colspan="6"><h5>{{ deelnemer.klasse.indiv.beschrijving }}</h5></td>
+                        <td colspan="4">
+                            <br>
+                            <h5>{{ deelnemer.klasse.indiv.beschrijving }}</h5>
+                        </td>
+                        <td colspan="2">
+                            <br>
+                            <a class="btn-nhb-blauw" href="{{ deelnemer.url_download_indiv }}">
+                                <i class="material-icons-round left">download</i>Download excel</a>
+                        </td>
                     </tr>
 
                     <tr>
@@ -123,10 +125,29 @@
                 </tr>
             {% endif %}
 
+            {% if geen_klassengrenzen %}
+                <tr class="nhb-grijs">
+                    <td colspan="6"></td>
+                </tr>
+                <tr class="white">
+                    <td colspan="6">
+                        <i class="red-text">De BKO heeft de teams klassengrenzen nog niet vastgesteld</i>
+                    </td>
+                </tr>
+                {% endif %}
+
             {% for team in deelnemers_teams %}
                 {% if team.break_before %}
                     <tr class="nhb-grijs">
-                        <td colspan="7"><h5>{{ team.klasse.team.beschrijving }}</h5></td>
+                        <td colspan="4">
+                            <br>
+                            <h5>{{ team.klasse.team.beschrijving }}</h5>
+                        </td>
+                        <td colspan="2">
+                            <br>
+                            <a class="btn-nhb-blauw" href="{{ team.url_download_teams }}">
+                                <i class="material-icons-round left">download</i>Download excel</a>
+                        </td>
                     </tr>
                     <tr>
                         <th><span class="hide-on-small-only">Nummer</span><span class="hide-unless-small">Nr</span></th>
@@ -162,10 +183,13 @@
                 {% endfor %}
             {% endfor %}
         </table>
-        <p>*1: Een invaller mag geen hoger gemiddelde hebben.</p>
+
+        {% if deelnemers_teams %}
+            <p>*1: Een invaller mag geen hoger gemiddelde hebben.</p>
+        {% endif %}
     {% endif %}
 
 
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-waarschijnlijke-deelnemers-rk-bk" %}
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-hwl-download-rk-formulier" %}
 
 {% endblock %}

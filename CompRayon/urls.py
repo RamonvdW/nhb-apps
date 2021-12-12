@@ -81,10 +81,17 @@ urlpatterns = [
 
 
     # HWL: waarschijnlijke deelnemers
-    path('waarschijnlijke-deelnemers/<wedstrijd_pk>/',
-         view_formulieren.WaarschijnlijkeDeelnemersKampioenschapView.as_view(),
-         name='waarschijnlijke-deelnemers'),
+    path('download-formulier/<wedstrijd_pk>/',
+         view_formulieren.DownloadRkFormulierView.as_view(),
+         name='download-formulier'),
 
+    path('download-formulier-indiv/<wedstrijd_pk>/<klasse_pk>/',
+         view_formulieren.FormulierIndivAlsBestandView.as_view(),
+         name='formulier-indiv-als-bestand'),
+
+    path('download-formulier-teams/<wedstrijd_pk>/<klasse_pk>/',
+         view_formulieren.FormulierTeamsAlsBestandView.as_view(),
+         name='formulier-teams-als-bestand'),
 
     # BKO
     path('<comp_pk>/rk-bk-teams-klassengrenzen/vaststellen/',

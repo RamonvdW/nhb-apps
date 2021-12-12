@@ -44,7 +44,7 @@
                     {% if not uitslag_invoeren %}
                         <td>
                             {% if obj.url_waarschijnlijke_deelnemers %}
-                                <a class="btn-nhb-blauw" href="{{ obj.url_waarschijnlijke_deelnemers }}">Toon lijst</a>
+                                <a class="btn-nhb-blauw" href="{{ obj.url_waarschijnlijke_deelnemers }}">{% if obj.is_rk %}RK programma{% else %}Toon lijst{% endif %}</a>
                             {% endif %}
                         </td>
                     {% endif %}
