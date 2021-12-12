@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_planning, view_indiv_rko, view_indiv_hwl, view_teams_bko, view_teams_rko, view_teams_hwl
+from . import (view_planning, view_indiv_rko, view_indiv_hwl, view_teams_bko, view_teams_rko, view_teams_hwl,
+               view_formulieren)
 
 app_name = 'CompRayon'
 
@@ -77,6 +78,12 @@ urlpatterns = [
     path('teams-vereniging/koppelen/<rk_team_pk>/',
          view_teams_hwl.RKTeamsKoppelLedenView.as_view(),
          name='teams-rk-koppelen'),
+
+
+    # HWL: waarschijnlijke deelnemers
+    path('waarschijnlijke-deelnemers/<wedstrijd_pk>/',
+         view_formulieren.WaarschijnlijkeDeelnemersKampioenschapView.as_view(),
+         name='waarschijnlijke-deelnemers'),
 
 
     # BKO

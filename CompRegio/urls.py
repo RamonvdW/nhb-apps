@@ -6,11 +6,20 @@
 
 from django.urls import path
 from . import (view_clusters, view_planning, view_instellingen, view_teams_rcl, view_poules, view_teams_hwl,
-               view_keuze_zeven_wedstrijden, view_wieschietwaar)
+               view_keuze_zeven_wedstrijden, view_wieschietwaar, view_waarschijnlijke_deelnemers)
 
 app_name = 'CompRegio'
 
 urlpatterns = [
+
+    path('waarschijnlijke-deelnemers/<wedstrijd_pk>/',
+         view_waarschijnlijke_deelnemers.WaarschijnlijkeDeelnemersView.as_view(),
+         name='waarschijnlijke-deelnemers'),
+
+    path('waarschijnlijke-deelnemers/<wedstrijd_pk>/als-bestand/',
+         view_waarschijnlijke_deelnemers.WaarschijnlijkeDeelnemersAlsBestandView.as_view(),
+         name='waarschijnlijke-deelnemers-als-bestand'),
+
 
     # RCL:planning regio
     path('planning/<deelcomp_pk>/',
@@ -119,6 +128,7 @@ urlpatterns = [
     path('teams-vereniging/<deelcomp_pk>/',
          view_teams_hwl.TeamsRegioView.as_view(),
          name='teams-regio'),
+
 
     # sporter / HWL
     path('keuze-zeven-wedstrijden/<deelnemer_pk>/',

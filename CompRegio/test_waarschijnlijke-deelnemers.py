@@ -20,14 +20,14 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestVerenigingWedstrijden(E2EHelpers, TestCase):
+class TestCompRegioWedstrijden(E2EHelpers, TestCase):
 
     """ tests voor de CompScores applicatie, functies voor Wedstrijden """
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 
-    url_scores = '/bondscompetities/scores/bij-de-vereniging/'
-    url_wedstrijden = '/bondscompetities/scores/wedstrijden-bij-de-vereniging/'
+    url_waarschijnlijke = '/bondscompetities/regio/waarschijnlijke-deelnemers/%s/'  # wedstrijd_pk
+    url_waarschijnlijke_bestand = '/bondscompetities/regio/waarschijnlijke-deelnemers/%s/als-bestand/' # wedstrijd_pk
 
     testdata = None
 
@@ -383,6 +383,13 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
             self.assertTrue("/waarschijnlijke-deelnemers/" in url or url.startswith('/bondscompetities/scores/uitslag-invoeren/'))
         # for
 
+        url = self.url_waarschijnlijke % self.wedstrijden[0].pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
+
         self.e2e_assert_other_http_commands_not_supported(url)
 
     def test_wedstrijden_wl(self):
@@ -404,6 +411,33 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden)
 
+        url = self.url_waarschijnlijke % self.wedstrijden[1].pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
+
+        # als bestand
+        url = self.url_waarschijnlijke_bestand % self.wedstrijden[1].pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_is_bestand(resp)
+
+        # zet teamcompetitie uit
+        self.deelcomp_regio_18.regio_organiseert_teamcompetitie = False
+        self.deelcomp_regio_18.save(update_fields=['regio_organiseert_teamcompetitie'])
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_is_bestand(resp)
+
+        # niet bestaande wedstrijd
+        url = self.url_waarschijnlijke_bestand % 999999
+        resp = self.client.get(url)
+        self.assert404(resp, 'Wedstrijd niet gevonden')
+
     def test_wedstrijden_sec(self):
         # login als SEC
         self.e2e_login_and_pass_otp(self.account_sec)
@@ -417,10 +451,74 @@ class TestVerenigingWedstrijden(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'plein/site_layout.dtl'))
 
+        url = self.url_waarschijnlijke % self.wedstrijden[2].pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
+
+    def test_bad(self):
         # geen toegang tot de pagina
         self.client.logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wedstrijden)
         self.assert403(resp)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_waarschijnlijke)
+        self.assert403(resp)
+
+        # login als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_waarschijnlijke % 99999)
+        self.assert404(resp)
+
+    def test_corner_cases(self):
+        # login als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        # cluster
+        self.nhbver1.clusters.add(NhbCluster.objects.all()[0])
+
+        url = self.url_waarschijnlijke % self.wedstrijden[0].pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
+
+        # inschrijfmethode 1
+        self.deelcomp_regio_18.inschrijf_methode = INSCHRIJF_METHODE_1
+        self.deelcomp_regio_18.save(update_fields=['inschrijf_methode'])
+
+        url = self.url_waarschijnlijke % self.wedstrijden[0].pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
+
+        # 25m1pijl wedstrijd
+        self.ronde.plan.wedstrijden.clear()
+        self.deelcomp_regio_18 = DeelCompetitie.objects.get(laag=LAAG_REGIO,
+                                                            nhb_regio=self.regio_111,
+                                                            competitie__afstand=25)
+        ronde = maak_deelcompetitie_ronde(self.deelcomp_regio_18)
+        ronde.plan.wedstrijden.add(self.wedstrijden[0])
+
+        url = self.url_waarschijnlijke % self.wedstrijden[0].pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
+
 
 # end of file

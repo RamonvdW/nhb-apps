@@ -66,9 +66,12 @@
 
     {% if heeft_indiv %}
         <table class="white">
-            <tr>
-                <td colspan="6" class="nhb-blauw white-text center-align"><h5>Individueel</h5></td>
-            </tr>
+            {% if heeft_teams %}
+                <tr>
+                    <td colspan="6" class="nhb-blauw white-text center-align"><h5>Individueel</h5></td>
+                </tr>
+            {% endif %}
+
             {% for deelnemer in deelnemers_indiv %}
                 {% if deelnemer.break_before %}
                     <tr class="nhb-grijs">
@@ -114,9 +117,11 @@
 
     {% if heeft_teams %}
         <table class="white">
-            <tr>
-                <td colspan="6" class="nhb-blauw white-text center-align"><h5>Teams</h5></td>
-            </tr>
+            {% if heeft_indiv %}
+                <tr>
+                    <td colspan="6" class="nhb-blauw white-text center-align"><h5>Teams</h5></td>
+                </tr>
+            {% endif %}
 
             {% for team in deelnemers_teams %}
                 {% if team.break_before %}
@@ -157,12 +162,10 @@
                 {% endfor %}
             {% endfor %}
         </table>
-    {% endif %}
-
-    {% if deelcomp.regio_organiseert_teamcompetitie %}
         <p>*1: Een invaller mag geen hoger gemiddelde hebben.</p>
     {% endif %}
 
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compscores-waarschijnlijke-deelnemers-rk-bk" %}
+
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-waarschijnlijke-deelnemers-rk-bk" %}
 
 {% endblock %}
