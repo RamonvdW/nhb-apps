@@ -18,7 +18,6 @@ from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Handleiding.views import reverse_handleiding
 from Overig.background_sync import BackgroundSync
-from Plein.menu import menu_dynamics
 import time
 import csv
 
@@ -83,7 +82,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         # 2) deelnemers voor RK zijn vastgesteld --> toon lijst
 
         try:
-            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor veiligheid
+            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor de veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie', 'nhb_rayon')
@@ -197,7 +196,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
     def get(self, request, *args, **kwargs):
 
         try:
-            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor veiligheid
+            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor de veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie', 'nhb_rayon')
@@ -296,7 +295,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor veiligheid
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
             deelnemer = (KampioenschapSchutterBoog
                          .objects
                          .select_related('deelcompetitie__competitie',
@@ -348,7 +347,7 @@ class WijzigStatusRkSchutterView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         """ wordt aangeroepen als de gebruik op de knop OPSLAAN druk """
         try:
-            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor veiligheid
+            deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
             deelnemer = (KampioenschapSchutterBoog
                          .objects
                          .select_related('klasse',

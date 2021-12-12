@@ -6,27 +6,13 @@
 
 from django.conf import settings
 from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponse, Http404
-from django.db.models import Count
-from django.views.generic import TemplateView, View
-from django.core.exceptions import PermissionDenied
+from django.http import Http404
+from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, Competitie, DeelCompetitie,
-                               CompetitieKlasse, DeelcompetitieKlasseLimiet, DeelcompetitieRonde,
-                               KampioenschapSchutterBoog, KampioenschapTeam, CompetitieMutatie,
-                               MUTATIE_CUT, MUTATIE_AFMELDEN, MUTATIE_AANMELDEN, DEELNAME_JA, DEELNAME_NEE)
+from Competitie.models import LAAG_RK, DeelCompetitie, KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
-from Handleiding.views import reverse_handleiding
-from Logboek.models import schrijf_in_logboek
-from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
-from Plein.menu import menu_dynamics
-from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdenPlan, WedstrijdLocatie
-from types import SimpleNamespace
-import datetime
-import time
-import csv
 
 
 TEMPLATE_COMPRAYON_LIJST_RK = 'comprayon/hwl-rk-selectie.dtl'
@@ -61,7 +47,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         rayon = ver.regio.rayon
 
         try:
-            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor veiligheid
+            rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor de veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
                            .select_related('competitie',
