@@ -7,6 +7,7 @@
 from django.http import HttpResponseRedirect, JsonResponse, Http404
 from django.urls import reverse
 from django.utils import timezone
+from django.db.models import Count
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -90,13 +91,15 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 
         wedstrijden = (CompetitieWedstrijd
                        .objects
-                       .select_related('uitslag')
+                       .select_related('uitslag',
+                                       'vereniging')
                        .filter(pk__in=wedstrijd_pks)
+                       .annotate(scores_count=Count('uitslag__scores'))
                        .order_by('datum_wanneer', 'tijd_begin_wedstrijd',
                                  'pk'))     # vaste sortering bij gelijke datum/tijd
 
         for wedstrijd in wedstrijden:
-            heeft_uitslag = (wedstrijd.uitslag and wedstrijd.uitslag.scores.count() > 0)
+            heeft_uitslag = (wedstrijd.uitslag and wedstrijd.scores_count > 0)
 
             beschrijving = wedstrijd2beschrijving[wedstrijd.pk]
             if wedstrijd.beschrijving != beschrijving:
@@ -860,7 +863,8 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         # de wedstrijd heeft een datum en uitslag met scores
         for wedstrijd in (CompetitieWedstrijd
                           .objects
-                          .select_related('uitslag')
+                          .select_related('uitslag',
+                                          'vereniging')
                           .prefetch_related('uitslag__scores')
                           .exclude(uitslag=None)
                           .filter(competitiewedstrijdenplan__in=plan_pks)):

@@ -219,7 +219,9 @@ class GebruikteKlassenFilter(admin.SimpleListFilter):
 
 class KampioenschapTeamAdmin(CreateOnlyAdmin):
 
-    filter_horizontal = ('tijdelijke_schutters', 'gekoppelde_schutters', 'feitelijke_schutters')
+    filter_horizontal = ('tijdelijke_schutters',
+                         'gekoppelde_schutters',
+                         'feitelijke_schutters')
 
     list_filter = ('deelcompetitie__competitie',
                    'vereniging__regio__rayon',
@@ -337,7 +339,7 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
                    'team__vereniging__regio',
                    'ronde_nr')
 
-    list_select_related = ('team', )
+    list_select_related = ('team', 'team__vereniging')
 
     fieldsets = (
         ('',

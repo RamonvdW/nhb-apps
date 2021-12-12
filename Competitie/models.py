@@ -812,7 +812,7 @@ class KampioenschapTeam(models.Model):
     # TODO: RK uitslag scores en ranking toevoegen
 
     def __str__(self):
-        return "%s: %s (%s)" % (self.vereniging, self.team_naam, self.gekoppelde_schutters.count())
+        return "%s: %s" % (self.vereniging, self.team_naam)
 
 
 class CompetitieMutatie(models.Model):
