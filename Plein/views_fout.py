@@ -11,6 +11,7 @@ from django.shortcuts import render
 from django.views.generic import View
 from django.views.defaults import ERROR_PAGE_TEMPLATE
 from django.core.exceptions import PermissionDenied
+from Functie.rol import rol_get_huidige_functie
 from Mailer.models import mailer_notify_internal_error
 from nhbapps import urls
 import traceback
@@ -100,20 +101,29 @@ def site_handler500_internal_server_error(request, exception=None):
     # print('site_handler500: exception=%s; info=%s' % (repr(exception), str(exception)))
     global in_500_handler
 
-    # vang de fout en schrijf deze in de syslog
-    tups = sys.exc_info()
-    tb = traceback.format_exception(*tups)
-    tb_msg = '\n'.join(tb)
-    my_logger.error('Internal server error:\n' + tb_msg)
-
     # voorkom fout op fout
     if not in_500_handler:              # pragma: no branch
         in_500_handler = True
 
+        _, functie_nu = rol_get_huidige_functie(request)
+
+        tb_msg_start = 'Internal server error:\n\n%s %s\n' % (request.method, request.path)
+        if functie_nu:
+            tb_msg_start += 'Huidige functie: [%s] %s\n' % (functie_nu.pk, str(functie_nu))
+        tb_msg_start += '\n'
+
+        # vang de fout en schrijf deze in de syslog
+        tups = sys.exc_info()
+        tb = traceback.format_exception(*tups)
+
+        # full traceback in the local log
+        tb_msg = tb_msg_start + '\n'.join(tb)
+        my_logger.error(tb_msg)
+
         # stuur een mail naar de ontwikkelaars
         # reduceer tot de nuttige regels
         tb = [line for line in tb if '/site-packages/' not in line]
-        tb_msg = '\n'.join(tb)
+        tb_msg = tb_msg_start + '\n'.join(tb)
 
         # deze functie stuurt maximaal 1 mail per dag over hetzelfde probleem
         mailer_notify_internal_error(tb_msg)
@@ -122,6 +132,7 @@ def site_handler500_internal_server_error(request, exception=None):
 
     context = dict()
     context['email_support'] = settings.EMAIL_SUPPORT
+
     return render(request, TEMPLATE_HANDLER_500, context)
 
 
