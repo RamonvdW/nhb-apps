@@ -12,7 +12,7 @@
 
     <script type="application/javascript">
         function zes_scores() {
-            let el = document.getElementById('zes_scores')
+            //let el = document.getElementById('zes_scores')
             window.location.href = "{{ zes_scores_next }}"
         }
     </script>
@@ -65,7 +65,7 @@
     <br><br>
     <div class="row">
         <div class="col s12 m6" style="padding:0">
-            <ul class="collapsible" style="box-shadow: none; border:0px">
+            <ul class="collapsible" style="box-shadow: none; border:0">
                 <li>
                     <div class="collapsible-header white">Klik voor verenigingen</div>
                     <div class="collapsible-body white">

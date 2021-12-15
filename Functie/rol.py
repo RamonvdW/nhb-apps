@@ -343,7 +343,7 @@ def rol_bepaal_beschrijving(rol, functie_pk=None):
     if rol == Rollen.ROL_BB:
         beschr = 'Manager competitiezaken'
     elif rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC):
-        beschr = functie.beschrijving
+        beschr = functie_naam
     elif rol == Rollen.ROL_SPORTER:
         beschr = 'Sporter'
     else:   # ook rol == None

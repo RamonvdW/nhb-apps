@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 # reset the tweede factor koppeling voor een account
 
-import argparse
 from django.core.management.base import BaseCommand
 from Account.models import Account
 from Logboek.models import schrijf_in_logboek
-from django.utils import timezone
 
 
 class Command(BaseCommand):

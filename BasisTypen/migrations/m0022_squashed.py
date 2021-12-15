@@ -359,11 +359,16 @@ def init_team_typen(apps, _):
 
     boog_r = boog_c = boog_bb = boog_ib = boog_lb = None
     for boog in boog_type_klas.objects.all():
-        if boog.afkorting == 'R':  boog_r = boog
-        if boog.afkorting == 'C':  boog_c = boog
-        if boog.afkorting == 'BB': boog_bb = boog
-        if boog.afkorting == 'IB': boog_ib = boog
-        if boog.afkorting == 'LB': boog_lb = boog
+        if boog.afkorting == 'R':
+            boog_r = boog
+        if boog.afkorting == 'C':
+            boog_c = boog
+        if boog.afkorting == 'BB':
+            boog_bb = boog
+        if boog.afkorting == 'IB':
+            boog_ib = boog
+        if boog.afkorting == 'LB':
+            boog_lb = boog
     # for
 
     # maak de standaard team typen aan

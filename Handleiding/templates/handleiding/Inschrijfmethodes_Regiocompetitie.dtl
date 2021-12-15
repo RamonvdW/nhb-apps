@@ -30,16 +30,16 @@
         <h5>Inschrijf methode 3</h5>
         <p>De sporter geeft bij het aanmelden voor de regiocompetitie op welke dagdelen de voorkeur hebben, zoals:</p>
         <ul style="padding-left: 20px">
-            <li style="list-style-type: disc; padding-left: 0px">Geen voorkeur</li>
-            <li style="list-style-type: disc; padding-left: 0px">'s Avonds</li>
-            <li style="list-style-type: disc; padding-left: 0px">Weekend</li>
-            <li style="list-style-type: disc; padding-left: 0px">Maandag</li>
-            <li style="list-style-type: disc; padding-left: 0px">Dinsdag</li>
-            <li style="list-style-type: disc; padding-left: 0px">Woensdag</li>
-            <li style="list-style-type: disc; padding-left: 0px">Donderdag</li>
-            <li style="list-style-type: disc; padding-left: 0px">Vrijdag</li>
-            <li style="list-style-type: disc; padding-left: 0px">Zaterdag</li>
-            <li style="list-style-type: disc; padding-left: 0px">Zondag</li>
+            <li style="list-style-type: disc; padding-left:0">Geen voorkeur</li>
+            <li style="list-style-type: disc; padding-left:0">'s Avonds</li>
+            <li style="list-style-type: disc; padding-left:0">Weekend</li>
+            <li style="list-style-type: disc; padding-left:0">Maandag</li>
+            <li style="list-style-type: disc; padding-left:0">Dinsdag</li>
+            <li style="list-style-type: disc; padding-left:0">Woensdag</li>
+            <li style="list-style-type: disc; padding-left:0">Donderdag</li>
+            <li style="list-style-type: disc; padding-left:0">Vrijdag</li>
+            <li style="list-style-type: disc; padding-left:0">Zaterdag</li>
+            <li style="list-style-type: disc; padding-left:0">Zondag</li>
         </ul>
         <p>De RCL krijgt het overzicht hoeveel sporters van elke vereniging bijvoorbeeld 's Avonds willen schieten. Om overbelasting van een accommodatie te voorkomen deelt de RCL quota-plaatsen uit aan de verenigingen voor elke wedstrijd. De verenigingen vergeven plaatsen aan de sporters.</p>
 

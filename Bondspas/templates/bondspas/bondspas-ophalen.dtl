@@ -131,7 +131,7 @@
             <div id="id_progressbar">
                 <p>Je bondspas wordt opgehaald.</p>
                 <div class="progress" style="width:250px">
-                    <div class="determinate" id="id_progress" style="width: 0%" data-pogingen=10 data-procent=0 data-step=10></div>
+                    <div class="determinate" id="id_progress" style="width:0" data-pogingen=10 data-procent=0 data-step=10></div>
                 </div>
             </div>
 

@@ -411,14 +411,5 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="info-competitie" %}
 
-    <script type="application/javascript">
-        document.addEventListener('DOMContentLoaded', function() {
-            let elems = document.querySelectorAll('.carousel');
-            let instances = M.Carousel.init(elems, { fullWidth: true,
-                                                     indicators: true,
-                                                     noWrap: true });
-        });
-    </script>
-
 {% endblock %}
 

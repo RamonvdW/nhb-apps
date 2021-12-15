@@ -300,7 +300,8 @@ class InterlandView(UserPassesTestMixin, TemplateView):
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_BB
 
-    def maak_data(self, context):
+    @staticmethod
+    def maak_data(context):
 
         # maak een cache aan van leden
         lid_nr2sporter = dict()  # [lid_nr] = Sporter

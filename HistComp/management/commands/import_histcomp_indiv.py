@@ -62,7 +62,8 @@ class Command(BaseCommand):
 
         return histcompetitie
 
-    def _verwijder_eerdere_import(self, seizoen, comptype):
+    @staticmethod
+    def _verwijder_eerdere_import(seizoen, comptype):
         objs = HistCompetitie.objects.filter(seizoen=seizoen, comp_type=comptype)
         if len(objs):
             objs.delete()

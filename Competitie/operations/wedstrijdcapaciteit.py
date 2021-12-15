@@ -7,7 +7,7 @@
 from django.db.models import Q
 from BasisTypen.models import BLAZOEN2STR, BLAZOEN_40CM, BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_DT
 from Competitie.models import (RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3)
+                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2)
 from Sporter.models import SporterVoorkeuren
 from types import SimpleNamespace
 import math

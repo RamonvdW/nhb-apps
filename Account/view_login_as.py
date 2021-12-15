@@ -10,7 +10,7 @@ from django.http import Http404
 from django.contrib.auth import login
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import ListView
-from django.db.models import Q, Value
+from django.db.models import Q
 from django.core.exceptions import PermissionDenied
 from .forms import ZoekAccountForm, KiesAccountForm
 from .models import Account, AccountEmail

@@ -26,9 +26,9 @@ def get_safe_from_ip(request):
         except (KeyError, AttributeError):
             pass
         else:
-            for chr in from_ip:
-                if chr in '0123456789ABCDEFabcdef:.':
-                    safe_ip += chr
+            for char in from_ip:
+                if char in '0123456789ABCDEFabcdef:.':
+                    safe_ip += char
             # for
 
             # also limit it in length

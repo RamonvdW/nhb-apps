@@ -39,11 +39,6 @@ a {
     background-color: #eee;      /* grey lighten-3 */
 }
 
-.handleiding-link {
-    color: #03628c;             /* NHB donker blauw */
- /* color: #0aa0e1;                NHB medium blauw */
-}
-
 /* pre-formatted / code block in de handleiding */
 .handleiding_code {
     padding: 10px;
@@ -93,7 +88,7 @@ del {
 /* lagere regel in een grid */
 .small-row {
     padding: 5px 10px 5px 10px;
-    margin-bottom: 0px;
+    margin-bottom: 0;
 }
 
 /* smal in de breedte */
@@ -186,7 +181,7 @@ input.table-filter {
 /* toon content tegen de linker kan als het menu niet in beeld is */
 @media only screen and (max-width: 1020px) {
     #container {
-        padding-left: 0px;
+        padding-left:0;
     }
 }
 

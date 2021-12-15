@@ -8,15 +8,11 @@ from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
 from BasisTypen.models import BoogType, TeamType
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
-from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, DEELNAME_NEE,
-                               TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES,
-                               Competitie, DeelCompetitie, DeelcompetitieKlasseLimiet,
-                               RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam)
-from Competitie.operations.poules import maak_poule_schema
+from NhbStructuur.models import NhbRegio, NhbVereniging
+from Competitie.models import (LAAG_REGIO, TEAM_PUNTEN_MODEL_SOM_SCORES, Competitie, DeelCompetitie,
+                               RegiocompetitieTeam, RegiocompetitieRondeTeam, RegioCompetitieSchutterBoog)
 from Competitie.menu import menu_dynamics_competitie
-from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_huidige
+from Functie.rol import Rollen, rol_get_huidige_functie
 from types import SimpleNamespace
 
 

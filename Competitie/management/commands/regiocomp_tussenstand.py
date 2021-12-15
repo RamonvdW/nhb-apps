@@ -23,7 +23,7 @@ class Command(BaseCommand):
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
-        self.stop_at = 0
+        self.stop_at = datetime.datetime(2000, 1, 1)
 
         self.taken = CompetitieTaken.objects.all()[0]
 

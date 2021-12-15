@@ -94,7 +94,7 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
         context['kruisjes'] = kruisjes = list()
         context['wedstrijden'] = wedstrijden
         for nummer, wedstrijd in enumerate(wedstrijden, start=1):
-            nummer_str = str(nummer )
+            nummer_str = str(nummer)
             kruisjes.append(nummer_str)
             wedstrijd.nummer_str = nummer_str
 

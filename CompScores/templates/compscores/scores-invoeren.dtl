@@ -149,7 +149,7 @@
                     if (rsp['fail'] === undefined)
                     {
                         // toon het zoekresultaat
-                        let deelnemer = rsp['deelnemers'][0]
+                        //let deelnemer = rsp['deelnemers'][0]
                         //console.log('deelnemer:', deelnemer)
 
                         //console.log('btn.dataset:', btn.dataset)
@@ -258,7 +258,6 @@
             el_rsp.value = ""
 
             const lid_nr = rsp['lid_nr']
-            let found_dupe = false
 
             // zoek het plekje in de tabel waar deze toegevoegd moet worden
             const table = document.getElementById('table1')

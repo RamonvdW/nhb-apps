@@ -25,12 +25,6 @@ class AccommodatieDetailsForm(forms.Form):
                             min_value=0,
                             max_value=25)
 
-	# FUTURE: remove this option
-    # max_dt = forms.IntegerField(
-    #                         required=False,
-    #                         min_value=3,
-    #                         max_value=4)
-
     max_sporters_18m = forms.IntegerField(
                             required=False,
                             min_value=0,

@@ -6,12 +6,12 @@
 
 from django.conf import settings
 from django.urls import reverse
-from django.http import Http404, HttpResponse, FileResponse
+from django.http import Http404, HttpResponse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (CompetitieKlasse, LAAG_RK,
-                               RegiocompetitieTeam, KampioenschapSchutterBoog, KampioenschapTeam)
+                               KampioenschapSchutterBoog, KampioenschapTeam)
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Wedstrijden.models import CompetitieWedstrijd

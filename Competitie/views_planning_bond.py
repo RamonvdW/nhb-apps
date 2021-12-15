@@ -209,7 +209,8 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
         menu_dynamics(self.request, context, actief='competitie')
         return context
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'Regel toevoegen' gebruikt wordt
             in de RK planning, om een nieuwe wedstrijd toe te voegen.
         """

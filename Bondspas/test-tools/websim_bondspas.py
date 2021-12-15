@@ -18,7 +18,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 class MyServer(BaseHTTPRequestHandler):
 
-    def log_message(self, format, *args):
+    def log_message(self, fmt, *args):
         # no logging please
         pass
 

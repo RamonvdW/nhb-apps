@@ -6,7 +6,6 @@
 
 # zet de is_BB vlag voor een account, vanaf de commandline
 
-import argparse
 from django.core.management.base import BaseCommand
 from Account.models import Account
 from Logboek.models import schrijf_in_logboek

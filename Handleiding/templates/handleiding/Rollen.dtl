@@ -15,13 +15,13 @@
         
         <p>De volgende rollen en bijbehorende afkortingen worden gebruikt:</p>
         <ul style="padding-left: 20px">
-            <li style="list-style-type: disc; padding-left: 0px">BB = Bondsburo / Manager Competitiezaken (aantal: 1)</li>
-            <li style="list-style-type: disc; padding-left: 0px">BKO = Bondskampioenschappen Organisator (aantal: 1 per competitie = 2)</li>
-            <li style="list-style-type: disc; padding-left: 0px">RKO = Rayonkampioenschappen Organisator (aantal: 4 per rayon per competitie = 4 x 2=8)</li>
-            <li style="list-style-type: disc; padding-left: 0px">RCL = Regiocompetitieleider (aantal: 1 per regio per competitie = 16 x 2=32)</li>
-            <li style="list-style-type: disc; padding-left: 0px">SEC = Secretaris van een vereniging (aantal: 1 per verenging)</li>
-            <li style="list-style-type: disc; padding-left: 0px">HWL = Hoofd wedstrijdleider bij een vereniging (aantal: 1 per vereniging)</li>
-            <li style="list-style-type: disc; padding-left: 0px">WL = Wedstrijdleider bij een vereniging (aantal: 1 per vereniging)</li>
+            <li style="list-style-type: disc; padding-left:0">BB = Bondsburo / Manager Competitiezaken (aantal: 1)</li>
+            <li style="list-style-type: disc; padding-left:0">BKO = Bondskampioenschappen Organisator (aantal: 1 per competitie = 2)</li>
+            <li style="list-style-type: disc; padding-left:0">RKO = Rayonkampioenschappen Organisator (aantal: 4 per rayon per competitie = 4 x 2=8)</li>
+            <li style="list-style-type: disc; padding-left:0">RCL = Regiocompetitieleider (aantal: 1 per regio per competitie = 16 x 2=32)</li>
+            <li style="list-style-type: disc; padding-left:0">SEC = Secretaris van een vereniging (aantal: 1 per verenging)</li>
+            <li style="list-style-type: disc; padding-left:0">HWL = Hoofd wedstrijdleider bij een vereniging (aantal: 1 per vereniging)</li>
+            <li style="list-style-type: disc; padding-left:0">WL = Wedstrijdleider bij een vereniging (aantal: 1 per vereniging)</li>
         </ul>
 
         <p>Er kunnen meerdere personen gekoppeld worden aan elke rol.</p>

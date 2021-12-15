@@ -100,7 +100,7 @@
 
             {% if obj.nieuwe_klasse %}
                 <tr class="nhb-grijs">
-                    <td colspan="3" style="padding-bottom: 0px"><h5>{{ obj.klasse.indiv.beschrijving }}</h5>Aantal: {{ obj.aantal_in_klasse }}</td>
+                    <td colspan="3" style="padding-bottom:0"><h5>{{ obj.klasse.indiv.beschrijving }}</h5>Aantal: {{ obj.aantal_in_klasse }}</td>
                 </tr>
 
                 <tr>

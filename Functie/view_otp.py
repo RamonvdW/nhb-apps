@@ -189,7 +189,6 @@ class OTPKoppelenStap3View(OTPKoppelenStapView):
             form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
             # FUTURE: blokkeer na X pogingen
 
-
         # still here --> re-render with error message
         context = dict()
 

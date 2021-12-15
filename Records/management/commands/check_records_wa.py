@@ -139,7 +139,6 @@ class Command(BaseCommand):
             self.stdout.write('[WARNING] Record %s-%s is onverwacht geslacht=V (WA: cat=%s)' % (nhb_rec.discipline, nhb_rec.volg_nr, cat))
             self._warning_count += 1
 
-
         # leeftijdscategorie = models.CharField(max_length=1, choices=LEEFTIJDSCATEGORIE)
 
         # verbeterbaar = models.BooleanField(default=True)

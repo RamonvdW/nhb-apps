@@ -601,15 +601,11 @@ class E2EHelpers(TestCase):
             if check_duration:
                 duration = datetime.datetime.now() - tracer.started_at
                 duration_seconds = duration.seconds
-                do_dump = True
             else:
                 duration_seconds = 0
 
             count = len(tracer.trace)
             if count > num:                     # pragma: no cover
-                do_dump = True
-
-            if do_dump:
                 queries = 'Captured queries:'
                 prefix = '\n       '
                 limit = 200     # begrens aantal queries dat we printen
@@ -629,10 +625,10 @@ class E2EHelpers(TestCase):
                         break
                 # for
 
-            if count > num:                                                         # pragma: no branch
-                msg = "Too many queries: %s; maximum %d. " % (count, num)           # pragma: no cover
-                self.fail(msg=msg + queries)                                        # pragma: no cover
-            else:
+                msg = "Too many queries: %s; maximum %d. " % (count, num)
+                self.fail(msg=msg + queries)
+
+            if count <= num:
                 # kijk of het wat minder kan
                 if num > 20:
                     ongebruikt = num - count

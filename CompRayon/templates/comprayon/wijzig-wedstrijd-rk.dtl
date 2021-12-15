@@ -25,9 +25,9 @@
             }
         }
 
-        function locatie_aanpassen(sel)
+        function locatie_aanpassen()
         {
-            const locaties = {{ locaties|safe }};   // nhb_ver.ver_nr --> adres
+            const locaties = {{ locaties|safe }}    // nhb_ver.ver_nr --> adres
             const el_sel = document.getElementById('id_ver_sel')
             const el_loc = document.getElementById('id_loc')
 
@@ -36,7 +36,7 @@
             } else {
                 let adres = locaties[el_sel.value];     // gekozen vereniging
                 if (adres === undefined)
-                    adres = '<i class="red-text">Niet beschikbaar!</i>';
+                    adres = '<i class="red-text">Niet beschikbaar!</i>'
                 adres = adres.replace(/\n/g, '<br>')    // vervang newlines door breaks
                 el_loc.innerHTML = adres
             }
@@ -219,14 +219,14 @@
     <!-- initialisatie van de time pickers -->
     <script type="application/javascript">
         document.addEventListener('DOMContentLoaded', function() {
-            let el = document.querySelector('#tijd1');
+            let el = document.querySelector('#tijd1')
             let options = {
                     twelveHour: false,
                     defaultTime: "{{ wedstrijd.tijd_begin_wedstrijd_str }}",
-                  };
-            let inst = M.Timepicker.init(el, options);
-            inst._updateTimeFromInput();
-            inst.done();
+                  }
+            let inst = M.Timepicker.init(el, options)
+            inst._updateTimeFromInput()
+            inst.done()
 
             locatie_aanpassen()
 

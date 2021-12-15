@@ -38,7 +38,7 @@ class UitslagenBondView(TemplateView):
         comp_boog = kwargs['comp_boog'][:2]          # afkappen voor de veiligheid
 
         try:
-           deelcomp = (DeelCompetitie
+            deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie')
                         .get(laag=LAAG_BK,

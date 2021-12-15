@@ -6,7 +6,6 @@
 
 from django.test import TestCase
 from Account.models import Account
-from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN
 from Functie.models import maak_functie
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers

@@ -5,19 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from django.http import Http404, HttpResponse
-from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (DeelcompetitieRonde, RegiocompetitieTeam, DeelCompetitie,
-                               KampioenschapSchutterBoog, KampioenschapTeam,
-                               LAAG_REGIO, LAAG_RK, LAAG_BK)
-from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers, bepaal_blazoen_behoefte
-from Competitie.menu import menu_dynamics_competitie
+from Competitie.models import DeelcompetitieRonde, DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import CompetitieWedstrijd
-import csv
 
 TEMPLATE_WEDSTRIJDEN = 'compscores/wedstrijden.dtl'
 

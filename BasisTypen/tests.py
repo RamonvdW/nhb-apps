@@ -7,7 +7,7 @@
 from django.test import TestCase
 from .models import (BoogType, TeamType, LeeftijdsKlasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
                      IndivWedstrijdklasse, TeamWedstrijdklasse, KalenderWedstrijdklasse)
-from .admin import BasisTypenIndivWedstrijdklasseAdmin, BasisTypenTeamWedstrijdklasseAdmin
+from .admin import BasisTypenIndivWedstrijdklasseAdmin
 
 
 class TestBasisTypen(TestCase):

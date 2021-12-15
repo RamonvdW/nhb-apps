@@ -92,7 +92,7 @@ def account_otp_koppel(request, account, code):
     schrijf_in_logboek(account=None,
                        gebruikte_functie="OTP controle",
                        activiteit='Gebruiker %s OTP koppeling controle mislukt vanaf IP %s' % (
-                       repr(account.username), from_ip))
+                            repr(account.username), from_ip))
     my_logger.info('%s 2FA koppeling mislukte controle voor account %s' % (from_ip, account.username))
     return False
 

@@ -34,7 +34,8 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rollen.ROL_BKO
 
-    def _tel_rk_teams(self, comp):
+    @staticmethod
+    def _tel_rk_teams(comp):
         """ Verdeel de ingeschreven (en complete) teams van elk team type over de beschikbare
             team wedstrijdklassen, door de grenzen tussen de klassen te bepalen.
         """

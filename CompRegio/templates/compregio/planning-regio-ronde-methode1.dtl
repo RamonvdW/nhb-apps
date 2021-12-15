@@ -94,7 +94,7 @@
         <!-- knop om een regel toe te voegen -->
         {% if url_nieuwe_wedstrijd %}
             <tr>
-                <td colspan={% if heeft_wkl %}"5"{% else %}"3"{% endif %}>
+                <td colspan="{% if heeft_wkl %}5{% else %}3{% endif %}">
                     <form action="{{ url_nieuwe_wedstrijd }}" method="post">
                         {% csrf_token %}
                         <button class="btn-nhb-blauw" type="submit">

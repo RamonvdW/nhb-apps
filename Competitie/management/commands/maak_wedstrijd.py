@@ -10,7 +10,6 @@ from django.core.management.base import BaseCommand
 from Competitie.models import Competitie, DeelcompetitieRonde, LAAG_REGIO
 from NhbStructuur.models import NhbRegio, NhbCluster, NhbVereniging
 from Wedstrijden.models import CompetitieWedstrijd
-import datetime
 
 
 class Command(BaseCommand):
