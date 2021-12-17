@@ -68,6 +68,8 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
             teamtype2sterktes[pk] = list()
         # for
 
+        niet_compleet_team = False
+
         for rk_team in (KampioenschapTeam
                         .objects
                         .filter(deelcompetitie__competitie=comp)
@@ -77,16 +79,16 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
                                   '-aanvangsgemiddelde')):
 
             if rk_team.aanvangsgemiddelde < 0.001:
-                print('geen ag voor rk_team %s' % rk_team)
+                niet_compleet_team = True
             else:
                 team_type_pk = rk_team.team_type.pk
                 teamtype2sterktes[team_type_pk].append(rk_team.aanvangsgemiddelde)
         # for
 
-        return teamtypes, teamtype2wkl, teamtype2sterktes
+        return teamtypes, teamtype2wkl, teamtype2sterktes, niet_compleet_team
 
     def _bepaal_klassengrenzen(self, comp):
-        tts, tt2wkl, tt2sterktes = self._tel_rk_teams(comp)
+        tts, tt2wkl, tt2sterktes, niet_compleet_team = self._tel_rk_teams(comp)
 
         if comp.afstand == '18':
             aantal_pijlen = 30
@@ -95,43 +97,44 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
 
         grenzen = list()
 
-        for tt in tts:
-            klassen = tt2wkl[tt.pk]
-            sterktes = tt2sterktes[tt.pk]
-            count = len(sterktes)
+        if not niet_compleet_team:
+            for tt in tts:
+                klassen = tt2wkl[tt.pk]
+                sterktes = tt2sterktes[tt.pk]
+                count = len(sterktes)
 
-            aantal_klassen = len(klassen)
-            step = int(count / aantal_klassen)
-            if count:
-                step = max(step, 1)     # ensure at least 1
-            index = 0
+                aantal_klassen = len(klassen)
+                step = int(count / aantal_klassen)
+                if count:
+                    step = max(step, 1)     # ensure at least 1
+                index = 0
 
-            klassen_lijst = list()
-            for klasse in klassen:
-                min_ag = 0.0
-                aantal_klassen -= 1
+                klassen_lijst = list()
+                for klasse in klassen:
+                    min_ag = 0.0
+                    aantal_klassen -= 1
 
-                if aantal_klassen == 0:
-                    # laatste klasse = geen ondergrens
-                    step = count - index
-                    min_ag_str = ""     # toon n.v.t.
-                else:
-                    index += step
-                    if index <= count and count > 0:
-                        min_ag = sterktes[index - 1]
+                    if aantal_klassen == 0:
+                        # laatste klasse = geen ondergrens
+                        step = count - index
+                        min_ag_str = ""     # toon n.v.t.
+                    else:
+                        index += step
+                        if index <= count and count > 0:
+                            min_ag = sterktes[index - 1]
 
-                    min_ag_str = "%05.1f" % (min_ag * aantal_pijlen)
-                    min_ag_str = min_ag_str.replace('.', ',')
+                        min_ag_str = "%05.1f" % (min_ag * aantal_pijlen)
+                        min_ag_str = min_ag_str.replace('.', ',')
 
-                tup = (klasse.team.beschrijving, step, min_ag, min_ag_str)
-                klassen_lijst.append(tup)
+                    tup = (klasse.team.beschrijving, step, min_ag, min_ag_str)
+                    klassen_lijst.append(tup)
+                # for
+
+                tup = (len(klassen) + 1, tt.beschrijving, count, klassen_lijst)
+                grenzen.append(tup)
             # for
 
-            tup = (len(klassen) + 1, tt.beschrijving, count, klassen_lijst)
-            grenzen.append(tup)
-        # for
-
-        return grenzen
+        return grenzen, niet_compleet_team
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -154,7 +157,11 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         if comp.klassengrenzen_vastgesteld_rk_bk:
             raise Http404('De klassengrenzen zijn al vastgesteld')
 
-        context['grenzen'] = self._bepaal_klassengrenzen(comp)
+        context['grenzen'], context['niet_compleet_team'] = self._bepaal_klassengrenzen(comp)
+
+        if context['niet_compleet_team']:
+            context['url_terug'] = reverse('Competitie:overzicht',
+                                           kwargs={'comp_pk': comp.pk})
 
         context['url_vaststellen'] = reverse('CompRayon:klassengrenzen-vaststellen-rk-bk-teams',
                                              kwargs={'comp_pk': comp.pk})
@@ -185,7 +192,10 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
 
         # vul de klassengrenzen in voor RK/BK  teams
 
-        grenzen = self._bepaal_klassengrenzen(comp)
+        grenzen, niet_compleet_team = self._bepaal_klassengrenzen(comp)
+
+        if niet_compleet_team:
+            raise Http404('Niet alle teams zijn compleet')
 
         beschrijving2klasse = dict()
 
