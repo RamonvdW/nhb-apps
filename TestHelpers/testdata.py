@@ -252,12 +252,12 @@ class TestData(object):
                             account=account,
                             acceptatie_datum=now)
                 bulk.append(vhpg)
-                if len(bulk) > 500:         # pragma: no cover
+                if len(bulk) > 150:         # pragma: no cover
                     VerklaringHanterenPersoonsgegevens.objects.bulk_create(bulk)
                     bulk = list()
         # for
 
-        if len(bulk):
+        if len(bulk) > 0:
             VerklaringHanterenPersoonsgegevens.objects.bulk_create(bulk)
 
     def _maak_verenigingen(self):
@@ -411,9 +411,15 @@ class TestData(object):
                                 otp_is_actief=True)
                     account.set_password(self.WACHTWOORD)
                     bulk.append(account)
+
+                    if len(bulk) > 100:
+                        Account.objects.bulk_create(bulk)
+                        bulk = list()
             # for
         # for
-        Account.objects.bulk_create(bulk)
+
+        if len(bulk) > 0:
+            Account.objects.bulk_create(bulk)
         del bulk
 
         # cache de aangemaakte accounts
@@ -425,11 +431,11 @@ class TestData(object):
         lid_nr = 300000
         bulk = list()
         for ver in NhbVereniging.objects.all():
-            
+
             self.ver_sporters[ver.ver_nr] = list()
             self.ver_sporters_met_account[ver.ver_nr] = list()
 
-            for wleeftijd, geslacht, voornaam, _ , _ in soorten:
+            for wleeftijd, geslacht, voornaam, _, _ in soorten:
                 lid_nr += 1
                 achternaam = "Lid%s van Club%s" % (ver.ver_nr, lid_nr)
                 geboortedatum = datetime.date(year=huidige_jaar - wleeftijd, month=3, day=24)
@@ -455,7 +461,7 @@ class TestData(object):
                         lid_tot_einde_jaar=huidige_jaar)
                 bulk.append(sporter)
 
-                if len(bulk) > 500:
+                if len(bulk) > 250:
                     Sporter.objects.bulk_create(bulk)
                     bulk = list()
             # for
@@ -498,7 +504,7 @@ class TestData(object):
                 voorkeuren.voorkeur_eigen_blazoen = True
 
             bulk_voorkeuren.append(voorkeuren)
-            if len(bulk_voorkeuren) > 500:
+            if len(bulk_voorkeuren) > 100:
                 SporterVoorkeuren.objects.bulk_create(bulk_voorkeuren)
                 bulk_voorkeuren = list()
 
@@ -515,7 +521,7 @@ class TestData(object):
 
                 bulk_sporter.append(sporterboog)
 
-                if len(bulk_sporter) > 500:
+                if len(bulk_sporter) > 250:
                     SporterBoog.objects.bulk_create(bulk_sporter)
                     bulk_sporter = list()
             # for
@@ -574,10 +580,15 @@ class TestData(object):
                     func.bevestigde_email = 'secretaris.club%s@testdata.zz' % ver.ver_nr
 
                 bulk.append(func)
+
+                if len(bulk) > 150:
+                    Functie.objects.bulk_create(bulk)
+                    bulk = list()
             # for
         # for
 
-        Functie.objects.bulk_create(bulk)
+        if len(bulk) > 0:
+            Functie.objects.bulk_create(bulk)
         del bulk
 
         # koppel de functies aan de accounts
