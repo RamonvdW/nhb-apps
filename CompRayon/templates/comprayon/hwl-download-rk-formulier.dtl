@@ -155,7 +155,6 @@
                         <th>Team / Sporters</th>
                         <th>Gemiddelde<sup>*1</sup></th>
                         <th>Team sterkte</th>
-                        <th class="center-align">Status</th>
                     </tr>
                 {% endif %}
 
@@ -164,7 +163,6 @@
                     <td>[{{ team.ver_nr }}] {{ team.ver_naam }}</td>
                     <td colspan="2">{{ team.team_naam }}</td>
                     <td>{{ team.sterkte_str }}</td>
-                    <td></td>
                 </tr>
 
                 {% for deelnemer in team.gekoppelde_schutters.all %}
@@ -173,12 +171,6 @@
                         <td style="padding-left: 30px">{{ deelnemer.naam_str }}</td>
                         <td>{{ deelnemer.gem_str }}</td>
                         <td></td>
-                        <td class="center-align">
-                            {% if deelnemer.deelname == 'J' %}<i class="material-icons-round green-text">check</i>
-                            {% elif deelnemer.deelname == 'N' %}<i class="material-icons-round black-text">block</i>
-                            {% else %}<i class="material-icons-round nhb-blauw-text">help</i>
-                            {% endif %}
-                        </td>
                     </tr>
                 {% endfor %}
             {% endfor %}
