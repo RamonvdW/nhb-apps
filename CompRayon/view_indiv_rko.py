@@ -261,13 +261,16 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
                         label += " "
                     label += "(deelname onzeker)"
 
+                gem_str = "%.3f" % deelnemer.gemiddelde
+                gem_str = gem_str.replace('.', ',')     # nederlands
+
                 writer.writerow([deelnemer.rank,
                                  sporter.lid_nr,
                                  sporter.volledige_naam(),
                                  ver_str,                  # [nnnn] Naam
                                  label,
                                  deelnemer.klasse.indiv.beschrijving,
-                                 deelnemer.gemiddelde])
+                                 gem_str])
         # for
 
         return response

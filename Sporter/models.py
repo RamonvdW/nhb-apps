@@ -144,7 +144,7 @@ class Secretaris(models.Model):
 
     # deze constructie voorkomt een circulaire dependency
 
-    # TODO: dupe met Functie SEC? (gekoppeld aan Account)
+    # FUTURE: dit record is dupe met Functie SEC? (gekoppeld aan Account)
 
     vereniging = models.ForeignKey(NhbVereniging, on_delete=models.CASCADE)
 

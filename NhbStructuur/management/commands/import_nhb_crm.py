@@ -781,7 +781,7 @@ class Command(BaseCommand):
                             else:
                                 self._count_uitgeschreven += 1
 
-                        # TODO: overschrijven tijdens regiocompetitie, bij afsluiten team ronde
+                        # FUTURE: overschrijven tijdens regiocompetitie, bij afsluiten team ronde
 
                         # let op: tijdens fase G van de competitie wordt de vereniging bevroren en moet de sporter
                         #         uitkomen op het RK van het rayon waarin die vereniging valt
@@ -910,8 +910,6 @@ class Command(BaseCommand):
                     # for
 
                     if found:
-                        # TODO: datum kunnen corrigeren
-
                         # verwijderen uit de lijst zodat echt verwijderde speelsterktes kunnen vinden
                         huidige_lijst.remove(found)
                     else:
@@ -937,7 +935,7 @@ class Command(BaseCommand):
             # for
 
             if len(huidige_lijst):
-                # TODO: verwijder oude speelsterktes
+                # FUTURE: verwijder oude speelsterktes
                 self.stderr.write('[WARNING] Kan speelsterktes nog niet verwijderen: lid=%s, te verwijderen: %s' % (lid_nr, repr(huidige_lijst)))
                 # self._count_verwijderingen += 1
 
@@ -959,8 +957,8 @@ class Command(BaseCommand):
                 if not self.dryrun:
                     obj.save()
                     self._cache_sporter[obj.pk] = obj
-                # TODO: afhandelen van het inactiveren/verwijderen van een lid dat in een team zit in een competitie
-                # TODO: afhandelen van het inactiveren/verwijderen van een lid dat secretaris is
+                # FUTURE: afhandelen van het inactiveren/verwijderen van een lid dat in een team zit in een competitie
+                # FUTURE: afhandelen van het inactiveren/verwijderen van een lid dat secretaris is
             elif obj.lid_nr in self._recordhouder_lid_nrs:
                 # lid heeft een record op zijn/haar naam --> behoud het hele record
                 # de CRM applicatie heeft hier nog geen veld voor
@@ -1104,8 +1102,8 @@ class Command(BaseCommand):
                     buiten_locatie.save(update_fields=updated)
         # for
 
-        # TODO: zichtbaar=False zetten voor wedstrijdlocatie zonder vereniging
-        # TODO: zichtbaar=True zetten voor (revived) wedstrijdlocatie met vereniging
+        # FUTURE: zichtbaar=False zetten voor wedstrijdlocatie zonder vereniging
+        # FUTURE: zichtbaar=True zetten voor (revived) wedstrijdlocatie met vereniging
 
     def handle(self, *args, **options):
         self.dryrun = options['dryrun']

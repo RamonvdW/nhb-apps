@@ -639,7 +639,7 @@ class E2EHelpers(TestCase):
                 print("Operation took suspiciously long: %.2f seconds (%s queries took %.2f ms)" % (
                                     duration_seconds, len(tracer.trace), tracer.total_duration_us / 1000.0))
 
-            if len(tracer.trace) > 500:
+            if len(tracer.trace) > 500:                                             # pragma: no cover
                 print("Operation required a lot of database interactions: %s queries" % len(tracer.trace))
 
         if REPORT_QUERY_ORIGINS:                                                    # pragma: no cover

@@ -1009,7 +1009,7 @@ class Command(BaseCommand):
             team.save(update_fields=['aanvangsgemiddelde', 'klasse'])
         # for
 
-        # TODO: maak een taak aan voor de HWL's om de RK teams te herzien (eerst functionaliteit voor HWL maken)
+        # FUTURE: maak een taak aan voor de HWL's om de RK teams te herzien (eerst functionaliteit voor HWL maken)
 
     def _verwerk_mutatie_afsluiten_regiocomp(self, comp):
 

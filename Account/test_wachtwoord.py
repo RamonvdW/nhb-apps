@@ -269,6 +269,6 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertContains(resp, 'Voer het e-mailadres en NHB nummer in van een bestaand account')
 
 
-# TODO: controleer dat andere sessies van deze gebruiker verdwijnen bij wijzigen wachtwoord?
+# FUTURE: controleer dat andere sessies van deze gebruiker verdwijnen bij wijzigen wachtwoord?
 
 # end of file

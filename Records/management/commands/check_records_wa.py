@@ -26,12 +26,12 @@ class Command(BaseCommand):
     def _cache_records(self):
         self._indiv_indoor = (IndivRecord
                               .objects
-                              .select_related('sporter')        # TODO: niet nodig
+                              .select_related('sporter')
                               .exclude(discipline='OD'))
 
         self._indiv_outdoor = (IndivRecord
                                .objects
-                               .select_related('sporter')       # TODO: niet nodig
+                               .select_related('sporter')
                                .filter(discipline='OD'))
 
         self._cache_nhb = dict()        # [indiv.pk] = IndivRecord

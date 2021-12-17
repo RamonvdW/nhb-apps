@@ -288,7 +288,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
         """
         functie = self._get_functie_or_404()
 
-        # TODO: functie.nieuwe_email opruimen als SiteTijdelijkeUrl verlopen is (of opgeruimd is)
+        # FUTURE: functie.nieuwe_email opruimen als SiteTijdelijkeUrl verlopen is (of opgeruimd is)
 
         # BKO, RKO, RCL, HWL mogen hun eigen contactgegevens wijzigen
         # als ze de rol aangenomen hebben
@@ -533,7 +533,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
 
         if self._functie.rol in ('SEC', 'HWL', 'WL'):
             context['is_vereniging_rol'] = True
-            # TODO: fix terug-url. Je kan hier op twee manieren komen:
+            # FUTURE: fix terug-url. Je kan hier op twee manieren komen:
             # via Plein, Verenigingen, Details (=Vereniging:accommodaties/details/pk/pk/), Koppel beheerders
             # via Verenging, Beheerders (=Functie:overzicht-vereniging), Koppel beheerders
             context['terug_url'] = reverse('Functie:overzicht-vereniging')

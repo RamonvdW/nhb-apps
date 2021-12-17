@@ -67,7 +67,7 @@
     </table>
 
     {% if is_paginated %}
-        <!-- TODO: update as per histcomp_indiv.dtl -->
+        <!-- FUTURE: update as per histcomp_indiv.dtl -->
         <p>
             <span>Spring naar een andere pagina:</span>
             {% for linkname, url in page_links %}

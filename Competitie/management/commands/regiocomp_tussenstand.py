@@ -74,7 +74,7 @@ class Command(BaseCommand):
 
         # 2. Schutters in regiocompetitie kunnen elk moment overstappen
         #    RegioCompetitieSchutterBoog.bij_vereniging
-        # TODO: voor de teamcompetitie moet dit pas gebeuren nadat de teamscores vastgesteld zijn
+        # FUTURE: voor de teamcompetitie moet dit pas gebeuren nadat de teamscores vastgesteld zijn
 
         # 3. Bij vaststellen RK/BK deelname/reserve wordt vereniging bevroren (afsluiten fase G)
         #    KampioenschapSchutterBoog.bij_vereniging

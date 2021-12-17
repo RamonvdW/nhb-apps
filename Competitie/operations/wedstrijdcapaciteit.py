@@ -13,7 +13,6 @@ from types import SimpleNamespace
 import math
 
 
-# TODO: vervangen door standaard strings uit BasisTypen
 BLAZOEN_STR_WENS_DT = 'DT (wens)'
 BLAZOEN_STR_WENS_4SPOT = '4-spot (wens)'
 

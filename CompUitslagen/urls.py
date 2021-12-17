@@ -20,7 +20,6 @@ urlpatterns = [
          view_uitslagen_vereniging.UitslagenVerenigingTeamsView.as_view(),
          name='uitslagen-vereniging-teams-n'),
 
-    # TODO: wordt deze gebruikt?
     path('<comp_pk>/<comp_boog>/vereniging/',
          view_uitslagen_vereniging.UitslagenVerenigingIndivView.as_view(),
          name='uitslagen-vereniging-indiv'),

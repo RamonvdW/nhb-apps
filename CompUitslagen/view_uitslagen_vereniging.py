@@ -159,7 +159,7 @@ class UitslagenVerenigingIndivView(TemplateView):
                         .select_related('competitie', 'nhb_regio')
                         .get(laag=LAAG_REGIO,
                              competitie=comp,
-                             competitie__is_afgesloten=False,       # TODO: waarom hier opeens filteren?
+                             competitie__is_afgesloten=False,       # FUTURE: op meer plekken dit filter toepassen
                              nhb_regio__regio_nr=regio_nr))
         except DeelCompetitie.DoesNotExist:     # pragma: no cover
             raise Http404('Competitie niet gevonden')
@@ -495,7 +495,6 @@ class UitslagenVerenigingTeamsView(TemplateView):
         # sorteer de teams
         unsorted_teams = list()
         for team in teams:
-            # TODO: zou moeten sorteren op team klasse volgorde, niet punten of score
             tup = (team.klasse.team.volgorde, team.totaal_punten, team.totaal_score, team.pk, team)
 
             while len(team.ronde_scores) < 7:

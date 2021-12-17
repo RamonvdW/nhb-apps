@@ -32,7 +32,7 @@ class HistCompetitie(models.Model):
     # alvast overgezet is ivm nieuwe AG's
     is_openbaar = models.BooleanField(default=True)
 
-    # TODO: voeg vertaaltabellen toe voor klasse2url en url2klasse (zie records)
+    # FUTURE: voeg vertaaltabellen toe voor klasse2url en url2klasse (zie records)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """

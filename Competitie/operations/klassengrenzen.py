@@ -160,7 +160,7 @@ def bepaal_klassengrenzen_indiv(comp, trans_indiv):
     # for (boogtype)
 
     # wedstrijdklassen vs leeftijd + bogen
-    targets = _get_targets_indiv()     # TODO: pass the caches
+    targets = _get_targets_indiv()     # FUTURE: pass the caches
 
     # creëer de resultatenlijst
     objs = list()

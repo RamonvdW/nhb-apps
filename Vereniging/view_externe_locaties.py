@@ -186,7 +186,7 @@ class ExterneLocatieDetailsView(TemplateView):
             locatie.zichtbaar = False
             locatie.save()
 
-            # TODO: als de locatie nergens meer gebruikt wordt, dan kan deze opgeruimd worden
+            # FUTURE: als de locatie nergens meer gebruikt wordt, dan kan deze opgeruimd worden
 
             url = reverse('Vereniging:externe-locaties',
                           kwargs={'vereniging_pk': ver.pk})

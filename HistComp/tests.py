@@ -225,7 +225,7 @@ class TestHistComp(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Blazoengatenmaker')
-        # TODO: check correct records was returned
+        # FUTURE: check correct records were returned
 
         # filter on a ver_nr
         with self.assert_max_queries(20):
@@ -290,40 +290,6 @@ class TestHistComp(E2EHelpers, TestCase):
         self.assertEqual("", f1.getvalue())
         self.assertTrue("Corrigeer" in f2.getvalue())
 
-    # def _UIT_test_view_invid_empty(self):
-    #     rsp = self.client.get('/hist/2019/18/Missing/indiv/')
-    #     self.assertEqual(rsp.status_code, 200)
-    #     self.assert_template_used(rsp, ('hist/histcomp_indiv.dtl', 'plein/site_layout.dtl'))
-    #     self.assert_html_ok(rsp)
-    #     # TODO: check correct records were returned
-    #
-    # def _UIT_test_view_team_all(self):
-    #     rsp = self.client.get('/hist/2019/18/Teamcurve3/team/', {'all': '1'})
-    #     self.assertEqual(rsp.status_code, 200)
-    #     self.assert_template_used(rsp, ('hist/histcomp_team.dtl', 'plein/site_layout.dtl'))
-    #     self.assert_html_ok(rsp)
-    #
-    # def _UIT_test_view_team_filter_schutter_nr(self):
-    #     rsp = self.client.get('/hist/2019/18/Teamcurve3/team/', {'filter': '123456'})
-    #     self.assertEqual(rsp.status_code, 200)
-    #     self.assert_template_used(rsp, ('hist/histcomp_team.dtl', 'plein/site_layout.dtl'))
-    #     self.assert_html_ok(rsp)
-    #     # TODO: check correct records was returned
-    #
-    # def _UIT_test_view_team_filter_vereniging_nr(self):
-    #     rsp = self.client.get('/hist/2019/18/Teamcurve3/team/', {'filter': '1234'})
-    #     self.assertEqual(rsp.status_code, 200)
-    #     self.assert_template_used(rsp, ('hist/histcomp_team.dtl', 'plein/site_layout.dtl'))
-    #     self.assert_html_ok(rsp)
-    #     # TODO: check correct records were returned
-    #
-    # def _UIT_test_view_team_filter_string(self):
-    #     rsp = self.client.get('/hist/2019/18/Teamcurve3/team/', {'filter': 'club'})
-    #     self.assertEqual(rsp.status_code, 200)
-    #     self.assert_template_used(rsp, ('hist/histcomp_team.dtl', 'plein/site_layout.dtl'))
-    #     self.assert_html_ok(rsp)
-    #     # TODO: check correct records were returned
-
-# TODO: assert_other_http_commands_not_supported
+# FUTURE: gebruik assert_other_http_commands_not_supported
 
 # end of file

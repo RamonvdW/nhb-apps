@@ -240,7 +240,7 @@ RECORDS_TOEGESTANE_SOORTEN = (
     '60m (12p)',
     '70m (12p)',
 
-    # Outdoor, TODO: still to be cleaned up
+    # Outdoor, FUTURE: still to be cleaned up
     'ShortMetric',
 
     # indoor

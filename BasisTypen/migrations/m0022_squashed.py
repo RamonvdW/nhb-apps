@@ -490,7 +490,7 @@ def init_wedstrijdklassen_team(apps, _):
         teamtype = boog_afkorting2teamtype[teamtype_afkorting]
 
         # blazoenen_18m is 1 of 2 lang voor de regio
-        # TODO: voor het RK/BK geldt alleen de laatste
+        # FUTURE: voor het RK/BK geldt alleen de laatste
         blazoenen_18m = list(blazoenen_18m)
         if len(blazoenen_18m) < 2:
             blazoenen_18m.append(blazoenen_18m[0])
