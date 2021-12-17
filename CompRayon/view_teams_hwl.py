@@ -38,7 +38,7 @@ def bepaal_regioschutter_gemiddelde_voor_rk_teams(deelnemer):
     return ag, bron
 
 
-def bepaal_rk_team_tijdelijke_sterkte_en_klasse(comp, rk_team, open_inschrijving):
+def bepaal_rk_team_tijdelijke_sterkte_en_klasse(rk_team, open_inschrijving):
     """ gebruik AG/VSG van gekoppelde schutters om team aanvangsgemiddelde te berekenen
         en bepaal aan de hand daarvan de team wedstrijdklasse
     """
@@ -611,7 +611,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
             rk_team.gekoppelde_schutters.clear()
             rk_team.gekoppelde_schutters.add(*pks)
 
-        bepaal_rk_team_tijdelijke_sterkte_en_klasse(comp, rk_team, open_inschrijving)
+        bepaal_rk_team_tijdelijke_sterkte_en_klasse(rk_team, open_inschrijving)
 
         if self.rol_nu == Rollen.ROL_HWL:
             url = reverse('CompRayon:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
