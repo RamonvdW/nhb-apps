@@ -111,7 +111,7 @@
 
     <tr>
         <td {% if comp.fase == 'G' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>G</td>
-        <td>Afsluiten regiocompetitie (BKO)<br>RK uitnodigen versturen<br>RK teams verwijder sporters met te weinig scores</td>
+        <td>Afsluiten regiocompetitie (BKO)<br>Kandidaat-deelnemerslijst opstellen RK individueel<br>Verwijder niet gerechtigde sporters uit RK teams</td>
         <td>
             {% if comp.fase > 'G' %}
                 <span class="green-text">Afgerond</span>
@@ -128,7 +128,7 @@
 
     <tr>
         <td {% if comp.fase == 'J' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>J</td>
-        <td>RK deelnemers en reserves bevestigen deelname<br>RK teams compleet maken (HWL)<br>Vaststellen klassengrenzen RK/BK team (BKO)</td>
+        <td>Bevestig deelname RK individueel (HWL / RKO)<br>RK teams compleet maken (HWL)<br>Vaststellen klassengrenzen RK/BK team (BKO)</td>
         <td>
             {% if comp.fase > 'J' %}
                 <span class="green-text">Afgerond</span>
@@ -140,7 +140,7 @@
 
     <tr>
         <td {% if comp.fase == 'K' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>K</td>
-        <td>RK deelnemers en reserves bevestigen deelname<br>RK teams koppel invallers (HWL)</td>
+        <td>Bevestig deelname RK individueel (HWL / RKO)<br>Koppel invallers RK teams (HWL)</td>
         <td>
             {% if comp.fase > 'K' %}
                 <span class="green-text">Afgerond</span>
