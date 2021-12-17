@@ -245,6 +245,27 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
             Elke klasse bevat een telling van het aantal sporters / teams
         """
 
+        # voorkom dubbel koppelen: zoek uit welke klassen al gekoppeld zijn aan een andere wedstrijd
+        alle_deelcomp_rk_plan_pks = DeelCompetitie.objects.filter(laag=LAAG_RK).values_list('plan__pk', flat=True)
+        wedstrijd_pks = list()
+        for plan in CompetitieWedstrijdenPlan.objects.prefetch_related('wedstrijden').filter(pk__in=alle_deelcomp_rk_plan_pks):
+            pks = list(plan.wedstrijden.all().values_list('pk', flat=True))
+            wedstrijd_pks.extend(pks)
+        # for
+        del alle_deelcomp_rk_plan_pks
+        if wedstrijd.pk in wedstrijd_pks:
+            wedstrijd_pks.remove(wedstrijd.pk)
+
+        indiv_in_use = list()       # [indiv.pk, ..]
+        team_in_use = list()        # [team.pk, ..]
+        for wed in CompetitieWedstrijd.objects.prefetch_related('indiv_klassen', 'team_klassen').filter(pk__in=wedstrijd_pks):
+            indiv_pks = list(wed.indiv_klassen.values_list('pk', flat=True))
+            indiv_in_use.extend(indiv_pks)
+
+            team_pks = list(wed.team_klassen.values_list('pk', flat=True))
+            team_in_use.extend(team_pks)
+        # for
+
         klasse2schutters = dict()
         for obj in (KampioenschapSchutterBoog
                     .objects
@@ -282,8 +303,12 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                 schutters = 0
             obj.short_str = obj.indiv.beschrijving
             obj.schutters = schutters
+
+            if obj.indiv.pk in indiv_in_use:
+                obj.disable = True
+            else:
+                obj.geselecteerd = (obj.indiv.pk in wedstrijd_indiv_pks)
             obj.sel_str = "wkl_indiv_%s" % obj.indiv.pk
-            obj.geselecteerd = (obj.indiv.pk in wedstrijd_indiv_pks)
         # for
 
         klasse_count = dict()   # [klasse.pk] = count
@@ -309,7 +334,10 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         for obj in wkl_team:
             obj.short_str = obj.team.beschrijving
             obj.sel_str = "wkl_team_%s" % obj.team.pk
-            obj.geselecteerd = (obj.team.pk in wedstrijd_team_pks)
+            if obj.team.pk in team_in_use:
+                obj.disable = True
+            else:
+                obj.geselecteerd = (obj.team.pk in wedstrijd_team_pks)
 
             try:
                 obj.teams_count = klasse_count[obj.pk]

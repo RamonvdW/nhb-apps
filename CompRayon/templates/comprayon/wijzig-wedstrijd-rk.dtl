@@ -126,7 +126,7 @@
                             <tr>
                                 <!-- {% if obj.break_before %}<br>{% endif %} -->
                                 <td><label>
-                                    <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %} onchange="gewijzigd()">
+                                    <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.disable %} disabled{% endif %} onchange="gewijzigd()">
                                     <span>&nbsp;</span>
                                     </label>
                                 </td>
@@ -159,7 +159,7 @@
 
                                 <td>
                                     <label>
-                                        <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}" {% if obj.geselecteerd %}checked{% endif %} onchange="gewijzigd()">
+                                        <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.disable %} disabled{% endif %} onchange="gewijzigd()">
                                         <span>&nbsp;</span>
                                     </label>
                                 </td>
