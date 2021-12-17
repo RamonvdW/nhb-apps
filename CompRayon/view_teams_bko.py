@@ -117,7 +117,7 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
                     min_ag_str = ""     # toon n.v.t.
                 else:
                     index += step
-                    if index <= count:
+                    if index <= count and count > 0:
                         min_ag = sterktes[index - 1]
 
                     min_ag_str = "%05.1f" % (min_ag * aantal_pijlen)
