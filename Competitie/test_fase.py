@@ -137,8 +137,9 @@ class TestCompetitieFase(TestCase):
         now = timezone.now()
         now = datetime.date(year=now.year, month=now.month, day=now.day)
         einde_jaar = datetime.date(year=now.year, month=12, day=31)
-        if now == einde_jaar:                           # pragma: no cover
-            einde_jaar += datetime.timedelta(days=1)    # needed once a year..
+        # einde_jaar is goed, behalve in the laatste 2 weken
+        if now > einde_jaar - datetime.timedelta(days=15):       # pragma: no cover
+            einde_jaar += datetime.timedelta(days=15)
         gisteren = now - datetime.timedelta(days=1)
 
         # maak een competitie aan en controleer de fase
