@@ -97,9 +97,11 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                 beschr.append('Teams')
         # for
 
+        vastgesteld = timezone.localtime(timezone.now())
+
         context['deelcomp'] = deelcomp
         context['wedstrijd'] = wedstrijd
-        context['vastgesteld'] = timezone.now()
+        context['vastgesteld'] = vastgesteld
         context['heeft_indiv'] = heeft_indiv
         context['heeft_teams'] = heeft_teams
         context['beschrijving'] = "%s %s" % (wedstrijd.beschrijving, " en ".join(beschr))
@@ -223,7 +225,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         comp = deelcomp.competitie
         # TODO: check fase
 
-        vastgesteld = timezone.now()
+        vastgesteld = timezone.localtime(timezone.now())
 
         klasse_str = klasse.indiv.beschrijving
 
@@ -348,7 +350,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         else:
             aantal_pijlen = 25
 
-        vastgesteld = timezone.now()
+        vastgesteld = timezone.localtime(timezone.now())
 
         klasse_str = klasse.team.beschrijving
 
