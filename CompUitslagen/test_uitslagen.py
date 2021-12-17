@@ -182,7 +182,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         # als Sporter
-        sporter = self.testdata.ver_sporters[self.ver_nr][0]
+        sporter = self.testdata.ver_sporters_met_account[self.ver_nr][0]
         self.e2e_login(sporter.account)
         url = self.url_uitslagen_regio % (self.testdata.comp25.pk, 'BB', 'alle')
         with self.assert_max_queries(20):
@@ -318,7 +318,7 @@ class TestCompetitieUitslagen(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compuitslagen/uitslagen-vereniging-indiv.dtl', 'plein/site_layout.dtl'))
 
         # als je de pagina ophaalt als een ingelogd lid, dan krijg je je eigen vereniging
-        sporter = self.testdata.ver_sporters[self.ver_nr][0]
+        sporter = self.testdata.ver_sporters_met_account[self.ver_nr][0]
         self.e2e_login(sporter.account)
 
         url = self.url_uitslagen_ver % (self.testdata.comp18.pk, 'R')

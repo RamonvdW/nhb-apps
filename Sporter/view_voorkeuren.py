@@ -230,13 +230,16 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         boogtypen = BoogType.objects.all()
         if len(objs) < len(boogtypen):
             aanwezig = objs.values_list('boogtype__pk', flat=True)
-            # TODO: maak hier een bulk-create van
+            bulk = list()
             for boogtype in boogtypen.exclude(pk__in=aanwezig):
                 sporterboog = SporterBoog(
                                     sporter=sporter,
                                     boogtype=boogtype)
-                sporterboog.save()
+                bulk.append(sporterboog)
             # for
+            SporterBoog.objects.bulk_create(bulk)
+            del bulk
+
             objs = (SporterBoog
                     .objects
                     .filter(sporter=sporter)

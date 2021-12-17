@@ -66,6 +66,7 @@ class TestData(object):
 
         # leden
         self.ver_sporters = dict()              # [ver_nr] = list(Sporter)
+        self.ver_sporters_met_account = dict()  # [ver_nr] = list(Sporter) met sporter.account != None
 
         # competities
         self.comp18 = None                      # Competitie
@@ -323,71 +324,71 @@ class TestData(object):
         lid_sinds_datum = datetime.date(year=huidige_jaar - 1, month=11, day=12)
 
         soorten = [
-            # wedstrijdleeftijd, geslacht, voornaam, boogtype
-            (10, 'M', 'Asp10', 'R'),
-            (10, 'V', 'Asp10', 'R'),
-            (11, 'M', 'Asp11', 'R'),
-            (12, 'V', 'Asp12', 'R'),
-            (13, 'M', 'Asp13', 'R'),
-            (14, 'M', 'Cad14', 'R'),
-            (14, 'M', 'Cad14b', 'C'),
-            (14, 'M', 'Cad15', 'c'),            # kleine letter: geen voorkeur voor de competitie
-            (15, 'V', 'Cad15', 'R'),
-            (15, 'M', 'Cad15b', 'BB'),
-            (15, 'V', 'Cad15b', 'C'),
-            (16, 'M', 'Cad16', 'R'),
-            (16, 'M', 'Cad16b', 'C'),
-            (16, 'M', 'Cad16c', 'BB'),
-            (17, 'V', 'Cad17', 'R'),            # account
-            (17, 'V', 'Cad17b', 'C'),
-            (17, 'V', 'Cad17c', 'BB'),
-            (18, 'M', 'Jun18', 'R'),
-            (18, 'M', 'Jun18b', 'C'),
-            (18, 'M', 'Jun18c', 'BB'),
-            (18, 'V', 'Jun18', 'BB'),
-            (19, 'V', 'Jun19', 'R'),
-            (19, 'V', 'Jun19b', 'C'),           # account
-            (20, 'M', 'Jun20', 'R'),
-            (20, 'M', 'Jun20b', 'LB'),
-            (21, 'V', 'Sen21', 'R'),
-            (21, 'V', 'Sen21b', 'C'),
-            (22, 'M', 'Sen22', 'R'),
-            (22, 'M', 'Sen22b', 'C'),
-            (22, 'M', 'Sen23', 'r'),            # kleine letter: geen voorkeur voor de competitie
-            (31, 'V', 'Sen31', 'R'),
-            (32, 'M', 'Sen32', 'C'),
-            (32, 'M', 'Sen32b', 'BB'),          # account
-            (33, 'V', 'Sen33', 'R'),
-            (33, 'V', 'Sen33b', 'BB'),
-            (34, 'M', 'Sen34', 'LB'),           # Sen34 = HWL
-            (35, 'V', 'Sen35', 'R'),
-            (36, 'M', 'Sen36', 'C'),
-            (36, 'M', 'Sen36b', 'BB'),
-            (37, 'V', 'Sen37', 'R'),
-            (38, 'M', 'Sen38', 'LB'),
-            (39, 'V', 'Sen39', 'R'),            # Sen39 = BKO/RKO/RCL
-            (40, 'M', 'Sen40', 'C'),
-            (41, 'V', 'Sen41', 'R'),
-            (42, 'M', 'Sen42', 'R'),
-            (42, 'M', 'Sen42b', 'C'),
-            (49, 'V', 'Sen49', 'R'),
-            (49, 'V', 'Sen49b', 'BB'),
-            (50, 'M', 'Mas50', 'R'),            # Mas50 = SEC
-            (51, 'V', 'Mas51', 'R'),            # account
-            (51, 'V', 'Mas51b', 'C'),
-            (51, 'V', 'Mas52', 'r'),            # kleine letter: geen voorkeur voor de competitie
-            (59, 'M', 'Mas59', 'R'),
-            (59, 'M', 'Mas59b', 'LB'),
-            (60, 'V', 'Vet60', 'R'),
-            (60, 'V', 'Vet60b', 'C'),
-            (60, 'V', 'Vet60c', 'LB'),          # account
-            (61, 'M', 'Vet61', 'C'),
-            (61, 'M', 'Vet61b', 'C'),
-            (80, 'V', 'Vet80', 'R'),
+            # wedstrijdleeftijd, geslacht, voornaam, boogtype, account
+            (10, 'M', 'Asp10',  'R',  False),
+            (10, 'V', 'Asp10',  'R',  False),
+            (11, 'M', 'Asp11',  'R',  False),
+            (12, 'V', 'Asp12',  'R',  False),
+            (13, 'M', 'Asp13',  'R',  False),
+            (14, 'M', 'Cad14',  'R',  False),
+            (14, 'M', 'Cad14b', 'C',  False),
+            (14, 'M', 'Cad15',  'c',  False),           # kleine letter: geen voorkeur voor de competitie
+            (15, 'V', 'Cad15',  'R',  False),
+            (15, 'M', 'Cad15b', 'BB', False),
+            (15, 'V', 'Cad15b', 'C',  False),
+            (16, 'M', 'Cad16',  'R',  False),
+            (16, 'M', 'Cad16b', 'C',  False),
+            (16, 'M', 'Cad16c', 'BB', False),
+            (17, 'V', 'Cad17',  'R',  True),            # account
+            (17, 'V', 'Cad17b', 'C',  False),
+            (17, 'V', 'Cad17c', 'BB', False),
+            (18, 'M', 'Jun18',  'R',  False),
+            (18, 'M', 'Jun18b', 'C',  False),
+            (18, 'M', 'Jun18c', 'BB', False),
+            (18, 'V', 'Jun18',  'BB', False),
+            (19, 'V', 'Jun19',  'R',  False),
+            (19, 'V', 'Jun19b', 'C',  True),            # account
+            (20, 'M', 'Jun20',  'R',  False),
+            (20, 'M', 'Jun20b', 'LB', False),
+            (21, 'V', 'Sen21',  'R',  False),
+            (21, 'V', 'Sen21b', 'C',  False),
+            (22, 'M', 'Sen22',  'R',  False),
+            (22, 'M', 'Sen22b', 'C',  False),
+            (22, 'M', 'Sen23',  'r',  False),           # kleine letter: geen voorkeur voor de competitie
+            (31, 'V', 'Sen31',  'R',  False),
+            (32, 'M', 'Sen32',  'C',  False),
+            (32, 'M', 'Sen32b', 'BB', True),            # account
+            (33, 'V', 'Sen33',  'R',  False),
+            (33, 'V', 'Sen33b', 'BB', False),
+            (34, 'M', 'Sen34',  'LB', True),            # Sen34 = HWL
+            (35, 'V', 'Sen35',  'R',  False),
+            (36, 'M', 'Sen36',  'C',  False),
+            (36, 'M', 'Sen36b', 'BB', False),
+            (37, 'V', 'Sen37',  'R',  False),
+            (38, 'M', 'Sen38',  'LB', False),
+            (39, 'V', 'Sen39',  'R',  True),            # Sen39 = BKO/RKO/RCL
+            (40, 'M', 'Sen40',  'C',  False),
+            (41, 'V', 'Sen41',  'R',  False),
+            (42, 'M', 'Sen42',  'R',  False),
+            (42, 'M', 'Sen42b', 'C',  False),
+            (49, 'V', 'Sen49',  'R',  False),
+            (49, 'V', 'Sen49b', 'BB', False),
+            (50, 'M', 'Mas50',  'R',  True),            # Mas50 = SEC
+            (51, 'V', 'Mas51',  'R',  True),            # account
+            (51, 'V', 'Mas51b', 'C',  False),
+            (51, 'V', 'Mas52',  'r',  False),           # kleine letter: geen voorkeur voor de competitie
+            (59, 'M', 'Mas59',  'R',  False),
+            (59, 'M', 'Mas59b', 'LB', False),
+            (60, 'V', 'Vet60',  'R',  False),
+            (60, 'V', 'Vet60b', 'C',  False),
+            (60, 'V', 'Vet60c', 'LB', True),            # account
+            (61, 'M', 'Vet61',  'C',  False),
+            (61, 'M', 'Vet61b', 'C',  False),
+            (80, 'V', 'Vet80',  'R',  False),
         ]
 
         geslacht_voornaam2boogtype = dict()
-        for _, geslacht, voornaam, boogtype in soorten:
+        for _, geslacht, voornaam, boogtype, _ in soorten:
             try:
                 _ = geslacht_voornaam2boogtype[geslacht + voornaam]
             except KeyError:
@@ -396,15 +397,47 @@ class TestData(object):
                 raise IndexError('TestData: combinatie geslacht %s + voornaam %s komt meerdere keren voor' % (geslacht, voornaam))      # pragma: no cover
         # for
 
+        # maak voor elke vereniging een paar accounts aan
         lid_nr = 300000
         bulk = list()
         for ver in NhbVereniging.objects.all():
-            self.ver_sporters[ver.ver_nr] = list()
+            for _, _, voornaam, _, maak_account in soorten:
+                lid_nr += 1
 
-            for wleeftijd, geslacht, voornaam, _ in soorten:
+                if maak_account:
+                    account = Account(
+                                username=str(lid_nr),
+                                otp_code=self.OTP_CODE,
+                                otp_is_actief=True)
+                    account.set_password(self.WACHTWOORD)
+                    bulk.append(account)
+            # for
+        # for
+        Account.objects.bulk_create(bulk)
+        del bulk
+
+        # cache de aangemaakte accounts
+        lid_nr2account = dict()
+        for account in Account.objects.all():
+            lid_nr2account[account.username] = account
+        # for
+
+        lid_nr = 300000
+        bulk = list()
+        for ver in NhbVereniging.objects.all():
+            
+            self.ver_sporters[ver.ver_nr] = list()
+            self.ver_sporters_met_account[ver.ver_nr] = list()
+
+            for wleeftijd, geslacht, voornaam, _ , _ in soorten:
                 lid_nr += 1
                 achternaam = "Lid%s van Club%s" % (ver.ver_nr, lid_nr)
                 geboortedatum = datetime.date(year=huidige_jaar - wleeftijd, month=3, day=24)
+
+                try:
+                    account = lid_nr2account[str(lid_nr)]
+                except KeyError:
+                    account = None
 
                 sporter = Sporter(
                         lid_nr=lid_nr,
@@ -418,15 +451,20 @@ class TestData(object):
                         is_actief_lid=True,
                         sinds_datum=lid_sinds_datum,
                         bij_vereniging=ver,
-                        # account
+                        account=account,
                         lid_tot_einde_jaar=huidige_jaar)
                 bulk.append(sporter)
+
+                if len(bulk) > 500:
+                    Sporter.objects.bulk_create(bulk)
+                    bulk = list()
             # for
         # for
 
-        Sporter.objects.bulk_create(bulk)
-        # print('TestData: Created %sx Sporter' % len(bulk))
+        if len(bulk) > 0:
+            Sporter.objects.bulk_create(bulk)
         del bulk
+        del lid_nr2account
 
         # maak voor elke Sporter nu de SporterBoog records aan
         boogtypen = list(BoogType.objects.all())
@@ -438,6 +476,12 @@ class TestData(object):
                         .select_related('account',
                                         'bij_vereniging')
                         .all()):
+
+            ver_nr = sporter.bij_vereniging.ver_nr
+
+            self.ver_sporters[ver_nr].append(sporter)
+            if sporter.account:
+                self.ver_sporters_met_account[ver_nr].append(sporter)
 
             gewenst_boogtype = geslacht_voornaam2boogtype[sporter.geslacht + sporter.voornaam]
 
@@ -493,48 +537,23 @@ class TestData(object):
             Koppel deze accounts aan de rollen SEC en HWL
         """
 
-        voornamen = ('Sen34', 'Sen39', 'Mas50',                         # Beheerders: SEC, HWL, WL
-                     'Cad17', 'Jun19b', 'Sen32b', 'Mas51', 'Vet60c')    # Sporter accounts
-
-        # maak voor elke vereniging een paar accounts aan
-        bulk = list()
-        for sporter in Sporter.objects.filter(voornaam__in=voornamen):
-            account = Account(
-                            username=str(sporter.lid_nr),
-                            otp_code=self.OTP_CODE,
-                            otp_is_actief=True)
-            account.set_password(self.WACHTWOORD)
-            bulk.append(account)
-        # for
-
-        Account.objects.bulk_create(bulk)
-        # print('TestData: created %sx Accounts' % len(bulk))
-        del bulk
-
-        # koppel de accounts aan de sporters
-        username2account = dict()
-        for account in Account.objects.all():
-            username2account[account.username] = account
-        # for
+        voornamen = ('Sen34', 'Sen39', 'Mas50')   # Beheerders: HWL, "beheerder", SEC
 
         for sporter in (Sporter
                         .objects
-                        .select_related('bij_vereniging')
+                        .select_related('bij_vereniging',
+                                        'account')
                         .filter(voornaam__in=voornamen)):
 
-            account = username2account[str(sporter.lid_nr)]
-            sporter.account = account
-            sporter.save(update_fields=['account'])
-
             ver_nr = sporter.bij_vereniging.ver_nr
+
             if sporter.voornaam == 'Sen34':
-                self.account_hwl[ver_nr] = account
+                self.account_hwl[ver_nr] = sporter.account
             elif sporter.voornaam == 'Mas50':
-                self.account_sec[ver_nr] = account
+                self.account_sec[ver_nr] = sporter.account
             elif sporter.voornaam == 'Sen39':
-                self._accounts_beheerders.append(account)
-            else:
-                self.ver_sporters[ver_nr].append(sporter)
+                # voor gebruik als BKO, RKO, RCL
+                self._accounts_beheerders.append(sporter.account)
         # for
 
         # maak de functies aan
@@ -559,7 +578,6 @@ class TestData(object):
         # for
 
         Functie.objects.bulk_create(bulk)
-        # print('TestData: created %sx Functie' % len(bulk))
         del bulk
 
         # koppel de functies aan de accounts
