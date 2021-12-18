@@ -25,7 +25,7 @@ class TestCompRayonTeams(E2EHelpers, TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        print('CompRayon: populating testdata start')
+        print('CompRayon.test_teams_rko: populating testdata start')
         s1 = timezone.now()
         cls.testdata = TestData()
         cls.testdata.maak_accounts()
@@ -33,7 +33,7 @@ class TestCompRayonTeams(E2EHelpers, TestCase):
         cls.testdata.maak_bondscompetities()
         s2 = timezone.now()
         d = s2 - s1
-        print('CompRayon: populating testdata took %s seconds' % d.seconds)
+        print('CompRayon.test_teams_rko: populating testdata took %s seconds' % d.seconds)
 
     def setUp(self):
         """ eenmalige setup voor alle tests

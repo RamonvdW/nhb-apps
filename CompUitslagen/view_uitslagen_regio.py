@@ -295,11 +295,8 @@ class UitslagenRegioIndivView(TemplateView):
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
                       .filter(deelcompetitie=deelcomp)
-                      .select_related('sporterboog',
-                                      'sporterboog__sporter',
+                      .select_related('sporterboog__sporter',
                                       'bij_vereniging',
-                                      'klasse',
-                                      'klasse__indiv',
                                       'klasse__indiv__boogtype')
                       .filter(klasse__indiv__boogtype=boogtype)
                       .order_by('klasse__indiv__volgorde', self.order_gemiddelde))

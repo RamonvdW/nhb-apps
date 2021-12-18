@@ -80,7 +80,7 @@ urlpatterns = [
          name='teams-rk-koppelen'),
 
 
-    # HWL: waarschijnlijke deelnemers
+    # HWL: download lijsten
     path('download-formulier/<wedstrijd_pk>/',
          view_formulieren.DownloadRkFormulierView.as_view(),
          name='download-formulier'),
@@ -92,6 +92,7 @@ urlpatterns = [
     path('download-formulier-teams/<wedstrijd_pk>/<klasse_pk>/',
          view_formulieren.FormulierTeamsAlsBestandView.as_view(),
          name='formulier-teams-als-bestand'),
+
 
     # BKO
     path('<comp_pk>/rk-bk-teams-klassengrenzen/vaststellen/',

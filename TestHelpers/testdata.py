@@ -58,6 +58,8 @@ class TestData(object):
         self.account_bb = None
 
         # verenigingen
+        self.regio_ver_nrs = dict()             # [regio_nr] = list(ver_nrs)
+
         self.account_sec = dict()               # [ver_nr] = Account
         self.account_hwl = dict()               # [ver_nr] = Account
 
@@ -98,6 +100,11 @@ class TestData(object):
         self.comp25_functie_rcl = dict()        # [regio_nr] = Functie
 
         self.regio_cluster = dict()             # [regio_nr] = NhbCluster (alleen regio 101 en 107)
+
+        self.comp18_klassen_indiv = list()
+        self.comp18_klassen_team = list()
+        self.comp25_klassen_indiv = list()
+        self.comp25_klassen_team = list()
 
         # all inschrijvingen
         self.comp18_deelnemers = list()
@@ -400,7 +407,9 @@ class TestData(object):
         # maak voor elke vereniging een paar accounts aan
         lid_nr = 300000
         bulk = list()
-        for ver in NhbVereniging.objects.all():
+        for ver in NhbVereniging.objects.select_related('regio').all():
+            self.regio_ver_nrs[ver.regio.regio_nr] = ver.ver_nr
+
             for _, _, voornaam, _, maak_account in soorten:
                 lid_nr += 1
 
@@ -720,7 +729,19 @@ class TestData(object):
                 else:
                     self.comp25_functie_bko = functie
                     self.comp25_account_bko = account
+        # for
 
+        for klasse in CompetitieKlasse.objects.select_related('competitie', 'indiv', 'team').all():
+            if klasse.competitie.afstand == '18':
+                if klasse.indiv:
+                    self.comp18_klassen_indiv.append(klasse)
+                else:
+                    self.comp18_klassen_team.append(klasse)
+            else:
+                if klasse.indiv:
+                    self.comp18_klassen_indiv.append(klasse)
+                else:
+                    self.comp18_klassen_team.append(klasse)
         # for
 
     def maak_inschrijven_competitie(self, afstand=18, ver_nr=None):
@@ -776,8 +797,7 @@ class TestData(object):
 
         new_deelnemers = (RegioCompetitieSchutterBoog
                           .objects
-                          .select_related('sporterboog',
-                                          'sporterboog__sporter',
+                          .select_related('sporterboog__sporter',
                                           'sporterboog__boogtype',
                                           'klasse')
                           .filter(sporterboog__pk__in=pks))
@@ -905,8 +925,7 @@ class TestData(object):
 
         for poule in (RegiocompetitieTeamPoule
                       .objects
-                      .select_related('deelcompetitie',
-                                      'deelcompetitie__competitie')
+                      .select_related('deelcompetitie__competitie')
                       .filter(deelcompetitie=deelcomp)):
 
             pks = list()
@@ -921,17 +940,6 @@ class TestData(object):
 
             poules.append(poule)
         # for
-
-
-def account_vhpg_is_geaccepteerd(account):
-    """ onthoud dat de vhpg net geaccepteerd is door de gebruiker
-    """
-    # Deze functie wordt aangeroepen vanuit een POST handler
-    # concurrency beveiliging om te voorkomen dat 2 records gemaakt worden
-    obj, created = (VerklaringHanterenPersoonsgegevens
-                    .objects
-                    .update_or_create(account=account,
-                                      defaults={'acceptatie_datum': timezone.now()}))
 
 
 # end of file

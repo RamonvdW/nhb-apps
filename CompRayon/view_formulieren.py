@@ -57,7 +57,12 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
+        plannen = wedstrijd.competitiewedstrijdenplan_set.all()
+        if len(plannen) == 0:
+            raise Http404('Geen wedstrijden plan')
+        plan = plannen[0]
+        del plannen
+
         deelcomp = plan.deelcompetitie_set.select_related('competitie', 'nhb_rayon').all()[0]
         if deelcomp.laag != LAAG_RK:
             raise Http404('Verkeerde competitie')

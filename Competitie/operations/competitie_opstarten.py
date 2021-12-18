@@ -70,6 +70,14 @@ def _maak_deelcompetities(comp, rayons, regios, functies):
         vorige_deelcomps[deelcomp.nhb_regio.regio_nr] = deelcomp
     # for
 
+    # maak wedstrijdplannen aan: voor de 4x LAAG_RK en 1x voor LAAG_BK
+    plannen = [CompetitieWedstrijdenPlan(),
+               CompetitieWedstrijdenPlan(),
+               CompetitieWedstrijdenPlan(),
+               CompetitieWedstrijdenPlan(),
+               CompetitieWedstrijdenPlan()]
+    CompetitieWedstrijdenPlan.objects.bulk_create(plannen)
+
     # maak de Deelcompetities aan voor Regio, RK, BK
     bulk = list()
     for laag, _ in DeelCompetitie.LAAG:
@@ -102,7 +110,8 @@ def _maak_deelcompetities(comp, rayons, regios, functies):
                 deel = DeelCompetitie(competitie=comp,
                                       laag=laag,
                                       nhb_rayon=obj,
-                                      functie=functie)
+                                      functie=functie,
+                                      plan=plannen[obj.rayon_nr])
                 bulk.append(deel)
             # for
         else:
@@ -110,7 +119,8 @@ def _maak_deelcompetities(comp, rayons, regios, functies):
             functie = functies[("BKO", comp.afstand, 0)]
             deel = DeelCompetitie(competitie=comp,
                                   laag=laag,
-                                  functie=functie)
+                                  functie=functie,
+                                  plan=plannen[0])
             bulk.append(deel)
     # for
 
