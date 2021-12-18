@@ -16,6 +16,7 @@ from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Wedstrijden.models import CompetitieWedstrijd
 from tempfile import NamedTemporaryFile
+from copy import copy
 import openpyxl
 import shutil
 import os
@@ -147,9 +148,11 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                      .objects
                      .filter(deelcompetitie=deelcomp,
                              klasse__team__pk__in=klasse_team_pks)
-                     .select_related('vereniging')
+                     .select_related('vereniging',
+                                     'klasse')
                      .prefetch_related('gekoppelde_schutters')
-                     .all())
+                     .order_by('klasse',
+                               '-aanvangsgemiddelde'))      # sterkste team bovenaan
             context['deelnemers_teams'] = teams
 
             if not comp.klassengrenzen_vastgesteld_rk_bk:
@@ -359,6 +362,9 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         klasse_str = klasse.team.beschrijving
 
+        boog_typen = klasse.team.team_type.boog_typen.all()
+        boog_pks = list(boog_typen.values_list('pk', flat=True))
+
         # bepaal de naam van het terug te geven bestand
         fname = "rk-programma_teams-rayon%s_" % deelcomp.nhb_rayon.rayon_nr
         fname += klasse_str.lower().replace(' ', '-')
@@ -376,7 +382,10 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
             raise Http404('Kan RK programma niet openen')
 
         # maak wijzigingen in het RK programma
-        ws = prg['scores']
+        ws = prg['Uitleg']
+        ws['A5'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
+
+        ws = prg['Deelnemers en Scores']
 
         ws['B1'] = 'Rayonkampioenschappen Teams Rayon %s, %s' % (deelcomp.nhb_rayon.rayon_nr, comp.beschrijving)
         ws['B4'] = 'Klasse: ' + klasse_str
@@ -391,15 +400,20 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
                  .select_related('vereniging',
                                  'vereniging__regio')
                  .prefetch_related('gekoppelde_schutters')
-                 .order_by('aanvangsgemiddelde'))
+                 .order_by('-aanvangsgemiddelde'))      # sterkste team bovenaan
+
+        ver_nrs = list()
 
         volg_nr = 0
         for team in teams:
             row_nr = 9 + volg_nr * 6
             row = str(row_nr)
 
-            # regio
             ver = team.vereniging
+            if ver.ver_nr not in ver_nrs:
+                ver_nrs.append(ver.ver_nr)
+
+            # regio
             ws['C' + row] = ver.regio.regio_nr
 
             # vereniging
@@ -476,7 +490,84 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         ws['B82'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
 
-        # TODO: all invallers opnemen op een apart tabblad, met gemiddelde
+        # alle gerechtigde invallers opnemen op een apart tabblad, met gemiddelde en boogtype
+        ws = prg['Invallers']
+
+        cd_font = ws['C18'].font
+        c_align = ws['C18'].alignment
+        c_format = ws['C18'].number_format
+
+        d_align = ws['D18'].alignment
+        d_format = ws['D18'].number_format
+
+        efgh_font = ws['E18'].font
+        e_align = ws['E18'].alignment
+
+        f_align = ws['F18'].alignment
+
+        g_align = ws['G18'].alignment
+        g_format = ws['G18'].number_format
+
+        row_nr = 16
+        prev_ver = None
+        for deelnemer in (KampioenschapSchutterBoog
+                          .objects
+                          .filter(deelcompetitie=deelcomp,
+                                  bij_vereniging__ver_nr__in=ver_nrs,
+                                  sporterboog__boogtype__pk__in=boog_pks)       # filter op toegestane boogtypen
+                          .select_related('bij_vereniging__regio',
+                                          'sporterboog__sporter',
+                                          'sporterboog__boogtype')
+                          .order_by('bij_vereniging__regio',
+                                    'bij_vereniging',
+                                    'sporterboog__sporter__unaccented_naam')):
+
+            row_nr += 1
+            row = str(row_nr)
+
+            # vereniging
+            ver = deelnemer.bij_vereniging
+            if ver != prev_ver:
+                row_nr += 1     # extra lege regel
+                row = str(row_nr)
+                ws['C' + row] = ver.regio.regio_nr
+                if row_nr != 18:
+                    ws['C' + row].font = copy(cd_font)
+                    ws['C' + row].alignment = copy(c_align)
+                    ws['C' + row].number_format = copy(c_format)
+
+                ws['D' + row] = '[%s] %s' % (ver.ver_nr, ver.naam)
+                if row_nr != 18:
+                    ws['D' + row].font = copy(cd_font)
+                    ws['D' + row].alignment = copy(d_align)
+                    ws['D' + row].number_format = copy(d_format)
+
+                prev_ver = ver
+
+            # sporter
+            sporter = deelnemer.sporterboog.sporter
+            ws['E' + row] = sporter.lid_nr
+            ws['F' + row] = sporter.volledige_naam()
+
+            ws['G' + row] = deelnemer.gemiddelde
+            ws['H' + row] = deelnemer.sporterboog.boogtype.beschrijving
+
+            if row_nr != 18:
+                ws['E' + row].font = copy(efgh_font)
+                ws['F' + row].font = copy(efgh_font)
+                ws['G' + row].font = copy(efgh_font)
+                ws['H' + row].font = copy(efgh_font)
+
+                ws['E' + row].alignment = copy(e_align)
+                ws['G' + row].alignment = copy(g_align)
+                ws['G' + row].number_format = copy(g_format)
+        # for
+
+        row_nr += 2
+        row = str(row_nr)
+        ws['B' + row] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
+        ws['B' + row].font = copy(efgh_font)
+        ws['B' + row].alignment = copy(f_align)
 
         # geef het aangepaste RK programma aan de client
         response = HttpResponse(content_type='application/vnd.ms-excel.sheet.macroEnabled.12')
