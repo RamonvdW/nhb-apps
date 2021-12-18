@@ -830,7 +830,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                     sporterboog_pk, naam_str = deelnemer2sporter_cache[deelnemer.pk]
                     sporterboog_pks.append(sporterboog_pk)
 
-                    if sporterboog.pk not in alle_sporterboog_pks:  # want deelnemer kan in meerdere teams voorkomen
+                    if sporterboog_pk not in alle_sporterboog_pks:  # want deelnemer kan in meerdere teams voorkomen
                         alle_sporterboog_pks.append(sporterboog_pk)
 
                     deelnemer.naam_str = naam_str
