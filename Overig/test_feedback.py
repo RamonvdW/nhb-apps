@@ -197,4 +197,20 @@ class TestOverigFeedback(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_feedback_inzicht)
 
+    def test_inzicht_it(self):
+        self.e2e_account_accepteert_vhpg(self.account_admin)
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_feedback_inzicht)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('overig/site-feedback-inzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertEqual(urls, ['/beheer/Overig/sitefeedback/'])
+
+
 # end of file
