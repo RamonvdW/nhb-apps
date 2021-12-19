@@ -1071,7 +1071,7 @@ class TestData(object):
 
         for deelnemer in deelnemers:
             if deelnemer.inschrijf_voorkeur_team and deelnemer.bij_vereniging.ver_nr == ver_nr:
-                print('deelnemer: %s (indiv ag: %s, team ag: %s)' % (deelnemer, deelnemer.ag_voor_indiv, deelnemer.ag_voor_team))
+                # print('deelnemer: %s (indiv ag: %s, team ag: %s)' % (deelnemer, deelnemer.ag_voor_indiv, deelnemer.ag_voor_team))
                 afkorting = deelnemer.sporterboog.boogtype.afkorting
                 try:
                     deelnemers_per_boog[afkorting].append(deelnemer)

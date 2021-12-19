@@ -538,6 +538,8 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
         context['regio'] = self.functie_nu.nhb_regio
 
+        # TODO: check competitie fase
+
         probleem_met_teams = False
         if deelcomp.huidige_team_ronde == 0:
             # check dat alle teams geplaatst in een wedstrijdklasse (dus genoeg sporters gekoppeld hebben)

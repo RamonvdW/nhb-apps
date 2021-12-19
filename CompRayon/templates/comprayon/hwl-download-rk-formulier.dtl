@@ -43,7 +43,12 @@
 
                 <div class="row small-row">
                     <div class="col s4">Bij vereniging:</div>
-                    <div class="col s8">{{ wedstrijd.vereniging }}</div>
+                    <div class="col s8">{{ vereniging }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s4">Aantal banen:</div>
+                    <div class="col s8">{{ aantal_banen }}</div>
                 </div>
 
                 <div class="row small-row">

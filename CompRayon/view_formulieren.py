@@ -10,14 +10,16 @@ from django.http import Http404, HttpResponse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (CompetitieKlasse, LAAG_RK,
-                               KampioenschapSchutterBoog, KampioenschapTeam)
+from Competitie.models import (CompetitieKlasse, LAAG_RK, DeelcompetitieKlasseLimiet,
+                               KampioenschapSchutterBoog, KampioenschapTeam,
+                               DEELNAME_NEE, DEELNAME2STR)
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Wedstrijden.models import CompetitieWedstrijd
 from tempfile import NamedTemporaryFile
 from copy import copy
 import openpyxl
+import zipfile
 import shutil
 import os
 
@@ -54,7 +56,8 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                          .select_related('vereniging')
                          .prefetch_related('indiv_klassen',
                                            'team_klassen')
-                         .get(pk=wedstrijd_pk))
+                         .get(pk=wedstrijd_pk,
+                              vereniging=self.functie_nu.nhb_ver))
         except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
@@ -68,12 +71,22 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
         if deelcomp.laag != LAAG_RK:
             raise Http404('Verkeerde competitie')
 
+        context['deelcomp'] = deelcomp
+        context['wedstrijd'] = wedstrijd
+        context['vereniging'] = wedstrijd.vereniging        # als we hier komen is dit altijd bekend
+        context['locatie'] = wedstrijd.locatie
+        context['aantal_banen'] = '?'
+
         comp = deelcomp.competitie
         # TODO: check fase
         if comp.afstand == '18':
             aantal_pijlen = 30
+            if wedstrijd.locatie:
+                context['aantal_banen'] = wedstrijd.locatie.banen_18m
         else:
             aantal_pijlen = 25
+            if wedstrijd.locatie:
+                context['aantal_banen'] = wedstrijd.locatie.banen_25m
 
         if deelcomp.laag == LAAG_RK:
             wedstrijd.is_rk = True
@@ -104,10 +117,8 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
         # for
 
         vastgesteld = timezone.localtime(timezone.now())
-
-        context['deelcomp'] = deelcomp
-        context['wedstrijd'] = wedstrijd
         context['vastgesteld'] = vastgesteld
+
         context['heeft_indiv'] = heeft_indiv
         context['heeft_teams'] = heeft_teams
         context['beschrijving'] = "%s %s" % (wedstrijd.beschrijving, " en ".join(beschr))
@@ -225,7 +236,12 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieKlasse.DoesNotExist):
             raise Http404('Klasse niet gevonden')
 
-        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
+        plannen = wedstrijd.competitiewedstrijdenplan_set.all()
+        if len(plannen) == 0:
+            raise Http404('Geen wedstrijden plan')
+        plan = plannen[0]
+        del plannen
+
         deelcomp = plan.deelcompetitie_set.select_related('competitie', 'nhb_rayon').all()[0]
         if deelcomp.laag != LAAG_RK:
             raise Http404('Verkeerde competitie')
@@ -237,6 +253,22 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
         klasse_str = klasse.indiv.beschrijving
 
+        aantal_banen = 16
+        if wedstrijd.locatie:
+            if comp.afstand == '18':
+                aantal_banen = wedstrijd.locatie.banen_18m
+            else:
+                aantal_banen = wedstrijd.locatie.banen_25m
+
+        # TODO: haal de ingestelde limiet op (maximum aantal deelnemers)
+        try:
+            lim = DeelcompetitieKlasseLimiet(deelcompetitie=deelcomp,
+                                             klasse=klasse)
+        except DeelcompetitieKlasseLimiet.DoesNotExist:
+            limiet = 24
+        else:
+            limiet = lim.limiet
+
         # bepaal de naam van het terug te geven bestand
         fname = "rk-programma_individueel-rayon%s_" % deelcomp.nhb_rayon.rayon_nr
         fname += klasse_str.lower().replace(' ', '-')
@@ -245,18 +277,28 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         # make een kopie van het RK programma in een tijdelijk bestand
         fpath = os.path.join(settings.INSTALL_PATH, 'CompRayon', 'files', 'template-excel-rk-indiv.xlsm')
         tmp_file = NamedTemporaryFile()
-        shutil.copyfile(fpath, tmp_file.name)
+        try:
+            shutil.copyfile(fpath, tmp_file.name)
+        except FileNotFoundError:
+            raise Http404('Kan RK programma niet vinden')
 
         # open de kopie, zodat we die aan kunnen passen
         try:
-            prg = openpyxl.open(tmp_file, keep_vba=True)
-        except OSError:
+            prg = openpyxl.load_workbook(tmp_file, keep_vba=True)
+        except (OSError, zipfile.BadZipFile, KeyError):
             raise Http404('Kan RK programma niet openen')
 
         # maak wijzigingen in het RK programma
         ws = prg['Voorronde']
 
         ws['C4'] = 'Rayonkampioenschappen %s, Rayon %s, %s' % (comp.beschrijving, deelcomp.nhb_rayon.rayon_nr, klasse.indiv.beschrijving)
+
+        ws['D5'] = wedstrijd.vereniging.naam     # organisatie
+        ws['F5'] = 'Datum: ' + wedstrijd.datum_wanneer.strftime('%Y-%m-%d')
+        if wedstrijd.locatie:
+            ws['H5'] = wedstrijd.locatie.adres       # adres van de wedstrijdlocatie
+        else:
+            ws['H5'] = 'Onbekend'
 
         deelnemers = (KampioenschapSchutterBoog
                       .objects
@@ -269,6 +311,10 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
                                       'klasse')
                       .order_by('klasse',
                                 'rank'))
+
+        baan_nr = 1
+        baan_letter = 'A'
+        deelnemer_nr = 0
 
         row_nr = 6
         for deelnemer in deelnemers:
@@ -288,11 +334,25 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             # regio
             ws['G' + row] = ver.regio.regio_nr
 
-            # klasse
-            ws['H' + row] = klasse_str
+            reserve_str = ''
+            if deelnemer.deelname != DEELNAME_NEE:
+                deelnemer_nr += 1
+                if deelnemer_nr > limiet:
+                    reserve_str = ' (reserve)'
+                else:
+                    ws['A' + row] = baan_nr
+                    ws['B' + row] = baan_letter
+
+                    baan_nr += 1
+                    if baan_nr > aantal_banen:
+                        baan_nr = 1
+                        baan_letter = chr(ord(baan_letter) + 1)
+
+            ws['H' + row] = DEELNAME2STR[deelnemer.deelname] + reserve_str
 
             # gemiddelde
             ws['I' + row] = deelnemer.gemiddelde
+
         # for
 
         row_nr += 2
@@ -345,7 +405,12 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieKlasse.DoesNotExist):
             raise Http404('Klasse niet gevonden')
 
-        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
+        plannen = wedstrijd.competitiewedstrijdenplan_set.all()
+        if len(plannen) == 0:
+            raise Http404('Geen wedstrijden plan')
+        plan = plannen[0]
+        del plannen
+
         deelcomp = plan.deelcompetitie_set.select_related('competitie', 'nhb_rayon').all()[0]
         if deelcomp.laag != LAAG_RK:
             raise Http404('Verkeerde competitie')
@@ -373,12 +438,16 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         # make een kopie van het RK programma in een tijdelijk bestand
         fpath = os.path.join(settings.INSTALL_PATH, 'CompRayon', 'files', 'template-excel-rk-teams.xlsm')
         tmp_file = NamedTemporaryFile()
-        shutil.copyfile(fpath, tmp_file.name)
+
+        try:
+            shutil.copyfile(fpath, tmp_file.name)
+        except FileNotFoundError:
+            raise Http404('Kan RK programma niet vinden')
 
         # open de kopie, zodat we die aan kunnen passen
         try:
-            prg = openpyxl.open(tmp_file, keep_vba=True)
-        except OSError:
+            prg = openpyxl.load_workbook(tmp_file, keep_vba=True)
+        except (OSError, zipfile.BadZipFile, KeyError):
             raise Http404('Kan RK programma niet openen')
 
         # maak wijzigingen in het RK programma
@@ -391,7 +460,10 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         ws['B4'] = 'Klasse: ' + klasse_str
         ws['D3'] = wedstrijd.datum_wanneer.strftime('%Y-%m-%d')
         ws['E3'] = wedstrijd.vereniging.naam     # organisatie
-        ws['H3'] = wedstrijd.locatie.adres       # adres van de wedstrijdlocatie
+        if wedstrijd.locatie:
+            ws['H3'] = wedstrijd.locatie.adres       # adres van de wedstrijdlocatie
+        else:
+            ws['H3'] = 'Onbekend'
 
         teams = (KampioenschapTeam
                  .objects

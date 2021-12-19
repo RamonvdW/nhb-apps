@@ -666,7 +666,7 @@ class E2EHelpers(TestCase):
 
         if resp.status_code != 200:     # pragma: no cover
             self.e2e_dump_resp(resp)
-            self.fail(msg="Unexpected real status code %s instead of 403" % resp.status_code)
+            self.fail(msg="Unexpected status code %s instead of 200" % resp.status_code)
 
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
@@ -678,7 +678,7 @@ class E2EHelpers(TestCase):
         # controleer dat we op de speciale code-404 handler pagina gekomen zijn
         if resp.status_code != 200:     # pragma: no cover
             self.e2e_dump_resp(resp)
-            self.fail(msg="Unexpected real status code %s instead of 404" % resp.status_code)
+            self.fail(msg="Unexpected status code %s instead of 200" % resp.status_code)
 
         # controleer dat we op de speciale code-404 handler pagina gekomen zijn
         self.assertEqual(resp.status_code, 200)
@@ -692,5 +692,15 @@ class E2EHelpers(TestCase):
                 pos = pagina.find('</code>')
                 pagina = pagina[:pos]
                 self.fail(msg='404 pagina contained %s instead of %s' % (repr(pagina), repr(expected_msg)))
+
+    def assert200_file(self, resp):
+        if resp.status_code != 200:     # pragma: no cover
+            self.e2e_dump_resp(resp)
+            self.fail(msg="Unexpected status code %s instead of 200" % resp.status_code)
+
+        header = resp['Content-Disposition']
+        if not header.startswith('attachment; filename'):
+            self.fail(msg="Response is not a file attachment")
+
 
 # end of file
