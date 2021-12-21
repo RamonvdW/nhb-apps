@@ -828,7 +828,7 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        if comp.fase != 'E':
+        if comp.fase not in ('E', 'F'):
             # staat niet meer open voor instellen regiocompetitie teams
             raise Http404('Competitie is niet in de juiste fase')
 
