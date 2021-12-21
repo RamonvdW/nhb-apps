@@ -795,7 +795,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
 
 class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
 
-    """ Laat de HWL de invallers van zijn teams opgeven.
+    """ Geef de HWL een overzicht van de teams waarvoor de invallers gekoppeld kunnen worden.
     """
 
     # class variables shared by all instances
@@ -830,7 +830,7 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
-        if comp.fase != 'E':
+        if comp.fase not in ('E', 'F'):
             # staat niet meer open voor instellen regiocompetitie teams
             raise Http404('Competitie is niet in de juiste fase')
 
@@ -965,6 +965,8 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp = team.deelcompetitie
         context['logboek'] = ronde_team.logboek
 
+        # TODO: check competitie fase (E of F)
+
         boog_typen = team.team_type.boog_typen.all()
         boog_pks = boog_typen.values_list('pk', flat=True)
         context['boog_typen'] = boog_typen
@@ -1098,6 +1100,8 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         team = ronde_team.team
         deelcomp = team.deelcompetitie
+
+        # TODO: check competitie fase
 
         # zoek uit wie 'bezet' zijn in een ander team
         deelnemers_bezet_pks = list()

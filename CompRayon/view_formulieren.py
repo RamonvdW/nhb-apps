@@ -300,6 +300,15 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         else:
             ws['H5'] = 'Onbekend'
 
+        ws['A32'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
+
+        i_font = ws['I7'].font
+        i_align = ws['I7'].alignment
+        i_format = ws['I7'].number_format
+
+        d_align = ws['D7'].alignment
+        g_align = ws['G7'].alignment
+
         deelnemers = (KampioenschapSchutterBoog
                       .objects
                       .filter(deelcompetitie=deelcomp,
@@ -307,19 +316,45 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
                                       'bij_vereniging',
-                                      'bij_vereniging__regio',
-                                      'klasse')
-                      .order_by('klasse',
-                                'rank'))
+                                      'bij_vereniging__regio')
+                      .order_by('rank'))
 
         baan_nr = 1
         baan_letter = 'A'
         deelnemer_nr = 0
 
-        row_nr = 6
+        row1_nr = 6
+        row2_nr = 35
         for deelnemer in deelnemers:
-            row_nr += 1
-            row = str(row_nr)
+            is_deelnemer = False
+            reserve_str = ''
+            if deelnemer.deelname != DEELNAME_NEE:
+                deelnemer_nr += 1
+                if deelnemer_nr > limiet:
+                    reserve_str = ' (reserve)'
+                else:
+                    is_deelnemer = True
+
+            if is_deelnemer:
+                row1_nr += 1
+                row = str(row1_nr)
+            else:
+                row2_nr += 1
+                row = str(row2_nr)
+                ws['D' + row].alignment = copy(d_align)
+                ws['G' + row].alignment = copy(g_align)
+                ws['I' + row].alignment = copy(i_align)
+                ws['I' + row].font = copy(i_font)
+                ws['I' + row].number_format = copy(i_format)
+
+            if is_deelnemer:
+                ws['A' + row] = baan_nr
+                ws['B' + row] = baan_letter
+
+                baan_nr += 1
+                if baan_nr > aantal_banen:
+                    baan_nr = 1
+                    baan_letter = chr(ord(baan_letter) + 1)
 
             # bondsnummer
             ws['D' + row] = deelnemer.sporterboog.sporter.lid_nr
@@ -334,29 +369,11 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             # regio
             ws['G' + row] = ver.regio.regio_nr
 
-            reserve_str = ''
-            if deelnemer.deelname != DEELNAME_NEE:
-                deelnemer_nr += 1
-                if deelnemer_nr > limiet:
-                    reserve_str = ' (reserve)'
-                else:
-                    ws['A' + row] = baan_nr
-                    ws['B' + row] = baan_letter
-
-                    baan_nr += 1
-                    if baan_nr > aantal_banen:
-                        baan_nr = 1
-                        baan_letter = chr(ord(baan_letter) + 1)
-
             ws['H' + row] = DEELNAME2STR[deelnemer.deelname] + reserve_str
 
             # gemiddelde
             ws['I' + row] = deelnemer.gemiddelde
-
         # for
-
-        row_nr += 2
-        ws['A' + str(row_nr)] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
 
         # geef het aangepaste RK programma aan de client
         response = HttpResponse(content_type='application/vnd.ms-excel.sheet.macroEnabled.12')

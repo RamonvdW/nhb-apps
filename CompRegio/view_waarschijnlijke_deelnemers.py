@@ -85,7 +85,7 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
 
         context['blazoenen'] = bepaal_blazoen_behoefte(afstand, sporters, teams)
 
-        context['url_download'] = reverse('CompScores:waarschijnlijke-deelnemers-als-bestand',
+        context['url_download'] = reverse('CompRegio:waarschijnlijke-deelnemers-als-bestand',
                                           kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         # prep de view

@@ -139,7 +139,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
             for deelcomp in deelcomps:
                 if deelcomp.competitie == comp:
-                    if deelcomp.regio_organiseert_teamcompetitie and comp.fase == 'E' and 1 <= deelcomp.huidige_team_ronde <= 7:
+                    if deelcomp.regio_organiseert_teamcompetitie and 'E' <= comp.fase <= 'F' and 1 <= deelcomp.huidige_team_ronde <= 7:
                         # team invallers opgeven
                         kaartje = SimpleNamespace(
                                     titel="Team Invallers",
