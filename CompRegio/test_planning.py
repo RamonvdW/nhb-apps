@@ -789,11 +789,6 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert404(resp)     # 404 = Not found/allowed
 
-        # converteer de enige ronde naar een import ronde
-        ronde_oud = DeelcompetitieRonde.objects.filter(deelcompetitie=self.deelcomp_regio101_25)[0]
-        ronde_oud.beschrijving = "Ronde 42 oude programma"
-        ronde_oud.save()
-
         # haal de planning op (maakt opnieuw een ronde aan)
         with self.assert_max_queries(22):
             resp = self.client.get(url)
@@ -801,7 +796,6 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compregio/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
 
-        ronde_oud.delete()
         ronde_pk = DeelcompetitieRonde.objects.filter(deelcompetitie=self.deelcomp_regio101_25)[0].pk
 
         # haal de planning op (nu is de ronde er al)

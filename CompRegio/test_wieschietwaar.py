@@ -367,10 +367,4 @@ class TestVerenigingWieSchietWaar(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
 
-        # verbouw de deelcompetitieronde zodat deze niet meer meegenomen wordt
-        self.ronde.beschrijving = 'Ronde 0 oude programma'
-        self.ronde.save()
-        resp = self.client.get(self.url_wieschietwaar % self.deelcomp_regio.pk)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-
 # end of file

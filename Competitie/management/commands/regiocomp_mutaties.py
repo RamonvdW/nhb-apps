@@ -980,9 +980,8 @@ class Command(BaseCommand):
                 try:
                     deelnemer = regiocompetitieschutterboog_pk2kampioenschapschutterboog[pk]
                 except KeyError:
-                    self.stderr.write(
-                        '[WARNING] Kan tijdelijke_sporter %s van team %s niet vinden als kampioenschapschutterboog' % (
-                            pk, team))
+                    # regio sporter is niet doorgekomen naar het RK en valt dus af
+                    pass
                 else:
                     # controleer de vereniging
                     if deelnemer.bij_vereniging.ver_nr == team_ver_nr:
@@ -1015,7 +1014,7 @@ class Command(BaseCommand):
 
         # controleer dat de competitie in fase G is
         if not comp.alle_regiocompetities_afgesloten:
-            # ga door naar fase K
+            # ga door naar fase J
             comp.alle_regiocompetities_afgesloten = True
             comp.save(update_fields=['alle_regiocompetities_afgesloten'])
 
