@@ -62,6 +62,8 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 
         context['deelcomp'] = deelcomp
 
+        # TODO: check competitie fase
+
         if deelcomp.regio_organiseert_teamcompetitie:
             context['url_team_scores'] = reverse('CompScores:selecteer-team-scores',
                                                  kwargs={'deelcomp_pk': deelcomp.pk})
@@ -78,6 +80,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
                       .select_related('plan')
                       .prefetch_related('plan__wedstrijden')
                       .filter(deelcompetitie=deelcomp)):
+
             for wedstrijd in ronde.plan.wedstrijden.all():
                 wedstrijd_pks.append(wedstrijd.pk)
                 beschrijving = ronde.beschrijving

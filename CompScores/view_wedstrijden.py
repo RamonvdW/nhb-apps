@@ -100,22 +100,24 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             wedstrijd.opvallen = (wedstrijd.is_rk or wedstrijd.is_bk) and is_mix
 
             wedstrijd.toon_geen_uitslag = True
-            heeft_uitslag = (wedstrijd.uitslag and wedstrijd.uitslag.scores.count() > 0)
-            mag_wijzigen = self.uitslag_invoeren and not (wedstrijd.uitslag and wedstrijd.uitslag.is_bevroren)
-            if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and mag_wijzigen:
-                # mag uitslag wijzigen
-                url = reverse('CompScores:uitslag-invoeren',
-                              kwargs={'wedstrijd_pk': wedstrijd.pk})
-                if heeft_uitslag:
-                    wedstrijd.url_uitslag_aanpassen = url
-                else:
-                    wedstrijd.url_score_invoeren = url
-                wedstrijd.toon_geen_uitslag = False
-            else:
-                if heeft_uitslag:
-                    wedstrijd.url_uitslag_bekijken = reverse('CompScores:uitslag-bekijken',
-                                                             kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+            if not (wedstrijd.is_rk or wedstrijd.is_bk):
+                heeft_uitslag = (wedstrijd.uitslag and wedstrijd.uitslag.scores.count() > 0)
+                mag_wijzigen = self.uitslag_invoeren and not (wedstrijd.uitslag and wedstrijd.uitslag.is_bevroren)
+                if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and mag_wijzigen:
+                    # mag uitslag wijzigen
+                    url = reverse('CompScores:uitslag-invoeren',
+                                  kwargs={'wedstrijd_pk': wedstrijd.pk})
+                    if heeft_uitslag:
+                        wedstrijd.url_uitslag_aanpassen = url
+                    else:
+                        wedstrijd.url_score_invoeren = url
                     wedstrijd.toon_geen_uitslag = False
+                else:
+                    if heeft_uitslag:
+                        wedstrijd.url_uitslag_bekijken = reverse('CompScores:uitslag-bekijken',
+                                                                 kwargs={'wedstrijd_pk': wedstrijd.pk})
+                        wedstrijd.toon_geen_uitslag = False
 
             # link naar de waarschijnlijke deelnemerslijst
             if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and not (wedstrijd.uitslag and wedstrijd.uitslag.is_bevroren):
