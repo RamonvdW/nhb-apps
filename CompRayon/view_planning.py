@@ -111,7 +111,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             obj.schutters_count = 0
 
             obj.wkl_namen = list()
-            for wkl in obj.indiv_klassen.order_by('volgorde'):
+            for wkl in obj.indiv_klassen.order_by('volgorde'):      # FUTURE: order_by zorgt voor extra database accesses
                 obj.wkl_namen.append(wkl.beschrijving)
                 niet_gebruikt[100000 + wkl.pk] = None
 
@@ -122,7 +122,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                     pass
             # for
 
-            for wkl in obj.team_klassen.order_by('volgorde'):
+            for wkl in obj.team_klassen.order_by('volgorde'):       # FUTURE: order_by zorgt voor extra database accesses
                 obj.wkl_namen.append(wkl.beschrijving)
                 niet_gebruikt[200000 + wkl.pk] = None
 
@@ -165,7 +165,6 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         for deelcomp in deelcomps:
             plan_pks = (DeelcompetitieRonde
                         .objects
-                        .exclude(beschrijving__contains=' oude programma')
                         .filter(deelcompetitie=deelcomp)
                         .values_list('plan__pk', flat=True))
             if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
@@ -246,13 +245,11 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         """
 
         # voorkom dubbel koppelen: zoek uit welke klassen al gekoppeld zijn aan een andere wedstrijd
-        alle_deelcomp_rk_plan_pks = DeelCompetitie.objects.filter(laag=LAAG_RK).values_list('plan__pk', flat=True)
         wedstrijd_pks = list()
-        for plan in CompetitieWedstrijdenPlan.objects.prefetch_related('wedstrijden').filter(pk__in=alle_deelcomp_rk_plan_pks):
+        for plan in CompetitieWedstrijdenPlan.objects.prefetch_related('wedstrijden').filter(pk=deelcomp_rk.plan.pk):
             pks = list(plan.wedstrijden.all().values_list('pk', flat=True))
             wedstrijd_pks.extend(pks)
         # for
-        del alle_deelcomp_rk_plan_pks
         if wedstrijd.pk in wedstrijd_pks:
             wedstrijd_pks.remove(wedstrijd.pk)
 
