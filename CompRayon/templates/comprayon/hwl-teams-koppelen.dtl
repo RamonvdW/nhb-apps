@@ -31,7 +31,6 @@
             const el = document.getElementById("opslaan_knop")
 
             const els = document.querySelectorAll('input[type=checkbox].filled-in')
-            console.log('els=', els)
             let count = 0
             els.forEach(checkbox => {
                     if (checkbox.checked) count += 1
