@@ -74,8 +74,7 @@
                         {% if toon_klassen %}
                             <h5 class="red-text">Nog niet geplaatste teams</h5>
                         {% endif %}
-                        <span>Vraag de HWL's om de teams compleet te maken met sporters die mee mogen doen met het RK.</span>
-                        <br><span class="red-text">Incomplete teams moeten verwijderd worden!</span>
+                        <span>Vraag de HWL's om <span class="red-text">rood gemarkeerde teams</span> compleet te maken met sporters die mee mogen doen met het RK, of te verwijderen.</span>
                     </td>
                 </tr>
                 <tr>

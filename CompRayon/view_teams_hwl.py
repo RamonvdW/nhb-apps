@@ -442,6 +442,9 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         if comp.fase <= 'G':
             # alle leden van de vereniging die meedoen aan de regiocompetitie mogen gekozen worden
+
+            context['onder_voorbehoud'] = True
+
             pks = rk_team.tijdelijke_schutters.values_list('pk', flat=True)
 
             bezet_pks = (KampioenschapTeam

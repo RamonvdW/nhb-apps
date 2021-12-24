@@ -33,7 +33,7 @@
             // enable/disable de 'opslaan' knop
             const el = document.getElementById("opslaan_knop")
 
-            const els = document.querySelectorAll('input[type=checkbox]')
+            const els = document.querySelectorAll('input[type=checkbox].filled-in')
             let count = 0
             els.forEach(checkbox => {
                     if (checkbox.checked) count += 1

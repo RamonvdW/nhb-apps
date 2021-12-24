@@ -228,10 +228,6 @@ class RayonTeamsView(TemplateView):
                 team.url_aanpassen = reverse('CompRayon:teams-rk-koppelen',
                                              kwargs={'rk_team_pk': team.pk})
 
-                if team.sporter_count < 3:
-                    team.url_verwijder = reverse('CompRayon:rayon-verwijder-team',
-                                                 kwargs={'rk_deelcomp_pk': deelcomp_rk.pk,
-                                                         'rk_team_pk': team.pk})
             totaal_teams += 1
 
             team.break_before = is_eerste

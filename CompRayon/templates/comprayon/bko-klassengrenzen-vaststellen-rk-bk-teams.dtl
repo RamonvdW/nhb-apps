@@ -20,7 +20,7 @@
     {% if niet_compleet_team %}
 
         <p>&nbsp;</p>
-        <p class="red-text">Deze actie kan niet uitgevoerd worden zolang er teams zijn met te weinig sporters.</p>
+        <p class="red-text">Deze actie kan niet uitgevoerd worden zolang er teams zijn zonder team sterkte (door te weinig gekoppelde sporters).</p>
 
         <p><a class="btn-nhb-blauw" href="{{ url_terug }}">Terug</a></p>
 
