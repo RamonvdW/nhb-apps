@@ -579,8 +579,8 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         ws['B82'] = 'Deze gegevens zijn opgehaald op %s' % vastgesteld.strftime('%Y-%m-%d %H:%M:%S')
 
-        # alle gerechtigde invallers opnemen op een apart tabblad, met gemiddelde en boogtype
-        ws = prg['Invallers']
+        # alle gerechtigde deelnemers opnemen op een apart tabblad, met gemiddelde en boogtype
+        ws = prg['Toegestane deelnemers']
 
         cd_font = ws['C18'].font
         c_align = ws['C18'].alignment
@@ -609,7 +609,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
                                           'sporterboog__boogtype')
                           .order_by('bij_vereniging__regio',
                                     'bij_vereniging',
-                                    'sporterboog__sporter__unaccented_naam')):
+                                    '-gemiddelde')):                            # hoogste eerst
 
             row_nr += 1
             row = str(row_nr)
