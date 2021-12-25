@@ -28,7 +28,7 @@ class Command(BaseCommand):
         do_save = options['commit']
 
         if boog_afk not in ('R', 'C', 'BB', 'IB', 'LB'):
-            self.stderr.write('Onbekend boog type: %s' % repr(options['boog']))
+            self.stderr.write('[ERROR] Onbekend boog type: %s' % repr(options['boog']))
             return
 
         # er kunnen meerdere competities actief zijn
@@ -52,7 +52,7 @@ class Command(BaseCommand):
                                        'bij_vereniging__regio')
                        .get(lid_nr=lid_nr))
         except Sporter.DoesNotExist:
-            self.stderr.write('[ERROR] Sporter met %s niet gevonden' % lid_nr)
+            self.stderr.write('[ERROR] Sporter %s niet gevonden' % lid_nr)
             return
 
         self.stdout.write('[INFO] Sporter %s is van vereniging %s in regio %s' % (
@@ -95,12 +95,17 @@ class Command(BaseCommand):
         # sporter heeft de nieuwe boog als voorkeur voor wedstrijden
         # juiste sporterboog is nog niet ingeschreven voor de competitie
 
-        deelnemer = (RegioCompetitieSchutterBoog
-                     .objects
-                     .select_related('sporterboog',
-                                     'sporterboog__boogtype')
-                     .get(deelcompetitie__competitie=comp,
-                          sporterboog__sporter__lid_nr=lid_nr))
+        try:
+            deelnemer = (RegioCompetitieSchutterBoog
+                         .objects
+                         .select_related('sporterboog',
+                                         'sporterboog__boogtype')
+                         .get(deelcompetitie__competitie=comp,
+                              sporterboog__sporter__lid_nr=lid_nr))
+        except RegioCompetitieSchutterBoog.MultipleObjectsReturned:
+            self.stderr.write('[ERROR] Sporter met meerdere inschrijvingen wordt niet ondersteund')
+            return
+
         huidige_boog_afk = deelnemer.sporterboog.boogtype.afkorting
         self.stdout.write('[INFO] Huidige deelnemer pk = %s' % deelnemer.pk)
         self.stdout.write('[INFO] Huidige sporterboog pk = %s, boogtype = %s' % (deelnemer.sporterboog.pk, huidige_boog_afk))
@@ -108,7 +113,7 @@ class Command(BaseCommand):
 
         # controleer of de sporter in een team mee doet
         if deelnemer.regiocompetitieteam_set.count() > 0:
-            self.stderr.write('[ERROR] Huidige deelnemer is deel van een team')
+            self.stderr.write('[ERROR] Sporter is onderdeel van een team')
             return
 
         score_pks = list()

@@ -20,12 +20,11 @@ class Command(BaseCommand):
                                  laag=LAAG_REGIO)
                          .order_by('nhb_regio__regio_nr')):
 
-            if not deelcomp.is_afgesloten:
-                regio_nr = deelcomp.nhb_regio.regio_nr
-                if regio_van <= regio_nr <= regio_tot:
-                    self.stdout.write('[INFO] Deelcompetitie %s wordt afgesloten' % deelcomp)
-                    deelcomp.is_afgesloten = True
-                    deelcomp.save()
+            regio_nr = deelcomp.nhb_regio.regio_nr
+            if regio_van <= regio_nr <= regio_tot:
+                self.stdout.write('[INFO] Deelcompetitie %s wordt afgesloten' % deelcomp)
+                deelcomp.is_afgesloten = True
+                deelcomp.save()
         # for
 
     def add_arguments(self, parser):
@@ -47,17 +46,18 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Valide regio nummers: 101 tot 116, oplopend')
             return
 
-        try:
-            # in geval van meerdere competities, pak de oudste (laagste begin_jaar)
-            comp = (Competitie
-                    .objects
-                    .filter(afstand=afstand,
-                            is_afgesloten=False)
-                    .order_by('begin_jaar'))[0]
-        except Competitie.DoesNotExist:
+        # in geval van meerdere competities, pak de oudste (laagste begin_jaar)
+        comps = (Competitie
+                 .objects
+                 .filter(afstand=afstand,
+                         is_afgesloten=False)
+                 .order_by('begin_jaar'))
+
+        if len(comps) == 0:
             self.stderr.write('[ERROR] Kan competitie met afstand %s niet vinden' % afstand)
             return
 
+        comp = comps[0]
         comp.bepaal_fase()
         if comp.fase < 'F' or comp.fase > 'G':
             self.stderr.write('[ERROR] Competitie in fase %s is niet ondersteund' % comp.fase)

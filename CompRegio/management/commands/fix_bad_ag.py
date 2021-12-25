@@ -8,6 +8,7 @@ from django.core.management.base import BaseCommand
 from Competitie.models import Competitie, RegioCompetitieSchutterBoog
 from Competitie.operations.klassengrenzen import KlasseBepaler
 from Score.models import Score, SCORE_TYPE_INDIV_AG
+from decimal import Decimal
 
 
 class Command(BaseCommand):
@@ -25,7 +26,7 @@ class Command(BaseCommand):
                 score = Score.objects.get(sporterboog=deelnemer.sporterboog,
                                           type=SCORE_TYPE_INDIV_AG,
                                           afstand_meter=afstand)
-                ag = score.waarde / 1000.0
+                ag = Decimal(score.waarde) / 1000
             except Score.DoesNotExist:
                 ag = 0.0
 

@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
         self.stdout.write('Deelnemers met inschreven boogtype niet meer actief als wedstrijdboog')
         # zoek alle leden met een andere voorkeur dan ingeschreven
-        comp = None
+        prev_comp = None
         for deelnemer in (RegioCompetitieSchutterBoog
                           .objects
                           .exclude(sporterboog__boogtype__afkorting='C')        # kan toch niet overzetten
@@ -41,9 +41,9 @@ class Command(BaseCommand):
                                     'sporterboog__sporter__lid_nr')):
 
             deelcomp = deelnemer.deelcompetitie
-            if deelcomp.competitie != comp:
-                comp = deelcomp.competitie
-                self.stdout.write('\n%s:' % comp)
+            if deelcomp.competitie != prev_comp:
+                prev_comp = deelcomp.competitie
+                self.stdout.write('\n%s:' % prev_comp)
 
             sporter = deelnemer.sporterboog.sporter
             voorkeuren = SporterBoog.objects.filter(sporter=sporter, voor_wedstrijd=True).select_related('boogtype').values_list('boogtype__afkorting', flat=True)
@@ -53,7 +53,7 @@ class Command(BaseCommand):
             self.stdout.write('Regio %s   %-30s   %-30s   %-2s -> %s' % (
                             deelcomp.nhb_regio.regio_nr,
                             self.afkappen(str(deelnemer.bij_vereniging), 30),
-                            self.afkappen(sporter.lid_nr_en_volledige_naam(), 30),
+                            self.afkappen(sporter.lid_nr_en_volledige_naam(), 40),
                             deelnemer.sporterboog.boogtype.afkorting,
                             wil_str))
         # for

@@ -43,7 +43,7 @@ class Command(BaseCommand):
         uitleggen = False
 
         for obj in dupes.values():
-            self.stdout.write('Verwijder alle data voor %s in %s' % (obj.sporterboog, obj.deelcompetitie.competitie))
+            self.stdout.write('Verwijder alle data voor deelnemer %s in %s' % (obj.sporterboog, obj.deelcompetitie.competitie))
 
             # verwijder alle scores, niet-AG
             # dit zijn er typisch veel te veel
@@ -64,6 +64,6 @@ class Command(BaseCommand):
         # for
 
         if uitleggen:
-            self.stderr.write('Gebruikt --commit om bovenstaande voorstellen echt te verwijderen')
+            self.stderr.write('Gebruik --commit om bovenstaande voorstellen echt te verwijderen')
 
 # end of file
