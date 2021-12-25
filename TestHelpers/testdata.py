@@ -9,7 +9,7 @@
 from django.test import Client
 from django.core import management
 from django.utils import timezone
-from Account.models import Account, account_create
+from Account.models import Account, account_create, AccountEmail
 from BasisTypen.models import BoogType, TeamType
 from Competitie.models import (Competitie, CompetitieKlasse, DeelCompetitie, LAAG_BK, LAAG_RK,
                                RegioCompetitieSchutterBoog,
@@ -447,12 +447,41 @@ class TestData(object):
 
                     if len(bulk) > 100:
                         Account.objects.bulk_create(bulk)
+
+                        # maak e-mails aan
+                        bulk2 = list()
+                        for account in bulk:
+                            # let op: e-mailadres moet overeenkomen met het Sporter.email
+                            email = AccountEmail(
+                                        account=account,
+                                        email_is_bevestigd=True,
+                                        bevestigde_email='lid%s@testdata.zz' % account.username)
+                            bulk2.append(email)
+                        # for
+
+                        AccountEmail.objects.bulk_create(bulk2)
+                        del bulk2
+
                         bulk = list()
             # for
         # for
 
         if len(bulk) > 0:
             Account.objects.bulk_create(bulk)
+
+            # maak e-mails aan
+            bulk2 = list()
+            for account in bulk:
+                email = AccountEmail(
+                            account=account,
+                            email_is_bevestigd=True,
+                            bevestigde_email='lid%s@testdata.zz' % account.username)
+                bulk2.append(email)
+            # for
+
+            AccountEmail.objects.bulk_create(bulk2)
+            del bulk2
+
         del bulk
 
         # cache de aangemaakte accounts
@@ -483,7 +512,7 @@ class TestData(object):
                         voornaam=voornaam,
                         achternaam=achternaam,
                         unaccented_naam=voornaam + ' ' + achternaam,
-                        email='lid%s@testdata.zz',
+                        email='lid%s@testdata.zz' % lid_nr,
                         geboorte_datum=geboortedatum,
                         geslacht=geslacht,
                         para_classificatie='',
@@ -864,7 +893,9 @@ class TestData(object):
                                           'sporterboog__boogtype',
                                           'bij_vereniging',
                                           'klasse')
-                          .filter(sporterboog__pk__in=pks))
+                          .filter(deelcompetitie__competitie=comp,
+                                  sporterboog__pk__in=pks))
+
         deelnemers.extend(new_deelnemers)
 
     def maak_inschrijvingen_regio_teamcompetitie(self, afstand, ver_nr):
@@ -1049,7 +1080,7 @@ class TestData(object):
         KampioenschapSchutterBoog.objects.bulk_create(bulk)
         del bulk
 
-    def maak_inschrijvingen_rk_teamcompetitie(self, afstand, ver_nr):
+    def maak_inschrijvingen_rk_teamcompetitie(self, afstand, ver_nr, ook_incomplete_teams=True):
         """ maak voor deze vereniging een paar teams aan voor de open RK teams inschrijving """
 
         ver = NhbVereniging.objects.select_related('regio__rayon').get(ver_nr=ver_nr)
@@ -1059,12 +1090,10 @@ class TestData(object):
             deelcomp_rk = self.deelcomp18_rk[rayon_nr]
             deelnemers = self.comp18_deelnemers
             rk_teams = self.comp18_kampioenschapteams
-            klassen = self.comp18_klassen_team
         else:
             deelcomp_rk = self.deelcomp25_rk[rayon_nr]
             deelnemers = self.comp25_deelnemers
             rk_teams = self.comp25_kampioenschapteams
-            klassen = self.comp25_klassen_team
 
         # verdeel de deelnemers per boogtype
         deelnemers_per_boog = dict()   # [boogtype.afkorting] = list(deelnemer)
@@ -1083,6 +1112,9 @@ class TestData(object):
         deelnemers_per_boog['R'].append(deelnemers_per_boog['BB'].pop(0))
         deelnemers_per_boog['R'].append(deelnemers_per_boog['LB'].pop(0))
 
+        ag = 21.0
+        ag_step = 0.72
+
         bulk = list()
         nieuwe_teams = list()
         for afkorting, deelnemers in deelnemers_per_boog.items():
@@ -1094,23 +1126,29 @@ class TestData(object):
                 koppel = deelnemers[:4]
                 deelnemers = deelnemers[4:]
 
-                ags = [deelnemer.gemiddelde for deelnemer in koppel]
-                ags.sort(reverse=True)      # hoogste eerst
-                ag = sum(ags[:3])           # beste 3
+                if ook_incomplete_teams or len(koppel) >= 3:
+                    # ags = [deelnemer.gemiddelde for deelnemer in koppel]
+                    # ags.sort(reverse=True)      # hoogste eerst
+                    # ag = sum(ags[:3])           # beste 3
+                    ag += ag_step
+                    if ag > 28.0:
+                        ag_step = -0.84
+                    elif ag < 19.0:
+                        ag_step = 0.57
 
-                team = KampioenschapTeam(
-                            deelcompetitie=deelcomp_rk,
-                            vereniging=ver,
-                            volg_nr=next_nr,
-                            team_type=self.afkorting2teamtype[afkorting],
-                            team_naam='rk-%s-%s-%s' % (ver_nr, next_nr, afkorting),
-                            aanvangsgemiddelde=ag,
-                            klasse=klassen[afkorting][0])
+                    team = KampioenschapTeam(
+                                deelcompetitie=deelcomp_rk,
+                                vereniging=ver,
+                                volg_nr=next_nr,
+                                team_type=self.afkorting2teamtype[afkorting],
+                                team_naam='rk-%s-%s-%s' % (ver_nr, next_nr, afkorting),
+                                # klasse wordt later bepaald door de BKO
+                                aanvangsgemiddelde=ag)
 
-                bulk.append(team)
+                    bulk.append(team)
 
-                tup = (team, koppel)
-                nieuwe_teams.append(tup)
+                    tup = (team, koppel)
+                    nieuwe_teams.append(tup)
             # while
         # for
 
@@ -1124,5 +1162,31 @@ class TestData(object):
             rk_teams.append(team)
         # for
 
+    def geef_rk_team_tijdelijke_sporters_genoeg_scores(self, afstand, ver_nr):
+        if afstand == 18:
+            rk_teams = self.comp18_kampioenschapteams       # list of KampioenschapTeam
+        else:
+            rk_teams = self.comp25_kampioenschapteams
+
+        gem = 7.0
+        step = 0.12
+
+        for team in rk_teams:
+            if team.vereniging.ver_nr == ver_nr:
+                for deelnemer in team.tijdelijke_schutters.all():
+                    deelnemer.aantal_scores = 6
+                    deelnemer.gemiddelde = gem
+                    deelnemer.save(update_fields=['aantal_scores', 'gemiddelde'])
+
+                    gem += step
+                    if gem > 9.7:
+                        step = -0.34
+                    elif gem < 5.0:
+                        step = 0.23
+
+                    # afronden op 3 decimalen (anders gebeurt dat tijdens opslaan in database)
+                    gem = round(gem, 3)
+                # for
+        # for
 
 # end of file

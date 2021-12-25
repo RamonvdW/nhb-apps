@@ -1011,6 +1011,7 @@ class Command(BaseCommand):
         # FUTURE: maak een taak aan voor de HWL's om de RK teams te herzien (eerst functionaliteit voor HWL maken)
 
     def _verwerk_mutatie_afsluiten_regiocomp(self, comp):
+        """ de BKO heeft gevraagd de regiocompetitie af te sluiten en alles klaar te maken voor het RK """
 
         # controleer dat de competitie in fase G is
         if not comp.alle_regiocompetities_afgesloten:
@@ -1074,7 +1075,7 @@ class Command(BaseCommand):
             self._verwerk_mutatie_team_ronde(mutatie.deelcompetitie)
 
         elif code == MUTATIE_AFSLUITEN_REGIOCOMP:
-            self.stdout.write('[INFO] Verwerk mutatie %s: afsluiten regiocompetitie')
+            self.stdout.write('[INFO] Verwerk mutatie %s: afsluiten regiocompetitie' % mutatie.pk)
             self._verwerk_mutatie_afsluiten_regiocomp(mutatie.competitie)
 
         else:

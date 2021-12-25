@@ -5,10 +5,14 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.core import management
 from django.utils import timezone
+from Competitie.models import Competitie, KampioenschapTeam
+from Competitie.test_fase import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 import datetime
+import io
 
 
 class TestCompUitslagen(E2EHelpers, TestCase):
@@ -22,12 +26,18 @@ class TestCompUitslagen(E2EHelpers, TestCase):
     url_uitslagen_regio_n = '/bondscompetities/uitslagen/%s/%s/%s/regio-individueel/%s/'            # comp_pk, comp_boog, regio_nr
     url_uitslagen_regio_teams = '/bondscompetities/uitslagen/%s/%s/regio-teams/'                    # comp_pk, team_type
     url_uitslagen_regio_teams_n = '/bondscompetities/uitslagen/%s/%s/regio-teams/%s/'               # comp_pk, team_type, regio_nr
-    url_uitslagen_rayon = '/bondscompetities/uitslagen/%s/%s/rayon-individueel/'                    # comp_pk, comp_boog
-    url_uitslagen_rayon_n = '/bondscompetities/uitslagen/%s/%s/rayon-individueel/%s/'               # comp_pk, comp_boog, rayon_nr
-    url_uitslagen_bond = '/bondscompetities/uitslagen/%s/%s/bond/'                                  # comp_pk, comp_boog
     url_uitslagen_ver = '/bondscompetities/uitslagen/%s/%s/vereniging/'                             # comp_pk, comp_boog
     url_uitslagen_indiv_ver_n = '/bondscompetities/uitslagen/%s/%s/vereniging/%s/individueel/'      # comp_bk, boog_type, ver_nr
     url_uitslagen_teams_ver_n = '/bondscompetities/uitslagen/%s/%s/vereniging/%s/teams/'            # comp_pk, team_type, ver_nr
+
+    url_uitslagen_rayon = '/bondscompetities/uitslagen/%s/%s/rayon-individueel/'                    # comp_pk, comp_boog
+    url_uitslagen_rayon_n = '/bondscompetities/uitslagen/%s/%s/rayon-individueel/%s/'               # comp_pk, comp_boog, rayon_nr
+    url_uitslagen_rayon_teams = '/bondscompetities/uitslagen/%s/%s/rayon-teams/'                    # comp_pk, team_type
+    url_uitslagen_rayon_teams_n = '/bondscompetities/uitslagen/%s/%s/rayon-teams/%s/'               # comp_pk, team_type, rayon_nr
+    url_uitslagen_bond = '/bondscompetities/uitslagen/%s/%s/bond/'                                  # comp_pk, comp_boog
+
+    url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'                                       # comp_pk
+    url_teams_klassengrenzen_vaststellen = '/bondscompetities/rk/%s/rk-bk-teams-klassengrenzen/vaststellen/'     # comp_pk
 
     ver_nr = 1012  # regio 101, vereniging 2
     club_naam = '[%s] Club %s' % (ver_nr, ver_nr)
@@ -54,6 +64,17 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         s2 = timezone.now()
         d = s2 - s1
         print('CompUitslagen: populating testdata took %s seconds' % d.seconds)
+
+    @staticmethod
+    def _verwerk_mutaties(show_all=False):
+        # vraag de achtergrond taak om de mutaties te verwerken
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+
+        if show_all:                                    # pragma: no cover
+            print(f1.getvalue())
+            print(f2.getvalue())
 
     def test_top(self):
         now = timezone.now()
@@ -232,7 +253,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assert404(resp, 'Competitie niet gevonden')
 
-    def test_rayon(self):
+    def test_rayon_indiv(self):
         url = self.url_uitslagen_rayon % (self.testdata.comp18.pk, 'R')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -253,7 +274,6 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         resp = self.client.get(url)
         self.assert404(resp, 'Competitie niet gevonden')
 
-    def test_rayon_n(self):
         url = self.url_uitslagen_rayon_n % (self.testdata.comp18.pk, 'IB', 1)      # bevat onze enige deelnemer met 6 scores
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -268,6 +288,77 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         url = self.url_uitslagen_rayon_n % (self.testdata.comp18.pk, 'R', '0')
         resp = self.client.get(url)
         self.assert404(resp, 'Competitie niet gevonden')
+
+    def test_rayon_teams(self):
+        url = self.url_uitslagen_rayon_teams % (self.testdata.comp18.pk, 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-rayon-teams.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_uitslagen_rayon_teams % (999999, 'R')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
+
+        url = self.url_uitslagen_rayon_teams % (self.testdata.comp18.pk, 'X')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Team type niet bekend')
+
+        url = self.url_uitslagen_rayon_teams_n % (self.testdata.comp18.pk, 'R', 1)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-rayon-teams.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_uitslagen_rayon_teams_n % (self.testdata.comp18.pk, 'R', 'X')
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerd rayonnummer')
+
+        url = self.url_uitslagen_rayon_teams_n % (self.testdata.comp18.pk, 'R', 999999)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
+
+        # maak een paar teams aan
+        self.testdata.maak_inschrijvingen_rk_teamcompetitie(25, self.ver_nr, ook_incomplete_teams=False)
+        self.testdata.geef_rk_team_tijdelijke_sporters_genoeg_scores(25, self.ver_nr)
+
+        url = self.url_uitslagen_rayon_teams_n % (self.testdata.comp25.pk, 'R', 1)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-rayon-teams.dtl', 'plein/site_layout.dtl'))
+
+        # als BKO doorzetten naar RK fase (G --> J) en bepaal de klassengrenzen (fase J --> K)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
+        zet_competitie_fase(self.testdata.comp25, 'G')
+
+        url = self.url_doorzetten_rk % self.testdata.comp25.pk
+        resp = self.client.post(url)
+        self.assert_is_redirect_not_plein(resp)
+        self._verwerk_mutaties()
+
+        comp = Competitie.objects.get(pk=self.testdata.comp25.pk)
+        comp.bepaal_fase()
+        self.assertEqual(comp.fase, 'J')
+
+        url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk
+        resp = self.client.post(url)
+        self.assert_is_redirect_not_plein(resp)
+
+        url = self.url_uitslagen_rayon_teams_n % (self.testdata.comp25.pk, 'R', 1)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('compuitslagen/uitslagen-rayon-teams.dtl', 'plein/site_layout.dtl'))
 
     def test_bond(self):
         url = self.url_uitslagen_bond % (self.testdata.comp18.pk, 'R')

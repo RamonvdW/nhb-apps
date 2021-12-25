@@ -67,7 +67,7 @@ class BondPlanningView(UserPassesTestMixin, TemplateView):
 
 class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
 
-    """ Met deze view kan de BKO de competitie doorzetten naar de BR fase """
+    """ Met deze view kan de BKO de competitie doorzetten naar de RK fase """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_DOORZETTEN_NAAR_RK

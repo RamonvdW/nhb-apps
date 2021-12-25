@@ -328,7 +328,7 @@ class UitslagenRayonTeamsView(TemplateView):
                                                 'rayon_nr': gekozen_rayon_nr})
         # for
 
-        # regio filters
+        # als het team type correct was, maak dan de rayon knopppen
         if context['teamtype']:
             # rayon filters
             rayons = (NhbRayon
@@ -407,6 +407,7 @@ class UitslagenRayonTeamsView(TemplateView):
                     .objects
                     .filter(deelcompetitie=deelcomp_rk,
                             team_type=teamtype)
+                    .select_related('klasse__team')
                     .order_by('klasse__team__volgorde',
                               '-aanvangsgemiddelde'))       # sterkste team eerst
 

@@ -124,7 +124,15 @@ def zet_competitie_fase(comp, fase):
 
     comp.laatst_mogelijke_wedstrijd = gister
 
-    # fase F of G: vaststellen uitslag in elke regio + afsluiten regiocompetitie
+    if fase == 'G':
+        # alle regios afsluiten
+        for deelcomp in comp.deelcompetitie_set.filter(is_afgesloten=False, laag=LAAG_REGIO):
+            deelcomp.is_afgesloten = True
+            deelcomp.save(update_fields=['is_afgesloten'])
+        comp.save()
+        return
+
+    # fase F: vaststellen uitslag in elke regio + afsluiten regiocompetitie
     comp.save()
     return
 

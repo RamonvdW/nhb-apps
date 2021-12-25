@@ -145,7 +145,7 @@ def maak_taak(**kwargs):
     taak = Taak(**kwargs)
     taak.save()
 
-    email = taak.toegekend_aan.accountemail_set.all()[0]
+    email = taak.toegekend_aan.accountemail_set.all()[0]        # FUTURE: kan niet tegen Account zonder AccountEmail
 
     if not email.optout_nieuwe_taak:
         email.laatste_email_over_taken = timezone.now()

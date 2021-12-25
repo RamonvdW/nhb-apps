@@ -368,7 +368,6 @@ class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wedstrijden)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden)
@@ -377,7 +376,6 @@ class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_scores)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'plein/site_layout.dtl'))
 
         urls2 = self.extract_all_urls(resp, skip_menu=True)
@@ -391,6 +389,8 @@ class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compregio/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
+
+        self.assert_html_ok(resp)
 
         self.e2e_assert_other_http_commands_not_supported(url)
 
@@ -408,7 +408,6 @@ class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wedstrijden)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden)
@@ -450,7 +449,6 @@ class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wedstrijden)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_waarschijnlijke % self.wedstrijden[2].pk
