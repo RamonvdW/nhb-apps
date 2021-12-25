@@ -23,7 +23,7 @@ import datetime
 import io
 
 
-class TestCompetitieMutaties(E2EHelpers, TestCase):
+class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
 
     """ tests voor de CompRayon applicatie, mutaties van RK/BK deelnemers lijsten """
 

@@ -16,7 +16,7 @@ from Functie.rol import Rollen, rol_get_huidige_functie
 from Wedstrijden.models import CompetitieWedstrijd
 import csv
 
-TEMPLATE_WAARSCHIJNLIJKE_DEELNEMERS = 'compscores/waarschijnlijke-deelnemers-regio.dtl'
+TEMPLATE_WAARSCHIJNLIJKE_DEELNEMERS = 'compregio/waarschijnlijke-deelnemers-regio.dtl'
 
 
 class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):

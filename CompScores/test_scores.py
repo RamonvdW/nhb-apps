@@ -14,7 +14,7 @@ from TestHelpers import testdata
 import json
 
 
-class TestCompetitieScores(E2EHelpers, TestCase):
+class TestCompScoresScores(E2EHelpers, TestCase):
 
     """ tests voor de CompScores applicatie, module Scores """
 

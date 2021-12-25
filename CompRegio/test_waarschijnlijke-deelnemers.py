@@ -20,7 +20,7 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestCompRegioWedstrijden(E2EHelpers, TestCase):
+class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
 
     """ tests voor de CompScores applicatie, functies voor Wedstrijden """
 
@@ -28,6 +28,8 @@ class TestCompRegioWedstrijden(E2EHelpers, TestCase):
 
     url_waarschijnlijke = '/bondscompetities/regio/waarschijnlijke-deelnemers/%s/'  # wedstrijd_pk
     url_waarschijnlijke_bestand = '/bondscompetities/regio/waarschijnlijke-deelnemers/%s/als-bestand/' # wedstrijd_pk
+    url_scores = '/bondscompetities/scores/bij-de-vereniging/'
+    url_wedstrijden = '/bondscompetities/scores/wedstrijden-bij-de-vereniging/'
 
     testdata = None
 
@@ -388,7 +390,7 @@ class TestCompRegioWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(url)
 
@@ -416,7 +418,7 @@ class TestCompRegioWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
 
         # als bestand
         url = self.url_waarschijnlijke_bestand % self.wedstrijden[1].pk
@@ -456,7 +458,7 @@ class TestCompRegioWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
 
     def test_bad(self):
         # geen toegang tot de pagina
@@ -492,7 +494,7 @@ class TestCompRegioWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
 
         # inschrijfmethode 1
         self.deelcomp_regio_18.inschrijf_methode = INSCHRIJF_METHODE_1
@@ -503,7 +505,7 @@ class TestCompRegioWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
 
         # 25m1pijl wedstrijd
         self.ronde.plan.wedstrijden.clear()
@@ -518,7 +520,7 @@ class TestCompRegioWedstrijden(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compscores/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
 
 
 # end of file

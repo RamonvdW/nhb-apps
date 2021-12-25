@@ -64,6 +64,7 @@ then
     # support Func1 Func2 by converting to Func1|Func2
     # after removing initial and trailing whitespace
     FOCUS=$(echo "$FOCUS1" | sed 's/^[[:blank:]]*//;s/[[:blank:]]*$//;s/  / /g;s/ /, /g')
+    echo "[INFO] Focus set to $FOCUS"
 
     COV_INCLUDE=$(for opt in $FOCUS1; do echo -n "$opt/*,"; done)
     #echo "[DEBUG] COV_INCLUDE set to $COV_INCLUDE"
@@ -129,6 +130,24 @@ then
     RES=$?
     #echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
     [ $RES -eq 3 ] && ABORTED=1
+fi
+
+if [ $RES -eq 0 -a "$FOCUS" != "" ]
+then
+    echo "[INFO] Discovering all management commands in $FOCUS"
+    for cmd in $(python3 ./manage.py --help);
+    do
+        [ -f $FOCUS/management/commands/$cmd.py ] && python3 -u $PYCOV ./manage.py $cmd help >>"$LOG" 2>&1
+    done
+fi
+
+if [ $RES -eq 0 -a $# -eq 0 ]
+then
+    echo "[INFO] Discovering all management commands"
+    for cmd in $(python3 ./manage.py --help);
+    do
+        [ -f */management/commands/$cmd.py ] && python3 -u $PYCOV ./manage.py $cmd help >>"$LOG" 2>&1
+    done
 fi
 
 # stop the websim tools

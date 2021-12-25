@@ -20,7 +20,7 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestVerenigingWedstrijden(E2EHelpers, TestCase):
+class TestCompScoresWedstrijden(E2EHelpers, TestCase):
 
     """ tests voor de CompScores applicatie, functies voor Wedstrijden """
 

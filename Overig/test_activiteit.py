@@ -13,7 +13,7 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestAccountActiviteit(E2EHelpers, TestCase):
+class TestOverigActiviteit(E2EHelpers, TestCase):
 
     """ tests voor de Overig applicatie; module Account Activiteit """
 

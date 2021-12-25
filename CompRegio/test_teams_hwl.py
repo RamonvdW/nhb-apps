@@ -22,7 +22,7 @@ import datetime
 import io
 
 
-class CompRegioTestTeamsHWL(E2EHelpers, TestCase):
+class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
 
     """ tests voor de CompRegio applicatie, Teams functies voor de HWL """
 

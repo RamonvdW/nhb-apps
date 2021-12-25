@@ -6,20 +6,12 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from BasisTypen.models import BoogType, TeamType
-from Competitie.models import (Competitie, CompetitieKlasse, DeelCompetitie,
-                               RegioCompetitieSchutterBoog, RegiocompetitieTeam,
-                               LAAG_BK, LAAG_RK, LAAG_REGIO)
-from Competitie.test_competitie import maak_competities_en_zet_fase_b
-from Functie.models import maak_functie, Functie
-from NhbStructuur.models import NhbRegio, NhbVereniging
-from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 import datetime
 
 
-class TestCompetitieUitslagen(E2EHelpers, TestCase):
+class TestCompUitslagen(E2EHelpers, TestCase):
 
     """ tests voor de CompUitslagen applicatie, module Uitslagen """
 

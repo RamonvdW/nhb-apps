@@ -13,7 +13,7 @@ from .models import maak_functie
 import io
 
 
-class TestAccountCLI(E2EHelpers, TestCase):
+class TestFunctieCli(E2EHelpers, TestCase):
 
     """ tests voor de Functie command line interface (CLI) applicatie """
 
