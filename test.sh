@@ -26,10 +26,10 @@ OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
 sudo cpupower frequency-set --governor performance > /dev/null
 
 # kill the http simulator if still running in the background
-pgrep -f websim
+pgrep -f websim > /dev/null
 if [ $? -eq 0 ]
 then
-    echo "[WARNING] websim was already running - killing it now with 'pkill -f websim'"
+    echo "[WARNING] simulators found running - cleaning up now"
     pkill -f websim
 fi
 
