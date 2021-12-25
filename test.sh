@@ -143,12 +143,15 @@ fi
 
 if [ $RES -eq 0 -a $# -eq 0 ]
 then
-    echo "[INFO] Discovering all management commands"
-    for cmd in $(python3 ./manage.py --help);
+    echo "[INFO] Running help for each management command"
+    for cmd in $(for x in */management/commands; do ls -1 $x | grep -v '__pycache__' | rev | cut -d. -f2- | rev; done);
     do
-        [ -f */management/commands/$cmd.py ] && python3 -u $PYCOV ./manage.py $cmd help >>"$LOG" 2>&1
+        echo -n '.'
+        echo "[INFO] ./manage.py help $cmd" >>"$LOG"
+        python3 -u $PYCOV ./manage.py $cmd help >>"$LOG" 2>&1
     done
 fi
+echo
 
 # stop the websim tools
 # use bash construct to prevent the Terminated message on the console
