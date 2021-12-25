@@ -357,10 +357,16 @@ class TestCompRegioCli(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('fix_bad_ag', stderr=f1, stdout=f2)
+            management.call_command('fix_bad_ag', '18', stderr=f1, stdout=f2)
 
-        self.assertTrue(f1.getvalue() == '')
-        self.assertTrue(f2.getvalue() == '')
+        self.assertTrue('[ERROR] Competitie is in de verkeerde fase' in f1.getvalue())
+
+        zet_competitie_fase(self.comp, 'B')
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20):
+            management.call_command('fix_bad_ag', '18', stderr=f1, stdout=f2)
 
         Score(
             sporterboog=self.sporterboog_r,
@@ -371,12 +377,31 @@ class TestCompRegioCli(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('fix_bad_ag', stderr=f1, stdout=f2)
+            management.call_command('fix_bad_ag', '18', stderr=f1, stdout=f2)
+
+        self.assertTrue(f1.getvalue() == '')
+        self.assertTrue('Gebruik --commit om wijzigingen door te voeren' in f2.getvalue())
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20):
+            management.call_command('fix_bad_ag', '18', '--commit', stderr=f1, stdout=f2)
 
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
 
         self.assertTrue(f1.getvalue() == '')
+
+        for comp in Competitie.objects.all():
+            comp.is_afgesloten = True
+            comp.save(update_fields=['is_afgesloten'])
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20):
+            management.call_command('fix_bad_ag', '18', stderr=f1, stdout=f2)
+
+        self.assertTrue('[ERROR] Geen actieve competitie gevonden' in f1.getvalue())
 
     def test_check_wp_f1(self):
         f1 = io.StringIO()

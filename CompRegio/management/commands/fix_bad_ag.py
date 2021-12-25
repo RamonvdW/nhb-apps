@@ -25,7 +25,7 @@ class Command(BaseCommand):
         # pak de jongste competitie
         comps = Competitie.objects.filter(is_afgesloten=False, afstand=afstand).order_by('-begin_jaar')  # jongste eerst
         if len(comps) == 0:
-            self.stdout.write('Geen competitie gevonden')
+            self.stderr.write('[ERROR] Geen actieve competitie gevonden')
             return
 
         comp = comps[0]
@@ -35,7 +35,7 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Fase: %s' % comp.fase)
 
         if not ('B' <= comp.fase <= 'E'):
-            self.stdout.write('[ERROR] Competitie is in de verkeerde fase')
+            self.stderr.write('[ERROR] Competitie is in de verkeerde fase')
             return
 
         bepaler = KlasseBepaler(comp)
@@ -92,6 +92,6 @@ class Command(BaseCommand):
         # for
 
         if vertel_commit:
-            self.stdout.write('\nGebruik --commit om wijziging door te voeren')
+            self.stdout.write('\nGebruik --commit om wijzigingen door te voeren')
 
 # end of file
