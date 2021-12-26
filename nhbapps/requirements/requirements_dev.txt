@@ -29,7 +29,7 @@ django==3.1.14
     #   -r requirements_test.txt
     #   django-debug-toolbar
     #   django-extensions
-django-debug-toolbar==3.2.2
+django-debug-toolbar==3.2.4
     # via -r requirements_dev.in
 django-extensions==3.1.5
     # via -r requirements_dev.in
@@ -37,7 +37,7 @@ et-xmlfile==1.1.0
     # via
     #   -r requirements_test.txt
     #   openpyxl
-google-api-core==2.3.0
+google-api-core==2.3.2
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
@@ -74,7 +74,7 @@ packaging==21.3
     # via pip-review
 pip-licenses==3.5.3
     # via -r requirements_dev.in
-pip-review==1.1.0
+pip-review==1.1.1
     # via -r requirements_dev.in
 protobuf==3.19.1
     # via

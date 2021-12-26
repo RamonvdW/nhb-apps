@@ -18,7 +18,7 @@ django==3.1.14
     #   -r requirements.in
 et-xmlfile==1.1.0
     # via openpyxl
-google-api-core==2.3.0
+google-api-core==2.3.2
     # via google-api-python-client
 google-api-python-client==2.33.0
     # via -r requirements.in
