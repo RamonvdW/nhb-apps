@@ -221,8 +221,8 @@ class UitslagenRayonIndivView(TemplateView):
             # deelnemers/reserveschutters van het RK tonen
             deelnemers = (KampioenschapSchutterBoog
                           .objects
-                          .exclude(bij_vereniging__isnull=True,      # attentie gevallen
-                                   deelname=DEELNAME_NEE)            # geen sporters die zich afgemeld hebben
+                          .exclude(bij_vereniging__isnull=True)      # attentie gevallen
+                          .exclude(deelname=DEELNAME_NEE)            # geen sporters die zich afgemeld hebben
                           .filter(deelcompetitie=deelcomp,
                                   klasse__indiv__boogtype=boogtype,
                                   volgorde__lte=48)                  # toon tot 48 sporters per klasse
@@ -266,13 +266,11 @@ class UitslagenRayonIndivView(TemplateView):
                           .order_by('klasse__indiv__volgorde', '-gemiddelde'))
 
         klasse = -1
-        rank = 0
         limiet = 24
         for deelnemer in deelnemers:
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
                 deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
-                rank = 1
                 try:
                     limiet = wkl2limiet[deelnemer.klasse.pk]
                 except KeyError:
@@ -288,9 +286,6 @@ class UitslagenRayonIndivView(TemplateView):
             if deelcomp.heeft_deelnemerslijst:
                 if deelnemer.rank > limiet:
                     deelnemer.is_reserve = True
-            else:
-                deelnemer.rank = rank
-                rank += 1
         # for
 
         context['deelnemers'] = deelnemers
