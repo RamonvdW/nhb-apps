@@ -10,7 +10,7 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.db.models import Q, Value, CharField
 from django.db.models.functions import Concat, Cast
-from django.views.generic import ListView, View
+from django.views.generic import ListView, View, TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
@@ -32,6 +32,7 @@ TEMPLATE_KOPPEL_BEHEERDERS = 'functie/koppel-beheerders.dtl'
 TEMPLATE_WIJZIG_EMAIL = 'functie/wijzig-email.dtl'
 TEMPLATE_BEVESTIG_EMAIL = 'functie/bevestig.dtl'
 TEMPLATE_EMAIL_BEVESTIGD = 'functie/bevestigd.dtl'
+TEMPLATE_LID_NRS = 'functie/beheerder_lid_nrs.dtl'
 
 
 def mag_beheerder_wijzigen_of_403(request, functie):
@@ -801,6 +802,58 @@ class OverzichtView(UserPassesTestMixin, ListView):
                                       .objects
                                       .filter(is_BB=True)
                                       .order_by('username'))
+
+            context['url_sec_hwl'] = reverse('Functie:sec-hwl-lid_nrs')
+
+        menu_dynamics(self.request, context, actief='competitie')
+        return context
+
+
+class LidNrsSecHwlView(UserPassesTestMixin, TemplateView):
+
+    """ Deze view is voor de BB en geeft een knip-en-plakbaar overzicht van
+        de lidnummers van alle SEC en HWL, zodat hier makkelijk een mailing voor te maken is.
+    """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_LID_NRS
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        # alle competitie beheerders + HWL
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu == Rollen.ROL_BB
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        lid_nrs = list()
+        for functie in (Functie
+                        .objects
+                        .filter(rol__in=('HWL', 'SEC'))
+                        .prefetch_related('accounts')):
+
+            for username in functie.accounts.values_list('username', flat=True):
+                if username not in lid_nrs:
+                    lid_nrs.append(username)
+            # for
+        # for
+
+        lid_nrs.sort()
+        context['aantal'] = len(lid_nrs)
+
+        context['groepjes'] = groepjes = list()
+        while len(lid_nrs) > 0:
+            groepje = lid_nrs[:8]
+            lid_nrs = lid_nrs[8:]
+            groepjes.append(", ".join(groepje))
+        # while
 
         menu_dynamics(self.request, context, actief='competitie')
         return context

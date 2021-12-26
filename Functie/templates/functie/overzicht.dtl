@@ -9,114 +9,121 @@
 {% block title %}Beheerders overzicht{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-overzicht" %}
 
-<h4>Beheerders</h4>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-overzicht" %}
 
-{% if rol_is_hwl %}
-    <p>Hieronder staan relevante functies en de beheerders.</p>
-{% else %}
-    <p>Hieronder staan globale functies en de gekoppelde beheerders. Afhankelijk van je rol mag je hier wijzigingen in aanbrengen.</p>
-{% endif %}
+    <h4>Beheerders</h4>
 
-<p>Jouw huidige rol is: <b>{{ huidige_rol }}</b></p>
+    {% if rol_is_hwl %}
+        <p>Hieronder staan relevante functies en de beheerders.</p>
+    {% else %}
+        <p>Hieronder staan globale functies en de gekoppelde beheerders. Afhankelijk van je rol mag je hier wijzigingen in aanbrengen.</p>
+    {% endif %}
 
-<!-- toon de functies met huidige beheerders in een tabel -->
-<div class="row">
-    <table class="white" id="table1">
-        <thead>
-            <tr>        <!-- filter rij -->
-                <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
-                <td></td>       <!-- email -->
-            </tr>
-            <tr>
-                <th data-filter="on">Functie / Rol</th>
-                <th data-filter="on">Beheerder(s)</th>
-                <th>E-mailadres</th>
-            </tr>
-        </thead>
+    {% if url_sec_hwl %}
+        <p>
+            <a class="btn-nhb-blauw" href="{{ url_sec_hwl }}">Lid nummers alle SEC en HWL</a>
+        </p>
+    {% endif %}
 
-        {% if accounts_it %}
-            <tr>
-                <td style="vertical-align: top">IT beheerder</td>
-                <td>
-                    {% for obj in accounts_it %}
-                        {% if not forloop.first %}
-                            <br>
-                        {% endif %}
-                        <span>{{ obj.volledige_naam }}</span>
-                    {% endfor %}
-                </td>
-                <td></td>   <!-- email -->
-            </tr>
-        {% endif %}
+    <p>Jouw huidige rol is: <b>{{ huidige_rol }}</b></p>
 
-        {% if accounts_bb %}
-            <tr>
-                <td style="vertical-align: top">Manager Competitiezaken</td>
-                <td>
-                    {% for obj in accounts_bb %}
-                        {% if not forloop.first %}
-                            <br>
-                        {% endif %}
-                        <span>{{ obj.volledige_naam }}</span>
-                    {% endfor %}
-                </td>
-                <td></td>   <!-- email -->
-            </tr>
-        {% endif %}
+    <!-- toon de functies met huidige beheerders in een tabel -->
+    <div class="row">
+        <table class="white" id="table1">
+            <thead>
+                <tr>        <!-- filter rij -->
+                    <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+                    <td></td>       <!-- email -->
+                </tr>
+                <tr>
+                    <th data-filter="on">Functie / Rol</th>
+                    <th data-filter="on">Beheerder(s)</th>
+                    <th>E-mailadres</th>
+                </tr>
+            </thead>
 
-        {% for obj in object_list %}
-            <tr>
-                <td style="vertical-align: top">{{ obj.beschrijving }}</td>
+            {% if accounts_it %}
+                <tr>
+                    <td style="vertical-align: top">IT beheerder</td>
+                    <td>
+                        {% for obj in accounts_it %}
+                            {% if not forloop.first %}
+                                <br>
+                            {% endif %}
+                            <span>{{ obj.volledige_naam }}</span>
+                        {% endfor %}
+                    </td>
+                    <td></td>   <!-- email -->
+                </tr>
+            {% endif %}
 
-                <td style="vertical-align: top">
-                    {% for beheerder in obj.beheerders %}
-                        {% if not forloop.first %}
-                            <br>
-                        {% endif %}
-                        <span>{{ beheerder }}</span>
-                    {% empty %}
+            {% if accounts_bb %}
+                <tr>
+                    <td style="vertical-align: top">Manager Competitiezaken</td>
+                    <td>
+                        {% for obj in accounts_bb %}
+                            {% if not forloop.first %}
+                                <br>
+                            {% endif %}
+                            <span>{{ obj.volledige_naam }}</span>
+                        {% endfor %}
+                    </td>
+                    <td></td>   <!-- email -->
+                </tr>
+            {% endif %}
+
+            {% for obj in object_list %}
+                <tr>
+                    <td style="vertical-align: top">{{ obj.beschrijving }}</td>
+
+                    <td style="vertical-align: top">
+                        {% for beheerder in obj.beheerders %}
+                            {% if not forloop.first %}
+                                <br>
+                            {% endif %}
+                            <span>{{ beheerder }}</span>
+                        {% empty %}
+                            {% if obj.wijzig_url %}
+                                <i class="red-text">Nog niet gekoppeld</i>
+                            {% else %}
+                                <i class="grey-text">Nog niet gekoppeld</i>
+                            {% endif %}
+                        {% endfor %}
+
                         {% if obj.wijzig_url %}
-                            <i class="red-text">Nog niet gekoppeld</i>
-                        {% else %}
-                            <i class="grey-text">Nog niet gekoppeld</i>
+                            <br><br>
+                            <a class="btn-nhb-blauw btn-small" href="{{ obj.wijzig_url }}"><i class="material-icons-round left">group_add</i>Koppelen</a>
                         {% endif %}
-                    {% endfor %}
+                    </td>
 
-                    {% if obj.wijzig_url %}
-                        <br><br>
-                        <a class="btn-nhb-blauw btn-small" href="{{ obj.wijzig_url }}"><i class="material-icons-round left">group_add</i>Koppelen</a>
-                    {% endif %}
-                </td>
+                    <td style="vertical-align: top">
+                        {% if obj.bevestigde_email %}
+                            <code>{{ obj.bevestigde_email }}</code>
+                        {% else %}
+                            {% if obj.email_url %}
+                                <i class="red-text">Geen</i>
+                            {% else %}
+                                <i class="grey-text">Geen</i>
+                            {% endif %}
+                        {% endif %}
 
-                <td style="vertical-align: top">
-                    {% if obj.bevestigde_email %}
-                        <code>{{ obj.bevestigde_email }}</code>
-                    {% else %}
+                        <!-- in geval van 2, 3, 4 beheerders: voeg extra breaks toe voor het e-mailadres -->
+                        {% for beheerder in obj.beheerders %}
+                            {% if not forloop.first %}
+                                <br>
+                            {% endif %}
+                        {% endfor %}
+
                         {% if obj.email_url %}
-                            <i class="red-text">Geen</i>
-                        {% else %}
-                            <i class="grey-text">Geen</i>
+                            <br><br>
+                            <a class="btn-nhb-blauw btn-small" href="{{ obj.email_url }}"><i class="material-icons-round left">alternate_email</i>Wijzig e-mail</a>
                         {% endif %}
-                    {% endif %}
-
-                    <!-- in geval van 2, 3, 4 beheerders: voeg extra breaks toe voor het e-mailadres -->
-                    {% for beheerder in obj.beheerders %}
-                        {% if not forloop.first %}
-                            <br>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if obj.email_url %}
-                        <br><br>
-                        <a class="btn-nhb-blauw btn-small" href="{{ obj.email_url }}"><i class="material-icons-round left">alternate_email</i>Wijzig e-mail</a>
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
-</div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
 
 {% endblock %}
 

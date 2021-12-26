@@ -32,6 +32,10 @@ urlpatterns = [
          views.OverzichtView.as_view(),
          name='overzicht'),
 
+    path('overzicht/alle-lid-nrs/sec-hwl/',
+         views.LidNrsSecHwlView.as_view(),
+         name='sec-hwl-lid_nrs'),
+
 
     path('otp-koppelen-stap1/',
          view_otp.OTPKoppelenStap1View.as_view(),
