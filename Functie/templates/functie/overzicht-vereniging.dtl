@@ -83,6 +83,8 @@
         </table>
     </div>
 
+    <p>Noteer: het e-mailadres van de secretaris wordt overgenomen uit Onze Relaties en kan hier niet aangepast worden.</p>
+
     <p>
         <a class="btn-nhb-blauw margin-5" href="{{ terug_url }}">
             <i class="material-icons-round left">arrow_back</i>Terug</a>
