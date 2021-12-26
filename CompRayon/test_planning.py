@@ -9,13 +9,11 @@ from django.core import management
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
                                KampioenschapSchutterBoog, CompetitieKlasse, DeelcompetitieKlasseLimiet,
-                               CompetitieMutatie, DEELNAME_NEE, DEELNAME_JA, INSCHRIJF_METHODE_1,
-                               RegioCompetitieSchutterBoog)
+                               CompetitieMutatie, DEELNAME_NEE, DEELNAME_JA, INSCHRIJF_METHODE_1)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
-from Score.models import Score
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie, CompetitieWedstrijdUitslag
 from TestHelpers.e2ehelpers import E2EHelpers

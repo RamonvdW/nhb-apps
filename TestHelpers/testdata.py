@@ -445,7 +445,7 @@ class TestData(object):
                     account.set_password(self.WACHTWOORD)
                     bulk.append(account)
 
-                    if len(bulk) > 100:
+                    if len(bulk) > 100:                                        # pragma: no branch
                         Account.objects.bulk_create(bulk)
 
                         # maak e-mails aan
@@ -466,7 +466,7 @@ class TestData(object):
             # for
         # for
 
-        if len(bulk) > 0:
+        if len(bulk) > 0:                           # pragma: no branch
             Account.objects.bulk_create(bulk)
 
             # maak e-mails aan
@@ -523,13 +523,13 @@ class TestData(object):
                         lid_tot_einde_jaar=huidige_jaar)
                 bulk.append(sporter)
 
-                if len(bulk) > 250:
+                if len(bulk) > 250:                                        # pragma: no branch
                     Sporter.objects.bulk_create(bulk)
                     bulk = list()
             # for
         # for
 
-        if len(bulk) > 0:
+        if len(bulk) > 0:                           # pragma: no branch
             Sporter.objects.bulk_create(bulk)
         del bulk
         del lid_nr2account
@@ -589,11 +589,11 @@ class TestData(object):
             # for
         # for
 
-        if len(bulk_voorkeuren):
+        if len(bulk_voorkeuren):                            # pragma: no branch
             SporterVoorkeuren.objects.bulk_create(bulk_voorkeuren)
         del bulk_voorkeuren
 
-        if len(bulk_sporter):
+        if len(bulk_sporter):                               # pragma: no branch
             SporterBoog.objects.bulk_create(bulk_sporter)
         del bulk_sporter
 
@@ -619,7 +619,7 @@ class TestData(object):
                 self.account_hwl[ver_nr] = sporter.account
             elif sporter.voornaam == 'Mas50':
                 self.account_sec[ver_nr] = sporter.account
-            elif sporter.voornaam == 'Sen39':
+            else:   # if sporter.voornaam == 'Sen39':
                 # voor gebruik als BKO, RKO, RCL
                 self._accounts_beheerders.append(sporter.account)
         # for
@@ -643,13 +643,13 @@ class TestData(object):
 
                 bulk.append(func)
 
-                if len(bulk) > 150:
+                if len(bulk) > 150:                           # pragma: no branch
                     Functie.objects.bulk_create(bulk)
                     bulk = list()
             # for
         # for
 
-        if len(bulk) > 0:
+        if len(bulk) > 0:                           # pragma: no branch
             Functie.objects.bulk_create(bulk)
         del bulk
 
@@ -713,7 +713,7 @@ class TestData(object):
                     bulk = list()
         # for
 
-        if len(bulk):
+        if len(bulk):                           # pragma: no branch
             Score.objects.bulk_create(bulk)
 
             bulk2 = list()
@@ -1133,7 +1133,7 @@ class TestData(object):
                     ag += ag_step
                     if ag > 28.0:
                         ag_step = -0.84
-                    elif ag < 19.0:
+                    elif ag < 19.0:             # pragma: no cover
                         ag_step = 0.57
 
                     team = KampioenschapTeam(

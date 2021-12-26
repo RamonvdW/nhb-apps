@@ -16,9 +16,11 @@ import argparse
 TOEGESTANE_KLASSEN = ('Recurve', 'Compound', 'Barebow', 'Longbow', 'Instinctive Bow')
 
 
-class Command(BaseCommand):
+class Command(BaseCommand):         # pragma: no cover
     help = "Importeer historische competitie uitslag, individueel"
     verbose = False
+
+    # FUTURE: obsolete this
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)

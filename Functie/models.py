@@ -161,7 +161,7 @@ def account_needs_otp(account):
             is_staff
             bepaalde functies
     """
-    if account.is_authenticated:
+    if account.is_authenticated:                    # pragma: no branch
         if account.is_BB or account.is_staff:
             return True
 

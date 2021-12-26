@@ -694,12 +694,12 @@ class E2EHelpers(TestCase):
                 self.fail(msg='404 pagina contained %s instead of %s' % (repr(pagina), repr(expected_msg)))
 
     def assert200_file(self, resp):
-        if resp.status_code != 200:     # pragma: no cover
+        if resp.status_code != 200:                                 # pragma: no cover
             self.e2e_dump_resp(resp)
             self.fail(msg="Unexpected status code %s instead of 200" % resp.status_code)
 
         header = resp['Content-Disposition']
-        if not header.startswith('attachment; filename'):
+        if not header.startswith('attachment; filename'):           # pragma: no cover
             self.fail(msg="Response is not a file attachment")
 
 

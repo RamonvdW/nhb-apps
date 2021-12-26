@@ -12,7 +12,7 @@ from Records.models import IndivRecord
 import csv
 
 
-class Command(BaseCommand):
+class Command(BaseCommand):         # pragma: no cover      # FUTURE: commando in gebruik nemen en test suite maken
     help = "Check alle NL records tegen de WA administratie (csv)"
 
     def __init__(self):
