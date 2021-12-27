@@ -597,7 +597,6 @@ class E2EHelpers(TestCase):
             with connection.execute_wrapper(tracer):
                 yield
         finally:
-            do_dump = False
             if check_duration:
                 duration = datetime.datetime.now() - tracer.started_at
                 duration_seconds = duration.seconds
@@ -605,7 +604,11 @@ class E2EHelpers(TestCase):
                 duration_seconds = 0
 
             count = len(tracer.trace)
-            if count > num:                     # pragma: no cover
+
+            if num == -1:                         # pragma: no cover
+                print('Operation resulted in %s queries' % count)
+
+            elif count > num:                     # pragma: no cover
                 queries = 'Captured queries:'
                 prefix = '\n       '
                 limit = 200     # begrens aantal queries dat we printen

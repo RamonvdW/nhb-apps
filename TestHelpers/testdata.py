@@ -134,6 +134,10 @@ class TestData(object):
         self.comp18_kampioenschapteams = list()
         self.comp25_kampioenschapteams = list()
 
+        # regiokampioenen
+        self.comp18_regiokampioenen = list()    # [KampioenschapSchutterBoog met kampioen_label != '', ...]
+        self.comp25_regiokampioenen = list()    # [KampioenschapSchutterBoog met kampioen_label != '', ...]
+
         self._accounts_beheerders = list()      # 1 per vereniging, voor BKO, RKO, RCL
 
         self.afkorting2teamtype = dict()        # [team afkorting] = TeamType()
@@ -684,7 +688,10 @@ class TestData(object):
         ag += ver_nr
 
         bulk = list()
-        for sporterboog in SporterBoog.objects.filter(sporter__bij_vereniging__ver_nr=ver_nr):
+        for sporterboog in (SporterBoog
+                            .objects
+                            .filter(sporter__bij_vereniging__ver_nr=ver_nr,
+                                    voor_wedstrijd=True)):
             # even pk get an AG
             if sporterboog.pk % 1 == 0:
                 ag = 6000 if ag > 9800 else ag + 25
@@ -1036,8 +1043,9 @@ class TestData(object):
             poules.append(poule)
         # for
 
-    def maak_rk_deelnemers(self, afstand=18, ver_nr=None):
+    def maak_rk_deelnemers(self, afstand, ver_nr, regio_nr):
         """ Maak de RK deelnemers aan, alsof ze doorgestroomd zijn vanuit de regiocompetitie
+            rank en volgorde wordt ingevuld door maak_label_regiokampioenen
 
             afstand = 18 / 25
             ver_nr = regio_nr * 10 + volgnummer
@@ -1055,13 +1063,21 @@ class TestData(object):
         ag = 7000       # 7.0
         ag += ver_nr
 
-        bulk = list()
-        volgorde = 0
-        for sporterboog in SporterBoog.objects.filter(sporter__bij_vereniging__ver_nr=ver_nr):
+        max_ag = 9000
+        if (regio_nr % 4) == 0:
+            max_ag = 9500           # zorg dat de regiokampioenen niet allemaal bovenaan staan
 
-            ag = 7000 if ag > 9500 else ag + 25
-            klasse = klassen[sporterboog.boogtype.afkorting][0]
-            volgorde += 1
+        bulk = list()
+        for sporterboog in (SporterBoog
+                            .objects
+                            .filter(sporter__bij_vereniging__ver_nr=ver_nr,
+                                    voor_wedstrijd=True)
+                            .select_related('boogtype')):
+
+            ag = 7000 if ag > max_ag else ag + 25
+
+            afk = sporterboog.boogtype.afkorting
+            klasse = klassen[afk][0]
 
             deelnemer = KampioenschapSchutterBoog(
                                 deelcompetitie=deelcomp_rk,
@@ -1069,16 +1085,59 @@ class TestData(object):
                                 klasse=klasse,
                                 bij_vereniging=sporterboog.sporter.bij_vereniging,
                                 kampioen_label='',
-                                volgorde=volgorde,
-                                rank=volgorde,
+                                volgorde=0,
+                                rank=0,
                                 # bevestiging_gevraagd_op (date/time) = None
-                                # deelname=DEELNAME_ONBKEND
+                                # deelname=DEELNAME_ONBEKEND
                                 gemiddelde=Decimal(ag) / 1000)
             bulk.append(deelnemer)
         # for
 
         KampioenschapSchutterBoog.objects.bulk_create(bulk)
         del bulk
+
+    def maak_label_regiokampioenen(self, afstand, regio_nr_begin, regio_nr_einde):
+        """ label de regiokampioen van elke wedstrijdklasse voor de gevraagde regios en competitie """
+        if afstand == 18:
+            regiokampioenen = self.comp18_regiokampioenen
+        else:
+            regiokampioenen = self.comp25_regiokampioenen
+
+        regio_nrs = [regio_nr for regio_nr in range(regio_nr_begin, regio_nr_einde + 1)]
+
+        volgorde_per_klasse = dict()    # [klasse.pk] = teller
+        klasse_regio_done = list()      # [(klasse.pk, regio_nr), ...]
+
+        for kampioen in (KampioenschapSchutterBoog
+                         .objects
+                         .filter(deelcompetitie__competitie__afstand=afstand,
+                                 bij_vereniging__regio__regio_nr__in=regio_nrs)
+                         .select_related('klasse',
+                                         'bij_vereniging__regio')
+                         .order_by('-gemiddelde',            # hoogste eerst
+                                   'klasse')):
+
+            klasse_pk = kampioen.klasse.pk
+            regio_nr = kampioen.bij_vereniging.regio.regio_nr
+
+            try:
+                volgorde = volgorde_per_klasse[klasse_pk] + 1
+            except KeyError:
+                volgorde = 1
+
+            kampioen.rank = kampioen.volgorde = volgorde_per_klasse[klasse_pk] = volgorde
+
+            tup = (klasse_pk, regio_nr)
+
+            if tup not in klasse_regio_done:
+                klasse_regio_done.append(tup)
+
+                # verklaar deze sporter kampioen van deze regio
+                kampioen.kampioen_label = "Kampioen regio %s" % regio_nr
+                regiokampioenen.append(kampioen)
+
+            kampioen.save(update_fields=['kampioen_label', 'rank', 'volgorde'])
+        # for
 
     def maak_inschrijvingen_rk_teamcompetitie(self, afstand, ver_nr, ook_incomplete_teams=True):
         """ maak voor deze vereniging een paar teams aan voor de open RK teams inschrijving """
@@ -1187,6 +1246,31 @@ class TestData(object):
                     # afronden op 3 decimalen (anders gebeurt dat tijdens opslaan in database)
                     gem = round(gem, 3)
                 # for
+        # for
+
+    def geef_regio_deelnemers_genoeg_scores_voor_rk(self, afstand):
+        if afstand == 18:
+            deelnemers = self.comp18_deelnemers
+        else:
+            deelnemers = self.comp25_deelnemers
+
+        gem = 7.0
+        step = 0.12
+
+        for deelnemer in deelnemers:
+            deelnemer.aantal_scores = 6
+            deelnemer.gemiddelde = gem
+            deelnemer.save(update_fields=['aantal_scores', 'gemiddelde'])
+
+            print(deelnemer, gem)
+            gem += step
+            if gem > 9.7:
+                step = -0.34
+            elif gem < 5.0:
+                step = 0.23
+
+            # afronden op 3 decimalen (anders gebeurt dat tijdens opslaan in database)
+            gem = round(gem, 3)
         # for
 
 # end of file
