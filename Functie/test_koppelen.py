@@ -698,4 +698,5 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         session = SessionStore(session_key_beh1)
         self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN], True)
 
+
 # end of file

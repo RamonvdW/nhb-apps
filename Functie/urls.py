@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import views, view_otp, view_vhpg, view_wisselvanrol
+from . import view_overzicht, view_otp, view_vhpg, view_wisselvanrol, view_koppelen
 
 app_name = 'Functie'
 
@@ -13,27 +13,27 @@ urlpatterns = [
 
     # post-only, alle data gaat via parameters in de body ipv de url
     path('wijzig/<functie_pk>/ontvang/',
-         views.OntvangBeheerderWijzigingenView.as_view(),
+         view_koppelen.OntvangBeheerderWijzigingenView.as_view(),
          name='ontvang-wijzigingen'),
 
     path('wijzig/<functie_pk>/',
-         views.WijzigBeheerdersView.as_view(),
+         view_koppelen.WijzigBeheerdersView.as_view(),
          name='wijzig-beheerders'),
 
     path('wijzig-email/<functie_pk>/',
-         views.WijzigEmailView.as_view(),
+         view_koppelen.WijzigEmailView.as_view(),
          name='wijzig-email'),
 
     path('overzicht/vereniging/',
-         views.OverzichtVerenigingView.as_view(),
+         view_overzicht.OverzichtVerenigingView.as_view(),
          name='overzicht-vereniging'),
 
     path('overzicht/',
-         views.OverzichtView.as_view(),
+         view_overzicht.OverzichtView.as_view(),
          name='overzicht'),
 
     path('overzicht/alle-lid-nrs/sec-hwl/',
-         views.LidNrsSecHwlView.as_view(),
+         view_overzicht.OverzichtLidNrsSecHwlView.as_view(),
          name='sec-hwl-lid_nrs'),
 
 
