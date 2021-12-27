@@ -179,6 +179,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                                                               'klasse_pk': team.klasse.pk})
 
                     prev_klasse = team.klasse
+                    volg_nr = 0
 
                 volg_nr += 1
                 team.volg_nr = volg_nr

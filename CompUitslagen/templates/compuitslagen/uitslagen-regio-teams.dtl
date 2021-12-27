@@ -101,19 +101,19 @@
                 <tr style="visibility: collapse">
                     <td colspan="2"><!-- rank, naam --></td>
                     <td class="right-align smal">888</td>
-                    <td class="left-align smal">{% if toon_punten %}(10){% else %}-{% endif %}</td>
+                    <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
                     <td class="right-align smal">888</td>
-                    <td class="left-align smal">{% if toon_punten %}(10){% else %}-{% endif %}</td>
+                    <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
                     <td class="right-align smal">888</td>
-                    <td class="left-align smal">{% if toon_punten %}(10){% else %}-{% endif %}</td>
+                    <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
                     <td class="right-align smal">888</td>
-                    <td class="left-align smal">{% if toon_punten %}(10){% else %}-{% endif %}</td>
+                    <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
                     <td class="right-align smal">888</td>
-                    <td class="left-align smal">{% if toon_punten %}(10){% else %}-{% endif %}</td>
+                    <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
                     <td class="right-align smal">888</td>
-                    <td class="left-align smal">{% if toon_punten %}(10){% else %}-{% endif %}</td>
+                    <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
                     <td class="right-align smal">888</td>
-                    <td class="left-align smal">{% if toon_punten %}(10){% else %}-{% endif %}</td>
+                    <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
                     <td class="right-align hide-on-small-only">8888</td>
                     <td class="right-align">{% if toon_punten %}88{% else %}-{% endif %}</td>
                 </tr>
@@ -174,7 +174,7 @@
                 <tr>
                     <th><!-- rank --></th>
                     <th>Team</th>
-                    <th class="center-align" colspan="14">{% if toon_punten %}Scores / Punten{% else %}Scores{% endif %}</th>
+                    <th class="center-align" colspan="14">{% if toon_punten %}Scores<span class="hide-on-small-only"> / Punten</span>{% else %}Scores{% endif %}</th>
                     <th class="right-align hide-on-small-only">Totaal</th>
                     <th class="right-align">{% if toon_punten %}Punten{% endif %}</th>
                 </tr>
@@ -186,7 +186,7 @@
                     <td class="smal">{{ team.naam_str }}</td>
                     {% for score, punten in team.ronde_scores %}
                         <td class="right-align smal">{{ score }}</td>
-                        <td class="left-align smal">{% if toon_punten %}{% if punten >= 0 %}/ {{ punten }}{% endif %}{% endif %}</td>
+                        <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}{% if punten >= 0 %}/ {{ punten }}{% endif %}{% endif %}</span></td>
                     {% endfor %}
                     <td class="right-align hide-on-small-only">{{ team.totaal_score }}</td>
                     <td class="right-align">{% if toon_punten %}{{ team.totaal_punten }}{% endif %}</td>

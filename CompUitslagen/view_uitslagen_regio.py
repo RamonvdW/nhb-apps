@@ -212,7 +212,8 @@ class UitslagenRegioIndivView(TemplateView):
         try:
             deelcomp = (DeelCompetitie
                         .objects
-                        .select_related('competitie', 'nhb_regio')
+                        .select_related('competitie',
+                                        'nhb_regio')
                         .get(laag=LAAG_REGIO,
                              competitie=comp,
                              competitie__is_afgesloten=False,
@@ -424,6 +425,11 @@ class UitslagenRegioTeamsView(TemplateView):
             raise Http404('Competitie niet gevonden')
 
         context['deelcomp'] = deelcomp
+
+        comp = deelcomp.competitie
+        comp.bepaal_fase()
+        if comp.fase > 'F':
+            deelcomp.huidige_team_ronde = 8     # voorkomt kleurmarkering ronde 7 als actieve ronde
 
         context['toon_punten'] = (deelcomp.regio_team_punten_model != TEAM_PUNTEN_MODEL_SOM_SCORES)
 
