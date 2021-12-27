@@ -85,7 +85,11 @@
                     <td class="center-align"><i class="nhb-blauw-text in-table-icon material-icons-round">help</i></td>
                 {% endif %}
 
-                <td><a class="btn-nhb-blauw btn-small" href="{{ obj.url_wijzig }}">Wijzig</a></td>
+                <td>
+                    {% if obj.url_wijzig %}
+                        <a class="btn-nhb-blauw btn-small" href="{{ obj.url_wijzig }}">Wijzig</a>
+                    {% endif %}
+                </td>
             </tr>
 
         {% endfor %}

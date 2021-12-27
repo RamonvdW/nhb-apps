@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
 from Competitie.test_fase import zet_competitie_fase
-from Competitie.models import (CompetitieKlasse, DeelcompetitieKlasseLimiet,
+from Competitie.models import (Competitie, CompetitieKlasse, DeelcompetitieKlasseLimiet,
                                CompetitieMutatie, MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AFMELDEN,
                                MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
                                KampioenschapSchutterBoog, DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
@@ -65,9 +65,13 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         self.functie_bko = self.testdata.comp18_functie_bko
         self.functie_rko = self.testdata.comp18_functie_rko[self.rayon_nr]
 
+        self.hwl_ver_nr = self.ver_nrs[1]
+        self.functie_hwl = self.testdata.functie_hwl[self.hwl_ver_nr]
+
         self.comp = self.testdata.comp18
         self.deelcomp_rk = self.testdata.deelcomp18_rk[self.rayon_nr]
-        self.url_lijst = self.url_lijst_rk_rko % self.deelcomp_rk.pk
+        self.url_lijst_rko = self.url_lijst_rk_rko % self.deelcomp_rk.pk
+        self.url_lijst_hwl = self.url_lijst_rk_hwl % self.deelcomp_rk.pk
 
         self.klasse = (CompetitieKlasse
                        .objects
@@ -186,9 +190,10 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         self.assertEqual(rank, volg)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_lijst)
+            resp = self.client.get(self.url_lijst_rko)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('comprayon/rko-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
     def test_opnieuw_initieel(self):
         # met de MUTATIE_INITIEEL kunnen we ook een 'reset' uitvoeren
@@ -204,19 +209,25 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         url = self.url_wijzig_status % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('comprayon/wijzig-status-rk-deelnemer.dtl', 'plein/site_layout.dtl'))
 
         deelnemer = KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(volgorde=3)
         url = self.url_wijzig_status % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         deelnemer = KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(volgorde=18)
         url = self.url_wijzig_status % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         self._verwerk_mutaties(376)
         # self._dump_deelnemers()
@@ -244,7 +255,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         url = self.url_wijzig_status % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         self._verwerk_mutaties()
 
@@ -267,7 +278,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         url = self.url_wijzig_status % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         self._verwerk_mutaties(130)
 
@@ -297,7 +308,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         url = self.url_wijzig_status % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         self._verwerk_mutaties(130)
 
@@ -328,7 +339,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         url = self.url_wijzig_status % reserve.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         self._verwerk_mutaties(129)
 
@@ -341,7 +352,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         url = self.url_wijzig_status % reserve.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         self._verwerk_mutaties(136)
 
@@ -365,10 +376,10 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         self._verwerk_mutaties(257)
         self._check_volgorde_en_rank()
@@ -388,7 +399,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         url = self.url_wijzig_status % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         self._verwerk_mutaties(130)
         # self._dump_deelnemers()
@@ -403,7 +414,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         url = self.url_wijzig_status % reserve.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         self._verwerk_mutaties(136)
         # self._dump_deelnemers()
@@ -428,10 +439,10 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         url = self.url_wijzig_status % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         self._verwerk_mutaties(258)
 
@@ -474,10 +485,10 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         url = self.url_wijzig_status % kampioen.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         self._verwerk_mutaties(258)
         # self._dump_deelnemers()
@@ -508,7 +519,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
             url = self.url_wijzig_status % pk
             with self.assert_max_queries(20):
                 resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-            self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+            self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
         # for
 
         self._verwerk_mutaties(376)
@@ -523,17 +534,17 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         url = self.url_wijzig_status % pks[0]
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         url = self.url_wijzig_status % pks[1]
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         url = self.url_wijzig_status % pks[2]
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         self._verwerk_mutaties(392)
         # self._dump_deelnemers()
@@ -573,7 +584,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
             url = self.url_wijzig_status % pk
             with self.assert_max_queries(20):
                 resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-            self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+            self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
         # for
 
         self._verwerk_mutaties(376)
@@ -588,17 +599,17 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         url = self.url_wijzig_status % pks[0]
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         url = self.url_wijzig_status % pks[1]
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         url = self.url_wijzig_status % pks[2]
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         self._verwerk_mutaties(392)
         # self._dump_deelnemers()
@@ -630,7 +641,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
             url = self.url_wijzig_status % pk
             with self.assert_max_queries(20):
                 resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-            self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+            self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
         # for
 
         self._verwerk_mutaties(383)
@@ -666,19 +677,19 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(rank=17).pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)  # 302 = redirect = success
 
         # normale deelnemer
         url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(rank=2).pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)  # 302 = redirect = success
 
         # kampioen
         url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(rank=1).pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)  # 302 = redirect = success
 
         # verplaats de cut naar 8
         url = self.url_wijzig_cut_rk % self.deelcomp_rk.pk
@@ -716,7 +727,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(rank=2).pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)  # 302 = redirect = success
 
         # verlaag de cut naar 20
         url = self.url_wijzig_cut_rk % self.deelcomp_rk.pk
@@ -760,20 +771,20 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(rank=2).pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)  # 302 = redirect = success
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)  # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)  # 302 = redirect = success
 
         # dubbel aanmelden
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
-        self.assert_is_redirect(resp, self.url_lijst)        # 302 = redirect = success
+        self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
         self._verwerk_mutaties(383)
 
@@ -859,7 +870,96 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
     def test_hwl_mutaties(self):
         # de HWL meldt leden van zijn eigen vereniging aan/af
 
-        url = self.url_lijst_rk_hwl
-        pass
+        deelnemer_pks = (KampioenschapSchutterBoog
+                         .objects
+                         .filter(bij_vereniging__ver_nr=self.hwl_ver_nr,
+                                 deelname=DEELNAME_ONBEKEND)
+                         .values_list('pk', flat=True))
+
+        self.e2e_login_and_pass_otp(self.account_bko)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst_hwl)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('comprayon/hwl-rk-selectie.dtl', 'plein/site_layout.dtl'))
+
+        # bad situaties
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst_rk_hwl % 99999)
+        self.assert404(resp, 'Competitie niet gevonden')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wijzig_status % 999999)
+        self.assert404(resp, 'Deelnemer niet gevonden')
+
+        # fase E
+        comp = Competitie.objects.get(pk=self.testdata.comp18.pk)
+        zet_competitie_fase(comp, 'E')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst_hwl)
+        self.assert404(resp, 'Pagina kan nog niet gebruikt worden')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wijzig_status % deelnemer_pks[1])
+        self.assert404(resp, 'Mag nog niet wijzigen')
+
+        # fase P
+        zet_competitie_fase(comp, 'P')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst_hwl)
+        self.assert404(resp, 'Pagina kan niet meer gebruikt worden')
+
+        # tijdens fase K en L mag de pagina gebruikt worden
+        zet_competitie_fase(comp, 'K')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst_hwl)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('comprayon/hwl-rk-selectie.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_wijzig_status % deelnemer_pks[1]
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('comprayon/wijzig-status-rk-deelnemer.dtl', 'plein/site_layout.dtl'))
+
+        # 1 sporter afmelden
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
+        self.assert_is_redirect(resp, self.url_lijst_hwl)        # 302 = redirect = success
+
+        # 1 sporter bevestigen
+        url = self.url_wijzig_status % deelnemer_pks[2]
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'bevestig': 1, 'snel': 1})
+        self.assert_is_redirect(resp, self.url_lijst_hwl)        # 302 = redirect = success
+
+        self._verwerk_mutaties(53)
+
+        zet_competitie_fase(comp, 'L')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst_hwl)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('comprayon/hwl-rk-selectie.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wijzig_status % deelnemer_pks[1])
+        self.assert404(resp, 'Mag niet meer wijzigen')
+
+        # sporter van andere vereniging
+        andere_ver = self.ver_nrs[0]
+        andere_deelnemer_pk = (KampioenschapSchutterBoog
+                               .objects
+                               .filter(bij_vereniging__ver_nr=andere_ver,
+                                       deelname=DEELNAME_ONBEKEND))[0].pk
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wijzig_status % andere_deelnemer_pk)
+        self.assert403(resp, 'Geen sporter van jouw vereniging')
+
 
 # end of file

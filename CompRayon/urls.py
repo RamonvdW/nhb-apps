@@ -5,7 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import (view_planning, view_indiv_rko, view_indiv_hwl, view_teams_bko, view_teams_rko, view_teams_hwl,
+from . import (view_planning,
+               view_indiv_rko, view_indiv_hwl, view_indiv_wijzig_status,
+               view_teams_bko, view_teams_rko, view_teams_hwl,
                view_formulieren)
 
 app_name = 'CompRayon'
@@ -30,11 +32,13 @@ urlpatterns = [
          name='rayon-verwijder-wedstrijd'),
 
 
-    # RK selectie individueel
+    # HWL: individueel
     path('lijst-rayonkampioenschappen/<rk_deelcomp_pk>/vereniging/',
          view_indiv_hwl.LijstRkSelectieView.as_view(),
          name='lijst-rk-ver'),
 
+
+    # RKO: individueel
     path('lijst-rayonkampioenschappen/<rk_deelcomp_pk>/',
          view_indiv_rko.LijstRkSelectieView.as_view(),
          name='lijst-rk'),
@@ -43,8 +47,10 @@ urlpatterns = [
          view_indiv_rko.LijstRkSelectieAlsBestandView.as_view(),
          name='lijst-rk-als-bestand'),
 
+
+    # HWL/RKO: individueel
     path('lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/<deelnemer_pk>/',
-         view_indiv_rko.WijzigStatusRkSchutterView.as_view(),
+         view_indiv_wijzig_status.WijzigStatusRkDeelnemerView.as_view(),
          name='wijzig-status-rk-deelnemer'),
 
 

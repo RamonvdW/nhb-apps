@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.urls import reverse
 from django.http import Http404
 from django.views.generic import TemplateView
@@ -12,12 +11,9 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import LAAG_RK, DeelCompetitie, KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
-from Overig.background_sync import BackgroundSync
 
 
 TEMPLATE_COMPRAYON_LIJST_RK = 'comprayon/hwl-rk-selectie.dtl'
-
-mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
 
 class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
@@ -67,7 +63,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
             raise Http404('Pagina kan nog niet gebruikt worden')
 
         if comp.fase > 'L':
-            raise Http404('Pagina niet gevonden')
+            raise Http404('Pagina kan niet meer gebruikt worden')
 
         mag_wijzigen = ('J' <= comp.fase <= 'K')
 
@@ -113,12 +109,10 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         # for
 
         context['deelnemers'] = deelnemers
-        context['aantal_klassen'] = aantal_klassen
 
-        if deelcomp_rk.heeft_deelnemerslijst:
-            context['aantal_afgemeld'] = aantal_afgemeld
-            context['aantal_onbekend'] = aantal_onbekend
-            context['aantal_bevestigd'] = aantal_bevestigd
+        context['aantal_afgemeld'] = aantal_afgemeld
+        context['aantal_onbekend'] = aantal_onbekend
+        context['aantal_bevestigd'] = aantal_bevestigd
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
         return context
