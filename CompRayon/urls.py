@@ -55,10 +55,6 @@ urlpatterns = [
 
 
     # RKO: RK teams
-    path('ingeschreven-teams/<rk_deelcomp_pk>/verwijder/<rk_team_pk>/',
-         view_teams_rko.RayonTeamsVerwijder.as_view(),
-         name='rayon-verwijder-team'),
-
     path('ingeschreven-teams/<comp_pk>/<subset>/',
          view_teams_rko.RayonTeamsAlleView.as_view(),
          name='rayon-teams-alle'),
