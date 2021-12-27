@@ -264,86 +264,12 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
 
         # post een wijziging
-        if lid_nr == 100003:
-            with self.assert_max_queries(20):
-                resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_BB': 'on',
-                                                                 'schiet_R': 'on',         # 2 bogen
-                                                                 'info_R': 'on',
-                                                                 'voorkeur_meedoen_competitie': 'on'})
-        elif lid_nr == 100012:
-            # geen voorkeur voor meedoen met de competitie
-            with self.assert_max_queries(20):
-                resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_BB': 'on',
-                                                                 'info_R': 'on'})
-
-            # verwijder de SchutterVoorkeur records
-            SporterVoorkeuren.objects.filter(sporter__lid_nr=100012).delete()
-        else:
-            with self.assert_max_queries(20):
-                resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
-                                                                 'schiet_R': 'on',
-                                                                 'info_C': 'on',
-                                                                 'voorkeur_meedoen_competitie': 'on'})
-
+        with self.assert_max_queries(20):
+            resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
+                                                             'schiet_R': 'on',
+                                                             'info_C': 'on',
+                                                             'voorkeur_meedoen_competitie': 'on'})
         self.assert_is_redirect(resp, self.url_voorkeuren)
-
-    def _zet_ag(self, lid_nr, afstand, waarde=7.42):
-        if lid_nr == 100003:
-            sporterboog = SporterBoog.objects.get(sporter__lid_nr=lid_nr, boogtype__afkorting='BB')
-            score_indiv_ag_opslaan(sporterboog, afstand, waarde, self.account_hwl, 'Test AG %s' % afstand)
-
-        sporterboog = SporterBoog.objects.get(sporter__lid_nr=lid_nr, boogtype__afkorting='R')
-        score_indiv_ag_opslaan(sporterboog, afstand, waarde, self.account_hwl, 'Test AG %s' % afstand)
-
-    def _maak_wedstrijden(self):
-        # log in as BB en maak de competitie aan
-        self.e2e_login_and_pass_otp(self.testdata.account_bb)
-        self.e2e_wisselnaarrol_bb()
-
-        # maak een aantal wedstrijden aan, als RCL van Regio 101
-        functie_rcl = Functie.objects.get(rol='RCL', comp_type='18', nhb_regio=self.deelcomp_regio.nhb_regio)
-        self.e2e_wissel_naar_functie(functie_rcl)
-
-        url = self.url_planning_regio % self.deelcomp_regio.pk
-
-        # haal de (lege) planning op. Dit maakt ook meteen de enige ronde aan
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
-        ronde_pk = DeelcompetitieRonde.objects.filter(deelcompetitie=self.deelcomp_regio)[0].pk
-
-        # haal de ronde planning op
-        url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url_ronde)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-
-        # maak een wedstrijd aan
-        self.assertEqual(CompetitieWedstrijd.objects.count(), 0)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_ronde)
-        self.assert_is_redirect_not_plein(resp)
-
-        wedstrijd_pk = CompetitieWedstrijd.objects.all()[0].pk
-
-        # wijzig de instellingen van deze wedstrijd
-        url_wed = self.url_wijzig_wedstrijd % wedstrijd_pk
-        with self.assert_max_queries(20):
-            resp = self.client.post(url_wed, {'nhbver_pk': self.nhbver1.pk,
-                                              'wanneer': '2020-12-11', 'aanvang': '12:34'})
-        self.assert_is_redirect(resp, url_ronde)
-
-        # maak nog een paar wedstrijden aan (voor later gebruik)
-        for lp in range(7):
-            with self.assert_max_queries(20):
-                resp = self.client.post(url_ronde)
-            self.assert_is_redirect_not_plein(resp)
-        # for
-
-        return [wedstrijd_pk]
 
     def test_overzicht(self):
         # anon

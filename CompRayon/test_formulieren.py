@@ -3,30 +3,15 @@
 #  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
-import zipfile
 
 from django.test import TestCase
 from django.utils import timezone
-from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
-                               KampioenschapSchutterBoog, CompetitieKlasse, DeelcompetitieKlasseLimiet,
-                               CompetitieMutatie, DEELNAME_NEE, DEELNAME_JA, INSCHRIJF_METHODE_1,
-                               RegioCompetitieSchutterBoog)
-from Competitie.operations import competities_aanmaken
-from Competitie.test_fase import zet_competitie_fase
-from Functie.models import maak_functie
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
-from Score.models import Score
-from Sporter.models import Sporter, SporterBoog
-from Wedstrijden.models import WedstrijdLocatie, CompetitieWedstrijdUitslag, CompetitieWedstrijd
+from Wedstrijden.models import CompetitieWedstrijd
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
-import datetime
+import zipfile
 import time
 import os
-import io
-
-sleep_oud = time.sleep
 
 
 class TestCompRayonFormulieren(E2EHelpers, TestCase):
@@ -58,8 +43,10 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         cls.ver = cls.testdata.vereniging[cls.ver_nr]
 
         cls.testdata.maak_inschrijvingen_regiocompetitie(18, cls.ver_nr)
-        cls.testdata.maak_rk_deelnemers(18, cls.ver_nr)
+        cls.testdata.maak_rk_deelnemers(18, cls.ver_nr, cls.regio_nr)
         cls.testdata.maak_inschrijvingen_rk_teamcompetitie(18, cls.ver_nr)
+
+        # TODO: competitie doorzetten naar fase K zodat de team.klasse ingevuld is
 
         s2 = timezone.now()
         d = s2 - s1
@@ -77,6 +64,7 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
                             tijd_begin_wedstrijd='10:00',
                             tijd_einde_wedstrijd='16:00',
                             vereniging=self.ver)            # koppelt wedstrijd aan de vereniging
+        # TODO: locatie koppelen
         self.wedstrijd.save()
 
         self.deelcomp18_rk_wedstrijden_plan = self.testdata.deelcomp18_rk[self.rayon_nr].plan

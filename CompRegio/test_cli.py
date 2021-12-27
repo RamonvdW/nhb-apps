@@ -170,8 +170,8 @@ class TestCompRegioCli(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             management.call_command('check_klasse', '--commit', stderr=f1, stdout=f2)
 
-        print("f1: %s" % f1.getvalue())
-        print("f2: %s" % f2.getvalue())
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
 
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue(f2.getvalue() == '')
