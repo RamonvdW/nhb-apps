@@ -905,6 +905,10 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wijzig_status % deelnemer_pks[1])
         self.assert404(resp, 'Mag nog niet wijzigen')
 
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig_status % deelnemer_pks[1])
+        self.assert404(resp, 'Mag nog niet wijzigen')
+
         # fase P
         zet_competitie_fase(comp, 'P')
         with self.assert_max_queries(20):
@@ -948,6 +952,10 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig_status % deelnemer_pks[1])
+        self.assert404(resp, 'Mag niet meer wijzigen')
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig_status % deelnemer_pks[1])
         self.assert404(resp, 'Mag niet meer wijzigen')
 
         # sporter van andere vereniging

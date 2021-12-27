@@ -130,7 +130,7 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
             mutatie_ping.ping()
 
             snel = str(request.POST.get('snel', ''))[:1]
-            if snel != '1':
+            if snel != '1':         # pragma: no cover
                 # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
                 interval = 0.2      # om steeds te verdubbelen
                 total = 0.0         # om een limiet te stellen
@@ -239,7 +239,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
         mutatie_ping.ping()
 
         snel = str(request.POST.get('snel', ''))[:1]
-        if snel != '1':
+        if snel != '1':             # pragma: no cover
             # wacht maximaal 7 seconden tot de mutatie uitgevoerd is
             total = 0         # om een limiet te stellen
             while not mutatie.is_verwerkt and total < 7:
