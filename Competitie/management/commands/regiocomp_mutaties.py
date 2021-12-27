@@ -1006,7 +1006,7 @@ class Command(BaseCommand):
             team.gekoppelde_schutters.set(deelnemer_pks)
 
             # bepaal de team sterkte
-            ags.sort()
+            ags.sort(reverse=True)
             if len(ags) >= 3:
                 team.aanvangsgemiddelde = sum(ags[:3])
             else:
