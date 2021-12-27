@@ -8,86 +8,16 @@ from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
 from BasisTypen.models import BoogType, TeamType
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from NhbStructuur.models import NhbVereniging
 from Competitie.models import (LAAG_REGIO, TEAM_PUNTEN_MODEL_SOM_SCORES, Competitie, DeelCompetitie,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam, RegioCompetitieSchutterBoog)
 from Competitie.menu import menu_dynamics_competitie
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.rol import rol_get_huidige_functie
 from types import SimpleNamespace
 
 
 TEMPLATE_COMPUITSLAGEN_VERENIGING_INDIV = 'compuitslagen/uitslagen-vereniging-indiv.dtl'
 TEMPLATE_COMPUITSLAGEN_VERENIGING_TEAMS = 'compuitslagen/uitslagen-vereniging-teams.dtl'
-TEMPLATE_COMPUITSLAGEN_REGIO_INDIV = 'compuitslagen/uitslagen-regio-indiv.dtl'
-TEMPLATE_COMPUITSLAGEN_REGIO_TEAMS = 'compuitslagen/uitslagen-regio-teams.dtl'
-TEMPLATE_COMPUITSLAGEN_RAYON_INDIV = 'compuitslagen/uitslagen-rayon-indiv.dtl'
-TEMPLATE_COMPUITSLAGEN_RAYON_TEAMS = 'compuitslagen/uitslagen-rayon-teams.dtl'
-TEMPLATE_COMPUITSLAGEN_BOND = 'compuitslagen/uitslagen-bond.dtl'
-
-
-def get_sporter_regio_nr(request):
-    """ Geeft het regio nummer van de ingelogde sporter terug,
-        of 101 als er geen regio vastgesteld kan worden
-    """
-    regio_nr = 101
-
-    rol_nu, functie_nu = rol_get_huidige_functie(request)
-
-    if functie_nu:
-        if functie_nu.nhb_ver:
-            # HWL, WL
-            regio_nr = functie_nu.nhb_ver.regio.regio_nr
-        elif functie_nu.nhb_regio:
-            # RCL
-            regio_nr = functie_nu.nhb_regio.regio_nr
-        elif functie_nu.nhb_rayon:
-            # RKO
-            regio = (NhbRegio
-                     .objects
-                     .filter(rayon=functie_nu.nhb_rayon,
-                             is_administratief=False)
-                     .order_by('regio_nr'))[0]
-            regio_nr = regio.regio_nr
-    elif rol_nu == Rollen.ROL_SPORTER:
-        # sporter
-        account = request.user
-        if account.sporter_set.count() > 0:
-            sporter = account.sporter_set.all()[0]
-            if sporter.is_actief_lid and sporter.bij_vereniging:
-                nhb_ver = sporter.bij_vereniging
-                regio_nr = nhb_ver.regio.regio_nr
-
-    return regio_nr
-
-
-def get_sporter_rayon_nr(request):
-    """ Geeft het rayon nummer van de ingelogde sporter terug,
-        of 1 als er geen rayon vastgesteld kan worden
-    """
-    rayon_nr = 1
-
-    rol_nu, functie_nu = rol_get_huidige_functie(request)
-
-    if functie_nu:
-        if functie_nu.nhb_ver:
-            # HWL, WL
-            rayon_nr = functie_nu.nhb_ver.regio.rayon.rayon_nr
-        elif functie_nu.nhb_regio:
-            # RCL
-            rayon_nr = functie_nu.nhb_regio.rayon.rayon_nr
-        elif functie_nu.nhb_rayon:
-            # RKO
-            rayon_nr = functie_nu.nhb_rayon.rayon_nr
-    elif rol_nu == Rollen.ROL_SPORTER:
-        # sporter
-        account = request.user
-        if account.sporter_set.count() > 0:
-            sporter = account.sporter_set.all()[0]
-            if sporter.is_actief_lid and sporter.bij_vereniging:
-                nhb_ver = sporter.bij_vereniging
-                rayon_nr = nhb_ver.regio.rayon.rayon_nr
-
-    return rayon_nr
 
 
 def get_sporter_ver_nr(request):
