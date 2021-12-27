@@ -735,10 +735,16 @@ class KampioenschapSchutterBoog(models.Model):
     # kampioenen hebben een label
     kampioen_label = models.CharField(max_length=50, default='', blank=True)
 
-    # positie van deze schutter in de lijst
-    # de eerste 24 zijn deelnemers; daarna reserveschutters
+    # positie van deze sporter in de lijst zoals vastgesteld aan het begin van het RK
+    # dit is de originele volgorde, welke nooit meer wijzigt ook al meldt de sporter zich af
+    # wordt gebruikt om de sporters in originele volgorde te tonen aan de RKO, inclusief afmeldingen
+    # bij aanpassing van de cut kan de volgorde aangepast worden zodat kampioenen boven de cut staan
     volgorde = models.PositiveSmallIntegerField(default=0)  # inclusief afmeldingen
-    rank = models.PositiveSmallIntegerField(default=0)      # exclusief afmeldingen
+
+    # deelname positie van de sporter in de meest up to date lijst
+    # de eerste N (tot de limiet/cut, standaard 24) zijn deelnemers; daarna reserveschutters
+    # afmeldingen hebben rank 0
+    rank = models.PositiveSmallIntegerField(default=0)
 
     # wanneer hebben we een bevestiging gevraagd hebben via e-mail
     # fase K: aan het begin van fase K wordt een uitnodiging gestuurd om deelname te bevestigen
