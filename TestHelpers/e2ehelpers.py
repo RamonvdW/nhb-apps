@@ -661,7 +661,7 @@ class E2EHelpers(TestCase):
                         print('-----')
                     print('%5s %s' % (count, msg[7:]))
 
-    def assert403(self, resp):
+    def assert403(self, resp, expected_msg=''):
         # controleer dat we op de speciale code-403 handler pagina gekomen zijn
 
         if isinstance(resp, str):
@@ -673,6 +673,16 @@ class E2EHelpers(TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
+
+        if expected_msg:
+            pagina = str(resp.content)
+            if expected_msg not in pagina:                                          # pragma: no cover
+                # haal de nuttige regel informatie uit de 403 pagina en toon die
+                pos = pagina.find('<code>')
+                pagina = pagina[pos+6:]
+                pos = pagina.find('</code>')
+                pagina = pagina[:pos]
+                self.fail(msg='403 pagina contained %s instead of %s' % (repr(pagina), repr(expected_msg)))
 
     def assert404(self, resp, expected_msg=''):
         if isinstance(resp, str):
@@ -686,6 +696,7 @@ class E2EHelpers(TestCase):
         # controleer dat we op de speciale code-404 handler pagina gekomen zijn
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
+
         if expected_msg:
             pagina = str(resp.content)
             if expected_msg not in pagina:                                          # pragma: no cover
