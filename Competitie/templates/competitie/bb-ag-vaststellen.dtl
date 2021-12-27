@@ -16,7 +16,7 @@
 
     <p>Als Manager Competitiezaken wil je de aanvangsgemiddelden voor elke sporter-boog vaststellen.</p>
 
-    <p>Deze actie moet tijdens de opstart van een nieuw competitie eenmalig uitgevoerd worden voordat de klassegrenzen vastgesteld worden. Meerdere keren de aanvangsgemiddelden vaststellen kan geen kwaad maar heeft geen effect.</p>
+    <p>Deze actie moet tijdens de opstart van een nieuw competitie eenmalig uitgevoerd worden voordat de klassengrenzen vastgesteld worden. Meerdere keren de aanvangsgemiddelden vaststellen kan geen kwaad maar heeft geen effect.</p>
 
     {% if geen_histcomp %}
 

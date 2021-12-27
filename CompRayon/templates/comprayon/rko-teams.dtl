@@ -1,0 +1,156 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}RK Teams{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-rko-teams" %}
+
+    <h4>RK Teams</h4>
+
+    <div class="row">
+
+        <!-- toon gegevens van de regio en competitie in een blauwe box -->
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
+
+                <div class="row small-row">
+                    <div class="col s3">Competitie:</div>
+                    <div class="col s7">{{ comp.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Rayon:</div>
+                    <div class="col s7">{{ rayon }}</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {% if subset_filter %}
+
+        <p>&nbsp;</p>
+        <div class="white shrink-wrap-5">
+            {% for filter in filters %}
+                {% if filter.url %}
+                    <a class="margin-5 btn-outline" href="{{ filter.url }}">{{ filter.label }}</a>
+                {% else %}
+                    <a class="margin-5 btn-nhb-blauw" href="#">{{ filter.label }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+    {% else %}
+        <p>&nbsp;</p>
+        <p>Op deze pagina kan de RKO de verenigingsteams inzien voor de rayonkampioenschappen.</p>
+    {% endif %}
+
+    {% if not toon_klassen %}
+        <p><b>De teams worden in een wedstrijdklasse geplaatst zodra de BKO de klassengrenzen heeft vastgesteld.</b></p>
+    {% endif %}
+
+    <p>&nbsp;</p>
+    <p>Totaal aantal teams: {{ totaal_teams }}</p>
+
+    <table class="white">
+        {% if totaal_teams == 0 %}
+            <!-- 0 teams en 0 niet-af teams -->
+            <tr>
+                <td><i>Er zijn nog geen teams aangemaakt</i></td>
+            </tr>
+        {% endif %}
+
+        {% for team in rk_teams_niet_af %}
+            {% if team.break_before %}
+                <tr class="nhb-grijs">
+                    <td colspan="7">
+                        {% if toon_klassen %}
+                            <h5 class="red-text">Nog niet geplaatste teams</h5>
+                        {% endif %}
+                        <span>Vraag de HWL's om <span class="red-text">rood gemarkeerde teams</span> compleet te maken met sporters die mee mogen doen met het RK, of te verwijderen.</span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Regio</th>
+                    <th>Vereniging</th>
+                    <th>Naam</th>
+                    <th>Sporters</th>
+                    <th>Team sterkte</th>
+                    <th>Soort team</th>
+                    <th><!-- kolom voor de knoppen --></th>
+                </tr>
+            {% endif %}
+
+            <tr>
+                <td>{{ team.vereniging.regio.regio_nr }}</td>
+                <td>{{ team.vereniging }}</td>
+                <td>{{ team.team_naam }}</td>
+                <td{% if team.sporter_count < 3 %} class="red-text"{% endif %}>{{ team.sporter_count }}</td>
+                <td{% if team.ag_str == "000,0" %} class="red-text"{% endif %}>{{ team.ag_str }}</td>
+                <td>{{ team.team_type.beschrijving }}</td>
+                <td>
+                    {% if team.url_aanpassen %}
+                        <a class="btn-nhb-blauw" href="{{ team.url_aanpassen }}">Aanpassen</a>
+                    {% endif %}
+                    {% if team.url_verwijder %}
+                        <span>&nbsp;&nbsp;</span>
+                        <a class="btn-nhb-rood" href="{{ team.url_verwijder }}">Verwijder</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+
+        {% if toon_klassen %}
+            {% for klasse, teams in rk_teams.items %}
+                <tr class="nhb-grijs">
+                    <td colspan="7"><h5>{{ klasse.team.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
+                </tr>
+                <tr>
+                    {% if subset_filter %}
+                        <th>Regio</th>
+                    {% endif %}
+                    <th>Vereniging</th>
+                    <th>Naam</th>
+                    <th>Aantal sporters</th>
+                    <th>Team sterkte</th>
+                    <th></th>
+                    <th><!-- kolom voor knoppen --></th>
+                </tr>
+
+                {% for team in teams %}
+                    <tr>
+                        <td>{{ team.vereniging.regio.regio_nr }}</td>
+                        <td>{{ team.vereniging }}</td>
+                        <td>{{ team.team_naam }}</td>
+                        <td>{{ team.sporter_count }}</td>
+                        <td>{{ team.ag_str }}</td>
+                        <td></td>
+                        <td>
+                            {% if team.url_aanpassen %}
+                                <a class="btn-nhb-blauw" href="{{ team.url_aanpassen }}">Aanpassen</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7">
+                            <i>Nog geen teams</i>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        {% endif %}
+    </table>
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

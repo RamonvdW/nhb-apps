@@ -5,9 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import (view_accommodatie, view_clusters, view_externe_locaties, view_overzicht, view_ledenlijst,
-               view_aanmelden, view_wedstrijden, view_lijst_rk, view_lijst_verenigingen,
-               view_schietmomenten, view_teams_regio, view_teams_rk)
+from . import view_accommodatie, view_externe_locaties, view_overzicht, view_ledenlijst, view_lijst_verenigingen
 
 app_name = 'Vereniging'
 
@@ -24,67 +22,6 @@ urlpatterns = [
     path('leden-voorkeuren/',
          view_ledenlijst.LedenVoorkeurenView.as_view(),
          name='leden-voorkeuren'),
-
-    path('leden-aanmelden/competitie/<comp_pk>/',
-         view_aanmelden.LedenAanmeldenView.as_view(),
-         name='leden-aanmelden'),
-
-    path('leden-ingeschreven/competitie/<deelcomp_pk>/',
-         view_aanmelden.LedenIngeschrevenView.as_view(),
-         name='leden-ingeschreven'),
-
-    path('leden-ingeschreven/wijzig-aanvangsgemiddelde/<deelnemer_pk>/',
-         view_teams_regio.WijzigTeamAGView.as_view(),
-         name='wijzig-ag'),
-
-    # TODO: term 'schietmomenten' aanpassen?
-    path('leden-ingeschreven/competitie/<deelcomp_pk>/schietmomenten/',
-         view_schietmomenten.LedenSchietmomentView.as_view(),
-         name='schietmomenten'),
-
-
-    # regio teams
-    path('teams/regio/koppelen/<team_pk>/',
-         view_teams_regio.TeamsRegioKoppelLedenView.as_view(),
-         name='teams-regio-koppelen'),
-
-    path('teams/regio/<deelcomp_pk>/nieuw/',
-         view_teams_regio.WijzigRegioTeamsView.as_view(),
-         name='teams-regio-nieuw'),
-
-    path('teams/regio/<deelcomp_pk>/wijzig/<team_pk>/',
-         view_teams_regio.WijzigRegioTeamsView.as_view(),
-         name='teams-regio-wijzig'),
-
-    path('teams/regio/<deelcomp_pk>/invallers/',
-         view_teams_regio.TeamsRegioInvallersView.as_view(),
-         name='teams-regio-invallers'),
-
-    path('teams/regio/invallers-koppelen/<ronde_team_pk>/',
-         view_teams_regio.TeamsRegioInvallersKoppelLedenView.as_view(),
-         name='teams-regio-invallers-koppelen'),
-
-    path('teams/regio/<deelcomp_pk>/',
-         view_teams_regio.TeamsRegioView.as_view(),
-         name='teams-regio'),
-
-
-    # RK teams
-    path('teams/rk/<rk_deelcomp_pk>/',
-         view_teams_rk.TeamsRkView.as_view(),
-         name='teams-rk'),
-
-    path('teams/rk/<rk_deelcomp_pk>/nieuw/',
-         view_teams_rk.WijzigRKTeamsView.as_view(),
-         name='teams-rk-nieuw'),
-
-    path('teams/rk/<rk_deelcomp_pk>/wijzig/<rk_team_pk>/',
-         view_teams_rk.WijzigRKTeamsView.as_view(),
-         name='teams-rk-wijzig'),
-
-    path('teams/rk/koppelen/<rk_team_pk>/',
-         view_teams_rk.RKTeamsKoppelLedenView.as_view(),
-         name='teams-rk-koppelen'),
 
 
     # Accommodatie
@@ -108,34 +45,6 @@ urlpatterns = [
          view_externe_locaties.ExterneLocatieDetailsView.as_view(),
          name='locatie-details'),
 
-
-    path('regio-clusters/',
-         view_clusters.WijzigClustersView.as_view(),
-         name='clusters'),
-
-    path('wedstrijden/<wedstrijd_pk>/waarschijnlijke-deelnemers/',
-         view_wedstrijden.WaarschijnlijkeDeelnemersView.as_view(),
-         name='waarschijnlijke-deelnemers'),
-
-    path('wedstrijden/<wedstrijd_pk>/waarschijnlijke-deelnemers/als-bestand/',
-         view_wedstrijden.WaarschijnlijkeDeelnemersAlsBestandView.as_view(),
-         name='waarschijnlijke-deelnemers-als-bestand'),
-
-    path('wedstrijden/',
-         view_wedstrijden.WedstrijdenView.as_view(),
-         name='wedstrijden'),
-
-    path('uitslag-invoeren/',
-         view_wedstrijden.WedstrijdenUitslagInvoerenView.as_view(),
-         name='wedstrijden-uitslag-invoeren'),
-
-    path('lijst-rayonkampioenschappen/<rk_deelcomp_pk>/alles/',
-         view_lijst_rk.VerenigingLijstRkSelectieAllesView.as_view(),
-         name='lijst-rk-alles'),
-
-    path('lijst-rayonkampioenschappen/<rk_deelcomp_pk>/',
-         view_lijst_rk.VerenigingLijstRkSelectieView.as_view(),
-         name='lijst-rk'),
 
     path('contact-geen-beheerders/',
          view_lijst_verenigingen.GeenBeheerdersView.as_view(),

@@ -12,7 +12,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
 from .forms import SiteFeedbackForm
-from .models import SiteFeedback, store_feedback
+from .models import SiteFeedback
+from .feedback_opslaan import store_feedback
 
 TEMPLATE_FEEDBACK_FORMULIER = 'overig/site-feedback-formulier.dtl'
 TEMPLATE_FEEDBACK_BEDANKT = 'overig/site-feedback-bedankt.dtl'
@@ -50,15 +51,14 @@ class SiteFeedbackView(UserPassesTestMixin, View):
         request.session['feedback_gebruiker'] = gebruiker_naam
 
         # geef het formulier aan de gebruiker om in te vullen
-        form = SiteFeedbackForm(initial={'bevinding': '6'})     # TODO: werkt niet met materialcss radiobuttons
+        form = SiteFeedbackForm(initial={'bevinding': '6'})
         bev = kwargs['bevinding']
         context = {'form': form,
                    'formulier_url': reverse('Overig:feedback-formulier'),     # URL voor de POST
                    'gebruiker_naam': gebruiker_naam,
-                   'check_0': (bev == 'plus'),     # TODO: workaround for materializecss radiobuttons in Django
-                   'check_1': (bev == 'nul'),      #       see comment in site-feedback-formulier.dtl
-                   'check_2': (bev == 'min')
-                  }
+                   'check_0': (bev == 'plus'),
+                   'check_1': (bev == 'nul'),
+                   'check_2': (bev == 'min')}
         menu_dynamics(request, context)
         return render(request, self.template_name, context)
 
@@ -111,20 +111,24 @@ class SiteFeedbackInzichtView(UserPassesTestMixin, ListView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_get_huidige(self.request) in (Rollen.ROL_IT, Rollen.ROL_BB)
+        return rol_get_huidige(self.request) == Rollen.ROL_BB
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
         # 50 nieuwste niet-afgehandelde site feedback items
-        self.count_aanwezig = SiteFeedback.objects.count()
-        self.count_niet_afgehandeld = SiteFeedback.objects.filter(is_afgehandeld=False).count()
         return SiteFeedback.objects.filter(is_afgehandeld=False).order_by('-toegevoegd_op')[:50]
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-        context['count_aanwezig'] = self.count_aanwezig
-        context['count_afgehandeld'] = self.count_aanwezig - self.count_niet_afgehandeld
+
+        count_niet_afgehandeld = SiteFeedback.objects.filter(is_afgehandeld=False).count()
+        context['count_aanwezig'] = count_aanwezig = SiteFeedback.objects.count()
+        context['count_afgehandeld'] = count_aanwezig - count_niet_afgehandeld
+
+        if self.request.user.is_staff:
+            context['url_admin_site'] = reverse('admin:Overig_sitefeedback_changelist')
+
         menu_dynamics(self.request, context)
         return context
 

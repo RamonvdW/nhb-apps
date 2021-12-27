@@ -47,7 +47,7 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspace="5"><i>Er zijn nog geen wedstrijden</i></td>
+                    <td colspan="5"><i>Er zijn nog geen wedstrijden</i></td>
                 </tr>
             {% endfor %}
 

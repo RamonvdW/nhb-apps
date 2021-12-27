@@ -6,9 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block extrastyle %}<link rel="stylesheet" type="text/css" href="{% static 'histcomp/team.css' %}">{% endblock %}
-
-{% block title %}Welkom in de INDIVIDUELE geschiedenis{% endblock %}
+{% block title %}Welkom in de TEAM geschiedenis{% endblock %}
 
 {% block pagina %}
 
@@ -69,7 +67,7 @@
     </table>
 
     {% if is_paginated %}
-        <!-- TODO: update as per histcomp_indiv.dtl -->
+        <!-- FUTURE: update as per histcomp_indiv.dtl -->
         <p>
             <span>Spring naar een andere pagina:</span>
             {% for linkname, url in page_links %}

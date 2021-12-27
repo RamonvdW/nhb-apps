@@ -6,349 +6,97 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-
-
-def init_boogtype(apps, _):
-    """ Maak de boog typen aan """
-
-    # boog typen volgens spec v2.1, tabel 3.2
-
-    # haal de klassen op die van toepassing zijn tijdens deze migratie
-    boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
-
-    # maak de standaard boogtypen aan
-    boogtype_klas(afkorting='R',  volgorde='A', beschrijving='Recurve').save()
-    boogtype_klas(afkorting='C',  volgorde='D', beschrijving='Compound').save()
-    boogtype_klas(afkorting='BB', volgorde='I', beschrijving='Barebow').save()
-    boogtype_klas(afkorting='IB', volgorde='M', beschrijving='Instinctive bow').save()
-    boogtype_klas(afkorting='LB', volgorde='S', beschrijving='Longbow').save()
-
-
-def init_leeftijdsklasse(apps, _):
-    """ Maak de leeftijdsklassen aan """
-
-    # leeftijdsklassen volgens spec v2.1, deel 3, tabel 3.1
-
-    # note: wedstrijdleeftijd = leeftijd die je bereikt in een jaar
-    #       competitieleeftijd = wedstrijdleeftijd + 1
-
-    # haal de klassen op die van toepassing zijn tijdens deze migratie
-    leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
-
-    # >= 60
-    leeftijdsklasse_klas(
-        afkorting='VH', geslacht='M',
-        klasse_kort='Veteraan',
-        beschrijving='Veteranen, mannen',
-        volgorde=60,
-        min_wedstrijdleeftijd=60,
-        max_wedstrijdleeftijd=0,
-        volgens_wa=False).save()
-    leeftijdsklasse_klas(
-        afkorting='VV', geslacht='V',
-        klasse_kort='Veteraan',
-        beschrijving='Veteranen, vrouwen',
-        volgorde=60,
-        min_wedstrijdleeftijd=60,
-        max_wedstrijdleeftijd=0,
-        volgens_wa=False).save()
-
-    # >= 50
-    leeftijdsklasse_klas(
-        afkorting='MH', geslacht='M',
-        klasse_kort='Master',
-        beschrijving='Masters, mannen',
-        volgorde=50,
-        min_wedstrijdleeftijd=50,
-        max_wedstrijdleeftijd=0,
-        volgens_wa=True).save()
-    leeftijdsklasse_klas(
-        afkorting='MV', geslacht='V',
-        klasse_kort='Master',
-        beschrijving='Masters, vrouwen',
-        volgorde=50,
-        min_wedstrijdleeftijd=50,
-        max_wedstrijdleeftijd=0,
-        volgens_wa=True).save()
-
-    # open klasse
-    leeftijdsklasse_klas(
-        afkorting='SH', geslacht='M',
-        klasse_kort='Senior',
-        beschrijving='Senioren, mannen',
-        volgorde=40,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=0).save()
-    leeftijdsklasse_klas(
-        afkorting='SV', geslacht='V',
-        klasse_kort='Senior',
-        beschrijving='Senioren, vrouwen',
-        volgorde=40,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=0).save()
-
-    # <= 20
-    leeftijdsklasse_klas(
-        afkorting='JH', geslacht='M',
-        klasse_kort='Junior',
-        beschrijving='Junioren, mannen',
-        volgorde=30,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=20).save()
-    leeftijdsklasse_klas(
-        afkorting='JV', geslacht='V',
-        klasse_kort='Junior',
-        beschrijving='Junioren, vrouwen',
-        volgorde=30,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=20).save()
-
-    # <= 17
-    leeftijdsklasse_klas(
-        afkorting='CH', geslacht='M',
-        klasse_kort='Cadet',
-        beschrijving='Cadetten, jongens',
-        volgorde=20,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=17).save()
-    leeftijdsklasse_klas(
-        afkorting='CV', geslacht='V',
-        klasse_kort='Cadet',
-        beschrijving='Cadetten, meisjes',
-        volgorde=20,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=17).save()
-
-    # <= 13
-    leeftijdsklasse_klas(
-        afkorting='AH2', geslacht='M',
-        klasse_kort='Aspirant',
-        beschrijving='Aspiranten 11-12, jongens',   # heet 11-12 ivm leeftijd in 1e jaar competitie..
-        volgorde=15,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=13,
-        volgens_wa=False).save()
-    leeftijdsklasse_klas(
-        afkorting='AV2', geslacht='V',
-        klasse_kort='Aspirant',
-        beschrijving='Aspiranten 11-12, meisjes',
-        volgorde=15,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=13,
-        volgens_wa=False).save()
-
-    # <= 11
-    leeftijdsklasse_klas(
-        afkorting='AH1', geslacht='M',
-        klasse_kort='Aspirant',
-        beschrijving='Aspiranten <11, jongens',
-        volgorde=10,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=11,
-        volgens_wa=False).save()
-    leeftijdsklasse_klas(
-        afkorting='AV1', geslacht='V',
-        klasse_kort='Aspirant',
-        beschrijving='Aspiranten <11, meisjes',
-        volgorde=10,
-        min_wedstrijdleeftijd=0,
-        max_wedstrijdleeftijd=11,
-        volgens_wa=False).save()
-
-
-def init_team_typen(apps, _):
-    """ Maak de team typen aan """
-
-    # team typen volgens spec v2.1, deel 3, tabel 3.3
-
-    # haal de klassen op die van toepassing zijn tijdens deze migratie
-    team_type_klas = apps.get_model('BasisTypen', 'TeamType')
-    boog_type_klas = apps.get_model('BasisTypen', 'BoogType')
-
-    boog_r = boog_type_klas.objects.get(afkorting='R')
-    boog_c = boog_type_klas.objects.get(afkorting='C')
-    boog_bb = boog_type_klas.objects.get(afkorting='BB')
-    boog_ib = boog_type_klas.objects.get(afkorting='IB')
-    boog_lb = boog_type_klas.objects.get(afkorting='LB')
-
-    # maak de standaard team typen aan
-    team = team_type_klas(afkorting='R',  volgorde='1', beschrijving='Recurve team')
-    team.save()
-    team.boog_typen.add(boog_r, boog_bb, boog_ib, boog_lb)
-
-    team = team_type_klas(afkorting='C',  volgorde='2', beschrijving='Compound team')
-    team.save()
-    team.boog_typen.add(boog_c)
-
-    team = team_type_klas(afkorting='BB', volgorde='3', beschrijving='Barebow team')
-    team.save()
-    team.boog_typen.add(boog_bb, boog_ib, boog_lb)
-
-    team = team_type_klas(afkorting='IB', volgorde='4', beschrijving='Instinctive Bow team')
-    team.save()
-    team.boog_typen.add(boog_ib, boog_lb)
-
-    team = team_type_klas(afkorting='LB', volgorde='5', beschrijving='Longbow team')
-    team.save()
-    team.boog_typen.add(boog_lb)
-
-
-# individuele wedstrijdklassen volgens spec v2.1, deel 3, tabel 3.4
-WKL_INDIV = (
-    (100, 'Recurve klasse 1',                      'R',  ('SH', 'SV')),
-    (101, 'Recurve klasse 2',                      'R',  ('SH', 'SV')),
-    (102, 'Recurve klasse 3',                      'R',  ('SH', 'SV')),
-    (103, 'Recurve klasse 4',                      'R',  ('SH', 'SV')),
-    (104, 'Recurve klasse 5',                      'R',  ('SH', 'SV')),
-    (105, 'Recurve klasse 6',                      'R',  ('SH', 'SV')),
-    (109, 'Recurve klasse onbekend',               'R',  ('SH', 'SV')),
-
-    (110, 'Recurve Junioren klasse 1',             'R',  ('JH', 'JV')),
-    (111, 'Recurve Junioren klasse 2',             'R',  ('JH', 'JV')),
-    (119, 'Recurve Junioren klasse onbekend',      'R',  ('JH', 'JV')),
-
-    (120, 'Recurve Cadetten klasse 1',             'R',  ('CH', 'CV')),
-    (121, 'Recurve Cadetten klasse 2',             'R',  ('CH', 'CV')),
-    (129, 'Recurve Cadetten klasse onbekend',      'R',  ('CH', 'CV')),
-
-    (150, 'Recurve Aspiranten 11-12 jaar',         'R',  ('AH2', 'AV2'), True),
-    (155, 'Recurve Aspiranten < 11 jaar',          'R',  ('AH1', 'AV1'), True),
-
-
-    (200, 'Compound klasse 1',                     'C',  ('SH', 'SV')),
-    (201, 'Compound klasse 2',                     'C',  ('SH', 'SV')),
-    (209, 'Compound klasse onbekend',              'C',  ('SH', 'SV')),
-
-    (210, 'Compound Junioren klasse 1',            'C',  ('JH', 'JV')),
-    (211, 'Compound Junioren klasse 2',            'C',  ('JH', 'JV')),
-    (219, 'Compound Junioren klasse onbekend',     'C',  ('JH', 'JV')),
-
-    (220, 'Compound Cadetten klasse 1',            'C',  ('CH', 'CV')),
-    (221, 'Compound Cadetten klasse 2',            'C',  ('CH', 'CV')),
-    (229, 'Compound Cadetten klasse onbekend',     'C',  ('CH', 'CV')),
-
-    (250, 'Compound Aspiranten 11-12 jaar',        'C',  ('AH2', 'AV2'), True),
-    (255, 'Compound Aspiranten < 11 jaar',         'C',  ('AH1', 'AV1'), True),
-
-
-    (300, 'Barebow klasse 1',                      'BB', ('SH', 'SV')),
-    (301, 'Barebow klasse 2',                      'BB', ('SH', 'SV')),
-    (309, 'Barebow klasse onbekend',               'BB', ('SH', 'SV')),
-
-    (310, 'Barebow Jeugd klasse 1',                'BB', ('JH', 'JV', 'CH', 'CV')),
-
-    (350, 'Barebow Aspiranten 11-12 jaar',         'BB', ('AH2', 'AV2'), True),
-    (355, 'Barebow Aspiranten < 11 jaar',          'BB', ('AH1', 'AV1'), True),
-
-
-    (400, 'Instinctive Bow klasse 1',              'IB', ('SH', 'SV')),
-    (401, 'Instinctive Bow klasse 2',              'IB', ('SH', 'SV')),
-    (409, 'Instinctive Bow klasse onbekend',       'IB', ('SH', 'SV')),
-
-    (410, 'Instinctive Bow Jeugd klasse 1',        'IB', ('JH', 'JV', 'CH', 'CV')),
-
-    (450, 'Instinctive Bow Aspiranten 11-12 jaar', 'IB', ('AH2', 'AV2'), True),
-    (455, 'Instinctive Bow Aspiranten < 11 jaar',  'IB', ('AH1', 'AV1'), True),
-
-
-    (500, 'Longbow klasse 1',                      'LB', ('SH', 'SV')),
-    (501, 'Longbow klasse 2',                      'LB', ('SH', 'SV')),
-    (509, 'Longbow klasse onbekend',               'LB', ('SH', 'SV')),
-
-    (510, 'Longbow Jeugd klasse 1',                'LB', ('JH', 'JV', 'CH', 'CV')),
-
-    (550, 'Longbow Aspiranten 11-12 jaar',         'LB', ('AH2', 'AV2'), True),
-    (555, 'Longbow Aspiranten < 11 jaar',          'LB', ('AH1', 'AV1'), True),
-)
-
-
-def init_wedstrijdklassen_individueel(apps, _):
-    """ Maak de wedstrijdklassen aan"""
-
-    # haal de klassen op die van toepassing zijn tijdens deze migratie
-    indiv_wedstrijdklasse_klas = apps.get_model('BasisTypen', 'IndivWedstrijdklasse')
-    leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
-    boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
-
-    # maak een look-up table voor de boog afkortingen
-    afkorting2boogtype = dict()
-    for obj in boogtype_klas.objects.all():
-        afkorting2boogtype[obj.afkorting] = obj
-    # for
-
-    for tup in WKL_INDIV:
-        if len(tup) == 4:
-            volgorde, beschrijving, boog_afkorting, leeftijdsklassen = tup
-            niet_voor_rk_bk = False
-        else:
-            volgorde, beschrijving, boog_afkorting, leeftijdsklassen, niet_voor_rk_bk = tup
-
-        boogtype_obj = afkorting2boogtype[boog_afkorting]
-        is_onbekend = 'onbekend' in beschrijving
-        if is_onbekend:
-            niet_voor_rk_bk = True
-
-        wkl = indiv_wedstrijdklasse_klas(
-                    beschrijving=beschrijving,
-                    volgorde=volgorde,
-                    boogtype=boogtype_obj,
-                    niet_voor_rk_bk=niet_voor_rk_bk,
-                    is_onbekend=is_onbekend)
-        wkl.save()
-
-        # koppel de gewenste leeftijdsklassen aan de wedstrijdklasse
-        lkl = list()
-        for obj in leeftijdsklasse_klas.objects.all():
-            if obj.afkorting in leeftijdsklassen:
-                lkl.append(obj)
-        # for
-        wkl.leeftijdsklassen.set(lkl)
-    # for
+from BasisTypen.models import (MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
+                               BLAZOEN_40CM, BLAZOEN_DT,
+                               BLAZOEN_60CM, BLAZOEN_60CM_4SPOT)
 
 
 # team wedstrijdklassen volgens spec v2.1, deel 3, tabel 3.5
-WKL_TEAM = (
-    (10, 'Recurve klasse ERE',         'R'),        # R = team type
-    (11, 'Recurve klasse A',           'R'),
-    (12, 'Recurve klasse B',           'R'),
-    (13, 'Recurve klasse C',           'R'),
-    (14, 'Recurve klasse D',           'R'),
+WKL_TEAM = (                                 # 18m                          # 25m
+                                             # regio1/2 == rk-bk1/2         # regio1, regio2, rk/bk
+    (10, 'Recurve klasse ERE',         'R',  (BLAZOEN_40CM, BLAZOEN_DT),    (BLAZOEN_60CM,)),        # R = team type
+    (11, 'Recurve klasse A',           'R',  (BLAZOEN_40CM,),               (BLAZOEN_60CM,)),
+    (12, 'Recurve klasse B',           'R',  (BLAZOEN_40CM,),               (BLAZOEN_60CM,)),
+    (13, 'Recurve klasse C',           'R',  (BLAZOEN_40CM,),               (BLAZOEN_60CM,)),
+    (14, 'Recurve klasse D',           'R',  (BLAZOEN_40CM,),               (BLAZOEN_60CM,)),
 
-    (20, 'Compound klasse ERE',        'C'),
-    (21, 'Compound klasse A',          'C'),
+    (20, 'Compound klasse ERE',        'C',  (BLAZOEN_DT,),                 (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
+    (21, 'Compound klasse A',          'C',  (BLAZOEN_DT,),                 (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
 
-    (30, 'Barebow klasse ERE',         'BB'),
+    (30, 'Barebow klasse ERE',         'BB', (BLAZOEN_40CM,),               (BLAZOEN_60CM,)),
 
-    (40, 'Instinctive Bow klasse ERE', 'IB'),
+    (40, 'Instinctive Bow klasse ERE', 'IB', (BLAZOEN_40CM,),               (BLAZOEN_60CM,)),
 
-    (50, 'Longbow klasse ERE',         'LB'),
+    (50, 'Longbow klasse ERE',         'LB', (BLAZOEN_40CM,),               (BLAZOEN_60CM,)),
 )
 
+# individuele wedstrijdklassen volgens spec v2.1, deel 3, tabel 3.4
+WKL_INDIV = (
+    (100, 'Recurve klasse 1',                      'R',  ('SH', 'SV'),   (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_DT),   (BLAZOEN_60CM,)),
+    (101, 'Recurve klasse 2',                      'R',  ('SH', 'SV'),   (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_DT),   (BLAZOEN_60CM,)),
+    (102, 'Recurve klasse 3',                      'R',  ('SH', 'SV'),   (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
+    (103, 'Recurve klasse 4',                      'R',  ('SH', 'SV'),   (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
+    (104, 'Recurve klasse 5',                      'R',  ('SH', 'SV'),   (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
+    (105, 'Recurve klasse 6',                      'R',  ('SH', 'SV'),   (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
+    (109, 'Recurve klasse onbekend',               'R',  ('SH', 'SV'),   (BLAZOEN_40CM, BLAZOEN_DT),               (BLAZOEN_60CM,)),
 
-def init_wedstrijdklassen_team(apps, _):
-    """ Maak de team wedstrijdklassen aan"""
+    (110, 'Recurve Junioren klasse 1',             'R',  ('JH', 'JV'),   (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_DT),   (BLAZOEN_60CM,)),
+    (111, 'Recurve Junioren klasse 2',             'R',  ('JH', 'JV'),   (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
+    (119, 'Recurve Junioren klasse onbekend',      'R',  ('JH', 'JV'),   (BLAZOEN_40CM, BLAZOEN_DT),               (BLAZOEN_60CM,)),
 
-    # haal de klassen op die van toepassing zijn tijdens deze migratie
-    team_type_klas = apps.get_model('BasisTypen', 'TeamType')
-    team_wedstrijdklasse_klas = apps.get_model('BasisTypen', 'TeamWedstrijdklasse')
+    (120, 'Recurve Cadetten klasse 1',             'R',  ('CH', 'CV'),   (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
+    (121, 'Recurve Cadetten klasse 2',             'R',  ('CH', 'CV'),   (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
+    (129, 'Recurve Cadetten klasse onbekend',      'R',  ('CH', 'CV'),   (BLAZOEN_40CM, BLAZOEN_DT),               (BLAZOEN_60CM,)),
 
-    # maak een look-up table voor de team type afkortingen
-    afkorting2teamtype = dict()
-    for team_type in team_type_klas.objects.all():
-        afkorting2teamtype[team_type.afkorting] = team_type
-    # for
+    (150, 'Recurve Aspiranten 11-12 jaar',         'R',  ('AH2', 'AV2'), (BLAZOEN_60CM,),                          (BLAZOEN_60CM,), True),
+    (155, 'Recurve Aspiranten < 11 jaar',          'R',  ('AH1', 'AV1'), (BLAZOEN_60CM,),                          (BLAZOEN_60CM,), True),
 
-    bulk = list()
-    for volgorde, beschrijving, teamtype_afkorting in WKL_TEAM:
-        teamtype = afkorting2teamtype[teamtype_afkorting]
-        obj = team_wedstrijdklasse_klas(
-                    beschrijving=beschrijving,
-                    volgorde=volgorde,
-                    team_type=teamtype)
-        bulk.append(obj)
-    # for
 
-    team_wedstrijdklasse_klas.objects.bulk_create(bulk)
+    (200, 'Compound klasse 1',                     'C',  ('SH', 'SV'),   (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
+    (201, 'Compound klasse 2',                     'C',  ('SH', 'SV'),   (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
+    (209, 'Compound klasse onbekend',              'C',  ('SH', 'SV'),   (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
+
+    (210, 'Compound Junioren klasse 1',            'C',  ('JH', 'JV'),   (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
+    (211, 'Compound Junioren klasse 2',            'C',  ('JH', 'JV'),   (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
+    (219, 'Compound Junioren klasse onbekend',     'C',  ('JH', 'JV'),   (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
+
+    (220, 'Compound Cadetten klasse 1',            'C',  ('CH', 'CV'),   (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
+    (221, 'Compound Cadetten klasse 2',            'C',  ('CH', 'CV'),   (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
+    (229, 'Compound Cadetten klasse onbekend',     'C',  ('CH', 'CV'),   (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
+
+    (250, 'Compound Aspiranten 11-12 jaar',        'C',  ('AH2', 'AV2'), (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM), (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT), True),
+    (255, 'Compound Aspiranten < 11 jaar',         'C',  ('AH1', 'AV1'), (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM), (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT), True),
+
+
+    (300, 'Barebow klasse 1',                      'BB', ('SH', 'SV'),             (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (301, 'Barebow klasse 2',                      'BB', ('SH', 'SV'),             (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (309, 'Barebow klasse onbekend',               'BB', ('SH', 'SV'),             (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+
+    (310, 'Barebow Jeugd klasse 1',                'BB', ('JH', 'JV', 'CH', 'CV'), (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+
+    (350, 'Barebow Aspiranten 11-12 jaar',         'BB', ('AH2', 'AV2'),           (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+    (355, 'Barebow Aspiranten < 11 jaar',          'BB', ('AH1', 'AV1'),           (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+
+
+    (400, 'Instinctive Bow klasse 1',              'IB', ('SH', 'SV'),             (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (401, 'Instinctive Bow klasse 2',              'IB', ('SH', 'SV'),             (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (409, 'Instinctive Bow klasse onbekend',       'IB', ('SH', 'SV'),             (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+
+    (410, 'Instinctive Bow Jeugd klasse 1',        'IB', ('JH', 'JV', 'CH', 'CV'), (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+
+    (450, 'Instinctive Bow Aspiranten 11-12 jaar', 'IB', ('AH2', 'AV2'),           (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+    (455, 'Instinctive Bow Aspiranten < 11 jaar',  'IB', ('AH1', 'AV1'),           (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+
+
+    (500, 'Longbow klasse 1',                      'LB', ('SH', 'SV'),             (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (501, 'Longbow klasse 2',                      'LB', ('SH', 'SV'),             (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (509, 'Longbow klasse onbekend',               'LB', ('SH', 'SV'),             (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+
+    (510, 'Longbow Jeugd klasse 1',                'LB', ('JH', 'JV', 'CH', 'CV'), (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+
+    (550, 'Longbow Aspiranten 11-12 jaar',         'LB', ('AH2', 'AV2'),           (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+    (555, 'Longbow Aspiranten < 11 jaar',          'LB', ('AH1', 'AV1'),           (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+)
 
 
 KALENDERWEDSTRIJDENKLASSEN = (
@@ -446,6 +194,329 @@ KALENDERWEDSTRIJDENKLASSEN = (
     (550, 'LB', 'AH2', 'Longbow aspirant jongens'),
     (551, 'LB', 'AV2', 'Longbow aspirant meisjes'),
 )
+
+
+def init_boogtype(apps, _):
+    """ Maak de boog typen aan """
+
+    # boog typen volgens spec v2.1, tabel 3.2
+
+    # haal de klassen op die van toepassing zijn tijdens deze migratie
+    boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
+
+    # maak de standaard boogtypen aan
+    bulk = [boogtype_klas(afkorting='R',  volgorde='A', beschrijving='Recurve'),
+            boogtype_klas(afkorting='C',  volgorde='D', beschrijving='Compound'),
+            boogtype_klas(afkorting='BB', volgorde='I', beschrijving='Barebow'),
+            boogtype_klas(afkorting='IB', volgorde='M', beschrijving='Instinctive bow'),
+            boogtype_klas(afkorting='LB', volgorde='S', beschrijving='Longbow')]
+    boogtype_klas.objects.bulk_create(bulk)
+
+
+def init_leeftijdsklasse(apps, _):
+    """ Maak de leeftijdsklassen aan """
+
+    # leeftijdsklassen volgens spec v2.1, deel 3, tabel 3.1
+
+    # note: wedstrijdleeftijd = leeftijd die je bereikt in een jaar
+    #       competitieleeftijd = wedstrijdleeftijd + 1
+
+    # haal de klassen op die van toepassing zijn tijdens deze migratie
+    leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
+
+    bulk = [
+        # >= 60
+        leeftijdsklasse_klas(
+            afkorting='VH', geslacht='M',
+            klasse_kort='Veteraan',
+            beschrijving='Veteranen, mannen',
+            volgorde=60,
+            min_wedstrijdleeftijd=60,
+            max_wedstrijdleeftijd=0,
+            volgens_wa=False),
+        leeftijdsklasse_klas(
+            afkorting='VV', geslacht='V',
+            klasse_kort='Veteraan',
+            beschrijving='Veteranen, vrouwen',
+            volgorde=60,
+            min_wedstrijdleeftijd=60,
+            max_wedstrijdleeftijd=0,
+            volgens_wa=False),
+
+        # >= 50
+        leeftijdsklasse_klas(
+            afkorting='MH', geslacht='M',
+            klasse_kort='Master',
+            beschrijving='Masters, mannen',
+            volgorde=50,
+            min_wedstrijdleeftijd=50,
+            max_wedstrijdleeftijd=0,
+            volgens_wa=True),
+        leeftijdsklasse_klas(
+            afkorting='MV', geslacht='V',
+            klasse_kort='Master',
+            beschrijving='Masters, vrouwen',
+            volgorde=50,
+            min_wedstrijdleeftijd=50,
+            max_wedstrijdleeftijd=0,
+            volgens_wa=True),
+
+        # open klasse
+        leeftijdsklasse_klas(
+            afkorting='SH', geslacht='M',
+            klasse_kort='Senior',
+            beschrijving='Senioren, mannen',
+            volgorde=40,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=0),
+        leeftijdsklasse_klas(
+            afkorting='SV', geslacht='V',
+            klasse_kort='Senior',
+            beschrijving='Senioren, vrouwen',
+            volgorde=40,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=0),
+
+        # <= 20
+        leeftijdsklasse_klas(
+            afkorting='JH', geslacht='M',
+            klasse_kort='Junior',
+            beschrijving='Junioren, mannen',
+            volgorde=30,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=20),
+        leeftijdsklasse_klas(
+            afkorting='JV', geslacht='V',
+            klasse_kort='Junior',
+            beschrijving='Junioren, vrouwen',
+            volgorde=30,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=20),
+
+        # <= 17
+        leeftijdsklasse_klas(
+            afkorting='CH', geslacht='M',
+            klasse_kort='Cadet',
+            beschrijving='Cadetten, jongens',
+            volgorde=20,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=17),
+        leeftijdsklasse_klas(
+            afkorting='CV', geslacht='V',
+            klasse_kort='Cadet',
+            beschrijving='Cadetten, meisjes',
+            volgorde=20,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=17),
+
+        # <= 13
+        leeftijdsklasse_klas(
+            afkorting='AH2', geslacht='M',
+            klasse_kort='Aspirant',
+            beschrijving='Aspiranten 11-12, jongens',   # heet 11-12 ivm leeftijd in 1e jaar competitie..
+            volgorde=15,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=13,
+            volgens_wa=False),
+        leeftijdsklasse_klas(
+            afkorting='AV2', geslacht='V',
+            klasse_kort='Aspirant',
+            beschrijving='Aspiranten 11-12, meisjes',
+            volgorde=15,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=13,
+            volgens_wa=False),
+
+        # <= 11
+        leeftijdsklasse_klas(
+            afkorting='AH1', geslacht='M',
+            klasse_kort='Aspirant',
+            beschrijving='Aspiranten <11, jongens',
+            volgorde=10,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=11,
+            volgens_wa=False),
+        leeftijdsklasse_klas(
+            afkorting='AV1', geslacht='V',
+            klasse_kort='Aspirant',
+            beschrijving='Aspiranten <11, meisjes',
+            volgorde=10,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=11,
+            volgens_wa=False),
+    ]
+    leeftijdsklasse_klas.objects.bulk_create(bulk)
+
+
+def init_team_typen(apps, _):
+    """ Maak de team typen aan """
+
+    # team typen volgens spec v2.1, deel 3, tabel 3.3
+
+    # haal de klassen op die van toepassing zijn tijdens deze migratie
+    team_type_klas = apps.get_model('BasisTypen', 'TeamType')
+    boog_type_klas = apps.get_model('BasisTypen', 'BoogType')
+
+    boog_r = boog_c = boog_bb = boog_ib = boog_lb = None
+    for boog in boog_type_klas.objects.all():
+        if boog.afkorting == 'R':
+            boog_r = boog
+        if boog.afkorting == 'C':
+            boog_c = boog
+        if boog.afkorting == 'BB':
+            boog_bb = boog
+        if boog.afkorting == 'IB':
+            boog_ib = boog
+        if boog.afkorting == 'LB':
+            boog_lb = boog
+    # for
+
+    # maak de standaard team typen aan
+    team_r = team_type_klas(afkorting='R',  volgorde='1', beschrijving='Recurve team')
+    team_c = team_type_klas(afkorting='C',  volgorde='2', beschrijving='Compound team')
+    team_bb = team_type_klas(afkorting='BB', volgorde='3', beschrijving='Barebow team')
+    team_ib = team_type_klas(afkorting='IB', volgorde='4', beschrijving='Instinctive Bow team')
+    team_lb = team_type_klas(afkorting='LB', volgorde='5', beschrijving='Longbow team')
+
+    team_type_klas.objects.bulk_create([team_r, team_c, team_bb, team_ib, team_lb])
+
+    team_r.boog_typen.add(boog_r, boog_bb, boog_ib, boog_lb)
+    team_c.boog_typen.add(boog_c)
+    team_bb.boog_typen.add(boog_bb, boog_ib, boog_lb)
+    team_ib.boog_typen.add(boog_ib, boog_lb)
+    team_lb.boog_typen.add(boog_lb)
+
+
+def init_wedstrijdklassen_individueel(apps, _):
+    """ Maak de wedstrijdklassen aan"""
+
+    # haal de klassen op die van toepassing zijn tijdens deze migratie
+    indiv_wedstrijdklasse_klas = apps.get_model('BasisTypen', 'IndivWedstrijdklasse')
+    leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
+    boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
+
+    # maak een look-up table voor de boog afkortingen
+    boog_afkorting2boogtype = dict()
+    for lkl_obj in boogtype_klas.objects.all():
+        boog_afkorting2boogtype[lkl_obj.afkorting] = lkl_obj
+    # for
+
+    lkl_afkorting2leeftijdsklasse = dict()
+    for lkl in leeftijdsklasse_klas.objects.all():
+        lkl_afkorting2leeftijdsklasse[lkl.afkorting] = lkl
+    # for
+
+    volgorde2lkl = dict()
+
+    bulk = list()
+    for tup in WKL_INDIV:
+        if len(tup) == 6:
+            volgorde, beschrijving, boog_afkorting, leeftijdsklassen_afkortingen, blazoenen_18m, blazoenen_25m = tup
+            niet_voor_rk_bk = False
+        else:
+            volgorde, beschrijving, boog_afkorting, leeftijdsklassen_afkortingen, blazoenen_18m, blazoenen_25m, niet_voor_rk_bk = tup
+
+        is_onbekend = 'onbekend' in beschrijving
+        if is_onbekend:
+            niet_voor_rk_bk = True
+
+        boogtype_obj = boog_afkorting2boogtype[boog_afkorting]
+
+        # blazoen is 1 of 3 lang
+        blazoenen_18m = list(blazoenen_18m)
+        while len(blazoenen_18m) < 3:
+            blazoenen_18m.append(blazoenen_18m[0])
+        # while
+
+        blazoenen_25m = list(blazoenen_25m)
+        while len(blazoenen_25m) < 3:
+            blazoenen_25m.append(blazoenen_25m[0])
+        # while
+
+        wkl = indiv_wedstrijdklasse_klas(
+                    beschrijving=beschrijving,
+                    volgorde=volgorde,
+                    boogtype=boogtype_obj,
+                    niet_voor_rk_bk=niet_voor_rk_bk,
+                    is_onbekend=is_onbekend,
+                    blazoen1_18m_regio=blazoenen_18m[0],
+                    blazoen2_18m_regio=blazoenen_18m[1],
+                    blazoen_18m_rk_bk=blazoenen_18m[2],
+                    blazoen1_25m_regio=blazoenen_25m[0],
+                    blazoen2_25m_regio=blazoenen_25m[1],
+                    blazoen_25m_rk_bk=blazoenen_25m[2])
+
+        # koppel de gewenste leeftijdsklassen aan de wedstrijdklasse
+        # en vlag de aspirant klassen
+        volgorde2lkl[volgorde] = lkl_lijst = list()
+        for lkl_afkorting in leeftijdsklassen_afkortingen:
+            lkl = lkl_afkorting2leeftijdsklasse[lkl_afkorting]
+
+            # vlag aspirant klassen
+            if lkl.max_wedstrijdleeftijd <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT:
+                wkl.is_aspirant_klasse = True
+
+            lkl_lijst.append(lkl)
+        # for
+
+        bulk.append(wkl)
+    # for
+
+    indiv_wedstrijdklasse_klas.objects.bulk_create(bulk)
+
+    # koppel nu de leeftijdsklassen aan elke wedstrijdklasse
+    for wkl in indiv_wedstrijdklasse_klas.objects.all():
+        lkl_lijst = volgorde2lkl[wkl.volgorde]
+        wkl.leeftijdsklassen.set(lkl_lijst)
+    # for
+
+
+def init_wedstrijdklassen_team(apps, _):
+    """ Maak de team wedstrijdklassen aan"""
+
+    # haal de klassen op die van toepassing zijn tijdens deze migratie
+    team_type_klas = apps.get_model('BasisTypen', 'TeamType')
+    team_wedstrijdklasse_klas = apps.get_model('BasisTypen', 'TeamWedstrijdklasse')
+
+    # maak een look-up table voor de team type afkortingen
+    boog_afkorting2teamtype = dict()
+    for team_type in team_type_klas.objects.all():
+        boog_afkorting2teamtype[team_type.afkorting] = team_type
+    # for
+
+    bulk = list()
+    for volgorde, beschrijving, teamtype_afkorting, blazoenen_18m, blazoenen_25m in WKL_TEAM:
+
+        teamtype = boog_afkorting2teamtype[teamtype_afkorting]
+
+        # blazoenen_18m is 1 of 2 lang voor de regio
+        # FUTURE: voor het RK/BK geldt alleen de laatste
+        blazoenen_18m = list(blazoenen_18m)
+        if len(blazoenen_18m) < 2:
+            blazoenen_18m.append(blazoenen_18m[0])
+
+        # blazoenen_25m is 1 of 3 lang (1 = repeated up to 3), daarna: 1+2 voor regio en 3 voor rk/bk
+        blazoenen_25m = list(blazoenen_25m)
+        while len(blazoenen_25m) < 3:
+            blazoenen_25m.append(blazoenen_25m[0])
+        # while
+
+        obj = team_wedstrijdklasse_klas(
+                    beschrijving=beschrijving,
+                    volgorde=volgorde,
+                    team_type=teamtype,
+                    blazoen1_18m_regio=blazoenen_18m[0],
+                    blazoen1_18m_rk_bk=blazoenen_18m[0],
+                    blazoen2_18m_regio=blazoenen_18m[1],
+                    blazoen2_18m_rk_bk=blazoenen_18m[1],
+                    blazoen1_25m_regio=blazoenen_25m[0],
+                    blazoen2_25m_regio=blazoenen_25m[1],
+                    blazoen_25m_rk_bk=blazoenen_25m[2])
+
+        bulk.append(obj)
+    # for
+
+    team_wedstrijdklasse_klas.objects.bulk_create(bulk)
 
 
 def init_kalenderwedstrijdklassen(apps, _):

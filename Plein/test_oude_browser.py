@@ -11,7 +11,8 @@ import types
 
 
 class TestPlein(E2EHelpers, TestCase):
-    """ unit tests voor de Plein applicatie """
+
+    """ tests voor de Plein applicatie """
 
     test_after = ('Functie',)
 

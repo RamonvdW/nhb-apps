@@ -149,14 +149,4 @@ class NhbVereniging(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-def validate_geboorte_datum(datum):
-    """ OBSOLETE """
-    return True
-
-
-def validate_sinds_datum(datum):
-    """ OBSOLETE """
-    return True
-
-
 # end of file

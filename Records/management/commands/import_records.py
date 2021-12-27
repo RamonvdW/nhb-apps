@@ -28,6 +28,11 @@ class Command(BaseCommand):
         self.count_toegevoegd = 0
         self.count_verwijderd = 0
         self.count_waarschuwing = 0
+        self.dryrun = False
+
+        # bereken de datum van morgen, om een check te kunnen doen van een datum
+        morgen = datetime.datetime.now() + datetime.timedelta(days=1)
+        self.datum_morgen = datetime.date(year=morgen.year, month=morgen.month, day=morgen.day)
 
     def add_arguments(self, parser):
         parser.add_argument('filename', nargs=1,
@@ -72,7 +77,7 @@ class Command(BaseCommand):
                 except IndivRecord.DoesNotExist:
                     # new record
                     pass
-                except IndivRecord.MultipleObjectsReturned:     # pragma: no coverage
+                except IndivRecord.MultipleObjectsReturned:     # pragma: no cover
                     errors.append('Meerdere records voor %s-%s' % (blad, val))
                 else:
                     # gevonden, dus voorkom verwijderen
@@ -489,8 +494,8 @@ class Command(BaseCommand):
         # for
 
         # rapporteer de samenvatting en schrijf deze ook in het logboek
-        samenvatting = "Samenvatting: %s records; %s ongewijzigd; %s overgeslagen i.v.m. fouten; %s verwijderd; %s wijzigingen; %s toegevoegd; %s waarschuwingen, %s fouten" %\
-                          (self.count_read,
+        samenvatting = "Samenvatting: %s records; %s ongewijzigd; %s overgeslagen i.v.m. fouten; %s verwijderd; %s wijzigingen; %s toegevoegd; %s waarschuwingen, %s fouten" % (
+                           self.count_read,
                            self.count_ongewijzigd,
                            self.count_errors_skipped,
                            self.count_verwijderd,
@@ -509,11 +514,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.dryrun = options['dryrun']
-
-        # bereken de datum van morgen, om een check te kunnen doen van een datum
-        morgen = datetime.datetime.now() + datetime.timedelta(days=1)
-        self.datum_morgen = datetime.date(year=morgen.year, month=morgen.month, day=morgen.day)
-        del morgen
 
         # lees de file in
         fname = options['filename'][0]

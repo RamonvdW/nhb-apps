@@ -6,7 +6,6 @@
 
 # zet de is_BB vlag voor een account, vanaf de commandline
 
-import argparse
 from django.core.management.base import BaseCommand
 from Account.models import Account
 from Logboek.models import schrijf_in_logboek
@@ -40,7 +39,7 @@ class Command(BaseCommand):
             else:
                 if options['set_bb']:
                     if account.is_BB:
-                        print('Account %s is al BB -- geen wijziging' % username)
+                        self.stdout.write('Account %s is al BB -- geen wijziging' % repr(username))
                     else:
                         account.is_BB = True
                         account.save(update_fields=['is_BB'])
@@ -51,10 +50,9 @@ class Command(BaseCommand):
                                            activiteit="Account %s is BB gemaakt" % repr(username))
 
                         self.stdout.write("Account %s is BB gemaakt" % repr(username))
-
-                elif options['clr_bb']:
+                else:
                     if not account.is_BB:
-                        print('Account %s is geen BB - geen wijziging' % username)
+                        self.stdout.write('Account %s is geen BB -- geen wijziging' % repr(username))
                     else:
                         account.is_BB = False
                         account.save(update_fields=['is_BB'])

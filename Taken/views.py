@@ -31,7 +31,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB,
+        return rol_nu in (Rollen.ROL_BB,
                           Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
                           Rollen.ROL_HWL)
 
@@ -78,7 +78,7 @@ class DetailsView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB,
+        return rol_nu in (Rollen.ROL_BB,
                           Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
                           Rollen.ROL_HWL)
 
@@ -87,7 +87,7 @@ class DetailsView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            taak_pk = int(kwargs['taak_pk'][:6])        # afkappen geeft veiligheid
+            taak_pk = int(kwargs['taak_pk'][:6])        # afkappen voor de veiligheid
             taak = (Taak
                     .objects
                     .select_related('deelcompetitie',
@@ -117,7 +117,7 @@ class DetailsView(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
 
         try:
-            taak_pk = int(kwargs['taak_pk'][:6])    # afkappen geeft veiligheid
+            taak_pk = int(kwargs['taak_pk'][:6])    # afkappen voor de veiligheid
             taak = Taak.objects.get(pk=taak_pk)
         except (ValueError, Taak.DoesNotExist):
             raise Http404('Geen valide taak')

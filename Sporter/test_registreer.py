@@ -16,7 +16,8 @@ import datetime
 
 
 class TestSporterRegistreer(E2EHelpers, TestCase):
-    """ unit tests voor de Sporter applicatie; module Registreer """
+
+    """ tests voor de Sporter applicatie; module Registreer """
 
     test_after = ('Account',)
 

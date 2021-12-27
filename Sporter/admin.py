@@ -24,7 +24,7 @@ class SporterAdmin(admin.ModelAdmin):
 class SporterBoogAdmin(admin.ModelAdmin):
     """ Admin configuratie voor SporterBoog klasse """
 
-    search_fields = ('sporter__lid_nr', 'sporter__unaccented_name')
+    search_fields = ('sporter__lid_nr', 'sporter__unaccented_naam')
 
     list_select_related = True
 
@@ -34,7 +34,7 @@ class SporterBoogAdmin(admin.ModelAdmin):
 class SporterVoorkeurenAdmin(admin.ModelAdmin):
     """ Admin configuratie voor SporterVoorkeuren klasse """
 
-    search_fields = ('sporter__lid_nr', 'sporter__unaccented_name')
+    search_fields = ('sporter__lid_nr', 'sporter__unaccented_naam')
 
     list_select_related = True
 
@@ -44,15 +44,32 @@ class SporterVoorkeurenAdmin(admin.ModelAdmin):
 class SecretarisAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Secretaris klasse """
 
-    # TODO: alleen leden van de eigen vereniging laten kiezen
-
-    search_fields = ('vereniging__ver_nr', 'vereniging__naam',)
+    search_fields = ('vereniging__ver_nr',
+                     'vereniging__naam',)
 
     list_filter = ('vereniging',)
 
     list_select_related = True
 
     auto_complete = ('vereniging', 'sporter')
+
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self.obj = None
+
+    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        if obj:
+            self.obj = obj
+        return super().get_form(request, obj, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        if db_field.name == 'sporter' and self.obj:
+            kwargs['queryset'] = (Sporter
+                                  .objects
+                                  .filter(bij_vereniging=self.obj.vereniging)
+                                  .order_by('unaccented_naam'))
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class SpeelsterkteAdmin(admin.ModelAdmin):

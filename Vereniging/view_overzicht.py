@@ -87,17 +87,6 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                     nhb_rayon=ver.regio.rayon)
                             .select_related('competitie'))
 
-            for deelcomp_rk in deelcomps_rk:
-                if deelcomp_rk.heeft_deelnemerslijst:
-                    comp = deelcomp_rk.competitie
-                    comp.bepaal_fase()
-                    if comp.fase == 'K':
-                        # RK voorbereidende fase
-                        deelcomp_rk.text_str = "Schutters van de vereniging aan-/afmelden voor het RK van de %s" % comp.beschrijving
-                        deelcomp_rk.url_lijst_rk = reverse('Vereniging:lijst-rk',
-                                                           kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
-            # for
-
             pks = (DeelcompetitieRonde
                    .objects
                    .filter(deelcompetitie__is_afgesloten=False,
@@ -139,7 +128,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 kaartje = SimpleNamespace()
                 kaartje.titel = "Aanmelden"
                 kaartje.tekst = 'Leden aanmelden voor de %s.' % comp.beschrijving
-                kaartje.url = reverse('Vereniging:leden-aanmelden', kwargs={'comp_pk': comp.pk})
+                kaartje.url = reverse('CompInschrijven:leden-aanmelden', kwargs={'comp_pk': comp.pk})
                 if comp.afstand == '18':
                     kaartje.img = static('plein/badge_nhb_indoor.png')
                 else:
@@ -155,7 +144,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje = SimpleNamespace(
                                     titel="Team Invallers",
                                     tekst="Invallers opgeven voor ronde %s van de regiocompetitie voor de %s." % (deelcomp.huidige_team_ronde, comp.beschrijving),
-                                    url=reverse('Vereniging:teams-regio-invallers', kwargs={'deelcomp_pk': deelcomp.pk}),
+                                    url=reverse('CompRegio:teams-regio-invallers', kwargs={'deelcomp_pk': deelcomp.pk}),
                                     icon='how_to_reg')
                         kaartjes.append(kaartje)
                     else:
@@ -164,7 +153,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                             kaartje = SimpleNamespace()
                             kaartje.titel = "Teams Regio"
                             kaartje.tekst = 'Verenigingsteams voor de regiocompetitie samenstellen voor de %s.' % comp.beschrijving
-                            kaartje.url = reverse('Vereniging:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
+                            kaartje.url = reverse('CompRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
                             kaartje.icon = 'gamepad'
                             if comp.fase < 'B':
                                 kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)
@@ -175,11 +164,22 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             # 3 - teams RK
             for deelcomp_rk in deelcomps_rk:
                 if deelcomp_rk.competitie == comp:
+                    if deelcomp_rk.heeft_deelnemerslijst:
+                        if 'J' <= comp.fase <= 'K':
+                            # RK voorbereidende fase
+                            kaartje = SimpleNamespace()
+                            kaartje.titel = "Deelnemers RK"
+                            kaartje.tekst = "Sporters van de vereniging aan-/afmelden voor het RK van de %s" % comp.beschrijving
+                            kaartje.url = reverse('CompRayon:lijst-rk-ver',
+                                                  kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+                            kaartje.icon = 'rule'
+                            kaartjes.append(kaartje)
+
                     if 'E' <= comp.fase <= 'K' and self.rol_nu != Rollen.ROL_WL:
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Teams RK"
                         kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen samenstellen voor de %s." % comp.beschrijving
-                        kaartje.url = reverse('Vereniging:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+                        kaartje.url = reverse('CompRayon:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
                         kaartje.icon = 'api'
                         # niet beschikbaar maken tot een paar weken na de eerste regiowedstrijd
                         vanaf = comp.eerste_wedstrijd + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
@@ -196,7 +196,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Ingeschreven"
                         kaartje.tekst = "Overzicht ingeschreven leden voor de %s." % comp.beschrijving
-                        kaartje.url = reverse('Vereniging:leden-ingeschreven', kwargs={'deelcomp_pk': deelcomp.pk})
+                        kaartje.url = reverse('CompInschrijven:leden-ingeschreven', kwargs={'deelcomp_pk': deelcomp.pk})
                         if comp.afstand == '18':
                             kaartje.img = static('plein/badge_nhb_indoor.png')
                         else:
@@ -207,8 +207,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                     if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1 and 'B' <= comp.fase <= 'F':
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Wie schiet waar?"
-                        kaartje.tekst = 'Overzicht gekozen schietmomenten voor de %s.' % comp.beschrijving
-                        kaartje.url = reverse('Vereniging:schietmomenten', kwargs={'deelcomp_pk': deelcomp.pk})
+                        kaartje.tekst = 'Overzicht gekozen wedstrijden voor de %s.' % comp.beschrijving
+                        kaartje.url = reverse('CompRegio:wie-schiet-waar', kwargs={'deelcomp_pk': deelcomp.pk})
                         kaartje.icon = 'gamepad'
                         if comp.fase < 'B':
                             kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)

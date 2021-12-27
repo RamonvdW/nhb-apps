@@ -81,15 +81,8 @@ def send_mail(obj, stdout=None, stderr=None):
                         deze kunnen in een log terecht komen
     """
 
-    # check which service is active. Need none-empty API key
-    has_postmark = hasattr(settings, 'POSTMARK_API_KEY') and settings.POSTMARK_API_KEY
-
-    if has_postmark:
-
-        # voorkom problemen en dubbel zenden
-        if obj.is_verstuurd or obj.aantal_pogingen >= 25:
-            return
-
+    # voorkom problemen en dubbel zenden
+    if not obj.is_verstuurd and obj.aantal_pogingen < 25:
         now = timezone.now()
 
         obj.laatste_poging = now
@@ -99,7 +92,5 @@ def send_mail(obj, stdout=None, stderr=None):
 
         send_mail_postmark(obj, stdout, stderr)
 
-    # not configured for sending emails
-    return
 
 # end of file

@@ -5,6 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
+from django.db.models.constraints import UniqueConstraint
+from django.db.models.query_utils import Q
 from django.utils.formats import localize
 from Account.models import Account
 from Sporter.models import SporterBoog
@@ -16,14 +18,18 @@ from Sporter.models import SporterBoog
 # via scorehist zijn de wijzigingen dan nog in te zien
 SCORE_WAARDE_VERWIJDERD = 32767
 
+# gebruik 'geen score' om bij te houden dat gekozen is deze sporterboog te markeren als 'niet geschoten'
+# zonder een echt score record aan te maken. Elke sporterboog heeft genoeg aan 1 'geen score' record.
 SCORE_TYPE_SCORE = 'S'
 SCORE_TYPE_INDIV_AG = 'I'
 SCORE_TYPE_TEAM_AG = 'T'
+SCORE_TYPE_GEEN = 'G'
 
 SCORE_CHOICES = (
     (SCORE_TYPE_SCORE, 'Score'),
     (SCORE_TYPE_INDIV_AG, 'Indiv AG'),
-    (SCORE_TYPE_TEAM_AG, 'Team AG')
+    (SCORE_TYPE_TEAM_AG, 'Team AG'),
+    (SCORE_TYPE_GEEN, 'Geen score')
 )
 
 
@@ -43,16 +49,30 @@ class Score(models.Model):
     # 18, 25, 70, etc.
     afstand_meter = models.PositiveSmallIntegerField()
 
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['sporterboog', 'type'],
+                condition=Q(type=SCORE_TYPE_GEEN),
+                name='max 1 geen score per sporterboog')
+        ]
+
     def __str__(self):
         if self.sporterboog:
             msg = "[%s]" % self.sporterboog
         else:
             msg = "[]"
-        msg += " - %sm: %s" % (self.afstand_meter, self.waarde)
-        if self.type == SCORE_TYPE_INDIV_AG:
-            msg += ' (indiv AG)'
-        elif self.type == SCORE_TYPE_TEAM_AG:
-            msg += ' (team AG)'
+
+        msg += " %sm" % self.afstand_meter
+
+        if self.type == SCORE_TYPE_GEEN:
+            msg += ' (geen score)'
+        else:
+            msg += ': %s' % self.waarde
+            if self.type == SCORE_TYPE_INDIV_AG:
+                msg += ' (indiv AG)'
+            elif self.type == SCORE_TYPE_TEAM_AG:
+                msg += ' (team AG)'
         return msg
 
     objects = models.Manager()      # for the editor only

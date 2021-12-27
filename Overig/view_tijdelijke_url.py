@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -22,7 +22,8 @@ class SiteTijdelijkeUrlView(View):
         We dispatchen naar de juiste afhandelaar
     """
 
-    def get(self, request, *args, **kwargs):
+    @staticmethod
+    def get(request, *args, **kwargs):
         """
             deze functie handelt het GET verzoek af met de extra parameter 'code',
             zoekt de bijbehorende data op en roept de juiste dispatcher aan.
@@ -60,7 +61,8 @@ class SiteTijdelijkeUrlView(View):
 
         return render(request, template, context)
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """
             deze functie wordt aangeroepen als op de knop GA DOOR gedrukt
             is na het volgen van een tijdelijke url.

@@ -20,16 +20,16 @@ import datetime
 
 class TestVerenigingHWL(E2EHelpers, TestCase):
 
-    """ Tests voor de Vereniging applicatie, functies voor de HWL """
+    """ tests voor de Vereniging applicatie, functies voor de SEC """
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 
     url_overzicht = '/vereniging/'
     url_ledenlijst = '/vereniging/leden-lijst/'
     url_voorkeuren = '/vereniging/leden-voorkeuren/'
-    url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'  # <comp_pk>
-    url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
-    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'  # <sporter_pk>
+    url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'      # <comp_pk>
+    url_ingeschreven = '/bondscompetities/deelnemen/leden-ingeschreven/%s/'  # <deelcomp_pk>
+    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                       # <sporter_pk>
 
     testdata = None
 
@@ -138,7 +138,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self._create_competitie()
 
     def _create_histcomp(self):
-        # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
+        # (strategisch gekozen) historische data om klassengrenzen uit te bepalen
         histcomp = HistCompetitie()
         histcomp.seizoen = '2018/2019'
         histcomp.comp_type = '18'

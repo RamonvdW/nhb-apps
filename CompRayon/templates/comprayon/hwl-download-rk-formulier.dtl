@@ -1,0 +1,192 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}RK programma{% endblock %}
+
+{% block pagina %}
+
+    <h4>RK programma</h4>
+
+    <p>Op deze pagina tonen we de deelnemerslijst voor de volgende bondscompetitie wedstrijd:</p>
+
+    <!-- toon gegevens van de wedstrijd in een blauw box -->
+    <div class="row">
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
+
+                <div class="row small-row">
+                    <div class="col s4">Competitie:</div>
+                    <div class="col s8">{{ deelcomp.competitie.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s4">Wedstrijd:</div>
+                    <div class="col s8">{{ beschrijving }}</div>
+                </div>
+
+                {% if wedstrijd.is_rk %}
+                    <div class="row small-row">
+                        <div class="col s4">Rayon:</div>
+                        <div class="col s8">{{ deelcomp.nhb_rayon }}</div>
+                    </div>
+                {% endif %}
+
+                <div class="row small-row">
+                    <div class="col s4">Wedstrijdklassen:</div>
+                    <div class="col s8">{% for klasse in wedstrijd.klassen_lijst %}{{ klasse }}<br>{% endfor %}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s4">Bij vereniging:</div>
+                    <div class="col s8">{{ vereniging }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s4">Aantal banen:</div>
+                    <div class="col s8">{{ aantal_banen }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s4">Wanneer:</div>
+                    <div class="col s8">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <p>&nbsp;</p>
+    <p>Deze lijst is gebaseerd op de gegevens van: <b>{{ vastgesteld }}</b>.</p>
+
+    {% if heeft_indiv %}
+        <table class="white">
+            {% if heeft_teams %}
+                <tr>
+                    <td colspan="6" class="nhb-blauw white-text center-align"><h5>Individueel</h5></td>
+                </tr>
+            {% endif %}
+
+            {% for deelnemer in deelnemers_indiv %}
+                {% if deelnemer.break_before %}
+                    <tr class="nhb-grijs">
+                        <td colspan="4">
+                            <br>
+                            <h5>{{ deelnemer.klasse.indiv.beschrijving }}</h5>
+                        </td>
+                        <td colspan="2">
+                            <br>
+                            <a class="btn-nhb-blauw" href="{{ deelnemer.url_download_indiv }}">
+                                <i class="material-icons-round left">download</i>Download excel</a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th><span class="hide-on-small-only">Nummer</span><span class="hide-unless-small">Nr</span></th>
+                        <th>Vereniging</th>
+                        <th>Sporter</th>
+                        <th>Gemiddelde</th>
+                        <th class="center-align">Status</th>
+                        <th>Notitie</th>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <td>{{ deelnemer.rank }}</td>
+                    <td>[{{ deelnemer.ver_nr }}]<span class="hide-on-small-only">&nbsp;{{ deelnemer.ver_naam }}</span></td>
+                    <td>[{{ deelnemer.lid_nr }}] {{ deelnemer.volledige_naam }}</td>
+                    <td>{{ deelnemer.gemiddelde_str }}</td>
+                    <td class="center-align">
+                        {% if deelnemer.deelname == 'J' %}<i class="material-icons-round green-text">check</i>
+                        {% elif deelnemer.deelname == 'N' %}<i class="material-icons-round black-text">block</i>
+                        {% else %}<i class="material-icons-round nhb-blauw-text">help</i>
+                        {% endif %}
+                    </td>
+                    <td>{{ deelnemer.kampioen_label }}</td>
+                </tr>
+
+            {% empty %}
+                <tr>
+                    <td colspan="7"><i>Geen sporters gevonden</i></td>
+                </tr>
+            {% endfor %}
+
+        </table>
+
+        {% if heeft_teams %}
+            <p>&nbsp;</p>
+        {% endif %}
+    {% endif %}
+
+    {% if heeft_teams %}
+        <table class="white">
+            {% if heeft_indiv %}
+                <tr>
+                    <td colspan="6" class="nhb-blauw white-text center-align"><h5>Teams</h5></td>
+                </tr>
+            {% endif %}
+
+            {% if geen_klassengrenzen %}
+                <tr class="nhb-grijs">
+                    <td colspan="6"></td>
+                </tr>
+                <tr class="white">
+                    <td colspan="6">
+                        <i class="red-text">De BKO heeft de teams klassengrenzen nog niet vastgesteld</i>
+                    </td>
+                </tr>
+                {% endif %}
+
+            {% for team in deelnemers_teams %}
+                {% if team.break_before %}
+                    <tr class="nhb-grijs">
+                        <td colspan="4">
+                            <br>
+                            <h5>{{ team.klasse.team.beschrijving }}</h5>
+                        </td>
+                        <td colspan="2">
+                            <br>
+                            <a class="btn-nhb-blauw" href="{{ team.url_download_teams }}">
+                                <i class="material-icons-round left">download</i>Download excel</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><span class="hide-on-small-only">Nummer</span><span class="hide-unless-small">Nr</span></th>
+                        <th>Vereniging</th>
+                        <th>Team / Sporters</th>
+                        <th>Gemiddelde<sup>*1</sup></th>
+                        <th>Team sterkte</th>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <td>{{ team.volg_nr }}</td>
+                    <td>[{{ team.ver_nr }}] {{ team.ver_naam }}</td>
+                    <td colspan="2">{{ team.team_naam }}</td>
+                    <td>{{ team.sterkte_str }}</td>
+                </tr>
+
+                {% for deelnemer in team.gekoppelde_schutters.all %}
+                    <tr>
+                        <td colspan="2"></td>
+                        <td style="padding-left: 30px">{{ deelnemer.naam_str }}</td>
+                        <td>{{ deelnemer.gem_str }}</td>
+                        <td></td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        </table>
+
+        {% if deelnemers_teams %}
+            <p>*1: Een invaller mag geen hoger gemiddelde hebben.</p>
+        {% endif %}
+    {% endif %}
+
+
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-hwl-download-rk-formulier" %}
+
+{% endblock %}

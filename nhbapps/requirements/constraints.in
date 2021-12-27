@@ -3,5 +3,7 @@
 # stick to django 3.1 for now
 django<3.2
 
+pyparsing<3
+
 # end of file
 

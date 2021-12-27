@@ -7,7 +7,7 @@
 """ ondersteuning voor de leeftijdsklassen binnen de NHB applicaties """
 
 from django.utils import timezone
-from BasisTypen.models import LeeftijdsKlasse, IndivWedstrijdklasse
+from BasisTypen.models import LeeftijdsKlasse
 
 
 def alle_wedstrijdleeftijden_groepen():

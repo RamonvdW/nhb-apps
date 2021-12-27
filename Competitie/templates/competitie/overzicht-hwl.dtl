@@ -26,6 +26,7 @@
 
             <!-- rayon -->
             {% include 'plein/card.dtl' with title="Rayon Individueel" text=text_rayon_indiv icon="view_compact" url=url_rayon_indiv %}
+            {% include 'plein/card.dtl' with title="Rayon Teams" text=text_rayon_teams icon="view_compact" url=url_rayon_teams %}
 
             <!-- bond -->
             {% include 'plein/card.dtl' with title="Bond" text=text_bond icon="flag" url=url_bond %}
@@ -46,7 +47,7 @@
 
         <!-- planning regiocompetities -->
         {% for deelcomp in planning_deelcomp %}
-            {% url 'Competitie:regio-planning' deelcomp.pk as card_url %}
+            {% url 'CompRegio:regio-planning' deelcomp.pk as card_url %}
             {% include 'plein/card.dtl' with title="Planning" text="Planning voor de "|add:deelcomp.competitie.beschrijving|add:" in "|add:deelcomp.nhb_regio.naam icon="date_range" url=card_url %}
         {% endfor %}
     </div>
@@ -59,8 +60,8 @@
 
         <!-- toon klassen info -->
         {% if comp.fase >= 'A2' %}
-            {% url 'Competitie:klassegrenzen-tonen' comp_pk=comp.pk as card_url %}
-            {% include 'plein/card.dtl' with title="Wedstrijdklassen" text="Toon de wedstrijdklassen, klassegrenzen en blazoenen voor de competitie." icon="equalizer" url=card_url %}
+            {% url 'Competitie:klassengrenzen-tonen' comp_pk=comp.pk as card_url %}
+            {% include 'plein/card.dtl' with title="Wedstrijdklassen" text="Toon de wedstrijdklassen, klassengrenzen en blazoenen voor de competitie." icon="equalizer" url=card_url %}
         {% endif %}
 
         <!-- algemene informatie over de competities -->

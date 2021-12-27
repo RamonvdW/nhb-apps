@@ -81,7 +81,8 @@ class VhpgAcceptatieView(TemplateView):
         menu_dynamics(request, context, actief="wissel-van-rol")
         return render(request, TEMPLATE_VHPG_ACCEPTATIE, context)
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ deze functie wordt aangeroepen als een POST request ontvangen is.
             dit is gekoppeld aan het drukken op de knop van het formulier.
         """

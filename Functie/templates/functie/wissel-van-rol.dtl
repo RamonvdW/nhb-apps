@@ -27,6 +27,16 @@
     <p>Op deze pagina kan je de rol kiezen die je aan wilt nemen.</p>
     <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
 
+    {% if url_admin_site or url_login_as %}
+        <div class="selectie-knoppen">
+            <a class="btn-nhb-rood" href="{{ url_admin_site }}">
+                <i class="material-icons-round left">build</i>Admin site</a>
+            <span>&nbsp;</span>
+            <a class="btn-nhb-rood" href="{{ url_login_as }}">
+                <i class="material-icons-round left">switch_access_shortcut</i>Account wissel</a>
+        </div>
+    {% endif %}
+
     {% if show_beheerder_intro %}
         <p>&nbsp;</p>
         <h5>Introductie Beheerder</h5>
@@ -57,22 +67,24 @@
         <a class="btn-nhb-rood" href="{% url 'Functie:otp-controle' %}">Nu controleren</a>
     {% endif %}
 
+
     {% if heeft_alle_rollen %}
         <p>&nbsp;</p>
         <h5>Springplankjes</h5>
         <h6>Indoor:</h6>
         <div class="white shrink-wrap-5">
-        {% for obj in heeft_alle_rollen %}
-            {% if obj.comp_type_break %}
-                </div>
-                <h6>25m1pijl:</h6>
-                <div class="white shrink-wrap-5">
-            {% endif %}
-            {% if obj.insert_break %}<br>{% endif %}
-            <form style="display: inline-block" method="post" action="{{ obj.url }}">{% csrf_token %}
-                <input class="btn-nhb-blauw" type="submit" value="{{ obj.knop_tekst }}">
-            </form>
-        {% endfor %}
+            {% for obj in heeft_alle_rollen %}
+                {% if obj.comp_type_break %}
+                    </div>
+                    <h6>25m1pijl:</h6>
+                    <div class="white shrink-wrap-5">
+                {% endif %}
+                {% if obj.insert_break %}<br>{% endif %}
+                <form style="display: inline-block" method="post" action="{{ obj.url }}">{% csrf_token %}
+                    <input class="btn-nhb-blauw" type="submit" value="{{ obj.knop_tekst }}">
+                </form>
+                {% if obj.horizontal_spacing %}<span style="margin-left:40px"></span>{% endif %}
+            {% endfor %}
         </div>
     {% endif %}
 
@@ -118,12 +130,6 @@
     {% if url_wissel_naar_sec %}
         <div class="selectie-knoppen">
             <a class="btn-nhb-blauw" href="{{ url_wissel_naar_sec }}">Secretaris</a><span>&nbsp;&nbsp;(extra keuzescherm)</span>
-        </div>
-    {% endif %}
-
-    {% if url_login_as %}
-        <div class="selectie-knoppen">
-            <a class="btn-nhb-rood" href="{{ url_login_as }}">Account wissel</a>
         </div>
     {% endif %}
 

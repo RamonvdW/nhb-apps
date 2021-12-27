@@ -11,16 +11,22 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models import F
 from django.core.management.base import BaseCommand
-from BasisTypen.models import TeamType
-from Competitie.models import (Competitie, CompetitieTaken, DeelCompetitie, DeelcompetitieKlasseLimiet,
+from BasisTypen.models import BoogType, TeamType
+from Competitie.models import (CompetitieMutatie, Competitie, CompetitieKlasse,
+                               DeelCompetitie, DeelcompetitieKlasseLimiet, LAAG_REGIO, LAAG_RK,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE,
-                               CompetitieMutatie, RegiocompetitieTeamPoule,
+                               KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND,
+                               KampioenschapTeam,
+                               CompetitieTaken,
                                MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M, MUTATIE_COMPETITIE_OPSTARTEN,
-                               MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AANMELDEN, MUTATIE_AFMELDEN, MUTATIE_TEAM_RONDE)
+                               MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AANMELDEN, MUTATIE_AFMELDEN, MUTATIE_TEAM_RONDE,
+                               MUTATIE_AFSLUITEN_REGIOCOMP)
 from Competitie.operations import (competities_aanmaken, bepaal_startjaar_nieuwe_competitie,
                                    aanvangsgemiddelden_vaststellen_voor_afstand)
+from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
+from Taken.taken import maak_taak
 import django.db.utils
 import datetime
 
@@ -43,8 +49,6 @@ class Command(BaseCommand):
 
         self.pk2scores = dict()         # [RegioCompetitieSchutterBoog.pk] = [tup, ..] with tup = (afstand, score)
         self.pk2scores_alt = dict()
-
-        self._onbekend2beter = dict()   # [competitieklasse.pk] = [klasse, ..] met oplopend AG
 
         self._sync = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
         self._count_ping = 0
@@ -114,6 +118,14 @@ class Command(BaseCommand):
             obj.save(update_fields=['rank', 'volgorde'])
         # for
 
+    def _verstuur_uitnodigingen(self):
+        """ deze taak wordt bij elke start van dit commando uitgevoerd om e-mails te sturen naar de sporters
+            (typisch 1x per uur)
+
+            uitnodiging deelname RK + verzoek bevestigen / afmelden deelname
+            herinnering bevestigen / afmelden deelname
+        """
+
     def _verwerk_mutatie_initieel_klasse(self, deelcomp, klasse):
         # Bepaal de top-X deelnemers voor een klasse van een kampioenschap
         # De kampioenen aangevuld met de schutters met hoogste gemiddelde
@@ -145,7 +157,8 @@ class Command(BaseCommand):
                 .filter(deelcompetitie=deelcomp,
                         klasse=klasse,
                         kampioen_label='')      # kampioenen hebben we al gedaan
-                .order_by('-gemiddelde'))       # hoogste boven
+                .order_by('-gemiddelde',        # hoogste boven
+                          '-regio_scores'))     # hoogste boven (gelijk gemiddelde)
 
         for obj in objs:
             tup = (obj.gemiddelde, len(lijst), obj)
@@ -309,7 +322,8 @@ class Command(BaseCommand):
                             klasse=klasse,
                             rank__gt=limiet,
                             gemiddelde__gte=deelnemer.gemiddelde)
-                    .order_by('gemiddelde'))
+                    .order_by('gemiddelde',
+                              'regio_scores'))
 
             if len(objs):
                 # invoegen na de reserve-schutter met gelijk of hoger gemiddelde
@@ -346,7 +360,8 @@ class Command(BaseCommand):
                             klasse=klasse,
                             gemiddelde__gte=deelnemer.gemiddelde,
                             volgorde__lt=VOLGORDE_PARKEER)
-                    .order_by('gemiddelde'))
+                    .order_by('gemiddelde',
+                              'regio_scores'))
 
             if len(objs) > 0:
                 # voeg de schutter in na de laatste deelnemer
@@ -440,9 +455,10 @@ class Command(BaseCommand):
                 .objects
                 .filter(deelcompetitie=deelcomp,
                         klasse=klasse,
-                        kampioen_label='',  # kampioenen hebben we al gedaan
+                        kampioen_label='',      # kampioenen hebben we al gedaan
                         rank__lte=cut_oud)
-                .order_by('-gemiddelde'))  # hoogste boven
+                .order_by('-gemiddelde',        # hoogste boven
+                          '-regio_scores'))     # hoogste boven (bij gelijk gemiddelde)
 
         for obj in objs:
             if obj.pk not in lijst_pks and aantal < cut_nieuw:
@@ -662,6 +678,377 @@ class Command(BaseCommand):
         deelcomp.huidige_team_ronde = ronde_nr
         deelcomp.save(update_fields=['huidige_team_ronde'])
 
+    @staticmethod
+    def _eindstand_regio_naar_histcomp(comp):
+        """ maak de HistComp aan vanuit een regiocompetitie eindstand """
+
+        seizoen = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
+        try:
+            objs = HistCompetitie.objects.filter(seizoen=seizoen,
+                                                 comp_type=comp.afstand,
+                                                 is_team=False)
+        except HistCompetitieIndividueel.DoesNotExist:
+            pass
+        else:
+            # er bestaat al een uitslag - verwijder deze eerst
+            # dit verwijderd ook alle gekoppelde scores (individueel en team)
+            # elk 'klasse' heeft een eigen instantie - typisch Recurve, Compound, etc.
+            objs.delete()
+
+        bulk = list()
+        for boogtype in BoogType.objects.all():
+            histcomp = HistCompetitie(seizoen=seizoen,
+                                      comp_type=comp.afstand,
+                                      klasse=boogtype.beschrijving,     # 'Recurve'
+                                      is_team=False,
+                                      is_openbaar=False)                # nog niet laten zien
+            histcomp.save()
+
+            klassen_pks = (CompetitieKlasse
+                           .objects
+                           .filter(competitie=comp,
+                                   indiv__boogtype=boogtype)
+                           .values_list('pk', flat=True))
+
+            deelnemers = (RegioCompetitieSchutterBoog
+                          .objects
+                          .select_related('sporterboog__sporter',
+                                          'bij_vereniging')
+                          .filter(deelcompetitie__competitie=comp,
+                                  klasse__in=klassen_pks)
+                          .order_by('-gemiddelde'))     # hoogste boven
+
+            rank = 0
+            for deelnemer in deelnemers:
+                # skip sporters met helemaal geen scores
+                if deelnemer.totaal > 0:
+                    rank += 1
+                    sporter = deelnemer.sporterboog.sporter
+                    ver = deelnemer.bij_vereniging
+                    hist = HistCompetitieIndividueel(
+                                histcompetitie=histcomp,
+                                rank=rank,
+                                schutter_nr=sporter.lid_nr,
+                                schutter_naam=sporter.volledige_naam(),
+                                boogtype=boogtype.afkorting,
+                                vereniging_nr=ver.ver_nr,
+                                vereniging_naam=ver.naam,
+                                score1=deelnemer.score1,
+                                score2=deelnemer.score2,
+                                score3=deelnemer.score3,
+                                score4=deelnemer.score4,
+                                score5=deelnemer.score5,
+                                score6=deelnemer.score6,
+                                score7=deelnemer.score7,
+                                laagste_score_nr=deelnemer.laagste_score_nr,
+                                totaal=deelnemer.totaal,
+                                gemiddelde=deelnemer.gemiddelde)
+
+                    bulk.append(hist)
+                    if len(bulk) >= 500:
+                        HistCompetitieIndividueel.objects.bulk_create(bulk)
+                        bulk = list()
+            # for
+
+        # for
+
+        if len(bulk):
+            HistCompetitieIndividueel.objects.bulk_create(bulk)
+
+    @staticmethod
+    def _get_regio_sporters_rayon(competitie, rayon_nr):
+        """ geeft een lijst met deelnemers terug
+            en een totaal-status van de onderliggende regiocompetities: alles afgesloten?
+        """
+
+        # schutter moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
+        pks = list()
+        for deelcomp in (DeelCompetitie
+                         .objects
+                         .filter(laag=LAAG_REGIO,
+                                 competitie=competitie,
+                                 nhb_regio__rayon__rayon_nr=rayon_nr)):
+            pks.append(deelcomp.pk)
+        # for
+
+        # TODO: sorteren en kampioenen eerst zetten kan allemaal weg
+        deelnemers = (RegioCompetitieSchutterBoog
+                      .objects
+                      .select_related('klasse__indiv',
+                                      'bij_vereniging__regio',
+                                      'sporterboog__sporter',
+                                      'sporterboog__sporter__bij_vereniging',
+                                      'sporterboog__sporter__bij_vereniging__regio__rayon')
+                      .filter(deelcompetitie__in=pks,
+                              aantal_scores__gte=competitie.aantal_scores_voor_rk_deelname,
+                              klasse__indiv__niet_voor_rk_bk=False)     # skip aspiranten
+                      .order_by('klasse__indiv__volgorde',              # groepeer per klasse
+                                '-gemiddelde'))                         # aflopend gemiddelde
+
+        # markeer de regiokampioenen
+        klasse = -1
+        regios = list()     # bijhouden welke kampioenen we al gemarkeerd hebben
+        kampioenen = list()
+        deelnemers = list(deelnemers)
+        nr = 0
+        insert_at = 0
+        rank = 0
+        while nr < len(deelnemers):
+            deelnemer = deelnemers[nr]
+
+            if klasse != deelnemer.klasse.indiv.volgorde:
+                klasse = deelnemer.klasse.indiv.volgorde
+                if len(kampioenen):
+                    kampioenen.sort()
+                    for _, kampioen in kampioenen:
+                        deelnemers.insert(insert_at, kampioen)
+                        insert_at += 1
+                        nr += 1
+                    # for
+                kampioenen = list()
+                regios = list()
+                insert_at = nr
+                rank = 0
+
+            # fake een paar velden uit KampioenschapSchutterBoog
+            rank += 1
+            deelnemer.volgorde = rank
+            deelnemer.deelname = DEELNAME_ONBEKEND
+
+            scores = [deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4,
+                      deelnemer.score5, deelnemer.score6, deelnemer.score7]
+            scores.sort(reverse=True)      # beste score eerst
+            deelnemer.regio_scores = "%03d%03d%03d%03d%03d%03d%03d" % tuple(scores)
+
+            regio_nr = deelnemer.bij_vereniging.regio.regio_nr
+            if regio_nr not in regios:
+                regios.append(regio_nr)
+                deelnemer.kampioen_label = "Kampioen regio %s" % regio_nr
+                tup = (regio_nr, deelnemer)
+                kampioenen.append(tup)
+                deelnemers.pop(nr)
+            else:
+                # alle schutters overnemen als potentiële reserveschutter
+                deelnemer.kampioen_label = ""
+                nr += 1
+        # while
+
+        if len(kampioenen):
+            kampioenen.sort(reverse=True)       # hoogste regionummer bovenaan
+            for _, kampioen in kampioenen:
+                deelnemers.insert(insert_at, kampioen)
+                insert_at += 1
+            # for
+
+        return deelnemers
+
+    def _maak_deelnemerslijst_rks(self, comp):
+        """ stel de kampioenschap deelnemers lijst aan de hand van gerechtigde deelnemers uit de regiocompetitie.
+            ook wordt hier de vereniging van de sporter bevroren.
+        """
+
+        # sporters moeten in het rayon van hun huidige vereniging geplaatst worden
+        rayon_nr2deelcomp_rk = dict()
+        for deelcomp_rk in (DeelCompetitie
+                            .objects
+                            .select_related('nhb_rayon')
+                            .filter(competitie=comp,
+                                    laag=LAAG_RK)):
+            rayon_nr2deelcomp_rk[deelcomp_rk.nhb_rayon.rayon_nr] = deelcomp_rk
+        # for
+
+        for deelcomp_rk in (DeelCompetitie
+                            .objects
+                            .select_related('nhb_rayon')
+                            .filter(competitie=comp,
+                                    laag=LAAG_RK)):
+
+            deelnemers = self._get_regio_sporters_rayon(comp, deelcomp_rk.nhb_rayon.rayon_nr)
+
+            # schrijf all deze schutters in voor het RK
+            # kampioenen als eerste in de lijst, daarna aflopend gesorteerd op gemiddelde
+            bulk_lijst = list()
+            for obj in deelnemers:
+
+                # sporter moet nu lid zijn bij een vereniging
+                ver = obj.sporterboog.sporter.bij_vereniging
+                if ver:
+                    # schrijf de sporter in het juiste rayon in
+                    sporter_deelcomp_rk = rayon_nr2deelcomp_rk[ver.regio.rayon.rayon_nr]
+
+                    deelnemer = KampioenschapSchutterBoog(
+                                    deelcompetitie=sporter_deelcomp_rk,
+                                    sporterboog=obj.sporterboog,
+                                    klasse=obj.klasse,
+                                    bij_vereniging=ver,             # bevries vereniging
+                                    gemiddelde=obj.gemiddelde,
+                                    kampioen_label=obj.kampioen_label,
+                                    regio_scores=obj.regio_scores)
+
+                    bulk_lijst.append(deelnemer)
+                    if len(bulk_lijst) > 150:       # pragma: no cover
+                        KampioenschapSchutterBoog.objects.bulk_create(bulk_lijst)
+                        bulk_lijst = list()
+                else:
+                    self.stdout.write('[WARNING] Sporter %s is geen RK deelnemer want heeft geen vereniging' % obj.sporterboog)
+            # for
+
+            if len(bulk_lijst) > 0:
+                KampioenschapSchutterBoog.objects.bulk_create(bulk_lijst)
+            del bulk_lijst
+        # for
+
+        for deelcomp_rk in (DeelCompetitie
+                            .objects
+                            .select_related('nhb_rayon')
+                            .filter(competitie=comp,
+                                    laag=LAAG_RK)
+                            .order_by('nhb_rayon__rayon_nr')):
+
+            deelcomp_rk.heeft_deelnemerslijst = True
+            deelcomp_rk.save(update_fields=['heeft_deelnemerslijst'])
+
+            # laat de lijsten sorteren en de volgorde bepalen
+            self._verwerk_mutatie_initieel_deelcomp(deelcomp_rk)
+
+            # stuur de RKO een taak ('ter info')
+            rko_namen = list()
+            functie_rko = deelcomp_rk.functie
+            now = timezone.now()
+            taak_deadline = now
+            taak_tekst = "Ter info: De deelnemerslijst voor jouw Rayonkampioenschappen zijn zojuist vastgesteld door de BKO"
+            taak_log = "[%s] Taak aangemaakt" % now
+
+            for account in functie_rko.accounts.all():
+                # maak een taak aan voor deze BKO
+                maak_taak(toegekend_aan=account,
+                          deadline=taak_deadline,
+                          aangemaakt_door=None,         # systeem
+                          beschrijving=taak_tekst,
+                          handleiding_pagina="",
+                          log=taak_log,
+                          deelcompetitie=deelcomp_rk)
+                rko_namen.append(account.volledige_naam())
+            # for
+
+            # schrijf in het logboek
+            msg = "De deelnemerslijst voor de Rayonkampioenschappen in %s is zojuist vastgesteld." % str(deelcomp_rk.nhb_rayon)
+            msg += '\nDe volgende beheerders zijn geïnformeerd via een taak: %s' % ", ".join(rko_namen)
+            schrijf_in_logboek(None, "Competitie", msg)
+        # for
+
+    def _converteer_rk_teams(self, comp):
+        """ converteer de sporters die gekoppeld zijn aan de RK teams
+            de RK teams zijn die tijdens de regiocompetitie al aangemaakt door de verenigingen
+            en er zijn regiocompetitie sporters aan gekoppeld welke misschien niet gerechtigd zijn.
+
+            controleer ook meteen de vereniging van de deelnemer
+            als laatste wordt de team sterkte opnieuw berekend
+
+            het vaststellen van de wedstrijdklasse voor de RK teams volgt later
+        """
+
+        # maak een look-up tabel van RegioCompetitieSchutterBoog naar KampioenschapSchutterBoog
+        sporterboog_pk2regiocompetitieschutterboog = dict()
+        for deelnemer in (RegioCompetitieSchutterBoog
+                          .objects
+                          .select_related('bij_vereniging')
+                          .filter(deelcompetitie__competitie=comp)):
+            sporterboog_pk2regiocompetitieschutterboog[deelnemer.sporterboog.pk] = deelnemer
+        # for
+
+        regiocompetitieschutterboog_pk2kampioenschapschutterboog = dict()
+        for deelnemer in (KampioenschapSchutterBoog
+                          .objects
+                          .select_related('bij_vereniging')
+                          .filter(deelcompetitie__competitie=comp)):
+            try:
+                regio_deelnemer = sporterboog_pk2regiocompetitieschutterboog[deelnemer.sporterboog.pk]
+            except KeyError:
+                self.stderr.write(
+                    '[WARNING] Kan regio deelnemer niet vinden voor kampioenschapschutterboog met pk=%s' %
+                    deelnemer.pk)
+            else:
+                regiocompetitieschutterboog_pk2kampioenschapschutterboog[regio_deelnemer.pk] = deelnemer
+        # for
+
+        # sporters mogen maar aan 1 team gekoppeld worden
+        gekoppelde_deelnemer_pks = list()
+
+        for team in (KampioenschapTeam
+                     .objects
+                     .select_related('vereniging')
+                     .prefetch_related('tijdelijke_schutters')
+                     .filter(deelcompetitie__competitie=comp)):
+
+            team_ver_nr = team.vereniging.ver_nr
+            deelnemer_pks = list()
+
+            ags = list()
+
+            for pk in team.tijdelijke_schutters.values_list('pk', flat=True):
+                try:
+                    deelnemer = regiocompetitieschutterboog_pk2kampioenschapschutterboog[pk]
+                except KeyError:
+                    # regio sporter is niet doorgekomen naar het RK en valt dus af
+                    pass
+                else:
+                    # controleer de vereniging
+                    if deelnemer.bij_vereniging.ver_nr == team_ver_nr:
+                        # controleer dat de deelnemer nog niet aan een RK team gekoppeld is
+                        if deelnemer.pk not in gekoppelde_deelnemer_pks:
+                            gekoppelde_deelnemer_pks.append(deelnemer.pk)
+
+                            deelnemer_pks.append(deelnemer.pk)
+                            ags.append(deelnemer.gemiddelde)
+            # for
+
+            team.gekoppelde_schutters.set(deelnemer_pks)
+
+            # bepaal de team sterkte
+            ags.sort()
+            if len(ags) >= 3:
+                team.aanvangsgemiddelde = sum(ags[:3])
+            else:
+                team.aanvangsgemiddelde = 0.0
+
+            # de klasse wordt later bepaald als de klassengrenzen vastgesteld zijn
+            team.klasse = None
+
+            team.save(update_fields=['aanvangsgemiddelde', 'klasse'])
+        # for
+
+        # FUTURE: maak een taak aan voor de HWL's om de RK teams te herzien (eerst functionaliteit voor HWL maken)
+
+    def _verwerk_mutatie_afsluiten_regiocomp(self, comp):
+        """ de BKO heeft gevraagd de regiocompetitie af te sluiten en alles klaar te maken voor het RK """
+
+        # controleer dat de competitie in fase G is
+        if not comp.alle_regiocompetities_afgesloten:
+            # ga door naar fase J
+            comp.alle_regiocompetities_afgesloten = True
+            comp.save(update_fields=['alle_regiocompetities_afgesloten'])
+
+            # verwijder alle eerder aangemaakte KampioenschapSchutterBoog
+            # verwijder eerst alle eerder gekoppelde team leden
+            for team in KampioenschapTeam.objects.filter(deelcompetitie__competitie=comp):
+                team.gekoppelde_schutters.clear()
+            # for
+            KampioenschapSchutterBoog.objects.filter(deelcompetitie__competitie=comp).all().delete()
+
+            # gerechtigde RK deelnemers aanmaken
+            self._maak_deelnemerslijst_rks(comp)
+
+            # RK teams opzetten en RK deelnemers koppelen
+            self._converteer_rk_teams(comp)
+
+            # eindstand regio in historische uitslag zetten (nodig voor AG's nieuwe competitie)
+            self._eindstand_regio_naar_histcomp(comp)
+
+            # maak taken aan voor de HWL's om deelname RK voor sporters van eigen vereniging door te geven
+
+            # versturen e-mails uitnodigingen naar de deelnemers gebeurt tijdens opstarten elk uur
+
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.mutatie
 
@@ -697,6 +1084,10 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Verwerk mutatie %s: team ronde' % mutatie.pk)
             self._verwerk_mutatie_team_ronde(mutatie.deelcompetitie)
 
+        elif code == MUTATIE_AFSLUITEN_REGIOCOMP:
+            self.stdout.write('[INFO] Verwerk mutatie %s: afsluiten regiocompetitie' % mutatie.pk)
+            self._verwerk_mutatie_afsluiten_regiocomp(mutatie.competitie)
+
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s door %s (pk=%s)' % (code, mutatie.door, mutatie.pk))
 
@@ -709,7 +1100,7 @@ class Command(BaseCommand):
 
         if self.taken.hoogste_mutatie:
             # gebruik deze informatie om te filteren
-            self.stdout.write('[INFO] vorige hoogste KampioenschapMutatie pk is %s' % self.taken.hoogste_mutatie.pk)
+            self.stdout.write('[INFO] vorige hoogste CompetitieMutatie pk is %s' % self.taken.hoogste_mutatie.pk)
             qset = (CompetitieMutatie
                     .objects
                     .filter(pk__gt=self.taken.hoogste_mutatie.pk))
@@ -768,7 +1159,7 @@ class Command(BaseCommand):
                     self._count_ping += 1                   # pragma: no cover
             else:
                 # near the end
-                break       # from the while
+                break       # from the while                # pragma: no cover
 
             now = datetime.datetime.now()
         # while
@@ -797,12 +1188,15 @@ class Command(BaseCommand):
         if options['all']:
             self.taken.hoogste_mutatie = None
 
+        # verstuur uitnodigingen naar de sporters
+        self._verstuur_uitnodigingen()
+
         # vang generieke fouten af
         try:
             self._monitor_nieuwe_mutaties()
-        except django.db.utils.DataError as exc:        # pragma: no coverage
+        except django.db.utils.DataError as exc:        # pragma: no cover
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
-        except KeyboardInterrupt:                       # pragma: no coverage
+        except KeyboardInterrupt:                       # pragma: no cover
             pass
 
         self.stdout.write('[DEBUG] Aantal pings ontvangen: %s' % self._count_ping)

@@ -536,7 +536,7 @@ class ZetStatusKalenderWedstrijdView(UserPassesTestMixin, View):
         verder = request.POST.get('verder', '')
         annuleer = request.POST.get('annuleer', '')
 
-        # TODO: zet wijzigingen in het logboek, of begin een logboekje per wedstrijd
+        # FUTURE: zet wijzigingen in het logboek, of begin een logboekje per wedstrijd
 
         if self.rol_nu == Rollen.ROL_HWL:
             if wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:

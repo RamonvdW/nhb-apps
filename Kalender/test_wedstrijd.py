@@ -15,7 +15,8 @@ import datetime
 
 
 class TestKalenderWedstrijd(E2EHelpers, TestCase):
-    """ unit tests voor de Kalender applicatie """
+
+    """ tests voor de Kalender applicatie """
 
     url_kalender_manager = '/kalender/manager/'
     url_kalender_vereniging = '/kalender/vereniging/'

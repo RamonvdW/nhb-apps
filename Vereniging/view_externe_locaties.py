@@ -36,11 +36,11 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC)
 
     def get_vereniging(self):
         try:
-            ver_pk = int(self.kwargs['vereniging_pk'][:6])        # afkappen voor veiligheid
+            ver_pk = int(self.kwargs['vereniging_pk'][:6])        # afkappen voor de veiligheid
             ver = NhbVereniging.objects.get(pk=ver_pk)
         except (ValueError, NhbVereniging.DoesNotExist):
             raise Http404('Vereniging niet gevonden')
@@ -120,7 +120,7 @@ class ExterneLocatieDetailsView(TemplateView):
 
     def get_vereniging(self):
         try:
-            ver_pk = int(self.kwargs['vereniging_pk'][:6])          # afkappen voor veiligheid
+            ver_pk = int(self.kwargs['vereniging_pk'][:6])          # afkappen voor de veiligheid
             ver = NhbVereniging.objects.get(pk=ver_pk)
         except (ValueError, NhbVereniging.DoesNotExist):
             raise Http404('Vereniging niet gevonden')
@@ -186,7 +186,7 @@ class ExterneLocatieDetailsView(TemplateView):
             locatie.zichtbaar = False
             locatie.save()
 
-            # TODO: als de locatie nergens meer gebruikt wordt, dan kan deze opgeruimd worden
+            # FUTURE: als de locatie nergens meer gebruikt wordt, dan kan deze opgeruimd worden
 
             url = reverse('Vereniging:externe-locaties',
                           kwargs={'vereniging_pk': ver.pk})

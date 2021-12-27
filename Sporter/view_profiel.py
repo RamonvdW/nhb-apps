@@ -203,12 +203,12 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                         obj.is_ingeschreven = True
                         inschrijvingen.remove(inschrijving)
                         if comp.fase <= 'B':
-                            obj.url_afmelden = reverse('Sporter:afmelden',
+                            obj.url_afmelden = reverse('CompInschrijven:afmelden',
                                                        kwargs={'deelnemer_pk': inschrijving.pk})
                             gebruik_knoppen = True
 
                         if obj.inschrijf_methode == INSCHRIJF_METHODE_1 and comp.fase <= 'E':
-                            obj.url_schietmomenten = reverse('Sporter:schietmomenten',
+                            obj.url_schietmomenten = reverse('CompRegio:keuze-zeven-wedstrijden',
                                                              kwargs={'deelnemer_pk': inschrijving.pk})
                             gebruik_knoppen = True
                         break
@@ -217,7 +217,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                 if not obj.is_ingeschreven:
                     # niet ingeschreven
                     if 'B' <= comp.fase < 'F':
-                        obj.url_aanmelden = reverse('Sporter:bevestig-aanmelden',
+                        obj.url_aanmelden = reverse('CompInschrijven:bevestig-aanmelden',
                                                     kwargs={'sporterboog_pk': sporterboog.pk,
                                                             'deelcomp_pk': obj.pk})
                         gebruik_knoppen = True
@@ -238,7 +238,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             comp = obj.competitie
             comp.bepaal_fase()
             if comp.fase <= 'B':
-                obj.url_afmelden = reverse('Sporter:afmelden',
+                obj.url_afmelden = reverse('CompInschrijven:afmelden',
                                            kwargs={'deelnemer_pk': inschrijving.pk})
                 gebruik_knoppen = True
         # for
@@ -362,9 +362,39 @@ class ProfielView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _find_speelsterktes(sporter):
         sterktes = Speelsterkte.objects.filter(sporter=sporter).order_by('volgorde')
-        if sterktes.count() == 0:
+        if sterktes.count() == 0:           # pragma: no branch
             sterktes = None
         return sterktes
+
+    @staticmethod
+    def _find_scores(sporter):
+        scores = list()
+
+        for deelnemer in (RegioCompetitieSchutterBoog
+                          .objects
+                          .select_related('deelcompetitie',
+                                          'deelcompetitie__competitie',
+                                          'sporterboog',
+                                          'sporterboog__boogtype')
+                          .filter(sporterboog__sporter=sporter)
+                          .order_by('deelcompetitie__competitie__afstand')):
+
+            comp = deelnemer.deelcompetitie.competitie
+
+            if comp.afstand == '18':
+                deelnemer.competitie_str = "18m Indoor"
+            else:
+                deelnemer.competitie_str = "25m 1pijl"
+
+            deelnemer.seizoen_str = "%s/%s" % (comp.begin_jaar, comp.begin_jaar + 1)
+
+            deelnemer.scores_str = "%s, %s, %s, %s, %s, %s, %s" % (deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7)
+
+            deelnemer.boog_str = deelnemer.sporterboog.boogtype.beschrijving
+
+            scores.append(deelnemer)
+        # for
+        return scores
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -384,6 +414,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         context['sporter'] = sporter
         context['records'], context['show_loc'] = self._find_records(sporter)
         context['histcomp'] = self._find_histcomp_scores(sporter, alle_bogen)
+        context['url_bondspas'] = reverse('Bondspas:toon-bondspas')
 
         context['toon_bondscompetities'] = False
         if sporter.bij_vereniging and not sporter.bij_vereniging.geen_wedstrijden:
@@ -395,6 +426,8 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             context['regiocompetities'] = regiocomps
             context['moet_bogen_kiezen'] = moet_bogen_kiezen
             context['gebruik_knoppen'] = gebruik_knoppen
+
+            context['regiocomp_scores'] = self._find_scores(sporter)
 
             context['gemiddelden'], context['heeft_ags'] = self._find_gemiddelden(sporter, alle_bogen)
 

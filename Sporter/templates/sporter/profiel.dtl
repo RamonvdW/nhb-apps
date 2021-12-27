@@ -148,6 +148,13 @@
 
 
     <p>&nbsp;</p>
+    <h5>Je bondspas</h5>
+    <p>De digitale bondspas is je bewijs van lidmaatschap. Op wedstrijden kan gevraagd worden om deze te tonen.</p>
+
+    {% include 'plein/card.dtl' with title="Bondspas" text="Bekijk je digitale bondspas." icon="card_membership" url=url_bondspas %}
+
+
+    <p>&nbsp;</p>
     <h5>Je leeftijdsklasse</h5>
     <p>Op wedstrijden en in de bondscompetities word je aan de hand van je leeftijd ingedeeld in een wedstrijdklasse.</p>
 
@@ -239,7 +246,10 @@
                         {% endfor %}
                     </table>
                 </div>
-                <br>
+
+                <p>Kijk op <code>www.handboogsport.nl</code> onder Procedures hoe je een presetatiespeld aan kan vragen:
+                    <a class="btn-nhb-blauw" href="https://www.handboogsport.nl/de-nhb/#procedures" target="_blank" rel="noopener noreferrer">
+                        <i class="material-icons-round left">open_in_new</i>Link</a></p>
             </div>
         </div>
     {% endif %}
@@ -247,9 +257,47 @@
 
     {% if histcomp %}
         <p>&nbsp;</p>
-        <h5>Jouw competitie scores</h5>
+        <h5>Jouw bondscompetitie scores</h5>
 
         <div class="row white">
+            {% if regiocomp_scores %}
+                <div class="col s12">
+                    <p>Dit zijn jouw scores van het huidige seizoen:</p>
+
+                    <div class="table-wrap-5">
+                        <table class="white">
+                            <thead>
+                                <tr>
+                                    <th>Competitie</th>
+                                    <th>Seizoen</th>
+                                    <th>Boog</th>
+                                    <th>Scores</th>
+                                    <th class="center-align">Gemiddelde pijl</th>
+                                </tr>
+                            </thead>
+
+                            <tr style="visibility: collapse">
+                                <td>18m Indoor</td>
+                                <td>8888/8888</td>
+                                <td>Instinctive Bow</td>
+                                <td>888, 888, 888, 888, 888, 888, 888</td>
+                                <td class="center-align">8,888</td>
+                            </tr>
+
+                            {% for deelnemer in regiocomp_scores %}
+                                <tr>
+                                    <td>{{ deelnemer.competitie_str }}</td>
+                                    <td>{{ deelnemer.seizoen_str }}</td>
+                                    <td>{{ deelnemer.boog_str }}</td>
+                                    <td>{{ deelnemer.scores_str }}</td>
+                                    <td class="center-align smal">{{ deelnemer.gemiddelde }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+
             <div class="col s12">
                 <p>Dit zijn jouw scores van voorgaande seizoenen:</p>
 
@@ -264,6 +312,14 @@
                                 <th class="center-align">Gemiddelde pijl</th>
                             </tr>
                         </thead>
+
+                        <tr style="visibility: collapse">
+                            <td>18m Indoor</td>
+                            <td>8888/8888</td>
+                            <td>Instinctive Bow</td>
+                            <td>888, 888, 888, 888, 888, 888, 888</td>
+                            <td class="center-align">8,888</td>
+                        </tr>
 
                         {% for obj in histcomp %}
                             <tr>

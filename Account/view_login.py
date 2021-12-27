@@ -318,27 +318,27 @@ class LoginView(TemplateView):
         """ deze functie wordt aangeroepen als een GET request ontvangen is
             we geven een lege form aan de template
         """
-        next = request.GET.get('next', '')      # waar eventueel naartoe na de login?
+        next_url = request.GET.get('next', '')      # waar eventueel naartoe na de login?
         if request.user.is_authenticated:
             # gebruiker is al ingelogd --> stuur meteen door
 
             # voer de automatische redirect uit, indien gevraagd
-            if next:
+            if next_url:
                 # reject niet bestaande urls
                 # resolve zoekt de view die de url af kan handelen
-                if next[-1] != '/':
-                    next += '/'
+                if next_url[-1] != '/':
+                    next_url += '/'
                 try:
-                    resolve(next)
+                    resolve(next_url)
                 except Resolver404:
                     pass
                 else:
                     # is valide url
-                    return HttpResponseRedirect(next)
+                    return HttpResponseRedirect(next_url)
 
             return HttpResponseRedirect(reverse('Plein:plein'))
 
-        form = LoginForm(initial={'next': next})
+        form = LoginForm(initial={'next': next_url})
         context = {'form': form}
         menu_dynamics(request, context)
         return render(request, TEMPLATE_LOGIN, context)

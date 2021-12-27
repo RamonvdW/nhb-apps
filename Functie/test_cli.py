@@ -13,8 +13,9 @@ from .models import maak_functie
 import io
 
 
-class TestAccountCLI(E2EHelpers, TestCase):
-    """ unit tests voor de Functie command line interface (CLI) applicatie """
+class TestFunctieCli(E2EHelpers, TestCase):
+
+    """ tests voor de Functie command line interface (CLI) applicatie """
 
     def setUp(self):
         """ initialisatie van de test case """

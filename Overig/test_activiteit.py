@@ -6,7 +6,6 @@
 
 from django.test import TestCase
 from Account.models import Account
-from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN
 from Functie.models import maak_functie
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -14,8 +13,9 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestAccountActiviteit(E2EHelpers, TestCase):
-    """ unit tests voor de Account applicatie; module Account Activiteit """
+class TestOverigActiviteit(E2EHelpers, TestCase):
+
+    """ tests voor de Overig applicatie; module Account Activiteit """
 
     test_after = ('Account.test_login',)
 
@@ -81,30 +81,6 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_activiteit)
 
-    def test_it(self):
-        # admin rechten
-        self.e2e_login_and_pass_otp(self.testdata.account_admin)
-        self.e2e_wisselnaarrol_it()
-        self.e2e_check_rol('IT')
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_activiteit)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
-
-        # manipuleer de sessie variabelen voor de corner-cases
-        session = self.client.session
-        del session[SESSIONVAR_ROL_MAG_WISSELEN]
-        # del session[SESSIONVAR_ROL_HUIDIGE]
-        session[SESSIONVAR_ROL_HUIDIGE] = 'bad'
-        session.save()
-        # TODO: waarom heeft bovenstaande geen effect?
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_activiteit)
-        self.assertEqual(resp.status_code, 200)  # 200 = OK
-
     def test_zoek(self):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
@@ -168,7 +144,7 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
         functie.accounts.add(self.account_100001)
 
         # zoek op nhb nummer --> wel functie, dus wel 2FA nodig
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_activiteit, {'zoekterm': '100001'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -189,7 +165,7 @@ class TestAccountActiviteit(E2EHelpers, TestCase):
         vhpg.delete()
 
         # zoek op nhb nummer --> geen VHPG record
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_activiteit, {'zoekterm': '100001'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)

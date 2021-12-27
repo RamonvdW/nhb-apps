@@ -9,7 +9,8 @@ from .models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 
 
 class TestNhbStructuur(TestCase):
-    """ unit tests voor de NhbStructuur applicatie """
+
+    """ tests voor de NhbStructuur applicatie """
 
     def setUp(self):
         """ initialisatie van de test case """

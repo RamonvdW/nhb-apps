@@ -1,0 +1,130 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Inschrijvingen{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-lijst-aangemeld-regio" %}
+
+    <h4>Inschrijvingen voor de regiocompetitie</h4>
+
+    <p>Op deze pagina tonen we inschrijvingen voor de regiocompetitie <b>{{ competitie.beschrijving }}</b>.</p>
+
+    <p>Filter mogelijkheden:</p>
+
+    <div class="white shrink-wrap-5">
+
+        {% if zoom_alles_url %}
+            <a class="margin-5 btn-nhb-blauw btn-small" href="{{ zoom_alles_url }}">Alles</a>
+        {% else %}
+            <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">Alles</a>
+        {% endif %}
+
+        <!-- begin rayon knoppen voor small -->
+        <br class="hide-on-med-and-up">
+
+        {% for rayon in zoom_rayons %}
+
+            {% if rayon.zoom_url %}
+                <a class="hide-on-med-and-up margin-5 btn-nhb-blauw btn-small" href="{{ rayon.zoom_url }}">{{ rayon.title_str }}</a>
+            {% else %}
+                <a class="hide-on-med-and-up margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ rayon.title_str }}</a>
+            {% endif %}
+
+        {% endfor %}
+        <!-- einde rayon knoppen voor small -->
+
+        {% for rayon in zoom_rayons %}
+
+            <br>
+
+            {% if rayon.zoom_url %}
+                <a class="hide-on-small-only margin-5 btn-nhb-blauw btn-small" href="{{ rayon.zoom_url }}">{{ rayon.title_str }}</a>
+            {% else %}
+                <a class="hide-on-small-only margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ rayon.title_str }}</a>
+            {% endif %}
+            <span class="hide-on-small-only">&nbsp;:&nbsp;</span>
+
+            {% for regio in rayon.regios %}
+
+                {% if regio.zoom_url %}
+                    <a class="margin-5 btn-nhb-blauw btn-small" href="{{ regio.zoom_url }}">{{ regio.title_str }}</a>
+                {% else %}
+                    <a class="margin-5 btn-nhb-blauw btn-small disabled" href="#">{{ regio.title_str }}</a>
+                {% endif %}
+            {% endfor %}
+
+        {% endfor %}
+    </div>
+
+
+    <p>Sporters die <b>{{ inhoud }}</b> ingeschreven zijn.</p>
+
+    <p>Totaal aantal: {{ object_list.count }}</p>
+
+    {% if url_download %}
+        <p>Je kan onderstaande lijst ook downloaden.</p>
+        <a class="btn-nhb-blauw" href="{{ url_download }}">
+            <i class="material-icons-round left">download</i>Download lijst</a>
+    {% endif %}
+
+
+    {% if show_gekozen_wedstrijden %}
+        <p>&nbsp;</p>
+        <p>
+            <a class="btn-nhb-blauw" href="{{ url_behoefte }}">
+                <i class="material-icons-round left">leaderboard</i>Gekozen wedstrijden</a>
+        </p>
+    {% endif %}
+
+    {% if show_dagdeel_telling %}
+        <p>&nbsp;</p>
+        <p>
+            <a class="btn-nhb-blauw" href="{{ url_behoefte }}">
+                <i class="material-icons-round left">leaderboard</i>Benodigde dagdelen</a>
+        </p>
+    {% endif %}
+
+
+    {% if object_list.count %}
+
+        <table class="white">
+
+        {% for obj in object_list %}
+
+            {% if obj.nieuwe_klasse %}
+                <tr class="nhb-grijs">
+                    <td colspan="3" style="padding-bottom:0"><h5>{{ obj.klasse.indiv.beschrijving }}</h5>Aantal: {{ obj.aantal_in_klasse }}</td>
+                </tr>
+
+                <tr>
+                    <th>Vereniging</th>
+                    <th>Aanvangsgemiddelde</th>
+                    <th>Naam schutter</th>
+                </tr>
+
+            {% endif %}
+
+            <tr>
+                <td>[{{ obj.bij_vereniging.ver_nr }}] {{ obj.bij_vereniging.naam }}</td>
+                <td>{{ obj.ag_voor_indiv }}</td>
+                <td>[{{ obj.sporterboog.sporter.lid_nr }}] {{ obj.sporterboog.sporter.volledige_naam }}</td>
+            </tr>
+
+        {% endfor %}
+
+        </table>
+
+    {% endif %}
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

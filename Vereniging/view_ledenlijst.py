@@ -64,7 +64,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
-                for lkl in (LeeftijdsKlasse
+                for lkl in (LeeftijdsKlasse                         # pragma: no branch
                             .objects
                             .filter(geslacht='M',
                                     min_wedstrijdleeftijd=0)        # exclude veteraan, master
@@ -99,7 +99,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
-                for lkl in (LeeftijdsKlasse
+                for lkl in (LeeftijdsKlasse                                 # pragma: no branch
                             .objects.filter(geslacht='M',
                                             max_wedstrijdleeftijd=0)        # skip jeugd klassen
                             .order_by('-volgorde')):                        # volgorde: veteraan, master, senior

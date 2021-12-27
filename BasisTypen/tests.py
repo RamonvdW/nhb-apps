@@ -7,11 +7,12 @@
 from django.test import TestCase
 from .models import (BoogType, TeamType, LeeftijdsKlasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
                      IndivWedstrijdklasse, TeamWedstrijdklasse, KalenderWedstrijdklasse)
-from .admin import BasisTypenIndivWedstrijdklasseAdmin, BasisTypenTeamWedstrijdklasseAdmin
+from .admin import BasisTypenIndivWedstrijdklasseAdmin
 
 
 class TestBasisTypen(TestCase):
-    """ unit tests voor de BasisTypen applicatie """
+
+    """ tests voor de BasisTypen applicatie """
 
     def setUp(self):
         """ eenmalige setup voor alle tests

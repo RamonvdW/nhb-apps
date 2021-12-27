@@ -116,7 +116,7 @@
                             <span>Lid van {{ account.vereniging_naam }}</span>
                             <p>Bondsnummer: {{ account.lid_nr_str|highlight:zoekterm }}</p>
                         {% else %}
-                            <p style="margin-top:0px">Bondsnummer: {{ account.lid_nr_str|highlight:zoekterm }}</p>
+                            <p style="margin-top:0">Bondsnummer: {{ account.lid_nr_str|highlight:zoekterm }}</p>
                         {% endif %}
                         <button class="btn-nhb-blauw" onclick="do_wijzig('add', this)" data-pk="{{ account.pk }}">
                             <i class="material-icons-round left">add</i>Maak beheerder</button>

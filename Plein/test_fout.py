@@ -5,14 +5,23 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from Functie.models import Functie
 from Mailer.models import MailQueue
+from NhbStructuur.models import NhbRegio
 from TestHelpers.e2ehelpers import E2EHelpers
+from TestHelpers import testdata
 
 
 class TestPleinFout(E2EHelpers, TestCase):
-    """ unit tests voor de Plein applicatie """
+
+    """ tests voor de Plein applicatie """
 
     url_speciale_pagina = '/plein/test-speciale-pagina/%s/'     # code
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.testdata = testdata.TestData()
+        cls.testdata.maak_accounts()
 
     def test_403(self):
         resp = self.client.get(self.url_speciale_pagina % '403a')
@@ -58,10 +67,26 @@ class TestPleinFout(E2EHelpers, TestCase):
         self.assertEqual(1, MailQueue.objects.count())
 
         # nog een keer, zodat de email naar de ontwikkelaar er al is
+        # controleer dat er maar 1 mail geschreven wordt (per dag)
         resp = self.client.get(self.url_speciale_pagina % '500')
         self.assertTrue(resp.status_code, 200)
-
-        # controleer dat er maar 1 mail geschreven wordt (per dag)
         self.assertEqual(1, MailQueue.objects.count())
+
+        # nu met een actieve functie
+
+        func = Functie(
+                    beschrijving="Test Functie 1234",
+                    rol='RCL',
+                    nhb_regio=NhbRegio.objects.get(regio_nr=104))
+        func.save()
+        func.accounts.add(self.testdata.account_bb)
+
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(func)
+        self.e2e_check_rol('RCL')
+
+        resp = self.client.get(self.url_speciale_pagina % '500')
+        self.assertTrue(resp.status_code, 200)
+        self.assertEqual(2, MailQueue.objects.count())
 
 # end of file

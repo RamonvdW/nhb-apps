@@ -4,6 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+# set high performance
+sudo cpupower frequency-set --governor performance > /dev/null
+
 export PYTHONDONTWRITEBYTECODE=1
 
 DEBUG=1
@@ -13,12 +16,12 @@ DEBUG=1
 echo "[INFO] Starting regiocomp_mutaties (runtime: 60 minutes)"
 pkill -f regiocomp_mutaties
 ./manage.py regiocomp_mutaties 60 &
-sleep 1
+# sleep 1
 
 echo "[INFO] Starting regiocomp_tussenstand (runtime: 60 minutes)"
 pkill -f regiocomp_tussenstand
 ./manage.py regiocomp_tussenstand 60 &
-sleep 1
+# sleep 1
 
 # start the development webserver
 if [ $DEBUG -eq 1 ]
@@ -36,5 +39,8 @@ fi
 echo "[INFO] Stopping background tasks"
 pkill -f regiocomp_mutaties
 pkill -f regiocomp_tussenstand
+
+# set normal performance
+sudo cpupower frequency-set --governor schedutil > /dev/null
 
 # end of file

@@ -16,7 +16,8 @@ import datetime
 
 
 class TestTakenTaken(E2EHelpers, TestCase):
-    """ unit tests voor de Taken applicatie """
+
+    """ tests voor de Taken applicatie """
 
     test_after = ('Functie',)
 
@@ -66,6 +67,9 @@ class TestTakenTaken(E2EHelpers, TestCase):
 
         deadline = datetime.date(2020, 12, 13)
 
+        bestaat = taken.check_taak_bestaat(deadline=deadline)
+        self.assertFalse(bestaat)
+
         taken.maak_taak(toegekend_aan=self.account_normaal,
                         deadline=deadline,
                         aangemaakt_door=None,
@@ -75,6 +79,9 @@ class TestTakenTaken(E2EHelpers, TestCase):
 
         self.assertEqual(1, Taak.objects.count())
         self.assertEqual(1, MailQueue.objects.count())
+
+        bestaat = taken.check_taak_bestaat(deadline=deadline)
+        self.assertTrue(bestaat)
 
         taak = Taak.objects.all()[0]
         self.assertFalse(taak.is_afgerond)

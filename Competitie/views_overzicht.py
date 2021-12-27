@@ -13,6 +13,7 @@ from django.templatetags.static import static
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from Score.operations import wanneer_ag_vastgesteld
+from Sporter.models import SporterBoog
 from Taken.taken import eval_open_taken
 from .menu import menu_dynamics_competitie
 from .models import LAAG_REGIO, LAAG_BK, Competitie, DeelCompetitie
@@ -23,7 +24,6 @@ TEMPLATE_COMPETITIE_KIES_SEIZOEN = 'competitie/kies.dtl'
 TEMPLATE_COMPETITIE_OVERZICHT = 'competitie/overzicht.dtl'
 TEMPLATE_COMPETITIE_OVERZICHT_HWL = 'competitie/overzicht-hwl.dtl'
 TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER = 'competitie/overzicht-beheerder.dtl'
-TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
 
 JA_NEE = {False: 'Nee', True: 'Ja'}
 
@@ -72,7 +72,7 @@ class CompetitieOverzichtView(View):
             context['rol_is_bb'] = True
             kan_beheren = True
 
-            if not comp.klassegrenzen_vastgesteld:
+            if not comp.klassengrenzen_vastgesteld:
                 afstand_meter = int(comp.afstand)
                 datum = wanneer_ag_vastgesteld(afstand_meter)
                 if datum:
@@ -101,19 +101,25 @@ class CompetitieOverzichtView(View):
             # vanaf fase E laten we dit niet meer zien en komen de RK Teams in beeld
             if comp.fase < 'E':
                 context['tekst_regio_teams_alle'] = "Alle teams inzien van de regiocompetitie."
-                context['url_regio_teams_alle'] = reverse('Competitie:regio-teams-alle',
+                context['url_regio_teams_alle'] = reverse('CompRegio:regio-teams-alle',
                                                           kwargs={'comp_pk': comp.pk,
                                                                   'subset': 'auto'})
 
+        if comp.fase == 'J' and not comp.klassengrenzen_vastgesteld_rk_bk and self.rol_nu == Rollen.ROL_BKO:
+            context['tekst_klassengrenzen_rk_bk_vaststellen'] = "Open inschrijving RK teams sluiten en de klassengrenzen voor het RK teams en BK teams vaststellen."
+            context['url_klassengrenzen_rk_bk_vaststellen'] = reverse('CompRayon:klassengrenzen-vaststellen-rk-bk-teams',
+                                                                      kwargs={'comp_pk': comp.pk})
+
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
             if comp.fase < 'L':
-                context['tekst_rayon_teams_alle'] = "Alle teams inzien van de rayonkampioenschappen"
-                context["url_rayon_teams_alle"] = reverse('Competitie:rayon-teams-alle',
+                context['tekst_rayon_teams_alle'] = "Alle aangemelde teams voor de rayonkampioenschappen teams in deze competitie"
+                context["url_rayon_teams_alle"] = reverse('CompRayon:rayon-teams-alle',
                                                           kwargs={'comp_pk': comp.pk,
                                                                   'subset': 'auto'})
 
         if self.rol_nu == Rollen.ROL_RCL:
             toon_handmatige_ag = False
+            context['toon_clusters'] = True
             context['planning_deelcomp'] = (DeelCompetitie
                                             .objects
                                             .filter(competitie=comp,
@@ -125,28 +131,28 @@ class CompetitieOverzichtView(View):
 
                 obj.titel = 'Planning Regio %s' % obj.nhb_regio.regio_nr
                 obj.tekst = 'Planning van de wedstrijden in %s voor deze competitie.' % obj.nhb_regio.naam
-                obj.url = reverse('Competitie:regio-planning',
+                obj.url = reverse('CompRegio:regio-planning',
                                   kwargs={'deelcomp_pk': obj.pk})
 
                 if obj.regio_organiseert_teamcompetitie and 'E' <= comp.fase <= 'F':
                     obj.titel_team_ronde = "Team Ronde"
                     obj.tekst_team_ronde = "Stel de team punten vast en zet de teamcompetitie door naar de volgende ronde."
-                    obj.url_team_ronde = reverse('Competitie:start-volgende-team-ronde',
+                    obj.url_team_ronde = reverse('CompRegio:start-volgende-team-ronde',
                                                  kwargs={'deelcomp_pk': obj.pk})
 
                 obj.tekst_scores = "Scores invoeren en aanpassen voor %s voor deze competitie." % obj.nhb_regio.naam
-                obj.url_scores = reverse('Competitie:scores-regio',
+                obj.url_scores = reverse('CompScores:scores-rcl',
                                          kwargs={'deelcomp_pk': obj.pk})
 
                 if obj.regio_organiseert_teamcompetitie:
                     obj.tekst_regio_teams = "Teams voor de regiocompetitie in %s inzien voor deze competitie." % obj.nhb_regio.naam
-                    obj.url_regio_teams = reverse('Competitie:regio-teams',
+                    obj.url_regio_teams = reverse('CompRegio:regio-teams',
                                                   kwargs={'deelcomp_pk': obj.pk})
 
                     # poules kaartje alleen het head-to-head puntenmodel gekozen is
                     if obj.heeft_poules_nodig():
                         obj.tekst_poules = "Poules voor directe teamwedstrijden tussen teams in deze regiocompetitie."
-                        obj.url_poules = reverse('Competitie:regio-poules',
+                        obj.url_poules = reverse('CompRegio:regio-poules',
                                                  kwargs={'deelcomp_pk': obj.pk})
 
                     toon_handmatige_ag = True
@@ -155,17 +161,17 @@ class CompetitieOverzichtView(View):
             # for
 
             if comp.fase <= 'F':
-                comp.url_regio_instellingen = reverse('Competitie:regio-instellingen',
+                comp.url_regio_instellingen = reverse('CompRegio:regio-instellingen',
                                                       kwargs={'comp_pk': comp.pk,
                                                               'regio_nr': self.functie_nu.nhb_regio.regio_nr})
 
                 if toon_handmatige_ag:
-                    comp.url_regio_handmatige_ag = reverse('Competitie:regio-ag-controle',
+                    comp.url_regio_handmatige_ag = reverse('CompRegio:regio-ag-controle',
                                                            kwargs={'comp_pk': comp.pk,
                                                                    'regio_nr': self.functie_nu.nhb_regio.regio_nr})
 
             if 'B' <= comp.fase <= 'E':
-                comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
+                comp.url_inschrijvingen = reverse('CompInschrijven:lijst-regiocomp-regio',
                                                   kwargs={'comp_pk': comp.pk,
                                                           'regio_pk': self.functie_nu.nhb_regio.pk})
 
@@ -181,7 +187,7 @@ class CompetitieOverzichtView(View):
 
                     obj.titel = 'Sluit Regiocompetitie'
                     obj.tekst = 'Bevestig eindstand %s voor de %s.' % (obj.nhb_regio.naam, obj.competitie.beschrijving)
-                    obj.url_afsluiten = reverse('Competitie:afsluiten-regiocomp',
+                    obj.url_afsluiten = reverse('CompRegio:afsluiten-regiocomp',
                                                 kwargs={'deelcomp_pk': obj.pk})
                 # for
 
@@ -201,24 +207,24 @@ class CompetitieOverzichtView(View):
 
                 deelcomp_rk.titel = 'Planning %s' % deelcomp_rk.nhb_rayon.naam
                 deelcomp_rk.tekst = 'Planning voor %s voor deze competitie.' % deelcomp_rk.nhb_rayon.naam
-                deelcomp_rk.url = reverse('Competitie:rayon-planning',
+                deelcomp_rk.url = reverse('CompRayon:rayon-planning',
                                           kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
-                deelcomp_rk.tekst_rayon_teams = "Teams voor de rayonkampioenschappen in Rayon %s inzien voor deze competitie." % deelcomp_rk.nhb_rayon.rayon_nr
-                deelcomp_rk.url_rayon_teams = reverse('Competitie:rayon-teams',
+                deelcomp_rk.tekst_rayon_teams = "Aangemelde teams inzien voor de rayonkampioenschappen in Rayon %s, voor deze competitie." % deelcomp_rk.nhb_rayon.rayon_nr
+                deelcomp_rk.url_rayon_teams = reverse('CompRayon:rayon-teams',
                                                       kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
                 context['planning_deelcomp'] = [deelcomp_rk, ]
 
                 # geeft de RKO de mogelijkheid om de deelnemerslijst voor het RK te bewerken
-                context['url_lijst_rk'] = reverse('Competitie:lijst-rk',
+                context['url_lijst_rk'] = reverse('CompRayon:lijst-rk',
                                                   kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
-                context['url_limieten_rk'] = reverse('Competitie:rayon-limieten',
+                context['url_limieten_rk'] = reverse('CompRayon:rayon-limieten',
                                                      kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
             if 'B' <= comp.fase <= 'E':
-                comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-rayon',
+                comp.url_inschrijvingen = reverse('CompInschrijven:lijst-regiocomp-rayon',
                                                   kwargs={'comp_pk': comp.pk,
                                                           'rayon_pk': self.functie_nu.nhb_rayon.pk})
 
@@ -240,7 +246,7 @@ class CompetitieOverzichtView(View):
                 # geef de BKO de mogelijkheid om
                 # - de regiocompetitie door te zetten naar de rayonkampioenschappen
                 # - de RK door te zetten naar de BK
-                if 'E' <= comp.fase < 'K':
+                if 'E' <= comp.fase <= 'G':
                     comp.url_doorzetten = reverse('Competitie:bko-doorzetten-naar-rk',
                                                   kwargs={'comp_pk': comp.pk})
                     comp.titel_doorzetten = '%s doorzetten naar de volgende fase (Regio naar RK)' % comp.beschrijving
@@ -280,7 +286,7 @@ class CompetitieOverzichtView(View):
             comp.regio_einde_teams_aanmaken = deelcomp.einde_teams_aanmaken
         # for
 
-        comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-regio',
+        comp.url_inschrijvingen = reverse('CompInschrijven:lijst-regiocomp-regio',
                                           kwargs={'comp_pk': comp.pk,
                                                   'regio_pk': self.functie_nu.nhb_ver.regio.pk})
 
@@ -299,31 +305,54 @@ class CompetitieOverzichtView(View):
         return TEMPLATE_COMPETITIE_OVERZICHT
 
     @staticmethod
-    def _get_uitslagen(context, comp):
+    def _get_uitslagen(context, comp, request):
 
         # kijk of de uitslagen klaar zijn om te tonen
         context['toon_uitslagen'] = (comp.fase >= 'B')      # inschrijving is open
 
-        context['url_regio_indiv'] = reverse('Competitie:uitslagen-regio-indiv',
+        wed_boog = team_type = 'r'
+        if request.user.is_authenticated:
+            # als deze sporter ingeschreven is voor de competitie, pak dan het boogtype waarmee hij ingeschreven is
+
+            # kies de eerste wedstrijdboog uit de voorkeuren van sporter
+            all_bogen = (SporterBoog
+                         .objects
+                         .filter(sporter__account=request.user,
+                                 voor_wedstrijd=True)
+                         .order_by('boogtype__volgorde'))
+
+            if all_bogen.count():
+                wed_boog = all_bogen[0].boogtype.afkorting.lower()
+
+            # TODO: zoek ook het team type van het team waarin hij geplaatst is
+            team_type = wed_boog
+
+        context['url_regio_indiv'] = reverse('CompUitslagen:uitslagen-regio-indiv',
                                              kwargs={'comp_pk': comp.pk,
                                                      'zes_scores': 'alle',
-                                                     'comp_boog': 'r'})
-        context['url_regio_teams'] = reverse('Competitie:uitslagen-regio-teams',
+                                                     'comp_boog': wed_boog})
+        context['url_regio_teams'] = reverse('CompUitslagen:uitslagen-regio-teams',
                                              kwargs={'comp_pk': comp.pk,
-                                                     'team_type': 'r'})
-        context['url_rayon_indiv'] = reverse('Competitie:uitslagen-rayon-indiv',
+                                                     'team_type': team_type})
+        context['url_rayon_indiv'] = reverse('CompUitslagen:uitslagen-rayon-indiv',
                                              kwargs={'comp_pk': comp.pk,
-                                                     'comp_boog': 'r'})
-        context['url_bond'] = reverse('Competitie:uitslagen-bond',
+                                                     'comp_boog': wed_boog})
+        context['url_rayon_teams'] = reverse('CompUitslagen:uitslagen-rayon-teams',
+                                             kwargs={'comp_pk': comp.pk,
+                                                     'team_type': team_type})
+        context['url_bond'] = reverse('CompUitslagen:uitslagen-bond',
                                       kwargs={'comp_pk': comp.pk,
-                                              'comp_boog': 'r'})
+                                              'comp_boog': wed_boog})
 
-        # TODO: tussenstand --> eindstand
-        context['text_regio_indiv'] = 'Tussenstand voor de regiocompetitie individueel'
-        context['text_regio_teams'] = 'Tussenstand voor de regiocompetitie teams'
-        context['text_rayon_indiv'] = 'Tussenstand voor de rayonkampioenschappen individueel'
-        context['text_rayon_teams'] = 'Tussenstand voor de rayonkampioenschappen teams'
-        context['text_bond'] = 'Tussenstand voor de bondskampioenschappen'
+        tussen_eind = "Tussen" if comp.fase < 'G' else "Eind"
+        context['text_regio_indiv'] = tussen_eind + 'stand voor de regiocompetitie individueel'
+        context['text_regio_teams'] = tussen_eind + 'stand voor de regiocompetitie teams'
+
+        tussen_eind = "Tussen" if comp.fase <= 'N' else "Eind"
+        context['text_rayon_indiv'] = tussen_eind + 'stand voor de rayonkampioenschappen individueel'
+        context['text_rayon_teams'] = tussen_eind + 'stand voor de rayonkampioenschappen teams'
+
+        context['text_bond'] = 'Tussenstand voor de landelijke bondskampioenschappen'
 
     def get(self, request, *args, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -333,7 +362,7 @@ class CompetitieOverzichtView(View):
         context = dict()
 
         try:
-            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen geeft beveiliging
+            comp_pk = int(kwargs['comp_pk'][:6])      # afkappen voor de veiligheid
             comp = (Competitie
                     .objects
                     .get(pk=comp_pk))
@@ -344,15 +373,17 @@ class CompetitieOverzichtView(View):
         comp.bepaal_openbaar(self.rol_nu)      # zet comp.is_openbaar
 
         comp.einde_fase_F = comp.laatst_mogelijke_wedstrijd + datetime.timedelta(days=7)
+        comp.einde_fase_G = comp.einde_fase_F + datetime.timedelta(days=1)
+        comp.einde_fase_K = comp.rk_eerste_wedstrijd - datetime.timedelta(days=14)
         comp.einde_fase_M = comp.rk_laatste_wedstrijd + datetime.timedelta(days=7)
 
         if 'B' <= comp.fase <= 'E':
-            comp.url_inschrijvingen = reverse('Competitie:lijst-regiocomp-alles',
+            comp.url_inschrijvingen = reverse('CompInschrijven:lijst-regiocomp-alles',
                                               kwargs={'comp_pk': comp.pk})
 
         context['comp'] = comp
 
-        self._get_uitslagen(context, comp)
+        self._get_uitslagen(context, comp, request)
 
         # afhankelijk van de huidige functie vs de competitie leveren we 2 pagina's:
         #   - beheerder
@@ -365,7 +396,7 @@ class CompetitieOverzichtView(View):
                 template = self._get_competitie_overzicht_beheerder(request, context, comp)
                 eval_open_taken(request)
 
-        elif self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB):
+        elif self.rol_nu == Rollen.ROL_BB:
             template = self._get_competitie_overzicht_beheerder(request, context, comp)
             eval_open_taken(request)
 
@@ -425,7 +456,7 @@ class CompetitieKiesView(TemplateView):
             context['nieuwe_seizoen'] = "%s/%s" % (beginjaar, beginjaar+1)
             context['bb_kan_competitie_aanmaken'] = (0 == Competitie.objects.filter(begin_jaar=beginjaar).count())
 
-        if rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
+        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
             context['toon_beheerders'] = True
 
         menu_dynamics_competitie(self.request, context)

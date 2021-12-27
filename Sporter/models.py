@@ -128,6 +128,9 @@ class Sporter(models.Model):
     def volledige_naam(self):
         return self.voornaam + " " + self.achternaam
 
+    def lid_nr_en_volledige_naam(self):
+        return "[%s] %s" % (self.lid_nr, self.voornaam + " " + self.achternaam)
+
     class Meta:
         """ meta data voor de admin interface """
         verbose_name = 'Sporter'
@@ -141,7 +144,7 @@ class Secretaris(models.Model):
 
     # deze constructie voorkomt een circulaire dependency
 
-    # TODO: dupe met Functie SEC? (gekoppeld aan Account)
+    # FUTURE: dit record is dupe met Functie SEC? (gekoppeld aan Account)
 
     vereniging = models.ForeignKey(NhbVereniging, on_delete=models.CASCADE)
 

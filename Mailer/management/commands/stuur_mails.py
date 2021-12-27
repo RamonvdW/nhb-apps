@@ -41,7 +41,7 @@ class Command(BaseCommand):
                         is_blocked=True))
         if len(objs) > 0:
             self.stdout.write('[DEBUG] Found %s blocked mails over 1 month old (that could be deleted)' % len(objs))
-            # TODO: actually delete old blocked mails
+            # FUTURE: actually delete old blocked mails
 
     def _stuur_oude_mails(self):
         # probeer eenmalig oude mails te sturen en keer daarna terug
@@ -115,9 +115,9 @@ class Command(BaseCommand):
             if not options['skip_old']:
                 self._stuur_oude_mails()
             self._stuur_nieuwe_mails()
-        except DataError as exc:                        # pragma: no coverage
+        except DataError as exc:                        # pragma: no cover
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
-        except KeyboardInterrupt:                       # pragma: no coverage
+        except KeyboardInterrupt:                       # pragma: no cover
             pass
 
         self.stdout.write('Klaar')

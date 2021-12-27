@@ -8,14 +8,14 @@
 {% block title %}Planning Regio{% endblock %}
 
 {% block pagina %}
-<div class="white" style="padding:10px 30px 10px 30px">
-<h4>Planning Regio</h4>
-<p>De planning voor de regio wordt gemaakt door de RCL (in overleg met de HWL's van de verenigingen in de regio) en bestaat uit minimaal 7 rondes.</p>
-<p></p>
-<p>Elke ronde valt in een te kiezen weeknummer en heeft een beschrijving.</p>
-<p></p>
-<p>Voorbeeld:</p>
-<p></p>
+
+    <div class="white" style="padding:10px 30px 10px 30px">
+
+        <h4>Planning Regio</h4>
+
+        <p>De planning voor de regio wordt gemaakt door de RCL (in overleg met de HWL's van de verenigingen in de regio) en bestaat uit minimaal 7 rondes.</p>
+        <p>Elke ronde valt in een te kiezen weeknummer en heeft een beschrijving.</p>
+        <p>Voorbeeld:</p>
 <pre class="handleiding_code"> wk37: ronde 1
  wk39: ronde 2
  wk41: ronde 3
@@ -25,12 +25,11 @@
  wk48: ronde 6
  wk49: inhaalronde
  wk50: ronde 7
-</pre><p></p>
-<p>Elke ronde bestaat uit een aantal wedstrijden bij verenigingen.</p>
-<p></p>
-<p>Voorbeeld:</p>
-<p></p>
-<pre class="handleiding_code"> ronde 1
+</pre>
+
+        <p>Elke ronde bestaat uit een aantal wedstrijden bij verenigingen.</p>
+        <p>Voorbeeld:</p>
+        <pre class="handleiding_code"> ronde 1
  -------
  maandag   20:00 Zwartmikkers
  dinsdag   19:30 Blauwmikker
@@ -38,10 +37,10 @@
  zaterdag  10:00 Roodmikkers
  zaterdag  14:00 Roodmikkers
  zondag    14:00 Blauwmikkers
-</pre><p></p>
-<p>Er zijn ook regio's waar een hele ronde naar 1 vereniging gaat:</p>
-<p></p>
-<pre class="handleiding_code"> ronde 1
+</pre>
+
+        <p>Er zijn ook regio's waar een hele ronde naar 1 vereniging gaat:</p>
+        <pre class="handleiding_code"> ronde 1
  -------
  maandag   19:00 Witmissers
  dinsdag   19:00 Witmissers
@@ -49,16 +48,17 @@
  zaterdag  10:00 Witmissers
  zaterdag  13:00 Witmissers
  zondag    10:00 Witmissers
-</pre><p></p>
-<p>Indien de regio gebruikt maakt van clusters, dan heeft elk cluster een eigen planning. Daarnaast kan de regio ook nog een eigen planning hebben, bijvoorbeeld voor verenigingen die niet bij een cluster horen, of gewoon om sporters een extra schietmogelijkheid te geven.</p>
-<p></p>
-<p></p>
-<hr><h5>Verder</h5>
-<p>Terug naar de <a class="btn-nhb-blauw" href="/handleiding/Hoofdpagina/">Hoofdpagina</a>.</p>
-<p></p>
-<p><a class="btn-nhb-blauw" href="/handleiding/Inschrijfmethodes_Regiocompetitie/">Inschrijfmethodes Regiocompetitie</a></p>
+</pre>
 
-</div>
+        <p>Indien de regio gebruikt maakt van clusters, dan heeft elk cluster een eigen planning. Daarnaast kan de regio ook nog een eigen planning hebben, bijvoorbeeld voor verenigingen die niet bij een cluster horen, of gewoon om sporters een extra schietmogelijkheid te geven.</p>
+
+        <p>&nbsp;</p>
+        <hr>
+        <h5>Verder</h5>
+        <p>Terug naar de <a class="btn-nhb-blauw" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Inschrijfmethodes_Regiocompetitie/">Inschrijfmethodes Regiocompetitie</a></p>
+
+    </div>
 
 {% endblock %}
 

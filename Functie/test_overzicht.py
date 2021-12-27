@@ -13,11 +13,13 @@ import datetime
 
 
 class TestFunctieOverzicht(E2EHelpers, TestCase):
-    """ unit tests voor de Functie applicatie, functionaliteit Koppel bestuurders """
+
+    """ tests voor de Functie applicatie, functionaliteit Koppel bestuurders """
 
     test_after = ('Account', 'Functie.test_2fa')
 
     url_overzicht = '/functie/overzicht/'
+    url_overzicht_lid_nrs = '/functie/overzicht/alle-lid-nrs/sec-hwl/'
     url_wijzig = '/functie/wijzig/'
     url_activeer_functie = '/functie/activeer-functie/%s/'
     url_activeer_rol = '/functie/activeer-rol/%s/'
@@ -263,5 +265,15 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+
+    def test_lid_nrs(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht_lid_nrs)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/overzicht-lid-nrs.dtl', 'plein/site_layout.dtl'))
 
 # end of file

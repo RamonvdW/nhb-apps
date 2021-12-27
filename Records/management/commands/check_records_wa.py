@@ -12,7 +12,7 @@ from Records.models import IndivRecord
 import csv
 
 
-class Command(BaseCommand):
+class Command(BaseCommand):         # pragma: no cover      # FUTURE: commando in gebruik nemen en test suite maken
     help = "Check alle NL records tegen de WA administratie (csv)"
 
     def __init__(self):
@@ -26,12 +26,12 @@ class Command(BaseCommand):
     def _cache_records(self):
         self._indiv_indoor = (IndivRecord
                               .objects
-                              .select_related('sporter')        # TODO: niet nodig
+                              .select_related('sporter')
                               .exclude(discipline='OD'))
 
         self._indiv_outdoor = (IndivRecord
                                .objects
-                               .select_related('sporter')       # TODO: niet nodig
+                               .select_related('sporter')
                                .filter(discipline='OD'))
 
         self._cache_nhb = dict()        # [indiv.pk] = IndivRecord
@@ -138,7 +138,6 @@ class Command(BaseCommand):
         elif nhb_rec.geslacht == 'V' and 'W' not in cat:
             self.stdout.write('[WARNING] Record %s-%s is onverwacht geslacht=V (WA: cat=%s)' % (nhb_rec.discipline, nhb_rec.volg_nr, cat))
             self._warning_count += 1
-
 
         # leeftijdscategorie = models.CharField(max_length=1, choices=LEEFTIJDSCATEGORIE)
 

@@ -8,14 +8,15 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Sporter.models import Sporter, SporterBoog
 from .models import (Score, ScoreHist,
-                     SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG, SCORE_TYPE_SCORE)
+                     SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN)
 from .operations import score_indiv_ag_opslaan, score_teams_ag_opslaan, wanneer_ag_vastgesteld
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 
 class TestScoreOpslaan(E2EHelpers, TestCase):
-    """ unit tests voor de Score applicatie, functie Opslaan """
+
+    """ tests voor de Score applicatie, functie Opslaan """
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -58,6 +59,9 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         self.assertEqual(score.waarde, waarde)
         self.assertEqual(score.sporterboog, self.sporterboog)
         self.assertTrue(str(score) != "")
+
+        score.type = SCORE_TYPE_GEEN
+        self.assertTrue("(geen score)" in str(score))
 
         score.type = SCORE_TYPE_INDIV_AG
         self.assertTrue("(indiv AG)" in str(score))

@@ -14,7 +14,8 @@ from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestKalender(E2EHelpers, TestCase):
-    """ unit tests voor de Kalender applicatie """
+
+    """ tests voor de Kalender applicatie """
 
     url_kalender = '/kalender/'
     url_kalender_manager = '/kalender/manager/'

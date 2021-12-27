@@ -1,0 +1,144 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Ingeschreven{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compinschrijven-leden-ingeschreven" %}
+
+    <h4>Ingeschreven</h4>
+
+    <script type="application/javascript">
+        function do_toggle(id)
+        {
+            // voer een POST uit om toe te voegen
+            const form = document.createElement('form')
+            form.name = 'form2'
+            form.method = 'post'
+            form.action = '{{ afmelden_url }}'
+
+            let inp = document.createElement('input')
+            inp.type = "hidden"
+            inp.name = "toggle_deelnemer_pk"
+            inp.value = id.getAttribute("data-pk")
+            form.appendChild(inp)
+
+            inp = document.createElement('input')
+            inp.type = "hidden"
+            inp.name = "csrfmiddlewaretoken"
+            inp.value = getCookie('csrftoken')
+            form.appendChild(inp)
+
+            form.style.display = 'hidden'
+            document.body.appendChild(form)
+            form.submit()
+
+            return false    // false prevents default browser behavior
+        }
+    </script>
+
+    <form method="post" action="{{ afmelden_url }}">
+        {% csrf_token %}
+
+        <p>Deze pagina toont de leden van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} die ingeschreven zijn voor de <b>{{ deelcomp }}</b>.</p>
+
+        {% if mag_afmelden %}
+            <p>Als hoofdwedstrijdleider kan je leden afmelden: zet een vinkje bij de naam en druk dan rode knop in de rechter onderhoek.</p>
+        {% else %}
+            <p>De hoofdwedstrijdleider kan leden afmelden tijdens fase B van de competitie.</p>
+        {% endif %}
+
+        <table class="white" id="table1">
+            <thead>
+                <tr>        <!-- filter veld -->
+                    {% if mag_afmelden %}
+                        <td><!-- kolom voor vinkje --></td>
+                    {% endif %}
+
+                    <td></td>
+
+                    <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+
+                    {% if toon_dagdeel %}
+                        <td colspan="5"></td>
+                    {% else %}
+                        <td colspan="4"></td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    {% if mag_afmelden %}
+                        <th><!-- kolom voor vinkje --></th>
+                    {% endif %}
+
+                    <th>Wedstrijdklasse</th>
+
+                    <th data-filter="on">Bonds<wbr/>nummer</th>
+                    <th data-filter="on">Naam</th>
+
+                    <th colspan="2"><span class="show-on-small hide-on-med-and-up">Team</span><span class="hide-on-small-only">Voorkeur<br>teamschieten</span></th>
+                    <!-- 2e kolom is voor team toggle knop -->
+
+                    {% if toon_dagdeel %}
+                        <th><span class="show-on-small hide-on-med-and-up">Dagdelen</span><span class="hide-on-small-only">Voorkeur<br>dagdelen</span></th>
+                    {% endif %}
+
+                    <th>Voorkeur<br>blazoen</th>
+
+                    <th class="hide-on-small-only">Opmerking</th>
+                </tr>
+            </thead>
+
+            {% for obj in object_list %}
+            <tr>
+                {% if mag_afmelden %}
+                    <td class="center-align">
+                        <label>
+                            <input type="checkbox" name="{{ obj.check }}" class="filled-in">
+                            <span><!-- noodzakelijk --></span>
+                        </label>
+                    </td>
+                {% endif %}
+
+                <td>{{ obj.klasse.indiv.beschrijving }}</td>
+
+                <td>{{ obj.lid_nr }}</td>
+                <td>{{ obj.naam_str }}</td>
+
+                <td>{{ obj.team_ja_nee }}</td>
+                <td>
+                    {% if obj.maak_ja %}
+                        <a class="btn-nhb-blauw" href="#" onclick="do_toggle(this)" data-pk="{{ obj.pk }}">Maak Ja</a>
+                    {% elif obj.maak_nee %}
+                        <a class="btn-nhb-blauw" href="#" onclick="do_toggle(this)" data-pk="{{ obj.pk }}">Maak Nee</a>
+                    {% endif %}
+                </td>
+
+                {% if toon_dagdeel %}
+                    <td>{{ obj.dagdeel_str }}</td>
+                {% endif %}
+
+                <td>{{ obj.eigen_blazoen_ja_nee }}</td>
+
+                <td class="hide-on-small-only">{{ obj.inschrijf_notitie|linebreaksbr }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        {% if mag_afmelden %}
+            <div class="fixed-action-btn">
+                <input class="btn-nhb-rood" type="submit" value="Geselecteerde leden afmelden">
+            </div>
+        {% endif %}
+
+    </form>
+
+    <!-- extra ruimte onder de tabel houden voor de aanmeld-knop -->
+    <p>&nbsp;</p>
+
+{% endblock %}

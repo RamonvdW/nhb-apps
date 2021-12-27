@@ -1,0 +1,203 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Team Ronde{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-rcl-team-ronde" %}
+
+    <h4>Team Ronde</h4>
+
+    <p>Op deze pagina kan de RCL de huidige ronde van de teamcompetitie inzien, team punten verdelen en afsluiten.</p>
+
+    <div class="row">
+
+        <!-- toon gegevens van de regio en competitie in een blauwe box -->
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
+
+                <div class="row small-row">
+                    <div class="col s4">Competitie:</div>
+                    <div class="col s7">{{ deelcomp.competitie.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s4">Regio:</div>
+                    <div class="col s7">{{ regio }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s4">Huidige ronde:</div>
+                    <div class="col s7">{{ deelcomp.huidige_team_ronde }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s4">Punten model:</div>
+                    <div class="col s7">{{ wp_model_str }}</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <p>&nbsp;</p>
+
+    {% if deelcomp.huidige_team_ronde > 7 %}
+
+        <p>Alle rondes van de teamcompetitie in deze regio zijn afgerond. Je hoeft niets meer te doen.</p>
+
+    {% elif deelcomp.huidige_team_ronde == 0 %}
+
+        {% if teams_niet_af %}
+            <h5 class="red-text">Nog niet geplaatste teams</h5>
+            <p>De volgende teams zijn niet compleet en daarom niet geplaatst in een wedstrijdklasse.</p>
+            <p>Dit moet eerst opgelost worden: sporters koppelen of het team verwijderen.</p>
+
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Vereniging</th>
+                        <th>Soort team</th>
+                        <th>Aantal gekoppelde sporters</th>
+                        <th>Poule</th>
+                        <th>Team naam</th>
+                    </tr>
+                </thead>
+
+                {% for team in teams_niet_af %}
+                    {% if team.is_niet_af  %}
+                        <tr>
+                            <td>{{ team.vereniging }}</td>
+                            <td>{{ team.team_type.beschrijving }}</td>
+                            <td{% if team.aantal_sporters < 3 %} class="red-text"{% endif %}>{{ team.aantal_sporters }}</td>
+                            <td>{% if team.poule %}{{ team.poule }}{% else %}<span class="red-text">Geen</span>{% endif %}</td>
+                            <td>{{ team.team_naam }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>De teamcompetitie wacht totdat jij de eerste ronde opent.</p>
+        {% endif %}
+
+        {% if url_volgende_ronde %}
+
+            <form method="post" action="{{ url_volgende_ronde }}">{% csrf_token %}
+                <button class="btn-nhb-rood">Start de eerste ronde</button>
+            </form>
+
+            <p>&nbsp;</p>
+            <!-- <p>Na het opstarten van een ronde krijgen alle HWL's een seintje dat ze de teams moeten controleren en eventuele invallers in moeten voeren.</p> -->
+            <p>Na het opstarten van een ronde moet je zelf alle HWL's laten weten dat ze de teams moeten controleren en eventuele invallers in kunnen voeren.</p>
+
+        {% endif %}
+    {% else %}
+
+        {% if toon_som %}
+            <p>Het is niet nodig om wedstrijdpunten toe te kennen.</p>
+        {% else %}
+            <p>Hieronder staan de team scores en voorgestelde wedstrijdpunten.</p>
+            <p>Eventuele scores <span class="red-text">in rood</span> geven aan dat deze uit minder dan 3 scores opgebouwd is.</p>
+        {% endif %}
+
+        {% if url_team_scores %}
+            <p>Besluit welke individuele scores deze team ronde horen: <a class="btn-nhb-blauw" href="{{ url_team_scores }}"><i class="material-icons-round left">gavel</i>Team scores selecteren</a>
+            </p>
+        {% endif %}
+
+        <table class="white">
+            {% if toon_h2h %}
+
+                <!-- directe tegenstanders -->
+                {% for regel in alle_regels %}
+                    {% if regel.break_poule %}
+                        <tr>
+                            <td colspan="4" class="nhb-grijs"><h6>{{ regel.poule_str }}</h6></td>
+                        </tr>
+                        <tr>
+                            <th>Team</th>
+                            <th>Team</th>
+                            <th>Scores</th>
+                            <th>Wedstrijdpunten</th>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <td>{{ regel.team1_str }}</td>
+                        <td>{% if regel.team2_is_bye %}<i class="grey-text">Bye</i>{% else %}{{ regel.team2_str }}{% endif %}</td>
+                        <td>
+                            <span{% if regel.team1_score_count < 3 %} class="red-text"{% endif %}>{{ regel.team1_score }}</span>
+                            <span> - </span>
+                            <span{% if regel.team2_score_count < 3 %} class="red-text"{% endif %}>{{ regel.team2_score }}</span>
+                        </td>
+                        <td>{{ regel.team1_wp }} - {{ regel.team2_wp }}</td>
+                    </tr>
+                {% endfor %}
+
+            {% elif toon_f1 %}
+
+                <!-- formule 1 -->
+                {% for regel in alle_regels %}
+                    {% if regel.break_poule %}
+                        <tr>
+                            <td colspan="4" class="nhb-grijs"><h6>{{ regel.poule_str }}</h6></td>
+                        </tr>
+                        <tr>
+                            <th><!-- rank --></th>
+                            <th>Team</th>
+                            <th>Score</th>
+                            <th>Wedstrijdpunten</th>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <td>{{ regel.rank }}</td>
+                        <td>{{ regel.team_str }}</td>
+                        <td>{{ regel.team_score }}</td>
+                        <td>{{ regel.ronde_wp }}</td>
+                    </tr>
+
+                {% endfor %}
+
+            {% endif %}
+        </table>
+
+        <p>&nbsp;</p>
+
+        {% if is_redelijk %}
+
+            <p><span class="red-text"><b>Let op: </b></span>Eventuele discussies over individuele scores moeten afgerond zijn. Na het afsluiten van deze ronde worden de teamscores{% if not toon_som %} en wedstrijdpunten{% endif %} bevroren.</p>
+
+            <form method="post" action="{{ url_volgende_ronde }}">{% csrf_token %}
+                <button class="btn-nhb-rood">Ronde {{ deelcomp.huidige_team_ronde }} nu afsluiten</button>
+            </form>
+
+            <p>&nbsp;</p>
+            <!-- <p>Na het opstarten van een ronde krijgen alle HWL's een seintje dat ze de teams moeten controleren en eventuele invallers in moeten voeren.</p>-->
+            <p>Na het opstarten van een ronde moet je zelf alle HWL's laten weten dat ze de teams moeten controleren en eventuele invallers in kunnen voeren.</p>
+
+            {% if not deelcomp.regio_heeft_vaste_teams %}
+                <p>Tijdens het doorzetten krijgt elk team nieuwe deelnemers afhankelijk van het voortschrijdend gemiddelde van de sporters.</p>
+            {% endif %}
+
+        {% else %}
+
+            <p>Afsluiten van de ronde kan pas als er scores zijn.</p>
+
+        {% endif %}
+
+    {% endif %}
+
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

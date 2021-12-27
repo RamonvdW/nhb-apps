@@ -9,13 +9,15 @@ from django.utils import timezone
 from django.test import TestCase
 from django.core import management
 from .models import Account, AccountEmail
+from Logboek.models import LogboekRegel
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 import io
 
 
-class TestAccountCLI(E2EHelpers, TestCase):
-    """ unit tests voor de Account command line interface (CLI) applicatie """
+class TestAccountCli(E2EHelpers, TestCase):
+
+    """ tests voor de Account command line interface (CLI) applicatie """
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -181,5 +183,65 @@ class TestAccountCLI(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             management.call_command('zet_2fa_geheim', 'nietbestaand', '1234567890123456', stderr=f1, stdout=f2)
         self.assertEqual(f1.getvalue(), 'Account matching query does not exist.\n')
+
+    def test_maak_bb(self):
+        LogboekRegel.objects.all().delete()
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20):
+            management.call_command('maak_bb', 'nietbestaand', stderr=f1, stdout=f2)
+
+        self.assertTrue('Kies een van --set_bb of --clr_bb' in f1.getvalue())
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20):
+            management.call_command('maak_bb', '--set_bb', '--clr_bb', 'nietbestaand', stderr=f1, stdout=f2)
+
+        self.assertTrue('Kies --set_bb of --clr_bb, niet beide' in f1.getvalue())
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20):
+            management.call_command('maak_bb', '--clr_bb', 'nietbestaand', stderr=f1, stdout=f2)
+
+        self.assertTrue("Geen account met de inlog naam 'nietbestaand'" in f1.getvalue())
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20):
+            management.call_command('maak_bb', '--clr_bb', 'normaal', stderr=f1, stdout=f2)
+
+        self.assertTrue("Account 'normaal' is geen BB -- geen wijziging" in f2.getvalue())
+        self.assertEqual(0, LogboekRegel.objects.count())
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20):
+            management.call_command('maak_bb', '--set_bb', 'normaal', stderr=f1, stdout=f2)
+
+        self.assertTrue("Account 'normaal' is BB gemaakt" in f2.getvalue())
+        self.assertEqual(1, LogboekRegel.objects.count())
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20):
+            management.call_command('maak_bb', '--set_bb', 'normaal', 'admin', stderr=f1, stdout=f2)
+
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+
+        self.assertTrue("Account 'normaal' is al BB -- geen wijziging" in f2.getvalue())
+        self.assertTrue("Account 'admin' is BB gemaakt" in f2.getvalue())
+        self.assertEqual(2, LogboekRegel.objects.count())
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20):
+            management.call_command('maak_bb', '--clr_bb', 'normaal', stderr=f1, stdout=f2)
+
+        self.assertTrue("Account 'normaal' is nu geen BB meer" in f2.getvalue())
+        self.assertEqual(3, LogboekRegel.objects.count())
 
 # end of file

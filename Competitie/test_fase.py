@@ -51,11 +51,20 @@ def zet_competitie_fase(comp, fase):
 
     comp.alle_rks_afgesloten = False
 
-    if fase >= 'K':
+    if fase >= 'J':
         # RK fases
         comp.alle_regiocompetities_afgesloten = True
+
+        if fase == 'J':
+            comp.klassengrenzen_vastgesteld_rk_bk = False
+            comp.datum_klassengrenzen_rk_bk_teams = morgen
+            comp.save()
+            return
+
+        comp.klassengrenzen_vastgesteld_rk_bk = True
+
         if fase == 'K':
-            comp.rk_eerste_wedstrijd = morgen
+            comp.rk_eerste_wedstrijd = morgen + datetime.timedelta(days=14)
             comp.save()
             return
 
@@ -77,14 +86,14 @@ def zet_competitie_fase(comp, fase):
 
     if fase == 'A':
         comp.begin_aanmeldingen = morgen
-        comp.klassegrenzen_vastgesteld = False
+        comp.klassengrenzen_vastgesteld = False
         comp.save()
         return
 
     if comp.competitieklasse_set.count() == 0:      # pragma: no cover
         raise NotImplementedError("Kan niet naar fase %s zonder competitie klassen!" % fase)
 
-    comp.klassegrenzen_vastgesteld = True
+    comp.klassengrenzen_vastgesteld = True
     comp.begin_aanmeldingen = gister
 
     if fase == 'B':
@@ -115,19 +124,30 @@ def zet_competitie_fase(comp, fase):
 
     comp.laatst_mogelijke_wedstrijd = gister
 
-    # fase F of G: vaststellen uitslag in elke regio + afsluiten regiocompetitie
+    if fase == 'G':
+        # alle regios afsluiten
+        for deelcomp in comp.deelcompetitie_set.filter(is_afgesloten=False, laag=LAAG_REGIO):
+            deelcomp.is_afgesloten = True
+            deelcomp.save(update_fields=['is_afgesloten'])
+        comp.save()
+        return
+
+    # fase F: vaststellen uitslag in elke regio + afsluiten regiocompetitie
     comp.save()
     return
 
 
 class TestCompetitieFase(TestCase):
 
+    """ tests voor de Competitie applicatie, hanteren van de competitie fases """
+
     def test_zet_fase(self):
         now = timezone.now()
         now = datetime.date(year=now.year, month=now.month, day=now.day)
         einde_jaar = datetime.date(year=now.year, month=12, day=31)
-        if now == einde_jaar:                           # pragma: no cover
-            einde_jaar += datetime.timedelta(days=1)    # needed once a year..
+        # einde_jaar is goed, behalve in the laatste 2 weken
+        if now > einde_jaar - datetime.timedelta(days=15):       # pragma: no cover
+            einde_jaar += datetime.timedelta(days=15)
         gisteren = now - datetime.timedelta(days=1)
 
         # maak een competitie aan en controleer de fase
@@ -136,6 +156,7 @@ class TestCompetitieFase(TestCase):
         comp.uiterste_datum_lid = datetime.date(year=2000, month=1, day=1)
         comp.begin_aanmeldingen = comp.einde_aanmeldingen = comp.einde_teamvorming = einde_jaar
         comp.eerste_wedstrijd = comp.laatst_mogelijke_wedstrijd = einde_jaar
+        comp.datum_klassengrenzen_rk_bk_teams = einde_jaar
         comp.rk_eerste_wedstrijd = comp.rk_laatste_wedstrijd = einde_jaar
         comp.bk_eerste_wedstrijd = comp.bk_laatste_wedstrijd = einde_jaar
         comp.save()
@@ -169,7 +190,7 @@ class TestCompetitieFase(TestCase):
         comp.bepaal_fase()
         self.assertEqual(comp.fase, 'A')
 
-        comp.klassegrenzen_vastgesteld = True
+        comp.klassengrenzen_vastgesteld = True
         comp.bepaal_fase()
         self.assertEqual(comp.fase, 'A')
 
@@ -205,6 +226,10 @@ class TestCompetitieFase(TestCase):
         self.assertEqual(comp.fase, 'G')
 
         comp.alle_regiocompetities_afgesloten = True
+        comp.bepaal_fase()
+        self.assertEqual(comp.fase, 'J')
+
+        comp.klassengrenzen_vastgesteld_rk_bk = True
         comp.bepaal_fase()
         self.assertEqual(comp.fase, 'K')
 
@@ -252,6 +277,7 @@ class TestCompetitieFase(TestCase):
         comp.uiterste_datum_lid = datetime.date(year=2000, month=1, day=1)
         comp.begin_aanmeldingen = comp.einde_aanmeldingen = comp.einde_teamvorming = einde_jaar
         comp.eerste_wedstrijd = comp.laatst_mogelijke_wedstrijd = einde_jaar
+        comp.datum_klassengrenzen_rk_bk_teams = einde_jaar
         comp.rk_eerste_wedstrijd = comp.rk_laatste_wedstrijd = einde_jaar
         comp.bk_eerste_wedstrijd = comp.bk_laatste_wedstrijd = einde_jaar
         comp.save()
@@ -270,12 +296,12 @@ class TestCompetitieFase(TestCase):
         comp.bepaal_fase()
         self.assertEqual(comp.fase, 'A')
 
-        comp.klassegrenzen_vastgesteld = True
+        comp.klassengrenzen_vastgesteld = True
         zet_competitie_fase(comp, 'A')
         comp.bepaal_fase()
         self.assertEqual(comp.fase, 'A')
 
-        sequence = 'BCDEGKLNPQSQPNLKGEDCBKSEBZLQC'  # let op! F en R kunnen niet
+        sequence = 'BCDEGJKLNPQSQPNLKJGEDCBKSEBZLQC'  # let op! F en R kunnen niet
         for fase in sequence:
             zet_competitie_fase(comp, fase)
             comp.bepaal_fase()

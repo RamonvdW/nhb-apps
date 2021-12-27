@@ -24,15 +24,16 @@ import datetime
 
 
 class TestSporterProfiel(E2EHelpers, TestCase):
-    """ unit tests voor de Sporter applicatie, module Profiel """
+
+    """ tests voor de Sporter applicatie, module Profiel """
 
     test_after = ('NhbStructuur', 'HistComp', 'Competitie', 'Sporter.regiocompetitie', 'Functie')
 
     url_profiel = '/sporter/'
     url_voorkeuren = '/sporter/voorkeuren/'
-    url_aanmelden = '/sporter/regiocompetitie/aanmelden/%s/%s/'                 # deelcomp_pk, sporterboog_pk
-    url_bevestig_inschrijven = '/sporter/regiocompetitie/aanmelden/bevestig/'   # deelcomp_pk, sporterboog_pk
-    url_afmelden = '/sporter/regiocompetitie/afmelden/%s/'                      # deelnemer_pk
+    url_aanmelden = '/bondscompetities/deelnemen/aanmelden/%s/%s/'                 # deelcomp_pk, sporterboog_pk
+    url_bevestig_inschrijven = '/bondscompetities/deelnemen/aanmelden/bevestig/'   # deelcomp_pk, sporterboog_pk
+    url_afmelden = '/bondscompetities/deelnemen/afmelden/%s/'                      # deelnemer_pk
 
     testdata = None
 
@@ -224,7 +225,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assertContains(resp, 'De volgende competities passen bij de bogen waar jij mee schiet:')
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
-        urls = [url for url in urls if '/sporter/regiocompetitie/aanmelden/' in url]
+        urls = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
         self.assertEqual(len(urls), 2)
 
         # schrijf de schutter in voor de 18m Recurve
@@ -249,9 +250,9 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assertContains(resp, 'De inschrijving is open tot ')     # 18m
         self.assertContains(resp, 'Aanmelden kan nog tot 1 februari 20')      # 25m
         urls = self.extract_all_urls(resp, skip_menu=True)
-        urls2 = [url for url in urls if '/sporter/regiocompetitie/aanmelden/' in url]
+        urls2 = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
         self.assertEqual(len(urls2), 1)
-        urls2 = [url for url in urls if '/sporter/regiocompetitie/afmelden/' in url]
+        urls2 = [url for url in urls if '/bondscompetities/deelnemen/afmelden/' in url]
         self.assertEqual(len(urls2), 1)
 
         # afmelden moet nog kunnen als de wedstrijdboog weer uitgezet is
@@ -262,9 +263,9 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.get(self.url_profiel)
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
-        urls2 = [url for url in urls if '/sporter/regiocompetitie/aanmelden/' in url]
+        urls2 = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
         self.assertEqual(len(urls2), 0)
-        urls2 = [url for url in urls if '/sporter/regiocompetitie/afmelden/' in url]
+        urls2 = [url for url in urls if '/bondscompetities/deelnemen/afmelden/' in url]
         self.assertEqual(len(urls2), 1)
         sporterboog_bb.voor_wedstrijd = True
         sporterboog_bb.save()
@@ -397,7 +398,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # competitie wordt niet getoond in vroege fases
         zet_competitie_fase(self.comp_18, 'A2')
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -406,7 +407,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # met standaard voorkeuren worden de regiocompetities getoond
         voorkeuren, _ = SporterVoorkeuren.objects.get_or_create(sporter=self.sporter1)
         self.assertTrue(voorkeuren.voorkeur_meedoen_competitie)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -416,7 +417,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # uitgezet worden de regiocompetities niet getoond
         voorkeuren.voorkeur_meedoen_competitie = False
         voorkeuren.save()
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -434,7 +435,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_profiel)
 
         # voorkeur net uitgezet, maar nog wel ingeschreven
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

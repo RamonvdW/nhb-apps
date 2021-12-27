@@ -12,7 +12,8 @@ import types
 
 
 class TestPlein(E2EHelpers, TestCase):
-    """ unit tests voor de Plein applicatie """
+
+    """ tests voor de Plein applicatie """
 
     url_root = '/'
     url_plein = '/plein/'
@@ -48,10 +49,10 @@ class TestPlein(E2EHelpers, TestCase):
 
     def test_quick(self):
         # voor test.sh om met een snelle run in debug mode
-        # wissel naar IT zodat we het beheerders plein krijgen
+        # wissel naar BB zodat we het beheerders plein krijgen
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
-        self.e2e_wisselnaarrol_it()
-        self.e2e_check_rol('IT')
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)

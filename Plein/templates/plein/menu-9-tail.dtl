@@ -14,16 +14,6 @@
 
 {% load static %}
 
-
-<!-- admin menu -->
-{% if menu_show_admin %}
-    <li class="menu-level1">
-        <a href="{% url 'admin:index' %}" class="white-text">
-            <i class="material-icons-round red-text">build</i>Admin site</a>
-    </li>
-{% endif %}
-
-
 <!-- taken, voor beheerders -->
 {% if menu_show_taken %}
     <li class="menu-level1{% if menu_actief == "taken" %} menu-actief{% endif %}">

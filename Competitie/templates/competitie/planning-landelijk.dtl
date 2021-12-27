@@ -62,7 +62,7 @@
 
             <!-- knop naar de details van de regioplanning -->
             <td>
-                <a class="btn-nhb-blauw btn-small" href="{% url 'Competitie:rayon-planning' deelcomp.pk %}">
+                <a class="btn-nhb-blauw btn-small" href="{% url 'CompRayon:rayon-planning' deelcomp.pk %}">
                     <i class="material-icons-round left">arrow_forward</i>Bekijk</a>
             </td>
         </tr>

@@ -19,15 +19,13 @@ import datetime
 
 class TestVerenigingWL(E2EHelpers, TestCase):
 
-    """ Tests voor de Vereniging applicatie, functies voor de WL """
+    """ tests voor de Vereniging applicatie, functies voor de WL """
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 
     url_overzicht = '/vereniging/'
     url_ledenlijst = '/vereniging/leden-lijst/'
     url_voorkeuren = '/vereniging/leden-voorkeuren/'
-    url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'  # <comp_pk>
-    url_ingeschreven = '/vereniging/leden-ingeschreven/competitie/%s/'  # <deelcomp_pk>
     url_schutter_voorkeuren = '/sporter/voorkeuren/%s/'  # <sporter_pk>
 
     testdata = None
@@ -135,7 +133,7 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         self._create_competitie()
 
     def _create_histcomp(self):
-        # (strategisch gekozen) historische data om klassegrenzen uit te bepalen
+        # (strategisch gekozen) historische data om klassengrenzen uit te bepalen
         histcomp = HistCompetitie()
         histcomp.seizoen = '2018/2019'
         histcomp.comp_type = '18'
@@ -258,45 +256,6 @@ class TestVerenigingWL(E2EHelpers, TestCase):
             self.assert403(resp)   # naar Plein, want mag niet
         # for
         self.assertEqual(SporterBoog.objects.count(), 0)
-
-    def test_inschrijven(self):
-        url = self.url_inschrijven % self.comp_18.pk
-
-        # login als WL
-        self.e2e_login_and_pass_otp(self.account_wl)
-        self.e2e_wissel_naar_functie(self.functie_wl)
-        self.e2e_check_rol('WL')
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert403(resp)       # WL mag dit niet
-
-    def test_ingeschreven(self):
-        # login als WL
-        self.e2e_login_and_pass_otp(self.account_wl)
-        self.e2e_wissel_naar_functie(self.functie_wl)
-        self.e2e_check_rol('WL')
-
-        url = self.url_ingeschreven % self.deelcomp_regio.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('vereniging/competitie-ingeschreven.dtl', 'plein/site_layout.dtl'))
-
-        # probeer in te schrijven (mag niet)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
-        self.assert403(resp)
-
-    def test_cornercase(self):
-        # login als WL
-        self.e2e_login_and_pass_otp(self.account_wl)
-        self.e2e_wissel_naar_functie(self.functie_wl)
-        self.e2e_check_rol('WL')
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_ingeschreven % 9999999)
-        self.assert404(resp)         # 404 = Not found
 
     def test_wedstrijdlocatie(self):
         # maak een locatie en koppel aan de vereniging

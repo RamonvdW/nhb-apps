@@ -1,0 +1,170 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Planning Rayon{% endblock %}
+
+{% block pagina %}
+
+    <h4>Planning Rayon</h4>
+
+    <div class="row">
+
+        <!-- toon gegevens van de regio en competitie in een blauwe box -->
+        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
+            <div class="white-text nhb-blauw z-depth-2">
+
+                <div class="row small-row">
+                    <div class="col s3">Competitie:</div>
+                    <div class="col s7">{{ deelcomp_rk.competitie.beschrijving }}</div>
+                </div>
+
+                <div class="row small-row">
+                    <div class="col s3">Rayon:</div>
+                    <div class="col s7">{{ rayon }}</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    {% if url_bond %}
+        <p>&nbsp;</p>
+        <p><a class="btn-nhb-blauw" href="{{ url_bond }}">
+        <i class="material-icons-round left">arrow_upward</i>Planning landelijk</a></p>
+    {% endif %}
+
+
+    <p>&nbsp;</p>
+    <h5>RK wedstrijden</h5>
+
+    {% if not url_nieuwe_wedstrijd %}
+        <p>De RKO kan deze planning aanpassen.</p>
+    {% endif %}
+
+    <table class="white">
+
+        <thead>
+            <tr>
+                <th>Wanneer</th>
+                <th>Waar</th>
+                <th>Klassen</th>
+                <th>Capaciteit</th>
+                <th><!-- kolom voor wijzig knoppen --></th>
+            </tr>
+        </thead>
+
+        {% for wedstrijd in wedstrijden_rk %}
+            <tr>
+                <td>{{ wedstrijd.datum_wanneer|date:"l j F Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }}</td>
+
+                <td>
+                    {% if wedstrijd.vereniging %}
+                        <span>{{ wedstrijd.vereniging }}</span>
+                    {% else %}
+                        <i class="red-text">Nog niet bekend</i>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% for naam in wedstrijd.wkl_namen %}
+                        <span>{{ naam }}</span><br>
+                    {% endfor %}
+                </td>
+
+                <td>Nodig: {{ wedstrijd.schutters_count }}<br>Maximum: ?</td>
+
+                <!-- knop om wedstrijd te wijzigen -->
+                <td>
+                    {% if wedstrijd.url_wijzig %}
+                        <a class="btn-nhb-blauw btn-small" href="{{ wedstrijd.url_wijzig }}">
+                            <i class="material-icons-round left">arrow_forward</i>Aanpassen</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            {% if not url_nieuwe_wedstrijd %}
+                <tr>
+                    <td colspan="4"><i>Nog geen wedstrijden aangemaakt</i></td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+
+        <!-- knop om een regel toe te voegen -->
+        {% if url_nieuwe_wedstrijd %}
+            <tr>
+                <td colspan="4">
+                    <form action="{{ url_nieuwe_wedstrijd }}" method="post">
+                        {% csrf_token %}
+                        <button class="btn-nhb-blauw" type="submit">
+                            <i class="material-icons-round left">add</i>Wedstrijd toevoegen</button>
+                    </form>
+                </td>
+            </tr>
+        {% endif %}
+
+        {% if wkl_niet_gebruikt %}
+            <tr>
+                <td colspan="2"><i>De volgende klassen zijn nog niet gekoppeld aan een wedstrijd:</i></td>
+                <td>
+                    {% for wkl_beschrijving in wkl_niet_gebruikt %}
+                        <span>{{ wkl_beschrijving }}</span><br>
+                    {% endfor %}
+                </td>
+                <td colspan="2"><!-- kolommen voor capaciteit en knoppen --></td>
+            </tr>
+        {% endif %}
+    </table>
+
+    <p>&nbsp;</p>
+    <h5>Regiocompetitie</h5>
+    <table class="white">
+
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>Gebied</th>
+                <th>Rondes</th>
+                <th>Wedstrijden</th>
+                <th><!-- kolom voor button --></th>
+            </tr>
+        </thead>
+
+        {% for deelcomp in regio_deelcomps %}
+            <tr>
+                <td>
+                    {% if deelcomp.is_afgesloten %}
+                        <span class="green-text">Afgesloten</span>
+                    {% else %}
+                        <span>Actief</span>
+                    {% endif %}
+                </td>
+
+                <td>{{ deelcomp.nhb_regio }}</td>
+
+                <td>{{ deelcomp.rondes_count }}</td>
+
+                <td>{{ deelcomp.wedstrijden_count }}</td>
+
+                <!-- knop naar de details van de regioplanning -->
+                <td>
+                    <a class="btn-nhb-blauw btn-small" href="{% url 'CompRegio:regio-planning' deelcomp.pk %}">
+                        <i class="material-icons-round left">arrow_forward</i>Bekijk</a>
+                </td>
+            </tr>
+        {% endfor %}
+
+    </table>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-planning-rayon" %}
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

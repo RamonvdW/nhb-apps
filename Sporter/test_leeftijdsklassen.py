@@ -14,7 +14,8 @@ import datetime
 
 
 class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
-    """ unit tests voor de Schutter applicatie, module Leeftijdsklassen """
+
+    """ tests voor de Sporter applicatie, module Leeftijdsklassen """
 
     def setUp(self):
         """ initialisatie van de test case """

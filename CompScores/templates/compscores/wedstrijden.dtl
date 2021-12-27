@@ -1,0 +1,77 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Bondscompetitie wedstrijden{% endblock %}
+
+{% block pagina %}
+
+    <h4>Bondscompetitie wedstrijden</h4>
+
+    <p>Hieronder volgt de lijst van bondscompetitie wedstrijden die geschoten worden bij vereniging <b>{{ vereniging }}</b>.</p>
+
+    <p>Overige wedstrijden worden beheerd via de Wedstrijdkalender (zie het menu).</p>
+
+    {% if geen_wedstrijden %}
+
+        <p>&nbsp;</p>
+        <p>In de planning staan geen wedstrijden voor deze vereniging.</p>
+
+    {% else %}
+
+        <table class="white">
+            <thead>
+                <tr>
+                    <th>Wanneer</th>
+                    <th>Beschrijving</th>
+                    {% if not uitslag_invoeren %}
+                        <th>Waarschijnlijke deelnemers</th>
+                    {% endif %}
+                    <th>Uitslag</th>
+                </tr>
+            </thead>
+
+            {% for obj in wedstrijden %}
+                <tr>
+                    <td>{{ obj.datum_wanneer }} om {{ obj.tijd_begin_wedstrijd }}</td>
+                    <td>{{ obj.beschrijving1 }}<br>{% if obj.opvallen %}<b>{{ obj.beschrijving2 }}</b>{% else %}{{ obj.beschrijving2 }}{% endif %}</td>
+
+                    <!-- knop om de waarschijnlijke deelnemerslijst te zien -->
+                    {% if not uitslag_invoeren %}
+                        <td>
+                            {% if obj.url_waarschijnlijke_deelnemers %}
+                                <a class="btn-nhb-blauw" href="{{ obj.url_waarschijnlijke_deelnemers }}">{% if obj.is_rk %}RK programma{% else %}Toon lijst{% endif %}</a>
+                            {% endif %}
+                        </td>
+                    {% endif %}
+
+                    <!-- knop om uitslagen te zien / in te voeren -->
+                    <td>
+                        {% if obj.url_uitslag_aanpassen %}
+                            <a class="btn-nhb-blauw" href="{{ obj.url_uitslag_aanpassen }}">
+                                <i class="material-icons-round left">arrow_forward</i>Aanpassen</a>
+                        {% elif obj.url_score_invoeren %}
+                            <a class="btn-nhb-blauw" href="{{ obj.url_score_invoeren }}">
+                                <i class="material-icons-round left">arrow_forward</i>Invoeren</a>
+                        {% elif obj.url_uitslag_bekijken %}
+                            <a class="btn-nhb-blauw" href="{{ obj.url_uitslag_bekijken }}">
+                                <i class="material-icons-round left">arrow_forward</i>Bekijken</a>
+                        {% endif %}
+
+                        {% if obj.toon_geen_uitslag %}
+                            <span><i>Nog geen</i></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+
+    {% endif %}
+
+{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compscores-wedstrijden" %}
+
+{% endblock %}

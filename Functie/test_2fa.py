@@ -17,7 +17,8 @@ def get_otp_code(account):
 
 
 class TestFunctie2FA(E2EHelpers, TestCase):
-    """ unit tests voor de Functie applicatie, module OTP / 2FA """
+
+    """ tests voor de Functie applicatie, module OTP / 2FA """
 
     test_after = ('Account', 'Functie.test_rol')
 
@@ -156,9 +157,9 @@ class TestFunctie2FA(E2EHelpers, TestCase):
 
         # login and pass OTP
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
-        # TODO: e2e manier vinden om te controleren dat account OTP nodig heeft
+        # FUTURE: e2e manier vinden om te controleren dat account OTP nodig heeft
         #self.assertTrue(account_needs_otp(self.account_admin))
-        # TODO: e2e manier vinden om te controleren dat account OTP control gehad heeft
+        # FUTURE: e2e manier vinden om te controleren dat account OTP control gehad heeft
         #self.assertTrue(user_is_otp_verified(self.client))
 
         # probeer OTP koppelen terwijl al gedaan

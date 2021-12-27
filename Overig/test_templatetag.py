@@ -9,7 +9,8 @@ from .templatetags.overig_filters import filter_highlight
 
 
 class TestOverigTemplatetags(TestCase):
-    """ unit tests voor de Overig applicatie, module Template tags """
+
+    """ tests voor de Overig applicatie, module Template tags """
 
     def setUp(self):
         """ initialisatie van de test case """

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -20,7 +20,8 @@ from datetime import timedelta
 
 
 class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
-    """ unit tests voor de Overig applicatie, module Tijdelijke Urls """
+
+    """ tests voor de Overig applicatie, module Tijdelijke Urls """
 
     testdata = None
 
@@ -252,6 +253,6 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported('/overig/url/0/')
 
 
-# TODO: tijdelijke URL horende bij kampioenschap
+# FUTURE: tijdelijke URL horende bij kampioenschap
 
 # end of file

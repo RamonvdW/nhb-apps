@@ -13,7 +13,6 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.otp import account_otp_prepare_koppelen, account_otp_koppel, account_otp_controleer, account_otp_is_gekoppeld
 from Functie.rol import rol_evalueer_opnieuw, rol_get_huidige_functie, rol_mag_wisselen
 from Plein.menu import menu_dynamics
-from .models import account_needs_otp
 from .forms import OTPControleForm
 from .maak_qrcode import qrcode_get
 
@@ -189,7 +188,6 @@ class OTPKoppelenStap3View(OTPKoppelenStapView):
             # controle is mislukt - is al gelogd
             form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
             # FUTURE: blokkeer na X pogingen
-
 
         # still here --> re-render with error message
         context = dict()

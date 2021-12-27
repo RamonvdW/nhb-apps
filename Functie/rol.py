@@ -36,7 +36,6 @@ class Rollen(enum.IntEnum):
 
     # rollen staan in prio volgorde
     # dus als je 3 hebt mag je kiezen uit 3 of hoger
-    ROL_IT = 1          # IT beheerder
     ROL_BB = 2          # Manager competitiezaken
     ROL_BKO = 3         # BK organisator, specifieke competitie
     ROL_RKO = 4         # RK organisator, specifieke competitie en rayon
@@ -56,7 +55,6 @@ class Rollen(enum.IntEnum):
 
 
 url2rol = {
-    'IT': Rollen.ROL_IT,
     'BB': Rollen.ROL_BB,
     'BKO': Rollen.ROL_BKO,
     'RKO': Rollen.ROL_RKO,
@@ -69,7 +67,6 @@ url2rol = {
 }
 
 rol2url = {
-    Rollen.ROL_IT: 'IT',
     Rollen.ROL_BB: 'BB',
     Rollen.ROL_BKO: 'BKO',
     Rollen.ROL_RKO: 'RKO',
@@ -131,10 +128,13 @@ def rol_zet_sessionvars(account, request):
     # lees de functie tabel eenmalig in en kopieer alle informatie
     # om verdere queries te voorkomen
     functie_cache = dict()
+    functie_rcl = dict()        # [regio nummer] = (functie_pk, functie_pk)
+
     for obj in (Functie
                 .objects
                 .select_related('nhb_rayon', 'nhb_regio', 'nhb_regio__rayon', 'nhb_ver')
                 .only('rol', 'comp_type',
+                      'nhb_regio__regio_nr',
                       'nhb_rayon__rayon_nr',
                       'nhb_regio__rayon__rayon_nr',
                       'nhb_ver__ver_nr')):
@@ -148,8 +148,13 @@ def rol_zet_sessionvars(account, request):
             func.rayon_nr = obj.nhb_rayon.rayon_nr
             func.comp_type = obj.comp_type
         elif func.rol == "RCL":
+            func.regio_nr = obj.nhb_regio.regio_nr
             func.regio_rayon_nr = obj.nhb_regio.rayon.rayon_nr
             func.comp_type = obj.comp_type
+            try:
+                functie_rcl[func.regio_nr].append(func.pk)
+            except KeyError:
+                functie_rcl[func.regio_nr] = [func.pk]
         elif func.rol in ("HWL", "WL", "SEC"):
             func.ver_nr = obj.nhb_ver.ver_nr
         functie_cache[obj.pk] = func
@@ -160,9 +165,6 @@ def rol_zet_sessionvars(account, request):
     if account.is_authenticated:
         show_vhpg, _ = account_needs_vhpg(account)
         if account_rechten_is_otp_verified(request) and not show_vhpg:
-            if account.is_staff:
-                rollen_vast.append(Rollen.ROL_IT)
-
             if account.is_staff or account.is_BB:
                 rollen_vast.append(Rollen.ROL_BB)
 
@@ -194,6 +196,17 @@ def rol_zet_sessionvars(account, request):
                     child_tup = (rol, functie.pk)
                     tup = (child_tup, parent_tup)
                     rollen_functies.append(tup)
+
+                    if rol == Rollen.ROL_RCL:
+                        # zoek de andere RCL functie van deze regio erbij
+                        func = functie_cache[functie.pk]
+                        rcl_pks = functie_rcl[func.regio_nr]
+                        for pk in rcl_pks:
+                            if pk != functie.pk:
+                                buur_tup = (rol, pk)
+                                tup = (buur_tup, child_tup)
+                                rollen_functies.append(tup)
+                        # for
             # for
 
             # probeer elke rol nog verder te expanderen
@@ -327,12 +340,10 @@ def rol_bepaal_beschrijving(rol, functie_pk=None):
     else:
         functie_naam = ""
 
-    if rol == Rollen.ROL_IT:
-        beschr = 'IT beheerder'
-    elif rol == Rollen.ROL_BB:
+    if rol == Rollen.ROL_BB:
         beschr = 'Manager competitiezaken'
     elif rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC):
-        beschr = functie.beschrijving
+        beschr = functie_naam
     elif rol == Rollen.ROL_SPORTER:
         beschr = 'Sporter'
     else:   # ook rol == None

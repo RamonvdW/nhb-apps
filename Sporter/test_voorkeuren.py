@@ -15,7 +15,8 @@ import datetime
 
 
 class TestSporterVoorkeuren(E2EHelpers, TestCase):
-    """ unit tests voor de Sporter applicatie, module Voorkeuren """
+
+    """ tests voor de Sporter applicatie, module Voorkeuren """
 
     url_voorkeuren = '/sporter/voorkeuren/'
     url_wijzig = '/account/nieuw-wachtwoord/'

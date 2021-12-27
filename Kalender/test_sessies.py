@@ -15,7 +15,8 @@ import datetime
 
 
 class TestKalenderSessies(E2EHelpers, TestCase):
-    """ unit tests voor de Kalender applicatie """
+
+    """ tests voor de Kalender applicatie """
 
     url_kalender_vereniging = '/kalender/vereniging/'
     url_kalender_sessies = '/kalender/%s/sessies/'  # wedstrijd_pk

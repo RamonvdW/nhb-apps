@@ -9,9 +9,9 @@ from django.core import management
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, CompetitieKlasse, DeelCompetitie, DeelcompetitieRonde,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
-                               LAAG_REGIO, LAAG_BK)
+                               LAAG_REGIO, LAAG_BK, update_uitslag_teamcompetitie)
 from Competitie.test_fase import zet_competitie_fase
-from Competitie.operations import competities_aanmaken, competitie_klassegrenzen_vaststellen
+from Competitie.operations import competities_aanmaken, competitie_klassengrenzen_vaststellen
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
 from Score.operations import score_indiv_ag_opslaan
@@ -34,9 +34,9 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
 
         score_indiv_ag_opslaan(self.sporterboog_100005, 18, 9.500, None, "Test")
 
-        # klassegrenzen vaststellen
-        competitie_klassegrenzen_vaststellen(comp_18)
-        competitie_klassegrenzen_vaststellen(comp_25)
+        # klassengrenzen vaststellen
+        competitie_klassengrenzen_vaststellen(comp_18)
+        competitie_klassengrenzen_vaststellen(comp_25)
 
         self.deelcomp_r101 = DeelCompetitie.objects.filter(laag=LAAG_REGIO,
                                                            competitie=self.comp,
@@ -186,27 +186,13 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
             sportersboog = sportersboog[skip:]
         # while
 
-    def _sluit_alle_regiocompetities(self, comp):
-        # deze functie sluit alle regiocompetities af zodat de competitie in fase G komt
-        comp.bepaal_fase()
-        # print(comp.fase)
-        self.assertTrue('B' < comp.fase < 'G')
-        for deelcomp in DeelCompetitie.objects.filter(competitie=comp, laag=LAAG_REGIO):
-            if not deelcomp.is_afgesloten:      # pragma: no branch
-                deelcomp.is_afgesloten = True
-                deelcomp.save()
-        # for
-
-        comp.bepaal_fase()
-        self.assertEqual(comp.fase, 'G')
-
     def setUp(self):
         """ initialisatie van de test case """
 
-        self.url_planning_regio = '/bondscompetities/planning/regio/%s/'                  # deelcomp_pk
-        self.url_planning_regio_ronde = '/bondscompetities/planning/regio/ronde/%s/'      # ronde_pk
+        self.url_planning_regio = '/bondscompetities/regio/planning/%s/'                  # deelcomp_pk
+        self.url_planning_regio_ronde = '/bondscompetities/regio/planning/ronde/%s/'      # ronde_pk
         self.url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'       # wedstrijd_pk
-        self.url_inschrijven = '/vereniging/leden-aanmelden/competitie/%s/'               # comp_pk       # TODO: ongewenste dependency op Vereniging
+        self.url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'          # comp_pk
 
         # deze test is afhankelijk van de standaard regio's
         self.regio_101 = NhbRegio.objects.get(regio_nr=101)
@@ -458,6 +444,17 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog=self.sporterboog_100001)
         self.assertEqual(deelnemer.bij_vereniging.ver_nr, self.ver.ver_nr)
+        sporter = self.sporterboog_100001.sporter
+
+        # zet de sporter tijdelijk 'zwevend', ook al voorkomt de CRM import deze situatie tegenwoordig
+        sporter.bij_vereniging = None
+        sporter.save(update_fields=['bij_vereniging'])
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(165):
+            management.call_command('regiocomp_tussenstand', '2', '--all', '--quick', stderr=f1, stdout=f2)
+        self.assertFalse("[INFO] Verwerk overstap" in f2.getvalue())
 
         # maak een tweede vereniging aan
         regio_116 = NhbRegio.objects.get(regio_nr=116)
@@ -469,9 +466,8 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         # secretaris kan nog niet ingevuld worden
         ver.save()
 
-        sporter = deelnemer.sporterboog.sporter
         sporter.bij_vereniging = ver
-        sporter.save()
+        sporter.save(update_fields=['bij_vereniging'])
 
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -483,7 +479,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         self.ver.regio = regio_116
         self.ver.save()
         sporter.bij_vereniging = self.ver
-        sporter.save()
+        sporter.save(update_fields=['bij_vereniging'])
 
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -535,93 +531,6 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         self.assertIsNone(deelnemer.sporterboog.sporter.bij_vereniging)
         self.assertIsNotNone(deelnemer.bij_vereniging)
 
-    def test_rk_fase_overstap(self):
-        # test schutters die overstappen naar een andere vereniging binnen het rayon, tijdens de RK fase
-
-        # maak een paar score + scorehist
-        self._score_opslaan(self.uitslagen[0], self.sporterboog_100002, 123)
-        self._score_opslaan(self.uitslagen[2], self.sporterboog_100002, 124)
-        f1 = io.StringIO()
-        f2 = io.StringIO()
-        with self.assert_max_queries(164):
-            management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
-        self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
-
-        deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog=self.sporterboog_100002)
-        self.assertEqual(deelnemer.bij_vereniging.ver_nr, self.ver.ver_nr)
-
-        deelnemer.aantal_scores = 6
-        deelnemer.save()
-
-        # BKO zet de competitie naar de RK fase
-        zet_competitie_fase(self.comp, 'F')
-        self._sluit_alle_regiocompetities(self.comp)
-        self.e2e_login_and_pass_otp(self.account_bb)
-        self.e2e_wissel_naar_functie(self.functie_bko)
-        url = '/bondscompetities/%s/doorzetten/rk/' % self.comp.pk
-        self.client.post(url)
-
-        # standaard vereniging is regio 101
-        # maak een tweede vereniging aan in regio 102
-        regio_102 = NhbRegio.objects.get(regio_nr=102)
-        ver = NhbVereniging()
-        ver.naam = "Polderclub"
-        ver.plaats = "Polderstad"
-        ver.ver_nr = 1100
-        ver.regio = regio_102
-        # secretaris kan nog niet ingevuld worden
-        ver.save()
-
-        sporter = deelnemer.sporterboog.sporter
-        sporter.bij_vereniging = ver
-        sporter.save()
-
-        rk_deelnemer = KampioenschapSchutterBoog.objects.get(sporterboog=deelnemer.sporterboog)
-        rk_deelnemer.bij_vereniging = None
-        rk_deelnemer.save()
-
-        f1 = io.StringIO()
-        f2 = io.StringIO()
-        with self.assert_max_queries(135):
-            management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
-        self.assertTrue("[INFO] Verwerk overstap 100002: GEEN VERENIGING --> [102] [1100] Polderclub" in f2.getvalue())
-
-        # overstap naar vereniging in buiten het rayon
-        self.ver.regio = NhbRegio.objects.get(regio_nr=105)
-        self.ver.save()
-        sporter.bij_vereniging = self.ver
-        sporter.save()
-
-        rk_deelnemer = KampioenschapSchutterBoog.objects.get(sporterboog=deelnemer.sporterboog)
-        rk_deelnemer.bij_vereniging = None
-        rk_deelnemer.save()
-
-        f1 = io.StringIO()
-        f2 = io.StringIO()
-        with self.assert_max_queries(135):
-            management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
-        # print("f1: %s" % f1.getvalue())
-        # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[WARNING] Verwerk overstap naar ander rayon niet mogelijk voor 100002 in RK voor rayon 1: GEEN VERENIGING --> [105] [1000] Grote Club" in f2.getvalue())
-
-        # schutter die nog niet helemaal overgestapt is
-        sporter.bij_vereniging = None
-        sporter.save()
-
-        rk_deelnemer = KampioenschapSchutterBoog.objects.get(sporterboog=deelnemer.sporterboog)
-        rk_deelnemer.bij_vereniging = None
-        rk_deelnemer.save()
-
-        f1 = io.StringIO()
-        f2 = io.StringIO()
-        with self.assert_max_queries(135):
-            management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
-
-        # corner case
-        zet_competitie_fase(self.comp, 'L')
-        f1 = io.StringIO()
-        f2 = io.StringIO()
-        with self.assert_max_queries(135):
-            management.call_command('regiocomp_tussenstand', '1', '--quick', stderr=f1, stdout=f2)
+    # TODO: test garantie dat overstapper na fase G niet meer verwerkt wordt en vereniging voor RK rayon bevroren is
 
 # end of file

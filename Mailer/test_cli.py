@@ -11,8 +11,14 @@ from TestHelpers.e2ehelpers import E2EHelpers
 import io
 
 
-class TestMailerCliBase(E2EHelpers, object):
-    """ unit tests voor de Mailer applicatie """
+# TODO: test van status_mail_queue toevoegen
+
+TEST_EMAIL_ADRES = 'schutter@nhb.test'
+
+
+class TestMailerCliBase(E2EHelpers, TestCase):
+
+    """ tests voor de Mailer applicatie """
 
     def test_leeg(self):
         f1 = io.StringIO()
@@ -24,12 +30,12 @@ class TestMailerCliBase(E2EHelpers, object):
         self.assertEqual(f1.getvalue(), '')
 
     def test_deliver_faal(self):
-        # requires websim.py running in the background
+        # requires websim_mailer.py running in the background
 
         # stop een mail in de queue
         objs = MailQueue.objects.all()
         self.assertEqual(len(objs), 0)
-        mailer_queue_email('schutter@nhb.test', 'onderwerp faal', 'body\ndoei!\n')
+        mailer_queue_email(TEST_EMAIL_ADRES, 'onderwerp faal', 'body\ndoei!\n')
 
         # probeer te versturen
         obj = MailQueue.objects.all()[0]
@@ -47,12 +53,12 @@ class TestMailerCliBase(E2EHelpers, object):
         self.assertTrue('[WARNING] ' in f2.getvalue())
 
     def test_oud(self):
-        # requires websim.py running in the background
+        # requires websim_mailer.py running in the background
 
         # stop een mail in de queue
         objs = MailQueue.objects.all()
         self.assertEqual(len(objs), 0)
-        mailer_queue_email('schutter@nhb.test', 'onderwerp_1', 'body\ndoei!\n')
+        mailer_queue_email(TEST_EMAIL_ADRES, 'onderwerp_1', 'body\ndoei!\n')
         obj = MailQueue.objects.all()[0]
         self.assertFalse(obj.is_verstuurd)
         self.assertFalse('(verstuurd)' in str(obj))
@@ -71,14 +77,14 @@ class TestMailerCliBase(E2EHelpers, object):
         self.assertTrue('(verstuurd)' in str(obj))
 
     def test_nieuw(self):
-        # requires websim.py running in the background
+        # requires websim_mailer.py running in the background
         # om geen multi-threaded test te hoeven maken kunnen we het management commando
         # vragen om geen oude mails te sturen
 
         # stop een mail in de queue
         objs = MailQueue.objects.all()
         self.assertEqual(len(objs), 0)
-        mailer_queue_email('schutter@nhb.test', 'onderwerp_1', 'body\ndoei!\n')
+        mailer_queue_email(TEST_EMAIL_ADRES, 'onderwerp_1', 'body\ndoei!\n')
 
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -96,12 +102,12 @@ class TestMailerCliBase(E2EHelpers, object):
         self.assertTrue('(verstuurd)' in str(obj))
 
     def test_stuur_mail_vertraag(self):
-        # requires websim.py running in the background
+        # requires websim_mailer.py running in the background
 
         # stop een mail in de queue
         objs = MailQueue.objects.all()
         self.assertEqual(len(objs), 0)
-        mailer_queue_email('schutter@nhb.test', 'onderwerp delay', 'body\ndoei!\n')
+        mailer_queue_email(TEST_EMAIL_ADRES, 'onderwerp delay', 'body\ndoei!\n')
 
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -116,8 +122,9 @@ class TestMailerCliBase(E2EHelpers, object):
         self.assertTrue('(verstuurd)' in str(obj))
 
 
-class TestMailerCliBadBase(E2EHelpers, object):
-    """ unit tests voor de Mailer applicatie """
+class TestMailerCliBadBase(E2EHelpers, TestCase):
+
+    """ tests voor de Mailer applicatie """
 
     def test_stuur_mails_bad_duration(self):
         f1 = io.StringIO()
@@ -130,16 +137,16 @@ class TestMailerCliBadBase(E2EHelpers, object):
         # zoals http://localhost:9999
 
         # stop een mail in de queue
-        objs = MailQueue.objects.all()
-        self.assertEqual(len(objs), 0)
-        mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
+        self.assertEqual(MailQueue.objects.count(), 0)
+        mailer_queue_email(TEST_EMAIL_ADRES, 'onderwerp', 'body\ndoei!\n')
 
-        # probeer te versturen
+        self.assertEqual(MailQueue.objects.count(), 1)
         obj = MailQueue.objects.all()[0]
         self.assertFalse(obj.is_verstuurd)
+        self.assertFalse(obj.is_blocked)
         self.assertEqual(obj.aantal_pogingen, 0)
 
-        # following port must not have any service responding to it
+        # probeer te versturen
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20, check_duration=False):     # duurt 7 seconden
@@ -154,7 +161,7 @@ class TestMailerCliBadBase(E2EHelpers, object):
                    POSTMARK_API_KEY='the-api-key',
                    EMAIL_FROM_ADDRESS='noreply@nhb.test',
                    EMAIL_ADDRESS_WHITELIST=())
-class TestMailerCliPostmark(TestMailerCliBase, TestCase):
+class TestMailerCliPostmark(TestMailerCliBase):
     pass
 
 
@@ -162,9 +169,14 @@ class TestMailerCliPostmark(TestMailerCliBase, TestCase):
 @override_settings(POSTMARK_URL='http://localhost:9999',
                    POSTMARK_API_KEY='the-api-key',
                    EMAIL_FROM_ADDRESS='noreply@nhb.test',
-                   EMAIL_ADDRESS_WHITELIST=())
-class TestMailerCliBadPostmark(TestMailerCliBadBase, TestCase):
+                   EMAIL_ADDRESS_WHITELIST=(TEST_EMAIL_ADRES,))
+class TestMailerCliBadPostmark(TestMailerCliBadBase):
     pass
+
+
+# voorkomt uitvoeren van de tests in deze base classes
+del TestMailerCliBase
+del TestMailerCliBadBase
 
 
 # end of file

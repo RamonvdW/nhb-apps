@@ -55,12 +55,12 @@
     <div class="row">
 
         <!-- wedstrijden -->
-        {% url 'Vereniging:wedstrijden' as card_url %}
+        {% url 'CompScores:wedstrijden' as card_url %}
         {% include 'plein/card.dtl' with title="Competitiewedstrijden" text="Alle bondscompetitie wedstrijden die bij deze vereniging geschoten worden." icon="event" url=card_url %}
 
         <!-- scores invoeren -->
         {% if heeft_wedstrijden %}
-            {% url 'Vereniging:wedstrijden-uitslag-invoeren' as card_url %}
+            {% url 'CompScores:wedstrijden-scores' as card_url %}
             {% include 'plein/card.dtl' with title="Scores invoeren" text="Scores invoeren voor de wedstrijden die bij deze vereniging geschoten worden." icon="edit" url=card_url %}
         {% endif %}
 

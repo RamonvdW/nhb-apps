@@ -26,14 +26,20 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2021-12-21'
+SITE_VERSIE = '2021-12-27'
 
 # modules van de site
 INSTALLED_APPS = [
     'Beheer.apps.BeheerConfig',             # replaces admin
     'Account.apps.AccountConfig',
     'BasisTypen.apps.BasisTypenConfig',
+    'Bondspas.apps.BondspasConfig',
     'Competitie.apps.CompetitieConfig',
+    'CompInschrijven.apps.CompInschrijvenConfig',
+    'CompRegio.apps.CompRegioConfig',
+    'CompRayon.apps.CompRayonConfig',
+    'CompScores.apps.CompScoresConfig',
+    'CompUitslagen.apps.CompUitslagenConfig',
     'Functie.apps.FunctieConfig',
     'Handleiding.apps.HandleidingConfig',
     'HistComp.apps.HistCompConfig',
@@ -51,7 +57,6 @@ INSTALLED_APPS = [
     'Wedstrijden.apps.WedstrijdenConfig',
     'django.contrib.staticfiles',   # gather static files from modules helper
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user
-    'django.contrib.admin',         # see-all/fix-all admin pages
     'django.contrib.auth',          # authenticatie framework
     'django.contrib.contenttypes',  # permission association to models
     'django.contrib.messages',
@@ -186,6 +191,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 # interface naar achtergrondtaken
 BACKGROUND_SYNC_POORT = 3000
 BACKGROUND_SYNC__REGIOCOMP_MUTATIES = BACKGROUND_SYNC_POORT + 1
+BACKGROUND_SYNC__BONDSPAS_DOWNLOADER = BACKGROUND_SYNC_POORT + 2
 
 
 # our own test runner that executes the tests ordered by application hierarchy indicators to ensure that
@@ -234,7 +240,7 @@ RECORDS_TOEGESTANE_SOORTEN = (
     '60m (12p)',
     '70m (12p)',
 
-    # Outdoor, TODO: still to be cleaned up
+    # Outdoor, FUTURE: still to be cleaned up
     'ShortMetric',
 
     # indoor
@@ -362,61 +368,6 @@ SPEELSTERKTE_VOLGORDE = (
 )
 
 
-# definitions taken from saml2.saml to avoid importing saml2
-# because it replaces ElementTree with cElementTree, which gives problems with QR code generation
-NAMEID_FORMAT_UNSPECIFIED = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
-# NAMEID_FORMAT_EMAILADDRESS = 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
-BINDING_HTTP_REDIRECT = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
-BINDING_HTTP_POST = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
-
-SAML_BASE_URL = SITE_URL + '/idp'
-
-SAML_IDP_CONFIG = {
-    'debug': False,
-    'xmlsec_binary': '/usr/bin/xmlsec1',
-
-    # the SAML entity id of this side, the Identity Provider
-    # just a globally unique string
-    'entityid': 'NHB IT applications SAML2 Identity Provider',
-
-    # our service description (the identity provider)
-    'service': {
-         'idp': {
-             'name': 'NHB IT applications IdP',
-             'endpoints': {
-                 'single_sign_on_service': [
-                     (SAML_BASE_URL + '/sso/post',     BINDING_HTTP_POST),
-                     (SAML_BASE_URL + '/sso/redirect', BINDING_HTTP_REDIRECT)
-                 ]
-             },
-             'name_id_format': [NAMEID_FORMAT_UNSPECIFIED],
-             # signing assertion and responses is mandatory in SAML 2.0
-             'sign_response': True,
-             'sign_assertion': True
-         }
-    },
-
-    # signing keys
-    'key_file': os.path.join(BASE_DIR, 'nhbapps/data_private/saml2/private.key'),
-    'cert_file': os.path.join(BASE_DIR, 'nhbapps/data_private/saml2/cert.crt'),
-    'valid_for': 100*24
-}
-
-# SP to be entered into the database using admin interface
-# details:
-#   EntityId  https://wiki.handboogsport.st-visir.nl/saml/module.php/saml/sp/metadata.php/default-sp
-#   processor Functie.idp_accesscheck.WikiAccessCheck
-#   Attribute-mapping (JSON)
-#       (Account.field_name: expose as)
-#       (Account.method_name: expose as)
-"""
-{
-"username": "username",
-"get_email": "emailAddress",
-"volledige_naam": "real_name"
-}
-"""
-
 # pagina's van de handleiding
 HANDLEIDING_TOP = 'Hoofdpagina'
 HANDLEIDING_SEC = 'Handleiding_Secretaris'
@@ -430,7 +381,7 @@ HANDLEIDING_BB = 'Handleiding_BB'
 HANDLEIDING_2FA = 'Twee-factor_authenticatie'
 HANDLEIDING_ROLLEN = 'Rollen'
 HANDLEIDING_INTRO_NIEUWE_BEHEERDERS = 'Intro_nieuwe_beheerders'
-HANDLEIDING_SCHUTTERBOOG = 'Schutter-boog'
+HANDLEIDING_SPORTERBOOG = 'Sporter-boog'
 HANDLEIDING_INSCHRIJFMETHODES = 'Inschrijfmethodes_Regiocompetitie'
 HANDLEIDING_CLUSTERS = 'Clusters'
 HANDLEIDING_RK_SELECTIE = 'RK_selectie'
@@ -450,7 +401,7 @@ HANDLEIDING_PAGINAS = [
     HANDLEIDING_2FA,
     HANDLEIDING_ROLLEN,
     HANDLEIDING_INTRO_NIEUWE_BEHEERDERS,
-    HANDLEIDING_SCHUTTERBOOG,
+    HANDLEIDING_SPORTERBOOG,
     HANDLEIDING_PLANNING_REGIO,
     HANDLEIDING_INSCHRIJFMETHODES,
     HANDLEIDING_CLUSTERS,
@@ -459,7 +410,6 @@ HANDLEIDING_PAGINAS = [
     HANDLEIDING_POULES,
     HANDLEIDING_WEDSTRIJDKALENDER_HWL,
     # pagina's van de handleiding die intern gerefereerd worden
-    'Tips_voor_wiki_gebruik',
     'Koppelen_beheerders'
 ]
 

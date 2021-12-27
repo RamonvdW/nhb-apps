@@ -17,7 +17,7 @@ import datetime
 
 class TestVerenigingenLijst(E2EHelpers, TestCase):
 
-    """ unit tests voor de Vereniging applicatie, Lijst Verenigingen """
+    """ tests voor de Vereniging applicatie, Lijst Verenigingen """
 
     url_lijst = '/vereniging/accommodaties/lijst/'
 
@@ -109,19 +109,8 @@ class TestVerenigingenLijst(E2EHelpers, TestCase):
         self.assert403(resp)
         self.e2e_assert_other_http_commands_not_supported(self.url_lijst)
 
-    def test_it(self):
-        # landelijke lijst + leden aantal
-        self.e2e_login_and_pass_otp(self.testdata.account_admin)
-        self.e2e_wisselnaarrol_it()
-        self.e2e_check_rol('IT')
-        with self.assert_max_queries(9):
-            resp = self.client.get(self.url_lijst)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('vereniging/lijst-verenigingen.dtl', 'plein/site_layout.dtl'))
-
     def test_bb(self):
-        # landelijke lijst met rayon & regio
+        # landelijke lijst met rayon & regio + leden aantallen
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')

@@ -22,21 +22,27 @@ def init_functies_2019(apps, _):
     comps = (('18', 'Indoor'),
              ('25', '25m 1pijl'))
 
+    bulk = list()
+
     for comp_type, comp_descr in comps:
         # BKO
-        functie_klas(beschrijving='BKO ' + comp_descr,
-                     rol='BKO',
-                     comp_type=comp_type).save()
+        bulk.append(
+            functie_klas(
+                    beschrijving='BKO ' + comp_descr,
+                    rol='BKO',
+                    comp_type=comp_type))
 
         # RKO per rayon
         for obj in (rayon_klas
                     .objects
                     .all()):
 
-            functie_klas(beschrijving='RKO Rayon %s %s' % (obj.rayon_nr, comp_descr),
-                         rol='RKO',
-                         nhb_rayon=obj,
-                         comp_type=comp_type).save()
+            bulk.append(
+                functie_klas(
+                        beschrijving='RKO Rayon %s %s' % (obj.rayon_nr, comp_descr),
+                        rol='RKO',
+                        nhb_rayon=obj,
+                        comp_type=comp_type))
         # for
 
         # RCL per regio
@@ -44,12 +50,16 @@ def init_functies_2019(apps, _):
                     .objects
                     .exclude(regio_nr=ADMINISTRATIEVE_REGIO)):
 
-            functie_klas(beschrijving='RCL Regio %s %s' % (obj.regio_nr, comp_descr),
-                         rol='RCL',
-                         nhb_regio=obj,
-                         comp_type=comp_type).save()
+            bulk.append(
+                functie_klas(
+                        beschrijving='RCL Regio %s %s' % (obj.regio_nr, comp_descr),
+                        rol='RCL',
+                        nhb_regio=obj,
+                        comp_type=comp_type))
         # for
     # for
+
+    functie_klas.objects.bulk_create(bulk)
 
 
 class Migration(migrations.Migration):

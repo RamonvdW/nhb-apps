@@ -17,7 +17,8 @@ import datetime
 
 
 class TestAccountLogin(E2EHelpers, TestCase):
-    """ unit tests voor de Account applicatie; module Login/Logout """
+
+    """ tests voor de Account applicatie; module Login/Logout """
 
     url_login = '/account/login/'
 

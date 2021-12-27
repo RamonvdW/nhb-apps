@@ -27,6 +27,7 @@
 
             <!-- rayon -->
             {% include 'plein/card.dtl' with title="Rayon Individueel" text=text_rayon_indiv icon="view_compact" url=url_rayon_indiv %}
+            {% include 'plein/card.dtl' with title="Rayon Teams" text=text_rayon_teams icon="view_compact" url=url_rayon_teams %}
 
             <!-- bond -->
             {% include 'plein/card.dtl' with title="Bond" text=text_bond icon="flag" url=url_bond %}
@@ -54,7 +55,7 @@
                 {% include 'plein/card.dtl' with title="Zet datums" text="Belangrijke datums aanpassen voor de fases van deze nieuwe competitie." icon="build" url=card_url %}
             {% endif %}
 
-            {% if not comp.klassegrenzen_vastgesteld %}
+            {% if not comp.klassengrenzen_vastgesteld %}
                 <!-- ag vaststellen -->
                 {% if datum_ag_vastgesteld %}
                     <!-- template tag 'add' cannot handle missing variables -->
@@ -63,9 +64,9 @@
                     {% include 'plein/card.dtl' with title="Aanvangsgemiddelden" text=comp_afstand|add:"m AG voor alle sporters vaststellen a.h.v. uitslag vorig seizoen (eerste keer)" icon="how_to_reg" url=comp.url_ag_vaststellen %}
                 {% endif %}
 
-                <!-- klassegrenzen vaststellen -->
-                {% url 'Competitie:klassegrenzen-vaststellen' comp_pk=comp.pk as card_url %}
-                {% include 'plein/card.dtl' with title="Zet klassegrenzen" text="Klassegrenzen vaststellen (eenmalige actie)." icon="equalizer" url=card_url %}
+                <!-- klassengrenzen vaststellen -->
+                {% url 'Competitie:klassengrenzen-vaststellen' comp_pk=comp.pk as card_url %}
+                {% include 'plein/card.dtl' with title="Zet klassengrenzen" text="Klassengrenzen vaststellen (eenmalige actie)." icon="equalizer" url=card_url %}
             {% endif %}
 
         {% endif %}     <!-- rol_is_bb -->
@@ -121,7 +122,7 @@
 
             <!-- RK selectie -->
             {% if url_lijst_rk %}
-                {% include 'plein/card.dtl' with title="RK selectie" text="Selectie van sporters voor de Rayonkampioenschappen." icon="receipt" url=url_lijst_rk %}
+                {% include 'plein/card.dtl' with title="RK selectie" text="Selectie van sporters voor de Rayonkampioenschappen." icon="rule" url=url_lijst_rk %}
             {% endif %}
 
             <!-- limieten RK -->
@@ -151,13 +152,23 @@
             {% include 'plein/card.dtl' with title="Doorzetten" text=bko_doorzetten.titel_doorzetten icon="mediation" url=bko_doorzetten.url_doorzetten %}
         {% endif %}
 
+        {% if url_klassengrenzen_rk_bk_vaststellen %}
+            {% include 'plein/card.dtl' with title="Doorzetten" text=tekst_klassengrenzen_rk_bk_vaststellen icon="mediation" url=url_klassengrenzen_rk_bk_vaststellen %}
+        {% endif %}
+
         {% if bko_afsluiten %}
             {% include 'plein/card.dtl' with title="Afsluiten" text=bko_afsluiten.titel_afsluiten icon="mediation" url=bko_afsluiten.url_afsluiten %}
         {% endif %}
 
         {% if regio_instellingen_globaal %}
-            {% url 'Competitie:regio-instellingen-globaal' comp_pk=comp.pk as card_url %}
+            {% url 'CompRegio:regio-instellingen-globaal' comp_pk=comp.pk as card_url %}
             {% include 'plein/card.dtl' with title="Regio keuzes" text="Overzicht van de keuzes gemaakt per regio" icon="flaky" url=card_url %}
+        {% endif %}
+
+        <!-- clusters RCL -->
+        {% if toon_clusters %}
+            {% url 'CompRegio:clusters' as card_url %}
+            {% include 'plein/card.dtl' with title="Clusters" text="Mogelijkheden om in jouw regio de verenigingen in geografische clusters te groeperen." icon="group_work" url=card_url %}
         {% endif %}
 
         {% if rol_is_bb %}
@@ -169,9 +180,9 @@
         {% endif %}     <!-- rol_is_bb -->
 
         <!-- toon klassen -->
-        {% if comp.klassegrenzen_vastgesteld %}
-            {% url 'Competitie:klassegrenzen-tonen' comp_pk=comp.pk as card_url %}
-            {% include 'plein/card.dtl' with title="Wedstrijdklassen" text="Toon de wedstrijdklassen, klassegrenzen en blazoenen voor de competitie." icon="equalizer" url=card_url %}
+        {% if comp.klassengrenzen_vastgesteld %}
+            {% url 'Competitie:klassengrenzen-tonen' comp_pk=comp.pk as card_url %}
+            {% include 'plein/card.dtl' with title="Wedstrijdklassen" text="Toon de wedstrijdklassen, klassengrenzen en blazoenen voor de competitie." icon="equalizer" url=card_url %}
         {% endif %}
 
     </div>

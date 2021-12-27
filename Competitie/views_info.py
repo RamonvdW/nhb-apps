@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.views.generic import TemplateView, ListView, View
+from django.views.generic import TemplateView
 from django.utils import timezone
 from Plein.menu import menu_dynamics
 from BasisTypen.models import IndivWedstrijdklasse

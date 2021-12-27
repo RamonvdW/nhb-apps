@@ -13,7 +13,8 @@ import datetime
 
 
 class TestFunctieWisselVanRol(E2EHelpers, TestCase):
-    """ unit tests voor de Functie applicatie, module Wissel van Rol """
+
+    """ tests voor de Functie applicatie, module Wissel van Rol """
 
     test_after = ('Functie.test_rol',)
 
@@ -119,11 +120,12 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
         # controleer dat de complete keuzemogelijkheden op de pagina staan
         self.client.session.save()      # in session aanwezige cache data (over taken) opslaan
-        with self.assert_max_queries(11):
+        with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assertContains(resp, 'IT beheerder')
+        self.assertContains(resp, 'Admin site')
+        self.assertContains(resp, 'Account wissel')
         self.assertContains(resp, 'Manager competitiezaken')
         self.assertContains(resp, 'Gebruiker')
 
@@ -190,22 +192,14 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Gebruiker")
         urls = self._get_wissel_urls(resp)
-        self.assertIn(self.url_activeer_rol % 'IT', urls)          # IT beheerder
         self.assertIn(self.url_activeer_rol % 'BB', urls)          # Manager competitiezaken
         self.assertIn(self.url_activeer_rol % 'geen', urls)        # Gebruiker
-        self.assertNotIn(self.url_accountwissel, urls)
+        self.assertIn(self.url_accountwissel, urls)
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_activeer_rol % 'BB', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Manager competitiezaken")
-        urls = self._get_wissel_urls(resp)
-        self.assertNotIn(self.url_accountwissel, urls)
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_activeer_rol % 'IT', follow=True)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "IT beheerder")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_accountwissel, urls)
 
@@ -214,20 +208,20 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_activeer_rol % 'huh', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "IT beheerder")
+        self.assertContains(resp, "Manager competitiezaken")
 
         # controleer dat een rol wissel die met een functie moet geen effect heeft
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_activeer_rol % 'BKO', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "IT beheerder")
+        self.assertContains(resp, "Manager competitiezaken")
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_activeer_rol % 'geen', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Gebruiker")
         urls = self._get_wissel_urls(resp)
-        self.assertNotIn(self.url_accountwissel, urls)
+        self.assertIn(self.url_accountwissel, urls)
 
     def test_bb(self):
         # maak een BB die geen NHB lid is
@@ -508,36 +502,6 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)       # checkt ook href's
-
-    def test_it_naar_sec(self):
-        self.e2e_account_accepteert_vhpg(self.account_admin)
-        self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_wisselnaarrol_it()
-        self.e2e_check_rol('IT')
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_wissel_van_rol)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "(extra keuzescherm)")
-        self.assertContains(resp, "Secretaris")
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_wissel_naar_sec)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('functie/wissel-naar-sec.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
-
-        self.e2e_assert_other_http_commands_not_supported(self.url_wissel_naar_sec)
-
-        self.e2e_wissel_naar_functie(self.functie_sec)
-        self.e2e_check_rol('SEC')
-
-        # corner cases
-        self.e2e_wisselnaarrol_it()
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_activeer_functie % 999999)
-        self.assert_is_redirect(resp, self.url_wissel_van_rol)
 
     def test_bb_naar_sec(self):
         # maak een BB die geen NHB lid is

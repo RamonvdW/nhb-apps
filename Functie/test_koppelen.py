@@ -18,7 +18,8 @@ import datetime
 
 
 class TestFunctieKoppelen(E2EHelpers, TestCase):
-    """ unit tests voor de Functie applicatie, functionaliteit Koppel bestuurders """
+
+    """ tests voor de Functie applicatie, functionaliteit Koppel bestuurders """
 
     test_after = ('Account', 'Functie.test_2fa', 'Functie.test_overzicht')
 
@@ -261,7 +262,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         # probeer een GET
         with self.assert_max_queries(20):
             resp = self.client.get('/functie/wijzig/123/ontvang/')
-        self.assert404(resp)  # 404 = Not allowed
+        self.assertEqual(resp.status_code, 405)  # 405 = Not implemented
 
         # probeer een niet-bestaande functie
         with self.assert_max_queries(20):
@@ -696,5 +697,6 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
 
         session = SessionStore(session_key_beh1)
         self.assertEqual(session[SESSIONVAR_ROL_MAG_WISSELEN], True)
+
 
 # end of file

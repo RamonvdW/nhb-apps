@@ -68,18 +68,15 @@ def minify_part(script):
 
 
 def zoek_eind_quote(script, stop_char):
-    #print('zoek_eind_quote: stop_char=%s, script=%s' % (repr(stop_char), repr(script[:100])))
     start = 0
     while start < len(script):
         pos = script.find(stop_char, start)
         if pos > 0 and script[pos-1] == '\\':
             # escaped, dus overslaan
-            #print('escaped: %s' % repr(script[pos-10:pos+10]))
             start = pos+1
         else:
             break   # from the while
     # while
-    #print('    pos=%s' % pos)
     return pos
 
 
@@ -112,7 +109,6 @@ def minify_javascript(script):
 
         if pos_c >= 0 and pos_q >= 0:
             # zowel quote and commentaar
-            #print('c+q=%s,%s: %s' % (pos_c, pos_q, repr(script[:50])))
             if pos_c < pos_q:
                 # commentaar komt eerst
 
@@ -128,7 +124,6 @@ def minify_javascript(script):
                     if pos > 0:
                         script = script[pos+1:]
                 else:
-                    #print('block comment: %s' % repr(script[:50]))
                     # verwijder block comment
                     pos = script.find('*/')
                     if pos > 0:
@@ -137,15 +132,12 @@ def minify_javascript(script):
                 # opnieuw evalueren
                 continue
 
-        #print('pos_sq:', pos_sq, 'pos_dq:', pos_dq, '--> pos:', pos)
-
         if pos_q >= 0:
             pre_string = script[:pos_q]
             clean += minify_part(pre_string)
 
             stop_char = script[pos_q]
             script = script[pos_q+1:]         # kap pre-string en quote eraf
-            #print('script[:20]:', repr(script[:20]))
             pos = zoek_eind_quote(script, stop_char)
             clean += stop_char              # open char
             clean += script[:pos+1]         # kopieer string inclusief stop-char

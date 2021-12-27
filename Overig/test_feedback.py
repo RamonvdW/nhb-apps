@@ -10,7 +10,8 @@ from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestOverigFeedback(E2EHelpers, TestCase):
-    """ unit tests voor de Overig applicatie, module Feedback """
+
+    """ tests voor de Overig applicatie, module Feedback """
 
     url_plein = '/plein/'
     url_feedback = '/overig/feedback/%s/%s/'  # min/nul/plus, op_pagina
@@ -102,9 +103,19 @@ class TestOverigFeedback(E2EHelpers, TestCase):
                                     {'bevinding': '4',
                                      'feedback': 20*'Just testing '})   # 20x makes it >80 chars long
         self.assert_is_redirect(resp, self.url_feedback_bedankt)
+
+        self.assertEqual(SiteFeedback.objects.count(), 1)
         obj = SiteFeedback.objects.all()[0]
         descr = str(obj)
         self.assertGreater(len(descr), 0)
+
+        # probeer dezelfde feedback nog een keer te posten (wordt voorkomen)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_feedback_formulier,
+                                    {'bevinding': '4',
+                                     'feedback': 20*'Just testing '})   # 20x makes it >80 chars long
+        self.assert_is_redirect(resp, self.url_feedback_bedankt)
+        self.assertEqual(SiteFeedback.objects.count(), 1)
 
     def test_form_bad(self):
         with self.assert_max_queries(20):
@@ -169,20 +180,6 @@ class TestOverigFeedback(E2EHelpers, TestCase):
             resp = self.client.get(self.url_feedback_inzicht)
         self.assert403(resp)
 
-    def test_inzicht_admin(self):
-        # do een get van alle feedback als IT beheerder
-        self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_wisselnaarrol_it()
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_feedback_inzicht)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('overig/site-feedback-inzicht.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
-        self.assertContains(resp, "door de ontwikkelaar afgehandeld")
-
-        self.e2e_assert_other_http_commands_not_supported(self.url_feedback_inzicht)
-
     def test_inzicht_bb(self):
         # do een get van alle feedback als BB
         self.account_normaal.is_BB = True
@@ -199,5 +196,21 @@ class TestOverigFeedback(E2EHelpers, TestCase):
         self.assertContains(resp, "door de ontwikkelaar afgehandeld")
 
         self.e2e_assert_other_http_commands_not_supported(self.url_feedback_inzicht)
+
+    def test_inzicht_it(self):
+        self.e2e_account_accepteert_vhpg(self.account_admin)
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_feedback_inzicht)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('overig/site-feedback-inzicht.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        self.assertEqual(urls, ['/beheer/Overig/sitefeedback/'])
+
 
 # end of file

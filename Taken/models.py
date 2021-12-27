@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -27,6 +27,7 @@ class Taak(models.Model):
     deadline = models.DateField()
 
     # wie heeft hier om gevraagd
+    # null/None = Systeem
     aangemaakt_door = models.ForeignKey(Account, on_delete=models.SET_NULL,
                                         null=True, blank=True,
                                         related_name='account_taken_aangemaakt')
@@ -63,21 +64,22 @@ def taken_opschonen(stdout):
     """ deze functie wordt typisch 1x per dag aangeroepen om de database
         tabellen van deze applicatie op te kunnen schonen.
 
-        We verwijderen taken die ...
+        We verwijderen taken die afgerond en een deadline meer dan 3 kwartalen geleden.
     """
 
-    # TODO: implement
-
     now = timezone.now()
-    # max_age = now - datetime.timedelta(days=)
+    oud = now - datetime.timedelta(days=92)
 
-    # for obj in (Taken
-    #            .objects
-    #            .filter(...)):
-    #
-    #    stdout.write('[INFO] Verwijder ongebruikte tijdelijke url %s' % obj)
-    #    obj.delete()
+    aantal = 0
+    for obj in (Taak
+                .objects
+                .filter(is_afgerond=True,
+                        deadline__lt=oud)):
+        aantal += 1
+        obj.delete()
     # for
 
+    if aantal > 0:
+        stdout.write('[INFO] Aantal oude afgehandelde taken verwijderd: %s' % aantal)
 
 # end of file

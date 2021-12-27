@@ -70,6 +70,14 @@ def _maak_deelcompetities(comp, rayons, regios, functies):
         vorige_deelcomps[deelcomp.nhb_regio.regio_nr] = deelcomp
     # for
 
+    # maak wedstrijdplannen aan: voor de 4x LAAG_RK en 1x voor LAAG_BK
+    plannen = [CompetitieWedstrijdenPlan(),
+               CompetitieWedstrijdenPlan(),
+               CompetitieWedstrijdenPlan(),
+               CompetitieWedstrijdenPlan(),
+               CompetitieWedstrijdenPlan()]
+    CompetitieWedstrijdenPlan.objects.bulk_create(plannen)
+
     # maak de Deelcompetities aan voor Regio, RK, BK
     bulk = list()
     for laag, _ in DeelCompetitie.LAAG:
@@ -102,7 +110,8 @@ def _maak_deelcompetities(comp, rayons, regios, functies):
                 deel = DeelCompetitie(competitie=comp,
                                       laag=laag,
                                       nhb_rayon=obj,
-                                      functie=functie)
+                                      functie=functie,
+                                      plan=plannen[obj.rayon_nr])
                 bulk.append(deel)
             # for
         else:
@@ -110,7 +119,8 @@ def _maak_deelcompetities(comp, rayons, regios, functies):
             functie = functies[("BKO", comp.afstand, 0)]
             deel = DeelCompetitie(competitie=comp,
                                   laag=laag,
-                                  functie=functie)
+                                  functie=functie,
+                                  plan=plannen[0])
             bulk.append(deel)
     # for
 
@@ -143,13 +153,27 @@ def _maak_competitieklassen(comp):
         bulk.append(klasse)
     # for
 
-    for team in (TeamWedstrijdklasse
-                 .objects
-                 .exclude(buiten_gebruik=True)):
+    teams = (TeamWedstrijdklasse
+             .objects
+             .exclude(buiten_gebruik=True))
+
+    # team klassen voor de regiocompetitie
+    for team in teams:
         klasse = CompetitieKlasse(
                         competitie=comp,
                         team=team,
-                        min_ag=AG_NUL)
+                        min_ag=AG_NUL,
+                        is_voor_teams_rk_bk=False)
+        bulk.append(klasse)
+    # for
+
+    # team klassen voor RK/BK
+    for team in teams:
+        klasse = CompetitieKlasse(
+                        competitie=comp,
+                        team=team,
+                        min_ag=AG_NUL,
+                        is_voor_teams_rk_bk=True)
         bulk.append(klasse)
     # for
 
@@ -207,6 +231,7 @@ def competities_aanmaken(jaar=None):
                     einde_teamvorming=yearend,
                     eerste_wedstrijd=yearend,
                     laatst_mogelijke_wedstrijd=begin_rk,
+                    datum_klassengrenzen_rk_bk_teams=begin_rk,
                     rk_eerste_wedstrijd=begin_rk,
                     rk_laatste_wedstrijd=begin_rk + datetime.timedelta(days=7),
                     bk_eerste_wedstrijd=begin_bk,

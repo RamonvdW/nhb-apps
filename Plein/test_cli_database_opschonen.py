@@ -9,14 +9,17 @@ from django.core import management
 from Account.models import account_create
 from Logboek.models import LogboekRegel, schrijf_in_logboek
 from Mailer.models import MailQueue, mailer_queue_email
-from Overig.models import SiteFeedback, save_tijdelijke_url, store_feedback
+from Overig.models import SiteFeedback, save_tijdelijke_url
+from Overig.feedback_opslaan import store_feedback
+from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 import io
 
 
 class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
-    """ unittests voor de Plein applicatie, management command database_opschonen """
+
+    """ tests voor de Plein applicatie, management command database_opschonen """
 
     maxDiff = None
     
@@ -37,7 +40,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         # maak een oude logboek regel aan
         schrijf_in_logboek(None, 'Test', 'Just testing')
         regel = LogboekRegel.objects.get(gebruikte_functie='Test')
-        regel.toegevoegd_op -= datetime.timedelta(days=366)
+        regel.toegevoegd_op -= datetime.timedelta(days=549)
         regel.save()
 
         # maak een mail aan die lang geleden verstuurd is
@@ -56,10 +59,15 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         feedback.is_afgehandeld = True
         feedback.save()
 
+        # maak een afgehandelde taak aan
+        Taak(is_afgerond=True,
+             deadline='2020-01-01',
+             beschrijving='test').save()
+
     def test_alles(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(26):
             management.call_command('database_opschonen', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())

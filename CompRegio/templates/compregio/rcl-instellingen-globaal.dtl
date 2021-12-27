@@ -1,0 +1,49 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Regio keuzes{% endblock %}
+
+{% block pagina %}
+
+    <h4>Regio keuzes</h4>
+
+    <p>Op deze pagina wordt een overzicht gegeven van de keuzes in de verschillende regio's voor de <b>{{ comp }}</b>.</p>
+
+    <table class="white">
+        <thead>
+            <tr>
+                <th class="center-align">Rayon</th>
+                <th class="center-align">Regio</th>
+                <th>Inschrijfmethode</th>
+                <th class="center-align">Teamcompetitie</th>
+                <th>Teams aanmaken tot</th>
+                <th>Team samenstelling</th>
+                <th>Team puntenmodel</th>
+            </tr>
+        </thead>
+
+        {% for deelcomp in deelcomps %}
+            <tr{% if deelcomp.highlight %} class="nhb-blauw white-text"{% endif %}>
+                <td class="center-align">{{ deelcomp.rayon_str }}</td>
+                <td class="center-align">{{ deelcomp.regio_str }}</td>
+                <td>{{ deelcomp.inschrijfmethode_str }}</td>
+                <td class="center-align">{{ deelcomp.teamcomp_str }}</td>
+                <td>{{ deelcomp.einde_teams_aanmaken_str }}</td>
+                <td>{{ deelcomp.team_type_str }}</td>
+                <td>{{ deelcomp.puntenmodel_str }}</td>
+           </tr>
+        {% endfor %}
+    </table>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-rcl-instellingen-globaal" %}
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

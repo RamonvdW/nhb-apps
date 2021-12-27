@@ -8,30 +8,33 @@
 {% block title %}Handleiding Hoofdwedstrijdleider{% endblock %}
 
 {% block pagina %}
-<div class="white" style="padding:10px 30px 10px 30px">
-<h4>Handleiding Hoofdwedstrijdleider</h4>
-<p>De HWL is de coördinator van een vereniging voor alles omtrent wedstrijden en de competities.</p>
-<p></p>
-<p>Binnen de website heeft de HWL de volgende mogelijkheden:</p>
-<ul style="padding-left: 20px">
-<li style="list-style-type: disc; padding-left: 0px">Leden helpen met het aanpassen van hun voorkeuren, zoals type boog waarmee geschoten wordt</li>
-<li style="list-style-type: disc; padding-left: 0px">Leden aanmelden voor de competitie (bulk optie)</li>
-<li style="list-style-type: disc; padding-left: 0px">Leden afmelden voor een competitie (bulk optie)</li>
-<li style="list-style-type: disc; padding-left: 0px">Teams aanmaken voor de regiocompetitie</li>
-<li style="list-style-type: disc; padding-left: 0px">Leden van de eigen vereniging koppelen aan de rol van Wedstrijdleider (WL) + ontkoppelen</li>
-<li style="list-style-type: disc; padding-left: 0px">Instellingen van de accommodatie en wedstrijdlocaties van de vereniging aanpassen</li>
-<li style="list-style-type: disc; padding-left: 0px">Wedstrijden beheren op de wedstrijdkalender</li>
-</ul>
-<p></p>
-<p>De HWL heeft inzicht in de tijdlijn van de bondscompetities.</p>
-<p></p>
-<hr><h5>Verder</h5>
-<ul style="padding-left: 20px">
-<li style="list-style-type: disc; padding-left: 0px">Terug naar de <a class="btn-nhb-blauw" href="/handleiding/Hoofdpagina/">Hoofdpagina</a>.</li>
-<li style="list-style-type: disc; padding-left: 0px"><a class="btn-nhb-blauw" href="/handleiding/Wedstrijdkalender_HWL/">Wedstrijdkalender HWL</a></li>
-</ul>
 
-</div>
+    <div class="white" style="padding:10px 30px 10px 30px">
+
+        <h4>Handleiding Hoofdwedstrijdleider</h4>
+        <p>De HWL is de coördinator van een vereniging voor alles omtrent wedstrijden en de competities.</p>
+
+        <p>&nbsp;</p>
+        <p>Binnen de website heeft de HWL de volgende mogelijkheden:</p>
+        <ul style="padding-left: 20px">
+            <li style="list-style-type: disc; padding-left:0">Leden helpen met het aanpassen van hun voorkeuren, zoals type boog waarmee geschoten wordt</li>
+            <li style="list-style-type: disc; padding-left:0">Leden aanmelden voor de competitie (bulk optie)</li>
+            <li style="list-style-type: disc; padding-left:0">Leden afmelden voor een competitie (bulk optie)</li>
+            <li style="list-style-type: disc; padding-left:0">Teams aanmaken voor de regiocompetitie</li>
+            <li style="list-style-type: disc; padding-left:0">Leden van de eigen vereniging koppelen aan de rol van Wedstrijdleider (WL) + ontkoppelen</li>
+            <li style="list-style-type: disc; padding-left:0">Instellingen van de accommodatie en wedstrijdlocaties van de vereniging aanpassen</li>
+            <li style="list-style-type: disc; padding-left:0">Wedstrijden beheren op de wedstrijdkalender</li>
+        </ul>
+
+        <p>De HWL heeft inzicht in de tijdlijn van de bondscompetities.</p>
+
+        <p>&nbsp;</p>
+        <hr>
+        <h5>Verder</h5>
+        <p>Terug naar de <a class="btn-nhb-blauw" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
+        <p><a class="btn-nhb-blauw" href="/handleiding/Wedstrijdkalender_HWL/">Wedstrijdkalender HWL</a></p>
+
+    </div>
 
 {% endblock %}
 

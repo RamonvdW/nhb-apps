@@ -25,11 +25,11 @@ OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
 # set high performance
 sudo cpupower frequency-set --governor performance > /dev/null
 
-# start the http simulator in the background
-pgrep -f websim
+# kill the http simulator if still running in the background
+pgrep -f websim > /dev/null
 if [ $? -eq 0 ]
 then
-    echo "[WARNING] websim was already running - killing it now with 'pkill -f websim'"
+    echo "[WARNING] simulators found running - cleaning up now"
     pkill -f websim
 fi
 
@@ -64,6 +64,7 @@ then
     # support Func1 Func2 by converting to Func1|Func2
     # after removing initial and trailing whitespace
     FOCUS=$(echo "$FOCUS1" | sed 's/^[[:blank:]]*//;s/[[:blank:]]*$//;s/  / /g;s/ /, /g')
+    echo "[INFO] Focus set to $FOCUS"
 
     COV_INCLUDE=$(for opt in $FOCUS1; do echo -n "$opt/*,"; done)
     #echo "[DEBUG] COV_INCLUDE set to $COV_INCLUDE"
@@ -71,16 +72,29 @@ fi
 
 ABORTED=0
 
-# start the simulator (for the mailer)
-python3 ./Mailer/test_tools/websim.py &
-PID_WEBSIM=$!
+# start the simulator for the mailer
+python3 ./Mailer/test_tools/websim_mailer.py &
+PID_WEBSIM1=$!
 sleep 0.5               # give python some time to load everything
-kill -0 $PID_WEBSIM     # check the simulator is running
+kill -0 $PID_WEBSIM1    # check the simulator is running
 RES=$?
 #echo "RES=$RES"
 if [ $RES -ne 0 ]
 then
-    echo "[ERROR] Simulator failed to start"
+    echo "[ERROR] Mail server simulator failed to start"
+    exit
+fi
+
+# start the simulator for the bondspas downloader
+python3 ./Bondspas/test-tools/websim_bondspas.py &
+PID_WEBSIM2=$!
+sleep 0.5               # give python some time to load everything
+kill -0 $PID_WEBSIM2    # check the simulator is running
+RES=$?
+#echo "RES=$RES"
+if [ $RES -ne 0 ]
+then
+    echo "[ERROR] Bondspas server simulator failed to start"
     exit
 fi
 
@@ -89,7 +103,9 @@ export COVERAGE_FILE="/tmp/.coverage.$$"
 python3 -m coverage erase
 
 echo "[INFO] Capturing output in $LOG"
-tail -f "$LOG" &
+COLOR_DEFAULT=$(tput sgr0)
+COLOR_RED=$(tput setaf 1)
+tail -f "$LOG" | grep --color -E "FAIL$|ERROR$|" &
 PID_TAIL=$!
 
 # -u = unbuffered stdin/stdout
@@ -97,7 +113,7 @@ PID_TAIL=$!
 # note: double quotes not supported around $*
 python3 -u $PYCOV ./manage.py test --settings=nhbapps.settings_autotest -v 2 --noinput $* >>"$LOG" 2>&1
 RES=$?
-echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
+#echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
 [ $RES -eq 3 ] && ABORTED=1
 
 echo >> "$LOG"
@@ -108,18 +124,41 @@ wait $PID_TAIL 2>/dev/null
 
 if [ $RES -eq 0 -a $# -eq 0 ]
 then
-    # add coverage with debug and wiki enabled
-    echo "[INFO] Performing run with debug + wiki run"
-    python3 -u $PYCOV ./manage.py test --settings=nhbapps.settings_autotest_wiki_nodebug -v 2 Plein.tests.TestPlein.test_quick Functie.test_saml2idp >>"$LOG" 2>&1
+    # add coverage with nodebug
+    echo "[INFO] Performing run with nodebug"
+    python3 -u $PYCOV ./manage.py test --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.TestPlein.test_quick >>"$LOG" 2>&1
     RES=$?
-    echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
+    #echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
     [ $RES -eq 3 ] && ABORTED=1
 fi
 
-# stop the websim tool
+if [ $RES -eq 0 -a "$FOCUS" != "" ]
+then
+    echo "[INFO] Discovering all management commands in $FOCUS"
+    for cmd in $(python3 ./manage.py --help);
+    do
+        [ -f $FOCUS/management/commands/$cmd.py ] && python3 -u $PYCOV ./manage.py $cmd help >>"$LOG" 2>&1
+    done
+fi
+
+if [ $RES -eq 0 -a $# -eq 0 ]
+then
+    echo "[INFO] Running help for each management command"
+    for cmd in $(for x in */management/commands; do ls -1 $x | grep -v '__pycache__' | rev | cut -d. -f2- | rev; done);
+    do
+        echo -n '.'
+        echo "[INFO] ./manage.py help $cmd" >>"$LOG"
+        python3 -u $PYCOV ./manage.py $cmd help >>"$LOG" 2>&1
+    done
+fi
+echo
+
+# stop the websim tools
 # use bash construct to prevent the Terminated message on the console
-kill $PID_WEBSIM
-wait $PID_WEBSIM 2>/dev/null
+kill $PID_WEBSIM1
+wait $PID_WEBSIM1 2>/dev/null
+kill $PID_WEBSIM2
+wait $PID_WEBSIM2 2>/dev/null
 
 if [ $ABORTED -eq 0 -o $FORCE_REPORT -eq 1 ]
 then

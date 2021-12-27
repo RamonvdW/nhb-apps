@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
 from Account.models import AccountEmail
@@ -22,7 +21,7 @@ class SiteFeedback(models.Model):
                 ('6', 'Bruikbaar'),
                 ('4', 'Moet beter')]
 
-    toegevoegd_op = models.DateTimeField()
+    toegevoegd_op = models.DateTimeField(null=True)
     site_versie = models.CharField(max_length=20)
     gebruiker = models.CharField(max_length=50)     # not linked to actual account
     op_pagina = models.CharField(max_length=50)
@@ -60,27 +59,6 @@ class SiteFeedback(models.Model):
         verbose_name = verbose_name_plural = "Site feedback"
 
     objects = models.Manager()      # for the editor only
-
-
-def store_feedback(gebruiker, op_pagina, bevinding, feedback):
-    """ Deze functie wordt aangeroepen vanuit de view waarin de feedback van de gebruiker
-        verzameld is. Deze functie slaat de feedback op in een database tabel.
-    """
-    obj = SiteFeedback()
-    obj.toegevoegd_op = timezone.now()
-    obj.site_versie = settings.SITE_VERSIE
-    obj.gebruiker = gebruiker
-    obj.op_pagina = op_pagina
-    obj.bevinding = bevinding
-    obj.feedback = feedback
-    obj.is_afgehandeld = False
-    obj.save()
-
-
-# class SiteControl(models.Model):
-#    onderhoud_start = models.DateTimeField()
-#    onderhoud_klaar = models.DateTimeField()
-#    onderhoud_bericht = models.TextField()
 
 
 class SiteTijdelijkeUrl(models.Model):

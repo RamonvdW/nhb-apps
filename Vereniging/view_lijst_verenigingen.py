@@ -30,11 +30,16 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu, self.functie_nu = None, None
+        self.is_staff = False
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_SEC)
+
+        if self.rol_nu == Rollen.ROL_BB:
+            self.is_staff = self.request.user.is_staff
+
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_SEC)
 
     def _get_verenigingen(self):
 
@@ -64,17 +69,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                                       'clusters')
                     .order_by('regio__regio_nr', 'ver_nr'))
 
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
-            # toon de landelijke lijst
-            return (NhbVereniging
-                    .objects
-                    .select_related('regio', 'regio__rayon')
-                    .exclude(regio__regio_nr=100)
-                    .prefetch_related('wedstrijdlocatie_set',
-                                      'clusters')
-                    .order_by('regio__regio_nr', 'ver_nr'))
-
-        if self.rol_nu == Rollen.ROL_IT:
+        if self.rol_nu == Rollen.ROL_BB and self.is_staff:
             # landelijke lijst + telling aantal leden
             objs = (NhbVereniging
                     .objects
@@ -94,6 +89,16 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                 # for
             # for
             return objs
+
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
+            # toon de landelijke lijst)
+            return (NhbVereniging
+                    .objects
+                    .select_related('regio', 'regio__rayon')
+                    .exclude(regio__regio_nr=100)
+                    .prefetch_related('wedstrijdlocatie_set',
+                                      'clusters')
+                    .order_by('regio__regio_nr', 'ver_nr'))
 
         # toon de lijst van verenigingen in de regio
         if self.rol_nu == Rollen.ROL_RCL:
@@ -126,16 +131,13 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
         context['toon_regio'] = True
         context['toon_cluster'] = False
         context['toon_details'] = True
-        context['toon_ledental'] = False
+        context['toon_ledental'] = self.is_staff
 
         menu_actief = 'hetplein'
 
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
-        context['landelijk'] = self.rol_nu in (Rollen.ROL_IT, Rollen.ROL_BB, Rollen.ROL_BKO)
-
-        if self.rol_nu == Rollen.ROL_IT:
-            context['toon_ledental'] = True
+        context['landelijk'] = self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO)
 
         if self.rol_nu == Rollen.ROL_BB:
             context['contact_geen_beheerders'] = reverse('Vereniging:contact-geen-beheerders')
@@ -158,7 +160,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                                          kwargs={'vereniging_pk': nhbver.pk})
 
             for loc in (nhbver
-                        .wedstrijdlocatie_set
+                        .wedstrijdlocatie_set           # FUTURE: kost een query -> aparte ophalen in dict
                         .filter(zichtbaar=True)):
                 if loc.baan_type == 'E':
                     nhbver.heeft_externe_locaties = True

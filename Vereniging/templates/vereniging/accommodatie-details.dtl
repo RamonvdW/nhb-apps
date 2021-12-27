@@ -17,18 +17,6 @@
     <p>Op deze pagina staan de details van de accommodatie van een vereniging.</p>
 
     <script type="application/javascript">
-        function show_hide_dt() {
-            // FUTURE: remove this function
-            const el18 = document.getElementById('banen_18')
-            const el25 = document.getElementById('banen_25')
-            const tr_dt = document.getElementById('id_dt_per_baan')
-            if (el18.value === "0" && el25.value === "0") {
-                tr_dt.classList.add('hide')
-            } else {
-                tr_dt.classList.remove('hide')
-            }
-        }
-
         function gewijzigd() {
             // het formulier is aangepast en moet opgeslagen worden
 
@@ -42,8 +30,6 @@
             const el = document.getElementById("opslaan_knop")
             el.disabled = false
             el.parentElement.style.display = "block"
-
-            //show_hide_dt()
         }
     </script>
 
@@ -602,12 +588,5 @@
             </li>
         </ul>
     {% endif %}
-
-    <script type="application/javascript">
-        // FUTURE: remove this function
-        document.addEventListener("DOMContentLoaded", function() {
-            //show_hide_dt()
-        })
-    </script>
 
 {% endblock %}

@@ -165,17 +165,22 @@ class HistCompBaseView(ListView):
                 if self.is_team:
                     if filter_is_nr:
                         return self.query_class.objects.filter(
-                            vereniging_nr__exact=self.get_filter,
-                            histcompetitie=histcomp).order_by('rank')
+                                    schutter_nr__exact=filter_nr,
+                                    histcompetitie=histcomp).order_by('rank')
                     else:
                         return self.query_class.objects.filter(
                             vereniging_naam__icontains=self.get_filter,
                             histcompetitie=histcomp).order_by('rank')
                 else:
                     if filter_is_nr:
-                        return self.query_class.objects.filter(
-                                            vereniging_nr__exact=self.get_filter,
-                                            histcompetitie=histcomp).order_by('rank')
+                        if filter_nr < 100000:
+                            return self.query_class.objects.filter(
+                                                vereniging_nr__exact=filter_nr,
+                                                histcompetitie=histcomp).order_by('rank')
+                        else:
+                            return self.query_class.objects.filter(
+                                                schutter_nr__exact=filter_nr,
+                                                histcompetitie=histcomp).order_by('rank')
                     else:
                         return self.query_class.objects.filter(
                                             Q(schutter_naam__icontains=self.get_filter) |
@@ -255,6 +260,11 @@ class HistCompBaseView(ListView):
             context['all_count'] = self.all_count
         # else: we laten de 'all' lijst zien dus laat de 'all' knop weg
 
+        if not self.is_team:
+            for obj in context['object_list']:
+                obj.schutter_nr_str = str(obj.schutter_nr)
+            # for
+
         menu_dynamics_competitie(self.request, context, actief='histcomp')
         return context
 
@@ -290,7 +300,8 @@ class InterlandView(UserPassesTestMixin, TemplateView):
         rol_nu = rol_get_huidige(self.request)
         return rol_nu == Rollen.ROL_BB
 
-    def maak_data(self, context):
+    @staticmethod
+    def maak_data(context):
 
         # maak een cache aan van leden
         lid_nr2sporter = dict()  # [lid_nr] = Sporter
@@ -373,7 +384,7 @@ class InterlandAlsBestandView(InterlandView):
     def get(self, request, *args, **kwargs):
 
         try:
-            klasse_pk = int(kwargs['klasse_pk'][:6])  # afkappen geeft beveiliging
+            klasse_pk = int(kwargs['klasse_pk'][:6])            # afkappen voor de veiligheid
             klasse = HistCompetitie.objects.get(pk=klasse_pk)
         except (ValueError, HistCompetitie.DoesNotExist):
             raise Http404('Klasse niet gevonden')

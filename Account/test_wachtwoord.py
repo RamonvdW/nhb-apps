@@ -11,7 +11,8 @@ from TestHelpers.e2ehelpers import E2EHelpers
 
 
 class TestAccountWachtwoord(E2EHelpers, TestCase):
-    """ unit tests voor de Account applicatie; module Login/Logout """
+
+    """ tests voor de Account applicatie; module Login/Logout """
 
     url_vergeten = '/account/wachtwoord-vergeten/'
     url_wijzig = '/account/nieuw-wachtwoord/'
@@ -268,6 +269,6 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertContains(resp, 'Voer het e-mailadres en NHB nummer in van een bestaand account')
 
 
-# TODO: controleer dat andere sessies van deze gebruiker verdwijnen bij wijzigen wachtwoord?
+# FUTURE: controleer dat andere sessies van deze gebruiker verdwijnen bij wijzigen wachtwoord?
 
 # end of file

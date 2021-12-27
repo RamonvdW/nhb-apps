@@ -1,0 +1,93 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Klassengrenzen vaststellen{% endblock %}
+
+{% block pagina %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="klassengrenzen-vaststellen" %}
+
+    <h4>Klassengrenzen vaststellen</h4>
+
+    {% if al_vastgesteld %}
+
+        <p>De klassengrenzen voor de <b>{{ comp.beschrijving }}</b> zijn al vastgesteld. Wat doe je hier?</p>
+
+        <a class="btn-nhb-blauw" href="{% url 'Plein:plein' %}">
+            <i class="material-icons-round left">close</i>Sluiten</a>
+
+    {% else %}
+
+        <p>Hieronder volgende de automatisch berekende klassengrenzen voor de individuele en teams wedstrijdklassen voor de <b>{{ comp.beschrijving }}</b>.</p>
+
+        <div class="container">
+            <ul class="collection with-header white">
+                <li class="collection-header"><h5 class="red-text">Controleer dat onderstaande gegevens juist zijn.</h5></li>
+                <li class="collection-item">Weet je zeker dat de <b>aanvangsgemiddelden</b> recentelijk vastgesteld zijn aan de hand van de uitslagen van vorig seizoen?</li>
+                <li class="collection-item">Op <b>{{ bb_ag_nieuwste_datum }}</b> zijn de aanvangsgemiddelden voor het laatste vastgesteld.</li>
+                <li class="collection-item"><a class="btn-nhb-blauw" href="{% url 'Competitie:ag-vaststellen-afstand' afstand=comp.afstand %}">Naar de aanvangsgemiddelden</a></li>
+            </ul>
+        </div>
+
+        <p>Hieronder volgen de berekende klassengrenzen voor de individuele en team klassen.</p>
+        <p>Onder aan deze pagina vindt je een knop om de klassengrenzen vast te leggen. Dit is een eenmalige actie voor elke competitie.</p>
+
+        <h5>Individuele wedstrijdklassen</h5>
+        <div class="row">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Materiaalklasse</th>
+                        <th>Aantal sporters</th>
+                        <th>Minimaal AG</th>
+                    </tr>
+                </thead>
+                {% for obj in klassengrenzen_indiv %}
+                    <tr>
+                        <td>{{ obj.beschrijving }}</td>
+                        <td>{{ obj.count }}</td>
+                        <td>{{ obj.ag|floatformat:3 }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <h5>Team wedstrijdklassen</h5>
+        <div class="row">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Materiaalklasse</th>
+                        <th>Aantal teams</th>
+                        <th>Minimaal Team-AG</th>
+                    </tr>
+                </thead>
+                {% for obj in klassengrenzen_teams %}
+                    <tr>
+                        <td>{{ obj.beschrijving }}</td>
+                        <td>{{ obj.count }}</td>
+                        <td>{{ obj.ag_str }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="row">
+            <form method="post" action="{% url 'Competitie:klassengrenzen-vaststellen' comp_pk=comp.pk %}">
+                {% csrf_token %}
+                <input class="btn-nhb-rood" name="button_aanmaken" type="submit" value="Deze klassengrenzen vaststellen">
+            </form>
+        </div>
+
+    {% endif %}
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

@@ -1,0 +1,170 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2021 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}RK selectie{% endblock %}
+
+{% block pagina %}
+
+    <h4>RK selectie</h4>
+
+    {% if url_uitslagen %}
+        <p>Op deze pagina kan je de lijst met kandidaat-deelnemers voor jouw RK's inzien en bewerken.</p>
+        <p>Dit is pas mogelijk als alle onderliggende regiocompetities afgesloten zijn. De status hiervan kan je hier onder zien.</p>
+        <p>Tot dat moment kan je de kandidaten voor elke wedstrijdklassen zien op deze pagina:</p>
+        <p>
+            <a class="btn-nhb-blauw" href="{{ url_uitslagen }}">Uitslagen</a>
+        </p>
+
+        <p>&nbsp;</p>
+        <h5>Status regiocompetities</h5>
+        <p>Deze tabel toont de status van elke regiocompetitie. Als ze allemaal afgesloten zijn, dan kunnen de kandidaat-deelnemers lijsten voor de RK's vastgesteld worden door de BKO.</p>
+        <div class="row">
+            <div class="col s12 m8 l6">
+                <table class="white">
+                    <thead>
+                        <tr>
+                            <th>Rayon</th>
+                            <th>Regio</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    {% for obj in regio_status %}
+                        <tr>
+                            <td>{{ obj.rayon_str }}</td>
+                            <td>{{ obj.regio_str }}</td>
+                            <td{% if obj.status_groen %} class="green-text"{% endif %}>{{ obj.status_str }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+            </div>
+        </div>
+
+    {% else %}
+
+        <p>Hieronder tonen we de vastgestelde sporters lijst voor elk van de {{ aantal_klassen }} wedstrijdklassen van de Rayonkampioenschappen in <b>{{ deelcomp_rk.nhb_rayon }}</b>.</p>
+
+        <p>
+            <a class="btn-small btn-nhb-blauw" href="{{ wiki_rk_schutters }}" target="_blank" rel="noopener noreferrer">
+                <i class="material-icons-round white-text">help_outline</i></a>
+        </p>
+
+        <p>&nbsp;</p>
+        <p>Deelname-status voor de geselecteerde sporters + eerste acht reserveschutters:</p>
+        <div class="row">
+            <div class="col offset-s1 s7 offset-m2 m6 offset-xl2 xl4">
+                <table class="white">
+                    <thead>
+                        <tr>
+                            <th><!--icon--></th>
+                            <th>Status</th>
+                            <th>Aantal</th>
+                        </tr>
+                    </thead>
+
+                    <tr>
+                        <td class="center-align"><i class="nhb-blauw-text in-table-icon material-icons-round">help</i></td>
+                        <td class="nhb-blauw-text">Onbekend</td>
+                        <td>{{ aantal_onbekend }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="center-align"><i class="green-text in-table-icon material-icons-round">check</i></td>
+                        <td class="green-text">Deelname bevestigd</td>
+                        <td>{{ aantal_bevestigd }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="center-align"><i class="grey-text in-table-icon material-icons-round">block</i></td>
+                        <td class="grey-text">Afgemeld</td>
+                        <td>{{ aantal_afgemeld }}</td>
+                    </tr>
+
+                    {% if aantal_attentie %}
+                        <tr>
+                            <td class="center-align"><i class="red-text in-table-icon material-icons-round">warning</i></td>
+                            <td class="red-text">Attentie</td>
+                            <td>{{ aantal_attentie }}</td>
+                        </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        {% if url_download %}
+            <p>
+                <span>De selectie-lijst kan als bestand opgehaald worden, voor gebruik in de RK excel: </span>
+                <a class="btn-nhb-blauw" href="{{ url_download }}">
+                    <i class="material-icons-round left">get_app</i>RK selectie bestand</a>
+            </p>
+        {% endif %}
+
+        <table class="white">
+
+            {% for obj in deelnemers %}
+
+                {% if obj.break_klasse %}
+                    <tr class="nhb-grijs">
+                        <td colspan="7" style="padding-bottom:0"><h5>{{ obj.klasse_str }}</h5></td>
+                    </tr>
+
+                    <tr>
+                        <th><!-- volgorde --></th>
+                        <th>Sporter</th>
+                        <th>Vereniging</th>
+                        <th class="hide-on-small-only">Gemiddelde</th>
+                        <th>Notitie</th>
+                        <th class="center-align">Status</th>
+                        <th><!-- knop --></th>
+                    </tr>
+
+                {% endif %}
+
+                <tr{% if obj.deelname == 'N' %} class="grey-text"{% endif %}>
+                    <td class="right-align">{% if obj.deelname != 'N' %}{{ obj.rank }}{% endif %}</td>
+
+                    <td>{{ obj.naam_str }}</td>
+
+                    {% if obj.bij_vereniging %}
+                        <td>[{{ obj.bij_vereniging.ver_nr }}]<span class="hide-on-small-only">&nbsp;{{ obj.bij_vereniging.naam }}</span></td>
+                    {% else %}
+                        <td><!-- geen vereniging --></td>
+                    {% endif %}
+
+                    <td class="hide-on-small-only">{{ obj.gemiddelde }}</td>
+
+                    <td>{% if obj.is_reserve %}<i>Reserve</i>{% if obj.kampioen_label != '' %}<br>{% endif %}{% endif %}{{ obj.kampioen_label }}</td>
+
+                    {% if not obj.bij_vereniging %}
+                        <td class="center-align"><i class="red-text in-table-icon material-icons-round">warning</i></td>
+                    {% elif obj.deelname == 'J' %}
+                        <td class="center-align"><i class="green-text in-table-icon material-icons-round">check</i></td>
+                    {% elif obj.deelname == 'N' %}
+                        <td class="center-align"><i class="grey-text in-table-icon material-icons-round">block</i></td>
+                    {% else %}
+                        <!-- onbekend -->
+                        <td class="center-align"><i class="nhb-blauw-text in-table-icon material-icons-round">help</i></td>
+                    {% endif %}
+
+                    <td><a class="btn-nhb-blauw btn-small" href="{{ obj.url_wijzig }}">Wijzig</a></td>
+                </tr>
+
+            {% endfor %}
+
+        </table>
+
+    {% endif %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-rko-rk-selectie" %}
+
+{% endblock %}
+
+{% block menu-competities %}
+    {% include 'competitie/menu.dtl' %}
+{% endblock %}

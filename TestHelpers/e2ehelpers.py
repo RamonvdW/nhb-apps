@@ -7,7 +7,7 @@
 from django.contrib import auth
 from django.utils import timezone
 from django.conf import settings
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.db import connection
 from Account.models import Account, account_create
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
@@ -50,7 +50,7 @@ class MyQueryTracer(object):
                 stack.append((fname, linenr, base))
         # for
 
-        if REPORT_QUERY_ORIGINS:
+        if REPORT_QUERY_ORIGINS:                        # pragma: no cover
             msg = ''
             for fname, linenr, base in stack:
                 msg += '\n         %s:%s %s' % (fname[-30:], linenr, base)
@@ -70,72 +70,7 @@ class MyQueryTracer(object):
         execute(sql, params, many, context)
 
 
-# class AssertMaxQueriesContext(object):
-#     def __init__(self, test_case, num, connection):
-#         self.test_case = test_case
-#         self.connection = connection
-#         self.num = num
-#
-#     def __enter__(self):
-#         # entering the 'with' block
-#         self.force_debug_cursor = self.connection.force_debug_cursor
-#         self.connection.force_debug_cursor = True
-#         self.connection.ensure_connection()
-#         self.initial_queries = len(self.connection.queries_log)
-#         request_started.disconnect(reset_queries)       # apparently prevents queries_log from being emptied
-#         return self
-#
-#     @staticmethod
-#     def _find_statement(query, start):                  # pragma: no cover
-#         best = -1
-#         word_len = 0
-#         for word in (#'SELECT', 'DELETE FROM', 'INSERT INTO',m
-#                      ' WHERE ', ' LEFT OUTER JOIN ',' INNER JOIN ', ' LEFT JOIN ', ' JOIN ',
-#                      ' ORDER BY ', ' GROUP BY ', ' ON ', ' FROM ', ' VALUES '):
-#             pos = query.find(word, start)
-#             if pos >= 0 and (best == -1 or pos < best):
-#                 best = pos
-#                 word_len = len(word)
-#         # for
-#         return best, word_len
-#
-#     def _reformat_sql(self, query):                     # pragma: no cover
-#         start = 0
-#         pos, word_len = self._find_statement(query, start)
-#         while pos >= 0:
-#             query = query[:pos] + '\n   ' + query[pos:]
-#             start = pos + word_len + 4
-#             pos, word_len = self._find_statement(query, start)
-#         # while
-#         return query
-#
-#     def __exit__(self, exc_type, exc_value, traceback):
-#         # leaving the 'with' block
-#         self.connection.force_debug_cursor = self.force_debug_cursor
-#         request_started.connect(reset_queries)
-#         if exc_type is not None:                        # pragma: no cover
-#             return
-#         final_queries = len(self.connection.queries_log)
-#         executed = final_queries - self.initial_queries
-#         if executed > self.num:                         # pragma: no cover
-#             queries = 'Captured queries from index %s to %s:' % (self.initial_queries, final_queries)
-#             for i, query in enumerate(self.connection.queries[self.initial_queries:final_queries], start=1):
-#                 queries += '\n [%d] %s' % (i, self._reformat_sql(query['sql']))
-#             # for
-#             msg = "Too many queries: %s; maximum %d. " % (executed, self.num)
-#             self.test_case.fail(msg=msg + queries)
-#         else:
-#             ongebruikt = self.num - executed
-#             if self.num > 20:
-#                 if ongebruikt / self.num > 0.25:        # pragma: no cover
-#                     queries = 'Captured queries from index %s to %s:' % (self.initial_queries, final_queries)
-#                     for i, query in enumerate(self.connection.queries[self.initial_queries:final_queries], start=1):
-#                         queries += '\n [%d] %s' % (i, self._reformat_sql(query['sql']))
-#                     # for
-#                     self.test_case.fail(msg="Maximum (%s) has a lot of margin. Can be set as low as %s\n%s" % (self.num, executed, queries))
-
-
-class E2EHelpers(object):
+class E2EHelpers(TestCase):
 
     """ Helpers voor het End-to-End testen, dus zoals de gebruiker de website gebruikt vanuit de browser
 
@@ -144,9 +79,10 @@ class E2EHelpers(object):
 
     WACHTWOORD = "qewretrytuyi"     # sterk genoeg default wachtwoord
 
+    client: Client                  # for code completion / code inspection
+
     def e2e_logout(self):
         # in case the test client behaves different from the real website, we can compensate here
-        assert isinstance(self, TestCase)
         self.client.logout()
 
     @staticmethod
@@ -154,7 +90,7 @@ class E2EHelpers(object):
         account_vhpg_is_geaccepteerd(account)
 
     @staticmethod
-    def _remove_debugtoolbar(html):
+    def _remove_debug_toolbar(html):
         """ removes the debug toolbar code """
         pos = html.find('<link rel="stylesheet" href="/static/debug_toolbar/css/print.css"')
         if pos > 0:     # pragma: no cover
@@ -192,7 +128,6 @@ class E2EHelpers(object):
         """ log in op de website via de voordeur, zodat alle rechten geëvalueerd worden """
         if not wachtwoord:
             wachtwoord = self.WACHTWOORD
-        assert isinstance(self, TestCase)
         resp = self.client.post('/account/login/', {'login_naam': account.username,
                                                     'wachtwoord': wachtwoord})
         return resp
@@ -200,7 +135,6 @@ class E2EHelpers(object):
     def e2e_login(self, account, wachtwoord=None):
         """ log in op de website via de voordeur, zodat alle rechten geëvalueerd worden """
         resp = self.e2e_login_no_check(account, wachtwoord)
-        assert isinstance(self, TestCase)
         self.assertEqual(resp.status_code, 302)  # 302 = Redirect
         user = auth.get_user(self.client)
         self.assertTrue(user.is_authenticated)
@@ -208,22 +142,14 @@ class E2EHelpers(object):
     def e2e_login_and_pass_otp(self, account, wachtwoord=None):
         self.e2e_login(account, wachtwoord)
         # door de login is een cookie opgeslagen met het csrf token
-        assert isinstance(self, TestCase)
         resp = self.client.post('/functie/otp-controle/', {'otp_code': pyotp.TOTP(account.otp_code).now()})
-        assert isinstance(self, E2EHelpers)
         self.assert_is_redirect(resp, '/functie/wissel-van-rol/')
 
     def _wissel_naar_rol(self, rol, expected_redirect):
-        assert isinstance(self, TestCase)
         resp = self.client.post('/functie/activeer-rol/%s/' % rol)
-        assert isinstance(self, E2EHelpers)
         self.assert_is_redirect(resp, expected_redirect)
 
-    def e2e_wisselnaarrol_it(self):
-        self._wissel_naar_rol('IT', '/functie/wissel-van-rol/')
-
     def e2e_wisselnaarrol_bb(self):
-        # self._wissel_naar_rol('BB', '/competitie/')
         self._wissel_naar_rol('BB', '/functie/wissel-van-rol/')
 
     def e2e_wisselnaarrol_sporter(self):
@@ -233,10 +159,8 @@ class E2EHelpers(object):
         self._wissel_naar_rol('geen', '/functie/wissel-van-rol/')
 
     def e2e_wissel_naar_functie(self, functie):
-        assert isinstance(self, TestCase)
         resp = self.client.post('/functie/activeer-functie/%s/' % functie.pk)
 
-        assert isinstance(self, E2EHelpers)
         if functie.rol in ('SEC', 'HWL', 'WL'):
             self.assert_is_redirect(resp, '/vereniging/')
         elif functie.rol in ('BKO', 'RKO', 'RCL') and resp.url.startswith('/bondscompetities/'):
@@ -246,7 +170,6 @@ class E2EHelpers(object):
             self.assert_is_redirect(resp, '/functie/wissel-van-rol/')
 
     def e2e_check_rol(self, rol_verwacht):
-        assert isinstance(self, TestCase)
         resp = self.client.get('/functie/wissel-van-rol/')
         self.assertEqual(resp.status_code, 200)
 
@@ -274,7 +197,7 @@ class E2EHelpers(object):
                 print('   %s' % repr(templ.name))
             # for
         content = str(resp.content)
-        content = self._remove_debugtoolbar(content)
+        content = self._remove_debug_toolbar(content)
         if len(content) < 50:
             print("very short content:", content)
         else:
@@ -283,7 +206,7 @@ class E2EHelpers(object):
 
     def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True):
         content = str(resp.content)
-        content = self._remove_debugtoolbar(content)
+        content = self._remove_debug_toolbar(content)
         if skip_menu:
             # menu is the last part of the body
             pos = content.find('<div id="menu">')
@@ -319,7 +242,7 @@ class E2EHelpers(object):
 
     def extract_checkboxes(self, resp):
         content = str(resp.content)
-        content = self._remove_debugtoolbar(content)
+        content = self._remove_debug_toolbar(content)
         checked = list()
         unchecked = list()
         pos = content.find('<input ')
@@ -336,7 +259,7 @@ class E2EHelpers(object):
                     if spl[0] == "type" and "checkbox" in spl[1]:
                         is_checkbox = True
                     elif spl[0] == "name":
-                        name = spl[1].replace('"', '')  # strip doublequotes
+                        name = spl[1].replace('"', '')  # strip double-quotes
                 elif spl[0] == "checked":
                     is_checked = True
             # for
@@ -356,8 +279,6 @@ class E2EHelpers(object):
             - links to external sites must have target="_blank" and rel="noopener noreferrer"
             - links should not be empty
         """
-        assert isinstance(self, TestCase)
-
         # strip head
         pos = content.find('<body')
         content = content[pos:]
@@ -386,7 +307,6 @@ class E2EHelpers(object):
         # while
 
     def assert_scripts_clean(self, html, template_name):
-        assert isinstance(self, TestCase)
         pos = html.find('<script ')
         while pos >= 0:
             html = html[pos:]
@@ -485,7 +405,6 @@ class E2EHelpers(object):
                     msg = "Bad HTML (template: %s):" % self._get_useful_template_name(response)
                     msg += "\n   Found block-level element '%s' inside 'p'" % elem
                     msg = msg + "\n   ==> " + sub[elem_pos:elem_pos+40]
-                    assert isinstance(self, TestCase)
                     self.fail(msg=msg)
             # for
             html = html[pos+3:]
@@ -495,14 +414,13 @@ class E2EHelpers(object):
     def assert_html_ok(self, response):
         """ Doe een aantal basic checks op een html response """
         html = response.content.decode('utf-8')
-        html = self._remove_debugtoolbar(html)
+        html = self._remove_debug_toolbar(html)
 
         dtl = self._get_useful_template_name(response)
         # print('useful template names:', dtl)
         if dtl not in validated_templates:
             validated_templates.append(dtl)
 
-        assert isinstance(self, TestCase)
         self.assertIn("<!DOCTYPE html>", html, msg='Missing DOCTYPE at start of %s' % dtl)
         self.assertIn("<html", html, msg='Missing <html in %s' % dtl)
         self.assertIn("<head", html, msg='Missing <head in %s' % dtl)
@@ -515,7 +433,6 @@ class E2EHelpers(object):
         self.assertNotIn('<td/>', html, msg='Illegal <td/> must be replaced with <td></td> in %s' % dtl)
         self.assertNotIn('<thead><th>', html, msg='Missing <tr> between <thead> and <th> in %s' % dtl)
 
-        assert isinstance(self, E2EHelpers)
         self.assert_link_quality(html, dtl)
         self.assert_scripts_clean(html, dtl)
         self._assert_no_div_in_p(response, html)
@@ -523,7 +440,6 @@ class E2EHelpers(object):
         urls = self.extract_all_urls(response)
         for url in urls:
             if url.find(" ") >= 0:                  # pragma: no cover
-                assert isinstance(self, TestCase)
                 self.fail(msg="Unexpected space in url %s on page %s" % (repr(url), dtl))
         # for
 
@@ -534,11 +450,9 @@ class E2EHelpers(object):
                 for issue in issues:
                     msg += "    %s\n" % issue
                 # for
-                assert isinstance(self, TestCase)
                 self.fail(msg=msg)
 
     def assert_is_bestand(self, response):
-        assert isinstance(self, TestCase)
 
         # check the headers that make this a download
         # print("response: ", repr([(a,b) for a,b in response.items()]))
@@ -550,9 +464,9 @@ class E2EHelpers(object):
         # ensure the file is not empty
         self.assertTrue(len(str(response.content)) > 30)
 
-    def _get_templates_not_used(self, resp, template_names):
+    @staticmethod
+    def _get_templates_not_used(resp, template_names):
         """ returns True when any of the templates have not been used """
-        assert isinstance(self, TestCase)
         lst = list(template_names)
         for templ in resp.templates:
             if templ.name in lst:
@@ -580,7 +494,6 @@ class E2EHelpers(object):
             self.assertTrue(False, msg=msg)
 
     def e2e_assert_logged_in(self):
-        assert isinstance(self, TestCase)
         resp = self.client.get('/account/logout/', follow=False)
         # indien ingelogd krijgen we een pagina terug met status_code == 200
         # indien niet ingelogd krijgen we een redirect met status_code == 302
@@ -588,7 +501,6 @@ class E2EHelpers(object):
             self.fail(msg='Onverwacht NIET ingelogd')   # pragma: no cover
 
     def e2e_assert_not_logged_in(self):
-        assert isinstance(self, TestCase)
         resp = self.client.get('/account/logout/', follow=False)
         # indien ingelogd krijgen we een pagina terug met status_code == 200
         # indien niet ingelogd krijgen we een redirect met status_code == 302
@@ -600,8 +512,6 @@ class E2EHelpers(object):
             en controleer dat deze niet ondersteund zijn (status code 405 = not allowed)
             POST, DELETE, PATCH
         """
-        assert isinstance(self, TestCase)
-
         # toegestane status_codes:
         #   302 (redirect)
         #   403 (not allowed)
@@ -638,7 +548,6 @@ class E2EHelpers(object):
                     self.e2e_dump_resp(resp)
                     msg += "; templates used: %s" % repr([tmpl.name for tmpl in resp.templates])
                 self.fail(msg=msg)
-        assert isinstance(self, TestCase)
         pos = expected_url.find('##')
         if pos > 0:
             self.assertTrue(resp.url.startswith(expected_url[:pos]))
@@ -646,7 +555,6 @@ class E2EHelpers(object):
             self.assertEqual(resp.url, expected_url)
 
     def assert_is_redirect_not_plein(self, resp):
-        assert isinstance(self, TestCase)
         if resp.status_code != 302:                     # pragma: no cover
             # geef een iets uitgebreider antwoord
             msg = "status_code: %s != 302" % resp.status_code
@@ -661,8 +569,8 @@ class E2EHelpers(object):
     def _find_statement(query, start):                  # pragma: no cover
         best = -1
         word_len = 0
-        for word in (# 'SELECT', 'DELETE FROM', 'INSERT INTO',
-                     ' WHERE ', ' LEFT OUTER JOIN ',' INNER JOIN ', ' LEFT JOIN ', ' JOIN ',
+        for word in (  # 'SELECT', 'DELETE FROM', 'INSERT INTO',
+                     ' WHERE ', ' LEFT OUTER JOIN ', ' INNER JOIN ', ' LEFT JOIN ', ' JOIN ',
                      ' ORDER BY ', ' GROUP BY ', ' ON ', ' FROM ', ' VALUES '):
             pos = query.find(word, start)
             if pos >= 0 and (best == -1 or pos < best):
@@ -689,19 +597,18 @@ class E2EHelpers(object):
             with connection.execute_wrapper(tracer):
                 yield
         finally:
-            do_dump = False
             if check_duration:
                 duration = datetime.datetime.now() - tracer.started_at
                 duration_seconds = duration.seconds
-                do_dump = True
             else:
                 duration_seconds = 0
 
             count = len(tracer.trace)
-            if count > num:                     # pragma: no cover
-                do_dump = True
 
-            if do_dump:
+            if num == -1:                         # pragma: no cover
+                print('Operation resulted in %s queries' % count)
+
+            elif count > num:                     # pragma: no cover
                 queries = 'Captured queries:'
                 prefix = '\n       '
                 limit = 200     # begrens aantal queries dat we printen
@@ -721,23 +628,24 @@ class E2EHelpers(object):
                         break
                 # for
 
-            if count > num:                                                         # pragma: no branch
-                msg = "Too many queries: %s; maximum %d. " % (count, num)           # pragma: no cover
-                self.fail(msg=msg + queries)                                        # pragma: no cover
-            else:
+                msg = "Too many queries: %s; maximum %d. " % (count, num)
+                self.fail(msg=msg + queries)
+
+            if count <= num:
                 # kijk of het wat minder kan
                 if num > 20:
                     ongebruikt = num - count
-                    if ongebruikt / num > 0.25:        # pragma: no cover
+                    if ongebruikt / num > 0.25:                                     # pragma: no cover
                         self.fail(msg="Maximum (%s) has a lot of margin. Can be set as low as %s" % (num, count))
 
-            if duration_seconds > 1.5:              # pragma: no cover
-                print("Operation took suspiciously long: %.2f seconds (%s queries took %.2f ms)" % (duration_seconds, len(tracer.trace), tracer.total_duration_us / 1000.0))
+            if duration_seconds > 1.5:                                              # pragma: no cover
+                print("Operation took suspiciously long: %.2f seconds (%s queries took %.2f ms)" % (
+                                    duration_seconds, len(tracer.trace), tracer.total_duration_us / 1000.0))
 
-            if len(tracer.trace) > 500:
+            if len(tracer.trace) > 500:                                             # pragma: no cover
                 print("Operation required a lot of database interactions: %s queries" % len(tracer.trace))
 
-        if REPORT_QUERY_ORIGINS:
+        if REPORT_QUERY_ORIGINS:                                                    # pragma: no cover
             # sorteer op aantal aanroepen
             counts = list()
             for msg, count in tracer.stack_counts.items():
@@ -753,17 +661,28 @@ class E2EHelpers(object):
                         print('-----')
                     print('%5s %s' % (count, msg[7:]))
 
-    def assert403(self, resp):
+    def assert403(self, resp, expected_msg=''):
         # controleer dat we op de speciale code-403 handler pagina gekomen zijn
+
         if isinstance(resp, str):
             self.fail(msg='Incorrect invocation: missing resp parameter?')          # pragma: no cover
 
         if resp.status_code != 200:     # pragma: no cover
             self.e2e_dump_resp(resp)
-            self.fail(msg="Unexpected real status code %s instead of 403" % resp.status_code)
+            self.fail(msg="Unexpected status code %s instead of 200" % resp.status_code)
 
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
+
+        if expected_msg:
+            pagina = str(resp.content)
+            if expected_msg not in pagina:                                          # pragma: no cover
+                # haal de nuttige regel informatie uit de 403 pagina en toon die
+                pos = pagina.find('<code>')
+                pagina = pagina[pos+6:]
+                pos = pagina.find('</code>')
+                pagina = pagina[:pos]
+                self.fail(msg='403 pagina contained %s instead of %s' % (repr(pagina), repr(expected_msg)))
 
     def assert404(self, resp, expected_msg=''):
         if isinstance(resp, str):
@@ -772,13 +691,30 @@ class E2EHelpers(object):
         # controleer dat we op de speciale code-404 handler pagina gekomen zijn
         if resp.status_code != 200:     # pragma: no cover
             self.e2e_dump_resp(resp)
-            self.fail(msg="Unexpected real status code %s instead of 404" % resp.status_code)
+            self.fail(msg="Unexpected status code %s instead of 200" % resp.status_code)
 
         # controleer dat we op de speciale code-404 handler pagina gekomen zijn
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
+
         if expected_msg:
-            assert isinstance(self, TestCase)
-            self.assertContains(resp, expected_msg)
+            pagina = str(resp.content)
+            if expected_msg not in pagina:                                          # pragma: no cover
+                # haal de nuttige regel informatie uit de 404 pagina en toon die
+                pos = pagina.find('<code>')
+                pagina = pagina[pos+6:]
+                pos = pagina.find('</code>')
+                pagina = pagina[:pos]
+                self.fail(msg='404 pagina contained %s instead of %s' % (repr(pagina), repr(expected_msg)))
+
+    def assert200_file(self, resp):
+        if resp.status_code != 200:                                 # pragma: no cover
+            self.e2e_dump_resp(resp)
+            self.fail(msg="Unexpected status code %s instead of 200" % resp.status_code)
+
+        header = resp['Content-Disposition']
+        if not header.startswith('attachment; filename'):           # pragma: no cover
+            self.fail(msg="Response is not a file attachment")
+
 
 # end of file

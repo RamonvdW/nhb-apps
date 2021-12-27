@@ -90,7 +90,14 @@
       "iso_abbr": null,
       "latitude": null,
       "longitude": null,
-      "blocked": false
+      "blocked": false,
+      "skill_levels": [
+        {"category_name":  "Senior",
+          "discipline_name": "Recurve",
+          "skill_level_name": "Recurve 1000",
+          "date": "1990-01-01"
+        }
+      ]
     },
     {"member_number": 100024,
       "club_number": 1000,

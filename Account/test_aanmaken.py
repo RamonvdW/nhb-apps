@@ -11,7 +11,8 @@ from TestHelpers import testdata
 
 
 class TestAccountAanmaken(E2EHelpers, TestCase):
-    """ unit tests voor de Account applicatie; module Aanmaken/Email bevestigen """
+
+    """ tests voor de Account applicatie; module Aanmaken/Email bevestigen """
 
     url_aangemaakt = '/account/aangemaakt/'
 
