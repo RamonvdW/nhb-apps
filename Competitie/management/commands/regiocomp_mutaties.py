@@ -157,7 +157,8 @@ class Command(BaseCommand):
                 .filter(deelcompetitie=deelcomp,
                         klasse=klasse,
                         kampioen_label='')      # kampioenen hebben we al gedaan
-                .order_by('-gemiddelde'))       # hoogste boven
+                .order_by('-gemiddelde',        # hoogste boven
+                          '-regio_scores'))     # hoogste boven (gelijk gemiddelde)
 
         for obj in objs:
             tup = (obj.gemiddelde, len(lijst), obj)
@@ -321,7 +322,8 @@ class Command(BaseCommand):
                             klasse=klasse,
                             rank__gt=limiet,
                             gemiddelde__gte=deelnemer.gemiddelde)
-                    .order_by('gemiddelde'))
+                    .order_by('gemiddelde',
+                              'regio_scores'))
 
             if len(objs):
                 # invoegen na de reserve-schutter met gelijk of hoger gemiddelde
@@ -358,7 +360,8 @@ class Command(BaseCommand):
                             klasse=klasse,
                             gemiddelde__gte=deelnemer.gemiddelde,
                             volgorde__lt=VOLGORDE_PARKEER)
-                    .order_by('gemiddelde'))
+                    .order_by('gemiddelde',
+                              'regio_scores'))
 
             if len(objs) > 0:
                 # voeg de schutter in na de laatste deelnemer
@@ -452,9 +455,10 @@ class Command(BaseCommand):
                 .objects
                 .filter(deelcompetitie=deelcomp,
                         klasse=klasse,
-                        kampioen_label='',  # kampioenen hebben we al gedaan
+                        kampioen_label='',      # kampioenen hebben we al gedaan
                         rank__lte=cut_oud)
-                .order_by('-gemiddelde'))  # hoogste boven
+                .order_by('-gemiddelde',        # hoogste boven
+                          '-regio_scores'))     # hoogste boven (bij gelijk gemiddelde)
 
         for obj in objs:
             if obj.pk not in lijst_pks and aantal < cut_nieuw:
@@ -712,7 +716,7 @@ class Command(BaseCommand):
                                           'bij_vereniging')
                           .filter(deelcompetitie__competitie=comp,
                                   klasse__in=klassen_pks)
-                          .order_by('-gemiddelde'))     # hoogste eerst
+                          .order_by('-gemiddelde'))     # hoogste boven
 
             rank = 0
             for deelnemer in deelnemers:
@@ -752,7 +756,7 @@ class Command(BaseCommand):
             HistCompetitieIndividueel.objects.bulk_create(bulk)
 
     @staticmethod
-    def _get_schutters_regios(competitie, rayon_nr):
+    def _get_regio_sporters_rayon(competitie, rayon_nr):
         """ geeft een lijst met deelnemers terug
             en een totaal-status van de onderliggende regiocompetities: alles afgesloten?
         """
@@ -767,6 +771,7 @@ class Command(BaseCommand):
             pks.append(deelcomp.pk)
         # for
 
+        # TODO: sorteren en kampioenen eerst zetten kan allemaal weg
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
                       .select_related('klasse__indiv',
@@ -809,6 +814,11 @@ class Command(BaseCommand):
             rank += 1
             deelnemer.volgorde = rank
             deelnemer.deelname = DEELNAME_ONBEKEND
+
+            scores = [deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4,
+                      deelnemer.score5, deelnemer.score6, deelnemer.score7]
+            scores.sort(reverse=True)      # beste score eerst
+            deelnemer.regio_scores = "%03d%03d%03d%03d%03d%03d%03d" % tuple(scores)
 
             regio_nr = deelnemer.bij_vereniging.regio.regio_nr
             if regio_nr not in regios:
@@ -853,7 +863,7 @@ class Command(BaseCommand):
                             .filter(competitie=comp,
                                     laag=LAAG_RK)):
 
-            deelnemers = self._get_schutters_regios(comp, deelcomp_rk.nhb_rayon.rayon_nr)
+            deelnemers = self._get_regio_sporters_rayon(comp, deelcomp_rk.nhb_rayon.rayon_nr)
 
             # schrijf all deze schutters in voor het RK
             # kampioenen als eerste in de lijst, daarna aflopend gesorteerd op gemiddelde
@@ -872,7 +882,8 @@ class Command(BaseCommand):
                                     klasse=obj.klasse,
                                     bij_vereniging=ver,             # bevries vereniging
                                     gemiddelde=obj.gemiddelde,
-                                    kampioen_label=obj.kampioen_label)
+                                    kampioen_label=obj.kampioen_label,
+                                    regio_scores=obj.regio_scores)
 
                     bulk_lijst.append(deelnemer)
                     if len(bulk_lijst) > 150:       # pragma: no cover
@@ -898,7 +909,6 @@ class Command(BaseCommand):
             deelcomp_rk.save(update_fields=['heeft_deelnemerslijst'])
 
             # laat de lijsten sorteren en de volgorde bepalen
-            # oud: CompetitieMutatie(mutatie=MUTATIE_INITIEEL, door=door_str, deelcompetitie=deelcomp_rk).save()
             self._verwerk_mutatie_initieel_deelcomp(deelcomp_rk)
 
             # stuur de RKO een taak ('ter info')

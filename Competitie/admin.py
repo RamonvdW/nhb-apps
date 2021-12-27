@@ -279,7 +279,8 @@ class KampioenschapSchutterBoogAdmin(CreateOnlyAdmin):
              }),
         ('Details',
             {'fields': ('gemiddelde',
-                        'kampioen_label')
+                        'kampioen_label',
+                        'regio_scores')
              }),
         ('Status aanmelding',
             {'fields': ('deelname',
@@ -291,7 +292,7 @@ class KampioenschapSchutterBoogAdmin(CreateOnlyAdmin):
     readonly_fields = ('deelcompetitie',
                        'sporterboog')
 
-    search_fields = ('sporterboog__sporter__unaccented_name',
+    search_fields = ('sporterboog__sporter__unaccented_naam',
                      'sporterboog__sporter__lid_nr')
 
     list_select_related = ('deelcompetitie',

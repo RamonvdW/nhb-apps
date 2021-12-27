@@ -757,6 +757,12 @@ class KampioenschapSchutterBoog(models.Model):
     # gemiddelde uit de voorgaande regiocompetitie
     gemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
 
+    # sporters met gelijk gemiddelde moeten in de juiste volgorde gehouden worden door te kijken naar
+    # de regio scores: hoogste score gaat voor
+    # scores zijn als string opgeslagen zodat er gesorteerd kan worden
+    # "AAAbbbCCCdddEEEfffGGG" met AAA..GGG=7 scores van 3 cijfers, gesorteerd van beste naar slechtste score
+    regio_scores = models.CharField(max_length=24, default='', blank=True)
+
     def __str__(self):
         if self.deelcompetitie.nhb_rayon:
             substr = "RK rayon %s" % self.deelcompetitie.nhb_rayon.rayon_nr
