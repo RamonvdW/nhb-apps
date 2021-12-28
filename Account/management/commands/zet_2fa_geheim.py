@@ -19,6 +19,7 @@ class Command(BaseCommand):
                             help="inlog naam")
         parser.add_argument('geheim', nargs=1,
                             help="2FA geheim (16 of 32 tekens)")
+        parser.add_argument('--zet-actief', action='store_true')
 
     def handle(self, *args, **options):
         username = options['username'][0]
@@ -34,13 +35,19 @@ class Command(BaseCommand):
             self.stderr.write("%s" % str(exc))
         else:
             account.otp_code = geheim
-            account.save()
+            msg = "2FA is opgeslagen voor account %s" % repr(username)
+
+            if options['zet_actief']:
+                account.otp_is_actief = True
+                msg += " en actief gezet"
+
+            account.save(update_fields=['otp_is_actief', 'otp_code'])
 
             # schrijf in het logboek
             schrijf_in_logboek(account=None,
                                gebruikte_functie="zet_2fa_geheim (command line)",
                                activiteit="2FA geheim is opgeslagen voor account %s" % repr(username))
 
-            self.stdout.write("2FA is opgeslagen voor account %s" % repr(username))
+            self.stdout.write(msg)
 
 # end of file
