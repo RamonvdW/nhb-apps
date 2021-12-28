@@ -553,6 +553,8 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('BasisTypen', 'm0022_squashed')]
+
     # dit is de eerste
     initial = True
 

@@ -22,6 +22,8 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('Competitie', 'm0055_squashed')]
+
     # dit is de eerste
     initial = True
 
