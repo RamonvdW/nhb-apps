@@ -155,21 +155,29 @@ class UitslagenRegioIndivView(TemplateView):
         rank_m = 0
         rank_v = 0
         asps_v = list()
+        count_v = None
+        count_m = None
         for deelnemer in asps:
             if deelnemer.sporterboog.sporter.geslacht == 'V':
                 if rank_v == 0:
                     deelnemer.klasse_str = klasse_str + ', meisjes'
                     deelnemer.break_klasse = True
+                    deelnemer.aantal_in_groep = 2
+                    count_v = deelnemer
                 rank_v += 1
                 deelnemer.rank = rank_v
                 asps_v.append(deelnemer)
+                count_v.aantal_in_groep += 1
             else:
                 if rank_m == 0:
                     deelnemer.klasse_str = klasse_str + ', jongens'
                     deelnemer.break_klasse = True
+                    deelnemer.aantal_in_groep = 2
+                    count_m = deelnemer
                 rank_m += 1
                 deelnemer.rank = rank_m
                 objs.append(deelnemer)
+                count_m.aantal_in_groep += 1
         # for
         if len(asps_v):
             objs.extend(asps_v)
@@ -246,10 +254,15 @@ class UitslagenRegioIndivView(TemplateView):
         objs = list()
         asps = list()
         is_asp = False
+        deelnemer_count = None
         for deelnemer in deelnemers:
 
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
+                deelnemer_count = deelnemer
+                deelnemer.aantal_in_groep = 2   # 1 extra zodat balk doorloopt tot horizonale afsluiter
+                deelnemer.is_eerste_groep = (klasse == -1)
+
                 if len(asps):
                     self._split_aspiranten(asps, objs)
                     asps = list()
@@ -272,6 +285,8 @@ class UitslagenRegioIndivView(TemplateView):
             deelnemer.rank = rank
             deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
+
+            deelnemer_count.aantal_in_groep += 1
 
             # if deelnemer.score1 == 0:
             #     deelnemer.score1 = '-'

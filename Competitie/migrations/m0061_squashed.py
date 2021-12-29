@@ -22,16 +22,18 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('Competitie', 'm0055_squashed')]
+
     # dit is de eerste
     initial = True
 
     # volgorde afdwingen
     dependencies = [
-        ('BasisTypen', 'm0021_is_aspirant__blazoenen'),
-        ('NhbStructuur', 'm0024_squashed'),
+        ('BasisTypen', 'm0024_squashed'),
         ('Functie', 'm0012_squashed'),
-        ('Sporter', 'm0003_squashed'),
+        ('NhbStructuur', 'm0024_squashed'),
         ('Score', 'm0011_squashed'),
+        ('Sporter', 'm0003_squashed'),
         ('Wedstrijden', 'm0020_squashed'),
     ]
 
@@ -56,9 +58,12 @@ class Migration(migrations.Migration):
                 ('alle_rks_afgesloten', models.BooleanField(default=False)),
                 ('alle_bks_afgesloten', models.BooleanField(default=False)),
                 ('laatst_mogelijke_wedstrijd', models.DateField()),
+                ('datum_klassengrenzen_rk_bk_teams', models.DateField()),
                 ('rk_eerste_wedstrijd', models.DateField()),
                 ('rk_laatste_wedstrijd', models.DateField()),
-                ('klassegrenzen_vastgesteld', models.BooleanField(default=False)),
+                ('klassengrenzen_vastgesteld', models.BooleanField(default=False)),
+                ('klassengrenzen_vastgesteld_rk_bk', models.BooleanField(default=False)),
+                ('aantal_scores_voor_rk_deelname', models.PositiveSmallIntegerField(default=6)),
             ],
         ),
         migrations.CreateModel(
@@ -69,6 +74,7 @@ class Migration(migrations.Migration):
                 ('competitie', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Competitie.competitie')),
                 ('indiv', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='BasisTypen.indivwedstrijdklasse')),
                 ('team', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='BasisTypen.teamwedstrijdklasse')),
+                ('is_voor_teams_rk_bk', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'Competitie klasse',
@@ -145,16 +151,7 @@ class Migration(migrations.Migration):
                 ('ag_voor_team', models.DecimalField(decimal_places=3, default=0.0, max_digits=5)),
                 ('ag_voor_team_mag_aangepast_worden', models.BooleanField(default=False)),
                 ('inschrijf_gekozen_wedstrijden', models.ManyToManyField(blank=True, to='Wedstrijden.CompetitieWedstrijd')),
-                ('inschrijf_voorkeur_dagdeel', models.CharField(choices=[('GN', 'Geen voorkeur'), ('AV', "'s Avonds"), ('MA', 'Maandag'),
-                                                                         ('MAa', 'Maandagavond'), ('DI', 'Dinsdag'), ('DIa', 'Dinsdagavond'),
-                                                                         ('WO', 'Woensdag'), ('WOa', 'Woensdagavond'), ('DO', 'Donderdag'),
-                                                                         ('DOa', 'Donderdagavond'), ('VR', 'Vrijdag'),
-                                                                         ('VRa', 'Vrijdagavond'), ('ZAT', 'Zaterdag'),
-                                                                         ('ZAo', 'Zaterdagochtend'), ('ZAm', 'Zaterdagmiddag'),
-                                                                         ('ZAa', 'Zaterdagavond'), ('ZON', 'Zondag'),
-                                                                         ('ZOo', 'Zondagochtend'), ('ZOm', 'Zondagmiddag'),
-                                                                         ('ZOa', 'Zondagavond'), ('WE', 'Weekend')],
-                                                                default='GN', max_length=3)),
+                ('inschrijf_voorkeur_dagdeel', models.CharField(choices=[('GN', 'Geen voorkeur'), ('AV', "'s Avonds"), ('MA', 'Maandag'), ('MAa', 'Maandagavond'), ('DI', 'Dinsdag'), ('DIa', 'Dinsdagavond'), ('WO', 'Woensdag'), ('WOa', 'Woensdagavond'), ('DO', 'Donderdag'), ('DOa', 'Donderdagavond'), ('VR', 'Vrijdag'), ('VRa', 'Vrijdagavond'), ('ZAT', 'Zaterdag'), ('ZAo', 'Zaterdagochtend'), ('ZAm', 'Zaterdagmiddag'), ('ZAa', 'Zaterdagavond'), ('ZON', 'Zondag'), ('ZOo', 'Zondagochtend'), ('ZOm', 'Zondagmiddag'), ('ZOa', 'Zondagavond'), ('WE', 'Weekend')], default='GN', max_length=3)),
                 ('gemiddelde_begin_team_ronde', models.DecimalField(decimal_places=3, default=0.0, max_digits=5)),
                 ('sporterboog', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='Sporter.sporterboog')),
             ],
@@ -177,6 +174,7 @@ class Migration(migrations.Migration):
                 ('rank', models.PositiveSmallIntegerField(default=0)),
                 ('deelname', models.CharField(choices=[('?', 'Onbekend'), ('J', 'Bevestigd'), ('N', 'Afgemeld')], default='?', max_length=1)),
                 ('sporterboog', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='Sporter.sporterboog')),
+                ('regio_scores', models.CharField(blank=True, default='', max_length=24)),
             ],
             options={
                 'verbose_name': 'Kampioenschap Schutterboog',
@@ -250,6 +248,7 @@ class Migration(migrations.Migration):
                 ('deelcompetitie', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='Competitie.deelcompetitie')),
                 ('deelnemer', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='Competitie.kampioenschapschutterboog')),
                 ('klasse', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='Competitie.competitieklasse')),
+                ('competitie', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='Competitie.competitie')),
             ],
             options={
                 'verbose_name': 'Competitie mutatie',
@@ -263,7 +262,7 @@ class Migration(migrations.Migration):
                 ('hoogste_mutatie', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='Competitie.competitiemutatie')),
             ],
         ),
-        migrations.RunPython(code=init_taken),
+        migrations.RunPython(init_taken),
     ]
 
 # end of file

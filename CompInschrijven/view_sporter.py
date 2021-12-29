@@ -73,7 +73,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         # controleer dat sporterboog bij de ingelogde gebruiker hoort
         # controleer dat deelcompetitie bij de juist regio hoort
         account = self.request.user
-        sporter = account.sporter_set.all()[0]      # ROL_SCHUTTER geeft bescherming tegen geen nhblid
+        sporter = account.sporter_set.all()[0]      # ROL_SPORTER geeft bescherming tegen geen nhblid
         if (sporterboog.sporter != sporter
                 or deelcomp.laag != LAAG_REGIO
                 or deelcomp.nhb_regio != sporter.bij_vereniging.regio):

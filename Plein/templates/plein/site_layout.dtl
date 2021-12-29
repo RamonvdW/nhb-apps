@@ -27,114 +27,77 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans&amp;display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu&amp;display=swap">
-        <link rel="stylesheet" href="{% static 'materialize-new-52.css' %}">
-        <link rel="stylesheet" href="{% static 'site_layout_min-25.css' %}"> <!-- moet ná materialize css -->
+        <link rel="stylesheet" href="{% static 'materialize-new-66.css' %}">
+        <link rel="stylesheet" href="{% static 'site_layout_min-29.css' %}"> <!-- moet ná materialize css -->
         {% block extraheader %}{% endblock %}
     </head>
 
-    <body class="nhb-grijs">
-        <div id="container">        <!-- css manipulates this to make space for the menu -->
+    <body class="white">
 
-            <!-- main contents -->
-            <div id="content">      <!-- css manipulates this -->
-
-                <!-- button to call-up the sidenav; hidden when not needed -->
-                <a id="discover-menu" href="#" data-target="slide-out" class="sidenav-trigger hide-on-large-only">
-                    <i class="material-icons-round black-text" style="line-height:1.2">menu</i>
-                </a>
-
-                <!-- aandachtstrekker: uitleg hoe in het menu te komen -->
-                <div class="tap-target" data-target="discover-menu" id="tap-target-voor-menu">
-                    <div class="tap-target-content white-text">
-                        <h5>Toegang tot het menu</h5>
-                        <p>Gebruik de drie streepjes om het menu op te roepen</p>
-                        <button class="btn-nhb-rood" onclick="closeTapTarget('tap-target-voor-menu')">Ik snap het</button>
-                    </div>
+        <!-- top navbar -->
+        <div class="navbar-fixed">
+            <nav class="nhb-grijs">
+                <div class="nav-wrapper">
+                    <a href="/plein/" class="brand-logo" style="left:0; transform:none; padding-left:7px; padding-top:7px">
+                        <img src="{% static 'plein/logo_with_text_nhb.png' %}" height="50" alt="NHB logo">
+                    </a>
+                    <ul id="nav-mobile" class="right">
+                        <!--
+                        <li><a class="btn-nhb-rood" href="{% url 'Competitie:kies' %}">Bondscompetities</a></li>
+                        <li><a class="btn-nhb-rood" href="{% url 'Records:overzicht' %}">Records</a></li>
+                        -->
+                        {% if user.is_authenticated %}
+                            <li>
+                                <a href="#" class="btn-nhb-rood dropdown-trigger" style="min-width:150px" data-target="dropdown1">
+                                    <i class="material-icons-round right" style="line-height:36px">expand_more</i>{{ user.get_first_name|escape }}</a>
+                            </li>
+                        {% else %}
+                            <li><a href="{% url 'Account:login' %}" class="btn-nhb-rood">Inloggen</a></li>
+                        {% endif %}
+                    </ul>
                 </div>
 
-                <!-- screen-size indicator labels -->
-                {% if toon_schermgrootte %}
-                    <div style="position: fixed; left: 320px; top: 2px; font-size:10px">
-                        <span class="hide-unless-small">Small</span>
-                        <span class="hide-unless-medium">Medium</span>
-                        <span class="hide-unless-large">Large</span>
-                        <span class="hide-unless-xlarge">Extra-large</span>
-                    </div>
-                {% endif %}
+                <ul id="dropdown1" class="dropdown-content nhb-grijs">
+                    {% if toon_wissel_van_rol %}
+                        <li><a class="black-text" href="{% url 'Functie:wissel-van-rol' %}">Wissel van rol</a></li>
+                    {% endif %}
 
-                <!-- echt pagina komt hier, vanuit de template -->
-                {% block pagina %}{% endblock %}
-            </div>
+                    {% if url_profiel %}
+                        <li><a class="black-text" href="{% url 'Sporter:profiel' %}">Mijn pagina</a></li>
+                    {% endif %}
 
-            <!-- sidenav (als laatste zodat dit niet de eerste tabstop is) -->
-            <div id="menu">
-                <ul id="slide-out" class="sidenav sidenav-fixed">
-                    {% include 'plein/menu-1-head.dtl' %}
+                    {% if url_admin_site %}
+                        <li class="divider"></li>
+                        <li><a class="red-text" href="{{ url_admin_site }}">Admin site</a></li>
+                    {% endif %}
 
-                    <!-- vervangbaar deel van het menu -->
-                    {% block menu-competities %}
-                        {% include 'plein/menu-2-competities.dtl' %}
-                    {% endblock %}
-
-                    {% include 'plein/menu-3.dtl' %}
-
-                    {% include 'plein/menu-9-tail.dtl' %}
+                    <li class="divider"></li>
+                    <li><a class="black-text" href="/account/logout/">Uitloggen</a></li>
                 </ul>
-            </div>
+            </nav>
 
+            <!-- screen-size indicator labels -->
+            {% if toon_schermgrootte %}
+                <div style="position: fixed; left: 350px; top: 2px; font-size:10px">
+                    <span class="hide-unless-small">Small</span>
+                    <span class="hide-unless-medium">Medium</span>
+                    <span class="hide-unless-large">Large</span>
+                    <span class="hide-unless-xlarge">Extra-large</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- main contents -->
+        <div class="nav-content-scrollbar">   <!-- css manipulates this to reduce padding on mobile -->
+
+            <!-- echt pagina komt hier, vanuit de template -->
+            {% block pagina %}{% endblock %}
         </div>
 
         <script src="{% static 'materialize-new-10_min.js' %}"></script>
 
         <!-- framework init, after everything has been loaded and instantiated -->
         <script type="application/javascript">
-            function discover_popup_delayed_open()
-            {
-                // in de tussentijd kan het scherm al weer groter zijn geworden
-                let menu_is_hidden = window.matchMedia("(max-width: 985px)")
-                if (menu_is_hidden.matches)
-                {
-                    let elem = document.querySelector(".tap-target")
-                    M.TapTarget.getInstance(elem).open()
-                }
-            }
-
-            function discover_popup_show(mq_event)
-            {
-                // scherm is kleiner geworden (of initieel klein), dus toon de tap target
-                if (mq_event == null || mq_event.matches) {
-                    // cookie zorgt ervoor dat de pop-up maar 3x tonen
-                    let count = getCookieNumber("menu_discover")
-                    if (count < 3)
-                    {
-                        document.cookie = "menu_discover=" + (count + 1) + "; path=/"
-                        // toon met een kleine vertraging
-                        setTimeout(discover_popup_delayed_open, 2000)
-                    }
-                }
-            }
-
-            function discover_popup_hide(mq_event) {
-                // scherm is kleiner geworden, dus haal de tap-target uit beeld
-                if (mq_event.matches)
-                {
-                    let elem = document.querySelector(".tap-target")
-                    M.TapTarget.getInstance(elem).close()
-                }
-            }
-
-            function closeTapTarget(id)
-            {
-                // haal het tap-target element uit beeld
-                let elem = document.getElementById(id)
-                let inst = M.TapTarget.getInstance(elem)
-                inst.close()        // administratief
-                inst.destroy()      // verwijderd visuele elementen
-
-                // zet het cookie dat voorkomt dat de tap target weer getoond wordt
-                document.cookie = "menu_discover=9; path=/"
-            }
-
             // helper functie om een opgeslagen cookie in te lezen
             function getCookie(name) {
                 let cookieValue = null
@@ -163,50 +126,25 @@
             }
 
             document.addEventListener("DOMContentLoaded", function() {
-                // sidenav
-                let elems = document.querySelectorAll(".sidenav")
-                M.Sidenav.init(elems, {})
-
                 // accordeons
                 const options = { inDuration: 100,    // default is 300
                                   outDuration: 100    // default is 300
                                 }
+                let elems;
+
                 elems = document.querySelectorAll(".collapsible")
                 M.Collapsible.init(elems, options)
+
+                elems = document.querySelectorAll(".dropdown-trigger")
+                M.Dropdown.init(elems, {coverTrigger: false, constraintWidth: false})
 
                 // tooltips
                 elems = document.querySelectorAll(".tooltipped")
                 M.Tooltip.init(elems, { enterDelay: 1000 })
 
-                // feature discovery
-                elems = document.querySelectorAll(".tap-target")
-                M.TapTarget.init(elems, {})
-
                 // rolgordijnen
                 elems = document.querySelectorAll("select")
                 M.FormSelect.init(elems, {})
-
-                let count = getCookieNumber("menu_discover")
-                if (count < 3)
-                {
-                    // -------------
-                    // KEEP IN SYNC
-                    // - site_layout.css: media query to show/hide labels
-                    // - site_layout.dtl: javascript checks for menu visible/hidden with media query
-                    // - materialize.js: cut-off point to show/hide sidebar (menu)
-                    // - variables.css: media query ranges
-                    // -------------
-
-                    let menu_is_shown = window.matchMedia("(min-width: 1021px)")
-                    menu_is_shown.addEventListener("change", discover_popup_hide)
-
-                    let menu_is_hidden = window.matchMedia("(max-width: 1020px)")
-                    menu_is_hidden.addEventListener("change", discover_popup_show)
-                    if (menu_is_hidden.matches) {
-                        // show immediately
-                        discover_popup_show(null)
-                    }
-                }
             })
 
             // ### tabel filter ###

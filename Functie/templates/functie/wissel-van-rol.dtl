@@ -20,8 +20,6 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wissel-van-rol" %}
-
     <h4>Wissel van rol</h4>
 
     <p>Op deze pagina kan je de rol kiezen die je aan wilt nemen.</p>
@@ -142,5 +140,7 @@
         <p><a class="btn-nhb-blauw" href="{% url 'Functie:vhpg-afspraken' %}"><i class="material-icons-round left">remove_red_eye</i>Afspraken inzien</a></p>
 
     {% endif %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wissel-van-rol" %}
 
 {% endblock %}

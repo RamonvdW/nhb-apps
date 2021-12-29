@@ -29,6 +29,14 @@ a {
     background-color: #03628c;    /* NHB donker blauw */
 }
 
+.nhb-blauw-hoofd {
+    background-color: #0aa0e1;    /* NHB medium blauw */
+}
+
+.nhb-blauw-steun {
+    background-color: #5EBDE7;    /* NHB lightblauw */
+}
+
 .nhb-rood {
     background-color: #f94137;   /* NHB hoofdkleur oranje */
 }

@@ -18,7 +18,8 @@ $nhb-rood-focus: lighten($nhb-rood-color, 5%) !default;
 $nhb-rood-hover: darken($nhb-rood-color, 25%) !default;
 
 $nhb-card-hover-background: #f5f5f5;
-$nhb-card-focus-border-color: $nhb-blauw-color !default;
+//$nhb-card-focus-border-color: $nhb-blauw-color !default;
+$nhb-card-focus-border-color: $nhb-rood-color !default;
 $nhb-collection-hover-background: $nhb-card-hover-background;
 
 

@@ -17,73 +17,16 @@
         }
     </script>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-regio-indiv" %}
-
-    <h4>Uitslagen regiocompetitie</h4>
-
-    <p>Deze pagina toont de {% if comp.alle_regiocompetities_afgesloten %}eindstand{% else %}tussenstand{% endif %} van de individuele regiocompetities.</p>
-
-
-    <p>Kies een wedstrijdboog:</p>
-
-    <div class="white shrink-wrap-5">
-        {% for boog in boog_filters %}
-            {% if boog.zoom_url %}
-                <a class="margin-5 btn-outline" href="{{ boog.zoom_url }}">{{ boog.beschrijving }}</a>
-            {% else %}
-                <a class="margin-5 btn-nhb-blauw" href="#">{{ boog.beschrijving }}</a>
-            {% endif %}
-        {% endfor %}
-    </div>
-
-
-    <p>Kies een regio:</p>
-
-    <div class="white shrink-wrap-5">
-        {% for regio in regio_filters %}
-            {% if regio.break_before %}
-                <br>
-            {% endif %}
-            {% if regio.zoom_url %}
-                <a class="margin-5 btn-outline" href="{{ regio.zoom_url }}">{{ regio.title_str }}</a>
-            {% else %}
-                <a class="margin-5 btn-nhb-blauw" href="#">{{ regio.title_str }}</a>
-            {% endif %}
-        {% endfor %}
-    </div>
-
-    <br><br>
-    <div class="white shrink-wrap-5">
-        <div style="margin-left: 10px">
-            <label>
-                <input type="checkbox" class="filled-in" id="zes_scores" onchange="zes_scores()"{% if zes_scores_checked %} checked{% endif %}>
-                <span class="black-text">Alleen sporters met 6 of meer geschoten wedstrijden</span>
-            </label>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Uitslagen regiocompetitie</h3>
+        </div>
+        <div class="col s12">
+            <p>Deze pagina toont de {% if comp.alle_regiocompetities_afgesloten %}eindstand{% else %}tussenstand{% endif %} van de individuele regiocompetities.</p>
         </div>
     </div>
 
-    <br><br>
-    <div class="row">
-        <div class="col s12 m6" style="padding:0">
-            <ul class="collapsible" style="box-shadow: none; border:0">
-                <li>
-                    <div class="collapsible-header white">Klik voor verenigingen</div>
-                    <div class="collapsible-body white">
-                        <span>Kies een vereniging:</span><br>
-                        {% for ver in ver_filters %}
-                            <p>
-                            <a class="btn-nhb-blauw" href="{{ ver.zoom_url }}">{{ ver.ver_nr }}</a>
-                            <span>&nbsp;&nbsp;{{ ver.naam }}</span>
-                            </p>
-                        {% endfor %}
-                    </div>
-                </li>
-            </ul>
-        </div>
-    </div>
-
-
-    <p>&nbsp;</p>
     <div class="row">
 
         <!-- toon gegevens van de regio en competitie in een blauwe box -->
@@ -108,12 +51,84 @@
         </div>
     </div>
 
-    <p>&nbsp;</p>
+
+    <!-- blauwe balk met kaartjes -->
+    <!--
+    <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="col s12">
+            <div class="white" style="margin:50px">
+            <p>Kies een wedstrijdboog:</p>
+
+            <div class="white shrink-wrap-5">
+                {% for boog in boog_filters %}
+                    {% if boog.zoom_url %}
+                        <a class="margin-5 btn-outline" href="{{ boog.zoom_url }}">{{ boog.beschrijving }}</a>
+                    {% else %}
+                        <a class="margin-5 btn-nhb-blauw" href="#">{{ boog.beschrijving }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+
+            <p>Kies een regio:</p>
+
+            <div class="white shrink-wrap-5">
+                {% for regio in regio_filters %}
+                    {% if regio.break_before %}
+                        <br>
+                    {% endif %}
+                    {% if regio.zoom_url %}
+                        <a class="margin-5 btn-outline" href="{{ regio.zoom_url }}">{{ regio.title_str }}</a>
+                    {% else %}
+                        <a class="margin-5 btn-nhb-blauw" href="#">{{ regio.title_str }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <br><br>
+            <div class="white shrink-wrap-5">
+                <div style="margin-left: 10px">
+                    <label>
+                        <input type="checkbox" class="filled-in" id="zes_scores" onchange="zes_scores()"{% if zes_scores_checked %} checked{% endif %}>
+                        <span class="black-text">Alleen sporters met 6 of meer geschoten wedstrijden</span>
+                    </label>
+                </div>
+            </div>
+
+            <br><br>
+            <div class="row">
+                <div class="col s12 m6" style="padding:0">
+                    <ul class="collapsible" style="box-shadow: none; border:0">
+                        <li>
+                            <div class="collapsible-header white">Klik voor verenigingen</div>
+                            <div class="collapsible-body white">
+                                <span>Kies een vereniging:</span><br>
+                                {% for ver in ver_filters %}
+                                    <p>
+                                    <a class="btn-nhb-blauw" href="{{ ver.zoom_url }}">{{ ver.ver_nr }}</a>
+                                    <span>&nbsp;&nbsp;{{ ver.naam }}</span>
+                                    </p>
+                                {% endfor %}
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            </div>
+        </div>
+    </div>
+-->
 
     {% if comp.aantal_scores_voor_rk_deelname != 6 %}
-    <div class="white shrink-wrap-5 z-depth-2">
-        <p class="red-text">Er is besloten een uitzondering te maken voor de {{ comp }}. Om deel te mogen nemen aan de Rayonkampioenschappen moeten <b>{{ comp.aantal_scores_voor_rk_deelname }} scores</b> neergezet zijn.<br>Het totaal en gemiddelde hieronder is daarom berekend over de <b>beste {{ comp.aantal_scores_voor_rk_deelname }} scores</b>.</p>
-    </div>
+        <p>&nbsp;</p>
+
+        <div class="row">
+            <div class="col s12 m8 offset-m2 nhb-rood z-depth-3">
+                <p class="white-text">Er is besloten een uitzondering te maken voor de {{ comp }}. Om deel te mogen nemen aan de Rayonkampioenschappen moeten <b>{{ comp.aantal_scores_voor_rk_deelname }} scores</b> neergezet zijn.<br>Het totaal en gemiddelde hieronder is daarom berekend over de <b>beste {{ comp.aantal_scores_voor_rk_deelname }} scores</b>.</p>
+            </div>
+        </div>
+
     {% endif %}
 
     <table class="white">
@@ -136,16 +151,23 @@
             {% endif %}
 
             {% if obj.break_klasse %}
-                <tr class="nhb-grijs">
-                    <td colspan="12"><h5>{{ obj.klasse_str }}</h5></td>
-                </tr>
+                {% if not obj.is_eerste_groep %}
+                    <tr>
+                        <td colspan="14" class="nhb-blauw-hoofd" style="padding:0px; height:3px"></td>
+                    </tr>
+                {% endif %}
                 <tr>
+                    <td colspan="14" class="center-align"><h5>{{ obj.klasse_str }}</h5></td>
+                </tr>
+                <tr class="nhb-blauw-hoofd white-text">
+                    <td class="nhb-blauw-hoofd" style="width:3px; padding:0" rowspan="{{ obj.aantal_in_groep }}"></td>
                     <th><!-- rank --></th>
                     <th>Sporter</th>
                     <th class="hide-on-small-only">Vereniging</th>
                     <th class="center-align">Gemiddelde</th>
                     <th class="center-align" colspan="7">Scores</th>
                     <th class="right-align hide-on-small-only">Totaal</th>
+                    <td class="nhb-blauw-hoofd" style="width:3px; padding:0" rowspan="{{ obj.aantal_in_groep }}"></td>
                 </tr>
             {% endif %}
 
@@ -165,10 +187,11 @@
             </tr>
 
         {% endfor %}
+        <tr>
+            <td colspan="14" class="nhb-blauw-hoofd" style="padding:0px; height:3px"></td>
+        </tr>
     </table>
 
-{% endblock %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-regio-indiv" %}
 
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}

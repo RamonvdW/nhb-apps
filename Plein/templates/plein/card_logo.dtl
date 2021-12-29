@@ -27,13 +27,13 @@
     <a href="{{ url }}"{% if extern_open %} target="_blank" rel="noopener noreferrer"{% endif %}>
 
         <!-- padding om bij de rand weg te blijven -->
-        <div class="nhb-card-content">
+        <div class="nhb-card-content center-align">
 
             <!-- titel -->
-            <div class="card-title center-align">{{ title }}</div>
+            <div class="card-title">{{ title }}</div>
 
             <!-- icoon -->
-            <div class="center-align" style="margin-bottom:8px">
+            <div style="margin-bottom:8px">
                 <img src="{{ img_src }}" height="{{ img_height }}" alt="logo"{% if img_style %} style="{{ img_style }}"{% endif %}>
             </div>
 

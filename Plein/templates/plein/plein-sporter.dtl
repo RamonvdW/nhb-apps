@@ -10,60 +10,100 @@
 
 {% block pagina %}
 
-    <h4>Het Plein</h4>
+    <!-- MijnHandboogsport banner -->
+    <div class="row center">
+        <div class="col s12">
+            <p>&nbsp;</p>
+            <h4>Welkom op</h4>
+        </div>
 
-    <p>Deze pagina geeft toegang tot alle delen van deze site: klik op een van onderstaande kaartjes, of gebruik het menu aan de linker kant.</p>
+        <div class="col s12 nhb-rood-text">
+            <h1 class="hide-on-small-only" style="margin:0; font-weight:bold">MijnHandboogsport</h1>
+            <h3 class="hide-on-med-and-up" style="margin:0; font-weight:bold">MijnHandboogsport</h3>
+        </div>
 
+        <div class="col s12">
+            <p>Op deze website kan je informatie vinden over de handboogsport, zoals records, wedstrijden en uitslagen.</p>
+            <p>&nbsp;</p>
+        </div>
+    </div>
+
+    <!-- banner om mensen weg te sturen van de test server -->
     {% if is_test_server %}
-        {% include 'plein/ga-naar-live-server.dtl' %}
+        <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+            <div class="col s12 ">
+                {% include 'plein/ga-naar-live-server.dtl' %}
+            </div>
+        </div>
     {% endif %}
 
-    <p>&nbsp;</p>
-    <h5>Op deze site</h5>
-
-    <div class="row">
-        {% url 'Sporter:profiel' as card_url %}
-        {% include 'plein/card.dtl' with title="Mijn pagina" text="Voorkeuren en informatie toegespitst op jou." icon="portrait" url=card_url %}
-
-        {% url 'Competitie:kies' as card_url %}
-        {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
-
-        {% url 'Records:overzicht' as card_url %}
-        {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
-
-        {% if toon_kalender %}      <!-- volg menu -->
-            {% url 'Kalender:landing-page' as card_url %}
-            {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
-        {% endif %}
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <p>&nbsp;</p>
+            <h4>Ontdekken</h4>
+        </div>
     </div>
 
-    <p>
-        <span>Lees hier hoe we omgaan met jouw privacy: </span>
-        <a href="{% url 'Plein:privacy' %}" class="btn-nhb-blauw">
-            <i class="material-icons-round left">security</i>Privacyverklaring</a>
-    </p>
+    <!-- blauwe balk met kaartjes -->
+    <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="col s12">
+            <!-- Mijn pagina -->
+            {% url 'Sporter:profiel' as card_url %}
+            {% include 'plein/card.dtl' with title="Mijn pagina" text="Voorkeuren en informatie toegespitst op jou." icon="portrait" url=card_url %}
 
-    <p>&nbsp;</p>
-    <h5>Verder</h5>
+            <!-- Bondscompetities -->
+            {% url 'Competitie:kies' as card_url %}
+            {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
 
-    <p>De volgende websites zijn misschien ook interessant voor je.</p>
+            <!-- Records -->
+            {% url 'Records:overzicht' as card_url %}
+            {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
 
-    <div class="row">
-        <!-- andere sites van de NHB -->
-        {% include 'plein/andere-sites-van-de-nhb.dtl' %}
+            <!-- Wedstrijdkalender -->
+            {% if toon_kalender %}      <!-- volg menu -->
+                {% url 'Kalender:landing-page' as card_url %}
+                {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
+            {% endif %}
+        </div>
     </div>
 
-    <p>Voor vragen en problemen kan je contact met ons opnemen via e-mail (druk op de knop om je mailprogramma te starten):</p>
-    <a href="mailto:{{ email_support }}" class="btn-nhb-blauw">
-        <i class="material-icons-round left">mail</i>{{ email_support }}</a>
 
-    <p>Voorstellen en feedback over deze site graag via de drie gekleurde smileys die op elke pagina te vinden zijn.</p>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <p>&nbsp;</p>
+            <h4>Andere sites van de NHB</h4>
+            <p>De volgende websites zijn misschien ook interessant voor je.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met links naar andere sites -->
+    <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="col s12">
+            {% include 'plein/andere-sites-van-de-nhb.dtl' %}
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <p>&nbsp;</p>
+            <h4>Hulp nodig?</h4>
+            <p>Het bondsbureau kan je bereiken op <code>{{ email_support }}</code></p>
+            <p>Voorstellen en feedback over deze site graag via de drie gekleurde smileys die op elke pagina te vinden zijn.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met kaartje -->
+    <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="col s12">
+            {% include 'plein/card.dtl' with title="Stuur een e-mail" text="Kies dit kaartje om je mailprogramma te starten" icon="email" url=email_support %}
+        </div>
+    </div>
+
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-schutter" %}
-
-    <p>
-        <a class="btn-nhb-rood" href="{% url 'Account:logout' %}" >
-            <i class="material-icons-round left">exit_to_app</i>Uitloggen</a>
-    </p>
 
 {% endblock %}

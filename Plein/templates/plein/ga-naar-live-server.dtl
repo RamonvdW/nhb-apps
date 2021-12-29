@@ -1,19 +1,17 @@
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2021 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
 <!-- banner om mensen weg te sturen van de test server -->
-<p>&nbsp;</p>
 <div class="container">
     <table class="white centered z-depth-2">
         <tr>
             <td>Deze site is voor het testen van de nieuwste software door een klein groepje gebruikers.<br><br><b>Wij adviseren gebruik van de offici&euml;le site:</b><br>
-                <br><a class="btn-nhb-blauw" href="https://mijn.handboogsport.nl" rel="noopener noreferrer" target="_blank">mijn.handboogsport.nl</a>
+                <br><a class="btn-nhb-rood" href="https://mijn.handboogsport.nl" rel="noopener noreferrer" target="_blank">mijn.handboogsport.nl</a>
             </td>
         </tr>
     </table>
 </div>
-<p>&nbsp;</p>

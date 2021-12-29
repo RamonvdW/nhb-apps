@@ -18,6 +18,10 @@
     color: $nhb-blauw-color;
 }
 
+.nhb-rood-text {
+    color: $nhb-rood-color;
+}
+
 
 //-----------------------------------
 // blauwe button
@@ -78,8 +82,9 @@
 
   // laat de kaartjes naast elkaar komen (in het display=block van de row)
   display: inline-flex;
-  margin-right: 30px;
-  padding: 2px;
+  margin-right: 15px;
+  margin-left: 15px;
+  padding: 3px;
   border-radius: 5px;
 
   // forceer een vaste breedte van de kaartjes
@@ -90,7 +95,7 @@
 
   &:hover {
     padding: 0;
-    border-width: 2px;
+    border-width: 3px;
     border-style: solid;
     border-color: $nhb-card-focus-border-color;
   }

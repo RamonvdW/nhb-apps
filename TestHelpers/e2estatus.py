@@ -12,10 +12,6 @@ validated_templates = list()
 included_templates = (
     'plein/site_layout.dtl',
     'plein/site_layout_minimaal.dtl',
-    'plein/menu-1-head.dtl',
-    'plein/menu-2-competities.dtl',
-    'plein/menu-3.dtl',
-    'plein/menu-9-tail.dtl',
     'plein/card.dtl',
     'plein/card_logo.dtl',
     'plein/andere-sites-van-de-nhb.dtl',

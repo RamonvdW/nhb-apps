@@ -458,6 +458,7 @@ class CompetitieKiesView(TemplateView):
 
         if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
             context['toon_beheerders'] = True
+            context['huidige_rol'] = rol_get_beschrijving(self.request)
 
         menu_dynamics_competitie(self.request, context)
         return context

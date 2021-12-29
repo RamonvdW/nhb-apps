@@ -10,60 +10,82 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-kies" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Bondscompetities</h3>
+        </div>
 
-    <h4>Bondscompetities</h4>
-
-    <p>Maak een keuze uit de beschikbare competities.</p>
-
-    <div class="row">
-
-        <!-- de beschikbare competities -->
-        {% for obj in competities %}
-            {% include 'plein/card_logo.dtl' with title=obj.titel text=obj.text img_src=obj.img_src img_height="63" url=obj.card_url %}
-        {% endfor %}
-
-        {% url 'HistComp:top' as card_url %}
-        {% include 'plein/card.dtl' with title="Uitslag vorig seizoen" text="De uitslag van vorig seizoen is hier in te zien." icon="undo" url=card_url %}
+        <div class="col s12">
+            {% if toon_beheerders %}
+                <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
+            {% endif %}
+        </div>
     </div>
 
+    <!-- blauwe balk met kaartjes -->
+    <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="col s12">
+            <!-- de beschikbare competities -->
+            {% for obj in competities %}
+                {% include 'plein/card_logo.dtl' with title=obj.titel text=obj.text img_src=obj.img_src img_height="63" url=obj.card_url %}
+            {% endfor %}
+
+            {% url 'HistComp:top' as card_url %}
+            {% include 'plein/card.dtl' with title="Uitslag vorig seizoen" text="De uitslag van vorig seizoen is hier in te zien." icon="undo" url=card_url %}
+        </div>
+    </div>
+
+
     {% if bb_kan_competitie_aanmaken %}
-        <h5>Management bondscompetitie</h5>
 
-        <p>Deze mogelijkheid zijn alleen door de Manager Competitiezaken te gebruiken.</p>
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <p>&nbsp;</p>
+                <h4>Management bondscompetitie</h4>
+            </div>
+        </div>
 
-        <div class="row">
-            <!-- competities aanmaken -->
-            {% if bb_kan_competitie_aanmaken %}
+        <!-- blauwe balk met kaartjes -->
+        <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+            <div class="col s12">
+                <!-- competities opstarten -->
                 {% url 'Competitie:instellingen-volgende-competitie' as card_url %}
                 {% include 'plein/card.dtl' with title="Start competitie" text="Instellingen voor seizoen "|add:nieuwe_seizoen|add:" controleren en nieuwe competities aanmaken." icon="playlist_add" url=card_url %}
-            {% endif %}
+            </div>
         </div>
 
     {% endif %}
 
-    <h5>Algemeen</h5>
 
-    <div class="row">
-
-        <!-- toon en koppel beheerders -->
-        {% if toon_beheerders %}
-            {% url 'Functie:overzicht' as card_url %}
-            {% include 'plein/card.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." icon="face" url=card_url %}
-        {% endif %}
-
-        <!-- algemene informatie over de competities -->
-        {% url 'Competitie:info-competitie' as card_url %}
-        {% include 'plein/card.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
-
-        <!-- informatie over leeftijden -->
-        {% url 'Competitie:info-leeftijden' as card_url %}
-        {% include 'plein/card.dtl' with title="Leeftijden" text="Informatie over de leeftijds-categori&euml;n voor wedstrijden en de competities." icon="star" url=card_url %}
-
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <p>&nbsp;</p>
+            <h4>Algemeen</h4>
+        </div>
     </div>
 
-{% endblock %}
+    <!-- blauwe balk met kaartjes -->
+    <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="col s12">
+            <!-- toon en koppel beheerders -->
+            {% if toon_beheerders %}
+                {% url 'Functie:overzicht' as card_url %}
+                {% include 'plein/card.dtl' with title="Beheerders" text="Toon wie beheerders van de bondscompetitie zijn, koppel andere beheerders of wijzig contactgegevens." icon="face" url=card_url %}
+            {% endif %}
 
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
+            <!-- algemene informatie over de competities -->
+            {% url 'Competitie:info-competitie' as card_url %}
+            {% include 'plein/card.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
+
+            <!-- informatie over leeftijden -->
+            {% url 'Competitie:info-leeftijden' as card_url %}
+            {% include 'plein/card.dtl' with title="Leeftijden" text="Informatie over de leeftijds-categori&euml;n voor wedstrijden en de competities." icon="star" url=card_url %}
+        </div>
+    </div>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-kies" %}
+
 {% endblock %}

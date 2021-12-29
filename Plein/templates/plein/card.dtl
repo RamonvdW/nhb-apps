@@ -26,14 +26,14 @@
     <a href="{{ url }}"{% if extern_open %} target="_blank" rel="noopener noreferrer"{% endif %}>
 
         <!-- padding om bij de rand weg te blijven -->
-        <div class="nhb-card-content">
+        <div class="nhb-card-content center-align">
 
             <!-- titel -->
-            <div class="card-title center-align">{{ title }}</div>
+            <div class="card-title">{{ title }}</div>
 
             <!-- icoon -->
-            <div class="center-align" style="margin-bottom:8px">
-                <i class="material-icons-round medium">{{ icon }}</i>
+            <div style="margin-bottom:8px">
+                <i class="material-icons-round medium nhb-rood-text">{{ icon }}</i>
             </div>
 
             <div>{{ text }}</div>

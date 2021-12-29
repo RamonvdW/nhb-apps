@@ -8,7 +8,7 @@ nav {
     }
 
     .nav-content {
-      position: relative;
+      //position: relative;
       line-height: normal;
     }
   }
@@ -205,4 +205,14 @@ nav {
   .navbar-fixed {
     height: $navbar-height;
   }
+}
+
+.nav-content-scrollbar {
+  line-height: normal;
+  // make the page scrollbar start underneath the navbar
+  position: fixed;
+  top: $navbar-height;
+  bottom: 0;
+  overflow:auto;
+  width: 100%;
 }

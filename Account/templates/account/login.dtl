@@ -10,70 +10,80 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="login" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Inloggen</h3>
+            <p>Heb je al een account, log dan in:</p>
+        </div>
+    </div>
 
-    <h4>Inloggen</h4>
-
-    <p>Heb je al een account, log dan in:</p>
+    <!-- blauwe balk met kaartjes -->
+    <div class="row nhb-blauw white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="col s12 l8 offset-l2">
 
     <div class="container z-depth-2 white">
-        <div class="row nhb-blauw white-text">
-            <div class="col s12 center-align">
-                <h5>Inloggen</h5>
-                <p>Met een bestaand account</p>
+        <div class="row">
+            <div class="col s12">
+                <div class="white depth-3" style="margin:30px">
+
+                <form action="{% url 'Account:login' %}" method="post">
+                    {{ form.next }}
+                    {% csrf_token %}
+
+
+                    {% if form.errors %}
+                        {% for error in form.non_field_errors %}
+                            <div class="row left-align">
+                                <div class="col s2 m1 red-text">Fout:</div>
+                                <div class="col s9 red-text">{{ error|escape }}</div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if show_wachtwoord_vergeten %}
+                        <div class="row"><div class="col s12"></div>
+                            <div class="center-align">
+                                <a class="btn-nhb-blauw" href="{% url 'Account:wachtwoord-vergeten' %}">
+                                    <i class="material-icons-round left">healing</i>Wachtwoord vergeten?</a>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="row"><div class="input-field col s12">
+                        {{ form.login_naam.label_tag }}{{ form.login_naam }}
+                    </div></div>
+
+                    <div class="row"><div class="input-field col s12">
+                        {{ form.wachtwoord.label_tag }}{{ form.wachtwoord }}
+                    </div></div>
+
+                    <!-- between Django and MaterializeCSS, checkboxes do not work
+                         because of the way Django generates the html (label before input tag)
+                         old: {{ form.aangemeld_blijven.label_tag }}{{ form.aangemeld_blijven }}
+                         workaround: manual deployment of the checkbox -->
+                    <div class="row"><div class="input-field col s12">
+                        <label>
+                            <input type="checkbox" class="filled-in" name="aangemeld_blijven">
+                            <span class="black-text">Aangemeld blijven</span>
+                        </label>
+                        <p>&nbsp;</p>
+                    </div></div>
+
+                    <div class="row"><div class="col s12">
+                        <div class="center-align">
+                            <input class="btn-nhb-rood center-align" type="submit" value="Log in">
+                        </div>
+                    </div></div>
+
+                </form>
+
+                </div>
+
             </div>
         </div>
+    </div>
 
-        <div class="row">
-            <form class="col s12" action="{% url 'Account:login' %}" method="post">
-                {{ form.next }}
-                {% csrf_token %}
-
-                {% if form.errors %}
-                    {% for error in form.non_field_errors %}
-                        <div class="row">
-                            <div class="col s2 m1 red-text">Fout:</div>
-                            <div class="col s9 red-text">{{ error|escape }}</div>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-
-                {% if show_wachtwoord_vergeten %}
-                    <div class="row"><div class="col s12"></div>
-                        <div class="center-align">
-                            <a class="btn-nhb-blauw" href="{% url 'Account:wachtwoord-vergeten' %}">
-                                <i class="material-icons-round left">healing</i>Wachtwoord vergeten?</a>
-                        </div>
-                    </div>
-                {% endif %}
-
-                <div class="row"><div class="input-field col s12">
-                    {{ form.login_naam.label_tag }}{{ form.login_naam }}
-                </div></div>
-
-                <div class="row"><div class="input-field col s12">
-                    {{ form.wachtwoord.label_tag }}{{ form.wachtwoord }}
-                </div></div>
-
-                <!-- between Django and MaterializeCSS, checkboxes do not work
-                     because of the way Django generates the html (label before input tag)
-                     old: {{ form.aangemeld_blijven.label_tag }}{{ form.aangemeld_blijven }}
-                     workaround: manual deployment of the checkbox -->
-                <div class="row"><div class="input-field col s12">
-                    <label>
-                        <input type="checkbox" class="filled-in" name="aangemeld_blijven">
-                        <span class="black-text">Aangemeld blijven</span>
-                    </label>
-                    <p>&nbsp;</p>
-                </div></div>
-
-                <div class="row"><div class="col s12">
-                    <div class="center-align">
-                        <input class="btn-nhb-blauw center-align" type="submit" value="Log in">
-                    </div>
-                </div></div>
-
-            </form>
         </div>
     </div>
 
@@ -100,10 +110,24 @@
         })
     </script>
 
-    <p>&nbsp;</p>
-    <h5>Wachtwoord vergeten?</h5>
-    <p>Heb je al een account aangemaakt maar lukt het niet meer om in te loggen?</p>
-    <p><a class="btn-nhb-blauw" href="{% url 'Account:wachtwoord-vergeten' %}">
-        <i class="material-icons-round left">healing</i>Wachtwoord vergeten</a></p>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Hulp nodig?</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="col s12">
+            {% url 'Account:wachtwoord-vergeten' as card_url %}
+            {% include 'plein/card.dtl' with title="Wachtwoord vergeten" text="Heb je al een account aangemaakt maar lukt het niet meer om in te loggen?" icon="help" url=card_url %}
+
+            {% url 'Sporter:registreer' as card_url %}
+            {% include 'plein/card.dtl' with title="Account aanmaken" text="Met een account krijg je informatie die voor jou relevant is.<br>(<i>alleen voor NHB leden</i>)" icon="fingerprint" url=card_url %}
+        </div>
+    </div>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="login" %}
 
 {% endblock %}

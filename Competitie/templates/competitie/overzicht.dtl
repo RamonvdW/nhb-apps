@@ -10,55 +10,68 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-overzicht" %}
-
-    <h4>{{ comp.beschrijving }}</h4>
-
-    <p>Op deze pagina tonen we informatie voor een specifieke bondscompetitie.</p>
-
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">{{ comp.beschrijving }}</h3>
+        </div>
+    </div>
 
     {% if toon_uitslagen %}
-        <h5>Uitslagen</h5>
-
-        <div class="row">
-            <!-- regio -->
-            {% include 'plein/card.dtl' with title="Regio Individueel" text=text_regio_indiv icon="view_comfy" url=url_regio_indiv %}
-            {% include 'plein/card.dtl' with title="Regio Teams" text=text_regio_teams icon="view_comfy" url=url_regio_teams %}
-
-            <!-- rayon -->
-            {% include 'plein/card.dtl' with title="Rayon Individueel" text=text_rayon_indiv icon="view_compact" url=url_rayon_indiv %}
-            {% include 'plein/card.dtl' with title="Rayon Teams" text=text_rayon_teams icon="view_compact" url=url_rayon_teams %}
-
-            <!-- bond -->
-            {% include 'plein/card.dtl' with title="Bond" text=text_bond icon="flag" url=url_bond %}
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Uitslagen</h4>
+            </div>
         </div>
-        <p>&nbsp;</p>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+            <div class="col s12">
+                <!-- regio -->
+                {% include 'plein/card.dtl' with title="Regio Individueel" text=text_regio_indiv icon="view_comfy" url=url_regio_indiv %}
+                {% include 'plein/card.dtl' with title="Regio Teams" text=text_regio_teams icon="view_comfy" url=url_regio_teams %}
+
+                <!-- rayon -->
+                {% include 'plein/card.dtl' with title="Rayon Individueel" text=text_rayon_indiv icon="view_compact" url=url_rayon_indiv %}
+                {% include 'plein/card.dtl' with title="Rayon Teams" text=text_rayon_teams icon="view_compact" url=url_rayon_teams %}
+
+                <!-- bond -->
+                {% include 'plein/card.dtl' with title="Bond" text=text_bond icon="flag" url=url_bond %}
+            </div>
+        </div>
 
     {% endif %}
 
-
-    <h5>Informatie</h5>
-
-    <div class="row">
-
-        <!-- toon klassen -->
-        {% if comp.fase >= 'A2' %}
-            {% url 'Competitie:klassengrenzen-tonen' comp_pk=comp.pk as card_url %}
-            {% include 'plein/card.dtl' with title="Wedstrijdklassen" text="Toon de wedstrijdklassen, klassengrenzen en blazoenen voor de competitie." icon="equalizer" url=card_url %}
-        {% endif %}
-
-        <!-- algemene informatie over de competities -->
-        {% url 'Competitie:info-competitie' as card_url %}
-        {% include 'plein/card.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
-
-        <!-- informatie over leeftijden -->
-        {% url 'Competitie:info-leeftijden' as card_url %}
-        {% include 'plein/card.dtl' with title="Leeftijden" text="Informatie over de leeftijds-categori&euml;n voor wedstrijden en de competities." icon="star" url=card_url %}
-
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            {% if toon_uitslagen %}
+                <p>&nbsp;</p>
+            {% endif %}
+            <h4>Informatie</h4>
+        </div>
     </div>
 
-{% endblock %}
+    <!-- blauwe balk met kaartjes -->
+    <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="col s12">
+            <!-- toon klassen -->
+            {% if comp.fase >= 'A2' %}
+                {% url 'Competitie:klassengrenzen-tonen' comp_pk=comp.pk as card_url %}
+                {% include 'plein/card.dtl' with title="Wedstrijdklassen" text="Toon de wedstrijdklassen, klassengrenzen en blazoenen voor de competitie." icon="equalizer" url=card_url %}
+            {% endif %}
 
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
+            <!-- algemene informatie over de competities -->
+            {% url 'Competitie:info-competitie' as card_url %}
+            {% include 'plein/card.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
+
+            <!-- informatie over leeftijden -->
+            {% url 'Competitie:info-leeftijden' as card_url %}
+            {% include 'plein/card.dtl' with title="Leeftijden" text="Informatie over de leeftijds-categori&euml;n voor wedstrijden en de competities." icon="star" url=card_url %}
+        </div>
+    </div>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-overzicht" %}
+
 {% endblock %}
