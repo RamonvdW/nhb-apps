@@ -10,13 +10,16 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="sporter-registreer" %}
-
-    <h4>Account aanmaken</h4>
-
-    <p>Met deze pagina maak je een nieuw account aan. Dit hoef je maar één keer te doen.</p>
-    <p>Je kan alleen een account aanmaken als je een bondsnummer hebt en je e-mail adres bekend is bij de bond.</p>
-    <p>&nbsp;</p>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Account aanmaken</h3>
+        </div>
+        <div class="col s12">
+            <p>Met deze pagina maak je een nieuw account aan. Dit hoef je maar één keer te doen.</p>
+            <p>Je kan alleen een account aanmaken als je een bondsnummer hebt en je e-mailadres bekend is bij de bond.</p>
+        </div>
+    </div>
 
     <div class="container z-depth-2 white">
         <div class="row nhb-blauw white-text">
@@ -70,5 +73,7 @@
         <a href="{% url 'Plein:privacy' %}" class="btn-nhb-blauw">
             <i class="material-icons-round left">security</i>Privacyverklaring</a>
     </p>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="sporter-registreer" %}
 
 {% endblock %}

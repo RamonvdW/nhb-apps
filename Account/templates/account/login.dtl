@@ -19,71 +19,35 @@
     </div>
 
     <!-- blauwe balk met kaartjes -->
-    <div class="row nhb-blauw white-text center" style="padding-top:50px; padding-bottom:50px">
-        <div class="col s12 l8 offset-l2">
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
 
-    <div class="container z-depth-2 white">
-        <div class="row">
-            <div class="col s12">
-                <div class="white depth-3" style="margin:30px">
-
+            <div style="margin:50px 30px 30px 30px">
                 <form action="{% url 'Account:login' %}" method="post">
                     {{ form.next }}
                     {% csrf_token %}
 
-
-                    {% if form.errors %}
-                        {% for error in form.non_field_errors %}
-                            <div class="row left-align">
-                                <div class="col s2 m1 red-text">Fout:</div>
-                                <div class="col s9 red-text">{{ error|escape }}</div>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-
-                    {% if show_wachtwoord_vergeten %}
-                        <div class="row"><div class="col s12"></div>
-                            <div class="center-align">
-                                <a class="btn-nhb-blauw" href="{% url 'Account:wachtwoord-vergeten' %}">
-                                    <i class="material-icons-round left">healing</i>Wachtwoord vergeten?</a>
-                            </div>
-                        </div>
-                    {% endif %}
-
-                    <div class="row"><div class="input-field col s12">
+                    <div class="input-field">
                         {{ form.login_naam.label_tag }}{{ form.login_naam }}
-                    </div></div>
+                    </div>
 
-                    <div class="row"><div class="input-field col s12">
+                    <div class="input-field">
                         {{ form.wachtwoord.label_tag }}{{ form.wachtwoord }}
-                    </div></div>
+                    </div>
 
-                    <!-- between Django and MaterializeCSS, checkboxes do not work
-                         because of the way Django generates the html (label before input tag)
-                         old: {{ form.aangemeld_blijven.label_tag }}{{ form.aangemeld_blijven }}
-                         workaround: manual deployment of the checkbox -->
-                    <div class="row"><div class="input-field col s12">
+                    <div class="input-field">
                         <label>
                             <input type="checkbox" class="filled-in" name="aangemeld_blijven">
                             <span class="black-text">Aangemeld blijven</span>
                         </label>
-                        <p>&nbsp;</p>
-                    </div></div>
+                    </div>
 
-                    <div class="row"><div class="col s12">
-                        <div class="center-align">
-                            <input class="btn-nhb-rood center-align" type="submit" value="Log in">
-                        </div>
-                    </div></div>
+                    <div class="center" style="margin-top:90px">
+                        <input class="btn-nhb-rood center-align" type="submit" value="Log in">
+                    </div>
 
                 </form>
-
-                </div>
-
             </div>
-        </div>
-    </div>
-
         </div>
     </div>
 
@@ -121,10 +85,10 @@
     <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
         <div class="col s12">
             {% url 'Account:wachtwoord-vergeten' as card_url %}
-            {% include 'plein/card.dtl' with title="Wachtwoord vergeten" text="Heb je al een account aangemaakt maar lukt het niet meer om in te loggen?" icon="help" url=card_url %}
+            {% include 'plein/card.dtl' with title="Wachtwoord?" text="Heb je een account aangemaakt maar ben je het wachtwoord vergeten?" icon="help" url=card_url %}
 
             {% url 'Sporter:registreer' as card_url %}
-            {% include 'plein/card.dtl' with title="Account aanmaken" text="Met een account krijg je informatie die voor jou relevant is.<br>(<i>alleen voor NHB leden</i>)" icon="fingerprint" url=card_url %}
+            {% include 'plein/card.dtl' with title="Account aanmaken" text="Doorloop eenmalig de korte registratie procedure.<br><br>(<i>alleen voor NHB leden</i>)" icon="fingerprint" url=card_url %}
         </div>
     </div>
 

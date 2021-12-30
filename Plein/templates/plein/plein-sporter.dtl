@@ -24,23 +24,12 @@
 
         <div class="col s12">
             <p>Op deze website kan je informatie vinden over de handboogsport, zoals records, wedstrijden en uitslagen.</p>
-            <p>&nbsp;</p>
         </div>
     </div>
-
-    <!-- banner om mensen weg te sturen van de test server -->
-    {% if is_test_server %}
-        <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
-            <div class="col s12 ">
-                {% include 'plein/ga-naar-live-server.dtl' %}
-            </div>
-        </div>
-    {% endif %}
 
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <p>&nbsp;</p>
             <h4>Ontdekken</h4>
         </div>
     </div>

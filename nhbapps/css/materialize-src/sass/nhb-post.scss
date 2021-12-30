@@ -14,14 +14,36 @@
     color: $off-black;
 }
 
+/* kleuren */
+.nhb-blauw {
+    background-color: $primary-color-dark;     /* NHB donker blauw */
+}
+
+.nhb-blauw-hoofd {
+    background-color: $primary-color;          /* NHB medium blauw */
+}
+
+.nhb-blauw-steun {
+    background-color: $primary-color-light;    /* NHB lightblauw */
+}
+
+.nhb-rood {
+    background-color: $secondary-color;        /* NHB hoofdkleur oranje */
+}
+
+.nhb-grijs {
+    /* standaard NHB achtergrondkleur is wat te donker
+    background-color: #f5f5f5;      grey lighten-4 == NHB achtergrondkleur */
+    background-color: #eee;      /* grey lighten-3 */
+}
+
 .nhb-blauw-text {
-    color: $nhb-blauw-color;
+    color: $primary-color;
 }
 
 .nhb-rood-text {
-    color: $nhb-rood-color;
+    color: $secondary-color;
 }
-
 
 //-----------------------------------
 // blauwe button
@@ -127,6 +149,23 @@
 }
 
 
+//--------------------------------------
+// blauw vlak op de witte achtergrond
+// voor het groeperen van content
+//
+.row-nhb-blauw {
+  @extend .row;
+  background-color: $primary-color;          /* NHB medium blauw */
+  color: white;
+  text-align: center;
+  padding: 50px;
+
+  @media #{$small-and-down} {
+    padding: 5px;
+  }
+
+}
+
 
 //-----------------------------------
 // grote klikbare oppervlakten
@@ -151,16 +190,5 @@
     }
 }
 
-
-//-----------------------------------
-// sidenav
-//
-.sidenav {
-  @extend .sidenav;
-
-  li > a {
-    &:hover { background-color: rgba(0,0,0,.15); }
-  }
-}
 
 // end of file

@@ -23,29 +23,6 @@ a {
     margin-bottom: 10px;
 }
 
-/* kleuren */
-.nhb-blauw {
-    /* background-color: #0aa0e1;    NHB medium blauw */
-    background-color: #03628c;    /* NHB donker blauw */
-}
-
-.nhb-blauw-hoofd {
-    background-color: #0aa0e1;    /* NHB medium blauw */
-}
-
-.nhb-blauw-steun {
-    background-color: #5EBDE7;    /* NHB lightblauw */
-}
-
-.nhb-rood {
-    background-color: #f94137;   /* NHB hoofdkleur oranje */
-}
-
-.nhb-grijs {
-    /* standaard NHB achtergrondkleur is wat te donker
-    background-color: #f5f5f5;      grey lighten-4 == NHB achtergrondkleur */
-    background-color: #eee;      /* grey lighten-3 */
-}
 
 /* pre-formatted / code block in de handleiding */
 .handleiding_code {
@@ -60,31 +37,14 @@ a {
     margin: 5px;
 }
 
-/* layout van het menu in de sidenav */
-.menu-level1 {
-    color: #fff;
-    font-size: 17px;
-}
-
-.menu-level2 {
-    color: #fff;
-    font-size: 16px;
-}
-
-.menu-level2-spacer {
-    margin: 0 68px 0 0;             /* 68 = 24 + 32 + een beetje */
-}
-
-.menu-actief  {
-    background-color: #f94137;      /* NHB medium rood */
-}
-
+/* voor doorkrassen score */
 del {
     text-decoration: line-through;
     text-decoration-style: double;
     text-decoration-color: #0aa0e1;     /* NHB blauw default */
 }
 
+/* voor wie-schiet-waar */
 .kruisje {
     text-align: center;
     border-left: 1px black dashed;
@@ -156,12 +116,6 @@ input.table-filter {
     display: inline-block;
     font-size: 12px;
 }
-
-/* sidenav zichtbaar en content dus een stuk opgeschoven */
-#container {
-    padding-left: 300px;
-}
-
 
 /* padding rond de main content */
 #content {

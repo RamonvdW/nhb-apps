@@ -78,10 +78,12 @@ class UitslagenRegioIndivView(TemplateView):
         context['boog_filters'] = boogtypen
 
         for boogtype in boogtypen:
+            boogtype.sel = 'boog_' + boogtype.afkorting
             if boogtype.afkorting.upper() == comp_boog.upper():
                 context['comp_boog'] = boogtype
                 comp_boog = boogtype.afkorting.lower()
                 # geen url --> knop disabled
+                boogtype.selected = True
             else:
                 boogtype.zoom_url = reverse(self.url_name,
                                             kwargs={'comp_pk': comp.pk,
@@ -102,6 +104,7 @@ class UitslagenRegioIndivView(TemplateView):
 
             prev_rayon = 1
             for regio in regios:
+                regio.sel = 'regio_%s' % regio.regio_nr
                 regio.break_before = (prev_rayon != regio.rayon.rayon_nr)
                 prev_rayon = regio.rayon.rayon_nr
 
@@ -115,6 +118,7 @@ class UitslagenRegioIndivView(TemplateView):
                 else:
                     # geen zoom_url --> knop disabled
                     context['regio'] = regio
+                    regio.selected = True
             # for
 
         # vereniging filters
@@ -126,6 +130,7 @@ class UitslagenRegioIndivView(TemplateView):
                     .order_by('ver_nr'))
 
             for ver in vers:
+                ver.sel = 'ver_%s' % ver.ver_nr
                 ver.zoom_url = reverse('CompUitslagen:uitslagen-vereniging-indiv-n',
                                        kwargs={'comp_pk': comp.pk,
                                                'comp_boog': comp_boog,

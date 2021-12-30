@@ -27,8 +27,8 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans&amp;display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu&amp;display=swap">
-        <link rel="stylesheet" href="{% static 'materialize-new-66.css' %}">
-        <link rel="stylesheet" href="{% static 'site_layout_min-29.css' %}"> <!-- moet ná materialize css -->
+        <link rel="stylesheet" href="{% static 'materialize-new-68.css' %}">
+        <link rel="stylesheet" href="{% static 'site_layout_min-30.css' %}"> <!-- moet ná materialize css -->
         {% block extraheader %}{% endblock %}
     </head>
 
@@ -51,7 +51,7 @@
                                 <a href="#" class="btn-nhb-rood dropdown-trigger" style="min-width:150px" data-target="dropdown1">
                                     <i class="material-icons-round right" style="line-height:36px">expand_more</i>{{ user.get_first_name|escape }}</a>
                             </li>
-                        {% else %}
+                        {% elif not verberg_login_knop %}
                             <li><a href="{% url 'Account:login' %}" class="btn-nhb-rood">Inloggen</a></li>
                         {% endif %}
                     </ul>
