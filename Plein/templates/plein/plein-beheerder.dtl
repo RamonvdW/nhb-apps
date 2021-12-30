@@ -18,16 +18,20 @@
 
         <div class="col s12">
             <p>Als beheerder vind je op dit plein extra kaartjes die bij jouw rechten passen.</p>
-            <p><i>Tip: klik op het logo in de linker bovenhoek om terug te komen naar deze pagina.</i></p>
-            <p>&nbsp;</p>
             <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
-            <p>Wissel naar de rol Sporter om het 'normale' plein te zien.</p>
         </div>
     </div>
 
     <!-- blauwe balk met kaartjes -->
     <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
         <div class="col s12">
+
+            <!-- vereniging menu -->
+            {% if rol_is_sec or rol_is_hwl or rol_is_wl %}
+                {% url 'Vereniging:overzicht' as card_url %}
+                {% include 'plein/card.dtl' with title="Beheer Vereniging" text="Extra functies voor beheerders van jouw vereniging." icon="store" url=card_url %}
+            {% endif %}
+
             <!-- bondscompetities -->
             {% url 'Competitie:kies' as card_url %}
             {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
@@ -42,34 +46,28 @@
                 {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
             {% endif %}
 
-            <!-- vereniging menu -->
-            {% if rol_is_sec or rol_is_hwl or rol_is_wl %}
-                {% url 'Vereniging:overzicht' as card_url %}
-                {% include 'plein/card.dtl' with title="Beheer Vereniging" text="Extra functies voor beheerders van jouw vereniging." icon="store" url=card_url %}
-            {% endif %}
-
             <!-- verenigingen/accommodaties overzicht IT/BB/BKO -->
             {% if rol_is_bko or rol_is_bb %}
                 {% url 'Vereniging:lijst-verenigingen' as card_url %}
-                {% include 'plein/card.dtl' with title="Verenigingen" text="Toon landelijk overzicht van de verenigingen, accommodaties en indeling in clusters." icon="view_list" url=card_url %}
+                {% include 'plein/card.dtl' with title="Verenigingen" text="Landelijk overzicht van de verenigingen, accommodaties en indeling in clusters." icon="share_location" url=card_url %}
             {% endif %}
 
             <!-- verenigingen/accommodaties overzicht RKO -->
             {% if rol_is_rko %}
                 {% url 'Vereniging:lijst-verenigingen' as card_url %}
-                {% include 'plein/card.dtl' with title="Verenigingen" text="Toon overzicht van de verenigingen, accommodaties en indeling in clusters in jouw rayon." icon="view_list" url=card_url %}
+                {% include 'plein/card.dtl' with title="Verenigingen" text="Overzicht van de verenigingen, accommodaties en indeling in clusters in jouw rayon." icon="share_location" url=card_url %}
             {% endif %}
 
             <!-- verenigingen/accommodaties overzicht RCL en HWL -->
             {% if rol_is_rcl %}
                 {% url 'Vereniging:lijst-verenigingen' as card_url %}
-                {% include 'plein/card.dtl' with title="Verenigingen" text="Toon overzicht van de verenigingen in jouw regio en mogelijkheid tot aanpassen accommodatie gegevens." icon="view_list" url=card_url %}
+                {% include 'plein/card.dtl' with title="Verenigingen" text="Overzicht van de verenigingen in jouw regio en mogelijkheid tot aanpassen accommodatie gegevens." icon="share_location" url=card_url %}
             {% endif %}
 
             <!-- verenigingen/accommodaties overzicht SEC en HWL -->
             {% if rol_is_sec or rol_is_hwl %}
                 {% url 'Vereniging:lijst-verenigingen' as card_url %}
-                {% include 'plein/card.dtl' with title="Verenigingen" text="Toon overzicht van de verenigingen en accommodaties in jouw regio." icon="view_list" url=card_url %}
+                {% include 'plein/card.dtl' with title="Verenigingen" text="Overzicht van de verenigingen en accommodaties in jouw regio." icon="share_location" url=card_url %}
             {% endif %}
 
             <!-- handleiding -->

@@ -18,14 +18,22 @@
         </div>
     </div>
 
-    <!-- blauwe balk met kaartjes -->
+    <!-- blauwe balk inlog dialaag -->
     <div class="row-nhb-blauw">
         <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
 
+            <!-- dialoog venster -->
             <div style="margin:50px 30px 30px 30px">
                 <form action="{% url 'Account:login' %}" method="post">
                     {{ form.next }}
                     {% csrf_token %}
+
+                    {% if form.errors %}
+                        {% for error in form.non_field_errors %}
+                            <p class="left-align red-text">Fout: {{ error|escape }}</p>
+                        {% endfor %}
+                        <p>&nbsp;</p>
+                    {% endif %}
 
                     <div class="input-field">
                         {{ form.login_naam.label_tag }}{{ form.login_naam }}
@@ -42,8 +50,19 @@
                         </label>
                     </div>
 
-                    <div class="center" style="margin-top:90px">
-                        <input class="btn-nhb-rood center-align" type="submit" value="Log in">
+                    <div class="row" style="margin-top:90px">
+                        {% if show_wachtwoord_vergeten %}
+                            <div class="col s8">
+                                <a class="btn-nhb-blauw" href="{% url 'Account:wachtwoord-vergeten' %}">Wachtwoord vergeten?</a>
+                            </div>
+                            <div class="col s4">
+                                <input class="btn-nhb-rood center-align" type="submit" value="Log in">
+                            </div>
+                        {% else %}
+                            <div class="col s12">
+                                <input class="btn-nhb-rood center-align" type="submit" value="Log in">
+                            </div>
+                        {% endif %}
                     </div>
 
                 </form>

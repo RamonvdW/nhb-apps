@@ -88,12 +88,6 @@ class PleinView(View):
         if request.user.is_authenticated:
             rol_nu = rol_get_huidige(request)
 
-            if rol_mag_wisselen(request):
-                context['toon_wissel_van_rol'] = True
-
-            if request.user.is_staff:
-                context['url_admin_site'] = reverse('admin:index')
-
             if rol_nu == Rollen.ROL_SPORTER:
                 template = TEMPLATE_PLEIN_SPORTER
                 context['url_profiel'] = reverse('Sporter:profiel')
@@ -132,8 +126,6 @@ class PleinView(View):
 
                 # kijk hoeveel taken er open staan
                 eval_open_taken(request)
-        else:
-            context['url_inloggen'] = reverse('Account:login')
 
         context['naam_site'] = settings.NAAM_SITE
         context['email_support'] = "mailto:%s" % settings.EMAIL_SUPPORT

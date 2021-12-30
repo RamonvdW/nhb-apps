@@ -21,7 +21,7 @@
 {% load static %}
 
 <!-- site feedback alleen tonen als gebruiker ingelogd is -->
-{% if menu_toon_naam %}
+{% if menu_voornaam %}
 
     <div class="site-sidebar-box z-depth-1">
         <div class="site-feedback">

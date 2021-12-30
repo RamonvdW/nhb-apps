@@ -18,17 +18,20 @@
 
 {% load static %}
 
+{% autoescape on %}
+
 <html lang="nl">
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}{% endblock %}</title>
         <link rel="icon" href="{% static 'plein/logo_nhb_192x192.png' %}" sizes="192x192">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans&amp;display=swap">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu&amp;display=swap">
-        <link rel="stylesheet" href="{% static 'materialize-new-68.css' %}">
-        <link rel="stylesheet" href="{% static 'site_layout_min-30.css' %}"> <!-- moet ná materialize css -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@500&display=swap">
+        <link rel="stylesheet" href="{% static 'materialize-new-71.css' %}">
+        <link rel="stylesheet" href="{% static 'site_layout_min-32.css' %}"> <!-- moet ná materialize css -->
         {% block extraheader %}{% endblock %}
     </head>
 
@@ -38,18 +41,21 @@
         <div class="navbar-fixed">
             <nav class="nhb-grijs">
                 <div class="nav-wrapper">
+                    <!-- logo aan de linker kant -->
                     <a href="/plein/" class="brand-logo" style="left:0; transform:none; padding-left:7px; padding-top:7px">
                         <img src="{% static 'plein/logo_with_text_nhb.png' %}" height="50" alt="NHB logo">
                     </a>
+
+                    <!-- login/quick access knop aan de rechter kant -->
                     <ul id="nav-mobile" class="right">
                         <!--
                         <li><a class="btn-nhb-rood" href="{% url 'Competitie:kies' %}">Bondscompetities</a></li>
                         <li><a class="btn-nhb-rood" href="{% url 'Records:overzicht' %}">Records</a></li>
                         -->
-                        {% if user.is_authenticated %}
+                        {% if menu_voornaam %}
                             <li>
-                                <a href="#" class="btn-nhb-rood dropdown-trigger" style="min-width:150px" data-target="dropdown1">
-                                    <i class="material-icons-round right" style="line-height:36px">expand_more</i>{{ user.get_first_name|escape }}</a>
+                                <a href="#" class="btn-nhb-rood dropdown-trigger" data-target="navbar-dropdown">
+                                    <i class="material-icons-round right" style="line-height:36px">expand_more</i>{{ menu_voornaam|escape }}</a>
                             </li>
                         {% elif not verberg_login_knop %}
                             <li><a href="{% url 'Account:login' %}" class="btn-nhb-rood">Inloggen</a></li>
@@ -57,27 +63,50 @@
                     </ul>
                 </div>
 
-                <ul id="dropdown1" class="dropdown-content nhb-grijs">
-                    {% if toon_wissel_van_rol %}
-                        <li><a class="black-text" href="{% url 'Functie:wissel-van-rol' %}">Wissel van rol</a></li>
-                    {% endif %}
-
-                    {% if url_profiel %}
-                        <li><a class="black-text" href="{% url 'Sporter:profiel' %}">Mijn pagina</a></li>
-                    {% endif %}
-
-                    {% if url_admin_site %}
+                <ul id="navbar-dropdown" class="dropdown-content">
+                    {% if menu_url_wissel_van_rol %}
                         <li class="divider"></li>
-                        <li><a class="red-text" href="{{ url_admin_site }}">Admin site</a></li>
+                        <li>
+                            <a href="{{ menu_url_wissel_van_rol }}">
+                                <i class="material-icons-round red-text">people_alt</i>Wissel van rol</a>
+                        </li>
+                    {% endif %}
+
+                    {% if menu_url_admin_site %}
+                        <li class="divider"></li>
+                        <li>
+                            <a href="{{ menu_url_admin_site }}">
+                                <i class="material-icons-round red-text">build</i>Admin site</a>
+                        </li>
+                    {% endif %}
+
+                    {% if menu_url_taken %}
+                        <li class="divider"></li>
+                        <li>
+                            <a href="{{ menu_url_taken }}">
+                                <i class="material-icons-round red-text">inbox</i>Taken <span class="new badge" data-badge-caption="open">{{ menu_aantal_open_taken }}</span>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% if menu_url_profiel %}
+                        <li class="divider"></li>
+                        <li>
+                            <a href="{{ menu_url_profiel }}">
+                                <i class="material-icons-round red-text">portrait</i>Mijn pagina</a>
+                        </li>
                     {% endif %}
 
                     <li class="divider"></li>
-                    <li><a class="black-text" href="/account/logout/">Uitloggen</a></li>
+                    <li>
+                        <a href="{{ menu_url_uitloggen }}">
+                            <i class="material-icons-round red-text">logout</i>Uitloggen</a>
+                    </li>
                 </ul>
             </nav>
 
             <!-- screen-size indicator labels -->
-            {% if toon_schermgrootte %}
+            {% if menu_toon_schermgrootte %}
                 <div style="position: fixed; left: 350px; top: 2px; font-size:10px">
                     <span class="hide-unless-small">Small</span>
                     <span class="hide-unless-medium">Medium</span>
@@ -136,7 +165,7 @@
                 M.Collapsible.init(elems, options)
 
                 elems = document.querySelectorAll(".dropdown-trigger")
-                M.Dropdown.init(elems, {coverTrigger: false, constraintWidth: false})
+                M.Dropdown.init(elems, {coverTrigger: false, constrainWidth: false})
 
                 // tooltips
                 elems = document.querySelectorAll(".tooltipped")
@@ -283,3 +312,5 @@
 
     </body>
 </html>
+
+{% endautoescape %}

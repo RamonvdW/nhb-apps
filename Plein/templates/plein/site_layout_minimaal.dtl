@@ -19,14 +19,16 @@
 
 {% load static %}
 
+{% autoescape on %}
+
 <html lang="nl">
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}{% endblock %}</title>
         <link rel="icon" href="{% static 'plein/logo_nhb_192x192.png' %}" sizes="192x192">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
-        <link rel="stylesheet" href="{% static 'materialize-new-68.css' %}">
-        <link rel="stylesheet" href="{% static 'site_layout_min-30.css' %}"> <!-- moet ná materialize css -->
+        <link rel="stylesheet" href="{% static 'materialize-new-71.css' %}">
+        <link rel="stylesheet" href="{% static 'site_layout_min-32.css' %}"> <!-- moet ná materialize css -->
     </head>
 
     <body class="nhb-grijs">
@@ -57,3 +59,5 @@
         </div>
     </body>
 </html>
+
+{% endautoescape %}

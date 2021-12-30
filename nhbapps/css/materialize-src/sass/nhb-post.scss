@@ -161,10 +161,33 @@
   padding: 50px;
 
   @media #{$small-and-down} {
-    padding: 5px;
+    padding-left: 0;
+    padding-right: 0;
   }
-
 }
+
+
+//-----------------------------------
+// tabel decoration
+// blauw rand rondom + header
+//
+.nhb-table-header {
+  @extend .nhb-blauw-hoofd;
+  color: white;
+}
+
+.nhb-table-zijrand {
+  @extend .nhb-blauw-hoofd;
+  padding: 0;
+  width: 3px;
+}
+
+.nhb-table-onderrand {
+  @extend .nhb-blauw-hoofd;
+  padding: 0px;
+  height: 3px;
+}
+
 
 
 //-----------------------------------

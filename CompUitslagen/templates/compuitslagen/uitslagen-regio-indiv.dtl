@@ -60,7 +60,7 @@
     <!-- blauwe balk met kaartjes -->
     <div class="row-nhb-blauw">
 
-        <div class="col s8 offset-s2 m4 l3 white left-align" style="margin-bottom:15px">
+        <div class="col s8 offset-s2 m4 offset-m1 l3 white left-align" style="margin-bottom:15px">
             <p><b>Kies een boog type:</b></p>
             <ul id="id_boog">
                 {% for boog in boog_filters %}
@@ -74,7 +74,7 @@
             </ul>
         </div>
 
-        <div class="col s8 offset-s2 m3 offset-m1 l2 offset-l1 white left-align" style="margin-bottom:15px">
+        <div class="col s8 offset-s2 m4 offset-m2 l2 offset-l1 white left-align" style="margin-bottom:15px">
             <p><b>Kies een regio:</b></p>
             <ul id="id_regio">
                 {% for regio in regio_filters %}
@@ -142,21 +142,21 @@
             {% if obj.break_klasse %}
                 {% if not obj.is_eerste_groep %}
                     <tr>
-                        <td colspan="14" class="nhb-blauw-hoofd" style="padding:0px; height:3px"></td>
+                        <td colspan="14" class="nhb-table-onderrand"></td>
                     </tr>
                 {% endif %}
                 <tr>
                     <td colspan="14" class="center-align"><h5>{{ obj.klasse_str }}</h5></td>
                 </tr>
-                <tr class="nhb-blauw-hoofd white-text">
-                    <td class="nhb-blauw-hoofd" style="width:3px; padding:0" rowspan="{{ obj.aantal_in_groep }}"></td>
-                    <th><!-- rank --></th>
-                    <th>Sporter</th>
-                    <th class="hide-on-small-only">Vereniging</th>
-                    <th class="center-align">Gemiddelde</th>
-                    <th class="center-align" colspan="7">Scores</th>
-                    <th class="right-align hide-on-small-only">Totaal</th>
-                    <td class="nhb-blauw-hoofd" style="width:3px; padding:0" rowspan="{{ obj.aantal_in_groep }}"></td>
+                <tr class="nhb-table-header">
+                    <td class="nhb-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
+                        <th><!-- rank --></th>
+                        <th>Sporter</th>
+                        <th class="hide-on-small-only">Vereniging</th>
+                        <th class="center-align">Gemiddelde</th>
+                        <th class="center-align" colspan="7">Scores</th>
+                        <th class="right-align hide-on-small-only">Totaal</th>
+                    <td class="nhb-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
                 </tr>
             {% endif %}
 
@@ -177,7 +177,7 @@
 
         {% endfor %}
         <tr>
-            <td colspan="14" class="nhb-blauw-hoofd" style="padding:0px; height:3px"></td>
+            <td colspan="14" class="nhb-table-onderrand"></td>
         </tr>
     </table>
 

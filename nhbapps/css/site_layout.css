@@ -11,7 +11,7 @@ html, button, input, optgroup, select, textarea {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Ubuntu', sans-serif;
+    font-family: 'Fira Sans', sans-serif;
 }
 
 a {
@@ -96,19 +96,12 @@ input.table-filter {
 /* site feedback floater */
 .site-sidebar-box {
     width: 180px;
-    float: right;
+    float: left;
     text-align: center;
     margin-top: 10px;
     margin-bottom: 10px;
     border-radius: 5px;
     background-color: #fff;     /* wit */
-}
-
-/* verwijder de sidebar op hele kleine schermen */
-@media only screen and (max-width: 300px) {
-    .site-sidebar-box {
-        display: none;
-    }
 }
 
 /* de binnenkant van de feedback floater */

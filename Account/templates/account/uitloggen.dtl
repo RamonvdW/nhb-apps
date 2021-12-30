@@ -10,15 +10,34 @@
 
 {% block pagina %}
 
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Uitloggen</h3>
+        </div>
+    </div>
+
+    <div class="row-nhb-blauw center">
+        <div class="col s8 offset-s2">
+
+            <!-- dialoog venster -->
+            <div class="white" style="margin:50px 30px 30px 30px; padding:30px">
+
+                <p>Druk op de knop om volledig uit te loggen:</p>
+                <p>&nbsp;</p>
+
+                <form class="col s12" action="{% url 'Account:logout' %}" method="post">
+                    {% csrf_token %}
+                    <input class="btn-nhb-rood" name="button_logout" type="submit" value="Uitloggen">
+                </form>
+
+                <p>&nbsp;</p>
+                <p>Of klik op het logo in de linker bovenhoek om op de site te blijven.</p>
+
+            </div>
+        </div>
+    </div>
+
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="uitloggen" %}
-
-    <h4>Uitloggen</h4>
-
-    <p>Druk op de knop om volledig uit te loggen, of maak een keuze in het menu om ingelogd te blijven.</p>
-
-    <form class="col s12" action="{% url 'Account:logout' %}" method="post">
-        {% csrf_token %}
-        <input class="btn-nhb-blauw" name="button_logout" type="submit" value="Uitloggen">
-    </form>
 
 {% endblock %}
