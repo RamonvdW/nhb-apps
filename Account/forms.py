@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2021 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -20,12 +20,12 @@ class LoginForm(forms.Form):
                         label='Inlog naam (NHB nummer of e-mailadres)',
                         max_length=50,
                         required=False,
-                        widget=forms.TextInput(attrs={'autofocus': True}))
+                        widget=forms.TextInput(attrs={'autofocus': True, 'autocomplete': 'username'}))
 
     wachtwoord = forms.CharField(
                         max_length=50,
                         required=False,
-                        widget=forms.PasswordInput())
+                        widget=forms.PasswordInput(attrs={'autocomplete': 'current-password'}))
 
     aangemeld_blijven = forms.BooleanField(
                         label='Aangemeld blijven',

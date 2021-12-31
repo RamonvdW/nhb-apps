@@ -161,5 +161,7 @@ class TestSpecialePagina(View):
             # nog geen exceptie gevonden die hiervoor gebruikt kan worden
             return site_handler500_internal_server_error(request, None)
 
+        raise Resolver404('Niet ondersteund code')
+
 
 # end of file
