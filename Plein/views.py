@@ -128,7 +128,8 @@ class PleinView(View):
                 eval_open_taken(request)
 
         context['naam_site'] = settings.NAAM_SITE
-        context['email_support'] = "mailto:%s" % settings.EMAIL_SUPPORT
+        context['email_support'] = settings.EMAIL_SUPPORT
+        context['url_email_support'] = "mailto:%s" % settings.EMAIL_SUPPORT
 
         menu_dynamics(self.request, context)
         return render(request, template, context)
