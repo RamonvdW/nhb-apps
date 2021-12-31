@@ -35,7 +35,7 @@
     </div>
 
     <!-- blauwe balk met kaartjes -->
-    <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+    <div class="row-nhb-blauw">
         <div class="col s12">
             <!-- Mijn pagina -->
             {% url 'Sporter:profiel' as card_url %}
@@ -68,7 +68,7 @@
     </div>
 
     <!-- blauwe balk met links naar andere sites -->
-    <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+    <div class="row-nhb-blauw">
         <div class="col s12">
             {% include 'plein/andere-sites-van-de-nhb.dtl' %}
         </div>
@@ -86,7 +86,7 @@
     </div>
 
     <!-- blauwe balk met kaartje -->
-    <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+    <div class="row-nhb-blauw">
         <div class="col s12">
             {% include 'plein/card.dtl' with title="Stuur een e-mail" text="Kies dit kaartje om je mailprogramma te starten" icon="email" url=url_email_support %}
         </div>

@@ -24,7 +24,7 @@
     </div>
 
     <!-- blauwe balk met kaartjes -->
-    <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+    <div class="row-nhb-blauw">
         <div class="col s12">
             <!-- de beschikbare competities -->
             {% for obj in competities %}
@@ -48,7 +48,7 @@
         </div>
 
         <!-- blauwe balk met kaartjes -->
-        <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+        <div class="row-nhb-blauw">
             <div class="col s12">
                 <!-- competities opstarten -->
                 {% url 'Competitie:instellingen-volgende-competitie' as card_url %}
@@ -68,7 +68,7 @@
     </div>
 
     <!-- blauwe balk met kaartjes -->
-    <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+    <div class="row-nhb-blauw">
         <div class="col s12">
             <!-- toon en koppel beheerders -->
             {% if toon_beheerders %}

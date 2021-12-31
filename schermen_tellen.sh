@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#  Copyright (c) 2021 Ramon van der Winkel.
+#  All rights reserved.
+#  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+
 EXCLUDE="plein/menu-"
 EXCLUDE+="|plein/site-layout"
 EXCLUDE+="|overig/site-feedback-sidebar.dtl"
@@ -25,16 +29,36 @@ fi
 SCHERMEN=$(ls -1 */templates/*/*dtl | grep -vE "$EXCLUDE")
 AANTAL=$(echo $SCHERMEN | wc -w)
 
+NEW_NR=0
+OLD_NR=0
+NR=0
+for scherm in $SCHERMEN
+do
+    NR=$((NR + 1))
+
+    grep -q 'class="row-nhb-blauw"' $scherm
+    if [ $? -eq 0 ]
+    then
+        NEW_NR=$((NEW_NR + 1))
+        TYPE='+'
+    else
+        OLD_NR=$((OLD_NR + 1))
+        TYPE='-'
+    fi
+
+    if [ $# -ne 0 ]
+    then
+        echo "$NR: $TYPE $scherm"
+    fi
+done
+
 if [ $# -ne 0 ]
 then
-    NR=0
-    for scherm in $SCHERMEN
-    do
-        NR=$((NR + 1))
-        echo "$NR: $scherm"
-    done
+    echo "Run with any argument to enumerate the screens"
 fi
 
 echo "Aantal schermen: $AANTAL"
+echo "Oud: $OLD_NR"
+echo "Nieuw: $NEW_NR"
 
 # end of file
