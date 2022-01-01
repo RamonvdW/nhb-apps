@@ -5,6 +5,7 @@
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load overig_filters %}   <!-- wbr_email filter -->
 
 {% block title %}Profiel{% endblock %}
 
@@ -460,7 +461,7 @@
 
                             <td>
                                 {% if rcl18_email %}
-                                    <a class="btn-nhb-blauw" href="mailto:{{ rcl18_email }}">{{ rcl18_email }}</a>
+                                    <a class="btn-nhb-blauw" href="mailto:{{ rcl18_email }}">{{ rcl18_email|wbr_email }}</a>
                                 {% else %}
                                     <i>Onbekend</i>
                                 {% endif %}
@@ -482,7 +483,7 @@
 
                             <td>
                                 {% if rcl25_email %}
-                                    <a class="btn-nhb-blauw" href="mailto:{{ rcl25_email }}">{{ rcl25_email }}</a>
+                                    <a class="btn-nhb-blauw" href="mailto:{{ rcl25_email }}">{{ rcl25_email|wbr_email }}</a>
                                 {% else %}
                                     <i>Onbekend</i>
                                 {% endif %}
@@ -504,7 +505,7 @@
 
                             <td>
                                 {% if hwl_email %}
-                                    <a class="btn-nhb-blauw" href="mailto:{{ hwl_email }}">{{ hwl_email }}</a>
+                                    <a class="btn-nhb-blauw" href="mailto:{{ hwl_email }}">{{ hwl_email|wbr_email }}</a>
                                 {% else %}
                                     <i>Onbekend</i>
                                 {% endif %}
@@ -527,7 +528,7 @@
 
                         <td>
                             {% if sec_email %}
-                                <a class="btn-nhb-blauw" href="mailto:{{ sec_email }}">{{ sec_email }}</a>
+                                <a class="btn-nhb-blauw" href="mailto:{{ sec_email }}">{{ sec_email|wbr_email }}</a>
                             {% else %}
                                 <i>Onbekend</i>
                             {% endif %}
