@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -19,7 +19,7 @@ TEMPLATE_COMPRAYON_KLASSENGRENZEN_TEAMS_VASTSTELLEN = 'comprayon/bko-klassengren
 
 class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view laat de RKO de status van een RK selectie aanpassen """
+    """ Deze view laat de BKO de teams klassengrenzen voor het RK en BK vaststellen """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPRAYON_KLASSENGRENZEN_TEAMS_VASTSTELLEN
@@ -102,24 +102,26 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
                 klassen = tt2wkl[tt.pk]
                 sterktes = tt2sterktes[tt.pk]
                 count = len(sterktes)
+                index = 0
 
                 aantal_klassen = len(klassen)
-                step = int(count / aantal_klassen)
-                if count:
-                    step = max(step, 1)     # ensure at least 1
-                index = 0
+                aantal_per_klasse = count / aantal_klassen
+
+                ophoog_factor = 0.4
+                ophoog_step = 1.0 / aantal_klassen     # 5 klassen --> 0.2 --> +0.4 +0.2 +0.0 -0.2
 
                 klassen_lijst = list()
                 for klasse in klassen:
                     min_ag = 0.0
-                    aantal_klassen -= 1
 
-                    if aantal_klassen == 0:
+                    if len(klassen_lijst) + 1 == aantal_klassen:
                         # laatste klasse = geen ondergrens
                         step = count - index
                         min_ag_str = ""     # toon n.v.t.
                     else:
+                        step = round(aantal_per_klasse + ophoog_factor)
                         index += step
+                        ophoog_factor -= ophoog_step
                         if index <= count and count > 0:
                             min_ag = sterktes[index - 1]
 
