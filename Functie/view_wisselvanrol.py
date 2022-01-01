@@ -167,7 +167,9 @@ class WisselVanRolView(UserPassesTestMixin, ListView):
             for obj in (Functie
                         .objects
                         .filter(pk__in=pks)
-                        .select_related('nhb_ver', 'nhb_regio', 'nhb_rayon')
+                        .select_related('nhb_ver',
+                                        'nhb_regio',
+                                        'nhb_rayon')
                         .only('beschrijving', 'rol',
                               'nhb_ver__ver_nr', 'nhb_ver__naam',
                               'nhb_rayon__rayon_nr', 'nhb_regio__regio_nr')):

@@ -42,17 +42,14 @@ then
     exit 1
 fi
 
-if [ ! -e "$DTL_FILE1" ]
-then
-    echo "[ERROR] Failed to locate dtl file $DTL_FILE1"
-    exit 1
-fi
-
-if [ ! -e "$DTL_FILE2" ]
-then
-    echo "[ERROR] Failed to locate dtl file $DTL_FILE2"
-    exit 1
-fi
+for fname in "$DTL_FILE1" "$DTL_FILE2"
+do
+    if [ ! -e "$fname" ]
+    then
+        echo "[ERROR] Failed to locate dtl file $fname"
+        exit 1
+    fi
+done
 
 # get the sequence number
 # <link rel="stylesheet" href="{% static 'site_layout_min-1.css' %}">

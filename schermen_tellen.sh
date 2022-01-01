@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#  Copyright (c) 2021 Ramon van der Winkel.
+#  All rights reserved.
+#  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+
 EXCLUDE="plein/menu-"
 EXCLUDE+="|plein/site-layout"
 EXCLUDE+="|overig/site-feedback-sidebar.dtl"
@@ -33,6 +37,8 @@ then
         NR=$((NR + 1))
         echo "$NR: $scherm"
     done
+else
+    echo "Run with any argument to enumerate the screens"
 fi
 
 echo "Aantal schermen: $AANTAL"
