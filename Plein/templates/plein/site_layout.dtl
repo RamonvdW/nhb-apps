@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -43,7 +43,7 @@
                 <div class="nav-wrapper">
                     <!-- logo aan de linker kant -->
                     <a href="/plein/" class="brand-logo" style="left:0; transform:none; padding-left:7px; padding-top:7px">
-                        <img src="{% static 'plein/logo_with_text_nhb.png' %}" height="50" alt="NHB logo">
+                        <img src="{% static 'plein/logo_with_text_nhb_jubileum.png' %}" height="50" alt="NHB logo">
                     </a>
 
                     <!-- login/quick access knop aan de rechter kant -->
