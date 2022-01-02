@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -32,9 +32,9 @@
         </div>
     </div>
 
-    <div class="row">
 
-        <!-- toon gegevens van de regio en competitie in een blauwe box -->
+    <!-- donkerblauwe balk met gegevens van de gekozen competitie, boogtype en regio -->
+    <div class="row">
         <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
             <div class="white-text nhb-blauw z-depth-2">
 
@@ -56,10 +56,15 @@
         </div>
     </div>
 
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Filters</h4>
+        </div>
+    </div>
 
-    <!-- blauwe balk met kaartjes -->
+    <!-- blauwe balk met filters -->
     <div class="row-nhb-blauw">
-
         <div class="col s8 offset-s2 m4 offset-m1 l3 white left-align" style="margin-bottom:15px">
             <p><b>Kies een boog type:</b></p>
             <ul id="id_boog">

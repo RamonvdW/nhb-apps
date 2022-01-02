@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -28,7 +28,7 @@
         <link rel="icon" href="{% static 'plein/logo_nhb_192x192.png' %}" sizes="192x192">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
         <link rel="stylesheet" href="{% static 'materialize-new-71.css' %}">
-        <link rel="stylesheet" href="{% static 'site_layout_min-32.css' %}"> <!-- moet ná materialize css -->
+        <link rel="stylesheet" href="{% static 'site_layout_min-33.css' %}"> <!-- moet ná materialize css -->
     </head>
 
     <body class="nhb-grijs">

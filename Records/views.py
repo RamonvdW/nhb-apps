@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -289,7 +289,10 @@ class RecordsVerbeterbaarKiesDisc(ListView):
                 .order_by('discipline'))
 
         for obj in objs:
-            obj.beschrijving = disc2str[obj.discipline]
+            obj.titel = disc2str[obj.discipline]
+            obj.img_src = DISCIPLINE_TO_ICON[obj.discipline]
+            obj.tekst = "Toon alle verbeterbare records van de %s discipline." % obj.titel
+
             url_disc = disc2url[obj.discipline]
             obj.url = reverse('Records:indiv-verbeterbaar-disc', kwargs={'disc': url_disc})
         # for

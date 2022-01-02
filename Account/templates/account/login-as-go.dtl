@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -16,17 +16,33 @@
 
 {% block pagina %}
 
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Account wissel</h3>
+        </div>
+    </div>
+
+    <!-- blauwe balk met dialoog -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 l8 offset-l2 white z-depth-3">
+
+            <!-- dialoog venster -->
+            <div style="margin:50px 30px 30px 30px">
+                <p>Met onderstaande knop wordt een nieuw tabblad geopend dat automatisch inlogt als account <b>{{ account.username }}</b>.</p>
+
+                <p>De knop moet binnen 60 seconden gebruikt worden.</p>
+
+                <p class="center">
+                    <a class="btn-nhb-rood" href="{{ login_as_url }}" target="_blank" rel="noopener noreferrer">
+                        <i class="material-icons-round right">open_in_new</i>Inloggen</a>
+                </p>
+
+                <p>Advies: rechts-klikken en openen in een 'incognito window' (Chrome) of 'private window' (Firefox), anders word je hier uitgelogd.</p>
+            </div>
+        </div>
+    </div>
+
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wissel-naar-account" %}
-
-    <h4>Wissel naar account</h4>
-
-    <p>Met onderstaande knop wordt een nieuw tabblad geopend dat automatisch inlogt als account <b>{{ account.username }}</b>.</p>
-
-    <p>De knop moet binnen 60 seconden gebruikt worden.</p>
-
-    <a class="btn-nhb-rood" href="{{ login_as_url }}" target="_blank" rel="noopener noreferrer">
-        <i class="material-icons-round right">open_in_new</i>Inloggen</a>
-
-    <p>Advies: rechts-klikken en openen in een 'incognito window' (Chrome) of 'private window' (Firefox), anders word je hier uitgelogd.</p>
 
 {% endblock %}

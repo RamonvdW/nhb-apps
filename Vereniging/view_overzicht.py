@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,6 +21,26 @@ import datetime
 
 
 TEMPLATE_OVERZICHT = 'vereniging/overzicht.dtl'
+
+# korte beschrijving van de competitie fase voor de HWL
+comp_fase_kort = {
+    'A': 'opstarten',
+    'B': 'inschrijven',
+    'C': 'inschrijven teams',
+    'D': 'voorbereiding regiocompetitie',
+    'E': 'wedstrijden regio',
+    'F': 'vaststellen uitslag regio',
+    'G': 'afsluiten regiocompetitie',
+    'J': 'voorbereiding RK',
+    'K': 'voorbereiding RK',
+    'L': 'wedstrijden RK',
+    'M': 'uitslagen RK overnemen',
+    'N': 'afsluiten RK',
+    'P': 'voorbereiding BK',
+    'Q': 'wedstrijden BK',
+    'R': 'uitslagen BK overnemen',
+    'S': 'afsluiten competitie',
+}
 
 
 class OverzichtView(UserPassesTestMixin, TemplateView):
@@ -115,9 +135,15 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                     kaartje.geen_kaartjes = True
                     kaartjes.append(kaartje)
 
+                if prev_jaar != 0:
+                    kaartje = SimpleNamespace()
+                    kaartje.einde_blok = True
+                    kaartjes.append(kaartje)
+
                 # nieuwe heading aanmaken
                 kaartje = SimpleNamespace()
                 kaartje.heading = comp.beschrijving
+                kaartje.comp_fase = "%s (%s)" % (comp.fase, comp_fase_kort[comp.fase])
                 kaartjes.append(kaartje)
 
                 prev_jaar = begin_jaar
@@ -216,6 +242,11 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             # for
 
         # for
+
+        if prev_jaar != 0:
+            kaartje = SimpleNamespace()
+            kaartje.einde_blok = True
+            kaartjes.append(kaartje)
 
         eval_open_taken(self.request)
 

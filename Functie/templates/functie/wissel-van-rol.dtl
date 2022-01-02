@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -91,7 +91,7 @@
             <div class="row-nhb-blauw">
 
                 <!-- witte rechthoek voor radiobuttons -->
-                <div class="col s3 offset-s1 m4 l3 white left-align">
+                <div class="col {% if show_hwl_rollen %}s3 offset-s1 m4 l3{% else %}s5{% endif %} white left-align">
                     <h6 class="center">Indoor</h6>
                         <ul>
                         {% for obj in alle_18 %}
@@ -109,7 +109,7 @@
                     </div>
 
                     <!-- witte rechthoek voor radiobuttons -->
-                    <div class="col s3 m4 l3 offset-l1 white left-align">
+                    <div class="col {% if show_hwl_rollen %}s3 m4 l3 offset-l1{% else %}s5 offset-s2{% endif %} white left-align">
                         <h6 class="center">25m1pijl</h6>
                         <ul>
                         {% for obj in alle_25 %}
@@ -175,7 +175,7 @@
 
                     <!-- kaartjes -->
                     {% if url_login_as %}
-                        <div class="col s12 l8">
+                        <div class="col s12 l8 xl6 offset-xl2">
                             {% include 'plein/card.dtl' with title="Uitleg Rollen" text="De site bekijken als een andere gebruiker." icon="help" url=wiki_rollen extern_open=True %}
                             {% include 'plein/card.dtl' with title="Account wissel" text="De site bekijken als een andere gebruiker." icon="switch_access_shortcut" url=url_login_as %}
                         </div>

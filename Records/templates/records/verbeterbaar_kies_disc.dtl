@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,14 +10,24 @@
 
 {% block pagina %}
 
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Handboog<wbr/>sport Records</h3>
+            <p>Kies een discipline waarvan de verbeterbare records getoond moeten worden:</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+
+            {% for obj in object_list %}
+                {% include 'plein/card_logo.dtl' with title=obj.titel text=obj.tekst img_src=obj.img_src img_height="63" url=obj.url %}
+            {% endfor %}
+        </div>
+    </div>
+
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-verbeterbaar-kies-discipline" %}
-
-    <h4>Nederlandse Handboog<wbr/>sport Records</h4>
-
-    <p>Kies de discipline waarbinnen de verbeterbare records getoond moeten worden:</p>
-
-    {% for disc in object_list %}
-        <p><a class="btn-nhb-blauw" href="{{ disc.url }}">{{ disc.beschrijving }}</a></p>
-    {% endfor %}
 
 {% endblock %}
