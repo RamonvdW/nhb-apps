@@ -21,7 +21,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>10 recente records</h4>
+            <h4>10 nieuwste records</h4>
         </div>
     </div>
 
@@ -31,7 +31,7 @@
             {% for obj in object_list %}
                 <div class="nhb-card">
                     <a href="{{ obj.url }}">
-                        <div class="nhb-card-content">
+                        <div class="nhb-card-content left-align" style="font-size: 80%">
                             <span class="card-title">{{ obj.title_str }}</span>
                             {% if obj.para_str %}
                                 <p>{{ obj.para_str }}</p>

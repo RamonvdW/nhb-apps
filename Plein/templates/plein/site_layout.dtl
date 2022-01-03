@@ -97,11 +97,13 @@
                         </li>
                     {% endif %}
 
-                    <li class="divider"></li>
-                    <li>
-                        <a href="{{ menu_url_uitloggen }}">
-                            <i class="material-icons-round red-text">logout</i>Uitloggen</a>
-                    </li>
+                    {% if menu_url_uitloggen %}
+                        <li class="divider"></li>
+                        <li>
+                            <a href="{{ menu_url_uitloggen }}">
+                                <i class="material-icons-round red-text">logout</i>Uitloggen</a>
+                        </li>
+                    {% endif %}
                 </ul>
             </nav>
 
