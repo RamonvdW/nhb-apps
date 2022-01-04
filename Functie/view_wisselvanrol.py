@@ -411,7 +411,6 @@ class ActiveerRolView(UserPassesTestMixin, View):
 
         if rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
             url = get_url_voor_competitie(functie_nu)
-            # print('rol=%s, comp_type=%s, url=%s' % (functie_nu.rol, functie_nu.comp_type, url))
             if url:
                 return redirect(url)
 

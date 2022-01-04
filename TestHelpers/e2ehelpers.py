@@ -208,9 +208,11 @@ class E2EHelpers(TestCase):
         content = str(resp.content)
         content = self._remove_debug_toolbar(content)
         if skip_menu:
-            # menu is the last part of the body
-            pos = content.find('<div id="menu">')
-            content = content[:pos]     # if not found, takes [:-1], which is OK
+            # menu is the in the navbar at the top of the page
+            # it ends with the nav-content-scrollbar div
+            pos = content.find('<div class="nav-content-scrollbar">')
+            if pos >= 0:
+                content = content[pos:]
 
         # skip the headers
         pos = content.find('<body')
