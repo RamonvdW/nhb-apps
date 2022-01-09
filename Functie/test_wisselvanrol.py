@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -86,7 +86,6 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
 
     def _get_wissel_urls(self, resp):
         urls = self.extract_all_urls(resp)
-        print('urls: %s' % repr(urls))
         return [url for url in urls if url.startswith('/functie/activeer') or url == self.url_accountwissel]
 
     def test_admin(self):
@@ -517,8 +516,10 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "(extra keuzescherm)")
-        self.assertContains(resp, "Secretaris")
+        self.assertContains(resp, "Wordt secretaris van een van de verenigingen")
+        urls = self.extract_all_urls(resp)
+        urls = [url for url in urls if url == '/functie/wissel-van-rol/secretaris/']
+        self.assertEqual(len(urls), 1)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_naar_sec)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -113,7 +113,7 @@ class TestBeheer(E2EHelpers, TestCase):
             resp = self.client.get('/beheer/', follow=True)
         self.assertTrue(len(resp.redirect_chain) == 0)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, '<title>Websitebeheer | Django-websitebeheer</title>')
+        self.assertContains(resp, '<title>Admin Site</title>')
 
         # onnodig via beheer-login naar post-authenticatie pagina
         with self.assert_max_queries(20):

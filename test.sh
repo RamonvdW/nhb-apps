@@ -144,8 +144,14 @@ then
     echo "[INFO] Discovering all management commands in $FOCUS"
     for cmd in $(python3 ./manage.py --help);
     do
-        [ -f $FOCUS/management/commands/$cmd.py ] && python3 -u $PYCOV ./manage.py $cmd help &>>"$LOG"
+        if [ -f $FOCUS/management/commands/$cmd.py ]
+        then
+            echo -n '.'
+            echo "[INFO] ./manage.py help $cmd" >>"$LOG"
+            python3 -u $PYCOV ./manage.py help $cmd &>>"$LOG"
+        fi
     done
+    echo
 fi
 
 if [ $RES -eq 0 -a $# -eq 0 ]
@@ -157,8 +163,8 @@ then
         echo "[INFO] ./manage.py help $cmd" >>"$LOG"
         python3 -u $PYCOV ./manage.py help $cmd &>>"$LOG"
     done
+    echo
 fi
-echo
 
 # stop the websim tools
 # use bash construct to prevent the Terminated message on the console

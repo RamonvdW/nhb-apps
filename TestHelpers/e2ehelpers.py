@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import auth
-from django.utils import timezone
 from django.conf import settings
 from django.test import TestCase, Client
 from django.db import connection
@@ -20,6 +19,7 @@ import datetime
 import tempfile
 import vnujar
 import pyotp
+import time
 
 
 # debug optie: toon waar in de code de queries vandaan komen
@@ -39,7 +39,7 @@ class MyQueryTracer(object):
         # print('params:', params)      # params for the %s ?
         # print('many:', many)          # true/false
 
-        time_start = timezone.now()
+        time_start = time.monotonic_ns()
         call['now'] = time_start
 
         call['stack'] = stack = list()
@@ -59,9 +59,9 @@ class MyQueryTracer(object):
             except KeyError:
                 self.stack_counts[msg] = 1
 
-        time_end = timezone.now()
-        time_delta = time_end - time_start
-        duration_us = (time_delta.seconds * 1000000) + time_delta.microseconds
+        time_end = time.monotonic_ns()
+        time_delta_ns = time_end - time_start
+        duration_us = int(time_delta_ns / 1000)
         call['duration_us'] = duration_us
         self.total_duration_us += duration_us
 
@@ -204,7 +204,7 @@ class E2EHelpers(TestCase):
             soup = BeautifulSoup(content, features="html.parser")
             print(soup.prettify())
 
-    def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True):
+    def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True, data_urls=True):
         content = str(resp.content)
         content = self._remove_debug_toolbar(content)
         if skip_menu:
@@ -224,11 +224,15 @@ class E2EHelpers(TestCase):
             # find the start of a new url
             pos1 = content.find('href="')
             pos2 = content.find('action="')
-            if pos1 >= 0 and (pos2 == -1 or pos2 > pos1):
+            pos3 = content.find('data-url="')
+            if pos1 >= 0 and (pos2 == -1 or pos2 > pos1) and (pos3 == -1 or pos3 > pos1):
                 content = content[pos1+6:]       # strip all before href
-            elif pos2 >= 0 and (pos1 == -1 or pos1 > pos2):
+            elif pos2 >= 0 and (pos1 == -1 or pos1 > pos2) and (pos3 == -1 or pos3 > pos2):
                 content = content[pos2+8:]       # strip all before action
+            elif pos3 >= 0:
+                content = content[pos3+10:]      # strip all before data-url
             else:
+                # all interesting aspects handled
                 content = ""
 
             # find the end of the new url

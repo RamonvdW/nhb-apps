@@ -30,7 +30,7 @@ SITE_VERSIE = '2022-01-09'
 
 # modules van de site
 INSTALLED_APPS = [
-    'Beheer.apps.BeheerConfigPre',      # uitbreiding op admin templates
+    'Plein.apps.PleinConfig',           # must go first: provides admin template override
     'Beheer.apps.BeheerConfig',         # uitbreiding op admin interface
     'Account.apps.AccountConfig',
     'BasisTypen.apps.BasisTypenConfig',
@@ -49,7 +49,6 @@ INSTALLED_APPS = [
     'Mailer.apps.MailerConfig',
     'NhbStructuur.apps.NhbStructuurConfig',
     'Overig.apps.OverigConfig',
-    'Plein.apps.PleinConfig',
     'Records.apps.RecordsConfig',
     'Score.apps.ScoreConfig',
     'Sporter.apps.SporterConfig',
