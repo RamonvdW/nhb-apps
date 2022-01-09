@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -50,13 +50,17 @@ class TestOverigFeedback(E2EHelpers, TestCase):
 
     def test_smileys(self):
         # controleer de links vanuit de drie smileys
+        self.e2e_account_accepteert_vhpg(self.account_admin)
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertContains(resp, 'Wat vind je van deze pagina?')
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=False)
-        self.assertTrue(self.url_feedback % ('min', 'plein-bezoeker') in urls)
-        self.assertTrue(self.url_feedback % ('nul', 'plein-bezoeker') in urls)
-        self.assertTrue(self.url_feedback % ('plus', 'plein-bezoeker') in urls)
+        self.assertTrue(self.url_feedback % ('min', 'plein-beheerder') in urls)
+        self.assertTrue(self.url_feedback % ('nul', 'plein-beheerder') in urls)
+        self.assertTrue(self.url_feedback % ('plus', 'plein-beheerder') in urls)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_feedback_min_plein)

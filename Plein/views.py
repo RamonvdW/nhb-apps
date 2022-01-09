@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
 from django.shortcuts import redirect, render, reverse
 from django.views.generic import TemplateView, View
-from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving, rol_mag_wisselen
+from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from Handleiding.views import reverse_handleiding
 from Taken.taken import eval_open_taken
 from .menu import menu_dynamics
@@ -129,7 +129,7 @@ class PleinView(View):
 
         context['naam_site'] = settings.NAAM_SITE
         context['email_support'] = settings.EMAIL_SUPPORT
-        context['url_email_support'] = "mailto:%s" % settings.EMAIL_SUPPORT
+        context['url_email_support'] = 'mailto:' + settings.EMAIL_SUPPORT
 
         menu_dynamics(self.request, context)
         return render(request, template, context)

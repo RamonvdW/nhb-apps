@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
 from django.shortcuts import reverse
+from Account.rechten import account_rechten_is_otp_verified
 from Functie.rol import Rollen, rol_mag_wisselen, rol_get_huidige
 from Taken.taken import aantal_open_taken
 
@@ -49,7 +50,8 @@ def menu_dynamics(request, context, actief='hetplein'):
             context['menu_url_wissel_van_rol'] = reverse('Functie:wissel-van-rol')
 
             if request.user.is_staff:
-                context['menu_url_admin_site'] = reverse('admin:index')
+                if account_rechten_is_otp_verified(request):
+                    context['menu_url_admin_site'] = reverse('admin:index')
 
             rol = rol_get_huidige(request)
 

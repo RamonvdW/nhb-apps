@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -122,6 +122,7 @@ class TestPlein(E2EHelpers, TestCase):
         self.e2e_logout()
 
     def test_plein_admin(self):
+        # voordat de 2FA control gedaan is, geen admin scherm link in het dropdown menu
         self.e2e_login(self.testdata.account_admin)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
@@ -130,7 +131,7 @@ class TestPlein(E2EHelpers, TestCase):
         urls = [url for url in self.extract_all_urls(resp) if "admin" in url or "beheer" in url]
         self.assertEqual(0, len(urls))
 
-        # simuleer 2FA
+        # simuleer 2FA, waarna het admin scherm in het dropdown menu komt
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
@@ -212,6 +213,7 @@ class TestPlein(E2EHelpers, TestCase):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, 'Secretaris vereniging 1000')
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
 
         # sporter
         self.e2e_wisselnaarrol_sporter()
@@ -219,6 +221,6 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, 'Sporter')
+        self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
 
 # end of file
