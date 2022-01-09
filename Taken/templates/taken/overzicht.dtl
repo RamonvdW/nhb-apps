@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,77 +10,97 @@
 
 {% block pagina %}
 
-    <h4>Taken overzicht</h4>
-
-    <p>Op deze pagina kan je open en afgeronde taken zien.</p>
-    <p>Deze taken zijn gericht aan jou, onafhankelijk van je gekozen rol.</p>
-    <p>Als je andere beheerders helpt (door van rol te wisselen) dan krijg je <i>hun</i> taken dus niet te zien.</p>
-
-    <p>&nbsp;</p>
-    <h5>Open taken</h5>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Taken overzicht</h3>
+        </div>
+    </div>
 
     {% if heeft_open_taken %}
-        <table class="white">
-            <thead>
-                <tr>
-                    <th class="center-align">Nummer</th>
-                    <th class="center-align">Deadline</th>
-                    <th>Beschrijving</th>
-                    <th><!-- kolom voor knop --></th>
-                </tr>
-            </thead>
 
-            {% for taak in taken %}
-                {% if not taak.is_afgerond %}
-                    <tr>
-                        <td class="center-align">{{ taak.pk }}</td>
-                        <td class="center-align">{{ taak.deadline|date:"Y-m-d" }}</td>
-                        <td>{{ taak.beschrijving|linebreaks }}</td>
-                        <td>
-                            <a class="btn-nhb-blauw btn-small" href="{{ taak.url }}">Details</a>
-                        </td>
-                    </tr>
-                {% endif %}
-            {% endfor %}
-        </table>
-    {% else %}
-        <p>Er zijn op dit moment geen open taken.</p>
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Open taken</h4>
+                <p>Deze taken zijn gericht aan jou, onafhankelijk van je gekozen rol.</p>
+                <p>Als je andere beheerders helpt (door van rol te wisselen) dan krijg je <i>hun</i> taken dus niet te zien.</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+
+                <table class="white">
+                    <thead>
+                        <tr>
+                            <th class="center-align">Nummer</th>
+                            <th class="center-align">Deadline</th>
+                            <th>Beschrijving</th>
+                            <th><!-- kolom voor knop --></th>
+                        </tr>
+                    </thead>
+
+                    {% for taak in taken %}
+                        {% if not taak.is_afgerond %}
+                            <tr>
+                                <td class="center-align">{{ taak.pk }}</td>
+                                <td class="center-align">{{ taak.deadline|date:"Y-m-d" }}</td>
+                                <td>{{ taak.beschrijving|linebreaks }}</td>
+                                <td>
+                                    <a class="btn-nhb-rood" href="{{ taak.url }}">Details</a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table>
+
+            </div>
+        </div>
     {% endif %}
 
-
-    <p>&nbsp;</p>
-    <h5>Afgeronde taken</h5>
 
     {% if heeft_afgeronde_taken %}
-        <table class="white">
-            <thead>
-                <tr>
-                    <th class="center-align">Nummer</th>
-                    <th class="center-align">Deadline</th>
-                    <th>Beschrijving</th>
-                    <th><!-- kolom voor knop --></th>
-                </tr>
-            </thead>
 
-            {% for taak in taken %}
-                {% if taak.is_afgerond %}
-                    <tr>
-                        <td class="center-align">{{ taak.pk }}</td>
-                        <td class="center-align">{{ taak.deadline|date:"Y-m-d" }}</td>
-                        <td>{{ taak.beschrijving|linebreaks }}</td>
-                        <td>
-                            <a class="btn-nhb-blauw btn-small" href="{{ taak.url }}">Details</a>
-                        </td>
-                    </tr>
-                {% endif %}
-            {% endfor %}
-        </table>
-    {% else %}
-        <p>Er zijn nog geen afgeronde taken.</p>
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Afgeronde taken</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+
+                <table class="white">
+                    <thead>
+                        <tr>
+                            <th class="center-align">Nummer</th>
+                            <th class="center-align">Deadline</th>
+                            <th>Beschrijving</th>
+                            <th><!-- kolom voor knop --></th>
+                        </tr>
+                    </thead>
+
+                    {% for taak in taken %}
+                        {% if taak.is_afgerond %}
+                            <tr>
+                                <td class="center-align">{{ taak.pk }}</td>
+                                <td class="center-align">{{ taak.deadline|date:"Y-m-d" }}</td>
+                                <td>{{ taak.beschrijving|linebreaks }}</td>
+                                <td>
+                                    <a class="btn-nhb-rood" href="{{ taak.url }}">Details</a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
     {% endif %}
-
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="taken-overzicht" %}
 
 {% endblock %}
-

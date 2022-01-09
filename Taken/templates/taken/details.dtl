@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,75 +10,74 @@
 
 {% block pagina %}
 
-    <h4>Taak details</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Taak details</h3>
+            <p>Details van deze aan jou toegekende taak</p>
+        </div>
+    </div>
 
-    <p>&nbsp;</p>
-    <p>Details van deze aan jou toegekende taak:</p>
+    <!-- blauwe balk -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
 
-    <table class="white">
-        <tr>
-            <td>Taak nummer:</td>
-            <td>{{ taak.pk }}</td>
-        </tr>
+            <table class="white">
+                <tr>
+                    <td>Taak nummer:</td>
+                    <td>{{ taak.pk }}</td>
+                </tr>
 
-        <tr>
-            <td>Deadline:</td>
-            <td>{{ taak.deadline|date:"Y-m-d" }}</td>
-        </tr>
+                <tr>
+                    <td>Deadline:</td>
+                    <td>{{ taak.deadline|date:"Y-m-d" }}</td>
+                </tr>
 
-        <tr>
-            <td>Aangemaakt door:</td>
-            {% if taak.aangemaakt_door %}
-                <td>{{ taak.aangemaakt_door.volledige_naam }}</td>
-            {% else %}
-                <td><i>Systeem</i></td>
-            {% endif %}
-        </tr>
+                <tr>
+                    <td>Aangemaakt door:</td>
+                    {% if taak.aangemaakt_door %}
+                        <td>{{ taak.aangemaakt_door.volledige_naam }}</td>
+                    {% else %}
+                        <td><i>Systeem</i></td>
+                    {% endif %}
+                </tr>
 
-        {% if taak.deelcompetitie %}
-            <tr>
-                <td>Hoort bij:</td>
-                <td>{{ taak.deelcompetitie }}</td>
-            </tr>
-        {% endif %}
+                {% if taak.deelcompetitie %}
+                    <tr>
+                        <td>Hoort bij:</td>
+                        <td>{{ taak.deelcompetitie }}</td>
+                    </tr>
+                {% endif %}
 
-        <tr>
-            <td>Beschrijving:</td>
-            <td>{{ taak.beschrijving|linebreaks }}</td>
-        </tr>
+                <tr>
+                    <td>Beschrijving:</td>
+                    <td>{{ taak.beschrijving|linebreaks }}</td>
+                </tr>
 
-        <tr>
-            <td>Instructies:</td>
-            {% if taak.handleiding_pagina %}
-                <td><a class="btn-nhb-blauw" href="{{ taak.url_handleiding }}">Openen</a></td>
-            {% else %}
-                <td><i>Geen instructies beschikbaar</i></td>
-            {% endif %}
-        </tr>
+                <tr>
+                    <td>Instructies:</td>
+                    {% if taak.handleiding_pagina %}
+                        <td><a class="btn-nhb-blauw" href="{{ taak.url_handleiding }}">Openen</a></td>
+                    {% else %}
+                        <td><i>Geen instructies beschikbaar</i></td>
+                    {% endif %}
+                </tr>
 
-    </table>
+                {% if taak.url_sluiten %}
+                    <tr>
+                        <td colspan="2" class="center">Als de taak afgehandeld is, dan kan je deze sluiten:<br><br>
+                            <form action="{{ taak.url_sluiten }}" method="post">
+                                {% csrf_token %}
+                                <input class="btn-nhb-rood" name="button_sluit_taak" type="submit" value="Taak sluiten">
+                            </form>
+                        </td>
+                    </tr>
+                {% endif %}
 
-    {% if taak.url_sluiten %}
-        <p>Als de taak afgehandeld is, dan kan je deze sluiten:</p>
-    {% endif %}
+            </table>
 
-    {% if taak.url_sluiten %}
-        <form action="{{ taak.url_sluiten }}" method="post">
-            {% csrf_token %}
-            <p>
-                <a class="btn-nhb-blauw" href="{% url 'Taken:overzicht' %}">
-                    <i class="material-icons-round left">close</i>Terug</a>
-
-                <span>&nbsp;&nbsp;&nbsp;</span>
-                <input class="btn-nhb-rood" name="button_sluit_taak" type="submit" value="Taak sluiten">
-            </p>
-        </form>
-    {% else %}
-        <p>
-            <a class="btn-nhb-blauw" href="{% url 'Taken:overzicht' %}">
-                <i class="material-icons-round left">close</i>Terug</a>
-        </p>
-    {% endif %}
+        </div>
+    </div>
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="taken-details" %}
 
