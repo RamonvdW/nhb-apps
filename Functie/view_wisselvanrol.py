@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
 from django.urls import reverse
 from django.shortcuts import redirect
-from django.views.generic import ListView, TemplateView, View
+from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.otp import account_otp_is_gekoppeld
 from Account.rechten import account_rechten_is_otp_verified
@@ -59,15 +59,6 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
 
         return rol_mag_wisselen(self.request)
-
-    # def dispatch(self, request, *args, **kwargs):
-    #     """ wegsturen naar tweede factor koppelen uitleg """
-    #
-    #     if request.user.is_authenticated:
-    #         if not account_otp_is_gekoppeld(request.user):
-    #             return redirect('Functie:otp-koppelen-stap1')
-    #
-    #     return super().dispatch(request, *args, **kwargs)
 
     @staticmethod
     def _functie_volgorde(functie):
@@ -213,7 +204,11 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
                     kort += ' %s' % functie.nhb_ver.ver_nr
 
-                    objs.append({'titel': functie.beschrijving, 'kort': kort, 'ver_naam': functie.nhb_ver.naam, 'url': url, 'volgorde': volgorde})
+                    objs.append({'titel': functie.beschrijving,
+                                 'kort': kort,
+                                 'ver_naam': functie.nhb_ver.naam,
+                                 'url': url,
+                                 'volgorde': volgorde})
                 else:
                     functie = pk2func[functie_pk]
                     volgorde = self._functie_volgorde(functie)
@@ -308,13 +303,8 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
         context['wiki_2fa_url'] = reverse_handleiding(self.request, settings.HANDLEIDING_2FA)
         context['wiki_rollen'] = reverse_handleiding(self.request, settings.HANDLEIDING_ROLLEN)
-        context['wiki_intro_nieuwe_beheerders'] = reverse_handleiding(self.request, settings.HANDLEIDING_INTRO_NIEUWE_BEHEERDERS)
-
-        # snel wissel kaartje voor BB
-        if self.account.is_BB or self.account.is_staff:
-            context['heeft_alle_rollen'] = True
-            context['alle_18'], context['alle_25'] = self._maak_alle_rollen()
-            context['url_wissel_naar_sec'] = reverse('Functie:wissel-naar-sec')
+        context['wiki_intro_nieuwe_beheerders'] = reverse_handleiding(self.request,
+                                                                      settings.HANDLEIDING_INTRO_NIEUWE_BEHEERDERS)
 
         # zoek de rollen (eigen + helpen)
         context['eigen_rollen'], hierarchy = self._get_functies_eigen()
@@ -322,6 +312,14 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         context['show_eigen_rollen'] = True
         context['show_hwl_rollen'] = len(context['hwl_rollen']) > 0
         context['show_help_rollen'] = len(context['help_rollen']) > 0
+
+        # snel wissel kaartje voor BB
+        if self.account.is_BB or self.account.is_staff:
+            context['heeft_alle_rollen'] = True
+            context['alle_18'], context['alle_25'] = self._maak_alle_rollen()
+
+        if self.rol_nu == Rollen.ROL_BB:
+            context['url_wissel_naar_sec'] = reverse('Functie:wissel-naar-sec')
 
         # bedoeld voor de testsuite, maar kan geen kwaad
         context['insert_meta'] = True
@@ -389,11 +387,17 @@ class ActiveerRolView(UserPassesTestMixin, View):
 
         if 'rol' in kwargs:
             # activeer rol
-            my_logger.info('%s ROL account %s wissel naar rol %s' % (from_ip, self.request.user.username, repr(kwargs['rol'])))
+            my_logger.info('%s ROL account %s wissel naar rol %s' % (
+                                from_ip,
+                                self.request.user.username,
+                                repr(kwargs['rol'])))
             rol_activeer_rol(request, kwargs['rol'])
         else:
             # activeer functie
-            my_logger.info('%s ROL account %s wissel naar functie %s' % (from_ip, self.request.user.username, repr(kwargs['functie_pk'])))
+            my_logger.info('%s ROL account %s wissel naar functie %s' % (
+                            from_ip,
+                            self.request.user.username,
+                            repr(kwargs['functie_pk'])))
             rol_activeer_functie(request, kwargs['functie_pk'])
 
         rol_beschrijving = rol_get_beschrijving(request)

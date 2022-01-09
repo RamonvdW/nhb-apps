@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,41 +10,47 @@
 
 {% block pagina %}
 
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Verenigingen</h3>
+            <p>Kies een vereniging waarvan je de SEC rol aan wilt nemen.</p>
+        </div>
+    </div>
+
+    <div class="nhb-blauw-hoofd" style="padding:3px">
+        <table class="white" id="table1">
+            <thead>
+                <tr>        <!-- filter veld -->
+                    <td colspan="2"></td>       <!-- rayon, regio -->
+                    <td class="table-filter white"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+                    <td</td>                    <!-- kolom voor knoppen -->
+                </tr>
+                <tr class="nhb-table-header">
+                    <th class="center-align">Rayon</th>
+                    <th class="center-align">Regio</th>
+                    <th data-filter="on">Vereniging</th>
+                    <th>Wissel naar rol</th>
+                </tr>
+            </thead>
+
+            {% for obj in verenigingen %}
+                <tr>
+                    <td class="center-align">{{ obj.regio.rayon.rayon_nr }}</td>
+                    <td class="center-align">{{ obj.regio.regio_nr }}</td>
+                    <td>[{{ obj.ver_nr }}] {{ obj.naam }}</td>
+
+                    <td>
+                        <form action="{{ obj.url_wordt_sec }}" method="post">
+                            {% csrf_token %}
+                            <button class="btn-nhb-rood">SEC {{ obj.ver_nr }}</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-wissel-naar-sec" %}
-
-    <h4>Verenigingen</h4>
-
-    <p>Hieronder volgt de landelijke lijst van {{ verenigingen.count }} verenigingen.</p>
-
-    <table class="white" id="table1">
-        <thead>
-            <tr>        <!-- filter veld -->
-                <td colspan="2"></td>       <!-- rayon, regio -->
-                <td class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
-                <td><!-- kolom voor knoppen --></td>
-            </tr>
-            <tr>
-                <th class="center-align">Rayon</th>
-                <th class="center-align">Regio</th>
-                <th data-filter="on">Vereniging</th>
-                <th>Wissel naar rol</th>
-            </tr>
-        </thead>
-
-        {% for obj in verenigingen %}
-            <tr>
-                <td class="center-align">{{ obj.regio.rayon.rayon_nr }}</td>
-                <td class="center-align">{{ obj.regio.regio_nr }}</td>
-                <td>[{{ obj.ver_nr }}] {{ obj.naam }}</td>
-
-                <td>
-                    <form action="{{ obj.url_wordt_sec }}" method="post">
-                        {% csrf_token %}
-                        <button class="btn-nhb-blauw">SEC {{ obj.ver_nr }}</button>
-                    </form>
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
 
 {% endblock %}

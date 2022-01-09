@@ -51,7 +51,7 @@ def get_sporter_regio_nr(request):
         # sporter
         account = request.user
         if account.sporter_set.count() > 0:
-            sporter = account.sporter_set.all()[0]
+            sporter = account.sporter_set.select_related('bij_vereniging__regio').all()[0]
             if sporter.is_actief_lid and sporter.bij_vereniging:
                 nhb_ver = sporter.bij_vereniging
                 regio_nr = nhb_ver.regio.regio_nr

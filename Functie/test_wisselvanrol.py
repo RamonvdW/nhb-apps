@@ -85,17 +85,22 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.functie_rko.save()
 
     def _get_wissel_urls(self, resp):
-        return [url for url in self.extract_all_urls(resp) if url.startswith('/functie/activeer') or url == self.url_accountwissel]
+        urls = self.extract_all_urls(resp)
+        print('urls: %s' % repr(urls))
+        return [url for url in urls if url.startswith('/functie/activeer') or url == self.url_accountwissel]
 
     def test_admin(self):
         # controleer dat de link naar het wisselen van rol op de pagina staat
         self.account_admin.otp_is_actief = False
         self.account_admin.save()
 
+        # zonder gekoppelde tweede factor worden we niet meteen (meer) doorgestuurd naar de QR-code pagina
         self.e2e_login(self.account_admin)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
-        self.assert_is_redirect_not_plein(resp)
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        urls = [url for url in urls if url.startswith('/functie/otp-koppelen-stap1/')]
+        self.assertEqual(urls, ['/functie/otp-koppelen-stap1/'])
 
         self.account_admin.otp_is_actief = True
         self.account_admin.save()
@@ -107,12 +112,9 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assertNotContains(resp, 'IT beheerder')
         self.assertNotContains(resp, 'Manager competitiezaken')
         self.assertContains(resp, 'Gebruiker')
-        self.assertContains(resp, 'Voordat je aan de slag kan moeten we eerst een paar afspraken maken over het omgaan met persoonsgegevens.')
-        # print(str(resp.content).replace('>', '>\n'))
-        self.assertContains(resp, 'Een aantal rollen komt beschikbaar nadat de controle van de tweede factor uitgevoerd is.')
+        self.assertContains(resp, 'Maak afspraken over het omgaan met persoonsgegevens.')
 
         # accepteer VHPG en login met OTP controle
         self.e2e_login_and_pass_otp(self.account_admin)
