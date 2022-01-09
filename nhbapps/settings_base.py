@@ -30,7 +30,8 @@ SITE_VERSIE = '2022-01-09'
 
 # modules van de site
 INSTALLED_APPS = [
-    'Beheer.apps.BeheerConfig',             # replaces admin
+    'Beheer.apps.BeheerConfigPre',      # uitbreiding op admin templates
+    'Beheer.apps.BeheerConfig',         # uitbreiding op admin interface
     'Account.apps.AccountConfig',
     'BasisTypen.apps.BasisTypenConfig',
     'Bondspas.apps.BondspasConfig',
