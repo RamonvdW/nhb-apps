@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -69,7 +69,7 @@ def site_handler404_page_not_found(request, exception=None):
                 toplevel = [str(pat.pattern) for pat in urls.urlpatterns if str(pat.pattern) != '']
                 if sub in toplevel:
                     rauw = False
-        except (KeyError, IndexError):
+        except (KeyError, IndexError, TypeError):
             # typical for an internally raised Resolver404()
             rauw = False
 
@@ -161,7 +161,7 @@ class TestSpecialePagina(View):
             # nog geen exceptie gevonden die hiervoor gebruikt kan worden
             return site_handler500_internal_server_error(request, None)
 
-        raise Resolver404('Niet ondersteund code')
+        return site_handler404_page_not_found(request, 'Niet ondersteunde code')
 
 
 # end of file

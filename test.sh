@@ -133,12 +133,18 @@ then
     [ $RES -eq 3 ] && ABORTED=1
 fi
 
+# stop showing the additions to the logfile, because the rest is less interesting
+# use bash construct to prevent the Terminated message on the console
+sleep 0.1
+kill $PID_TAIL
+wait $PID_TAIL 2>/dev/null
+
 if [ $RES -eq 0 -a "$FOCUS" != "" ]
 then
     echo "[INFO] Discovering all management commands in $FOCUS"
     for cmd in $(python3 ./manage.py --help);
     do
-        [ -f $FOCUS/management/commands/$cmd.py ] && python3 -u $PYCOV ./manage.py $cmd help >>"$LOG" 2>&1
+        [ -f $FOCUS/management/commands/$cmd.py ] && python3 -u $PYCOV ./manage.py $cmd help &>>"$LOG"
     done
 fi
 
@@ -149,7 +155,7 @@ then
     do
         echo -n '.'
         echo "[INFO] ./manage.py help $cmd" >>"$LOG"
-        python3 -u $PYCOV ./manage.py $cmd help >>"$LOG" 2>&1
+        python3 -u $PYCOV ./manage.py help $cmd &>>"$LOG"
     done
 fi
 echo
@@ -167,13 +173,14 @@ COVERAGE_RED=0
 if [ $ABORTED -eq 0 -o $FORCE_REPORT -eq 1 ]
 then
     echo "[INFO] Generating reports" >>"$LOG"
+    echo "[INFO] Generating reports"
 
     # delete old coverage report
     rm -rf "$REPORT_DIR" &>>"$LOG"
 
     if [ -z "$FOCUS" ]
     then
-        python3 -m coverage report --precision=1 --skip-covered --fail-under=98 $OMIT &>>"$LOG"
+        python3 -m coverage report --precision=1 --skip-covered --fail-under=98 $OMIT
         res=$?
 
         python3 -m coverage html -d "$REPORT_DIR" --precision=1 --skip-covered $OMIT &>>"$LOG"
@@ -183,7 +190,7 @@ then
             COVERAGE_RED=1
         fi
     else
-        python3 -m coverage report --precision=1 --include=$COV_INCLUDE &>>"$LOG"
+        python3 -m coverage report --precision=1 --include=$COV_INCLUDE
         python3 -m coverage html -d "$REPORT_DIR" --precision=1 --skip-covered --include=$COV_INCLUDE &>>"$LOG"
     fi
 
@@ -194,10 +201,6 @@ fi
 
 # set normal performance
 sudo cpupower frequency-set --governor schedutil > /dev/null
-
-# use bash construct to prevent the Terminated message on the console
-kill $PID_TAIL
-wait $PID_TAIL 2>/dev/null
 
 if [ $COVERAGE_RED -ne 0 ]
 then

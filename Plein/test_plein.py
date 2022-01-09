@@ -139,7 +139,7 @@ class TestPlein(E2EHelpers, TestCase):
         self.assertContains(resp, 'Wissel van rol')
         self.assert_template_used(resp, ('plein/plein-sporter.dtl', 'plein/site_layout.dtl'))
         urls = [url for url in self.extract_all_urls(resp) if "beheer" in url]
-        self.assertEqual(0, len(urls))  # komt pas in beeld na kiezen rol IT
+        self.assertEqual(1, len(urls))      # is globaal beschikbaar bij is_staff
 
         # wissel naar elk van de functies
 
@@ -197,7 +197,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, 'Gebruiker')
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
     def test_sec(self):
         # login als secretaris

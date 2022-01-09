@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -47,6 +47,11 @@ class TestPleinFout(E2EHelpers, TestCase):
 
         resp = self.client.get(self.url_speciale_pagina % '404c')
         self.assertTrue(resp.status_code, 200)
+        self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
+
+        resp = self.client.get(self.url_speciale_pagina % '42')
+        self.assertTrue(resp.status_code, 200)
+        self.assertContains(resp, 'Niet ondersteunde code')
         self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
 
         resp = self.client.get('/plein/seems-part-of-site/')
