@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -12,7 +12,7 @@
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina=obj_record.op_pagina %}
 
-    <h4>Nederlandse Handboog<wbr/>sport Record</h4>
+    <h4>Nederlandse Handboog<wbr>sport Record</h4>
 
     <div class="row">
 
@@ -80,11 +80,11 @@
                     <div class="col s6">{{ obj_record.gesl_str }}</div>
                 </div>
                 <div class="row small-row">
-                    <div class="col s5">Leeftijds<wbr/>categorie:</div>
+                    <div class="col s5">Leeftijds<wbr>categorie:</div>
                     <div class="col s6">{{ obj_record.lcat_str }}</div>
                 </div>
                 <div class="row small-row">
-                    <div class="col s5">Materiaal<wbr/>klasse:</div>
+                    <div class="col s5">Materiaal<wbr>klasse:</div>
                     <div class="col s6">{{ obj_record.makl_str }}</div>
                 </div>
                 {% if obj_record.para_klasse %}

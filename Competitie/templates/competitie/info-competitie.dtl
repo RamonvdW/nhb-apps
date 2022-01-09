@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -36,10 +36,10 @@
                     <thead>
                         <tr>
                             <th>Competitie</th>
-                            <th>Schiet<wbr/>afstand</th>
+                            <th>Schiet<wbr>afstand</th>
                             <th><span class="hide-on-small-only">Pijlen per schietbeurt</span>
                                 <span class="hide-on-med-and-up">Per beurt</span></th>
-                            <th>Schiet<wbr/>beurten</th>
+                            <th>Schiet<wbr>beurten</th>
                             <th class="hide-on-small-only">Blazoen</th>
                             <th class="hide-on-small-only">Maximale score</th>
                         </tr>

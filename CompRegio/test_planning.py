@@ -318,7 +318,7 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_bond % self.deelcomp_bond_18.pk)
         self.assert403(resp)      # not allowed
 
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -790,7 +790,7 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         self.assert404(resp)     # 404 = Not found/allowed
 
         # haal de planning op (maakt opnieuw een ronde aan)
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)

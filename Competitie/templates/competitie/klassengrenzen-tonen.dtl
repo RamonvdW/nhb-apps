@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -35,7 +35,7 @@
 
             <tr>
                 <th>Materiaalklasse</th>
-                <th>Minimaal aanvangs<wbr/>gemiddelde</th>
+                <th>Minimaal aanvangs<wbr>gemiddelde</th>
                 {% if toon_aantal %}
                     <th>Aantal deelnemers</th>
                 {% endif %}
@@ -73,7 +73,7 @@
 
             <tr>
                 <th>Materiaalklasse</th>
-                <th>Minimale team<wbr/>sterkte</th>
+                <th>Minimale team<wbr>sterkte</th>
                 {% if toon_aantal %}
                     <th></th>
                 {% endif %}
@@ -113,7 +113,7 @@
 
             <tr>
                 <th>Materiaalklasse</th>
-                <th>Minimale team<wbr/>sterkte</th>
+                <th>Minimale team<wbr>sterkte</th>
                 {% if toon_aantal %}
                     <th></th>
                 {% endif %}

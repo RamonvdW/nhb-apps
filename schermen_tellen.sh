@@ -37,7 +37,12 @@ do
     NR=$((NR + 1))
 
     grep -q 'class="row-nhb-blauw"' $scherm
-    if [ $? -eq 0 ]
+    CHECK1=$?
+    
+    grep -q '<h3 class="nhb-rood-text">' $scherm
+    CHECK2=$?
+    
+    if [ $CHECK1 -eq 0 -o $CHECK2 -eq 0 ]
     then
         NEW_NR=$((NEW_NR + 1))
         TYPE='+'

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -47,7 +47,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Bonds<wbr/>competities</h4>
+                <h4>Bonds<wbr>competities</h4>
             </div>
         </div>
 
@@ -616,7 +616,7 @@
 
                     <!-- HWL -->
                     <tr>
-                        <td rowspan="2">Wedstrijd<wbr/>leiding:</td>
+                        <td rowspan="2">Wedstrijd<wbr>leiding:</td>
 
                         <td>{% if hwl_namen|length > 1 %}Namen:{% else %}Naam:{% endif %}</td>
 

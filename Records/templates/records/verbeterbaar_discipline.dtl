@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -12,7 +12,7 @@
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-alle-verbeterbaar" %}
 
-    <h4>Nederlandse Handboog<wbr/>sport Records</h4>
+    <h4>Nederlandse Handboog<wbr>sport Records</h4>
 
     <p>Deze pagina toont de nederlandse handboogsport records voor de discipline <b>{{ beschrijving }}</b> die verbeterbaar zijn.</p>
 
@@ -64,8 +64,8 @@
         <thead>
             <tr>
                 <th>Soort record</th>
-                <th>Materiaal<wbr/>klasse</th>
-                <th class="hide-on-small-only">Leeftijds<wbr/>categorie</th>
+                <th>Materiaal<wbr>klasse</th>
+                <th class="hide-on-small-only">Leeftijds<wbr>categorie</th>
                 {% if toon_para_kolom %}
                     <th>Para klasse</th>
                 {% endif %}

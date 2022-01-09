@@ -155,12 +155,12 @@
                 </tr>
                 <tr class="nhb-table-header">
                     <td class="nhb-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
-                        <th><!-- rank --></th>
-                        <th>Sporter</th>
-                        <th class="hide-on-small-only">Vereniging</th>
-                        <th class="center-align">Gemiddelde</th>
-                        <th class="center-align" colspan="7">Scores</th>
-                        <th class="right-align hide-on-small-only">Totaal</th>
+                    <th><!-- rank --></th>
+                    <th>Sporter</th>
+                    <th class="hide-on-small-only">Vereniging</th>
+                    <th class="center-align">Gemiddelde</th>
+                    <th class="center-align" colspan="7">Scores</th>
+                    <th class="right-align hide-on-small-only">Totaal</th>
                     <td class="nhb-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
                 </tr>
             {% endif %}

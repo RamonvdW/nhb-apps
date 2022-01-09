@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -104,7 +104,7 @@
                                         {% if mag_wijzigen %}
                                             <th><!-- checkbox column --></th>
                                         {% endif %}
-                                        <th>Aanvangs<wbr/>gemiddelde</th>
+                                        <th>Aanvangs<wbr>gemiddelde</th>
                                         <th>Boog</th>
                                         <th>Naam</th>
                                     </tr>
@@ -132,7 +132,7 @@
                         <table class="striped">
                             <thead>
                                 <tr>
-                                    <th>Aanvangs<wbr/>gemiddelde</th>
+                                    <th>Aanvangs<wbr>gemiddelde</th>
                                     <th>Boog</th>
                                     <th>Naam</th>
                                 </tr>

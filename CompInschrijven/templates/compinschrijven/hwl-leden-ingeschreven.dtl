@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -78,7 +78,7 @@
 
                     <th>Wedstrijdklasse</th>
 
-                    <th data-filter="on">Bonds<wbr/>nummer</th>
+                    <th data-filter="on">Bonds<wbr>nummer</th>
                     <th data-filter="on">Naam</th>
 
                     <th colspan="2"><span class="show-on-small hide-on-med-and-up">Team</span><span class="hide-on-small-only">Voorkeur<br>teamschieten</span></th>
