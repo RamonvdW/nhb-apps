@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -82,7 +82,9 @@ then
 
     # move from NhbStructuur/cron/ to top-dir
     cd ../..
-    ./manage.py import_nhb_crm "$SPOOLFILE" &>> "$LOG"
+
+    # -u = unbuffered --> needed to maintain the order of stdout and stderr lines
+    python3 -u ./manage.py import_nhb_crm "$SPOOLFILE" &>> "$LOG"
 
     echo "[INFO] Import finished" >> "$LOG"
 fi
