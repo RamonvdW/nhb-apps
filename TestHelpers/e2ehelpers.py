@@ -213,11 +213,11 @@ class E2EHelpers(TestCase):
             pos = content.find('<div class="nav-content-scrollbar">')
             if pos >= 0:
                 content = content[pos:]
-
-        # skip the headers
-        pos = content.find('<body')
-        if pos > 0:                             # pragma: no branch
-            content = content[pos:]             # strip header
+        else:
+            # skip the headers
+            pos = content.find('<body')
+            if pos > 0:                             # pragma: no branch
+                content = content[pos:]             # strip header
 
         urls = list()
         while len(content):

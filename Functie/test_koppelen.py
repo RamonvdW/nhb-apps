@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -162,7 +162,6 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Manager competitiezaken")
 
         # probeer de zoek functie
         with self.assert_max_queries(20):
@@ -203,7 +202,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         with self.assert_max_queries(21):
             resp = self.client.post(self.url_activeer_functie % self.functie_hwl.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "HWL")
+        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
 
         # probeer de zoek functie: zoek 'er' --> vind 'beheerder' en 'ander'
         url = self.url_wijzig % self.functie_hwl.pk

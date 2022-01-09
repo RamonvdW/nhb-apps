@@ -178,8 +178,7 @@ COVERAGE_RED=0
 
 if [ $ABORTED -eq 0 -o $FORCE_REPORT -eq 1 ]
 then
-    echo "[INFO] Generating reports" >>"$LOG"
-    echo "[INFO] Generating reports"
+    echo "[INFO] Generating reports" | tee -a "$LOG"
 
     # delete old coverage report
     rm -rf "$REPORT_DIR" &>>"$LOG"
