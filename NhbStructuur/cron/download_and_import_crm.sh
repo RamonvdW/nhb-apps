@@ -82,7 +82,9 @@ then
 
     # move from NhbStructuur/cron/ to top-dir
     cd ../..
-    ./manage.py import_nhb_crm "$SPOOLFILE" &>> "$LOG"
+
+    # -u = unbuffered --> needed to maintain the order of stdout and stderr lines
+    python3 -u ./manage.py import_nhb_crm "$SPOOLFILE" &>> "$LOG"
 
     echo "[INFO] Import finished" >> "$LOG"
 fi
