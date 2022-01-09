@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,6 +11,14 @@ export PYTHONDONTWRITEBYTECODE=1
 
 DEBUG=1
 [ "$1" = "--nodebug" ] && DEBUG=0
+
+./manage.py check
+[ $? -eq 0 ] || exit 1
+
+echo "[INFO] Refreshing static files"
+STATIC_DIR="nhbapps/.static"
+rm -rf "$STATIC_DIR"/*
+./manage.py collectstatic -l
 
 # start the background processes
 echo "[INFO] Starting regiocomp_mutaties (runtime: 60 minutes)"
