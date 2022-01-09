@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -20,8 +20,8 @@
                 <th>Datum</th>
                 <th>Sporter</th>
                 <th>Soort record</th>
-                <th>Materiaal<wbr/>klasse</th>
-                <!-- <th>Leeftijds<wbr/>categorie</th> -->
+                <th>Materiaal<wbr>klasse</th>
+                <!-- <th>Leeftijds<wbr>categorie</th> -->
                 <!-- <th>Para klasse</th> -->
                 <th>Score</th>
                 <th><!-- kolom voor de 'details' knop --></th>

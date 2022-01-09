@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -43,7 +43,7 @@ Zodra de eerste ronde geopend wordt door de RCL is het mogelijk om invallers te 
                     <th>Naam</th>
                     <th class="hide-on-small-only center-align">Gekoppeld</th>
                     <th class="hide-on-small-only">Sterkte</th>
-                    <th>Wedstrijd<wbr/>klasse</th>
+                    <th>Wedstrijd<wbr>klasse</th>
                     <th><!-- kolom voor de knoppen --></th>
                 </tr>
             </thead>

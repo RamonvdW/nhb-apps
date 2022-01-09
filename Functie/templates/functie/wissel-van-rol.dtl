@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -55,7 +55,7 @@
 
     {% if show_vhpg %}
         <p>&nbsp;</p>
-        <h5>Hanteren persoons<wbr/>gegevens</h5>
+        <h5>Hanteren persoons<wbr>gegevens</h5>
         <p>Voordat je aan de slag kan moeten we eerst een paar afspraken maken over het omgaan met persoonsgegevens.</p>
         <p><a class="btn-nhb-rood" href="{% url 'Functie:vhpg-acceptatie' %}">Bekijken</a></p>
     {% endif %}
@@ -136,7 +136,7 @@
     {% if not show_vhpg %}
 
         <p>&nbsp;</p>
-        <h5>Hanteren persoons<wbr/>gegevens</h5>
+        <h5>Hanteren persoons<wbr>gegevens</h5>
 
         <p>Je hebt de verklaring hanteren persoonsgegevens afgegeven op {{ vhpg.acceptatie_datum|date:"j F Y" }}.</p>
         <p><a class="btn-nhb-blauw" href="{% url 'Functie:vhpg-afspraken' %}"><i class="material-icons-round left">remove_red_eye</i>Afspraken inzien</a></p>

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -37,7 +37,7 @@
                     <th class="hide-on-small-only">Soort team</th>
                     <th class="hide-on-med-and-up">Soort</th>
                     <th>Naam</th>
-                    <th>Wedstrijd<wbr/>klasse</th>
+                    <th>Wedstrijd<wbr>klasse</th>
                     <th class="hide-on-small-only center-align">Gekoppeld</th>
                     <th><!-- kolom voor de knoppen --></th>
                 </tr>

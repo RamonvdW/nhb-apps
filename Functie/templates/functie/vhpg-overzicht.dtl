@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -11,7 +11,7 @@
 {% block pagina %}
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vhpg-overzicht" %}
 
-<h4>Omgaan met persoons<wbr/>gegevens</h4>
+<h4>Omgaan met persoons<wbr>gegevens</h4>
 
 <p>Hieronder kan je zien welke beheerders de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd hebben.</p>
 
