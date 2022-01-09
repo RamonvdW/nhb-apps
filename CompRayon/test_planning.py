@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -248,7 +248,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
 
         # maak een RK wedstrijd aan in een ander rayon
         url = self.url_planning_rayon % self.deelcomp_rayon2_18.pk
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         # controleer dat er geen 'ronde toevoegen' knop is
@@ -256,7 +256,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         self.assertNotIn(url, urls)     # url wordt gebruikt voor POST
 
         # coverage: nog een keer ophalen, want dan is het plan er al
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
@@ -273,7 +273,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         wedstrijd_r1_pk = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0].pk
         url = self.url_wijzig_rk_wedstrijd % wedstrijd_r1_pk
 
-        with self.assert_max_queries(30):
+        with self.assert_max_queries(21):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
@@ -318,14 +318,14 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         # haal de wedstrijd op
         wedstrijd_r1 = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0]
         url_w = self.url_wijzig_rk_wedstrijd % wedstrijd_r1.pk
-        with self.assert_max_queries(35):
+        with self.assert_max_queries(26):
             resp = self.client.get(url_w)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('comprayon/wijzig-wedstrijd-rk.dtl', 'plein/site_layout.dtl'))
 
         # nog een keer ophalen, want dan zijn wedstrijd.vereniging en wedstrijd.locatie al gezet
-        with self.assert_max_queries(35):
+        with self.assert_max_queries(26):
             resp = self.client.get(url_w)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
@@ -358,7 +358,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
 
         # doet een 'get' op de planning zodat er een plan aangemaakt wordt
         url = self.url_planning_rayon % self.deelcomp_rayon1_18.pk
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.deelcomp_rayon1_18 = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk)
@@ -466,7 +466,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         # hierbij lukt het niet om de wedstrijd.vereniging in te vullen
         wedstrijd_r2_pk = DeelCompetitie.objects.get(pk=self.deelcomp_rayon2_18.pk).plan.wedstrijden.all()[0].pk
         url = self.url_wijzig_rk_wedstrijd % wedstrijd_r2_pk
-        with self.assert_max_queries(28):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -477,7 +477,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         ver.regio = self.regio_105  # verhuis naar rayon 2
         ver.save()
 
-        with self.assert_max_queries(29):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 

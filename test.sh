@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -108,25 +108,26 @@ COLOR_RED=$(tput setaf 1)
 tail -f "$LOG" | grep --color -E "FAIL$|ERROR$|" &
 PID_TAIL=$!
 
-# -u = unbuffered stdin/stdout
+echo "[INFO] Deleting test database"
+sudo -u postgres dropdb --if-exists test_data3
+
+# -u = unbuffered stdin/stdout --> also ensures the order of stdout/stderr lines
 # -v = verbose
 # note: double quotes not supported around $*
-python3 -u $PYCOV ./manage.py test --settings=nhbapps.settings_autotest -v 2 --noinput $* >>"$LOG" 2>&1
+echo "[INFO] Starting main test run" >>"$LOG"
+python3 -u $PYCOV ./manage.py test --keepdb --settings=nhbapps.settings_autotest -v 2 --noinput $* &>>"$LOG"
 RES=$?
 #echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
 [ $RES -eq 3 ] && ABORTED=1
 
-echo >> "$LOG"
-
-# use bash construct to prevent the Terminated message on the console
-kill $PID_TAIL
-wait $PID_TAIL 2>/dev/null
+echo >>"$LOG"
+echo "[INFO] Finished main test run" >>"$LOG"
 
 if [ $RES -eq 0 -a $# -eq 0 ]
 then
     # add coverage with nodebug
     echo "[INFO] Performing run with nodebug"
-    python3 -u $PYCOV ./manage.py test --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.TestPlein.test_quick >>"$LOG" 2>&1
+    python3 -u $PYCOV ./manage.py test --keepdb --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.TestPlein.test_quick &>>"$LOG"
     RES=$?
     #echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
     [ $RES -eq 3 ] && ABORTED=1
@@ -160,43 +161,58 @@ wait $PID_WEBSIM1 2>/dev/null
 kill $PID_WEBSIM2
 wait $PID_WEBSIM2 2>/dev/null
 
+ASK_LAUNCH=0
+COVERAGE_RED=0
+
 if [ $ABORTED -eq 0 -o $FORCE_REPORT -eq 1 ]
 then
-    echo "[INFO] Generating reports"
+    echo "[INFO] Generating reports" >>"$LOG"
 
     # delete old coverage report
-    rm -rf "$REPORT_DIR"
+    rm -rf "$REPORT_DIR" &>>"$LOG"
 
-    echo
     if [ -z "$FOCUS" ]
     then
-        python3 -m coverage report --precision=1 --skip-covered --fail-under=98 $OMIT | tee -a "$LOG"
+        python3 -m coverage report --precision=1 --skip-covered --fail-under=98 $OMIT &>>"$LOG"
         res=$?
 
-        echo
-        python3 -m coverage html -d "$REPORT_DIR" --precision=1 --skip-covered $OMIT
+        python3 -m coverage html -d "$REPORT_DIR" --precision=1 --skip-covered $OMIT &>>"$LOG"
 
         if [ "$res" -gt 0 ] && [ -z "$ARGS" ]
         then
-            echo -e "$RED"
-            echo "      ==========================="
-            echo "      FAILED: NOT ENOUGH COVERAGE"
-            echo "      ==========================="
-            echo -e "$RESET"
-        else
-            echo "HTML report is in $REPORT_DIR  (try firefox $REPORT_DIR/index.html)"
+            COVERAGE_RED=1
         fi
     else
-        python3 -m coverage report --precision=1 --include=$COV_INCLUDE | tee -a "$LOG"
-        python3 -m coverage html -d "$REPORT_DIR" --precision=1 --skip-covered --include=$COV_INCLUDE
-        echo "HTML report is in $REPORT_DIR  (try firefox $REPORT_DIR/index.html)"
+        python3 -m coverage report --precision=1 --include=$COV_INCLUDE &>>"$LOG"
+        python3 -m coverage html -d "$REPORT_DIR" --precision=1 --skip-covered --include=$COV_INCLUDE &>>"$LOG"
     fi
 
     rm "$COVERAGE_FILE"
 
-    # set normal performance
-    sudo cpupower frequency-set --governor schedutil > /dev/null
+    ASK_LAUNCH=1
+fi
 
+# set normal performance
+sudo cpupower frequency-set --governor schedutil > /dev/null
+
+# use bash construct to prevent the Terminated message on the console
+kill $PID_TAIL
+wait $PID_TAIL 2>/dev/null
+
+if [ $COVERAGE_RED -ne 0 ]
+then
+    echo
+    echo -e "$RED"
+    echo "      ==========================="
+    echo "      FAILED: NOT ENOUGH COVERAGE"
+    echo "      ==========================="
+    echo -e "$RESET"
+    echo
+fi
+
+if [ $ASK_LAUNCH -ne 0 ]
+then
+    echo "HTML report is in $REPORT_DIR  (try firefox $REPORT_DIR/index.html)"
     echo
     echo -n "Press ENTER to start firefox now, or Ctrl+C to abort"
     read -t 5
@@ -213,9 +229,6 @@ then
 
     echo "Done"
 fi
-
-# set normal performance
-sudo cpupower frequency-set --governor schedutil > /dev/null
 
 # end of file
 
