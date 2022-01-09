@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -32,6 +32,7 @@ def account_rechten_eval_now(request, account):
 
 
 def _account_rechten_change_otp_status(request, is_verified):
+    """ De 2FA verificatie status is aangepast - sla dit op """
     request.session[SESSIONVAR_ACCOUNT_IS_OTP_VERIFIED] = is_verified
     account = request.user
     account_rechten_eval_now(request, account)
