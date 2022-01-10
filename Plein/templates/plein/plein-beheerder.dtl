@@ -58,7 +58,7 @@
             <!-- verenigingen/accommodaties overzicht RCL en HWL -->
             {% if rol_is_rcl %}
                 {% url 'Vereniging:lijst-verenigingen' as card_url %}
-                {% include 'plein/card.dtl' with title="Verenigingen" text="Overzicht van de verenigingen in jouw regio en mogelijkheid tot aanpassen accommodatie gegevens." icon="share_location" url=card_url %}
+                {% include 'plein/card.dtl' with title="Verenigingen" text="Overzicht van de verenigingen in jouw regio en mogelijkheid tot aanpassen accommodaties." icon="share_location" url=card_url %}
             {% endif %}
 
             <!-- verenigingen/accommodaties overzicht SEC en HWL -->

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -16,7 +16,7 @@ from .models import Functie
 
 TEMPLATE_OVERZICHT = 'functie/overzicht.dtl'
 TEMPLATE_OVERZICHT_VERENIGING = 'functie/overzicht-vereniging.dtl'
-TEMPLATE_OVERZICHT_LID_NRS = 'functie/overzicht-lid-nrs.dtl'
+TEMPLATE_OVERZICHT_EMAILS_SEC_HWL = 'functie/overzicht-emails-sec-hwl.dtl'
 
 
 class OverzichtVerenigingView(UserPassesTestMixin, ListView):
@@ -283,14 +283,14 @@ class OverzichtView(UserPassesTestMixin, ListView):
         return context
 
 
-class OverzichtLidNrsSecHwlView(UserPassesTestMixin, TemplateView):
+class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
 
     """ Deze view is voor de BB en geeft een knip-en-plakbaar overzicht van
         de lidnummers van alle SEC en HWL, zodat hier makkelijk een mailing voor te maken is.
     """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_OVERZICHT_LID_NRS
+    template_name = TEMPLATE_OVERZICHT_EMAILS_SEC_HWL
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -307,27 +307,14 @@ class OverzichtLidNrsSecHwlView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        lid_nrs = list()
-        for functie in (Functie
-                        .objects
-                        .filter(rol__in=('HWL', 'SEC'))
-                        .prefetch_related('accounts')):
+        emails = (Functie
+                  .objects
+                  .filter(rol__in=('HWL', 'SEC'))
+                  .exclude(bevestigde_email='')
+                  .values_list('bevestigde_email', flat=True))
 
-            for username in functie.accounts.values_list('username', flat=True):
-                if username not in lid_nrs:
-                    lid_nrs.append(username)
-            # for
-        # for
-
-        lid_nrs.sort()
-        context['aantal'] = len(lid_nrs)
-
-        context['groepjes'] = groepjes = list()
-        while len(lid_nrs) > 0:
-            groepje = lid_nrs[:8]
-            lid_nrs = lid_nrs[8:]
-            groepjes.append(", ".join(groepje))
-        # while
+        context['aantal'] = len(emails)
+        context['emails'] = "; ".join(emails)
 
         menu_dynamics(self.request, context, actief='competitie')
         return context

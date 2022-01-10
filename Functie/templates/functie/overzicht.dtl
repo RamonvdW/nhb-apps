@@ -10,33 +10,39 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-overzicht" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Beheerders</h3>
+            {% if rol_is_hwl %}
+                <p>Hieronder staan relevante functies en de beheerders.</p>
+            {% else %}
+                <p>Hieronder staan globale functies en de gekoppelde beheerders. Afhankelijk van je rol mag je hier wijzigingen in aanbrengen.</p>
+            {% endif %}
+            <p>Jouw huidige rol is: <b>{{ huidige_rol }}</b></p>
 
-    <h4>Beheerders</h4>
+            {% if url_sec_hwl %}
+                <p>
+                    <a class="btn-nhb-rood" href="{{ url_sec_hwl }}">
+                        <i class="material-icons-round left">email</i>E-mailadressen van alle SEC en HWL</a>
+                </p>
+            {% endif %}
 
-    {% if rol_is_hwl %}
-        <p>Hieronder staan relevante functies en de beheerders.</p>
-    {% else %}
-        <p>Hieronder staan globale functies en de gekoppelde beheerders. Afhankelijk van je rol mag je hier wijzigingen in aanbrengen.</p>
-    {% endif %}
-
-    {% if url_sec_hwl %}
-        <p>
-            <a class="btn-nhb-blauw" href="{{ url_sec_hwl }}">Lid nummers alle SEC en HWL</a>
-        </p>
-    {% endif %}
-
-    <p>Jouw huidige rol is: <b>{{ huidige_rol }}</b></p>
+        </div>
+    </div>
 
     <!-- toon de functies met huidige beheerders in een tabel -->
-    <div class="row">
+    <div class="nhb-blauw-hoofd" style="padding:3px">
+
         <table class="white" id="table1">
             <thead>
                 <tr>        <!-- filter rij -->
-                    <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+                    <td colspan="2" class="table-filter">
+                        <input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/>
+                    </td>
                     <td></td>       <!-- email -->
                 </tr>
-                <tr>
+                <tr class="nhb-table-header">
                     <th data-filter="on">Functie / Rol</th>
                     <th data-filter="on">Beheerder(s)</th>
                     <th>E-mailadres</th>
@@ -93,7 +99,8 @@
 
                         {% if obj.wijzig_url %}
                             <br><br>
-                            <a class="btn-nhb-blauw btn-small" href="{{ obj.wijzig_url }}"><i class="material-icons-round left">group_add</i>Koppelen</a>
+                            <a class="btn-nhb-rood" href="{{ obj.wijzig_url }}">
+                                <i class="material-icons-round left">group_add</i>Koppelen</a>
                         {% endif %}
                     </td>
 
@@ -117,13 +124,16 @@
 
                         {% if obj.email_url %}
                             <br><br>
-                            <a class="btn-nhb-blauw btn-small" href="{{ obj.email_url }}"><i class="material-icons-round left">alternate_email</i>Wijzig e-mail</a>
+                            <a class="btn-nhb-rood" href="{{ obj.email_url }}">
+                                <i class="material-icons-round left">alternate_email</i>Wijzig e-mail</a>
                         {% endif %}
                     </td>
                 </tr>
             {% endfor %}
         </table>
     </div>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-overzicht" %}
 
 {% endblock %}
 

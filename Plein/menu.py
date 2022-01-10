@@ -40,7 +40,6 @@ def menu_dynamics(request, context, actief='hetplein'):
         # gebruiker is ingelogd
 
         context['menu_url_uitloggen'] = reverse('Account:logout')
-        context['menu_url_profiel'] = reverse('Sporter:profiel')
 
         # naam voor op de knop
         context['menu_voornaam'] = request.user.get_first_name()
@@ -61,8 +60,11 @@ def menu_dynamics(request, context, actief='hetplein'):
                        Rollen.ROL_HWL):
                 context['menu_aantal_open_taken'] = aantal_open_taken(request)
                 context['menu_url_taken'] = reverse('Taken:overzicht')
+
+            elif rol == Rollen.ROL_SPORTER:
+                context['menu_url_profiel'] = reverse('Sporter:profiel')
         else:
-            context['menu_toon_sporter_profiel'] = True
+            context['menu_url_profiel'] = reverse('Sporter:profiel')
 
     else:
         context['menu_url_inloggen'] = reverse('Account:login')
