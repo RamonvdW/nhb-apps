@@ -31,11 +31,11 @@
         <link rel="stylesheet" href="{% static 'site_layout_min-33.css' %}"> <!-- moet ná materialize css -->
     </head>
 
-    <body class="nhb-grijs">
+    <body class="white">
         <!-- geen menu -->
         <div id="content">      <!-- geeft padding -->
 
-            <h4>Oeps!</h4>
+            <h3 class="nhb-rood-text">Oeps!</h3>
 
             <!-- echt inhoud komt hier, vanuit de template -->
             {% block pagina_minimaal %}{% endblock %}
@@ -46,7 +46,7 @@
                 <p>&nbsp;</p>
                 <h5>Terug naar veiligheid</h5>
                 <p>Druk op de volgende knop om terug te gaan naar de begin pagina:</p>
-                <a class="btn-nhb-blauw" href="/plein/"><i class="material-icons-round left">home</i>Terug naar Het Plein</a>
+                <a class="btn-nhb-rood" href="/plein/"><i class="material-icons-round left">home</i>Terug naar Het Plein</a>
             {% endblock %}
 
             <p>&nbsp;</p>
