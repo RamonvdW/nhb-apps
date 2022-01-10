@@ -1,5 +1,5 @@
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -140,7 +140,7 @@
 
     <tr>
         <td {% if comp.fase == 'K' %} class="nhb-blauw white-text center-align"{% else %}class="center-align"{% endif %}>K</td>
-        <td>Bevestig deelname RK individueel (HWL / RKO)<br>Koppel invallers RK teams (HWL)</td>
+        <td>Bevestig deelname RK individueel (HWL / RKO)<!--<br>Koppel invallers RK teams (HWL)--></td>
         <td>
             {% if comp.fase > 'K' %}
                 <span class="green-text">Afgerond</span>
