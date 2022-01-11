@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -135,7 +135,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_uitslagen_regio_teams % (self.testdata.comp18.pk, 'R')
-        with self.assert_max_queries(70):       # TODO: reduceer
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -143,7 +143,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
 
         # lijst met onze deelnemers
         url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, 'IB', 101)
-        with self.assert_max_queries(46):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -511,7 +511,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_uitslagen_regio_teams % (self.testdata.comp18.pk, 'R')
-        with self.assert_max_queries(68):       # TODO: reduceer
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -519,7 +519,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
 
         # lijst met onze deelnemers
         url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, 'IB', 101)
-        with self.assert_max_queries(44):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -557,7 +557,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
 
     def test_teams(self):
         url = self.url_uitslagen_regio_teams % (self.testdata.comp18.pk, 'R')
-        with self.assert_max_queries(68):       # TODO: reduceer
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -570,7 +570,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
 
         # regio 100 --> 101
         url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, 'R', 100)
-        with self.assert_max_queries(68):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -593,7 +593,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
 
         # regio 101 heeft teams in een poule
         url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, 'R', 101)
-        with self.assert_max_queries(68):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
