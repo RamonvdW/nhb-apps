@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -51,7 +51,7 @@ def get_sporter_regio_nr(request):
         # sporter
         account = request.user
         if account.sporter_set.count() > 0:
-            sporter = account.sporter_set.all()[0]
+            sporter = account.sporter_set.select_related('bij_vereniging__regio').all()[0]
             if sporter.is_actief_lid and sporter.bij_vereniging:
                 nhb_ver = sporter.bij_vereniging
                 regio_nr = nhb_ver.regio.regio_nr
@@ -366,6 +366,7 @@ class UitslagenRegioTeamsView(TemplateView):
                          .objects
                          .filter(deelcompetitie__competitie=comp,
                                  vereniging__regio__regio_nr=gekozen_regio_nr)
+                         .select_related('vereniging')
                          .order_by('vereniging__ver_nr')):
                 if team.vereniging.ver_nr not in ver_nrs:
                     ver_nrs.append(team.vereniging.ver_nr)
@@ -450,7 +451,7 @@ class UitslagenRegioTeamsView(TemplateView):
             heeft_poules = True
             heeft_teams = False
 
-            for team in poule.teams.order_by('pk'):
+            for team in poule.teams.select_related('team_type').order_by('pk'):
                 if team.team_type == context['teamtype']:
                     team_pk2poule[team.pk] = poule
                     heeft_teams = True
@@ -468,7 +469,8 @@ class UitslagenRegioTeamsView(TemplateView):
                  .exclude(klasse=None)
                  .filter(deelcompetitie=deelcomp,
                          team_type=context['teamtype'])
-                 .select_related('vereniging')
+                 .select_related('vereniging',
+                                 'klasse__team')
                  .order_by('klasse__team__volgorde'))
         pk2team = dict()
         for team in teams:
@@ -486,6 +488,7 @@ class UitslagenRegioTeamsView(TemplateView):
                        .filter(team__in=teams)
                        .prefetch_related('deelnemers_geselecteerd',
                                          'deelnemers_feitelijk')
+                       .select_related('team')
                        .order_by('ronde_nr'))
         for ronde_team in ronde_teams:
             team = pk2team[ronde_team.team.pk]
