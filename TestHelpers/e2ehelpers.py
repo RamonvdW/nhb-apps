@@ -153,7 +153,7 @@ class E2EHelpers(TestCase):
         self._wissel_naar_rol('BB', '/functie/wissel-van-rol/')
 
     def e2e_wisselnaarrol_sporter(self):
-        self._wissel_naar_rol('sporter', '/functie/wissel-van-rol/')
+        self._wissel_naar_rol('sporter', '/plein/')
 
     def e2e_wisselnaarrol_gebruiker(self):
         self._wissel_naar_rol('geen', '/functie/wissel-van-rol/')
@@ -605,9 +605,9 @@ class E2EHelpers(TestCase):
         finally:
             if check_duration:
                 duration = datetime.datetime.now() - tracer.started_at
-                duration_seconds = duration.seconds
+                duration_seconds = duration.seconds + (duration.microseconds / 1000000.0)
             else:
-                duration_seconds = 0
+                duration_seconds = 0.0
 
             count = len(tracer.trace)
 

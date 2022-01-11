@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2022-01-10'
+SITE_VERSIE = '2022-01-11'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -95,6 +95,7 @@ AUTH_BAD_PASSWORD_LOCKOUT_MINS = 15
 # templates (django template language) processors
 TEMPLATES = [
     {
+        'NAME': 'dtl_loader',
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         # 'DIRS': [ str(APPS_DIR.path('templates')), ],
         # 'APP_DIRS': True,
