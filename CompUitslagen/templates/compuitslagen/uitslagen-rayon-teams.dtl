@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -73,8 +73,17 @@
             {% for team in rk_teams %}
                 {% if team.break_klasse %}
                     <tr class="nhb-grijs">
-                        <td colspan="5"><h5>{{ team.klasse_str }}</h5></td>
+                        <td colspan="5">
+                            <h5>{{ team.klasse_str }}</h5>
+                            {% if team.wedstrijd %}
+                                <span>{{ team.wedstrijd.datum_wanneer }} om {{ team.wedstrijd.tijd_begin_wedstrijd }} bij {{ team.wedstrijd.vereniging }}</span>
+                                {% if team.wedstrijd.locatie %}
+                                    <span> ({{ team.wedstrijd.adres_str }})</span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
                     </tr>
+
                     <tr>
                         <th></th>   <!-- rank -->
                         <th>Vereniging</th>
