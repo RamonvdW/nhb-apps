@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,6 +13,7 @@ from Competitie.models import (LAAG_REGIO, LAAG_RK, DEELNAME_NEE,
                                Competitie, DeelCompetitie, DeelcompetitieKlasseLimiet,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam)
 from Competitie.menu import menu_dynamics_competitie
+from Wedstrijden.models import CompetitieWedstrijd
 from Functie.rol import Rollen, rol_get_huidige_functie
 
 
@@ -135,7 +136,10 @@ class UitslagenRayonIndivView(TemplateView):
         try:
             deelcomp = (DeelCompetitie
                         .objects
-                        .select_related('competitie', 'nhb_rayon')
+                        .select_related('competitie',
+                                        'nhb_rayon',
+                                        'plan')
+                        .prefetch_related('plan__wedstrijden')
                         .get(laag=LAAG_RK,
                              competitie__is_afgesloten=False,
                              competitie=comp,
@@ -145,6 +149,23 @@ class UitslagenRayonIndivView(TemplateView):
 
         context['deelcomp'] = deelcomp
         deelcomp.competitie.bepaal_fase()
+
+        # haal de planning erbij: competitieklasse --> competitiewedstrijd
+        indiv2wedstrijd = dict()    # [indiv_pk] = competitiewedstrijd
+        wedstrijd_pks = list(deelcomp.plan.wedstrijden.values_list('pk', flat=True))
+        for wedstrijd in (CompetitieWedstrijd
+                          .objects
+                          .prefetch_related('indiv_klassen')
+                          .select_related('locatie')
+                          .filter(pk__in=wedstrijd_pks)):
+
+            if wedstrijd.locatie:
+                wedstrijd.adres_str = ", ".join(wedstrijd.locatie.adres.split('\n'))
+
+            for indiv in wedstrijd.indiv_klassen.all():
+                indiv2wedstrijd[indiv.pk] = wedstrijd
+            # for
+        # for
 
         wkl2limiet = dict()    # [pk] = aantal
 
@@ -201,7 +222,13 @@ class UitslagenRayonIndivView(TemplateView):
         for deelnemer in deelnemers:
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
-                deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
+                indiv = deelnemer.klasse.indiv
+                deelnemer.klasse_str = indiv.beschrijving
+                try:
+                    deelnemer.wedstrijd = indiv2wedstrijd[indiv.pk]
+                except KeyError:
+                    pass
+
                 try:
                     limiet = wkl2limiet[deelnemer.klasse.pk]
                 except KeyError:
@@ -324,6 +351,22 @@ class UitslagenRayonTeamsView(TemplateView):
         comp = deelcomp_rk.competitie
         comp.bepaal_fase()
 
+        # haal de planning erbij: competitieklasse --> competitiewedstrijd
+        team2wedstrijd = dict()     # [team_pk] = competitiewedstrijd
+        wedstrijd_pks = list(deelcomp_rk.plan.wedstrijden.values_list('pk', flat=True))
+        for wedstrijd in (CompetitieWedstrijd
+                          .objects
+                          .prefetch_related('team_klassen')
+                          .select_related('locatie')
+                          .filter(pk__in=wedstrijd_pks)):
+
+            if wedstrijd.locatie:
+                wedstrijd.adres_str = ", ".join(wedstrijd.locatie.adres.split('\n'))
+
+            for team in wedstrijd.team_klassen.all():
+                team2wedstrijd[team.pk] = wedstrijd
+        # for
+
         if comp.afstand == '18':
             aantal_pijlen = 30
         else:
@@ -344,8 +387,13 @@ class UitslagenRayonTeamsView(TemplateView):
                 team.break_klasse = True
                 if team.klasse:
                     team.klasse_str = team.klasse.team.beschrijving
+                    try:
+                        team.wedstrijd = team2wedstrijd[team.klasse.team.pk]
+                    except KeyError:
+                        pass
                 else:
                     team.klasse_str = "%s - Nog niet ingedeeld in een wedstrijdklasse" % team.team_type.beschrijving
+
                 prev_klasse = team.klasse
                 rank = 0
 
