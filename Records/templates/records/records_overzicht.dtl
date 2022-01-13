@@ -39,7 +39,7 @@
                             <p>{{ obj.descr1_str }}</p>
                             <p>{{ obj.descr2_str }}</p>
                             <p>&nbsp;</p>
-                            <img class="right" src="{{ obj.icon }}" height="50" alt="klein logo">
+                            <img class="right" src="{{ obj.icon }}" height="50" width="41" alt="klein logo">
                             <p>{{ obj.datum }}</p>
                             <p>Plaats: {{ obj.plaats }}</p>
                             <p class="truncate"><b>{{ obj.naam }}</b></p>

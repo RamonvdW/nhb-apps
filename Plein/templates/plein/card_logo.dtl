@@ -34,7 +34,7 @@
 
             <!-- icoon -->
             <div style="margin-bottom:8px">
-                <img src="{{ img_src }}" height="{{ img_height }}" alt="logo"{% if img_style %} style="{{ img_style }}"{% endif %}>
+                <img src="{{ img_src }}" height="{{ img_height }}" width="{{ img_width }}" alt="logo"{% if img_style %} style="{{ img_style }}"{% endif %}>
             </div>
 
             <div class="card-text">{{ text }}</div>

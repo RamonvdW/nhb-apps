@@ -14,42 +14,43 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="nhb-rood-text">Beheer Vereniging</h3>
-            <p>Als beheerder van de vereniging heb je toegang tot onderstaande functies.</p>
+            <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
         </div>
     </div>
 
-    <!-- toon gegevens van de vereniging in een blauwe box -->
-    <div class="row">
-        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-            <div class="white-text nhb-blauw z-depth-2">
-                <div class="row small-row">
-                    <div class="col s4">Verenigingsnummer:</div>
-                    <div class="col s6">{{ nhb_ver.ver_nr }}</div>
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Naam:</div>
-                    <div class="col s6">{{ nhb_ver.naam }}</div>
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Plaats:</div>
-                    <div class="col s6">{{ nhb_ver.plaats }}</div>
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Regio:</div>
-                    <div class="col s6">{{ nhb_ver.regio }}</div>
-                </div>
+    <!-- blauwe balk met informatie -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Verenigingsnummer</th>
+                    <td>{{ nhb_ver.ver_nr }}</td>
+                </tr>
+                <tr>
+                    <th>Naam</th>
+                    <td>{{ nhb_ver.naam }}</td>
+                </tr>
+                <tr>
+                    <th>Plaats</th>
+                    <td>{{ nhb_ver.plaats }}</td>
+                </tr>
+                <tr>
+                    <th>Regio</th>
+                    <td>{{ nhb_ver.regio }}</td>
+                </tr>
 
                 {% if clusters.count > 0 %}
-                    <div class="row small-row">
-                        <div class="col s4">Cluster{% if clusters.count > 1 %}s{% endif %}:</div>
-                        <div class="col s6">
+                    <tr>
+                        <th>Cluster{% if clusters.count > 1 %}s{% endif %}</th>
+                        <td>
                             {% for cluster in clusters %}
                                 <span>{{ cluster }}</span><br>
                             {% endfor %}
-                        </div>
-                    </div>
+                        </td>
+                    </tr>
                 {% endif %}
-            </div>
+                <tr>
+            </table>
         </div>
     </div>
 

@@ -12,7 +12,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
 from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
                                LAAG_REGIO, LAAG_RK, INSCHRIJF_METHODE_1)
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Taken.taken import eval_open_taken
 from Wedstrijden.models import CompetitieWedstrijd, BAAN_TYPE_EXTERN
@@ -65,6 +65,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         context['nhb_ver'] = ver = self.functie_nu.nhb_ver
+        context['huidige_rol'] = rol_get_beschrijving(self.request)
 
         context['clusters'] = ver.clusters.all()
 
