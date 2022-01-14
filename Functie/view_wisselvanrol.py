@@ -94,7 +94,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                 obj.selected = (self.rol_nu == rol)
                 obj.pk = 90002
                 volgorde = 2
-                tup = (volgorde, obj)
+                tup = (volgorde, obj.pk, obj)
                 objs.append(tup)
 
             elif rol == Rollen.ROL_SPORTER:
@@ -102,7 +102,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                 obj.url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
                 obj.selected = (self.rol_nu == rol)
                 obj.pk = volgorde = 90000
-                tup = (volgorde, obj)
+                tup = (volgorde, obj.pk, obj)
                 objs.append(tup)
 
             elif rol == Rollen.ROL_NONE:
@@ -110,7 +110,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                 obj.url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
                 obj.selected = (self.rol_nu == rol)
                 obj.pk = volgorde = 90001
-                tup = (volgorde, obj)
+                tup = (volgorde, obj.pk, obj)
                 objs.append(tup)
 
             elif parent_tup == (None, None):
@@ -144,12 +144,12 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                               kwargs={'functie_pk': obj.pk})
 
             volgorde = self._functie_volgorde(obj)
-            tup = (volgorde, obj)
+            tup = (volgorde, obj.pk, obj)
             objs.append(tup)
         # for
 
         objs.sort()
-        objs = [obj for _, obj in objs]
+        objs = [obj for _, _, obj in objs]
         return objs, hierarchy2
 
     def _get_functies_help_anderen(self, hierarchy2):
