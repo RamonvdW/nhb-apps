@@ -346,8 +346,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/ledenlijst.dtl', 'plein/site_layout.dtl'))
 
-        self.assertContains(resp, 'Jeugd')
-        self.assertContains(resp, 'Senioren')
+        self.assertContains(resp, 'Jeugdleden')
+        self.assertContains(resp, 'Volwassenen')
         self.assertNotContains(resp, 'Inactieve leden')
 
         # maak een lid inactief
@@ -361,8 +361,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_ledenlijst)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
-        self.assertContains(resp, 'Jeugd')
-        self.assertContains(resp, 'Senioren')
+        self.assertContains(resp, 'Jeugdleden')
+        self.assertContains(resp, 'Volwassenen')
         self.assertContains(resp, 'Inactieve leden')
 
         self.e2e_assert_other_http_commands_not_supported(self.url_ledenlijst)

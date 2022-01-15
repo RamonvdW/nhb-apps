@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -227,8 +227,8 @@ class TestVerenigingWL(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/ledenlijst.dtl', 'plein/site_layout.dtl'))
 
-        self.assertContains(resp, 'Jeugd')
-        self.assertContains(resp, 'Senioren')
+        self.assertContains(resp, 'Jeugdleden')
+        self.assertContains(resp, 'Volwassenen')
         self.assertNotContains(resp, 'Inactieve leden')
 
     def test_voorkeuren(self):
