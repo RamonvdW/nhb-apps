@@ -37,6 +37,9 @@ echo
 echo "****************************** START OF TEST RUN ******************************"
 echo
 
+STAMP=$(date +"%Y-%m-%d %H:%M:%S")
+echo "[INFO] Now is $STAMP"
+
 echo "[INFO] Checking application is free of fatal errors"
 python3 ./manage.py check || exit $?
 

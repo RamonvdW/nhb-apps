@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -75,6 +75,14 @@ class BoogType(models.Model):
         verbose_name = "Boog type"
         verbose_name_plural = "Boog types"
 
+        indexes = [
+            # help vinden op afkorting
+            models.Index(fields=['afkorting']),
+
+            # help sorteren op volgorde
+            models.Index(fields=['volgorde']),
+        ]
+
     objects = models.Manager()      # for the editor only
 
 
@@ -102,6 +110,14 @@ class TeamType(models.Model):
         """ meta data voor de admin interface """
         verbose_name = "Team type"
         verbose_name_plural = "Team typen"
+
+        indexes = [
+            # help vinden op afkorting
+            models.Index(fields=['afkorting']),
+
+            # help sorteren op volgorde
+            models.Index(fields=['volgorde']),
+        ]
 
     objects = models.Manager()      # for the editor only
 
@@ -223,6 +239,11 @@ class IndivWedstrijdklasse(models.Model):
         verbose_name = "Indiv Wedstrijdklasse"
         verbose_name_plural = "Indiv Wedstrijdklassen"
 
+        indexes = [
+            # help sorteren op volgorde
+            models.Index(fields=['volgorde']),
+        ]
+
     objects = models.Manager()      # for the editor only
 
 
@@ -266,6 +287,11 @@ class TeamWedstrijdklasse(models.Model):
         verbose_name = "Team Wedstrijdklasse"
         verbose_name_plural = "Team Wedstrijdklassen"
 
+        indexes = [
+            # help sorteren op volgorde
+            models.Index(fields=['volgorde']),
+        ]
+
     objects = models.Manager()      # for the editor only
 
 
@@ -296,6 +322,11 @@ class KalenderWedstrijdklasse(models.Model):
         """ meta data voor de admin interface """
         verbose_name = "KalenderWedstrijdklasse"
         verbose_name_plural = "KalenderWedstrijdklassen"
+
+        indexes = [
+            # help sorteren op volgorde
+            models.Index(fields=['volgorde']),
+        ]
 
     objects = models.Manager()      # for the editor only
 
