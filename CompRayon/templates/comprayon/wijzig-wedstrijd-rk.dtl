@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -25,23 +25,49 @@
             }
         }
 
-        function locatie_aanpassen()
-        {
-            const locaties = {{ locaties|safe }}    // nhb_ver.ver_nr --> adres
-            const el_sel = document.getElementById('id_ver_sel')
-            const el_loc = document.getElementById('id_loc')
+        // omdat materialize-css het option 'hidden' attribuut niet ondersteund, verwijderen we opties
+        // hierin stoppen we de kopie om de lijst mee te herstellen
+        let locatie_keuzes_html = ''
 
-            if (el_sel.value === 'geen') {
-                el_loc.innerHTML = '<i class="grey-text">n.v.t.</i>'
-            } else {
-                let adres = locaties[el_sel.value];     // gekozen vereniging
-                if (adres === undefined)
-                    adres = '<i class="red-text">Niet beschikbaar!</i>'
-                adres = adres.replace(/\n/g, '<br>')    // vervang newlines door breaks
-                el_loc.innerHTML = adres
+        function locatie_keuze_tonen() {
+            // herstel de hele lijst
+            const el_td = document.getElementById('id_accommodatie_td')
+            el_td.innerHTML = locatie_keuzes_html
+
+            // haal de keuze op
+            const ver = document.getElementById('id_ver_sel').value
+
+            // maak een selectie in het drop-down menu
+            const el_select = document.getElementById('id_loc_sel')
+            for (let i = 0; i < el_select.length;) {
+                let option = el_select.options[i]
+                if (option.dataset.ver !== ver) {
+                    option.remove()
+                } else {
+                    i++;
+                }
             }
 
+            if (el_select.length == 0) {
+                // vervang drop-down door statische text
+                el_td.innerHTML = '<i class="red-text">Geen accommodatie gegevens bekend</i>'
+            } else if (el_select.length == 1) {
+                // vervang drop-down door statische text
+                el_td.innerHTML = el_select.options[0].text + '<input type="hidden" name="loc_pk" value="' + el_select.options[0].value + '">'
+            } else {
+                M.FormSelect.init(el_select)
+            }
+        }
+
+        function locatie_keuzes_aanpassen() {
+            locatie_keuze_tonen()
             gewijzigd()
+        }
+
+        function locatie_keuzes_init() {
+            // bewaar een kopie van de volledige data set
+            locatie_keuzes_html = document.getElementById('id_accommodatie_td').innerHTML
+            locatie_keuze_tonen()
         }
     </script>
 
@@ -95,7 +121,7 @@
             <tr>
                 <td>Bij vereniging:</td>
                 <td>
-                    <select name="nhbver_pk" onchange="locatie_aanpassen()" id="id_ver_sel">
+                    <select name="nhbver_pk" onchange="locatie_keuzes_aanpassen()" id="id_ver_sel">
                         <option value="geen"{% if not wedstrijd.vereniging %} selected{% endif %}>-- nog niet afgesproken --</option>
                         {% for opt in verenigingen %}
                             <option value="{{ opt.pk }}"{% if opt.pk == wedstrijd.vereniging.pk %} selected{% endif %}>{{ opt }}</option>
@@ -106,9 +132,14 @@
 
             <tr>
                 <td>Accommodatie:</td>
-                <td id="id_loc"></td>
+                <td id="id_accommodatie_td">
+                    <select name="loc_pk" id="id_loc_sel" onchange="gewijzigd()">
+                        {% for opt in all_locaties %}
+                            <option value="{{ opt.pk }}" data-ver="{{ opt.ver_pk }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
             </tr>
-
             <tr>
                 <!-- inline-block gives vertical align top -->
                 <td style="display: inline-block">Wedstrijdklassen individueel:</td>
@@ -228,7 +259,7 @@
             inst._updateTimeFromInput()
             inst.done()
 
-            locatie_aanpassen()
+            locatie_keuzes_init()
 
             ignore_changes = false
         })
