@@ -476,7 +476,8 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         if deelcomp_rk.functie != self.functie_nu:
             raise PermissionDenied()
 
-        competitie = deelcomp_rk.competitie
+        comp = deelcomp_rk.competitie
+        is_25m = (comp.afstand == '25')
 
         # weekdag is een cijfer van 0 tm 6
         # aanvang bestaat uit vier cijfers, zoals 0830
@@ -484,7 +485,9 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         aanvang = request.POST.get('aanvang', '')[:5]           # afkappen voor de veiligheid
         nhbver_pk = request.POST.get('nhbver_pk', '')[:6]       # afkappen voor de veiligheid
         loc_pk = request.POST.get('loc_pk', '')[:6]             # afkappen voor de veiligheid
-        if weekdag == "" or nhbver_pk == "" or loc_pk == "" or len(aanvang) != 5 or aanvang[2] != ':':
+
+        # let op: loc_pk='' is toegestaan
+        if weekdag == "" or nhbver_pk == "" or len(aanvang) != 5 or aanvang[2] != ':':
             raise Http404('Incompleet verzoek')
 
         try:
@@ -500,7 +503,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         wedstrijd.datum_wanneer = deelcomp_rk.competitie.rk_eerste_wedstrijd + datetime.timedelta(days=weekdag)
 
         # check dat datum_wanneer nu in de ingesteld RK periode valt
-        if not (competitie.rk_eerste_wedstrijd <= wedstrijd.datum_wanneer <= competitie.rk_laatste_wedstrijd):
+        if not (comp.rk_eerste_wedstrijd <= wedstrijd.datum_wanneer <= comp.rk_laatste_wedstrijd):
             raise Http404('Geen valide datum')
 
         # vertaal aanvang naar een tijd
@@ -532,11 +535,20 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                 except WedstrijdLocatie.DoesNotExist:
                     raise Http404('Locatie niet gevonden')
             else:
-                # formulier stuurt niets als er niet gekozen hoeft te worden
+                # formulier stuurt niets als er niet gekozen hoeft te worden, of als er geen locatie is
                 loc = None
-                locs = nhbver.wedstrijdlocatie_set.exclude(zichtbaar=False).all()
-                if locs.count() == 1:
-                    loc = locs[0]  # de enige keuze
+                for ver_loc in nhbver.wedstrijdlocatie_set.exclude(zichtbaar=False).all():
+                    keep = False
+                    if is_25m:
+                        if ver_loc.banen_25m > 0 and (ver_loc.discipline_indoor or ver_loc.discipline_25m1pijl):
+                            keep = True
+                    else:
+                        if ver_loc.discipline_indoor and ver_loc.banen_18m > 0:
+                            keep = True
+
+                    if keep:
+                        loc = ver_loc
+                # for
 
             wedstrijd.locatie = loc
 

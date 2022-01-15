@@ -337,6 +337,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.post(url_w, {'weekdag': 1,
                                             'aanvang': '12:34',
                                             'nhbver_pk': self.nhbver_101.ver_nr,
+                                            'loc_pk': self.loc.pk,
                                             sel_indiv_1: "on",
                                             sel_indiv_2: "on",
                                             sel_indiv_3: "on",

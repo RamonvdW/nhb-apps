@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,7 +14,7 @@ from Functie.models import Functie
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from Sporter.models import Secretaris
-from Wedstrijden.models import WedstrijdLocatie, BAANTYPE2STR
+from Wedstrijden.models import WedstrijdLocatie, BAANTYPE2STR, BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
 from Logboek.models import schrijf_in_logboek
 from .forms import AccommodatieDetailsForm
 
@@ -55,11 +55,12 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         buiten_locatie = None
         externe_locaties = list()
         for loc in nhbver.wedstrijdlocatie_set.exclude(zichtbaar=False).all():
-            if loc.baan_type == 'E':
+            if loc.baan_type == BAAN_TYPE_EXTERN:
                 externe_locaties.append(loc)
-            elif loc.baan_type == 'B':
+            elif loc.baan_type == BAAN_TYPE_BUITEN:
                 buiten_locatie = loc
             else:
+                # BAAN_TYPE_BINNEN_VOLLEDIG_OVERDEKT, BAAN_TYPE_BINNEN_BUITEN of BAAN_TYPE_ONBEKEND
                 binnen_locatie = loc
         # for
 
@@ -231,7 +232,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                     buiten_locatie.save()
             elif binnen_locatie:
                 buiten = WedstrijdLocatie(
-                                baan_type='B',
+                                baan_type=BAAN_TYPE_BUITEN,
                                 adres_uit_crm=False,
                                 adres=binnen_locatie.adres,
                                 plaats=binnen_locatie.plaats,
