@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -663,26 +663,32 @@ class E2EHelpers(TestCase):
 
     def assert403(self, resp, expected_msg=''):
         # controleer dat we op de speciale code-403 handler pagina gekomen zijn
+        # of een redirect hebben gekregen naar de login pagina
 
         if isinstance(resp, str):
             self.fail(msg='Incorrect invocation: missing resp parameter?')          # pragma: no cover
 
-        if resp.status_code != 200:     # pragma: no cover
-            self.e2e_dump_resp(resp)
-            self.fail(msg="Unexpected status code %s instead of 200" % resp.status_code)
+        if resp.status_code == 302:
+            if resp.url != '/account/login/':
+                self.e2e_dump_resp(resp)
+                self.fail(msg="Unexpected redirect to %s" % resp.url)
+        else:
+            if resp.status_code != 200:     # pragma: no cover
+                self.e2e_dump_resp(resp)
+                self.fail(msg="Unexpected status code %s instead of 200" % resp.status_code)
 
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
+            self.assertEqual(resp.status_code, 200)
+            self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
 
-        if expected_msg:
-            pagina = str(resp.content)
-            if expected_msg not in pagina:                                          # pragma: no cover
-                # haal de nuttige regel informatie uit de 403 pagina en toon die
-                pos = pagina.find('<code>')
-                pagina = pagina[pos+6:]
-                pos = pagina.find('</code>')
-                pagina = pagina[:pos]
-                self.fail(msg='403 pagina contained %s instead of %s' % (repr(pagina), repr(expected_msg)))
+            if expected_msg:
+                pagina = str(resp.content)
+                if expected_msg not in pagina:                                          # pragma: no cover
+                    # haal de nuttige regel informatie uit de 403 pagina en toon die
+                    pos = pagina.find('<code>')
+                    pagina = pagina[pos+6:]
+                    pos = pagina.find('</code>')
+                    pagina = pagina[:pos]
+                    self.fail(msg='403 pagina contained %s instead of %s' % (repr(pagina), repr(expected_msg)))
 
     def assert404(self, resp, expected_msg=''):
         if isinstance(resp, str):

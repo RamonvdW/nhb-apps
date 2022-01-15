@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -404,6 +404,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         with self.assert_max_queries(21):       # TODO: 21 of 20??
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('compscores/scores-invoeren.dtl', 'plein/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertIn(ack_url, urls)
 

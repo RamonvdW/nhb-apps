@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -384,6 +384,8 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         # zoek het weeknummer waarin deze wedstrijd gehouden moet worden
         plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
         deelcomp_rk = plan.deelcompetitie_set.all()[0]
+        comp = deelcomp_rk.competitie
+        is_25m = (comp.afstand == '25')
 
         # is dit de beheerder?
         if deelcomp_rk.functie != self.functie_nu:
@@ -399,29 +401,46 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         # wedstrijd.tijd_begin_aanmelden_str = wedstrijd.tijd_begin_aanmelden.strftime("%H%M")
         # wedstrijd.tijd_einde_wedstrijd_str = wedstrijd.tijd_einde_wedstrijd.strftime("%H%M")
 
-        verenigingen = NhbVereniging.objects.filter(regio__rayon=deelcomp_rk.nhb_rayon,
-                                                    regio__is_administratief=False)
+        verenigingen = (NhbVereniging
+                        .objects
+                        .filter(regio__rayon=deelcomp_rk.nhb_rayon,
+                                regio__is_administratief=False)
+                        .prefetch_related('wedstrijdlocatie_set')
+                        .order_by('ver_nr'))
         context['verenigingen'] = verenigingen
-
-        # forceer een eerste vereniging
-        # if not wedstrijd.vereniging:
-        #     if verenigingen.count() > 0:
-        #         wedstrijd.vereniging = verenigingen[0]
-        #         wedstrijd.save()
 
         # zet de wedstrijdlocatie indien nog niet gezet en nu beschikbaar gekomen
         if not wedstrijd.locatie:
             if wedstrijd.vereniging:
-                locaties = wedstrijd.vereniging.wedstrijdlocatie_set.all()
+                locaties = wedstrijd.vereniging.wedstrijdlocatie_set.exclude(zichtbaar=False).all()
                 if locaties.count() > 0:
                     wedstrijd.locatie = locaties[0]
                     wedstrijd.save()
 
-        context['locaties'] = locaties = dict()
-        pks = [ver.pk for ver in verenigingen]
-        for obj in WedstrijdLocatie.objects.prefetch_related('verenigingen').filter(verenigingen__pk__in=pks):
-            for ver in obj.verenigingen.all():
-                locaties[str(ver.pk)] = obj.adres   # ver_nr --> adres
+        context['all_locaties'] = all_locs = list()
+        for ver in verenigingen:
+            for loc in ver.wedstrijdlocatie_set.exclude(zichtbaar=False):
+                keep = False
+                if is_25m:
+                    if loc.banen_25m > 0 and (loc.discipline_indoor or loc.discipline_25m1pijl):
+                        keep = True
+                else:
+                    if loc.discipline_indoor and loc.banen_18m > 0:
+                        keep = True
+
+                if keep:
+                    all_locs.append(loc)
+                    loc.ver_pk = ver.pk
+                    keuze = loc.adres.replace('\n', ', ')
+                    if loc.notities:
+                        keuze += ' (%s)' % loc.notities
+                    if not keuze:
+                        keuze = loc.plaats
+                    if not keuze:
+                        keuze = 'Locatie zonder naam (%s)' % loc.pk
+                    loc.keuze_str = keuze
+                    if wedstrijd.locatie == loc:
+                        loc.selected = True
             # for
         # for
 
@@ -457,13 +476,17 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         if deelcomp_rk.functie != self.functie_nu:
             raise PermissionDenied()
 
-        competitie = deelcomp_rk.competitie
+        comp = deelcomp_rk.competitie
+        is_25m = (comp.afstand == '25')
 
         # weekdag is een cijfer van 0 tm 6
         # aanvang bestaat uit vier cijfers, zoals 0830
-        weekdag = request.POST.get('weekdag', '')[:2]     # afkappen voor de veiligheid
-        aanvang = request.POST.get('aanvang', '')[:5]
-        nhbver_pk = request.POST.get('nhbver_pk', '')[:6]
+        weekdag = request.POST.get('weekdag', '')[:2]           # afkappen voor de veiligheid
+        aanvang = request.POST.get('aanvang', '')[:5]           # afkappen voor de veiligheid
+        nhbver_pk = request.POST.get('nhbver_pk', '')[:6]       # afkappen voor de veiligheid
+        loc_pk = request.POST.get('loc_pk', '')[:6]             # afkappen voor de veiligheid
+
+        # let op: loc_pk='' is toegestaan
         if weekdag == "" or nhbver_pk == "" or len(aanvang) != 5 or aanvang[2] != ':':
             raise Http404('Incompleet verzoek')
 
@@ -480,7 +503,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         wedstrijd.datum_wanneer = deelcomp_rk.competitie.rk_eerste_wedstrijd + datetime.timedelta(days=weekdag)
 
         # check dat datum_wanneer nu in de ingesteld RK periode valt
-        if not (competitie.rk_eerste_wedstrijd <= wedstrijd.datum_wanneer <= competitie.rk_laatste_wedstrijd):
+        if not (comp.rk_eerste_wedstrijd <= wedstrijd.datum_wanneer <= comp.rk_laatste_wedstrijd):
             raise Http404('Geen valide datum')
 
         # vertaal aanvang naar een tijd
@@ -506,11 +529,28 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
             wedstrijd.vereniging = nhbver
 
-            locaties = nhbver.wedstrijdlocatie_set.all()
-            if locaties.count() > 0:
-                wedstrijd.locatie = locaties[0]
+            if loc_pk:
+                try:
+                    loc = nhbver.wedstrijdlocatie_set.get(pk=loc_pk)
+                except WedstrijdLocatie.DoesNotExist:
+                    raise Http404('Locatie niet gevonden')
             else:
-                wedstrijd.locatie = None
+                # formulier stuurt niets als er niet gekozen hoeft te worden, of als er geen locatie is
+                loc = None
+                for ver_loc in nhbver.wedstrijdlocatie_set.exclude(zichtbaar=False).all():
+                    keep = False
+                    if is_25m:
+                        if ver_loc.banen_25m > 0 and (ver_loc.discipline_indoor or ver_loc.discipline_25m1pijl):
+                            keep = True
+                    else:
+                        if ver_loc.discipline_indoor and ver_loc.banen_18m > 0:
+                            keep = True
+
+                    if keep:
+                        loc = ver_loc
+                # for
+
+            wedstrijd.locatie = loc
 
         wedstrijd.save()
 
