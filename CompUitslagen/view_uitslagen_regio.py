@@ -265,7 +265,7 @@ class UitslagenRegioIndivView(TemplateView):
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
                 deelnemer_count = deelnemer
-                deelnemer.aantal_in_groep = 2   # 1 extra zodat balk doorloopt tot horizonale afsluiter
+                deelnemer.aantal_in_groep = 2   # 1 extra zodat balk doorloopt tot horizontale afsluiter
                 deelnemer.is_eerste_groep = (klasse == -1)
 
                 if len(asps):
@@ -341,16 +341,19 @@ class UitslagenRegioTeamsView(TemplateView):
         context['teamtype_filters'] = teamtypen
 
         for team in teamtypen:
+            team.sel = team.afkorting
             if team.afkorting.upper() == teamtype_afkorting.upper():
                 context['teamtype'] = team
                 teamtype_afkorting = team.afkorting.lower()
-                # geen url --> knop disabled
+                team.selected = True
             else:
                 team.zoom_url = reverse(self.url_name,
                                         kwargs={'comp_pk': comp.pk,
                                                 'team_type': team.afkorting.lower(),
                                                 'regio_nr': gekozen_regio_nr})
         # for
+
+        # TODO: wanneer komt het voor dat teamtype niet bestaat? Template laat altijd regios/verenigingen zien!
 
         # regio filters
         if context['teamtype']:
@@ -367,6 +370,8 @@ class UitslagenRegioTeamsView(TemplateView):
                 regio.break_before = (prev_rayon != regio.rayon.rayon_nr)
                 prev_rayon = regio.rayon.rayon_nr
 
+                regio.sel = 'regio_%s' % regio.regio_nr
+
                 regio.title_str = 'Regio %s' % regio.regio_nr
                 if regio.regio_nr != gekozen_regio_nr:
                     regio.zoom_url = reverse(self.url_name,
@@ -374,7 +379,7 @@ class UitslagenRegioTeamsView(TemplateView):
                                                      'team_type': teamtype_afkorting,
                                                      'regio_nr': regio.regio_nr})
                 else:
-                    # geen zoom_url --> knop disabled
+                    regio.selected = True
                     context['regio'] = regio
             # for
 
@@ -395,6 +400,7 @@ class UitslagenRegioTeamsView(TemplateView):
 
             if len(vers):
                 for ver in vers:
+                    ver.sel = 'ver_%s' % ver.ver_nr
                     ver.zoom_url = reverse('CompUitslagen:uitslagen-vereniging-teams-n',
                                            kwargs={'comp_pk': comp.pk,
                                                    'team_type': context['teamtype'].afkorting.lower(),
@@ -551,6 +557,7 @@ class UitslagenRegioTeamsView(TemplateView):
         prev_klasse = None
         prev_poule = None
         rank = 0
+        aantal_team = None
         for tup in unsorted_teams:
             poule = tup[-2]
             team = tup[-1]
@@ -561,22 +568,29 @@ class UitslagenRegioTeamsView(TemplateView):
                     team.poule_str = poule.beschrijving
                     if prev_poule:
                         team.schema = prev_poule.schema
+                        teams[-1].onderrand = True
                     prev_poule = poule
                     prev_klasse = None
 
             if team.klasse != prev_klasse:
                 team.break_klasse = True
                 team.klasse_str = team.klasse.team.beschrijving
+                team.aantal_in_groep = 3        # inclusief afsluitende blauwe regel
+                aantal_team = team
+                if prev_klasse:
+                    teams[-1].onderrand = True
                 prev_klasse = team.klasse
                 rank = 1
             else:
                 rank += 1
+                aantal_team.aantal_in_groep += 1
 
             team.rank = rank
             teams.append(team)
         # for
 
         if prev_poule:
+            teams[-1].onderrand = True
             afsluiter = SimpleNamespace(
                             is_afsluiter=True,
                             break_poule=True,

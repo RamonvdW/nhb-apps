@@ -14,9 +14,9 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="nhb-rood-text">Bondscompetitie wedstrijden</h3>
+            <p>Bondscompetitiewedstrijden die geschoten worden bij vereniging <b>{{ vereniging }}</b>.</p>
+            <!-- <p>Overige wedstrijden worden beheerd via de Wedstrijdkalender (zie het menu).</p> -->
         </div>
-        <p>Bondscompetitiewedstrijden die geschoten worden bij vereniging <b>{{ vereniging }}</b>.</p>
-        <!-- <p>Overige wedstrijden worden beheerd via de Wedstrijdkalender (zie het menu).</p> -->
     </div>
 
     <div class="row-nhb-blauw">

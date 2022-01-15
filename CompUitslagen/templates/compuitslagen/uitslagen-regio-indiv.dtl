@@ -34,9 +34,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="nhb-rood-text">Uitslagen regiocompetitie</h3>
-        </div>
-        <div class="col s12">
-            <p>Deze pagina toont de {% if comp.alle_regiocompetities_afgesloten %}eindstand{% else %}tussenstand{% endif %} van de individuele regiocompetities.</p>
+            <p>{% if comp.alle_regiocompetities_afgesloten %}Eindstand{% else %}Tussenstand{% endif %} van de individuele regiocompetities.</p>
         </div>
     </div>
 
@@ -143,6 +141,7 @@
             {% if forloop.first %}      <!-- alleen toevoegen als er deelnemers zijn, anders probleem met colspan=2 -->
                 <!-- forceer gelijkmatige layout in de Scores kolommen -->
                 <tr style="visibility: collapse">
+                    <td class="nhb-table-zijrand"></td>
                     <td colspan="2"><!-- rank, naam --></td>
                     <td class="hide-on-small-only"><!-- vereniging --></td>
                     <td><!-- gemiddelde --></td>
@@ -154,6 +153,7 @@
                     <td class="right-align smal">888</td>
                     <td class="right-align smal">888</td>
                     <td class="right-align hide-on-small-only"><!-- totaal --></td>
+                    <td class="nhb-table-zijrand"></td>
                 </tr>
             {% endif %}
 
