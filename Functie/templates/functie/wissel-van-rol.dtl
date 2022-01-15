@@ -21,7 +21,10 @@
 {% block pagina %}
 
     <script type="application/javascript">
-        function wissel_naar_rol(el) {
+        function wissel_naar_rol() {
+            // vind de gekozen radiobutton
+            const el = document.querySelector("input[type='radio'][name='rol']:checked")
+
             // haal de url op van het input element
             const url = el.dataset.url
 
@@ -99,7 +102,7 @@
                     {% for obj in alle_18 %}
                         <li>
                             <label class="black-text" for="id_{{ obj.pk }}">
-                                <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% else %}onchange="wissel_naar_rol(this)"{% endif %}>
+                                <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
                                 <span>
                                     <span class="hide-on-small-only">{{ obj.tekst_lang }}</span>
                                     <span class="hide-unless-small">{{ obj.tekst_kort }}</span>
@@ -108,6 +111,9 @@
                         </li>
                     {% endfor %}
                     </ul>
+                    <p class="center">
+                        <a class="btn-nhb-rood" onclick="wissel_naar_rol()">Activeer</a>
+                    </p>
                 </div>
 
                 <!-- witte rechthoek voor radiobuttons -->
@@ -117,7 +123,7 @@
                     {% for obj in alle_25 %}
                         <li>
                             <label class="black-text" for="id_{{ obj.pk }}">
-                                <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% else %}onchange="wissel_naar_rol(this)"{% endif %}>
+                                <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
                                 <span>
                                     <span class="hide-on-small-only">{{ obj.tekst_lang }}</span>
                                     <span class="hide-unless-small">{{ obj.tekst_kort }}</span>
@@ -126,6 +132,9 @@
                         </li>
                     {% endfor %}
                     </ul>
+                    <p class="center">
+                        <a class="btn-nhb-rood" onclick="wissel_naar_rol()">Activeer</a>
+                    </p>
                 </div>
 
                 <!-- verenigingen -->
@@ -136,12 +145,15 @@
                             {% for obj in hwl_rollen %}
                                 <li>
                                     <label class="black-text" for="id_{{ obj.pk }}">
-                                        <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% else %}onchange="wissel_naar_rol(this)"{% endif %}>
+                                        <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
                                         <span>{{ obj.beschrijving }}</span>
                                     </label>
                                 </li>
                             {% endfor %}
                         </ul>
+                        <p class="center">
+                            <a class="btn-nhb-rood" onclick="wissel_naar_rol()">Activeer</a>
+                        </p>
                     </div>
                 {% endif %}
             </div>
@@ -168,12 +180,15 @@
                     {% for obj in eigen_rollen %}
                         <li>
                             <label class="black-text" for="id_{{ obj.pk }}">
-                                <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% else %}onchange="wissel_naar_rol(this)"{% endif %}>
+                                <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
                                 <span>{{ obj.beschrijving }}{% if obj.ver_naam %}&nbsp;&nbsp;{{ obj.ver_naam }}{% endif %}</span>
                             </label>
                         </li>
                     {% endfor %}
                     </ul>
+                    <p class="center">
+                        <a class="btn-nhb-rood" onclick="wissel_naar_rol()">Activeer</a>
+                    </p>
                 </div>
 
                 <!-- kaartjes -->
@@ -226,7 +241,7 @@
                         {% for obj in help_rollen %}
                             <li>
                                 <label class="black-text" for="id_{{ obj.pk }}">
-                                    <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% else %}onchange="wissel_naar_rol(this)"{% endif %}>
+                                    <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
                                     {% if obj.kort %}
                                         <span>
                                             <span class="hide-on-small-only">{{ obj.titel }}{% if obj.ver_naam %}&nbsp;&nbsp;{{ obj.ver_naam }}{% endif %}</span>
@@ -239,6 +254,9 @@
                             </li>
                         {% endfor %}
                         </ul>
+                        <p class="center">
+                            <a class="btn-nhb-rood" onclick="wissel_naar_rol()">Activeer</a>
+                        </p>
                     </div>
                 {% endif %}
 
