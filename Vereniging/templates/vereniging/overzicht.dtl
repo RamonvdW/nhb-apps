@@ -67,12 +67,12 @@
 
             <!-- wedstrijden -->
             {% url 'CompScores:wedstrijden' as card_url %}
-            {% include 'plein/card.dtl' with title="Competitiewedstrijden" text="Alle bondscompetitie wedstrijden die bij deze vereniging geschoten worden." icon="event" url=card_url %}
+            {% include 'plein/card.dtl' with title="Competitiewedstrijden" text="Wedstrijden die bij deze vereniging geschoten worden." icon="event" url=card_url %}
 
             <!-- scores invoeren -->
             {% if heeft_wedstrijden %}
                 {% url 'CompScores:wedstrijden-scores' as card_url %}
-                {% include 'plein/card.dtl' with title="Scores invoeren" text="Scores invoeren voor de wedstrijden die bij deze vereniging geschoten worden." icon="edit" url=card_url %}
+                {% include 'plein/card.dtl' with title="Scores invoeren" text="Scores invoeren voor wedstrijden die bij deze vereniging geschoten worden." icon="edit" url=card_url %}
             {% endif %}
 
             <!-- wedstrijdkalender -->
