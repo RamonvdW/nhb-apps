@@ -5,9 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.urls import Resolver404
-from django.shortcuts import render
+from django.shortcuts import render, reverse
 from django.views.generic import View
 from django.views.defaults import ERROR_PAGE_TEMPLATE
 from django.core.exceptions import PermissionDenied
@@ -35,6 +35,18 @@ def site_handler403_permission_denied(request, exception=None):
         Deze functie wordt aangeroepen voor de volgende excepties:
             PermissionDenied from django.core.exceptions
     """
+
+    # typische authenticatie fouten zijn omdat de gebruiker niet (meer) ingelogd is
+    if not request.user.is_authenticated:
+        url = reverse('Account:login')
+
+        # next_url werkt niet want er moet eerst nog van rol gewisseld worden
+        #   en het blokkeert redirect naar 2FA check
+        # from django.utils.http import urlencode
+        # url += '?%s' % urlencode({'next': request.path})
+
+        return HttpResponseRedirect(url)
+
     # print('site_handler403: exception=%s; info=%s' % (repr(exception), str(exception)))
     context = dict()
     info = str(exception)

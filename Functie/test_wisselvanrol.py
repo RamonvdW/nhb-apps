@@ -531,4 +531,6 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_check_rol('SEC')
 
 
+    # TODO: test maken waarbij gebruiker aan 2x rol zit met dezelfde 'volgorde' (gaf sorteerprobleem), zowel 2xBKO als 2xHWL
+
 # end of file
