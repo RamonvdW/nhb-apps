@@ -216,7 +216,7 @@ class UitslagenRegioIndivView(TemplateView):
             # bepaal welke (initiële) regio bij de huidige gebruiker past
             regio_nr = get_sporter_regio_nr(self.request)
         except ValueError:
-            raise Http404('Verkeerd regionummer')
+            raise Http404('Verkeerde regionummer')
 
         # voorkom 404 voor leden in de administratieve regio
         if regio_nr == 100:

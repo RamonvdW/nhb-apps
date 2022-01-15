@@ -16,9 +16,17 @@
             window.location.href = "{{ zes_scores_next }}"
         }
 
-        function keuze_gemaakt(url) {
-            window.location.href = url
-            // TODO: als gebruiker op back button drukt dan staan de verkeerde radio buttons actief
+        function keuze_gemaakt(groep) {
+
+            // TODO: sta wijziging in meerdere radiobuttons tegelijk toe: construeer de URL hier
+
+            const selector = "input[type='radio'][name=" + groep + "]:checked"
+            const el = document.querySelector(selector)
+            const url = el.dataset.url
+
+            // de radiobutton die bij het geladen geselecteerd werd heeft geen url
+            if (url != '')
+                window.location.href = url
         }
     </script>
 
@@ -65,35 +73,41 @@
 
     <!-- blauwe balk met filters -->
     <div class="row-nhb-blauw">
-        <div class="col s8 offset-s2 m4 offset-m1 l3 white left-align" style="margin-bottom:15px">
+        <div class="col s8 offset-s2 m6 offset-m3 l3 white left-align" style="margin-bottom:15px">
             <p><b>Kies een boog type:</b></p>
             <ul id="id_boog">
                 {% for boog in boog_filters %}
                     <li>
                         <label class="black-text" for="id_{{ boog.sel }}">
-                            <input class="with-gap" type="radio" name="boog" value="{{ boog.sel }}" required id="id_{{ boog.sel }}" {% if boog.selected %}checked{% else %}onchange="keuze_gemaakt('{{ boog.zoom_url }}')"{% endif %}>
+                            <input class="with-gap" type="radio" name="boog" value="{{ boog.sel }}" required id="id_{{ boog.sel }}" {% if boog.selected %}checked{% endif %} data-url="{{ boog.zoom_url }}">
                             <span>{{ boog.beschrijving }}</span>
                         </label>
                     </li>
                 {% endfor %}
             </ul>
+            <p style="margin-left:35px">
+                <a class="btn-nhb-rood" onclick="keuze_gemaakt('boog')">Activeer</a>
+            </p>
         </div>
 
-        <div class="col s8 offset-s2 m4 offset-m2 l2 offset-l1 white left-align" style="margin-bottom:15px">
+        <div class="col s8 offset-s2 m4 l2 offset-l1 white left-align" style="margin-bottom:15px">
             <p><b>Kies een regio:</b></p>
             <ul id="id_regio">
                 {% for regio in regio_filters %}
                     <li>
                         <label class="black-text" for="id_{{ regio.sel }}">
-                            <input class="with-gap" type="radio" name="regio" value="{{ regio.sel }}" required id="id_{{ regio.sel }}" {% if regio.selected %}checked{% else %}onchange="keuze_gemaakt('{{ regio.zoom_url }}')"{% endif %}>
+                            <input class="with-gap" type="radio" name="regio" value="{{ regio.sel }}" required id="id_{{ regio.sel }}" {% if regio.selected %}checked{% endif %} data-url="{{ regio.zoom_url }}">
                             <span>{{ regio.title_str }}</span>
                         </label>
                     </li>
                 {% endfor %}
             </ul>
+            <p style="margin-left:35px">
+                <a class="btn-nhb-rood" onclick="keuze_gemaakt('regio')">Activeer</a>
+            </p>
         </div>
 
-        <div class="col s8 offset-s2 l5 offset-l1 white left-align">
+        <div class="col s8 offset-s2 m7 offset-m1 l5 offset-l1 white left-align">
             <p><b>Kies een vereniging:</b></p>
             <ul id="id_ver">
                 <li>
@@ -105,12 +119,15 @@
                 {% for ver in ver_filters %}
                     <li>
                         <label class="black-text" for="id_{{ ver.sel }}">
-                            <input class="with-gap" type="radio" name="ver" value="{{ ver.sel }}" required id="id_{{ ver.sel }}" onchange="keuze_gemaakt('{{ ver.zoom_url }}')">
+                            <input class="with-gap" type="radio" name="ver" value="{{ ver.sel }}" required id="id_{{ ver.sel }}" data-url="{{ ver.zoom_url }}">
                             <span>[{{ ver.ver_nr }}]&nbsp;&nbsp;{{ ver.naam }}</span>
                         </label>
                     </li>
                 {% endfor %}
             </ul>
+            <p style="margin-left:35px">
+                <a class="btn-nhb-rood" onclick="keuze_gemaakt('ver')">Activeer</a>
+            </p>
         </div>
     </div>
 
