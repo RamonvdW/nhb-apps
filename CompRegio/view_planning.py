@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -772,7 +772,15 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
         # voeg een wedstrijd toe
         jaar = ronde.deelcompetitie.competitie.begin_jaar
         wedstrijd = CompetitieWedstrijd()
-        wedstrijd.datum_wanneer = competitie_week_nr_to_date(jaar, settings.COMPETITIES_START_WEEK)
+
+        # kies de datum voor de wedstrijd: vandaag, of de eerste dag van competitie wedstrijden
+        datum = competitie_week_nr_to_date(jaar, settings.COMPETITIES_START_WEEK)
+        now = timezone.now()
+        datum_now = datetime.date(now.year, now.month, now.day)
+        if datum_now > datum:
+            wedstrijd.datum_wanneer = datum_now
+        else:
+            wedstrijd.datum_wanneer = datum
         wedstrijd.tijd_begin_aanmelden = datetime.time(hour=0, minute=0, second=0)
         wedstrijd.tijd_begin_wedstrijd = wedstrijd.tijd_begin_aanmelden
         wedstrijd.tijd_einde_wedstrijd = wedstrijd.tijd_begin_aanmelden
