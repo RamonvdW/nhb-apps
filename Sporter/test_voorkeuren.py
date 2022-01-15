@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -84,9 +84,9 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.boog_R = BoogType.objects.get(afkorting='R')
 
     def test_view(self):
-        # zonder login --> terug naar het plein
+        # zonder login
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_voorkeuren, follow=True)
+            resp = self.client.get(self.url_voorkeuren)
         self.assert403(resp)
 
         # met sporter-login wel toegankelijk
