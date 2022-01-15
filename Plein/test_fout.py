@@ -24,6 +24,12 @@ class TestPleinFout(E2EHelpers, TestCase):
         cls.testdata.maak_accounts()
 
     def test_403(self):
+        # niet ingelogd
+        resp = self.client.get(self.url_speciale_pagina % '403a')
+        self.assert_is_redirect(resp, '/account/login/')
+
+        self.e2e_login(self.testdata.account_admin)
+
         resp = self.client.get(self.url_speciale_pagina % '403a')
         self.assertTrue(resp.status_code, 200)
         self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
