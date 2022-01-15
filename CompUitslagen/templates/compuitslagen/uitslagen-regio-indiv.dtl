@@ -40,27 +40,23 @@
         </div>
     </div>
 
-
-    <!-- donkerblauwe balk met gegevens van de gekozen competitie, boogtype en regio -->
-    <div class="row">
-        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-            <div class="white-text nhb-blauw z-depth-2">
-
-                <div class="row small-row">
-                    <div class="col s3">Competitie:</div>
-                    <div class="col s7">{{ deelcomp.competitie.beschrijving }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3">Wedstrijdboog:</div>
-                    <div class="col s7">{{ comp_boog.beschrijving }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3">Regio:</div>
-                    <div class="col s7">{{ regio }}</div>
-                </div>
-            </div>
+    <!-- blauwe balk met informatie -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Competitie</th>
+                    <td>{{ deelcomp.competitie.beschrijving }}</td>
+                </tr>
+                <tr>
+                    <th>Wedstrijdboog:</th>
+                    <td>{{ comp_boog.beschrijving }}</td>
+                </tr>
+                <tr>
+                    <th>Regio:</th>
+                    <td>{{ regio }}</td>
+                </tr>
+            </table>
         </div>
     </div>
 
