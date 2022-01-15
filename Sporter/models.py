@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -240,6 +240,11 @@ class SporterBoog(models.Model):
         """ meta data voor de admin interface """
         verbose_name = "SporterBoog"
         verbose_name_plural = "SporterBoog"
+
+        indexes = [
+            # ondersteuning voor filteren op voor_wedstrijd=True
+            models.Index(fields=['voor_wedstrijd'])
+        ]
 
     def __str__(self):
         # voorkom exceptie als nhblid op None staat

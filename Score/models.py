@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -57,6 +57,14 @@ class Score(models.Model):
                 name='max 1 geen score per sporterboog')
         ]
 
+        indexes = [
+            # help filteren op afstand
+            models.Index(fields=['afstand_meter']),
+
+            # help filteren op type
+            models.Index(fields=['type'])
+        ]
+
     def __str__(self):
         if self.sporterboog:
             msg = "[%s]" % self.sporterboog
@@ -97,6 +105,12 @@ class ScoreHist(models.Model):
 
     def __str__(self):
         return "[%s] (%s) %s --> %s: %s" % (localize(self.when), self.door_account, self.oude_waarde, self.nieuwe_waarde, self.notitie)
+
+    class Meta:
+        indexes = [
+            # help sorteren op datum
+            models.Index(fields=['when'])
+        ]
 
     objects = models.Manager()      # for the editor only
 

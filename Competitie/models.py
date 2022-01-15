@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -598,6 +598,17 @@ class RegioCompetitieSchutterBoog(models.Model):
         verbose_name = "Regiocompetitie Schutterboog"
         verbose_name_plural = "Regiocompetitie Schuttersboog"
 
+        indexes = [
+            # help de filters op aantal_scores
+            models.Index(fields=['aantal_scores']),
+
+            # help sorteren op gemiddelde (hoogste eerst)
+            models.Index(fields=['-gemiddelde']),
+
+            # help de specifieke filters op deelcompetitie en aantal_scores
+            models.Index(fields=['aantal_scores', 'deelcompetitie']),
+        ]
+
     objects = models.Manager()      # for the editor only
 
 
@@ -778,6 +789,20 @@ class KampioenschapSchutterBoog(models.Model):
     class Meta:
         verbose_name = "Kampioenschap Schutterboog"
         verbose_name_plural = "Kampioenschap Schuttersboog"
+
+        indexes = [
+            # help sorteren op gemiddelde (hoogste eerst)
+            models.Index(fields=['-gemiddelde']),
+
+            # help sorteren op volgorde
+            models.Index(fields=['volgorde']),
+
+            # help sorteren op rank
+            models.Index(fields=['rank']),
+
+            # help sorteren op volgorde en gemiddelde
+            models.Index(fields=['volgorde', '-gemiddelde']),
+        ]
 
     objects = models.Manager()      # for the editor only
 
