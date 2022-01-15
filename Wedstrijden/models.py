@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -51,13 +51,13 @@ class WedstrijdLocatie(models.Model):
     verenigingen = models.ManyToManyField(NhbVereniging,
                                           blank=True)       # mag leeg zijn / gemaakt worden
 
-    # eigen accommodatie binnenbaan, buitenbaan of extern
+    # eigen accommodatie binnenbaan (volledig overdekt of half overdekt), buitenbaan, extern of 'onbekend'
     baan_type = models.CharField(max_length=1, choices=BAAN_TYPE, default=BAAN_TYPE_ONBEKEND)
 
     # welke disciplines kunnen hier georganiseerd worden?
     discipline_25m1pijl = models.BooleanField(default=False)
     discipline_outdoor = models.BooleanField(default=False)
-    discipline_indoor = models.BooleanField(default=False)      # Indoor = 18m/25m 3pijl
+    discipline_indoor = models.BooleanField(default=False)      # Indoor = 18m/25m 3pijl, True als banen_18m>0 of banen_25m>0
     discipline_clout = models.BooleanField(default=False)
     discipline_veld = models.BooleanField(default=False)
     discipline_run = models.BooleanField(default=False)
@@ -96,7 +96,7 @@ class WedstrijdLocatie(models.Model):
         if self.discipline_outdoor:
             disc.append('outdoor')
         if self.discipline_indoor:
-            disc.append('indoor')
+            disc.append('indoor(18+25)')
         if self.discipline_25m1pijl:
             disc.append('25m1pijl')
         if self.discipline_clout:
@@ -122,6 +122,8 @@ class WedstrijdLocatie(models.Model):
         # msg += " (%s verenigingen)" % self.verenigingen.count()
 
         msg += " [disciplines: %s]" % self.disciplines_str()
+
+        msg += " [banen: 18m=%s, 25m=%s]" % (self.banen_18m, self.banen_25m)
 
         return msg
 
