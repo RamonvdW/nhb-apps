@@ -1,5 +1,5 @@
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -25,6 +25,12 @@
 
     <!-- de hele kaart is klikbaar -->
     <a href="{{ url }}"{% if extern_open %} target="_blank" rel="noopener noreferrer"{% endif %}>
+
+        {% if extern_open %}
+            <div style="position:absolute; right:6px; top:6px">
+                <i class="material-icons-round nhb-blauw-text">open_in_new</i>
+            </div>
+        {% endif %}
 
         <!-- padding om bij de rand weg te blijven -->
         <div class="nhb-card-content center-align">

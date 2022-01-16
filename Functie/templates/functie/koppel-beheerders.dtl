@@ -176,8 +176,6 @@
             </div>
         </div>
 
-
-
     {% endif %} <!-- zoekterm -->
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-koppel-beheerders" %}
