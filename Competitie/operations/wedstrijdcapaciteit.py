@@ -57,6 +57,7 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                         bij_vereniging__in=ver_pks)
                                 .select_related('klasse',
                                                 'klasse__indiv',
+                                                'bij_vereniging',
                                                 'sporterboog',
                                                 'sporterboog__boogtype',
                                                 'sporterboog__sporter',
@@ -79,6 +80,7 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                 .filter(deelcompetitie=deelcomp)
                                 .select_related('klasse',
                                                 'klasse__indiv',
+                                                'bij_vereniging',
                                                 'sporterboog',
                                                 'sporterboog__boogtype',
                                                 'sporterboog__sporter',
