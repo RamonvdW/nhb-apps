@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,77 +10,77 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="otp-koppelen-stap1" %}
-
-    <h4>Koppel tweede factor</h4>
-
-    <p>Voordat je als beheerder aan de slag kant moet je een extra beveiliging activeren: de tweede factor.</p>
-    <p>Hiervoor is een klein programma nodig.</p>
-
-    <p>&nbsp;</p>
-    <h5>Stappenplan</h5>
-    <div class="row white">
+    <!-- banner -->
+    <div class="row center">
         <div class="col s12">
-            <p>1. Installeer de applicatie op je mobiel of tablet.</p>
-            <p>2. Scan een QR-code om de koppeling te maken met MijnHandboogsport.</p>
-            <p>3. Voer 6 cijfers in om koppeling te controleren.</p>
-            <p></p>
+            <h3 class="nhb-rood-text">Koppel tweede factor</h3>
+            <p>Voordat je als beheerder aan de slag kant moet je een extra beveiliging activeren: de tweede factor.</p>
+            <p>Hiervoor is een klein programma nodig.</p>
+        </div>
+    </div>
+
+    <!-- blauw balk met het stappenplan -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 l8 offset-l2 xl6 offset-xl3 white left-align">
+            <h5>Stappenplan</h5>
+            <p class="valign-wrapper nhb-rood-text"><i class="small material-icons-round">looks_one</i> <b>Installeer een applicatie op je mobiel of tablet.</b></p>
+            <p class="valign-wrapper"><i class="small material-icons-round">looks_two</i> Scan een QR-code om de koppeling te maken met MijnHandboogsport.</p>
+            <p class="valign-wrapper"><i class="small material-icons-round">looks_3</i> Voer 6 cijfers in om koppeling te controleren.</p>
         </div>
     </div>
 
 
-    <p>&nbsp;</p>
-    <h5>Stap 1</h5>
-    <div class="row white">
+    <!-- witruimte -->
+    <div class="row center">
         <div class="col s12">
+            <h4>Stap 1</h4>
             <p>De applicatie die we nodig hebben kan elke 30 seconden een 6-cijferige code genereren, bijvoorbeeld 649012.</p>
-            <p>Wij adviseren om een apart apparaat (zoals een mobiele telefoon) te gebruiken voor deze applicatie.</p>
-            <p>Bekende applicaties zijn de gratis Google Authenticator en Authy. Installeer deze via de app store van je mobiel of tablet.</p>
-            <p>Via onderstaande knoppen kan je meer informatie krijgen over deze apps.</p>
-            <div style="margin-left:50px">
-                <p>
-                    <a class="btn-nhb-blauw" href="https://en.wikipedia.org/wiki/Google_Authenticator" target="_blank" rel="noopener noreferrer">
-                        <i class="material-icons-round left">open_in_new</i>Google Authenticator</a>&nbsp;&nbsp;(Play store, Apple store)
-                </p>
-
-                <p>
-                    <a class="btn-nhb-blauw" href="https://authy.com" target="_blank" rel="noopener noreferrer">
-                        <i class="material-icons-round left">open_in_new</i>Authy</a>&nbsp;&nbsp;(Play store, Apple store)
-                </p>
-            </div>
-
-            <p>&nbsp;</p>
-            <p>Ook is het mogelijk om een plug-in voor je browser te gebruiken.</p>
-            <p>Een bekende extensie voor zowel Chrome als FireFox is Authenticator.</p>
-            <div style="margin-left:50px">
-                <p>
-                    <a class="btn-nhb-blauw" href="https://chrome.google.com/webstore/detail/authenticator/bhghoamapcdpbohphigoooaddinpkbai?hl=nl-nl" target="_blank" rel="noopener noreferrer">
-                        <i class="material-icons-round left">open_in_new</i>Authenticator</a>&nbsp;&nbsp;(extensie voor de Chrome browser)
-                </p>
-
-                <p>
-                    <a class="btn-nhb-blauw" href="https://addons.mozilla.org/en-GB/firefox/addon/auth-helper/" target="_blank" rel="noopener noreferrer">
-                        <i class="material-icons-round left">open_in_new</i>Authenticator</a>&nbsp;&nbsp;(extensie voor de FireFox browser)
-                </p>
-            </div>
-
-            <p>&nbsp;</p>
-            <p>Als je een applicatie of plug-in ge&iuml;nstalleerd hebt, dan kan je door naar de volgende stap.</p>
+            <p>Wij adviseren om een apart apparaat te gebruiken (zoals een mobiele telefoon).</p>
+            <p>Bekende gratis applicaties zijn <b>Authenticator</b> en <b>Authy</b>. Installeer deze via de app store van je mobiel of tablet.</p>
         </div>
     </div>
 
-    <p>&nbsp;</p>
-    <div class="row center-align">
-        <a class="btn-nhb-rood" href="{{ url_stap_2 }}"><i class="material-icons-round right">arrow_forward_ios</i>Verder naar stap 2</a>
-    </div>
-
-    <p>&nbsp;</p>
-    <h5>Ik heb een andere app!</h5>
-    <div class="row white">
+    <!-- blauw balk met kaartjes -->
+    <div class="row-nhb-blauw">
         <div class="col s12">
-            <p>MijnHandboogsport ondersteunt iedere applicatie die de TOPT (time-based one time password) standaard ondersteunt.</p>
-            <p></p>
+            {% static 'plein/logo_authenticator_256x256.png' as img_src %}
+            {% include 'plein/card_logo.dtl' with title="Authenticator" text="Informatie over Google Authenticator.<br>(engelstalig)" img_src=img_src img_height=85 img_width=85 url="https://en.wikipedia.org/wiki/Google_Authenticator" extern_open=True %}
+
+            {% static 'plein/logo_authy_256x256.png' as img_src %}
+            {% include 'plein/card_logo.dtl' with title="Authy" text="Informatie over Authy.<br>(engelstalig)" img_src=img_src img_height=85 img_width=85 url="https://authy.com" extern_open=True %}
+        </div>
+
+        <div class="col s8 offset-s2 xl6 offset-xl3 white" style="margin-top:40px">
+            <p>Als je een applicatie of plug-in ge&iuml;nstalleerd hebt, dan kan je door naar de volgende stap.</p>
+            <p>
+                <a class="btn-nhb-rood" href="{{ url_stap_2 }}">
+                    <i class="material-icons-round right">arrow_forward_ios</i>Verder naar stap 2</a>
+            </p>
         </div>
     </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+
+            <h5>Ik heb een andere app!</h5>
+            <p>Andere apps worden ook ondersteund, zelfs een extensie / plug-in voor je browser.</p>
+            <p>MijnHandboogsport vereist de TOPT standaard (TOTP = Time-based One Time Password).</p>
+        </div>
+    </div>
+
+    <!-- blauw balk met kaartjes -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            {% static 'plein/logo_chrome_256x256.png' as img_src %}
+            {% include 'plein/card_logo.dtl' with title="Chrome extensie" text="Authenticator extensie voor de Chrome browser." img_src=img_src img_height=85 img_width=85 url="https://chrome.google.com/webstore/detail/authenticator/bhghoamapcdpbohphigoooaddinpkbai?hl=nl-nl" extern_open=True %}
+
+            {% static 'plein/logo_firefox_256x256.png' as img_src %}
+            {% include 'plein/card_logo.dtl' with title="FireFox extensie" text="Authenticator extensie voor de FireFox browser." img_src=img_src img_height=85 img_width=85 url="https://addons.mozilla.org/en-GB/firefox/addon/auth-helper/" extern_open=True %}
+        </div>
+    </div>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="otp-koppelen-stap1" %}
 
 {% endblock %}

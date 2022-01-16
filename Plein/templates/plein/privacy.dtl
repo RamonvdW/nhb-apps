@@ -14,14 +14,14 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="nhb-rood-text">Privacy<wbr>verklaring</h3>
-            <p>Alle vragen en verzoeken over privacy kunnen gericht worden aan de Nederlandse Handboog Bond via e-mail aan:<br><code>{{ email_bb }}</code></p>
+            <p>Alle vragen en verzoeken over privacy kunnen gericht worden aan<br>de Nederlandse Handboog Bond via e-mail: <code>{{ email_bb }}</code></p>
         </div>
     </div>
 
     <!-- blauwe balk met informatie -->
     <div class="row-nhb-blauw">
         <div class="col s12">
-            {% include 'plein/card.dtl' with title="Verklaring openen" text="Hoe we omgaan met jouw privacy staat beschreven in een apart document." icon="open_in_new" extern_open=True url=url_privacyverklaring %}
+            {% include 'plein/card.dtl' with title="Verklaring openen" text="Hoe we omgaan met jouw privacy staat beschreven in een apart document." icon="article" extern_open=True url=url_privacyverklaring %}
 
             {% include 'plein/card.dtl' with title="Contact" text="Kies dit kaartje om je mailprogramma te starten." icon="email" extern_open=True url=url_email_bb %}
         </div>

@@ -50,7 +50,6 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="nhb-rood-text">Wissel van rol</h3>
-            <p>Kies de rol die je aan wilt nemen</p>
             <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
         </div>
     </div>
