@@ -53,7 +53,7 @@
                     <div class="row" style="margin-top:90px">
                         {% if show_wachtwoord_vergeten %}
                             <div class="col s8">
-                                <a class="btn-nhb-blauw" href="{% url 'Account:wachtwoord-vergeten' %}">Wachtwoord vergeten?</a>
+                                <a class="btn-nhb-rood" href="{% url 'Account:wachtwoord-vergeten' %}">Wachtwoord vergeten?</a>
                             </div>
                             <div class="col s4">
                                 <input class="btn-nhb-rood center-align" type="submit" value="Log in">

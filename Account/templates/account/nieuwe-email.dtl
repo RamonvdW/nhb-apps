@@ -10,16 +10,26 @@
 
 {% block pagina %}
 
-    <h4>E-mail bevestigen</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Nieuwe e-mail bevestigen</h3>
+        </div>
+    </div>
 
-    <p>We hebben een nieuw e-mailadres doorgekregen uit de administratie van de NHB.</p>
+    <!-- blauw balk -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 m12 white left-align">
+            <p>We hebben een nieuw e-mailadres doorgekregen uit de administratie van de NHB.</p>
 
-    <p>We hebben een e-mail gestuurd naar <b>{{ partial_email }}</b> om zeker te zijn dat we je kunnen bereiken.</p>
+            <p>We hebben een e-mail gestuurd naar <b><code>{{ partial_email }}</code></b> om zeker te zijn dat we je kunnen bereiken.</p>
 
-    <p>Volg de instructies in de e-mail om de bevestiging af te ronden.</p>
+            <p>Volg de instructies in de e-mail om de bevestiging af te ronden.</p>
 
-    <p>Deze pagina kan je sluiten.</p>
+            <p>Deze pagina kan je sluiten.</p>
+        </div>
+    </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-nieuwe-email" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-email-bevestigen-nieuwe" %}
 
 {% endblock %}

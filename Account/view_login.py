@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -122,6 +122,9 @@ def receive_bevestiging_accountemail(request, obj):
     context = dict()
     if not request.user.is_authenticated:
         context['show_login'] = True
+
+    context['verberg_login_knop'] = True
+
     menu_dynamics(request, context)
     return render(request, TEMPLATE_BEVESTIGD, context)
 

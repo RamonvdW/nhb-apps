@@ -10,17 +10,32 @@
 
 {% block pagina %}
 
-    <h4>Bevestigd</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Bevestigd</h3>
+        </div>
+    </div>
 
-    <p>Je hebt laten zien dat je toegang hebt tot je e-mail.</p>
+    <!-- blauw balk -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 m12 white">
+            <p>Je hebt laten zien dat je toegang hebt tot je e-mail.</p>
 
-    {% if show_login %}
-        <p>Je kan nu inloggen.</p>
-        <p><a class="btn-nhb-blauw" href="{% url 'Account:login' %}"><i class="material-icons-round left">person</i>inloggen</a></p>
-    {% else %}
-        <p><a class="btn-nhb-blauw" href="{% url 'Plein:plein' %}"><i class="material-icons-round left">close</i>Sluiten</a></p>
-    {% endif %}
+            {% if show_login %}
+                <p>Je kan nu inloggen.</p>
+                <p>
+                    <a class="btn-nhb-rood" href="{% url 'Account:login' %}">
+                        <i class="material-icons-round left">person</i>inloggen</a>
+                </p>
+            {% else %}
+                <p>
+                    <a class="btn-nhb-rood" href="{% url 'Plein:plein' %}">
+                        <i class="material-icons-round left">close</i>Sluiten</a>
+                </p>
+            {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-email-bevestigd" %}
+        </div>
+    </div>
 
 {% endblock %}

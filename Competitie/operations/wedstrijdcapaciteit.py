@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -57,6 +57,7 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                         bij_vereniging__in=ver_pks)
                                 .select_related('klasse',
                                                 'klasse__indiv',
+                                                'bij_vereniging',
                                                 'sporterboog',
                                                 'sporterboog__boogtype',
                                                 'sporterboog__sporter',
@@ -79,6 +80,7 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                 .filter(deelcompetitie=deelcomp)
                                 .select_related('klasse',
                                                 'klasse__indiv',
+                                                'bij_vereniging',
                                                 'sporterboog',
                                                 'sporterboog__boogtype',
                                                 'sporterboog__sporter',
@@ -189,7 +191,7 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
     for deelnemer in deelnemers_indiv:
         sporterboog = deelnemer.sporterboog
         sporter = sporterboog.sporter
-        ver = sporter.bij_vereniging
+        ver = deelnemer.bij_vereniging
         boog = sporterboog.boogtype
 
         sporter = SimpleNamespace(

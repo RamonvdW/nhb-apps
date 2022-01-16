@@ -9,9 +9,8 @@ RED="\e[31m"
 RESET="\e[0m"
 REPORT_DIR="/tmp/covhtml"
 LOG="/tmp/test_out.txt"
-LOG1="/tmp/tmp_out1.txt"
-[ -e "$LOG" ] && rm "$LOG" && touch "$LOG"
-[ -e "$LOG1" ] && rm "$LOG1"
+[ -e "$LOG" ] && rm "$LOG"
+touch "$LOG"
 
 PYCOV=""
 PYCOV="-m coverage run --append --branch"
@@ -147,14 +146,13 @@ then
     echo "[INFO] Discovering all management commands in $FOCUS"
     for cmd in $(python3 ./manage.py --help);
     do
-        if [ -f $FOCUS/management/commands/$cmd.py ]
+        if [ -f "$FOCUS/management/commands/$cmd.py" ]
         then
             echo -n '.'
             echo "[INFO] ./manage.py help $cmd" >>"$LOG"
             python3 -u $PYCOV ./manage.py help $cmd &>>"$LOG"
         fi
     done
-    echo
 fi
 
 if [ $RES -eq 0 -a $# -eq 0 ]
