@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -26,6 +26,19 @@ TEMPLATE_LOGBOEK_NHBSTRUCTUUR = 'logboek/nhbstructuur.dtl'
 TEMPLATE_LOGBOEK_ACCOMMODATIES = 'logboek/accommodaties.dtl'
 
 RESULTS_PER_PAGE = 50
+
+
+DELEN = (
+    # urlconf/html-id, titel
+    ('rest', 'Rest'),
+    ('records', 'Records'),
+    ('accounts', 'Accounts'),
+    ('rollen', 'Rollen'),
+    ('import', 'CRM import'),
+    ('clusters', 'Clusters'),
+    ('competitie', 'Bondscompetities'),
+    ('uitrol', 'Uitrol')
+)
 
 
 class LogboekBasisView(UserPassesTestMixin, ListView):
@@ -104,8 +117,6 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['filter'] = self.filter
-
         if context['is_paginated']:
             context['page_links'] = self._make_link_urls(context)
             context['active'] = str(context['page_obj'].number)
@@ -115,34 +126,26 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
             obj.door = obj.bepaal_door()
         # for
 
-        context['url_rest'] = reverse('Logboek:rest')
-        context['url_rollen'] = reverse('Logboek:rollen')
-        context['url_uitrol'] = reverse('Logboek:uitrol')
-        context['url_records'] = reverse('Logboek:records')
-        context['url_accounts'] = reverse('Logboek:accounts')
-        context['url_clusters'] = reverse('Logboek:clusters')
-        context['url_competitie'] = reverse('Logboek:competitie')
-        context['url_nhbstructuur'] = reverse('Logboek:nhbstructuur')
-        context['url_accommodaties'] = reverse('Logboek:accommodaties')
-
         context['filter_url'] = self.base_url
 
         # extra knop tonen om zoekterm te wissen
         zoekterm = self.request.GET.get('zoekterm', '')
         if zoekterm:
             context['zoekterm'] = zoekterm
-            context['unfiltered_url'] = reverse('Logboek:%s' % self.filter)
+            context['unfiltered_url'] = self.base_url
 
-            zoekterm = "?zoekterm=%s" % quote_plus(zoekterm)
-            context['url_rest'] += zoekterm
-            context['url_rollen'] += zoekterm
-            context['url_uitrol'] += zoekterm
-            context['url_records'] += zoekterm
-            context['url_accounts'] += zoekterm
-            context['url_clusters'] += zoekterm
-            context['url_competitie'] += zoekterm
-            context['url_nhbstructuur'] += zoekterm
-            context['url_accommodaties'] += zoekterm
+            q_zoekterm = "?zoekterm=%s" % quote_plus(zoekterm)
+        else:
+            q_zoekterm = ''
+            context['zoekterm'] = ''
+
+        context['filters'] = filters = list()
+        for optie, titel in DELEN:
+            url = reverse('Logboek:%s' % optie) + q_zoekterm
+            is_actief = (optie in self.base_url) or (optie == 'rest' and self.base_url == '/logboek/')
+            tup = (optie, url, titel, is_actief)
+            filters.append(tup)
+        # for
 
         menu_dynamics(self.request, context, actief='hetplein')
         return context
@@ -251,7 +254,7 @@ class LogboekNhbStructuurView(LogboekBasisView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.base_url = reverse('Logboek:nhbstructuur')
+        self.base_url = reverse('Logboek:import')
 
     def get_focused_queryset(self):
         """ retourneer de data voor de template view """

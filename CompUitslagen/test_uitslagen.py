@@ -239,7 +239,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
 
         url = self.url_uitslagen_regio_n % (self.testdata.comp18.pk, 'R', 'alle', "NaN")
         resp = self.client.get(url)
-        self.assert404(resp, 'Verkeerd regionummer')
+        self.assert404(resp, 'Verkeerde regionummer')
 
         url = self.url_uitslagen_regio_n % (self.testdata.comp18.pk, 'BAD', 'alle', 101)
         resp = self.client.get(url)

@@ -297,17 +297,19 @@ class E2EHelpers(TestCase):
                 pos = content.find('</a>')
                 link = content[:pos+4]
                 content = content[pos+4:]
-                # filter out website-internal links
-                if link.find('href="/') < 0 and link.find('href="#') < 0:
-                    if link.find('href=""') >= 0 or link.find('href="mailto:"') >= 0:   # pragma: no cover
-                        self.fail(msg='Unexpected empty link %s on page %s' % (link, template_name))
-                    elif link.find('href="mailto:') < 0:
-                        # remainder must be links that leave the website
-                        # these must target a blank window
-                        if 'target="_blank"' not in link:            # pragma: no cover
-                            self.fail(msg='Missing target="_blank" in link %s on page %s' % (link, template_name))
-                        if 'rel="noopener noreferrer"' not in link:  # pragma: no cover
-                            self.fail(msg='Missing rel="noopener noreferrer" in link %s on page %s' % (link, template_name))
+                # check the link (skip if plain button with onclick handler)
+                if link.find('href="') >= 0:
+                    # filter out website-internal links
+                    if link.find('href="/') < 0 and link.find('href="#') < 0:
+                        if link.find('href=""') >= 0 or link.find('href="mailto:"') >= 0:   # pragma: no cover
+                            self.fail(msg='Unexpected empty link %s on page %s' % (link, template_name))
+                        elif link.find('href="mailto:') < 0:
+                            # remainder must be links that leave the website
+                            # these must target a blank window
+                            if 'target="_blank"' not in link:            # pragma: no cover
+                                self.fail(msg='Missing target="_blank" in link %s on page %s' % (link, template_name))
+                            if 'rel="noopener noreferrer"' not in link:  # pragma: no cover
+                                self.fail(msg='Missing rel="noopener noreferrer" in link %s on page %s' % (link, template_name))
             else:
                 content = ''
         # while
