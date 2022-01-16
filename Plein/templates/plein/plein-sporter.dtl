@@ -88,7 +88,7 @@
     <!-- blauwe balk met kaartje -->
     <div class="row-nhb-blauw">
         <div class="col s12">
-            {% include 'plein/card.dtl' with title="Stuur een e-mail" text="Kies dit kaartje om je mailprogramma te starten" icon="email" url=url_email_support %}
+            {% include 'plein/card.dtl' with title="Stuur een e-mail" text="Kies dit kaartje om je mailprogramma te starten" icon="email" extern_open=True url=url_email_support %}
         </div>
     </div>
 
