@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -707,6 +707,7 @@ class WedstrijdUitslagBekijkenView(TemplateView):
 
         for score in scores:
             score.schutter_str = score.sporterboog.sporter.volledige_naam()
+            score.lid_nr = score.sporterboog.sporter.lid_nr
             score.boog_str = score.sporterboog.boogtype.beschrijving
             try:
                 score.vereniging_str = str(sporterboog2vereniging[score.sporterboog.pk])
@@ -715,9 +716,10 @@ class WedstrijdUitslagBekijkenView(TemplateView):
                 score.vereniging_str = "?"
         # for
 
-        te_sorteren = [(score.vereniging_str, score.schutter_str, score.boog_str, score) for score in scores]
+        # vereniging kan 2 leden met dezelfde naam en boog hebben, daarom lid_nr
+        te_sorteren = [(score.vereniging_str, score.schutter_str, score.boog_str, score.lid_nr, score) for score in scores]
         te_sorteren.sort()
-        scores = [score for _, _, _, score in te_sorteren]
+        scores = [score for _, _, _, _, score in te_sorteren]
 
         context['scores'] = scores
         context['wedstrijd'] = wedstrijd
