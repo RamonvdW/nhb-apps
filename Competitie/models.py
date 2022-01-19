@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -179,6 +179,10 @@ class Competitie(models.Model):
     # fase N: afsluiten rayonkampioenschappen
     alle_rks_afgesloten = models.BooleanField(default=False)
 
+    # als het RK afgelast is, toon dan deze tekst
+    rk_is_afgelast = models.BooleanField(default=False)
+    rk_afgelast_bericht = models.TextField(blank=True)
+
     # ----
     # fases en datums bondskampioenschappen
     # ----
@@ -189,6 +193,10 @@ class Competitie(models.Model):
     bk_laatste_wedstrijd = models.DateField()
     # fase R: vaststellen en publiceren uitslag
     alle_bks_afgesloten = models.BooleanField(default=False)
+
+    # als het BK afgelast is, toon dan deze tekst
+    bk_is_afgelast = models.BooleanField(default=False)
+    bk_afgelast_bericht = models.TextField(blank=True)
 
     # nog te wijzigen?
     is_afgesloten = models.BooleanField(default=False)
@@ -598,6 +606,17 @@ class RegioCompetitieSchutterBoog(models.Model):
         verbose_name = "Regiocompetitie Schutterboog"
         verbose_name_plural = "Regiocompetitie Schuttersboog"
 
+        indexes = [
+            # help de filters op aantal_scores
+            models.Index(fields=['aantal_scores']),
+
+            # help sorteren op gemiddelde (hoogste eerst)
+            models.Index(fields=['-gemiddelde']),
+
+            # help de specifieke filters op deelcompetitie en aantal_scores
+            models.Index(fields=['aantal_scores', 'deelcompetitie']),
+        ]
+
     objects = models.Manager()      # for the editor only
 
 
@@ -778,6 +797,20 @@ class KampioenschapSchutterBoog(models.Model):
     class Meta:
         verbose_name = "Kampioenschap Schutterboog"
         verbose_name_plural = "Kampioenschap Schuttersboog"
+
+        indexes = [
+            # help sorteren op gemiddelde (hoogste eerst)
+            models.Index(fields=['-gemiddelde']),
+
+            # help sorteren op volgorde
+            models.Index(fields=['volgorde']),
+
+            # help sorteren op rank
+            models.Index(fields=['rank']),
+
+            # help sorteren op volgorde en gemiddelde
+            models.Index(fields=['volgorde', '-gemiddelde']),
+        ]
 
     objects = models.Manager()      # for the editor only
 

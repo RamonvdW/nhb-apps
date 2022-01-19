@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Bondspas', 'm0001_initial'), ('Bondspas', 'm0002_bondspas')]
+    replaces = [('Bondspas', 'm0001_initial')]
 
     # dit is de eerste
     initial = True

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -553,7 +553,7 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('BasisTypen', 'm0022_squashed'), ('BasisTypen', 'm0023_blazoen_correcties')]
+    replaces = [('BasisTypen', 'm0022_squashed')]
 
     # dit is de eerste
     initial = True

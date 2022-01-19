@@ -65,6 +65,16 @@
         </div>
     </div>
 
+    {% if comp.rk_is_afgelast %}
+        <p>&nbsp;</p>
+
+        <div class="row">
+            <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
+                <p>{{ comp.rk_afgelast_bericht }}</p>
+            </div>
+        </div>
+    {% endif %}
+
     {% if geen_teams %}
         <p>&nbsp;</p>
         <p>Aantal teams ingeschreven: 0.</p>
@@ -76,10 +86,12 @@
                         <td colspan="5">
                             <h5>{{ team.klasse_str }}</h5>
                             {% if team.wedstrijd %}
+                                {% if comp.rk_is_afgelast %}<s>{% endif %}
                                 <span>{{ team.wedstrijd.datum_wanneer }} om {{ team.wedstrijd.tijd_begin_wedstrijd }} bij {{ team.wedstrijd.vereniging }}</span>
                                 {% if team.wedstrijd.locatie %}
                                     <span> ({{ team.wedstrijd.adres_str }})</span>
                                 {% endif %}
+                                {% if comp.rk_is_afgelast %}</s>{% endif %}
                             {% endif %}
                         </td>
                     </tr>

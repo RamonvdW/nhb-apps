@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,15 +13,14 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Overig', 'm0007_squashed'),
+        ('Sporter', 'm0003_squashed'),
     ]
 
     # migratie functies
     operations = [
-        migrations.AlterField(
-            model_name='sitefeedback',
-            name='toegevoegd_op',
-            field=models.DateTimeField(null=True),
+        migrations.AddIndex(
+            model_name='sporterboog',
+            index=models.Index(fields=['voor_wedstrijd'], name='Sporter_spo_voor_we_c6b357_idx'),
         ),
     ]
 

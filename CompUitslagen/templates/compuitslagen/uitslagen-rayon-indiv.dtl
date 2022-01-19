@@ -70,6 +70,16 @@
         <p>Sporters worden in de lijst opgenomen als ze {{ comp.aantal_scores_voor_rk_deelname }} of meer scores hebben.</p>
     {% endif %}
 
+    {% if comp.rk_is_afgelast %}
+        <p>&nbsp;</p>
+
+        <div class="row">
+            <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
+                <p>{{ comp.rk_afgelast_bericht }}</p>
+            </div>
+        </div>
+    {% endif %}
+
     <table class="white">
         {% for obj in deelnemers %}
             {% if obj.break_klasse %}
@@ -77,10 +87,12 @@
                     <td colspan="6">
                         <h5>{{ obj.klasse_str }}</h5>
                         {% if obj.wedstrijd %}
+                            {% if comp.rk_is_afgelast %}<s>{% endif %}
                             <span>{{ obj.wedstrijd.datum_wanneer }} om {{ obj.wedstrijd.tijd_begin_wedstrijd }} bij {{ obj.wedstrijd.vereniging }}</span>
                             {% if obj.wedstrijd.locatie %}
                                 <span> ({{ obj.wedstrijd.adres_str }})</span>
                             {% endif %}
+                            {% if comp.rk_is_afgelast %}</s>{% endif %}
                         {% endif %}
                     </td>
                 </tr>
