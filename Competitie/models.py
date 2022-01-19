@@ -179,6 +179,10 @@ class Competitie(models.Model):
     # fase N: afsluiten rayonkampioenschappen
     alle_rks_afgesloten = models.BooleanField(default=False)
 
+    # als het RK afgelast is, toon dan deze tekst
+    rk_is_afgelast = models.BooleanField(default=False)
+    rk_afgelast_bericht = models.TextField(blank=True)
+
     # ----
     # fases en datums bondskampioenschappen
     # ----
@@ -189,6 +193,10 @@ class Competitie(models.Model):
     bk_laatste_wedstrijd = models.DateField()
     # fase R: vaststellen en publiceren uitslag
     alle_bks_afgesloten = models.BooleanField(default=False)
+
+    # als het BK afgelast is, toon dan deze tekst
+    bk_is_afgelast = models.BooleanField(default=False)
+    bk_afgelast_bericht = models.TextField(blank=True)
 
     # nog te wijzigen?
     is_afgesloten = models.BooleanField(default=False)

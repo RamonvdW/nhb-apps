@@ -148,7 +148,7 @@ class UitslagenRayonIndivView(TemplateView):
             raise Http404('Competitie niet gevonden')
 
         context['deelcomp'] = deelcomp
-        deelcomp.competitie.bepaal_fase()
+        deelcomp.competitie.bepaal_fase()           # TODO: kan weg? We hebben al comp (zie hierboven)
 
         # haal de planning erbij: competitieklasse --> competitiewedstrijd
         indiv2wedstrijd = dict()    # [indiv_pk] = competitiewedstrijd

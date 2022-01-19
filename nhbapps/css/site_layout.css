@@ -44,6 +44,10 @@ del {
     text-decoration-color: #0aa0e1;     /* NHB blauw default */
 }
 
+.decorate-nhb-rood {
+    text-decoration-color: #f94137;     /* NHB rood */
+}
+
 /* voor wie-schiet-waar */
 .kruisje {
     text-align: center;
