@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -32,7 +32,8 @@ class SiteFeedbackForm(forms.Form):
                     max_length=2500,
                     required=True,
                     widget=forms.Textarea(
-                        attrs={'placeholder': 'Tik hier je bericht',
+                        attrs={'autofocus': True,
+                               'placeholder': 'Tik hier je bericht',
                                'data-length': 2500,
                                'class': 'materialize-textarea'}))
 
@@ -47,7 +48,7 @@ class ZoekAccountForm(forms.Form):
                     label='Zoek op:',
                     max_length=50,
                     required=False,
-                    widget=forms.TextInput(attrs={'autofocus': ''}))
+                    widget=forms.TextInput(attrs={'autofocus': True}))
 
 
 # end of file
