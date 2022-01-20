@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -136,6 +136,11 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         context['url'] = reverse('Account:account-wissel')
         context['zoekterm'] = self.zoekterm
         context['form'] = self.form
+
+        if context['object_list']:
+            context['aantal_gevonden'] = context['object_list'].count()
+        else:
+            context['aantal_gevonden'] = 0
 
         menu_dynamics(self.request, context, actief='wissel-van-rol')
         return context

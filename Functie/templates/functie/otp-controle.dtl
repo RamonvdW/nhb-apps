@@ -47,7 +47,7 @@
         </div>
     </div>
 
-    <p class="center">Tip: Je moet de 6-cijferige code overtikken uit je authenticatie app (waarschijnlijk op je mobiel).</p>
+    <p class="center">Tik de 6-cijferige code over uit je authenticatie app (waarschijnlijk op je mobiel).</p>
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="otp-controle" %}
 

@@ -11,7 +11,12 @@
 
 {% block pagina %}
 
-    <h4>Zoek account</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Account wissel</h3>
+        </div>
+    </div>
 
     <script type="application/javascript">
         function do_selecteer(id)
@@ -39,56 +44,66 @@
         }
     </script>
 
-    <p>Beleef de website als elke andere gebruiker.</p>
-    <p>Gebruik onderstaand formulier om naar een account te zoeken.</p>
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
 
-    <div class="container z-depth-2 white">
-        <div class="row nhb-blauw white-text">
-            <div class="col s12 center-align">
-                <h5>Zoek gebruiker</h5>
-                <p>Zoek op username of gebruiker naam</p>
-            </div>
-        </div>
+            <!-- dialoog venster -->
+            <div style="margin:50px 30px 30px 30px">
+                <form action="{{ url }}" method="get">
 
-        <div class="row">
-            <form class="col s12" action="{{ url }}" method="get">
-                <div class="row"><div class="input-field col s12">
-                    {{ form.zoekterm.label_tag }}{{ form.zoekterm }}
-                </div></div>
-
-                <div class="row"><div class="col s12"></div>
-                    <div class="center-align">
-                        <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
+                    <div class="input-field">
+                        {{ form.zoekterm.label_tag }}{{ form.zoekterm }}
                     </div>
-                </div>
-            </form>
+
+                    <button class="btn-nhb-rood" type="submit">
+                        <i class="material-icons-round left">search</i>Zoek</button>
+                </form>
+            </div>
         </div>
     </div>
 
 
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Gevonden gebruikers ({{ aantal_gevonden }})</h4>
+        </div>
+    </div>
+
+    <!-- zoekresultaten -->
     {% if zoekterm %}
         {% if object_list.count %}
-            <h5>Gevonden gebruikers ({{ object_list.count }})</h5>
-            <ul class="collapsible">
-                {% for obj in object_list %}
-                    <!-- obj is Account -->
-                    <li>
-                        <div class="collapsible-header white">
-                            <span>{{ obj.volledige_naam|highlight:zoekterm }}</span>
-                        </div>
-                        <div class="collapsible-body white">
-                            <span>Volledige naam: {{ obj.volledige_naam }}</span>
-                            <p>Username: {{ obj.username|highlight:zoekterm }}</p>
-                            <button class="btn-nhb-blauw" onclick="do_selecteer(this)" data-pk="{{ obj.pk }}">Selecteer</button>
-                        </div>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p class="red-text">Niets gevonden</p>
+
+            <!-- blauwe balk witten tabel met resultaten -->
+            <div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">
+                <div class="col s12 m8 offset-m2 l6 offset-l3">
+
+                    <table class="white">
+                        <tr>
+                            <th>Inlog</th>
+                            <th>Volledige naam</th>
+                            <th><!-- kolom voor knoppen --></th>
+                        </tr>
+
+                        {% for account in object_list %}
+                            <tr>
+                                <td>{{ account.username|highlight:zoekterm }}</td>
+                                <td>{{ account.volledige_naam|highlight:zoekterm }}</td>
+                                <td>
+                                    <button class="btn-nhb-rood" onclick="do_selecteer(this)" data-pk="{{ account.pk }}">
+                                        <i class="material-icons-round">play_arrow</i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+
+                </div>
+            </div>
         {% endif %}
 
-        <p>Staat de gezochte persoon er niet bij? Alleen personen met een account op deze website worden getoond.</p>
+        <p class="center">Tip: gebruiker moet een account aangemaakt hebben.</p>
     {% endif %}
 
 {% endblock %}
