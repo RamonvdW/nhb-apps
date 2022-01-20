@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,14 +10,17 @@
 
 {% block pagina %}
 
-    <h4>Bedankt!</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Bedankt!</h3>
+            <p>Bedankt voor het delen van je mening.</p>
+            <p class="nhb-blauw-text"><i class="material-icons-round" style="font-size: 6rem">record_voice_over</i></p>
+            <p>Voel je vrij om deze functie vaker te gebruiken. We staan open voor alle tips en tops!</p>
 
-    <p>Bedankt voor het delen van je mening.</p>
+            <p>Via het logo in de linker bovenhoek kom je terug op het plein.</p>
+        </div>
+    </div>
 
-    <p><i class="material-icons-round" style="font-size: 6rem">record_voice_over</i></p>
-
-    <p>Voel je vrij om deze functie vaker te gebruiken. We staan open voor alle tips en tops!</p>
-
-    <p><a class="btn-nhb-blauw" href="{% url 'Plein:plein' %}">Naar Het Plein</a></p>
 
 {% endblock %}

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,43 +10,72 @@
 
 {% block pagina %}
 
-    <h4>Site feedback</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Site feedback</h3>
+            <p>De nieuwste feedback op de site (maximaal 50) volgen hieronder.</p>
+        </div>
+    </div>
 
-    {% if url_admin_site %}
-        <p>
-            <a class="btn-nhb-rood" href="{{ url_admin_site }}">
-                <i class="material-icons-round left">build</i>Admin site</a>
-        </p>
-    {% endif %}
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:0 10px 0 10px">
+                <table class="white">
+                    {% for obj in object_list %}
+                        <tr>
+                            <td>
+                                <b>{{ obj.pk }}</b>
+                            </td>
 
-    <p>De nieuwste feedback op de site (maximaal 50) volgen hieronder.</p>
+                            <td class="center">
+                                {% if obj.bevinding == "4" %}
+                                    <i class="material-icons-round red-text">thumb_down</i>
+                                {% elif obj.bevinding == "6" %}
+                                    <i class="material-icons-round">thumbs_up_down</i>
+                                {% elif obj.bevinding == "8" %}
+                                    <i class="material-icons-round green-text">thumb_up</i>
+                                {% else %}
+                                    <span class="red-text">{{ obj.bevinding }}</span>
+                                {% endif %}
+                            </td>
 
-    <ul class="collapsible white">
-        {% for obj in object_list %}
-        <li>
-            <div class="collapsible-header white-text">
-                {% if obj.bevinding == "4" %}
-                    <i class="material-icons-round red-text">thumb_down</i>
-                {% elif obj.bevinding == "6" %}
-                    <i class="material-icons-round">thumbs_up_down</i>
-                {% elif obj.bevinding == "8" %}
-                    <i class="material-icons-round green-text">thumb_up</i>
-                {% else %}
-                    Bevinding {{ obj.bevinding }}
-                {% endif %}
-                op pagina '{{ obj.op_pagina }}'
+                            <td>{{ obj.op_pagina }}</td>
+                            <td class="right-align">
+                                <!-- button for admin site -->
+                                <a class="btn-nhb-rood" href="{{ url_admin_site }}{{ obj.pk }}/change/">
+                                    <i class="material-icons-round left">edit</i>Bewerk</a>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="2"></td>
+                            <td colspan="2">
+                                <div style="border-left:groove; padding:5px">{{ obj.feedback|linebreaksbr }}</div>
+                                <p>door <b>{{ obj.gebruiker }}</b> toegevoegd op {{ obj.toegevoegd_op|date:"l j F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}</p>
+                                <p>(site versie: {{ obj.site_versie }})</p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
             </div>
-            <div class="collapsible-body">
-                <span>#{{ obj.pk }} door <b>{{ obj.gebruiker }}</b> toegevoegd op {{ obj.toegevoegd_op|date:"l j F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}</span>
-                <p>(site versie: {{ obj.site_versie }})</p>
-                <p><u>Feedback</u></p>
-                <h6>{{ obj.feedback|linebreaks }}</h6>
-            </div>
-        </li>
-        {% endfor %}
-    </ul>
+        </div>
 
-    <p>Let op: Van alle nog aanwezige site feedback ({{ count_aanwezig }}) zijn er {{ count_afgehandeld }} door de ontwikkelaar afgehandeld en worden niet meer getoond.</p>
+        <div class="col s7 m5 xl3" style="margin-top:50px">
+                <table class="white">
+                    <tr>
+                        <th>Aantal nog aanwezig:</th>
+                        <td style="width:10%">{{ count_aanwezig }}</td>
+                    </tr>
+                    <tr>
+                        <th>Aantal afgehandeld:</th>
+                        <td style="width:10%">{{ count_afgehandeld }}</td>
+                    </tr>
+                </table>
+        </div>
+
+    </div>
 
 {% endblock %}
 
