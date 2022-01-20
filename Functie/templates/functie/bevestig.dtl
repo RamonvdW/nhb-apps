@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,14 +9,19 @@
 {% block title %}Bevestig e-mail{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-bevestig-email" %}
 
-<h4>E-mail bevestigen</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">E-mail bevestigen</h3>
+            <p>We hebben een e-mail gestuurd naar <b>{{ functie.nieuwe_email }}</b> om zeker te zijn dat we je kunnen bereiken.</p>
+            <p>Volg de instructies in de e-mail om het koppelen af te ronden.</p>
 
-<p>We hebben een e-mail gestuurd naar <b>{{ functie.nieuwe_email }}</b> om zeker te zijn dat we je kunnen bereiken.</p>
+            <a class="btn-nhb-rood" href="{{ terug_url }}">
+                <i class="material-icons-round left">arrow_back</i>Terug</a>
+        </div>
+    </div>
 
-<p>Volg de instructies in de e-mail om het koppelen af te ronden.</p>
-
-<a class="btn-nhb-blauw" href="{{ terug_url }}"><i class="material-icons-round left">arrow_back</i>Terug</a>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-bevestig-email" %}
 
 {% endblock %}

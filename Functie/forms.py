@@ -75,7 +75,9 @@ class OTPControleForm(forms.Form):
 class WijzigEmailForm(forms.Form):
     """ Dit formulier wordt gebruikt om het e-mailadres van een rol aan te passen """
 
-    email = forms.EmailField()
+    email = forms.EmailField(
+                    label='Nieuwe e-mailadres',
+                    widget=forms.TextInput(attrs={'autofocus': True}))
 
 
 # end of file
