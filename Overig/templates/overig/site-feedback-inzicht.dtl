@@ -63,16 +63,16 @@
         </div>
 
         <div class="col s7 m5 xl3" style="margin-top:50px">
-                <table class="white">
-                    <tr>
-                        <th>Aantal nog aanwezig:</th>
-                        <td style="width:10%">{{ count_aanwezig }}</td>
-                    </tr>
-                    <tr>
-                        <th>Aantal afgehandeld:</th>
-                        <td style="width:10%">{{ count_afgehandeld }}</td>
-                    </tr>
-                </table>
+            <table class="white">
+                <tr>
+                    <th>Aantal nog aanwezig:</th>
+                    <td style="width:10%">{{ count_aanwezig }}</td>
+                </tr>
+                <tr>
+                    <th>Aantal afgehandeld:</th>
+                    <td style="width:10%">{{ count_afgehandeld }}</td>
+                </tr>
+            </table>
         </div>
 
     </div>

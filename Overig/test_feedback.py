@@ -197,7 +197,7 @@ class TestOverigFeedback(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('overig/site-feedback-inzicht.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
-        self.assertContains(resp, "door de ontwikkelaar afgehandeld")
+        self.assertContains(resp, "Aantal afgehandeld:")
 
         self.e2e_assert_other_http_commands_not_supported(self.url_feedback_inzicht)
 
@@ -206,15 +206,23 @@ class TestOverigFeedback(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wisselnaarrol_bb()
 
+        # maak feedback aan
+        # zet sessie variabelen: op_pagina en gebruiker
+        self.client.get(self.url_feedback_nul_plein)
+        resp = self.client.post(self.url_feedback_formulier,
+                                {'bevinding': '4',
+                                 'feedback': 'Just testing'})
+        self.assert_is_redirect(resp, self.url_feedback_bedankt)
+
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_feedback_inzicht)
-
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('overig/site-feedback-inzicht.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         urls = self.extract_all_urls(resp, skip_menu=True)
-        self.assertEqual(urls, ['/beheer/Overig/sitefeedback/'])
+        urls = [url for url in urls if url.startswith('/beheer/Overig/sitefeedback/')]
+        self.assertEqual(len(urls), 1)
 
 
 # end of file
