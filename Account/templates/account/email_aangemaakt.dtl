@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,16 +10,26 @@
 
 {% block pagina %}
 
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">E-mail bevestigen</h3>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie vlak -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 m12 white">
+            <p>Het account voor bondsnummer <b>{{ login_naam }}</b> is aangemaakt. Dit nummer is je inlog naam.</p>
+
+            <p>We hebben een e-mail gestuurd naar <b>{{ partial_email }}</b> om zeker te zijn dat we je kunnen bereiken.</p>
+
+            <p>Volg de instructies in de e-mail om het aanmaken van je account af te ronden. Daarna kan je inloggen.</p>
+
+            <p>Deze pagina kan je sluiten.</p>
+        </div>
+    </div>
+
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-aangemaakt-email" %}
-
-    <h4>E-mail bevestigen</h4>
-
-    <p>Het account voor bondsnummer <b>{{ login_naam }}</b> is aangemaakt. Dit nummer is je inlog naam.</p>
-
-    <p>We hebben een e-mail gestuurd naar <b>{{ partial_email }}</b> om zeker te zijn dat we je kunnen bereiken.</p>
-
-    <p>Volg de instructies in de e-mail om het aanmaken van je account af te ronden. Daarna kan je inloggen.</p>
-
-    <p>Deze pagina kan je sluiten.</p>
 
 {% endblock %}

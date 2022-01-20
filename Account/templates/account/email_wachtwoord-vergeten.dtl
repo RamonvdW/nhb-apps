@@ -10,13 +10,23 @@
 
 {% block pagina %}
 
-    <h4>Wachtwoord vergeten</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Wachtwoord vergeten</h3>
+        </div>
+    </div>
 
-    <p>We hebben een e-mail gestuurd naar het door jouw opgegeven e-mailadres.</p>
+    <!-- blauw balk met wit informatie vlak -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 m12 white">
+            <p>We hebben een e-mail gestuurd naar het door jouw opgegeven e-mailadres.</p>
 
-    <p>Volg de instructies in de e-mail om je wachtwoord te wijzigen. Daarna kan je inloggen.</p>
+            <p>Volg de instructies in de e-mail om je wachtwoord te wijzigen. Daarna kan je inloggen.</p>
 
-    <p>Deze pagina kan je sluiten.</p>
+            <p>Deze pagina kan je sluiten.</p>
+        </div>
+    </div>
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-wachtwoord-vergeten-email" %}
 

@@ -10,9 +10,19 @@
 
 {% block pagina %}
 
-    <h4>Inlog mislukt</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Inlog mislukt</h3>
+        </div>
+    </div>
 
-    <p>Het account {{ account.username }} is geblokkeerd tot {{ account.is_geblokkeerd_tot }} omdat te vaak een verkeerd wachtwoord ingevoerd is.</p>
+    <!-- blauw balk met wit informatie vlak -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 m12 white">
+            <p>Het account {{ account.username }} is geblokkeerd tot {{ account.is_geblokkeerd_tot }} omdat te vaak een verkeerd wachtwoord ingevoerd is.</p>
+        </div>
+    </div>
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-geblokkeerd" %}
 

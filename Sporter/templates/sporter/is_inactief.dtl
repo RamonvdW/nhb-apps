@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,12 +9,23 @@
 {% block title %}Inlog mislukt{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-is-inactief" %}
 
-<h4>Inlog mislukt</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Inlog mislukt</h3>
+        </div>
+    </div>
 
-<p>Het account {{ account.username }} kan geen gebruik maken van de NHB diensten.</p>
+    <!-- blauw balk met wit informatie vlak -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 m12 white">
+            <p>Het account {{ account.username }} kan geen gebruik maken van de NHB diensten.</p>
 
-<p>De secretaris van je NHB vereniging kan je verder helpen.</p>
+            <p>De secretaris van je NHB vereniging kan je verder helpen.</p>
+        </div>
+    </div>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-is-inactief" %}
 
 {% endblock %}
