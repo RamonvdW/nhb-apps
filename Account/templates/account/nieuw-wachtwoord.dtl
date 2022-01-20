@@ -10,52 +10,49 @@
 
 {% block pagina %}
 
-    <h4>Nieuw wachtwoord</h4>
-
-    <p>Via deze pagina kan je een nieuw wachtwoord kiezen.</p>
-
-    <div class="container z-depth-2 white">
-
-        <div class="row nhb-blauw white-text">
-            <div class="col s12 center-align">
-                <h5>Wachtwoord wijzigen</h5>
-                <p>Voor een bestaand account</p>
-            </div>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Wachtwoord wijzigen</h3>
         </div>
+    </div>
 
-        <div class="row">
-            <form class="col s12" action="{% url 'Account:nieuw-wachtwoord' %}" method="post">
-                {% csrf_token %}
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
 
-                <!-- accessibility: zorg dat password managers bij welke user dit hoort -->
-                <input type="text" name="username" value="{{ request.user.username }}" autocomplete="username" style="display:none">
+            <!-- dialoog venster -->
+            <div style="margin:50px 30px 30px 30px" class="left-align">
+                <form action="{% url 'Account:nieuw-wachtwoord' %}" method="post">
+                    {% csrf_token %}
 
-                {% if foutmelding %}
-                    <div class="row"><div class="col s12">
-                        <span class="red-text">Fout: {{ foutmelding }}</span>
-                    </div></div>
-                {% endif %}
+                    <!-- accessibility: zorg dat password managers bij welke user dit hoort -->
+                    <input type="text" name="username" value="{{ request.user.username }}" autocomplete="username" style="display:none">
 
-                {% if moet_oude_ww_weten %}
-                    <div class="row"><div class="input-field col s12">
-                        <label for="id_huidige">Huidige wachtwoord:</label>
-                        <input class="with-gap" type="password" autofocus name="huidige" value="" required id="id_huidige" autocomplete="current-password">
-                    </div></div>
-                {% endif %}
+                    {% if foutmelding %}
+                        <p class="red-text">Fout: {{ foutmelding }}</p>
+                        <p>&nbsp;</p>
+                    {% endif %}
 
-                <div class="row"><div class="input-field col s12">
-                    <label for="id_nieuwe">Nieuwe wachtwoord:</label>
-                    <input class="with-gap" type="password" name="nieuwe" value="" required id="id_nieuwe" autocomplete="new-password"{% if not moet_oude_ww_weten %} autofocus{% endif %}>
-                </div></div>
+                    {% if moet_oude_ww_weten %}
+                        <div class="input-field">
+                            <label for="id_huidige">Huidige wachtwoord:</label>
+                            <input class="with-gap" type="password" autofocus name="huidige" value="" required id="id_huidige" autocomplete="current-password">
+                        </div>
+                    {% endif %}
 
-                <div class="row"><div class="col s12">
-                    <div class="center-align">
-                        <button class="btn-nhb-blauw" type="submit">
-                            <i class="material-icons-round left">check</i>Opslaan</button>
+                    <div class="input-field">
+                        <label for="id_nieuwe">Nieuwe wachtwoord:</label>
+                        <input class="with-gap" type="password" name="nieuwe" value="" required id="id_nieuwe" autocomplete="new-password"{% if not moet_oude_ww_weten %} autofocus{% endif %}>
                     </div>
-                </div></div>
 
-            </form>
+                    <p class="center">
+                        <button class="btn-nhb-rood" type="submit">
+                            <i class="material-icons-round left">check</i>Opslaan</button>
+                    </p>
+
+                </form>
+            </div>
         </div>
     </div>
 
