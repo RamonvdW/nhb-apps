@@ -239,13 +239,20 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
         self.obj = None
+        self.competitie = None
         self.boog_pks = list()
 
     def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
         if obj:
             self.obj = obj
+            if obj.deelcompetitie:
+                self.competitie = self.obj.deelcompetitie.competitie
             # bepaal welke bogen gebruik mogen worden voor dit team type
             self.boog_pks = list(obj.team_type.boog_typen.values_list('pk', flat=True))
+        else:
+            self.obj = None
+            self.competitie = None
+            self.boog_pks = list()
 
         return super().get_form(request, obj, **kwargs)
 
@@ -260,18 +267,13 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
                                                       'sporterboog__sporter',
                                                       'sporterboog__boogtype',
                                                       'bij_vereniging')
-                                      .filter(bij_vereniging=self.obj.vereniging,
+                                      .filter(deelcompetitie__competitie=self.competitie,
+                                              bij_vereniging=self.obj.vereniging,
                                               sporterboog__boogtype__pk__in=self.boog_pks)
                                       .order_by('sporterboog__sporter__lid_nr'))
             else:
                 # Add
-                kwargs['queryset'] = (RegioCompetitieSchutterBoog
-                                      .objects
-                                      .select_related('sporterboog',
-                                                      'sporterboog__sporter',
-                                                      'sporterboog__boogtype',
-                                                      'bij_vereniging')
-                                      .order_by('sporterboog__sporter__lid_nr'))
+                kwargs['queryset'] = RegioCompetitieSchutterBoog.objects.none()
 
         elif db_field.name in ('gekoppelde_schutters', 'feitelijke_schutters'):
             if self.obj:
@@ -282,19 +284,13 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
                                                       'sporterboog__sporter',
                                                       'sporterboog__boogtype',
                                                       'deelcompetitie__nhb_rayon')
-                                      .filter(bij_vereniging=self.obj.vereniging,
+                                      .filter(deelcompetitie__competitie=self.competitie,
+                                              bij_vereniging=self.obj.vereniging,
                                               sporterboog__boogtype__pk__in=self.boog_pks)
                                       .order_by('sporterboog__sporter__lid_nr'))
             else:
                 # Add
-                kwargs['queryset'] = (KampioenschapSchutterBoog
-                                      .objects
-                                      .select_related('sporterboog',
-                                                      'sporterboog__sporter',
-                                                      'sporterboog__boogtype',
-                                                      'deelcompetitie__nhb_rayon')
-                                      .order_by('deelcompetitie__nhb_rayon__rayon_nr',
-                                                'sporterboog__sporter__lid_nr'))
+                kwargs['queryset'] = KampioenschapSchutterBoog.objects.none()
 
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
