@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from Wedstrijden.models import CompetitieWedstrijd
-from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde, LAAG_REGIO,
+from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde, LAAG_REGIO, LAAG_RK,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet,
                      RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam,
                      RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
@@ -229,6 +229,7 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
 
     list_select_related = ('deelcompetitie',
                            'deelcompetitie__nhb_rayon',
+                           'deelcompetitie__nhb_regio',
                            'deelcompetitie__competitie',
                            'vereniging',
                            'klasse',
@@ -249,21 +250,71 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
         return super().get_form(request, obj, **kwargs)
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
-
-        if db_field.name == 'tijdelijke_schutters' and self.obj:
+        if db_field.name == 'tijdelijke_schutters':
             # alleen schutters van de juiste vereniging en boogtype laten kiezen
-            kwargs['queryset'] = (RegioCompetitieSchutterBoog
-                                  .objects
-                                  .filter(bij_vereniging=self.obj.vereniging,
-                                          sporterboog__boogtype__pk__in=self.boog_pks))
+            if self.obj:
+                # Edit
+                kwargs['queryset'] = (RegioCompetitieSchutterBoog
+                                      .objects
+                                      .select_related('sporterboog',
+                                                      'sporterboog__sporter',
+                                                      'sporterboog__boogtype',
+                                                      'bij_vereniging')
+                                      .filter(bij_vereniging=self.obj.vereniging,
+                                              sporterboog__boogtype__pk__in=self.boog_pks)
+                                      .order_by('sporterboog__sporter__lid_nr'))
+            else:
+                # Add
+                kwargs['queryset'] = (RegioCompetitieSchutterBoog
+                                      .objects
+                                      .select_related('sporterboog',
+                                                      'sporterboog__sporter',
+                                                      'sporterboog__boogtype',
+                                                      'bij_vereniging')
+                                      .order_by('sporterboog__sporter__lid_nr'))
 
-        elif db_field.name in ('gekoppelde_schutters', 'feitelijke_schutters') and self.obj:
-            kwargs['queryset'] = (KampioenschapSchutterBoog
-                                  .objects
-                                  .filter(bij_vereniging=self.obj.vereniging,
-                                          sporterboog__boogtype__pk__in=self.boog_pks))
+        elif db_field.name in ('gekoppelde_schutters', 'feitelijke_schutters'):
+            if self.obj:
+                # Edit
+                kwargs['queryset'] = (KampioenschapSchutterBoog
+                                      .objects
+                                      .select_related('sporterboog',
+                                                      'sporterboog__sporter',
+                                                      'sporterboog__boogtype',
+                                                      'deelcompetitie__nhb_rayon')
+                                      .filter(bij_vereniging=self.obj.vereniging,
+                                              sporterboog__boogtype__pk__in=self.boog_pks)
+                                      .order_by('sporterboog__sporter__lid_nr'))
+            else:
+                # Add
+                kwargs['queryset'] = (KampioenschapSchutterBoog
+                                      .objects
+                                      .select_related('sporterboog',
+                                                      'sporterboog__sporter',
+                                                      'sporterboog__boogtype',
+                                                      'deelcompetitie__nhb_rayon')
+                                      .order_by('deelcompetitie__nhb_rayon__rayon_nr',
+                                                'sporterboog__sporter__lid_nr'))
 
         return super().formfield_for_manytomany(db_field, request, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        if db_field.name == 'deelcompetitie':
+            kwargs['queryset'] = (DeelCompetitie
+                                  .objects
+                                  .filter(laag=LAAG_RK)
+                                  .select_related('competitie',
+                                                  'nhb_rayon')
+                                  .order_by('competitie__pk', 'nhb_rayon__rayon_nr'))
+
+        elif db_field.name == 'klasse':
+            kwargs['queryset'] = (CompetitieKlasse
+                                  .objects
+                                  .exclude(team=None)
+                                  .select_related('team')
+                                  .order_by('team__volgorde'))
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class KampioenschapSchutterBoogAdmin(CreateOnlyAdmin):
@@ -389,7 +440,8 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
                                                       'sporterboog__boogtype')
                                       .filter(deelcompetitie=self.deelcomp,
                                               bij_vereniging=self.ver,
-                                              inschrijf_voorkeur_team=True))
+                                              inschrijf_voorkeur_team=True)
+                                      .order_by('sporterboog__sporter__lid_nr'))
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
