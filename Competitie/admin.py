@@ -301,14 +301,20 @@ class KampioenschapTeamAdmin(CreateOnlyAdmin):
                                   .filter(laag=LAAG_RK)
                                   .select_related('competitie',
                                                   'nhb_rayon')
-                                  .order_by('competitie__pk', 'nhb_rayon__rayon_nr'))
+                                  .order_by('competitie__pk',
+                                            'nhb_rayon__rayon_nr'))
 
         elif db_field.name == 'klasse':
-            kwargs['queryset'] = (CompetitieKlasse
-                                  .objects
-                                  .exclude(team=None)
-                                  .select_related('team')
-                                  .order_by('team__volgorde'))
+            if self.competitie:
+                kwargs['queryset'] = (CompetitieKlasse
+                                      .objects
+                                      .exclude(team=None)
+                                      .filter(competitie=self.competitie,
+                                              is_voor_teams_rk_bk=True)
+                                      .select_related('team')
+                                      .order_by('team__volgorde'))
+            else:
+                kwargs['queryset'] = CompetitieKlasse.objects.none()
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
