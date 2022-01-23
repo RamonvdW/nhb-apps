@@ -8,27 +8,26 @@
     </div>
 
 
-
-<!-- witruimte -->
-<div class="row center">
-    <div class="col s12">
-        <h4>Stap 3</h4>
-        <p>Ga naar je tweede-factor app en bekijk de cijfers voor "MijnHandboogsport".</p>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Stap 3</h4>
+            <p>Ga naar je tweede-factor app en bekijk de cijfers voor "MijnHandboogsport".</p>
+        </div>
     </div>
-</div>
 
 
-<!-- blauw balk met wit informatie veld -->
-<div class="row-nhb-blauw">
-    <div class="col s10 offset-s1 m12 white">
-        <p>Je hebt laten zien dat je toegang hebt tot je e-mail.</p>
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 m12 white">
+            <p>Je hebt laten zien dat je toegang hebt tot je e-mail.</p>
 
-        <p>
-            <a class="btn-nhb-rood" href="{% url 'Plein:plein' %}">
-                <i class="material-icons-round left">close</i>Sluiten</a>
-        </p>
+            <p>
+                <a class="btn-nhb-rood" href="{% url 'Plein:plein' %}">
+                    <i class="material-icons-round left">close</i>Sluiten</a>
+            </p>
+        </div>
     </div>
-</div>
 
 
 <!-- blauwe balk met informatie label : info -->
@@ -102,7 +101,6 @@
         </table>
     </div>
 </div>
-
 
 
 <!-- blauwe balk met dialoog venster -->
