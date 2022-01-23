@@ -436,7 +436,11 @@ class TestData(object):
         lid_nr = 300000
         bulk = list()
         for ver in self.vereniging.values():
-            self.regio_ver_nrs[ver.regio.regio_nr] = ver.ver_nr
+
+            try:
+                self.regio_ver_nrs[ver.regio.regio_nr].append(ver.ver_nr)
+            except KeyError:
+                self.regio_ver_nrs[ver.regio.regio_nr] = [ver.ver_nr]
 
             for _, _, voornaam, _, maak_account in soorten:
                 lid_nr += 1
@@ -1168,8 +1172,11 @@ class TestData(object):
         # for
 
         # zet 1x BB en 1x LB in een recurve team
-        deelnemers_per_boog['R'].append(deelnemers_per_boog['BB'].pop(0))
-        deelnemers_per_boog['R'].append(deelnemers_per_boog['LB'].pop(0))
+        if 'BB' in deelnemers_per_boog and len(deelnemers_per_boog['BB']) > 0:
+            deelnemers_per_boog['R'].append(deelnemers_per_boog['BB'].pop(0))
+
+        if 'LB' in deelnemers_per_boog and len(deelnemers_per_boog['LB']) > 0:
+            deelnemers_per_boog['R'].append(deelnemers_per_boog['LB'].pop(0))
 
         ag = 21.0
         ag_step = 0.72

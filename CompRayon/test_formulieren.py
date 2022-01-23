@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -39,7 +39,7 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         cls.testdata.maak_clubs_en_sporters()
         cls.testdata.maak_bondscompetities()
 
-        cls.ver_nr = cls.testdata.regio_ver_nrs[cls.regio_nr]
+        cls.ver_nr = cls.testdata.regio_ver_nrs[cls.regio_nr][0]
         cls.ver = cls.testdata.vereniging[cls.ver_nr]
 
         cls.testdata.maak_inschrijvingen_regiocompetitie(18, cls.ver_nr)
