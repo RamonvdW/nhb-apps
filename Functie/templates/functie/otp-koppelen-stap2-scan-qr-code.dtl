@@ -45,28 +45,31 @@
 
     <!-- blauw balk -->
     <div class="row-nhb-blauw">
-        <div class="col s10 offset-s1 m12 white left-align">
-            <p>Open de applicatie op je mobiel en dan:</p>
-            <p>1. Kies "<b>account toevoegen</b>" (bij Google Authenticator: druk op het plus icoon)</p>
-            <p>2. Kies "<b>Scan QR code</b>"</p>
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+                <p>Open de applicatie op je mobiel en dan:</p>
+                <p>1. Kies "<b>account toevoegen</b>" (bij Google Authenticator: druk op het plus icoon)</p>
+                <p>2. Kies "<b>Scan QR code</b>"</p>
 
-            <p>Daarna kan je onderstaande QR-code scannen met de <b>camera</b> van je mobiel of tablet. Soms moet je eerst toestemming geven om de camera te gebruiken.</p>
+                <p>Daarna kan je onderstaande QR-code scannen met de <b>camera</b> van je mobiel of tablet. Soms moet je eerst toestemming geven om de camera te gebruiken.</p>
+            </div>
         </div>
 
         <div class="col s12 nhb-blauw-hoofd" style="padding:25px">
         </div>
 
-        <div class="col s10 offset-s1 l6 offset-l3 white">
-            <h5>Scan deze QR-code</h5>
-            {{ qrcode }}    <!-- geeft plaatje in svg tags, welke met display:inline getoond wordt -->
+        <div class="col s12 l6 offset-l3">
+            <div class="white" style="padding:10px">
+                <h5>Scan deze QR-code</h5>
+                {{ qrcode }}    <!-- geeft plaatje in svg tags, welke met display:inline getoond wordt -->
 
-            <p>Als het gelukt is dan laat de applicatie de 6 cijfers zien onder het kopje "MijnHandboogsport".</p>
-            <p>
-                <a class="btn-nhb-rood" href="{{ url_stap_3 }}">
-                    <i class="material-icons-round right">arrow_forward_ios</i>Verder naar stap 3</a>
-            </p>
+                <p>Als het gelukt is dan laat de applicatie de 6 cijfers zien onder het kopje "MijnHandboogsport".</p>
+                <p>
+                    <a class="btn-nhb-rood" href="{{ url_stap_3 }}">
+                        <i class="material-icons-round right">arrow_forward_ios</i>Verder naar stap 3</a>
+                </p>
+            </div>
         </div>
-
     </div>
 
 
