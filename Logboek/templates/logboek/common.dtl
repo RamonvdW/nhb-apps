@@ -29,26 +29,28 @@
 <div class="row-nhb-blauw">
 
     <!-- witte rechthoek voor radiobuttons -->
-    <div class="col s10 offset-s1 m4 offset-m1 white left-align">
-        <ul>
-            {% for optie, url, titel, is_actief in filters %}
-            <li>
-                <label class="black-text" for="id_{{ optie }}">
-                    <input class="with-gap" type="radio" name="deel" value="{{ optie }}" required id="id_{{ optie }}" data-url="{{ url }}" {% if is_actief %}checked{% endif %}>
-                    <span>{{ titel }}</span>
-                </label>
-            </li>
-            {% endfor %}
-        </ul>
-        <p class="center">
-            <a class="btn-nhb-rood" onclick="activeer_deel()">Activeer</a>
-        </p>
+    <div class="col s12 m5">
+        <div class="white left-align" style="padding:10px; margin-bottom:15px">
+            <ul>
+                {% for optie, url, titel, is_actief in filters %}
+                <li>
+                    <label class="black-text" for="id_{{ optie }}">
+                        <input class="with-gap" type="radio" name="deel" value="{{ optie }}" required id="id_{{ optie }}" data-url="{{ url }}" {% if is_actief %}checked{% endif %}>
+                        <span>{{ titel }}</span>
+                    </label>
+                </li>
+                {% endfor %}
+            </ul>
+            <p class="center">
+                <a class="btn-nhb-rood" onclick="activeer_deel()">Activeer</a>
+            </p>
+        </div>
     </div>
 
     <!-- dialoog venster voor zoekterm -->
-    <div class="col s10 offset-s1 m6 offset-m1 white left-align z-depth-3">
-        <!-- dialoog venster -->
-        <div style="margin:50px 30px 30px 30px">
+    <div class="col s12 m7">
+        <div class="white left-align z-depth-3" style="padding:50px 30px 30px 30px">
+            <!-- dialoog venster -->
             <form method="get" action="{{ filter_url }}">
                 <div class="input-text">
                     <span>Zoek naar:</span>

@@ -19,18 +19,20 @@
 
     <!-- blauw balk -->
     <div class="row-nhb-blauw">
-        <div class="col s10 offset-s1 m12 white">
-            <p>Je hebt verzocht om {{ activiteit }}.</p>
-            <p>Als dit klopt, druk dan op onderstaande knop.</p>
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+                <p>Je hebt verzocht om {{ activiteit }}.</p>
+                <p>Als dit klopt, druk dan op onderstaande knop.</p>
 
-            <form method="post" action="{{ url }}">
-                {% csrf_token %}
-                <button class="btn-nhb-rood" type="submit" value="Ga door">
-                    <i class="material-icons-round left">check</i>Ga door</button>
-            </form>
+                <form method="post" action="{{ url }}">
+                    {% csrf_token %}
+                    <button class="btn-nhb-rood" type="submit" value="Ga door">
+                        <i class="material-icons-round left">check</i>Ga door</button>
+                </form>
 
-            <p>&nbsp;</p>
-            <p>Klopt er helemaal niets van? Sluit dan gewoon dit venster.</p>
+                <p>&nbsp;</p>
+                <p>Klopt er helemaal niets van? Sluit dan gewoon dit venster.</p>
+            </div>
         </div>
     </div>
 

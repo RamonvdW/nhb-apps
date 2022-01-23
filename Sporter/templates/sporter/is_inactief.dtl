@@ -19,10 +19,12 @@
 
     <!-- blauw balk met wit informatie vlak -->
     <div class="row-nhb-blauw">
-        <div class="col s10 offset-s1 m12 white">
-            <p>Het account {{ account.username }} kan geen gebruik maken van de NHB diensten.</p>
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+                <p>Het account {{ account.username }} kan geen gebruik maken van de NHB diensten.</p>
 
-            <p>De secretaris van je NHB vereniging kan je verder helpen.</p>
+                <p>De secretaris van je NHB vereniging kan je verder helpen.</p>
+            </div>
         </div>
     </div>
 

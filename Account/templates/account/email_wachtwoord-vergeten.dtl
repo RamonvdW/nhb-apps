@@ -19,12 +19,14 @@
 
     <!-- blauw balk met wit informatie vlak -->
     <div class="row-nhb-blauw">
-        <div class="col s10 offset-s1 m12 white">
-            <p>We hebben een e-mail gestuurd naar het door jouw opgegeven e-mailadres.</p>
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+                <p>We hebben een e-mail gestuurd naar het door jouw opgegeven e-mailadres.</p>
 
-            <p>Volg de instructies in de e-mail om je wachtwoord te wijzigen. Daarna kan je inloggen.</p>
+                <p>Volg de instructies in de e-mail om je wachtwoord te wijzigen. Daarna kan je inloggen.</p>
 
-            <p>Deze pagina kan je sluiten.</p>
+                <p>Deze pagina kan je sluiten.</p>
+            </div>
         </div>
     </div>
 

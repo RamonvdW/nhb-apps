@@ -78,9 +78,9 @@
                     <!-- ag vaststellen -->
                     {% if datum_ag_vastgesteld %}
                         <!-- template tag 'add' cannot handle missing variables -->
-                        {% include 'plein/card.dtl' with title="Aanvangsgemiddelden" text=comp_afstand|add:"m AG voor alle sporters vaststellen a.h.v. uitslag vorig seizoen (op "|add:datum_ag_vastgesteld|add:" voor het laatst gedaan)" icon="how_to_reg" url=comp.url_ag_vaststellen %}
+                        {% include 'plein/card.dtl' with title="Aanvangsgemiddelden" text="AG vaststellen voor alle sporters a.h.v. uitslag vorig seizoen (laatst gedaan op "|add:datum_ag_vastgesteld|add:")" icon="how_to_reg" url=comp.url_ag_vaststellen %}
                     {% else %}
-                        {% include 'plein/card.dtl' with title="Aanvangsgemiddelden" text=comp_afstand|add:"m AG voor alle sporters vaststellen a.h.v. uitslag vorig seizoen (eerste keer)" icon="how_to_reg" url=comp.url_ag_vaststellen %}
+                        {% include 'plein/card.dtl' with title="Aanvangsgemiddelden" text="AG vaststellen voor alle sporters a.h.v. uitslag vorig seizoen (eerste keer)" icon="how_to_reg" url=comp.url_ag_vaststellen %}
                     {% endif %}
 
                     <!-- klassengrenzen vaststellen -->

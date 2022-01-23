@@ -413,11 +413,28 @@ class E2EHelpers(TestCase):
                     msg = "Bad HTML (template: %s):" % self._get_useful_template_name(response)
                     msg += "\n   Found block-level element '%s' inside 'p'" % elem
                     msg = msg + "\n   ==> " + sub[elem_pos:elem_pos+40]
-                    self.fail(msg=msg)
+                    self.fail(msg)
             # for
             html = html[pos+3:]
             pos = html.find('<p')
         # while
+
+    def _assert_no_col_white(self, html, dtl):
+        pos = html.find("class=")
+        while pos > 0:
+            html = html[pos+6:]
+
+            # find the end of this tag
+            pos = html.find('>')
+            sub = html[:pos]
+
+            if sub.find('col s10') >= 0 and sub.find('white') >= 0 and sub.find('z-depth') < 0:
+                msg = 'Found grid col s10 + white (too much unused space on small) --> use separate div.white + padding:10px) in %s' % dtl
+                self.fail(msg)
+
+            pos = html.find("class=")
+        # while
+        pass
 
     def assert_html_ok(self, response):
         """ Doe een aantal basic checks op een html response """
@@ -444,6 +461,7 @@ class E2EHelpers(TestCase):
         self.assert_link_quality(html, dtl)
         self.assert_scripts_clean(html, dtl)
         self._assert_no_div_in_p(response, html)
+        self._assert_no_col_white(html, dtl)
 
         urls = self.extract_all_urls(response)
         for url in urls:

@@ -21,11 +21,13 @@
 
     <!-- blauw balk met het stappenplan -->
     <div class="row-nhb-blauw">
-        <div class="col s10 offset-s1 l8 offset-l2 xl6 offset-xl3 white left-align">
-            <h5>Stappenplan</h5>
-            <p class="valign-wrapper nhb-rood-text"><i class="small material-icons-round">looks_one</i> <b>Installeer een applicatie op je mobiel of tablet.</b></p>
-            <p class="valign-wrapper"><i class="small material-icons-round">looks_two</i> Scan een QR-code om de koppeling te maken met MijnHandboogsport.</p>
-            <p class="valign-wrapper"><i class="small material-icons-round">looks_3</i> Voer 6 cijfers in om koppeling te controleren.</p>
+        <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
+            <div class="white left-align" style="padding:10px">
+                <h5>Stappenplan</h5>
+                <p class="valign-wrapper nhb-rood-text"><i class="small material-icons-round">looks_one</i> <b>Installeer een applicatie op je mobiel of tablet.</b></p>
+                <p class="valign-wrapper"><i class="small material-icons-round">looks_two</i> Scan een QR-code om de koppeling te maken met MijnHandboogsport.</p>
+                <p class="valign-wrapper"><i class="small material-icons-round">looks_3</i> Voer 6 cijfers in om koppeling te controleren.</p>
+            </div>
         </div>
     </div>
 

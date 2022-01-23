@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -496,7 +496,7 @@ class TestCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht % comp.pk)
         urls = self.extract_all_urls(resp)
         self.assertTrue(self.url_ag_vaststellen_afstand % comp.afstand in urls)
-        self.assertNotContains(resp, "voor het laatst gedaan")
+        self.assertNotContains(resp, "laatst gedaan op")
 
         # verander de fase van de 25m competitie zodat we verschillen hebben
         comp = Competitie.objects.get(afstand=25, is_afgesloten=False)
@@ -534,7 +534,7 @@ class TestCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht % comp.pk)
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertTrue(self.url_ag_vaststellen_afstand % 18 in urls)
-        self.assertContains(resp, "voor het laatst gedaan")
+        self.assertContains(resp, "laatst gedaan op")
 
     def test_ag_vaststellen_cornercases(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
@@ -657,8 +657,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/klassengrenzen-tonen.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, ' zijn nog niet vastgesteld')
-        self.assertContains(resp, 'De klassengrenzen voor de ')
+        self.assertContains(resp, 'De klassengrenzen zijn nog niet vastgesteld')
 
         # klassengrenzen vaststellen (18m en 25m)
         # s1 = timezone.now()

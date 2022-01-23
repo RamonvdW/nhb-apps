@@ -32,14 +32,15 @@
 
         <!-- blauw balk met wit informatie veld -->
         <div class="row-nhb-blauw">
-            <div class="col s10 offset-s1 m12 white">
-
-                <h5 class="red-text">Controleer dat onderstaande gegevens juist zijn.</h5>
-                <p>Weet je zeker dat de <b>aanvangsgemiddelden</b> recentelijk vastgesteld zijn aan de hand van de uitslagen van vorig seizoen?</p>
-                <p>Op <b>{{ bb_ag_nieuwste_datum }}</b> zijn de aanvangsgemiddelden voor het laatste vastgesteld.</p>
-                <p>
-                    <a class="btn-nhb-blauw" href="{% url 'Competitie:ag-vaststellen-afstand' afstand=comp.afstand %}">Naar de aanvangsgemiddelden</a>
-                </p>
+            <div class="col s12">
+                <div class="white" style="padding:10px">
+                    <h5 class="red-text">Controleer dat onderstaande gegevens juist zijn.</h5>
+                    <p>Weet je zeker dat de <b>aanvangsgemiddelden</b> recentelijk vastgesteld zijn aan de hand van de uitslagen van vorig seizoen?</p>
+                    <p>Op <b>{{ bb_ag_nieuwste_datum }}</b> zijn de aanvangsgemiddelden voor het laatste vastgesteld.</p>
+                    <p>
+                        <a class="btn-nhb-blauw" href="{% url 'Competitie:ag-vaststellen-afstand' afstand=comp.afstand %}">Naar de aanvangsgemiddelden</a>
+                    </p>
+                </div>
             </div>
         </div>
 

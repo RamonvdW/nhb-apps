@@ -25,11 +25,13 @@
 
     <!-- blauw balk met het stappenplan -->
     <div class="row-nhb-blauw">
-        <div class="col s10 offset-s1 white left-align">
-            <h5>Stappenplan</h5>
-            <p class="valign-wrapper"><i class="small material-icons-round">looks_one</i> Installeer een applicatie op je mobiel of tablet.</p>
-            <p class="valign-wrapper nhb-rood-text"><i class="small material-icons-round">looks_two</i> <b>Scan een QR-code om de koppeling te maken met MijnHandboogsport.</b></p>
-            <p class="valign-wrapper"><i class="small material-icons-round">looks_3</i> Voer 6 cijfers in om koppeling te controleren.</p>
+        <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
+            <div class="white left-align" style="padding:10px">
+                <h5>Stappenplan</h5>
+                <p class="valign-wrapper"><i class="small material-icons-round">looks_one</i> Installeer een applicatie op je mobiel of tablet.</p>
+                <p class="valign-wrapper nhb-rood-text"><i class="small material-icons-round">looks_two</i> <b>Scan een QR-code om de koppeling te maken met MijnHandboogsport.</b></p>
+                <p class="valign-wrapper"><i class="small material-icons-round">looks_3</i> Voer 6 cijfers in om koppeling te controleren.</p>
+            </div>
         </div>
     </div>
 
@@ -77,23 +79,27 @@
 
     <!-- blauw balk -->
     <div class="row-nhb-blauw">
-        <div class="col s10 offset-s1 m12 white left-align">
-            <p>Gebruik je een browser plug-in, klik dan op het menu van de plug-in en kies "Scan QR code". Markeer daarna met je muis de QR code op het scherm (teken een vierkant om het plaatje).</p>
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+                <p>Gebruik je een browser plug-in, klik dan op het menu van de plug-in en kies "Scan QR code". Markeer daarna met je muis de QR code op het scherm (teken een vierkant om het plaatje).</p>
+            </div>
         </div>
 
         <div class="col s12 nhb-blauw-hoofd" style="padding:25px">
         </div>
 
-        <div class="col s10 offset-s1 m12 white left-align">
-            <p>Als het niet lukt om de QR-code te scannen, dan is het ook mogelijk om handmatig een koppeling te maken.</p>
-            <p>Hiervoor moet je deze code over tikken in de applicatie:</p>
-            <p class="center-align"><b>{{ otp_secret }}</b></p>
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+                <p>Als het niet lukt om de QR-code te scannen, dan is het ook mogelijk om handmatig een koppeling te maken.</p>
+                <p>Hiervoor moet je deze code over tikken in de applicatie:</p>
+                <p class="center-align"><b>{{ otp_secret }}</b></p>
 
-            <p>Open de applicatie op je mobiel, kies "account toevoegen" (bij Google Authenticator: druk op het plus icoon) en kies voor "handmatig invoeren".</p>
-            <p>Onder "Issuer" schrijf je "MijnHandboogsport" (eventueel gevolgd door je NHB nummer) en onder "secret" tik je bovenstaande code over.</p>
+                <p>Open de applicatie op je mobiel, kies "account toevoegen" (bij Google Authenticator: druk op het plus icoon) en kies voor "handmatig invoeren".</p>
+                <p>Onder "Issuer" schrijf je "MijnHandboogsport" (eventueel gevolgd door je NHB nummer) en onder "secret" tik je bovenstaande code over.</p>
 
-            <p>Gebruik je een browser plug-in, klik dan op het menu van de plug-in en kies "wijzig" (het pennetje) en daarna "toevoegen" (het plus icoon). Kies daarna "handmatig invoeren".</p>
-            <p>Onder "Issuer" schrijf je "MijnHandboogsport" (eventueel gevolgd door je NHB nummer) en onder "secret" tik je bovenstaande code over.</p>
+                <p>Gebruik je een browser plug-in, klik dan op het menu van de plug-in en kies "wijzig" (het pennetje) en daarna "toevoegen" (het plus icoon). Kies daarna "handmatig invoeren".</p>
+                <p>Onder "Issuer" schrijf je "MijnHandboogsport" (eventueel gevolgd door je NHB nummer) en onder "secret" tik je bovenstaande code over.</p>
+            </div>
         </div>
     </div>
 

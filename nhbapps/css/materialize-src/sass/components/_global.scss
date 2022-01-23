@@ -430,7 +430,7 @@ table {
   }
 
   &.centered {
-    thead tr th, tbody tr td {
+    thead tr th, tbody tr td, tbody tr th {
       text-align: center;
     }
   }
