@@ -130,6 +130,17 @@ class KlassengrenzenTonenView(View):
             context['aantal_pijlen'] = aantal_pijlen
             context['rk_bk_klassen_vastgesteld'] = comp.klassengrenzen_vastgesteld_rk_bk
 
+            context['aantal_indiv_regels'] = 2 + len(context['indiv_klassen'])
+
+            context['aantal_team_rk_bk_regels'] = 2
+
+            for team in context['team_klassen']:
+                if team.is_voor_teams_rk_bk:
+                    context['aantal_team_rk_bk_regels'] += 1
+            # for
+
+            context['aantal_team_regels'] = 2 + len(context['team_klassen']) - (context['aantal_team_rk_bk_regels'] - 2)
+
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return render(request, self.template_name, context)
 

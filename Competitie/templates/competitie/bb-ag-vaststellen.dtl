@@ -48,12 +48,12 @@
             <div class="col s10 offset-s1 white">
                 <p>Als bovenstaande gegevens correct zijn, druk dan op de volgende knop:</p>
 
-                <p>
-                    <form method="post" action="{{ url_vaststellen }}">
-                        {% csrf_token %}
-                        <input class="btn-nhb-rood" name="button_vaststellen" type="submit" value="Ja, stel de aanvangsgemiddelden vast">
-                    </form>
-                </p>
+                <form method="post" action="{{ url_vaststellen }}">
+                    {% csrf_token %}
+                    <input class="btn-nhb-rood" name="button_vaststellen" type="submit" value="Ja, stel de aanvangsgemiddelden vast">
+                </form>
+
+                <br>
             </div>
 
         {% endif %}
