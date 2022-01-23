@@ -292,6 +292,8 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         datum = wanneer_ag_vastgesteld(comp.afstand)
         if datum:
             context['bb_ag_nieuwste_datum'] = localize(datum.date())
+        else:
+            context['bb_ag_nieuwste_datum'] = '????'
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return render(request, self.template_name, context)
