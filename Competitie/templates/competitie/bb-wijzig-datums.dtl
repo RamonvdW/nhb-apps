@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,7 +9,6 @@
 {% block title %}Competitie datums{% endblock %}
 
 {% block pagina %}
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-wijzig-datums" %}
 
     <script type="application/javascript">
 
@@ -113,100 +112,110 @@
         }
     </script>
 
-    <h4>Competitie datums</h4>
-
-    <p>Op deze pagina kan je de belangrijke datums aanpassen voor de <b>{{ competitie }}</b>.</p>
-
-    <p>Klik op de datum om deze te wijzigen.</p>
-
-    <table class="white">
-        <thead>
-            <tr>
-                <th>Beschrijving</th>
-                <th>Week notatie</th>
-                <th>Datum</th>
-            </tr>
-        </thead>
-        <tr>
-            <td>Begin fase B (inschrijven)</td>
-            <td id="weeknr1"></td>
-            <td><input type="text" class="nl_datepicker" id="datum1" onchange="gewijzigd()"></td>
-        </tr>
-
-        <tr>
-            <td colspan="3"><b>Regiocompetitie</b></td>
-        </tr>
-
-        <tr>
-            <td>Begin fase C</td>
-            <td id="weeknr2"></td>
-            <td><input type="text" class="nl_datepicker" id="datum2" onchange="gewijzigd()"></td>
-        </tr>
-        <tr>
-            <td>Begin fase D</td>
-            <td id="weeknr3"></td>
-            <td><input type="text" class="nl_datepicker" id="datum3" onchange="gewijzigd()"></td>
-        </tr>
-        <tr>
-            <td>Begin fase E (wedstrijden)</td>
-            <td id="weeknr4"></td>
-            <td><input type="text" class="nl_datepicker" id="datum4" onchange="gewijzigd()"></td>
-        </tr>
-        <tr>
-            <td>Begin fase F</td>
-            <td id="weeknr5"></td>
-            <td><input type="text" class="nl_datepicker" id="datum5" onchange="gewijzigd()"></td>
-        </tr>
-
-        <tr>
-            <td colspan="3"><b>Rayonkampioenschappen</b></td>
-        </tr>
-
-        <tr>
-            <td>Begin fase J (indicatief)</td>
-            <td id="weeknr6"></td>
-            <td><input type="text" class="nl_datepicker" id="datum6" onchange="gewijzigd()"></td>
-        </tr>
-
-        <tr>
-            <td>Begin fase L (wedstrijden)</td>
-            <td id="weeknr7"></td>
-            <td><input type="text" class="nl_datepicker" id="datum7" onchange="gewijzigd()"></td>
-        </tr>
-
-        <tr>
-            <td>Begin fase M</td>
-            <td id="weeknr8"></td>
-            <td><input type="text" class="nl_datepicker" id="datum8" onchange="gewijzigd()"></td>
-        </tr>
-
-        <tr>
-            <td colspan="3"><b>Bondskampioenschappen</b></td>
-        </tr>
-
-        <tr>
-            <td>Begin fase Q (wedstrijden)</td>
-            <td id="weeknr9"></td>
-            <td><input type="text" class="nl_datepicker" id="datum9" onchange="gewijzigd()"></td>
-        </tr>
-
-        <tr>
-            <td>Begin fase R</td>
-            <td id="weeknr10"></td>
-            <td><input type="text" class="nl_datepicker" id="datum10" onchange="gewijzigd()"></td>
-        </tr>
-
-    </table>
-
-    <div class="fixed-action-btn" style="display: none">
-        <button id="opslaan_knop" class="btn-nhb-rood" onclick="post_datums()" disabled>
-            <i class="material-icons-round left">check</i>Opslaan</button>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Competitie datums</h3>
+            <p>voor de <b>{{ comp }}</b></p>
+        </div>
     </div>
 
-    <p>
-        <a class="btn-nhb-blauw" href="{% url 'Competitie:overzicht' comp_pk=comp.pk %}">
-            <i class="material-icons-round left">close</i>Terug</a>
-    </p>
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 white z-depth-3">
+
+            <!-- dialoog venster -->
+            <div style="margin:50px 30px 30px 30px" class="left-align">
+
+                <table class="white">
+                    <thead>
+                        <tr>
+                            <th>Beschrijving</th>
+                            <th>Week notatie</th>
+                            <th>Datum</th>
+                        </tr>
+                    </thead>
+                    <tr>
+                        <td>Begin fase B (inschrijven)</td>
+                        <td id="weeknr1"></td>
+                        <td><input type="text" class="nl_datepicker" id="datum1" onchange="gewijzigd()"></td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="3"><b>Regiocompetitie</b></td>
+                    </tr>
+
+                    <tr>
+                        <td>Begin fase C</td>
+                        <td id="weeknr2"></td>
+                        <td><input type="text" class="nl_datepicker" id="datum2" onchange="gewijzigd()"></td>
+                    </tr>
+                    <tr>
+                        <td>Begin fase D</td>
+                        <td id="weeknr3"></td>
+                        <td><input type="text" class="nl_datepicker" id="datum3" onchange="gewijzigd()"></td>
+                    </tr>
+                    <tr>
+                        <td>Begin fase E (wedstrijden)</td>
+                        <td id="weeknr4"></td>
+                        <td><input type="text" class="nl_datepicker" id="datum4" onchange="gewijzigd()"></td>
+                    </tr>
+                    <tr>
+                        <td>Begin fase F</td>
+                        <td id="weeknr5"></td>
+                        <td><input type="text" class="nl_datepicker" id="datum5" onchange="gewijzigd()"></td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="3"><b>Rayonkampioenschappen</b></td>
+                    </tr>
+
+                    <tr>
+                        <td>Begin fase J (indicatief)</td>
+                        <td id="weeknr6"></td>
+                        <td><input type="text" class="nl_datepicker" id="datum6" onchange="gewijzigd()"></td>
+                    </tr>
+
+                    <tr>
+                        <td>Begin fase L (wedstrijden)</td>
+                        <td id="weeknr7"></td>
+                        <td><input type="text" class="nl_datepicker" id="datum7" onchange="gewijzigd()"></td>
+                    </tr>
+
+                    <tr>
+                        <td>Begin fase M</td>
+                        <td id="weeknr8"></td>
+                        <td><input type="text" class="nl_datepicker" id="datum8" onchange="gewijzigd()"></td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="3"><b>Bondskampioenschappen</b></td>
+                    </tr>
+
+                    <tr>
+                        <td>Begin fase Q (wedstrijden)</td>
+                        <td id="weeknr9"></td>
+                        <td><input type="text" class="nl_datepicker" id="datum9" onchange="gewijzigd()"></td>
+                    </tr>
+
+                    <tr>
+                        <td>Begin fase R</td>
+                        <td id="weeknr10"></td>
+                        <td><input type="text" class="nl_datepicker" id="datum10" onchange="gewijzigd()"></td>
+                    </tr>
+
+                </table>
+
+                <div class="fixed-action-btn" style="display: none">
+                    <button id="opslaan_knop" class="btn-nhb-rood" onclick="post_datums()" disabled>
+                        <i class="material-icons-round left">check</i>Opslaan</button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
 
     <!-- initialisatie van de datum pickers -->
     <script type="application/javascript">
@@ -282,8 +291,6 @@
         })
     </script>
 
-{% endblock %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-wijzig-datums" %}
 
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}
