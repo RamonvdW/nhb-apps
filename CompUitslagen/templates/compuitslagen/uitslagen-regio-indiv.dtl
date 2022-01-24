@@ -101,27 +101,29 @@
             </p>
         </div>
 
-        <div class="col s8 offset-s2 m7 offset-m1 l5 offset-l1 white left-align">
-            <p><b>Kies een vereniging:</b></p>
-            <ul id="id_ver">
-                <li>
-                    <label class="black-text" for="id_ver_0">
-                        <input class="with-gap" type="radio" name="ver" value="0" required id="id_ver_0" checked>
-                        <span>Alle</span>
-                    </label>
-                </li>
-                {% for ver in ver_filters %}
+        <div class="col s12 m7 offset-m1 l5 offset-l1">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Kies een vereniging:</b></p>
+                <ul id="id_ver">
                     <li>
-                        <label class="black-text" for="id_{{ ver.sel }}">
-                            <input class="with-gap" type="radio" name="ver" value="{{ ver.sel }}" required id="id_{{ ver.sel }}" data-url="{{ ver.zoom_url }}">
-                            <span>[{{ ver.ver_nr }}]&nbsp;&nbsp;{{ ver.naam }}</span>
+                        <label class="black-text" for="id_ver_0">
+                            <input class="with-gap" type="radio" name="ver" value="0" required id="id_ver_0" checked>
+                            <span>Alle</span>
                         </label>
                     </li>
-                {% endfor %}
-            </ul>
-            <p style="margin-left:35px">
-                <a class="btn-nhb-rood" onclick="keuze_gemaakt('ver')">Activeer</a>
-            </p>
+                    {% for ver in ver_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ ver.sel }}">
+                                <input class="with-gap" type="radio" name="ver" value="{{ ver.sel }}" required id="id_{{ ver.sel }}" data-url="{{ ver.zoom_url }}">
+                                <span>[{{ ver.ver_nr }}]&nbsp;&nbsp;{{ ver.naam }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('ver')">Activeer</a>
+                </p>
+            </div>
         </div>
     </div>
 
@@ -129,8 +131,10 @@
         <p>&nbsp;</p>
 
         <div class="row">
-            <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
-                <p>Er is besloten een uitzondering te maken voor de {{ comp }}.<br>Om deel te mogen nemen aan de Rayonkampioenschappen moeten <b>{{ comp.aantal_scores_voor_rk_deelname }} scores</b> neergezet zijn.<br>Het totaal en gemiddelde hieronder is daarom berekend over de <b>beste {{ comp.aantal_scores_voor_rk_deelname }} scores</b>.</p>
+            <div style="padding:10px">
+                <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
+                    <p>Er is besloten een uitzondering te maken voor de {{ comp }}.<br>Om deel te mogen nemen aan de Rayonkampioenschappen moeten <b>{{ comp.aantal_scores_voor_rk_deelname }} scores</b> neergezet zijn.<br>Het totaal en gemiddelde hieronder is daarom berekend over de <b>beste {{ comp.aantal_scores_voor_rk_deelname }} scores</b>.</p>
+                </div>
             </div>
         </div>
 
@@ -145,13 +149,15 @@
                     <td colspan="2"><!-- rank, naam --></td>
                     <td class="hide-on-small-only"><!-- vereniging --></td>
                     <td><!-- gemiddelde --></td>
-                    <td class="right-align smal">888</td>
-                    <td class="right-align smal">888</td>
-                    <td class="right-align smal">888</td>
-                    <td class="right-align smal">888</td>
-                    <td class="right-align smal">888</td>
-                    <td class="right-align smal">888</td>
-                    <td class="right-align smal">888</td>
+                    <td class="hide-on-med-and-up"><!-- scores --></td>
+                    <td class="right-align smal hide-on-small-only">888</td>
+                    <td class="right-align smal hide-on-small-only">888</td>
+                    <td class="right-align smal hide-on-small-only">888</td>
+                    <td class="right-align smal hide-on-small-only">888</td>
+                    <td class="right-align smal hide-on-small-only">888</td>
+                    <td class="right-align smal hide-on-small-only">888</td>
+                    <td class="right-align smal hide-on-small-only">888</td>
+                    <td class="right-align smal hide-on-small-only">888</td>
                     <td class="right-align hide-on-small-only"><!-- totaal --></td>
                     <td class="nhb-table-zijrand"></td>
                 </tr>
@@ -160,11 +166,13 @@
             {% if obj.break_klasse %}
                 {% if not obj.is_eerste_groep %}
                     <tr>
-                        <td colspan="14" class="nhb-table-onderrand"></td>
+                        <td class="nhb-table-onderrand hide-on-small-only" colspan="14"></td>
+                        <td class="nhb-table-onderrand hide-on-med-and-up" colspan="8" ></td>
                     </tr>
                 {% endif %}
                 <tr>
-                    <td colspan="14" class="center-align"><h5>{{ obj.klasse_str }}</h5></td>
+                    <td class="center-align hide-on-small-only" colspan="14"><h5>{{ obj.klasse_str }}</h5></td>
+                    <td class="center-align hide-on-med-and-up" colspan="8" ><h5>{{ obj.klasse_str }}</h5></td>
                 </tr>
                 <tr class="nhb-table-header">
                     <td class="nhb-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
@@ -172,7 +180,8 @@
                     <th>Sporter</th>
                     <th class="hide-on-small-only">Vereniging</th>
                     <th class="center-align">Gemiddelde</th>
-                    <th class="center-align" colspan="7">Scores</th>
+                    <th class="right-align hide-on-med-and-up">Scores</th>
+                    <th class="center-align hide-on-small-only" colspan="7">Scores</th>
                     <th class="right-align hide-on-small-only">Totaal</th>
                     <td class="nhb-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
                 </tr>
@@ -183,19 +192,28 @@
                 <td class="smal">{{ obj.naam_str }}</td>
                 <td class="smal hide-on-small-only">{{ obj.ver_str }}</td>
                 <td class="center-align smal">{{ obj.gemiddelde }}</td>
-                <td class="right-align smal">{% if obj.laagste_score_nr == 1 %}<del>{{ obj.score1 }}</del>{% else %}{{ obj.score1 }}{% endif %}</td>
-                <td class="right-align smal">{% if obj.laagste_score_nr == 2 %}<del>{{ obj.score2 }}</del>{% else %}{{ obj.score2 }}{% endif %}</td>
-                <td class="right-align smal">{% if obj.laagste_score_nr == 3 %}<del>{{ obj.score3 }}</del>{% else %}{{ obj.score3 }}{% endif %}</td>
-                <td class="right-align smal">{% if obj.laagste_score_nr == 4 %}<del>{{ obj.score4 }}</del>{% else %}{{ obj.score4 }}{% endif %}</td>
-                <td class="right-align smal">{% if obj.laagste_score_nr == 5 %}<del>{{ obj.score5 }}</del>{% else %}{{ obj.score5 }}{% endif %}</td>
-                <td class="right-align smal">{% if obj.laagste_score_nr == 6 %}<del>{{ obj.score6 }}</del>{% else %}{{ obj.score6 }}{% endif %}</td>
-                <td class="right-align smal">{% if obj.laagste_score_nr == 7 %}<del>{{ obj.score7 }}</del>{% else %}{{ obj.score7 }}{% endif %}</td>
+                <td class="right-align hide-on-med-and-up">
+{% if obj.laagste_score_nr == 1 %}<del>{{ obj.score1 }}</del>{% else %}{{ obj.score1 }}{% endif %}<br>
+{% if obj.laagste_score_nr == 2 %}<del>{{ obj.score2 }}</del>{% else %}{{ obj.score2 }}{% endif %}<br>
+{% if obj.laagste_score_nr == 3 %}<del>{{ obj.score3 }}</del>{% else %}{{ obj.score3 }}{% endif %}<br>
+{% if obj.laagste_score_nr == 4 %}<del>{{ obj.score4 }}</del>{% else %}{{ obj.score4 }}{% endif %}<br>
+{% if obj.laagste_score_nr == 5 %}<del>{{ obj.score5 }}</del>{% else %}{{ obj.score5 }}{% endif %}<br>
+{% if obj.laagste_score_nr == 6 %}<del>{{ obj.score6 }}</del>{% else %}{{ obj.score6 }}{% endif %}<br>
+{% if obj.laagste_score_nr == 7 %}<del>{{ obj.score7 }}</del>{% else %}{{ obj.score7 }}{% endif %}</td>
+                <td class="right-align smal hide-on-small-only">{% if obj.laagste_score_nr == 1 %}<del>{{ obj.score1 }}</del>{% else %}{{ obj.score1 }}{% endif %}</td>
+                <td class="right-align smal hide-on-small-only">{% if obj.laagste_score_nr == 2 %}<del>{{ obj.score2 }}</del>{% else %}{{ obj.score2 }}{% endif %}</td>
+                <td class="right-align smal hide-on-small-only">{% if obj.laagste_score_nr == 3 %}<del>{{ obj.score3 }}</del>{% else %}{{ obj.score3 }}{% endif %}</td>
+                <td class="right-align smal hide-on-small-only">{% if obj.laagste_score_nr == 4 %}<del>{{ obj.score4 }}</del>{% else %}{{ obj.score4 }}{% endif %}</td>
+                <td class="right-align smal hide-on-small-only">{% if obj.laagste_score_nr == 5 %}<del>{{ obj.score5 }}</del>{% else %}{{ obj.score5 }}{% endif %}</td>
+                <td class="right-align smal hide-on-small-only">{% if obj.laagste_score_nr == 6 %}<del>{{ obj.score6 }}</del>{% else %}{{ obj.score6 }}{% endif %}</td>
+                <td class="right-align smal hide-on-small-only">{% if obj.laagste_score_nr == 7 %}<del>{{ obj.score7 }}</del>{% else %}{{ obj.score7 }}{% endif %}</td>
                 <td class="right-align hide-on-small-only">{{ obj.totaal }}</td>
             </tr>
 
         {% endfor %}
         <tr>
-            <td colspan="14" class="nhb-table-onderrand"></td>
+            <td class="nhb-table-onderrand hide-on-small-only" colspan="14"></td>
+            <td class="nhb-table-onderrand hide-on-med-and-up" colspan="8" ></td>
         </tr>
     </table>
 
