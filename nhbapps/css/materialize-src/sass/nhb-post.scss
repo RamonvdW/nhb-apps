@@ -1,5 +1,5 @@
 
-// Copyright (c) 2020-2021 Ramon van der Winkel.
+// Copyright (c) 2020-2022 Ramon van der Winkel.
 // All rights reserved.
 // Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -214,4 +214,38 @@
 }
 
 
+//-----------------------------------
+// broodkruimels
+//
+.broodkruimels-back {
+  padding: 3px;
+  font-size: 11px;
+  vertical-align: middle;
+  border: 1px solid #03628c;
+  border-radius: $button-radius;
+  display: inline-block;
+  -webkit-tap-highlight-color: transparent; // Gets rid of tap active state
+  outline: 0;
+  box-shadow: none;
+  background-color: transparent;
+  color: #03628c;         // donker blauw;
+  cursor: pointer;
+
+  &:focus, &:hover {
+    border: 2px solid #03628c;
+    padding: 2px;
+    transition: .25s;
+  }
+}
+
+.broodkruimels-link {
+  font-size:13px;
+  margin-right:5px;
+
+  &:focus, &:hover {
+    color: #03628c;
+    text-decoration:underline;
+    transition: .25s;
+  }
+}
 // end of file

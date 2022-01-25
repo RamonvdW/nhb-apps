@@ -140,6 +140,11 @@ class RecordsOverzichtView(ListView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+
+        context['kruimels'] = (
+            (None, 'Records'),
+        )
+
         menu_dynamics(self.request, context, actief='records')
         return context
 
@@ -269,6 +274,12 @@ class RecordsZoekView(ListView):
         context['have_searched'] = self.get_zoekterm != ""
         context['zoekterm'] = self.get_zoekterm
         context['records_zoek_url'] = reverse('Records:zoek')
+
+        context['kruimels'] = (
+            (reverse('Records:overzicht'), 'Records'),
+            (None, 'Zoek')
+        )
+
         menu_dynamics(self.request, context, actief='records')
         return context
 
@@ -291,7 +302,7 @@ class RecordsVerbeterbaarKiesDisc(ListView):
         for obj in objs:
             obj.titel = disc2str[obj.discipline]
             obj.img_src = DISCIPLINE_TO_ICON[obj.discipline]
-            obj.tekst = "Toon alle verbeterbare records van de %s discipline." % obj.titel
+            obj.tekst = "Toon alle verbeterbare records van de discipline %s." % obj.titel
 
             url_disc = disc2url[obj.discipline]
             obj.url = reverse('Records:indiv-verbeterbaar-disc', kwargs={'disc': url_disc})
@@ -302,6 +313,12 @@ class RecordsVerbeterbaarKiesDisc(ListView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+
+        context['kruimels'] = (
+            (reverse('Records:overzicht'), 'Records'),
+            (None, 'Verbeterbaar')
+        )
+
         menu_dynamics(self.request, context, actief='records')
         return context
 
@@ -397,14 +414,18 @@ class RecordsVerbeterbaarInDiscipline(ListView):
             extra.append('boog=' + boogtype)
         if leeftijd != 'alles':
             extra.append('leeftijdsklasse=' + leeftijd)
+
         context['geslacht'] = list()
-        for geslacht_key in self.geslacht2filter.keys():
+        for geslacht_key, geslacht_filter in self.geslacht2filter.items():
             obj = SimpleNamespace()
-            obj.button_str = geslacht_key
-            if geslacht != geslacht_key:
-                obj.url = self.maak_url(base_url, extra, 'geslacht', geslacht_key)
-            else:
-                obj.url = None
+            obj.sel = 'geslacht_' + geslacht_filter
+            try:
+                obj.beschrijving = gesl2str[geslacht_filter]
+            except KeyError:
+                obj.beschrijving = 'Alle'
+            if geslacht == geslacht_key:
+                obj.selected = True
+            obj.url = self.maak_url(base_url, extra, 'geslacht', geslacht_key)
             context['geslacht'].append(obj)
         # for
 
@@ -413,14 +434,18 @@ class RecordsVerbeterbaarInDiscipline(ListView):
             extra.append('geslacht=' + geslacht)
         if leeftijd != 'alles':
             extra.append('leeftijdsklasse=' + leeftijd)
+
         context['bogen'] = list()
-        for boogtype_key in self.boogtype2filter.keys():
+        for boogtype_key, boogtype_filter in self.boogtype2filter.items():
             obj = SimpleNamespace()
-            obj.button_str = boogtype_key
-            if boogtype != boogtype_key:
-                obj.url = self.maak_url(base_url, extra, 'boog', boogtype_key)
-            else:
-                obj.url = None
+            obj.sel = "boog_" + boogtype_filter
+            try:
+                obj.beschrijving = makl2str[boogtype_filter]
+            except KeyError:
+                obj.beschrijving = 'Alle'
+            if boogtype == boogtype_key:
+                obj.selected = True
+            obj.url = self.maak_url(base_url, extra, 'boog', boogtype_key)
             context['bogen'].append(obj)
         # for
 
@@ -429,19 +454,23 @@ class RecordsVerbeterbaarInDiscipline(ListView):
             extra.append('boog=' + boogtype)
         if geslacht != 'alles':
             extra.append('geslacht=' + geslacht)
+
         context['leeftijd'] = list()
-        for leeftijd_key in self.leeftijd2filter.keys():
+        for leeftijd_key, leeftijd_filter in self.leeftijd2filter.items():
 
             # skip de 'para' knop tenzij het voor Outdoor is
             if leeftijd_key == 'para' and discipline != 'OD':
                 continue
 
             obj = SimpleNamespace()
-            obj.button_str = leeftijd_key
-            if leeftijd != leeftijd_key:
-                obj.url = self.maak_url(base_url, extra, 'leeftijdsklasse', leeftijd_key)
-            else:
-                obj.url = None
+            obj.sel = 'lcat_' + leeftijd_filter
+            try:
+                obj.beschrijving = lcat2str[leeftijd_filter]
+            except KeyError:
+                obj.beschrijving = 'Alle'
+            if leeftijd == leeftijd_key:
+                obj.selected = True
+            obj.url = self.maak_url(base_url, extra, 'leeftijdsklasse', leeftijd_key)
             context['leeftijd'].append(obj)
         # for
 
@@ -453,6 +482,14 @@ class RecordsVerbeterbaarInDiscipline(ListView):
                 context['toon_para_kolom'] = True
                 break
         # for
+
+        context['aantal_regels'] = len(context['object_list']) + 2
+
+        context['kruimels'] = (
+            (reverse('Records:overzicht'), 'Records'),
+            (reverse('Records:indiv-verbeterbaar'), 'Verbeterbaar'),
+            (None, context['beschrijving'])
+        )
 
         menu_dynamics(self.request, context, actief='records')
         return context

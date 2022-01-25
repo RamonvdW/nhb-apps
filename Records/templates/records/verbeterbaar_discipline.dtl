@@ -6,74 +6,122 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Handboogsport Records{% endblock %}
+{% block title %}Verbeterbare Records{% endblock %}
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-alle-verbeterbaar" %}
+    <script type="application/javascript">
+        function keuze_gemaakt(groep) {
 
-    <h4>Nederlandse Handboog<wbr>sport Records</h4>
+            // TODO: sta wijziging in meerdere radiobuttons tegelijk toe: construeer de URL hier
 
-    <p>Deze pagina toont de nederlandse handboogsport records voor de discipline <b>{{ beschrijving }}</b> die verbeterbaar zijn.</p>
+            const selector = "input[type='radio'][name=" + groep + "]:checked"
+            const el = document.querySelector(selector)
+            const url = el.dataset.url
 
-    <p>Filter op geslacht, wedstrijdboog of leeftijdsklasse:</p>
+            if (url.length > 0)
+                window.location.href = url
+        }
+    </script>
 
-    <div class="selectie-knoppen">
-        <div class="white shrink-wrap-5">
-            {% for obj in geslacht %}
-                {% if obj.url %}
-                    <a class="margin-5 btn-outline" href="{{ obj.url }}">{{ obj.button_str }}</a>
-                {% else %}
-                    <a class="margin-5 btn-nhb-blauw" href="#">{{ obj.button_str }}</a>
-                {% endif %}
-            {% endfor %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Verbeterbare Records</h3>
+            <p>Nederlandse handboogsport records voor de discipline <b>{{ beschrijving }}</b>.</p>
         </div>
     </div>
 
-    <div class="selectie-knoppen">
-        <div class="white shrink-wrap-5">
-            {% for obj in bogen %}
-                {% if obj.url %}
-                    <a class="margin-5 btn-outline" href="{{ obj.url }}">{{ obj.button_str }}</a>
-                {% else %}
-                    <a class="margin-5 btn-nhb-blauw" href="#">{{ obj.button_str }}</a>
-                {% endif %}
-            {% endfor %}
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Filteren</h4>
         </div>
     </div>
 
-    <div class="selectie-knoppen">
-        <div class="white shrink-wrap-5">
-            {% for obj in leeftijd %}
-                {% if obj.url %}
-                    <a class="margin-5 btn-outline" href="{{ obj.url }}">{{ obj.button_str }}</a>
-                {% else %}
-                    <a class="margin-5 btn-nhb-blauw" href="#">{{ obj.button_str }}</a>
-                {% endif %}
-            {% endfor %}
+    <!-- blauwe balk met filters -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m6 l4" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Boog type:</b></p>
+                <ul id="id_boog">
+                    {% for obj in bogen %}
+                        <li>
+                            <label class="black-text" for="id_{{ obj.sel }}">
+                                <input class="with-gap" type="radio" name="boog" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.url }}">
+                                <span>{{ obj.beschrijving }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('boog')">Activeer</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="col s12 m6 l4" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Leeftijdsklasse:</b></p>
+                <ul id="id_leeftijd">
+                    {% for obj in leeftijd %}
+                        <li>
+                            <label class="black-text" for="id_{{ obj.sel }}">
+                                <input class="with-gap" type="radio" name="leeftijd" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.url }}">
+                                <span>{{ obj.beschrijving }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('leeftijd')">Activeer</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="col s12 m6 l4" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Geslacht:</b></p>
+                <ul id="id_geslacht">
+                    {% for obj in geslacht %}
+                        <li>
+                            <label class="black-text" for="id_{{ obj.sel }}">
+                                <input class="with-gap" type="radio" name="geslacht" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.url }}">
+                                <span>{{ obj.beschrijving }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('geslacht')">Activeer</a>
+                </p>
+            </div>
         </div>
     </div>
 
-    {% if is_alles %}
-        <p>Hieronder volgen alle <b>{{ object_list.count }}</b> records die verbeterbaar zijn.</p>
-    {% else %}
-        <p>Hieronder volgen <b>{{ object_list.count }}</b> van de records die verbeterbaar zijn.</p>
-    {% endif %}
+    <div class="center">
+        {% if is_alles %}
+            <p>Hieronder volgen alle <b>{{ object_list.count }}</b> records die verbeterbaar zijn.</p>
+        {% else %}
+            <p>Hieronder volgen <b>{{ object_list.count }}</b> van de records die verbeterbaar zijn.</p>
+        {% endif %}
+    </div>
 
     <table class="white">
-        <thead>
-            <tr>
-                <th>Soort record</th>
-                <th>Materiaal<wbr>klasse</th>
-                <th class="hide-on-small-only">Leeftijds<wbr>categorie</th>
-                {% if toon_para_kolom %}
-                    <th>Para klasse</th>
-                {% endif %}
-                <th>Geslacht</th>
-                <th>Score</th>
-                <th><!-- kolom voor de 'details' knop --></th>
-            </tr>
-        </thead>
+        <tr class="nhb-table-header">
+            <td rowspan="{{ aantal_regels }}" class="nhb-table-zijrand"></td>
+            <th>Soort record</th>
+            <th>Materiaal<wbr>klasse</th>
+            <th class="hide-on-small-only">Leeftijds<wbr>categorie</th>
+            {% if toon_para_kolom %}
+                <th>Para klasse</th>
+            {% endif %}
+            <th>Geslacht</th>
+            <th>Score</th>
+            <th><!-- kolom voor de 'details' knop --></th>
+            <td rowspan="{{ aantal_regels }}" class="nhb-table-zijrand"></td>
+        </tr>
 
         {% for obj in object_list %}
             <tr>
@@ -86,29 +134,50 @@
                 <td>{{ obj.geslacht_str }}</td>
                 <td>{{ obj.beste.score_str }}</td>
                 <td>
-                    <a class="btn-nhb-blauw btn-small" href="{{ obj.url_details }}">Details</a>
+                    <a class="btn-nhb-rood" href="{{ obj.url_details }}">Toon</a>
                 </td>
             </tr>
         {% endfor %}
+
+        <tr>
+            <td class="hide-on-small-only nhb-table-onderrand"></td>
+            {% if toon_para_kolom %}
+                <td class="nhb-table-onderrand"></td>
+            {% endif %}
+            <td colspan="5" class="nhb-table-onderrand"></td>
+        </tr>
     </table>
 
-    <p>&nbsp;</p>
-    <h5>Nieuw record aanvragen?</h5>
-    <div class="row white">
-        <div class="col s12">
-            <p>Om een nieuw record aan te vragen moet je de volgende stappen doorlopen:</p>
-            <p>&nbsp;1. Wedstrijd moet de A-status hebben;</p>
-            <p>&nbsp;2. Scorebriefje door de scheidsrechter laten controleren en ondertekenen;</p>
-            <p>&nbsp;3. Aanvraagformulier invullen en samen met de scorebriefjes naar het bondsbureau sturen.</p>
 
-            <p>&nbsp;</p>
-            <p>Directe link naar het aanvraagformulier:
-                <a class="btn-nhb-blauw" href="https://docs.google.com/spreadsheets/d/1hTMVLe_HmMqCdOeoauW7n8PFf0CvuEXORX7gRWzqLoA/edit?usp=sharing" target="_blank" rel="noopener noreferrer">
-                    <i class="material-icons-round left">open_in_new</i>Openen</a></p>
-            <p>Mocht deze niet werken, kijk dan <code>www.handboogsport.nl</code> onder Procedures:
-                <a class="btn-nhb-blauw" href="https://www.handboogsport.nl/de-nhb/#procedures" target="_blank" rel="noopener noreferrer">
-                    <i class="material-icons-round left">open_in_new</i>Link</a></p>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Nieuw record aanvragen?</h4>
         </div>
     </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+
+                <p>Om een nieuw record aan te vragen moet je de volgende stappen doorlopen:</p>
+                <p>&nbsp;1. Wedstrijd moet de A-status hebben;</p>
+                <p>&nbsp;2. Scorebriefje door de scheidsrechter laten controleren en ondertekenen;</p>
+                <p>&nbsp;3. Aanvraagformulier invullen en samen met de scorebriefjes naar het bondsbureau sturen.</p>
+
+                <p>&nbsp;</p>
+                <p>Directe link naar het aanvraagformulier:
+                    <a class="btn-nhb-rood" href="https://docs.google.com/spreadsheets/d/1hTMVLe_HmMqCdOeoauW7n8PFf0CvuEXORX7gRWzqLoA/edit?usp=sharing" target="_blank" rel="noopener noreferrer">
+                        <i class="material-icons-round left">open_in_new</i>Openen</a></p>
+                <p>Mocht deze niet werken, kijk dan <code>www.handboogsport.nl</code> onder Procedures:
+                    <a class="btn-nhb-rood" href="https://www.handboogsport.nl/de-nhb/#procedures" target="_blank" rel="noopener noreferrer">
+                        <i class="material-icons-round left">open_in_new</i>Link</a></p>
+
+            </div>
+        </div>
+    </div>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-alle-verbeterbaar" %}
 
 {% endblock %}

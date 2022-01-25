@@ -25,7 +25,7 @@
             const url = el.dataset.url
 
             // de radiobutton die bij het geladen geselecteerd werd heeft geen url
-            if (url != '')
+            if (url.length > 0)
                 window.location.href = url
         }
     </script>

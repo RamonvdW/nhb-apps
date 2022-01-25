@@ -146,4 +146,27 @@
 </div>
 
 
+    <!-- blauwe balk met filters -->
+    <div class="row-nhb-blauw">
+        <div class="col s12" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Kies een boog type:</b></p>
+                <ul id="id_boog">
+                    {% for boog in boog_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ boog.sel }}">
+                                <input class="with-gap" type="radio" name="boog" value="{{ boog.sel }}" required id="id_{{ boog.sel }}" {% if boog.selected %}checked{% endif %} data-url="{{ boog.zoom_url }}">
+                                <span>{{ boog.beschrijving }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('boog')">Activeer</a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-wijzig-email" %}

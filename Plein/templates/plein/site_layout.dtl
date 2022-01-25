@@ -30,7 +30,7 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@500&display=swap">
-        <link rel="stylesheet" href="{% static 'materialize-new-77.css' %}">
+        <link rel="stylesheet" href="{% static 'materialize-new-81.css' %}">
         <link rel="stylesheet" href="{% static 'site_layout_min-35.css' %}"> <!-- moet ná materialize css -->
         {% block extraheader %}{% endblock %}
     </head>
@@ -120,6 +120,24 @@
 
         <!-- main contents -->
         <div class="nav-content-scrollbar">   <!-- css manipulates this to reduce padding on mobile -->
+
+            {% block broodkruimels %}
+                <div style="padding:10px">
+                    <a class="broodkruimels-back" style="margin-right:5px" href="javascript:history.go(-1)">&lt;&nbsp;&nbsp;VORIGE</a>
+
+                    {% if kruimels %}
+                        <a class="broodkruimels-link" href="{% url 'Plein:plein' %}">Plein</a>
+                        {% for url, kruimel in kruimels %}
+                            <span style="font-size:11px">&#12297;</span>
+                            {% if forloop.last %}
+                                <span style="font-size:13px">{{ kruimel }}</span>
+                            {% else %}
+                                <a class="broodkruimels-link" href="{{ url }}">{{ kruimel }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endblock %}
 
             <!-- echt pagina komt hier, vanuit de template -->
             {% block pagina %}{% endblock %}
