@@ -96,27 +96,29 @@
             </p>
         </div>
 
-        <div class="col s8 offset-s2 m7 offset-m1 l5 offset-l1 white left-align">
-            <p><b>Kies een vereniging:</b></p>
-            <ul id="id_ver">
-                <li>
-                    <label class="black-text" for="id_ver_0">
-                        <input class="with-gap" type="radio" name="ver" value="0" required id="id_ver_0" checked>
-                        <span>Alle</span>
-                    </label>
-                </li>
-                {% for ver in ver_filters %}
+        <div class="col s12 m7 offset-m1 l5 offset-l1">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Kies een vereniging:</b></p>
+                <ul id="id_ver">
                     <li>
-                        <label class="black-text" for="id_{{ ver.sel }}">
-                            <input class="with-gap" type="radio" name="ver" value="{{ ver.sel }}" required id="id_{{ ver.sel }}" data-url="{{ ver.zoom_url }}">
-                            <span>[{{ ver.ver_nr }}]&nbsp;&nbsp;{{ ver.naam }}</span>
+                        <label class="black-text" for="id_ver_0">
+                            <input class="with-gap" type="radio" name="ver" value="0" required id="id_ver_0" checked>
+                            <span>Alle</span>
                         </label>
                     </li>
-                {% endfor %}
-            </ul>
-            <p style="margin-left:35px">
-                <a class="btn-nhb-rood" onclick="keuze_gemaakt('ver')">Activeer</a>
-            </p>
+                    {% for ver in ver_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ ver.sel }}">
+                                <input class="with-gap" type="radio" name="ver" value="{{ ver.sel }}" required id="id_{{ ver.sel }}" data-url="{{ ver.zoom_url }}">
+                                <span>[{{ ver.ver_nr }}]&nbsp;&nbsp;{{ ver.naam }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('ver')">Activeer</a>
+                </p>
+            </div>
         </div>
     </div>
 

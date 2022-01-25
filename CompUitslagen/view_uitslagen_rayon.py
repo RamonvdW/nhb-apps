@@ -69,15 +69,17 @@ class UitslagenRayonIndivView(TemplateView):
         context['boog_filters'] = boogtypen
 
         for boogtype in boogtypen:
+            boogtype.sel = boogtype.afkorting.lower()
+
             if boogtype.afkorting.upper() == comp_boog.upper():
+                boogtype.selected = True
                 context['comp_boog'] = boogtype
                 comp_boog = boogtype.afkorting.lower()
-                # geen url --> knop disabled
-            else:
-                boogtype.zoom_url = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
-                                            kwargs={'comp_pk': comp.pk,
-                                                    'comp_boog': boogtype.afkorting.lower(),
-                                                    'rayon_nr': gekozen_rayon_nr})
+
+            boogtype.zoom_url = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
+                                        kwargs={'comp_pk': comp.pk,
+                                                'comp_boog': boogtype.afkorting.lower(),
+                                                'rayon_nr': gekozen_rayon_nr})
         # for
 
         if context['comp_boog']:
@@ -91,14 +93,15 @@ class UitslagenRayonIndivView(TemplateView):
 
             for rayon in rayons:
                 rayon.title_str = 'Rayon %s' % rayon.rayon_nr
-                if rayon.rayon_nr != gekozen_rayon_nr:
-                    rayon.zoom_url = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
-                                             kwargs={'comp_pk': comp.pk,
-                                                     'comp_boog': comp_boog,
-                                                     'rayon_nr': rayon.rayon_nr})
-                else:
-                    # geen zoom_url --> knop disabled
+                rayon.sel = 'rayon_%s' % rayon.pk
+                rayon.zoom_url = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
+                                         kwargs={'comp_pk': comp.pk,
+                                                 'comp_boog': comp_boog,
+                                                 'rayon_nr': rayon.rayon_nr})
+
+                if rayon.rayon_nr == gekozen_rayon_nr:
                     context['rayon'] = rayon
+                    rayon.selected = True
             # for
 
     def get_context_data(self, **kwargs):
@@ -219,9 +222,12 @@ class UitslagenRayonIndivView(TemplateView):
 
         klasse = -1
         limiet = 24
+        curr_teller = None
         for deelnemer in deelnemers:
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
+                if klasse == -1:
+                    deelnemer.is_eerste_break = True
                 indiv = deelnemer.klasse.indiv
                 deelnemer.klasse_str = indiv.beschrijving
                 try:
@@ -233,6 +239,10 @@ class UitslagenRayonIndivView(TemplateView):
                     limiet = wkl2limiet[deelnemer.klasse.pk]
                 except KeyError:
                     limiet = 24
+
+                curr_teller = deelnemer
+                curr_teller.aantal_regels = 2
+
             klasse = deelnemer.klasse.indiv.volgorde
 
             sporter = deelnemer.sporterboog.sporter
@@ -244,6 +254,8 @@ class UitslagenRayonIndivView(TemplateView):
             if deelcomp.heeft_deelnemerslijst:
                 if deelnemer.rank > limiet:
                     deelnemer.is_reserve = True
+
+            curr_teller.aantal_regels += 1
         # for
 
         context['deelnemers'] = deelnemers
