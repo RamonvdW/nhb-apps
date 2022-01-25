@@ -204,7 +204,7 @@ class E2EHelpers(TestCase):
             soup = BeautifulSoup(content, features="html.parser")
             print(soup.prettify())
 
-    def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True, data_urls=True):
+    def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True, skip_broodkruimels=True, data_urls=True):
         content = str(resp.content)
         content = self._remove_debug_toolbar(content)
         if skip_menu:
@@ -218,6 +218,15 @@ class E2EHelpers(TestCase):
             pos = content.find('<body')
             if pos > 0:                             # pragma: no branch
                 content = content[pos:]             # strip header
+
+        if skip_broodkruimels:
+            pos = content.find('class="broodkruimels-')
+            while pos >= 0:
+                content = content[pos+20:]
+                pos = content.find('</a>')
+                content = content[pos+4:]
+                pos = content.find('class="broodkruimels-')
+            # while
 
         urls = list()
         while len(content):
@@ -303,7 +312,7 @@ class E2EHelpers(TestCase):
                     if link.find('href="/') < 0 and link.find('href="#') < 0:
                         if link.find('href=""') >= 0 or link.find('href="mailto:"') >= 0:   # pragma: no cover
                             self.fail(msg='Unexpected empty link %s on page %s' % (link, template_name))
-                        elif link.find('href="mailto:') < 0:
+                        elif link.find('href="mailto:') < 0 and link.find('javascript:history.go(-1)') < 0:
                             # remainder must be links that leave the website
                             # these must target a blank window
                             if 'target="_blank"' not in link:            # pragma: no cover
