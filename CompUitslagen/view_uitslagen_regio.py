@@ -320,6 +320,12 @@ class UitslagenRegioIndivView(TemplateView):
 
         context['deelnemers'] = objs
 
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Regio individueel')
+        )
+
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context
 
@@ -596,6 +602,12 @@ class UitslagenRegioTeamsView(TemplateView):
                             break_poule=True,
                             schema=prev_poule.schema)
             teams.append(afsluiter)
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Regio teams')
+        )
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context

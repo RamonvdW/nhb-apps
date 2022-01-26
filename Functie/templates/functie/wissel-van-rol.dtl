@@ -78,7 +78,7 @@
 
                 {% if show_otp_controle %}
                     {% url 'Functie:otp-controle' as card_url %}
-                    {% include 'plein/card.dtl' with title="Controle 2e factor" text="Voor je controle code in." icon="lock" url=card_url %}
+                    {% include 'plein/card.dtl' with title="Controle 2e factor" text="Voer je controle code in." icon="lock" url=card_url %}
                 {% endif %}
             </div>
         </div>

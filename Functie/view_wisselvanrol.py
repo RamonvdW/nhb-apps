@@ -331,6 +331,10 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
         eval_open_taken(self.request, forceer=True)
 
+        context['kruimels'] = (
+            (None, 'Wissel van rol'),
+        )
+
         menu_dynamics(self.request, context, actief='wissel-van-rol')
         return context
 

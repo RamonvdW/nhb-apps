@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -281,6 +281,11 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 context['email'] = sporter.account.accountemail_set.all()[0]
 
         context['opslaan_url'] = reverse('Sporter:voorkeuren')
+
+        context['kruimels'] = (
+            (reverse('Sporter:profiel'), 'Mijn pagina'),
+            (None, 'Voorkeuren')
+        )
 
         menu_dynamics(self.request, context, actief=actief)
         return context

@@ -360,7 +360,6 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             # for
 
         context['bb_email'] = settings.EMAIL_BONDSBUREAU
-        print('bb_email=%s' % context['bb_email'])
 
     @staticmethod
     def _find_speelsterktes(sporter):
@@ -442,6 +441,10 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             context['speelsterktes'] = self._find_speelsterktes(sporter)
 
         self._get_contact_gegevens(sporter, context)
+
+        context['kruimels'] = (
+            (None, 'Mijn pagina'),
+        )
 
         menu_dynamics(self.request, context, actief='sporter-profiel')
         return context

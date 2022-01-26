@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -407,6 +407,11 @@ class CompetitieOverzichtView(View):
         if not template:
             template = self._get_competitie_overzicht_schutter_bezoeker(context, comp)
 
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (None, comp.beschrijving.replace(' competitie', ''))
+        )
+
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return render(request, template, context)
 
@@ -459,6 +464,10 @@ class CompetitieKiesView(TemplateView):
         if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
             context['toon_beheerders'] = True
             context['huidige_rol'] = rol_get_beschrijving(self.request)
+
+        context['kruimels'] = (
+            (None, 'Bondscompetities'),
+        )
 
         menu_dynamics_competitie(self.request, context)
         return context

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -184,9 +184,18 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
 
         account = self.request.user
         if account.sporter_set.count() > 0:      # FUTURE: ongewenste kennis over op Sporter.account
+            context['kruimels'] = (
+                (reverse('Sporter:profiel'), 'Mijn pagina'),
+                (None, 'Wachtwoord wijzigen')
+            )
+
             menu_dynamics(self.request, context, actief="sporter-profiel")
         else:
+            context['kruimels'] = (
+                (None, 'Wachtwoord wijzigen'),
+            )
             menu_dynamics(self.request, context)
+
         return context
 
     def post(self, request, *args, **kwargs):

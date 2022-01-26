@@ -50,6 +50,12 @@ class VhpgAfsprakenView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         if self.vhpg:
             context['acceptatie_datum'] = self.vhpg.acceptatie_datum
+
+        context['kruimels'] = (
+            (reverse('Functie:wissel-van-rol'), 'Wissel van rol'),
+            (None, 'Persoonsgegevens')
+        )
+
         menu_dynamics(self.request, context, actief='wissel-van-rol')
         return context
 
@@ -59,10 +65,10 @@ def account_vhpg_is_geaccepteerd(account):
     """
     # Deze functie wordt aangeroepen vanuit een POST handler
     # concurrency beveiliging om te voorkomen dat 2 records gemaakt worden
-    obj, created = (VerklaringHanterenPersoonsgegevens
-                    .objects
-                    .update_or_create(account=account,
-                                      defaults={'acceptatie_datum': timezone.now()}))
+    _ = (VerklaringHanterenPersoonsgegevens
+         .objects
+         .update_or_create(account=account,
+                           defaults={'acceptatie_datum': timezone.now()}))
 
 
 class VhpgAcceptatieView(TemplateView):
@@ -83,7 +89,15 @@ class VhpgAcceptatieView(TemplateView):
             return HttpResponseRedirect(reverse('Plein:plein'))
 
         form = AccepteerVHPGForm()
-        context = {'form': form}
+
+        context = dict()
+        context['form'] = form
+
+        context['kruimels'] = (
+            (reverse('Functie:wissel-van-rol'), 'Wissel van rol'),
+            (None, 'Persoonsgegevens')
+        )
+
         menu_dynamics(request, context, actief="wissel-van-rol")
         return render(request, TEMPLATE_VHPG_ACCEPTATIE, context)
 

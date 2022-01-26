@@ -21,6 +21,7 @@ included_templates = (
     'competitie/menu.dtl',          # TODO: obsolete
     'competitie/tijdlijn.dtl',
     'handleiding/menu.dtl',
+    'snippets.dtl'
 )
 
 

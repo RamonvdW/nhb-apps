@@ -342,7 +342,15 @@ class LoginView(TemplateView):
             return HttpResponseRedirect(reverse('Plein:plein'))
 
         form = LoginForm(initial={'next': next_url})
-        context = {'form': form, 'verberg_login_knop': True}
+
+        context = dict()
+        context['form'] = form
+        context['verberg_login_knop'] = True
+
+        context['kruimels'] = (
+            (None, 'Inloggen'),
+        )
+
         menu_dynamics(request, context)
         return render(request, TEMPLATE_LOGIN, context)
 

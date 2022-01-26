@@ -148,6 +148,11 @@ class PrivacyView(TemplateView):
         context['url_privacyverklaring'] = settings.PRIVACYVERKLARING_URL
         context['email_bb'] = settings.EMAIL_BONDSBUREAU
         context['url_email_bb'] = 'mailto:' + settings.EMAIL_BONDSBUREAU
+
+        context['kruimels'] = (
+            (None, 'Privacy'),
+        )
+
         menu_dynamics(self.request, context)
         return context
 

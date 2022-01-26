@@ -142,6 +142,11 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         else:
             context['aantal_gevonden'] = 0
 
+        context['kruimels'] = (
+            (reverse('Functie:wissel-van-rol'), 'Wissel van rol'),
+            (None, 'Account wissel'),
+        )
+
         menu_dynamics(self.request, context, actief='wissel-van-rol')
         return context
 

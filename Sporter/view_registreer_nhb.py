@@ -159,7 +159,14 @@ class RegistreerNhbNummerView(TemplateView):
         """
         # GET operation --> create empty form
         form = RegistreerForm()
-        context = {'form': form}
+
+        context = dict()
+        context['form'] = form
+
+        context['kruimels'] = (
+            (None, 'Account aanmaken'),
+        )
+
         menu_dynamics(request, context)
         return render(request, TEMPLATE_REGISTREER, context)
 

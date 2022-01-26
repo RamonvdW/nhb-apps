@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.views.generic import TemplateView
+from django.urls import reverse
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige
@@ -45,6 +46,11 @@ class LeeftijdsklassenView(UserPassesTestMixin, TemplateView):
         context['wlst'] = wlst
         context['clst'] = clst
         context['lkl_volgende_competitie'] = lkl_volgende_competitie
+
+        context['kruimels'] = (
+            (reverse('Sporter:profiel'), 'Mijn pagina'),
+            (None, 'Leeftijdsklassen'),
+        )
 
         menu_dynamics(self.request, context, actief='sporter-profiel')
         return context

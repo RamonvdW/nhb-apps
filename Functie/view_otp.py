@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -46,7 +46,15 @@ class OTPControleView(TemplateView):
         next_url = request.GET.get('next', '')
 
         form = OTPControleForm(initial={'next_url': next_url})
-        context = {'form': form}
+
+        context = dict()
+        context['form'] = form
+
+        context['kruimels'] = (
+            (reverse('Functie:wissel-van-rol'), 'Wissel van rol'),
+            (None, 'Controle tweede factor')
+        )
+
         menu_dynamics(request, context, actief="wissel-van-rol")
         return render(request, TEMPLATE_OTP_CONTROLE, context)
 
