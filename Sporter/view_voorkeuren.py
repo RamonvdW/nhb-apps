@@ -9,9 +9,9 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Plein.menu import menu_dynamics
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_mag_wisselen
 from BasisTypen.models import BoogType
+from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_mag_wisselen
+from Plein.menu import menu_dynamics
 from .models import Sporter, SporterVoorkeuren, SporterBoog
 import logging
 
@@ -19,6 +19,15 @@ import logging
 TEMPLATE_VOORKEUREN = 'sporter/voorkeuren.dtl'
 
 my_logger = logging.getLogger('NHBApps.Sporter')
+
+
+def get_sporter_voorkeuren(sporter):
+    """ zoek het SporterVoorkeuren object erbij, of maak een nieuwe aan
+    """
+
+    voorkeuren, was_created = SporterVoorkeuren.objects.get_or_create(sporter=sporter)
+
+    return voorkeuren
 
 
 class VoorkeurenView(UserPassesTestMixin, TemplateView):
@@ -99,7 +108,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 obj.save()
         # for
 
-        voorkeuren, _ = SporterVoorkeuren.objects.get_or_create(sporter=sporter)
+        voorkeuren = get_sporter_voorkeuren(sporter)
 
         old_eigen_blazoen = voorkeuren.voorkeur_eigen_blazoen
         voorkeuren.voorkeur_eigen_blazoen = False
@@ -266,8 +275,8 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         context['geen_wedstrijden'] = geen_wedstrijden = sporter.bij_vereniging and sporter.bij_vereniging.geen_wedstrijden
 
         context['bogen'] = self._get_bogen(sporter, geen_wedstrijden)
-        context['voorkeuren'], _ = SporterVoorkeuren.objects.get_or_create(sporter=sporter)
         context['sporter'] = sporter
+        context['voorkeuren'] = get_sporter_voorkeuren(sporter)
 
         if self.rol_nu == Rollen.ROL_HWL:
             actief = 'vereniging'

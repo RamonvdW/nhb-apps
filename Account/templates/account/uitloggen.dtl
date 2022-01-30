@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -18,10 +18,10 @@
     </div>
 
     <div class="row-nhb-blauw">
-        <div class="col s8 offset-s2">
+        <div class="col s12 m8 offset-m2 l6 offset-l3">
 
             <!-- dialoog venster -->
-            <div class="white" style="margin:50px 30px 30px 30px; padding:30px">
+            <div class="white" style="padding:30px">
 
                 <p>Druk op de knop om volledig uit te loggen:</p>
                 <p>&nbsp;</p>

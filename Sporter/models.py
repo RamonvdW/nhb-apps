@@ -76,7 +76,10 @@ class Sporter(models.Model):
     # het e-mailadres van dit lid
     email = models.CharField(max_length=150)
 
+    # geboortedatum van de sporter
     geboorte_datum = models.DateField(validators=[validate_geboorte_datum])
+
+    # geslacht (M/V)
     geslacht = models.CharField(max_length=1, choices=GESLACHT)
 
     # officieel geregistreerde para classificatie

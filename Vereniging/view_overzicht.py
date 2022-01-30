@@ -251,6 +251,10 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         eval_open_taken(self.request)
 
+        context['kruimels'] = (
+            (None, 'Beheer vereniging'),
+        )
+
         menu_dynamics(self.request, context, actief='vereniging')
         return context
 

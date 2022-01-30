@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -180,6 +180,10 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                     # verander in 101a,b
                     nhbver.cluster_letters = str(nhbver.regio.regio_nr) + nhbver.cluster_letters
         # for
+
+        context['kruimels'] = (
+            (None, 'Verenigingen'),
+        )
 
         menu_dynamics(self.request, context, actief=menu_actief)
         return context

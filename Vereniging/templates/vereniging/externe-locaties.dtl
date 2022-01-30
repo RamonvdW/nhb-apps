@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,59 +10,75 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-externe-locaties" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Externe locaties</h3>
+            <p>Locaties die vereniging <b>{{ ver }}</b> kan gebruiken voor wedstrijden, naast de eigen accommodatie.</p>
+        </div>
+    </div>
 
-    <h4>Externe locaties</h4>
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
 
-    <p>Op deze pagina kan je locaties bijhouden die vereniging <b>{{ ver }}</b> kan gebruiken voor wedstrijden, naast de eigen accommodatie.</p>
+                <thead>
+                    <tr>
+                        <th>Locatie</th>
+                        <th>Disciplines</th>
+                        <th>Plaats</th>
+                        <th><!-- kolom voor knop --></th>
+                    </tr>
+                </thead>
 
-    <table class="white">
-        <thead>
-            <tr>
-                <th>Locatie</th>
-                <th>Disciplines</th>
-                <th>Plaats</th>
-                <th><!-- kolom voor knop --></th>
-            </tr>
-        </thead>
+                {% for locatie in locaties %}
+                    <tr>
+                        <td>{% if locatie.geen_naam %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.naam }}{% endif %}</td>
 
-        {% for locatie in locaties %}
-            <tr>
-                <td>{% if locatie.geen_naam %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.naam }}{% endif %}</td>
+                        <td>
+                            {% if locatie.geen_disciplines %}<i>Nog niet gekozen</i>{% endif %}
+                            {% if locatie.discipline_outdoor %}<span>Outdoor</span><br>{% endif %}
+                            {% if locatie.discipline_indoor %}<span>Indoor</span><br>{% endif %}
+                            {% if locatie.discipline_25m1pijl %}<span>25m 1pijl</span><br>{% endif %}
+                            {% if locatie.discipline_clout %}<span>Clout</span><br>{% endif %}
+                            {% if locatie.discipline_veld %}<span>Veld</span><br>{% endif %}
+                            {% if locatie.discipline_run %}<span>Run archery</span><br>{% endif %}
+                            {% if locatie.discipline_3d %}<span>3D</span><br>{% endif %}
+                        </td>
 
-                <td>
-                    {% if locatie.geen_disciplines %}<i>Nog niet gekozen</i>{% endif %}
-                    {% if locatie.discipline_outdoor %}<span>Outdoor</span><br>{% endif %}
-                    {% if locatie.discipline_indoor %}<span>Indoor</span><br>{% endif %}
-                    {% if locatie.discipline_25m1pijl %}<span>25m 1pijl</span><br>{% endif %}
-                    {% if locatie.discipline_clout %}<span>Clout</span><br>{% endif %}
-                    {% if locatie.discipline_veld %}<span>Veld</span><br>{% endif %}
-                    {% if locatie.discipline_run %}<span>Run archery</span><br>{% endif %}
-                    {% if locatie.discipline_3d %}<span>3D</span><br>{% endif %}
-                </td>
+                        <td>{% if locatie.geen_plaats %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.plaats }}{% endif %}</td>
 
-                <td>{% if locatie.geen_plaats %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.plaats }}{% endif %}</td>
+                        <td>
+                            <a class="btn-nhb-rood" href="{{ locatie.url_wijzig }}">{% if readonly %}Details{% else %}Wijzig{% endif %}</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4">
+                            <i>Er zijn nog geen wedstrijdlocaties aangemaakt</i>
+                        </td>
+                    </tr>
+                {% endfor %}
 
-                <td>
-                    <a class="btn-nhb-blauw" href="{{ locatie.url_wijzig }}">{% if readonly %}Details{% else %}Wijzig{% endif %}</a>
-                </td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="4"><i>Er zijn nog geen externe locaties aangemaakt</i></td>
-            </tr>
-        {% endfor %}
-    </table>
+                {% if url_toevoegen %}
+                    <tr>
+                        <td colspan="4">
+                            <form action="{{ url_toevoegen }}" method="post">
+                                {% csrf_token %}
+                                <button class="btn-nhb-rood" type="submit">
+                                    <i class="material-icons-round left">add</i>Aanmaken</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endif %}
+
+            </table>
+        </div>
+    </div>
 
     <p>Deze gegevens kunnen worden aangepast door de hoofdwedstrijdleider van de vereniging.</p>
 
-    {% if url_toevoegen %}
-        <p>&nbsp;</p>
-        <form action="{{ url_toevoegen }}" method="post">
-            {% csrf_token %}
-            <button class="btn-nhb-blauw btn-small" type="submit">
-                <i class="material-icons-round left">add</i>Externe locatie toevoegen</button>
-        </form>
-    {% endif %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-externe-locaties" %}
 
 {% endblock %}

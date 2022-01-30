@@ -168,6 +168,10 @@
                 // rolgordijnen
                 elems = document.querySelectorAll("select")
                 M.FormSelect.init(elems, {})
+
+                // modals
+                elems = document.querySelectorAll(".modal")
+                M.Modal.init(elems, {'endingTop': '35%'})
             })
 
             // zoek alle tabellen met een zoekveld en trigger de oninput method

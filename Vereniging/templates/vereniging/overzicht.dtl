@@ -159,12 +159,12 @@
 
             <!-- accommodatie details -->
             {% if accommodatie_details_url %}
-                {% include 'plein/card.dtl' with title="Accommodatie" text="Gegevens over de accommodatie die van belang zijn voor wedstrijden." icon="account_balance" url=accommodatie_details_url %}
+                {% include 'plein/card.dtl' with title="Accommodatie" text="Details over jullie accommodatie die van belang zijn voor wedstrijden." icon="account_balance" url=accommodatie_details_url %}
             {% endif %}
 
             <!-- externe locaties -->
             {% if url_externe_locaties %}
-                {% include 'plein/card.dtl' with title="Wedstrijd Locaties" text="Gegevens over de locaties waar de vereniging wedstrijden kan organiseren." icon="hiking" url=url_externe_locaties %}
+                {% include 'plein/card.dtl' with title="Wedstrijdlocaties" text="Externe locaties waar jullie vereniging wedstrijden kan organiseren." icon="hiking" url=url_externe_locaties %}
             {% endif %}
         </div>
     </div>
