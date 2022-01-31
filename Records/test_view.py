@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -225,21 +225,23 @@ class TestRecordsView(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_zoek, {'zoekterm': 'jaja'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assertContains(resp, "Niets gevonden")
+        self.assertContains(resp, "Geen records gevonden")
 
     def test_view_zoek_plaats(self):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_zoek, {'zoekterm': 'Papendal'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_template_used(resp, ('records/records_zoek.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Gevonden records (1)")
+        self.assertContains(resp, "Resultaten")
+        self.assertContains(resp, "1 record")
         self.assert_html_ok(resp)
 
     def test_view_zoek_plaats_case_insensitive(self):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_zoek, {'zoekterm': 'PENdal'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
-        self.assertContains(resp, "Gevonden records (1)")
+        self.assertContains(resp, "Resultaten")
+        self.assertContains(resp, "1 record")
 
     def test_special(self):
         self.rec.is_european_record = True
