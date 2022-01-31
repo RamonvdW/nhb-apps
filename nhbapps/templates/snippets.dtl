@@ -32,137 +32,139 @@
     </div>
 
 
-<!-- blauwe balk met informatie label : info -->
-<div class="row-nhb-blauw">
-    <div class="col s12 m10 offset-m1 l8 offset-l2">
-        <table class="white">
-            <tr>
-                <th>Jouw bondsnummer</th>
-                <td>{{ sporter.lid_nr }}</td>
-            </tr>
-            <tr>
-                <th>Lid sinds</th>
-                <td>{{ sporter.sinds_datum }}</td>
-            </tr>
-            <tr>
-                <th>Lid bij vereniging</th>
-                <td>[{{ sporter.bij_vereniging.ver_nr }}] {{ sporter.bij_vereniging.naam }}</td>
-            </tr>
-            <tr>
-                <th>In plaats</th>
-                <td>{{ sporter.bij_vereniging.plaats }}</td>
-            </tr>
-            <tr>
-                <th>In NHB regio</th>
-                <td>{{ sporter.bij_vereniging.regio }}</td>
-            </tr>
-            <tr>
-                <th>In NHB rayon</th>
-                <td>{{ sporter.bij_vereniging.regio.rayon }}</td>
-            </tr>
-            {% if sporter.para_classificatie %}
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
                 <tr>
-                    <th>Para classificatie</th>
-                    <td>{{ sporter.para_classificatie }}</td>
+                    <th>Jouw bondsnummer</th>
+                    <td>{{ sporter.lid_nr }}</td>
                 </tr>
-            {% endif %}
-        </table>
-    </div>
-</div>
-
-
-<!-- blauwe balk met informatie in een tabel -->
-<div class="row-nhb-blauw">
-    <div class="col s12">
-        <table class="white">
-            <thead>
                 <tr>
-                    <th>Datum</th>
-                    <th>Soort record</th>
-                    <th>Boog type</th>
-                    <th>Score</th>
-                    {% if show_loc %}
-                        <th>Plaats</th>
-                    {% endif %}
-                    <th><!-- kolom voor knop --></th>
+                    <th>Lid sinds</th>
+                    <td>{{ sporter.sinds_datum }}</td>
                 </tr>
-            </thead>
-
-            {% for obj in records %}
                 <tr>
-                    <td>{{ obj.datum }}</td>
-                    <td>{{ obj.soort_record }}</td>
-                    <td>{{ obj.boog_str }}</td>
-                    <td>{{ obj.score_str }}</td>
-                    {% if show_loc %}
-                        <td>{{ obj.loc_str }}</td>
-                    {% endif %}
-                    <td><a class="btn-nhb-rood" href="{{ obj.url }}">Details</a></td>
+                    <th>Lid bij vereniging</th>
+                    <td>[{{ sporter.bij_vereniging.ver_nr }}] {{ sporter.bij_vereniging.naam }}</td>
                 </tr>
-            {% endfor %}
-        </table>
-    </div>
-</div>
-
-
-<!-- blauwe balk met dialoog venster -->
-<div class="row-nhb-blauw">
-    <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
-
-        <!-- dialoog venster -->
-        <div style="margin:50px 30px 30px 30px" class="left-align">
-            <form action="{{ url }}" method="post">
-                {% csrf_token %}
-
-                {% if foutmelding %}
-                    <p class="red-text">Fout: {{ foutmelding }}</p>
-                    <p>&nbsp;</p>
+                <tr>
+                    <th>In plaats</th>
+                    <td>{{ sporter.bij_vereniging.plaats }}</td>
+                </tr>
+                <tr>
+                    <th>In NHB regio</th>
+                    <td>{{ sporter.bij_vereniging.regio }}</td>
+                </tr>
+                <tr>
+                    <th>In NHB rayon</th>
+                    <td>{{ sporter.bij_vereniging.regio.rayon }}</td>
+                </tr>
+                {% if sporter.para_classificatie %}
+                    <tr>
+                        <th>Para classificatie</th>
+                        <td>{{ sporter.para_classificatie }}</td>
+                    </tr>
                 {% endif %}
-
-
-                <!-- form field -->
-                <div class="input-field">
-                    {{ form.login_naam.label_tag }}{{ form.login_naam }}
-                </div>
-
-                <!-- manually constructed field -->
-                <div class="input-field">
-                    <label>
-                        <input type="checkbox" class="filled-in" name="aangemeld_blijven">
-                        <span class="black-text">Aangemeld blijven</span>
-                    </label>
-                </div>
-
-                <!-- button -->
-                <p class="center">
-                    <button class="btn-nhb-rood" type="submit">
-                        <i class="material-icons-round left">check</i>Opslaan</button>
-                </p>
-
-            </form>
+            </table>
         </div>
-
     </div>
-</div>
+
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Soort record</th>
+                        <th>Boog type</th>
+                        <th>Score</th>
+                        {% if show_loc %}
+                            <th>Plaats</th>
+                        {% endif %}
+                        <th><!-- kolom voor knop --></th>
+                    </tr>
+                </thead>
+
+                {% for obj in records %}
+                    <tr>
+                        <td>{{ obj.datum }}</td>
+                        <td>{{ obj.soort_record }}</td>
+                        <td>{{ obj.boog_str }}</td>
+                        <td>{{ obj.score_str }}</td>
+                        {% if show_loc %}
+                            <td>{{ obj.loc_str }}</td>
+                        {% endif %}
+                        <td><a class="btn-nhb-rood" href="{{ obj.url }}">Details</a></td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
+
+            <!-- dialoog venster -->
+            <div style="margin:50px 30px 30px 30px" class="left-align">
+                <form action="{{ url }}" method="post">
+                    {% csrf_token %}
+
+                    {% if foutmelding %}
+                        <p class="red-text">Fout: {{ foutmelding }}</p>
+                        <p>&nbsp;</p>
+                    {% endif %}
+
+
+                    <!-- form field -->
+                    <div class="input-field">
+                        {{ form.login_naam.label_tag }}{{ form.login_naam }}
+                    </div>
+
+                    <!-- manually constructed field -->
+                    <div class="input-field">
+                        <label>
+                            <input type="checkbox" class="filled-in" name="aangemeld_blijven">
+                            <span class="black-text">Aangemeld blijven</span>
+                        </label>
+                    </div>
+
+                    <!-- button -->
+                    <p class="center">
+                        <button class="btn-nhb-rood" type="submit">
+                            <i class="material-icons-round left">check</i>Opslaan</button>
+                    </p>
+
+                </form>
+            </div>
+
+        </div>
+    </div>
 
 
     <!-- blauwe balk met filters -->
     <div class="row-nhb-blauw">
-        <div class="col s12" style="margin-bottom:15px">
+
+        <!-- filter: xxx -->
+        <div class="col s3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
-                <p><b>Kies een boog type:</b></p>
-                <ul id="id_boog">
-                    {% for boog in boog_filters %}
+                <p><b>Kies een xxx type:</b></p>
+                <ul id="id_xxx">
+                    {% for obj in xxx_filters %}
                         <li>
-                            <label class="black-text" for="id_{{ boog.sel }}">
-                                <input class="with-gap" type="radio" name="boog" value="{{ boog.sel }}" required id="id_{{ boog.sel }}" {% if boog.selected %}checked{% endif %} data-url="{{ boog.zoom_url }}">
-                                <span>{{ boog.beschrijving }}</span>
+                            <label class="black-text" for="id_{{ obj.sel }}">
+                                <input class="with-gap" type="radio" name="xxx" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.zoom_url }}">
+                                <span>{{ obj.beschrijving }}</span>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
                 <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('boog')">Activeer</a>
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('xxx')">Activeer</a>
                 </p>
             </div>
         </div>

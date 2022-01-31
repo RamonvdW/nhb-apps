@@ -203,6 +203,11 @@ class RecordsIndivSpecifiekView(TemplateView):
         context['obj_record'] = spec
         context['object_list'] = objs
 
+        context['kruimels'] = (
+            (reverse('Records:overzicht'), 'Records'),
+            (None, 'Details')
+        )
+
         menu_dynamics(self.request, context, actief='records')
         return context
 
@@ -265,7 +270,7 @@ class RecordsZoekView(ListView):
                         .order_by('-datum',
                                   'soort_record'))[:settings.RECORDS_MAX_ZOEKRESULTATEN]
 
-        return None
+        return list()
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -275,9 +280,18 @@ class RecordsZoekView(ListView):
         context['zoekterm'] = self.get_zoekterm
         context['records_zoek_url'] = reverse('Records:zoek')
 
+        for obj in context['object_list']:
+            print(obj.soort_record, ' / ', obj.para_klasse)
+            obj.para_str = ''
+            if obj.para_klasse:
+                obj.para_str = ' - para'
+                if obj.para_klasse != 'Ja':
+                    obj.para_str += ': ' + obj.para_klasse
+        # for
+
         context['kruimels'] = (
             (reverse('Records:overzicht'), 'Records'),
-            (None, 'Zoek')
+            (None, 'Zoeken')
         )
 
         menu_dynamics(self.request, context, actief='records')

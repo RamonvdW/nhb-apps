@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -63,6 +63,10 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         eval_open_taken(self.request)
 
+        context['kruimels'] = (
+            (None, 'Taken'),
+        )
+
         menu_dynamics(self.request, context, actief='taken')
         return context
 
@@ -110,6 +114,11 @@ class DetailsView(UserPassesTestMixin, TemplateView):
             taak.url_sluiten = reverse('Taken:details', kwargs={'taak_pk': taak.pk})
 
         context['taak'] = taak
+
+        context['kruimels'] = (
+            (reverse('Taken:overzicht'), 'Taken'),
+            (None, 'Details')
+        )
 
         menu_dynamics(self.request, context, actief='taken')
         return context

@@ -30,7 +30,7 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@500&display=swap">
-        <link rel="stylesheet" href="{% static 'materialize-new-81.css' %}">
+        <link rel="stylesheet" href="{% static 'materialize-new-82.css' %}">
         <link rel="stylesheet" href="{% static 'site_layout_min-35.css' %}"> <!-- moet ná materialize css -->
         {% block extraheader %}{% endblock %}
     </head>
@@ -42,7 +42,7 @@
             <nav class="nhb-grijs">
                 <div class="nav-wrapper">
                     <!-- logo aan de linker kant -->
-                    <a href="/plein/" class="brand-logo" style="left:0; transform:none; padding-left:7px; padding-top:7px">
+                    <a href="/plein/" class="brand-logo" style="left:0; transform:none; padding-left:7px; padding-top:7px; z-index:-1">
                         <img src="{% static 'plein/logo_with_text_nhb_jubileum.png' %}" height="50" width="213" alt="NHB logo">
                     </a>
 
@@ -55,7 +55,9 @@
                         {% if menu_voornaam %}
                             <li>
                                 <a href="#" class="btn-nhb-rood dropdown-trigger" data-target="navbar-dropdown">
-                                    <i class="material-icons-round right" style="line-height:36px">expand_more</i>{{ menu_voornaam|escape }}</a>
+                                    <i class="material-icons-round right hide-on-small-only" style="line-height:36px">expand_more</i>
+                                    <i class="material-icons-round hide-on-med-and-up" style="line-height:36px">expand_more</i>
+                                    <span class="hide-on-small-only">{{ menu_voornaam|escape }}</span></a>
                             </li>
                         {% elif not verberg_login_knop %}
                             <li><a href="{% url 'Account:login' %}" class="btn-nhb-rood">Inloggen</a></li>
