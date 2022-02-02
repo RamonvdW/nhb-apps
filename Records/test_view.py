@@ -187,7 +187,7 @@ class TestRecordsView(E2EHelpers, TestCase):
         self.assertContains(resp, 'Ergens Anders')
         self.assertContains(resp, 'Nederland')
         self.assertContains(resp, 'Top Schutter 2')
-        self.assertContains(resp, 'Para klasse:')
+        self.assertContains(resp, 'Para klasse')
         self.assertContains(resp, 'Open')
 
     def test_view_specifiek_missing(self):

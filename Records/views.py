@@ -281,7 +281,6 @@ class RecordsZoekView(ListView):
         context['records_zoek_url'] = reverse('Records:zoek')
 
         for obj in context['object_list']:
-            print(obj.soort_record, ' / ', obj.para_klasse)
             obj.para_str = ''
             if obj.para_klasse:
                 obj.para_str = ' - para'

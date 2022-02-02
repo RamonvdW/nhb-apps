@@ -47,11 +47,11 @@
                     <td>{{ deelcomp.competitie.beschrijving }}</td>
                 </tr>
                 <tr>
-                    <th>Wedstrijdboog:</th>
+                    <th>Wedstrijdboog</th>
                     <td>{{ comp_boog.beschrijving }}</td>
                 </tr>
                 <tr>
-                    <th>Regio:</th>
+                    <th>Regio</th>
                     <td>{{ regio }}</td>
                 </tr>
             </table>
@@ -67,41 +67,45 @@
 
     <!-- blauwe balk met filters -->
     <div class="row-nhb-blauw">
-        <div class="col s8 offset-s2 m6 offset-m3 l3 white left-align" style="margin-bottom:15px">
-            <p><b>Kies een boog type:</b></p>
-            <ul id="id_boog">
-                {% for boog in boog_filters %}
-                    <li>
-                        <label class="black-text" for="id_{{ boog.sel }}">
-                            <input class="with-gap" type="radio" name="boog" value="{{ boog.sel }}" required id="id_{{ boog.sel }}" {% if boog.selected %}checked{% endif %} data-url="{{ boog.zoom_url }}">
-                            <span>{{ boog.beschrijving }}</span>
-                        </label>
-                    </li>
-                {% endfor %}
-            </ul>
-            <p style="margin-left:35px">
-                <a class="btn-nhb-rood" onclick="keuze_gemaakt('boog')">Activeer</a>
-            </p>
+        <div class="col s12 m6 l3" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Kies een boog type:</b></p>
+                <ul id="id_boog">
+                    {% for boog in boog_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ boog.sel }}">
+                                <input class="with-gap" type="radio" name="boog" value="{{ boog.sel }}" required id="id_{{ boog.sel }}" {% if boog.selected %}checked{% endif %} data-url="{{ boog.zoom_url }}">
+                                <span>{{ boog.beschrijving }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('boog')">Activeer</a>
+                </p>
+            </div>
         </div>
 
-        <div class="col s8 offset-s2 m4 l2 offset-l1 white left-align" style="margin-bottom:15px">
-            <p><b>Kies een regio:</b></p>
-            <ul id="id_regio">
-                {% for regio in regio_filters %}
-                    <li>
-                        <label class="black-text" for="id_{{ regio.sel }}">
-                            <input class="with-gap" type="radio" name="regio" value="{{ regio.sel }}" required id="id_{{ regio.sel }}" {% if regio.selected %}checked{% endif %} data-url="{{ regio.zoom_url }}">
-                            <span>{{ regio.title_str }}</span>
-                        </label>
-                    </li>
-                {% endfor %}
-            </ul>
-            <p style="margin-left:35px">
-                <a class="btn-nhb-rood" onclick="keuze_gemaakt('regio')">Activeer</a>
-            </p>
+        <div class="col s12 m6 l3" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Kies een regio:</b></p>
+                <ul id="id_regio">
+                    {% for regio in regio_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ regio.sel }}">
+                                <input class="with-gap" type="radio" name="regio" value="{{ regio.sel }}" required id="id_{{ regio.sel }}" {% if regio.selected %}checked{% endif %} data-url="{{ regio.zoom_url }}">
+                                <span>{{ regio.title_str }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('regio')">Activeer</a>
+                </p>
+            </div>
         </div>
 
-        <div class="col s12 m7 offset-m1 l5 offset-l1">
+        <div class="col s12 m8 offset-m2 l6">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een vereniging:</b></p>
                 <ul id="id_ver">
@@ -146,11 +150,10 @@
                 <!-- forceer gelijkmatige layout in de Scores kolommen -->
                 <tr style="visibility: collapse">
                     <td class="nhb-table-zijrand"></td>
-                    <td colspan="2"><!-- rank, naam --></td>
+                    <td colspan="2"><!-- rank, sporter --></td>
                     <td class="hide-on-small-only"><!-- vereniging --></td>
                     <td><!-- gemiddelde --></td>
-                    <td class="hide-on-med-and-up"><!-- scores --></td>
-                    <td class="right-align smal hide-on-small-only">888</td>
+                    <td class="hide-on-med-and-up">888</td>     <!-- scores -->
                     <td class="right-align smal hide-on-small-only">888</td>
                     <td class="right-align smal hide-on-small-only">888</td>
                     <td class="right-align smal hide-on-small-only">888</td>
@@ -166,14 +169,16 @@
             {% if obj.break_klasse %}
                 {% if not obj.is_eerste_groep %}
                     <tr>
-                        <td class="nhb-table-onderrand hide-on-small-only" colspan="14"></td>
-                        <td class="nhb-table-onderrand hide-on-med-and-up" colspan="8" ></td>
+                        <td class="nhb-table-onderrand hide-on-small-only" colspan="13"></td>
+                        <td class="nhb-table-onderrand hide-on-med-and-up" colspan="4" ></td>
                     </tr>
                 {% endif %}
+                <!--
                 <tr>
                     <td class="center-align hide-on-small-only" colspan="14"><h5>{{ obj.klasse_str }}</h5></td>
-                    <td class="center-align hide-on-med-and-up" colspan="8" ><h5>{{ obj.klasse_str }}</h5></td>
+                    <td class="center-align hide-on-med-and-up" colspan="6" ><h5>{{ obj.klasse_str }}</h5></td>
                 </tr>
+                -->
                 <tr class="nhb-table-header">
                     <td class="nhb-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
                     <th><!-- rank --></th>
@@ -211,9 +216,10 @@
             </tr>
 
         {% endfor %}
+
         <tr>
-            <td class="nhb-table-onderrand hide-on-small-only" colspan="14"></td>
-            <td class="nhb-table-onderrand hide-on-med-and-up" colspan="8" ></td>
+            <td class="nhb-table-onderrand hide-on-small-only" colspan="13"></td>
+            <td class="nhb-table-onderrand hide-on-med-and-up" colspan="4" ></td>
         </tr>
     </table>
 
