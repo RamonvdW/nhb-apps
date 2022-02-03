@@ -39,7 +39,7 @@
                         </tr>
                         <tr> <!-- class="nhb-table-header" -->
                             <th data-filter="on">Bonds<wbr>nummer</th>
-                            <th>M/V</th>
+                            <th>M/V/X</th>
                             <th data-filter="on">Voor<wbr>naam</th>
                             <th data-filter="on">Achter<wbr>naam</th>
                             <th>Leeftijd</th>

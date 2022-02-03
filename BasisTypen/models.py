@@ -26,6 +26,10 @@ GESLACHT_MVX = [(GESLACHT_MAN, 'Man'),
 GESLACHT_MV = [(GESLACHT_MAN, 'Man'),
                (GESLACHT_VROUW, 'Vrouw')]
 
+# voor wedstrijdklassen herkennen we alleen M/V
+GESLACHT_MV_MEERVOUD = [(GESLACHT_MAN, 'Mannen'),
+                        (GESLACHT_VROUW, 'Vrouwen')]
+
 BLAZOEN_40CM = '40'
 BLAZOEN_60CM = '60'
 BLAZOEN_60CM_4SPOT = '4S'

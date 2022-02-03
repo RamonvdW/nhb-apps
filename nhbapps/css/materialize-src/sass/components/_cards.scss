@@ -22,6 +22,8 @@
   .card-title {
     font-size: 20px;
     font-weight: 300;
+    margin-left: -100%;    // allow slightly too wide titles
+    margin-right: -100%;   // allow slightly too wide titles
     &.activator {
       cursor: pointer;
     }

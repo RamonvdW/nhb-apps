@@ -9,10 +9,11 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import BoogType, GESLACHT_ANDERS
+from BasisTypen.models import BoogType, GESLACHT_ANDERS, GESLACHT_MV_MEERVOUD
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_mag_wisselen
 from Plein.menu import menu_dynamics
 from .models import Sporter, SporterVoorkeuren, SporterBoog
+from types import SimpleNamespace
 import logging
 
 
@@ -192,6 +193,20 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                                            'voorkeur_discipline_run',
                                            'voorkeur_discipline_3d'])
 
+        if sporter.geslacht == GESLACHT_ANDERS:
+            keuze = request.POST.get('wedstrijd_mv', None)
+
+            if keuze in ('M', 'V'):
+                gekozen = True
+            else:
+                keuze = 'M'         # veld accepteert alleen M of V
+                gekozen = False
+
+            if gekozen != voorkeuren.wedstrijd_geslacht_gekozen or voorkeuren.wedstrijd_geslacht != keuze:
+                voorkeuren.wedstrijd_geslacht_gekozen = gekozen
+                voorkeuren.wedstrijd_geslacht = keuze
+                voorkeuren.save(update_fields=['wedstrijd_geslacht_gekozen', 'wedstrijd_geslacht'])
+
         del voorkeuren
 
         if self.rol_nu != Rollen.ROL_HWL:
@@ -285,8 +300,20 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
 
         context['bogen'] = self._get_bogen(sporter, geen_wedstrijden)
         context['sporter'] = sporter
-        context['voorkeuren'] = get_sporter_voorkeuren(sporter)
-        context['toon_geslacht'] = (sporter.geslacht == GESLACHT_ANDERS)
+        context['voorkeuren'] = voorkeuren = get_sporter_voorkeuren(sporter)
+
+        if sporter.geslacht == GESLACHT_ANDERS:
+            context['toon_geslacht'] = True
+            context['opt_wedstrijd_mv'] = opts = list()
+
+            opt = SimpleNamespace(sel='X', tekst='Geen keuze', selected=not voorkeuren.wedstrijd_geslacht_gekozen)
+            opts.append(opt)
+
+            for sel, tekst in GESLACHT_MV_MEERVOUD:
+                selected = (voorkeuren.wedstrijd_geslacht_gekozen and voorkeuren.wedstrijd_geslacht == sel)
+                opt = SimpleNamespace(sel=sel, tekst=tekst, selected=selected)
+                opts.append(opt)
+            # for
 
         if self.rol_nu == Rollen.ROL_HWL:
             actief = 'vereniging'
