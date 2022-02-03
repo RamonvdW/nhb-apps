@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,11 +12,20 @@ import datetime
 
 class LogboekRegel(models.Model):
     """ definitie van een regel in het logboek """
+
+    # wanneer toegevoegd
     toegevoegd_op = models.DateTimeField()
+
+    # traceerbaarheid naar een gebruiker
     actie_door_account = models.ForeignKey(Account, on_delete=models.CASCADE,
                                            blank=True,  # allow access input in form
                                            null=True)  # allow NULL relation in database
+
+    # welk deel van het logboek?
     gebruikte_functie = models.CharField(max_length=100)
+
+    # de logboek regel
+    # let op: bevat newlines
     activiteit = models.CharField(max_length=500)
 
     def bepaal_door(self):
