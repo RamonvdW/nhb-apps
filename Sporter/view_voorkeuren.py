@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import BoogType
+from BasisTypen.models import BoogType, GESLACHT_ANDERS
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_mag_wisselen
 from Plein.menu import menu_dynamics
 from .models import Sporter, SporterVoorkeuren, SporterBoog
@@ -26,6 +26,15 @@ def get_sporter_voorkeuren(sporter):
     """
 
     voorkeuren, was_created = SporterVoorkeuren.objects.get_or_create(sporter=sporter)
+    if was_created:
+        # default voor wedstrijd_geslacht_gekozen = True
+        if sporter.geslacht != GESLACHT_ANDERS:
+            if sporter.geslacht != voorkeuren.wedstrijd_geslacht:  # default is Man
+                voorkeuren.wedstrijd_geslacht = sporter.geslacht
+                voorkeuren.save(update_fields=['wedstrijd_geslacht'])
+        else:
+            voorkeuren.wedstrijd_geslacht_gekozen = False  # laat de sporter kiezen
+            voorkeuren.save(update_fields=['wedstrijd_geslacht_gekozen'])
 
     return voorkeuren
 
@@ -277,6 +286,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         context['bogen'] = self._get_bogen(sporter, geen_wedstrijden)
         context['sporter'] = sporter
         context['voorkeuren'] = get_sporter_voorkeuren(sporter)
+        context['toon_geslacht'] = (sporter.geslacht == GESLACHT_ANDERS)
 
         if self.rol_nu == Rollen.ROL_HWL:
             actief = 'vereniging'

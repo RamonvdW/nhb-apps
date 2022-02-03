@@ -15,9 +15,16 @@ MAXIMALE_LEEFTIJD_JEUGD = 20
 
 GESLACHT_MAN = 'M'
 GESLACHT_VROUW = 'V'
+GESLACHT_ANDERS = 'X'
 
-GESLACHT = [(GESLACHT_MAN, 'Man'),
-            (GESLACHT_VROUW, 'Vrouw')]
+# geregistreerde geslacht van sporters: M/V/X
+GESLACHT_MVX = [(GESLACHT_MAN, 'Man'),
+                (GESLACHT_VROUW, 'Vrouw'),
+                (GESLACHT_ANDERS, 'Anders')]
+
+# voor wedstrijdklassen herkennen we alleen M/V
+GESLACHT_MV = [(GESLACHT_MAN, 'Man'),
+               (GESLACHT_VROUW, 'Vrouw')]
 
 BLAZOEN_40CM = '40'
 BLAZOEN_60CM = '60'
@@ -135,7 +142,7 @@ class LeeftijdsKlasse(models.Model):
     beschrijving = models.CharField(max_length=80)      # CH Cadetten, mannen
 
     # man of vrouw
-    geslacht = models.CharField(max_length=1, choices=GESLACHT)
+    geslacht = models.CharField(max_length=1, choices=GESLACHT_MV)
 
     # leeftijds grenzen voor de klassen: of ondergrens, of bovengrens
     #   de jeugdklassen hebben een leeftijd bovengrens

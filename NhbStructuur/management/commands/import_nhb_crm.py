@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -683,7 +683,7 @@ class Command(BaseCommand):
                     self._count_errors += 1
 
             lid_geslacht = member['gender']
-            if lid_geslacht not in ('M', 'F'):
+            if lid_geslacht not in ('M', 'F', 'X'):
                 self.stderr.write('[ERROR] Lid %s heeft onbekend geslacht: %s (moet zijn: M of F)' % (lid_nr, lid_geslacht))
                 self._count_errors += 1
                 lid_geslacht = 'M'  # forceer naar iets valide
@@ -845,6 +845,24 @@ class Command(BaseCommand):
                         obj.save(update_fields=updated)
                         self._cache_sporter[obj.pk] = obj
 
+                        # wijziging van geslacht
+                        if 'geslacht' in updated:
+                            voorkeuren = obj.sportervoorkeuren_set.all()
+                            if len(voorkeuren) > 0:
+                                voorkeuren = voorkeuren[0]
+
+                                if lid_geslacht == 'X':
+                                    # wijziging naar geslacht X
+                                    # geef mogelijkheid om een keuze te maken voor de wedstrijden
+                                    voorkeuren.wedstrijd_geslacht_gekozen = False
+                                    self.stdout.write('[INFO] Lid %s voorkeuren: wedstrijd geslacht instelbaar gemaakt')
+                                else:
+                                    # forceer vaste geslacht voor wedstrijden
+                                    voorkeuren.wedstrijd_geslacht_gekozen = True
+                                    voorkeuren.wedstrijd_geslacht = lid_geslacht
+                                    self.stdout.write('[INFO] Lid %s voorkeuren: wedstrijd geslacht vastgezet')
+
+                                voorkeuren.save(update_fields=['wedstrijd_geslacht_gekozen', 'wedstrijd_geslacht'])
                 # else
             # else
 
