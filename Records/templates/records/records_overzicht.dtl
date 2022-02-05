@@ -31,7 +31,7 @@
             {% for obj in object_list %}
                 <div class="nhb-card">
                     <a href="{{ obj.url }}">
-                        <div class="nhb-card-content left-align" style="font-size: 80%">
+                        <div class="nhb-card-content center-align" style="font-size: 80%">
                             <span class="card-title">{{ obj.title_str }}</span>
                             {% if obj.para_str %}
                                 <p>{{ obj.para_str }}</p>
@@ -39,11 +39,13 @@
                             <p>{{ obj.descr1_str }}</p>
                             <p>{{ obj.descr2_str }}</p>
                             <p>&nbsp;</p>
-                            <img class="right" src="{{ obj.icon }}" height="50" width="41" alt="klein logo">
-                            <p>{{ obj.datum }}</p>
-                            <p>Plaats: {{ obj.plaats }}</p>
-                            <p class="truncate"><b>{{ obj.naam }}</b></p>
-                            <p>Score: {{ obj.score_str }} / {{ obj.max_score_str }}</p>
+                            <div class="left-align">
+                                <img class="right" src="{{ obj.icon }}" height="50" width="41" alt="klein logo">
+                                <p>{{ obj.datum }}</p>
+                                <p>Plaats: {{ obj.plaats }}</p>
+                                <p class="truncate"><b>{{ obj.naam }}</b></p>
+                                <p>Score: {{ obj.score_str }} / {{ obj.max_score_str }}</p>
+                            </div>
                         </div>
                     </a>
                 </div>
