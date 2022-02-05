@@ -30,8 +30,7 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@500&display=swap">
-        <link rel="stylesheet" href="{% static 'materialize-new-83.css' %}">
-        <link rel="stylesheet" href="{% static 'site_layout_min-35.css' %}"> <!-- moet ná materialize css -->
+        <link rel="stylesheet" href="{% static 'materialize-new-84.css' %}">
         {% block extraheader %}{% endblock %}
     </head>
 
