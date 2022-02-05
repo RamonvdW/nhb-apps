@@ -72,6 +72,13 @@ class Command(BaseCommand):
         self.stdout.write("[INFO] Verwijder beste records met inconsistente para_klasse: %s" % objs.count())
         objs.delete()
 
+        # ruim fout op: soort_record komt niet overeen met gekoppelde soort_record
+        objs = (BesteIndivRecords
+                .objects
+                .exclude(beste__soort_record=F('soort_record')))
+        self.stdout.write("[INFO] Verwijder beste records met inconsistente soort_record: %s" % objs.count())
+        objs.delete()
+
         # bepaal alle unieke combinaties
         objs = (IndivRecord
                 .objects
@@ -86,6 +93,7 @@ class Command(BaseCommand):
 
             beste, _ = (BesteIndivRecords
                         .objects
+                        .select_related('beste')
                         .get_or_create(
                             discipline=obj.discipline,
                             soort_record=obj.soort_record,
