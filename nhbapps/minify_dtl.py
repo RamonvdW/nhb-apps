@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -193,7 +193,32 @@ class Loader(AppDirectoriesLoader):
         # remove whitespace between html tags
         contents = re.sub(r'>\s+<', '><', contents)
 
-        return contents
+        # optimize inside style=""
+        new_contents = ''
+        pos = contents.find('style="')      # let op: neemt ook img_style="padding:10px" mee
+        while pos > 0:
+            new_contents += contents[:pos+7]
+            contents = contents[pos+7:]
+
+            pos = contents.find('"')
+            if pos > 0:
+                style = contents[:pos]
+                contents = contents[pos:]
+
+                style = style.replace(';  ', ';')
+                style = style.replace('; ', ';')
+                style = style.replace(': ', ':')
+
+                if style[-1] == ';':
+                    style = style[:-1]
+
+                new_contents += style
+
+            pos = contents.find('style="')
+        # while
+        new_contents += contents
+
+        return new_contents
 
     def get_contents(self, origin):
         """ Deze Loader methode lijkt aangeroepen """

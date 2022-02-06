@@ -41,8 +41,8 @@
             <nav class="nhb-grijs">
                 <div class="nav-wrapper">
                     <!-- logo aan de linker kant -->
-                    <a href="/plein/" class="brand-logo" style="left:0; transform:none; padding-left:7px; padding-top:7px; z-index:-1">
-                        <img src="{% static 'plein/logo_with_text_nhb_jubileum.png' %}" height="50" width="213" alt="NHB logo">
+                    <a href="/plein/" class="brand-logo" style="left:0; transform:none; padding-left:7px; padding-top:7px">
+                        <img src="{% static 'plein/logo_with_text_nhb_jubileum.png' %}" height="50" width="213" alt="NHB logo" style="z-index:1">
                     </a>
 
                     <!-- login/quick access knop aan de rechter kant -->
@@ -53,13 +53,13 @@
                         -->
                         {% if menu_voornaam %}
                             <li>
-                                <a href="#" class="btn-nhb-rood dropdown-trigger" data-target="navbar-dropdown">
+                                <a href="#" class="btn-nhb-rood dropdown-trigger" data-target="navbar-dropdown" style="position:relative; z-index:2">
                                     <i class="material-icons-round right hide-on-small-only" style="line-height:36px">expand_more</i>
                                     <i class="material-icons-round hide-on-med-and-up" style="line-height:36px">expand_more</i>
                                     <span class="hide-on-small-only">{{ menu_voornaam|escape }}</span></a>
                             </li>
                         {% elif not verberg_login_knop %}
-                            <li><a href="{% url 'Account:login' %}" class="btn-nhb-rood">Inloggen</a></li>
+                            <li><a href="{% url 'Account:login' %}" class="btn-nhb-rood" style="position:relative; z-index:2">Inloggen</a></li>
                         {% endif %}
                     </ul>
                 </div>

@@ -147,6 +147,10 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
             filters.append(tup)
         # for
 
+        context['kruimels'] = (
+            (None, 'Logboek'),
+        )
+
         menu_dynamics(self.request, context, actief='hetplein')
         return context
 
