@@ -97,7 +97,10 @@ class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
                      'sporterboog__sporter__lid_nr')
 
     list_filter = ('deelcompetitie__competitie',
-                   'deelcompetitie__nhb_regio',)
+                   'deelcompetitie__nhb_regio',
+                   'sporterboog__boogtype',
+                   ('sporterboog__sporter__bij_vereniging', admin.EmptyFieldListFilter),
+                   'sporterboog__sporter__bij_vereniging')
 
     list_select_related = ('deelcompetitie',
                            'deelcompetitie__nhb_regio',
@@ -360,7 +363,9 @@ class KampioenschapSchutterBoogAdmin(CreateOnlyAdmin):
 
     list_filter = ('deelcompetitie__competitie',
                    'deelcompetitie__nhb_rayon',
-                   'sporterboog__boogtype')
+                   'sporterboog__boogtype',
+                   ('sporterboog__sporter__bij_vereniging', admin.EmptyFieldListFilter),
+                   'sporterboog__sporter__bij_vereniging')
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
         if db_field.name == 'klasse':

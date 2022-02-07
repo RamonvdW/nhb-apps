@@ -457,9 +457,9 @@ class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
         if len(deelnemers) == 0:
             out['fail'] = 1         # is niet ingeschreven voor deze competitie
         else:
-
             out['deelnemers'] = list()
 
+            geen_lid = True
             for deelnemer in deelnemers:
                 sporterboog = deelnemer.sporterboog
                 sporter = sporterboog.sporter
@@ -467,14 +467,13 @@ class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
 
                 # volgende blok wordt een paar keer uitgevoerd, maar dat maak niet uit
                 ver = sporter.bij_vereniging
-                if ver:
-                    out['vereniging'] = str(ver)
-                    out['regio'] = str(ver.regio)
-                else:
-                    if 'vereniging' not in out:
-                        out['vereniging'] = '?'
-                        out['regio'] = '?'
+                if not ver:
+                    # niet lid bij een vereniging, dan niet toe te voegen
+                    geen_lid = True
+                    continue
 
+                out['vereniging'] = str(ver)
+                out['regio'] = str(ver.regio)
                 out['lid_nr'] = sporter.lid_nr
                 out['naam'] = sporter.volledige_naam()
                 out['ver_nr'] = sporter.bij_vereniging.ver_nr
@@ -504,6 +503,9 @@ class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
 
                 out['deelnemers'].append(sub)
             # for
+
+            if geen_lid and len(out['deelnemers']) == 0:
+                out['fail'] = 1
 
         return JsonResponse(out)
 
