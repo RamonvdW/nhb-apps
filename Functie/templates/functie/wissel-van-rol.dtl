@@ -89,60 +89,41 @@
 
         {% if heeft_alle_rollen %}
 
-            <h4 class="center">Springplanken</h4>
+            <h4 class="center">Snel wisselen</h4>
 
             <!-- blauwe balk -->
-            <div class="row-nhb-blauw">
+            {% if show_hwl_rollen %}
+                <div class="row-nhb-blauw" style="padding:15px 0 0 0">
+                    <!-- verticale versie -->
 
-                <!-- witte rechthoek voor radiobuttons -->
-                <div class="col {% if show_hwl_rollen %}s6 m4 l3{% else %}s5{% endif %}">
-                    <div class="white left-align" style="padding:10px; margin-bottom:15px">
-                        <h6 class="center">Indoor</h6>
-                        <ul>
-                        {% for obj in alle_18 %}
-                            <li>
-                                <label class="black-text" for="id_{{ obj.pk }}">
-                                    <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
-                                    <span>
-                                        <span class="hide-on-small-only">{{ obj.tekst_lang }}</span>
-                                        <span class="hide-unless-small">{{ obj.tekst_kort }}</span>
-                                    </span>
-                                </label>
-                            </li>
-                        {% endfor %}
-                        </ul>
-                        <p class="center">
-                            <a class="btn-nhb-rood" onclick="wissel_naar_rol()">Activeer</a>
-                        </p>
+                    <!-- indoor -->
+                    <div class="col s6 m3">
+                        <div class="white left-align" style="padding:10px; margin-bottom:15px">
+                            <b>Indoor:</b><br>
+                            {% for obj in alle_18 %}
+                                <form method="post" action="{{ obj.url }}" style="display:inline">
+                                    {% csrf_token %}
+                                    <button class="btn-nhb-rood">{{ obj.tekst_kort }}</button>
+                                </form>
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
 
-                <!-- witte rechthoek voor radiobuttons -->
-                <div class="col {% if show_hwl_rollen %}s6 m4 l3{% else %}s5 offset-s2{% endif %}">
-                    <div class="white left-align" style="padding:10px; margin-bottom:15px">
-                        <h6 class="center">25m1pijl</h6>
-                        <ul>
-                        {% for obj in alle_25 %}
-                            <li>
-                                <label class="black-text" for="id_{{ obj.pk }}">
-                                    <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
-                                    <span>
-                                        <span class="hide-on-small-only">{{ obj.tekst_lang }}</span>
-                                        <span class="hide-unless-small">{{ obj.tekst_kort }}</span>
-                                    </span>
-                                </label>
-                            </li>
-                        {% endfor %}
-                        </ul>
-                        <p class="center">
-                            <a class="btn-nhb-rood" onclick="wissel_naar_rol()">Activeer</a>
-                        </p>
+                    <!-- 25m1pijl -->
+                    <div class="col s6 m3">
+                        <div class="white left-align" style="padding:10px; margin-bottom:15px">
+                            <b>25m1pijl:</b><br>
+                            {% for obj in alle_25 %}
+                                <form method="post" action="{{ obj.url }}" style="display:inline">
+                                    {% csrf_token %}
+                                    <button class="btn-nhb-blauw">{{ obj.tekst_kort }}</button>
+                                </form>
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
 
-                <!-- verenigingen -->
-                {% if show_hwl_rollen %}
-                    <div class="col s12 m4 l6">
+                    <!-- verenigingen -->
+                    <div class="col s12 m6">
                         <div class="white left-align" style="padding:10px; margin-bottom:15px">
                             <h6 class="center">Verenigingen</h6>
                             <ul>
@@ -160,8 +141,50 @@
                             </p>
                         </div>
                     </div>
-                {% endif %}
-            </div>
+
+                </div>
+
+            {% else %}
+                <!-- horizontale versie -->
+
+                <div class="row-nhb-blauw" style="padding:15px 0 0 0">
+
+                    <!-- indoor -->
+                    <div class="col s12">
+                        <div class="white left-align" style="padding:10px; margin-bottom:15px">
+                            <div style="display:flex">
+                                <div class="valign-wrapper" style="margin-right:10px"><b>Indoor</b></div>
+                                <div>
+                                    {% for obj in alle_18 %}
+                                        <form method="post" action="{{ obj.url }}" style="display:inline">
+                                            {% csrf_token %}
+                                            <button class="btn-nhb-rood">{{ obj.tekst_kort }}</button>
+                                        </form>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 25m1pijl -->
+                    <div class="col s12">
+                        <div class="white left-align" style="padding:10px; margin-bottom:15px">
+                            <div style="display:flex">
+                                <div class="valign-wrapper" style="margin-right:10px"><b>25m1pijl</b></div>
+                                <div>
+                                    {% for obj in alle_25 %}
+                                        <form method="post" action="{{ obj.url }}" style="display:inline">
+                                            {% csrf_token %}
+                                            <button class="btn-nhb-blauw">{{ obj.tekst_kort }}</button>
+                                        </form>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            {% endif %}     <!-- show_hwl_rollen -->
 
         {% endif %}     <!-- springplanken -->
 

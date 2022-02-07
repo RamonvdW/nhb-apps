@@ -466,8 +466,15 @@ class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
                 boog = sporterboog.boogtype
 
                 # volgende blok wordt een paar keer uitgevoerd, maar dat maak niet uit
-                out['vereniging'] = str(sporter.bij_vereniging)
-                out['regio'] = str(sporter.bij_vereniging.regio)
+                ver = sporter.bij_vereniging
+                if ver:
+                    out['vereniging'] = str(ver)
+                    out['regio'] = str(ver.regio)
+                else:
+                    if 'vereniging' not in out:
+                        out['vereniging'] = '?'
+                        out['regio'] = '?'
+
                 out['lid_nr'] = sporter.lid_nr
                 out['naam'] = sporter.volledige_naam()
                 out['ver_nr'] = sporter.bij_vereniging.ver_nr

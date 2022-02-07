@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -59,6 +59,12 @@ class SiteFeedbackView(UserPassesTestMixin, View):
                    'check_0': (bev == 'plus'),
                    'check_1': (bev == 'nul'),
                    'check_2': (bev == 'min')}
+
+        # bewust geen broodkruimels (behalve de "vorige" knop)
+        #context['kruimels'] = (
+        #    (None, 'Geef feedback'),
+        #)
+
         menu_dynamics(request, context)
         return render(request, self.template_name, context)
 
@@ -128,6 +134,10 @@ class SiteFeedbackInzichtView(UserPassesTestMixin, ListView):
 
         if self.request.user.is_staff:
             context['url_admin_site'] = reverse('admin:Overig_sitefeedback_changelist')
+
+        context['kruimels'] = (
+            (None, 'Site feedback'),
+        )
 
         menu_dynamics(self.request, context)
         return context

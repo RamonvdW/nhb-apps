@@ -45,7 +45,7 @@ class ZoekAccountForm(forms.Form):
 
     # een simpel tekstveld waarin de gebruiker de zoek/filter tekst in kan voeren
     zoekterm = forms.CharField(
-                    label='Zoek op:',
+                    label='Bondsnummer of deel volledige naam:',
                     max_length=50,
                     required=False,
                     widget=forms.TextInput(attrs={'autofocus': True}))

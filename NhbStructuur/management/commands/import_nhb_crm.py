@@ -712,7 +712,8 @@ class Command(BaseCommand):
             except (ValueError, TypeError):
                 lid_sinds = None
                 is_valid = False
-                self.stderr.write('[ERROR] Lid %s heeft geen valide lidmaatschapsdatum' % lid_nr)
+                self.stderr.write('[ERROR] Lid %s heeft geen valide lidmaatschapsdatum: %s' % (
+                                        lid_nr, repr(member['member_from'])))
                 self._count_errors += 1
 
             lid_email = member['email']

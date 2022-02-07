@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -11,77 +11,83 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-activiteit" %}
-
-    <h4>Account activiteit</h4>
-
-    <p>Spring naar een sectie op deze pagina:</p>
-    <div class="white shrink-wrap-5">
-
-        <a class="btn-nhb-blauw btn-small margin-5" href="#hulp">Mogelijk hulp nodig</a>
-        <a class="btn-nhb-blauw btn-small margin-5" href="#nieuwe">Nieuwe accounts</a>
-        <a class="btn-nhb-blauw btn-small margin-5" href="#recent">Recente activiteit</a>
-        <a class="btn-nhb-blauw btn-small margin-5" href="#poging">Mislukte inlog pogingen</a>
-        {% if accses %}
-            <a class="btn-nhb-blauw btn-small margin-5" href="#sessies">Sessies (experimenteel)</a>
-        {% endif %}
-        {% if age_groups %}
-            <a class="btn-nhb-blauw btn-small margin-5" href="#leeftijdsgroepen">Leeftijd gebruikers</a>
-        {% endif %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Account activiteit</h3>
+        </div>
     </div>
 
-    <p>&nbsp;</p>
-    <div class="row">
-        <!-- toon gegevens in een blauwe box -->
-        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-            <div class="white-text nhb-blauw z-depth-2">
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Totaal accounts aangemaakt</th>
+                    <td>{{ totaal }}</td>
+                </tr>
+                <tr>
+                    <th>Nieuw sinds {{ deze_maand|date }}</th>
+                    <td>{{ deze_maand_count }}</td>
+                </tr>
+                <tr>
+                    <th>Aantal actieve gebruikers</th>
+                    <td>{{ aantal_actieve_gebruikers }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
 
-                <div class="row small-row">
-                    <div class="col s5">Totaal accounts aangemaakt:</div>
-                    <div class="col s3">{{ totaal }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s5">Sinds {{ deze_maand|date }}:</div>
-                    <div class="col s3">{{ deze_maand_count }}</div>
-                </div>
-
-            </div>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Details specifieke gebruiker</h4>
+            <p>Gebruik het formulier om details op te vragen over een specifieke gebruiker</p>
         </div>
     </div>
 
     <!-- zoekformulier -->
-    <p>&nbsp;</p>
-    <h5>Details specifieke gebruiker</h5>
-    <p>Gebruik het formulier om details op te vragen over een specifieke gebruiker:</p>
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
 
-    <div class="container z-depth-2 white">
-        <div class="row nhb-blauw white-text">
-            <div class="col s12 center-align">
-                <h5>Zoek gebruiker</h5>
-                <p>Zoek op inlog naam of (deel van) volledige naam</p>
-            </div>
-        </div>
+            <!-- dialoog venster -->
+            <div style="margin:50px 30px 30px 30px" class="left-align">
+                <form action="{{ zoek_url }}" method="get">
+                    {% csrf_token %}
 
-        <div class="row">
-            <form class="col s12" action="{{ zoek_url }}" method="get">
-                <div class="row"><div class="input-field col s12">
-                    {{ zoekform.zoekterm.label_tag }}{{ zoekform.zoekterm }}
-                </div></div>
-
-                <div class="row"><div class="col s12"></div>
-                    <div class="center-align">
-                        <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
+                    <!-- form field -->
+                    <div class="input-field">
+                        {{ zoekform.zoekterm.label_tag }}{{ zoekform.zoekterm }}
                     </div>
-                </div>
-            </form>
+
+                    <!-- button -->
+                    <p class="center">
+                        <button class="btn-nhb-rood" type="submit">
+                            <i class="material-icons-round left">search</i>Zoek</button>
+                    </p>
+                </form>
+            </div>
+
         </div>
     </div>
 
-
+    <!-- zoekresultaten -->
     {% if zoekterm %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Zoekresultaten</h4>
+                {% if zoek_leden %}
+                    <p>{{ zoek_leden|length }} gebruikers gevonden</p>
+                {% else %}
+                    <p class="red-text">Niets gevonden</p>
+                {% endif %}
+            </div>
+        </div>
+
         {% if zoek_leden %}
-            <h6>Gevonden gebruikers</h6>
             <ul class="collapsible">
                 {% for obj in zoek_leden %}
                     <!-- obj is Account -->
@@ -100,12 +106,25 @@
                     </li>
                 {% endfor %}
             </ul>
-        {% else %}
-            <p class="red-text">Niets gevonden</p>
         {% endif %}
 
     {% endif %}
 
+    <div class="row center">
+        <div class="col s12">
+            <p>Secties verderop op deze pagina:</p>
+            <!-- a class="btn-nhb-rood btn-small margin-5" href="#hulp">Mogelijk hulp nodig</a -->
+            <a class="btn-nhb-rood btn-small margin-5" href="#nieuwe">Nieuwe accounts</a>
+            <a class="btn-nhb-rood btn-small margin-5" href="#recent">Recente activiteit</a>
+            <a class="btn-nhb-rood btn-small margin-5" href="#poging">Mislukte inlog pogingen</a>
+            {% if accses %}
+                <a class="btn-nhb-rood btn-small margin-5" href="#sessies">Sessies (experimenteel)</a>
+            {% endif %}
+            {% if age_groups %}
+                <a class="btn-nhb-rood btn-small margin-5" href="#leeftijdsgroepen">Leeftijd gebruikers</a>
+            {% endif %}
+        </div>
+    </div>
 
     <p>&nbsp;</p>
     <h5 id="hulp">Mogelijk hulp nodig</h5>
@@ -342,6 +361,8 @@
             </div>
         </div>
     {% endif %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-activiteit" %}
 
 {% endblock %}
 
