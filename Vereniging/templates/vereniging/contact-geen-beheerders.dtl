@@ -1,44 +1,67 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block title %}Verenigingen zonder beheerders{% endblock %}
+{% block title %}Zonder beheerders{% endblock %}
 
 {% block pagina %}
 
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Verenigingen zonder beheerders</h3>
+            <p>Contactgegevens van de secretarissen van verenigingen die nog niet actief genoeg zijn op de website.</p>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Geen beheerders</h4>
+            <p>Nog helemaal geen leden gekoppeld aan de beheerder rollen SEC / HWL / WL</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <tr>
+                    <td>{% for ver in geen_beheerders %}{{ ver.nr_geen_beheerders }}<br>{% endfor %}</td>
+                    <td>{% for ver in geen_beheerders %}{{ ver }}<br>{% endfor %}</td>
+                    <td>{% for ver in geen_beheerders %}{{ ver.functie_sec_email }}<br>{% endfor %}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Secretaris account</h4>
+            <p>Secretaris heeft nog geen account aangemaakt</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <tr>
+                    <td>{% for ver in geen_sec %}{{ ver.nr_geen_sec }}<br>{% endfor %}</td>
+                    <td>{% for ver in geen_sec %}{{ ver }}<br>{% endfor %}</td>
+                    <td>{% for ver in geen_sec %}{{ ver.functie_sec_email }}<br>{% endfor %}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-contact-geen-beheerders" %}
-
-    <h4>Verenigingen zonder beheerders</h4>
-
-    <p>Op deze pagina staan de contactgegevens van de secretarissen van verenigingen die nog niet actief genoeg zijn op de website.</p>
-
-
-    <p>&nbsp;</p>
-    <h5>Nog helemaal nog geen beheerders gekoppeld</h5>
-
-    <table class="white">
-        <tr>
-            <td>{% for ver in geen_beheerders %}{{ ver.nr_geen_beheerders }}<br>{% endfor %}</td>
-            <td>{% for ver in geen_beheerders %}{{ ver }}<br>{% endfor %}</td>
-            <td>{% for ver in geen_beheerders %}{{ ver.functie_sec_email }}<br>{% endfor %}</td>
-        </tr>
-    </table>
-
-
-    <p>&nbsp;</p>
-    <h5>Secretaris heeft nog geen account</h5>
-
-    <table class="white">
-        <tr>
-            <td>{% for ver in geen_sec %}{{ ver.nr_geen_sec }}<br>{% endfor %}</td>
-            <td>{% for ver in geen_sec %}{{ ver }}<br>{% endfor %}</td>
-            <td>{% for ver in geen_sec %}{{ ver.functie_sec_email }}<br>{% endfor %}</td>
-        </tr>
-    </table>
-
 
 {% endblock %}

@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Verenigingen en Accommodaties{% endblock %}
+{% block title %}Verenigingen{% endblock %}
 
 {% block pagina %}
 
@@ -22,7 +22,7 @@
             {% endif %}
 
             {% if contact_geen_beheerders %}
-                <p><a class="btn-nhb-blauw" href="{{ contact_geen_beheerders }}">Verenigingen zonder beheerders</a></p>
+                <p><a class="btn-nhb-rood" href="{{ contact_geen_beheerders }}">Verenigingen zonder beheerders</a></p>
             {% endif %}
         </div>
     </div>

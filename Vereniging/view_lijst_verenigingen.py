@@ -253,6 +253,11 @@ class GeenBeheerdersView(UserPassesTestMixin, TemplateView):
                 ver.nr_geen_beheerders = len(geen_beheerders)
         # for
 
+        context['kruimels'] = (
+            (reverse('Vereniging:lijst-verenigingen'), 'Verenigingen'),
+            (None, 'Zonder beheerders')
+        )
+
         menu_dynamics(self.request, context, actief='vereniging')
         return context
 

@@ -47,6 +47,7 @@ urlpatterns = [
          name='locatie-details'),
 
 
+    # voor de BB
     path('contact-geen-beheerders/',
          view_lijst_verenigingen.GeenBeheerdersView.as_view(),
          name='contact-geen-beheerders')
