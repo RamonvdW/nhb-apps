@@ -145,7 +145,7 @@
         </div>
 
         <script src="{% static 'materialize-new-10_min.js' %}"></script>
-        <script src="{% static 'site_layout-5_min.js' %}"></script>
+        <script src="{% static 'site_layout-9_min.js' %}"></script>
 
         <!-- framework init, after everything has been loaded and instantiated -->
         <script type="application/javascript">
