@@ -4,13 +4,13 @@
 #
 #    pip-compile requirements_dev.in
 #
-asgiref==3.4.1
+asgiref==3.5.0
     # via
     #   -r requirements_test.txt
     #   django
 beautifulsoup4==4.10.0
     # via -r requirements_dev.in
-cachetools==4.2.4
+cachetools==5.0.0
     # via
     #   -r requirements_test.txt
     #   google-auth
@@ -18,13 +18,13 @@ certifi==2021.10.8
     # via
     #   -r requirements_test.txt
     #   requests
-charset-normalizer==2.0.9
+charset-normalizer==2.0.11
     # via
     #   -r requirements_test.txt
     #   requests
-coverage==6.2
+coverage==6.3.1
     # via -r requirements_dev.in
-django==3.2.11
+django==3.2.12
     # via
     #   -r requirements_test.txt
     #   django-debug-toolbar
@@ -37,13 +37,13 @@ et-xmlfile==1.1.0
     # via
     #   -r requirements_test.txt
     #   openpyxl
-google-api-core==2.3.2
+google-api-core==2.5.0
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-google-api-python-client==2.33.0
+google-api-python-client==2.36.0
     # via -r requirements_test.txt
-google-auth==2.3.3
+google-auth==2.6.0
     # via
     #   -r requirements_test.txt
     #   google-api-core
@@ -59,7 +59,7 @@ googleapis-common-protos==1.54.0
     #   google-api-core
 html5validator==0.4.0
     # via -r requirements_dev.in
-httplib2==0.20.2
+httplib2==0.20.4
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
@@ -76,7 +76,7 @@ pip-licenses==3.5.3
     # via -r requirements_dev.in
 pip-review==1.1.1
     # via -r requirements_dev.in
-protobuf==3.19.1
+protobuf==3.19.4
     # via
     #   -r requirements_test.txt
     #   google-api-core
@@ -96,7 +96,7 @@ pyasn1-modules==0.2.8
     #   google-auth
 pyotp==2.6.0
     # via -r requirements_test.txt
-pyparsing==3.0.6
+pyparsing==3.0.7
     # via
     #   -r requirements_test.txt
     #   httplib2
@@ -109,7 +109,7 @@ pyyaml==6.0
     # via html5validator
 qrcode==7.3.1
     # via -r requirements_test.txt
-requests==2.27.0
+requests==2.27.1
     # via
     #   -r requirements_test.txt
     #   google-api-core
@@ -133,11 +133,10 @@ uritemplate==4.1.1
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-urllib3==1.26.7
+urllib3==1.26.8
     # via
     #   -r requirements_test.txt
     #   requests
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
-# setuptools
