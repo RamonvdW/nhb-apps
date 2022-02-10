@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,40 +9,48 @@
 
 {% block pagina %}
 
-    <div class="white" style="padding:10px 30px 10px 30px">
-
-        <h4>Clusters</h4>
-
-        <p>Een cluster is een geografisch gebied binnen een regio en kan vrij ingedeeld worden door de RCL.</p>
-
-        <p>De clusters worden typisch toegepast:</p>
-        <ul style="padding-left: 20px">
-        <li style="list-style-type: disc; padding-left:0">om de reistijd en/of kosten acceptabel te houden. Voorbeeld: sporters op de eilanden, of grote geografische spreiding.</li>
-        <li style="list-style-type: disc; padding-left:0">omdat er beperkingen zijn wie de accommodatie mogen betreden. Voorbeeld: bedrijfsverenigingen met accommodatie op het bedrijfsterrein.</li>
-        </ul>
-
-        <p>De website biedt standaard 8 clusters per regio:</p>
-        <ul style="padding-left: 20px">
-        <li style="list-style-type: disc; padding-left:0">4 voor de Indoor competitie</li>
-        <li style="list-style-type: disc; padding-left:0">4 voor de 25m 1pijl competitie.</li>
-        </ul>
-
-        <p>&nbsp;</p>
-        <p>Verenigingen kunnen worden toegevoegd aan twee clusters (apart voor Indoor een 25m 1pijl).</p>
-        <p>De clusters bestaan uit het nummer van de regio plus een unieke letter, bijvoorbeeld 101d.</p>
-        <p>De RCL kan elk clusters een beschrijving geven.</p>
-        <p>&nbsp;</p>
-        <p>Bij behoefte kunnen extra clusters aangevraagd worden via het bondsbureau. De letters zijn ook aan te passen.</p>
-
-        <p>&nbsp;</p>
-        <hr>
-        <h5>Verder</h5>
-        <p>Terug naar de <a class="btn-nhb-blauw" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
-        <p><a class="btn-nhb-blauw" href="/handleiding/Planning_Regio/">Planning Regio</a></p>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Clusters</h3>
+        </div>
     </div>
 
-{% endblock %}
 
-{% block menu %}
-    {% include 'handleiding/menu.dtl' %}
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+
+                <p>Een cluster is een geografisch gebied binnen een regio en kan vrij ingedeeld worden door de RCL.</p>
+
+                <p>De clusters worden typisch toegepast:</p>
+                <ul style="padding-left: 20px">
+                <li style="list-style-type: disc; padding-left:0">om de reistijd en/of kosten acceptabel te houden. Voorbeeld: sporters op de eilanden, of grote geografische spreiding.</li>
+                <li style="list-style-type: disc; padding-left:0">omdat er beperkingen zijn wie de accommodatie mogen betreden. Voorbeeld: bedrijfsverenigingen met accommodatie op het bedrijfsterrein.</li>
+                </ul>
+
+                <p>De website biedt standaard 8 clusters per regio:</p>
+                <ul style="padding-left: 20px">
+                <li style="list-style-type: disc; padding-left:0">4 voor de Indoor competitie</li>
+                <li style="list-style-type: disc; padding-left:0">4 voor de 25m 1pijl competitie.</li>
+                </ul>
+
+                <p>&nbsp;</p>
+                <p>Verenigingen kunnen worden toegevoegd aan twee clusters (apart voor Indoor een 25m 1pijl).</p>
+                <p>De clusters bestaan uit het nummer van de regio plus een unieke letter, bijvoorbeeld 101d.</p>
+                <p>De RCL kan elk clusters een beschrijving geven.</p>
+                <p>&nbsp;</p>
+                <p>Bij behoefte kunnen extra clusters aangevraagd worden via het bondsbureau. De letters zijn ook aan te passen.</p>
+
+                <p>&nbsp;</p>
+                <hr>
+                <h5>Verder</h5>
+                <p>Terug naar de <a class="btn-nhb-rood" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
+                <p><a class="btn-nhb-rood" href="/handleiding/Planning_Regio/">Planning Regio</a></p>
+
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

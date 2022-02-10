@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,41 +9,33 @@
 
 {% block pagina %}
 
-    <div class="white" style="padding:10px 30px 10px 30px">
-
-        <h4>Twee-factor authenticatie</h4>
-
-        <h5>Doelstelling</h5>
-        <p>Tweestapsverificatie (2FA: 2e Factor Authenticatie / Two-factor Authentication) voorkomt misbruik van een account.</p>
-        <p>Iemand met je inlognaam en wachtwoord heeft nog iets meer nodig: een 6-cijferige code die typisch door een app op je mobiel gemaakt wordt.</p>
-
-        <p>Zo kunnen de codes er uit zien in Google Authenticator op je mobiel:<br></p>
-        <p><img src="{% static 'handleiding/Google-authenticator-mainscreen.jpg' %}" width="400" alt="Google Authenticator"></p>
-
-        <p>&nbsp;</p>
-        <h5>Hulpprogramma's</h5>
-        <p>Om de geheime code te onthouden en de codes te genereren heb je een programmatje nodig.</p>
-        <p>Voor je mobiel zijn Google Authenticator en Authy beschikbaar - zoek in de app-store van je mobiele telefoon.</p>
-        <a class="btn-nhb-blauw" href="https://chrome.google.com/webstore/detail/authenticator/bhghoamapcdpbohphigoooaddinpkbai" target="_blank" rel="noopener noreferrer"><i class="material-icons-round left">open_in_new</i>Authenticator voor Chrome</a><p>Er bestaan ook browser plug-ins zoals .</p>
-
-        <p>&nbsp;</p>
-        <h5>Activeren</h5>
-        <p>Na het inloggen kan je onder 'Wissel van rol' op de knop 'NU CONTROLEREN' drukken en de code opgeven. Daarna komen meer opties beschikbaar in het menu - en extra rollen onder 'Wissel van rol'.</p>
-        <p>Het controlescherm waar de code ingevoerd moet worden:<br></p>
-        <p><img src="{% static 'handleiding/2fa-controle.png' %}" alt="Het controlescherm"></p>
-        <p>De eerste keer moet de koppeling met de app gemaakt worden. De tekst op de knop is dan 'NU KOPPELEN'. De website toont een QR-code (zie hieronder) die de informatie bevat voor de app op je mobiel. Kies in de app de optie om een koppeling te maken (in Google Authenticator is dit de rode plus knop) en kies "barcode scannen". Scan de barcode met de camera van je mobiel.</p>
-        <p><img src="{% static 'handleiding/2FA-koppelen.png' %}" alt="QR-code om te scannen"></p>
-        <p>Als je de QR code niet kunt scannen, dan kan je de code handmatig invoeren. Kies in de app de optie om een koppeling te maken en kies dan "Voer een code in" / "Enter a provided key". Je moet nu twee velden invullen: een beschrijving die je zelf mag kiezen en de code. Tik de letters en cijfers over - kleine letter/hoofdletters en spaties maken niet uit. Kies 'Time-based' want de website gebruikt Time-based OTP, want betekent dat elke 30 seconden een nieuwe 6-cijferige code gegenereerd wordt.</p>
-
-        <p>&nbsp;</p>
-        <hr>
-        <h5>Verder</h5>
-        <p>Terug naar de <a class="btn-nhb-blauw" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
-
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Twee-factor authenticatie</h3>
+            <p>Subtitle</p>
+        </div>
     </div>
 
-{% endblock %}
 
-{% block menu %}
-    {% include 'handleiding/menu.dtl' %}
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+
+                <h5>Doelstelling</h5>
+                <p>Tweestapsverificatie (2FA: 2e Factor Authenticatie / Two-factor Authentication) voorkomt misbruik van een account.</p>
+                <p>Iemand met je inlognaam en wachtwoord heeft nog iets meer nodig: een 6-cijferige code die typisch door een app op je mobiel gemaakt wordt.</p>
+
+                <p>Als je de QR code niet kunt scannen, dan kan je de code handmatig invoeren. Kies in de app de optie om een koppeling te maken en kies dan "Voer een code in" / "Enter a provided key". Je moet nu twee velden invullen: een beschrijving die je zelf mag kiezen en de code. Tik de letters en cijfers over - kleine letter/hoofdletters en spaties maken niet uit. Kies 'Time-based' want de website gebruikt Time-based OTP, want betekent dat elke 30 seconden een nieuwe 6-cijferige code gegenereerd wordt.</p>
+
+                <p>&nbsp;</p>
+                <hr>
+                <h5>Verder</h5>
+                <p>Terug naar de <a class="btn-nhb-rood" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
+
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

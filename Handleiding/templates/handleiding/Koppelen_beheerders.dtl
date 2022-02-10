@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,37 +9,43 @@
 
 {% block pagina %}
 
-    <div class="white" style="padding:10px 30px 10px 30px">
-
-        <h4>Koppelen beheerders</h4>
-        <p>&nbsp;</p>
-
-        <h5>Beheerders competitie</h5>
-        <p>Leden van de NHB kunnen gekoppeld worden aan een functie, bijvoorbeeld RCL.</p>
-        <p>De koppeling moet uitgevoerd worden door de hiërarchisch direct bovenliggende rol. In het geval van de RCL Indoor voor een regio is dat dus de RKO Indoor voor het rayon.</p>
-        <p>Het kaartje om beheerders in te zien en aan te passen kan gevonden worden op Het Plein.</p>
-
-        <p>&nbsp;</p>
-        <h5>Beheerders binnen een vereniging</h5>
-        <p>Aan functies binnen een vereniging (SEC, HWL, WL) kunnen alleen leden van de vereniging gekoppeld worden. Dit kan gedaan worden door de SEC of HWL.</p>
-        <p>Het kaartje om beheerders van de vereniging in te zien is te vinden in het Vereniging menu.</p>
-
-        <p>&nbsp;</p>
-        <h5>Hoe koppelen</h5>
-        <p>Kies de WIJZIG knop voor de functie die je wilt wijzigen.</p>
-        <p>Boven aan het scherm staan de gekoppelde leden. Druk op de naam om de ontkoppel knop te zien.</p>
-        <p>Via het zoekveld kan gezocht worden naar een lid, op naam of bondsnummer. Het lid moet een account aangemaakt hebben.</p>
-        <p>Klik op de naam van het gevonden lid, controleer dat het de juiste persoon is aan de hand van de extra informatie die getoond wordt en klik daarna op de knop om te koppelen.</p>
-
-        <p>&nbsp;</p>
-        <hr>
-        <h5>Verder</h5>
-        <p>Terug naar de <a class="btn-nhb-blauw" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
-
+        <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Koppelen beheerders</h3>
+        </div>
     </div>
 
-{% endblock %}
 
-{% block menu %}
-    {% include 'handleiding/menu.dtl' %}
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+
+                <h5>Beheerders competitie</h5>
+                <p>Leden van de NHB kunnen gekoppeld worden aan een functie, bijvoorbeeld RCL.</p>
+                <p>De koppeling moet uitgevoerd worden door de hiërarchisch direct bovenliggende rol. In het geval van de RCL Indoor voor een regio is dat dus de RKO Indoor voor het rayon.</p>
+                <p>Het kaartje om beheerders in te zien en aan te passen kan gevonden worden op Het Plein.</p>
+
+                <p>&nbsp;</p>
+                <h5>Beheerders binnen een vereniging</h5>
+                <p>Aan functies binnen een vereniging (SEC, HWL, WL) kunnen alleen leden van de vereniging gekoppeld worden. Dit kan gedaan worden door de SEC of HWL.</p>
+                <p>Het kaartje om beheerders van de vereniging in te zien is te vinden in het Vereniging menu.</p>
+
+                <p>&nbsp;</p>
+                <h5>Hoe koppelen</h5>
+                <p>Kies de WIJZIG knop voor de functie die je wilt wijzigen.</p>
+                <p>Boven aan het scherm staan de gekoppelde leden. Druk op de naam om de ontkoppel knop te zien.</p>
+                <p>Via het zoekveld kan gezocht worden naar een lid, op naam of bondsnummer. Het lid moet een account aangemaakt hebben.</p>
+                <p>Klik op de naam van het gevonden lid, controleer dat het de juiste persoon is aan de hand van de extra informatie die getoond wordt en klik daarna op de knop om te koppelen.</p>
+
+                <p>&nbsp;</p>
+                <hr>
+                <h5>Verder</h5>
+                <p>Terug naar de <a class="btn-nhb-rood" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
+
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

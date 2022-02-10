@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,34 +9,41 @@
 
 {% block pagina %}
 
-    <div class="white" style="padding:10px 30px 10px 30px">
-
-        <h4>Handleiding BB</h4>
-
-        <p>Deze pagina beschrijft de mogelijkheden voor de Manager Competitiezaken.</p>
-
-        <h5>Opstarten nieuwe competitie</h5>
-
-        <p>Opstarten van de nieuwe competitie bestaat uit de volgende stappen:</p>
-        <ul style="padding-left: 20px">
-            <li style="list-style-type: disc; padding-left:0">Afsluiten van de competitie van vorige seizoen; uitslagen definitief maken</li>
-            <li style="list-style-type: disc; padding-left:0">Vaststellen van de aanvangsgemiddelden voor elke sporter (schutter-boog) met voldoende scores</li>
-            <li style="list-style-type: disc; padding-left:0">Aanmaken van de nieuwe competities (Indoor + 25m1pijl)</li>
-            <li style="list-style-type: disc; padding-left:0">Vaststellen van de wedstrijdklassen</li>
-            <li style="list-style-type: disc; padding-left:0">Vaststellen van de klassengrenzen per competitie, aan de hand van de aanvangsgemiddelden</li>
-            <li style="list-style-type: disc; padding-left:0">Aanpassen van de kalenderdatums</li>
-        </ul>
-
-        <p>&nbsp;</p>
-        <hr>
-        <h5>Verder</h5>
-        <p>Terug naar de <a class="btn-nhb-blauw" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
-        <p>Uitleg over <a class="btn-nhb-blauw" href="/handleiding/Sporter-boog/">Sporter-boog</a></p>
-
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Handleiding BB</h3>
+        </div>
     </div>
 
-{% endblock %}
 
-{% block menu %}
-    {% include 'handleiding/menu.dtl' %}
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+
+                <p>Deze pagina beschrijft de mogelijkheden voor de Manager Competitiezaken.</p>
+
+                <h5>Opstarten nieuwe competitie</h5>
+
+                <p>Opstarten van de nieuwe competitie bestaat uit de volgende stappen:</p>
+                <ul style="padding-left: 20px">
+                    <li style="list-style-type: disc; padding-left:0">Afsluiten van de competitie van vorige seizoen; uitslagen definitief maken</li>
+                    <li style="list-style-type: disc; padding-left:0">Vaststellen van de aanvangsgemiddelden voor elke sporter (schutter-boog) met voldoende scores</li>
+                    <li style="list-style-type: disc; padding-left:0">Aanmaken van de nieuwe competities (Indoor + 25m1pijl)</li>
+                    <li style="list-style-type: disc; padding-left:0">Vaststellen van de wedstrijdklassen</li>
+                    <li style="list-style-type: disc; padding-left:0">Vaststellen van de klassengrenzen per competitie, aan de hand van de aanvangsgemiddelden</li>
+                    <li style="list-style-type: disc; padding-left:0">Aanpassen van de kalenderdatums</li>
+                </ul>
+
+                <p>&nbsp;</p>
+                <hr>
+                <h5>Verder</h5>
+                <p>Terug naar de <a class="btn-nhb-rood" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
+                <p>Uitleg over <a class="btn-nhb-rood" href="/handleiding/Sporter-boog/">Sporter-boog</a></p>
+
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
