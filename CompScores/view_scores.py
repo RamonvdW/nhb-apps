@@ -714,6 +714,8 @@ class WedstrijdUitslagBekijkenView(TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPSCORES_BEKIJKEN
 
+    # TODO: pagina is alleen bereikbaar vanuit Beheer Vereniging --> UserPassesTestMixin toevoegen?
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -763,6 +765,16 @@ class WedstrijdUitslagBekijkenView(TemplateView):
         context['wedstrijd'] = wedstrijd
         context['deelcomp'] = deelcomp
         context['ronde'] = ronde
+
+        context['aantal_regels'] = 2 + len(scores)
+
+        comp = deelcomp.competitie
+
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+            (reverse('CompScores:wedstrijden'), 'Competitie wedstrijden'),
+            (None, 'Uitslag'),
+        )
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context
