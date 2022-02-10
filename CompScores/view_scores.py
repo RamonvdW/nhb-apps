@@ -50,8 +50,11 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:6])            # afkappen voor de veiligheid
-            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk,
-                                                  laag=LAAG_REGIO)
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie')
+                        .get(pk=deelcomp_pk,
+                             laag=LAAG_REGIO))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -62,6 +65,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 
         context['deelcomp'] = deelcomp
 
+        comp = deelcomp.competitie
         # TODO: check competitie fase
 
         if deelcomp.regio_organiseert_teamcompetitie:
@@ -121,6 +125,15 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
         # for
 
         context['wedstrijden'] = wedstrijden
+
+        context['aantal_regels'] = wedstrijden.count() + 2
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+             comp.beschrijving.replace(' competitie', '')),
+            (None, 'Scores')
+        )
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context

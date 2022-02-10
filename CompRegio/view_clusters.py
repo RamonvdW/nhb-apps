@@ -120,7 +120,8 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
             menu_dynamics_competitie(self.request, context, comp_pk=comp_pk)
             context['kruimels'] = (
                 (reverse('Competitie:kies'), 'Bondscompetities'),
-                (reverse('Competitie:overzicht', kwargs={'comp_pk': comp_pk}), deelcomp.competitie.beschrijving),
+                (reverse('Competitie:overzicht', kwargs={'comp_pk': comp_pk}),
+                 deelcomp.competitie.beschrijving.replace(' competitie', '')),
                 (None, 'Clusters')
             )
         else:
