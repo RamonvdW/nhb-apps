@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,7 +9,6 @@
 {% block title %}Scores koppelen aan team{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compscores-rcl-scores-regio-teams" %}
 
     <h4>Scores koppelen aan team</h4>
 
@@ -149,9 +148,6 @@
         <p>Deze pagina is niet beschikbaar voor de huidige team ronde</p>
     {% endif %}
 
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compscores-rcl-scores-regio-teams" %}
 
-{% endblock %}
-
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}

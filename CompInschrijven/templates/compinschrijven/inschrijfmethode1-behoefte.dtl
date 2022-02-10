@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,8 +9,6 @@
 {% block title %}Inschrijf voorkeuren{% endblock %}
 
 {% block pagina %}
-
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-inschrijfmethode1-behoefte" %}
 
     <h4>Inschrijf voorkeuren</h4>
 
@@ -55,8 +53,6 @@
 
     </table>
 
-{% endblock %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-inschrijfmethode1-behoefte" %}
 
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}

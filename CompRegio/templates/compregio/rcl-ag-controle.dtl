@@ -47,7 +47,3 @@
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-rcl-ag-controle" %}
 
 {% endblock %}
-
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
-{% endblock %}

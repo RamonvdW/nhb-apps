@@ -18,7 +18,6 @@ included_templates = (
     'plein/ga-naar-live-server.dtl',
     'overig/site-feedback-sidebar.dtl',
     'logboek/common.dtl',
-    'competitie/menu.dtl',          # TODO: obsolete
     'competitie/tijdlijn.dtl',
     'snippets.dtl'
 )

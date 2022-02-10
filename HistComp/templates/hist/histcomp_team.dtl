@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -11,8 +11,6 @@
 {% block pagina %}
 
     <p>Uitslag van de {{ comp_type_str }} team competitie, seizoen {{ jaar }}, klasse {{ klasse }}.</p>
-
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="histcomp_team" %}
 
     {% if is_paginated %}
         <p>Pagina {{ page_obj.number }} van de {{ paginator.num_pages }}</p>
@@ -84,8 +82,6 @@
         Geen resultaten gevonden.
     {% endif %}
 
-{% endblock %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="histcomp_team" %}
 
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}

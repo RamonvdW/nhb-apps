@@ -268,7 +268,3 @@
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-wijzig-wedstrijd-rk" %}
 
 {% endblock %}
-
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
-{% endblock %}

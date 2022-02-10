@@ -212,7 +212,3 @@
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-overzicht-beheerder" %}
 
 {% endblock %}
-
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
-{% endblock %}

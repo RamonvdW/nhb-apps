@@ -23,7 +23,3 @@
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-bond" %}
 
 {% endblock %}
-
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
-{% endblock %}
