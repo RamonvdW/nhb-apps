@@ -74,38 +74,42 @@
 
     <!-- blauwe balk met filters -->
     <div class="row-nhb-blauw">
-        <div class="col s8 offset-s2 m6 offset-m3 l3 white left-align" style="margin-bottom:15px">
-            <p><b>Kies een boog type:</b></p>
-            <ul id="id_boog">
-                {% for boog in boog_filters %}
-                    <li>
-                        <label class="black-text" for="id_{{ boog.sel }}">
-                            <input class="with-gap" type="radio" name="boog" value="{{ boog.sel }}" required id="id_{{ boog.sel }}" {% if boog.selected %}checked{% endif %} data-url="{{ boog.zoom_url }}">
-                            <span>{{ boog.beschrijving }}</span>
-                        </label>
-                    </li>
-                {% endfor %}
-            </ul>
-            <p style="margin-left:35px">
-                <a class="btn-nhb-rood" onclick="keuze_gemaakt('boog')">Activeer</a>
-            </p>
+        <div class="col s12 m6 l4 offset-l2 xl3 offset-xl3" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Kies een boog type:</b></p>
+                <ul id="id_boog">
+                    {% for boog in boog_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ boog.sel }}">
+                                <input class="with-gap" type="radio" name="boog" value="{{ boog.sel }}" required id="id_{{ boog.sel }}" {% if boog.selected %}checked{% endif %} data-url="{{ boog.zoom_url }}">
+                                <span>{{ boog.beschrijving }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('boog')">Activeer</a>
+                </p>
+            </div>
         </div>
 
-        <div class="col s8 offset-s2 m4 l2 offset-l1 white left-align" style="margin-bottom:15px">
-            <p><b>Kies een rayon:</b></p>
-            <ul id="id_rayon">
-                {% for rayon in rayon_filters %}
-                    <li>
-                        <label class="black-text" for="id_{{ rayon.sel }}">
-                            <input class="with-gap" type="radio" name="rayon" value="{{ rayon.sel }}" required id="id_{{ rayon.sel }}" {% if rayon.selected %}checked{% endif %} data-url="{{ rayon.zoom_url }}">
-                            <span>{{ rayon.title_str }}</span>
-                        </label>
-                    </li>
-                {% endfor %}
-            </ul>
-            <p style="margin-left:35px">
-                <a class="btn-nhb-rood" onclick="keuze_gemaakt('rayon')">Activeer</a>
-            </p>
+        <div class="col s12 m6 l4 xl3" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Kies een rayon:</b></p>
+                <ul id="id_rayon">
+                    {% for rayon in rayon_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ rayon.sel }}">
+                                <input class="with-gap" type="radio" name="rayon" value="{{ rayon.sel }}" required id="id_{{ rayon.sel }}" {% if rayon.selected %}checked{% endif %} data-url="{{ rayon.zoom_url }}">
+                                <span>{{ rayon.title_str }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('rayon')">Activeer</a>
+                </p>
+            </div>
         </div>
     </div>
 

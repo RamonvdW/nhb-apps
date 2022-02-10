@@ -70,26 +70,8 @@
 
     <!-- blauwe balk met filters -->
     <div class="row-nhb-blauw">
-        <div class="col s12 m6 offset-m3 l3" style="margin-bottom:15px">
-            <div class="white left-align" style="padding:10px">
-                <p><b>Kies een team type:</b></p>
-                <ul id="id_boog">
-                    {% for teamtype in teamtype_filters %}
-                        <li>
-                            <label class="black-text" for="id_{{ teamtype.sel }}">
-                                <input class="with-gap" type="radio" name="teamtype" value="{{ teamtype.sel }}" required id="id_{{ teamtype.sel }}" {% if teamtype.selected %}checked{% endif %} data-url="{{ teamtype.zoom_url }}">
-                                <span>{{ teamtype.beschrijving }}</span>
-                            </label>
-                        </li>
-                    {% endfor %}
-                </ul>
-                <p style="margin-left:35px">
-                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('teamtype')">Activeer</a>
-                </p>
-            </div>
-        </div>
 
-        <div class="col s12 m4 l3" style="margin-bottom:15px">
+        <div class="col s12 m4 offset-m1 l3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een regio:</b></p>
                 <ul id="id_regio">
@@ -108,7 +90,26 @@
             </div>
         </div>
 
-        <div class="col s12 m7 offset-m1 l6">
+        <div class="col s12 m5 l4" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Kies een team type:</b></p>
+                <ul id="id_boog">
+                    {% for teamtype in teamtype_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ teamtype.sel }}">
+                                <input class="with-gap" type="radio" name="teamtype" value="{{ teamtype.sel }}" required id="id_{{ teamtype.sel }}" {% if teamtype.selected %}checked{% endif %} data-url="{{ teamtype.zoom_url }}">
+                                <span>{{ teamtype.beschrijving }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('teamtype')">Activeer</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="col s12 m6 l5">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een vereniging:</b></p>
                 <ul id="id_ver">

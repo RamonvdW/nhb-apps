@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -59,7 +59,6 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
             comp_pk = None
         else:
             comp_pk = deelcomp.competitie.pk
-            context['terug_url'] = reverse('Competitie:overzicht', kwargs={'comp_pk': comp_pk})
 
         # cluster namen
         objs = (NhbCluster
@@ -117,9 +116,20 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         context['email_bondsbureau'] = settings.EMAIL_BONDSBUREAU
 
         if comp_pk:
+            # deelcompetitie gevonden
             menu_dynamics_competitie(self.request, context, comp_pk=comp_pk)
+            context['kruimels'] = (
+                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Competitie:overzicht', kwargs={'comp_pk': comp_pk}), deelcomp.competitie.beschrijving),
+                (None, 'Clusters')
+            )
         else:
+            # deelcompetitie niet gevonden
             menu_dynamics(self.request, context, actief='competitie')
+            context['kruimels'] = (
+                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (None, 'Clusters')
+            )
 
         return context
 

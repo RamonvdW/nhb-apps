@@ -173,12 +173,12 @@
                         <td class="nhb-table-onderrand hide-on-med-and-up" colspan="4" ></td>
                     </tr>
                 {% endif %}
-                <!--
+
                 <tr>
                     <td class="center-align hide-on-small-only" colspan="14"><h5>{{ obj.klasse_str }}</h5></td>
                     <td class="center-align hide-on-med-and-up" colspan="6" ><h5>{{ obj.klasse_str }}</h5></td>
                 </tr>
-                -->
+
                 <tr class="nhb-table-header">
                     <td class="nhb-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
                     <th><!-- rank --></th>
