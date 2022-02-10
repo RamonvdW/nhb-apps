@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,75 +10,67 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compscores-scores-invoeren" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Uitslag {% if is_controle %}controleren{% else %}invoeren{% endif %}</h3>
 
-    {% if is_controle %}
-        <h4>Uitslag controleren</h4>
-    {% else %}
-        <h4>Uitslag invoeren</h4>
-    {% endif %}
+            {% if is_controle %}
+                <!-- is controle van scores door RCL -->
+                {% if is_akkoord %}
+                    <p>Op deze pagina kan je als RCL de uitslag van een wedstrijd nog aanpassen.</p>
+                    <p>Je hebt eerder akkoord gegeven, dus de HWL/WL kan de uitslag niet meer aanpassen.</p>
+                {% else %}
+                    <p>Op deze pagina kan je als RCL de uitslag van een wedstrijd controleren en accorderen, waarna de HWL/WL de uitslag niet meer aan kan passen. De RCL kan de uitslag altijd nog corrigeren.</p>
+                    <p>
+                        <form method="post" action="{{ url_geef_akkoord }}">
+                            {% csrf_token %}
+                            <button class="btn-nhb-rood" type="submit">Ik geef akkoord voor deze uitslag</button>
+                        </form>
+                    </p>
+                {% endif %}
+            {% else %}
+                <p>Op deze pagina kan je de uitslag van een wedstrijd invoeren.</p>
+            {% endif %}
 
-    <div class="row">
-
-        <!-- toon gegevens van de competitie, regio, wedstrijd en accommodatie in blauwe box -->
-        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-            <div class="white-text nhb-blauw z-depth-2">
-                <!--
-                <div class="row small-row">
-                    <div class="col s1">1</div>
-                    <div class="col s1">2</div>
-                    <div class="col s1">3</div>
-                    <div class="col s1">4</div>
-                    <div class="col s1">5</div>
-                    <div class="col s1">6</div>
-                    <div class="col s1">7</div>
-                    <div class="col s1">8</div>
-                    <div class="col s1">9</div>
-                    <div class="col s1">0</div>
-                    <div class="col s1">1</div>
-                    <div class="col s1">2</div>
-                </div> -->
-
-                <div class="row small-row">
-                    <div class="col s3 l4">Competitie:</div>
-                    <div class="col s8">{{ deelcomp.competitie.beschrijving }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3 l4">Regio:</div>
-                    <div class="col s8">{{ deelcomp.nhb_regio }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3 l4">Wedstrijd:</div>
-                    <div class="col s8">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3 l4">Bij vereniging:</div>
-                    <div class="col s8">{{ wedstrijd.vereniging }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3 l4">Plaats:</div>
-                    <div class="col s8">{{ wedstrijd.vereniging.plaats }}</div>
-                </div>
-            </div>
         </div>
     </div>
 
-    <p>
-        <a class="btn-nhb-blauw" href="{{ url_terug }}">
-            <i class="material-icons-round left">arrow_back</i>Terug</a>
-    </p>
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Competitie</th>
+                    <td>{{ deelcomp.competitie.beschrijving }}</td>
+                </tr>
+
+                <tr>
+                    <th>Regio</th>
+                    <td>{{ deelcomp.nhb_regio }}</td>
+                </tr>
+
+                <tr>
+                    <th>Wedstrijd</th>
+                    <td>{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }}</td>
+                </tr>
+
+                <tr>
+                    <th>Bij vereniging</th>
+                    <td>{{ wedstrijd.vereniging }}</td>
+                </tr>
+
+                <tr>
+                    <th>Plaats</th>
+                    <td>{{ wedstrijd.vereniging.plaats }}</td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
 
     {% if is_controle %}
-        <!-- is controle van scores door RCL -->
-        {% if is_akkoord %}
-            <p>Op deze pagina kan je als RCL de uitslag van een wedstrijd nog aanpassen.</p>
-            <p>Je hebt eerder akkoord gegeven, dus de HWL/WL kan de uitslag niet meer aanpassen.</p>
-        {% else %}
-            <p>Op deze pagina kan je als RCL de uitslag van een wedstrijd controleren en accorderen, waarna de HWL/WL de uitslag niet meer aan kan passen. De RCL kan de uitslag altijd nog corrigeren.</p>
+        {% if not is_akkoord %}
             <p>
                 <form method="post" action="{{ url_geef_akkoord }}">
                     {% csrf_token %}
@@ -86,8 +78,6 @@
                 </form>
             </p>
         {% endif %}
-    {% else %}
-        <p>Op deze pagina kan je de uitslag van een wedstrijd invoeren.</p>
     {% endif %}
 
     <script type="application/javascript">
@@ -102,29 +92,18 @@
         }
         {% endif %}
 
+        function opzoeken_hide_status()
+        {
+            const el = document.getElementById("id_zoekstatus")
+            el.classList.add("hide")
+        }
+
         function opzoeken_toon_status(dataset, tekst, color)
         {
-            for (let d in dataset)
-            {
-                if (d !== 'xhr' && d !== 'opzoeken')
-                {
-                    const id = dataset[d]
-                    const el = document.getElementById(id)
-
-                    // underscore aan het einde wordt gebruikt voor twee regels
-                    // die onder elkaar staan, zodat de melding maar 1x getoond wordt
-                    if (id.slice(-1) === '_')
-                    {
-                        el.innerHTML = ""
-                        el.style.color = color
-                    }
-                    else
-                    {
-                        el.innerHTML = tekst
-                        el.style.color = color
-                    }
-                }
-            } // for
+            const el = document.getElementById("id_zoekstatus")
+            el.classList.remove("hide")
+            el.innerHTML = tekst
+            el.style.color = color
         }
 
         function opzoeken_klaar(xhr, btn)
@@ -174,15 +153,21 @@
                 }
             }
 
-            const el = document.getElementById('id_btn_toevoegen')
+            const el1 = document.getElementById('id_btn_toevoegen')
+            const el2 = document.getElementById('id_zoekresultaten')
             if (is_fail)
             {
-                el.disabled = true
                 opzoeken_toon_status(btn.dataset, "niet gevonden", "red")
+
+                el1.disabled = true
+                el2.classList.add("hide")
             }
             else
             {
-                el.disabled = false
+                opzoeken_hide_status()
+
+                el1.disabled = false
+                el2.classList.remove("hide")
             }
         }
 
@@ -202,6 +187,8 @@
             // voorkom parallelle verzoeken
             if (btn.dataset['xhr'] === undefined)
             {
+                opzoeken_toon_status(btn.dataset, "bezig..", "gray")
+
                 const xhr = new XMLHttpRequest()
 
                 // doorloop de data- attributen van de knop
@@ -219,8 +206,6 @@
                         obj['lid_nr'] = lid_nr
                     }
                 } // for
-
-                opzoeken_toon_status(btn.dataset, "bezig..", "gray")
 
                 // toevoegen knop disabled maken
                 document.getElementById('id_btn_toevoegen').disabled = true
@@ -256,6 +241,9 @@
             const rsp = el_rsp.value
             //console.log('toevoegen: rsp:', rsp)
             el_rsp.value = ""
+
+            const el_gevonden = document.getElementById('id_zoekresultaten')
+            el_gevonden.classList.add("hide")
 
             const lid_nr = rsp['lid_nr']
 
@@ -595,122 +583,159 @@
         }
     </script>
 
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
 
-    <table class="white" id="table1">
+            <div class="white left-align z-depth-3">
 
-        <thead>
-            <tr>        <!-- filter veld -->
-                <td class="table-filter" colspan="4">
-                    <input id="table1_zoeken_input" class="table-filter" autofocus oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/>
-                </td>
-                <td></td>
-            </tr>
-            <tr>
-                <th data-filter="on">Bondsnummer</th>
-                <th data-filter="on">Naam</th>
-                <th data-filter="on">Vereniging</th>
-                <th data-filter="on">Boog type</th>
-                <th>Score</th>
-                {% if deelcomp.regio_organiseert_teamcompetitie %}
-                    <th>In team</th>
-                {% endif %}
-            </tr>
-        </thead>
+                <table class="white" id="table1">
 
-        <!-- eerste regel van de body is een template om een 'clone' mee uit te voeren
-             dit maakt ook de JS eenvoudiger omdat we nooit in hoeven te voegen voor row[0] -->
-        <!-- let op dat de tabel filter hier attributen aan toe zal voegen die we moeten verwijderen bij kopiëren -->
-        <tr class="hide">
-            <td data-pk="0">000000</td>
-            <td>dit is een niet zo korte naam</td>
-            <td>
-                <span>[0000]</span>
-                <span class="hide-on-small-only">&nbsp;naam van de vereniging</span>
-            </td>
-            <td>boogtype</td>
-            <td><input type="text" oninput="controleer_score(this)" placeholder="0" value="" size="3" maxlength="3" style="width:3em; height:2rem; margin:0"></td>
-            {% if deelcomp.regio_organiseert_teamcompetitie %}
-                <td><!-- team name --></td>
-            {% endif %}
-        </tr>
+                    <thead>
+                        <tr>        <!-- filter veld -->
+                            <td class="table-filter" colspan="4">
+                                <input id="table1_zoeken_input" class="table-filter" autofocus oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/>
+                            </td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <th data-filter="on"><span class="hide-on-small-only">Bondsnummer</span><span class="hide-on-med-and-up">Nr</span></th>
+                            <th data-filter="on">Naam</th>
+                            <th data-filter="on">Vereniging</th>
+                            <th data-filter="on">Boog type</th>
+                            <th>Score</th>
+                            {% if deelcomp.regio_organiseert_teamcompetitie %}
+                                <th>In team</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
 
-        {% for score in scores %}
-            <tr>
-                <td data-pk="{{ score.sporterboog.pk }}">{{ score.sporterboog.sporter.lid_nr }}</td>
-                <td>{{ score.sporterboog.sporter.volledige_naam }}</td>
-                <td>
-                    <span>[{{ score.sporterboog.sporter.bij_vereniging.ver_nr }}]</span>
-                    <span class="hide-on-small-only">&nbsp;{{ score.sporterboog.sporter.bij_vereniging.naam }}</span>
-                </td>
-                <td>{{ score.sporterboog.boogtype.beschrijving }}{% if score.team_gem %} ({{ score.team_gem }}){% endif %}</td>
-                <td><input type="text" oninput="controleer_score(this)" placeholder="0" value="{{ score.waarde }}" size="3" maxlength="3" style="width:3em; height:2rem; margin:0"></td>
-                {% if deelcomp.regio_organiseert_teamcompetitie %}
-                    <td>{{ score.team_naam }}</td>
-                {% endif %}
-            </tr>
-        {% endfor %}
+                    <!-- eerste regel van de body is een template om een 'clone' mee uit te voeren
+                         dit maakt ook de JS eenvoudiger omdat we nooit in hoeven te voegen voor row[0] -->
+                    <!-- let op dat de tabel filter hier attributen aan toe zal voegen die we moeten verwijderen bij kopiëren -->
+                    <tr class="hide">
+                        <td data-pk="0">000000</td>
+                        <td>dit is een niet zo korte naam</td>
+                        <td>
+                            <span>[0000]</span>
+                            <span class="hide-on-small-only">&nbsp;naam van de vereniging</span>
+                        </td>
+                        <td>boogtype</td>
+                        <td><input type="text" oninput="controleer_score(this)" placeholder="0" value="" size="3" maxlength="3" style="width:3em; height:2rem; margin:0"></td>
+                        {% if deelcomp.regio_organiseert_teamcompetitie %}
+                            <td><!-- team name --></td>
+                        {% endif %}
+                    </tr>
 
-        <tr class="nhb-grijs" data-tablefilter="stop" style="border: 0">
-            <td colspan="{% if deelcomp.regio_organiseert_teamcompetitie %}6{% else %}5{% endif %}" class="center-align">
-                <button class="btn-nhb-blauw" onclick="deelnemers_ophalen(this)">Waarschijnlijke deelnemers toevoegen</button>
-            </td>
-        </tr>
+                    {% for score in scores %}
+                        <tr>
+                            <td data-pk="{{ score.sporterboog.pk }}">{{ score.sporterboog.sporter.lid_nr }}</td>
+                            <td>{{ score.sporterboog.sporter.volledige_naam }}</td>
+                            <td>
+                                <span>[{{ score.sporterboog.sporter.bij_vereniging.ver_nr }}]</span>
+                                <span class="hide-on-small-only">&nbsp;{{ score.sporterboog.sporter.bij_vereniging.naam }}</span>
+                            </td>
+                            <td>{{ score.sporterboog.boogtype.beschrijving }}{% if score.team_gem %} ({{ score.team_gem }}){% endif %}</td>
+                            <td><input type="text" oninput="controleer_score(this)" placeholder="0" value="{{ score.waarde }}" size="3" maxlength="3" style="width:3em; height:2rem; margin:0"></td>
+                            {% if deelcomp.regio_organiseert_teamcompetitie %}
+                                <td>{{ score.team_naam }}</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+
+                    <tr data-tablefilter="stop" style="display:hide">
+                        <td colspan="5"></td>
+                        {% if deelcomp.regio_organiseert_teamcompetitie %}
+                            <td></td>
+                        {% endif %}
+                    </tr>
+                </table>
+            </div>
+        </div>
 
         <!-- Hieronder: zoekveld voor ander lid (nhb-nr >> naam + vereniging) -->
 
-        <tr class="nhb-grijs" data-tablefilter="stop">
-            <td colspan="{% if deelcomp.regio_organiseert_teamcompetitie %}6{% else %}5{% endif %}">
-                <span>Gebruik onderstaand formulier om een ander bondsnummer toe te voegen</span>
-            </td>
-        </tr>
+        <div class="col s12 m10 offset-m1" style="margin-top:50px">
+            <div class="white left-align z-depth-3 center">
 
-        <tr>
-            <th>Bondsnummer</th>
-            <th>Naam</th>
-            <th>Vereniging</th>
-            <th colspan="{% if deelcomp.regio_organiseert_teamcompetitie %}3{% else %}2{% endif %}"></th>
-        </tr>
+                <!-- dialoog venster -->
+                <h6 style="padding:30px">Zoeken en toevoegen</h6>
 
-        <tr style="border: 0">
-            <td>
-                <input id="id_nhbnr" type="text" placeholder="123456" size="6" maxlength="6" style="width:auto; margin:0">
-                <div id="id_zoekresultaat" style="display: none"></div>
-            </td>
+                <!-- bondsnummer invoer veld + zoek knop -->
+                <div class="center">
+                    <div class="input-field" style="display:inline-block">
+                        <label for="id_lid_nr">Bondsnummer:</label>
+                        <input type="text" name="zoek_lid_nr" placeholder="123456" size="6" maxlength="6" id="id_lid_nr">
 
-            <td id="id_naam" style="color:gray">
-                <span>Naam van de sporter</span>
-            </td>
+                    </div>
 
-            <td>
-                <span id="id_ver" style="color:gray">Naam van de vereniging</span>
-                <br>
-                <span id="id_regio_"></span>
-                  <!-- underscore ^  onderdrukt status melding -->
-            </td>
+                    <div style="display:inline-block; margin-left:100px">
+                        <button class="btn-nhb-rood" onclick="opzoeken(this)" data-opzoeken="id_lid_nr" data-lid_nr="id_bondsnummer" data-naam="id_naam" data-vereniging="id_ver" data-regio="id_regio_">
+                            <i class="material-icons-round left">search</i>Zoek</button>
+                    </div>
+                </div>
 
-            <td colspan="{% if deelcomp.regio_organiseert_teamcompetitie %}3{% else %}2{% endif %}">
-                <button id="id_btn_toevoegen" class="btn-nhb-blauw" onclick="toevoegen()" disabled>
-                    <i class="material-icons-round left">add</i>Toevoegen</button>
-            </td>
-        </tr>
+                <p id="id_zoekstatus" class="center hide">Status</p>
 
-        <tr>
-            <td colspan="2">
-                <button class="btn-nhb-blauw" onclick="opzoeken(this)" data-opzoeken="id_nhbnr" data-naam="id_naam" data-vereniging="id_ver" data-regio="id_regio_">
-                    <i class="material-icons-round left">search</i>Zoek</button>
-            </td>
-            <td colspan="{% if deelcomp.regio_organiseert_teamcompetitie %}4{% else %}3{% endif %}"></td>
-        </tr>
+                <!-- zoekresultaten -->
+                <div id="id_zoekresultaten" class="hide" style="padding:0px 30px 0px 30px">
+                    <!-- element om ontvangen zoekresultaat in op te slaan -->
+                    <div id="id_zoekresultaat" style="display:none"></div>
 
-    </table>
+                    <table>
+                        <tr>
+                            <th>Sporter</th>
+                            <td id="id_bondsnummer" style="color:gray">
+                                 <span>Bondsnummer</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Sporter</th>
+                            <td id="id_naam" style="color:gray">
+                                 <span>Naam</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Vereniging</th>
+                            <td>
+                                <span id="id_ver" style="color:gray">Naam</span>
+                                <br>
+                                <span id="id_regio_"></span>
+                                  <!-- underscore ^  onderdrukt status melding -->
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- toevoegen knop -->
+                    <p class="center">
+                        <button id="id_btn_toevoegen" class="btn-nhb-rood" onclick="toevoegen()" disabled>
+                            <i class="material-icons-round left">add</i>Toevoegen</button>
+                    </p>
+                </div>
+
+                <p style="padding-top:30px"></p>
+
+            </div>
+        </div>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="col s12" style="margin-top:50px">
+
+            <!-- vereniging menu -->
+            {% include 'plein/card_button.dtl' with title="Lijst ophalen" text="Waarschijnlijke deelnemers toevoegen aan de uitslag." icon="add" onclick="deelnemers_ophalen(this)" %}
+            <!-- button class="btn-nhb-blauw" onclick="deelnemers_ophalen(this)">Waarschijnlijke deelnemers toevoegen</button -->
+
+        </div>
+
+    </div>
 
     <div class="fixed-action-btn">
         <button class="btn-nhb-rood" onclick="opslaan(this)">
             <i class="material-icons-round left">check</i>Opslaan</button>
     </div>
 
-{% endblock %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compscores-scores-invoeren" %}
 
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}

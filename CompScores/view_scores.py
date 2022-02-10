@@ -202,6 +202,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
     template_name = TEMPLATE_COMPSCORES_INVOEREN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     is_controle = False
+    kruimel = 'Invoeren'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -314,8 +315,22 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rollen.ROL_RCL:
             context['url_terug'] = reverse('CompScores:scores-rcl',
                                            kwargs={'deelcomp_pk': deelcomp.pk})
+
+            comp = deelcomp.competitie
+            context['kruimels'] = (
+                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+                    comp.beschrijving.replace(' competitie', '')),
+                (reverse('CompScores:scores-rcl', kwargs={'deelcomp_pk': deelcomp.pk}), 'Scores'),
+                (None, self.kruimel)
+            )
         else:
             context['url_terug'] = reverse('CompScores:wedstrijden-scores')
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+                (reverse('CompScores:scores-rcl', kwargs={'deelcomp_pk': deelcomp.pk}), 'Scores'),
+                (None, self.kruimel)
+            )
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context
@@ -326,6 +341,7 @@ class WedstrijdUitslagControlerenView(WedstrijdUitslagInvoerenView):
     """ Deze view laat de RCL de uitslag van een wedstrijd aanpassen en accorderen """
 
     is_controle = True
+    kruimel = 'Controleer'
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'ik geef akkoord voor deze uitslag'

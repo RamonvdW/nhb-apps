@@ -17,6 +17,18 @@
     </div>
 
 
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+
+            <!-- vereniging menu -->
+            {% url 'Vereniging:overzicht' as card_url %}
+            {% include 'plein/card.dtl' with title="Beheer Vereniging" text="Extra functies voor beheerders van jouw vereniging." icon="store" url=card_url %}
+
+        </div>
+    </div>
+
+
     <!-- blauw balk met wit informatie veld -->
     <div class="row-nhb-blauw">
         <div class="col s12">
@@ -73,10 +85,11 @@
 
     <!-- blauwe balk met dialoog venster -->
     <div class="row-nhb-blauw">
-        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
+        <div class="col s12">
 
             <!-- dialoog venster -->
-            <div style="margin:50px 30px 30px 30px" class="left-align">
+            <div class="white left-align z-depth-3">
+
                 <form action="{{ url }}" method="post">
                     {% csrf_token %}
 
@@ -170,6 +183,7 @@
             </table>
         </div>
     </div>
+
 
     <!-- scherm-brede tabel met dunne blauw rand -->
     <table class="white">

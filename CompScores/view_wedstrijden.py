@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -24,6 +24,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
     template_name = TEMPLATE_WEDSTRIJDEN
     uitslag_invoeren = False
     raise_exception = True      # genereer PermissionDefined als test_func False terug geeft
+    kruimel = 'Competitie wedstrijden'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -136,6 +137,11 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
         context['wedstrijden'] = wedstrijden
         context['uitslag_invoeren'] = self.uitslag_invoeren
 
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+            (None, self.kruimel)
+        )
+
         menu_dynamics(self.request, context, actief='vereniging')
         return context
 
@@ -143,6 +149,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
 class WedstrijdenScoresView(WedstrijdenView):
 
     uitslag_invoeren = True
+    kruimel = 'Scores invoeren'
 
 
 # end of file
