@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -54,7 +54,7 @@
         <div class="col s12">
             <h4>Resultaten</h4>
                 {% if niet_gevonden %}
-                    <p class="red-text">Niet gevonden</p>
+                    <p class="red-text">Niets gevonden</p>
                 {% else %}
                     <p>Gevonden scores voor sporter<br><b>{{ sporter }}</b><br>van {{ sporter.bij_vereniging }} te {{ sporter.bij_vereniging.plaats }}<br>in {{ sporter.bij_vereniging.regio }}</p>
                 {% endif %}
