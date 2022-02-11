@@ -90,6 +90,12 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context['indivklassen'] = self._get_queryset_indivklassen()
         context['teamklassen'] = self._get_queryset_teamklassen()
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (None, 'Start competitie')
+        )
+
         menu_dynamics(self.request, context, actief='competitie')
         return context
 
@@ -153,6 +159,12 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
         if Competitie.objects.filter(begin_jaar=jaar).count() > 0:
             context['bestaat_al'] = True
 
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:instellingen-volgende-competitie'), 'Start competitie'),
+            (None, 'Aanmaken')
+        )
+
         menu_dynamics_competitie(self.request, context)
         return context
 
@@ -203,6 +215,13 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
             context['geen_histcomp'] = True
         else:
             context['seizoen'] = histcomps[0].seizoen
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+                comp.beschrijving.replace(' competitie', '')),
+            (None, 'Aanvangsgemiddelden')
+        )
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return render(request, self.template_name, context)
@@ -295,6 +314,13 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         else:
             context['bb_ag_nieuwste_datum'] = '????'
 
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+                comp.beschrijving.replace(' competitie', '')),
+            (None, 'Klassegrenzen')
+        )
+
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return render(request, self.template_name, context)
 
@@ -358,6 +384,13 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         comp.datum8 = comp.rk_laatste_wedstrijd
         comp.datum9 = comp.bk_eerste_wedstrijd
         comp.datum10 = comp.bk_laatste_wedstrijd
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+                comp.beschrijving.replace(' competitie', '')),
+            (None, 'Zet datums'),
+        )
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context
