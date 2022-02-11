@@ -431,6 +431,8 @@ class CompetitieKiesView(TemplateView):
 
         context['competities'] = comps = list()
 
+        eerdere_comp = dict()
+
         for comp in (Competitie
                      .objects
                      .exclude(is_afgesloten=True)
@@ -453,6 +455,13 @@ class CompetitieKiesView(TemplateView):
                     comp.text = "Hier worden de voorbereidingen voor getroffen voor de volgende bondscompetitie."
                 else:
                     comp.text = "Alle informatie en uitslagen van de actuele bondscompetitie."
+
+            try:
+                if comp.afstand in eerdere_comp:
+                    comp.is_volgend_seizoen = True
+            except KeyError:
+                pass
+            eerdere_comp[comp.afstand] = True
         # for
 
         if rol_nu == Rollen.ROL_BB:

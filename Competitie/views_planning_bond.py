@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -134,6 +134,13 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
             # klaar om door te zetten
             context['url_doorzetten'] = reverse('Competitie:bko-doorzetten-naar-rk',
                                                 kwargs={'comp_pk': comp.pk})
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+                comp.beschrijving.replace(' competitie', '')),
+            (None, 'Doorzetten')
+        )
 
         menu_dynamics(self.request, context, actief='competitie')
         return context
