@@ -133,6 +133,10 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
         else:
             context['niet_gevonden'] = True
 
+        context['kruimels'] = (
+            (None, 'Score geschiedenis'),
+        )
+
         menu_dynamics(self.request, context, actief='hetplein')
         return render(request, self.template, context)
 
