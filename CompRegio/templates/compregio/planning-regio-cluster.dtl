@@ -76,7 +76,8 @@
                         <!-- knop naar de ronde van de regioplanning -->
                         <td class="center">
                             <a class="btn-nhb-rood" href="{% url 'CompRegio:regio-ronde-planning' ronde.pk %}">
-                                <i class="material-icons-round">zoom_in</i></a>
+                                <img src="{% static 'plein/zoom_in.svg' %}" height="36px">
+                            </a>
                         </td>
                     </tr>
                 {% empty %}
