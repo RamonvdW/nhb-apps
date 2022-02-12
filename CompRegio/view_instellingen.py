@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -51,7 +51,8 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor de veiligheid
             deelcomp = (DeelCompetitie
                         .objects
-                        .select_related('competitie', 'nhb_regio')
+                        .select_related('competitie',
+                                        'nhb_regio')
                         .get(competitie=comp_pk,
                              laag=LAAG_REGIO,
                              nhb_regio__regio_nr=regio_nr))
@@ -113,6 +114,14 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
                                                  'regio_nr': deelcomp.nhb_regio.regio_nr})
 
         context['wiki_rcl_regio_instellingen_url'] = reverse_handleiding(self.request, settings.HANDLEIDING_RCL_INSTELLINGEN_REGIO)
+
+        comp = deelcomp.competitie
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Instellingen teams'),
+        )
 
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
         return context

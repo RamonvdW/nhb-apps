@@ -130,7 +130,7 @@
             {% endif %}
 
             {% if comp.url_regio_handmatige_ag and comp.fase >= 'B' %}
-                {% include 'plein/card.dtl' with title="AG controle" text="Bekijk handmatig ingevoerde aanvangsgemiddelden voor de teamcompetitie in de regio." icon="how_to_reg" url=comp.url_regio_handmatige_ag %}
+                {% include 'plein/card.dtl' with title="AG controle" text="Handmatig ingevoerde aanvangsgemiddelden voor de teamcompetitie." icon="how_to_reg" url=comp.url_regio_handmatige_ag %}
             {% endif %}
 
             {% if tekst_regio_teams_alle %}
@@ -158,7 +158,7 @@
 
             <!-- toon inschrijvingen regiocompetitie -->
             {% if comp.url_inschrijvingen %}
-                {% include 'plein/card.dtl' with title="Inschrijvingen" text="Toon lijst met sporters ingeschreven voor de regiocompetitie van de "|add:comp.beschrijving|add:"." icon="receipt" url=comp.url_inschrijvingen %}
+                {% include 'plein/card.dtl' with title="Inschrijvingen" text="Toon lijst met sporters ingeschreven voor de regiocompetitie." icon="receipt" url=comp.url_inschrijvingen %}
             {% endif %}
 
             <!-- afsluiten deelcomp -->
@@ -187,7 +187,7 @@
             <!-- clusters RCL -->
             {% if toon_clusters %}
                 {% url 'CompRegio:clusters' as card_url %}
-                {% include 'plein/card.dtl' with title="Clusters" text="Mogelijkheden om in jouw regio de verenigingen in geografische clusters te groeperen." icon="group_work" url=card_url %}
+                {% include 'plein/card.dtl' with title="Clusters" text="Verenigingen groeperen in geografische clusters." icon="group_work" url=card_url %}
             {% endif %}
 
             {% if rol_is_bb %}
