@@ -51,15 +51,6 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         # waarvan de definitie heel handig overeen komt met cluster.gebruik
         context['gebruik'] = gebruik_filter = functie_nu.comp_type
 
-        # probeer een competitie te vinden om te tonen in het menu
-        try:
-            deelcomp = DeelCompetitie.objects.get(competitie__afstand=gebruik_filter,
-                                                  nhb_regio=functie_nu.nhb_regio)
-        except DeelCompetitie.DoesNotExist:
-            comp_pk = None
-        else:
-            comp_pk = deelcomp.competitie.pk
-
         # cluster namen
         objs = (NhbCluster
                 .objects
@@ -115,22 +106,11 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         context['handleiding_clusters_url'] = reverse('Handleiding:Clusters')
         context['email_bondsbureau'] = settings.EMAIL_BONDSBUREAU
 
-        if comp_pk:
-            # deelcompetitie gevonden
-            menu_dynamics_competitie(self.request, context, comp_pk=comp_pk)
-            context['kruimels'] = (
-                (reverse('Competitie:kies'), 'Bondscompetities'),
-                (reverse('Competitie:overzicht', kwargs={'comp_pk': comp_pk}),
-                 deelcomp.competitie.beschrijving.replace(' competitie', '')),
-                (None, 'Clusters')
-            )
-        else:
-            # deelcompetitie niet gevonden
-            menu_dynamics(self.request, context, actief='competitie')
-            context['kruimels'] = (
-                (reverse('Competitie:kies'), 'Bondscompetities'),
-                (None, 'Clusters')
-            )
+        menu_dynamics(self.request, context, actief='competitie')
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (None, 'Clusters')
+        )
 
         return context
 
@@ -216,15 +196,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
             self._swap_cluster(obj, gebruik_filter)
         # for
 
-        # probeer een competitie te vinden om te tonen in het menu
-        try:
-            deelcomp = DeelCompetitie.objects.get(competitie__afstand=gebruik_filter,
-                                                  nhb_regio=functie_nu.nhb_regio)
-        except DeelCompetitie.DoesNotExist:
-            url = reverse('Competitie:kies')
-        else:
-            comp_pk = deelcomp.competitie.pk
-            url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp_pk})
+        url = reverse('Competitie:kies')
 
         return HttpResponseRedirect(url)
 
