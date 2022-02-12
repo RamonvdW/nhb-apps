@@ -24,7 +24,7 @@
 
         <table class="white">
             <tr>
-                <td colspan="6" class="nhb-blauw white-text center-align"><h5>Individueel</h5></td>
+                <td colspan="6" class="nhb-blauw white-text center"><h5>Individueel</h5></td>
             </tr>
             <tr>
                 <th>Klasse</th>
@@ -51,7 +51,7 @@
                 <td colspan="6" class="nhb-grijs"></td>
             </tr>
             <tr>
-                <td colspan="6" class="nhb-blauw white-text center-align"><h5>Teams</h5></td>
+                <td colspan="6" class="nhb-blauw white-text center"><h5>Teams</h5></td>
             </tr>
             <tr>
                 <th>Klasse</th>

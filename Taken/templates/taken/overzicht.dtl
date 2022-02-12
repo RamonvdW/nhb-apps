@@ -35,8 +35,8 @@
                 <table class="white">
                     <thead>
                         <tr>
-                            <th class="center-align">Nummer</th>
-                            <th class="center-align">Deadline</th>
+                            <th class="center">Nummer</th>
+                            <th class="center">Deadline</th>
                             <th>Beschrijving</th>
                             <th><!-- kolom voor knop --></th>
                         </tr>
@@ -45,8 +45,8 @@
                     {% for taak in taken %}
                         {% if not taak.is_afgerond %}
                             <tr>
-                                <td class="center-align">{{ taak.pk }}</td>
-                                <td class="center-align">{{ taak.deadline|date:"Y-m-d" }}</td>
+                                <td class="center">{{ taak.pk }}</td>
+                                <td class="center">{{ taak.deadline|date:"Y-m-d" }}</td>
                                 <td>{{ taak.beschrijving|linebreaks }}</td>
                                 <td>
                                     <a class="btn-nhb-rood" href="{{ taak.url }}">Details</a>
@@ -77,8 +77,8 @@
                 <table class="white">
                     <thead>
                         <tr>
-                            <th class="center-align">Nummer</th>
-                            <th class="center-align">Deadline</th>
+                            <th class="center">Nummer</th>
+                            <th class="center">Deadline</th>
                             <th>Beschrijving</th>
                             <th><!-- kolom voor knop --></th>
                         </tr>
@@ -87,8 +87,8 @@
                     {% for taak in taken %}
                         {% if taak.is_afgerond %}
                             <tr>
-                                <td class="center-align">{{ taak.pk }}</td>
-                                <td class="center-align">{{ taak.deadline|date:"Y-m-d" }}</td>
+                                <td class="center">{{ taak.pk }}</td>
+                                <td class="center">{{ taak.deadline|date:"Y-m-d" }}</td>
                                 <td>{{ taak.beschrijving|linebreaks }}</td>
                                 <td>
                                     <a class="btn-nhb-rood" href="{{ taak.url }}">Details</a>

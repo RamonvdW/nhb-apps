@@ -25,28 +25,28 @@
             <table class="white">
                 <thead>
                     <tr>
-                        <th class="center-align hide-on-med-and-down">Rayon</th>
-                        <th class="center-align">Regio</th>
-                        <th class="center-align hide-on-large-and-up">Inschrijf<wbr>methode</th>
+                        <th class="center hide-on-med-and-down">Rayon</th>
+                        <th class="center">Regio</th>
+                        <th class="center hide-on-large-and-up">Inschrijf<wbr>methode</th>
                         <th class="hide-on-med-and-down">Inschrijf<wbr>methode</th>
-                        <th class="center-align">Team<wbr>competitie</th>
+                        <th class="center">Team<wbr>competitie</th>
                         <th>Teams aanmaken tot</th>
-                        <th class="center-align">Team samen<wbr>stelling</th>
-                        <th class="center-align hide-on-med-and-up">Team WP</th>
+                        <th class="center">Team samen<wbr>stelling</th>
+                        <th class="center hide-on-med-and-up">Team WP</th>
                         <th class="hide-on-small-only">Team punten<wbr>model</th>
                     </tr>
                 </thead>
 
                 {% for deelcomp in deelcomps %}
                     <tr{% if deelcomp.highlight %} class="nhb-blauw white-text"{% endif %}>
-                        <td class="center-align hide-on-med-and-down">{{ deelcomp.rayon_str }}</td>
-                        <td class="center-align">{{ deelcomp.regio_str }}</td>
-                        <td class="center-align hide-on-large-and-up">{{ deelcomp.short_inschrijfmethode_str }}</td>
+                        <td class="center hide-on-med-and-down">{{ deelcomp.rayon_str }}</td>
+                        <td class="center">{{ deelcomp.regio_str }}</td>
+                        <td class="center hide-on-large-and-up">{{ deelcomp.short_inschrijfmethode_str }}</td>
                         <td class="hide-on-med-and-down">{{ deelcomp.inschrijfmethode_str }}</td>
-                        <td class="center-align">{{ deelcomp.teamcomp_str }}</td>
+                        <td class="center">{{ deelcomp.teamcomp_str }}</td>
                         <td>{{ deelcomp.einde_teams_aanmaken_str }}</td>
-                        <td class="center-align">{{ deelcomp.team_type_str }}</td>
-                        <td class="center-align hide-on-med-and-up">{{ deelcomp.short_puntenmodel_str }}</td>
+                        <td class="center">{{ deelcomp.team_type_str }}</td>
+                        <td class="center hide-on-med-and-up">{{ deelcomp.short_puntenmodel_str }}</td>
                         <td class="hide-on-small-only">{{ deelcomp.puntenmodel_str }}</td>
                    </tr>
                 {% endfor %}

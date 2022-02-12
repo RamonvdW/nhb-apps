@@ -268,18 +268,18 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 
                 <table>
                     <tr>
-                        <td class="center-align">
+                        <td class="center">
                             <img src="{% static 'plein/blazoen_dt.png' %}" style="max-height:300px; height:auto" loading="lazy" alt="Dutch Target blazoen">
                         </td>
-                        <td class="center-align">
+                        <td class="center">
                             <img src="{% static 'plein/blazoen_40cm.png' %}" style="max-height:220px; height:auto; border:1px solid gray" loading="lazy" alt="40cm / 60cm blazoen" >
                         </td>
                     </tr>
                     <tr>
-                        <td class="center-align">
+                        <td class="center">
                             <code style="font-size:12px">het Dutch Target (DT) blazoen</code>
                         </td>
-                        <td class="center-align">
+                        <td class="center">
                             <code style="font-size:12px">het 40cm / 60cm blazoen</code>
                         </td>
                     </tr>
@@ -307,47 +307,47 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 
                 <table class="white">
                     <tr>
-                        <td class="center-align"><b>Achtste finale</b><br>(16<span class="hide-on-small-only"> sporters</span>)</td>
-                        <td class="center-align"><b>Kwart finale</b><br>(8<span class="hide-on-small-only"> sporters</span>)</td>
-                        <td class="center-align"><b>Halve finale</b><br>(4<span class="hide-on-small-only"> sporters</span>)</td>
-                        <td class="center-align"><b>Bronzen finale</b><br>(2<span class="hide-on-small-only"> sporters</span>)</td>
-                        <td class="center-align"><b>Gouden finale</b><br>(2<span class="hide-on-small-only"> sporters</span>)</td>
+                        <td class="center"><b>Achtste finale</b><br>(16<span class="hide-on-small-only"> sporters</span>)</td>
+                        <td class="center"><b>Kwart finale</b><br>(8<span class="hide-on-small-only"> sporters</span>)</td>
+                        <td class="center"><b>Halve finale</b><br>(4<span class="hide-on-small-only"> sporters</span>)</td>
+                        <td class="center"><b>Bronzen finale</b><br>(2<span class="hide-on-small-only"> sporters</span>)</td>
+                        <td class="center"><b>Gouden finale</b><br>(2<span class="hide-on-small-only"> sporters</span>)</td>
                     </tr>
 
                     <tr>
-                        <td class="center-align"><span class="nhb-blauw-text">#1</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#16</td>
-                        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
-                        <td class="center-align" rowspan="4">2<span class="hide-on-small-only"> sporters</span></td>
-                        <td class="center-align" rowspan="8">2<span class="hide-on-small-only"> sporters</span></td>
-                        <td class="center-align" rowspan="8">2<span class="hide-on-small-only"> sporters</span></td>
+                        <td class="center"><span class="nhb-blauw-text">#1</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#16</td>
+                        <td class="center" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
+                        <td class="center" rowspan="4">2<span class="hide-on-small-only"> sporters</span></td>
+                        <td class="center" rowspan="8">2<span class="hide-on-small-only"> sporters</span></td>
+                        <td class="center" rowspan="8">2<span class="hide-on-small-only"> sporters</span></td>
                     </tr>
                     <tr>
-                        <td class="center-align">#8<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#9</td>
-                    </tr>
-
-                    <tr>
-                        <td class="center-align">#5<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#12</td>
-                        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
-                    </tr>
-                    <tr>
-                        <td class="center-align"><span class="nhb-blauw-text">#4</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#13</td>
+                        <td class="center">#8<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#9</td>
                     </tr>
 
                     <tr>
-                        <td class="center-align"><span class="nhb-blauw-text">#3</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#14</td>
-                        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
-                        <td class="center-align" rowspan="4">2<span class="hide-on-small-only"> sporters</span></td>
+                        <td class="center">#5<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#12</td>
+                        <td class="center" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
                     </tr>
                     <tr>
-                        <td class="center-align">#6<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#11</td>
+                        <td class="center"><span class="nhb-blauw-text">#4</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#13</td>
                     </tr>
 
                     <tr>
-                        <td class="center-align">#7<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#10</td>
-                        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
+                        <td class="center"><span class="nhb-blauw-text">#3</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#14</td>
+                        <td class="center" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
+                        <td class="center" rowspan="4">2<span class="hide-on-small-only"> sporters</span></td>
                     </tr>
                     <tr>
-                        <td class="center-align"><span class="nhb-blauw-text">#2</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#15</td>
+                        <td class="center">#6<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#11</td>
+                    </tr>
+
+                    <tr>
+                        <td class="center">#7<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#10</td>
+                        <td class="center" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
+                    </tr>
+                    <tr>
+                        <td class="center"><span class="nhb-blauw-text">#2</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#15</td>
                     </tr>
 
                 </table>

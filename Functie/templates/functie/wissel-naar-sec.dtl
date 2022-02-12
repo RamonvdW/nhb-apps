@@ -27,8 +27,8 @@
                     <td</td>                    <!-- kolom voor knoppen -->
                 </tr>
                 <tr class="nhb-table-header">
-                    <th class="center-align">Rayon</th>
-                    <th class="center-align">Regio</th>
+                    <th class="center">Rayon</th>
+                    <th class="center">Regio</th>
                     <th data-filter="on">Vereniging</th>
                     <th>Wissel naar rol</th>
                 </tr>
@@ -36,8 +36,8 @@
 
             {% for obj in verenigingen %}
                 <tr>
-                    <td class="center-align">{{ obj.regio.rayon.rayon_nr }}</td>
-                    <td class="center-align">{{ obj.regio.regio_nr }}</td>
+                    <td class="center">{{ obj.regio.rayon.rayon_nr }}</td>
+                    <td class="center">{{ obj.regio.regio_nr }}</td>
                     <td>[{{ obj.ver_nr }}] {{ obj.naam }}</td>
 
                     <td>

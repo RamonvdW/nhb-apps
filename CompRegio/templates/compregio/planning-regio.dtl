@@ -6,14 +6,14 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Planning Regio{% endblock %}
+{% block title %}Planning{% endblock %}
 
 {% block pagina %}
 
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Planning Regio</h3>
+            <h3 class="nhb-rood-text">Planning</h3>
             <p>De RCL kan deze planning aanpassen</p>
             <p>
                 <a class="btn-nhb-rood" href="{{ handleiding_planning_regio_url }}" target="_blank" rel="noopener noreferrer">
@@ -52,7 +52,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Planningen per cluster</h4>
+                <h4>Planning per cluster</h4>
             </div>
         </div>
 
@@ -64,8 +64,8 @@
                         <tr>
                             <th>Cluster</th>
                             <th>Naam</th>
-                            <th class="center-align">Rondes</th>
-                            <th class="center-align"><!-- kolom voor knoppen --></th>
+                            <th class="center">Rondes</th>
+                            <th class="center"><!-- kolom voor knoppen --></th>
                         </tr>
                     </thead>
 
@@ -73,10 +73,10 @@
                         <tr>
                             <td>{{ cluster.cluster_code_str }}</td>
                             <td>{% if cluster.naam %}{{ cluster.naam }}{% else %}<i>Niet ingesteld</i>{% endif %}</td>
-                            <td class="center-align">{{ cluster.ronde_count }}</td>
+                            <td class="center">{{ cluster.ronde_count }}</td>
 
                             <!-- knop naar de ronde van de regioplanning -->
-                            <td class="center-align">
+                            <td class="center">
                                 <a class="btn-nhb-rood" href="{{ cluster.url_bekijk }}">
                                     <i class="material-icons-round">zoom_in</i></a>
                             </td>
@@ -102,28 +102,28 @@
             <table class="white">
                 <thead>
                     <tr>
-                        <th class="center-align">Week</th>
+                        <th class="center">Week</th>
                         <th>Beschrijving</th>
-                        <th class="center-align">Wedstrijden</th>
-                        <th class="center-align"><!-- kolom voor knoppen --></th>
+                        <th class="center">Wedstrijden</th>
+                        <th class="center"><!-- kolom voor knoppen --></th>
                     </tr>
                 </thead>
 
                 {% for ronde in rondes %}
                     <tr>
-                        <td class="center-align">{{ ronde.week_nr }}</td>
+                        <td class="center">{{ ronde.week_nr }}</td>
                         <td>{{ ronde.beschrijving }}</td>
-                        <td class="center-align">{{ ronde.wedstrijd_count }}</td>
+                        <td class="center">{{ ronde.wedstrijd_count }}</td>
 
                         <!-- knop naar de ronde van de regioplanning -->
-                        <td class="center-align">
+                        <td class="center">
                             <a class="btn-nhb-rood" href="{% url 'CompRegio:regio-ronde-planning' ronde.pk %}">
                                 <i class="material-icons-round">edit</i></a>
                         </td>
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="4" class="center-align"><i>Geen blokken aanwezig</i></td>
+                        <td colspan="4" class="center"><i>Geen blokken aanwezig</i></td>
                     </tr>
                 {% endfor %}
 
@@ -131,7 +131,7 @@
                 <!-- knop om een regel toe te voegen -->
                 {% if url_nieuwe_week %}
                     <tr>
-                        <td colspan="4" class="center-align">
+                        <td colspan="4" class="center">
                             <form action="{{ url_nieuwe_week }}" method="post">
                                 {% csrf_token %}
                                 <button class="btn-nhb-rood" type="submit">

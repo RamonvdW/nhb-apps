@@ -27,14 +27,14 @@
         <table class="white">
             <thead>
                 <tr>
-                    <th class="center-align">Fase</th>
+                    <th class="center">Fase</th>
                     <th>Activiteit</th>
                     <th>Periode</th>
                 </tr>
             </thead>
 
             <tr>
-                <td class="center-align{% if comp.fase == 'A' %} nhb-rood white-text{% endif %}">A</td>
+                <td class="center{% if comp.fase == 'A' %} nhb-rood white-text{% endif %}">A</td>
                 <td>Vaststellen klassengrenzen (Bondsburo)<br>Instellingen regio en planning regiocompetitie wedstrijden (RCL)</td>
                 <td>
                     {% if comp.fase > 'A' %}
@@ -51,7 +51,7 @@
             </tr>
 
             <tr>
-                <td {% if comp.fase == 'B' %}class="nhb-rood white-text center-align"{% else %}class="center-align"{% endif %}>B</td>
+                <td {% if comp.fase == 'B' %}class="nhb-rood white-text center"{% else %}class="center"{% endif %}>B</td>
                 <!-- {{ comp.uiterste_datum_lid }} is 1 augustus om praktische redenen, maar reglement zegt 15 juli -->
                 <td>Open voor aanmelden individueel en teams<br>(indien lid voor 15 juli {{ comp.uiterste_datum_lid|date:"Y" }})</td>
                 <td>
@@ -64,7 +64,7 @@
             </tr>
 
             <tr>
-                <td {% if comp.fase == 'C' %} class="nhb-rood white-text center-align"{% else %}class="center-align"{% endif %}>C</td>
+                <td {% if comp.fase == 'C' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>C</td>
                 <td>Afronden aanmaken teams (HWL)</td>
                 <td>
                     {% if comp.fase > 'C' %}
@@ -80,7 +80,7 @@
             </tr>
 
             <tr>
-                <td {% if comp.fase == 'D' %} class="nhb-rood white-text center-align"{% else %}class="center-align"{% endif %}>D</td>
+                <td {% if comp.fase == 'D' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>D</td>
                 <td>Afronden poules (RCL)</td>
                 <td>
                     {% if comp.fase > 'D' %}
@@ -92,7 +92,7 @@
             </tr>
 
             <tr>
-                <td {% if comp.fase == 'E' %} class="nhb-rood white-text center-align"{% else %}class="center-align"{% endif %}>E</td>
+                <td {% if comp.fase == 'E' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>E</td>
                 <td>Wedstrijden<br>Open inschrijving RK teams (HWL)</td>
                 <td>
                     {% if comp.fase > 'E' %}
@@ -106,7 +106,7 @@
             </tr>
 
             <tr>
-                <td {% if comp.fase == 'F' %} class="nhb-rood white-text center-align"{% else %}class="center-align"{% endif %}>F</td>
+                <td {% if comp.fase == 'F' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>F</td>
                 <td>Vaststellen uitslagen in elke regio (RCL)</td>
                 <td>
                     {% if comp.fase > 'F' %}
@@ -118,7 +118,7 @@
             </tr>
 
             <tr>
-                <td {% if comp.fase == 'G' %} class="nhb-rood white-text center-align"{% else %}class="center-align"{% endif %}>G</td>
+                <td {% if comp.fase == 'G' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>G</td>
                 <td>Afsluiten regiocompetitie (BKO)<br>Kandidaat-deelnemerslijst opstellen RK individueel<br>Verwijder niet gerechtigde sporters uit RK teams</td>
                 <td>
                     {% if comp.fase > 'G' %}
@@ -135,7 +135,7 @@
             </tr>
 
             <tr>
-                <td {% if comp.fase == 'J' %} class="nhb-rood white-text center-align"{% else %}class="center-align"{% endif %}>J</td>
+                <td {% if comp.fase == 'J' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>J</td>
                 <td>Bevestig deelname RK individueel (HWL / RKO)<br>RK teams compleet maken (HWL)<br>Vaststellen klassengrenzen RK/BK team (BKO)</td>
                 <td>
                     {% if comp.fase > 'J' %}
@@ -147,7 +147,7 @@
             </tr>
 
             <tr>
-                <td {% if comp.fase == 'K' %} class="nhb-rood white-text center-align"{% else %}class="center-align"{% endif %}>K</td>
+                <td {% if comp.fase == 'K' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>K</td>
                 <td>Bevestig deelname RK individueel (HWL / RKO)<!--<br>Koppel invallers RK teams (HWL)--></td>
                 <td>
                     {% if comp.fase > 'K' %}
@@ -159,7 +159,7 @@
             </tr>
 
             <tr>
-                <td {% if comp.fase == 'L' %} class="nhb-rood white-text center-align"{% else %}class="center-align"{% endif %}>L</td>
+                <td {% if comp.fase == 'L' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>L</td>
                 <td>Wedstrijden</td>
                 <td>
                     {% if comp.fase > 'L' %}
@@ -173,7 +173,7 @@
             </tr>
 
             <tr>
-                <td {% if comp.fase == 'M' %} class="nhb-rood white-text center-align"{% else %}class="center-align"{% endif %}>M</td>
+                <td {% if comp.fase == 'M' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>M</td>
                 <td>Uitslagen RK wedstrijden overgenomen</td>
                 <td>
                     {% if comp.fase > 'M' %}
@@ -185,7 +185,7 @@
             </tr>
 
             <tr>
-                <td {% if comp.fase == 'N' %} class="nhb-rood white-text center-align"{% else %}class="center-align"{% endif %}>N</td>
+                <td {% if comp.fase == 'N' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>N</td>
                 <td>Afsluiten rayonkampioenschappen (BKO)</td>
                 <td>
                     {% if comp.fase > 'N' %}
@@ -200,7 +200,7 @@
             </tr>
 
             <tr>
-                <td {% if comp.fase == 'P' %} class="nhb-rood white-text center-align"{% else %}class="center-align"{% endif %}>P</td>
+                <td {% if comp.fase == 'P' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>P</td>
                 <td>Deelnemers en reserveschutters oproepen / bevestigen</td>
                 <td>
                     {% if comp.fase > 'P' %}
@@ -210,7 +210,7 @@
             </tr>
 
             <tr>
-                <td {% if comp.fase == 'Q' %} class="nhb-rood white-text center-align"{% else %}class="center-align"{% endif %}>Q</td>
+                <td {% if comp.fase == 'Q' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>Q</td>
                 <td>Wedstrijden</td>
                 <td>
                     {% if comp.fase > 'Q' %}
@@ -224,7 +224,7 @@
             </tr>
 
             <tr>
-                <td {% if comp.fase == 'R' %} class="nhb-rood white-text center-align"{% else %}class="center-align"{% endif %}>R</td>
+                <td {% if comp.fase == 'R' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>R</td>
                 <td>Uitslagen BK wedstrijden overgenomen</td>
                 <td>
                     {% if comp.fase > 'R' %}
@@ -234,7 +234,7 @@
             </tr>
 
             <tr>
-                <td {% if comp.fase == 'S' %} class="nhb-rood white-text center-align"{% else %}class="center-align"{% endif %}>S</td>
+                <td {% if comp.fase == 'S' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>S</td>
                 <td>Afsluiten competitie (BKO)</td>
                 <td></td>
             </tr>

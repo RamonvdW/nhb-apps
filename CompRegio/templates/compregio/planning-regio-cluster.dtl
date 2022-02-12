@@ -60,35 +60,35 @@
 
                 <thead>
                     <tr>
-                        <th class="center-align">Week</th>
+                        <th class="center">Week</th>
                         <th>Beschrijving</th>
-                        <th class="center-align">Wedstrijden</th>
+                        <th class="center">Wedstrijden</th>
                         <th><!-- kolom voor knoppen --></th>
                     </tr>
                 </thead>
 
                 {% for ronde in rondes %}
                     <tr>
-                        <td class="center-align">{{ ronde.week_nr }}</td>
+                        <td class="center">{{ ronde.week_nr }}</td>
                         <td>{{ ronde.beschrijving }}</td>
-                        <td class="center-align">{{ ronde.wedstrijd_count }}</td>
+                        <td class="center">{{ ronde.wedstrijd_count }}</td>
 
                         <!-- knop naar de ronde van de regioplanning -->
-                        <td class="center-align">
+                        <td class="center">
                             <a class="btn-nhb-rood" href="{% url 'CompRegio:regio-ronde-planning' ronde.pk %}">
                                 <i class="material-icons-round">zoom_in</i></a>
                         </td>
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="4" class="center-align"><i>Geen blokken aanwezig</i></td>
+                        <td colspan="4" class="center"><i>Geen blokken aanwezig</i></td>
                     </tr>
                 {% endfor %}
 
                 <!-- knop om een regel toe te voegen -->
                 {% if url_nieuwe_week %}
                     <tr>
-                        <td colspan="4" class="center-align">
+                        <td colspan="4" class="center">
                             <form action="{{ url_nieuwe_week }}" method="post">
                                 {% csrf_token %}
                                 <button class="btn-nhb-rood" type="submit">

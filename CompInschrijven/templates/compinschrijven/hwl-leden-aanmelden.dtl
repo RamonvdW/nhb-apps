@@ -147,7 +147,7 @@
                         <td colspan="4"></td>
                     </tr>
                     <tr>
-                        <th class="center-align">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
+                        <th class="center">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
                         <th data-filter="on">Bonds<wbr>nummer</th>
                         <th data-filter="on">Naam</th>
                         <th>Leeftijd {{ tweede_jaar }}</th>
@@ -169,7 +169,7 @@
                             <td class="grey-text">{{ obj.boogtype }}</td>
                             <td><!-- geen aanvangsgemiddelde --></td>
                         {% else %}
-                            <td class="center-align">
+                            <td class="center">
                                 {% if mag_aanmelden %}
                                     <label>
                                         <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{%endif%} data-boog="{% if obj.mag_teamschieten %}{{ obj.afkorting }}{% else %}X{% endif %}">
@@ -207,7 +207,7 @@
                     <td colspan="2"></td>
                 </tr>
                 <tr>
-                    <th class="center-align">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
+                    <th class="center">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
                     <th data-filter="on">Bonds<wbr>nummer</th>
                     <th data-filter="on">Naam</th>
                     <th>Wedstrijdboog</th>
@@ -225,7 +225,7 @@
                         <td class="grey-text">{{ obj.boogtype }}</td>
                         <td><!-- geen aanvangsgemiddelde --></td>
                     {% else %}
-                        <td class="center-align">
+                        <td class="center">
                             {% if mag_aanmelden %}
                                 <label>
                                     <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{% endif %} data-boog="{{ obj.afkorting }}">

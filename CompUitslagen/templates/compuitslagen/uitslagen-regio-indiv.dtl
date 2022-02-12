@@ -175,8 +175,8 @@
                 {% endif %}
 
                 <tr>
-                    <td class="center-align hide-on-small-only" colspan="14"><h5>{{ obj.klasse_str }}</h5></td>
-                    <td class="center-align hide-on-med-and-up" colspan="6" ><h5>{{ obj.klasse_str }}</h5></td>
+                    <td class="center hide-on-small-only" colspan="14"><h5>{{ obj.klasse_str }}</h5></td>
+                    <td class="center hide-on-med-and-up" colspan="6" ><h5>{{ obj.klasse_str }}</h5></td>
                 </tr>
 
                 <tr class="nhb-table-header">
@@ -184,19 +184,19 @@
                     <th><!-- rank --></th>
                     <th>Sporter</th>
                     <th class="hide-on-small-only">Vereniging</th>
-                    <th class="center-align">Gemiddelde</th>
+                    <th class="center">Gemiddelde</th>
                     <th class="right-align hide-on-med-and-up">Scores</th>
-                    <th class="center-align hide-on-small-only" colspan="7">Scores</th>
+                    <th class="center hide-on-small-only" colspan="7">Scores</th>
                     <th class="right-align hide-on-small-only">Totaal</th>
                     <td class="nhb-table-zijrand" rowspan="{{ obj.aantal_in_groep }}"></td>
                 </tr>
             {% endif %}
 
             <tr>
-                <td class="center-align smal">{{ obj.rank }}</td>
+                <td class="center smal">{{ obj.rank }}</td>
                 <td class="smal">{{ obj.naam_str }}</td>
                 <td class="smal hide-on-small-only">{{ obj.ver_str }}</td>
-                <td class="center-align smal">{{ obj.gemiddelde }}</td>
+                <td class="center smal">{{ obj.gemiddelde }}</td>
                 <td class="right-align hide-on-med-and-up">
 {% if obj.laagste_score_nr == 1 %}<del>{{ obj.score1 }}</del>{% else %}{{ obj.score1 }}{% endif %}<br>
 {% if obj.laagste_score_nr == 2 %}<del>{{ obj.score2 }}</del>{% else %}{{ obj.score2 }}{% endif %}<br>

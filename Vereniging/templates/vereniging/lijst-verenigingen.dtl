@@ -58,15 +58,15 @@
                 </tr>
                 <tr class="nhb-table-header">
                     {% if toon_rayon %}
-                        <th class="center-align hide-on-med-and-down">Rayon</th>
+                        <th class="center hide-on-med-and-down">Rayon</th>
                     {% endif %}
 
                     {% if toon_regio %}
-                        <th class="center-align hide-on-med-and-down">Regio</th>
+                        <th class="center hide-on-med-and-down">Regio</th>
                     {% endif %}
 
                     {% if toon_cluster %}
-                        <th class="center-align hide-on-med-and-down">Clusters</th>
+                        <th class="center hide-on-med-and-down">Clusters</th>
                     {% endif %}
 
                     <th data-filter="on">Vereniging</th>
@@ -79,8 +79,8 @@
                     {% endif %}
 
                     {% if toon_ledental %}
-                        <th class="center-align hide-on-med-and-down">Aantal leden</th>
-                        <th class="center-align hide-on-med-and-down">Aantal beheerders</th>
+                        <th class="center hide-on-med-and-down">Aantal leden</th>
+                        <th class="center hide-on-med-and-down">Aantal beheerders</th>
                     {% endif %}
                 </tr>
             </thead>
@@ -88,15 +88,15 @@
             {% for obj in verenigingen %}
                 <tr>
                     {% if toon_rayon %}
-                        <td class="center-align hide-on-med-and-down">{{ obj.regio.rayon.rayon_nr }}</td>
+                        <td class="center hide-on-med-and-down">{{ obj.regio.rayon.rayon_nr }}</td>
                     {% endif %}
 
                     {% if toon_regio %}
-                        <td class="center-align hide-on-med-and-down">{{ obj.regio.regio_nr }}</td>
+                        <td class="center hide-on-med-and-down">{{ obj.regio.regio_nr }}</td>
                     {% endif %}
 
                     {% if toon_cluster %}
-                        <td class="center-align hide-on-med-and-down">{{ obj.cluster_letters }}</td>
+                        <td class="center hide-on-med-and-down">{{ obj.cluster_letters }}</td>
                     {% endif %}
 
                     <!-- vereniging -->
@@ -176,8 +176,8 @@
                     {% endif %}
 
                     {% if toon_ledental %}
-                        <td class="center-align{% if obj.aantal_leden >= 100 %} nhb-blauw-text{% endif %} hide-on-med-and-down">{{ obj.aantal_leden }}</td>
-                        <td class="center-align hide-on-med-and-down">{{ obj.aantal_beheerders }}</td>
+                        <td class="center{% if obj.aantal_leden >= 100 %} nhb-blauw-text{% endif %} hide-on-med-and-down">{{ obj.aantal_leden }}</td>
+                        <td class="center hide-on-med-and-down">{{ obj.aantal_beheerders }}</td>
                     {% endif %}
                 </tr>
             {% endfor %}

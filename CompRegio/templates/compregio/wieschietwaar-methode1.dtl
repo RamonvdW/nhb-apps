@@ -59,7 +59,7 @@
                     <td class="kruisje">{{ kruisje }}</td>
                 {% endfor %}
 
-                <td class="center-align">
+                <td class="center">
                     {% if deelnemer.url_wijzig %}
                         <a class="btn-nhb-blauw" href="{{ deelnemer.url_wijzig }}">Wijzig</a>
                     {% endif %}

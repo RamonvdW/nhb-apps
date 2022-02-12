@@ -158,7 +158,7 @@
                 {% endif %}
 
                 <tr>
-                    <td class="center-align">{% if not team.is_reserve %}{{ team.rank }}{% endif %}</td>
+                    <td class="center">{% if not team.is_reserve %}{{ team.rank }}{% endif %}</td>
                     <td>
                         <span class="hide-on-med-and-up">{{ team.ver_nr }}</span>
                         <span class="hide-on-small-only">{{ team.ver_str }}</span>

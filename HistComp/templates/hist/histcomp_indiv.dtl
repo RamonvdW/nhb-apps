@@ -37,7 +37,7 @@
 
     <div class="container white z-depth-2">
         <div class="row nhb-blauw white-text">
-            <div class="col s12 center-align">
+            <div class="col s12 center">
                 <h5>Zoeken op naam</h5>
                 <p>of verenigingsnummer</p>
             </div>
@@ -52,7 +52,7 @@
             </div>
 
             <div class="row">
-                <div class="center-align">
+                <div class="center">
                     <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
                     {% if unfiltered_url %}
                         <span>&nbsp;&nbsp;</span><a class="btn-nhb-blauw" href="{{ unfiltered_url }}"><i class="material-icons-round left">backspace</i>Leeg maken</a>
@@ -88,12 +88,12 @@
         <table class="white">
             <thead>
                 <tr>
-                    <th class="center-align">Rank</th>
+                    <th class="center">Rank</th>
                     <th>Sporter</th>
                     <th>Vereniging</th>
-                    <th class="center-align">Gemiddelde pijl</th>
-                    <th class="center-align" colspan="7">Scores</th>
-                    <th class="center-align">Totaal</th>
+                    <th class="center">Gemiddelde pijl</th>
+                    <th class="center" colspan="7">Scores</th>
+                    <th class="center">Totaal</th>
                 </tr>
             </thead>
 
@@ -115,10 +115,10 @@
                 {% endif %}
 
                 <tr>
-                    <td class="center-align">{{ obj.rank }}</td>
+                    <td class="center">{{ obj.rank }}</td>
                     <td>[{{ obj.schutter_nr_str|highlight:zoekterm }}] {{ obj.schutter_naam|highlight:zoekterm }}</td>
                     <td>[{{ obj.vereniging_nr }}] {{ obj.vereniging_naam|highlight:zoekterm }}</td>
-                    <td class="center-align">{{ obj.gemiddelde }}</td>
+                    <td class="center">{{ obj.gemiddelde }}</td>
 
                     <td class="right-align">{% if obj.laagste_score_nr == 1 %}<del>{{ obj.score1 }}</del>{% else %}{{ obj.score1 }}{% endif %}</td>
                     <td class="right-align">{% if obj.laagste_score_nr == 2 %}<del>{{ obj.score2 }}</del>{% else %}{{ obj.score2 }}{% endif %}</td>

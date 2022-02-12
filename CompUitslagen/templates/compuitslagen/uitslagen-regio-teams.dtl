@@ -177,14 +177,14 @@
                                 <table>
                                     <tr class="nhb-table-header">
                                         <td class="nhb-table-zijrand" rowspan="9"></td>
-                                        <th class="center-align">Ronde</th>
+                                        <th class="center">Ronde</th>
                                         <th>Thuis team</th>
                                         <th>Bezoekend team</th>
                                         <td class="nhb-table-zijrand" rowspan="9"></td>
                                     </tr>
                                     {% for ronde_nr, wedstrijden in team.schema %}
                                         <tr>
-                                            <td class="center-align">{{ ronde_nr }}{% if deelcomp.huidige_team_ronde == ronde_nr %}<br>(huidige){% endif %}</td>
+                                            <td class="center">{{ ronde_nr }}{% if deelcomp.huidige_team_ronde == ronde_nr %}<br>(huidige){% endif %}</td>
                                             <td>
                                                 {% for team1, team2 in wedstrijden %}{{ team1.team_str }}<br>{% endfor %}
                                             </td>
@@ -223,7 +223,7 @@
                         <td class="nhb-table-zijrand" rowspan="{{ team.aantal_in_groep }}"></td>
                         <th><!-- rank --></th>
                         <th>Team</th>
-                        <th class="center-align" colspan="14">{% if toon_punten %}Scores<span class="hide-on-small-only"> / Punten</span>{% else %}Scores{% endif %}</th>
+                        <th class="center" colspan="14">{% if toon_punten %}Scores<span class="hide-on-small-only"> / Punten</span>{% else %}Scores{% endif %}</th>
                         <th class="right-align hide-on-small-only">Totaal</th>
                         <th class="right-align">{% if toon_punten %}Punten{% endif %}</th>
                         <td class="nhb-table-zijrand" rowspan="{{ team.aantal_in_groep }}"></td>
@@ -232,7 +232,7 @@
 
                 {% if not team.is_afsluiter %}
                     <tr>
-                        <td class="center-align smal">{{ team.rank }}</td>
+                        <td class="center smal">{{ team.rank }}</td>
                         <td class="smal">{{ team.naam_str }}</td>
                         {% for score, punten in team.ronde_scores %}
                             <td class="right-align smal">{{ score }}</td>

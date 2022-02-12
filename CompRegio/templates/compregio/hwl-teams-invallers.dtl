@@ -24,7 +24,7 @@
         <div class="container">
             <table class="white">
                 <tr>
-                    <td class="center-align">De invallers voor <b class="red-text">RONDE {{ deelcomp.huidige_team_ronde }}</b> kunnen nu doorgegeven worden.</td>
+                    <td class="center">De invallers voor <b class="red-text">RONDE {{ deelcomp.huidige_team_ronde }}</b> kunnen nu doorgegeven worden.</td>
                 </tr>
             </table>
         </div>
@@ -38,7 +38,7 @@
                     <th class="hide-on-med-and-up">Soort</th>
                     <th>Naam</th>
                     <th>Wedstrijd<wbr>klasse</th>
-                    <th class="hide-on-small-only center-align">Gekoppeld</th>
+                    <th class="hide-on-small-only center">Gekoppeld</th>
                     <th><!-- kolom voor de knoppen --></th>
                 </tr>
             </thead>
@@ -49,7 +49,7 @@
                     <td class="hide-on-med-and-up">{{ team.team_type.afkorting }}</td>
                     <td>{{ team.team_naam }}</td>
                     <td>{{ team.klasse.team.beschrijving }}</td>
-                    <td class="hide-on-small-only center-align{% if team.aantal < 3 or team.aantal > 4 %} red-text{% endif %}">{{ team.aantal }}</td>
+                    <td class="hide-on-small-only center{% if team.aantal < 3 or team.aantal > 4 %} red-text{% endif %}">{{ team.aantal }}</td>
                     <td>
                         {% if team.url_koppelen %}
                             <a class="btn-nhb-blauw" href="{{ team.url_koppelen }}">Invallers koppelen</a>

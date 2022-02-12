@@ -180,6 +180,14 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             # for
         # for
 
+        comp = deelcomp_rk.competitie
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Planning')
+        )
+
         menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
         return context
 

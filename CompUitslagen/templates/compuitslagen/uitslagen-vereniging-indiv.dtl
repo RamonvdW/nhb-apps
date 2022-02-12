@@ -101,11 +101,11 @@
                 <th></th>   <!-- rank -->
                 <th>Sporter</th>
                 <th>Wedstrijd<wbr>klasse</th>
-                <th class="center-align">
+                <th class="center">
                     <span class="hide-on-med-and-down">Gemiddelde</span>
                     <span class="hide-on-large-only">Gem.</span>
                 </th>
-                <th colspan="7" class="center-align">Scores</th>
+                <th colspan="7" class="center">Scores</th>
                 <td rowspan="{{ aantal_regels }}" class="nhb-table-zijrand"></td>
             </tr>
 
@@ -123,10 +123,10 @@
 
             {% for obj in deelnemers %}
                 <tr>
-                    <td class="center-align">{{ obj.rank }}</td>
+                    <td class="center">{{ obj.rank }}</td>
                     <td>{{ obj.naam_str }}</td>
                     <td>{{ obj.klasse_str }}</td>
-                    <td class="center-align">{{ obj.gemiddelde }}</td>
+                    <td class="center">{{ obj.gemiddelde }}</td>
                     <td class="right-align smal">{% if obj.laagste_score_nr == 1 %}<del>{{ obj.score1 }}</del>{% else %}{{ obj.score1 }}{% endif %}</td>
                     <td class="right-align smal">{% if obj.laagste_score_nr == 2 %}<del>{{ obj.score2 }}</del>{% else %}{{ obj.score2 }}{% endif %}</td>
                     <td class="right-align smal">{% if obj.laagste_score_nr == 3 %}<del>{{ obj.score3 }}</del>{% else %}{{ obj.score3 }}{% endif %}</td>

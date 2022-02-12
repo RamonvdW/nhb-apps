@@ -30,19 +30,19 @@
                 </thead>
 
                 <tr>
-                    <td class="center-align"><i class="nhb-blauw-text in-table-icon material-icons-round">help</i></td>
+                    <td class="center"><i class="nhb-blauw-text in-table-icon material-icons-round">help</i></td>
                     <td class="nhb-blauw-text">Onbekend</td>
                     <td>{{ aantal_onbekend }}</td>
                 </tr>
 
                 <tr>
-                    <td class="center-align"><i class="green-text in-table-icon material-icons-round">check</i></td>
+                    <td class="center"><i class="green-text in-table-icon material-icons-round">check</i></td>
                     <td class="green-text">Deelname bevestigd</td>
                     <td>{{ aantal_bevestigd }}</td>
                 </tr>
 
                 <tr>
-                    <td class="center-align"><i class="grey-text in-table-icon material-icons-round">block</i></td>
+                    <td class="center"><i class="grey-text in-table-icon material-icons-round">block</i></td>
                     <td class="grey-text">Afgemeld</td>
                     <td>{{ aantal_afgemeld }}</td>
                 </tr>
@@ -63,7 +63,7 @@
                     <th>Sporter</th>
                     <th class="hide-on-small-only">Gemiddelde</th>
                     <th>Notitie</th>
-                    <th class="center-align">Status</th>
+                    <th class="center">Status</th>
                     <th><!-- knop --></th>
                 </tr>
 
@@ -77,12 +77,12 @@
                 <td class="hide-on-small-only">{{ obj.kampioen_label }}</td>
 
                 {% if obj.deelname == 'J' %}
-                    <td class="center-align"><i class="green-text in-table-icon material-icons-round">check</i></td>
+                    <td class="center"><i class="green-text in-table-icon material-icons-round">check</i></td>
                 {% elif obj.deelname == 'N' %}
-                    <td class="center-align"><i class="grey-text in-table-icon material-icons-round">block</i></td>
+                    <td class="center"><i class="grey-text in-table-icon material-icons-round">block</i></td>
                 {% else %}
                     <!-- onbekend -->
-                    <td class="center-align"><i class="nhb-blauw-text in-table-icon material-icons-round">help</i></td>
+                    <td class="center"><i class="nhb-blauw-text in-table-icon material-icons-round">help</i></td>
                 {% endif %}
 
                 <td>

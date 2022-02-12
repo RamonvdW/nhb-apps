@@ -67,7 +67,7 @@
         <table class="white">
             {% if heeft_teams %}
                 <tr>
-                    <td colspan="6" class="nhb-blauw white-text center-align"><h5>Individueel</h5></td>
+                    <td colspan="6" class="nhb-blauw white-text center"><h5>Individueel</h5></td>
                 </tr>
             {% endif %}
 
@@ -90,7 +90,7 @@
                         <th>Vereniging</th>
                         <th>Sporter</th>
                         <th>Gemiddelde</th>
-                        <th class="center-align">Status</th>
+                        <th class="center">Status</th>
                         <th>Notitie</th>
                     </tr>
                 {% endif %}
@@ -100,7 +100,7 @@
                     <td>[{{ deelnemer.ver_nr }}]<span class="hide-on-small-only">&nbsp;{{ deelnemer.ver_naam }}</span></td>
                     <td>[{{ deelnemer.lid_nr }}] {{ deelnemer.volledige_naam }}</td>
                     <td>{{ deelnemer.gemiddelde_str }}</td>
-                    <td class="center-align">
+                    <td class="center">
                         {% if deelnemer.deelname == 'J' %}<i class="material-icons-round green-text">check</i>
                         {% elif deelnemer.deelname == 'N' %}<i class="material-icons-round black-text">block</i>
                         {% else %}<i class="material-icons-round nhb-blauw-text">help</i>
@@ -126,7 +126,7 @@
         <table class="white">
             {% if heeft_indiv %}
                 <tr>
-                    <td colspan="6" class="nhb-blauw white-text center-align"><h5>Teams</h5></td>
+                    <td colspan="6" class="nhb-blauw white-text center"><h5>Teams</h5></td>
                 </tr>
             {% endif %}
 

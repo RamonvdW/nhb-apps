@@ -28,10 +28,10 @@
                 <th>Blazoen</th>
 
                 {% for beschrijving in dagdelen %}
-                    <th class="center-align">{{ beschrijving }}</th>
+                    <th class="center">{{ beschrijving }}</th>
                 {% endfor %}
 
-                <th class="center-align">Totaal</th>
+                <th class="center">Totaal</th>
             </tr>
         </thead>
 
@@ -46,7 +46,7 @@
                     <td><!-- vereniging --></td>
                     <td>{{ blazoen_str }}</td>
                     {% for count in counts_list %}
-                        <td class="center-align">{{ count }}</td>
+                        <td class="center">{{ count }}</td>
                     {% endfor %}
                 </tr>
             {% endfor %}
@@ -56,7 +56,7 @@
             <td><!-- vereniging --></td>
             <td class="right-align"><b>Totalen:</b></td>
             {% for count in totalen %}
-                <td class="center-align"><b>{{ count }}</b></td>
+                <td class="center"><b>{{ count }}</b></td>
             {% endfor %}
         </tr>
 
@@ -77,10 +77,10 @@
                 <th>Type blazoen</th>
 
                 {% for beschrijving in dagdelen %}
-                    <th class="center-align">{{ beschrijving }}</th>
+                    <th class="center">{{ beschrijving }}</th>
                 {% endfor %}
 
-                <th class="center-align">Totaal</th>
+                <th class="center">Totaal</th>
             </tr>
         <!-- /thead -->
 
@@ -89,7 +89,7 @@
                 <td><!-- vereniging naam --></td>
                 <td>{{ blazoen_str }}</td>
                 {% for kolom in kolommen %}
-                    <td class="center-align">{{ kolom }}</td>
+                    <td class="center">{{ kolom }}</td>
                 {% endfor %}
             </tr>
         {% endfor %}

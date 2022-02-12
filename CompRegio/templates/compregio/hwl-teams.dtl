@@ -23,9 +23,9 @@
             <table class="white">
                 <tr>
                     {% if mag_wijzigen %}
-                        <td class="center-align">Teams kunnen aangepast worden tot <b>{{ deelcomp.einde_teams_aanmaken }}</b>.</td>
+                        <td class="center">Teams kunnen aangepast worden tot <b>{{ deelcomp.einde_teams_aanmaken }}</b>.</td>
                     {% else %}
-                        <td class="center-align">De deadline is gepasseerd, dus de teams kunnen niet meer aangepast worden.<br>
+                        <td class="center">De deadline is gepasseerd, dus de teams kunnen niet meer aangepast worden.<br>
 Zodra de eerste ronde geopend wordt door de RCL is het mogelijk om invallers te selecteren.
                         </td>
                     {% endif %}
@@ -41,7 +41,7 @@ Zodra de eerste ronde geopend wordt door de RCL is het mogelijk om invallers te 
                     <th class="hide-on-small-only">Soort team</th>
                     <th class="hide-on-med-and-up">Soort</th>
                     <th>Naam</th>
-                    <th class="hide-on-small-only center-align">Gekoppeld</th>
+                    <th class="hide-on-small-only center">Gekoppeld</th>
                     <th class="hide-on-small-only">Sterkte</th>
                     <th>Wedstrijd<wbr>klasse</th>
                     <th><!-- kolom voor de knoppen --></th>
@@ -53,7 +53,7 @@ Zodra de eerste ronde geopend wordt door de RCL is het mogelijk om invallers te 
                     <td class="hide-on-small-only">{{ team.team_type.beschrijving }}</td>
                     <td class="hide-on-med-and-up">{{ team.team_type.afkorting }}</td>
                     <td>{{ team.team_naam }}</td>
-                    <td class="hide-on-small-only center-align{% if team.aantal < 3 or team.aantal > 4 %} red-text{% endif %}">{{ team.aantal }}</td>
+                    <td class="hide-on-small-only center{% if team.aantal < 3 or team.aantal > 4 %} red-text{% endif %}">{{ team.aantal }}</td>
 
                     {% if team.klasse %}
                         <td class="hide-on-small-only">{{ team.ag_str }}</td>

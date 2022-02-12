@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -26,7 +26,7 @@
         </tr>
         <tr>
             <td class="right-align"><a class="btn-nhb-blauw" href="{{ url_prev_maand }}"><i class="material-icons-round">chevron_left</i></a></td>
-            <td class="center-align"><h5>{{ datum|date:'F Y' }}</h5></td>
+            <td class="center"><h5>{{ datum|date:'F Y' }}</h5></td>
             <td class="left-align"><a class="btn-nhb-blauw" href="{{ url_next_maand }}"><i class="material-icons-round">chevron_right</i></a></td>
         </tr>
         <!-- FUTURE: drop-down maken om direct naar een jaar/maand te springen -->

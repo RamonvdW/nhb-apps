@@ -61,6 +61,14 @@ class BondPlanningView(UserPassesTestMixin, TemplateView):
                                               competitie=deelcomp_bk.competitie)
                                       .order_by('nhb_rayon__rayon_nr'))
 
+        comp = deelcomp_bk.competitie
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Planning')
+        )
+
         menu_dynamics(self.request, context, actief='competitie')
         return context
 

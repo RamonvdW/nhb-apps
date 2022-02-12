@@ -10,6 +10,53 @@
 
 {% block pagina %}
 
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Wijzig wedstrijd</h3>
+        </div>
+    </div>
+
+        <!-- blauwe balk met informatie label : info -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Competitie</th>
+                    <td>{{ competitie.beschrijving }}</td>
+                </tr>
+                <tr>
+                    <th>Rayon</th>
+                    <td>{{ regio.rayon }}</td>
+                </tr>
+                <tr>
+                    <th>Regio</th>
+                    <td>{{ regio }}</td>
+                </tr>
+                {% if ronde.cluster %}
+                    <tr>
+                        <th>Cluster</th>
+                        <td>{{ ronde.cluster }}</td>
+                    </tr>
+                {% endif %}
+                {% if opt_weekdagen %}
+                    <tr>
+                        <th>Weeknummer</th>
+                        <td>{{ ronde.week_nr }}</td>
+                    </tr>
+                    <tr>
+                        <th>Maandag</th>
+                        <td>{{ ronde.maandag|date:"j F Y" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Ronde</th>
+                        <td>{% if ronde.beschrijving %}{{ ronde.beschrijving }}{% else %}<i>Geen beschrijving</i>{% endif %}</td>
+                    </tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+
     <script type="application/javascript">
 
         let ignore_changes = true
@@ -18,6 +65,12 @@
             // het formulier is aangepast en moet opgeslagen worden
 
             if (!ignore_changes) {
+                // disable alle knoppen waarmee de invoer verloren zou gaan
+                const els = document.getElementsByClassName("vertrek_knop")
+                Array.prototype.forEach.call(els, function(el) {
+                    el.classList.add('disabled')
+                })
+
                 // enable de 'opslaan' knop
                 const el = document.getElementById("opslaan_knop")
                 el.disabled = false
@@ -77,215 +130,194 @@
         }
     </script>
 
-    <h4>Wijzig wedstrijd</h4>
 
-    <div class="row">
-
-        <!-- toon gegevens van de regio en competitie in een blauwe box -->
-        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-            <div class="white-text nhb-blauw z-depth-2">
-
-                <div class="row small-row">
-                    <div class="col s3">Competitie:</div>
-                    <div class="col s8">{{ competitie.beschrijving }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3">Rayon:</div>
-                    <div class="col s8">{{ regio.rayon }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3">Regio:</div>
-                    <div class="col s8">{{ regio }}</div>
-                </div>
-
-                {% if ronde.cluster %}
-                    <div class="row small-row">
-                        <div class="col s3">Cluster:</div>
-                        <div class="col s8">{{ cluster }}</div>
-                    </div>
-                {% endif %}
-
-                {% if opt_weekdagen %}
-                    <div class="row small-row">
-                        <div class="col s3">Week nr:</div>
-                        <div class="col s8">{{ ronde.week_nr }}</div>
-                    </div>
-
-                    <div class="row small-row">
-                        <div class="col s3">Maandag:</div>
-                        <div class="col s8">{{ ronde.maandag|date:"j F Y" }}</div>
-                    </div>
-
-                    <div class="row small-row">
-                        <div class="col s3">Ronde:</div>
-                        <div class="col s8">{{ ronde.beschrijving }}</div>
-                    </div>
-                {% endif %}
-
-            </div>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Instellingen</h4>
         </div>
     </div>
 
-    <p>&nbsp;</p>
-    <p>Op deze pagina kunnen de details voor een competitiewedstrijd{% if opt_weekdagen %} in bovenstaande week{% endif %} aangepast worden.</p>
 
-    <form method="post" action="{{ url_opslaan }}">
-        {% csrf_token %}
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
 
-        <table class="white">
+            <!-- dialoog venster -->
+            <div class="white left-align z-depth-3">
+                <div style="padding:30px">
 
-            <tr>
-                <td>Datum wedstrijd:</td>
-                <td>
-                    {% if opt_weekdagen %}
-                        <!-- drop-down voor dagen in de week -->
-                        <select name="weekdag" onchange="gewijzigd()">
-                            {% for opt in opt_weekdagen %}
-                                <option value="{{ opt.weekdag_nr }}"{% if opt.actief %} selected{% endif %}>{{ opt.datum|date:"l j F Y" }}</option>
-                            {% endfor %}
-                        </select>
-                    {% else %}
-                        <!-- datum picker -->
-                        <input type="text" class="nl_datepicker" id="datum" onchange="datum_omzetten()">
+                    <form method="post" action="{{ url_opslaan }}">
+                        {% csrf_token %}
 
-                        <!-- voor POST, in juiste formaat -->
-                        <input type="hidden" name="wanneer" id="wanneer">
-                    {% endif %}
-                </td>
-            </tr>
+                        <table class="white">
 
-            <tr>
-                <td>Aanvang wedstrijd:</td>
-                <td>
-                    <input id="tijd1" name="aanvang" type="text" class="timepicker" onchange="gewijzigd()">
-                </td>
-            </tr>
-
-            <tr>
-                <td>Organiserende vereniging:</td>
-                <td>
-                    <select name="nhbver_pk" onchange="locatie_keuzes_aanpassen()" id="id_ver_sel">
-                        {% for opt in verenigingen %}
-                            <option value="{{ opt.pk }}"{% if opt.pk == wedstrijd.vereniging.pk %} selected{% endif %}>{{ opt }}</option>
-                        {% endfor %}
-                    </select>
-                </td>
-            </tr>
-
-            <tr>
-                <td>Accommodatie:</td>
-                <td id="id_accommodatie_td">
-                    <select name="loc_pk" id="id_loc_sel" onchange="gewijzigd()">
-                        {% for opt in all_locaties %}
-                            <option value="{{ opt.pk }}" data-ver="{{ opt.ver_pk }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
-                        {% endfor %}
-                    </select>
-                </td>
-            </tr>
-
-            {% if heeft_wkl and wkl_team %}
-                <tr>
-                    <!-- inline-block gives vertical align top -->
-                    <td style="display: inline-block">Wedstrijdklassen teams:</td>
-                    <td>
-                        <table class="striped">
                             <tr>
-                                <th><!-- checkbox column --></th>
-                                <th>Klasse</th>
-                                <th>Aantal teams</th>
+                                <th>Datum wedstrijd</th>
+                                <td>
+                                    {% if opt_weekdagen %}
+                                        <!-- drop-down voor dagen in de week -->
+                                        <select name="weekdag" onchange="gewijzigd()">
+                                            {% for opt in opt_weekdagen %}
+                                                <option value="{{ opt.weekdag_nr }}"{% if opt.actief %} selected{% endif %}>{{ opt.datum|date:"l j F Y" }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    {% else %}
+                                        <!-- datum picker -->
+                                        <input type="text" class="nl_datepicker" id="datum" onchange="datum_omzetten()">
+
+                                        <!-- voor POST, in juiste formaat -->
+                                        <input type="hidden" name="wanneer" id="wanneer">
+                                    {% endif %}
+                                </td>
                             </tr>
-                            {% for obj in wkl_team %}
+
+                            <tr>
+                                <th>Aanvang wedstrijd</th>
+                                <td>
+                                    <input id="tijd1" name="aanvang" type="text" class="timepicker" onchange="gewijzigd()">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Organiserende vereniging</th>
+                                <td>
+                                    <select name="nhbver_pk" onchange="locatie_keuzes_aanpassen()" id="id_ver_sel">
+                                        {% for opt in verenigingen %}
+                                            <option value="{{ opt.pk }}"{% if opt.pk == wedstrijd.vereniging.pk %} selected{% endif %}>{{ opt }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Accommodatie</th>
+                                <td id="id_accommodatie_td">
+                                    <select name="loc_pk" id="id_loc_sel" onchange="gewijzigd()">
+                                        {% for opt in all_locaties %}
+                                            <option value="{{ opt.pk }}" data-ver="{{ opt.ver_pk }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                            </tr>
+
+                            {% if heeft_wkl and wkl_team %}
                                 <tr>
+                                    <!-- inline-block gives vertical align top -->
+                                    <th style="display: inline-block">Wedstrijdklassen teams</th>
                                     <td>
-                                        <label>
-                                            <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %} onchange="gewijzigd()">
-                                            <span>&nbsp;</span>
-                                        </label>
+                                        <table class="striped">
+                                            <tr>
+                                                <th><!-- checkbox column --></th>
+                                                <th>Klasse</th>
+                                                <th>Aantal teams</th>
+                                            </tr>
+                                            {% for obj in wkl_team %}
+                                                <tr>
+                                                    <td>
+                                                        <label>
+                                                            <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %} onchange="gewijzigd()">
+                                                            <span>&nbsp;</span>
+                                                        </label>
+                                                    </td>
+                                                    <td>{{ obj.short_str }}</td>
+                                                    <td>{{ obj.aantal_teams }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </table>
                                     </td>
-                                    <td>{{ obj.short_str }}</td>
-                                    <td>{{ obj.aantal_teams }}</td>
                                 </tr>
-                            {% endfor %}
-                        </table>
-                    </td>
-                </tr>
-            {% endif %}
+                            {% endif %}
 
-            {% if heeft_wkl %}
-                <tr>
-                    <!-- inline-block gives vertical align top -->
-                    <td style="display: inline-block">Wedstrijdklassen individueel:</td>
-                    <td>
-                        <table class="striped">
-                            {% for obj in wkl_indiv %}
-                                {% if obj.break_before %}
-                                    <tr>
-                                        <th><!-- checkbox column --></th>
-                                        <th>Klasse</th>
-                                        <th>Aantal sporters</th>
-                                    </tr>
-                                {% endif %}
+                            {% if heeft_wkl %}
                                 <tr>
+                                    <!-- inline-block gives vertical align top -->
+                                    <th style="display: inline-block">Wedstrijdklassen individueel</th>
                                     <td>
-                                        <label>
-                                            <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %} onchange="gewijzigd()">
-                                            <span>&nbsp;</span>
-                                        </label>
+                                        <table class="striped">
+                                            {% for obj in wkl_indiv %}
+                                                {% if obj.break_before %}
+                                                    <tr>
+                                                        <th><!-- checkbox column --></th>
+                                                        <th>Klasse</th>
+                                                        <th>Aantal sporters</th>
+                                                    </tr>
+                                                {% endif %}
+                                                <tr>
+                                                    <td>
+                                                        <label>
+                                                            <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %} onchange="gewijzigd()">
+                                                            <span>&nbsp;</span>
+                                                        </label>
+                                                    </td>
+                                                    <td>{{ obj.short_str }}</td>
+                                                    <td>{{ obj.aantal_sporters }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </table>
                                     </td>
-                                    <td>{{ obj.short_str }}</td>
-                                    <td>{{ obj.aantal_sporters }}</td>
                                 </tr>
-                            {% endfor %}
+                            {% endif %}
+
                         </table>
-                    </td>
-                </tr>
-            {% endif %}
 
-        </table>
+                        <br>
+                        <p class="center">
+                            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                                <i class="material-icons-round left">check</i>Opslaan</button>
+                        </p>
 
-        <p>
-            <a class="btn-nhb-blauw" href="{{ url_terug }}">
-                <i class="material-icons-round left">close</i>Terug (niet opslaan)</a>
-        </p>
+                    </form>
 
-        <div class="fixed-action-btn" style="display: none">
-            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
-                <i class="material-icons-round left">check</i>Opslaan</button>
+                </div>
+            </div>
+
         </div>
-
-    </form>
+    </div>
 
     {% if kan_niet_verwijderen %}
-        <p>&nbsp;</p>
-        <ul class="collapsible">
-            <li>
-                <div class="collapsible-header white">
-                    <span>Klik eerst hier als je de wedstrijd wilt verwijderen</span>
-                </div>
-                <div class="collapsible-body white">
-                    <p>Deze wedstrijd kan niet meer verwijderd worden, want er hangt een uitslag aan</p>
-                </div>
-            </li>
-        </ul>
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Verwijderen</h4>
+                <p>Deze wedstrijd kan niet meer verwijderd worden, want er hangt een uitslag aan</p>
+            </div>
+        </div>
+
     {% elif url_verwijderen %}
-        <p>&nbsp;</p>
-        <form method="post" action="{{ url_verwijderen }}">
-            {% csrf_token %}
-            <ul class="collapsible">
-                <li>
-                    <div class="collapsible-header white">
-                        <span>Klik eerst hier als je de wedstrijd wilt verwijderen</span>
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Verwijderen</h4>
+                <p>
+                    <a class="btn-nhb-rood modal-trigger vertrek_knop" href="#bevestig_verwijder_wedstrijd">Verwijder deze wedstrijd</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="modal" id="bevestig_verwijder_wedstrijd">
+            <div class="modal-content center">
+                <h5>Verwijder wedstrijd?</h5>
+                <p>Wil je deze wedstrijd echt verwijderen uit de planning?</p>
+
+                <form method="post" action="{{ url_verwijderen }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="verwijder_ronde" value="1">
+
+                    <div class="modal-footer" style="text-align:center; display:block">
+                        <div style="display:inline-block; width:50%">
+                            <button class="btn-nhb-rood" type="submit">Ja</button>
+                        </div>
+                        <div style="display:inline-block; width:50%">
+                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                        </div>
                     </div>
-                    <div class="collapsible-body white">
-                        <p>Heb je deze wedstrijd echt niet meer nodig?</p>
-                        <button class="btn-nhb-rood" type="submit">
-                            <i class="material-icons-round left">delete</i>Verwijder deze wedstrijd</button>
-                    </div>
-                </li>
-            </ul>
-        </form>
+                </form>
+            </div>
+        </div>
+
     {% endif %}
 
     <!-- initialisatie van de datum/tijd kiezers -->

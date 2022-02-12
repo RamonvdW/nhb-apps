@@ -152,7 +152,7 @@
                     <th></th>   <!-- rank -->
                     <th>Sporter</th>
                     <th class="hide-on-small-only">Vereniging</th>
-                    <th class="center-align">Gemiddelde</th>
+                    <th class="center">Gemiddelde</th>
                     <th></th>   <!-- label -->
                     <th>RK scores</th>
                     <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
@@ -160,10 +160,10 @@
             {% endif %}
 
             <tr>
-                <td class="center-align">{% if not obj.is_reserve %}{{ obj.rank }}{% endif %}</td>
+                <td class="center">{% if not obj.is_reserve %}{{ obj.rank }}{% endif %}</td>
                 <td>{{ obj.naam_str }}</td>
                 <td class="hide-on-small-only">{% if obj.geen_deelname_risico %}<del>{{ obj.ver_str }}</del> (geen RK deelname!){% else %}{{ obj.ver_str }}{% endif %}</td>
-                <td class="center-align">{{ obj.gemiddelde }}</td>
+                <td class="center">{{ obj.gemiddelde }}</td>
                 {% if obj.is_reserve %}
                     <td><i>Reserve</i></td>
                 {% elif is_lijst_rk %}

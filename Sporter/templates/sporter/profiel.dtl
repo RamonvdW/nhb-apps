@@ -348,7 +348,7 @@
                             <th>Seizoen</th>
                             <th>Boog</th>
                             <th>Scores</th>
-                            <th class="center-align">Gemiddelde pijl</th>
+                            <th class="center">Gemiddelde pijl</th>
                         </tr>
 
                         <tr style="visibility: collapse">
@@ -356,7 +356,7 @@
                             <td>8888/8888</td>
                             <td>Instinctive Bow</td>
                             <td>888, 888, 888, 888, 888, 888, 888</td>
-                            <td class="center-align">8,888</td>
+                            <td class="center">8,888</td>
                         </tr>
 
                         {% for deelnemer in regiocomp_scores %}
@@ -365,7 +365,7 @@
                                 <td>{{ deelnemer.seizoen_str }}</td>
                                 <td>{{ deelnemer.boog_str }}</td>
                                 <td>{{ deelnemer.scores_str }}</td>
-                                <td class="center-align smal">{{ deelnemer.gemiddelde }}</td>
+                                <td class="center smal">{{ deelnemer.gemiddelde }}</td>
                             </tr>
                         {% endfor %}
                     </table>
@@ -389,7 +389,7 @@
                         <th>Seizoen</th>
                         <th>Boog</th>
                         <th>Scores</th>
-                        <th class="center-align">Gemiddelde pijl</th>
+                        <th class="center">Gemiddelde pijl</th>
                     </tr>
 
                     <tr style="visibility: collapse">
@@ -397,7 +397,7 @@
                         <td>8888/8888</td>
                         <td>Instinctive Bow</td>
                         <td>888, 888, 888, 888, 888, 888, 888</td>
-                        <td class="center-align">8,888</td>
+                        <td class="center">8,888</td>
                     </tr>
 
                     {% for obj in histcomp %}
@@ -406,7 +406,7 @@
                             <td>{{ obj.seizoen_str }}</td>
                             <td>{{ obj.boog_str }}</td>
                             <td>{{ obj.scores_str }}</td>
-                            <td class="center-align">{{ obj.gemiddelde }}</td>
+                            <td class="center">{{ obj.gemiddelde }}</td>
                         </tr>
                     {% endfor %}
 
@@ -439,7 +439,7 @@
                         <tr>
                             <th>Boog</th>
                             <th>Afstand</th>
-                            <th class="center-align">Gemiddelde</th>
+                            <th class="center">Gemiddelde</th>
                             <th>Vast<wbr>gesteld op</th>
                             <th>Bron</th>
                         </tr>
@@ -450,7 +450,7 @@
                             <tr>
                                 <td>{{ sporterboog.boogtype.beschrijving }}</td>
                                 <td>{{ ag.afstand_meter }} meter</td>
-                                <td class="center-align">{{ ag.ag|floatformat:3 }}</td>
+                                <td class="center">{{ ag.ag|floatformat:3 }}</td>
                                 <td>{{ ag.scorehist.when|date:"j F Y" }}</td>
                                 <td>{{ ag.scorehist.notitie }}</td>
                             </tr>

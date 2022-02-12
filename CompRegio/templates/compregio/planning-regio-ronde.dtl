@@ -51,7 +51,7 @@
                 </tr>
                 <tr>
                     <th>Beschrijving</th>
-                    <td>{{ ronde.beschrijving }}</td>
+                    <td>{% if ronde.beschrijving %}{{ ronde.beschrijving }}{% else %}<i>Niet ingevuld</i>{% endif %}</td>
                 </tr>
             </table>
         </div>
@@ -74,14 +74,12 @@
     </script>
 
 
-
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
             <h4>Wedstrijden</h4>
         </div>
     </div>
-
 
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-nhb-blauw">
@@ -96,7 +94,7 @@
                             <th>Wedstrijdklassen</th>
                             <th>Bezetting</th>
                         {% endif %}
-                        <th class="center-align"><!-- kolom voor wijzig knoppen --></th>
+                        <th class="center"><!-- kolom voor wijzig knoppen --></th>
                     </tr>
                 </thead>
 
@@ -130,7 +128,7 @@
                         {% endif %}
 
                         <!-- knop om wedstrijd te wijzigen -->
-                        <td class="center-align">
+                        <td class="center">
                             {% if wedstrijd.url_wijzig %}
                                 <a class="btn-nhb-rood" href="{{ wedstrijd.url_wijzig }}">
                                     <i class="material-icons-round">edit</i></a>
@@ -139,7 +137,7 @@
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="{% if heeft_wkl %}5{% else %}3{% endif %}" class="center-align">
+                        <td colspan="{% if heeft_wkl %}5{% else %}3{% endif %}" class="center">
                             <i>Nog geen wedstrijden</i>
                         </td>
                     </tr>
@@ -148,7 +146,7 @@
                 <!-- knop om een regel toe te voegen -->
                 {% if url_nieuwe_wedstrijd %}
                     <tr>
-                        <td colspan="{% if heeft_wkl %}5{% else %}3{% endif %}" class="center-align">
+                        <td colspan="{% if heeft_wkl %}5{% else %}3{% endif %}" class="center">
                             <form action="{{ url_nieuwe_wedstrijd }}" method="post">
                                 {% csrf_token %}
                                 <button class="btn-nhb-rood vertrek_knop" type="submit">
@@ -219,7 +217,7 @@
                             {% endif %}
 
                             {% if not readonly %}
-                                <p class="center-align">
+                                <p class="center">
                                     <button id="opslaan_knop" class="btn-nhb-rood disabled" type="submit">
                                         <i class="material-icons-round left">check</i>Instellingen opslaan</button>
                                 </p>

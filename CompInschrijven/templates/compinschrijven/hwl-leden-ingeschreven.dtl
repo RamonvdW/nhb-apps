@@ -97,7 +97,7 @@
             {% for obj in object_list %}
             <tr>
                 {% if mag_afmelden %}
-                    <td class="center-align">
+                    <td class="center">
                         <label>
                             <input type="checkbox" name="{{ obj.check }}" class="filled-in">
                             <span><!-- noodzakelijk --></span>

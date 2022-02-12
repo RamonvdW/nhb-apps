@@ -49,8 +49,8 @@
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
-                    <th>Jouw bondsnummer</th>
-                    <td>{{ sporter.lid_nr }}</td>
+                    <th></th>
+                    <td>{{  }}</td>
                 </tr>
                 <tr>
                     <th>Lid sinds</th>

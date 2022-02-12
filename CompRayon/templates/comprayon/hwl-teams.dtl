@@ -30,8 +30,8 @@
                 <th class="hide-on-small-only">Soort team</th>
                 <th class="hide-on-med-and-up">Soort</th>
                 <th>Naam</th>
-                <th class="hide-on-small-only center-align">Aantal sporters</th>
-                <th class="hide-on-small-only center-align">Sterkte</th>
+                <th class="hide-on-small-only center">Aantal sporters</th>
+                <th class="hide-on-small-only center">Sterkte</th>
                 <th>Wedstrijd<wbr>klasse RK/BK</th>
                 <th><!-- kolom voor de knoppen --></th>
             </tr>
@@ -43,9 +43,9 @@
                 <td class="hide-on-med-and-up">{{ rk_team.team_type.afkorting }}</td>
                 <td>{{ rk_team.team_naam }}</td>
 
-                <td class="hide-on-small-only center-align{% if rk_team.aantal < 3 or rk_team.aantal > 4 %} red-text{% endif %}">{{ rk_team.aantal }}</td>
+                <td class="hide-on-small-only center{% if rk_team.aantal < 3 or rk_team.aantal > 4 %} red-text{% endif %}">{{ rk_team.aantal }}</td>
 
-                <td class="hide-on-small-only center-align">{{ rk_team.ag_str }}</td>
+                <td class="hide-on-small-only center">{{ rk_team.ag_str }}</td>
                 <td>{% if rk_bk_klassen_vastgesteld %}{{ rk_team.klasse.team.beschrijving }}{% else %}<i class="grey-text">Nog niet vastgesteld</i>{% endif %}</td>
 
                 <td>
