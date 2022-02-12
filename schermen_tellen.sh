@@ -47,6 +47,9 @@ do
     grep -q '<h3 class="nhb-rood-text">' $scherm
     CHECK3=$?
     
+    grep "Copyright" $scherm | grep -q 2022
+    CHECK4=$?
+    
     if [ $CHECK1 -eq 0 -o $CHECK2 -eq 0 -o $CHECK3 -eq 0 ]
     then
         NEW_NR=$((NEW_NR + 1))
@@ -56,9 +59,12 @@ do
         TYPE='-'
     fi
 
+    COPYR=""
+    [ $CHECK4 -ne 0 ] && COPYR="(c)"
+
     if [ $# -ne 0 ]
     then
-        echo "$NR: $TYPE $scherm"
+        echo "$NR: $TYPE $COPYR $scherm"
     fi
 done
 

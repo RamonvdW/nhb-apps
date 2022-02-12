@@ -10,19 +10,8 @@ from Account.rechten import account_rechten_is_otp_verified
 from Functie.rol import Rollen, rol_mag_wisselen, rol_get_huidige
 from Taken.taken import aantal_open_taken
 
-# ACTIEF_OPTIES = (
-#     'hetplein',
-#     'sporter-profiel',
-#     'vereniging',
-#     'competitie',
-#     'records',
-#     'kalender',
-#     'taken',
-#     'wissel-van-rol',
-# )
 
-
-def menu_dynamics(request, context, actief='hetplein'):
+def menu_dynamics(request, context, actief=None):
     """ Deze functie update the template context voor het dynamische gedrag van
         menu zoals de 'Andere rollen' en het menu item dat actief is.
     """

@@ -71,9 +71,26 @@
                             <td>{{ account.volledige_naam }}</td>
                             <td>{{ account.geo_beschrijving }}</td>
                             <td class="nhb-red-text">{{ account.let_op }}</td>
-                            <td>
-                                <button class="btn-nhb-rood" onclick="do_wijzig('drop', this)" data-pk="{{ account.pk }}">
-                                    <i class="material-icons-round left">delete</i>Verwijder</button>
+                            <td class="center">
+                                <a class="btn-nhb-rood modal-trigger" href="#bevestig_ontkoppel_{{ account.pk }}">
+                                    <i class="material-icons-round left">delete</i>Verwijder</a>
+
+                                <!-- modal dialog voor deze specifieke beheerder -->
+                                <div class="modal" id="bevestig_ontkoppel_{{ account.pk }}">
+                                    <div class="modal-content center">
+                                        <h5>Ontkoppel beheerder?</h5>
+                                        <p>Wil je <b>{{ account.volledige_naam }}</b> loskoppelen<br>van de functie <b>{{ functie.beschrijving }}</b>?</p>
+
+                                        <div class="modal-footer" style="text-align:center; display:block">
+                                            <div style="display:inline-block; width:50%">
+                                                <button class="btn-nhb-rood" onclick="do_wijzig('drop', this)" data-pk="{{ account.pk }}">Ja</button>
+                                            </div>
+                                            <div style="display:inline-block; width:50%">
+                                                <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}
@@ -86,12 +103,13 @@
 
                 {% else %}
                     <tr>
-                        <td>Er zijn nog geen beheerders gekoppeld. Gebruik het formulier om leden te zoeken en toe te voegen.</td>
+                        <td class="center">Er zijn nog geen beheerders gekoppeld.<br>Gebruik het formulier om leden te zoeken en toe te voegen.</td>
                     </tr>
                 {% endif %}
             </table>
         </div>
     </div>
+
 
     <!-- witruimte -->
     <div class="row center">

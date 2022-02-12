@@ -46,6 +46,13 @@
 
     {% endcomment %}
 
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Wedstrijden</h4>
+        </div>
+    </div>
+
 
     <!-- blauwe balk met informatie in een tabel -->
     <table class="white">
@@ -55,31 +62,28 @@
             <th>Wanneer</th>
             <th class="hide-on-med-and-down">Bij vereniging</th>
             <th>Beschrijving</th>
-            <th>Uitslag</th>
+            <th class="center">Uitslag</th>
             <td rowspan="{{ aantal_regels }}" class="nhb-table-zijrand"></td>
         </tr>
 
         {% for obj in wedstrijden %}
             <tr>
-                <td>{{ obj.datum_wanneer|date:"l j F Y" }} om {{ obj.tijd_begin_wedstrijd }}</td>
+                <td>{{ obj.datum_wanneer|date:"l j F Y" }}<br class="hide-on-extra-large-only">om {{ obj.tijd_begin_wedstrijd }}</td>
                 <td class="hide-on-med-and-down">{{ obj.vereniging }}</td>
                 <td>{{ obj.beschrijving }}</td>
                 <!-- knop om uitslagen te zien / in te voeren -->
-                <td>
+                <td class="center">
                     {% if obj.url_uitslag_controleren %}
 
-                        <a class="btn-nhb-rood hide-on-med-and-down" href="{{ obj.url_uitslag_controleren }}">
+                        <a class="btn-nhb-blauw hide-on-med-and-down" href="{{ obj.url_uitslag_controleren }}">
                             <i class="material-icons-round left">visibility</i>Controleer</a>
 
-                        <a class="btn-nhb-rood hide-on-large-and-up" href="{{ obj.url_uitslag_controleren }}">
+                        <a class="btn-nhb-blauw hide-on-large-and-up" href="{{ obj.url_uitslag_controleren }}">
                             <i class="material-icons-round">visibility</i></a>
 
                     {% elif obj.url_uitslag_invoeren %}
 
-                        <a class="btn-nhb-rood hide-on-med-and-down" href="{{ obj.url_uitslag_invoeren }}">
-                            <i class="material-icons-round left">edit</i>Invoeren</a>
-
-                        <a class="btn-nhb-rood hide-on-large-and-up" href="{{ obj.url_uitslag_invoeren }}">
+                        <a class="btn-nhb-rood" href="{{ obj.url_uitslag_invoeren }}">
                             <i class="material-icons-round">edit</i></a>
 
                     {% else %}

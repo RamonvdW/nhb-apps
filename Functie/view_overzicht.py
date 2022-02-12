@@ -108,6 +108,11 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
 
         context['terug_url'] = reverse('Vereniging:overzicht')
 
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+            (None, 'Beheerders'),
+        )
+
         menu_dynamics(self.request, context, actief='vereniging')
         return context
 
@@ -279,6 +284,11 @@ class OverzichtView(UserPassesTestMixin, ListView):
 
             context['url_sec_hwl'] = reverse('Functie:sec-hwl-lid_nrs')
 
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (None, 'Beheerders'),
+        )
+
         menu_dynamics(self.request, context, actief='competitie')
         return context
 
@@ -315,6 +325,12 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
 
         context['aantal'] = len(emails)
         context['emails'] = "; ".join(emails)
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Functie:overzicht'), 'Beheerders'),
+            (None, 'Beheerder e-mailadressen')
+        )
 
         menu_dynamics(self.request, context, actief='competitie')
         return context

@@ -14,7 +14,8 @@
   max-height: 70%;
   width: 55%;
   margin: auto;
-  overflow-y: auto;
+  //overflow-y: auto;
+  overflow-y:hidden;    // geen scrollbar bij heel klein browser window
 
   border-radius: 2px;
   will-change: top, opacity;

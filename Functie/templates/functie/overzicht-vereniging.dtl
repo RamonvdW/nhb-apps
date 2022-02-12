@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -55,7 +55,7 @@
                             {% if obj.wijzig_url %}
                                 <br><br>
                                 <a class="btn-nhb-rood" href="{{ obj.wijzig_url }}">
-                                    <i class="material-icons-round left">group_add</i>Koppel beheerders</a>
+                                    <i class="material-icons-round left">group_add</i>Wijzig beheerders</a>
                             {% endif %}
                         </td>
 

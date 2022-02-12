@@ -92,7 +92,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
                     beschrijving = ronde.cluster.naam
                 if not beschrijving:
                     beschrijving = "?? (ronde)"
-                wedstrijd2beschrijving[wedstrijd.pk] = "%s - %s" % (comp_str, beschrijving)
+                wedstrijd2beschrijving[wedstrijd.pk] = beschrijving
             # for
         # for
 

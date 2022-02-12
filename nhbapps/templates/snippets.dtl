@@ -261,4 +261,29 @@
     </table>
 
 
+    <!-- modal dialog -->
+    <a class="btn-nhb-rood modal-trigger" href="#bevestig_verwijder_buitenbaan">Verwijder de buitenbaan</a>
+
+    <div class="modal" id="bevestig_verwijder_buitenbaan">
+        <div class="modal-content center">
+            <h5>Verwijder buitenbaan?</h5>
+            <p>Wil je de buitenbaan van vereniging<br><b>{{ nhbver }}</b><br>verwijderen uit het systeem?</p>
+
+            <form method="post" action="{{ url_verwijder_buitenbaan }}">
+                {% csrf_token %}
+                <input type="hidden" name="verwijder_buitenbaan" value="1">
+
+                <div class="modal-footer" style="text-align:center; display:block">
+                    <div style="display:inline-block; width:50%">
+                        <button class="btn-nhb-rood" type="submit">Ja</button>
+                    </div>
+                    <div style="display:inline-block; width:50%">
+                        <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
 {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-wijzig-email" %}

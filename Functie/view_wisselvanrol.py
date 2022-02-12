@@ -372,7 +372,12 @@ class WisselNaarSecretarisView(UserPassesTestMixin, TemplateView):
         # for
         context['verenigingen'] = vers
 
-        menu_dynamics(self.request, context, actief='wissel-van-rol')
+        context['kruimels'] = (
+            (reverse('Functie:wissel-van-rol'), 'Wissel van rol'),
+            (None, 'Secretaris')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 

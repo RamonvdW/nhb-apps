@@ -53,7 +53,7 @@ class VhpgAfsprakenView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Functie:wissel-van-rol'), 'Wissel van rol'),
-            (None, 'Persoonsgegevens')
+            (None, 'Afspraken inzien')
         )
 
         menu_dynamics(self.request, context, actief='wissel-van-rol')
@@ -151,6 +151,11 @@ class VhpgOverzichtView(UserPassesTestMixin, ListView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+
+        context['kruimels'] = (
+            (None, 'VHPG status'),
+        )
+
         menu_dynamics(self.request, context, actief='hetplein')
         return context
 

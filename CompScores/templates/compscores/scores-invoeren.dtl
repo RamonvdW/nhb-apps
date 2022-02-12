@@ -69,17 +69,6 @@
         </div>
     </div>
 
-    {% if is_controle %}
-        {% if not is_akkoord %}
-            <p>
-                <form method="post" action="{{ url_geef_akkoord }}">
-                    {% csrf_token %}
-                    <button class="btn-nhb-rood" type="submit">Ik geef akkoord voor deze uitslag</button>
-                </form>
-            </p>
-        {% endif %}
-    {% endif %}
-
     <script type="application/javascript">
 
         {% if deelcomp.regio_organiseert_teamcompetitie %}
@@ -583,6 +572,13 @@
         }
     </script>
 
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Uitslag</h4>
+        </div>
+    </div>
+
     <!-- blauwe balk met dialoog venster -->
     <div class="row-nhb-blauw">
         <div class="col s12">
@@ -659,7 +655,7 @@
             <div class="white left-align z-depth-3 center">
 
                 <!-- dialoog venster -->
-                <h6 style="padding:30px">Zoeken en toevoegen</h6>
+                <h5 style="padding:30px">Zoeken en toevoegen</h5>
 
                 <!-- bondsnummer invoer veld + zoek knop -->
                 <div class="center">

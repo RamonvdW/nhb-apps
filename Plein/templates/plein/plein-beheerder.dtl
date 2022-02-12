@@ -70,6 +70,10 @@
                 {% include 'plein/card.dtl' with title="Verenigingen" text="Overzicht van de verenigingen en accommodaties in jouw regio." icon="share_location" url=card_url %}
             {% endif %}
 
+            <!-- wissel van rol -->
+            {% url 'Functie:wissel-van-rol' as card_url %}
+            {% include 'plein/card.dtl' with title="Wissel van Rol" text="Wissel naar een andere beheerdersrol of naar Sporter." icon="switch_account" url=card_url %}
+
             <!-- handleiding -->
             {% if handleiding_url %}
                 {% include 'plein/card.dtl' with title="Handleiding" text="Bekijk de handleiding." icon="help" url=handleiding_url extern_open=True %}

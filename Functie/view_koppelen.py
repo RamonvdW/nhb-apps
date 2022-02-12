@@ -271,14 +271,23 @@ class WijzigEmailView(UserPassesTestMixin, View):
 
         if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
-            menu_dynamics(self.request, context, actief='vereniging')
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+                (reverse('Functie:overzicht-vereniging'), 'Beheerders'),
+                (None, 'Wijzig e-mail')
+            )
         else:
             context['terug_url'] = reverse('Functie:overzicht')
-            menu_dynamics(self.request, context, actief='competitie')
+            context['kruimels'] = (
+                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Functie:overzicht'), 'Beheerders'),
+                (None, 'Wijzig e-mail')
+            )
 
         context['form'] = form
         context['form_submit_url'] = reverse('Functie:wijzig-email', kwargs={'functie_pk': functie.pk})
 
+        menu_dynamics(self.request, context)
         return render(self.request, TEMPLATE_WIJZIG_EMAIL, context)
 
     def get(self, request, *args, **kwargs):
@@ -531,14 +540,24 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
 
         if self._functie.rol in ('SEC', 'HWL', 'WL'):
             context['is_vereniging_rol'] = True
-            # FUTURE: fix terug-url. Je kan hier op twee manieren komen:
+
+            # Je kan hier op twee manieren komen:
             # via Plein, Verenigingen, Details (=Vereniging:accommodaties/details/pk/pk/), Koppel beheerders
             # via Verenging, Beheerders (=Functie:overzicht-vereniging), Koppel beheerders
-            context['terug_url'] = reverse('Functie:overzicht-vereniging')
-            menu_dynamics(self.request, context, actief='vereniging')
+
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+                (reverse('Functie:overzicht-vereniging'), 'Beheerders'),
+                (None, 'Wijzig beheerder')
+            )
         else:
-            context['terug_url'] = reverse('Functie:overzicht')
-            menu_dynamics(self.request, context, actief='competitie')
+            context['kruimels'] = (
+                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Functie:overzicht'), 'Beheerders'),
+                (None, 'Wijzig beheerder')
+            )
+
+        menu_dynamics(self.request, context)
         return context
 
 
