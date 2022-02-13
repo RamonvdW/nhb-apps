@@ -92,7 +92,7 @@
     {% endif %}
 
     <!-- witruimte -->
-    <div class="row center">
+    <div class="row center" style="margin-bottom:0">
         <div class="col s12">
             <h4>Teams</h4>
             {% if totaal_teams == 0 %}
@@ -110,7 +110,7 @@
         {% for team in regioteams_niet_af %}
             {% if team.break_before %}
                 <tr>
-                    <td colspan="{% if subset_filter %}6{% else %}5{% endif %}">
+                    <td colspan="{{ cols }}">
                         <h5 class="red-text center">Nog niet geplaatste teams</h5>
                     </td>
                 </tr>
@@ -153,13 +153,13 @@
         {% endfor %}
         {% if regioteams_niet_af %}
             <tr>
-                <td colspan="{% if subset_filter %}6{% else %}5{% endif %}" class="nhb-table-onderrand"></td>
+                <td colspan="{{ cols }}" class="nhb-table-onderrand"></td>
             </tr>
         {% endif %}
 
         {% for klasse, teams in regioteams.items %}
             <tr>
-                <td colspan="{% if subset_filter %}6{% else %}5{% endif %}" class="center">
+                <td colspan="{{ cols }}" class="center">
                     <h5>{{ klasse.team.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
             </tr>
             <tr class="nhb-table-header">
@@ -192,12 +192,12 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="{% if subset_filter %}6{% else %}5{% endif %}" class="center"><i>Nog geen teams</i></td>
+                    <td colspan="{{ cols }}" class="center"><i>Nog geen teams</i></td>
                 </tr>
             {% endfor %}
 
             <tr>
-                <td colspan="{% if subset_filter %}6{% else %}5{% endif %}" class="nhb-table-onderrand"></td>
+                <td colspan="{{ cols }}" class="nhb-table-onderrand"></td>
             </tr>
         {% endfor %}
 

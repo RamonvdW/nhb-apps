@@ -245,6 +245,10 @@ class RegioTeamsView(TemplateView):
         context['aantal_regels_niet_af'] = len(regioteams) + 2
         context['totaal_teams'] = totaal_teams
 
+        context['cols'] = 7
+        if self.subset_filter:
+            context['cols'] += 1     # regio kolom
+
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
             (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
