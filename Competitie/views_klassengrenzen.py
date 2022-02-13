@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.views.generic import View
 from django.http import Http404
-from django.shortcuts import render
+from django.shortcuts import render, reverse
 from BasisTypen.models import BLAZOEN2STR
 from Functie.rol import rol_get_huidige, Rollen
 from .models import (AG_NUL, Competitie, CompetitieKlasse)
@@ -140,6 +140,12 @@ class KlassengrenzenTonenView(View):
             # for
 
             context['aantal_team_regels'] = 2 + len(context['team_klassen']) - (context['aantal_team_rk_bk_regels'] - 2)
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Wedstrijdklassen')
+        )
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return render(request, self.template_name, context)

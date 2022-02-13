@@ -187,7 +187,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'plein/site_layout.dtl'))
 
         # controleer aanwezigheid van verwijder knoppen
-        self.assertContains(resp, '</i>Verwijder</button>', count=2)
+        self.assertContains(resp, '</i>Verwijder</a>', count=2)
 
         self.e2e_assert_other_http_commands_not_supported(url)
 
@@ -215,7 +215,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         # controleer aanwezigheid van toevoeg knoppen
         self.assertContains(resp, '</i>Koppel</button>', count=2)         # 2 leden van de vereniging
         # controleer afwezigheid van verwijder knoppen
-        self.assertContains(resp, '</i>Verwijder</button>', count=1)      # kan zichzelf verwijderen
+        self.assertContains(resp, '</i>Verwijder</a>', count=1)      # kan zichzelf verwijderen
 
     def test_koppel_ontkoppel_bb(self):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)

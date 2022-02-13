@@ -39,7 +39,7 @@
             <tr class="row-nhb-blauw">
                 <td class="nhb-table-zijrand" rowspan="{{ aantal_indiv_regels }}"></td>
                 <th>Materiaalklasse</th>
-                <th>Minimaal aanvangs<wbr>gemiddelde</th>
+                <th class="center">Minimaal aanvangs<wbr>gemiddelde</th>
                 {% if toon_aantal %}
                     <th>Aantal deelnemers</th>
                 {% endif %}
@@ -52,11 +52,7 @@
                 <tr>
                     <td>{{ klasse.indiv.beschrijving }}</td>
 
-                    {% if klasse.min_ag_str %}
-                        <td>{{ klasse.min_ag_str }}</td>
-                    {% else %}
-                        <td><i class="grey-text">n.v.t.</i></td>
-                    {% endif %}
+                    <td class="center">{% if klasse.min_ag_str %}{{ klasse.min_ag_str }}{% else %}<i class="grey-text">n.v.t.</i>{% endif %}</td>
 
                     {% if toon_aantal %}
                         <td>{{ klasse.aantal }}</td>
@@ -91,7 +87,7 @@
             <tr class="row-nhb-blauw">
                 <td class="nhb-table-zijrand" rowspan="{{ aantal_team_regels }}"></td>
                 <th>Materiaalklasse</th>
-                <th>Minimale team<wbr>sterkte</th>
+                <th class="center">Minimale team<wbr>sterkte</th>
                 {% if toon_aantal %}
                     <th></th>
                 {% endif %}
@@ -105,11 +101,7 @@
                     <tr>
                         <td>{{ klasse.team.beschrijving }}</td>
 
-                        {% if klasse.min_ag_str %}
-                            <td>{{ klasse.min_ag_str }}</td>
-                        {% else %}
-                            <td><i class="grey-text">n.v.t.</i></td>
-                        {% endif %}
+                        <td class="center">{% if klasse.min_ag_str %}{{ klasse.min_ag_str }}{% else %}<i class="grey-text">n.v.t.</i>{% endif %}</td>
 
                         {% if toon_aantal %}
                             <td></td>
@@ -148,7 +140,7 @@
             <tr class="row-nhb-blauw">
                 <td class="nhb-table-zijrand" rowspan="{{ aantal_team_rk_bk_regels }}"></td>
                 <th>Materiaalklasse</th>
-                <th>Minimale team<wbr>sterkte</th>
+                <th class="center">Minimale team<wbr>sterkte</th>
                 {% if toon_aantal %}
                     <th></th>
                 {% endif %}
@@ -162,15 +154,15 @@
                     <tr>
                         <td>{{ klasse.team.beschrijving }}</td>
 
-                        {% if klasse.min_ag_str %}
-                            <td>{{ klasse.min_ag_str }}</td>
-                        {% else %}
+
+                        <td class="center">{% if klasse.min_ag_str %}{{ klasse.min_ag_str }}{% else %}
                             {% if rk_bk_klassen_vastgesteld %}
-                                <td><i class="grey-text">n.v.t.</i></td>
+                                <i class="grey-text">n.v.t.</i>
                             {% else %}
-                                <td><i class="grey-text">Nog niet vastgesteld</i></td>
+                                <i class="grey-text">Nog niet vastgesteld</i>
                             {% endif %}
                         {% endif %}
+                        </td>
 
                         {% if toon_aantal %}
                             <td></td>
