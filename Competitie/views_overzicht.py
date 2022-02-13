@@ -99,8 +99,8 @@ class CompetitieOverzichtView(View):
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
             # laat alle teams zien, ook de teams die nog niet af zijn of nog niet in een poule zitten
             # vanaf fase E laten we dit niet meer zien en komen de RK Teams in beeld
-            if 'B' <= comp.fase < 'E':
-                context['tekst_regio_teams_alle'] = "Alle teams inzien van de regiocompetitie."
+            if 'B' <= comp.fase <= 'E':
+                context['tekst_regio_teams_alle'] = "Alle aangemelde teams voor de regio teamcompetitie"
                 context['url_regio_teams_alle'] = reverse('CompRegio:regio-teams-alle',
                                                           kwargs={'comp_pk': comp.pk,
                                                                   'subset': 'auto'})
@@ -112,7 +112,7 @@ class CompetitieOverzichtView(View):
 
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
             if comp.fase < 'L':
-                context['tekst_rayon_teams_alle'] = "Alle aangemelde teams voor de rayonkampioenschappen teams in deze competitie"
+                context['tekst_rayon_teams_alle'] = "Alle aangemelde teams voor de rayonkampioenschappen teams"
                 context["url_rayon_teams_alle"] = reverse('CompRayon:rayon-teams-alle',
                                                           kwargs={'comp_pk': comp.pk,
                                                                   'subset': 'auto'})

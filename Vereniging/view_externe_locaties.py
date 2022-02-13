@@ -74,7 +74,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
         # for
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
             (None, 'Wedstrijdlocaties')
         )
 
@@ -179,7 +179,7 @@ class ExterneLocatieDetailsView(TemplateView):
                                        kwargs={'vereniging_pk': ver.pk})
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
             (reverse('Vereniging:externe-locaties', kwargs={'vereniging_pk': ver.pk}), 'Wedstrijdlocaties'),
             (None, 'Locatie details')
         )

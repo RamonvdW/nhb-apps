@@ -6,14 +6,14 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Externe locaties{% endblock %}
+{% block title %}Wedstrijdlocaties{% endblock %}
 
 {% block pagina %}
 
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Externe locaties</h3>
+            <h3 class="nhb-rood-text">Wedstrijd<wbr>locaties</h3>
             <p>Locaties die vereniging <b>{{ ver }}</b> kan gebruiken voor wedstrijden, naast de eigen accommodatie.</p>
         </div>
     </div>
@@ -49,13 +49,18 @@
 
                         <td>{% if locatie.geen_plaats %}<i>Nog niet ingevuld</i>{% else %}{{ locatie.plaats }}{% endif %}</td>
 
-                        <td>
-                            <a class="btn-nhb-rood" href="{{ locatie.url_wijzig }}">{% if readonly %}Details{% else %}Wijzig{% endif %}</a>
+                        <td class="center">
+                            {% if readonly %}
+                                <a class="btn-nhb-rood" href="{{ locatie.url_wijzig }}">Details</a>
+                            {% else %}
+                                <a class="btn-nhb-rood" href="{{ locatie.url_wijzig }}">
+                                    <i class="material-icons-round">edit</i></a>
+                            {% endif %}
                         </td>
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="4">
+                        <td colspan="4" class="center">
                             <i>Er zijn nog geen wedstrijdlocaties aangemaakt</i>
                         </td>
                     </tr>
@@ -63,11 +68,11 @@
 
                 {% if url_toevoegen %}
                     <tr>
-                        <td colspan="4">
+                        <td colspan="4" class="center">
                             <form action="{{ url_toevoegen }}" method="post">
                                 {% csrf_token %}
                                 <button class="btn-nhb-rood" type="submit">
-                                    <i class="material-icons-round left">add</i>Aanmaken</button>
+                                    <i class="material-icons-round">add</i></button>
                             </form>
                         </td>
                     </tr>

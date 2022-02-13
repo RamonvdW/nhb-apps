@@ -272,7 +272,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
         if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
                 (reverse('Functie:overzicht-vereniging'), 'Beheerders'),
                 (None, 'Wijzig e-mail')
             )
@@ -546,7 +546,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
             # via Verenging, Beheerders (=Functie:overzicht-vereniging), Koppel beheerders
 
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
                 (reverse('Functie:overzicht-vereniging'), 'Beheerders'),
                 (None, 'Wijzig beheerder')
             )

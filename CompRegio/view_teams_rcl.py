@@ -91,18 +91,20 @@ class RegioTeamsView(TemplateView):
                                 .values_list('pk', flat=True))
 
             context['filters'] = filters = list()
-            alle_filter = {'label': 'Alles'}
-            if subset != 'alle':
-                alle_filter['url'] = reverse('CompRegio:regio-teams-alle',
-                                             kwargs={'comp_pk': comp.pk,
-                                                     'subset': 'alle'})
+            alle_filter = dict(label='Alles',
+                               sel='alle',
+                               selected=(subset == 'alle'),
+                               url=reverse('CompRegio:regio-teams-alle',
+                                           kwargs={'comp_pk': comp.pk,
+                                                   'subset': 'alle'}))
             filters.append(alle_filter)
 
             for rayon in NhbRayon.objects.all():
                 rayon.label = 'Rayon %s' % rayon.rayon_nr
-                if str(rayon.rayon_nr) != subset:
-                    rayon.url = reverse('CompRegio:regio-teams-alle',
-                                        kwargs={'comp_pk': comp.pk, 'subset': rayon.rayon_nr})
+                rayon.sel ='rayon_%s' % rayon.rayon_nr
+                rayon.selected = (str(rayon.rayon_nr) == subset)
+                rayon.url = reverse('CompRegio:regio-teams-alle',
+                                    kwargs={'comp_pk': comp.pk, 'subset': rayon.rayon_nr})
                 filters.append(rayon)
             # for
 
@@ -203,6 +205,10 @@ class RegioTeamsView(TemplateView):
 
         context['regioteams'] = klasse2teams
 
+        for klasse, teams in klasse2teams.items():
+            klasse.aantal_regels = max(len(teams), 1) + 2
+        # for
+
         # zoek de teams die niet 'af' zijn
         regioteams = (RegiocompetitieTeam
                       .objects
@@ -223,10 +229,10 @@ class RegioTeamsView(TemplateView):
             team.ag_str = ag_str.replace('.', ',')
 
             if comp.fase <= 'D' and self.rol_nu == Rollen.ROL_RCL:
-                team.url_aanpassen = reverse('Vereniging:teams-regio-koppelen',
+                team.url_aanpassen = reverse('CompRegio:teams-regio-koppelen',
                                              kwargs={'team_pk': team.pk})
 
-                team.url_verwijder = reverse('Vereniging:teams-regio-wijzig',
+                team.url_verwijder = reverse('CompRegio:teams-regio-wijzig',
                                              kwargs={'deelcomp_pk': team.deelcompetitie.pk,
                                                      'team_pk': team.pk})
             totaal_teams += 1
@@ -236,7 +242,14 @@ class RegioTeamsView(TemplateView):
         # for
 
         context['regioteams_niet_af'] = regioteams
+        context['aantal_regels_niet_af'] = len(regioteams) + 2
         context['totaal_teams'] = totaal_teams
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Regio Teams')
+        )
 
         menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
         return context

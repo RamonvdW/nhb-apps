@@ -160,7 +160,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         # terug en opslaan knoppen voor in de template
         if 'is_ver' in kwargs:      # wordt gezet door VerenigingAccommodatieDetailsView
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
                 (None, 'Accommodatie')
             )
 

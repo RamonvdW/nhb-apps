@@ -138,7 +138,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
         context['uitslag_invoeren'] = self.uitslag_invoeren
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
             (None, self.kruimel)
         )
 

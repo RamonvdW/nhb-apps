@@ -89,36 +89,37 @@
 
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3">
+                <div style="padding:30px">
+                    <form action="{{ url }}" method="post">
+                        {% csrf_token %}
 
-                <form action="{{ url }}" method="post">
-                    {% csrf_token %}
-
-                    {% if foutmelding %}
-                        <p class="red-text">Fout: {{ foutmelding }}</p>
-                        <p>&nbsp;</p>
-                    {% endif %}
+                        {% if foutmelding %}
+                            <p class="red-text">Fout: {{ foutmelding }}</p>
+                            <p>&nbsp;</p>
+                        {% endif %}
 
 
-                    <!-- form field -->
-                    <div class="input-field">
-                        {{ form.login_naam.label_tag }}{{ form.login_naam }}
-                    </div>
+                        <!-- form field -->
+                        <div class="input-field">
+                            {{ form.login_naam.label_tag }}{{ form.login_naam }}
+                        </div>
 
-                    <!-- manually constructed field -->
-                    <div class="input-field">
-                        <label>
-                            <input type="checkbox" class="filled-in" name="aangemeld_blijven">
-                            <span class="black-text">Aangemeld blijven</span>
-                        </label>
-                    </div>
+                        <!-- manually constructed field -->
+                        <div class="input-field">
+                            <label>
+                                <input type="checkbox" class="filled-in" name="aangemeld_blijven">
+                                <span class="black-text">Aangemeld blijven</span>
+                            </label>
+                        </div>
 
-                    <!-- button -->
-                    <p class="center">
-                        <button class="btn-nhb-rood" type="submit">
-                            <i class="material-icons-round left">check</i>Opslaan</button>
-                    </p>
+                        <!-- button -->
+                        <p class="center">
+                            <button class="btn-nhb-rood" type="submit">
+                                <i class="material-icons-round left">check</i>Opslaan</button>
+                        </p>
 
-                </form>
+                    </form>
+                </div>
             </div>
 
         </div>

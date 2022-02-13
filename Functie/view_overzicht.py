@@ -109,7 +109,7 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
         context['terug_url'] = reverse('Vereniging:overzicht')
 
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
             (None, 'Beheerders'),
         )
 

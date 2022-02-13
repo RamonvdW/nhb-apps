@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021-2022Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,90 +10,131 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-rcl-teams" %}
-
-    <h4>Regio Teams</h4>
-
-    <div class="row">
-
-        <!-- toon gegevens van de regio en competitie in een blauwe box -->
-        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-            <div class="white-text nhb-blauw z-depth-2">
-
-                <div class="row small-row">
-                    <div class="col s3">Competitie:</div>
-                    <div class="col s7">{{ comp.beschrijving }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3">Rayon:</div>
-                    <div class="col s7">{{ rayon }}</div>
-                </div>
-
-                {% if regio %}
-                    <div class="row small-row">
-                        <div class="col s3">Regio:</div>
-                        <div class="col s7">{{ regio }}</div>
-                    </div>
-                {% endif %}
-
-            </div>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Regio Teams</h3>
+            <p>Alle teams aangemeld door de verenigingen voor de teamcompetitie</p>
         </div>
     </div>
 
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Competitie</th>
+                    <td>{{ comp.beschrijving }}</td>
+                </tr>
+                <tr>
+                    <th>Rayon</th>
+                    <td>{{ rayon }}</td>
+                </tr>
+                {% if regio %}
+                    <tr>
+                        <th>Regio</th>
+                        <td>{{ regio }}</td>
+                    </tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+
+    <script type="application/javascript">
+        function keuze_gemaakt(groep) {
+
+            // TODO: sta wijziging in meerdere radiobuttons tegelijk toe: construeer de URL hier
+
+            const selector = "input[type='radio'][name=" + groep + "]:checked"
+            const el = document.querySelector(selector)
+            const url = el.dataset.url
+
+            // de radiobutton die bij het geladen geselecteerd werd heeft geen url
+            if (url.length > 0)
+                window.location.href = url
+        }
+    </script>
+
     {% if subset_filter %}
 
-        <p>&nbsp;</p>
-        <div class="white shrink-wrap-5">
-            {% for filter in filters %}
-                {% if filter.url %}
-                    <a class="margin-5 btn-outline" href="{{ filter.url }}">{{ filter.label }}</a>
-                {% else %}
-                    <a class="margin-5 btn-nhb-blauw" href="#">{{ filter.label }}</a>
-                {% endif %}
-            {% endfor %}
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Filters</h4>
+            </div>
         </div>
 
-    {% else %}
-        <p>&nbsp;</p>
-        <p>Op deze pagina kan de RCL de verenigingsteams inzien voor de regiocompetitie.</p>
+        <!-- blauwe balk filters -->
+        <div class="row-nhb-blauw">
+
+            <!-- filter: xxx -->
+            <div class="col s6 offset-s3 m4 offset-m4 xl2 offset-xl5" style="margin-bottom:15px">
+                <div class="white left-align" style="padding:10px">
+                    <p><b>Kies een rayon:</b></p>
+                    <ul id="id_subset">
+                        {% for obj in filters %}
+                            <li>
+                                <label class="black-text" for="id_{{ obj.sel }}">
+                                    <input class="with-gap" type="radio" name="subset" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.url }}">
+                                    <span>{{ obj.label }}</span>
+                                </label>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <p style="margin-left:35px">
+                        <a class="btn-nhb-rood" onclick="keuze_gemaakt('subset')">Activeer</a>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
     {% endif %}
 
-    <p>&nbsp;</p>
-    <p>Totaal aantal teams: {{ totaal_teams }}</p>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Teams</h4>
+            {% if totaal_teams == 0 %}
+                <!-- 0 teams en 0 niet-af teams -->
+                <p><i>Er zijn nog geen teams aangemaakt</i></p>
+            {% else %}
+                <p>Totaal aantal teams: {{ totaal_teams }}</p>
+            {% endif %}
+        </div>
+    </div>
 
+    <!-- blauwe balk met informatie in een tabel -->
     <table class="white">
-        {% if totaal_teams == 0 %}
-            <!-- 0 teams en 0 niet-af teams -->
-            <tr>
-                <td><i>Er zijn nog geen teams aangemaakt</i></td>
-            </tr>
-        {% endif %}
 
         {% for team in regioteams_niet_af %}
             {% if team.break_before %}
-                <tr class="nhb-grijs">
-                    <td colspan="{% if subset_filter %}6{% else %}5{% endif %}"><h5 class="red-text">Nog niet geplaatste teams</h5></td>
-                </tr>
                 <tr>
+                    <td colspan="{% if subset_filter %}6{% else %}5{% endif %}">
+                        <h5 class="red-text center">Nog niet geplaatste teams</h5>
+                    </td>
+                </tr>
+                <tr class="nhb-table-header">
+                    <td rowspan="{{ aantal_regels_niet_af }}" class="nhb-table-zijrand"></td>
                     {% if subset_filter %}
-                        <th>Regio</th>
+                        <th class="center">Regio</th>
                     {% endif %}
                     <th>Vereniging</th>
                     <th>Naam</th>
-                    <th>Team sterkte</th>
+                    <th class="center">Team sterkte</th>
                     <th>Soort team</th>
                     <th><!-- kolom voor de knoppen --></th>
+                    <td rowspan="{{ aantal_regels_niet_af }}" class="nhb-table-zijrand"></td>
                 </tr>
             {% endif %}
 
             <tr>
                 {% if subset_filter %}
-                    <td>{{ team.vereniging.regio.regio_nr }}</td>
+                    <td class="center">{{ team.vereniging.regio.regio_nr }}</td>
                 {% endif %}
                 <td>{{ team.vereniging }}</td>
                 <td>{{ team.team_naam }}</td>
-                <td>{{ team.ag_str }}</td>
+                <td class="center">{{ team.ag_str }}</td>
                 <td>{{ team.team_type.beschrijving }}</td>
                 <td>
                     {% if team.url_aanpassen %}
@@ -110,30 +151,38 @@
                 </td>
             </tr>
         {% endfor %}
+        {% if regioteams_niet_af %}
+            <tr>
+                <td colspan="{% if subset_filter %}6{% else %}5{% endif %}" class="nhb-table-onderrand"></td>
+            </tr>
+        {% endif %}
 
         {% for klasse, teams in regioteams.items %}
-            <tr class="nhb-grijs">
-                <td colspan="{% if subset_filter %}6{% else %}5{% endif %}"><h5>{{ klasse.team.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
-            </tr>
             <tr>
+                <td colspan="{% if subset_filter %}6{% else %}5{% endif %}" class="center">
+                    <h5>{{ klasse.team.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
+            </tr>
+            <tr class="nhb-table-header">
+                <td rowspan="{{ klasse.aantal_regels }}" class="nhb-table-zijrand"></td>
                 {% if subset_filter %}
-                    <th>Regio</th>
+                    <th class="center">Regio</th>
                 {% endif %}
                 <th>Vereniging</th>
                 <th>Naam</th>
-                <th>Team sterkte</th>
+                <th class="center">Team sterkte</th>
                 <th></th>
                 <th><!-- kolom voor knoppen --></th>
+                <td rowspan="{{ klasse.aantal_regels }}" class="nhb-table-zijrand"></td>
             </tr>
 
             {% for team in teams %}
                 <tr>
                     {% if subset_filter %}
-                        <td>{{ team.vereniging.regio.regio_nr }}</td>
+                        <td class="center">{{ team.vereniging.regio.regio_nr }}</td>
                     {% endif %}
                     <td>{{ team.vereniging }}</td>
                     <td>{{ team.team_naam }}</td>
-                    <td>{{ team.ag_str }}</td>
+                    <td class="center">{{ team.ag_str }}</td>
                     <td></td>
                     <td>
                         {% if team.url_aanpassen %}
@@ -143,10 +192,17 @@
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="{% if subset_filter %}6{% else %}5{% endif %}"><i>Nog geen teams</i></td>
+                    <td colspan="{% if subset_filter %}6{% else %}5{% endif %}" class="center"><i>Nog geen teams</i></td>
                 </tr>
             {% endfor %}
+
+            <tr>
+                <td colspan="{% if subset_filter %}6{% else %}5{% endif %}" class="nhb-table-onderrand"></td>
+            </tr>
         {% endfor %}
+
     </table>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-rcl-teams" %}
 
 {% endblock %}
