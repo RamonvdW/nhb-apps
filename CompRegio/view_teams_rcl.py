@@ -16,12 +16,12 @@ from Competitie.models import (LAAG_REGIO, AG_NUL,
                                Competitie, CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                                CompetitieMutatie, MUTATIE_TEAM_RONDE)
-from Competitie.menu import menu_dynamics_competitie
 from Competitie.operations.poules import maak_poule_schema
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbRayon
 from Overig.background_sync import BackgroundSync
+from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 import time
 
@@ -101,7 +101,7 @@ class RegioTeamsView(TemplateView):
 
             for rayon in NhbRayon.objects.all():
                 rayon.label = 'Rayon %s' % rayon.rayon_nr
-                rayon.sel ='rayon_%s' % rayon.rayon_nr
+                rayon.sel = 'rayon_%s' % rayon.rayon_nr
                 rayon.selected = (str(rayon.rayon_nr) == subset)
                 rayon.url = reverse('CompRegio:regio-teams-alle',
                                     kwargs={'comp_pk': comp.pk, 'subset': rayon.rayon_nr})
@@ -255,7 +255,7 @@ class RegioTeamsView(TemplateView):
             (None, 'Regio Teams')
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -370,7 +370,7 @@ class AGControleView(UserPassesTestMixin, TemplateView):
             (None, 'AG controle')
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -626,7 +626,14 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
                 context['url_volgende_ronde'] = reverse('CompRegio:start-volgende-team-ronde',
                                                         kwargs={'deelcomp_pk': deelcomp.pk})
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        comp = deelcomp.competitie
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Team Ronde')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
