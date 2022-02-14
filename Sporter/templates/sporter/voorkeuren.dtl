@@ -118,7 +118,7 @@
 
                         {% if toon_geslacht %}
                             <tr>
-                                <td style="width:60%">Bondscompetities zijn gender-neutraal. Om in te kunnen schrijven op wedstrijden zonder gender-neutrale klassen kan je hier een keuze maken.</td>
+                                <td style="width:60%">Om in te kunnen schrijven op wedstrijden zonder gender-neutrale klassen kan je hier een keuze maken.</td>
                                 <td>
                                     <select name="wedstrijd_mv" onchange="gewijzigd()">
                                         {% for opt in opt_wedstrijd_mv %}

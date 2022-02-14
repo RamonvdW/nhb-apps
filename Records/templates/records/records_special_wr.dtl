@@ -10,39 +10,49 @@
 
 {% block pagina %}
 
-    <h4>Wereld Records</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">Wereld Records</h3>
+            <p>Hieronder staan de individuele records van nederlandse sporters die toegekend zijn als Wereld Record door World Archery.</p>
+        </div>
+    </div>
 
-    <p>Hieronder staan de individuele records van nederlandse sporters die toegekend zijn als Wereld Record door World Archery.</p>
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Sporter</th>
+                        <th>Soort record</th>
+                        <th>Materiaal<wbr>klasse</th>
+                        <!-- <th>Leeftijds<wbr>categorie</th> -->
+                        <!-- <th>Para klasse</th> -->
+                        <th>Score</th>
+                        <th><!-- kolom voor de 'details' knop --></th>
+                    </tr>
+                </thead>
 
-    <table class="white">
-        <thead>
-            <tr>
-                <th>Datum</th>
-                <th>Sporter</th>
-                <th>Soort record</th>
-                <th>Materiaal<wbr>klasse</th>
-                <!-- <th>Leeftijds<wbr>categorie</th> -->
-                <!-- <th>Para klasse</th> -->
-                <th>Score</th>
-                <th><!-- kolom voor de 'details' knop --></th>
-            </tr>
-        </thead>
-
-        {% for obj in object_list %}
-            <tr>
-                <td>{{ obj.datum }}</td>
-                <td>{{ obj.naam }}</td>
-                <td>{{ obj.soort_record }}</td>
-                <td>{{ obj.materiaalklasse_str }}</td>
-                <!-- <td>{{ obj.leeftijdscategorie_str }}</td> -->
-                <!-- <td>{{ obj.para_klasse }}</td> -->
-                <td>{{ obj.score_str }}</td>
-                <td>
-                    <a class="btn-nhb-blauw btn-small" href="{{ obj.url_details }}">Details</a>
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
+                {% for obj in object_list %}
+                    <tr>
+                        <td>{{ obj.datum }}</td>
+                        <td>{{ obj.naam }}</td>
+                        <td>{{ obj.soort_record }}</td>
+                        <td>{{ obj.materiaalklasse_str }}</td>
+                        <!-- <td>{{ obj.leeftijdscategorie_str }}</td> -->
+                        <!-- <td>{{ obj.para_klasse }}</td> -->
+                        <td>{{ obj.score_str }}</td>
+                        <td>
+                            <a class="btn-nhb-rood" href="{{ obj.url_details }}">
+                                <i class="material-icons-round">visibility</i></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-lijst-wr" %}
 

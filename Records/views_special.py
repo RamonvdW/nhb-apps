@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -44,6 +44,11 @@ class RecordsSpecialView(ListView):
                                                                    'nummer': obj.volg_nr})
         # for
 
+        context['kruimels'] = (
+            (reverse('Records:overzicht'), 'Records'),
+            (None, self.kruimel)
+        )
+
         menu_dynamics(self.request, context, actief='records')
         return context
 
@@ -52,6 +57,7 @@ class RecordsSpecialERView(RecordsSpecialView):
     """ Toon alle ER records """
 
     template_name = TEMPLATE_RECORDS_SPECIAL_ER
+    kruimel = 'Europesche Records'
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -65,6 +71,7 @@ class RecordsSpecialWRView(RecordsSpecialView):
     """ Toon alle WR records """
 
     template_name = TEMPLATE_RECORDS_SPECIAL_WR
+    kruimel = 'Wereld Records'
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
