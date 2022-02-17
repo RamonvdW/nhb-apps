@@ -530,6 +530,10 @@
                     {
                         const rsp = JSON.parse(xhr.responseText)
                         deelnemers_ophalen_toevoegen(rsp)
+
+                        // zet focus op het filter
+                        const el = document.getElementById("table1_zoeken_input")
+                        el.focus()
                     }
                 }
                 else
