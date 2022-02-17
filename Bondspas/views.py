@@ -100,7 +100,7 @@ class ToonBondspasView(UserPassesTestMixin, View):
         )
 
         # toon een pagina die wacht op de download
-        menu_dynamics(request, context, actief='sporter-profiel')
+        menu_dynamics(request, context)
         return render(request, self.template_name, context)
 
 

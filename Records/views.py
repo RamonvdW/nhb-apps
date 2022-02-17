@@ -107,7 +107,7 @@ class RecordsOverzichtView(ListView):
             (None, 'Records'),
         )
 
-        menu_dynamics(self.request, context, actief='records')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -170,7 +170,7 @@ class RecordsIndivSpecifiekView(TemplateView):
             (None, 'Details')
         )
 
-        menu_dynamics(self.request, context, actief='records')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -255,7 +255,7 @@ class RecordsZoekView(ListView):
             (None, 'Zoeken')
         )
 
-        menu_dynamics(self.request, context, actief='records')
+        menu_dynamics(self.request, context)
         return context
 
 # end of file

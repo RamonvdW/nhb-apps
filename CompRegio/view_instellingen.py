@@ -14,9 +14,9 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (LAAG_REGIO, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
                                TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES, TEAM_PUNTEN,
                                Competitie, DeelCompetitie)
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Handleiding.views import reverse_handleiding
+from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 import datetime
 
@@ -123,7 +123,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             (None, 'Instellingen teams'),
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -290,7 +290,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
             (None, 'Regio keuzes overzicht')
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp_pk)
+        menu_dynamics(self.request, context)
         return context
 
 

@@ -70,7 +70,7 @@
                         <tr>
                             <td>{{ obj.beschrijving }}</td>
                             <td>{{ obj.count }}</td>
-                            <td>{{ obj.ag|floatformat:3 }}</td>
+                            <td>{{ obj.ag|floatformat:3 }}{% if obj.ag < 0.0005 %} (onbekend){% endif %}</td>
                         </tr>
                     {% endfor %}
 

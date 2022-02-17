@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -515,7 +515,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on',        # 3=BB
                                           'dagdeel': 'AV',
@@ -588,7 +588,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on',        # 3=BB
                                           'dagdeel': 'AV',
@@ -621,12 +621,12 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         url = self.url_aanmelden % self.comp_18.pk
         zet_competitie_fase(self.comp_18, 'B')
 
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(24):
             resp = self.client.post(url, {'wedstrijd_%s' % wedstrijd_pks[0]: 'on',
                                           'lid_100003_boogtype_3': 'on'})
         self.assert_is_redirect_not_plein(resp)     # check success
@@ -838,7 +838,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
             indiv.save(update_fields=['is_onbekend'])
         # for
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on'})
         self.assert404(resp)
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,11 +18,13 @@ def _get_targets_indiv():
     """ Retourneer een data structuur met daarin voor alle individuele wedstrijdklassen
         de toegestane boogtypen en leeftijden
 
-        out: target = dict() met [ (min_age, max_age, boogtype, heeft_onbekend) ] = list(IndivWedstrijdklasse)
+        out: target = dict() met [ (min_age, max_age, boogtype, geslacht, heeft_onbekend) ] = list(IndivWedstrijdklasse)
 
-        Voorbeeld: { (21,150,'R',True ): [obj1, obj2, etc.],
-                     (21,150,'C',True ): [obj10, obj11],
-                     (14, 17,'C',False): [obj20,]  }
+        Voorbeeld: { (21,150,'R','A', True ): [obj1, obj2, etc.],
+                     (21,150,'C','A', True ): [obj10, obj11],
+                     (14, 17,'C','A', False): [obj20,],             # gender-neutraal
+                     (12, 14,'C','M', False): [obj30,],             # alleen jongens (mannen)
+                     (12, 14,'C','V', False): [obj31,] }            # alleen meisjes (vrouwen)
     """
     targets = dict()        # [ (min_age, max_age, boogtype) ] = list(wedstrijdklassen)
     for wedstrklasse in (IndivWedstrijdklasse
@@ -32,14 +34,16 @@ def _get_targets_indiv():
                          .filter(buiten_gebruik=False)
                          .order_by('volgorde')):
         # zoek de minimale en maximaal toegestane leeftijden voor deze wedstrijdklasse
+        geslacht = 'A'
         age_min = 999
         age_max = 0
         for lkl in wedstrklasse.leeftijdsklassen.all():
             age_min = min(lkl.min_wedstrijdleeftijd, age_min)
             age_max = max(lkl.max_wedstrijdleeftijd, age_max)
+            geslacht = lkl.geslacht
         # for
 
-        tup = (age_min, age_max, wedstrklasse.boogtype)
+        tup = (age_min, age_max, geslacht, wedstrklasse.boogtype)
         if tup not in targets:
             targets[tup] = list()
         targets[tup].append(wedstrklasse)
@@ -47,9 +51,9 @@ def _get_targets_indiv():
 
     targets2 = dict()
     for tup, wedstrklassen in targets.items():
-        age_min, age_max, boogtype = tup
+        age_min, age_max, geslacht, boogtype = tup
         # print("age=%s..%s, boogtype=%s, wkl=%s, %s" % (age_min, age_max, boogtype.afkorting, repr(wedstrklassen), wedstrklassen[-1].is_onbekend))
-        tup = (age_min, age_max, boogtype, wedstrklassen[-1].is_onbekend)
+        tup = (age_min, age_max, boogtype, geslacht, wedstrklassen[-1].is_onbekend)
         targets2[tup] = wedstrklassen
     # for
     return targets2
@@ -58,9 +62,9 @@ def _get_targets_indiv():
 def _get_targets_teams():
     """ Retourneer een data structuur met daarin voor alle team wedstrijdklassen
 
-        out: target = dict() met [ boogtype afkorting ] = list(TeamWedstrijdklasse)
+        out: target = dict() met [ team type afkorting ] = list(TeamWedstrijdklasse)
 
-        Voorbeeld: { 'R': [obj1, obj2, etc.],
+        Voorbeeld: { 'R2': [obj1, obj2, etc.],
                      'C': [obj10, obj11],
                      'BB': [obj20]  }
     """
@@ -114,25 +118,29 @@ def bepaal_klassengrenzen_indiv(comp, trans_indiv):
     # for
     del boogtype
 
-    lkl_cache = list()
-    klasse2lkl_mannen = dict()     # [klasse.pk] = [lkl, lkl, lkl..]
-    for lkl in (LeeftijdsKlasse
-                .objects
-                .filter(geslacht='M')
-                .order_by('volgorde')):         # Aspiranten eerst, Senioren laatst
+    lkl_pks = list()
+    unsorted = list()
+    klasse2lkl = dict()     # [klasse.pk] = [lkl, lkl, lkl..]
+    for klasse in (IndivWedstrijdklasse
+                   .objects
+                   .exclude(buiten_gebruik=True)
+                   .prefetch_related('leeftijdsklassen')):
 
-        klasse_pks = list(lkl.indivwedstrijdklasse_set.values_list('pk', flat=True))
-        if len(klasse_pks) > 0:
-            # wordt gebruikt in de bondscompetities
-            lkl_cache.append(lkl)
-            for pk in klasse_pks:
-                try:
-                    klasse2lkl_mannen[pk].append(lkl)
-                except KeyError:
-                    klasse2lkl_mannen[pk] = [lkl]
-            # for
+        klasse2lkl[klasse.pk] = lkls = list()
+        for lkl in klasse.leeftijdsklassen.all():
+            if lkl.pk not in lkl_pks:
+                lkl_pks.append(lkl.pk)
+                tup = (lkl.volgorde, lkl)
+                unsorted.append(tup)
+
+            lkls.append(lkl)
+        # for
     # for
-    del lkl
+    del klasse
+    del lkl_pks
+    unsorted.sort()
+    lkl_cache = [lkl for _, lkl in unsorted]
+    del unsorted
 
     # verdeel de schuttersboog (waar we een AG van hebben) over boogtype-leeftijdsklasse groepjes
     done_nrs = list()
@@ -152,7 +160,7 @@ def bepaal_klassengrenzen_indiv(comp, trans_indiv):
                     age = sporter.bereken_wedstrijdleeftijd(jaar)
                     # volgorde lkl is Aspirant .. Senior
                     # pak de eerste de beste klasse die compatible is
-                    if lkl.leeftijd_is_compatible(age):
+                    if lkl.geslacht_is_compatible(sporter.geslacht) and lkl.leeftijd_is_compatible(age):
                         nrs.append(nr)
                         done_nrs.append(nr)
             # for (score)
@@ -160,19 +168,19 @@ def bepaal_klassengrenzen_indiv(comp, trans_indiv):
     # for (boogtype)
 
     # wedstrijdklassen vs leeftijd + bogen
-    targets = _get_targets_indiv()     # FUTURE: pass the caches
+    targets = _get_targets_indiv()
 
     # creëer de resultatenlijst
     objs = list()
     for tup, wedstrklassen in targets.items():
-        _, _, boogtype, heeft_klasse_onbekend = tup
+        _, _, boogtype, geslacht, heeft_klasse_onbekend = tup
         scores = boogtype2ags[boogtype.afkorting]
 
-        # zoek alle schutters-boog die hier in passen (boog, leeftijd)
+        # zoek alle sporters-boog die hier in passen (boog, leeftijd, geslacht)
         gemiddelden = list()
         index_gehad = list()
         for klasse in wedstrklassen:
-            for lkl in klasse2lkl_mannen[klasse.pk]:
+            for lkl in klasse2lkl[klasse.pk]:
                 index = boogtype.afkorting + '_' + lkl.afkorting
                 if index not in index_gehad:
                     index_gehad.append(index)
@@ -305,9 +313,21 @@ def bepaal_klassengrenzen_teams(comp, trans_team):
     # wedstrijdklassen vs leeftijd + bogen
     targets = _get_targets_teams()
 
+    teamtype2boogtype = {
+        'R2': 'R',
+        'C': 'C',
+        'BB2': 'BB',
+        'TR': 'TR',
+        'LB': 'LB'
+    }
+
     # bepaal de mogelijk te vormen teams en de team score
     boog2team_scores = dict()    # [boogtype afkorting] = list(team scores)
-    for boogtype_afkorting, klassen in targets.items():
+    for teamtype_afkorting, klassen in targets.items():
+
+        # vertaal team type naar boog type
+        boogtype_afkorting = teamtype2boogtype[teamtype_afkorting]
+
         boog2team_scores[boogtype_afkorting] = team_scores = list()
 
         # zoek alle schutters-boog die hier in passen (boog, leeftijd)
@@ -341,7 +361,8 @@ def bepaal_klassengrenzen_teams(comp, trans_team):
     # for
 
     objs = list()
-    for boogtype_afkorting, klassen in targets.items():
+    for teamtype_afkorting, klassen in targets.items():
+        boogtype_afkorting = teamtype2boogtype[teamtype_afkorting]
         team_scores = boog2team_scores[boogtype_afkorting]
         team_scores.sort(reverse=True)       # hoogste eerst
         count = len(team_scores)
@@ -419,8 +440,10 @@ class KlasseBepaler(object):
         self.boogtype2klassen = dict()      # [boogtype.afkorting] = [CompetitieKlasse, CompetitieKlasse, ..]
         self.lkl_cache_mannen = dict()      # [CompetitieKlasse.pk] = [lkl, lkl, ...]
         self.lkl_cache_vrouwen = dict()     # [CompetitieKlasse.pk] = [lkl, lkl, ...]
+        self.lkl_cache_neutraal = dict()    # [CompetitieKlasse.pk] = [lkl, lkl, ...]
         self.lkl_cache = {'M': self.lkl_cache_mannen,
-                          'V': self.lkl_cache_vrouwen}
+                          'V': self.lkl_cache_vrouwen,
+                          'X': self.lkl_cache_neutraal}
 
         # vul de caches met individuele wedstrijdklassen
         for klasse in (CompetitieKlasse

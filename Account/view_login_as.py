@@ -147,7 +147,7 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
             (None, 'Account wissel'),
         )
 
-        menu_dynamics(self.request, context, actief='wissel-van-rol')
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -179,7 +179,7 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         url = maak_tijdelijke_url_accountwissel(accountemail, naar_account=accountemail.account.username)
         context['login_as_url'] = url
 
-        menu_dynamics(self.request, context, actief='wissel-van-rol')
+        menu_dynamics(self.request, context)
         return render(self.request, TEMPLATE_LOGIN_AS_GO, context)
 
 

@@ -52,7 +52,7 @@ class LeeftijdsklassenView(UserPassesTestMixin, TemplateView):
             (None, 'Leeftijdsklassen'),
         )
 
-        menu_dynamics(self.request, context, actief='sporter-profiel')
+        menu_dynamics(self.request, context)
         return context
 
 

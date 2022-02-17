@@ -34,7 +34,7 @@ gesl2str = {'M': 'Mannen',
 makl2str = {'R': 'Recurve',
             'C': 'Compound',
             'BB': 'Barebow',
-            'IB': 'Instinctive bow',
+            'IB': 'Instinctive bow',        # TODO: Traditional
             'LB': 'Longbow'}
 
 lcat2str = {'M': 'Masters (50+)',
@@ -85,7 +85,7 @@ class RecordsVerbeterbaarKiesDisc(ListView):
             (None, 'Verbeterbaar')
         )
 
-        menu_dynamics(self.request, context, actief='records')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -257,7 +257,7 @@ class RecordsVerbeterbaarInDiscipline(ListView):
             (None, context['beschrijving'])
         )
 
-        menu_dynamics(self.request, context, actief='records')
+        menu_dynamics(self.request, context)
         return context
 
 # end of file

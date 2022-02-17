@@ -56,7 +56,7 @@ class VhpgAfsprakenView(UserPassesTestMixin, TemplateView):
             (None, 'Afspraken inzien')
         )
 
-        menu_dynamics(self.request, context, actief='wissel-van-rol')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -156,7 +156,7 @@ class VhpgOverzichtView(UserPassesTestMixin, ListView):
             (None, 'VHPG status'),
         )
 
-        menu_dynamics(self.request, context, actief='hetplein')
+        menu_dynamics(self.request, context)
         return context
 
 

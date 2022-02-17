@@ -188,14 +188,12 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
                 (reverse('Sporter:profiel'), 'Mijn pagina'),
                 (None, 'Wachtwoord wijzigen')
             )
-
-            menu_dynamics(self.request, context, actief="sporter-profiel")
         else:
             context['kruimels'] = (
                 (None, 'Wachtwoord wijzigen'),
             )
-            menu_dynamics(self.request, context)
 
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -236,10 +234,9 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
             except KeyError:
                 context['moet_oude_ww_weten'] = True
 
-            if account.sporter_set.count() > 0:  # FUTURE: ongewenste kennis over Sporter.account
-                menu_dynamics(self.request, context, actief="sporter-profiel")
-            else:
-                menu_dynamics(self.request, context)
+            #if account.sporter_set.count() > 0:  # FUTURE: ongewenste kennis over Sporter.account
+
+            menu_dynamics(self.request, context)
             return render(request, self.template_name, context)
 
         # wijzigen van het wachtwoord zorgt er ook voor dat alle sessies van deze gebruiker vervallen

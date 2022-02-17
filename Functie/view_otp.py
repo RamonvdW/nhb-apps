@@ -132,7 +132,7 @@ class OTPKoppelenStap1View(OTPKoppelenStapView):
 
         context['url_stap_2'] = reverse('Functie:otp-koppelen-stap2')
 
-        menu_dynamics(self.request, context, actief="wissel-van-rol")
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -156,7 +156,7 @@ class OTPKoppelenStap2View(OTPKoppelenStapView):
         tmp = account.otp_code.lower()
         context['otp_secret'] = " ".join([tmp[i:i+4] for i in range(0, len(tmp), 4)])
 
-        menu_dynamics(self.request, context, actief="wissel-van-rol")
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -174,7 +174,7 @@ class OTPKoppelenStap3View(OTPKoppelenStapView):
         context['form'] = OTPControleForm()
         context['now'] = timezone.now()
 
-        menu_dynamics(self.request, context, actief="wissel-van-rol")
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

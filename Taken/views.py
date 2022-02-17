@@ -67,7 +67,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             (None, 'Taken'),
         )
 
-        menu_dynamics(self.request, context, actief='taken')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -120,7 +120,7 @@ class DetailsView(UserPassesTestMixin, TemplateView):
             (None, 'Details')
         )
 
-        menu_dynamics(self.request, context, actief='taken')
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

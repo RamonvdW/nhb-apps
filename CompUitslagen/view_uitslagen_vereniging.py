@@ -12,8 +12,8 @@ from NhbStructuur.models import NhbVereniging
 from Competitie.models import (LAAG_REGIO, TEAM_PUNTEN_MODEL_SOM_SCORES, Competitie, DeelCompetitie,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam, RegioCompetitieSchutterBoog,
                                get_competitie_team_typen)
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import rol_get_huidige_functie
+from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 
 
@@ -199,7 +199,7 @@ class UitslagenVerenigingIndivView(TemplateView):
             (None, 'Vereniging')
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -467,7 +467,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
             (None, 'Vereniging')
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        menu_dynamics(self.request, context)
         return context
 
 

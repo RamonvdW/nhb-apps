@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,12 +12,12 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import (COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60CM_4SPOT,
                                BLAZOEN_WENS_4SPOT, BLAZOEN_WENS_DT,
                                BLAZOEN2STR, BLAZOEN2STR_COMPACT)
-from Competitie.menu import menu_dynamics_competitie
 from Competitie.models import (LAAG_REGIO, Competitie, DeelCompetitie, DeelcompetitieRonde,
                                RegioCompetitieSchutterBoog,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN)
 from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren
 from Wedstrijden.models import CompetitieWedstrijd
 import csv
@@ -117,6 +117,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
                 obj.nieuwe_klasse = True
                 if obj_aantal:
                     obj_aantal.aantal_in_klasse = aantal
+                    obj_aantal.aantal_regels = aantal + 2
                 aantal = 0
                 obj_aantal = obj
                 volgorde = obj.klasse.indiv.volgorde
@@ -125,13 +126,20 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
         # for
         if obj_aantal:
             obj_aantal.aantal_in_klasse = aantal
+            obj_aantal.aantal_regels = aantal + 2
 
         context['object_list'] = objs
 
         context['inhoud'] = 'landelijk'
         maak_regiocomp_zoom_knoppen(context, comp_pk)
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Inschrijvingen')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -194,6 +202,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
                 obj.nieuwe_klasse = True
                 if obj_aantal:
                     obj_aantal.aantal_in_klasse = aantal
+                    obj_aantal.aantal_regels = aantal + 2
                 aantal = 0
                 obj_aantal = obj
                 volgorde = obj.klasse.indiv.volgorde
@@ -202,12 +211,19 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
         # for
         if obj_aantal:
             obj_aantal.aantal_in_klasse = aantal
+            obj_aantal.aantal_regels = aantal + 2
 
         context['object_list'] = objs
 
         maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=rayon)
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Inschrijvingen')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -280,6 +296,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
                 obj.nieuwe_klasse = True
                 if obj_aantal:
                     obj_aantal.aantal_in_klasse = aantal
+                    obj_aantal.aantal_regels = aantal + 2
                 aantal = 0
                 obj_aantal = obj
                 volgorde = obj.klasse.indiv.volgorde
@@ -288,6 +305,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
         # for
         if obj_aantal:
             obj_aantal.aantal_in_klasse = aantal
+            obj_aantal.aantal_regels = aantal + 2
 
         context['object_list'] = objs
 
@@ -311,7 +329,13 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
         maak_regiocomp_zoom_knoppen(context, comp.pk, regio=regio)
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Inschrijvingen')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -598,7 +622,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                                           kwargs={'comp_pk': comp.pk,
                                                   'regio_pk': regio.pk})
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -821,7 +845,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                                           kwargs={'comp_pk': comp.pk,
                                                   'regio_pk': regio.pk})
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
+        menu_dynamics(self.request, context)
         return context
 
 

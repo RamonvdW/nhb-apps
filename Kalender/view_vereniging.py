@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -62,7 +62,7 @@ class VerenigingKalenderWedstrijdenView(UserPassesTestMixin, View):
         else:
             context['geen_locatie'] = True
 
-        menu_dynamics(self.request, context, actief='kalender')
+        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):

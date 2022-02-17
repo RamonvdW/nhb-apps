@@ -204,7 +204,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
             (None, 'Teams Regio %s' % deelcomp.competitie.beschrijving.replace(' competitie', ''))
         )
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -376,7 +376,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
                 (None, 'Wijzig team')
             )
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -736,7 +736,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                 obj.ag_str = ag_str.replace('.', ',')
             # for
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -959,7 +959,7 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
         unsorted_deelnemers.sort()
         context['deelnemers'] = [tup[-1] for tup in unsorted_deelnemers]
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -1117,7 +1117,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
         context['url_opslaan'] = reverse('CompRegio:teams-regio-invallers-koppelen',
                                          kwargs={'ronde_team_pk': ronde_team_nu.pk})
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

@@ -12,10 +12,10 @@ from django.utils.formats import localize
 from django.templatetags.static import static
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
+from Plein.menu import menu_dynamics
 from Score.operations import wanneer_ag_vastgesteld
 from Sporter.models import SporterBoog
 from Taken.taken import eval_open_taken
-from .menu import menu_dynamics_competitie
 from .models import LAAG_REGIO, LAAG_BK, Competitie, DeelCompetitie
 import datetime
 
@@ -412,7 +412,7 @@ class CompetitieOverzichtView(View):
             (None, comp.beschrijving.replace(' competitie', ''))
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        menu_dynamics(self.request, context)
         return render(request, template, context)
 
 
@@ -478,7 +478,7 @@ class CompetitieKiesView(TemplateView):
             (None, 'Bondscompetities'),
         )
 
-        menu_dynamics_competitie(self.request, context)
+        menu_dynamics(self.request, context)
         return context
 
 

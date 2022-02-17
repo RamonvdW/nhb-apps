@@ -180,7 +180,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         context['wedstrijdklasse_jaar'] = self.huidige_jaar
         context['toon_wijzig_kolom'] = (self.rol_nu == Rollen.ROL_HWL)
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        menu_dynamics(self.request, context)
         return context
 
 

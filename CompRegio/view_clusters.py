@@ -9,8 +9,6 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import DeelCompetitie
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from NhbStructuur.models import NhbCluster, NhbVereniging
 from Plein.menu import menu_dynamics
@@ -106,12 +104,12 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         context['handleiding_clusters_url'] = reverse('Handleiding:Clusters')
         context['email_bondsbureau'] = settings.EMAIL_BONDSBUREAU
 
-        menu_dynamics(self.request, context, actief='competitie')
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
             (None, 'Clusters')
         )
 
+        menu_dynamics(self.request, context)
         return context
 
     def _swap_cluster(self, nhbver, gebruik):

@@ -380,6 +380,43 @@ class CompetitieKlasse(models.Model):
     objects = models.Manager()      # for the editor only
 
 
+def get_competitie_indiv_leeftijdsklassen(comp):
+    lijst = list()
+    pks = list()
+    for klasse in (CompetitieKlasse
+                   .objects
+                   .filter(competitie=comp)
+                   .exclude(indiv=None)
+                   .prefetch_related('indiv__leeftijdsklassen')):
+        for lkl in klasse.indiv.leeftijdsklassen.all():
+            if lkl.pk not in pks:
+                pks.append(lkl.pk)
+                tup = (lkl.volgorde, lkl.pk, lkl)
+                lijst.append(tup)
+        # for
+    # for
+
+    lijst.sort()
+    return [lkl for _, _, lkl in lijst]
+
+
+def get_competitie_team_typen(comp):
+    """ Geef een lijst van TeamType records terug die gebruikt worden in deze competitie,
+        gesorteerd op 'volgorde'.
+    """
+
+    teamtypen = [(klasse.team.team_type.volgorde,
+                  klasse.team.team_type) for klasse in (CompetitieKlasse
+                                                        .objects
+                                                        .filter(competitie=comp)
+                                                        .exclude(team=None)
+                                                        .distinct('team__team_type'))]
+
+    # sorteer op volgorde, want order_by werkt niet (moet gelijk zijn aan distinct)
+    teamtypen.sort()
+    return [teamtype for _, teamtype in teamtypen]
+
+
 class DeelCompetitie(models.Model):
     """ Deze database tabel bevat informatie over een deel van een competitie:
         regiocompetitie (16x), rayoncompetitie (4x) of bondscompetitie (1x)
@@ -664,6 +701,9 @@ class RegiocompetitieTeam(models.Model):
 
     def __str__(self):
         return self.maak_team_naam()
+
+    class Meta:
+        ordering = ['vereniging__ver_nr', 'volg_nr']
 
 
 class RegiocompetitieTeamPoule(models.Model):

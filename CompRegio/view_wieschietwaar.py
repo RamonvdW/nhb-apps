@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -135,7 +135,7 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
             context['afmelden_url'] = reverse('CompInschrijven:leden-ingeschreven',
                                               kwargs={'deelcomp_pk': deelcomp.pk})
 
-        menu_dynamics(self.request, context, actief='vereniging')   # TODO: veranderen in competitie
+        menu_dynamics(self.request, context)
         return context
 
 # end of file

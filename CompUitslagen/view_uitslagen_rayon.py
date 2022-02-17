@@ -13,7 +13,7 @@ from Competitie.models import (LAAG_REGIO, LAAG_RK, DEELNAME_NEE,
                                Competitie, DeelCompetitie, DeelcompetitieKlasseLimiet,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam,
                                get_competitie_team_typen)
-from Competitie.menu import menu_dynamics_competitie
+from Plein.menu import menu_dynamics
 from Wedstrijden.models import CompetitieWedstrijd
 from Functie.rol import Rollen, rol_get_huidige_functie
 
@@ -267,7 +267,7 @@ class UitslagenRayonIndivView(TemplateView):
             (None, 'Uitslag RK individueel')
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -448,7 +448,7 @@ class UitslagenRayonTeamsView(TemplateView):
             (None, 'Uitslag RK teams')
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        menu_dynamics(self.request, context)
         return context
 
 

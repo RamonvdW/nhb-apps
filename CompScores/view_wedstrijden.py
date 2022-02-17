@@ -142,7 +142,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             (None, self.kruimel)
         )
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        menu_dynamics(self.request, context)
         return context
 
 

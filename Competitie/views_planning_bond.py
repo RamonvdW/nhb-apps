@@ -69,7 +69,7 @@ class BondPlanningView(UserPassesTestMixin, TemplateView):
             (None, 'Planning')
         )
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -150,7 +150,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
             (None, 'Doorzetten')
         )
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -221,7 +221,7 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
 
         context['comp'] = comp
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics(self.request, context)
         return context
 
     @staticmethod
@@ -328,7 +328,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 #         if comp.fase < 'R' or comp.fase >= 'Z':
 #             raise Http404('Verkeerde competitie fase')
 #
-#         menu_dynamics(self.request, context, actief='competitie')
+#         menu_dynamics(self.request, context)
 #         return context
 #
 #     def post(self, request, *args, **kwargs):

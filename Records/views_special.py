@@ -49,7 +49,7 @@ class RecordsSpecialView(ListView):
             (None, self.kruimel)
         )
 
-        menu_dynamics(self.request, context, actief='records')
+        menu_dynamics(self.request, context)
         return context
 
 

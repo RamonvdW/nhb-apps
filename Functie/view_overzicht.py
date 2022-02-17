@@ -113,7 +113,7 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
             (None, 'Beheerders'),
         )
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -289,7 +289,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
             (None, 'Beheerders'),
         )
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -332,7 +332,7 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
             (None, 'Beheerder e-mailadressen')
         )
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics(self.request, context)
         return context
 
 

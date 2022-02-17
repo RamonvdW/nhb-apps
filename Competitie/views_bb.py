@@ -23,7 +23,6 @@ from .models import (Competitie, DeelCompetitie, CompetitieMutatie, LAAG_REGIO,
                      MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
 from .operations import (bepaal_startjaar_nieuwe_competitie, get_mappings_wedstrijdklasse_to_competitieklasse,
                          bepaal_klassengrenzen_indiv, bepaal_klassengrenzen_teams, competitie_klassengrenzen_vaststellen)
-from .menu import menu_dynamics_competitie
 import datetime
 import time
 
@@ -96,7 +95,7 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
             (None, 'Start competitie')
         )
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -165,7 +164,7 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
             (None, 'Aanmaken')
         )
 
-        menu_dynamics_competitie(self.request, context)
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -223,7 +222,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
             (None, 'Aanvangsgemiddelden')
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
     @staticmethod
@@ -321,7 +320,7 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
             (None, 'Klassegrenzen')
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
     @staticmethod
@@ -392,7 +391,7 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
             (None, 'Zet datums'),
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        menu_dynamics(self.request, context)
         return context
 
     @staticmethod

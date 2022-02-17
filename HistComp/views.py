@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,8 +9,8 @@ from django.http import HttpResponse, Http404
 from django.views.generic import ListView, TemplateView
 from django.db.models import Q
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige
+from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
 from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTeam
 from .forms import FilterForm
@@ -97,7 +97,7 @@ class HistCompAlleJarenView(ListView):
         if HistCompetitie.objects.filter(seizoen=self.seizoen, is_team=True).count() > 0:
             context['show_team'] = True
 
-        menu_dynamics_competitie(self.request, context, actief='histcomp')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -265,7 +265,7 @@ class HistCompBaseView(ListView):
                 obj.schutter_nr_str = str(obj.schutter_nr)
             # for
 
-        menu_dynamics_competitie(self.request, context, actief='histcomp')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -371,7 +371,7 @@ class InterlandView(UserPassesTestMixin, TemplateView):
 
         self.maak_data(context)
 
-        menu_dynamics_competitie(self.request, context, actief='histcomp')
+        menu_dynamics(self.request, context)
         return context
 
 

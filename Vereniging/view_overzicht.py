@@ -255,7 +255,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             (None, 'Beheer Vereniging'),
         )
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        menu_dynamics(self.request, context)
         return context
 
 

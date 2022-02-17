@@ -10,8 +10,8 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import Competitie, CompetitieKlasse, KampioenschapTeam
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
+from Plein.menu import menu_dynamics
 
 
 TEMPLATE_COMPRAYON_KLASSENGRENZEN_TEAMS_VASTSTELLEN = 'comprayon/bko-klassengrenzen-vaststellen-rk-bk-teams.dtl'
@@ -168,7 +168,7 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         context['url_vaststellen'] = reverse('CompRayon:klassengrenzen-vaststellen-rk-bk-teams',
                                              kwargs={'comp_pk': comp.pk})
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

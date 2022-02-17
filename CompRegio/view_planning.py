@@ -16,10 +16,10 @@ from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1
                                DeelCompetitie, DeelcompetitieRonde,
                                CompetitieKlasse, RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from Competitie.operations import maak_deelcompetitie_ronde
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbCluster, NhbVereniging
+from Plein.menu import menu_dynamics
 from Taken.taken import maak_taak
 from Wedstrijden.models import CompetitieWedstrijd, WedstrijdLocatie
 from types import SimpleNamespace
@@ -243,7 +243,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             (None, 'Planning'),
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -349,7 +349,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
             (None, 'Cluster')
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -582,7 +582,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                    'Cluster')
             context['kruimels'].insert(-1, tup)
 
-        menu_dynamics_competitie(self.request, context, comp_pk=ronde.deelcompetitie.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -780,7 +780,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
                 (None, 'Wedstrijden')
             ]
 
-        menu_dynamics_competitie(self.request, context, comp_pk=ronde.deelcompetitie.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -1089,7 +1089,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                    'Cluster')
             context['kruimels'].insert(-2, tup)
 
-        menu_dynamics_competitie(self.request, context, comp_pk=context['competitie'].pk)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -1365,7 +1365,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
         context['url_terug'] = reverse('Competitie:overzicht',
                                        kwargs={'comp_pk': deelcomp.competitie.pk})
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

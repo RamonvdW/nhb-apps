@@ -78,7 +78,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
             (None, 'Wedstrijdlocaties')
         )
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -184,7 +184,7 @@ class ExterneLocatieDetailsView(TemplateView):
             (None, 'Locatie details')
         )
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):

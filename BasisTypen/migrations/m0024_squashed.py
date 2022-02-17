@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,9 +12,9 @@ from BasisTypen.models import (MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
 
 
 # team wedstrijdklassen volgens spec v2.1, deel 3, tabel 3.5
-WKL_TEAM = (                                 # 18m                                     # 25m
-                                             # regio1/2, rk-bk                         # regio1, regio2, rk/bk
-    (10, 'Recurve klasse ERE',         'R',  (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_DT),   (BLAZOEN_60CM,)),        # R = team type
+WKL_TEAM = (                                 # 18m                                      # 25m
+                                             # regio1/2, rk-bk                          # regio1, regio2, rk/bk
+    (10, 'Recurve klasse ERE',         'R',  (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_DT),    (BLAZOEN_60CM,)),        # R = team type
     (11, 'Recurve klasse A',           'R',  (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM),  (BLAZOEN_60CM,)),
     (12, 'Recurve klasse B',           'R',  (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM),  (BLAZOEN_60CM,)),
     (13, 'Recurve klasse C',           'R',  (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM),  (BLAZOEN_60CM,)),

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,9 +12,9 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (KampioenschapSchutterBoog, CompetitieMutatie,
                                MUTATIE_AFMELDEN, MUTATIE_AANMELDEN)
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync
+from Plein.menu import menu_dynamics
 import time
 
 
@@ -91,7 +91,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
             context['url_terug'] = reverse('CompRayon:lijst-rk-ver',
                                            kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk})
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelnemer.deelcompetitie.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

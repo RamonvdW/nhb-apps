@@ -391,7 +391,7 @@ class RecordsIndivView(TemplateView):
             (reverse('Records:overzicht'), 'Records'),
             (None, 'Filteren')
         )
-        menu_dynamics(self.request, context, actief='records')
+        menu_dynamics(self.request, context)
         return context
 
 # end of file

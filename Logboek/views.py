@@ -151,7 +151,7 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
             (None, 'Logboek'),
         )
 
-        menu_dynamics(self.request, context, actief='hetplein')
+        menu_dynamics(self.request, context)
         return context
 
 

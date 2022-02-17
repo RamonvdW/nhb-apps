@@ -133,8 +133,6 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
         context['toon_details'] = True
         context['toon_ledental'] = self.is_staff
 
-        menu_actief = 'hetplein'
-
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
         context['landelijk'] = self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO)
@@ -148,8 +146,6 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
         if self.rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_SEC):
             context['toon_rayon'] = False
             context['toon_regio'] = False
-            if self.rol_nu == Rollen.ROL_HWL:
-                menu_actief = 'vereniging'
 
         context['verenigingen'] = verenigingen = self._get_verenigingen()
 
@@ -185,7 +181,7 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
             (None, 'Verenigingen'),
         )
 
-        menu_dynamics(self.request, context, actief=menu_actief)
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -258,7 +254,7 @@ class GeenBeheerdersView(UserPassesTestMixin, TemplateView):
             (None, 'Zonder beheerders')
         )
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        menu_dynamics(self.request, context)
         return context
 
 

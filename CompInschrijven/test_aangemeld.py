@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -122,10 +122,10 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
         # klassengrenzen vaststellen
         url_klassengrenzen = '/bondscompetities/%s/klassengrenzen/vaststellen/'
-        with self.assert_max_queries(86):
+        with self.assert_max_queries(24):
             resp = self.client.post(url_klassengrenzen % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
-        with self.assert_max_queries(86):
+        with self.assert_max_queries(24):
             resp = self.client.post(url_klassengrenzen % self.comp_25.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2

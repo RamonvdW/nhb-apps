@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -180,7 +180,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
             context['url_nieuw_team'] = reverse('CompRayon:teams-rk-nieuw',
                                                 kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -276,7 +276,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         if rk_team.pk > 0:
             context['url_verwijderen'] = context['url_opslaan']
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -525,7 +525,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
             context['url_opslaan'] = reverse('CompRayon:teams-rk-koppelen',
                                              kwargs={'rk_team_pk': rk_team.pk})
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

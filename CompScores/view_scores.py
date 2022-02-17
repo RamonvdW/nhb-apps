@@ -15,8 +15,8 @@ from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_dee
 from Competitie.models import (LAAG_REGIO, DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieTeamPoule,
                                update_uitslag_teamcompetitie)
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Plein.menu import menu_dynamics
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
 from Sporter.models import SporterBoog
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
@@ -77,7 +77,6 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 
         wedstrijd_pks = list()
         wedstrijd2beschrijving = dict()
-        comp_str = deelcomp.competitie.beschrijving
 
         for ronde in (DeelcompetitieRonde
                       .objects
@@ -135,7 +134,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
             (None, 'Scores')
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -332,7 +331,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
                 (None, self.kruimel)
             )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -768,15 +767,13 @@ class WedstrijdUitslagBekijkenView(TemplateView):
 
         context['aantal_regels'] = 2 + len(scores)
 
-        comp = deelcomp.competitie
-
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
             (reverse('CompScores:wedstrijden'), 'Competitie wedstrijden'),
             (None, 'Uitslag'),
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -1079,7 +1076,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
             context['url_opslaan'] = reverse('CompScores:selecteer-team-scores',
                                              kwargs={'deelcomp_pk': deelcomp.pk})
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

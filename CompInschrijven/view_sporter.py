@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -209,7 +209,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
             if sporterboog.boogtype.afkorting in ('R', 'BB'):
                 context['show_dt'] = True
 
-        menu_dynamics(self.request, context, actief='sporter-profiel')
+        menu_dynamics(self.request, context)
         return context
 
 

@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect, Http404
+from django.http import Http404
 from django.urls import reverse
 from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import LAAG_RK, AG_NUL, Competitie, CompetitieKlasse, DeelCompetitie, KampioenschapTeam
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from NhbStructuur.models import NhbRayon
-from Logboek.models import schrijf_in_logboek
+from Plein.menu import menu_dynamics
 
 
 TEMPLATE_COMPRAYON_RKO_TEAMS = 'comprayon/rko-teams.dtl'
@@ -237,7 +236,7 @@ class RayonTeamsView(TemplateView):
         context['totaal_teams'] = totaal_teams
         context['toon_klassen'] = comp.klassengrenzen_vastgesteld_rk_bk
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        menu_dynamics(self.request, context)
         return context
 
 

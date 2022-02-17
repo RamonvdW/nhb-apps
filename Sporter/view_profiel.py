@@ -447,7 +447,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             (None, 'Mijn pagina'),
         )
 
-        menu_dynamics(self.request, context, actief='sporter-profiel')
+        menu_dynamics(self.request, context)
         return context
 
 

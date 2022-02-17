@@ -333,7 +333,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             (None, 'Voorkeuren')
         )
 
-        menu_dynamics(self.request, context, actief=actief)
+        menu_dynamics(self.request, context)
         return context
 
 

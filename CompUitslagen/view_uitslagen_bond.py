@@ -8,7 +8,7 @@ from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
 from Competitie.models import Competitie, DeelCompetitie, LAAG_BK
-from Competitie.menu import menu_dynamics_competitie
+from Plein.menu import menu_dynamics
 
 
 TEMPLATE_COMPUITSLAGEN_BOND = 'compuitslagen/uitslagen-bond.dtl'
@@ -54,7 +54,7 @@ class UitslagenBondView(TemplateView):
             (None, 'Uitslag BK')
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        menu_dynamics(self.request, context)
         return context
 
 

@@ -14,12 +14,12 @@ from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1
                                CompetitieKlasse, DeelcompetitieKlasseLimiet, DeelcompetitieRonde,
                                KampioenschapSchutterBoog, KampioenschapTeam, CompetitieMutatie,
                                MUTATIE_CUT, DEELNAME_NEE)
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Handleiding.views import reverse_handleiding
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
+from Plein.menu import menu_dynamics
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdenPlan, WedstrijdLocatie
 from types import SimpleNamespace
 import datetime
@@ -188,7 +188,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             (None, 'Planning')
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -460,7 +460,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         context['url_verwijderen'] = reverse('CompRayon:rayon-verwijder-wedstrijd',
                                              kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -695,7 +695,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         context['wiki_rk_schutters'] = reverse_handleiding(self.request, settings.HANDLEIDING_RK_SELECTIE)
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

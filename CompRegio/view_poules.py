@@ -12,9 +12,9 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import LAAG_REGIO, DeelCompetitie, RegiocompetitieTeam, RegiocompetitieTeamPoule
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Handleiding.views import reverse_handleiding
+from Plein.menu import menu_dynamics
 
 
 TEMPLATE_COMPREGIO_RCL_TEAMS_POULES = 'compregio/rcl-teams-poules.dtl'
@@ -113,7 +113,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
             (None, 'Team Poules')
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -229,7 +229,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
         context['url_terug'] = reverse('CompRegio:regio-poules',
                                        kwargs={'deelcomp_pk': deelcomp.pk})
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

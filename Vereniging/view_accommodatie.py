@@ -165,14 +165,12 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
             )
 
             opslaan_urlconf = 'Vereniging:vereniging-accommodatie-details'
-            menu_actief = 'vereniging'
         else:
             context['kruimels'] = (
                 (reverse('Vereniging:lijst-verenigingen'), 'Verenigingen'),
                 (None, 'Accommodatie')
             )
             opslaan_urlconf = 'Vereniging:accommodatie-details'
-            menu_actief = 'hetplein'
 
         if binnen_locatie or buiten_locatie:
             context['opslaan_url'] = reverse(opslaan_urlconf,
@@ -188,7 +186,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         else:
             context['readonly'] = True
 
-        menu_dynamics(self.request, context, actief=menu_actief)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

@@ -53,7 +53,7 @@ class InfoCompetitieView(TemplateView):
             (None, 'Informatie')
         )
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -103,7 +103,7 @@ class InfoLeeftijdenView(TemplateView):
             (None, 'Leeftijdsgroepen')
         )
 
-        menu_dynamics(self.request, context, actief='competitie')
+        menu_dynamics(self.request, context)
         return context
 
 

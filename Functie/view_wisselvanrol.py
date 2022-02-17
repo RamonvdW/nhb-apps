@@ -335,7 +335,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
             (None, 'Wissel van rol'),
         )
 
-        menu_dynamics(self.request, context, actief='wissel-van-rol')
+        menu_dynamics(self.request, context)
         return context
 
 

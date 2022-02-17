@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -54,13 +54,23 @@ class HistCompetitieIndividueel(models.Model):
     """
     # primary key = los uniek nummer
     histcompetitie = models.ForeignKey(HistCompetitie, on_delete=models.CASCADE)
+
+    # volgorde in de vastgestelde uitslag
     rank = models.PositiveIntegerField()
-    schutter_nr = models.PositiveIntegerField()             # bondsnummer
-    schutter_naam = models.CharField(max_length=50)         # voor + achternaam aaneen
-    boogtype = models.CharField(max_length=5,               # R/C/BB/IB/LB
-                                null=True, blank=True)      # indien beschikbaar
-    vereniging_nr = models.PositiveIntegerField()           # verenigingsnummer
+
+    # lid nummer en volledige naam
+    schutter_nr = models.PositiveIntegerField()
+    schutter_naam = models.CharField(max_length=50)
+
+    # R/C/BB/IB/LB/TR (indien beschikbaar)
+    boogtype = models.CharField(max_length=5,
+                                null=True, blank=True)
+
+    # vereniging van de sporter (bij afsluiten competitie)
+    vereniging_nr = models.PositiveIntegerField()
     vereniging_naam = models.CharField(max_length=50)
+
+    # de scores
     score1 = models.PositiveIntegerField()
     score2 = models.PositiveIntegerField()
     score3 = models.PositiveIntegerField()
@@ -68,9 +78,15 @@ class HistCompetitieIndividueel(models.Model):
     score5 = models.PositiveIntegerField()
     score6 = models.PositiveIntegerField()
     score7 = models.PositiveIntegerField()
+
+    # welke score doorstrepen?
     laagste_score_nr = models.PositiveIntegerField(default=0)  # 1..7
-    totaal = models.PositiveIntegerField()                     # som van de best 6 scores
-    gemiddelde = models.DecimalField(max_digits=5, decimal_places=3)    # 10.000
+
+    # som van de beste 6 scores
+    totaal = models.PositiveIntegerField()
+
+    # gemiddelde pijl (10.000) = totaal / aantal niet-nul scores
+    gemiddelde = models.DecimalField(max_digits=5, decimal_places=3)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """

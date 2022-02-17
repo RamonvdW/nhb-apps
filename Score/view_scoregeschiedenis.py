@@ -137,7 +137,7 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
             (None, 'Score geschiedenis'),
         )
 
-        menu_dynamics(self.request, context, actief='hetplein')
+        menu_dynamics(self.request, context)
         return render(request, self.template, context)
 
 

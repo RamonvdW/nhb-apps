@@ -9,8 +9,8 @@ from django.http import Http404
 from django.shortcuts import render, reverse
 from BasisTypen.models import BLAZOEN2STR
 from Functie.rol import rol_get_huidige, Rollen
+from Plein.menu import menu_dynamics
 from .models import (AG_NUL, Competitie, CompetitieKlasse)
-from .menu import menu_dynamics_competitie
 
 
 TEMPLATE_COMPETITIE_KLASSENGRENZEN_TONEN = 'competitie/klassengrenzen-tonen.dtl'
@@ -147,7 +147,7 @@ class KlassengrenzenTonenView(View):
             (None, 'Wedstrijdklassen')
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
 

@@ -15,8 +15,8 @@ from Competitie.models import (LAAG_REGIO,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                RegioCompetitieSchutterBoog, get_competitie_team_typen)
 from Competitie.operations.poules import maak_poule_schema
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
+from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 
 
@@ -326,7 +326,7 @@ class UitslagenRegioIndivView(TemplateView):
             (None, 'Uitslag regio individueel')
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -607,7 +607,7 @@ class UitslagenRegioTeamsView(TemplateView):
             (None, 'Uitslag regio teams')
         )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        menu_dynamics(self.request, context)
         return context
 
 
