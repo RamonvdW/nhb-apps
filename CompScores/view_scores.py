@@ -877,23 +877,31 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                     regel.klasse_str = klasse_str
                     prev_klasse = klasse_str
 
-                regel.deelnemers = deelnemers = list()
+                regel.deelnemers = list()
                 for deelnemer in (ronde_team
                                   .deelnemers_feitelijk
                                   .all()):
 
-                    sporterboog_pk, naam_str = deelnemer2sporter_cache[deelnemer.pk]
-                    sporterboog_pks.append(sporterboog_pk)
+                    try:
+                        sporterboog_pk, naam_str = deelnemer2sporter_cache[deelnemer.pk]
+                    except KeyError:
+                        # sporter zit niet meer in de deelcompetitie
+                        # dit komt (kort) voor na een overschrijving
+                        # TODO: hoe verder afhandelen?
+                        # TODO: sporter die overgestapt is naar andere vereniging binnen regio blijft wel zichtbaar
+                        pass
+                    else:
+                        sporterboog_pks.append(sporterboog_pk)
 
-                    if sporterboog_pk not in alle_sporterboog_pks:  # want deelnemer kan in meerdere teams voorkomen
-                        alle_sporterboog_pks.append(sporterboog_pk)
+                        if sporterboog_pk not in alle_sporterboog_pks:  # want deelnemer kan in meerdere teams voorkomen
+                            alle_sporterboog_pks.append(sporterboog_pk)
 
-                    deelnemer.naam_str = naam_str
-                    deelnemer.sporterboog_pk = sporterboog_pk
-                    deelnemer.gevonden_scores = None
-                    deelnemer.kan_kiezen = False
-                    deelnemer.keuze_nodig = False
-                    regel.deelnemers.append(deelnemer)
+                        deelnemer.naam_str = naam_str
+                        deelnemer.sporterboog_pk = sporterboog_pk
+                        deelnemer.gevonden_scores = None
+                        deelnemer.kan_kiezen = False
+                        deelnemer.keuze_nodig = False
+                        regel.deelnemers.append(deelnemer)
                 # for
 
                 regel.score_pks_feitelijk = list(ronde_team

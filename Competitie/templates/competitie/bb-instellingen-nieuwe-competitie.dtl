@@ -75,7 +75,6 @@
                 {% for obj in teamklassen %}
                     <tr>
                         <td>{{ obj.beschrijving }}</td>
-                        <td>{{ obj.boogtype.beschrijving }}</td>
                         <td>
                             {% for boogtype in obj.boogtypen_list %}
                                 <span>{{ boogtype }}</span><br>

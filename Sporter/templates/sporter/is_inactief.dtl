@@ -8,6 +8,10 @@
 
 {% block title %}Inlog mislukt{% endblock %}
 
+{% block broodkruimels %}
+    <!-- toon geen broodkruimels / back knop -->
+{% endblock %}
+
 {% block pagina %}
 
     <!-- banner -->
@@ -24,6 +28,8 @@
                 <p>Het account {{ account.username }} kan geen gebruik maken van de NHB diensten.</p>
 
                 <p>De secretaris van je NHB vereniging kan je verder helpen.</p>
+
+                <p>Dit venster kan je sluiten</p>
             </div>
         </div>
     </div>

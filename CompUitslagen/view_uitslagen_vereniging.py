@@ -7,10 +7,11 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from BasisTypen.models import BoogType, TeamType
+from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbVereniging
 from Competitie.models import (LAAG_REGIO, TEAM_PUNTEN_MODEL_SOM_SCORES, Competitie, DeelCompetitie,
-                               RegiocompetitieTeam, RegiocompetitieRondeTeam, RegioCompetitieSchutterBoog)
+                               RegiocompetitieTeam, RegiocompetitieRondeTeam, RegioCompetitieSchutterBoog,
+                               get_competitie_team_typen)
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import rol_get_huidige_functie
 from types import SimpleNamespace
@@ -213,10 +214,8 @@ class UitslagenVerenigingTeamsView(TemplateView):
     def _maak_filter_knoppen(context, comp, ver_nr, teamtype_afkorting):
         """ filter knoppen voor de vereniging """
 
-        teamtypen = TeamType.objects.order_by('volgorde').all()
-
         context['teamtype'] = None
-        context['teamtype_filters'] = teamtypen
+        context['teamtype_filters'] = teamtypen = get_competitie_team_typen(comp)
 
         for team in teamtypen:
             team.sel = 'team_' + team.afkorting

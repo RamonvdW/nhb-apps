@@ -7,13 +7,13 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from BasisTypen.models import BoogType, TeamType
+from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (LAAG_REGIO,
                                TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES,
                                Competitie, DeelCompetitie,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               RegioCompetitieSchutterBoog)
+                               RegioCompetitieSchutterBoog, get_competitie_team_typen)
 from Competitie.operations.poules import maak_poule_schema
 from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
@@ -341,10 +341,8 @@ class UitslagenRegioTeamsView(TemplateView):
     def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, teamtype_afkorting):
         """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
 
-        teamtypen = TeamType.objects.order_by('volgorde').all()
-
         context['teamtype'] = None
-        context['teamtype_filters'] = teamtypen
+        context['teamtype_filters'] = teamtypen = get_competitie_team_typen(comp)
 
         for team in teamtypen:
             team.sel = team.afkorting
