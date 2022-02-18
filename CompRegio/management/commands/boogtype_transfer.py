@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -27,7 +27,7 @@ class Command(BaseCommand):
         afstand = options['afstand']
         do_save = options['commit']
 
-        if boog_afk not in ('R', 'C', 'BB', 'IB', 'LB'):
+        if boog_afk not in ('R', 'C', 'BB', 'TR', 'LB'):
             self.stderr.write('[ERROR] Onbekend boog type: %s' % repr(options['boog']))
             return
 

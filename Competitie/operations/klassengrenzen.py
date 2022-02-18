@@ -5,8 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
-from BasisTypen.models import BoogType, LeeftijdsKlasse
-from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
+from BasisTypen.models import (BoogType, LeeftijdsKlasse, IndivWedstrijdklasse, TeamWedstrijdklasse,
+                               MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT, GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE)
 from Competitie.models import AG_NUL, AG_LAAGSTE_NIET_NUL, CompetitieKlasse
 from Score.models import Score, SCORE_TYPE_INDIV_AG
 from Sporter.models import Sporter
@@ -34,7 +34,7 @@ def _get_targets_indiv():
                          .filter(buiten_gebruik=False)
                          .order_by('volgorde')):
         # zoek de minimale en maximaal toegestane leeftijden voor deze wedstrijdklasse
-        geslacht = 'A'
+        geslacht = GESLACHT_ALLE
         age_min = 999
         age_max = 0
         for lkl in wedstrklasse.leeftijdsklassen.all():
@@ -441,9 +441,11 @@ class KlasseBepaler(object):
         self.lkl_cache_mannen = dict()      # [CompetitieKlasse.pk] = [lkl, lkl, ...]
         self.lkl_cache_vrouwen = dict()     # [CompetitieKlasse.pk] = [lkl, lkl, ...]
         self.lkl_cache_neutraal = dict()    # [CompetitieKlasse.pk] = [lkl, lkl, ...]
-        self.lkl_cache = {'M': self.lkl_cache_mannen,
-                          'V': self.lkl_cache_vrouwen,
-                          'X': self.lkl_cache_neutraal}
+        self.lkl_cache = {
+            GESLACHT_MAN: self.lkl_cache_mannen,
+            GESLACHT_ALLE: self.lkl_cache_neutraal,
+            GESLACHT_VROUW: self.lkl_cache_vrouwen
+        }
 
         # vul de caches met individuele wedstrijdklassen
         for klasse in (CompetitieKlasse
@@ -487,14 +489,28 @@ class KlasseBepaler(object):
         ag += Decimal(0.00005)
 
         mogelijkheden = list()
-        for klasse in self.boogtype2klassen[sporterboog.boogtype.afkorting]:
-            if ag >= klasse.min_ag or klasse.indiv.is_onbekend:
-                for lkl in self.lkl_cache[sporter.geslacht][klasse.pk]:
-                    if lkl.leeftijd_is_compatible(age):
-                        tup = (lkl.volgorde, klasse.pk, lkl, klasse)
-                        mogelijkheden.append(tup)
-                # for
-        # for
+
+        try:
+            klassen = self.boogtype2klassen[sporterboog.boogtype.afkorting]
+        except KeyError:
+            raise LookupError('Boogtype %s wordt niet ondersteund' % sporterboog.boogtype.afkorting)
+        else:
+            for klasse in klassen:
+                if ag >= klasse.min_ag or klasse.indiv.is_onbekend:
+                    for geslacht in (sporter.geslacht, GESLACHT_ALLE):
+                        try:
+                            lkls = self.lkl_cache[geslacht][klasse.pk]
+                        except KeyError:
+                            # deze combinatie bestaat niet
+                            pass
+                        else:
+                            for lkl in lkls:
+                                if lkl.leeftijd_is_compatible(age):
+                                    tup = (lkl.volgorde, klasse.pk, lkl, klasse)
+                                    mogelijkheden.append(tup)
+                            # for
+                    # for
+            # for
 
         mogelijkheden.sort(reverse=True)
 

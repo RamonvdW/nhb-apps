@@ -179,18 +179,18 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         self.klasse_r = CompetitieKlasse.objects.filter(competitie=self.comp_18,
                                                         indiv__is_onbekend=False,
                                                         indiv__niet_voor_rk_bk=False,
-                                                        indiv__volgorde=100,            # Recurve klasse 1
+                                                        indiv__volgorde=1100,           # Recurve klasse 1
                                                         indiv__boogtype__afkorting='R')[0]
         self.klasse_c = CompetitieKlasse.objects.filter(competitie=self.comp_18,
                                                         indiv__is_onbekend=False,
                                                         indiv__niet_voor_rk_bk=False,
-                                                        indiv__volgorde=201,            # Compound klasse 2
+                                                        indiv__volgorde=1201,           # Compound klasse 2
                                                         indiv__boogtype__afkorting='C')[0]
         self.klasse_ib = CompetitieKlasse.objects.filter(competitie=self.comp_18,
                                                          indiv__is_onbekend=False,
                                                          indiv__niet_voor_rk_bk=False,
-                                                         indiv__volgorde=400,           # IB klasse 1
-                                                         indiv__boogtype__afkorting='IB')[0]
+                                                         indiv__volgorde=1400,          # TR klasse 1
+                                                         indiv__boogtype__afkorting='TR')[0]
 
         # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()

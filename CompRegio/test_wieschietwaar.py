@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -86,10 +86,10 @@ class TestCompRegioWieSchietWaar(E2EHelpers, TestCase):
         sporter.save()
         self.sporter_100001 = sporter
 
-        boog_ib = BoogType.objects.get(afkorting='IB')
+        boog_tr = BoogType.objects.get(afkorting='TR')
 
         sporterboog = SporterBoog(sporter=sporter,
-                                  boogtype=boog_ib,
+                                  boogtype=boog_tr,
                                   voor_wedstrijd=True)
         sporterboog.save()
         self.sporterboog_100001 = sporterboog
@@ -186,7 +186,7 @@ class TestCompRegioWieSchietWaar(E2EHelpers, TestCase):
         self.lid_120001 = sporter
 
         sporterboog = SporterBoog(sporter=sporter,
-                                  boogtype=boog_ib,
+                                  boogtype=boog_tr,
                                   voor_wedstrijd=True)
         sporterboog.save()
         self.sporterboog_120001 = sporterboog

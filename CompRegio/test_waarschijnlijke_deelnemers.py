@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -243,7 +243,7 @@ class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
 
     def _maak_inschrijvingen(self):
         # schrijf iemand in
-        boog_ib = BoogType.objects.get(afkorting='IB')
+        boog_tr = BoogType.objects.get(afkorting='TR')
         boog_r = BoogType.objects.get(afkorting='R')
         boog_c = BoogType.objects.get(afkorting='C')
 
@@ -315,11 +315,11 @@ class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         klasse = (CompetitieKlasse
                   .objects
                   .filter(competitie=self.comp_18,
-                          indiv__boogtype=boog_ib,
-                          indiv__beschrijving__contains="Aspirant"))[0]
+                          indiv__boogtype=boog_tr,
+                          indiv__beschrijving__contains="Onder 14"))[0]
 
         sporterboog = SporterBoog(sporter=self.sporter_100012,
-                                  boogtype=boog_ib,
+                                  boogtype=boog_tr,
                                   voor_wedstrijd=True)
         sporterboog.save()
 
@@ -332,8 +332,8 @@ class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         klasse = (CompetitieKlasse
                   .objects
                   .filter(competitie=self.comp_25,
-                          indiv__boogtype=boog_ib,
-                          indiv__beschrijving__contains="Aspirant"))[0]
+                          indiv__boogtype=boog_tr,
+                          indiv__beschrijving__contains="Onder 14"))[0]
 
         RegioCompetitieSchutterBoog(
                 deelcompetitie=self.deelcomp_regio_25,

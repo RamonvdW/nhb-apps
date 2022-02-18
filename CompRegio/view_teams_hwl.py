@@ -96,7 +96,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
                              laag=LAAG_REGIO,                           # moet regiocompetitie zijn
                              nhb_regio=self.functie_nu.nhb_ver.regio))
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Http404()
+            raise Http404('Competitie niet gevonden')
 
         comp = deelcomp.competitie
         comp.bepaal_fase()
@@ -244,7 +244,13 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
             # te veel teams
             raise Http404('Maximum van 10 teams is bereikt')
 
-        team_type = TeamType.objects.get(afkorting='R')
+        # afkorting is optioneel, voornamelijk bedoeld voor de autotester
+        afkorting = request.POST.get('team_type', 'R2')
+        afkorting = afkorting[:6]       # afkappen voor de veiligheid
+        try:
+            team_type = TeamType.objects.get(afkorting=afkorting)
+        except TeamType.DoesNotExist:
+            raise Http404('Verkeerd team type')
 
         naam_str = "%s-%s" % (ver.ver_nr, next_nr)
 
@@ -412,7 +418,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
                     .get(pk=team_pk,
                          deelcompetitie=deelcomp))
         except RegiocompetitieTeam.DoesNotExist:
-            raise Http404()
+            raise Http404('Team niet gevonden')
 
         if self.rol_nu == Rollen.ROL_HWL:
             if team.vereniging != self.functie_nu.nhb_ver:
@@ -422,6 +428,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         if not verwijderen:
             afkorting = request.POST.get('team_type', '')
+            afkorting = afkorting[:6]       # afkappen voor de veiligheid
             if team.team_type.afkorting != afkorting:
                 try:
                     team_type = TeamType.objects.get(afkorting=afkorting)

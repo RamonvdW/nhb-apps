@@ -525,7 +525,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # controleer dat er geen dubbele SporterBoog records aangemaakt zijn
         self.assertEqual(1, SporterBoog.objects.filter(sporter=self.sporter_100001, boogtype__afkorting='R').count())
         self.assertEqual(1, SporterBoog.objects.filter(sporter=self.sporter_100002, boogtype__afkorting='BB').count())
-        self.assertEqual(14954, SporterBoog.objects.count())
+        self.assertEqual(17835, SporterBoog.objects.count())
 
         # controleer dat het "ag vaststellen" kaartje er nog steeds is
         # dit keer met de "voor het laatst gedaan" notitie
@@ -595,7 +595,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # nu kunnen we met een POST de klassengrenzen vaststellen
         count = CompetitieKlasse.objects.filter(competitie=comp18, min_ag__gt=0).count()
         self.assertEqual(count, 0)
-        with self.assert_max_queries(86):
+        with self.assert_max_queries(91):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)        # redirect = success
         count = CompetitieKlasse.objects.filter(competitie=comp18, min_ag__gt=0).count()
@@ -661,12 +661,12 @@ class TestCompetitie(E2EHelpers, TestCase):
 
         # klassengrenzen vaststellen (18m en 25m)
         # s1 = timezone.now()
-        with self.assert_max_queries(86):
+        with self.assert_max_queries(91):
             resp = self.client.post(self.url_klassengrenzen_vaststellen % comp_18.pk)
         # s2 = timezone.now()
         # print('duration:', s2-s1)
         self.assert_is_redirect_not_plein(resp)        # redirect = success
-        with self.assert_max_queries(86):
+        with self.assert_max_queries(91):
             resp = self.client.post(self.url_klassengrenzen_vaststellen % comp_25.pk)
         self.assert_is_redirect_not_plein(resp)        # redirect = success
 

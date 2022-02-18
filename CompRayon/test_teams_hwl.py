@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -258,7 +258,7 @@ class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
         elif lid_nr == 100013:
             with self.assert_max_queries(20):
                 resp = self.client.post(url_schutter_voorkeuren, {'sporter_pk': lid_nr,
-                                                                  'schiet_IB': 'on',
+                                                                  'schiet_TR': 'on',
                                                                   'voorkeur_meedoen_competitie': 'on'})
         else:
             with self.assert_max_queries(20):
@@ -273,7 +273,7 @@ class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
         if lid_nr == 100003:
             afkorting = 'BB'
         elif lid_nr == 100013:
-            afkorting = 'IB'
+            afkorting = 'TR'
         else:
             afkorting = 'R'
         sporterboog = SporterBoog.objects.get(sporter__lid_nr=lid_nr, boogtype__afkorting=afkorting)
@@ -287,7 +287,7 @@ class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
         self._zet_schutter_voorkeuren(100003)       # BB
         self._zet_schutter_voorkeuren(100004)       # R
         self._zet_schutter_voorkeuren(100012)       # R
-        self._zet_schutter_voorkeuren(100013)       # IB
+        self._zet_schutter_voorkeuren(100013)       # TR
 
         self._zet_ag(100002, 18)
         self._zet_ag(100003, 18)
@@ -295,12 +295,12 @@ class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
         self._zet_ag(100013, 18)
 
         url = url_inschrijven % self.comp_18.pk
-        with self.assert_max_queries(33):
+        with self.assert_max_queries(43):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
                                           'lid_100003_boogtype_3': 'on',    # 3=BB
                                           'lid_100004_boogtype_1': 'on',    # 1=R
                                           'lid_100012_boogtype_1': 'on',    # 1=R
-                                          'lid_100013_boogtype_4': 'on',    # 4=IB
+                                          'lid_100013_boogtype_6': 'on',    # 6=TR
                                           'wil_in_team': 'ja!'})
         self.assert_is_redirect_not_plein(resp)     # check success
 
