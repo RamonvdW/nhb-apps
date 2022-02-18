@@ -78,6 +78,7 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
 
         sporters, teams = bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd)
         context['sporters'] = sporters
+        context['aantal_regels'] = 2 + len(sporters) + len(team_pk2naam.keys())
 
         for sporter in sporters:
             sporter.in_team_naam = team_pk2naam[sporter.team_pk]
@@ -94,6 +95,12 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
             sporter.volg_nr = nr
             nr += 1
         # for
+
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('CompScores:wedstrijden'), 'Competitie wedstrijden'),
+            (None, 'Deelnemers')
+        )
 
         menu_dynamics(self.request, context)
         return context

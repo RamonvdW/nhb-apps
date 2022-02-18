@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -393,7 +393,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                 resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
         # for
-        self.assertEqual(SporterBoog.objects.count(), 15)
+        self.assertEqual(SporterBoog.objects.count(), 18)
 
         # zet een aantal sporterboog records op gebruik voor wedstrijd
         # dit maakt een sporterboog-boog

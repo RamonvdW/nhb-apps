@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.models import BoogType
+from BasisTypen.models import BoogType, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
@@ -29,6 +29,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
     url_behoefte3_bestand = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/dagdeel-behoefte-als-bestand/'  # comp_pk, regio_pk
 
     testdata = None
+    begin_jaar = 2019
 
     @classmethod
     def setUpTestData(cls):
@@ -83,7 +84,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         self.account_schutter = self._prep_beheerder_lid('Schutter')
 
         # creëer een competitie met deelcompetities
-        competities_aanmaken(jaar=2019)
+        competities_aanmaken(jaar=self.begin_jaar)
         # nu in fase A
 
         self.comp_18 = Competitie.objects.get(afstand='18')
@@ -168,12 +169,15 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
                 sporter.bij_vereniging = nhb_ver
                 sporter.is_actief_lid = True
                 if barebow_boog_pk:
-                    sporter.geboorte_datum = datetime.date(2019-12, 1, 1)   # aspirant
+                    sporter.geboorte_datum = datetime.date(self.begin_jaar - 12, 1, 1)   # aspirant
                 else:
-                    sporter.geboorte_datum = datetime.date(2000, 1, 1)      # senior
-                sporter.sinds_datum = datetime.date(2010, 1, 1)
+                    sporter.geboorte_datum = datetime.date(self.begin_jaar - 19, 1, 1)      # senior
+                sporter.sinds_datum = datetime.date(self.begin_jaar - 9, 1, 1)
                 sporter.geslacht = 'M'
                 sporter.save()
+
+                if barebow_boog_pk:
+                    self.assertTrue(sporter.bereken_wedstrijdleeftijd(self.begin_jaar + 1) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
 
                 # haal de schutter voorkeuren op, zodat de schutterboog records aangemaakt worden
                 url_voorkeuren = '/sporter/voorkeuren/%s/' % lid_nr
