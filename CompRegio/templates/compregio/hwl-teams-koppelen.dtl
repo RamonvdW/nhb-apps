@@ -10,22 +10,24 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-hwl-teams-koppelen" %}
-
-    <h4>{% if readonly %}Bekijk{% else %}Koppel{% endif %} teamleden</h4>
-
-    {% if mag_wijzigen %}
-        <p>Op deze pagina kan je leden van de vereniging koppelen aan het team.</p>
-        {% if deelcomp.regio_heeft_vaste_teams %}
-            <p>In jullie regio is gekozen voor <b>vaste teams</b>, dus de leden die je koppelt blijven het hele seizoen in dit team en kunnen vervangen worden door een invaller.</p>
-        {% else %}
-            <p>In jullie regio is gekozen voor dynamische teams gebaseerd op het principe van <b>voortschrijdend gemiddelde</b> (VSG), dus elke ronde krijgt het team automatisch leden toegekend.</p>
-            <p>Tijdens de inschrijving moet je leden handmatig koppelen zodat sporters met een BB, IB or LB boog in het gewenste type team komen.</p>
-        {% endif %}
-    {% else %}
-        <p>Op deze pagina kan je zien wie er aan het team gekoppeld zijn.</p>
-        <p>Het is niet meer mogelijk om wijzigingen aan te brengen. Zodra de RCL de eerste ronde opstart kan je invallers doorvoeren.</p>
-    {% endif %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="nhb-rood-text">{% if readonly %}Bekijk{% else %}Koppel{% endif %} teamleden</h3>
+            {% if mag_wijzigen %}
+                <p>Leden van de vereniging koppelen aan het team.</p>
+                {% if deelcomp.regio_heeft_vaste_teams %}
+                    <p>In jullie regio is gekozen voor <b>vaste teams</b>, dus de leden die je koppelt blijven het hele seizoen in dit team en kunnen vervangen worden door een invaller.</p>
+                {% else %}
+                    <p>In jullie regio is gekozen voor dynamische teams gebaseerd op het principe van <b>voortschrijdend gemiddelde</b> (VSG), dus elke ronde krijgt het team automatisch leden toegekend.</p>
+                    <p>Tijdens de inschrijving moet je leden handmatig koppelen zodat sporters met een BB, IB or LB boog in het gewenste type team komen.</p>
+                {% endif %}
+            {% else %}
+                <p>Zien wie er aan het team gekoppeld zijn.</p>
+                <p>Het is niet meer mogelijk om wijzigingen aan te brengen. Zodra de RCL de eerste ronde opstart kan je invallers doorvoeren.</p>
+            {% endif %}
+        </div>
+    </div>
 
     <script type="application/javascript">
         function gewijzigd() {
@@ -44,122 +46,138 @@
         }
     </script>
 
-    {% if mag_wijzigen %}
-    <form action="{{ url_opslaan }}" method="post">
-        {% csrf_token %}
-    {% endif %}
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
 
-        <table class="white">
+            {% if mag_wijzigen %}
+                <!-- dialoog venster -->
+                <div class="white left-align z-depth-3">
+                    <div style="padding:30px">
+                        <form action="{{ url_opslaan }}" method="post">
+                            {% csrf_token %}
+            {% endif %}
 
-            <tr>
-                <td>Vereniging</td>
-                <td>{{ team.vereniging }}</td>
-            </tr>
+                            <table class="white">
 
-            <tr>
-                <td>Team nummer</td>
-                <td>{{ team.volg_nr }}</td>
-            </tr>
+                                <tr>
+                                    <td>Vereniging</td>
+                                    <td>{{ team.vereniging }}</td>
+                                </tr>
 
-            <tr>
-                <td>Team naam</td>
-                <td>{{ team.team_naam }}</td>
-            </tr>
+                                <tr>
+                                    <td>Team nummer</td>
+                                    <td>{{ team.volg_nr }}</td>
+                                </tr>
 
-            <tr>
-                <td>Soort team</td>
-                <td>{{ team.team_type.beschrijving }}</td>
-            </tr>
+                                <tr>
+                                    <td>Team naam</td>
+                                    <td>{{ team.team_naam }}</td>
+                                </tr>
 
-            <tr>
-                <td style="vertical-align: top">Toegestane bogen</td>
-                <td>
-                    {% for boog in boog_typen %}
-                        <span>{{ boog.beschrijving }}</span><br>
-                    {% endfor %}
-                </td>
-            </tr>
+                                <tr>
+                                    <td>Soort team</td>
+                                    <td>{{ team.team_type.beschrijving }}</td>
+                                </tr>
 
-            <tr>
-                <td>Team sterkte</td>
-                <td>{{ team.ag_str }}</td>
-            </tr>
+                                <tr>
+                                    <td style="vertical-align: top">Toegestane bogen</td>
+                                    <td>
+                                        {% for boog in boog_typen %}
+                                            <span>{{ boog.beschrijving }}</span><br>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
 
-            <tr>
-                <td>Team wedstrijdklasse</td>
-                <td>{{ team.klasse.team.beschrijving }}</td>
-            </tr>
+                                <tr>
+                                    <td>Team sterkte</td>
+                                    <td>{{ team.ag_str }}</td>
+                                </tr>
 
-            <tr>
-                {% if mag_wijzigen %}
-                    <td style="vertical-align: top">Selecteer 3 of 4 sporters</td>
+                                <tr>
+                                    <td>Team wedstrijdklasse</td>
+                                    <td>{{ team.klasse.team.beschrijving }}</td>
+                                </tr>
 
-                    {% if not deelnemers.count %}
-                        <td colspan="3"><i class="red-text">Geen sporters gevonden met toegestaan boog type</i></td>
-                    {% else %}
-                        <td>
-                            <table class="striped">
-                                <thead>
-                                    <tr>
-                                        {% if mag_wijzigen %}
-                                            <th><!-- checkbox column --></th>
+                                <tr>
+                                    {% if mag_wijzigen %}
+                                        <td style="vertical-align: top">Selecteer 3 of 4 sporters</td>
+
+                                        {% if not deelnemers.count %}
+                                            <td colspan="3"><i class="red-text">Geen sporters gevonden met toegestaan boog type</i></td>
+                                        {% else %}
+                                            <td>
+                                                <table class="striped">
+                                                    <thead>
+                                                        <tr>
+                                                            {% if mag_wijzigen %}
+                                                                <th><!-- checkbox column --></th>
+                                                            {% endif %}
+                                                            <th>Aanvangs<wbr>gemiddelde</th>
+                                                            <th>Boog</th>
+                                                            <th>Naam</th>
+                                                        </tr>
+                                                    </thead>
+                                                    {% for obj in deelnemers %}
+                                                        <tr>
+                                                            <td>
+                                                                <label>
+                                                                    <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.blokkeer %} disabled{% endif %} onchange="gewijzigd()">
+                                                                    <span>&nbsp;</span>
+                                                                </label>
+                                                            </td>
+                                                            <td>{{ obj.ag_str }}</td>
+                                                            <td>{{ obj.boog_str }}</td>
+                                                            <td>{{ obj.naam_str }}</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </table>
+                                            </td>
                                         {% endif %}
-                                        <th>Aanvangs<wbr>gemiddelde</th>
-                                        <th>Boog</th>
-                                        <th>Naam</th>
-                                    </tr>
-                                </thead>
-                                {% for obj in deelnemers %}
-                                    <tr>
+                                    {% else %}
+                                        <!-- mag niet meer wijzigen -->
+                                        <td style="vertical-align: top">Initi&euml;le sporters</td>
                                         <td>
-                                            <label>
-                                                <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.blokkeer %} disabled{% endif %} onchange="gewijzigd()">
-                                                <span>&nbsp;</span>
-                                            </label>
+                                            <table class="striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Aanvangs<wbr>gemiddelde</th>
+                                                        <th>Boog</th>
+                                                        <th>Naam</th>
+                                                    </tr>
+                                                </thead>
+                                                {% for obj in gekoppeld %}
+                                                    <tr>
+                                                        <td>{{ obj.ag_str }}</td>
+                                                        <td>{{ obj.boog_str }}</td>
+                                                        <td>{{ obj.naam_str }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </table>
                                         </td>
-                                        <td>{{ obj.ag_str }}</td>
-                                        <td>{{ obj.boog_str }}</td>
-                                        <td>{{ obj.naam_str }}</td>
-                                    </tr>
-                                {% endfor %}
+                                    {% endif %}
+                                </tr>
+
                             </table>
-                        </td>
-                    {% endif %}
-                {% else %}
-                    <!-- mag niet meer wijzigen -->
-                    <td style="vertical-align: top">Initi&euml;le sporters</td>
-                    <td>
-                        <table class="striped">
-                            <thead>
-                                <tr>
-                                    <th>Aanvangs<wbr>gemiddelde</th>
-                                    <th>Boog</th>
-                                    <th>Naam</th>
-                                </tr>
-                            </thead>
-                            {% for obj in gekoppeld %}
-                                <tr>
-                                    <td>{{ obj.ag_str }}</td>
-                                    <td>{{ obj.boog_str }}</td>
-                                    <td>{{ obj.naam_str }}</td>
-                                </tr>
-                            {% endfor %}
-                        </table>
-                    </td>
-                {% endif %}
-            </tr>
 
-        </table>
+            {% if mag_wijzigen %}
+                            <div class="fixed-action-btn" style="display: none">
+                                <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                                    <i class="material-icons-round left">check</i>Opslaan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
 
-        <div class="fixed-action-btn" style="display: none">
-            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
-                <i class="material-icons-round left">check</i>Opslaan</button>
         </div>
-    {% if mag_wijzigen %}
-    </form>
-    {% endif %}
+    </div>
 
-    <p>De <i>team sterkte</i> wordt berekend uit het aanvangsgemiddelde van de drie sterkste teamleden.</p>
-    <p>De <i>team wedstrijdklasse</i> wordt bepaald door de team sterkte en de vastgestelde minimum sterkte voor een wedstrijdklasse.</p>
+    <div class="center">
+        <p>De <i>team sterkte</i> wordt berekend uit het aanvangsgemiddelde van de drie sterkste teamleden.</p>
+        <p>De <i>team wedstrijdklasse</i> wordt bepaald door de team sterkte en de vastgestelde minimum sterkte voor een wedstrijdklasse.</p>
+    </div>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-hwl-teams-koppelen" %}
 
 {% endblock %}

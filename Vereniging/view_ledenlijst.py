@@ -180,6 +180,11 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         context['wedstrijdklasse_jaar'] = self.huidige_jaar
         context['toon_wijzig_kolom'] = (self.rol_nu == Rollen.ROL_HWL)
 
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (None, 'Ledenlijst')
+        )
+
         menu_dynamics(self.request, context)
         return context
 

@@ -238,6 +238,11 @@
   }
 }
 
+.broodkruimels-nolink {
+  font-size:13px;
+  margin-right:5px;
+}
+
 .broodkruimels-link {
   font-size:13px;
   margin-right:5px;
@@ -251,11 +256,15 @@
 
 /* fonts */
 html, button, input, optgroup, select, textarea {
-    font-family: 'Open Sans', sans-serif;
+  font-family: 'Open Sans', sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Fira Sans', sans-serif;
+  font-family: 'Fira Sans', sans-serif;
+}
+
+.page-banner {
+  color: $secondary-color;
 }
 
 a {

@@ -10,9 +10,19 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compinschrijven-leden-ingeschreven" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Ingeschreven</h3>
+            <p>Leden van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} die ingeschreven zijn voor de <b>{{ deelcomp }}</b>.</p>
 
-    <h4>Ingeschreven</h4>
+            {% if mag_afmelden %}
+                <p>Als hoofdwedstrijdleider kan je leden afmelden: zet een vinkje bij de naam en druk dan rode knop in de rechter onderhoek.</p>
+            {% else %}
+                <p>De hoofdwedstrijdleider kan leden afmelden tijdens fase B (inschrijven) van de competitie.</p>
+            {% endif %}
+        </div>
+    </div>
 
     <script type="application/javascript">
         function do_toggle(id)
@@ -43,102 +53,108 @@
         }
     </script>
 
-    <form method="post" action="{{ afmelden_url }}">
-        {% csrf_token %}
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
 
-        <p>Deze pagina toont de leden van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} die ingeschreven zijn voor de <b>{{ deelcomp }}</b>.</p>
+            {% if mag_afmelden %}
+                <!-- dialoog venster -->
+                <div class="white left-align z-depth-3">
+                    <div style="padding:30px">
+                        <form method="post" action="{{ afmelden_url }}">
+                        {% csrf_token %}
+            {% endif %}
 
-        {% if mag_afmelden %}
-            <p>Als hoofdwedstrijdleider kan je leden afmelden: zet een vinkje bij de naam en druk dan rode knop in de rechter onderhoek.</p>
-        {% else %}
-            <p>De hoofdwedstrijdleider kan leden afmelden tijdens fase B van de competitie.</p>
-        {% endif %}
+                        <table class="white" id="table1">
+                            <thead>
+                                <tr>        <!-- filter veld -->
+                                    {% if mag_afmelden %}
+                                        <td><!-- kolom voor vinkje --></td>
+                                    {% endif %}
 
-        <table class="white" id="table1">
-            <thead>
-                <tr>        <!-- filter veld -->
-                    {% if mag_afmelden %}
-                        <td><!-- kolom voor vinkje --></td>
-                    {% endif %}
+                                    <td></td>
 
-                    <td></td>
+                                    <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
 
-                    <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+                                    {% if toon_dagdeel %}
+                                        <td colspan="5"></td>
+                                    {% else %}
+                                        <td colspan="4"></td>
+                                    {% endif %}
+                                </tr>
+                                    <tr>
+                                        {% if mag_afmelden %}
+                                            <th><!-- kolom voor vinkje --></th>
+                                        {% endif %}
 
-                    {% if toon_dagdeel %}
-                        <td colspan="5"></td>
-                    {% else %}
-                        <td colspan="4"></td>
-                    {% endif %}
-                </tr>
-                <tr>
-                    {% if mag_afmelden %}
-                        <th><!-- kolom voor vinkje --></th>
-                    {% endif %}
+                                        <th>Wedstrijdklasse</th>
 
-                    <th>Wedstrijdklasse</th>
+                                        <th data-filter="on" class="center">Bonds<wbr>nummer</th>
+                                        <th data-filter="on">Naam</th>
 
-                    <th data-filter="on">Bonds<wbr>nummer</th>
-                    <th data-filter="on">Naam</th>
+                                        <th colspan="2"><span class="show-on-small hide-on-med-and-up">Team</span><span class="hide-on-small-only">Voorkeur<br>teamschieten</span></th>
+                                        <!-- 2e kolom is voor team toggle knop -->
 
-                    <th colspan="2"><span class="show-on-small hide-on-med-and-up">Team</span><span class="hide-on-small-only">Voorkeur<br>teamschieten</span></th>
-                    <!-- 2e kolom is voor team toggle knop -->
+                                        {% if toon_dagdeel %}
+                                            <th><span class="show-on-small hide-on-med-and-up">Dagdelen</span><span class="hide-on-small-only">Voorkeur<br>dagdelen</span></th>
+                                        {% endif %}
 
-                    {% if toon_dagdeel %}
-                        <th><span class="show-on-small hide-on-med-and-up">Dagdelen</span><span class="hide-on-small-only">Voorkeur<br>dagdelen</span></th>
-                    {% endif %}
+                                        <th>Voorkeur<br>blazoen</th>
 
-                    <th>Voorkeur<br>blazoen</th>
+                                        <th class="hide-on-small-only">Opmerking</th>
+                                    </tr>
+                                </thead>
 
-                    <th class="hide-on-small-only">Opmerking</th>
-                </tr>
-            </thead>
+                                {% for obj in object_list %}
+                                <tr>
+                                    {% if mag_afmelden %}
+                                        <td class="center">
+                                            <label>
+                                                <input type="checkbox" name="{{ obj.check }}" class="filled-in">
+                                                <span><!-- noodzakelijk --></span>
+                                            </label>
+                                        </td>
+                                    {% endif %}
 
-            {% for obj in object_list %}
-            <tr>
+                                    <td>{{ obj.klasse.indiv.beschrijving }}</td>
+
+                                    <td>{{ obj.lid_nr }}</td>
+                                    <td>{{ obj.naam_str }}</td>
+
+                                    <td>{{ obj.team_ja_nee }}</td>
+                                    <td>
+                                        {% if obj.maak_ja %}
+                                            <a class="btn-nhb-rood" href="#" onclick="do_toggle(this)" data-pk="{{ obj.pk }}">Maak Ja</a>
+                                        {% elif obj.maak_nee %}
+                                            <a class="btn-nhb-blauw" href="#" onclick="do_toggle(this)" data-pk="{{ obj.pk }}">Maak Nee</a>
+                                        {% endif %}
+                                    </td>
+
+                                    {% if toon_dagdeel %}
+                                        <td>{{ obj.dagdeel_str }}</td>
+                                    {% endif %}
+
+                                    <td>{{ obj.eigen_blazoen_ja_nee }}</td>
+
+                                    <td class="hide-on-small-only">{{ obj.inschrijf_notitie|linebreaksbr }}</td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+
+                            {% if mag_afmelden %}
+                                <div class="fixed-action-btn">
+                                    <input class="btn-nhb-rood" type="submit" value="Geselecteerde leden afmelden">
+                                </div>
+                            {% endif %}
+
                 {% if mag_afmelden %}
-                    <td class="center">
-                        <label>
-                            <input type="checkbox" name="{{ obj.check }}" class="filled-in">
-                            <span><!-- noodzakelijk --></span>
-                        </label>
-                    </td>
+                            </form>
+                        </div>
+                    </div>
                 {% endif %}
-
-                <td>{{ obj.klasse.indiv.beschrijving }}</td>
-
-                <td>{{ obj.lid_nr }}</td>
-                <td>{{ obj.naam_str }}</td>
-
-                <td>{{ obj.team_ja_nee }}</td>
-                <td>
-                    {% if obj.maak_ja %}
-                        <a class="btn-nhb-blauw" href="#" onclick="do_toggle(this)" data-pk="{{ obj.pk }}">Maak Ja</a>
-                    {% elif obj.maak_nee %}
-                        <a class="btn-nhb-blauw" href="#" onclick="do_toggle(this)" data-pk="{{ obj.pk }}">Maak Nee</a>
-                    {% endif %}
-                </td>
-
-                {% if toon_dagdeel %}
-                    <td>{{ obj.dagdeel_str }}</td>
-                {% endif %}
-
-                <td>{{ obj.eigen_blazoen_ja_nee }}</td>
-
-                <td class="hide-on-small-only">{{ obj.inschrijf_notitie|linebreaksbr }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-
-        {% if mag_afmelden %}
-            <div class="fixed-action-btn">
-                <input class="btn-nhb-rood" type="submit" value="Geselecteerde leden afmelden">
             </div>
-        {% endif %}
+        </div>
 
-    </form>
-
-    <!-- extra ruimte onder de tabel houden voor de aanmeld-knop -->
-    <p>&nbsp;</p>
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compinschrijven-leden-ingeschreven" %}
 
 {% endblock %}

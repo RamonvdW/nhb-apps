@@ -329,6 +329,12 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                             context['dagdelen'].append(dagdeel)
                     # for
 
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+            (None, self.comp.beschrijving.replace(' competitie', '')),
+            (None, 'Aanmelden')
+        )
+
         menu_dynamics(self.request, context)
         return context
 
@@ -612,6 +618,12 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         methode = self.deelcomp.inschrijf_methode
         if methode == INSCHRIJF_METHODE_3:
             context['toon_dagdeel'] = DAGDELEN
+
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (None, self.deelcomp.competitie.beschrijving.replace(' competitie', '')),
+            (None, 'Ingeschreven')
+        )
 
         menu_dynamics(self.request, context)
         return context

@@ -14,7 +14,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
 from Competitie.models import (CompetitieKlasse, AG_NUL, DeelCompetitie, LAAG_REGIO,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               update_uitslag_teamcompetitie)
+                               update_uitslag_teamcompetitie, get_competitie_team_typen)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Score.models import ScoreHist, SCORE_TYPE_TEAM_AG
@@ -351,7 +351,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         context['team'] = team
 
-        context['opt_team_type'] = teamtypes = TeamType.objects.order_by('volgorde')
+        context['opt_team_type'] = teamtypes = get_competitie_team_typen(deelcomp.competitie)
         for obj in teamtypes:
             obj.choice_name = obj.afkorting
             obj.actief = (team.team_type == obj)
@@ -742,6 +742,13 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
                 ag_str = "%.3f" % obj.ag_voor_team
                 obj.ag_str = ag_str.replace('.', ',')
             # for
+
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('CompRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk}),
+                'Teams Regio %s' % comp.beschrijving.replace(' competitie', '')),
+            (None, 'Koppel teamleden')
+        )
 
         menu_dynamics(self.request, context)
         return context
