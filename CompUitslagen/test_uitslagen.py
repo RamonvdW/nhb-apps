@@ -135,7 +135,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compuitslagen/uitslagen-regio-indiv.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_uitslagen_regio_teams % (self.testdata.comp18.pk, 'R2')
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(28):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -143,7 +143,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
 
         # lijst met onze deelnemers
         url = self.url_uitslagen_regio_teams_n % (self.testdata.comp18.pk, 'TR', 101)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(25):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
