@@ -973,6 +973,14 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
         unsorted_deelnemers.sort()
         context['deelnemers'] = [tup[-1] for tup in unsorted_deelnemers]
 
+        comp = deelcomp.competitie
+
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (None, comp.beschrijving.replace(' competitie', '')),
+            (None, 'Team Invallers')
+        )
+
         menu_dynamics(self.request, context)
         return context
 
@@ -1130,6 +1138,14 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         context['url_opslaan'] = reverse('CompRegio:teams-regio-invallers-koppelen',
                                          kwargs={'ronde_team_pk': ronde_team_nu.pk})
+
+        comp = deelcomp.competitie
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (None, comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompRegio:teams-regio-invallers', kwargs={'deelcomp_pk': deelcomp.pk}), 'Team Invallers'),
+            (None, 'Invallers Koppelen')
+        )
 
         menu_dynamics(self.request, context)
         return context
