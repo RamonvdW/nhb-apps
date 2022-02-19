@@ -150,8 +150,8 @@ WKL_INDIV_NIEUW = (                                                             
 
     (1310, 'Barebow Jeugd klasse 1',                        'BB', ('JA', 'CA'),  (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
 
-    (1350, 'Barebow Onder 14 meisjes (aspiranten)',         'BB', ('AH2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
-    (1350, 'Barebow Onder 14 jongens (aspiranten)',         'BB', ('AV2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+    (1350, 'Barebow Onder 14 jongens (aspiranten)',         'BB', ('AH2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+    (1351, 'Barebow Onder 14 meisjes (aspiranten)',         'BB', ('AV2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
 
     (1360, 'Barebow Onder 12 jongens (aspiranten)',         'BB', ('AH1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
     (1361, 'Barebow Onder 12 meisjes (aspiranten)',         'BB', ('AV1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
@@ -177,10 +177,10 @@ WKL_INDIV_NIEUW = (                                                             
     (1510, 'Longbow Jeugd klasse 1',                        'LB', ('JA', 'CA'),  (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
 
     (1550, 'Longbow Onder 14 jongens (aspiranten)',         'LB', ('AH2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
-    (1550, 'Longbow Onder 14 meisjes (aspiranten)',         'LB', ('AV2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+    (1551, 'Longbow Onder 14 meisjes (aspiranten)',         'LB', ('AV2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
 
     (1555, 'Longbow Onder 12 jongens (aspiranten)',         'LB', ('AH1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
-    (1555, 'Longbow Onder 12 meisjes (aspiranten)',         'LB', ('AV1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+    (1556, 'Longbow Onder 12 meisjes (aspiranten)',         'LB', ('AV1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
 )
 
 

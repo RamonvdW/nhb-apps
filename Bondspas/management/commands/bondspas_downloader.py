@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -114,8 +114,6 @@ class Command(BaseCommand):
         # monitor voor nieuwe verzoeken
         now = datetime.datetime.now()
         while now < self._stop_at:                   # pragma: no branch
-            self.stdout.write('tick')
-
             now = timezone.now()                # timezone-aware
             for bondspas in Bondspas.objects.filter(status=BONDSPAS_STATUS_OPHALEN):
                 if bondspas.opnieuw_proberen_na is None or now > bondspas.opnieuw_proberen_na:

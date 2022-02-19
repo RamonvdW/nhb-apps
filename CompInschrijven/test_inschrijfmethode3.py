@@ -171,7 +171,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
                 if barebow_boog_pk:
                     sporter.geboorte_datum = datetime.date(self.begin_jaar - 12, 1, 1)   # aspirant
                 else:
-                    sporter.geboorte_datum = datetime.date(self.begin_jaar - 19, 1, 1)      # senior
+                    sporter.geboorte_datum = datetime.date(self.begin_jaar - 19, 1, 1)   # senior
                 sporter.sinds_datum = datetime.date(self.begin_jaar - 9, 1, 1)
                 sporter.geslacht = 'M'
                 sporter.save()
