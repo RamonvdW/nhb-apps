@@ -533,10 +533,10 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         sessie = KalenderWedstrijdSessie.objects.all()[0]
         sessie2 = KalenderWedstrijdSessie.objects.all()[1]
 
-        wkl = wedstrijd.wedstrijdklassen.get(beschrijving='Recurve master vrouwen')
+        wkl = wedstrijd.wedstrijdklassen.get(beschrijving='Recurve 50+ vrouwen (master)')
         sessie2.wedstrijdklassen.add(wkl)
 
-        wkl = wedstrijd.wedstrijdklassen.get(beschrijving='Recurve master mannen')
+        wkl = wedstrijd.wedstrijdklassen.get(beschrijving='Recurve 50+ mannen (master)')
         wkl_pks = list(wedstrijd.wedstrijdklassen.values_list('pk', flat=True))
         sessie.wedstrijdklassen.add(wkl)
         sessie2.wedstrijdklassen.add(wkl)
@@ -554,7 +554,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
 
         self.assertEqual(wedstrijd.boogtypen.count(), 2)                # alleen R en C
-        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 16)        # alleen R en C klassen
+        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 17)        # alleen R en C klassen
 
         # kies een wedstrijdklasse in een sessie
         sessie.wedstrijdklassen.add(wkl)
