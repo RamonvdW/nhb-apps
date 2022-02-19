@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Uitslag {% if is_controle %}controleren{% else %}invoeren{% endif %}</h3>
+            <h3 class="page-banner">Uitslag {% if is_controle %}controleren{% else %}invoeren{% endif %}</h3>
 
             {% if is_controle %}
                 <!-- is controle van scores door RCL -->

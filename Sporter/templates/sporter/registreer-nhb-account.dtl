@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Account aanmaken</h3>
+            <h3 class="page-banner">Account aanmaken</h3>
             <p>Met deze pagina maak je een nieuw account aan. Dit hoef je maar één keer te doen.</p>
             <p>Je kan alleen een account aanmaken als je een bondsnummer hebt en je e-mailadres bekend is bij de NHB.</p>
         </div>

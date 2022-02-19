@@ -1362,8 +1362,12 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
                 context['url_afsluiten'] = reverse('CompRegio:afsluiten-regiocomp',
                                                    kwargs={'deelcomp_pk': deelcomp.pk})
 
-        context['url_terug'] = reverse('Competitie:overzicht',
-                                       kwargs={'comp_pk': deelcomp.competitie.pk})
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': deelcomp.competitie.pk}),
+                deelcomp.competitie.beschrijving.replace(' competitie', '')),
+            (None, 'Sluit regiocompetitie')
+        )
 
         menu_dynamics(self.request, context)
         return context

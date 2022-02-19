@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Bedankt!</h3>
+            <h3 class="page-banner">Bedankt!</h3>
             <p>Bedankt voor het delen van je mening.</p>
             <p class="nhb-blauw-text"><i class="material-icons-round" style="font-size: 6rem">record_voice_over</i></p>
             <p>Voel je vrij om deze functie vaker te gebruiken. We staan open voor alle tips en tops!</p>

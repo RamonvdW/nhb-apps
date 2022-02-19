@@ -28,7 +28,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Uitslagen teams</h3>
+            <h3 class="page-banner">Uitslagen teams</h3>
             <p>{% if comp.alle_regiocompetities_afgesloten %}Eindstand{% else %}Tussenstand{% endif %} van de regiocompetitie teams binnen een vereniging</p>
         </div>
     </div>

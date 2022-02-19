@@ -29,7 +29,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Uitslagen rayon<wbr>kampioen<wbr>schappen</h3>
+            <h3 class="page-banner">Uitslagen rayon<wbr>kampioen<wbr>schappen</h3>
             <p>Tussenstand/eindstand van de individuele rayonkampioenschappen.</p>
         </div>
     </div>

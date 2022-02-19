@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Competitie wedstrijden</h3>
+            <h3 class="page-banner">Competitie wedstrijden</h3>
             <p>Bondscompetitiewedstrijden die geschoten worden bij vereniging <b>{{ vereniging }}</b>.</p>
             <!-- <p>Overige wedstrijden worden beheerd via de Wedstrijdkalender (zie het menu).</p> -->
         </div>

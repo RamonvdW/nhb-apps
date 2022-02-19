@@ -10,32 +10,30 @@
 
 {% block pagina %}
 
-    <h4>Scores koppelen aan team</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Scores koppelen aan team</h3>
+            <p>Individuele scores koppelen aan een team, voor de huidige ronde</p>
+        </div>
+    </div>
 
-    <p>Via deze pagina kan de RCL de individuele scores koppelen aan een team voor de huidige ronde.</p>
-
-    <p>&nbsp;</p>
-    <div class="row">
-
-        <!-- toon gegevens van de regio en competitie in een blauwe box -->
-        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-            <div class="white-text nhb-blauw z-depth-2">
-
-                <div class="row small-row">
-                    <div class="col s3">Competitie:</div>
-                    <div class="col s7">{{ deelcomp.competitie.beschrijving }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3">Regio:</div>
-                    <div class="col s7">{{ deelcomp.nhb_regio }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3">Huidige ronde:</div>
-                    <div class="col s7">{{ deelcomp.huidige_team_ronde }}</div>
-                </div>
-
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Competitie</th>
+                    <td>{{ deelcomp.competitie.beschrijving }}</td>
+                </tr>
+                <tr>
+                    <th>Regio</th>
+                    <td>{{ deelcomp.nhb_regio }}</td>
+                </tr>
+                <tr>
+                    <th>Huidige ronde</th>
+                    <td>{{ deelcomp.huidige_team_ronde }}</td>
+                </tr>
             </div>
         </div>
     </div>

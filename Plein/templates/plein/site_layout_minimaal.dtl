@@ -34,7 +34,7 @@
         <!-- geen menu -->
         <div id="content">      <!-- geeft padding -->
 
-            <h3 class="nhb-rood-text">Oeps!</h3>
+            <h3 class="page-banner">Oeps!</h3>
 
             <!-- echt inhoud komt hier, vanuit de template -->
             {% block pagina_minimaal %}{% endblock %}

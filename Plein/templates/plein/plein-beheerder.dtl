@@ -16,7 +16,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Beheerders Plein</h3>
+            <h3 class="page-banner">Beheerders Plein</h3>
             <p>Als beheerder vind je op dit plein extra kaartjes die bij jouw rechten passen.</p>
             <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
         </div>

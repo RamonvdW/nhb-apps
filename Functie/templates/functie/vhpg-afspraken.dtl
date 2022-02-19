@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Omgaan met persoons<wbr>gegevens</h3>
+            <h3 class="page-banner">Omgaan met persoons<wbr>gegevens</h3>
             <p>Je hebt op {{ acceptatie_datum|date:'j F Y \o\m H:i' }} akkoord gegeven op onderstaande tekst.</p>
             <p>Een keer per jaar zullen we je vragen om deze afspraken opnieuw te bevestigen.</p>
         </div>

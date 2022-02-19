@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Koppel tweede factor</h3>
+            <h3 class="page-banner">Koppel tweede factor</h3>
             <p>Voordat je als beheerder aan de slag kant moet je een extra beveiliging activeren: de tweede factor.</p>
             <p>Hiervoor is een klein programma nodig.</p>
         </div>

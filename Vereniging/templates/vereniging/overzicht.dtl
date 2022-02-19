@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Beheer Vereniging</h3>
+            <h3 class="page-banner">Beheer Vereniging</h3>
             <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
         </div>
     </div>

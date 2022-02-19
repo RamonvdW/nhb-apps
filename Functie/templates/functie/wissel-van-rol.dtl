@@ -49,7 +49,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Wissel van rol</h3>
+            <h3 class="page-banner">Wissel van rol</h3>
             <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
         </div>
     </div>

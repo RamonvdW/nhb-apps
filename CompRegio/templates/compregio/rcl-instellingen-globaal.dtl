@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Regio keuzes</h3>
+            <h3 class="page-banner">Regio keuzes</h3>
             <p>Overzicht van de keuzes in de verschillende regio's<br>voor de <b>{{ comp }}</b></p>
         </div>
     </div>

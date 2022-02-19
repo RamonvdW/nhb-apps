@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -73,9 +73,61 @@ def filter_wbr_email(text):
     return mark_safe(new_text)
 
 
+dagdeel2wbr = {
+    'GN': ("Geen", "Geen voorkeur"),
+    'AV': ("Avond", "'s Avonds"),
+    'MA': ("M", "Maandag"),
+    'MAa': ("M-Av", "Maandagavond"),
+    'DI': ("Di", "Dinsdag"),
+    'DIa': ("Di-Av", "Dinsdagavond"),
+    'WO': ("W", "Woensdag"),
+    'WOa': ("W-Av", "Woensdagavond"),
+    'DO': ("Do", "Donderdag"),
+    'DOa': ("Do-Av", "Donderdagavond"),
+    'VR': ("V", "Vrijdag"),
+    'VRa': ("V-Av", "Vrijdagavond"),
+    'ZAT': ("Za", "Zaterdag"),
+    'ZAo': ("Za-Och", "Zaterdagochtend"),
+    'ZAm': ("Zo-Mi", "Zaterdagmiddag"),
+    'ZAa': ("Za-Av", "Zaterdagavond"),
+    'ZON': ("Zo", "Zondag"),
+    'ZOo': ("Zo-Och", "Zondagochtend"),
+    'ZOm': ("Zo-Mi", "Zondagmiddag"),
+    'ZOa': ("Zo-Av", "Zondagavond"),
+    'WE': ("Weekend", "Weekend")
+}
+
+
+def filter_wbr_dagdeel(text):
+    """  wbr_dagdeel filter voegt de <wbr> html tag in zodat dagdeel beschrijvingen kunnen wrappen,
+         zoals "woensdagavond" en "zaterdagochtend"
+    """
+
+    try:
+        tup = dagdeel2wbr[text]
+    except KeyError:
+        new_text = text
+    else:
+        kort, lang = tup
+        new_text = '<span class="hide-on-med-and-up">' + escape(kort) + '</span>'
+        new_text += '<span class="hide-on-small-only">'
+
+        for suffix in ('avond', 'middag', 'ochtend'):
+            suffix_len = len(suffix)
+            if lang[-suffix_len:] == suffix:
+                new_text += escape(lang[:-suffix_len]) + '<wbr>' + escape(suffix)
+                break   # from the for
+        # for
+
+        new_text += '</span>'
+
+    return mark_safe(new_text)
+
+
 # register the filters
 register = template.Library()
 register.filter('highlight', filter_highlight)
 register.filter('wbr_email', filter_wbr_email)
+register.filter('wbr_dagdeel', filter_wbr_dagdeel)
 
 # end of file

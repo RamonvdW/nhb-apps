@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Teams Regio</h3>
+            <h3 class="page-banner">Teams Regio</h3>
             {% if not deelcomp.regio_organiseert_teamcompetitie %}
                 <p>In jullie regio wordt geen team competitie gehouden</p>
                 <p>Voor meer informatie: neem contact op met de RCL</p>

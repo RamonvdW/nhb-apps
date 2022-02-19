@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Verenigingen</h3>
+            <h3 class="page-banner">Verenigingen</h3>
             <p>Je rol is <b>{{ huidige_rol }}</b>.</p>
             {% if landelijk %}
                 <p>Hieronder volgt de landelijke lijst van {{ verenigingen.count }} verenigingen.</p>

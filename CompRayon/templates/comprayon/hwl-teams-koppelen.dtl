@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,19 +10,13 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-ver-teams-koppelen" %}
-
-    <h4>Koppel teamleden</h4>
-
-    <p>Op deze pagina kan je leden van de vereniging koppelen aan het team voor de Rayonkampioenschappen.</p>
-
-    {% if alleen_bekijken %}
-        <p>Er kunnen geen wijzigingen meer gedaan worden. {% if rk_team.klasse %}Dit team is geplaatst voor het RK teams!{% else %}Teamleden die niet gerechtigd waren om deel te nemen aan de Rayonkampioenschappen zijn verwijderd.</p><p class="red-text">Dit team is niet compleet en daarom niet geplaatst.{% endif %}</p>
-    {% else %}
-        {% if onder_voorbehoud %}
-            <p>LET OP: Teamleden moeten gerechtigd zijn deel te nemen aan de Rayonkampioenschappen. Deze controle wordt aan het einde van de regiocompetitie gedaan. De berekende team sterkte en team wedstrijdklasse voor het RK zijn daarom <b>onder voorbehoud</b>.</p>
-        {% endif %}
-    {% endif %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Koppel teamleden</h3>
+            <p>Leden van de vereniging koppelen aan het team voor de Rayonkampioenschappen.</p>
+        </div>
+    </div>
 
     <script type="application/javascript">
         function gewijzigd() {
@@ -41,105 +35,142 @@
         }
     </script>
 
-    <form action="{{ url_opslaan }}" method="post">
-        {% csrf_token %}
 
-        <table class="white">
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
 
-            <tr>
-                <td>Vereniging</td>
-                <td>{{ rk_team.vereniging }}</td>
-            </tr>
+            <!-- dialoog venster -->
+            <div class="white left-align z-depth-3">
+                <div style="padding:30px">
 
-            <tr>
-                <td>Team nummer</td>
-                <td>{{ rk_team.volg_nr }}</td>
-            </tr>
+                    <form action="{{ url_opslaan }}" method="post">
+                        {% csrf_token %}
 
-            <tr>
-                <td>Team naam</td>
-                <td>{{ rk_team.team_naam }}</td>
-            </tr>
+                        <table class="white">
 
-            <tr>
-                <td>Soort team</td>
-                <td>{{ rk_team.team_type.beschrijving }}</td>
-            </tr>
+                            <tr>
+                                <td>Vereniging</td>
+                                <td>{{ rk_team.vereniging }}</td>
+                            </tr>
 
-            <tr>
-                <td style="vertical-align: top">Toegestane bogen</td>
-                <td>
-                    {% for boog in boog_typen %}
-                        <span>{{ boog.beschrijving }}</span><br>
-                    {% endfor %}
-                </td>
-            </tr>
+                            <tr>
+                                <td>Team nummer</td>
+                                <td>{{ rk_team.volg_nr }}</td>
+                            </tr>
 
-            <tr>
-                <td>Team sterkte</td>
-                <td>{{ rk_team.ag_str }}</td>
-            </tr>
+                            <tr>
+                                <td>Team naam</td>
+                                <td>{{ rk_team.team_naam }}</td>
+                            </tr>
 
-            <tr>
-                <td>Team wedstrijdklasse</td>
-                <td>{% if rk_team.klasse %}{{ rk_team.klasse.team.beschrijving }}{% else %}<i class="grey-text">Nog niet vastgesteld</i>{% endif %}</td>
-            </tr>
+                            <tr>
+                                <td>Soort team</td>
+                                <td>{{ rk_team.team_type.beschrijving }}</td>
+                            </tr>
 
-            <tr>
-                <td style="vertical-align: top">Selecteer 3 of 4 sporters</td>
+                            <tr>
+                                <td style="vertical-align: top">Toegestane bogen</td>
+                                <td>
+                                    {% for boog in boog_typen %}
+                                        <span>{{ boog.beschrijving }}</span><br>
+                                    {% endfor %}
+                                </td>
+                            </tr>
 
-                {% if not deelnemers.count %}
-                    <td><i class="red-text">Geen sporters gevonden met toegestaan boog type</i></td>
-                {% else %}
-                    <td>
-                        <table class="striped">
-                            <thead>
-                                <tr>
-                                    <th><!-- checkbox column --></th>
-                                    <th>Gemiddelde</th>
-                                    <th>Bron</th>
-                                    <th>Boog</th>
-                                    <th>Naam</th>
-                                </tr>
-                            </thead>
-                            {% for obj in deelnemers %}
-                                <tr>
+                            <tr>
+                                <td>Team sterkte</td>
+                                <td>{{ rk_team.ag_str }}</td>
+                            </tr>
+
+                            <tr>
+                                <td>Team wedstrijdklasse</td>
+                                <td>{% if rk_team.klasse %}{{ rk_team.klasse.team.beschrijving }}{% else %}<i class="grey-text">Nog niet vastgesteld</i>{% endif %}</td>
+                            </tr>
+
+                            <tr>
+                                <td style="vertical-align: top">Selecteer 3 of 4 sporters</td>
+
+                                {% if not deelnemers.count %}
+                                    <td><i class="red-text">Geen sporters gevonden met toegestaan boog type</i></td>
+                                {% else %}
                                     <td>
-                                        {% if alleen_bekijken %}
-                                            {% if obj.geselecteerd %}
-                                                <i class="material-icons-round left nhb-blauw-text">check</i>
-                                            {% elif obj.blokkeer %}
-                                                <i class="material-icons-round left grey-text">square</i>
-                                            {% else %}
-                                                <i>reserve</i>
-                                            {% endif %}
-                                        {% else %}
-                                            <label>
-                                                <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.blokkeer %} disabled{% endif %} onchange="gewijzigd()">
-                                                <span>&nbsp;</span>
-                                            </label>
-                                        {% endif %}
+                                        <table class="striped">
+                                            <thead>
+                                                <tr>
+                                                    <th><!-- checkbox column --></th>
+                                                    <th>Gemiddelde</th>
+                                                    <th>Bron</th>
+                                                    <th>Boog</th>
+                                                    <th>Naam</th>
+                                                </tr>
+                                            </thead>
+                                            {% for obj in deelnemers %}
+                                                <tr>
+                                                    <td>
+                                                        {% if alleen_bekijken %}
+                                                            {% if obj.geselecteerd %}
+                                                                <i class="material-icons-round left nhb-blauw-text">check</i>
+                                                            {% elif obj.blokkeer %}
+                                                                <i class="material-icons-round left grey-text">square</i>
+                                                            {% else %}
+                                                                <i>reserve</i>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            <label>
+                                                                <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.blokkeer %} disabled{% endif %} onchange="gewijzigd()">
+                                                                <span>&nbsp;</span>
+                                                            </label>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>{{ obj.ag_str }}</td>
+                                                    <td>{{ obj.ag_bron }}</td>
+                                                    <td>{{ obj.boog_str }}</td>
+                                                    <td>{{ obj.naam_str }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                        </table>
                                     </td>
-                                    <td>{{ obj.ag_str }}</td>
-                                    <td>{{ obj.ag_bron }}</td>
-                                    <td>{{ obj.boog_str }}</td>
-                                    <td>{{ obj.naam_str }}</td>
-                                </tr>
-                            {% endfor %}
+                                {% endif %}
+                            </tr>
+
                         </table>
-                    </td>
-                {% endif %}
-            </tr>
 
-        </table>
-
-        <div class="fixed-action-btn" style="display: none">
-            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
-                <i class="material-icons-round left">check</i>Opslaan</button>
+                        <div class="fixed-action-btn" style="display: none">
+                            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                                <i class="material-icons-round left">check</i>Opslaan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-    </form>
+    </div>
 
-    <p>De <i>team sterkte</i> wordt berekend uit het gemiddelde uit de regiocompetitie van de drie sterkste teamleden.</p>
-    <p>De <i>team wedstrijdklasse</i> wordt bepaald door de team sterkte en de vastgestelde minimum sterkte voor een wedstrijdklasse.</p>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Belangrijk</h4>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+                {% if alleen_bekijken %}
+                    <p>Er kunnen geen wijzigingen meer gedaan worden. {% if rk_team.klasse %}Dit team is geplaatst voor het RK teams!{% else %}Teamleden die niet gerechtigd waren om deel te nemen aan de Rayonkampioenschappen zijn verwijderd.</p><p class="red-text">Dit team is niet compleet en daarom niet geplaatst.{% endif %}</p>
+                {% else %}
+                    {% if onder_voorbehoud %}
+                        <p>LET OP: Teamleden moeten gerechtigd zijn deel te nemen aan de Rayonkampioenschappen. Deze controle wordt aan het einde van de regiocompetitie gedaan. De berekende team sterkte en team wedstrijdklasse voor het RK zijn daarom <b>onder voorbehoud</b>.</p>
+                    {% endif %}
+                {% endif %}
+
+                <p>De <i>team sterkte</i> wordt berekend uit het gemiddelde uit de regiocompetitie van de drie sterkste teamleden.</p>
+                <p>De <i>team wedstrijdklasse</i> wordt bepaald door de team sterkte en de vastgestelde minimum sterkte voor een wedstrijdklasse.</p>
+            </div>
+        </div>
+    </div>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-ver-teams-koppelen" %}
 
 {% endblock %}

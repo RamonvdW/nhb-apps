@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Feedback geven</h3>
+            <h3 class="page-banner">Feedback geven</h3>
             <p>Met dit formulier kan je een suggestie of compliment aan de ontwikkelaars doorgeven.</p>
             <p>Dit gebruiken we om de site te verbeteren.</p>
         </div>

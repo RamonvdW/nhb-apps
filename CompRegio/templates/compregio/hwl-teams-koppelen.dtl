@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">{% if readonly %}Bekijk{% else %}Koppel{% endif %} teamleden</h3>
+            <h3 class="page-banner">{% if readonly %}Bekijk{% else %}Koppel{% endif %} teamleden</h3>
             {% if mag_wijzigen %}
                 <p>Leden van de vereniging koppelen aan het team.</p>
                 {% if deelcomp.regio_heeft_vaste_teams %}

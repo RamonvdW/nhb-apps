@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Teams klassengrenzen vaststellen</h3>
+            <h3 class="page-banner">Teams klassengrenzen vaststellen</h3>
             <p>voor de RK/BK teams wedstrijdklassen van de <b>{{ comp.beschrijving }}</b>.</p>
             <p>Dit is een eenmalig actie <span class="red-text">welke ook de open inschrijving voor RK teams afsluit.</span></p>
         </div>

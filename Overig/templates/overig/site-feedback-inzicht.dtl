@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Site feedback</h3>
+            <h3 class="page-banner">Site feedback</h3>
             <p>De nieuwste feedback op de site (maximaal 50) volgen hieronder.</p>
         </div>
     </div>

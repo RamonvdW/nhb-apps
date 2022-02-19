@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">VHPG status</h3>
+            <h3 class="page-banner">VHPG status</h3>
             <p>Hieronder zie je wanneer elk van de {{ object_list|length }} beheerders<br>de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd heeft</p>
         </div>
     </div>

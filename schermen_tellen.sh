@@ -44,7 +44,7 @@ do
     grep -q 'class="nhb-blauw-hoofd"' $scherm
     CHECK2=$?
 
-    grep -q '<h3 class="nhb-rood-text">' $scherm
+    grep -q '<h3 class="page-banner">' $scherm
     CHECK3=$?
     
     grep "Copyright" $scherm | grep -q 2022

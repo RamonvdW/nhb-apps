@@ -29,7 +29,7 @@ LAAG_BK = 'BK'
 AFSTANDEN = [('18', 'Indoor'),
              ('25', '25m 1pijl')]
 
-DAGDELEN = [('GN', "Geen voorkeur"),
+DAGDELEN = [('GN', "Geen voorkeur"),            # LET OP: lijst staat ook in Overig/templatetags/overig_filters.py
             ('AV', "'s Avonds"),
             ('MA', "Maandag"),
             ('MAa', "Maandagavond"),

@@ -11,8 +11,9 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.models import (AG_NUL, DeelCompetitie, LAAG_RK,
-                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam)
+from Competitie.models import (AG_NUL, DeelCompetitie, LAAG_RK, CompetitieKlasse,
+                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam,
+                               get_competitie_team_typen)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 import datetime
@@ -180,6 +181,13 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
             context['url_nieuw_team'] = reverse('CompRayon:teams-rk-nieuw',
                                                 kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
+        comp = deelcomp_rk.competitie
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (None, comp.beschrijving.replace(' competitie', '')),
+            (None, 'Teams RK'),
+        )
+
         menu_dynamics(self.request, context)
         return context
 
@@ -206,18 +214,18 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         # haal de gevraagde deelcompetitie op
         try:
             deelcomp_pk = int(deelcomp_rk_pk[:6])     # afkappen voor de veiligheid
-            deelcomp = (DeelCompetitie
-                        .objects
-                        .select_related('competitie',
-                                        'nhb_rayon')
-                        .get(pk=deelcomp_pk,
-                             is_afgesloten=False,
-                             laag=LAAG_RK,                           # moet RK zijn
-                             nhb_rayon=self.functie_nu.nhb_ver.regio.rayon))
+            deelcomp_rk = (DeelCompetitie
+                           .objects
+                           .select_related('competitie',
+                                           'nhb_rayon')
+                           .get(pk=deelcomp_pk,
+                                is_afgesloten=False,
+                                laag=LAAG_RK,                           # moet RK zijn
+                                nhb_rayon=self.functie_nu.nhb_ver.regio.rayon))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
-        comp = deelcomp.competitie
+        comp = deelcomp_rk.competitie
         comp.bepaal_fase()
 
         if not ('E' <= comp.fase <= 'J'):
@@ -228,7 +236,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         if datetime.date.today() < vanaf:
             raise Http404('Competitie is niet in de juiste fase 2')
 
-        return deelcomp
+        return deelcomp_rk
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -237,15 +245,15 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         # zoek de deelcompetitie waar de regio teams voor in kunnen stellen
         context['deelcomp_rk'] = deelcomp_rk = self._get_deelcomp_rk(kwargs['rk_deelcomp_pk'])
         ver = self.functie_nu.nhb_ver
+        comp = deelcomp_rk.competitie
 
         teamtype_default = None
-        teams = TeamType.objects.order_by('volgorde')
-        for obj in teams:
-            obj.choice_name = obj.afkorting
-            if obj.afkorting == 'R':
-                teamtype_default = obj
+        context['opt_team_type'] = teamtypes = get_competitie_team_typen(comp)
+        for teamtype in teamtypes:
+            teamtype.choice_name = teamtype.afkorting
+            if teamtype.afkorting == 'R2':
+                teamtype_default = teamtype
         # for
-        context['opt_team_type'] = teams
 
         try:
             rk_team_pk = int(kwargs['rk_team_pk'][:6])      # afkappen voor de veiligheid
@@ -265,7 +273,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
 
         context['rk_team'] = rk_team
 
-        for obj in teams:
+        for obj in teamtypes:
             obj.actief = rk_team.team_type == obj
         # for
 
@@ -275,6 +283,14 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
 
         if rk_team.pk > 0:
             context['url_verwijderen'] = context['url_opslaan']
+
+        comp = deelcomp_rk.competitie
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (None, comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompRayon:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk}), 'Teams RK'),
+            (None, 'Wijzig team')
+        )
 
         menu_dynamics(self.request, context)
         return context
@@ -310,8 +326,13 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
 
             afkorting = request.POST.get('team_type', '')
             try:
-                team_type = TeamType.objects.get(afkorting=afkorting)
-            except TeamType.DoesNotExist:
+                klasse = (CompetitieKlasse
+                          .objects
+                          .select_related('team__team_type')
+                          .filter(team__buiten_gebruik=False,
+                                  team__team_type__afkorting=afkorting))[0]
+                team_type = klasse.team.team_type
+            except (IndexError, TeamType.DoesNotExist):
                 raise Http404('Onbekend team type')
 
             rk_team = KampioenschapTeam(
@@ -524,6 +545,14 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
         if not alleen_bekijken:
             context['url_opslaan'] = reverse('CompRayon:teams-rk-koppelen',
                                              kwargs={'rk_team_pk': rk_team.pk})
+
+        comp = deelcomp_rk.competitie
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (None, comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompRayon:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk}), 'Teams RK'),
+            (None, 'Koppel teamleden')
+        )
 
         menu_dynamics(self.request, context)
         return context

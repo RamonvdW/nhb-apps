@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Beheerders van de vereniging</h3>
+            <h3 class="page-banner">Beheerders van de vereniging</h3>
             <p>Hieronder staan functies en de gekoppelde beheerders. Afhankelijk van je rol mag je hier wijzigingen in aanbrengen.</p>
             <p>Jouw huidige rol is: <b>{{ huidige_rol }}</b></p>
         </div>

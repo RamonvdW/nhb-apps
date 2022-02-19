@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Privacy<wbr>verklaring</h3>
+            <h3 class="page-banner">Privacy<wbr>verklaring</h3>
             <p>Alle vragen en verzoeken over privacy kunnen gericht worden aan<br>de Nederlandse Handboog Bond via e-mail: <code>{{ email_bb }}</code></p>
         </div>
     </div>

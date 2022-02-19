@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Voorkeuren leden</h3>
+            <h3 class="page-banner">Voorkeuren leden</h3>
             <p>Van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }}.</p>
         </div>
     </div>

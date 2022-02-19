@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Planning</h3>
+            <h3 class="page-banner">Planning</h3>
             <p>De RCL kan deze planning aanpassen.</p>
             <p>
                 <a class="btn-nhb-rood" href="{{ handleiding_planning_regio_url }}" target="_blank" rel="noopener noreferrer">

@@ -12,7 +12,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Hoofdpagina</h3>
+            <h3 class="page-banner">Hoofdpagina</h3>
             <p>van de handleiding</p>
         </div>
     </div>

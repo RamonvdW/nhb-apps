@@ -390,7 +390,7 @@ class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assertEqual(KampioenschapTeam.objects.count(), 0)
             with self.assert_max_queries(20):
                 url = self.url_rk_teams_wijzig % (deelcomp_rk3.pk, 0)  # 0 = nieuw team
-                resp = self.client.post(url, {'team_type': 'R'})
+                resp = self.client.post(url, {'team_type': 'R2'})
                 self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
             self.assertEqual(KampioenschapTeam.objects.count(), 1)
 
@@ -473,7 +473,7 @@ class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assertEqual(KampioenschapTeam.objects.count(), 0)
             with self.assert_max_queries(20):
                 url = self.url_rk_teams_wijzig % (deelcomp_rk3.pk, 0)  # 0 = nieuw team
-                resp = self.client.post(url, {'team_type': 'R'})
+                resp = self.client.post(url, {'team_type': 'R2'})
                 self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
             self.assertEqual(KampioenschapTeam.objects.count(), 1)
 
@@ -512,7 +512,7 @@ class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assertEqual(KampioenschapTeam.objects.count(), 0)
             with self.assert_max_queries(20):
                 url = self.url_rk_teams_wijzig % (deelcomp_rk3.pk, 0)  # 0 = nieuw team
-                resp = self.client.post(url, {'team_type': 'R'})
+                resp = self.client.post(url, {'team_type': 'R2'})
                 self.assert_is_redirect_not_plein(resp)     # is redirect naar 'koppelen'
             self.assertEqual(KampioenschapTeam.objects.count(), 1)
 

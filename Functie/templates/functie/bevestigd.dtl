@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">E-mail is bevestigd</h3>
+            <h3 class="page-banner">E-mail is bevestigd</h3>
             <p>Je hebt toegang tot de e-mail bevestigd.</p>
 
             <p>Het e-mailadres is nu gekoppeld aan de functie <b>{{ functie.beschrijving }}</b>.</p>

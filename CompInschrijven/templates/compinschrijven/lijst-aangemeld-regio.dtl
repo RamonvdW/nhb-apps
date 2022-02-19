@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Inschrijvingen</h3>
+            <h3 class="page-banner">Inschrijvingen</h3>
             <p>voor de regiocompetitie <b>{{ competitie.beschrijving }}</b></p>
         </div>
     </div>

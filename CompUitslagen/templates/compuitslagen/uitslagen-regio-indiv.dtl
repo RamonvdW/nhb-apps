@@ -33,7 +33,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Uitslagen regiocompetitie</h3>
+            <h3 class="page-banner">Uitslagen regiocompetitie</h3>
             <p>{% if comp.alle_regiocompetities_afgesloten %}Eindstand{% else %}Tussenstand{% endif %} van de individuele regiocompetities.</p>
         </div>
     </div>

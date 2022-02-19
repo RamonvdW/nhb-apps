@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Instellingen Team<wbr>competitie</h3>
+            <h3 class="page-banner">Instellingen Team<wbr>competitie</h3>
             {% if readonly_na_fase_D %}
                 <p>Hieronder kan je de gemaakte keuzes maken voor jouw regiocompetitie inzien. Wijzigen is niet meer mogelijk.</p>
             {% else %}

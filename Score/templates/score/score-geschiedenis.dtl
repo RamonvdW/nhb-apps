@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Score Geschiedenis</h3>
+            <h3 class="page-banner">Score Geschiedenis</h3>
             <p>Geschiedenis van een de scores/AG van een sporter inzien</p>
         </div>
     </div>

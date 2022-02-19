@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Team Ronde</h3>
+            <h3 class="page-banner">Team Ronde</h3>
             <p>De huidige ronde van de teamcompetitie inzien, team punten verdelen en afsluiten</p>
         </div>
     </div>

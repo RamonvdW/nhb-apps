@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Wedstrijd<wbr>locaties</h3>
+            <h3 class="page-banner">Wedstrijd<wbr>locaties</h3>
             <p>Locaties die vereniging <b>{{ ver }}</b> kan gebruiken voor wedstrijden, naast de eigen accommodatie.</p>
         </div>
     </div>
@@ -82,7 +82,7 @@
         </div>
     </div>
 
-    <p>Deze gegevens kunnen worden aangepast door de hoofdwedstrijdleider van de vereniging.</p>
+    <p class="center">Deze gegevens kunnen worden aangepast door de hoofdwedstrijdleider van de vereniging.</p>
 
     {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-externe-locaties" %}
 

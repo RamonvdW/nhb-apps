@@ -27,7 +27,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Verbeterbare Records</h3>
+            <h3 class="page-banner">Verbeterbare Records</h3>
             <p>Nederlandse handboogsport records voor de discipline <b>{{ beschrijving }}</b>.</p>
         </div>
     </div>

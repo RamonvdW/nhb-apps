@@ -115,7 +115,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Competitie datums</h3>
+            <h3 class="page-banner">Competitie datums</h3>
             <p>voor de <b>{{ comp }}</b></p>
         </div>
     </div>

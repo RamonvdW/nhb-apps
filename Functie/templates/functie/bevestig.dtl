@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">E-mail bevestigen</h3>
+            <h3 class="page-banner">E-mail bevestigen</h3>
             <p>We hebben een e-mail gestuurd naar <b>{{ functie.nieuwe_email }}</b> om zeker te zijn dat we je kunnen bereiken.</p>
             <p>Volg de instructies in de e-mail om het koppelen af te ronden.</p>
 

@@ -181,7 +181,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
             else:
                 aanmelding.klasse = klassen[0]
             aanmelding.save()
-            # print('ingeschreven: %s in klasse %s' % (aanmelding.sporterboog, aanmelding.klasse))
+            print('ingeschreven: %s in klasse %s' % (aanmelding.sporterboog, aanmelding.klasse))
 
             sportersboog = sportersboog[skip:]
         # while

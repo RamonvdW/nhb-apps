@@ -30,7 +30,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Accommodatie</h3>
+            <h3 class="page-banner">Accommodatie</h3>
             <p>Details van de accommodatie van vereniging <b>{{ nhbver }}</b>.</p>
         </div>
     </div>

@@ -24,7 +24,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Filteren</h3>
+            <h3 class="page-banner">Filteren</h3>
             <p>Vind nederlandse handboogsport records van interesse</p>
         </div>
     </div>

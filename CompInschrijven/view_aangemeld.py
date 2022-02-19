@@ -409,7 +409,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         context['dagdelen'] = dagdelen = list()
         for afkorting, beschrijving in DAGDELEN:
             if alles_mag or (afkorting in dagdelen_spl):
-                dagdelen.append(beschrijving)
+                dagdelen.append(afkorting)
         # for
 
         # maak een lijst van alle verenigingen in deze regio
@@ -621,6 +621,13 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         context['url_download'] = reverse('CompInschrijven:inschrijfmethode3-behoefte-als-bestand',
                                           kwargs={'comp_pk': comp.pk,
                                                   'regio_pk': regio.pk})
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompInschrijven:lijst-regiocomp-regio', kwargs={'comp_pk': comp.pk, 'regio_pk': deelcomp.nhb_regio.regio_nr}), 'Inschrijvingen'),
+            (None, 'Benodigde dagdelen')
+        )
 
         menu_dynamics(self.request, context)
         return context
@@ -844,6 +851,13 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
         context['url_download'] = reverse('CompInschrijven:inschrijfmethode1-behoefte-als-bestand',
                                           kwargs={'comp_pk': comp.pk,
                                                   'regio_pk': regio.pk})
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompInschrijven:lijst-regiocomp-regio', kwargs={'comp_pk': comp.pk, 'regio_pk': deelcomp.nhb_regio.regio_nr}), 'Inschrijvingen'),
+            (None, 'Gekozen wedstrijden')
+        )
 
         menu_dynamics(self.request, context)
         return context

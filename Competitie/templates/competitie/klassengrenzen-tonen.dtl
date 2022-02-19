@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Klassen bondscompetitie</h3>
+            <h3 class="page-banner">Klassen bondscompetitie</h3>
             <p>voor de <b>{{ comp.beschrijving }}</b></p>
             {% if not comp.klassengrenzen_vastgesteld %}
                 <p>De klassengrenzen zijn nog niet vastgesteld.</p>

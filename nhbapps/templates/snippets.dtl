@@ -2,7 +2,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Page heading</h3>
+            <h3 class="page-banner">Page heading</h3>
             <p>Subtitle</p>
         </div>
     </div>

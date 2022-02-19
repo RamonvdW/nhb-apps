@@ -302,7 +302,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
             self._zet_ag(100013, 18)
 
             url = url_inschrijven % self.comp_18.pk
-            with self.assert_max_queries(43):
+            with self.assert_max_queries(32):
                 resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
                                               'lid_100003_boogtype_3': 'on',    # 3=BB
                                               'lid_100004_boogtype_1': 'on',    # 1=R
@@ -519,7 +519,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
 
         # nu zijn er 10 teams. Maak #11 aan
         resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
-                                {'team_type': 'R'})
+                                {'team_type': 'R2'})
         self.assert404(resp)     # 404 = Not found
 
         # haal het teams overzicht op

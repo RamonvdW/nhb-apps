@@ -35,7 +35,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Aanmelden</h3>
+            <h3 class="page-banner">Aanmelden</h3>
         </div>
     </div>
 
@@ -291,6 +291,6 @@
         </script>
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compinschrijven-leden-aanmelden" %}
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compinschrijven-hwl-leden-aanmelden" %}
 
 {% endblock %}

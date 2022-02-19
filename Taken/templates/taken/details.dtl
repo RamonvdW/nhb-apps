@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Taak details</h3>
+            <h3 class="page-banner">Taak details</h3>
             <p>Details van deze aan jou toegekende taak</p>
         </div>
     </div>

@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Mijn pagina</h3>
+            <h3 class="page-banner">Mijn pagina</h3>
             <p>Op deze pagina verzamelen we informatie die voor jou interessant is.</p>
         </div>
     </div>

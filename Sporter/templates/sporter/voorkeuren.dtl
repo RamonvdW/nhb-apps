@@ -24,7 +24,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Voorkeuren</h3>
+            <h3 class="page-banner">Voorkeuren</h3>
             {% if is_hwl %}
                 <p>Voorkeuren van lid <b>{{ sporter.volledige_naam }}</b></p>
             {% endif %}

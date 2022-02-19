@@ -14,7 +14,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Wijzig e-mailadres</h3>
+            <h3 class="page-banner">Wijzig e-mailadres</h3>
             <p>Voor beheerders gekoppeld aan de functie <b>{{ functie.beschrijving }}</b>.</p>
             <p>Huidige (bevestigde) e-mailadres: {% if functie.bevestigde_email %}<code>{{ functie.bevestigde_email }}</code>{% else %}<i class="red-text">Geen</i>{% endif %}</p>
         </div>

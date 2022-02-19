@@ -20,7 +20,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="nhb-rood-text">Beheerder e-mailadressen</h3>
+            <h3 class="page-banner">Beheerder e-mailadressen</h3>
             <p>Hieronder staan de e-mailadressen van alle {{ aantal }} SEC en HWL.</p>
 
             <a class="btn-nhb-rood" href="#" onclick="copy_to_clipboard()"><i class="material-icons-round left">copy</i>Kopieer naar mijn klembord</a>
