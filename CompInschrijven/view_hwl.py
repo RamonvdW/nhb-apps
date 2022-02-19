@@ -367,11 +367,6 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                                               nhb_regio=hwl_regio)
         methode = deelcomp.inschrijf_methode
 
-        boog2teamtype = dict()
-        for obj in get_competitie_team_typen(comp):
-            boog2teamtype[obj.afkorting] = obj
-        # for
-
         # zoek eerst de voorkeuren op
         mag_team_schieten = comp.fase == 'B'
         bulk_team = False

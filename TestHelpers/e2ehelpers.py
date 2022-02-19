@@ -217,16 +217,14 @@ class E2EHelpers(TestCase):
             # skip the headers
             pos = content.find('<body')
             if pos > 0:                             # pragma: no branch
-                content = content[pos:]             # strip header
+                content = content[pos:]             # strip head section
 
         if skip_broodkruimels:
             pos = content.find('class="broodkruimels-')
-            while pos >= 0:
-                content = content[pos+20:]
-                pos = content.find('</a>')
-                content = content[pos+4:]
-                pos = content.find('class="broodkruimels-')
-            # while
+            if pos >= 0:
+                content = content[pos:]
+                pos = content.find('</div>')
+                content = content[pos:]
 
         urls = list()
         while len(content):
@@ -490,7 +488,6 @@ class E2EHelpers(TestCase):
                 self.fail(msg=msg)
 
     def assert_is_bestand(self, response):
-
         # check the headers that make this a download
         # print("response: ", repr([(a,b) for a,b in response.items()]))
         content_type_header = response['Content-Type']

@@ -86,7 +86,7 @@ class VerenigingKalenderWedstrijdenView(UserPassesTestMixin, View):
                 wed.save()
 
                 # default alle bogen aan zetten
-                bogen = BoogType.objects.all()
+                bogen = BoogType.objects.all()      # TODO: exclude IB
                 wed.boogtypen.set(bogen)
 
                 # default alle wedstrijdklassen kiezen die onder A-status vallen

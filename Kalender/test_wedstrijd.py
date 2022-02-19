@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -521,8 +521,8 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
         self.assertEqual(1, KalenderWedstrijd.objects.count())
         wedstrijd = KalenderWedstrijd.objects.all()[0]
-        self.assertEqual(wedstrijd.boogtypen.count(), 5)
-        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 40)
+        self.assertEqual(wedstrijd.boogtypen.count(), 6)
+        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 49)
 
         url = self.url_kalender_sessies % wedstrijd.pk
         resp = self.client.post(url, {'nieuwe_sessie': 'graag'})

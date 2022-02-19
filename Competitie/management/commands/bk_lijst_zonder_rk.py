@@ -56,7 +56,7 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Team klasse: %s' % klasse)
             nr2ver = dict()  # [ver_nr] = vereniging
 
-            ws = wb.create_sheet(title=klasse.team.beschrijving)
+            ws = wb.create_sheet(title=klasse.team.beschrijving[:31].strip())     # sheet title max length = 31
             ws['A1'] = 'Team klasse: %s' % klasse.team.beschrijving
             ws['A1'].font = font_titel
 
@@ -222,7 +222,7 @@ class Command(BaseCommand):
 
             self.stdout.write('[INFO] Individuele klasse: %s' % klasse)
 
-            ws = wb.create_sheet(title=klasse.indiv.beschrijving)
+            ws = wb.create_sheet(title=klasse.indiv.beschrijving[:31].strip())     # sheet title max length = 31
             ws['A1'] = 'Individuele klasse: %s' % klasse.indiv.beschrijving
             ws['A1'].font = font_titel
 
