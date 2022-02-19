@@ -46,6 +46,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
             raise Http404('Inschrijving niet gevonden')
 
         context['deelnemer'] = deelnemer
+        comp = deelnemer.deelcompetitie.competitie
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
@@ -123,10 +124,19 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
                                          kwargs={'deelnemer_pk': deelnemer.pk})
 
         if rol_nu == Rollen.ROL_SPORTER:
-            context['url_terug'] = reverse('Sporter:profiel')
+            context['kruimels'] = (
+                (reverse('Sporter:profiel'), 'Mijn pagina'),
+                (None, comp.beschrijving.replace(' competitie', '')),
+                (None, 'Aanpassen')
+            )
         else:
-            context['url_terug'] = reverse('CompRegio:wie-schiet-waar',
-                                           kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk})
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (None, comp.beschrijving.replace(' competitie', '')),
+                (reverse('CompRegio:wie-schiet-waar', kwargs={'deelcomp_pk': deelnemer.deelcompetitie.pk}),
+                    'Wie schiet waar?'),
+                (None, 'Aanpassen')
+            )
 
         menu_dynamics(self.request, context)
         return context

@@ -11,6 +11,26 @@
 
 {% block pagina %}
 
+    <script type="application/javascript">
+        function do_uitschrijven(id)
+        {
+            // voer een POST uit om toe te voegen
+            let form = document.createElement('form');
+            form.setAttribute('method', 'post');
+            form.setAttribute('action', id.getAttribute("data-url"));
+
+            inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = "csrfmiddlewaretoken";
+            inp.value = getCookie('csrftoken');
+            form.appendChild(inp);
+
+            form.style.display = 'hidden';
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
+
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
@@ -119,7 +139,7 @@
                                         {% endif %}
                                     {% else %}
                                         {% if deelcomp.is_ingeschreven %}
-                                            <span class="green-text">Je bent ingeschreven</span>
+                                            <span>Je bent ingeschreven</span>
                                         {% else %}
                                             <span>Je bent niet ingeschreven</span>
                                         {% endif %}
@@ -127,17 +147,32 @@
                                 </td>
                                 <td>
                                     {% if deelcomp.url_schietmomenten %}
-                                        <a class="btn-nhb-blauw" href="{{ deelcomp.url_schietmomenten }}">Aanpassen</a>
+                                        <a class="btn-nhb-rood" href="{{ deelcomp.url_schietmomenten }}">Aanpassen</a>
                                         <span>&nbsp;&nbsp;</span>
                                     {% endif %}
                                     {% if deelcomp.url_aanmelden %}
                                         <a class="btn-nhb-rood" href="{{ deelcomp.url_aanmelden }}">Aanmelden</a>
                                     {% else %}
                                         {% if deelcomp.url_afmelden %}
-                                            <form method="post" action="{{ deelcomp.url_afmelden }}" style="display:inline">
-                                                {% csrf_token %}
-                                                <input class="btn-nhb-blauw" type="submit" value="Uitschrijven" style="display:inline">
-                                            </form>
+
+                                            <a class="btn-nhb-blauw modal-trigger" href="#bevestig_uitschrijven_{{ deelcomp.pk }}">Uitschrijven</a>
+
+                                            <!-- modal dialog voor deze specifieke competitie -->
+                                            <div class="modal" id="bevestig_uitschrijven_{{ deelcomp.pk }}">
+                                                <div class="modal-content center">
+                                                    <h5>Uitschrijven?</h5>
+                                                    <p>Wil je jezelf uitschrijven voor de<br><b>{{ deelcomp.competitie.beschrijving }}</b>?</p>
+
+                                                    <div class="modal-footer" style="text-align:center; display:block">
+                                                        <div style="display:inline-block; width:50%">
+                                                            <button class="btn-nhb-rood" onclick="do_uitschrijven(this)" data-url="{{ deelcomp.url_afmelden }}">Ja</button>
+                                                        </div>
+                                                        <div style="display:inline-block; width:50%">
+                                                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         {% elif deelcomp.competitie.fase < 'B' %}
                                             <span>Inschrijven kan nog niet</span>
                                         {% endif %}

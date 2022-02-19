@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Teams Poules</h3>
+            <h3 class="page-banner">Poules</h3>
             <p>Poules {% if readonly %}bekijken{% else %}instellen{% endif %} voor de teamcompetitie</p>
             <p><a class="btn-nhb-rood" href="{{ wiki_rcl_poules_url }}" target="_blank" rel="noopener noreferrer">
                 <i class="material-icons-round left">help_outline</i>Handleiding</a>

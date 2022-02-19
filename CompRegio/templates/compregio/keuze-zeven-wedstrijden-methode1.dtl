@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,18 +10,18 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-keuze-zeven-wedstrijden-methode1" %}
-
-    <h4>Wanneer wil je schieten?</h4>
-
-    {% if is_hwl %}
-        <p>Als HWL kan je via scherm de keuzes voor lid <b>{{ deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam }}</b> van jouw vereniging aanpassen voor de <b>{{ deelnemer.deelcompetitie.competitie.beschrijving }}</b>.</p>
-    {% else %}
-        <p>In jouw regio mag je zelf aangeven wanneer je kan schieten.</p>
-        <p>Hieronder staat je huidige keuze voor de <b>{{ deelnemer.deelcompetitie.competitie.beschrijving }}</b>.</p>
-    {% endif %}
-
-    <p>Indien nodig, verander de vinkjes en druk op Opslaan.</p>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Aanpassen</h3>
+            {% if is_hwl %}
+                <p>Als HWL kan je via scherm de keuzes voor lid <b>{{ deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam }}</b> van jouw vereniging aanpassen<br>voor de <b>{{ deelnemer.deelcompetitie.competitie.beschrijving }}</b></p>
+            {% else %}
+                <p>In jouw regio mag je zelf aangeven wanneer je kan schieten.</p>
+                <p>Hieronder staat je huidige keuze voor de <b>{{ deelnemer.deelcompetitie.competitie.beschrijving }}</b>.</p>
+            {% endif %}
+        </div>
+    </div>
 
     <script type="application/javascript">
         function tel_wedstrijden() {
@@ -46,52 +46,77 @@
         }
     </script>
 
-    <form method="post" action="{{ url_opslaan }}">
-        {% csrf_token %}
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Wanneer wil je schieten?</h4>
+            <p>Indien nodig, verander de vinkjes en druk op OPSLAAN</p>
+        </div>
+    </div>
 
-        <table class="white">
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
 
-            {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
-                <tr>
-                    <td>Kies wanneer je wilt schieten:<br>
-                        {% for wedstrijd in wedstrijden_1 %}
-                            <label style="margin-left: 20px">
-                                <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()"{% if wedstrijd.is_gekozen %} checked{% endif %}>
-                                <span class="black-text">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
-                            </label>
-                            <br>
-                        {% endfor %}
-                    </td>
-                </tr>
-            {% else %}
-                <tr><td><i>Sorry, geen wedstrijden aanwezig</i></td></tr>
-            {% endif %}
+            <!-- dialoog venster -->
+            <div class="white left-align z-depth-3">
+                <div style="padding:30px">
+                        <form method="post" action="{{ url_opslaan }}">
+                            {% csrf_token %}
 
-            {% if wedstrijden_2 %}
-                <tr id="id_wedstrijden_2_knop">
-                    <td><button class="btn-nhb-blauw" type="button" onclick="toon_wedstrijden_2()">Toon meer wedstrijden</button>&nbsp;&nbsp;Er zijn nog {{ wedstrijden_2|length }} wedstrijden in de regio, wat verder weg.</td>
-                </tr>
+                            <table class="white">
 
-                <tr id="id_wedstrijden_2" class="hide">
-                    <td>
-                        {% for wedstrijd in wedstrijden_2 %}
-                            <label style="margin-left: 20px">
-                                <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()">
-                                <span class="black-text">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
-                            </label>
-                            <br>
-                        {% endfor %}
-                    </td>
-                </tr>
-            {% endif %}
+                                {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
+                                    <tr>
+                                        <td>
+                                            {% for wedstrijd in wedstrijden_1 %}
+                                                <label style="margin-left: 20px">
+                                                    <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()"{% if wedstrijd.is_gekozen %} checked{% endif %}>
+                                                    <span class="black-text">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
+                                                </label>
+                                                <br>
+                                            {% endfor %}
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td class="center">
+                                            <i>Sorry, geen wedstrijden aanwezig</i>
+                                        </td>
+                                    </tr>
+                                {% endif %}
 
-        </table>
+                                {% if wedstrijden_2 %}
+                                    <tr id="id_wedstrijden_2_knop">
+                                        <td><button class="btn-nhb-blauw" type="button" onclick="toon_wedstrijden_2()">Toon meer wedstrijden</button>&nbsp;&nbsp;Er zijn nog {{ wedstrijden_2|length }} wedstrijden in de regio, wat verder weg.</td>
+                                    </tr>
 
-        <p>Je mag maximaal 7 keuzes opgeven. <span>Je hebt <b id="aantal">0 wedstrijden</b> gekozen.</span></p>
-        <a class="btn-nhb-blauw" href="{{ url_terug }}">Terug</a>
-        <span>&nbsp;&nbsp;&nbsp;</span>
-        <input class="btn-nhb-rood" type="submit" value="Opslaan" id="submit">
-    </form>
+                                    <tr id="id_wedstrijden_2" class="hide">
+                                        <td>
+                                            {% for wedstrijd in wedstrijden_2 %}
+                                                <label style="margin-left: 20px">
+                                                    <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()">
+                                                    <span class="black-text">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
+                                                </label>
+                                                <br>
+                                            {% endfor %}
+                                        </td>
+                                    </tr>
+                                {% endif %}
+
+                            </table>
+
+                            <div class="center">
+                                <p>Je mag maximaal 7 keuzes opgeven. <span>Je hebt <b id="aantal">0 wedstrijden</b> gekozen.</span></p>
+                                <input class="btn-nhb-rood" type="submit" value="Opslaan" id="submit">
+                            </div>
+                        </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
 
     <!-- initialisatie -->
     <script type="application/javascript">
@@ -100,5 +125,7 @@
             tel_wedstrijden()
         })
     </script>
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-keuze-zeven-wedstrijden-methode1" %}
 
 {% endblock %}

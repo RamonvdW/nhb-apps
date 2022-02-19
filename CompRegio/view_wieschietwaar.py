@@ -135,6 +135,13 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
             context['afmelden_url'] = reverse('CompInschrijven:leden-ingeschreven',
                                               kwargs={'deelcomp_pk': deelcomp.pk})
 
+        comp = deelcomp.competitie
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (None, comp.beschrijving.replace(' competitie', '')),
+            (None, 'Wie schiet waar?')
+        )
+
         menu_dynamics(self.request, context)
         return context
 

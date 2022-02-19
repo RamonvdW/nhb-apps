@@ -110,7 +110,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
             (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (None, 'Team Poules')
+            (None, 'Poules')
         )
 
         menu_dynamics(self.request, context)
@@ -226,8 +226,13 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
         context['poule'] = poule
         context['url_opslaan'] = reverse('CompRegio:wijzig-poule',
                                          kwargs={'poule_pk': poule.pk})
-        context['url_terug'] = reverse('CompRegio:regio-poules',
-                                       kwargs={'deelcomp_pk': deelcomp.pk})
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompRegio:regio-poules', kwargs={'deelcomp_pk': deelcomp.pk}), 'Poules'),
+            (None, 'Wijzig')
+        )
 
         menu_dynamics(self.request, context)
         return context

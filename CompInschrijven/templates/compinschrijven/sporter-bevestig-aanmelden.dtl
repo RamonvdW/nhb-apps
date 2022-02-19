@@ -170,13 +170,13 @@
                             </tr>
                         </table>
 
-                        {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
-                            <p>Je mag maximaal 7 keuzes opgeven. <span>Je hebt <b id="aantal">0 wedstrijden</b> gekozen.</span></p>
-                        {% else %}
-                            <p>&nbsp;</p>
-                        {% endif %}
-
                         <div class="center">
+                            {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
+                                <p>Je mag maximaal 7 keuzes opgeven. <span>Je hebt <b id="aantal">0 wedstrijden</b> gekozen.</span></p>
+                            {% else %}
+                                <p>&nbsp;</p>
+                            {% endif %}
+
                             <input class="btn-nhb-rood" type="submit" value="Meld mij aan" id="submit">
                         </div>
                     </form>
