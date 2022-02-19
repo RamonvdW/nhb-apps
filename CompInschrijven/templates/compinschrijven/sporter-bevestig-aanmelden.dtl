@@ -1,16 +1,14 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block title %}Aanmelden voor de competitie{% endblock %}
+{% block title %}Aanmelden{% endblock %}
 
 {% block pagina %}
-
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compinschrijven-sporter-bevestig-aanmelden" %}
 
     <script type="application/javascript">
         function tel_wedstrijden() {
@@ -34,138 +32,159 @@
         }
     </script>
 
-    <h4>Aanmelden voor de competitie</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Aanmelden</h3>
+            <p>Aanmelden voor de <b>{{ deelcomp.competitie.beschrijving }}</b> in jouw regio</p>
+        </div>
+    </div>
 
-    <p>Via dit formulier kan je je aanmelden voor de <b>{{ deelcomp.competitie.beschrijving }}</b> in jouw regio.</p>
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
 
-    <form method="post" action="{{ bevestig_url }}">
-        {% csrf_token %}
-        <input type="hidden" name="sporterboog_pk" value="{{ sporterboog.pk }}">
-        <input type="hidden" name="deelcomp_pk" value="{{ deelcomp.pk }}">
+            <!-- dialoog venster -->
+            <div class="white left-align z-depth-3">
+                <div style="padding:30px">
 
-        <table class="white">
-            <tr>
-                <td>Je wil deelnemen met je <b>{{ sporterboog.boogtype.beschrijving }}</b> boog.</td>
-            </tr>
+                    <form method="post" action="{{ bevestig_url }}">
+                        {% csrf_token %}
 
-            {% if show_dt %}
-                <tr>
-                    <td>
-                        <span>Voorkeur voor eigen blazoen: </span>
-                        {% if voorkeuren.voorkeur_eigen_blazoen %}
-                            <span><b>Ja</b></span>
+                        <input type="hidden" name="sporterboog_pk" value="{{ sporterboog.pk }}">
+                        <input type="hidden" name="deelcomp_pk" value="{{ deelcomp.pk }}">
+
+                        <table class="white">
+                            <tr>
+                                <td>Je wilt deelnemen met je <b>{{ sporterboog.boogtype.beschrijving }}</b> boog.</td>
+                            </tr>
+
+                            {% if eigen_blazoen %}
+                                <tr>
+                                    <td>
+                                        <span>Voorkeur voor eigen blazoen: </span>
+                                        {% if voorkeuren.voorkeur_eigen_blazoen %}
+                                            <span><b>Ja</b></span>
+                                        {% else %}
+                                            <span><b>Nee</b></span>
+                                        {% endif %}
+                                        <span class="right">(ga naar Voorkeuren om dit te wijzigen)</span>
+                                    </td>
+                                </tr>
+                            {% endif %}
+
+                            <tr>
+                                <td>
+                                    <span>Aanvangsgemiddelde: </span>
+                                    {% if ag %}
+                                        <span><b>{{ ag|floatformat:3 }}</b></span>
+                                        {% if ag_hist %}
+                                            <br><span class="grey-text">(vastgesteld op {{ ag_hist.when|date:"j F Y" }} - {{ ag_hist.notitie }})</span>
+                                        {% endif %}
+                                        <br><br>
+                                        <span>Je wordt geplaatst in klasse: <b>{{ wedstrijdklasse }}</b></span>
+                                    {% else %}
+                                        <span><b>Geen</b></span>
+                                        <br><br>
+                                        <span>Je wordt {% if is_klasse_onbekend %}voorlopig {% endif %}geplaatst in klasse: <b>{{ wedstrijdklasse }}</b></span>
+                                        {% if is_klasse_onbekend %}<p><i>Omdat we nu niet weten hoe goed je kan schieten, plaatsen we je na 3 scores automatisch in de juiste klasse.</i></p>{% endif %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            {% if mag_team_schieten %}  <!-- niet voor aspiranten, niet na fase B, niet in regio zonder teamcompetitie -->
+                                <tr>
+                                    <td>Kies of je in een team wil schieten:<br><br>
+                                        <label style="margin-left: 20px">
+                                            <input type="checkbox" class="filled-in" name="wil_in_team">
+                                            <span class="black-text">Ik heb interesse om met een team te schieten</span>
+                                        </label>
+                                        <p><i>Als je hier voor kiest dan kan jouw vereniging je in een team plaatsen.</i></p>
+                                    </td>
+                                </tr>
+                            {% endif %}
+
+                            {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
+                                <tr>
+                                    <td>Kies wanneer je wilt schieten:<br>
+                                        <br>
+                                        {% for wedstrijd in wedstrijden_1 %}
+                                            <label style="margin-left: 20px">
+                                                <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()">
+                                                <span class="black-text">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b> te {{ wedstrijd.vereniging.plaats }}</span>
+                                            </label>
+                                            <br>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                            {% endif %}
+
+                            {% if wedstrijden_2 %}
+                                <tr id="id_wedstrijden_2_knop">
+                                    <td><button class="btn-nhb-blauw" type="button" onclick="toon_wedstrijden_2()">Toon meer wedstrijden</button>&nbsp;&nbsp;Er zijn nog {{ wedstrijden_2|length }} wedstrijden in de regio, wat verder weg.</td>
+                                </tr>
+
+                                <tr id="id_wedstrijden_2" class="hide">
+                                    <td>
+                                        {% for wedstrijd in wedstrijden_2 %}
+                                            <label style="margin-left: 20px">
+                                                <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()">
+                                                <span class="black-text">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
+                                            </label>
+                                            <br>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                            {% endif %}
+
+                            {% if dagdelen %}       <!-- inschrijfmethode 3 -->
+                                <tr>
+                                    <td>Kies wanneer in de week je kan schieten:<br>
+
+                                        <ul id="id_dagdeel">
+                                            {% for code, beschr in dagdelen %}
+                                                <li>
+                                                    <label class="black-text" for="id_dagdeel_{{ code }}" style="margin-left: 20px">
+                                                        <!-- let op: bewust wordt hier geen default keuze gezet -->
+                                                        <input class="with-gap" type="radio" name="dagdeel" value="{{ code }}" required id="id_dagdeel_{{ code }}">
+                                                        <span>{{ beschr }}</span>
+                                                    </label>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </td>
+                                </tr>
+                            {% endif %}
+
+                            <!-- team: AG -->
+                            <!-- voorkeur teamleden -->
+                            <!-- opmerkingen -->
+
+                            <tr>
+                                <td>
+                                    <span>Eventueel bericht aan de organisatie:</span><br>
+                                    <div class="input-text" style="margin-left: 20px">
+                                        <textarea name="opmerking" cols="40" rows="10" placeholder="Tik hier je bericht" data-length="500" class="materialize-textarea" maxlength="500" id="id_opmerkingen"></textarea>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
+                            <p>Je mag maximaal 7 keuzes opgeven. <span>Je hebt <b id="aantal">0 wedstrijden</b> gekozen.</span></p>
                         {% else %}
-                            <span><b>Nee</b></span>
+                            <p>&nbsp;</p>
                         {% endif %}
-                        <span class="right">(ga naar Voorkeuren om dit te wijzigen)</span>
-                    </td>
-                </tr>
-            {% endif %}
 
-            <tr>
-                <td>
-                    <span>Aanvangsgemiddelde: </span>
-                    {% if ag %}
-                    <span><b>{{ ag|floatformat:3 }}</b></span>
-                        {% if ag_hist %}
-                            <br><span class="grey-text">(vastgesteld op {{ ag_hist.when|date:"j F Y" }} - {{ ag_hist.notitie }})</span>
-                        {% endif %}
-                        <br><br>
-                        <span>Je wordt geplaatst in klasse: <b>{{ wedstrijdklasse }}</b></span>
-                    {% else %}
-                        <span>Geen</span>
-                        <br><br>
-                        <span>Je wordt {% if is_klasse_onbekend %}voorlopig {% endif %}geplaatst in klasse: <b>{{ wedstrijdklasse }}</b></span>
-                        {% if is_klasse_onbekend %}<p><i>Omdat we nu niet weten hoe goed je kan schieten, plaatsen we je na 3 scores automatisch in de juiste klasse.</i></p>{% endif %}
-                    {% endif %}
-                </td>
-            </tr>
+                        <div class="center">
+                            <input class="btn-nhb-rood" type="submit" value="Meld mij aan" id="submit">
+                        </div>
+                    </form>
 
-            {% if mag_team_schieten %}  <!-- niet voor aspiranten, niet na fase B, niet in regio zonder teamcompetitie -->
-                <tr>
-                    <td>Kies of je in een team wil schieten:<br><br>
-                        <label style="margin-left: 20px">
-                            <input type="checkbox" class="filled-in" name="wil_in_team">
-                            <span class="black-text">Ik heb interesse om met een team te schieten</span>
-                        </label>
-                        <p><i>Als je hier voor kiest dan kan jouw vereniging je in een team plaatsen.</i></p>
-                    </td>
-                </tr>
-            {% endif %}
-
-            {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
-                <tr>
-                    <td>Kies wanneer je wilt schieten:<br>
-                        <br>
-                        {% for wedstrijd in wedstrijden_1 %}
-                            <label style="margin-left: 20px">
-                                <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()">
-                                <span class="black-text">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b> te {{ wedstrijd.vereniging.plaats }}</span>
-                            </label>
-                            <br>
-                        {% endfor %}
-                    </td>
-                </tr>
-            {% endif %}
-
-            {% if wedstrijden_2 %}
-                <tr id="id_wedstrijden_2_knop">
-                    <td><button class="btn-nhb-blauw" type="button" onclick="toon_wedstrijden_2()">Toon meer wedstrijden</button>&nbsp;&nbsp;Er zijn nog {{ wedstrijden_2|length }} wedstrijden in de regio, wat verder weg.</td>
-                </tr>
-
-                <tr id="id_wedstrijden_2" class="hide">
-                    <td>
-                        {% for wedstrijd in wedstrijden_2 %}
-                            <label style="margin-left: 20px">
-                                <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()">
-                                <span class="black-text">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
-                            </label>
-                            <br>
-                        {% endfor %}
-                    </td>
-                </tr>
-            {% endif %}
-
-            {% if dagdelen %}       <!-- inschrijfmethode 3 -->
-                <tr>
-                    <td>Kies wanneer in de week je kan schieten:<br>
-
-                        <ul id="id_dagdeel">
-                            {% for code, beschr in dagdelen %}
-                                <li>
-                                    <label class="black-text" for="id_dagdeel_{{ code }}" style="margin-left: 20px">
-                                        <!-- let op: bewust wordt hier geen default keuze gezet -->
-                                        <input class="with-gap" type="radio" name="dagdeel" value="{{ code }}" required id="id_dagdeel_{{ code }}">
-                                        <span>{{ beschr }}</span>
-                                    </label>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </td>
-                </tr>
-            {% endif %}
-
-            <!-- team: AG -->
-            <!-- voorkeur teamleden -->
-            <!-- opmerkingen -->
-
-            <tr>
-                <td>
-                    <span>Eventueel bericht aan de organisatie:</span><br>
-                    <div class="input-text" style="margin-left: 20px">
-                        <textarea name="opmerking" cols="40" rows="10" placeholder="Tik hier je bericht" data-length="500" class="materialize-textarea" maxlength="500" id="id_opmerkingen"></textarea>
-                    </div>
-                </td>
-            </tr>
-        </table>
-
-        {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
-            <p>Je mag maximaal 7 keuzes opgeven. <span>Je hebt <b id="aantal">0 wedstrijden</b> gekozen.</span></p>
-        {% else %}
-            <p>&nbsp;</p>
-        {% endif %}
-        <input class="btn-nhb-rood" type="submit" value="Meld mij aan" id="submit">
-    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
         <!-- initialisatie -->
@@ -176,5 +195,7 @@
             })
         </script>
     {% endif %}
+
+    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compinschrijven-sporter-bevestig-aanmelden" %}
 
 {% endblock %}

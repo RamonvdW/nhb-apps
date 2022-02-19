@@ -1,5 +1,5 @@
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -29,17 +29,17 @@
             <br>
             <div style="display: flex; justify-content: center">
                 <div style="width: 40px; height: 40px">
-                    <a href="{% url 'Overig:feedback-bevinding' bevinding='plus' op_pagina=op_pagina %}">
+                    <a href="{% url 'Overig:feedback-bevinding' bevinding='plus' op_pagina=op_pagina %}" target="_blank" rel="noopener noreferrer">
                         <img src="{% static 'overig/smiley5_plus_nul_min.png' %}" width=40 height=40 style="object-fit: cover; object-position: 0px 0px" alt="min">
                     </a>
                 </div>
                 <div style="width: 40px; height: 40px; margin: 0px 15px 0px 15px">
-                    <a href="{% url 'Overig:feedback-bevinding' bevinding='nul'  op_pagina=op_pagina %}">
+                    <a href="{% url 'Overig:feedback-bevinding' bevinding='nul'  op_pagina=op_pagina %}" target="_blank" rel="noopener noreferrer">
                         <img src="{% static 'overig/smiley5_plus_nul_min.png' %}" width=40 height=40 style="object-fit: cover; object-position: -40px 0px" alt="nul">
                     </a>
                 </div>
                 <div style="width: 40px; height: 40px">
-                    <a href="{% url 'Overig:feedback-bevinding' bevinding='min'  op_pagina=op_pagina %}">
+                    <a href="{% url 'Overig:feedback-bevinding' bevinding='min'  op_pagina=op_pagina %}" target="_blank" rel="noopener noreferrer">
                         <img src="{% static 'overig/smiley5_plus_nul_min.png' %}" width=40 height=40 style="object-fit: cover; object-position: -80px 0px" alt="plus">
                     </a>
                 </div>

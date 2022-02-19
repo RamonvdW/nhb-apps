@@ -179,6 +179,12 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         url = maak_tijdelijke_url_accountwissel(accountemail, naar_account=accountemail.account.username)
         context['login_as_url'] = url
 
+        context['kruimels'] = (
+            (reverse('Functie:wissel-van-rol'), 'Wissel van rol'),
+            (reverse('Account:account-wissel'), 'Account wissel'),
+            (None, 'Activeer'),
+        )
+
         menu_dynamics(self.request, context)
         return render(self.request, TEMPLATE_LOGIN_AS_GO, context)
 
