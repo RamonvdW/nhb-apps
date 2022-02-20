@@ -418,7 +418,7 @@ input.table-filter {
 }
 
 /* large: 1021-1350 */
-@media only screen and (max-width : 1020px) {
+@media only screen and (max-width: 1020px) {
     .hide-unless-large {
         display: none;
     }
@@ -432,6 +432,25 @@ input.table-filter {
 /* xlarge: >1330 */
 @media only screen and (max-width : 1350px) {
     .hide-unless-xlarge {
+        display: none;
+    }
+}
+
+
+/* print support
+   without this, the content is one long page that doesn't fit on a printer page
+*/
+@media print {
+    // simulate "large" display when printing
+    .hide-unless-small, .hide-on-med-only, .hide-on-med-and-up, .hide-on-large-only, .hide-on-extra-large-only, .hide-on-large-and-down {
+        display: none !important;
+    }
+    .show-on-medium-and-up, .show-on-large {
+        display: block !important;
+    }
+
+    // hide the size labels
+    .hide-unless-small, .hide-unless-medium, .hide-unless-large, .hide-unless-xlarge {
         display: none;
     }
 }

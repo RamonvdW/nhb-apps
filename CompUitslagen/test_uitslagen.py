@@ -120,7 +120,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
 
         url = self.url_uitslagen_regio % (self.testdata.comp18.pk, 'R', 'alle')
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -128,7 +128,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
 
         # lijst met onze deelnemers
         url = self.url_uitslagen_regio_n % (self.testdata.comp18.pk, 'TR', 'alle', 101)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
@@ -405,7 +405,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         self.e2e_login(sporter.account)
 
         url = self.url_uitslagen_ver % (self.testdata.comp18.pk, 'R')
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, self.club_naam)
@@ -415,7 +415,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         # tenzij je geen lid meer bent bij een vereniging
         sporter.is_actief_lid = False
         sporter.save()
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)

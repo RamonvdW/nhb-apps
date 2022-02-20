@@ -150,7 +150,8 @@ class E2EHelpers(TestCase):
         self.assert_is_redirect(resp, expected_redirect)
 
     def e2e_wisselnaarrol_bb(self):
-        self._wissel_naar_rol('BB', '/functie/wissel-van-rol/')
+        #self._wissel_naar_rol('BB', '/functie/wissel-van-rol/')
+        self._wissel_naar_rol('BB', '/plein/')
 
     def e2e_wisselnaarrol_sporter(self):
         self._wissel_naar_rol('sporter', '/plein/')

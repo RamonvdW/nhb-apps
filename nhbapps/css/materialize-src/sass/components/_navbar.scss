@@ -194,6 +194,7 @@ nav {
     position: fixed;
   }
 }
+
 @media #{$medium-and-up} {
   nav.nav-extended .nav-wrapper {
     min-height: $navbar-height;
@@ -215,4 +216,20 @@ nav {
   bottom: 0;
   overflow:auto;
   width: 100%;
+}
+
+
+/* print support
+   without this, the content is one long page that doesn't fit on a printer page
+*/
+@media print {
+    // hide the navigation (otherwise all pages turn into navbar background)
+    .navbar-fixed {
+        display: none
+    }
+
+    // remove the scrollbar, otherwise all content ends up on 1 page
+    .nav-content-scrollbar {
+        position: unset;
+    }
 }

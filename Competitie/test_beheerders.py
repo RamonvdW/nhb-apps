@@ -238,7 +238,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(functie_bko)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(self.url_overzicht % comp18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -251,7 +251,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rko)
         self.e2e_wissel_naar_functie(functie_rko)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(self.url_overzicht % comp25.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -262,7 +262,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(functie_rcl)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(self.url_overzicht % comp18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
