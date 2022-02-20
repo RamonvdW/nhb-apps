@@ -179,7 +179,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         # als HWL
         self.e2e_wissel_naar_functie(self.testdata.functie_hwl[self.ver_nr])
         url = self.url_uitslagen_regio % (self.testdata.comp25.pk, 'R', 'alle')
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)

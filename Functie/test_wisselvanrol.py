@@ -200,6 +200,9 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_activeer_rol % 'BB', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        # response = het Plein
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wissel_van_rol)
         self.assertContains(resp, "Manager competitiezaken")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_accountwissel, urls)
