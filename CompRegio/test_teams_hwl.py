@@ -333,7 +333,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
 
         if do_25:
             url = url_inschrijven % self.comp_25.pk
-            with self.assert_max_queries(33):
+            with self.assert_max_queries(22):
                 self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
                                        'lid_100004_boogtype_1': 'on',    # 1=R
                                        'lid_100012_boogtype_1': 'on',    # 1=R

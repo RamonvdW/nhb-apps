@@ -11,7 +11,7 @@ from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbVereniging
 from Competitie.models import (LAAG_REGIO, TEAM_PUNTEN_MODEL_SOM_SCORES, Competitie, DeelCompetitie,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam, RegioCompetitieSchutterBoog,
-                               get_competitie_team_typen)
+                               get_competitie_boog_typen, get_competitie_team_typen)
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from types import SimpleNamespace
@@ -61,8 +61,8 @@ class UitslagenVerenigingIndivView(TemplateView):
     def _maak_filter_knoppen(context, comp, ver_nr, comp_boog):
         """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
 
-        # boogtype files
-        boogtypen = BoogType.objects.order_by('volgorde').all()
+        # boogtype filters
+        boogtypen = get_competitie_boog_typen(comp)
 
         context['comp_boog'] = None
         context['boog_filters'] = boogtypen
@@ -245,7 +245,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
         comp.bepaal_fase()
         context['comp'] = comp
 
-        teamtype_afkorting = kwargs['team_type'][:2]     # afkappen voor de veiligheid
+        teamtype_afkorting = kwargs['team_type'][:3]     # afkappen voor de veiligheid
 
         # ver_nr is optioneel en resulteert in het nummer van de sporter
         try:

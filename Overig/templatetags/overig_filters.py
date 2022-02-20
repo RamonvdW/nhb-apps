@@ -7,6 +7,7 @@
 from django import template
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
+from Competitie.models import DAGDEEL2LABEL
 
 
 def filter_highlight(text, search_for):
@@ -73,38 +74,13 @@ def filter_wbr_email(text):
     return mark_safe(new_text)
 
 
-dagdeel2wbr = {
-    'GN': ("Geen", "Geen voorkeur"),
-    'AV': ("Avond", "'s Avonds"),
-    'MA': ("M", "Maandag"),
-    'MAa': ("M-Av", "Maandagavond"),
-    'DI': ("Di", "Dinsdag"),
-    'DIa': ("Di-Av", "Dinsdagavond"),
-    'WO': ("W", "Woensdag"),
-    'WOa': ("W-Av", "Woensdagavond"),
-    'DO': ("Do", "Donderdag"),
-    'DOa': ("Do-Av", "Donderdagavond"),
-    'VR': ("V", "Vrijdag"),
-    'VRa': ("V-Av", "Vrijdagavond"),
-    'ZAT': ("Za", "Zaterdag"),
-    'ZAo': ("Za-Och", "Zaterdagochtend"),
-    'ZAm': ("Zo-Mi", "Zaterdagmiddag"),
-    'ZAa': ("Za-Av", "Zaterdagavond"),
-    'ZON': ("Zo", "Zondag"),
-    'ZOo': ("Zo-Och", "Zondagochtend"),
-    'ZOm': ("Zo-Mi", "Zondagmiddag"),
-    'ZOa': ("Zo-Av", "Zondagavond"),
-    'WE': ("Weekend", "Weekend")
-}
-
-
 def filter_wbr_dagdeel(text):
     """  wbr_dagdeel filter voegt de <wbr> html tag in zodat dagdeel beschrijvingen kunnen wrappen,
          zoals "woensdagavond" en "zaterdagochtend"
     """
 
     try:
-        tup = dagdeel2wbr[text]
+        tup = DAGDEEL2LABEL[text]
     except KeyError:
         new_text = text
     else:
@@ -112,12 +88,17 @@ def filter_wbr_dagdeel(text):
         new_text = '<span class="hide-on-med-and-up">' + escape(kort) + '</span>'
         new_text += '<span class="hide-on-small-only">'
 
+        done = False
         for suffix in ('avond', 'middag', 'ochtend'):
             suffix_len = len(suffix)
             if lang[-suffix_len:] == suffix:
                 new_text += escape(lang[:-suffix_len]) + '<wbr>' + escape(suffix)
+                done = True
                 break   # from the for
         # for
+
+        if not done:
+            new_text += escape(lang)
 
         new_text += '</span>'
 

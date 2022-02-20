@@ -12,7 +12,7 @@ from NhbStructuur.models import NhbRayon
 from Competitie.models import (LAAG_REGIO, LAAG_RK, DEELNAME_NEE,
                                Competitie, DeelCompetitie, DeelcompetitieKlasseLimiet,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam,
-                               get_competitie_team_typen)
+                               get_competitie_boog_typen, get_competitie_team_typen)
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import CompetitieWedstrijd
 from Functie.rol import Rollen, rol_get_huidige_functie
@@ -63,8 +63,8 @@ class UitslagenRayonIndivView(TemplateView):
     def _maak_filter_knoppen(context, comp, gekozen_rayon_nr, comp_boog):
         """ filter knoppen per rayon en per competitie boog type """
 
-        # boogtype files
-        boogtypen = BoogType.objects.order_by('volgorde').all()
+        # boogtype filters
+        boogtypen = get_competitie_boog_typen(comp)
 
         context['comp_boog'] = None
         context['boog_filters'] = boogtypen
@@ -339,7 +339,7 @@ class UitslagenRayonTeamsView(TemplateView):
         comp.bepaal_fase()
         context['comp'] = comp
 
-        teamtype_afkorting = kwargs['team_type'][:2]     # afkappen voor de veiligheid
+        teamtype_afkorting = kwargs['team_type'][:3]     # afkappen voor de veiligheid
 
         # rayon_nr is optioneel (eerste binnenkomst zonder rayon nummer)
         try:

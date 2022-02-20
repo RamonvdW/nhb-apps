@@ -13,7 +13,7 @@ from BasisTypen.models import (COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60CM_4S
                                BLAZOEN_WENS_4SPOT, BLAZOEN_WENS_DT,
                                BLAZOEN2STR, BLAZOEN2STR_COMPACT)
 from Competitie.models import (LAAG_REGIO, Competitie, DeelCompetitie, DeelcompetitieRonde,
-                               RegioCompetitieSchutterBoog,
+                               RegioCompetitieSchutterBoog, DAGDEEL2LABEL,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN)
 from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
@@ -699,13 +699,15 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         self._maak_data_dagdeel_behoefte(context, deelcomp, objs, regio)
         self._maak_data_blazoen_behoefte(context)
 
+        dagdelen = [DAGDEEL2LABEL[dagdeel][0] for dagdeel in context['dagdelen']]
+
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="behoefte-%s.csv"' % regio.regio_nr
 
         writer = csv.writer(response, delimiter=";")      # ; is good for import with dutch regional settings
 
         # voorkeur dagdelen per vereniging
-        writer.writerow(['ver_nr', 'Naam', 'Blazoen'] + context['dagdelen'] + ['Totaal'])
+        writer.writerow(['ver_nr', 'Naam', 'Blazoen'] + dagdelen + ['Totaal'])
 
         for nhb_ver in context['regio_verenigingen']:
             for blazoen_str, counts_list in nhb_ver.blazoen_list:
@@ -716,7 +718,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
 
         # blazoen behoefte
         writer.writerow(['-', '-', '-'] + ['-' for _ in context['totalen']])
-        writer.writerow(['-', '-', 'Blazoen'] + context['dagdelen'] + ['Totaal'])
+        writer.writerow(['-', '-', 'Blazoen'] + dagdelen + ['Totaal'])
 
         for blazoen_str, behoefte in context['blazoen_count']:
             writer.writerow(['-', '-', blazoen_str] + behoefte)

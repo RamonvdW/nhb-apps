@@ -153,16 +153,16 @@
                 // accordeons
                 const options = { inDuration: 100,    // default is 300
                                   outDuration: 100    // default is 300
-                                }
+                                };
                 let elems;
 
                 // console.log('history.length:', history.length)
                 if (history.length < 2) {
                     // nothing to go back to
                     // typically happens when opening a manual page in a new window
-                    const el = document.getElementById("id_kruimels_back")
+                    const el = document.getElementById("id_kruimels_back");
                     el.style.display = "none"
-                }
+                };
 
                 elems = document.querySelectorAll(".collapsible");
                 M.Collapsible.init(elems, options);
@@ -182,7 +182,7 @@
                 // modals
                 elems = document.querySelectorAll(".modal");
                 M.Modal.init(elems, {'endingTop': '35%'});
-            })
+            });
 
             // zoek alle tabellen met een zoekveld en trigger de oninput method
             // dit is noodzakelijk bij gebruik van de browser 'back' knop
@@ -196,24 +196,23 @@
                         const inputs = table.getElementsByTagName("input");
                         if (inputs.length >= 1) myTableFilter(inputs[0], table.id);
                     }
-                })
+                });
 
                 // evalueer de posities van de labels van de forms
                 // zodat het label niet over het ingevulde input veld staat
-                M.updateTextFields()
-            })
+                M.updateTextFields();
+            });
 
             // resize listener, om het dropdown menu automatisch te verstoppen
             window.addEventListener('resize', function() {
-                const elems = document.querySelectorAll(".dropdown-trigger")
+                const elems = document.querySelectorAll(".dropdown-trigger");
                 Array.from(elems).forEach(elem => {
                     const instance = M.Dropdown.getInstance(elem);
                     if (instance.isOpen) {
                         instance.close();
                     }
-                })
-
-            })
+                });
+            });
         </script>
 
     </body>

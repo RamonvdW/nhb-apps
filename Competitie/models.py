@@ -29,7 +29,7 @@ LAAG_BK = 'BK'
 AFSTANDEN = [('18', 'Indoor'),
              ('25', '25m 1pijl')]
 
-DAGDELEN = [('GN', "Geen voorkeur"),            # LET OP: lijst staat ook in Overig/templatetags/overig_filters.py
+DAGDELEN = [('GN', "Geen voorkeur"),
             ('AV', "'s Avonds"),
             ('MA', "Maandag"),
             ('MAa', "Maandagavond"),
@@ -50,6 +50,31 @@ DAGDELEN = [('GN', "Geen voorkeur"),            # LET OP: lijst staat ook in Ove
             ('ZOm', "Zondagmiddag"),
             ('ZOa', "Zondagavond"),
             ('WE', "Weekend")]
+
+DAGDEEL2LABEL = {
+    'GN': ("Geen", "Geen voorkeur"),
+    'AV': ("Avond", "'s Avonds"),
+    'MA': ("M", "Maandag"),
+    'MAa': ("M-Av", "Maandagavond"),
+    'DI': ("Di", "Dinsdag"),
+    'DIa': ("Di-Av", "Dinsdagavond"),
+    'WO': ("W", "Woensdag"),
+    'WOa': ("W-Av", "Woensdagavond"),
+    'DO': ("Do", "Donderdag"),
+    'DOa': ("Do-Av", "Donderdagavond"),
+    'VR': ("V", "Vrijdag"),
+    'VRa': ("V-Av", "Vrijdagavond"),
+    'ZAT': ("Za", "Zaterdag"),
+    'ZAo': ("Za-Och", "Zaterdagochtend"),
+    'ZAm': ("Zo-Mi", "Zaterdagmiddag"),
+    'ZAa': ("Za-Av", "Zaterdagavond"),
+    'ZON': ("Zo", "Zondag"),
+    'ZOo': ("Zo-Och", "Zondagochtend"),
+    'ZOm': ("Zo-Mi", "Zondagmiddag"),
+    'ZOa': ("Zo-Av", "Zondagavond"),
+    'WE': ("Weekend", "Weekend")
+}
+
 
 # Let op: DAGDEEL_AFKORTINGEN moet in dezelfde volgorde zijn als DAGDELEN
 DAGDEEL_AFKORTINGEN = tuple([afk for afk, _ in DAGDELEN])
@@ -396,8 +421,24 @@ def get_competitie_indiv_leeftijdsklassen(comp):
         # for
     # for
 
-    lijst.sort()
+    lijst.sort()        # op volgorde
     return [lkl for _, _, lkl in lijst]
+
+
+def get_competitie_boog_typen(comp):
+    """ Geef een lijst van BoogType records terug die gebruikt worden in deze competitie,
+        gesorteerd op 'volgorde'.
+    """
+    boogtypen = [(klasse.indiv.boogtype.volgorde,
+                  klasse.indiv.boogtype) for klasse in (CompetitieKlasse
+                                                        .objects
+                                                        .filter(competitie=comp)
+                                                        .exclude(indiv=None)
+                                                        .distinct('indiv__boogtype'))]
+
+    # sorteer op volgorde, want order_by werkt niet (moet gelijk zijn aan distinct)
+    boogtypen.sort()
+    return [boogtype for _, boogtype in boogtypen]
 
 
 def get_competitie_team_typen(comp):

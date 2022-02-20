@@ -7,13 +7,13 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (LAAG_REGIO,
                                TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES,
                                Competitie, DeelCompetitie,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               RegioCompetitieSchutterBoog, get_competitie_team_typen)
+                               RegioCompetitieSchutterBoog,
+                               get_competitie_boog_typen, get_competitie_team_typen)
 from Competitie.operations.poules import maak_poule_schema
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -69,10 +69,10 @@ class UitslagenRegioIndivView(TemplateView):
     order_gemiddelde = '-gemiddelde'
 
     def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, comp_boog, zes_scores):
-        """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
+        """ filter optie voor de regio """
 
-        # boogtype files
-        boogtypen = BoogType.objects.order_by('volgorde').all()
+        # boogtype filters
+        boogtypen = get_competitie_boog_typen(comp)
 
         context['comp_boog'] = None
         context['boog_filters'] = boogtypen
@@ -428,7 +428,7 @@ class UitslagenRegioTeamsView(TemplateView):
         comp.bepaal_fase()
         context['comp'] = comp
 
-        teamtype_afkorting = kwargs['team_type'][:2]     # afkappen voor de veiligheid
+        teamtype_afkorting = kwargs['team_type'][:3]     # afkappen voor de veiligheid
 
         # regio_nr is optioneel (eerste binnenkomst zonder regio nummer)
         try:
