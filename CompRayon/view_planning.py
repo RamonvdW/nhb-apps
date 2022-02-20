@@ -185,7 +185,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
             (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (None, 'Planning')
+            (None, 'Planning RK')
         )
 
         menu_dynamics(self.request, context)
@@ -454,11 +454,17 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['wkl_indiv'], context['wkl_team'] = self._get_wedstrijdklassen(deelcomp_rk, wedstrijd)
 
-        context['url_terug'] = reverse('CompRayon:rayon-planning', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
         context['url_opslaan'] = reverse('CompRayon:rayon-wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         context['url_verwijderen'] = reverse('CompRayon:rayon-verwijder-wedstrijd',
                                              kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompRayon:rayon-planning', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk}), 'Planning RK'),
+            (None, 'Wijzig RK wedstrijd')
+        )
 
         menu_dynamics(self.request, context)
         return context
