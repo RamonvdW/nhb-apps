@@ -121,8 +121,8 @@ class SiteFeedbackInzichtView(UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
-        # 50 nieuwste niet-afgehandelde site feedback items
-        return SiteFeedback.objects.filter(is_afgehandeld=False).order_by('-toegevoegd_op')[:50]
+        # 100 nieuwste niet-afgehandelde site feedback items
+        return SiteFeedback.objects.filter(is_afgehandeld=False).order_by('-toegevoegd_op')[:100]
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
