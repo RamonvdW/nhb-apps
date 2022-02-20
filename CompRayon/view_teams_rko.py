@@ -236,6 +236,12 @@ class RayonTeamsView(TemplateView):
         context['totaal_teams'] = totaal_teams
         context['toon_klassen'] = comp.klassengrenzen_vastgesteld_rk_bk
 
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'RK Teams')
+        )
+
         menu_dynamics(self.request, context)
         return context
 

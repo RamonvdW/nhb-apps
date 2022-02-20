@@ -211,7 +211,7 @@ class CompetitieOverzichtView(View):
                 deelcomp_rk.url = reverse('CompRayon:rayon-planning',
                                           kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
-                deelcomp_rk.tekst_rayon_teams = "Aangemelde teams inzien voor de rayonkampioenschappen in Rayon %s, voor deze competitie." % deelcomp_rk.nhb_rayon.rayon_nr
+                deelcomp_rk.tekst_rayon_teams = "Aangemelde teams voor de Rayonkampioenschappen in Rayon %s." % deelcomp_rk.nhb_rayon.rayon_nr
                 deelcomp_rk.url_rayon_teams = reverse('CompRayon:rayon-teams',
                                                       kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 

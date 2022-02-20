@@ -416,8 +416,8 @@ class ActiveerRolView(UserPassesTestMixin, View):
         # de rest blijft in Wissel van Rol
         rol_nu, functie_nu = rol_get_huidige_functie(request)
 
-        # if rol_nu == Rollen.ROL_BB:
-        #     return redirect('Competitie:kies')
+        if rol_nu == Rollen.ROL_BB:
+            return redirect('Plein:plein')
 
         if rol_nu == Rollen.ROL_SPORTER:
             return redirect('Plein:plein')

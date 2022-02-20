@@ -691,9 +691,14 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         context['url_opslaan'] = reverse('CompRayon:rayon-limieten',
                                          kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
-        context['url_terug'] = reverse('Competitie:kies')
-
         context['wiki_rk_schutters'] = reverse_handleiding(self.request, settings.HANDLEIDING_RK_SELECTIE)
+
+        comp = deelcomp_rk.competitie
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'RK limieten')
+        )
 
         menu_dynamics(self.request, context)
         return context
@@ -715,13 +720,16 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         if self.functie_nu != deelcomp_rk.functie:
             raise PermissionDenied()     # niet de juiste RKO
 
+        comp = deelcomp_rk.competitie
+        # TODO: check competitie fase
+
         pk2ckl = dict()
         pk2keuze = dict()
 
         for ckl in (CompetitieKlasse
                     .objects
                     .exclude(indiv__niet_voor_rk_bk=True)
-                    .filter(competitie=deelcomp_rk.competitie,
+                    .filter(competitie=comp,
                             team=None)):
 
             sel = 'sel_%s' % ckl.pk
@@ -739,7 +747,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         for ckl in (CompetitieKlasse
                     .objects
-                    .filter(competitie=deelcomp_rk.competitie,
+                    .filter(competitie=comp,
                             is_voor_teams_rk_bk=True,
                             indiv=None)):
 
@@ -824,7 +832,9 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                     mutatie = CompetitieMutatie.objects.get(pk=mutatie.pk)
                 # while
 
-        return HttpResponseRedirect(reverse('Competitie:kies'))
+        url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk})
+
+        return HttpResponseRedirect(url)
 
 
 class VerwijderWedstrijdView(UserPassesTestMixin, View):
