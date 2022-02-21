@@ -84,12 +84,20 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
                                         kwargs={'deelnemer_pk': deelnemer.pk})
 
         if self.rol_nu == Rollen.ROL_RKO:
-            context['url_terug'] = reverse('CompRayon:lijst-rk',
-                                           kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk})
+            context['kruimels'] = (
+                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+                (reverse('CompRayon:lijst-rk', kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk}), 'RK selectie'),
+                (None, 'Wijzig sporter status')
+            )
         else:
             # HWL
-            context['url_terug'] = reverse('CompRayon:lijst-rk-ver',
-                                           kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk})
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (None, comp.beschrijving.replace(' competitie', '')),
+                (reverse('CompRayon:lijst-rk-ver', kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk}), 'RK selectie'),
+                (None, 'Wijzig sporter status')
+            )
 
         menu_dynamics(self.request, context)
         return context

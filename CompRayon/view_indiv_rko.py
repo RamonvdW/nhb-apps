@@ -93,6 +93,9 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
         context['deelcomp_rk'] = deelcomp_rk
 
+        comp = deelcomp_rk.competitie
+        # TODO: check competitie fase
+
         if not deelcomp_rk.heeft_deelnemerslijst:
             # situatie 1)
             context['url_uitslagen'] = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
@@ -176,6 +179,12 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
             context['aantal_attentie'] = aantal_attentie
 
         context['wiki_rk_schutters'] = reverse_handleiding(self.request, settings.HANDLEIDING_RK_SELECTIE)
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'RK selectie')
+        )
 
         menu_dynamics(self.request, context)
         return context
