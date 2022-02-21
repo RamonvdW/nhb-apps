@@ -10,13 +10,14 @@
 
 {% block pagina %}
 
+
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Uitslagen bonds<wbr>kampioenschappen</h3>
-        </div>
-        <div class="col s12">
-            <p>Dit deel van de site is nog niet af.</p>
+            <h3 class="page-banner">Uitslagen BK</h3>
+            <p>Tussenstand/eindstand van de bonds<wbr>kampioenschappen</p>
+            <br>
+            <p><i>Dit deel van de site is nog niet af</i></p>
         </div>
     </div>
 

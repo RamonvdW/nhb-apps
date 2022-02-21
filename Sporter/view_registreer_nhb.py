@@ -151,6 +151,9 @@ class RegistreerNhbNummerView(TemplateView):
 
         # still here --> re-render with error message
         context = {'form': form, 'verberg_login_knop': True}
+        context['kruimels'] = (
+            (None, 'Account aanmaken'),
+        )
         menu_dynamics(request, context)
         return render(request, TEMPLATE_REGISTREER, context)
 

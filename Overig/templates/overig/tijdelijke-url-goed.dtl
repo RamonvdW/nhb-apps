@@ -8,6 +8,9 @@
 
 {% block title %}Eenmalig verzoek{% endblock %}
 
+{% block broodkruimels %}
+{% endblock %}
+
 {% block pagina %}
 
     <!-- banner -->
@@ -19,7 +22,7 @@
 
     <!-- blauw balk -->
     <div class="row-nhb-blauw">
-        <div class="col s12">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
             <div class="white" style="padding:10px">
                 <p>Je hebt verzocht om {{ activiteit }}.</p>
                 <p>Als dit klopt, druk dan op onderstaande knop.</p>

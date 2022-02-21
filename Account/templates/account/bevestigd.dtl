@@ -8,6 +8,9 @@
 
 {% block title %}E-mail bevestigd{% endblock %}
 
+{% block broodkruimels %}
+{% endblock %}
+
 {% block pagina %}
 
     <!-- banner -->
@@ -19,7 +22,7 @@
 
     <!-- blauw balk met wit informatie veld -->
     <div class="row-nhb-blauw">
-        <div class="col s12">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
             <div class="white" style="padding:10px">
                 <p>Je hebt laten zien dat je toegang hebt tot je e-mail.</p>
 

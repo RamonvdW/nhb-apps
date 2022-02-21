@@ -264,7 +264,7 @@ class UitslagenRayonIndivView(TemplateView):
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
             (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (None, 'Uitslag RK individueel')
+            (None, 'Uitslagen RK individueel')
         )
 
         menu_dynamics(self.request, context)
@@ -445,7 +445,7 @@ class UitslagenRayonTeamsView(TemplateView):
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
             (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (None, 'Uitslag RK teams')
+            (None, 'Uitslagen RK teams')
         )
 
         menu_dynamics(self.request, context)

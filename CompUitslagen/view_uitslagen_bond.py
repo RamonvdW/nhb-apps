@@ -51,7 +51,7 @@ class UitslagenBondView(TemplateView):
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
             (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-            (None, 'Uitslag BK')
+            (None, 'Uitslagen BK')
         )
 
         menu_dynamics(self.request, context)
