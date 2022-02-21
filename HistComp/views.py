@@ -31,28 +31,6 @@ class HistCompTop(TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_HISTCOMP_ALLEJAREN
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    @staticmethod
-    def _zet_op_volgorde_klassen(objs_unsorted):
-        # sorteer de klassen op de gewenste volgorde
-        # deze routine lijkt een beetje omslachtig, maar dat komt omdat QuerySet geen remove heeft
-        objs = list()
-        for klas in KLASSEN_VOLGORDE:
-            # zoek objecten met klassen die hier aan voldoen
-            for obj in objs_unsorted:
-                if klas in obj.klasse:
-                    objs.append(obj)
-            # for
-        # for
-        # voeg de rest ongesorteerd toe
-        for obj in objs_unsorted:
-            if obj not in objs:
-                objs.append(obj)
-        # for
-        return objs
-
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
