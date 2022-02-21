@@ -66,6 +66,12 @@ class WachtwoordVergetenView(TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+
+        context['kruimels'] = (
+            (reverse('Account:login'), 'Inloggen'),
+            (None, 'Wachtwoord vergeten')
+        )
+
         menu_dynamics(self.request, context)
         return context
 

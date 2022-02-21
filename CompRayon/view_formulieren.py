@@ -129,6 +129,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                           .objects
                           .filter(deelcompetitie=deelcomp,
                                   klasse__indiv__pk__in=klasse_indiv_pks)
+                          .exclude(deelname=DEELNAME_NEE)
                           .select_related('sporterboog',
                                           'sporterboog__sporter',
                                           'bij_vereniging',
@@ -194,6 +195,12 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                     lid.gem_str = lid.gemiddelde
                 # for
             # for
+
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('CompScores:wedstrijden'), 'Competitie wedstrijden'),
+            (None, 'RK programma')
+        )
 
         menu_dynamics(self.request, context)
         return context

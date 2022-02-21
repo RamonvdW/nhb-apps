@@ -231,6 +231,12 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
 
         context['comp'] = comp
 
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Competitie doorzetten')
+        )
+
         menu_dynamics(self.request, context)
         return context
 
