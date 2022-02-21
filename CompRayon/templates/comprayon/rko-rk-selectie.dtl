@@ -84,13 +84,15 @@
         <div class="row-nhb-blauw">
             <div class="col s12 m8 offset-m2 l6 offset-l3">
                 <table class="white">
-                    <thead>
-                        <tr>
-                            <th><!--icon--></th>
-                            <th>Status</th>
-                            <th class="center">Aantal</th>
-                        </tr>
-                    </thead>
+                    <tr>
+                        <td colspan="3" class="center">Deelname-status voor de sporters</td>
+                    </tr>
+
+                    <tr>
+                        <th><!--icon--></th>
+                        <th>Status</th>
+                        <th class="center">Aantal</th>
+                    </tr>
 
                     <tr>
                         <td class="center"><i class="nhb-blauw-text in-table-icon material-icons-round">help</i></td>

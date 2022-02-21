@@ -114,6 +114,12 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         context['aantal_onbekend'] = aantal_onbekend
         context['aantal_bevestigd'] = aantal_bevestigd
 
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (None, comp.beschrijving.replace(' competitie', '')),
+            (None, 'Deelnemers RK'),
+        )
+
         menu_dynamics(self.request, context)
         return context
 

@@ -95,7 +95,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
                 (None, comp.beschrijving.replace(' competitie', '')),
-                (reverse('CompRayon:lijst-rk-ver', kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk}), 'RK selectie'),
+                (reverse('CompRayon:lijst-rk-ver', kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk}), 'Deelnemers RK'),
                 (None, 'Wijzig sporter status')
             )
 

@@ -49,7 +49,7 @@
 
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-nhb-blauw">
-        <div class="col s12">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
 
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3">
