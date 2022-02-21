@@ -228,7 +228,7 @@ class IndivWedstrijdklasse(models.Model):
     boogtype = models.ForeignKey(BoogType, on_delete=models.PROTECT)
 
     # volgende voor gebruik bij het presenteren van een lijst van klassen
-    # lager nummer = betere schutters
+    # lager nummer = betere / oudere deelnemers
     volgorde = models.PositiveIntegerField()
 
     # de leeftijdsklassen: aspirant, cadet, junior, senior en mannen/vrouwen

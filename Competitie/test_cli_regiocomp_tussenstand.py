@@ -170,7 +170,8 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
                        .objects
                        .filter(competitie=deelcomp.competitie,
                                indiv__is_onbekend=(sporterboog.sporter.lid_nr == 100001),
-                               indiv__boogtype=sporterboog.boogtype))
+                               indiv__boogtype=sporterboog.boogtype)
+                       .order_by('indiv__volgorde'))
 
             aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
                                                      sporterboog=sporterboog)
@@ -411,7 +412,9 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         # check het verplaatsen van een schutter uit klasse onbekend
 
         deelnemer = RegioCompetitieSchutterBoog.objects.filter(sporterboog=self.sporterboog_100001)[0]
+        # print('deelnemer: %s (leeftijd: %s)' % (deelnemer, deelnemer.sporterboog.sporter.geboorte_datum))
         self.assertTrue(deelnemer.klasse.indiv.is_onbekend)
+        # print('huidige klasse: %s (pk=%s)' % (deelnemer.klasse.indiv, deelnemer.klasse.pk))
 
         # 100001: 7 scores, gebruik eerste 3 voor bepalen AG voor overstap
         self._score_opslaan(self.uitslagen[0], self.sporterboog_100001, 123)
