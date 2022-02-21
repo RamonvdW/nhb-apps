@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.core import management
-from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTeam
+from .models import HistCompetitie, HistCompetitieIndividueel
 from .views import RESULTS_PER_PAGE
 from TestHelpers.e2ehelpers import E2EHelpers
 import io
@@ -16,7 +16,6 @@ class TestHistComp(E2EHelpers, TestCase):
     """ unittests voor de HistComp applicatie """
 
     url_hist_top = '/bondscompetities/hist/'
-    url_hist_team = '/bondscompetities/hist/team/%s/'  # team_pk
     url_hist_indiv = '/bondscompetities/hist/indiv/%s/'  # indiv_pk
 
     def setUp(self):
@@ -59,30 +58,6 @@ class TestHistComp(E2EHelpers, TestCase):
         rec.save()
         self.indiv_rec_pk = rec.pk
 
-        obj.pk = None
-        obj.klasse = 'Teamcurve3'
-        obj.is_team = True
-        obj.save()
-        self.team_histcomp_pk = obj.pk
-
-        rec = HistCompetitieTeam()
-        rec.histcompetitie = obj
-        rec.subklasse = 'TERE'
-        rec.rank = 1
-        rec.vereniging_nr = 123
-        rec.vereniging_naam = 'Groen Veldje'
-        rec.team_nr = 1
-        rec.totaal_ronde1 = 1000
-        rec.totaal_ronde2 = 1100
-        rec.totaal_ronde3 = 1200
-        rec.totaal_ronde4 = 1300
-        rec.totaal_ronde5 = 1400
-        rec.totaal_ronde6 = 1500
-        rec.totaal_ronde7 = 1600
-        rec.totaal = 9876
-        rec.gemiddelde = 1234.5
-        rec.save()
-
         obj = HistCompetitie()
         obj.seizoen = '2017/2018'
         obj.comp_type = '18'
@@ -109,14 +84,7 @@ class TestHistComp(E2EHelpers, TestCase):
         obj.clean()                         # run model validator
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
 
-    def test_histcomp_individueel(self):
         obj = HistCompetitieIndividueel.objects.all()[0]
-        obj.clean_fields()                  # run field validators
-        obj.clean()                         # run model validator
-        self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
-
-    def test_histcomp_team(self):
-        obj = HistCompetitieTeam.objects.all()[0]
         obj.clean_fields()                  # run field validators
         obj.clean()                         # run model validator
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
@@ -130,7 +98,6 @@ class TestHistComp(E2EHelpers, TestCase):
         self.assertContains(resp, "2018/2019")
         self.assertNotContains(resp, "2017/2018")
         self.assertContains(resp, 'Compound')
-        self.assertContains(resp, 'Special Type')
         self.assertContains(resp, 'Recurve')
         self.e2e_assert_other_http_commands_not_supported(self.url_hist_top)
 
@@ -138,9 +105,7 @@ class TestHistComp(E2EHelpers, TestCase):
         resp_str = str(resp.content)
         pos1 = resp_str.find('Recurve')
         pos2 = resp_str.find('Compound')
-        pos3 = resp_str.find('Special Type')
         self.assertTrue(0 < pos1 < pos2)
-        self.assertTrue(0 < pos2 < pos3)
 
     def test_view_allejaren_leeg(self):
         # verwijder alle records en controleer dat het goed gaat
@@ -272,14 +237,6 @@ class TestHistComp(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assertNotContains(resp, "Test Club")
 
-    def test_team(self):
-        url = self.url_hist_team % self.team_histcomp_pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('hist/histcomp_team.dtl', 'plein/site_layout.dtl'))
-        self.assert_html_ok(resp)
-
     def test_correct_histcomp(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -289,7 +246,5 @@ class TestHistComp(E2EHelpers, TestCase):
         # print('f2: %s' % f1.getvalue())
         self.assertEqual("", f1.getvalue())
         self.assertTrue("Corrigeer" in f2.getvalue())
-
-# FUTURE: gebruik assert_other_http_commands_not_supported
 
 # end of file

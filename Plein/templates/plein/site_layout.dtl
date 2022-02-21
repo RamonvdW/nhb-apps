@@ -124,7 +124,8 @@
 
             {% block broodkruimels %}
                 <div style="padding:10px">
-                    <a class="broodkruimels-back" id="id_kruimels_back" href="javascript:history.go(-1)">&lt;&nbsp;&nbsp;VORIGE</a>
+                    <a class="broodkruimels-back" id="id_kruimels_back" href="javascript:history.go(-1)"><!--&lt;&nbsp;&nbsp;VORIGE-->
+                        <i class="material-icons-round" style="font-size:19px;vertical-align:bottom;padding-bottom:2px;">arrow_back</i></a>
 
                     {% if kruimels %}
                         <a class="broodkruimels-link" href="{% url 'Plein:plein' %}">Plein</a>
