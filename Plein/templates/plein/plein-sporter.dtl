@@ -26,7 +26,7 @@
         </div>
 
         <div class="col s12">
-            <p>Op deze website kan je informatie vinden over de handboogsport, zoals records, wedstrijden en uitslagen.</p>
+            <p>Op deze website kan je informatie vinden over de handboogsport, zoals records, wedstrijden en uitslagen</p>
         </div>
     </div>
 
@@ -66,7 +66,7 @@
         <div class="col s12">
             <p>&nbsp;</p>
             <h4>Andere sites van de NHB</h4>
-            <p>De volgende websites zijn misschien ook interessant voor je.</p>
+            <p>De volgende websites zijn misschien ook interessant voor je</p>
         </div>
     </div>
 
@@ -84,7 +84,7 @@
             <p>&nbsp;</p>
             <h4>Hulp nodig?</h4>
             <p>Het bondsbureau kan je bereiken op <code>{{ email_support }}</code></p>
-            <p>Voorstellen en feedback over deze site graag via de drie gekleurde smileys die op elke pagina te vinden zijn.</p>
+            <p>Voorstellen en feedback over deze site graag via de drie gekleurde smileys die op elke pagina te vinden zijn</p>
         </div>
     </div>
 
