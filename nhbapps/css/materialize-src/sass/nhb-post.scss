@@ -219,8 +219,9 @@
 //
 .broodkruimels-back {
   padding: 3px;
-  font-size: 11px;
-  vertical-align: middle;
+  margin-right:5px;
+  //font-size: 11px;
+  //vertical-align: middle;
   border: 1px solid #03628c;
   border-radius: $button-radius;
   display: inline-block;
@@ -239,12 +240,12 @@
 }
 
 .broodkruimels-nolink {
-  font-size:13px;
+  //font-size:13px;
   margin-right:5px;
 }
 
 .broodkruimels-link {
-  font-size:13px;
+  //font-size:13px;
   margin-right:5px;
 
   &:focus, &:hover {

@@ -30,7 +30,7 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@500&display=swap">
-        <link rel="stylesheet" href="{% static 'materialize-new-96.css' %}">
+        <link rel="stylesheet" href="{% static 'materialize-new-99.css' %}">
         {% block extraheader %}{% endblock %}
     </head>
 
@@ -124,7 +124,7 @@
 
             {% block broodkruimels %}
                 <div style="padding:10px">
-                    <a class="broodkruimels-back" id="id_kruimels_back" style="margin-right:5px" href="javascript:history.go(-1)">&lt;&nbsp;&nbsp;VORIGE</a>
+                    <a class="broodkruimels-back" id="id_kruimels_back" href="javascript:history.go(-1)">&lt;&nbsp;&nbsp;VORIGE</a>
 
                     {% if kruimels %}
                         <a class="broodkruimels-link" href="{% url 'Plein:plein' %}">Plein</a>

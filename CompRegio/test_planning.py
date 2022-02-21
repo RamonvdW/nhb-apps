@@ -1571,8 +1571,6 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compregio/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
-        hrefs = self.extract_all_urls(resp, skip_menu=True)
-        self.assertEqual(hrefs, ['/bondscompetities/%s/' % self.comp_18.pk])  # alleen de terug knop
 
         # probeer afsluiten
         with self.assert_max_queries(20):
@@ -1605,8 +1603,6 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compregio/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
-        hrefs = self.extract_all_urls(resp, skip_menu=True)
-        self.assertEqual(hrefs, ['/bondscompetities/%s/' % self.comp_18.pk])  # alleen de terug knop
 
         # nogmaals afsluiten doet niets
         with self.assert_max_queries(20):
