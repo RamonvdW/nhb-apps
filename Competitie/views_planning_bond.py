@@ -218,6 +218,16 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
             # klaar om door te zetten
             context['url_doorzetten'] = reverse('Competitie:bko-doorzetten-naar-bk',
                                                 kwargs={'comp_pk': comp.pk})
+        else:
+            # bepaal de status van elk rayon
+            context['rk_status'] = deelcomps = DeelCompetitie.objects.select_related('nhb_rayon').filter(competitie=comp, laag=LAAG_RK)
+            for deelcomp in deelcomps:
+                deelcomp.rayon_str = 'Rayon %s' % deelcomp.nhb_rayon.rayon_nr
+                if deelcomp.is_afgesloten:
+                    deelcomp.status_str = "Afgesloten"
+                    deelcomp.status_groen = True
+                else:
+                    deelcomp.status_str = "Actief"
 
         context['comp'] = comp
 
