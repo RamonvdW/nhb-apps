@@ -52,6 +52,10 @@ class KalenderManagerView(UserPassesTestMixin, View):
 
         context['wedstrijden'] = wedstrijden
 
+        context['kruimels'] = (
+            (None, 'Wedstrijdkalender'),
+        )
+
         menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 

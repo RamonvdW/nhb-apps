@@ -62,6 +62,10 @@ class VerenigingKalenderWedstrijdenView(UserPassesTestMixin, View):
         else:
             context['geen_locatie'] = True
 
+        context['kruimels'] = (
+            (None, 'Wedstrijdkalender'),
+        )
+
         menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
