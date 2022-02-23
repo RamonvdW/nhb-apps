@@ -253,9 +253,14 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
             context['url_verwijder'] = context['url_opslaan']
 
         if self.rol_nu == Rollen.ROL_HWL:
-            context['url_terug'] = reverse('Kalender:vereniging')
+            url_terug = reverse('Kalender:vereniging')
         else:
-            context['url_terug'] = reverse('Kalender:manager')
+            url_terug = reverse('Kalender:manager')
+
+        context['kruimels'] = (
+            (url_terug, 'Wedstrijdkalender'),
+            (None, 'Wijzig wedstrijd')
+        )
 
         menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
