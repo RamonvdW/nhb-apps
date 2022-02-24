@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -142,6 +142,10 @@ class KalenderMaandView(TemplateView):
                                           kwargs={'wedstrijd_pk': wed.pk})
         # for
         context['wedstrijden'] = wedstrijden
+
+        context['kruimels'] = (
+            (None, 'Wedstrijdkalender'),
+        )
 
         menu_dynamics(self.request, context, 'kalender')
         return context
