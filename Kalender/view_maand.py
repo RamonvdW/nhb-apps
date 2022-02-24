@@ -171,6 +171,15 @@ class WedstrijdInfoView(TemplateView):
 
         context['wedstrijd'] = wedstrijd
 
+        url_terug = reverse('Kalender:maand',
+                            kwargs={'jaar': wedstrijd.datum_begin.year,
+                                    'maand': MAAND2URL[wedstrijd.datum_begin.month]})
+
+        context['kruimels'] = (
+            (url_terug, 'Wedstrijdkalender'),
+            (None, 'Wedstrijd details'),
+        )
+
         menu_dynamics(self.request, context, 'kalender')
         return context
 

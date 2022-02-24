@@ -67,7 +67,7 @@
                         <td>{{ wed.titel }}</td>
                         <td>{{ wed.locatie.plaats }}</td>
                         <td>
-                            {% if url_details %}
+                            {% if wed.url_details %}
                                 <a class="btn-nhb-rood" href="{{ wed.url_details }}">Details</a>
                             {% endif %}
                         </td>
