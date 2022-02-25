@@ -291,6 +291,6 @@
         })
     </script>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-wijzig-datums" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-wijzig-datums" %}
 
 {% endblock %}

@@ -781,6 +781,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="sporter-profiel" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="sporter-profiel" %}
 
 {% endblock %}

@@ -178,6 +178,6 @@
         <p>De <i>team wedstrijdklasse</i> wordt bepaald door de team sterkte en de vastgestelde minimum sterkte voor een wedstrijdklasse.</p>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-hwl-teams-koppelen" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compregio-hwl-teams-koppelen" %}
 
 {% endblock %}

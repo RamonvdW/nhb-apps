@@ -187,6 +187,6 @@
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina=obj_record.op_pagina %}
+    {% include 'feedback/sidebar.dtl' with op_pagina=obj_record.op_pagina %}
 
 {% endblock %}

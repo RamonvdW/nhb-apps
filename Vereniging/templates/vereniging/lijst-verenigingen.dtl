@@ -184,6 +184,6 @@
         </table>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="lijst-verenigingen" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="lijst-verenigingen" %}
 
 {% endblock %}

@@ -91,6 +91,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-planning-landelijk" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-planning-landelijk" %}
 
 {% endblock %}

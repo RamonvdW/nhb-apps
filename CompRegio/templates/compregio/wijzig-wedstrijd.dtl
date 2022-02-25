@@ -350,6 +350,6 @@
             })
     </script>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-wijzig-wedstrijd" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compregio-wijzig-wedstrijd" %}
 
 {% endblock %}

@@ -156,6 +156,6 @@
 
     <p class="center">De klassen Master en Veteraan zijn niet in gebruik in de bondscompetities.</p>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-info-leeftijden" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-info-leeftijden" %}
 
 {% endblock %}

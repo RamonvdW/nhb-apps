@@ -51,6 +51,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vhpg-acceptatie" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="vhpg-acceptatie" %}
 
 {% endblock %}

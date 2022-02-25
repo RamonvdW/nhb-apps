@@ -84,6 +84,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="kalender-overzicht-maand" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-overzicht-maand" %}
 
 {% endblock %}

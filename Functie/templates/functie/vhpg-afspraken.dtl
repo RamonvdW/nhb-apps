@@ -37,6 +37,6 @@
     </div>
 
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vhpg-afspraken" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="vhpg-afspraken" %}
 
 {% endblock %}

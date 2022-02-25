@@ -76,6 +76,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-overzicht" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="records-overzicht" %}
 
 {% endblock %}

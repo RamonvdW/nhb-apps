@@ -83,6 +83,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-wieschietwaar-methode1" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compregio-wieschietwaar-methode1" %}
 
 {% endblock %}

@@ -163,6 +163,6 @@
             </div>
         </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compinschrijven-hwl-leden-ingeschreven" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compinschrijven-hwl-leden-ingeschreven" %}
 
 {% endblock %}

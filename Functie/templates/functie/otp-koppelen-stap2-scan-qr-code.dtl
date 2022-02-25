@@ -106,6 +106,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="otp-koppelen-stap2" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="otp-koppelen-stap2" %}
 
 {% endblock %}

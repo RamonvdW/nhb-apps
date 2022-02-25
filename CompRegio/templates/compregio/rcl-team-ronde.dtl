@@ -242,6 +242,6 @@
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-rcl-team-ronde" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compregio-rcl-team-ronde" %}
 
 {% endblock %}

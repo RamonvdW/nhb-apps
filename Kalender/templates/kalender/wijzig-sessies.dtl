@@ -108,6 +108,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="kalender-wijzig-sessies" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-wijzig-sessies" %}
 
 {% endblock %}

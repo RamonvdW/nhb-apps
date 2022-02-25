@@ -171,6 +171,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-ver-teams-koppelen" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="comprayon-ver-teams-koppelen" %}
 
 {% endblock %}

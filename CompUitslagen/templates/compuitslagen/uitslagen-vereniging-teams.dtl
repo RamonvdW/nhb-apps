@@ -197,6 +197,6 @@
         {% endif %}
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-vereniging-teams" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-uitslagen-vereniging-teams" %}
 
 {% endblock %}

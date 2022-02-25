@@ -126,6 +126,6 @@
         })
     </script>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-keuze-zeven-wedstrijden-methode1" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compregio-keuze-zeven-wedstrijden-methode1" %}
 
 {% endblock %}

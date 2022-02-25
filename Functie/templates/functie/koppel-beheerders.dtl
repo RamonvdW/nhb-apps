@@ -196,7 +196,7 @@
 
     {% endif %} <!-- zoekterm -->
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-koppel-beheerders" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-koppel-beheerders" %}
 
 {% endblock %}
 

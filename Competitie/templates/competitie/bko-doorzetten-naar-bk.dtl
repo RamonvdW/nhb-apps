@@ -79,6 +79,6 @@
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-bko-doorzetten-naar-bk" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-bko-doorzetten-naar-bk" %}
 
 {% endblock %}

@@ -86,6 +86,6 @@
         </div>
     </div>
 
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="histcomp-interland" %}
+{% include 'feedback/sidebar.dtl' with op_pagina="histcomp-interland" %}
 
 {% endblock %}

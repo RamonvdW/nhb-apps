@@ -127,6 +127,6 @@
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-hwl-teams-wijzig" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compregio-hwl-teams-wijzig" %}
 
 {% endblock %}

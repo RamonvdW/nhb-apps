@@ -56,6 +56,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-wachtwoord-vergeten" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="account-wachtwoord-vergeten" %}
 
 {% endblock %}

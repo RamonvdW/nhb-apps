@@ -122,6 +122,6 @@
         </form>
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-wijzig-poule" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compregio-wijzig-poule" %}
 
 {% endblock %}

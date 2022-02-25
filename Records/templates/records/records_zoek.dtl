@@ -110,6 +110,6 @@
         {% endif %}
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-zoek-formulier" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="records-zoek-formulier" %}
 
 {% endblock %}

@@ -29,6 +29,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-geblokkeerd" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="account-geblokkeerd" %}
 
 {% endblock %}

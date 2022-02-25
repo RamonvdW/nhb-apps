@@ -43,6 +43,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wissel-naar-account" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wissel-naar-account" %}
 
 {% endblock %}

@@ -70,6 +70,6 @@
 
     <p class="center">Na het opslaan wordt een e-mail gestuurd naar het opgegeven adres. Volg de instructies in de e-mail om het adres te bevestigen.</p>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-wijzig-email" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-wijzig-email" %}
 
 {% endblock %}

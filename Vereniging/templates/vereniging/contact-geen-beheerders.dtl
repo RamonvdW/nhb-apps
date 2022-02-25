@@ -62,6 +62,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-contact-geen-beheerders" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="vereniging-contact-geen-beheerders" %}
 
 {% endblock %}

@@ -123,6 +123,6 @@
         </div>
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-hwl-teams-invallers" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compregio-hwl-teams-invallers" %}
 
 {% endblock %}

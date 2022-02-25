@@ -112,6 +112,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compinschrijven-inschrijfmethode3-behoefte" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compinschrijven-inschrijfmethode3-behoefte" %}
 
 {% endblock %}

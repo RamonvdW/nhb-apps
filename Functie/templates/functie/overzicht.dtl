@@ -137,7 +137,7 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-overzicht" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-overzicht" %}
 
 {% endblock %}
 

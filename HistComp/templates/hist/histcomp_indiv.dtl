@@ -177,6 +177,6 @@
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="histcomp_indiv" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="histcomp_indiv" %}
 
 {% endblock %}

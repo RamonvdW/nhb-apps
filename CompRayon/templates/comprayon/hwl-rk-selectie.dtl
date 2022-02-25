@@ -122,6 +122,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-hwl-rk-selectie" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="comprayon-hwl-rk-selectie" %}
 
 {% endblock %}

@@ -18,6 +18,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="kalender-wedstrijd-details" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-wedstrijd-details" %}
 
 {% endblock %}

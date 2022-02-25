@@ -176,6 +176,6 @@
         </table>
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-rayon-teams" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-uitslagen-rayon-teams" %}
 
 {% endblock %}

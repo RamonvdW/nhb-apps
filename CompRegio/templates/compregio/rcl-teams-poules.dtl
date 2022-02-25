@@ -138,6 +138,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-rcl-teams-poules" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compregio-rcl-teams-poules" %}
 
 {% endblock %}

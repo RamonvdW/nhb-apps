@@ -51,6 +51,6 @@
         </table>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-wissel-naar-sec" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-wissel-naar-sec" %}
 
 {% endblock %}

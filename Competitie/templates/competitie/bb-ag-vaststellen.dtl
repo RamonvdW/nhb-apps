@@ -66,6 +66,6 @@
         {% endif %}
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competities-ag-vaststellen" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="competities-ag-vaststellen" %}
 
 {% endblock %}

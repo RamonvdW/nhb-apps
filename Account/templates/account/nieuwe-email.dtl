@@ -32,6 +32,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-email-bevestigen-nieuwe" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="account-email-bevestigen-nieuwe" %}
 
 {% endblock %}

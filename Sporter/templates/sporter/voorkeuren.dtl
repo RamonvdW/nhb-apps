@@ -279,6 +279,6 @@
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="sporter-voorkeuren" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="sporter-voorkeuren" %}
 
 {% endblock %}

@@ -189,6 +189,6 @@
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="klassengrenzen-tonen" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="klassengrenzen-tonen" %}
 
 {% endblock %}

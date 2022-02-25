@@ -112,6 +112,6 @@
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-verteams-wijzig" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="comprayon-verteams-wijzig" %}
 
 {% endblock %}

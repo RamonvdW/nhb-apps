@@ -188,6 +188,6 @@
             <i class="material-icons-round left">help_outline</i>Handleiding</a>
     </p>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-rcl-instellingen" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compregio-rcl-instellingen" %}
 
 {% endblock %}

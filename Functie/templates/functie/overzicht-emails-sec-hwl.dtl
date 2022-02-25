@@ -40,6 +40,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-beheerders-lid-nrs" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-beheerders-lid-nrs" %}
 
 {% endblock %}

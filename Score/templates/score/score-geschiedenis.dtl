@@ -135,7 +135,7 @@
 
     {% endif %}
 
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="score-geschiedenis" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="score-geschiedenis" %}
 
 {% endblock %}
 

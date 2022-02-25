@@ -11,16 +11,16 @@ from django.urls import Resolver404, reverse
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
-from .forms import SiteFeedbackForm
-from .models import SiteFeedback
+from .forms import FeedbackForm
+from .models import Feedback
 from .feedback_opslaan import store_feedback
 
-TEMPLATE_FEEDBACK_FORMULIER = 'overig/site-feedback-formulier.dtl'
-TEMPLATE_FEEDBACK_BEDANKT = 'overig/site-feedback-bedankt.dtl'
-TEMPLATE_FEEDBACK_INZICHT = 'overig/site-feedback-inzicht.dtl'
+TEMPLATE_FEEDBACK_FORMULIER = 'feedback/formulier.dtl'
+TEMPLATE_FEEDBACK_BEDANKT = 'feedback/bedankt.dtl'
+TEMPLATE_FEEDBACK_INZICHT = 'feedback/inzicht.dtl'
 
 
-class SiteFeedbackView(UserPassesTestMixin, View):
+class KrijgFeedbackView(UserPassesTestMixin, View):
     """ View voor het feedback formulier
         get: radio-button wordt gezet aan de hand van de gebruikte url
         post: ingevoerde waarden worden in de database gezet
@@ -48,13 +48,14 @@ class SiteFeedbackView(UserPassesTestMixin, View):
 
         # bewaar twee parameters in de sessie - deze blijven server-side
         request.session['feedback_op_pagina'] = kwargs['op_pagina']
+        request.session['feedback_volledige_url'] = '/' + kwargs['volledige_url'] + '/'
         request.session['feedback_gebruiker'] = gebruiker_naam
 
         # geef het formulier aan de gebruiker om in te vullen
-        form = SiteFeedbackForm(initial={'bevinding': '6'})
+        form = FeedbackForm(initial={'bevinding': '6'})
         bev = kwargs['bevinding']
         context = {'form': form,
-                   'formulier_url': reverse('Overig:feedback-formulier'),     # URL voor de POST
+                   'formulier_url': reverse('Feedback:formulier'),     # URL voor de POST
                    'gebruiker_naam': gebruiker_naam,
                    'check_0': (bev == 'plus'),
                    'check_1': (bev == 'nul'),
@@ -72,10 +73,11 @@ class SiteFeedbackView(UserPassesTestMixin, View):
         """ deze functie handelt het http-post verzoek af
             als de gebruiker op de Verstuur knop drukt krijgt deze functie de ingevoerde data.
         """
-        form = SiteFeedbackForm(data=request.POST)
+        form = FeedbackForm(data=request.POST)
         if form.is_valid():
             try:
                 op_pagina = request.session['feedback_op_pagina']
+                volledige_url = request.session['feedback_volledige_url']
                 gebruiker = request.session['feedback_gebruiker']
             except KeyError:
                 pass
@@ -83,17 +85,18 @@ class SiteFeedbackView(UserPassesTestMixin, View):
                 store_feedback(
                     gebruiker,
                     op_pagina,
+                    volledige_url,
                     form.cleaned_data['bevinding'],
                     form.cleaned_data['feedback'])
-                return redirect('Overig:feedback-bedankt')
+                return redirect('Feedback:bedankt')
 
         context = {'form': form,
-                   'formulier_url': reverse('Overig:feedback-formulier')}  # URL voor de POST
+                   'formulier_url': reverse('Feedback:formulier')}  # URL voor de POST
         menu_dynamics(request, context)
         return render(request, self.template_name, context)
 
 
-class SiteFeedbackBedanktView(TemplateView):
+class BedanktView(TemplateView):
     """ Deze view wordt gebruikt nadat de gebruiker feedback geleverd heeft.
         Een statische pagina wordt getoond, met transitie terug naar het plein.
     """
@@ -108,7 +111,7 @@ class SiteFeedbackBedanktView(TemplateView):
         return context
 
 
-class SiteFeedbackInzichtView(UserPassesTestMixin, ListView):
+class InzichtView(UserPassesTestMixin, ListView):
     """ Deze view toont de ontvangen feedback. """
 
     # class variables shared by all instances
@@ -122,21 +125,21 @@ class SiteFeedbackInzichtView(UserPassesTestMixin, ListView):
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
         # 100 nieuwste niet-afgehandelde site feedback items
-        return SiteFeedback.objects.filter(is_afgehandeld=False).order_by('-toegevoegd_op')[:100]
+        return Feedback.objects.filter(is_afgehandeld=False).order_by('-toegevoegd_op')[:100]
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        count_niet_afgehandeld = SiteFeedback.objects.filter(is_afgehandeld=False).count()
-        context['count_aanwezig'] = count_aanwezig = SiteFeedback.objects.count()
+        count_niet_afgehandeld = Feedback.objects.filter(is_afgehandeld=False).count()
+        context['count_aanwezig'] = count_aanwezig = Feedback.objects.count()
         context['count_afgehandeld'] = count_aanwezig - count_niet_afgehandeld
 
         if self.request.user.is_staff:
-            context['url_admin_site'] = reverse('admin:Overig_sitefeedback_changelist')
+            context['url_admin_site'] = reverse('admin:Feedback_feedback_changelist')
 
         context['kruimels'] = (
-            (None, 'Site feedback'),
+            (None, 'Feedback'),
         )
 
         menu_dynamics(self.request, context)

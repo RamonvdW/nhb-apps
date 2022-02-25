@@ -194,6 +194,6 @@
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-wijzig-clusters" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compregio-wijzig-clusters" %}
 
 {% endblock %}

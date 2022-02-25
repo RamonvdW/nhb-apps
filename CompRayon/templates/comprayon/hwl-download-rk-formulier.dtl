@@ -195,6 +195,6 @@
 
     {% endif %}     <!-- heeft_teams -->
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-hwl-download-rk-formulier" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="comprayon-hwl-download-rk-formulier" %}
 
 {% endblock %}

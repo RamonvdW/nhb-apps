@@ -209,6 +209,6 @@
 
     {% include 'competitie/tijdlijn.dtl' with comp=comp %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-overzicht-beheerder" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-overzicht-beheerder" %}
 
 {% endblock %}

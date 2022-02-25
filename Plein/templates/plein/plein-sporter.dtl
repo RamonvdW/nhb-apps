@@ -96,6 +96,6 @@
     </div>
 
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-schutter" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="plein-schutter" %}
 
 {% endblock %}

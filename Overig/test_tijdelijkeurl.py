@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -107,7 +107,7 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         # self.assertEqual(request, "request")
         self.assertEqual(hoortbij_accountemail, self.email_normaal)
         self.callback_count += 1
-        url = "/overig/feedback/bedankt/"
+        url = "/feedback/bedankt/"
         if self.callback_count == 1:
             # return url
             return url
@@ -145,7 +145,7 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.callback_count, 2)
         # _my_receiver_func stuurt door naar de feedback-bedankt pagina
-        self.assert_template_used(resp, ('overig/site-feedback-bedankt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
 
     def test_account_wissel(self):
         set_tijdelijke_url_receiver(RECEIVER_ACCOUNT_WISSEL, self._my_receiver_func_email)
@@ -177,7 +177,7 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.callback_count, 1)
         # _my_receiver_func stuurt door naar de feedback-bedankt pagina
-        self.assert_template_used(resp, ('overig/site-feedback-bedankt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
 
     def test_wachtwoord_vergeten(self):
         set_tijdelijke_url_receiver(RECEIVER_WACHTWOORD_VERGETEN, self._my_receiver_func_email)
@@ -208,12 +208,12 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.callback_count, 1)
         # _my_receiver_func stuurt door naar de feedback-bedankt pagina
-        self.assert_template_used(resp, ('overig/site-feedback-bedankt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
 
     def _my_receiver_func_functie(self, request, hoortbij_functie):
         # self.assertEqual(request, "request")
         self.callback_count += 1
-        url = "/overig/feedback/bedankt/"
+        url = "/feedback/bedankt/"
         return url
 
     def test_functie_email(self):
@@ -237,17 +237,17 @@ class TestOverigTijdelijkeUrl(E2EHelpers, TestCase):
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
         # print('urls: %s' % repr(urls))
         self.assertEqual(1, len(urls))
-        self.assertTrue('/overig/url/' in urls[0])
+        url = urls[0]
+        self.assertTrue('/overig/url/' in url)
         self.assertEqual(self.callback_count, 0)
 
         # volg de 'ga door' knop
-        url = urls[0]
         with self.assert_max_queries(20):
             resp = self.client.post(url, follow=True)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(self.callback_count, 1)
         # _my_receiver_func stuurt door naar de feedback-bedankt pagina
-        self.assert_template_used(resp, ('overig/site-feedback-bedankt.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('feedback/bedankt.dtl', 'plein/site_layout.dtl'))
 
     def test_other_http(self):
         self.e2e_assert_other_http_commands_not_supported('/overig/url/0/')

@@ -196,6 +196,6 @@
         </script>
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compinschrijven-sporter-bevestig-aanmelden" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compinschrijven-sporter-bevestig-aanmelden" %}
 
 {% endblock %}

@@ -65,6 +65,6 @@
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="histcomp_top" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="histcomp_top" %}
 
 {% endblock %}

@@ -403,7 +403,7 @@
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-activiteit" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="account-activiteit" %}
 
 {% endblock %}
 

@@ -146,6 +146,6 @@
         <p>Deze pagina is niet beschikbaar voor de huidige team ronde</p>
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compscores-rcl-scores-regio-teams" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compscores-rcl-scores-regio-teams" %}
 
 {% endblock %}

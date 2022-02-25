@@ -46,6 +46,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competities-aanmaken" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="competities-aanmaken" %}
 
 {% endblock %}

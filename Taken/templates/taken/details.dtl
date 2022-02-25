@@ -79,7 +79,7 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="taken-details" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="taken-details" %}
 
 {% endblock %}
 

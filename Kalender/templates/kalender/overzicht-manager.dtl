@@ -59,6 +59,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="kalender-overzicht-manager" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-overzicht-manager" %}
 
 {% endblock %}

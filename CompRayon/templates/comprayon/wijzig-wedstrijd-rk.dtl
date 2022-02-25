@@ -274,6 +274,6 @@
         })
     </script>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-wijzig-wedstrijd-rk" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="comprayon-wijzig-wedstrijd-rk" %}
 
 {% endblock %}

@@ -99,8 +99,8 @@
                 {% url 'Overig:activiteit' as card_url %}
                 {% include 'plein/card.dtl' with title="Account activiteit" text="Toon overzicht van de recent gebruikte en aangemaakte accounts." icon="recent_actors" url=card_url %}
 
-                <!-- site feedback -->
-                {% url 'Overig:feedback-inzicht' as card_url %}
+                <!-- feedback -->
+                {% url 'Feedback:inzicht' as card_url %}
                 {% include 'plein/card.dtl' with title="Site feedback" text="Toon de feedback van de gebruikers." icon="feedback" url=card_url %}
 
                 <!-- logboek -->
@@ -123,6 +123,6 @@
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-beheerder" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="plein-beheerder" %}
 
 {% endblock %}

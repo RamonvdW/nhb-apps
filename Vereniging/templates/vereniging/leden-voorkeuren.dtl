@@ -140,6 +140,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-leden-voorkeuren" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="vereniging-leden-voorkeuren" %}
 
 {% endblock %}

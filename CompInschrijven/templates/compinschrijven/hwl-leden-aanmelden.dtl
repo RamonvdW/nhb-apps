@@ -291,6 +291,6 @@
         </script>
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compinschrijven-hwl-leden-aanmelden" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compinschrijven-hwl-leden-aanmelden" %}
 
 {% endblock %}

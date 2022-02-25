@@ -184,6 +184,6 @@
         window.addEventListener("load", function() { invallers_grijs_maken() })
     </script>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-hwl-teams-invallers-koppelen" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compregio-hwl-teams-invallers-koppelen" %}
 
 {% endblock %}

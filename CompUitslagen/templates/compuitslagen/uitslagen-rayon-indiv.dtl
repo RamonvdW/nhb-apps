@@ -181,6 +181,6 @@
         </tr>
     </table>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-rayon-indiv" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-uitslagen-rayon-indiv" %}
 
 {% endblock %}

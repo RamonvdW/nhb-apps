@@ -90,7 +90,7 @@
         <a class="btn-nhb-rood" href="{% url 'Competitie:aanmaken' %}">Ik wil de nieuwe competities aanmaken</a>
     </p>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="instellingen-nieuwe-competitie" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="instellingen-nieuwe-competitie" %}
 
 {% endblock %}
 

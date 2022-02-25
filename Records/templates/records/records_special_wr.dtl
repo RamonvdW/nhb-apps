@@ -54,6 +54,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-lijst-wr" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="records-lijst-wr" %}
 
 {% endblock %}

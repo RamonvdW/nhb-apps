@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -31,6 +31,7 @@ urlpatterns = [
     path('bondscompetities/hist/',          include('HistComp.urls')),
     path('bondscompetities/',               include('Competitie.urls')),
     path('functie/',                        include('Functie.urls')),
+    path('feedback/',                       include('Feedback.urls')),
     path('handleiding/',                    include('Handleiding.urls')),
     path('kalender/',                       include('Kalender.urls')),
     path('logboek/',                        include('Logboek.urls')),

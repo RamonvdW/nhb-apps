@@ -22,6 +22,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-bevestig-email" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-bevestig-email" %}
 
 {% endblock %}

@@ -323,6 +323,6 @@
 
     {% endif %}         <!-- volwaardig beheerder -->
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wissel-van-rol" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wissel-van-rol" %}
 
 {% endblock %}

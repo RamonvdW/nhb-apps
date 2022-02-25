@@ -736,6 +736,6 @@
             <i class="material-icons-round left">check</i>Opslaan</button>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compscores-scores-invoeren" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compscores-scores-invoeren" %}
 
 {% endblock %}

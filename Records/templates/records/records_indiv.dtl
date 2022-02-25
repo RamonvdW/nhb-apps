@@ -403,6 +403,6 @@
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-indiv-zoom5" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="records-indiv-zoom5" %}
 
 {% endblock %}

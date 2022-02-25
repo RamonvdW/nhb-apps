@@ -16,7 +16,7 @@ included_templates = (
     'plein/card_logo.dtl',
     'plein/andere-sites-van-de-nhb.dtl',
     'plein/ga-naar-live-server.dtl',
-    'overig/site-feedback-sidebar.dtl',
+    'feedback/sidebar.dtl',
     'logboek/common.dtl',
     'competitie/tijdlijn.dtl',
     'snippets.dtl'

@@ -118,6 +118,6 @@
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="klassengrenzen-vaststellen" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="klassengrenzen-vaststellen" %}
 
 {% endblock %}

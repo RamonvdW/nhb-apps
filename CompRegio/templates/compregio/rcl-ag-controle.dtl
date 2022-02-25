@@ -68,6 +68,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-rcl-ag-controle" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compregio-rcl-ag-controle" %}
 
 {% endblock %}

@@ -168,6 +168,6 @@
 
     {% endif %}     <!-- inactieve leden -->
 
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-ledenlijst" %}
+{% include 'feedback/sidebar.dtl' with op_pagina="vereniging-ledenlijst" %}
 
 {% endblock %}

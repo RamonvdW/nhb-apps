@@ -30,6 +30,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-bevestig-email" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="account-bevestig-email" %}
 
 {% endblock %}

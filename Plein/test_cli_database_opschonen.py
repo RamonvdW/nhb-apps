@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.core import management
 from Account.models import account_create
+from Feedback.models import Feedback
+from Feedback.feedback_opslaan import store_feedback
 from Logboek.models import LogboekRegel, schrijf_in_logboek
 from Mailer.models import MailQueue, mailer_queue_email
-from Overig.models import SiteFeedback, save_tijdelijke_url
-from Overig.feedback_opslaan import store_feedback
+from Overig.models import save_tijdelijke_url
 from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
@@ -53,8 +54,8 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         save_tijdelijke_url('code', 'test', geldig_dagen=-8)
 
         # maak een oude, afgehandelde site feedback aan
-        store_feedback('mij', 'pagina', SiteFeedback.url2bev['plus'], 'feedback')
-        feedback = SiteFeedback.objects.all()[0]
+        store_feedback('mij', 'pagina', '/pagina/', Feedback.url2bev['plus'], 'feedback')
+        feedback = Feedback.objects.all()[0]
         feedback.toegevoegd_op -= datetime.timedelta(days=92)
         feedback.is_afgehandeld = True
         feedback.save()

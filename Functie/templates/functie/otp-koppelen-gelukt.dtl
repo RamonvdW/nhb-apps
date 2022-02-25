@@ -22,6 +22,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="otp-koppelen-gelukt" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="otp-koppelen-gelukt" %}
 
 {% endblock %}

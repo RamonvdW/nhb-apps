@@ -267,6 +267,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-waarschijnlijke-deelnemers-regio" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compregio-waarschijnlijke-deelnemers-regio" %}
 
 {% endblock %}

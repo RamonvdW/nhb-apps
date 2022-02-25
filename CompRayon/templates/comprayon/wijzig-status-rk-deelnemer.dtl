@@ -112,6 +112,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-wijzig-status-rk-deelnemer" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="comprayon-wijzig-status-rk-deelnemer" %}
 
 {% endblock %}

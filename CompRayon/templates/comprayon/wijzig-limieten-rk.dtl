@@ -129,6 +129,6 @@
         </div>
     </form>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-wijzig-limieten-rk" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="comprayon-wijzig-limieten-rk" %}
 
 {% endblock %}

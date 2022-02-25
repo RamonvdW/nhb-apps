@@ -150,6 +150,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-hwl-teams-regio" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compregio-hwl-teams-regio" %}
 
 {% endblock %}

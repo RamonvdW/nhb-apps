@@ -90,6 +90,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-kies" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-kies" %}
 
 {% endblock %}

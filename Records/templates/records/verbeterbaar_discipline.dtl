@@ -178,6 +178,6 @@
         </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-alle-verbeterbaar" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="records-alle-verbeterbaar" %}
 
 {% endblock %}

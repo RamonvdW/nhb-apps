@@ -68,6 +68,6 @@
 
     {% include 'competitie/tijdlijn.dtl' with comp=comp %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-overzicht-hwl" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-overzicht-hwl" %}
 
 {% endblock %}

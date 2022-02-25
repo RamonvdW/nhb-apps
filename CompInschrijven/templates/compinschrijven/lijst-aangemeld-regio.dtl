@@ -154,6 +154,6 @@
 
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-lijst-aangemeld-regio" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-lijst-aangemeld-regio" %}
 
 {% endblock %}

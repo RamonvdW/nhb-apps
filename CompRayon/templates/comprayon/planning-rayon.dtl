@@ -172,6 +172,6 @@
     </div>
 
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-planning-rayon" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="comprayon-planning-rayon" %}
 
 {% endblock %}
