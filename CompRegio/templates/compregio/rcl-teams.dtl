@@ -136,7 +136,7 @@
                 <td>{{ team.team_naam }}</td>
                 <td class="center">{{ team.ag_str }}</td>
                 <td>{{ team.team_type.beschrijving }}</td>
-                <td>
+                <td class="center">
                     {% if team.url_aanpassen %}
                         <a class="btn-nhb-rood" href="{{ team.url_aanpassen }}">
                             <i class="material-icons-round">edit</i></a>
@@ -203,9 +203,10 @@
                     <td>{{ team.team_naam }}</td>
                     <td class="center">{{ team.ag_str }}</td>
                     <td></td>
-                    <td>
+                    <td class="center">
                         {% if team.url_aanpassen %}
-                            <a class="btn-nhb-blauw" href="{{ team.url_aanpassen }}">Aanpassen</a>
+                            <a class="btn-nhb-rood" href="{{ team.url_aanpassen }}">
+                                <i class="material-icons-round">edit</i></a>
                         {% endif %}
                     </td>
                 </tr>

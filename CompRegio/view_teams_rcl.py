@@ -196,7 +196,7 @@ class RegioTeamsView(TemplateView):
             team.ag_str = ag_str.replace('.', ',')
 
             if comp.fase <= 'D' and self.rol_nu == Rollen.ROL_RCL:
-                team.url_aanpassen = reverse('Vereniging:teams-regio-koppelen',
+                team.url_aanpassen = reverse('CompRegio:teams-regio-koppelen',
                                              kwargs={'team_pk': team.pk})
             totaal_teams += 1
 
