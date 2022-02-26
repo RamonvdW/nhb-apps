@@ -350,7 +350,7 @@ def update_boogtypen(apps, _):
 
     # kopieer elke SporterBoog(IB) naar SporterBoog(TR)
     bulk = list()
-    for sporterboog_ib in sporterboog_klas.objects.filter(boogtype__afkorting='IB'):
+    for sporterboog_ib in sporterboog_klas.objects.filter(boogtype__afkorting='IB'):        # pragma: no cover
 
         # maak een TR variant van deze IB
         obj = sporterboog_klas(
