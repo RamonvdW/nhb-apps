@@ -251,7 +251,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         context['opt_team_type'] = teamtypes = get_competitie_team_typen(comp)
         for teamtype in teamtypes:
             teamtype.choice_name = teamtype.afkorting
-            if teamtype.afkorting == 'R2':
+            if teamtype.afkorting[0] == 'R':        # R or R2
                 teamtype_default = teamtype
         # for
 
@@ -297,7 +297,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         deelcomp = self._get_deelcomp_rk(kwargs['rk_deelcomp_pk'])
-
+        comp = deelcomp.competitie
         ver = self.functie_nu.nhb_ver
 
         try:
@@ -325,11 +325,12 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
                 raise Http404('Maximum van 25 teams is bereikt')
 
             afkorting = request.POST.get('team_type', '')
+            print('post: afkorting=%s' % afkorting)
             try:
                 klasse = (CompetitieKlasse
                           .objects
                           .select_related('team__team_type')
-                          .filter(team__buiten_gebruik=False,
+                          .filter(competitie=comp,
                                   team__team_type__afkorting=afkorting))[0]
                 team_type = klasse.team.team_type
             except (IndexError, TeamType.DoesNotExist):

@@ -261,7 +261,7 @@ class IndivWedstrijdklasse(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
-        return self.beschrijving
+        return self.beschrijving + ' [' + self.boogtype.afkorting + ']'
 
     class Meta:
         """ meta data voor de admin interface """
@@ -309,7 +309,7 @@ class TeamWedstrijdklasse(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
-        return self.beschrijving
+        return self.beschrijving + ' [' + self.team_type.afkorting + ']'
 
     class Meta:
         """ meta data voor de admin interface """

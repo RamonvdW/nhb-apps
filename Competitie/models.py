@@ -387,9 +387,9 @@ class CompetitieKlasse(models.Model):
     def __str__(self):
         msg = "?"
         if self.indiv:
-            msg = self.indiv.beschrijving
+            msg = self.indiv.beschrijving + ' [' + self.indiv.boogtype.afkorting + ']'
         if self.team:
-            msg = self.team.beschrijving
+            msg = self.team.beschrijving + ' [' + self.team.team_type.afkorting + ']'
         msg += " (%.3f)" % self.min_ag
 
         if self.is_voor_teams_rk_bk:

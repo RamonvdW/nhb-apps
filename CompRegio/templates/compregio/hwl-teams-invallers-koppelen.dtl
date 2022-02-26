@@ -126,7 +126,7 @@
                                         <ul id="id_{{ group_str }}" data-uitvaller="1">
                                             {% for is_uitvaller, invaller_gem_str, id_invaller, invaller_nr, invaller_naam_str, toon_checked in invallers %}
                                                 <li>
-                                                    <label class="black-text" for="{{ id_invaller }}">
+                                                    <label class="white" for="{{ id_invaller }}">
                                                         <input class="with-gap" type="radio" name="{{ group_str }}" value="{{ invaller_nr }}" data-nr="{{ invaller_nr }}" data-is-uitvaller="{{ is_uitvaller }}" required id="{{ id_invaller }}"{% if toon_checked %} checked{% endif %} onchange="gewijzigd()">
                                                         <span>{% if invaller_gem_str %}({{ invaller_gem_str }})&nbsp;&nbsp;{% endif %}{{ invaller_naam_str }}</span>
                                                     </label>

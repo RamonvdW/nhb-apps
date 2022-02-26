@@ -42,6 +42,8 @@ class Score(models.Model):
     # bij wie hoort deze score
     sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT, null=True)
 
+    # TODO: kopie toevoegen van het boogtype van de sporterboog, om eenvoudiger op te kunnen filteren
+
     # waarde van de score, bijvoorbeeld 360
     # bij indiv/team ag is dit de AG * 1000, dus 9.123 --> 9123
     waarde = models.PositiveSmallIntegerField()     # max = 32767
