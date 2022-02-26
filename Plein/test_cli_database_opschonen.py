@@ -54,7 +54,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         save_tijdelijke_url('code', 'test', geldig_dagen=-8)
 
         # maak een oude, afgehandelde site feedback aan
-        store_feedback('mij', 'pagina', '/pagina/', Feedback.url2bev['plus'], 'feedback')
+        store_feedback('mij', 'rol', 'pagina', '/pagina/', Feedback.url2bev['plus'], 'feedback')
         feedback = Feedback.objects.all()[0]
         feedback.toegevoegd_op -= datetime.timedelta(days=92)
         feedback.is_afgehandeld = True

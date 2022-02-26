@@ -194,7 +194,7 @@ $input-margin-bottom: 8px;
 $input-margin: 0 0 $input-margin-bottom 0 !default;
 $input-padding: 0 !default;
 $label-font-size: .8rem !default;
-$input-disabled-color: rgba(0,0,0, .75) !default;   // meer contrast op wit dan: rgba(0,0,0, .42) !default;
+$input-disabled-color: rgba(0,0,0, .42) !default;
 $input-disabled-solid-color: #757575 !default;      // meer contrast op wit dan: #949494 !default;
 $input-disabled-border: 1px dotted $input-disabled-color !default;
 $input-invalid-border: 1px solid $input-error-color !default;
