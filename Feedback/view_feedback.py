@@ -9,7 +9,7 @@ from django.views.generic import TemplateView, ListView
 from django.shortcuts import render, redirect
 from django.urls import Resolver404, reverse
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.rol import Rollen, rol_get_huidige
+from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from .forms import FeedbackForm
 from .models import Feedback
@@ -44,19 +44,21 @@ class KrijgFeedbackView(UserPassesTestMixin, View):
             # stuur ze weg
             raise Resolver404()
 
-        gebruiker_naam = request.user.get_account_full_name()
+        gebruiker_str = request.user.get_account_full_name()
+        rol_str = rol_get_beschrijving(request)
 
         # bewaar twee parameters in de sessie - deze blijven server-side
         request.session['feedback_op_pagina'] = kwargs['op_pagina']
         request.session['feedback_volledige_url'] = '/' + kwargs['volledige_url'] + '/'
-        request.session['feedback_gebruiker'] = gebruiker_naam
+        request.session['feedback_gebruiker'] = gebruiker_str
+        request.session['feedback_in_rol'] = rol_str
 
         # geef het formulier aan de gebruiker om in te vullen
         form = FeedbackForm(initial={'bevinding': '6'})
         bev = kwargs['bevinding']
         context = {'form': form,
                    'formulier_url': reverse('Feedback:formulier'),     # URL voor de POST
-                   'gebruiker_naam': gebruiker_naam,
+                   'gebruiker_naam': gebruiker_str,
                    'check_0': (bev == 'plus'),
                    'check_1': (bev == 'nul'),
                    'check_2': (bev == 'min')}
@@ -78,12 +80,14 @@ class KrijgFeedbackView(UserPassesTestMixin, View):
             try:
                 op_pagina = request.session['feedback_op_pagina']
                 volledige_url = request.session['feedback_volledige_url']
-                gebruiker = request.session['feedback_gebruiker']
+                gebruiker_str = request.session['feedback_gebruiker']
+                rol_str = request.session['feedback_in_rol']
             except KeyError:
                 pass
             else:
                 store_feedback(
-                    gebruiker,
+                    gebruiker_str,
+                    rol_str,
                     op_pagina,
                     volledige_url,
                     form.cleaned_data['bevinding'],

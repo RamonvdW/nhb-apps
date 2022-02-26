@@ -59,7 +59,12 @@
                             <td colspan="2"></td>
                             <td colspan="2">
                                 <div style="border-left:groove; padding:5px">{{ obj.feedback|linebreaksbr }}</div>
-                                <p>door <b>{{ obj.gebruiker }}</b> toegevoegd op {{ obj.toegevoegd_op|date:"l j F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}</p>
+                                <p>door <b>{{ obj.gebruiker }}</b>
+                                    {% if obj.in_rol != '?' %}
+                                        <span> in de rol <b>{{ obj.in_rol }}</b></span>
+                                    {% endif %}
+                                </p>
+                                <p>Toegevoegd op {{ obj.toegevoegd_op|date:"l j F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}</p>
                                 <p>(site versie: {{ obj.site_versie }})</p>
                             </td>
                         </tr>

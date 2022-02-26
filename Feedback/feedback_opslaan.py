@@ -12,7 +12,7 @@ from .models import Feedback
 import datetime
 
 
-def store_feedback(gebruiker, op_pagina, volledige_url, bevinding, feedback):
+def store_feedback(gebruiker_str, rol_str, op_pagina, volledige_url, bevinding, feedback):
     """ Deze functie wordt aangeroepen vanuit de view waarin de feedback van de gebruiker
         verzameld is. Deze functie slaat de feedback op in een database tabel.
     """
@@ -20,9 +20,10 @@ def store_feedback(gebruiker, op_pagina, volledige_url, bevinding, feedback):
     # prevent double creation (double/triple-click button)
     obj, is_new = Feedback.objects.get_or_create(
                         site_versie=settings.SITE_VERSIE,
-                        gebruiker=gebruiker,
-                        op_pagina=op_pagina,
-                        volledige_url=volledige_url,
+                        gebruiker=gebruiker_str[:50],
+                        in_rol=rol_str[:100],
+                        op_pagina=op_pagina[:50],
+                        volledige_url=volledige_url[:250],
                         feedback=feedback,
                         is_afgehandeld=False,
                         bevinding=bevinding)

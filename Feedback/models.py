@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -24,6 +24,9 @@ class Feedback(models.Model):
 
     # wie heeft de feedback opgeschreven
     gebruiker = models.CharField(max_length=50)     # not linked to actual account
+
+    # in welke rol is deze feedback gegeven
+    in_rol = models.CharField(max_length=100, default='?', blank=True)
 
     # de naam van de pagina; typisch de naam van de template zoals "plein-beheerder"
     op_pagina = models.CharField(max_length=50)
