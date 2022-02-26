@@ -325,7 +325,6 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
                 raise Http404('Maximum van 25 teams is bereikt')
 
             afkorting = request.POST.get('team_type', '')
-            print('post: afkorting=%s' % afkorting)
             try:
                 klasse = (CompetitieKlasse
                           .objects

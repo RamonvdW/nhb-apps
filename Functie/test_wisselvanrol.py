@@ -23,6 +23,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
     url_activeer_rol = '/functie/activeer-rol/%s/'
     url_activeer_functie = '/functie/activeer-functie/%s/'
     url_accountwissel = '/account/account-wissel/'
+    url_bondscompetities = '/bondscompetities/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -163,18 +164,18 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # niet een niet- bestaande functie vanuit de RCL functie
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_activeer_functie % self.functie_rcl.pk)
-        self.assert_is_redirect(resp, self.url_wissel_van_rol)
+        self.assert_is_redirect(resp, self.url_bondscompetities)
         self.e2e_check_rol('RCL')
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_activeer_functie % 999999)
-        self.assert_is_redirect(resp, self.url_wissel_van_rol)
+        self.assert_is_redirect(resp, self.url_bondscompetities)
 
         self.e2e_check_rol('RCL')
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_activeer_functie % 'getal')
-        self.assert_is_redirect(resp, self.url_wissel_van_rol)
+        self.assert_is_redirect(resp, self.url_bondscompetities)
         self.e2e_check_rol('RCL')
 
         # probeer te wisselen naar secretaris

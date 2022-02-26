@@ -41,6 +41,8 @@ class BasisTypenIndivWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
     # lijstweergave
     list_filter = ('buiten_gebruik', 'boogtype', 'is_aspirant_klasse')
 
+    list_select_related = ('boogtype',)
+
     # record weergave
     fieldsets = (
         (None, {'fields': ('volgorde', 'beschrijving', 'boogtype', 'buiten_gebruik')}),
@@ -65,6 +67,8 @@ class BasisTypenTeamWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
 
     # lijstweergave
     list_filter = ('buiten_gebruik',)
+
+    list_select_related = ('team_type',)
 
     # record weergave
     fieldsets = (

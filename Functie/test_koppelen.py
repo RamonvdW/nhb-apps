@@ -283,7 +283,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # neem de BKO rol aan
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(20):
             resp = self.client.post('/functie/activeer-functie/%s/' % self.functie_bko.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "BKO ")
@@ -372,7 +372,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # neem de RCL rol aan
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(20):
             resp = self.client.post(self.url_activeer_functie % self.functie_rcl111.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "RCL ")

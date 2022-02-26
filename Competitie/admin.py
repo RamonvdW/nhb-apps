@@ -51,7 +51,7 @@ class CompetitieKlasseAdmin(CreateOnlyAdmin):
 
     list_filter = ('competitie', 'team__team_type')
 
-    list_select_related = ('competitie', 'indiv', 'team')
+    list_select_related = ('competitie', 'indiv', 'team', 'indiv__boogtype', 'team__team_type')
 
     ordering = ('team__volgorde', 'indiv__volgorde')
 
@@ -409,10 +409,43 @@ class CompetitieMutatieAdmin(CreateOnlyAdmin):
     readonly_fields = ('mutatie', 'when', 'deelnemer', 'door')
 
     list_select_related = ('deelnemer__deelcompetitie',
+                           'deelnemer__deelcompetitie__nhb_rayon',
                            'deelnemer__klasse',
-                           'deelnemer__sporterboog__sporter')
+                           'deelnemer__sporterboog__sporter',
+                           'deelnemer__sporterboog__boogtype')
 
     list_filter = ('is_verwerkt', 'mutatie')
+
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self.obj = None
+
+    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        if obj:
+            self.obj = obj
+        return super().get_form(request, obj, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        if db_field.name == 'klasse' and self.obj:
+            kwargs['queryset'] = (CompetitieKlasse
+                                  .objects
+                                  .select_related('indiv',
+                                                  'indiv__boogtype',
+                                                  'team',
+                                                  'team__team_type')
+                                  .filter(competitie=self.obj.competitie)
+                                  .order_by('indiv__volgorde',
+                                            'team__volgorde'))
+        elif db_field.name == 'deelcompetitie' and self.obj:
+            kwargs['queryset'] = (DeelCompetitie
+                                  .objects
+                                  .select_related('nhb_regio',
+                                                  'nhb_rayon')
+                                  .filter(competitie=self.obj.competitie)
+                                  .order_by('nhb_rayon__rayon_nr',
+                                            'nhb_regio__regio_nr'))
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):

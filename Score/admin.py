@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -38,6 +38,8 @@ class ScoreHistAdmin(admin.ModelAdmin):
 
     # voorkom trage admin interface (lange lijstjes die veel queries kosten)
     readonly_fields = ('score', 'door_account', 'when')
+
+    list_select_related = ('door_account',)
 
 
 admin.site.register(Score, ScoreAdmin)

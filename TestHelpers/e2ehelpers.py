@@ -288,6 +288,28 @@ class E2EHelpers(TestCase):
         # while
         return checked, unchecked
 
+    SAFE_LINKS = ('/plein/', '/sporter/', '/bondscompetities/', '/records/', '/account/login/', '/account/logout/')
+
+    def _test_link(self, link, template_name):
+        """ make sure the link works """
+        if link in self.SAFE_LINKS or link.startswith('/feedback/') or link.startswith('#'):
+            return
+
+        print('test_link: %s' % repr(link))
+        resp = self.client.head(link)
+        if resp.status_code != 200:
+            self.fail(msg='Link not usable (code %s) on page %s (%s)' % (resp.status_code, template_name, link))
+
+    def assert_broodkruimels(self, content, template_name):
+        # find the start
+        pos = content.find('class="broodkruimels-link" href="')
+        while pos > 0:
+            content = content[pos+33:]
+            link = content[:content.find('"')]
+            self._test_link(link, template_name)
+            pos = content.find('class="broodkruimels-link" href="')
+        # while
+
     def assert_link_quality(self, content, template_name):
         """ assert the quality of links
             - links to external sites must have target="_blank" and rel="noopener noreferrer"
