@@ -48,14 +48,14 @@
 
                     <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten. Je kan ze hier bij helpen via het kaartje "voorkeuren leden".</p>
 
-                    <p>Aanmelden gaat in bulk: kies de voorkeuren, zet daarna een vinkje bij de sporters die je aan wilt melden en druk dan rode knop in de rechter onderhoek. Leden die al aangemeld zijn hebben een grijs vinkje.</p>
-                    <p>Leden die aangegeven hebben niet mee te willen doen met de (winter-)competities zijn helemaal grijs.</p>
+                    <p>Aanmelden gaat in bulk: kies de voorkeuren, zet daarna een vinkje bij de sporters die je aan wilt melden en druk op de rode knop in de rechter onderhoek. Leden die al aangemeld zijn hebben een grijs vinkje.</p>
+                    <p>Leden die aangegeven hebben niet mee te willen doen met de bondscompetities worden in grijs weergegeven.</p>
                 {% else %}
                     <p>Deze pagina toont voor leden van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} of ze aangemeld zijn voor de <b>{{ comp.beschrijving }}</b>.</p>
 
                     <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten.</p>
 
-                    <p>De hoofdwedstrijdleider kan leden aanmelden voor de competitie.</p>
+                    <p>De hoofdwedstrijdleider kan leden aanmelden voor de bondscompetitie.</p>
                 {% endif %}
             </div>
         </div>
@@ -143,7 +143,7 @@
 
                         <tr>
                             <td>
-                                <span>Eventueel bericht aan de organisatie:</span><br>
+                                <span>Eventueel bericht voor de organisatie:</span><br>
                                 <div class="input-text" style="margin-left: 20px">
                                     <textarea name="opmerking" cols="40" rows="10" placeholder="Tik hier je bericht" data-length="500" class="materialize-textarea" maxlength="500" id="id_opmerkingen"></textarea>
                                 </div>
