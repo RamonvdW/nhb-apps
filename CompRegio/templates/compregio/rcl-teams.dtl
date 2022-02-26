@@ -138,15 +138,34 @@
                 <td>{{ team.team_type.beschrijving }}</td>
                 <td>
                     {% if team.url_aanpassen %}
-                        <a class="btn-nhb-blauw" href="{{ team.url_aanpassen }}">Aanpassen</a>
+                        <a class="btn-nhb-rood" href="{{ team.url_aanpassen }}">
+                            <i class="material-icons-round">edit</i></a>
                     {% endif %}
                     {% if team.url_verwijder %}
                         <span>&nbsp;&nbsp;</span>
-                        <form action="{{ team.url_verwijder }}" method="post" style="display: inline">
-                            {% csrf_token %}
-                            <input type="hidden" name="verwijderen" value="1">
-                            <button class="btn-nhb-rood" type="submit">Verwijder</button>
-                        </form>
+                        <a class="btn-nhb-blauw modal-trigger" href="#bevestig_verwijder_team_{{ team.pk }}">
+                            <i class="material-icons-round">delete</i></a>
+
+                        <div class="modal" id="bevestig_verwijder_team_{{ team.pk }}">
+                            <div class="modal-content center">
+                                <h5>Verwijder team?</h5>
+                                <p>Wil je team <b>{{ team.team_naam }}</b> van vereniging<br><b>{{ team.vereniging }}</b><br>verwijderen uit het systeem?</p>
+
+                                <form method="post" action="{{ team.url_verwijder }}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="verwijder" value="1">
+
+                                    <div class="modal-footer" style="text-align:center; display:block">
+                                        <div style="display:inline-block; width:50%">
+                                            <button class="btn-nhb-rood" type="submit">Ja</button>
+                                        </div>
+                                        <div style="display:inline-block; width:50%">
+                                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     {% endif %}
                 </td>
             </tr>
