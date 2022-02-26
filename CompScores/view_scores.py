@@ -327,7 +327,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
             context['url_terug'] = reverse('CompScores:wedstrijden-scores')
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-                (reverse('CompScores:scores-rcl', kwargs={'deelcomp_pk': deelcomp.pk}), 'Scores'),
+                (reverse('CompScores:wedstrijden-scores'), 'Scores'),
                 (None, self.kruimel)
             )
 
