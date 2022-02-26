@@ -568,6 +568,16 @@ class Command(BaseCommand):
                                                     ver_secretaris.lid_nr, obj.ver_nr))
         # for
 
+    @staticmethod
+    def _corrigeer_tussenvoegsel(lid_nr, tussenvoegsel, achternaam):
+        if tussenvoegsel and tussenvoegsel[0].isupper():
+            laag = tussenvoegsel.lower()
+            if laag in ('de', 'den', 'van', 'van de', 'van der', 'van den', 'ter', 'van t'):
+                tussenvoegsel = laag
+            # else:
+            #     print(lid_nr, tussenvoegsel, achternaam)
+        return tussenvoegsel
+
     def _import_members(self, data):
         """ Importeert data van alle leden """
 
@@ -636,7 +646,7 @@ class Command(BaseCommand):
                 lid_achternaam = new_achternaam
 
             if member['prefix']:
-                lid_achternaam = member['prefix'] + ' ' + lid_achternaam
+                lid_achternaam = self._corrigeer_tussenvoegsel(lid_nr, member['prefix'], lid_achternaam) + ' ' + lid_achternaam
 
             naam = lid_voornaam + ' ' + lid_achternaam
             lid_unaccented_naam = maak_unaccented(naam)
