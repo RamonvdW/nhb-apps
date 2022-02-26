@@ -6,6 +6,7 @@
 
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from BasisTypen.models import TeamWedstrijdklasse, IndivWedstrijdklasse
 from Wedstrijden.models import CompetitieWedstrijd
 from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde, LAAG_REGIO, LAAG_RK,
                      CompetitieKlasse, DeelcompetitieKlasseLimiet,
@@ -47,13 +48,27 @@ class DeelcompetitieRondeAdmin(CreateOnlyAdmin):
     readonly_fields = ('deelcompetitie', 'cluster', 'plan')
 
 
-class CompetitieKlasseAdmin(CreateOnlyAdmin):
+class CompetitieKlasseAdmin(admin.ModelAdmin):
 
     list_filter = ('competitie', 'team__team_type')
 
     list_select_related = ('competitie', 'indiv', 'team', 'indiv__boogtype', 'team__team_type')
 
     ordering = ('team__volgorde', 'indiv__volgorde')
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        if db_field.name == 'indiv':
+            kwargs['queryset'] = (IndivWedstrijdklasse
+                                  .objects
+                                  .select_related('boogtype')
+                                  .order_by('volgorde'))
+        elif db_field.name == 'team':
+            kwargs['queryset'] = (TeamWedstrijdklasse
+                                  .objects
+                                  .select_related('team_type')
+                                  .order_by('volgorde'))
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
