@@ -38,7 +38,7 @@
                         {{ form.otp_code.label_tag }}{{ form.otp_code }}
                     </div>
 
-                    <div class="center" style="margin-top:50px">
+                    <div class="center" style="margin-top:30px">
                         <input class="btn-nhb-rood center-align" type="submit" value="Controleer">
                     </div>
                 </form>

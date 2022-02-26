@@ -18,11 +18,11 @@ certifi==2021.10.8
     # via
     #   -r requirements_test.txt
     #   requests
-charset-normalizer==2.0.11
+charset-normalizer==2.0.12
     # via
     #   -r requirements_test.txt
     #   requests
-coverage==6.3.1
+coverage==6.3.2
     # via -r requirements_dev.in
 django==3.2.12
     # via
@@ -41,7 +41,7 @@ google-api-core==2.5.0
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-google-api-python-client==2.36.0
+google-api-python-client==2.38.0
     # via -r requirements_test.txt
 google-auth==2.6.0
     # via
@@ -53,7 +53,7 @@ google-auth-httplib2==0.1.0
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-googleapis-common-protos==1.54.0
+googleapis-common-protos==1.55.0
     # via
     #   -r requirements_test.txt
     #   google-api-core

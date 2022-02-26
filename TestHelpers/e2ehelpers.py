@@ -249,7 +249,7 @@ class E2EHelpers(TestCase):
                 url = content[:pos]
                 content = content[pos:]
                 if url != "#":
-                    if not (skip_smileys and url.startswith('/overig/feedback/')):
+                    if not (skip_smileys and url.startswith('/feedback/')):
                         urls.append(url)
         # while
         return urls

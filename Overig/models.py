@@ -102,17 +102,4 @@ def overig_opschonen(stdout):
         obj.delete()
     # for
 
-    max_age = now - datetime.timedelta(days=91)
-
-    objs = (SiteFeedback
-            .objects
-            .filter(is_afgehandeld=True,
-                    toegevoegd_op__lt=max_age))
-
-    count = objs.count()
-    if count > 0:
-        stdout.write('[INFO] Verwijder %s afgehandelde site feedback' % count)
-        objs.delete()
-
-
 # end of file

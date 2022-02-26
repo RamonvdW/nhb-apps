@@ -10,7 +10,7 @@ cachetools==5.0.0
     # via google-auth
 certifi==2021.10.8
     # via requests
-charset-normalizer==2.0.11
+charset-normalizer==2.0.12
     # via requests
 django==3.2.12
     # via
@@ -20,7 +20,7 @@ et-xmlfile==1.1.0
     # via openpyxl
 google-api-core==2.5.0
     # via google-api-python-client
-google-api-python-client==2.36.0
+google-api-python-client==2.38.0
     # via -r requirements.in
 google-auth==2.6.0
     # via
@@ -30,7 +30,7 @@ google-auth==2.6.0
     #   google-auth-httplib2
 google-auth-httplib2==0.1.0
     # via google-api-python-client
-googleapis-common-protos==1.54.0
+googleapis-common-protos==1.55.0
     # via google-api-core
 httplib2==0.20.4
     # via

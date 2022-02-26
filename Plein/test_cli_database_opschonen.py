@@ -78,7 +78,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Verwijder 1 oude logboek regels" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder 1 oude emails" in f2.getvalue())
         self.assertTrue("[INFO] Verwijder ongebruikte tijdelijke url" in f2.getvalue())
-        self.assertTrue("[INFO] Verwijder 1 afgehandelde site feedback" in f2.getvalue())
+        self.assertTrue('[INFO] Verwijder 1 afgehandelde feedback' in f2.getvalue())
 
         # nog een keer aanroepen terwijl er niets meer te verwijderen valt
         f1 = io.StringIO()
