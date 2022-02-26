@@ -55,7 +55,6 @@ class CompetitieWedstrijdAdmin(admin.ModelAdmin):             # pragma: no cover
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
-        print('db_field.name=%s' % db_field.name)
         if db_field.name == 'indiv_klassen':
             kwargs['queryset'] = (IndivWedstrijdklasse
                                   .objects
