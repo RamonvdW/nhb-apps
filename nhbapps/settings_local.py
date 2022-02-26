@@ -7,7 +7,7 @@
 """
     Django local settings for the NhbApps project.
 
-    This file is included from settings.py and contains specific
+    This file is included from settings_base.py and contains specific
     settings that can be changed as part of a deployment, without
     having to edit the settings.py file.
 """
@@ -17,20 +17,18 @@
 # details: https://docs.djangoproject.com/en/2.2/ref/settings/#secret-key
 SECRET_KEY = '1234-replace-with-your-own-secret-key-56789abcdefg'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-ENABLE_DEBUG_TOOLBAR = False
+BASE_URL = "yourdomain.com"
 
-SITE_URL = "https://yourdomain.com"         # used by Overige:tijdelijke urls and SAML2
+# SITE_URL wordt gebruikt door Overige:tijdelijke urls
+#SITE_URL = "https://" + BASE_URL
+SITE_URL = "http://localhost:8000"
 
-ALLOWED_HOSTS = [
-    '127.0.0.1'
-]
+ALLOWED_HOSTS = ['localhost']
 
-IS_TEST_SERVER = False
+IS_TEST_SERVER = True
 
 # Database
-# https://docs.djangoproject.com/en/2.2/ref/settings/#databases
+# https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -42,17 +40,23 @@ DATABASES = {
     }
 }
 
+# allow the database connections to stay open
+CONN_MAX_AGE = None
+
 # the issuer name that is sent to the OTP application in the QR code
 OTP_ISSUER_NAME = "yourdomain.com"
 
 NAAM_SITE = "YourSite (dev)"
 
-EMAIL_BONDSBURO = "info@handboogsport.nl"
+EMAIL_BONDSBUREAU = "info@handboogsport.nl"
+EMAIL_SUPPORT = EMAIL_BONDSBUREAU
 
-# sending email
+
+# sending e-mail via Postmark
 #POSTMARK_URL = 'https://api.postmarkapp.com/email'
 #POSTMARK_API_KEY = 'postmark private api key'
 #EMAIL_FROM_ADDRESS = 'noreply@yourdomain.com'         # zie ook https://nl.wikipedia.org/wiki/Noreply
+
 
 EMAIL_DEVELOPER_TO = 'developer@yourdomain.com'
 EMAIL_DEVELOPER_SUBJ = 'Internal Server Error: ' + NAAM_SITE
@@ -81,14 +85,24 @@ RECORDS_GSHEET_SHEET_NAMES = [
 ]
 
 
-# use static manual pages (wiki is for the test server only)
-ENABLE_WIKI = False
-# ondersteuning van de Wiki met SSO via de IdP, of ingebouwde handleiding?
-WIKI_URL = 'http://wiki.yourdomain.com'
+# bondspassen ophalen bij OnzeRelaties en lokaal cachen
+#BONDSPAS_CACHE_PATH = '/var/spool/bondspas-cache/'
+BONDSPAS_CACHE_PATH = '/tmp/'
+BONDSPAS_MAX_SIZE_MB = 100          # 150kB/stuk --> genoeg voor 682 passen
+BONDSPAS_MAX_SIZE_PDF_KB = 500      # accepteer een pdf alleen al deze minder is dan 500kB
+BONDSPAS_RETRY_MINUTES = 5          # 5 minuten wachten, dan pas opnieuw proberen
+#BONDSPAS_DOWNLOAD_URL = 'download-url'  # bondsnummer
+BONDSPAS_DOWNLOAD_URL = 'http://localhost:8124/bondspas/%s'   # bondsnummer
 
-# vertaling van tijdelijke (99xxxx nummers) naar correcte NHB nummer
-MAP_99_NRS = {
-    990001: 1234567,
-}
+
+# voor wie een taak aanmaken over feedback?
+TAAK_OVER_FEEDBACK_ACCOUNTS = [
+    # comma-separated list of account usernames
+]
+
+# the full path to the installation directory where each app subdirectory is located
+# this is used to access resources like CompRayon/files/template-excel-rk-teams.xls
+INSTALL_PATH = '/var/www/nhb-apps-venv/nhb-apps/'
+
 
 # end of file
