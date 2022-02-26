@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,75 +10,102 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="otp-koppelen-stap2" %}
-
-    <h4>Koppel tweede factor</h4>
-
-    <p>&nbsp;</p>
-    <p>
-        <a class="btn-nhb-blauw margin-5" href="{{ url_stap_1 }}"><i class="material-icons-round left">arrow_back_ios</i>Terug naar stap 1</a>
-    </p>
-
-    <p>&nbsp;</p>
-    <h5>Stap 2</h5>
-    <div class="row white">
+    <!-- banner -->
+    <div class="row center">
         <div class="col s12">
-            <p>Open de applicatie op je mobiel en dan:</p>
-            <p>1. Kies "<b>account toevoegen</b>" (bij Google Authenticator: druk op het plus icoon)</p>
-            <p>2. Kies "<b>Scan QR code</b>"</p>
-            <p>Daarna kan je onderstaande QR-code scannen met de <b>camera</b> van je mobiel of tablet. Soms moet je eerst toestemming geven om de camera te gebruiken.</p>
+            <h3 class="page-banner">Koppel tweede factor</h3>
+            <p>Voordat je als beheerder aan de slag kant moet je een extra beveiliging activeren: de tweede factor.</p>
 
-            <p>&nbsp;</p>
-            <p>Gebruik je een browser plug-in, klik dan op het menu van de plug-in en kies "Scan QR code".</p>
-            <p>Markeer daarna met je muis de QR code op het scherm (teken een vierkant om het plaatje).</p>
+            <p>
+                <a class="btn-nhb-rood" href="{{ url_stap_1 }}"><i class="material-icons-round left">arrow_back_ios</i>Terug naar stap 1</a>
+            </p>
         </div>
     </div>
 
 
-    <p>&nbsp;</p>
-    <div class="container z-depth-2 white center-align">
-        <div class="row">
-            <p>&nbsp;</p>
-            <h5>Scan deze QR-code</h5>
-        </div>
-        <div class="row">
-            {{ qrcode }}
-        </div>
-        <div class="row">
-            <p>Als het gelukt is dan laat de applicatie de 6 cijfers zien onder het kopje "MijnHandboogsport".</p>
+    <!-- blauw balk met het stappenplan -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
+            <div class="white left-align" style="padding:10px">
+                <h5>Stappenplan</h5>
+                <p class="valign-wrapper"><i class="small material-icons-round">looks_one</i> Installeer een applicatie op je mobiel of tablet.</p>
+                <p class="valign-wrapper nhb-rood-text"><i class="small material-icons-round">looks_two</i> <b>Scan een QR-code om de koppeling te maken met MijnHandboogsport.</b></p>
+                <p class="valign-wrapper"><i class="small material-icons-round">looks_3</i> Voer 6 cijfers in om koppeling te controleren.</p>
+            </div>
         </div>
     </div>
 
-    <div class="row center-align">
-        <a class="btn-nhb-rood margin-5" href="{{ url_stap_3 }}"><i class="material-icons-round right">arrow_forward_ios</i>Verder naar stap 3</a>
-    </div>
 
-
-    <p>&nbsp;</p>
-    <h5>Het lukt niet!</h5>
-    <div class="row white">
+    <!-- witruimte -->
+    <div class="row center">
         <div class="col s12">
-            <p>Als het niet lukt om de QR-code te scannen, dan is het ook mogelijk om handmatig een koppeling te maken.</p>
-            <p>Hiervoor moet je deze code over tikken in de applicatie:</p>
-            <div class="center-align"><h5>{{ otp_secret }}</h5></div>
+            <h4>Stap 2</h4>
+        </div>
+    </div>
 
-            <p>&nbsp;</p>
-            <p>Open de applicatie op je mobiel, kies "account toevoegen" (bij Google Authenticator: druk op het plus icoon) en kies voor "handmatig invoeren".</p>
-            <p>Onder "Issuer" schrijf je "MijnHandboogsport" (eventueel gevolgd door je NHB nummer) en onder "secret" tik je bovenstaande code over.</p>
+    <!-- blauw balk -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+                <p>Open de applicatie op je mobiel en dan:</p>
+                <p>1. Kies "<b>account toevoegen</b>" (bij Google Authenticator: druk op het plus icoon)</p>
+                <p>2. Kies "<b>Scan QR code</b>"</p>
 
-            <p>&nbsp;</p>
-            <p>Gebruik je een browser plug-in, klik dan op het menu van de plug-in en kies "wijzig" (het pennetje) en daarna "toevoegen" (het plus icoon). Kies daarna "handmatig invoeren".</p>
-            <p>Onder "Issuer" schrijf je "MijnHandboogsport" (eventueel gevolgd door je NHB nummer) en onder "secret" tik je bovenstaande code over.</p>
+                <p>Daarna kan je onderstaande QR-code scannen met de <b>camera</b> van je mobiel of tablet. Soms moet je eerst toestemming geven om de camera te gebruiken.</p>
+            </div>
+        </div>
+
+        <div class="col s12 nhb-blauw-hoofd" style="padding:25px">
+        </div>
+
+        <div class="col s12 l6 offset-l3">
+            <div class="white" style="padding:10px">
+                <h5>Scan deze QR-code</h5>
+                {{ qrcode }}    <!-- geeft plaatje in svg tags, welke met display:inline getoond wordt -->
+
+                <p>Als het gelukt is dan laat de applicatie de 6 cijfers zien onder het kopje "MijnHandboogsport".</p>
+                <p>
+                    <a class="btn-nhb-rood" href="{{ url_stap_3 }}">
+                        <i class="material-icons-round right">arrow_forward_ios</i>Verder naar stap 3</a>
+                </p>
+            </div>
         </div>
     </div>
 
 
-    <p>&nbsp;</p>
-    <div class="row center-align">
-        <a class="btn-nhb-rood margin-5" href="{{ url_stap_3 }}"><i class="material-icons-round right">arrow_forward_ios</i>Verder naar stap 3</a>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Hulp nodig?</h4>
+        </div>
     </div>
 
+    <!-- blauw balk -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+                <p>Gebruik je een browser plug-in, klik dan op het menu van de plug-in en kies "Scan QR code". Markeer daarna met je muis de QR code op het scherm (teken een vierkant om het plaatje).</p>
+            </div>
+        </div>
 
+        <div class="col s12 nhb-blauw-hoofd" style="padding:25px">
+        </div>
 
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+                <p>Als het niet lukt om de QR-code te scannen, dan is het ook mogelijk om handmatig een koppeling te maken.</p>
+                <p>Hiervoor moet je deze code over tikken in de applicatie:</p>
+                <p class="center-align"><b>{{ otp_secret }}</b></p>
+
+                <p>Open de applicatie op je mobiel, kies "account toevoegen" (bij Google Authenticator: druk op het plus icoon) en kies voor "handmatig invoeren".</p>
+                <p>Onder "Issuer" schrijf je "MijnHandboogsport" (eventueel gevolgd door je NHB nummer) en onder "secret" tik je bovenstaande code over.</p>
+
+                <p>Gebruik je een browser plug-in, klik dan op het menu van de plug-in en kies "wijzig" (het pennetje) en daarna "toevoegen" (het plus icoon). Kies daarna "handmatig invoeren".</p>
+                <p>Onder "Issuer" schrijf je "MijnHandboogsport" (eventueel gevolgd door je NHB nummer) en onder "secret" tik je bovenstaande code over.</p>
+            </div>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="otp-koppelen-stap2" %}
 
 {% endblock %}

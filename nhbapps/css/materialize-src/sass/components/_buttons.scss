@@ -72,6 +72,7 @@
 .btn-small,
 .btn-flat {
   font-size: $button-font-size;
+  font-weight: bold;            // toegevoegd voor betere leesbaarheid op met nhb-rood
   outline: 0;
   i {
     font-size: $button-icon-font-size;

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -336,7 +336,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         # check dat de HWL de opslaan-knop aangeboden krijgt
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertTrue(url in urls)                # opslaan url
-        self.assertTrue('/vereniging/' in urls)     # terug url
 
         # probeer een wijziging te doen
         with self.assert_max_queries(20):
@@ -515,7 +514,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         # check dat de HWL de opslaan-knop aangeboden krijgt
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertTrue(url in urls)                                    # opslaan url
-        self.assertTrue('/vereniging/accommodaties/lijst/' in urls)     # terug url
 
     def test_bad(self):
         # login als SEC van ver2 op loc2
@@ -590,7 +588,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         # check dat de HWL de opslaan-knop aangeboden krijgt
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertTrue(url in urls)                                    # opslaan url
-        self.assertTrue('/vereniging/accommodaties/lijst/' in urls)     # terug url
 
         # accommodaties lijst corner case
         self.e2e_login_and_pass_otp(self.testdata.account_bb)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -77,11 +77,16 @@ class KalenderWedstrijdSessiesView(UserPassesTestMixin, View):
                                                    kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         if self.rol_nu == Rollen.ROL_HWL:
-            context['url_terug'] = reverse('Kalender:vereniging')
+            url_terug = reverse('Kalender:vereniging')
         else:
-            context['url_terug'] = reverse('Kalender:manager')
+            url_terug = reverse('Kalender:manager')
 
-        menu_dynamics(self.request, context, actief='kalender')
+        context['kruimels'] = (
+            (url_terug, 'Wedstrijdkalender'),
+            (None, 'Wedstrijd sessies'),
+        )
+
+        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
@@ -240,9 +245,6 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
 
         context['opt_klassen_m'], context['opt_klassen_v'] = self._maak_opt_klassen(wedstrijd, sessie)
 
-        context['url_terug'] = reverse('Kalender:wijzig-sessies',
-                                       kwargs={'wedstrijd_pk': wedstrijd.pk})
-
         context['url_opslaan'] = reverse('Kalender:wijzig-sessie',
                                          kwargs={'wedstrijd_pk': wedstrijd.pk,
                                                  'sessie_pk': sessie.pk})
@@ -252,7 +254,21 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
         else:
             context['url_verwijder'] = context['url_opslaan']
 
-        menu_dynamics(self.request, context, actief='kalender')
+        if self.rol_nu == Rollen.ROL_HWL:
+            url_top = reverse('Kalender:vereniging')
+        else:
+            url_top = reverse('Kalender:manager')
+
+        url_terug = reverse('Kalender:wijzig-sessies',
+                            kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+        context['kruimels'] = (
+            (url_top, 'Wedstrijdkalender'),
+            (url_terug, 'Wedstrijd sessies'),
+            (None, 'Wijzig sessie')
+        )
+
+        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):

@@ -159,13 +159,18 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
 
         # terug en opslaan knoppen voor in de template
         if 'is_ver' in kwargs:      # wordt gezet door VerenigingAccommodatieDetailsView
-            context['terug_url'] = reverse('Vereniging:overzicht')
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (None, 'Accommodatie')
+            )
+
             opslaan_urlconf = 'Vereniging:vereniging-accommodatie-details'
-            menu_actief = 'vereniging'
         else:
-            context['terug_url'] = reverse('Vereniging:lijst-verenigingen')
+            context['kruimels'] = (
+                (reverse('Vereniging:lijst-verenigingen'), 'Verenigingen'),
+                (None, 'Accommodatie')
+            )
             opslaan_urlconf = 'Vereniging:accommodatie-details'
-            menu_actief = 'hetplein'
 
         if binnen_locatie or buiten_locatie:
             context['opslaan_url'] = reverse(opslaan_urlconf,
@@ -176,31 +181,12 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         if self._mag_wijzigen(nhbver, rol_nu, functie_nu):
             context['readonly'] = False
 
-            # geef ook meteen de mogelijkheid om leden te koppelen aan rollen
-            if rol_nu == Rollen.ROL_SEC:
-                context['url_koppel_sec'] = reverse('Functie:wijzig-beheerders',
-                                                    kwargs={'functie_pk': functie_sec.pk})
-            context['url_koppel_hwl'] = reverse('Functie:wijzig-beheerders',
-                                                kwargs={'functie_pk': functie_hwl.pk})
-            context['url_koppel_wl'] = reverse('Functie:wijzig-beheerders',
-                                               kwargs={'functie_pk': functie_wl.pk})
-
-            # geef ook meteen de mogelijkheid om de e-mailadressen van een functie aan te passen
-            context['url_email_hwl'] = reverse('Functie:wijzig-email',
-                                               kwargs={'functie_pk': functie_hwl.pk})
-            context['url_email_wl'] = reverse('Functie:wijzig-email',
-                                              kwargs={'functie_pk': functie_wl.pk})
-
             if buiten_locatie:
                 context['url_verwijder_buitenbaan'] = context['opslaan_url']
         else:
             context['readonly'] = True
 
-            if binnen_locatie:      # pragma: no branch
-                if binnen_locatie.banen_18m + binnen_locatie.banen_25m > 0:
-                    context['readonly_show_max_dt'] = True
-
-        menu_dynamics(self.request, context, actief=menu_actief)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

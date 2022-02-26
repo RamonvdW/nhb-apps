@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,12 +10,13 @@ from django.http import Http404
 from django.views.generic import View, TemplateView
 from django.utils.formats import localize
 from django.templatetags.static import static
+from Competitie.models import get_competitie_boog_typen, get_competitie_team_typen
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
+from Plein.menu import menu_dynamics
 from Score.operations import wanneer_ag_vastgesteld
 from Sporter.models import SporterBoog
 from Taken.taken import eval_open_taken
-from .menu import menu_dynamics_competitie
 from .models import LAAG_REGIO, LAAG_BK, Competitie, DeelCompetitie
 import datetime
 
@@ -99,8 +100,8 @@ class CompetitieOverzichtView(View):
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO):
             # laat alle teams zien, ook de teams die nog niet af zijn of nog niet in een poule zitten
             # vanaf fase E laten we dit niet meer zien en komen de RK Teams in beeld
-            if comp.fase < 'E':
-                context['tekst_regio_teams_alle'] = "Alle teams inzien van de regiocompetitie."
+            if 'B' <= comp.fase <= 'E':
+                context['tekst_regio_teams_alle'] = "Alle aangemelde teams voor de regio teamcompetitie"
                 context['url_regio_teams_alle'] = reverse('CompRegio:regio-teams-alle',
                                                           kwargs={'comp_pk': comp.pk,
                                                                   'subset': 'auto'})
@@ -112,7 +113,7 @@ class CompetitieOverzichtView(View):
 
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
             if comp.fase < 'L':
-                context['tekst_rayon_teams_alle'] = "Alle aangemelde teams voor de rayonkampioenschappen teams in deze competitie"
+                context['tekst_rayon_teams_alle'] = "Alle aangemelde teams voor de rayonkampioenschappen teams"
                 context["url_rayon_teams_alle"] = reverse('CompRayon:rayon-teams-alle',
                                                           kwargs={'comp_pk': comp.pk,
                                                                   'subset': 'auto'})
@@ -130,7 +131,7 @@ class CompetitieOverzichtView(View):
                 kan_beheren = True
 
                 obj.titel = 'Planning Regio %s' % obj.nhb_regio.regio_nr
-                obj.tekst = 'Planning van de wedstrijden in %s voor deze competitie.' % obj.nhb_regio.naam
+                obj.tekst = 'Planning van de wedstrijden voor deze competitie.'
                 obj.url = reverse('CompRegio:regio-planning',
                                   kwargs={'deelcomp_pk': obj.pk})
 
@@ -145,7 +146,7 @@ class CompetitieOverzichtView(View):
                                          kwargs={'deelcomp_pk': obj.pk})
 
                 if obj.regio_organiseert_teamcompetitie:
-                    obj.tekst_regio_teams = "Teams voor de regiocompetitie in %s inzien voor deze competitie." % obj.nhb_regio.naam
+                    obj.tekst_regio_teams = "Teams voor de regiocompetitie inzien voor deze competitie."
                     obj.url_regio_teams = reverse('CompRegio:regio-teams',
                                                   kwargs={'deelcomp_pk': obj.pk})
 
@@ -210,7 +211,7 @@ class CompetitieOverzichtView(View):
                 deelcomp_rk.url = reverse('CompRayon:rayon-planning',
                                           kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
-                deelcomp_rk.tekst_rayon_teams = "Aangemelde teams inzien voor de rayonkampioenschappen in Rayon %s, voor deze competitie." % deelcomp_rk.nhb_rayon.rayon_nr
+                deelcomp_rk.tekst_rayon_teams = "Aangemelde teams voor de Rayonkampioenschappen in Rayon %s." % deelcomp_rk.nhb_rayon.rayon_nr
                 deelcomp_rk.url_rayon_teams = reverse('CompRayon:rayon-teams',
                                                       kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
@@ -310,7 +311,8 @@ class CompetitieOverzichtView(View):
         # kijk of de uitslagen klaar zijn om te tonen
         context['toon_uitslagen'] = (comp.fase >= 'B')      # inschrijving is open
 
-        wed_boog = team_type = 'r'
+        wed_boog = 'r'  # get_competitie_boog_typen(comp)[0].afkorting.lower()         # r
+
         if request.user.is_authenticated:
             # als deze sporter ingeschreven is voor de competitie, pak dan het boogtype waarmee hij ingeschreven is
 
@@ -325,7 +327,9 @@ class CompetitieOverzichtView(View):
                 wed_boog = all_bogen[0].boogtype.afkorting.lower()
 
             # TODO: zoek ook het team type van het team waarin hij geplaatst is
-            team_type = wed_boog
+            #team_type = wed_boog
+
+        team_type = get_competitie_team_typen(comp)[0].afkorting.lower()        # r/r2
 
         context['url_regio_indiv'] = reverse('CompUitslagen:uitslagen-regio-indiv',
                                              kwargs={'comp_pk': comp.pk,
@@ -407,7 +411,12 @@ class CompetitieOverzichtView(View):
         if not template:
             template = self._get_competitie_overzicht_schutter_bezoeker(context, comp)
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (None, comp.beschrijving.replace(' competitie', ''))
+        )
+
+        menu_dynamics(self.request, context)
         return render(request, template, context)
 
 
@@ -425,6 +434,8 @@ class CompetitieKiesView(TemplateView):
         rol_nu = rol_get_huidige(self.request)
 
         context['competities'] = comps = list()
+
+        eerdere_comp = dict()
 
         for comp in (Competitie
                      .objects
@@ -448,6 +459,13 @@ class CompetitieKiesView(TemplateView):
                     comp.text = "Hier worden de voorbereidingen voor getroffen voor de volgende bondscompetitie."
                 else:
                     comp.text = "Alle informatie en uitslagen van de actuele bondscompetitie."
+
+            try:
+                if comp.afstand in eerdere_comp:
+                    comp.is_volgend_seizoen = True
+            except KeyError:
+                pass
+            eerdere_comp[comp.afstand] = True
         # for
 
         if rol_nu == Rollen.ROL_BB:
@@ -458,8 +476,13 @@ class CompetitieKiesView(TemplateView):
 
         if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
             context['toon_beheerders'] = True
+            context['huidige_rol'] = rol_get_beschrijving(self.request)
 
-        menu_dynamics_competitie(self.request, context)
+        context['kruimels'] = (
+            (None, 'Bondscompetities'),
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 

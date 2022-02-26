@@ -8,7 +8,7 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from Account.models import Account
-from BasisTypen.models import BoogType, GESLACHT
+from BasisTypen.models import BoogType, GESLACHT_MVX, GESLACHT_MV, GESLACHT_MAN
 # mag niet afhankelijk zijn van Competitie
 from NhbStructuur.models import NhbVereniging
 import datetime
@@ -76,8 +76,11 @@ class Sporter(models.Model):
     # het e-mailadres van dit lid
     email = models.CharField(max_length=150)
 
+    # geboortedatum van de sporter
     geboorte_datum = models.DateField(validators=[validate_geboorte_datum])
-    geslacht = models.CharField(max_length=1, choices=GESLACHT)
+
+    # geslacht (M/V/X)
+    geslacht = models.CharField(max_length=1, choices=GESLACHT_MVX)
 
     # officieel geregistreerde para classificatie
     para_classificatie = models.CharField(max_length=30, blank=True)
@@ -210,6 +213,11 @@ class SporterVoorkeuren(models.Model):
     voorkeur_discipline_veld = models.BooleanField(default=True)
     voorkeur_discipline_run = models.BooleanField(default=True)
     voorkeur_discipline_3d = models.BooleanField(default=True)
+
+    # het gekozen geslacht voor wedstrijden
+    # alleen van toepassing op sporters met geslacht='X'
+    wedstrijd_geslacht_gekozen = models.BooleanField(default=True)
+    wedstrijd_geslacht = models.CharField(max_length=1, choices=GESLACHT_MV, default=GESLACHT_MAN)
 
     class Meta:
         """ meta data voor de admin interface """

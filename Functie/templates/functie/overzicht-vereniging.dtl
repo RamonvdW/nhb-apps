@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,85 +10,88 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-overzicht-vereniging" %}
-
-    <h4>Beheerders van de vereniging</h4>
-
-    <p>Hieronder staan functies en de gekoppelde beheerders. Afhankelijk van je rol mag je hier wijzigingen in aanbrengen.</p>
-
-    <p>Jouw huidige rol is: <b>{{ huidige_rol }}</b></p>
-
-    <!-- toon de functies met huidige beheerders in een tabel -->
-    <div class="row">
-        <table class="white">
-            <thead>
-                <tr>
-                    <th>Functie / Rol</th>
-                    <th>Beheerder(s)</th>
-                    <th>E-mailadres</th>
-                </tr>
-            </thead>
-
-            {% for obj in object_list %}
-                <tr>
-                    <td>{{ obj.beschrijving }}</td>
-
-                    <td>
-                        {% for beheerder in obj.beheerders %}
-                            {% if not forloop.first %}
-                                <br>
-                            {% endif %}
-                            <span>{{ beheerder }}</span>
-                        {% empty %}
-                            {% if obj.wijzig_url %}
-                                <i class="red-text">Nog niet gekoppeld</i>
-                            {% else %}
-                                <i class="grey-text">Nog niet gekoppeld</i>
-                            {% endif %}
-                        {% endfor %}
-
-                        {% if obj.wijzig_url %}
-                            <br><br>
-                            <a class="btn-nhb-blauw" href="{{ obj.wijzig_url }}">
-                                <i class="material-icons-round left">group_add</i>Koppel beheerders</a>
-                        {% endif %}
-                    </td>
-
-                    <td>
-                        {% if obj.bevestigde_email %}
-                            <code>{{ obj.bevestigde_email }}</code>
-                        {% else %}
-                            {% if obj.email_url %}
-                                <i class="red-text">Geen</i>
-                            {% else %}
-                                <i class="grey-text">Geen</i>
-                            {% endif %}
-                        {% endif %}
-
-                        <!-- in geval van 2, 3, 4 beheerders: voeg extra breaks toe voor het e-mailadres -->
-                        {% for beheerder in obj.beheerders %}
-                            {% if not forloop.first %}
-                                <br>
-                            {% endif %}
-                        {% endfor %}
-
-                        {% if obj.email_url %}
-                            <br><br>
-                            <a class="btn-nhb-blauw" href="{{ obj.email_url }}">
-                                <i class="material-icons-round left">alternate_email</i>Wijzig e-mail</a>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-        </table>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Beheerders van de vereniging</h3>
+            <p>Hieronder staan functies en de gekoppelde beheerders. Afhankelijk van je rol mag je hier wijzigingen in aanbrengen.</p>
+            <p>Jouw huidige rol is: <b>{{ huidige_rol }}</b></p>
+        </div>
     </div>
 
-    <p>Noteer: het e-mailadres van de secretaris wordt overgenomen uit Onze Relaties en kan hier niet aangepast worden.</p>
 
-    <p>
-        <a class="btn-nhb-blauw margin-5" href="{{ terug_url }}">
-            <i class="material-icons-round left">arrow_back</i>Terug</a>
-    </p>
+    <!-- blauwe balk -->
+    <div class="row-nhb-blauw">
+
+        <!-- toon de functies met huidige beheerders in een tabel -->
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Functie / Rol</th>
+                        <th>Beheerder(s)</th>
+                        <th>E-mailadres</th>
+                    </tr>
+                </thead>
+
+                {% for obj in object_list %}
+                    <tr>
+                        <td>{{ obj.beschrijving }}</td>
+
+                        <td>
+                            {% for beheerder in obj.beheerders %}
+                                {% if not forloop.first %}
+                                    <br>
+                                {% endif %}
+                                <span>{{ beheerder }}</span>
+                            {% empty %}
+                                {% if obj.wijzig_url %}
+                                    <i class="red-text">Nog niet gekoppeld</i>
+                                {% else %}
+                                    <i class="grey-text">Nog niet gekoppeld</i>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if obj.wijzig_url %}
+                                <br><br>
+                                <a class="btn-nhb-rood" href="{{ obj.wijzig_url }}">
+                                    <i class="material-icons-round left">group_add</i>Wijzig beheerders</a>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if obj.bevestigde_email %}
+                                <code>{{ obj.bevestigde_email }}</code>
+                            {% else %}
+                                {% if obj.email_url %}
+                                    <i class="red-text">Geen</i>
+                                {% else %}
+                                    <i class="grey-text">Geen</i>
+                                {% endif %}
+                            {% endif %}
+
+                            <!-- in geval van 2, 3, 4 beheerders: voeg extra breaks toe voor het e-mailadres -->
+                            {% for beheerder in obj.beheerders %}
+                                {% if not forloop.first %}
+                                    <br>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if obj.email_url %}
+                                <br><br>
+                                <a class="btn-nhb-rood" href="{{ obj.email_url }}">
+                                    <i class="material-icons-round left">alternate_email</i>Wijzig e-mail</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    <p class="center">Noteer: het e-mailadres van de secretaris wordt overgenomen uit Onze Relaties en kan hier niet aangepast worden.</p>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-overzicht-vereniging" %}
 
 {% endblock %}
 

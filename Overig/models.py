@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,53 +12,6 @@ from Competitie.models import KampioenschapSchutterBoog
 from Functie.models import Functie
 from .tijdelijke_url import set_tijdelijke_url_saver
 import datetime
-
-
-class SiteFeedback(models.Model):
-    """ Database tabel waarin de feedback van de gebruikers staat """
-
-    FEEDBACK = [('8', 'Tevreden'),
-                ('6', 'Bruikbaar'),
-                ('4', 'Moet beter')]
-
-    toegevoegd_op = models.DateTimeField(null=True)
-    site_versie = models.CharField(max_length=20)
-    gebruiker = models.CharField(max_length=50)     # not linked to actual account
-    op_pagina = models.CharField(max_length=50)
-    bevinding = models.CharField(max_length=1, choices=FEEDBACK)
-    is_afgehandeld = models.BooleanField(default=False)
-    feedback = models.TextField()
-
-    url2bev = {
-        'plus': '8',
-        'nul': '6',
-        'min': '4'
-    }
-
-    bev2str = {
-        '8': 'Tevreden',
-        '6': 'Bruikbaar',
-        '4': 'Moet beter'
-    }
-
-    def __str__(self):
-        """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        short_feedback = self.feedback[:60]
-        if len(self.feedback) > 60:
-            short_feedback += "..."
-        msg = "[%s] %s [%s] %s" % (self.toegevoegd_op.strftime('%Y-%m-%d %H:%M utc'),
-                                   self.gebruiker,
-                                   self.bev2str[self.bevinding],
-                                   short_feedback)
-        if self.is_afgehandeld:
-            msg = "(afgehandeld) " + msg
-        return msg
-
-    class Meta:
-        """ meta data voor de admin interface """
-        verbose_name = verbose_name_plural = "Site feedback"
-
-    objects = models.Manager()      # for the editor only
 
 
 class SiteTijdelijkeUrl(models.Model):
@@ -148,18 +101,5 @@ def overig_opschonen(stdout):
         stdout.write('[INFO] Verwijder ongebruikte tijdelijke url %s' % obj)
         obj.delete()
     # for
-
-    max_age = now - datetime.timedelta(days=91)
-
-    objs = (SiteFeedback
-            .objects
-            .filter(is_afgehandeld=True,
-                    toegevoegd_op__lt=max_age))
-
-    count = objs.count()
-    if count > 0:
-        stdout.write('[INFO] Verwijder %s afgehandelde site feedback' % count)
-        objs.delete()
-
 
 # end of file

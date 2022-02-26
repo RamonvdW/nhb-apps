@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,46 +9,55 @@
 
 {% block pagina %}
 
-    <div class="white" style="padding:10px 30px 10px 30px">
-        <h4>Intro nieuwe beheerders</h4>
-        <p>Deze pagina is geschreven voor leden die voor het eerst te maken krijgen met de Wissel van Rol pagina.</p>
-        <p>In vergelijking tot een sporter krijg je als beheerder toegang tot extra functies van de website.</p>
-        <p>Aangezien de meeste rollen toegang hebben tot persoonsgegevens, moeten we zeker stellen dat je hier juist mee om gaat en extra veiligheidsmaatregelen activeren.</p>
-
-        <p>&nbsp;</p>
-        <h5>Stap 1: tweede factor</h5>
-        <p>De website maakt gebruik van verificatie met een tweede factor. Na de inlog met bondsnummer en wachtwoord moet je een 6-cijferige code invoeren die door een app op je telefoon berekend wordt. Deze code wijzigt elke 30 seconden.</p>
-        <p>Kwaadwillenden moeten dus niet alleen je gebruikersnaam en wachtwoord weten, maar ook toegang hebben tot de app die de codes genereert.</p>
-        <p>Installatie is heel simpel. Uitleg over het activeren van de tweede factor staat op deze pagina van de handleiding: <a class="btn-nhb-blauw" href="/handleiding/Twee-factor_authenticatie/">Twee-factor_authenticatie</a>.</p>
-
-        <p>&nbsp;</p>
-        <h5>Stap 2: Verklaring ondertekenen</h5>
-        <p>We hebben een simpele verklaring geschreven over de omgang met persoonsgegevens. Deze moet je elk jaar lezen en accorderen.</p>
-
-        <p>&nbsp;</p>
-        <h5>Stap 3: Kies een rol</h5>
-        <p>Via Wissel van Rol in het menu kom je op een pagina waar je kan wisselen tussen rollen. De verschillende rollen staan beschreven op deze pagina: <a class="btn-nhb-blauw" href="/handleiding/Rollen/">Rollen</a>.</p>
-        <p>Een aantal rollen heeft de mogelijkheid om andere rollen te helpen.</p>
-        <p>Zo kan een Rayonco&ouml;rdinator (RKO) de Regiocompetitieleiders (RCL) helpen.</p>
-        <p>De pagina Wissel van Rol laat twee secties zien:</p>
-        <ol style="padding-left: 20px">
-            <li>keuze van een rol waar je aan gekoppeld bent </li>
-            <li>keuze van een rol waarmee je een andere rol gaat helpen</li>
-        </ol>
-        <p>Na het kiezen van een rol kunnen er nieuwe rollen beschikbaar komen. Zo kan een RKO een RCL helpen en via die rol een HWL helpen.</p>
-        <p>De rol 'sporter' is bedoeld om terug te gaan naar het persoonlijke gebruik van de website, bijvoorbeeld om jezelf in te schrijven voor een competitie.</p>
-
-        <p>&nbsp;</p>
-        <hr>
-        <h5>Verder</h5>
-        <p>Terug naar de <a class="btn-nhb-blauw" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
-        <p>Beschrijving van de <a class="btn-nhb-blauw" href="/handleiding/Rollen/">Rollen</a></p>
-        <p><a class="btn-nhb-blauw" href="/handleiding/Twee-factor_authenticatie/">Twee-factor_authenticatie</a></p>
-
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Intro nieuwe beheerders</h3>
+        </div>
     </div>
 
-{% endblock %}
 
-{% block menu %}
-    {% include 'handleiding/menu.dtl' %}
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+
+                <p>Deze pagina is geschreven voor leden die voor het eerst te maken krijgen met de Wissel van Rol pagina.</p>
+                <p>In vergelijking tot een sporter krijg je als beheerder toegang tot extra functies van de website.</p>
+                <p>Aangezien de meeste rollen toegang hebben tot persoonsgegevens, moeten we zeker stellen dat je hier juist mee om gaat en extra veiligheidsmaatregelen activeren.</p>
+
+                <p>&nbsp;</p>
+                <h5>Stap 1: tweede factor</h5>
+                <p>De website maakt gebruik van verificatie met een tweede factor. Na de inlog met bondsnummer en wachtwoord moet je een 6-cijferige code invoeren die door een app op je telefoon berekend wordt. Deze code wijzigt elke 30 seconden.</p>
+                <p>Kwaadwillenden moeten dus niet alleen je gebruikersnaam en wachtwoord weten, maar ook toegang hebben tot de app die de codes genereert.</p>
+                <p>Installatie is heel simpel. Uitleg over het activeren van de tweede factor staat op deze pagina van de handleiding: <a class="btn-nhb-rood" href="/handleiding/Twee-factor_authenticatie/">Twee-factor authenticatie</a>.</p>
+
+                <p>&nbsp;</p>
+                <h5>Stap 2: Verklaring ondertekenen</h5>
+                <p>We hebben een simpele verklaring geschreven over de omgang met persoonsgegevens. Deze moet je elk jaar lezen en accorderen.</p>
+
+                <p>&nbsp;</p>
+                <h5>Stap 3: Kies een rol</h5>
+                <p>Via Wissel van Rol in het menu kom je op een pagina waar je kan wisselen tussen rollen. De verschillende rollen staan beschreven op deze pagina: <a class="btn-nhb-rood" href="/handleiding/Rollen/">Rollen</a>.</p>
+                <p>Een aantal rollen heeft de mogelijkheid om andere rollen te helpen.</p>
+                <p>Zo kan een Rayonco&ouml;rdinator (RKO) de Regiocompetitieleiders (RCL) helpen.</p>
+                <p>De pagina Wissel van Rol laat twee secties zien:</p>
+                <ol style="padding-left: 20px">
+                    <li>keuze van een rol waar je aan gekoppeld bent </li>
+                    <li>keuze van een rol waarmee je een andere rol gaat helpen</li>
+                </ol>
+                <p>Na het kiezen van een rol kunnen er nieuwe rollen beschikbaar komen. Zo kan een RKO een RCL helpen en via die rol een HWL helpen.</p>
+                <p>De rol 'sporter' is bedoeld om terug te gaan naar het persoonlijke gebruik van de website, bijvoorbeeld om jezelf in te schrijven voor een competitie.</p>
+
+                <p>&nbsp;</p>
+                <hr>
+                <h5>Verder</h5>
+                <p>Terug naar de <a class="btn-nhb-rood" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
+                <p>Beschrijving van de <a class="btn-nhb-rood" href="/handleiding/Rollen/">Rollen</a></p>
+                <p><a class="btn-nhb-rood" href="/handleiding/Twee-factor_authenticatie/">Twee-factor authenticatie</a></p>
+
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

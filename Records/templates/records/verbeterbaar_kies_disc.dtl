@@ -6,18 +6,27 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Handboogsport Records{% endblock %}
+{% block title %}Verbeterbare Records{% endblock %}
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="records-verbeterbaar-kies-discipline" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Verbeterbare Records</h3>
+        </div>
+    </div>
 
-    <h4>Nederlandse Handboog<wbr>sport Records</h4>
+    <!-- blauwe balk -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
 
-    <p>Kies de discipline waarbinnen de verbeterbare records getoond moeten worden:</p>
+            {% for obj in object_list %}
+                {% include 'plein/card_logo.dtl' with title=obj.titel text=obj.tekst img_src=obj.img_src img_height="63" url=obj.url %}
+            {% endfor %}
+        </div>
+    </div>
 
-    {% for disc in object_list %}
-        <p><a class="btn-nhb-blauw" href="{{ disc.url }}">{{ disc.beschrijving }}</a></p>
-    {% endfor %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="records-verbeterbaar-kies-discipline" %}
 
 {% endblock %}

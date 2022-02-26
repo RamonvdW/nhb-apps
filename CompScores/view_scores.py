@@ -15,8 +15,8 @@ from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_dee
 from Competitie.models import (LAAG_REGIO, DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog,
                                RegiocompetitieTeam, RegiocompetitieRondeTeam, RegiocompetitieTeamPoule,
                                update_uitslag_teamcompetitie)
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Plein.menu import menu_dynamics
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
 from Sporter.models import SporterBoog
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
@@ -50,8 +50,11 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:6])            # afkappen voor de veiligheid
-            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk,
-                                                  laag=LAAG_REGIO)
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie')
+                        .get(pk=deelcomp_pk,
+                             laag=LAAG_REGIO))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -62,6 +65,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 
         context['deelcomp'] = deelcomp
 
+        comp = deelcomp.competitie
         # TODO: check competitie fase
 
         if deelcomp.regio_organiseert_teamcompetitie:
@@ -73,7 +77,6 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 
         wedstrijd_pks = list()
         wedstrijd2beschrijving = dict()
-        comp_str = deelcomp.competitie.beschrijving
 
         for ronde in (DeelcompetitieRonde
                       .objects
@@ -88,7 +91,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
                     beschrijving = ronde.cluster.naam
                 if not beschrijving:
                     beschrijving = "?? (ronde)"
-                wedstrijd2beschrijving[wedstrijd.pk] = "%s - %s" % (comp_str, beschrijving)
+                wedstrijd2beschrijving[wedstrijd.pk] = beschrijving
             # for
         # for
 
@@ -122,7 +125,16 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 
         context['wedstrijden'] = wedstrijden
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        context['aantal_regels'] = wedstrijden.count() + 2
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+             comp.beschrijving.replace(' competitie', '')),
+            (None, 'Scores')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -189,6 +201,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
     template_name = TEMPLATE_COMPSCORES_INVOEREN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
     is_controle = False
+    kruimel = 'Invoeren'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -301,10 +314,24 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rollen.ROL_RCL:
             context['url_terug'] = reverse('CompScores:scores-rcl',
                                            kwargs={'deelcomp_pk': deelcomp.pk})
+
+            comp = deelcomp.competitie
+            context['kruimels'] = (
+                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+                    comp.beschrijving.replace(' competitie', '')),
+                (reverse('CompScores:scores-rcl', kwargs={'deelcomp_pk': deelcomp.pk}), 'Scores'),
+                (None, self.kruimel)
+            )
         else:
             context['url_terug'] = reverse('CompScores:wedstrijden-scores')
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('CompScores:scores-rcl', kwargs={'deelcomp_pk': deelcomp.pk}), 'Scores'),
+                (None, self.kruimel)
+            )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -313,6 +340,7 @@ class WedstrijdUitslagControlerenView(WedstrijdUitslagInvoerenView):
     """ Deze view laat de RCL de uitslag van een wedstrijd aanpassen en accorderen """
 
     is_controle = True
+    kruimel = 'Controleer'
 
     def post(self, request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'ik geef akkoord voor deze uitslag'
@@ -457,17 +485,23 @@ class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
         if len(deelnemers) == 0:
             out['fail'] = 1         # is niet ingeschreven voor deze competitie
         else:
-
             out['deelnemers'] = list()
 
+            geen_lid = True
             for deelnemer in deelnemers:
                 sporterboog = deelnemer.sporterboog
                 sporter = sporterboog.sporter
                 boog = sporterboog.boogtype
 
                 # volgende blok wordt een paar keer uitgevoerd, maar dat maak niet uit
-                out['vereniging'] = str(sporter.bij_vereniging)
-                out['regio'] = str(sporter.bij_vereniging.regio)
+                ver = sporter.bij_vereniging
+                if not ver:
+                    # niet lid bij een vereniging, dan niet toe te voegen
+                    geen_lid = True
+                    continue
+
+                out['vereniging'] = str(ver)
+                out['regio'] = str(ver.regio)
                 out['lid_nr'] = sporter.lid_nr
                 out['naam'] = sporter.volledige_naam()
                 out['ver_nr'] = sporter.bij_vereniging.ver_nr
@@ -497,6 +531,9 @@ class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
 
                 out['deelnemers'].append(sub)
             # for
+
+            if geen_lid and len(out['deelnemers']) == 0:
+                out['fail'] = 1
 
         return JsonResponse(out)
 
@@ -676,6 +713,8 @@ class WedstrijdUitslagBekijkenView(TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPSCORES_BEKIJKEN
 
+    # TODO: pagina is alleen bereikbaar vanuit Beheer Vereniging --> UserPassesTestMixin toevoegen?
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -726,7 +765,15 @@ class WedstrijdUitslagBekijkenView(TemplateView):
         context['deelcomp'] = deelcomp
         context['ronde'] = ronde
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        context['aantal_regels'] = 2 + len(scores)
+
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('CompScores:wedstrijden'), 'Competitie wedstrijden'),
+            (None, 'Uitslag'),
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -827,23 +874,31 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                     regel.klasse_str = klasse_str
                     prev_klasse = klasse_str
 
-                regel.deelnemers = deelnemers = list()
+                regel.deelnemers = list()
                 for deelnemer in (ronde_team
                                   .deelnemers_feitelijk
                                   .all()):
 
-                    sporterboog_pk, naam_str = deelnemer2sporter_cache[deelnemer.pk]
-                    sporterboog_pks.append(sporterboog_pk)
+                    try:
+                        sporterboog_pk, naam_str = deelnemer2sporter_cache[deelnemer.pk]
+                    except KeyError:
+                        # sporter zit niet meer in de deelcompetitie
+                        # dit komt (kort) voor na een overschrijving
+                        # TODO: hoe verder afhandelen?
+                        # TODO: sporter die overgestapt is naar andere vereniging binnen regio blijft wel zichtbaar
+                        pass
+                    else:
+                        sporterboog_pks.append(sporterboog_pk)
 
-                    if sporterboog_pk not in alle_sporterboog_pks:  # want deelnemer kan in meerdere teams voorkomen
-                        alle_sporterboog_pks.append(sporterboog_pk)
+                        if sporterboog_pk not in alle_sporterboog_pks:  # want deelnemer kan in meerdere teams voorkomen
+                            alle_sporterboog_pks.append(sporterboog_pk)
 
-                    deelnemer.naam_str = naam_str
-                    deelnemer.sporterboog_pk = sporterboog_pk
-                    deelnemer.gevonden_scores = None
-                    deelnemer.kan_kiezen = False
-                    deelnemer.keuze_nodig = False
-                    regel.deelnemers.append(deelnemer)
+                        deelnemer.naam_str = naam_str
+                        deelnemer.sporterboog_pk = sporterboog_pk
+                        deelnemer.gevonden_scores = None
+                        deelnemer.kan_kiezen = False
+                        deelnemer.keuze_nodig = False
+                        regel.deelnemers.append(deelnemer)
                 # for
 
                 regel.score_pks_feitelijk = list(ronde_team
@@ -1021,7 +1076,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
             context['url_opslaan'] = reverse('CompScores:selecteer-team-scores',
                                              kwargs={'deelcomp_pk': deelcomp.pk})
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

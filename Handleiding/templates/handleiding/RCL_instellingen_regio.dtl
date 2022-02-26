@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,28 +9,35 @@
 
 {% block pagina %}
 
-    <div class="white" style="padding:10px 30px 10px 30px">
-
-        <h4>RCL instellingen regio</h4>
-
-        <p>De RCL kan een aantal keuzes voor de regiocompetitie maken.</p>
-        <p>Regio organiseert Team Competitie: Ja/Nee</p>
-        <p>De teamcompetitie is optioneel (sinds 2021) en de RCL kan deze keuze invoeren.</p>
-        <p>Noteer dat de teamcompetitie in de regio niet meer noodzakelijk is voor deelname aan het RK Teams.</p>
-        <p>Teams horen bij een vereniging en bestaat uit vier sporters van die vereniging. Per boogtype mag een sporter maximaal in 1 team deelnemen.</p>
-        <p>Een team kan steeds uit dezelfde sporters bestaan ('vaste teams') of wordt voor elke ronde van de competitie opnieuw gevuld met de beste sporters van de vereniging.</p>
-        <p>De sporters die in den beginnen aan een team gekoppeld worden bepaalt de sterkte van het team en daarmee de wedstrijdklasse waarin het team geplaatst wordt.</p>
-        <p>De teams van de regio kunnen op verschillende manieren tegen elkaar 'strijden': directe tegenstanders en sterkste team van de ronde. Het eindresultaat is hetzelfde: teams worden gerankt op sterkte.</p>
-
-        <p>&nbsp;</p>
-        <hr>
-        <h5>Verder</h5>
-        <p>Terug naar de <a class="btn-nhb-blauw" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
-
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">RCL instellingen regio</h3>
+        </div>
     </div>
 
-{% endblock %}
 
-{% block menu %}
-    {% include 'handleiding/menu.dtl' %}
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+
+                <p>De RCL kan een aantal keuzes voor de regiocompetitie maken.</p>
+                <p>Regio organiseert Team Competitie: Ja/Nee</p>
+                <p>De teamcompetitie is optioneel (sinds 2021) en de RCL kan deze keuze invoeren.</p>
+                <p>Noteer dat de teamcompetitie in de regio niet meer noodzakelijk is voor deelname aan het RK Teams.</p>
+                <p>Teams horen bij een vereniging en bestaat uit vier sporters van die vereniging. Per boogtype mag een sporter maximaal in 1 team deelnemen.</p>
+                <p>Een team kan steeds uit dezelfde sporters bestaan ('vaste teams') of wordt voor elke ronde van de competitie opnieuw gevuld met de beste sporters van de vereniging.</p>
+                <p>De sporters die in den beginnen aan een team gekoppeld worden bepaalt de sterkte van het team en daarmee de wedstrijdklasse waarin het team geplaatst wordt.</p>
+                <p>De teams van de regio kunnen op verschillende manieren tegen elkaar 'strijden': directe tegenstanders en sterkste team van de ronde. Het eindresultaat is hetzelfde: teams worden gerankt op sterkte.</p>
+
+                <p>&nbsp;</p>
+                <hr>
+                <h5>Verder</h5>
+                <p>Terug naar de <a class="btn-nhb-rood" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
+
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

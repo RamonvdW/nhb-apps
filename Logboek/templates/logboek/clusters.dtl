@@ -1,10 +1,11 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load overig_filters %}   <!-- highlight filter -->
 
 {% block title %}Logboek - Clusters{% endblock %}
 
@@ -12,14 +13,21 @@
 
     {% include 'logboek/common.dtl' %}
 
-    <ul class="collection white">
-        {% for obj in object_list %}
-        <li class="collection-item">
-            <span>{{ obj.toegevoegd_op|date:"l j F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}</span><br>
-            <span>Door account: {{ obj.door }}</span><br>
-            <span>{{ obj.activiteit|linebreaksbr }}</span>
-        </li>
-        {% endfor %}
-    </ul>
+    <!-- blauwe balk met resultaten -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <ul class="collection white left-align">
+                {% for obj in object_list %}
+                    <li class="collection-item">
+                        <span>{{ obj.toegevoegd_op|date:"l j F Y" }} om {{ obj.toegevoegd_op|date:"H:i" }}</span><br>
+                        <span>Door account: {{ obj.door|highlight:zoekterm }}</span><br>
+                        <span>{{ obj.activiteit|highlight:zoekterm|linebreaksbr }}</span>
+                    </li>
+                {% empty %}
+                    <li class="collection-item center"><i>Niets gevonden</i></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
 
 {% endblock %}

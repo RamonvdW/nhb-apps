@@ -5,11 +5,14 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.core import management
 from django.utils import timezone
 from Competitie.models import DeelCompetitie, LAAG_RK
 from Competitie.operations import competities_aanmaken
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
+import io
+import os
 
 
 class TestCompRayonTeams(E2EHelpers, TestCase):
@@ -137,6 +140,13 @@ class TestCompRayonTeams(E2EHelpers, TestCase):
         url = self.url_rko_teams % self.testdata.deelcomp25_rk[2].pk
         resp = self.client.get(url)
         self.assert403(resp)
+
+    def test_bk_lijst(self):
+        # maak de BK lijst aan
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('bk_lijst_zonder_rk', '18', stderr=f1, stdout=f2)
+        os.remove('bk_lijst.xlsx')
 
 
 # end of file

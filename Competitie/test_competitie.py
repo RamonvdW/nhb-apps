@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -496,7 +496,7 @@ class TestCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht % comp.pk)
         urls = self.extract_all_urls(resp)
         self.assertTrue(self.url_ag_vaststellen_afstand % comp.afstand in urls)
-        self.assertNotContains(resp, "voor het laatst gedaan")
+        self.assertNotContains(resp, "laatst gedaan op")
 
         # verander de fase van de 25m competitie zodat we verschillen hebben
         comp = Competitie.objects.get(afstand=25, is_afgesloten=False)
@@ -525,7 +525,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # controleer dat er geen dubbele SporterBoog records aangemaakt zijn
         self.assertEqual(1, SporterBoog.objects.filter(sporter=self.sporter_100001, boogtype__afkorting='R').count())
         self.assertEqual(1, SporterBoog.objects.filter(sporter=self.sporter_100002, boogtype__afkorting='BB').count())
-        self.assertEqual(14954, SporterBoog.objects.count())
+        self.assertEqual(17835, SporterBoog.objects.count())
 
         # controleer dat het "ag vaststellen" kaartje er nog steeds is
         # dit keer met de "voor het laatst gedaan" notitie
@@ -534,7 +534,7 @@ class TestCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(self.url_overzicht % comp.pk)
         urls = self.extract_all_urls(resp, skip_menu=True)
         self.assertTrue(self.url_ag_vaststellen_afstand % 18 in urls)
-        self.assertContains(resp, "voor het laatst gedaan")
+        self.assertContains(resp, "laatst gedaan op")
 
     def test_ag_vaststellen_cornercases(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
@@ -595,7 +595,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # nu kunnen we met een POST de klassengrenzen vaststellen
         count = CompetitieKlasse.objects.filter(competitie=comp18, min_ag__gt=0).count()
         self.assertEqual(count, 0)
-        with self.assert_max_queries(86):
+        with self.assert_max_queries(91):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)        # redirect = success
         count = CompetitieKlasse.objects.filter(competitie=comp18, min_ag__gt=0).count()
@@ -657,17 +657,16 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/klassengrenzen-tonen.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, ' zijn nog niet vastgesteld')
-        self.assertContains(resp, 'De klassengrenzen voor de ')
+        self.assertContains(resp, 'De klassengrenzen zijn nog niet vastgesteld')
 
         # klassengrenzen vaststellen (18m en 25m)
         # s1 = timezone.now()
-        with self.assert_max_queries(86):
+        with self.assert_max_queries(91):
             resp = self.client.post(self.url_klassengrenzen_vaststellen % comp_18.pk)
         # s2 = timezone.now()
         # print('duration:', s2-s1)
         self.assert_is_redirect_not_plein(resp)        # redirect = success
-        with self.assert_max_queries(86):
+        with self.assert_max_queries(91):
             resp = self.client.post(self.url_klassengrenzen_vaststellen % comp_25.pk)
         self.assert_is_redirect_not_plein(resp)        # redirect = success
 

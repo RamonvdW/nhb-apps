@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,9 +10,45 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="bondspas-ophalen" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Bondspas ophalen</h3>
+        </div>
+    </div>
 
-    <h4>Bondspas ophalen</h4>
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+
+                {% if has_error %}
+
+                    <p>Er is een onverwacht probleem opgetreden waardoor we jouw bondspas nu niet kunnen tonen.</p>
+                    <p>Over een paar minuten kan je dit opnieuw proberen (vanaf {{ ophalen_na|date:"H:i" }}).</p>
+
+                {% else %}
+
+                    <div id="id_progressbar" class="center" style="width:250px; display:inline-block">
+                        <p>Je bondspas wordt opgehaald</p>
+                        <div class="progress">
+                            <div class="determinate" id="id_progress" style="width:0" data-pogingen=10 data-procent=0 data-step=10></div>
+                        </div>
+                    </div>
+
+                    <div id="id_toon_fout" class="hide">
+                        <p class="red-text">Het is helaas niet gelukt om je bondspas op te halen. Probeer het over een paar minuten opnieuw</p>
+                    </div>
+
+                    <div id="id_toon_klaar" class="hide">
+                        <p>Je bondspas is beschikbaar als bestand</p>
+                    </div>
+
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
 
     <script type="application/javascript">
 
@@ -121,42 +157,13 @@
             }
         }
 
+        window.addEventListener("load", function()
+        {
+            // doe de eerste status check over 500ms
+            setTimeout(check_bondspas_status, 500)
+        })
     </script>
 
-        {% if has_error %}
-            <p>Er is een onverwacht probleem opgetreden waardoor we jouw bondspas nu niet kunnen tonen.</p>
-            <p>Over een paar minuten kan je dit opnieuw proberen (vanaf {{ ophalen_na|date:"H:i" }}).</p>
-        {% else %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="bondspas-ophalen" %}
 
-            <div id="id_progressbar">
-                <p>Je bondspas wordt opgehaald.</p>
-                <div class="progress" style="width:250px">
-                    <div class="determinate" id="id_progress" style="width:0" data-pogingen=10 data-procent=0 data-step=10></div>
-                </div>
-            </div>
-
-            <div id="id_toon_fout" class="hide">
-                <p class="red-text">Het is helaas niet gelukt om je bondspas op te halen. Probeer het over een paar minuten opnieuw</p>
-                <a class="btn-nhb-blauw" href="{{ url_terug }}">Terug</a>
-            </div>
-
-            <div id="id_toon_klaar" class="hide">
-                <p>Je bondspas is beschikbaar als bestand.</p>
-                <a class="btn-nhb-blauw" href="{{ url_terug }}">Terug</a>
-            </div>
-
-            <script>
-                window.addEventListener("load", function()
-                {
-                    // doe de eerste status check over 500ms
-                    setTimeout(check_bondspas_status, 500)
-                })
-            </script>
-
-        {% endif %}
-
-{% endblock %}
-
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}

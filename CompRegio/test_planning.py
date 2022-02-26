@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -144,13 +144,13 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=10,
+                                              team__volgorde=15,        # Rec ERE
                                               is_voor_teams_rk_bk=False)
         klasse.min_ag = 29.0
         klasse.save()
 
         klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=11,
+                                              team__volgorde=16,        # Rec A
                                               is_voor_teams_rk_bk=False)
         klasse.min_ag = 25.0
         klasse.save()
@@ -277,23 +277,11 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('comprayon/planning-rayon.dtl', 'plein/site_layout.dtl'))
         # TODO: check geen knoppen 'wedstrijd toevoegen' of 'aanpassen wedstrijd'
 
-        # controleer dat de URL naar de bondscompetitie er in zit
-        urls = self.extract_all_urls(resp, skip_menu=True)
-        urls2 = [url for url in urls if url.startswith('/bondscompetities/planning/bk/')]
-        if len(urls2) != 1:     # pragma: no cover
-            self.fail(msg='Link naar bondscompetitie planning ontbreekt. Urls on page: %s' % repr(urls))
-
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compregio/planning-regio.dtl', 'plein/site_layout.dtl'))
-
-        # controleer dat de URL naar de rayoncompetitie er in zit
-        urls = self.extract_all_urls(resp, skip_menu=True)
-        urls2 = [url for url in urls if url.startswith('/bondscompetities/rk/planning/')]
-        if len(urls2) != 1:     # pragma: no cover
-            self.fail(msg='Link naar rayoncompetitie planning ontbreekt. Urls on page: %s' % repr(urls))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio_cluster % (self.deelcomp_regio101_18.pk, self.cluster_101a_18.pk))
@@ -329,12 +317,6 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compregio/planning-regio.dtl', 'plein/site_layout.dtl'))
-
-        # controleer dat de URL naar de rayoncompetitie er in zit
-        urls = self.extract_all_urls(resp, skip_menu=True)
-        urls2 = [url for url in urls if url.startswith('/bondscompetities/rk/planning/')]
-        if len(urls2) != 1:     # pragma: no cover
-            self.fail(msg='Link naar rayoncompetitie planning ontbreekt. Urls on page: %s' % repr(urls))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_regio_cluster % (self.deelcomp_regio101_18.pk, self.cluster_101a_18.pk))
@@ -1490,14 +1472,15 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         # zoek alle weeknummers op
         parts = list()
         html = str(resp.content)
-        html = html[html.find('<table'):]           # pak de eerste tabel (in de 2e staan clusters)
-        html = html[:html.find('</table>')]
+        # zoek de tabel met de weeknummers
+        html = html[html.find('<h4>Wedstrijd blokken</h4>'):]
+        html = html[:html.find('<form>')]
         while len(html):
-            pos = html.find('<tr><td>')
+            pos = html.find('<tr><td class="center">')
             if pos < 0:
                 html = ''
             else:
-                html = html[pos+8:]
+                html = html[pos+23:]
                 pos = html.find('</td>')
                 part = html[:pos]
                 parts.append(part)
@@ -1588,8 +1571,6 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compregio/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
-        hrefs = self.extract_all_urls(resp, skip_menu=True)
-        self.assertEqual(hrefs, ['/bondscompetities/%s/' % self.comp_18.pk])  # alleen de terug knop
 
         # probeer afsluiten
         with self.assert_max_queries(20):
@@ -1622,8 +1603,6 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compregio/rcl-afsluiten-regiocomp.dtl', 'plein/site_layout.dtl'))
-        hrefs = self.extract_all_urls(resp, skip_menu=True)
-        self.assertEqual(hrefs, ['/bondscompetities/%s/' % self.comp_18.pk])  # alleen de terug knop
 
         # nogmaals afsluiten doet niets
         with self.assert_max_queries(20):

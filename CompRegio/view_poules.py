@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,9 +12,9 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import LAAG_REGIO, DeelCompetitie, RegiocompetitieTeam, RegiocompetitieTeamPoule
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Handleiding.views import reverse_handleiding
+from Plein.menu import menu_dynamics
 
 
 TEMPLATE_COMPREGIO_RCL_TEAMS_POULES = 'compregio/rcl-teams-poules.dtl'
@@ -107,7 +107,13 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
 
         context['wiki_rcl_poules_url'] = reverse_handleiding(self.request, settings.HANDLEIDING_POULES)
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Poules')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -220,10 +226,15 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
         context['poule'] = poule
         context['url_opslaan'] = reverse('CompRegio:wijzig-poule',
                                          kwargs={'poule_pk': poule.pk})
-        context['url_terug'] = reverse('CompRegio:regio-poules',
-                                       kwargs={'deelcomp_pk': deelcomp.pk})
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompRegio:regio-poules', kwargs={'deelcomp_pk': deelcomp.pk}), 'Poules'),
+            (None, 'Wijzig')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

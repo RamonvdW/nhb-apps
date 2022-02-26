@@ -10,8 +10,6 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compinschrijven-leden-aanmelden" %}
-
     <script>
         function tel_wedstrijden() {
             // tel hoeveel checkboxes aangekruist zijn
@@ -34,227 +32,254 @@
         }
     </script>
 
-    <h4>Aanmelden</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Aanmelden</h3>
+        </div>
+    </div>
 
-    <form method="post" action="{{ url_aanmelden }}">
-        {% csrf_token %}
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+                {% if mag_aanmelden %}
+                    <p>Als hoofdwedstrijdleider kan je via deze pagina leden van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} aanmelden voor de <b>{{ comp.beschrijving }}</b>.</p>
 
-        {% if mag_aanmelden %}
-            <p>Als hoofdwedstrijdleider kan je via deze pagina leden van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} aanmelden voor de <b>{{ comp.beschrijving }}</b>.</p>
+                    <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten. Je kan ze hier bij helpen via het kaartje "voorkeuren leden".</p>
 
-            <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten. Je kan ze hier bij helpen via het kaartje "voorkeuren leden".</p>
+                    <p>Aanmelden gaat in bulk: kies de voorkeuren, zet daarna een vinkje bij de sporters die je aan wilt melden en druk dan rode knop in de rechter onderhoek. Leden die al aangemeld zijn hebben een grijs vinkje.</p>
+                    <p>Leden die aangegeven hebben niet mee te willen doen met de (winter-)competities zijn helemaal grijs.</p>
+                {% else %}
+                    <p>Deze pagina toont voor leden van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} of ze aangemeld zijn voor de <b>{{ comp.beschrijving }}</b>.</p>
 
-            <p>Aanmelden gaat in bulk: kies de voorkeuren, zet daarna een vinkje bij de sporters die je aan wilt melden en druk dan rode knop in de rechter onderhoek. Leden die al aangemeld zijn hebben een grijs vinkje.</p>
-            <p>Leden die aangegeven hebben niet mee te willen doen met de (winter-)competities zijn helemaal grijs.</p>
+                    <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten.</p>
 
-            <table class="white">
-                <tr>
-                    <td><b>Voorkeuren voor aanmelden in bulk</b></td>
-                </tr>
-
-                {% if mag_team_schieten %}
-                    <tr>
-                        <td>Aanmelden voor team schieten:<br><br>
-                            <label style="margin-left: 20px">
-                                <input type="checkbox" class="filled-in" name="wil_in_team">
-                                <span class="black-text">Ja</span>
-                            </label>
-                        </td>
-                    </tr>
+                    <p>De hoofdwedstrijdleider kan leden aanmelden voor de competitie.</p>
                 {% endif %}
+            </div>
+        </div>
+    </div>
 
-                {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
-                    <tr>
-                        <td>Kies wanneer de sporters willen schieten door 7 keuzes te maken in onderstaande lijst. Dit is later nog individueel aan te passen.<br>
-                        <span>Je hebt <b id="aantal">0 wedstrijden</b> gekozen.</span><br><br>
+    {% if mag_aanmelden %}
+        <form method="post" action="{{ url_aanmelden }}">
+            {% csrf_token %}
+    {% endif %}
 
-                            {% for wedstrijd in wedstrijden_1 %}
-                                <label style="margin-left: 20px">
-                                    <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()">
-                                    <span class="black-text">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
-                                </label>
-                                <br>
-                            {% endfor %}
-                        </td>
-                    </tr>
-                {% endif %}
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
 
-                {% if wedstrijden_2 %}
-                    <tr id="id_wedstrijden_2_knop">
-                        <td><button class="btn-nhb-blauw" type="button" onclick="toon_wedstrijden_2()">Toon meer wedstrijden</button>&nbsp;&nbsp;Er zijn nog {{ wedstrijden_2|length }} wedstrijden in de regio, wat verder weg.</td>
-                    </tr>
+            <!-- dialoog venster -->
+            <div class="white left-align z-depth-3">
+                <div style="padding:30px">
+                    <table class="white">
+                        <tr>
+                            <td><b>Voorkeuren voor aanmelden in bulk</b></td>
+                        </tr>
 
-                    <tr id="id_wedstrijden_2" class="hide">
-                        <td>
-                            {% for wedstrijd in wedstrijden_2 %}
-                                <label style="margin-left: 20px">
-                                    <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()">
-                                    <span class="black-text">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
-                                </label>
-                                <br>
-                            {% endfor %}
-                        </td>
-                    </tr>
-                {% endif %}
-
-                {% if dagdelen %}       <!-- inschrijfmethode 3 -->
-                    <tr>
-                        <td>Kies wanneer in de week ze willen schieten:<br>
-
-                            <ul id="id_dagdeel">
-                                {% for code, beschr in dagdelen %}
-                                    <li>
-                                        <label class="black-text" for="id_dagdeel_{{ code }}" style="margin-left: 20px">
-                                            <input class="with-gap" type="radio" name="dagdeel" value="{{ code }}" required id="id_dagdeel_{{ code }}">
-                                            <span>{{ beschr }}</span>
-                                        </label>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </td>
-                    </tr>
-                {% endif %}
-
-                <tr>
-                    <td>
-                        <span>Eventueel bericht aan de organisatie:</span><br>
-                        <div class="input-text" style="margin-left: 20px">
-                            <textarea name="opmerking" cols="40" rows="10" placeholder="Tik hier je bericht" data-length="500" class="materialize-textarea" maxlength="500" id="id_opmerkingen"></textarea>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-
-        {% else %}
-            <p>Deze pagina toont voor leden van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }} of ze aangemeld zijn voor de <b>{{ comp.beschrijving }}</b>.</p>
-
-            <p>Onderstaande lijst toont alleen leden die ingesteld hebben met welke boog ze schieten.</p>
-
-            <p>De hoofdwedstrijdleider kan leden aanmelden voor de competitie.</p>
-        {% endif %}
-
-        {% if leden_jeugd %}
-
-            <h5>Jeugd</h5>
-
-            <table class="white" id="table1">
-                <thead>
-                    <tr>        <!-- filter veld -->
-                        <td></td>
-                        <td colspan="2" class="table-filter">
-                            <input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/>
-                        </td>
-                        <td colspan="4"></td>
-                    </tr>
-                    <tr>
-                        <th class="center-align">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
-                        <th data-filter="on">Bonds<wbr>nummer</th>
-                        <th data-filter="on">Naam</th>
-                        <th>Leeftijd {{ tweede_jaar }}</th>
-                        <th class="hide-on-small-only">Leeftijdsklasse {{ seizoen }}</th>
-                        <th>Wedstrijd<wbr>boog</th>
-                        <th><span class="hide-on-small-only">Aanvangs<wbr>gemiddelde</span><span class="hide-on-med-and-up">AG</span></th>
-                    </tr>
-                </thead>
-
-                {% for obj in leden_jeugd %}
-                    <tr>
-                        {% if not obj.wil_competitie %}
-                            <!-- sporter wil niet meedoen -->
-                            <td><!-- geen checkbox --></td>
-                            <td class="grey-text">{{ obj.lid_nr }}</td>
-                            <td class="grey-text">{{ obj.volledige_naam }}</td>
-                            <td class="grey-text">{{ obj.leeftijd }}</td>
-                            <td class="grey-text hide-on-small-only">{{ obj.leeftijdsklasse.klasse_kort }}</td>
-                            <td class="grey-text">{{ obj.boogtype }}</td>
-                            <td><!-- geen aanvangsgemiddelde --></td>
-                        {% else %}
-                            <td class="center-align">
-                                {% if mag_aanmelden %}
-                                    <label>
-                                        <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{%endif%} data-boog="{% if obj.mag_teamschieten %}{{ obj.afkorting }}{% else %}X{% endif %}">
-                                        <span><!-- noodzakelijk --></span>
+                        {% if mag_team_schieten %}
+                            <tr>
+                                <td>Aanmelden voor team schieten:<br><br>
+                                    <label style="margin-left: 20px">
+                                        <input type="checkbox" class="filled-in" name="wil_in_team">
+                                        <span class="black-text">Ja</span>
                                     </label>
-                                {% else %}
-                                    {% if obj.is_aangemeld %}
-                                        <i class="material-icons-round">check</i>
-                                    {% endif %}
-                                {% endif %}
-                            </td>
-                            <td>{{ obj.lid_nr }}</td>
-                            <td>{{ obj.volledige_naam }}</td>
-                            <td>{{ obj.leeftijd }}</td>
-                            <td class="hide-on-small-only">{{ obj.leeftijdsklasse.klasse_kort }}</td>
-                            <td>{{ obj.boogtype }}</td>
-                            <td>{{ obj.ag|floatformat:3 }}</td>
+                                </td>
+                            </tr>
                         {% endif %}
-                    </tr>
-                {% endfor %}
-            </table>
 
-        {% endif %}
+                        {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
+                            <tr>
+                                <td>Kies wanneer de sporters willen schieten door 7 keuzes te maken in onderstaande lijst. Dit is later nog individueel aan te passen.<br>
+                                <span>Je hebt <b id="aantal">0 wedstrijden</b> gekozen.</span><br><br>
 
+                                    {% for wedstrijd in wedstrijden_1 %}
+                                        <label style="margin-left: 20px">
+                                            <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()">
+                                            <span class="black-text">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
+                                        </label>
+                                        <br>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                        {% endif %}
 
-        <h5>Senioren</h5>
+                        {% if wedstrijden_2 %}
+                            <tr id="id_wedstrijden_2_knop">
+                                <td><button class="btn-nhb-blauw" type="button" onclick="toon_wedstrijden_2()">Toon meer wedstrijden</button>&nbsp;&nbsp;Er zijn nog {{ wedstrijden_2|length }} wedstrijden in de regio, wat verder weg.</td>
+                            </tr>
 
-        <table class="white" id="table2">
-            <thead>
-                <tr>        <!-- filter veld -->
-                    <td></td>
-                    <td colspan="2" class="table-filter">
-                        <input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/>
-                    </td>
-                    <td colspan="2"></td>
-                </tr>
-                <tr>
-                    <th class="center-align">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
-                    <th data-filter="on">Bonds<wbr>nummer</th>
-                    <th data-filter="on">Naam</th>
-                    <th>Wedstrijdboog</th>
-                    <th><span class="hide-on-small-only">Aanvangs<wbr>gemiddelde</span><span class="hide-on-med-and-up">AG</span></th>
-                </tr>
-            </thead>
+                            <tr id="id_wedstrijden_2" class="hide">
+                                <td>
+                                    {% for wedstrijd in wedstrijden_2 %}
+                                        <label style="margin-left: 20px">
+                                            <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="tel_wedstrijden()">
+                                            <span class="black-text">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij <b>{{ wedstrijd.vereniging.naam }}</b><span class="hide-on-small-only"> te {{ wedstrijd.vereniging.plaats }}</span></span>
+                                        </label>
+                                        <br>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                        {% endif %}
 
-            {% for obj in leden_senior %}
-                <tr>
-                    {% if not obj.wil_competitie %}
-                        <!-- wil niet meedoen, dus kan niet aanmelden -->
-                        <td><!-- geen checkbox --></td>
-                        <td class="grey-text">{{ obj.lid_nr }}</td>
-                        <td class="grey-text">{{ obj.volledige_naam }}</td>
-                        <td class="grey-text">{{ obj.boogtype }}</td>
-                        <td><!-- geen aanvangsgemiddelde --></td>
-                    {% else %}
-                        <td class="center-align">
-                            {% if mag_aanmelden %}
-                                <label>
-                                    <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{% endif %} data-boog="{{ obj.afkorting }}">
-                                    <span><!-- noodzakelijk --></span>
-                                </label>
-                            {% else %}
-                                {% if obj.is_aangemeld %}
-                                    <i class="material-icons-round">check</i>
-                                {% endif %}
-                            {% endif %}
-                        </td>
-                        <td>{{ obj.lid_nr }}</td>
-                        <td>{{ obj.volledige_naam }}</td>
-                        <td>{{ obj.boogtype }}</td>
-                        <td>{{ obj.ag|floatformat:3 }}</td>
+                        {% if dagdelen %}       <!-- inschrijfmethode 3 -->
+                            <tr>
+                                <td>Kies wanneer in de week ze willen schieten:<br>
+
+                                    <ul id="id_dagdeel">
+                                        {% for code, beschr in dagdelen %}
+                                            <li>
+                                                <label class="black-text" for="id_dagdeel_{{ code }}" style="margin-left: 20px">
+                                                    <input class="with-gap" type="radio" name="dagdeel" value="{{ code }}" required id="id_dagdeel_{{ code }}">
+                                                    <span>{{ beschr }}</span>
+                                                </label>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </td>
+                            </tr>
+                        {% endif %}
+
+                        <tr>
+                            <td>
+                                <span>Eventueel bericht aan de organisatie:</span><br>
+                                <div class="input-text" style="margin-left: 20px">
+                                    <textarea name="opmerking" cols="40" rows="10" placeholder="Tik hier je bericht" data-length="500" class="materialize-textarea" maxlength="500" id="id_opmerkingen"></textarea>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    {% if leden_jeugd %}
+
+                        <h5 class="center">Jeugd</h5>
+
+                        <table class="white" id="table1">
+                            <thead>
+                                <tr>        <!-- filter veld -->
+                                    <td></td>
+                                    <td colspan="2" class="table-filter">
+                                        <input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/>
+                                    </td>
+                                    <td colspan="4"></td>
+                                </tr>
+                                <tr>
+                                    <th class="center">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
+                                    <th data-filter="on">Bonds<wbr>nummer</th>
+                                    <th data-filter="on">Naam</th>
+                                    <th>Leeftijd {{ tweede_jaar }}</th>
+                                    <th class="hide-on-small-only">Leeftijdsklasse {{ seizoen }}</th>
+                                    <th>Wedstrijd<wbr>boog</th>
+                                    <th class="center"><span class="hide-on-small-only">Aanvangs<wbr>gemiddelde</span><span class="hide-on-med-and-up">AG</span></th>
+                                </tr>
+                            </thead>
+
+                            {% for obj in leden_jeugd %}
+                                <tr>
+                                    {% if not obj.wil_competitie %}
+                                        <!-- sporter wil niet meedoen -->
+                                        <td><!-- geen checkbox --></td>
+                                        <td class="grey-text">{{ obj.lid_nr }}</td>
+                                        <td class="grey-text">{{ obj.volledige_naam }}</td>
+                                        <td class="grey-text">{{ obj.leeftijd }}</td>
+                                        <td class="grey-text hide-on-small-only">{{ obj.leeftijdsklasse.beschrijving }}</td>
+                                        <td class="grey-text">{{ obj.boogtype }}</td>
+                                        <td><!-- geen aanvangsgemiddelde --></td>
+                                    {% else %}
+                                        <td class="center">
+                                            {% if mag_aanmelden %}
+                                                <label>
+                                                    <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{%endif%} data-boog="{% if obj.mag_teamschieten %}{{ obj.afkorting }}{% else %}X{% endif %}">
+                                                    <span><!-- noodzakelijk --></span>
+                                                </label>
+                                            {% else %}
+                                                {% if obj.is_aangemeld %}
+                                                    <i class="material-icons-round">check</i>
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ obj.lid_nr }}</td>
+                                        <td>{{ obj.volledige_naam }}</td>
+                                        <td>{{ obj.leeftijd }}</td>
+                                        <td class="hide-on-small-only">{{ obj.leeftijdsklasse.beschrijving }}</td>
+                                        <td>{{ obj.boogtype }}</td>
+                                        <td class="center">{{ obj.ag|floatformat:3 }}</td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </table>
+
                     {% endif %}
-                </tr>
-            {% endfor %}
-        </table>
 
-        {% if mag_aanmelden %}
+                    <h5 class="center">Senioren</h5>
+
+                    <table class="white" id="table2">
+                        <thead>
+                            <tr>        <!-- filter veld -->
+                                <td></td>
+                                <td colspan="2" class="table-filter">
+                                    <input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/>
+                                </td>
+                                <td colspan="2"></td>
+                            </tr>
+                            <tr>
+                                <th class="center">{% if mag_aanmelden %}<!-- kolom voor vinkje -->{% else %}Aangemeld{% endif %}</th>
+                                <th data-filter="on">Bonds<wbr>nummer</th>
+                                <th data-filter="on">Naam</th>
+                                <th>Wedstrijd<wbr>boog</th>
+                                <th class="center"><span class="hide-on-small-only">Aanvangs<wbr>gemiddelde</span><span class="hide-on-med-and-up">AG</span></th>
+                            </tr>
+                        </thead>
+
+                        {% for obj in leden_senior %}
+                            <tr>
+                                {% if not obj.wil_competitie %}
+                                    <!-- wil niet meedoen, dus kan niet aanmelden -->
+                                    <td><!-- geen checkbox --></td>
+                                    <td class="grey-text">{{ obj.lid_nr }}</td>
+                                    <td class="grey-text">{{ obj.volledige_naam }}</td>
+                                    <td class="grey-text">{{ obj.boogtype }}</td>
+                                    <td><!-- geen aanvangsgemiddelde --></td>
+                                {% else %}
+                                    <td class="center">
+                                        {% if mag_aanmelden %}
+                                            <label>
+                                                <input type="checkbox" name="{{ obj.check }}" {% if obj.is_aangemeld %}disabled checked{% else %}class="filled-in"{% endif %} data-boog="{{ obj.afkorting }}">
+                                                <span><!-- noodzakelijk --></span>
+                                            </label>
+                                        {% else %}
+                                            {% if obj.is_aangemeld %}
+                                                <i class="material-icons-round">check</i>
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ obj.lid_nr }}</td>
+                                    <td>{{ obj.volledige_naam }}</td>
+                                    <td>{{ obj.boogtype }}</td>
+                                    <td class="center">{{ obj.ag|floatformat:3 }}</td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </table>
+
+                    {% if mag_aanmelden %}
+                        <div class="fixed-action-btn">
+                            <input class="btn-nhb-rood" type="submit" value="Geselecteerde sporters aanmelden" id="submit">
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if mag_aanmelden %}
             <div class="fixed-action-btn">
                 <input class="btn-nhb-rood" type="submit" value="Geselecteerde sporters aanmelden" id="submit">
             </div>
-        {% endif %}
-    </form>
-
-    <!-- extra ruimte onder de tabel houden voor de aanmeld-knop -->
-    <p>&nbsp;</p>
+        </form>
+    {% endif %}     <!-- mag aanmelden -->
 
     {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
         <!-- initialisatie -->
@@ -265,5 +290,7 @@
             })
         </script>
     {% endif %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="compinschrijven-hwl-leden-aanmelden" %}
 
 {% endblock %}

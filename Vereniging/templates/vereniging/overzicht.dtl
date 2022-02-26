@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,125 +10,172 @@
 
 {% block pagina %}
 
-    <h4>Beheer Vereniging</h4>
-
-    <div class="row">
-
-        <!-- toon gegevens van de vereniging in een blauwe box -->
-        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-            <div class="white-text nhb-blauw z-depth-2">
-                <div class="row small-row">
-                    <div class="col s4">Verenigingsnummer:</div>
-                    <div class="col s6">{{ nhb_ver.ver_nr }}</div>
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Naam:</div>
-                    <div class="col s6">{{ nhb_ver.naam }}</div>
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Plaats:</div>
-                    <div class="col s6">{{ nhb_ver.plaats }}</div>
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Regio:</div>
-                    <div class="col s6">{{ nhb_ver.regio }}</div>
-                </div>
-
-                {% if clusters.count > 0 %}
-                    <div class="row small-row">
-                        <div class="col s4">Cluster{% if clusters.count > 1 %}s{% endif %}:</div>
-                        <div class="col s6">
-                            {% for cluster in clusters %}
-                                <span>{{ cluster }}</span><br>
-                            {% endfor %}
-                        </div>
-                    </div>
-                {% endif %}
-            </div>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Beheer Vereniging</h3>
+            <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
         </div>
     </div>
 
-    <!--&nbsp;-->
-    <p>Als beheerder van de vereniging heb je toegang tot onderstaande functies.</p>
+    <!-- blauwe balk met informatie -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Verenigingsnummer</th>
+                    <td>{{ nhb_ver.ver_nr }}</td>
+                </tr>
+                <tr>
+                    <th>Naam</th>
+                    <td>{{ nhb_ver.naam }}</td>
+                </tr>
+                <tr>
+                    <th>Plaats</th>
+                    <td>{{ nhb_ver.plaats }}</td>
+                </tr>
+                <tr>
+                    <th>Regio</th>
+                    <td>{{ nhb_ver.regio }}</td>
+                </tr>
 
-    <h5>Wedstrijden</h5>
-    <div class="row">
-
-        <!-- wedstrijden -->
-        {% url 'CompScores:wedstrijden' as card_url %}
-        {% include 'plein/card.dtl' with title="Competitiewedstrijden" text="Alle bondscompetitie wedstrijden die bij deze vereniging geschoten worden." icon="event" url=card_url %}
-
-        <!-- scores invoeren -->
-        {% if heeft_wedstrijden %}
-            {% url 'CompScores:wedstrijden-scores' as card_url %}
-            {% include 'plein/card.dtl' with title="Scores invoeren" text="Scores invoeren voor de wedstrijden die bij deze vereniging geschoten worden." icon="edit" url=card_url %}
-        {% endif %}
-
-        <!-- wedstrijdkalender -->
-        {% if toon_wedstrijdkalender %}
-            {% url 'Kalender:vereniging' as card_url %}
-            {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Alle overige wedstrijden die door deze vereniging georganiseerd worden." icon="event_note" url=card_url %}
-        {% endif %}
+                {% if clusters.count > 0 %}
+                    <tr>
+                        <th>Cluster{% if clusters.count > 1 %}s{% endif %}</th>
+                        <td>
+                            {% for cluster in clusters %}
+                                <span>{{ cluster }}</span><br>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
+                <tr>
+            </table>
+        </div>
     </div>
 
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Wedstrijden</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+
+            <!-- wedstrijden -->
+            {% url 'CompScores:wedstrijden' as card_url %}
+            {% include 'plein/card.dtl' with title="Competitiewedstrijden" text="Wedstrijden die bij deze vereniging geschoten worden." icon="event" url=card_url %}
+
+            <!-- scores invoeren -->
+            {% if heeft_wedstrijden %}
+                {% url 'CompScores:wedstrijden-scores' as card_url %}
+                {% include 'plein/card.dtl' with title="Scores invoeren" text="Scores invoeren voor wedstrijden die bij deze vereniging geschoten worden." icon="edit" url=card_url %}
+            {% endif %}
+
+            <!-- wedstrijdkalender -->
+            {% if toon_wedstrijdkalender %}
+                {% url 'Kalender:vereniging' as card_url %}
+                {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Alle overige wedstrijden die door deze vereniging georganiseerd worden." icon="event_note" url=card_url %}
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- competities -->
     {% for kaartje in kaartjes %}
+
         {% if kaartje.heading %}
-            <h5>{{ kaartje.heading }}</h5>
-        {% elif kaartje.geen_kaartjes %}
-            <p>Geen kaartjes voor deze competitie.</p>
-        {% elif kaartje.beschikbaar_vanaf %}
-            <!-- toon disabled -->
-            <div class="nhb-card-disabled">
-                <div class="nhb-card-content">
-                    <div class="card-title center-align grey-text">{{ kaartje.titel }}</div>
-                    <div class="center-align" style="margin-bottom:8px; position: relative">
-                        {% if kaartje.img %}
-                            <div><img src="{{ kaartje.img }}" height="60" alt="logo" style="opacity: 0.5"></div>
-                            <div style="position:absolute; top:50%; width:100%" class="center-align white-text nhb-rood">VANAF {{ kaartje.beschikbaar_vanaf|upper }}</div>
-                        {% else %}
-                            <div class="grey-text"><i class="material-icons-round medium">{{ kaartje.icon }}</i></div>
-                            <div style="position:absolute; top:50%; width:100%" class="center-align white-text nhb-rood">VANAF {{ kaartje.beschikbaar_vanaf|upper }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="card-text grey-text">{{ kaartje.tekst }}</div>
+            <!-- witruimte -->
+            <div class="row center">
+                <div class="col s12">
+                    <h4>{{ kaartje.heading }}</h4>
+                    <p>Competitie fase {{ kaartje.comp_fase }}</p>
                 </div>
             </div>
+
+            <!-- blauwe balk -->
+            <div class="row-nhb-blauw">
+                <div class="col s12">
+
+        {% elif kaartje.einde_blok %}
+
+                </div>
+            </div>
+
+        {% elif kaartje.geen_kaartjes %}
+
+                    <!-- TODO: is dit mooi genoeg? -->
+                    <p class="white" style="padding:30px">
+                        <i>Geen kaartjes voor deze competitie</i>
+                    </p>
+
+        {% elif kaartje.beschikbaar_vanaf %}
+
+                    <!-- toon disabled -->
+                    <div class="nhb-card-disabled">
+                        <div class="nhb-card-content">
+                            <div class="card-title center-align grey-text">{{ kaartje.titel }}</div>
+                            <div class="center-align" style="margin-bottom:8px; position: relative">
+                                {% if kaartje.img %}
+                                    <div><img src="{{ kaartje.img }}" height="60" alt="logo" style="opacity: 0.5"></div>
+                                    <div style="position:absolute; top:50%; width:100%" class="center-align white-text nhb-rood">VANAF {{ kaartje.beschikbaar_vanaf|upper }}</div>
+                                {% else %}
+                                    <div class="grey-text"><i class="material-icons-round medium">{{ kaartje.icon }}</i></div>
+                                    <div style="position:absolute; top:50%; width:100%" class="center-align white-text nhb-rood">VANAF {{ kaartje.beschikbaar_vanaf|upper }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="card-text grey-text">{{ kaartje.tekst }}</div>
+                        </div>
+                    </div>
+
         {% elif kaartje.img %}
-            {% include 'plein/card_logo.dtl' with title=kaartje.titel text=kaartje.tekst img_src=kaartje.img img_height="60" url=kaartje.url %}
+
+                    {% include 'plein/card_logo.dtl' with title=kaartje.titel text=kaartje.tekst img_src=kaartje.img img_height="60" url=kaartje.url %}
+
         {% else %}
-            {% include 'plein/card.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icon url=kaartje.url %}
+
+                    {% include 'plein/card.dtl' with title=kaartje.titel text=kaartje.tekst icon=kaartje.icon url=kaartje.url %}
+
         {% endif %}
     {% endfor %}
 
-
-    <h5>Beheer vereniging</h5>
-
-    <div class="row">
-
-        <!-- ledenlijst -->
-        {% url 'Vereniging:ledenlijst' as card_url %}
-        {% include 'plein/card.dtl' with title="Ledenlijst" text="Bekijk de ledenlijst van de vereniging, inclusief wedstrijdklasse jeugdleden en laatste inlog op deze website." icon="import_contacts" url=card_url %}
-
-        <!-- beheerders vereniging -->
-        {% url 'Functie:overzicht-vereniging' as card_url %}
-        {% include 'plein/card.dtl' with title="Beheerders" text="E-mailadressen van de (hoofd-)wedstrijdleider functies en eraan gekoppelde leden." icon="supervisor_account" url=card_url %}
-
-        <!-- instellingen leden -->
-        {% url 'Vereniging:leden-voorkeuren' as card_url %}
-        {% include 'plein/card.dtl' with title="Voorkeuren" text="Voorkeuren van de leden inzien en boog type instellen." icon="tune" url=card_url %}
-
-        <!-- accommodatie details -->
-        {% if accommodatie_details_url %}
-            {% include 'plein/card.dtl' with title="Accommodatie" text="Gegevens over de accommodatie die van belang zijn voor wedstrijden." icon="account_balance" url=accommodatie_details_url %}
-        {% endif %}
-
-        <!-- externe locaties -->
-        {% if url_externe_locaties %}
-            {% include 'plein/card.dtl' with title="Wedstrijd Locaties" text="Gegevens over de locaties waar de vereniging wedstrijden kan organiseren." icon="hiking" url=url_externe_locaties %}
-        {% endif %}
-
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Beheer Vereniging</h4>
+        </div>
     </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-overzicht" %}
+    <!-- blauwe balk -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <!-- ledenlijst -->
+            {% url 'Vereniging:ledenlijst' as card_url %}
+            {% include 'plein/card.dtl' with title="Ledenlijst" text="Leden van de vereniging, inclusief wedstrijdklasse jeugdleden en laatste inlog op deze website." icon="import_contacts" url=card_url %}
+
+            <!-- beheerders vereniging -->
+            {% url 'Functie:overzicht-vereniging' as card_url %}
+            {% include 'plein/card.dtl' with title="Beheerders" text="E-mailadressen van de (hoofd-)wedstrijdleider functies en eraan gekoppelde leden." icon="supervisor_account" url=card_url %}
+
+            <!-- instellingen leden -->
+            {% url 'Vereniging:leden-voorkeuren' as card_url %}
+            {% include 'plein/card.dtl' with title="Voorkeuren" text="Voorkeuren van de leden inzien en boog type instellen." icon="tune" url=card_url %}
+
+            <!-- accommodatie details -->
+            {% if accommodatie_details_url %}
+                {% include 'plein/card.dtl' with title="Accommodatie" text="Details over jullie accommodatie die van belang zijn voor wedstrijden." icon="account_balance" url=accommodatie_details_url %}
+            {% endif %}
+
+            <!-- externe locaties -->
+            {% if url_externe_locaties %}
+                {% include 'plein/card.dtl' with title="Wedstrijdlocaties" text="Externe locaties waar jullie vereniging wedstrijden kan organiseren." icon="hiking" url=url_externe_locaties %}
+            {% endif %}
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="vereniging-overzicht" %}
 
 {% endblock %}

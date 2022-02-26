@@ -20,86 +20,234 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="wissel-van-rol" %}
+    <script type="application/javascript">
+        function wissel_naar_rol() {
+            // vind de gekozen radiobutton
+            const el = document.querySelector("input[type='radio'][name='rol']:checked")
 
-    <h4>Wissel van rol</h4>
+            // haal de url op van het input element
+            const url = el.dataset.url
 
-    <p>Op deze pagina kan je de rol kiezen die je aan wilt nemen.</p>
-    <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
+            // do een form post met de url
+            const form = document.createElement('form')
+            form.method = 'post'
+            form.action = url
+            form.style.display = 'hidden'
 
-    {% if url_admin_site or url_login_as %}
-        <div class="selectie-knoppen">
-            <a class="btn-nhb-rood" href="{{ url_admin_site }}">
-                <i class="material-icons-round left">build</i>Admin site</a>
-            <span>&nbsp;</span>
-            <a class="btn-nhb-rood" href="{{ url_login_as }}">
-                <i class="material-icons-round left">switch_access_shortcut</i>Account wissel</a>
+            let inp = document.createElement('input')
+            inp.type = "hidden"
+            inp.name = "csrfmiddlewaretoken"
+            inp.value = getCookie('csrftoken')
+            form.appendChild(inp)
+
+            document.body.appendChild(form)
+            form.submit()
+        }
+    </script>
+
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Wissel van rol</h3>
+            <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
         </div>
-    {% endif %}
-
-    {% if show_beheerder_intro %}
-        <p>&nbsp;</p>
-        <h5>Introductie Beheerder</h5>
-        <p>Lees hier de introductie voor nieuwe beheerders:
-    <a class="btn-small btn-nhb-blauw" href="{{ wiki_intro_nieuwe_beheerders }}" target="_blank" rel="noopener noreferrer"><i class="material-icons-round white-text">help_outline</i></a></p>
-    {% endif %}
-
-    {% if show_otp_koppelen %}
-        <p>&nbsp;</p>
-        <h5>Veiligheid</h5>
-        <p>Controle met een tweede factor is verplicht voor gebruikers met toegang tot persoonsgegevens.</p>
-        <p><a class="btn-nhb-rood" href="{% url 'Functie:otp-koppelen' %}">Nu Koppelen</a></p>
-        <p>Handleiding over het koppelen: <a class="btn-nhb-blauw" href="{{ wiki_2fa_url }}" target="_blank" rel="noopener noreferrer">
-            <i class="material-icons-round white-text left">help_outline</i>Tweede-factor authenticatie</a></p>
-    {% endif %}
-
-    {% if show_vhpg %}
-        <p>&nbsp;</p>
-        <h5>Hanteren persoons<wbr>gegevens</h5>
-        <p>Voordat je aan de slag kan moeten we eerst een paar afspraken maken over het omgaan met persoonsgegevens.</p>
-        <p><a class="btn-nhb-rood" href="{% url 'Functie:vhpg-acceptatie' %}">Bekijken</a></p>
-    {% endif %}
-
-    {% if show_otp_controle %}
-        <p>&nbsp;</p>
-        <h5>Veiligheid</h5>
-        <p>Een aantal rollen komt beschikbaar nadat de controle van de tweede factor uitgevoerd is.</p>
-        <a class="btn-nhb-rood" href="{% url 'Functie:otp-controle' %}">Nu controleren</a>
-    {% endif %}
+    </div>
 
 
-    {% if heeft_alle_rollen %}
-        <p>&nbsp;</p>
-        <h5>Springplankjes</h5>
-        <h6>Indoor:</h6>
-        <div class="white shrink-wrap-5">
-            {% for obj in heeft_alle_rollen %}
-                {% if obj.comp_type_break %}
-                    </div>
-                    <h6>25m1pijl:</h6>
-                    <div class="white shrink-wrap-5">
+    {% if show_beheerder_intro or show_otp_koppelen or show_vhpg or show_otp_controle %}
+
+        <!-- nog niet mogelijk om te wisselen, dus toon kaartjes -->
+
+        <!-- blauwe balk -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+                {% if show_beheerder_intro %}
+                    {% include 'plein/card.dtl' with title="Introductie" text="Lees de introductie voor nieuwe beheerders." icon="help_outline" url=wiki_intro_nieuwe_beheerders extern_open=True %}
                 {% endif %}
-                {% if obj.insert_break %}<br>{% endif %}
-                <form style="display: inline-block" method="post" action="{{ obj.url }}">{% csrf_token %}
-                    <input class="btn-nhb-blauw" type="submit" value="{{ obj.knop_tekst }}">
-                </form>
-                {% if obj.horizontal_spacing %}<span style="margin-left:40px"></span>{% endif %}
-            {% endfor %}
+
+                {% if show_otp_koppelen %}
+                    {% url 'Functie:otp-koppelen-stap1' as card_url %}
+                    {% include 'plein/card.dtl' with title="Koppel 2e factor" text="Verplicht voor gebruikers met toegang tot persoonsgegevens." icon="lock" url=card_url %}
+                {% endif %}
+
+                {% if show_vhpg %}
+                    {% url 'Functie:vhpg-acceptatie' as card_url %}
+                    {% include 'plein/card.dtl' with title="Persoonsgegevens" text="Maak afspraken over het omgaan met persoonsgegevens." icon="gavel" url=card_url %}
+                {% endif %}
+
+                {% if show_otp_controle %}
+                    {% url 'Functie:otp-controle' as card_url %}
+                    {% include 'plein/card.dtl' with title="Controle 2e factor" text="Voer je controle code in." icon="lock" url=card_url %}
+                {% endif %}
+            </div>
         </div>
-    {% endif %}
 
-    {% if object_list %}
-        <p>&nbsp;</p>
-        <h5>Eigen rollen</h5>
+    {% else %}
 
-        {% for obj in object_list %}
-            <div class="selectie-knoppen">
-                {% if obj.separator %}
-                    <p>&nbsp;</p>
-                    <h5>Help anderen</h5>
+        <!-- volwaardige beheerder en tweede factor is gecontroleerd -->
 
+        {% if heeft_alle_rollen %}
+
+            <h4 class="center">Snel wisselen</h4>
+
+            <!-- blauwe balk -->
+            {% if show_hwl_rollen %}
+                <div class="row-nhb-blauw" style="padding:15px 0 0 0">
+                    <!-- verticale versie -->
+
+                    <!-- indoor -->
+                    <div class="col s6 m3">
+                        <div class="white left-align" style="padding:10px; margin-bottom:15px">
+                            <div class="center"><b>Indoor</b></div>
+                            {% for obj in alle_18 %}
+                                <form method="post" action="{{ obj.url }}" style="display:inline">
+                                    {% csrf_token %}
+                                    <button class="btn-nhb-rood">{{ obj.tekst_kort }}</button>
+                                </form>
+                                {% if obj.do_break %}<br>{% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- 25m1pijl -->
+                    <div class="col s6 m3">
+                        <div class="white left-align" style="padding:10px; margin-bottom:15px">
+                            <div class="center"><b>25m1pijl</b></div>
+                            {% for obj in alle_25 %}
+                                <form method="post" action="{{ obj.url }}" style="display:inline">
+                                    {% csrf_token %}
+                                    <button class="btn-nhb-blauw">{{ obj.tekst_kort }}</button>
+                                </form>
+                                {% if obj.do_break %}<br>{% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- verenigingen -->
+                    <div class="col s12 m6">
+                        <div class="white left-align" style="padding:10px; margin-bottom:15px">
+                            <h6 class="center">Verenigingen</h6>
+                            <ul>
+                                {% for obj in hwl_rollen %}
+                                    <li>
+                                        <label class="black-text" for="id_{{ obj.pk }}">
+                                            <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
+                                            <span>{{ obj.beschrijving }}</span>
+                                        </label>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <p class="center">
+                                <a class="btn-nhb-rood" onclick="wissel_naar_rol()">Activeer</a>
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+            {% else %}
+                <!-- horizontale versie -->
+
+                <div class="row-nhb-blauw" style="padding:15px 0 0 0">
+
+                    <!-- indoor -->
+                    <div class="col s12">
+                        <div class="white left-align" style="padding:10px; margin-bottom:15px">
+                            <div style="display:flex">
+                                <div class="valign-wrapper" style="margin-right:10px"><b>Indoor</b></div>
+                                <div>
+                                    {% for obj in alle_18 %}
+                                        <form method="post" action="{{ obj.url }}" style="display:inline">
+                                            {% csrf_token %}
+                                            <button class="btn-nhb-rood"{% if obj.ruimte %}style="margin-right:5px"{% endif %}>{{ obj.tekst_kort }}</button>
+                                        </form>
+                                        {% if obj.do_break %}<br>{% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 25m1pijl -->
+                    <div class="col s12">
+                        <div class="white left-align" style="padding:10px; margin-bottom:15px">
+                            <div style="display:flex">
+                                <div class="valign-wrapper" style="margin-right:10px"><b>25m1pijl</b></div>
+                                <div>
+                                    {% for obj in alle_25 %}
+                                        <form method="post" action="{{ obj.url }}" style="display:inline">
+                                            {% csrf_token %}
+                                            <button class="btn-nhb-blauw"{% if obj.ruimte %}style="margin-right:5px"{% endif %}>{{ obj.tekst_kort }}</button>
+                                        </form>
+                                        {% if obj.do_break %}<br>{% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            {% endif %}     <!-- show_hwl_rollen -->
+
+        {% endif %}     <!-- springplanken -->
+
+        {% if show_eigen_rollen %}
+            <!-- rollen waarnaar gewisseld kan worden -->
+
+            <!-- witruimte -->
+            <div class="row center">
+                <div class="col s12">
+                    <h4>Eigen rollen</h4>
+                    <p>Wissel naar een van de aan jou toegekende rollen.</p>
+                </div>
+            </div>
+
+            <!-- blauwe balk -->
+            <div class="row-nhb-blauw">
+
+                <!-- witte rechthoek voor radiobuttons -->
+                <div class="col s12 m8 offset-m2 l4" style="margin-bottom:50px">
+                    <div class="white left-align" style="padding:10px">
+                        <ul>
+                        {% for obj in eigen_rollen %}
+                            <li>
+                                <label class="black-text" for="id_{{ obj.pk }}">
+                                    <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
+                                    <span>{{ obj.beschrijving }}{% if obj.ver_naam %}&nbsp;&nbsp;{{ obj.ver_naam }}{% endif %}</span>
+                                </label>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                        <p class="center">
+                            <a class="btn-nhb-rood" onclick="wissel_naar_rol()">Activeer</a>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- kaartjes -->
+                {% if url_login_as %}
+                    <div class="col s12 l8 xl6 offset-xl2">
+                        {% include 'plein/card.dtl' with title="Uitleg Rollen" text="De site bekijken als een andere gebruiker." icon="help" url=wiki_rollen extern_open=True %}
+                        {% include 'plein/card.dtl' with title="Account wissel" text="De site bekijken als een andere gebruiker." icon="switch_access_shortcut" url=url_login_as %}
+                    </div>
+                {% else %}
+                    <div class="col s12 l4 offset-l3">
+                        {% include 'plein/card.dtl' with title="Uitleg Rollen" text="De site bekijken als een andere gebruiker." icon="help" url=wiki_rollen extern_open=True %}
+                    </div>
+                {% endif %}
+            </div>
+
+        {% endif %}     <!-- show_eigen_rollen -->
+
+        {% if show_help_rollen or url_wissel_naar_sec %}
+
+            <!-- witruimte -->
+            <div class="row center">
+                <div class="col s12">
+                    <h4>Help anderen</h4>
                     <p>Vanuit je <i>huidige</i> rol heb je de mogelijkheid om andere beheerders te helpen door naar <b>hun rol</b> te wisselen.<br>Na het wisselen zie je de website precies zoals zij hem zien. Je kan altijd weer terug.</p>
-                    <p>De keuzes hieronder veranderen dus steeds, afhankelijk van je gekozen rol.<br>
+                    <p class="nhb-rood-text">
                             <!-- hierarchie -->
                         <span>De hi&euml;rarchie is BB</span>
                         <span style="position: relative; bottom: .15em;"> &rarr; </span>
@@ -111,36 +259,70 @@
                         <span style="position: relative; bottom: .15em;"> &rarr; </span>
                         <span>HWL</span>
                         <span style="position: relative; bottom: .15em;"> &rarr; </span>
-                        <span>WL.&nbsp;&nbsp;&nbsp;</span>
-                        <a class="btn-small btn-nhb-blauw" href="{{ wiki_rollen }}" target="_blank" rel="noopener noreferrer"><i class="material-icons-round white-text">help_outline</i></a>
+                        <span>WL.</span>
                     </p>
-                {% else %}
-                    <form method="post" action="{{ obj.url }}">
-                        {% csrf_token %}
-                        <input class="btn-nhb-blauw" type="submit" value="{{ obj.titel }}">
-                        {% if obj.ver_naam %}
-                            <span>&nbsp;&nbsp;{{ obj.ver_naam }}</span>
-                        {% endif %}
-                    </form>
-                {% endif %}
+                    <p>De keuzes hieronder veranderen dus steeds, afhankelijk van je huidige rol.</p>
+                </div>
             </div>
-        {% endfor %}
-    {% endif %}
 
-    {% if url_wissel_naar_sec %}
-        <div class="selectie-knoppen">
-            <a class="btn-nhb-blauw" href="{{ url_wissel_naar_sec }}">Secretaris</a><span>&nbsp;&nbsp;(extra keuzescherm)</span>
+            <!-- blauwe balk -->
+            <div class="row-nhb-blauw">
+
+                <!-- witte rechthoek met de radiobuttons -->
+                {% if show_help_rollen %}
+                    <div class="col s12 m10 offset-m1 {% if url_wissel_naar_sec %}l6{% else %}l8 offset-l3{% endif %}" style="margin-bottom:50px">
+                        <div class="white left-align" style="padding:10px">
+                            <ul>
+                            {% for obj in help_rollen %}
+                                <li>
+                                    <label class="black-text" for="id_{{ obj.pk }}">
+                                        <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
+                                        {% if obj.kort %}
+                                            <span>
+                                                <span class="hide-on-small-only">{{ obj.titel }}{% if obj.ver_naam %}&nbsp;&nbsp;{{ obj.ver_naam }}{% endif %}</span>
+                                                <span class="hide-unless-small">{{ obj.kort }}{% if obj.ver_naam %}&nbsp;&nbsp;{{ obj.ver_naam }}{% endif %}</span>
+                                            </span>
+                                        {% else %}
+                                            <span>{{ obj.titel }}{% if obj.ver_naam %}&nbsp;&nbsp;{{ obj.ver_naam }}{% endif %}</span>
+                                        {% endif %}
+                                    </label>
+                                </li>
+                            {% endfor %}
+                            </ul>
+                            <p class="center">
+                                <a class="btn-nhb-rood" onclick="wissel_naar_rol()">Activeer</a>
+                            </p>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if url_wissel_naar_sec %}
+                    <div class="col s12{% if show_help_rollen %} l6{% endif %}">
+                        {% include 'plein/card.dtl' with title="Secretaris" text="Wordt secretaris van een van de verenigingen." icon="help" url=url_wissel_naar_sec %}
+                    </div>
+                {% endif %}
+          </div>
+
+       {% endif %}     <!-- show_help_rollen -->
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Hanteren persoons<wbr>gegevens</h4>
+                <p>Je hebt de verklaring hanteren persoonsgegevens afgegeven op {{ vhpg.acceptatie_datum|date:"j F Y" }}.</p>
+            </div>
         </div>
-    {% endif %}
 
-    {% if not show_vhpg %}
+        <!-- blauwe balk -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+                {% url 'Functie:vhpg-afspraken' as card_url %}
+                {% include 'plein/card.dtl' with title="Afspraken inzien" text="Bekijk de genaakte afspraken over het omgaan met persoonsgegevens." icon="gavel" url=card_url %}
+            </div>
+        </div>
 
-        <p>&nbsp;</p>
-        <h5>Hanteren persoons<wbr>gegevens</h5>
+    {% endif %}         <!-- volwaardig beheerder -->
 
-        <p>Je hebt de verklaring hanteren persoonsgegevens afgegeven op {{ vhpg.acceptatie_datum|date:"j F Y" }}.</p>
-        <p><a class="btn-nhb-blauw" href="{% url 'Functie:vhpg-afspraken' %}"><i class="material-icons-round left">remove_red_eye</i>Afspraken inzien</a></p>
-
-    {% endif %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wissel-van-rol" %}
 
 {% endblock %}

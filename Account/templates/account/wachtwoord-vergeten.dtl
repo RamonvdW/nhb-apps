@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,55 +10,52 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-wachtwoord-vergeten" %}
-
-    <h4>Wachtwoord vergeten</h4>
-
-    <p>Heb je eerder een account aangemaakt en weet je nu je wachtwoord niet meer?</p>
-
-    <div class="container z-depth-2 white">
-
-        <div class="row nhb-blauw white-text">
-            <div class="col s12 center-align">
-                <h5>Wachtwoord vergeten</h5>
-                <p>Voor een bestaand account</p>
-            </div>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Wachtwoord vergeten</h3>
+            <p>Heb je eerder een account aangemaakt en weet je nu je wachtwoord niet meer?</p>
         </div>
+    </div>
 
-        <div class="row"><div class="col s12">
-            <p>Vul je NHB nummer en e-mailadres in, dan sturen we een e-mail waarmee je een nieuw wachtwoord in kan stellen.</p>
-        </div></div>
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl6 offset-xl3 white z-depth-3">
 
-        <div class="row">
-            <form class="col s12" action="{% url 'Account:wachtwoord-vergeten' %}" method="post">
-                {% csrf_token %}
+            <!-- dialoog venster -->
+            <div style="margin:50px 30px 30px 30px" class="left-align">
+                <form action="{% url 'Account:wachtwoord-vergeten' %}" method="post">
+                    {% csrf_token %}
 
-                <div class="row"><div class="input-field col s12">
-                    <label class="black-text" for="id_lid_nr">Bondsnummer:</label>
-                    <input class="with-gap" autofocus type="text" name="lid_nr" minlength="6" maxlength="6" value="" required id="id_lid_nr">
-                </div></div>
+                    {% if foutmelding %}
+                        <p class="red-text">Fout: {{ foutmelding }}</p>
+                    {% else %}
+                        <p>Vul je NHB nummer en e-mailadres in, dan sturen we een e-mail waarmee je een nieuw wachtwoord in kan stellen.</p>
+                    {% endif %}
 
-                <div class="row"><div class="input-field col s12">
-                    <label class="black-text" for="id_email">E-mailadres:</label>
-                    <input class="with-gap" type="email" name="email" value="" required id="id_email" autocomplete="email">
-                </div></div>
+                    <p>&nbsp;</p>
 
-                {% if foutmelding %}
-                    <div class="row"><div class="col s12">
-                        <span class="red-text">Fout: {{ foutmelding }}</span>
-                    </div></div>
-                {% endif %}
-
-                <div class="row"><div class="col s12">
-                    <div class="center-align">
-                        <button class="btn-nhb-blauw" type="submit">
-                            <i class="material-icons-round left">email</i>Verstuur e-mail</button>
+                    <div class="input-field">
+                        <label class="black-text" for="id_lid_nr">Bondsnummer:</label>
+                        <input class="with-gap" autofocus type="text" name="lid_nr" minlength="6" maxlength="6" value="" required id="id_lid_nr">
                     </div>
-                </div></div>
 
-            </form>
+                    <div class="input-field">
+                        <label class="black-text" for="id_email">E-mailadres:</label>
+                        <input class="with-gap" type="email" name="email" value="" required id="id_email" autocomplete="email">
+                    </div>
+
+                    <p class="center-align">
+                        <button class="btn-nhb-rood" type="submit">
+                            <i class="material-icons-round left">email</i>Verstuur e-mail</button>
+                    </p>
+
+                </form>
+            </div>
 
         </div>
     </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="account-wachtwoord-vergeten" %}
 
 {% endblock %}

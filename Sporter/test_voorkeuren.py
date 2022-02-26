@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -84,9 +84,9 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.boog_R = BoogType.objects.get(afkorting='R')
 
     def test_view(self):
-        # zonder login --> terug naar het plein
+        # zonder login
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_voorkeuren, follow=True)
+            resp = self.client.get(self.url_voorkeuren)
         self.assert403(resp)
 
         # met sporter-login wel toegankelijk
@@ -102,13 +102,13 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('sporter/voorkeuren.dtl', 'plein/site_layout.dtl'))
 
         # na bekijken voorkeuren zijn ze aangemaakt
-        self.assertEqual(SporterBoog.objects.count(), 5)
+        self.assertEqual(SporterBoog.objects.count(), 6)
 
         # controleer dat ze niet nog een keer aangemaakt worden
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertEqual(SporterBoog.objects.count(), 5)
+        self.assertEqual(SporterBoog.objects.count(), 6)
 
         obj = SporterBoog.objects.get(sporter=self.sporter1, boogtype=self.boog_R)
         self.assertTrue(obj.heeft_interesse)
@@ -120,7 +120,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
                                                           'info_BB': 'on',
                                                           'voorkeur_eigen_blazoen': 'on'})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
-        self.assertEqual(SporterBoog.objects.count(), 5)
+        self.assertEqual(SporterBoog.objects.count(), 6)
         self.assertEqual(SporterVoorkeuren.objects.count(), 1)
 
         obj = SporterBoog.objects.get(sporter=self.sporter1, boogtype=self.boog_R)

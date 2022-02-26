@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -141,13 +141,13 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=10,
+                                              team__volgorde=15,        # Rec ERE
                                               is_voor_teams_rk_bk=False)
         klasse.min_ag = 29.0
         klasse.save()
 
         klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=11,
+                                              team__volgorde=16,        # Rec A
                                               is_voor_teams_rk_bk=False)
         klasse.min_ag = 25.0
         klasse.save()
@@ -217,7 +217,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
         teamtype_r = TeamType.objects.get(afkorting='R')
         klasse_r_ere = CompetitieKlasse.objects.get(
                                     competitie=deelcomp.competitie,
-                                    team__volgorde=10,
+                                    team__volgorde=15,                # Rec ERE
                                     is_voor_teams_rk_bk=False)        # zie WKL_TEAM in BasisTypen migrations
 
         team1 = RegiocompetitieTeam(
@@ -271,7 +271,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
         team_r = TeamType.objects.get(afkorting='R')
         klasse_r_ere = CompetitieKlasse.objects.get(
                                     competitie=self.comp_18,
-                                    team__volgorde=10,
+                                    team__volgorde=15,      # Rec ERE
                                     is_voor_teams_rk_bk=False)
         # create two complete teams
         RegiocompetitieTeam(
@@ -477,7 +477,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
         self.client.post(url, {'snel': 1})
         self.client.post(url, {'snel': 1})
 
-        self._verwerk_mutaties(51, show_warnings=False)
+        self._verwerk_mutaties(54, show_warnings=False)
 
         self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
@@ -505,7 +505,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
-        self._verwerk_mutaties(39)
+        self._verwerk_mutaties(42)
 
         self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 2)
@@ -528,7 +528,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
-        self._verwerk_mutaties(39)
+        self._verwerk_mutaties(42)
 
         self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 3)
@@ -557,7 +557,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
 
-        self._verwerk_mutaties(39)
+        self._verwerk_mutaties(40)
 
         self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
@@ -590,7 +590,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
-        self._verwerk_mutaties(39)
+        self._verwerk_mutaties(42)
 
         self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 2)
@@ -623,7 +623,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
 
-        self._verwerk_mutaties(39)
+        self._verwerk_mutaties(40)
 
         self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 1)
@@ -651,7 +651,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.deelcomp_regio112_18.competitie.pk)
-        self._verwerk_mutaties(39)
+        self._verwerk_mutaties(42)
 
         self.deelcomp_regio112_18 = DeelCompetitie.objects.get(pk=self.deelcomp_regio112_18.pk)
         self.assertEqual(self.deelcomp_regio112_18.huidige_team_ronde, 2)

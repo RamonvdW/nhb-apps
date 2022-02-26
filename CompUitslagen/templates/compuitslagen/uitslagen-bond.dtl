@@ -10,14 +10,17 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-bond" %}
 
-    <h4>Uitslagen bonds<wbr>kampioenschappen</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Uitslagen BK</h3>
+            <p>Tussenstand/eindstand van de bonds<wbr>kampioenschappen</p>
+            <br>
+            <p><i>Dit deel van de site is nog niet af</i></p>
+        </div>
+    </div>
 
-    <p>Dit deel van de site is nog niet af.</p>
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-uitslagen-bond" %}
 
-{% endblock %}
-
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}

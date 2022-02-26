@@ -1,104 +1,117 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
+{% load overig_filters %}       <!-- wbr_dagdeel filter -->
 
-{% block title %}Aanmeldingen{% endblock %}
+{% block title %}Benodigde dagdelen{% endblock %}
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-inschrijfmethode3-behoefte" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Benodigde dagdelen</h3>
+            <p>Behoefte voor de regiocompetitie <b>{{ competitie.beschrijving }}</b> voor <b>{{ regio }}</b></p>
+            <p>Je kan onderstaande lijst ook downloaden:</p>
+            <a class="btn-nhb-rood" href="{{ url_download }}">
+                <i class="material-icons-round left">download</i>Download lijst</a>
+        </div>
+    </div>
 
-    <h4>Behoefte dagdelen</h4>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Behoefte</h4>
+            <p>Aantal sporters per dagdeel en blazoen type</p>
+        </div>
+    </div>
 
-    <p>Op deze pagina tonen we de behoefte voor de regiocompetitie <b>{{ competitie.beschrijving }}</b> voor <b>{{ regio }}</b>.</p>
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Ver<span class="hide-on-small-only">eniging</span></th>
+                        <th>Blazoen</th>
 
-    <p>Je kan onderstaande lijst ook downloaden:</p>
-    <a class="btn-nhb-blauw" href="{{ url_download }}">
-        <i class="material-icons-round left">download</i>Download lijst</a>
-    <p>&nbsp;</p>
+                        {% for beschrijving in dagdelen %}
+                            <th class="center">{{ beschrijving|wbr_dagdeel }}</th>
+                        {% endfor %}
 
-    <h5>Dagdeel behoefte:</h5>
+                        <th class="center">Totaal</th>
+                    </tr>
+                </thead>
 
-    <table class="white">
-        <thead>
-            <tr>
-                <th>Vereniging</th>
-                <th>Blazoen</th>
-
-                {% for beschrijving in dagdelen %}
-                    <th class="center-align">{{ beschrijving }}</th>
+                {% for ver in regio_verenigingen %}
+                    <tr>
+                        <td>[{{ ver.ver_nr }}]<span class="hide-on-small-only"> {{ ver.naam }}</span></td>
+                        <td><!-- blazoen --></td>
+                        <td colspan="{{ dagdelen|length }}"></td>
+                    </tr>
+                    {% for blazoen_str, counts_list in ver.blazoen_list %}
+                        <tr>
+                            <td><!-- vereniging --></td>
+                            <td>{{ blazoen_str }}</td>
+                            {% for count in counts_list %}
+                                <td class="center">{{ count }}</td>
+                            {% endfor %}
+                            <td><!-- totaal --></td>
+                        </tr>
+                    {% endfor %}
                 {% endfor %}
 
-                <th class="center-align">Totaal</th>
-            </tr>
-        </thead>
-
-        {% for nhb_ver in regio_verenigingen %}
-            <tr>
-                <td>{{ nhb_ver }}</td>  <!-- geeft [ver_nr] naam -->
-                <td><!-- blazoen --></td>
-                <td colspan="{{ dagdelen|length }}"></td>
-            </tr>
-            {% for blazoen_str, counts_list in nhb_ver.blazoen_list %}
                 <tr>
                     <td><!-- vereniging --></td>
-                    <td>{{ blazoen_str }}</td>
-                    {% for count in counts_list %}
-                        <td class="center-align">{{ count }}</td>
+                    <td class="right-align"><b>Totalen:</b></td>
+                    {% for count in totalen %}
+                        <td class="center"><b>{{ count }}</b></td>
                     {% endfor %}
                 </tr>
-            {% endfor %}
-        {% endfor %}
-
-        <tr>
-            <td><!-- vereniging --></td>
-            <td class="right-align"><b>Totalen:</b></td>
-            {% for count in totalen %}
-                <td class="center-align"><b>{{ count }}</b></td>
-            {% endfor %}
-        </tr>
+            </table>
+        </div>
+    </div>
 
 
-        <!-- Aantal sporters per blazoen -->
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Totalen</h4>
+        </div>
+    </div>
 
-        <tr class="nhb-grijs">
-            <td colspan="{{ dagdelen|length }}">
-                <p>&nbsp;</p>
-                <h5>Aantal sporters per blazoen type:</h5>
-            </td>
-            <td colspan="3"></td>
-        </tr>
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Type blazoen</th>
 
-        <!-- thead -->
-            <tr>
-                <th><!-- vereniging naam --></th>
-                <th>Type blazoen</th>
+                        {% for beschrijving in dagdelen %}
+                            <th class="center">{{ beschrijving|wbr_dagdeel }}</th>
+                        {% endfor %}
 
-                {% for beschrijving in dagdelen %}
-                    <th class="center-align">{{ beschrijving }}</th>
+                        <th class="center">Totaal</th>
+                    </tr>
+                </thead>
+
+                {% for blazoen_str, kolommen in blazoen_count %}
+                    <tr>
+                        <td>{{ blazoen_str }}</td>
+                        {% for kolom in kolommen %}
+                            <td class="center">{{ kolom }}</td>
+                        {% endfor %}
+                    </tr>
                 {% endfor %}
+            </table>
+        </div>
+    </div>
 
-                <th class="center-align">Totaal</th>
-            </tr>
-        <!-- /thead -->
+    {% include 'feedback/sidebar.dtl' with op_pagina="compinschrijven-inschrijfmethode3-behoefte" %}
 
-        {% for blazoen_str, kolommen in blazoen_count %}
-            <tr>
-                <td><!-- vereniging naam --></td>
-                <td>{{ blazoen_str }}</td>
-                {% for kolom in kolommen %}
-                    <td class="center-align">{{ kolom }}</td>
-                {% endfor %}
-            </tr>
-        {% endfor %}
-    </table>
-
-{% endblock %}
-
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}

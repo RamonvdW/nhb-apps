@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -133,7 +133,11 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
         else:
             context['niet_gevonden'] = True
 
-        menu_dynamics(self.request, context, actief='hetplein')
+        context['kruimels'] = (
+            (None, 'Score geschiedenis'),
+        )
+
+        menu_dynamics(self.request, context)
         return render(request, self.template, context)
 
 

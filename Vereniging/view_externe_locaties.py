@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -73,7 +73,12 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
                                                  'locatie_pk': locatie.pk})
         # for
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (None, 'Wedstrijdlocaties')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -88,9 +93,10 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
         locatie.save()
         locatie.verenigingen.add(ver)
 
-        # terug naar de lijst
-        url = reverse('Vereniging:externe-locaties',
-                      kwargs={'vereniging_pk': ver.pk})
+        # meteen wijzigen
+        url = reverse('Vereniging:locatie-details',
+                      kwargs={'vereniging_pk': ver.pk,
+                              'locatie_pk': locatie.pk})
 
         return HttpResponseRedirect(url)
 
@@ -172,7 +178,13 @@ class ExterneLocatieDetailsView(TemplateView):
         context['url_terug'] = reverse('Vereniging:externe-locaties',
                                        kwargs={'vereniging_pk': ver.pk})
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Vereniging:externe-locaties', kwargs={'vereniging_pk': ver.pk}), 'Wedstrijdlocaties'),
+            (None, 'Locatie details')
+        )
+
+        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):

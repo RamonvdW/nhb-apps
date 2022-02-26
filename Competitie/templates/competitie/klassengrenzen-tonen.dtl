@@ -10,48 +10,49 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="klassengrenzen-tonen" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Klassen bondscompetitie</h3>
+            <p>voor de <b>{{ comp.beschrijving }}</b></p>
+            {% if not comp.klassengrenzen_vastgesteld %}
+                <p>De klassengrenzen zijn nog niet vastgesteld.</p>
+            {% else %}
+                <p>Hieronder staan de wedstrijdklassen, vastgestelde klassengrenzen en te gebruiken blazoenen, voor individuele sporters en teams.</p>
+            {% endif %}
+        </div>
+    </div>
 
-    <h4>Klassen bondscompetitie</h4>
+    {% if comp.klassengrenzen_vastgesteld %}
 
-    {% if not comp.klassengrenzen_vastgesteld %}
+        <!-- individuele klassen -->
 
-        <p>De klassengrenzen voor de <b>{{ comp.beschrijving }}</b> zijn nog niet vastgesteld.</p>
-
-    {% else %}
-
-        <p>Hieronder staan de wedstrijdklassen, vastgestelde klassengrenzen en te gebruiken blazoenen, voor individuele sporters en teams, voor de <b>{{ comp.beschrijving }}</b>.</p>
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h5>Wedstrijdklassen individuele competitie</h5>
+                <p>(Regio + RK + BK)</p>
+            </div>
+        </div>
 
         <table class="white">
-
-            <!-- individuele klassen -->
-
-            <tr class="nhb-grijs">
-                <td colspan="{% if toon_aantal %}3{% else %}2{% endif %}">
-                    <h5>Wedstrijdklassen individuele competitie (Regio + RK + BK)</h5>
-                </td>
-                <td colspan="2" class="hide-on-small-only"></td>
-            </tr>
-
-            <tr>
+            <tr class="row-nhb-blauw">
+                <td class="nhb-table-zijrand" rowspan="{{ aantal_indiv_regels }}"></td>
                 <th>Materiaalklasse</th>
-                <th>Minimaal aanvangs<wbr>gemiddelde</th>
+                <th class="center">Minimaal aanvangs<wbr>gemiddelde</th>
                 {% if toon_aantal %}
                     <th>Aantal deelnemers</th>
                 {% endif %}
                 <th class="hide-on-small-only">Blazoen regio</th>
                 <th class="hide-on-small-only">Blazoen RK/BK</th>
+                <td class="nhb-table-zijrand" rowspan="{{ aantal_indiv_regels }}"></td>
             </tr>
 
             {% for klasse in indiv_klassen %}
                 <tr>
                     <td>{{ klasse.indiv.beschrijving }}</td>
 
-                    {% if klasse.min_ag_str %}
-                        <td>{{ klasse.min_ag_str }}</td>
-                    {% else %}
-                        <td><i class="grey-text">n.v.t.</i></td>
-                    {% endif %}
+                    <td class="center">{% if klasse.min_ag_str %}{{ klasse.min_ag_str }}{% else %}<i class="grey-text">n.v.t.</i>{% endif %}</td>
 
                     {% if toon_aantal %}
                         <td>{{ klasse.aantal }}</td>
@@ -62,23 +63,37 @@
                 </tr>
             {% endfor %}
 
-            <!-- Team wedstrijdklassen regio -->
-
-            <tr class="nhb-grijs">
-                <td colspan="{% if toon_aantal %}3{% else %}2{% endif %}">
-                    <h5>Wedstrijdklassen teamcompetitie (regio)</h5>
-                </td>
-                <td colspan="2" class="hide-on-small-only"></td>
-            </tr>
-
+            <!-- blauwe onderrand -->
             <tr>
+                <td colspan="2"  class="nhb-table-onderrand"></td>
+                {% if toon_aantal %}
+                    <td  class="nhb-table-onderrand"></td>
+                {% endif %}
+                <td colspan="2" class="hide-on-small-only nhb-table-onderrand"></td>
+            </tr>
+        </table>
+
+
+        <!-- Team wedstrijdklassen regio -->
+
+        <!-- witruimte -->
+        <div class="row center" style="margin-top:50px">
+            <div class="col s12">
+                <h5>Wedstrijdklassen regiocompetitie teams</h5>
+            </div>
+        </div>
+
+        <table class="white">
+            <tr class="row-nhb-blauw">
+                <td class="nhb-table-zijrand" rowspan="{{ aantal_team_regels }}"></td>
                 <th>Materiaalklasse</th>
-                <th>Minimale team<wbr>sterkte</th>
+                <th class="center">Minimale team<wbr>sterkte</th>
                 {% if toon_aantal %}
                     <th></th>
                 {% endif %}
                 <th class="hide-on-small-only">Blazoen regio</th>
                 <th class="hide-on-small-only">Blazoen RK/BK</th>
+                <td class="nhb-table-zijrand" rowspan="{{ aantal_team_regels }}"></td>
             </tr>
 
             {% for klasse in team_klassen %}
@@ -86,11 +101,7 @@
                     <tr>
                         <td>{{ klasse.team.beschrijving }}</td>
 
-                        {% if klasse.min_ag_str %}
-                            <td>{{ klasse.min_ag_str }}</td>
-                        {% else %}
-                            <td><i class="grey-text">n.v.t.</i></td>
-                        {% endif %}
+                        <td class="center">{% if klasse.min_ag_str %}{{ klasse.min_ag_str }}{% else %}<i class="grey-text">n.v.t.</i>{% endif %}</td>
 
                         {% if toon_aantal %}
                             <td></td>
@@ -102,23 +113,40 @@
                 {% endif %}
             {% endfor %}
 
-            <!-- Wedstrijdklassen RK/BK teams -->
-
-            <tr class="nhb-grijs">
-                <td colspan="{% if toon_aantal %}3{% else %}2{% endif %}">
-                    <h5>Wedstrijdklassen RK teams en BK teams</h5>
-                </td>
-                <td colspan="2" class="hide-on-small-only"></td>
+            <!-- blauwe onderrand -->
+            <tr>
+                <td colspan="2"  class="nhb-table-onderrand"></td>
+                {% if toon_aantal %}
+                    <td  class="nhb-table-onderrand"></td>
+                {% endif %}
+                <td colspan="2" class="hide-on-small-only nhb-table-onderrand"></td>
             </tr>
 
-            <tr>
+        </table>
+
+        <p class="center">Teamsterkte = Som van de aanvangsgemiddelden van de 3 beste sporters van het team, vermenigvuldigd met {{ aantal_pijlen }}.</p>
+
+
+        <!-- Wedstrijdklassen RK/BK teams -->
+
+        <!-- witruimte -->
+        <div class="row center" style="margin-top:50px">
+            <div class="col s12">
+                <h5>Wedstrijdklassen RK teams en BK teams</h5>
+            </div>
+        </div>
+
+        <table class="white">
+            <tr class="row-nhb-blauw">
+                <td class="nhb-table-zijrand" rowspan="{{ aantal_team_rk_bk_regels }}"></td>
                 <th>Materiaalklasse</th>
-                <th>Minimale team<wbr>sterkte</th>
+                <th class="center">Minimale team<wbr>sterkte</th>
                 {% if toon_aantal %}
                     <th></th>
                 {% endif %}
                 <th class="hide-on-small-only"></th>
                 <th class="hide-on-small-only">Blazoen RK/BK</th>
+                <td class="nhb-table-zijrand" rowspan="{{ aantal_team_rk_bk_regels }}"></td>
             </tr>
 
             {% for klasse in team_klassen %}
@@ -126,15 +154,15 @@
                     <tr>
                         <td>{{ klasse.team.beschrijving }}</td>
 
-                        {% if klasse.min_ag_str %}
-                            <td>{{ klasse.min_ag_str }}</td>
-                        {% else %}
+
+                        <td class="center">{% if klasse.min_ag_str %}{{ klasse.min_ag_str }}{% else %}
                             {% if rk_bk_klassen_vastgesteld %}
-                                <td><i class="grey-text">n.v.t.</i></td>
+                                <i class="grey-text">n.v.t.</i>
                             {% else %}
-                                <td><i class="grey-text">Nog niet vastgesteld</i></td>
+                                <i class="grey-text">Nog niet vastgesteld</i>
                             {% endif %}
                         {% endif %}
+                        </td>
 
                         {% if toon_aantal %}
                             <td></td>
@@ -145,13 +173,22 @@
                     </tr>
                 {% endif %}
             {% endfor %}
+
+            <!-- blauwe onderrand -->
+            <tr>
+                <td colspan="2"  class="nhb-table-onderrand"></td>
+                {% if toon_aantal %}
+                    <td  class="nhb-table-onderrand"></td>
+                {% endif %}
+                <td colspan="2" class="hide-on-small-only nhb-table-onderrand"></td>
+            </tr>
+
         </table>
 
-        <p>Teamsterkte = Som van de aanvangsgemiddelden van de 3 beste sporters van het team, vermenigvuldigd met {{ aantal_pijlen }}.</p>
+        <p class="center">Teamsterkte = Som van de aanvangsgemiddelden van de 3 beste sporters van het team, vermenigvuldigd met {{ aantal_pijlen }}.</p>
+
     {% endif %}
 
-{% endblock %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="klassengrenzen-tonen" %}
 
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}

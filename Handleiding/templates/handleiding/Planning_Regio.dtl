@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,13 +9,22 @@
 
 {% block pagina %}
 
-    <div class="white" style="padding:10px 30px 10px 30px">
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Planning Regio</h3>
+        </div>
+    </div>
 
-        <h4>Planning Regio</h4>
 
-        <p>De planning voor de regio wordt gemaakt door de RCL (in overleg met de HWL's van de verenigingen in de regio) en bestaat uit minimaal 7 rondes.</p>
-        <p>Elke ronde valt in een te kiezen weeknummer en heeft een beschrijving.</p>
-        <p>Voorbeeld:</p>
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+
+                <p>De planning voor de regio wordt gemaakt door de RCL (in overleg met de HWL's van de verenigingen in de regio) en bestaat uit minimaal 7 rondes.</p>
+                <p>Elke ronde valt in een te kiezen weeknummer en heeft een beschrijving.</p>
+                <p>Voorbeeld:</p>
 <pre class="handleiding_code"> wk37: ronde 1
  wk39: ronde 2
  wk41: ronde 3
@@ -27,9 +36,9 @@
  wk50: ronde 7
 </pre>
 
-        <p>Elke ronde bestaat uit een aantal wedstrijden bij verenigingen.</p>
-        <p>Voorbeeld:</p>
-        <pre class="handleiding_code"> ronde 1
+                <p>Elke ronde bestaat uit een aantal wedstrijden bij verenigingen.</p>
+                <p>Voorbeeld:</p>
+                <pre class="handleiding_code"> ronde 1
  -------
  maandag   20:00 Zwartmikkers
  dinsdag   19:30 Blauwmikker
@@ -39,8 +48,8 @@
  zondag    14:00 Blauwmikkers
 </pre>
 
-        <p>Er zijn ook regio's waar een hele ronde naar 1 vereniging gaat:</p>
-        <pre class="handleiding_code"> ronde 1
+                <p>Er zijn ook regio's waar een hele ronde naar 1 vereniging gaat:</p>
+                <pre class="handleiding_code"> ronde 1
  -------
  maandag   19:00 Witmissers
  dinsdag   19:00 Witmissers
@@ -50,18 +59,16 @@
  zondag    10:00 Witmissers
 </pre>
 
-        <p>Indien de regio gebruikt maakt van clusters, dan heeft elk cluster een eigen planning. Daarnaast kan de regio ook nog een eigen planning hebben, bijvoorbeeld voor verenigingen die niet bij een cluster horen, of gewoon om sporters een extra schietmogelijkheid te geven.</p>
+                <p>Indien de regio gebruikt maakt van clusters, dan heeft elk cluster een eigen planning. Daarnaast kan de regio ook nog een eigen planning hebben, bijvoorbeeld voor verenigingen die niet bij een cluster horen, of gewoon om sporters een extra schietmogelijkheid te geven.</p>
 
-        <p>&nbsp;</p>
-        <hr>
-        <h5>Verder</h5>
-        <p>Terug naar de <a class="btn-nhb-blauw" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
-        <p><a class="btn-nhb-blauw" href="/handleiding/Inschrijfmethodes_Regiocompetitie/">Inschrijfmethodes Regiocompetitie</a></p>
+                <p>&nbsp;</p>
+                <hr>
+                <h5>Verder</h5>
+                <p>Terug naar de <a class="btn-nhb-rood" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
+                <p><a class="btn-nhb-rood" href="/handleiding/Inschrijfmethodes_Regiocompetitie/">Inschrijfmethodes Regiocompetitie</a></p>
 
+            </div>
+        </div>
     </div>
 
-{% endblock %}
-
-{% block menu %}
-    {% include 'handleiding/menu.dtl' %}
 {% endblock %}

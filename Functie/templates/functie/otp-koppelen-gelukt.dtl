@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,14 +10,18 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="otp-koppelen-gelukt" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Gelukt!</h3>
+            <p>Het koppelen van de tweede factor is gelukt.</p>
+            <p>Naast de inlog met gebruikersnaam en wachtwoord vraagt deze website vanaf nu bij een rol wissel ook om de tweede-factor code.</p>
+            <p>
+                <a class="btn-nhb-rood" href="{% url 'Functie:wissel-van-rol' %}">Wissel van rol</a>
+            </p>
+        </div>
+    </div>
 
-    <h4>Gelukt!</h4>
-
-    <p>Het koppelen van de tweede factor is gelukt.</p>
-
-    <p>Naast de inlog met gebruikersnaam en wachtwoord vraagt deze website vanaf nu bij een rol wissel ook om de tweede-factor code.</p>
-
-    <p><a class="btn-nhb-blauw" href="{% url 'Functie:wissel-van-rol' %}">Wissel van rol</a></p>
+    {% include 'feedback/sidebar.dtl' with op_pagina="otp-koppelen-gelukt" %}
 
 {% endblock %}

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -62,58 +62,62 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         now = timezone.localtime(now)  # convert to active timezone (say Europe/Amsterdam)
         huidige_jaar = now.year
 
-        # aspirant
+        # check de 5 persoonlijke indicaties: -1 t/m +3 jaar ronde de huidige leeftijd
+
+        # onder 12 / aspirant
         tup = bereken_leeftijdsklassen(huidige_jaar - 9)
         self.assertEqual(tup, (huidige_jaar,
                                9,
-                               ['Aspirant', 'Aspirant', 'Aspirant', 'Aspirant', 'Aspirant'],
-                               ['Aspiranten <11 jaar', 'Aspiranten <11 jaar', 'Aspiranten <11 jaar', 'Aspiranten 11-12 jaar', 'Aspiranten 11-12 jaar'],
-                               'Aspirant'))
+                               # wedstrijden
+                               ['Onder 12', 'Onder 12', 'Onder 12', 'Onder 12', 'Onder 14'],
+                               # competitie (1 jaar opgeschoven)
+                               ['Onder 12 (aspiranten)', 'Onder 12 (aspiranten)', 'Onder 12 (aspiranten)', 'Onder 14 (aspiranten)', 'Onder 14 (aspiranten)'],
+                               'Onder 12'))
 
-        # cadet (14..17)
+        # onder 18 / cadet (14..17)
         tup = bereken_leeftijdsklassen(huidige_jaar - 13)
         self.assertEqual(tup, (huidige_jaar,
                                13,
-                               ['Aspirant', 'Aspirant', 'Cadet', 'Cadet', 'Cadet'],
-                               ['Aspiranten 11-12 jaar', 'Cadetten', 'Cadetten', 'Cadetten', 'Cadetten'],
-                               'Cadet'))
+                               ['Onder 14', 'Onder 14', 'Onder 18', 'Onder 18', 'Onder 18'],
+                               ['Onder 14 (aspiranten)', 'Onder 18 (cadetten)', 'Onder 18 (cadetten)', 'Onder 18 (cadetten)', 'Onder 18 (cadetten)'],
+                               'Onder 18'))
 
         # junior (18..20)
         tup = bereken_leeftijdsklassen(huidige_jaar - 18)
         self.assertEqual(tup, (huidige_jaar,
                                18,
-                               ['Cadet', 'Junior', 'Junior', 'Junior', 'Senior'],
-                               ['Junioren', 'Junioren', 'Junioren', 'Senioren', 'Senioren'],
-                               'Junior'))
+                               ['Onder 18', 'Onder 21', 'Onder 21', 'Onder 21', '21+'],
+                               ['Onder 21 (junioren)', 'Onder 21 (junioren)', 'Onder 21 (junioren)', '21+ (senioren)', '21+ (senioren)'],
+                               'Onder 21'))
 
         # senior
         tup = bereken_leeftijdsklassen(huidige_jaar - 21)
         self.assertEqual(tup, (huidige_jaar,
                                21,
-                               ['Junior', 'Senior', 'Senior', 'Senior', 'Senior'],
-                               ['Senioren', 'Senioren', 'Senioren', 'Senioren', 'Senioren'],
-                               'Senior'))
+                               ['Onder 21', '21+', '21+', '21+', '21+'],
+                               ['21+ (senioren)', '21+ (senioren)', '21+ (senioren)', '21+ (senioren)', '21+ (senioren)'],
+                               '21+'))
 
         # master
         tup = bereken_leeftijdsklassen(huidige_jaar - 50)
         self.assertEqual(tup, (huidige_jaar,
                                50,
-                               ['Senior', 'Master', 'Master', 'Master', 'Master'],
-                               ['Senioren', 'Senioren', 'Senioren', 'Senioren', 'Senioren'],
-                               'Senior'))
+                               ['21+', '50+', '50+', '50+', '50+'],
+                               ['21+ (senioren)', '21+ (senioren)', '21+ (senioren)', '21+ (senioren)', '21+ (senioren)'],
+                               '21+'))
 
         # veteraan
         tup = bereken_leeftijdsklassen(huidige_jaar - 60)
         self.assertEqual(tup, (huidige_jaar,
                                60,
-                               ['Master', 'Veteraan', 'Veteraan', 'Veteraan', 'Veteraan'],
-                               ['Senioren', 'Senioren', 'Senioren', 'Senioren', 'Senioren'],
-                               'Senior'))
+                               ['50+', '60+', '60+', '60+', '60+'],
+                               ['21+ (senioren)', '21+ (senioren)', '21+ (senioren)', '21+ (senioren)', '21+ (senioren)'],
+                               '21+'))
 
     def test_view(self):
         # zonder login
         with self.assert_max_queries(20):
-            resp = self.client.get('/sporter/leeftijdsklassen/', follow=True)
+            resp = self.client.get('/sporter/leeftijdsklassen/')
         self.assert403(resp)
 
         # inlog, geen NHB lid

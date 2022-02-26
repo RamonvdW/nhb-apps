@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -133,8 +133,6 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
         context['toon_details'] = True
         context['toon_ledental'] = self.is_staff
 
-        menu_actief = 'hetplein'
-
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
         context['landelijk'] = self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO)
@@ -148,8 +146,6 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
         if self.rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_SEC):
             context['toon_rayon'] = False
             context['toon_regio'] = False
-            if self.rol_nu == Rollen.ROL_HWL:
-                menu_actief = 'vereniging'
 
         context['verenigingen'] = verenigingen = self._get_verenigingen()
 
@@ -181,7 +177,11 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
                     nhbver.cluster_letters = str(nhbver.regio.regio_nr) + nhbver.cluster_letters
         # for
 
-        menu_dynamics(self.request, context, actief=menu_actief)
+        context['kruimels'] = (
+            (None, 'Verenigingen'),
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -249,7 +249,12 @@ class GeenBeheerdersView(UserPassesTestMixin, TemplateView):
                 ver.nr_geen_beheerders = len(geen_beheerders)
         # for
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        context['kruimels'] = (
+            (reverse('Vereniging:lijst-verenigingen'), 'Verenigingen'),
+            (None, 'Zonder beheerders')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 

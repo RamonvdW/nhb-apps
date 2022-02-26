@@ -4,11 +4,11 @@
 #
 #    pip-compile requirements_test.in
 #
-asgiref==3.4.1
+asgiref==3.5.0
     # via
     #   -r requirements.txt
     #   django
-cachetools==4.2.4
+cachetools==5.0.0
     # via
     #   -r requirements.txt
     #   google-auth
@@ -16,23 +16,23 @@ certifi==2021.10.8
     # via
     #   -r requirements.txt
     #   requests
-charset-normalizer==2.0.9
+charset-normalizer==2.0.12
     # via
     #   -r requirements.txt
     #   requests
-django==3.2.11
+django==3.2.12
     # via -r requirements.txt
 et-xmlfile==1.1.0
     # via
     #   -r requirements.txt
     #   openpyxl
-google-api-core==2.3.2
+google-api-core==2.5.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.33.0
+google-api-python-client==2.38.0
     # via -r requirements.txt
-google-auth==2.3.3
+google-auth==2.6.0
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -42,11 +42,11 @@ google-auth-httplib2==0.1.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-googleapis-common-protos==1.54.0
+googleapis-common-protos==1.55.0
     # via
     #   -r requirements.txt
     #   google-api-core
-httplib2==0.20.2
+httplib2==0.20.4
     # via
     #   -r requirements.txt
     #   google-api-python-client
@@ -57,7 +57,7 @@ idna==3.3
     #   requests
 openpyxl==3.0.9
     # via -r requirements.txt
-protobuf==3.19.1
+protobuf==3.19.4
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -75,7 +75,7 @@ pyasn1-modules==0.2.8
     #   google-auth
 pyotp==2.6.0
     # via -r requirements.txt
-pyparsing==3.0.6
+pyparsing==3.0.7
     # via
     #   -r requirements.txt
     #   httplib2
@@ -85,7 +85,7 @@ pytz==2021.3
     #   django
 qrcode==7.3.1
     # via -r requirements.txt
-requests==2.27.0
+requests==2.27.1
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -106,10 +106,7 @@ uritemplate==4.1.1
     # via
     #   -r requirements.txt
     #   google-api-python-client
-urllib3==1.26.7
+urllib3==1.26.8
     # via
     #   -r requirements.txt
     #   requests
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools

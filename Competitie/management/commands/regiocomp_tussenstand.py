@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -105,7 +105,7 @@ class Command(BaseCommand):
             indiv = obj.indiv
             if not indiv.is_onbekend:
                 tup = (indiv.boogtype.pk,)
-                tup += tuple(indiv.leeftijdsklassen.values_list('pk', flat=True))
+                tup += tuple(indiv.leeftijdsklassen.values_list('pk', flat=True))       # TODO: avoid database hit
                 try:
                     if indiv not in indiv_alike[tup]:
                         indiv_alike[tup].append(indiv)
@@ -118,7 +118,7 @@ class Command(BaseCommand):
         for klasse in klassen_qset:
             if klasse.indiv.is_onbekend:
                 tup = (klasse.indiv.boogtype.pk,)
-                tup += tuple(klasse.indiv.leeftijdsklassen.values_list('pk', flat=True))
+                tup += tuple(klasse.indiv.leeftijdsklassen.values_list('pk', flat=True))    # TODO: avoid database hit
 
                 for indiv in indiv_alike[tup]:
                     # zoek klasse met deze indiv

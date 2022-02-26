@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,102 +10,132 @@
 
 {% block pagina %}
 
-    <h4>Score Geschiedenis</h4>
-
-    <p>Via deze pagina kan je de geschiedenis van een de scores van een sporter inzien.</p>
-
-    <!-- zoekformulier -->
-
-    <div class="container z-depth-2 white">
-        <div class="row nhb-blauw white-text">
-            <div class="col s12 center-align">
-                <h5>Zoek sporter</h5>
-                <p>Zoek op bondsnummer</p>
-            </div>
-        </div>
-
-        <div class="row">
-            <form class="col s12" action="{{ url_ophalen }}" method="get">
-                <div class="row"><div class="input-field col s12">
-                    {{ form.zoekterm.label_tag }}{{ form.zoekterm }}
-                </div></div>
-
-                <div class="row"><div class="col s12"></div>
-                    <div class="center-align">
-                        <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
-                    </div>
-                </div>
-            </form>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Score Geschiedenis</h3>
+            <p>Geschiedenis van een de scores/AG van een sporter inzien</p>
         </div>
     </div>
 
+    <!-- zoekformulier -->
+
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 white left-align z-depth-3">
+
+            <!-- dialoog venster -->
+            <div style="margin:50px 30px 30px 30px">
+
+                <form action="{{ url_ophalen }}" method="get">
+
+                    <!-- form field -->
+                    <div class="input-field">
+                        {{ form.zoekterm.label_tag }}{{ form.zoekterm }}
+                    </div>
+
+                    <!-- button -->
+                    <p class="center">
+                        <button class="btn-nhb-rood" type="submit">
+                            <i class="material-icons-round left">search</i>Zoek</button>
+                    </p>
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+
+
     <!-- resultaten -->
-    <p>&nbsp;</p>
-    {% if niet_gevonden %}
-        <p><i>Niets gevonden</i></p>
-    {% else %}
-        <p>Gevonden scores voor sporter <b>{{ sporter }}</b> van {{ sporter.bij_vereniging }} te {{ sporter.bij_vereniging.plaats }} in {{ sporter.bij_vereniging.regio }}</p>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Resultaten</h4>
+                {% if niet_gevonden %}
+                    <p class="red-text">Niets gevonden</p>
+                {% else %}
+                    <p>Gevonden scores voor sporter<br><b>{{ sporter }}</b><br>van {{ sporter.bij_vereniging }} te {{ sporter.bij_vereniging.plaats }}<br>in {{ sporter.bij_vereniging.regio }}</p>
+                {% endif %}
+        </div>
+    </div>
+
+    {% if not niet_gevonden %}
 
         {% for afstand in afstanden %}
 
-            <h5>Afstand: {{ afstand }}m</h5>
+            <!-- witruimte -->
+            <div class="row center">
+                <div class="col s12">
+                    <h5 class="red-text">Afstand: {{ afstand }}m</h5>
+                </div>
+            </div>
 
-            <table class="white">
-                <thead>
-                    <tr>
-                        <th>Boog</th>
-                        <th>Wedstrijd</th>
-                        <th>Waarde</th>
-                        <th>Geschiedenis</th>
-                    </tr>
-                </thead>
+            <!-- blauwe balk met informatie in een tabel -->
+            <div class="row-nhb-blauw">
+                <div class="col s12">
+                    <table class="white">
+                        <thead>
+                            <tr>
+                                <th>Boog</th>
+                                <th>Wedstrijd</th>
+                                <th>Waarde</th>
+                                <th>Geschiedenis</th>
+                            </tr>
+                        </thead>
 
-                {% for sporterboog in sportersboog %}
-                    {% if sporterboog.scores %}
-                        <tr>
-                            <td>{{ sporterboog.boogtype.beschrijving }}</td>
-                            <td colspan="3"></td>
-                        </tr>
-
-                        {% for score in sporterboog.scores %}
-                            {% if score.afstand_meter == afstand %}
+                        {% for sporterboog in sportersboog %}
+                            {% if sporterboog.scores %}
                                 <tr>
-                                    <td></td>   <!-- boog -->
-
-                                    {% if score.type == 'S' %}
-                                        <td>{{ score.wedstrijd_str }}<br>{{ score.wedstrijd_waar }}</td>
-                                        <td>{{ score.waarde }}</td>
-                                    {% else %}
-                                        <!-- de view heeft score.waarde al omgezet naar N.MMM -->
-                                        <td>{% if score.type == 'T' %}AG voor teams (handmatig){% else %}Aanvangsgemiddelde{% endif %}</td>
-                                        <td>{{ score.waarde }}</td>
-                                    {% endif %}
-
-                                    <td></td>
+                                    <td>{{ sporterboog.boogtype.beschrijving }}</td>
+                                    <td colspan="3"></td>
                                 </tr>
 
-                                {% for hist in score.hists %}
-                                    <tr>
-                                        <td colspan="2"></td>
-                                        <td{% if hist.is_edit %} class="nhb-blauw-text"{% endif %}>{{ hist.oude_waarde }}<span style="position: relative; bottom: .15em;"> &rarr; </span>{{ hist.nieuwe_waarde }}</td>
-                                        <td>{{ hist.when }}{% if hist.door_account_str %} door {{ hist.door_account_str }}{% endif %}<br>{{ hist.notitie }}</td>
-                                    </tr>
-                                {% endfor %}
+                                {% for score in sporterboog.scores %}
+                                    {% if score.afstand_meter == afstand %}
+                                        <tr>
+                                            <td></td>   <!-- boog -->
 
-                            {% endif %} <!-- score.afstand_meter == afstand -->
+                                            {% if score.type == 'S' %}
+                                                <td>{{ score.wedstrijd_str }}<br>{{ score.wedstrijd_waar }}</td>
+                                                <td>{{ score.waarde }}</td>
+                                            {% else %}
+                                                <!-- de view heeft score.waarde al omgezet naar N.MMM -->
+                                                <td>{% if score.type == 'T' %}AG voor teams (handmatig){% else %}Aanvangsgemiddelde{% endif %}</td>
+                                                <td>{{ score.waarde }}</td>
+                                            {% endif %}
 
-                        {% endfor %} <!-- score -->
+                                            <td></td>
+                                        </tr>
 
-                    {% endif %} <!-- sporterboog heeft scores -->
+                                        {% for hist in score.hists %}
+                                            <tr>
+                                                <td colspan="2"></td>
+                                                <td{% if hist.is_edit %} class="nhb-blauw-text"{% endif %}>{{ hist.oude_waarde }}<span style="position: relative; bottom: .15em;"> &rarr; </span>{{ hist.nieuwe_waarde }}</td>
+                                                <td>{{ hist.when }}{% if hist.door_account_str %} door {{ hist.door_account_str }}{% endif %}<br>{{ hist.notitie }}</td>
+                                            </tr>
+                                        {% endfor %}
 
-                {% endfor %}    <!-- for sporterboog -->
-            </table>
+                                    {% endif %} <!-- score.afstand_meter == afstand -->
+
+                                {% endfor %} <!-- score -->
+
+                            {% endif %} <!-- sporterboog heeft scores -->
+
+                        {% endfor %}    <!-- for sporterboog -->
+                    </table>
+
+
+                </div>
+            </div>
+
 
         {% endfor %}
 
     {% endif %}
 
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="score-geschiedenis" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="score-geschiedenis" %}
 
 {% endblock %}
 

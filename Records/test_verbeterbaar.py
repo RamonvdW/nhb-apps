@@ -186,7 +186,7 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(url)
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
-        self.assertEqual(14, len(urls))
+        self.assertEqual(17, len(urls))
         self.assertTrue('/records/record-18-43/' in urls)
 
         self.e2e_assert_other_http_commands_not_supported(url)
@@ -201,7 +201,7 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(url)
 
         urls = self.extract_all_urls(resp, skip_menu=True, skip_smileys=True)
-        self.assertEqual(14, len(urls))
+        self.assertEqual(17, len(urls))
         self.assertTrue('/records/record-25-45/' in urls)
 
     def test_combies(self):

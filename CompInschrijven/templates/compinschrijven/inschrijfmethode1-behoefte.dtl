@@ -1,62 +1,65 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block title %}Inschrijf voorkeuren{% endblock %}
+{% block title %}Gekozen wedstrijden{% endblock %}
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-inschrijfmethode1-behoefte" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Gekozen wedstrijden</h3>
+            <p>Wedstrijden gekozen door de sporters aangemeld voor de regiocompetitie <b>{{ competitie.beschrijving }}</b> in <b>{{ regio }}</b></p>
 
-    <h4>Inschrijf voorkeuren</h4>
+            <p>Je kan onderstaande lijst ook downloaden, inclusief de keuzes van elke sporter.</p>
+            <a class="btn-nhb-rood" href="{{ url_download }}">
+                <i class="material-icons-round left">download</i>Download lijst</a>
+        </div>
+    </div>
 
-    <p>Op deze pagina tonen we welke wedstrijden gekozen zijn door de sporters aangemeld voor de regiocompetitie <b>{{ competitie.beschrijving }}</b> in <b>{{ regio }}</b>.</p>
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th colspan="3"></th>
+                        <th colspan="{{ blazoenen|length }}">Benodigde blazoenen</th>
+                    </tr>
+                    <tr>
+                        <th>Wedstrijd</th>
+                        <th>Locatie</th>
+                        <th class="center">Aantal keer gekozen</th>
+                        {% for blazoen in blazoenen %}
+                            <th class="center">{{ blazoen }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
 
-    <p>Je kan onderstaande lijst ook downloaden, inclusief de keuzes van elke sporter.</p>
-    <a class="btn-nhb-blauw" href="{{ url_download }}">
-        <i class="material-icons-round left">download</i>Download lijst</a>
-
-
-    <p>&nbsp;</p>
-    <table class="white">
-        <thead>
-            <tr>
-                <th colspan="3"></th>
-                <th colspan="{{ blazoenen|length }}">Benodigde blazoenen</th>
-            </tr>
-            <tr>
-                <th>Wedstrijd</th>
-                <th>Locatie</th>
-                <th>Aantal keer gekozen</th>
-                {% for blazoen in blazoenen %}
-                    <th>{{ blazoen }}</th>
+                {% for wedstrijd in wedstrijden %}
+                    <tr>
+                        <td>{{ wedstrijd.beschrijving_str }}</td>
+                        <td>{{ wedstrijd.locatie_str }}</td>
+                        <td class="center">{{ wedstrijd.keuze_count }}</td>
+                        {% for count in wedstrijd.blazoen_count %}
+                            <td class="center">{{ count }}</td>
+                        {% endfor %}
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="2"><i>Nog geen keuzes gemaakt</i></td>
+                    </tr>
                 {% endfor %}
-            </tr>
-        </thead>
 
-        {% for wedstrijd in wedstrijden %}
-            <tr>
-                <td>{{ wedstrijd.beschrijving_str }}</td>
-                <td>{{ wedstrijd.locatie_str }}</td>
-                <td>{{ wedstrijd.keuze_count }}</td>
-                {% for count in wedstrijd.blazoen_count %}
-                    <td>{{ count }}</td>
-                {% endfor %}
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="2"><i>Nog geen keuzes gemaakt</i></td>
-            </tr>
-        {% endfor %}
+            </table>
+        </div>
+    </div>
 
-    </table>
+    {% include 'feedback/sidebar.dtl' with op_pagina="compinschrijven-inschrijfmethode1-behoefte" %}
 
-{% endblock %}
-
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}

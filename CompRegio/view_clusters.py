@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,8 +9,6 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import DeelCompetitie
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from NhbStructuur.models import NhbCluster, NhbVereniging
 from Plein.menu import menu_dynamics
@@ -50,16 +48,6 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         # filter clusters die aangepast mogen worden op competitie type
         # waarvan de definitie heel handig overeen komt met cluster.gebruik
         context['gebruik'] = gebruik_filter = functie_nu.comp_type
-
-        # probeer een competitie te vinden om te tonen in het menu
-        try:
-            deelcomp = DeelCompetitie.objects.get(competitie__afstand=gebruik_filter,
-                                                  nhb_regio=functie_nu.nhb_regio)
-        except DeelCompetitie.DoesNotExist:
-            comp_pk = None
-        else:
-            comp_pk = deelcomp.competitie.pk
-            context['terug_url'] = reverse('Competitie:overzicht', kwargs={'comp_pk': comp_pk})
 
         # cluster namen
         objs = (NhbCluster
@@ -116,11 +104,12 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
         context['handleiding_clusters_url'] = reverse('Handleiding:Clusters')
         context['email_bondsbureau'] = settings.EMAIL_BONDSBUREAU
 
-        if comp_pk:
-            menu_dynamics_competitie(self.request, context, comp_pk=comp_pk)
-        else:
-            menu_dynamics(self.request, context, actief='competitie')
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (None, 'Clusters')
+        )
 
+        menu_dynamics(self.request, context)
         return context
 
     def _swap_cluster(self, nhbver, gebruik):
@@ -205,15 +194,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
             self._swap_cluster(obj, gebruik_filter)
         # for
 
-        # probeer een competitie te vinden om te tonen in het menu
-        try:
-            deelcomp = DeelCompetitie.objects.get(competitie__afstand=gebruik_filter,
-                                                  nhb_regio=functie_nu.nhb_regio)
-        except DeelCompetitie.DoesNotExist:
-            url = reverse('Competitie:kies')
-        else:
-            comp_pk = deelcomp.competitie.pk
-            url = reverse('Competitie:overzicht', kwargs={'comp_pk': comp_pk})
+        url = reverse('Competitie:kies')
 
         return HttpResponseRedirect(url)
 

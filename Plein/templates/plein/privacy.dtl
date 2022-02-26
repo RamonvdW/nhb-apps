@@ -10,15 +10,22 @@
 
 {% block pagina %}
 
-<!-- gebruik niet de hele breedte van het scherm -->
-<div class="row"><div class="col s12 m9">
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Privacy<wbr>verklaring</h3>
+            <p>Alle vragen en verzoeken over privacy kunnen gericht worden aan<br>de Nederlandse Handboog Bond via e-mail: <code>{{ email_bb }}</code></p>
+        </div>
+    </div>
 
-    <h4>Privacy<wbr>verklaring</h4>
+    <!-- blauwe balk met informatie -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            {% include 'plein/card.dtl' with title="Verklaring openen" text="Hoe we omgaan met jouw privacy staat beschreven in een apart document." icon="article" extern_open=True url=url_privacyverklaring %}
 
-    <p>Hoe we omgaan met jouw privacy staat beschreven in een apart document.</p>
-
-    <a class="btn-nhb-blauw" href="{{ url_privacyverklaring }}" target="_blank" rel="noopener noreferrer">
-        <i class="material-icons-round left">open_in_new</i>document openen</a>
+            {% include 'plein/card.dtl' with title="Contact" text="Kies dit kaartje om je mailprogramma te starten." icon="email" extern_open=True url=url_email_bb %}
+        </div>
+    </div>
 
     <!--
     <h5>Cookies</h5>
@@ -36,16 +43,7 @@
     <p>Hier kan je <a href="https://www.rijksoverheid.nl/onderwerpen/telecommunicatie/vraag-en-antwoord/mag-een-website-ongevraagd-cookies-plaatsen" target="_blank" rel="noopener noreferrer">meer informatie over cookies</a> vinden.</p>
     -->
 
-    <p>&nbsp;</p>
-    <h5>Contact</h5>
-
-    <p>Alle vragen en verzoeken over privacy kunnen gericht worden aan de Nederlandse Handboog Bond via e-mail aan:</p>
-    <a class="btn-nhb-blauw" href="mailto:{{ email_bondsbureau }}">
-        <i class="material-icons-round left">email</i>{{ email_bondsbureau }}</a>
-
-</div></div>
-
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="privacy" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="privacy" %}
 
 {% endblock %}
 

@@ -10,304 +10,349 @@
 
 {% block pagina %}
 
-    <h4>Informatie over de bondscompetities</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Informatie over de bonds<wbr>competities</h3>
+            <p>Algemene informatie over de competities die tijdens de wintermaanden gehouden worden.</p>
+        </div>
+    </div>
 
-    <p>Op deze pagina staat algemene informatie over de bondscompetities die tijdens de wintermaanden gehouden worden.</p>
 
-    <br>
-    <div class="center-align">
+    <!-- sfeerfoto -->
+    <div class="center" style="margin-top:50px; margin-bottom:30px">
         <img src="{% static 'plein/indoor_sfeer_1.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
-
         <p>
-            <a class="btn-nhb-blauw" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
+            <a class="btn-nhb-rood" href="https://handboogsport.smugmug.com/Indoor/" target="_blank" rel="noopener noreferrer">
                 <i class="material-icons-round left">open_in_new</i>Meer foto's</a>
         </p>
     </div>
 
 
-    <p>&nbsp;</p>
-    <h5>Bondscompetitie</h5>
-    <div class="row white">
+    <!-- witruimte -->
+    <div class="row center">
         <div class="col s12">
+            <h4>Bondscompetities</h4>
             <p>Elk jaar organiseert de NHB twee competities tijdens het winterseizoen, met verschillende uitdagingen.</p>
-            <div class="table-wrap-5">
-                <table class="white">
-                    <thead>
-                        <tr>
-                            <th>Competitie</th>
-                            <th>Schiet<wbr>afstand</th>
-                            <th><span class="hide-on-small-only">Pijlen per schietbeurt</span>
-                                <span class="hide-on-med-and-up">Per beurt</span></th>
-                            <th>Schiet<wbr>beurten</th>
-                            <th class="hide-on-small-only">Blazoen</th>
-                            <th class="hide-on-small-only">Maximale score</th>
-                        </tr>
-                    </thead>
-
-                    <tr>
-                        <td>Indoor</td>
-                        <td>18 m<span class="hide-on-small-only">eter</span></td>
-                        <td>3 pijlen</td>
-                        <td>10</td>
-                        <td class="hide-on-small-only">40cm</td>
-                        <td class="hide-on-small-only">300</td>
-                    </tr>
-
-                    <tr>
-                        <td>25m 1pijl</td>
-                        <td>25 m<span class="hide-on-small-only">eter</span></td>
-                        <td>1 pijl</td>
-                        <td>25</td>
-                        <td class="hide-on-small-only">60cm</td>
-                        <td class="hide-on-small-only">250</td>
-                    </tr>
-                </table>
-            </div>
-            <p>Aspiranten schieten beide competities op 18 meter, op een 60cm blazoen.</p>
         </div>
     </div>
 
-    <br>
-    <div class="center-align">
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Competitie</th>
+                        <th>Schiet<wbr>afstand</th>
+                        <th><span class="hide-on-small-only">Pijlen per schietbeurt</span>
+                            <span class="hide-on-med-and-up">Per beurt</span></th>
+                        <th>Schiet<wbr>beurten</th>
+                        <th class="hide-on-small-only">Blazoen</th>
+                        <th class="hide-on-small-only">Maximale score</th>
+                    </tr>
+                </thead>
+
+                <tr>
+                    <td>Indoor</td>
+                    <td>18 m<span class="hide-on-small-only">eter</span></td>
+                    <td>3 pijlen</td>
+                    <td>10</td>
+                    <td class="hide-on-small-only">40cm</td>
+                    <td class="hide-on-small-only">300</td>
+                </tr>
+
+                <tr>
+                    <td>25m 1pijl</td>
+                    <td>25 m<span class="hide-on-small-only">eter</span></td>
+                    <td>1 pijl</td>
+                    <td>25</td>
+                    <td class="hide-on-small-only">60cm</td>
+                    <td class="hide-on-small-only">250</td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+    <p class="center">Aspiranten schieten beide competities op 18 meter, op een 60cm blazoen.</p>
+
+
+    <!-- sfeerfoto -->
+    <div class="center" style="margin-top:50px; margin-bottom:30px">
         <img src="{% static 'plein/indoor_sfeer_2.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
     </div>
 
 
-    <p>&nbsp;</p>
-    <h5>Geografische opdeling</h5>
-    <div class="row white">
+    <!-- witruimte -->
+    <div class="row center">
         <div class="col s12">
+            <h4>Geografische opdeling</h4>
             <p>Bij de NHB is Nederland geografisch verdeeld in 4 rayons met elk 4 regio's.</p>
-            {% for regio in regios %}{% if regio.mijn_regio %}<p>Jouw regio wordt met blauw aangegeven.</p>{% endif %}{% endfor %}
+        </div>
+    </div>
 
-            <div class="table-wrap-5">
-                <table class="white">
-                    <thead>
-                        <tr>
-                            <th class="hide-on-small-only">Rayon</th>
-                            <th>Regio</th>
-                        </tr>
-                    </thead>
-                    {% for regio in regios %}
-                    <tr {% if regio.mijn_regio %}class="nhb-blauw white-text"{% endif %}>
-                        <td class="hide-on-small-only">{{ regio.rayon.naam }}</td>
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m8 offset-m2 l6 offset-l3">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Rayon</th>
+                        <th>Regio</th>
+                    </tr>
+                </thead>
+                {% for regio in regios %}
+                    <tr {% if regio.mijn_regio %}class="nhb-rood white-text"{% endif %}>
+                        <td>{{ regio.rayon.naam }}</td>
                         <td>{{ regio.naam }}</td>
                     </tr>
-                    {% endfor %}
-                </table>
-            </div>
-            <br>
+                {% endfor %}
+
+            </table>
         </div>
     </div>
 
 
-
     {% if mijn_vereniging %}
 
-        <p>&nbsp;</p>
-        <h5>Jouw vereniging</h5>
-        <div class="row white">
-            <div class="col s12">
-                <p>Dit zijn de gegevens van jouw vereniging:</p>
-                <div class="table-wrap-5">
-                    <table class="white">
-                        <tr>
-                            <td>Naam:</td>
-                            <td>{{ mijn_vereniging.naam }}</td>
-                        </tr>
-                        <tr>
-                            <td>Plaats:</td>
-                            <td>{{ mijn_vereniging.plaats }}</td>
-                        </tr>
-                        <tr>
-                            <td>Regio:</td>
-                            <td>{{ mijn_vereniging.regio.naam }}</td>
-                        </tr>
-                        <tr>
-                            <td>Rayon:</td>
-                            <td>{{ mijn_vereniging.regio.rayon.naam }}</td>
-                        </tr>
-                    </table>
-                </div>
-                <br>
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12 m10 offset-m1 l8 offset-l2 xl6 offset-xl3">
+                <h4>Jouw vereniging</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie label : info -->
+        <div class="row-nhb-blauw">
+            <div class="col s12 m10 offset-m1 l8 offset-l2">
+                <table class="white">
+                    <tr>
+                        <th>Naam:</th>
+                        <td>{{ mijn_vereniging.naam }}</td>
+                    </tr>
+                    <tr>
+                        <th>Plaats:</th>
+                        <td>{{ mijn_vereniging.plaats }}</td>
+                    </tr>
+                    <tr>
+                        <th>Regio:</th>
+                        <td>{{ mijn_vereniging.regio.naam }}</td>
+                    </tr>
+                    <tr>
+                        <th>Rayon:</th>
+                        <td>{{ mijn_vereniging.regio.rayon.naam }}</td>
+                    </tr>
+                </table>
             </div>
         </div>
 
     {% endif %}
 
 
-    <p>&nbsp;</p>
-    <div class="center-align">
+    <!-- sfeerfoto -->
+    <div class="center" style="margin-top:50px; margin-bottom:30px">
         <img src="{% static 'plein/indoor_sfeer_4.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
     </div>
 
 
-    <p>&nbsp;</p>
-    <h5>Regiocompetitie</h5>
-    <div class="row white">
+    <!-- witruimte -->
+    <div class="row center">
         <div class="col s12">
-            <p>De competitie begint met de regiocompetities in elk van de 16 regio's.
+            <h4>Regiocompetitie</h4>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+
+                <p>De competitie begint met de regiocompetities in elk van de 16 regio's.
 Vraag op je vereniging waar en wanneer de wedstrijden in jouw regio gehouden worden.</p>
 
-            <p>De regiocompetitie is per boog type, leeftijdsgroep en speelsterkte opgedeeld in wedstrijdklassen.
+                <p>De regiocompetitie is per boog type, leeftijdsgroep en speelsterkte opgedeeld in wedstrijdklassen.<br>
 Je schiet <b>7 rondes</b>, waarvan de beste 6 tellend zijn.</p>
 
-            <p>We hebben een aparte pagina waarop de leeftijdsgroepen uitgelegd staan: <a class="btn-nhb-blauw" href="{% url 'Competitie:info-leeftijden' %}">Leeftijden</a></p>
+                <p>We hebben een aparte pagina waarop de leeftijdsgroepen uitgelegd staan:</p>
+                <p>
+                    <a class="btn-nhb-rood" href="{% url 'Competitie:info-leeftijden' %}">Leeftijden</a>
+                </p>
 
-            <p>Sporters die vorige seizoen 6 scores neergezet hebben krijgen aan de hand van dat gemiddelde een <i>aanvangsgemiddelde</i> waarmee de indeling op speelsterkte gedaan wordt.
+                <p>Sporters die vorige seizoen 6 scores neergezet hebben krijgen aan de hand van dat gemiddelde een <i>aanvangsgemiddelde</i> waarmee de indeling op speelsterkte gedaan wordt.
 Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 
-            <p>In elke van de {{ klassen_count }} wedstrijdklassen wordt de sporter met de hoogste score gekroond tot <b>regiokampioen</b>.</p>
+                <p>In elke van de {{ klassen_count }} wedstrijdklassen wordt de sporter met de hoogste score gekroond tot <b>regiokampioen</b>.</p>
+                <p>De wedstrijdklassen van de bondscompetitie zijn gender-neutraal, behalve in de jongste leeftijdsklassen (Onder 12 en Onder 14, voorheen aspiranten) waarin aparte medailles uitgedeeld worden aan jongens en meisjes.</p>
+            </div>
         </div>
     </div>
 
 
-    <p>&nbsp;</p>
-    <div class="center-align">
+    <!-- sfeerfoto -->
+    <div class="center" style="margin-top:50px; margin-bottom:30px">
         <img src="{% static 'plein/indoor_sfeer_3.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
     </div>
 
 
-    <p>&nbsp;</p>
-    <h5>Rayonkampioenschappen (RK)</h5>
-    <div class="row white">
+    <!-- witruimte -->
+    <div class="row center">
         <div class="col s12">
-            <p>De rayonkampioenschappen worden in elk van de 4 rayons georganiseerd voor de sporters uit de 4 regio's van het rayon.</p>
-            <p>In elke wedstrijdklasse nemen 24 sporters het tegen elkaar op, bestaande uit de 4 regiokampioenen aangevuld met de 20 beste sporters uit de regiocompetities.</p>
+            <h4>Rayonkampioenschappen (RK)</h4>
+        </div>
+    </div>
 
-            <p>Voor aspiranten geldt een open inschrijving (iedereen die wil mag meedoen).</p>
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px">
 
-            <div class="table-wrap-5">
-                <table class="white">
-                    <thead>
-                        <tr>
-                            <th>Competitie</th>
-                            <th>Pijlen</th>
-                            <th>Knock-out finales</th>
-                        </tr>
-                    </thead>
+                <p>De rayonkampioenschappen worden in elk van de 4 rayons georganiseerd voor de sporters uit de 4 regio's van het rayon.</p>
+                <p>In elke wedstrijdklasse nemen 24 sporters het tegen elkaar op, bestaande uit de 4 regiokampioenen aangevuld met de 20 beste sporters uit de regiocompetities.</p>
 
-                    <tr>
-                        <td>Indoor</td>
-                        <td>60</td>
-                        <td>Ja</td>
-                    </tr>
+                <p>Voor aspiranten geldt een open inschrijving (iedereen die wil mag meedoen).</p>
 
-                    <tr>
-                        <td>25m 1pijl</td>
-                        <td>50</td>
-                        <td>Nee</td>
-                    </tr>
-                </table>
+                <!-- tabel met blauwe rand binnen het informatie vlak -->
+                <div class="row">
+                    <div class="col s12 m10 offset-m1 l6 offset-l3">
+                        <table class="centered">
+                            <tr class="nhb-table-header">
+                                <td rowspan="4" class="nhb-table-zijrand"></td>
+                                <th style="width:33%">Competitie</th>
+                                <th style="width:33%">Pijlen</th>
+                                <th style="width:33%">Knock-out finales</th>
+                                <td rowspan="4" class="nhb-table-zijrand"></td>
+                            </tr>
+
+                            <tr>
+                                <td style="width:33%">Indoor</td>
+                                <td style="width:33%">60</td>
+                                <td style="width:33%">Ja</td>
+                            </tr>
+
+                            <tr>
+                                <td style="width:33%">25m 1pijl</td>
+                                <td style="width:33%">50</td>
+                                <td style="width:33%">Nee</td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="3" class="nhb-table-onderrand"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <p>Aspiranten schieten 1 ronde.</p>
+                <p>Compound en Recurve klasse 1 en 2 schieten de Indoor Rayonkampioenschappen op Dutch Target blazoen.</p>
             </div>
-
-            <p>Aspiranten schieten 1 ronde.</p>
-            <p>Compound en Recurve klasse 1 en 2 schieten de Indoor Rayonkampioenschappen op Dutch Target blazoen.</p>
         </div>
     </div>
 
 
-    <p>&nbsp;</p>
-    <h5>Blazoenen</h5>
-    <div class="row white">
+    <!-- witruimte -->
+    <div class="row center">
         <div class="col s12">
+            <h4>Blazoenen</h4>
+        </div>
+    </div>
 
-            <table class="white">
-                <tr>
-                    <td colspan="2"><p>Hieronder volgen voorbeelden van de belangrijkste blazoenen voor de competities.</p></td>
-                </tr>
-                <tr>
-                    <td class="center-align">
-                        <img src="{% static 'plein/blazoen_dt.png' %}" style="max-height:300px; height:auto" loading="lazy" alt="Dutch Target blazoen">
-                    </td>
-                    <td class="center-align">
-                        <img src="{% static 'plein/blazoen_40cm.png' %}" style="max-height:220px; height:auto; border:1px solid gray" loading="lazy" alt="40cm / 60cm blazoen" >
-                    </td>
-                </tr>
-                <tr>
-                    <td class="center-align">
-                        <code style="font-size:12px">het Dutch Target (DT) blazoen</code>
-                    </td>
-                    <td class="center-align">
-                        <code style="font-size:12px">het 40cm / 60cm blazoen</code>
-                    </td>
-                </tr>
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+                <p>Hieronder volgen voorbeelden van de belangrijkste blazoenen voor de competities.</p>
 
-                <tr>
-                    <td colspan="2" class="center-align">
-                        <span>Het blazoen rechts heeft 10 scorende ringen van 1 (buitenste) tot 10 (binnenste) punten.</span>
-                        <br><span>Het DT heeft dezelfde maat als de binnenste 5 ringen van het 40cm blazoen.</span>
-                    </td>
-                </tr>
-            </table>
+                <table>
+                    <tr>
+                        <td class="center">
+                            <img src="{% static 'plein/blazoen_dt.png' %}" style="max-height:300px; height:auto" loading="lazy" alt="Dutch Target blazoen">
+                        </td>
+                        <td class="center">
+                            <img src="{% static 'plein/blazoen_40cm.png' %}" style="max-height:220px; height:auto; border:1px solid gray" loading="lazy" alt="40cm / 60cm blazoen" >
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="center">
+                            <code style="font-size:12px">het Dutch Target (DT) blazoen</code>
+                        </td>
+                        <td class="center">
+                            <code style="font-size:12px">het 40cm / 60cm blazoen</code>
+                        </td>
+                    </tr>
+                </table>
 
+                <p>Het blazoen rechts heeft 10 scorende ringen van 1 (buitenste) tot 10 (binnenste) punten.<br>Het DT heeft dezelfde maat als de binnenste 5 ringen van het 40cm blazoen.</p>
+            </div>
         </div>
     </div>
 
 
-
-    <p>&nbsp;</p>
-    <h5>Indoor knock-out finales</h5>
-    <div class="row white">
+    <!-- witruimte -->
+    <div class="row center">
         <div class="col s12">
-            <p>De knock-out finales (alleen voor de Indoor competitie) begint met de beste 16 sporters, waarvan de 8 winnaars doorgaan naar de kwartfinale.
-Uit de kwartfinale gaan de 4 winnaars door naar de halve finale. Zie het schema hier onder.</p>
+            <h4>Indoor knock-out finales</h4>
+        </div>
+    </div>
 
-            <p>De winnaars van de halve finales gaan naar de gouden finale voor plaats 1 en 2.
-De overige twee sporters uit de halve finales gaan naar de bronzen finale voor plaats 3 en 4.</p>
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+                <p>De knock-out finales (alleen voor de Indoor competitie) begint met de beste 16 sporters, waarvan de 8 winnaars doorgaan naar de kwartfinale. Uit de kwartfinale gaan de 4 winnaars door naar de halve finale. Zie het schema hier onder.</p>
+                <p>De winnaars van de halve finales gaan naar de gouden finale voor plaats 1 en 2. De overige twee sporters uit de halve finales gaan naar de bronzen finale voor plaats 3 en 4.</p>
 
-            <div class="table-wrap-5">
                 <table class="white">
                     <tr>
-                        <td class="center-align"><b>Achtste finale</b><br>(16<span class="hide-on-small-only"> sporters</span>)</td>
-                        <td class="center-align"><b>Kwart finale</b><br>(8<span class="hide-on-small-only"> sporters</span>)</td>
-                        <td class="center-align"><b>Halve finale</b><br>(4<span class="hide-on-small-only"> sporters</span>)</td>
-                        <td class="center-align"><b>Bronzen finale</b><br>(2<span class="hide-on-small-only"> sporters</span>)</td>
-                        <td class="center-align"><b>Gouden finale</b><br>(2<span class="hide-on-small-only"> sporters</span>)</td>
+                        <td class="center"><b>Achtste finale</b><br>(16<span class="hide-on-small-only"> sporters</span>)</td>
+                        <td class="center"><b>Kwart finale</b><br>(8<span class="hide-on-small-only"> sporters</span>)</td>
+                        <td class="center"><b>Halve finale</b><br>(4<span class="hide-on-small-only"> sporters</span>)</td>
+                        <td class="center"><b>Bronzen finale</b><br>(2<span class="hide-on-small-only"> sporters</span>)</td>
+                        <td class="center"><b>Gouden finale</b><br>(2<span class="hide-on-small-only"> sporters</span>)</td>
                     </tr>
 
                     <tr>
-                        <td class="center-align"><span class="nhb-blauw-text">#1</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#16</td>
-                        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
-                        <td class="center-align" rowspan="4">2<span class="hide-on-small-only"> sporters</span></td>
-                        <td class="center-align" rowspan="8">2<span class="hide-on-small-only"> sporters</span></td>
-                        <td class="center-align" rowspan="8">2<span class="hide-on-small-only"> sporters</span></td>
+                        <td class="center"><span class="nhb-blauw-text">#1</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#16</td>
+                        <td class="center" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
+                        <td class="center" rowspan="4">2<span class="hide-on-small-only"> sporters</span></td>
+                        <td class="center" rowspan="8">2<span class="hide-on-small-only"> sporters</span></td>
+                        <td class="center" rowspan="8">2<span class="hide-on-small-only"> sporters</span></td>
                     </tr>
                     <tr>
-                        <td class="center-align">#8<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#9</td>
-                    </tr>
-
-                    <tr>
-                        <td class="center-align">#5<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#12</td>
-                        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
-                    </tr>
-                    <tr>
-                        <td class="center-align"><span class="nhb-blauw-text">#4</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#13</td>
+                        <td class="center">#8<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#9</td>
                     </tr>
 
                     <tr>
-                        <td class="center-align"><span class="nhb-blauw-text">#3</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#14</td>
-                        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
-                        <td class="center-align" rowspan="4">2<span class="hide-on-small-only"> sporters</span></td>
+                        <td class="center">#5<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#12</td>
+                        <td class="center" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
                     </tr>
                     <tr>
-                        <td class="center-align">#6<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#11</td>
+                        <td class="center"><span class="nhb-blauw-text">#4</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#13</td>
                     </tr>
 
                     <tr>
-                        <td class="center-align">#7<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#10</td>
-                        <td class="center-align" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
+                        <td class="center"><span class="nhb-blauw-text">#3</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#14</td>
+                        <td class="center" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
+                        <td class="center" rowspan="4">2<span class="hide-on-small-only"> sporters</span></td>
                     </tr>
                     <tr>
-                        <td class="center-align"><span class="nhb-blauw-text">#2</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#15</td>
+                        <td class="center">#6<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#11</td>
+                    </tr>
+
+                    <tr>
+                        <td class="center">#7<span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#10</td>
+                        <td class="center" rowspan="2">2<span class="hide-on-small-only"> sporters</span></td>
+                    </tr>
+                    <tr>
+                        <td class="center"><span class="nhb-blauw-text">#2</span><span class="hide-on-small-only"> tegen</span><br class="show-on-med-and-up"/>#15</td>
                     </tr>
 
                 </table>
-            </div>
+
                 <p>Compound sporters schieten in de finale 5x3 pijlen en vergelijken hun totale score.
 Alle andere sporters schieten de finale volgens het set-systeem over 5 sets van 3 pijlen.
 Na elke set krijgen de sporters setpunten: 0 (laagste score), 1 (gelijke score) of 2 (hoogste score).</p>
@@ -315,55 +360,79 @@ Na elke set krijgen de sporters setpunten: 0 (laagste score), 1 (gelijke score) 
                 <p>Als de compound sporters met gelijke score eindigen, dan volgt een shoot-off.
 De set-systeem sporters schieten een shoot-off als na 5 sets the score gelijk is (5-5).
 In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl het dichts bij het midden zit.</p>
+
+            </div>
         </div>
     </div>
 
 
-    <p>&nbsp;</p>
-    <div class="center-align">
+    <!-- sfeerfoto -->
+    <div class="center" style="margin-top:50px; margin-bottom:30px">
         <img src="{% static 'plein/indoor_sfeer_5.jpg' %}" style="width:70%; height:auto" loading="lazy" alt="sfeerfoto"><br>
         <code style="font-size:12px">Sfeerfoto van een wedstrijd binnenshuis</code>
     </div>
 
 
-    <p>&nbsp;</p>
-    <h5>Bondskampioenschappen (BK)</h5>
-    <div class="row white">
+    <!-- witruimte -->
+    <div class="row center">
         <div class="col s12">
-            <p>De bondskampioenschappen worden landelijk georganiseerd.</p>
-            <p>In elke wedstrijdklasse nemen 24 sporters het tegen elkaar op, bestaande uit de 4 rayonkampioenen aangevuld met de 20 beste sporters uit de rayonkampioenschappen.</p>
-
-            <p>Voor aspiranten geldt een open inschrijving (iedereen die wil mag meedoen).</p>
-
-            <p>Overige details zijn gelijk aan de rayonkampioenschappen.</p>
+            <h4>Bondskampioenschappen (BK)</h4>
         </div>
     </div>
 
-    <p>&nbsp;</p>
-    <h5>Nederlandse kampioenschappen (NK)</h5>
-    <div class="row white">
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
         <div class="col s12">
-            <p>De winnaars in de hoogste wedstrijdklassen van het BK 25m 1pijl mogen zich Nederlands Kampioen noemen.</p>
-            <p>Het BK Indoor staat los van de Nederlandse Kampioenschappen Indoor (met open inschrijving).</p>
+            <div class="white" style="padding:10px">
+                <p>De bondskampioenschappen worden landelijk georganiseerd.</p>
+                <p>In elke wedstrijdklasse nemen 24 sporters het tegen elkaar op, bestaande uit de 4 rayonkampioenen aangevuld met de 20 beste sporters uit de rayonkampioenschappen.</p>
+
+                <p>Voor aspiranten geldt een open inschrijving (iedereen die wil mag meedoen).</p>
+
+                <p>Overige details zijn gelijk aan de rayonkampioenschappen.</p>
+            </div>
         </div>
     </div>
 
 
-    <p>&nbsp;</p>
-    <h5>Kalender</h5>
-    <div class="row white">
+    <!-- witruimte -->
+    <div class="row center">
         <div class="col s12">
-            <p>Als je voor het einde van de regiocompetitie begint met schieten, dan kan je individueel altijd nog aanmelden.</p>
+            <h4>Nederlandse kampioenschappen (NK)</h4>
+        </div>
+    </div>
 
-            <div class="table-wrap-5">
-                <table class="white">
-                    <thead>
-                        <tr>
-                            <th>Activiteit</th>
-                            <th>Indoor</th>
-                            <th>25m 1pijl</th>
-                        </tr>
-                    </thead>
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+                <p>De winnaars in de hoogste wedstrijdklassen van het BK 25m 1pijl mogen zich Nederlands Kampioen noemen.</p>
+                <p>Het BK Indoor staat los van de Nederlandse Kampioenschappen Indoor (met open inschrijving).</p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Kalender</h4>
+        </div>
+    </div>
+
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+                <p>Als je voor het einde van de regiocompetitie begint met schieten, dan kan je individueel altijd nog aanmelden.</p>
+
+                <table>
+                    <tr class="nhb-table-header">
+                        <td rowspan="7" class="nhb-table-zijrand"></td>
+                        <th style="width:33%">Activiteit</th>
+                        <th style="width:33%">Indoor</th>
+                        <th style="width:33%">25m 1pijl</th>
+                        <td rowspan="7" class="nhb-table-zijrand"></td>
+                    </tr>
 
                     <tr>
                         <td>Aanmelden</td>
@@ -398,18 +467,21 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
                         <td>mei / juni</td>
                     </tr>
 
-                </table>
-            </div>
+                    <tr>
+                        <td colspan="3" class="nhb-table-onderrand"></td>
+                    </tr>
 
-            <p>Om mee te doen in een team of het RK/BK moet je uiterlijk 15 juli lid zijn bij een vereniging.</p>
+                </table>
+
+                <p>Om mee te doen in een team of het RK/BK moet je uiterlijk 15 juli lid zijn bij een vereniging.</p>
+            </div>
         </div>
     </div>
 
+    <br>
+    <p class="center"><i>Er kunnen geen rechten ontleend worden aan de informatie op deze pagina. Het schiettechnisch reglement van de NHB is leidend.</i></p>
 
-
-    <p><br><br><i>Er kunnen geen rechten ontleend worden aan de informatie op deze pagina. Het schiettechnisch reglement van de NHB is leidend.</i></p>
-
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="info-competitie" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="info-competitie" %}
 
 {% endblock %}
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -63,7 +63,11 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         eval_open_taken(self.request)
 
-        menu_dynamics(self.request, context, actief='taken')
+        context['kruimels'] = (
+            (None, 'Taken'),
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -111,7 +115,12 @@ class DetailsView(UserPassesTestMixin, TemplateView):
 
         context['taak'] = taak
 
-        menu_dynamics(self.request, context, actief='taken')
+        context['kruimels'] = (
+            (reverse('Taken:overzicht'), 'Taken'),
+            (None, 'Details')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -28,9 +28,9 @@ class TestCompRegioCli(E2EHelpers, TestCase):
 
         boog_r = BoogType.objects.get(afkorting='R')
         boog_bb = BoogType.objects.get(afkorting='BB')
-        boog_ib = BoogType.objects.get(afkorting='IB')
+        boog_tr = BoogType.objects.get(afkorting='TR')
 
-        teamtype_r = TeamType.objects.get(afkorting='R')
+        teamtype_r = TeamType.objects.get(afkorting='R2')
 
         datum = datetime.date(year=2000, month=1, day=1)
 
@@ -60,7 +60,7 @@ class TestCompRegioCli(E2EHelpers, TestCase):
 
         indiv_r1 = IndivWedstrijdklasse.objects.filter(boogtype=boog_r)[1]
         indiv_r2 = IndivWedstrijdklasse.objects.filter(boogtype=boog_r)[2]
-        indiv_ib = IndivWedstrijdklasse.objects.filter(boogtype=boog_ib)[0]
+        indiv_tr = IndivWedstrijdklasse.objects.filter(boogtype=boog_tr)[0]
         indiv_bb = IndivWedstrijdklasse.objects.filter(boogtype=boog_bb)[0]
 
         klasse_r1 = CompetitieKlasse(
@@ -79,11 +79,11 @@ class TestCompRegioCli(E2EHelpers, TestCase):
                 indiv=indiv_bb,
                 min_ag=0.0).save()
 
-        klasse_ib = CompetitieKlasse(
+        klasse_tr = CompetitieKlasse(
                         competitie=comp,
-                        indiv=indiv_ib,
+                        indiv=indiv_tr,
                         min_ag=0.0)
-        klasse_ib.save()
+        klasse_tr.save()
 
         # maak een test vereniging
         ver = NhbVereniging()
@@ -113,12 +113,12 @@ class TestCompRegioCli(E2EHelpers, TestCase):
         sporterboog_r.save()
         self.sporterboog_r = sporterboog_r
 
-        sporterboog_ib = SporterBoog(
+        sporterboog_tr = SporterBoog(
                             sporter=sporter,
-                            boogtype=boog_ib,
+                            boogtype=boog_tr,
                             voor_wedstrijd=False)
-        sporterboog_ib.save()
-        self.sporterboog_ib = sporterboog_ib
+        sporterboog_tr.save()
+        self.sporterboog_tr = sporterboog_tr
 
         sporterboog_bb = SporterBoog(
                             sporter=sporter,
@@ -136,14 +136,14 @@ class TestCompRegioCli(E2EHelpers, TestCase):
         deelnemer_r.save()
         self.deelnemer_r = deelnemer_r
 
-        deelnemer_ib = RegioCompetitieSchutterBoog(
+        deelnemer_tr = RegioCompetitieSchutterBoog(
                             deelcompetitie=deelcomp,
-                            sporterboog=sporterboog_ib,
+                            sporterboog=sporterboog_tr,
                             bij_vereniging=ver,
-                            klasse=klasse_ib,
+                            klasse=klasse_tr,
                             aantal_scores=2)
-        deelnemer_ib.save()
-        self.deelnemer_ib = deelnemer_ib
+        deelnemer_tr.save()
+        self.deelnemer_tr = deelnemer_tr
 
         team = RegiocompetitieTeam(
                             deelcompetitie=deelcomp,
@@ -154,7 +154,7 @@ class TestCompRegioCli(E2EHelpers, TestCase):
         team.save()
         self.team = team
 
-        team.gekoppelde_schutters.add(deelnemer_ib)
+        team.gekoppelde_schutters.add(deelnemer_tr)
 
     def test_check_klasse(self):
         f1 = io.StringIO()
@@ -187,7 +187,7 @@ class TestCompRegioCli(E2EHelpers, TestCase):
 
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('[123456] Ramon' in f2.getvalue())
-        self.assertTrue('IB -> R' in f2.getvalue())
+        self.assertTrue('TR -> R' in f2.getvalue())
 
         self.sporter.achternaam = "de Tester met speciale naam"
         #           [123456] Ramon de                    ^
@@ -204,7 +204,7 @@ class TestCompRegioCli(E2EHelpers, TestCase):
 
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('met speciale..' in f2.getvalue())
-        self.assertTrue('IB -> ?' in f2.getvalue())
+        self.assertTrue('TR -> ?' in f2.getvalue())
 
     def test_boogtype_transfer(self):
         f1 = io.StringIO()
@@ -241,13 +241,13 @@ class TestCompRegioCli(E2EHelpers, TestCase):
 
         self.assertTrue('[ERROR] Sporter heeft geen wedstrijd boog als voorkeur' in f1.getvalue())
 
-        self.sporterboog_ib.voor_wedstrijd = True
-        self.sporterboog_ib.save()
+        self.sporterboog_tr.voor_wedstrijd = True
+        self.sporterboog_tr.save()
 
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('boogtype_transfer', '123456', 'IB', '18', stderr=f1, stdout=f2)
+            management.call_command('boogtype_transfer', '123456', 'TR', '18', stderr=f1, stdout=f2)
 
         self.assertTrue('[ERROR] Sporter is al ingeschreven met dat boog type' in f1.getvalue())
 
@@ -256,7 +256,7 @@ class TestCompRegioCli(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             management.call_command('boogtype_transfer', '123456', 'BB', '18', stderr=f1, stdout=f2)
 
-        self.assertTrue('[ERROR] Sporter heeft boog BB niet als voorkeur. Wel: IB' in f1.getvalue())
+        self.assertTrue('[ERROR] Sporter heeft boog BB niet als voorkeur. Wel: TR' in f1.getvalue())
 
         self.sporterboog_bb.voor_wedstrijd = True
         self.sporterboog_bb.save()
@@ -266,7 +266,7 @@ class TestCompRegioCli(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             management.call_command('boogtype_transfer', '123456', 'BB', '18', stderr=f1, stdout=f2)
 
-        # sporter is met R en IB ingeschreven
+        # sporter is met R en TR ingeschreven
         self.assertTrue('[ERROR] Sporter met meerdere inschrijvingen wordt niet ondersteund' in f1.getvalue())
 
         self.deelnemer_r.delete()

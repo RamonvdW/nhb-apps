@@ -1,12 +1,12 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block title %}Wijzig wedstrijd{% endblock %}
+{% block title %}Wijzig sessie{% endblock %}
 
 {% block pagina %}
 
@@ -24,149 +24,160 @@
         }
     </script>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="kalender-wijzig-sessie" %}
-
-    <h4>Wijzig wedstrijd sessie</h4>
-
-    <p>Op deze pagina kunnen de details van een wedstrijd sessie aangepast worden.</p>
-
-    <div class="row">
-        <!-- toon gegevens van de wedstrijd een blauwe box -->
-        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-            <div class="white-text nhb-blauw z-depth-2">
-
-                <div class="row small-row">
-                    <div class="col s3">Titel:</div>
-                    <div class="col s8">{{ wedstrijd.titel }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3">Vereniging:</div>
-                    <div class="col s8">{{ wedstrijd.organiserende_vereniging }}</div>
-                </div>
-
-                <div class="row small-row">
-                    {% if wed.datum.begin != wed.datum_einde %}
-                        <div class="col s3">Datums:</div>
-                        <div class="col s8">{{ wedstrijd.datum_begin }} - {{ wedstrijd.datum_einde }}</div>
-                    {% else %}
-                        <div class="col s3">Datum:</div>
-                        <div class="col s8">{{ wedstrijd.datum_begin }}</div>
-                    {% endif %}
-                </div>
-
-            </div>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Wijzig sessie</h3>
         </div>
     </div>
 
-    <form method="post" action="{{ url_opslaan }}">
-        {% csrf_token %}
-
-        <table class="white">
-
-            <tr>
-                <td>Datum:</td>
-                <td colspan="2">
-                    <ul>
-                        {% for opt in opt_datums %}
-                            <li>
-                                <label class="black-text" for="id_{{ opt.sel }}">
-                                    <input class="with-gap" type="radio" name="datum" value="{{ opt.sel }}" required id="id_{{ opt.sel }}"{% if opt.selected %} checked{% endif %} onchange="gewijzigd()">
-                                    <span>{{ opt.datum|date:"l j F Y" }}</span>
-                                </label>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </td>
-            </tr>
-
-            <tr>
-                <td>Begintijd:</td>
-                <td>
-                    <input id="tijd" name="tijd_begin" type="text" class="timepicker" onchange="gewijzigd()">
-                </td>
-                <td></td>
-            </tr>
-
-            <tr>
-                <td>Duur van de sessie (schatting):</td>
-                <td>
-                    <select name="duur" onchange="gewijzigd()">
-                        {% for opt in opt_duur %}
-                            <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
-                        {% endfor %}
-                    </select>
-                </td>
-                <td></td>
-            </tr>
-
-            <tr>
-                <td>Maximum aantal sporters:</td>
-                <td>
-                    <input type="number" min="1" max="999" name="max_sporters" value="{{ sessie.max_sporters }}" oninput="gewijzigd()">
-                </td>
-                <td></td>
-            </tr>
-
-            <tr>
-                <!-- inline-block gives vertical align top -->
-                <td style="display: inline-block">Wedstrijdklassen in deze sessie:</td>
-                <td>
-                    {% for klasse in opt_klassen_m %}
-                        <label class="black-text">
-                            <input type="checkbox" class="filled-in" name="{{ klasse.sel }}"{% if klasse.selected %} checked{% endif %} onchange="gewijzigd()">
-                            <span>{{ klasse.beschrijving }}</span>
-                        </label><br>
-                    {% endfor %}
-                </td>
-                <td>
-                    {% for klasse in opt_klassen_v %}
-                        <label class="black-text">
-                            <input type="checkbox" class="filled-in" name="{{ klasse.sel }}"{% if klasse.selected %} checked{% endif %} onchange="gewijzigd()">
-                            <span>{{ klasse.beschrijving }}</span>
-                        </label><br>
-                    {% endfor %}
-                </td>
-            </tr>
-
-        </table>
-
-        <br>
-
-        <div>
-            <a class="btn-nhb-blauw" href="{{ url_terug }}">
-                <i class="material-icons-round left">arrow_back</i>Terug (niets opslaan)</a>
-
-            <div class="fixed-action-btn" style="display: none">
-                <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
-                    <i class="material-icons-round left">check</i>Wijzigen opslaan</button>
-            </div>
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Titel</th>
+                    <td>{{ wedstrijd.titel }}</td>
+                </tr>
+                <tr>
+                    <th>Vereniging</th>
+                    <td>{{ wedstrijd.organiserende_vereniging }}</td>
+                </tr>
+                <tr>
+                    {% if wedstrijd.datum_begin != wedstrijd.datum_einde %}
+                        <th>Datums</th>
+                        <td>{{ wedstrijd.datum_begin }} - {{ wedstrijd.datum_einde }}</td>
+                    {% else %}
+                        <th>Datum:</th>
+                        <td>{{ wedstrijd.datum_begin }}</td>
+                    {% endif %}
+                </tr>
+            </table>
         </div>
+    </div>
 
-    </form>
 
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
 
-    <p>&nbsp;</p>
+            <!-- dialoog venster -->
+            <div class="white left-align z-depth-3">
+                <div style="padding:30px">
+                    <form method="post" action="{{ url_opslaan }}">
+                        {% csrf_token %}
+
+                        <table class="white">
+                            <tr>
+                                <th>Datum</th>
+                                <td colspan="2">
+                                    <ul>
+                                        {% for opt in opt_datums %}
+                                            <li>
+                                                <label class="black-text" for="id_{{ opt.sel }}">
+                                                    <input class="with-gap" type="radio" name="datum" value="{{ opt.sel }}" required id="id_{{ opt.sel }}"{% if opt.selected %} checked{% endif %} onchange="gewijzigd()">
+                                                    <span>{{ opt.datum|date:"l j F Y" }}</span>
+                                                </label>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Begintijd</th>
+                                <td>
+                                    <input id="tijd" name="tijd_begin" type="text" class="timepicker" onchange="gewijzigd()">
+                                </td>
+                                <td></td>
+                            </tr>
+
+                            <tr>
+                                <th>Duur van de sessie (schatting)</th>
+                                <td>
+                                    <select name="duur" onchange="gewijzigd()">
+                                        {% for opt in opt_duur %}
+                                            <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td></td>
+                            </tr>
+
+                            <tr>
+                                <th>Maximum aantal sporters</th>
+                                <td>
+                                    <input type="number" min="1" max="999" name="max_sporters" value="{{ sessie.max_sporters }}" oninput="gewijzigd()">
+                                </td>
+                                <td></td>
+                            </tr>
+
+                            <tr>
+                                <!-- inline-block gives vertical align top -->
+                                <th style="display: inline-block">Wedstrijdklassen in deze sessie</th>
+                                <td>
+                                    {% for klasse in opt_klassen_m %}
+                                        <label class="black-text">
+                                            <input type="checkbox" class="filled-in" name="{{ klasse.sel }}"{% if klasse.selected %} checked{% endif %} onchange="gewijzigd()">
+                                            <span>{{ klasse.beschrijving }}</span>
+                                        </label><br>
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% for klasse in opt_klassen_v %}
+                                        <label class="black-text">
+                                            <input type="checkbox" class="filled-in" name="{{ klasse.sel }}"{% if klasse.selected %} checked{% endif %} onchange="gewijzigd()">
+                                            <span>{{ klasse.beschrijving }}</span>
+                                        </label><br>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+
+                        </table>
+
+                        <!-- button -->
+                        <div class="fixed-action-btn" style="display: none">
+                            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                                <i class="material-icons-round left">check</i>Wijzigen opslaan</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
 
     <!-- verwijderen van de sessie -->
 
     {% if url_verwijder %}
-        <form method="post" action="{{ url_verwijder }}">
-            {% csrf_token %}
-            <input type="hidden" name="verwijder_sessie" value="ja">
-            <ul class="collapsible">
-                <li>
-                    <div class="collapsible-header white">
-                        <span>Klik eerst hier als je deze sessie wilt verwijderen</span>
+
+        <p style="margin-left:10px">
+            <a class="btn-nhb-blauw modal-trigger" href="#bevestig_verwijder_sessie">Verwijder deze sessie</a>
+        </p>
+
+        <div class="modal" id="bevestig_verwijder_sessie">
+            <div class="modal-content center">
+                <h5>Verwijder sessie?</h5>
+                <p>Wil je deze sessie echt verwijderen?</p>
+
+                <form method="post" action="{{ url_verwijder }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="verwijder_sessie" value="ja">
+
+                    <div class="modal-footer" style="text-align:center; display:block">
+                        <div style="display:inline-block; width:50%">
+                            <button class="btn-nhb-rood" type="submit">Ja</button>
+                        </div>
+                        <div style="display:inline-block; width:50%">
+                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                        </div>
                     </div>
-                    <div class="collapsible-body white">
-                        <p>Wil je deze sessie echt verwijderen?</p>
-                        <button class="btn-nhb-rood" type="submit">
-                            <i class="material-icons-round left">delete</i>Ja, verwijder</button>
-                    </div>
-                </li>
-            </ul>
-        </form>
+                </form>
+            </div>
+        </div>
+
     {% endif %}
 
     <!-- initialisatie van de datum/tijd kiezers -->
@@ -185,8 +196,6 @@
             })
     </script>
 
-{% endblock %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-wijzig-sessie" %}
 
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}

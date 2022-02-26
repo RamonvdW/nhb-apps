@@ -1,120 +1,102 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
-from django.http import HttpResponse, Http404
-from django.views.generic import ListView, TemplateView
+from django.http import Http404
+from django.views.generic import TemplateView, ListView
 from django.db.models import Q
-from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.menu import menu_dynamics_competitie
-from Functie.rol import Rollen, rol_get_huidige
-from Sporter.models import Sporter
-from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTeam
+from Plein.menu import menu_dynamics
+from .models import HistCompetitie, HistCompetitieIndividueel
 from .forms import FilterForm
-from decimal import Decimal
 from urllib.parse import quote_plus
-import csv
 
 TEMPLATE_HISTCOMP_ALLEJAREN = 'hist/histcomp_top.dtl'
 TEMPLATE_HISTCOMP_INDIV = 'hist/histcomp_indiv.dtl'
-TEMPLATE_HISTCOMP_TEAM = 'hist/histcomp_team.dtl'
-TEMPLATE_HISTCOMP_INTERLAND = 'hist/interland.dtl'
 
 RESULTS_PER_PAGE = 100
 
-KLASSEN_VOLGORDE = ("Recurve", "Compound", "Barebow", "Instinctive", "Longbow")
+KLASSEN_VOLGORDE = ("Recurve", "Compound", "Barebow", "Instinctive Bow", "Traditional", "Longbow")
+
+COMP_TYPE_STR = {
+    '18': 'Indoor',
+    '25': '25m 1pijl'
+}
 
 
-MINIMALE_LEEFTIJD_JEUGD_INTERLAND = 13      # alles jonger wordt niet getoond
-MAXIMALE_LEEFTIJD_JEUGD_INTERLAND = 20      # boven deze leeftijd Senior
-
-
-class HistCompAlleJarenView(ListView):
+class HistCompTop(TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_HISTCOMP_ALLEJAREN
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.seizoen = ""
-
-    @staticmethod
-    def _zet_op_volgorde_klassen(objs_unsorted):
-        # sorteer de klassen op de gewenste volgorde
-        # deze routine lijkt een beetje omslachtig, maar dat komt omdat QuerySet geen remove heeft
-        objs = list()
-        for klas in KLASSEN_VOLGORDE:
-            # zoek objecten met klassen die hier aan voldoen
-            for obj in objs_unsorted:
-                if klas in obj.klasse:
-                    objs.append(obj)
-            # for
-        # for
-        # voeg de rest ongesorteerd toe
-        for obj in objs_unsorted:
-            if obj not in objs:
-                objs.append(obj)
-        # for
-        return objs
-
-    def get_queryset(self):
-        """ called by the template system to get the queryset or list of objects for the template """
-
-        # zoek het nieuwste seizoen beschikbaar
-        qset = (HistCompetitie
-                .objects
-                .exclude(is_openbaar=False)
-                .order_by('-seizoen')
-                .distinct('seizoen'))
-        if len(qset) == 0:
-            # geen data beschikbaar
-            self.seizoen = ""
-            objs = list()
-        else:
-            # neem de data van het nieuwste seizoen
-            self.seizoen = qset[0].seizoen
-            objs_unsorted = HistCompetitie.objects.filter(seizoen=self.seizoen)
-            objs = self._zet_op_volgorde_klassen(objs_unsorted)
-            # bepaal voor elke entry een url om de uitslag te bekijken
-            for obj in objs:
-                if obj.is_team:
-                    urlconf = 'HistComp:team'
-                else:
-                    urlconf = 'HistComp:indiv'
-                obj.url = reverse(urlconf, kwargs={'histcomp_pk': obj.pk})
-            # for
-        return objs
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['seizoen'] = self.seizoen
+        # zoek het nieuwste seizoen beschikbaar
+        qset = (HistCompetitie
+                .objects
+                .exclude(is_openbaar=False)     # False vanaf einde regiocompetitie tot afsluiten BK/competitie
+                .order_by('-seizoen')
+                .distinct('seizoen'))
 
-        if HistCompetitie.objects.filter(seizoen=self.seizoen, is_team=True).count() > 0:
-            context['show_team'] = True
+        if len(qset) == 0:
+            context['geen_data'] = True
+        else:
+            # neem de data van het nieuwste seizoen
+            context['seizoen'] = seizoen = qset[0].seizoen
 
-        menu_dynamics_competitie(self.request, context, actief='histcomp')
+            qset = HistCompetitie.objects.filter(seizoen=seizoen, is_team=False).distinct('comp_type', 'klasse')
+
+            gevonden = dict()       # [(comp_type, klasse)] = HistCompetitie
+            for obj in qset:
+                tup = (obj.comp_type, obj.klasse)
+                gevonden[tup] = obj
+            # for
+
+            context['bogen_indiv_18'] = bogen_indiv_18 = list()
+            context['bogen_indiv_25'] = bogen_indiv_25 = list()
+
+            for klasse in KLASSEN_VOLGORDE:
+
+                try:
+                    histcomp = gevonden[('18', klasse)]
+                except KeyError:
+                    pass
+                else:
+                    tup = (klasse, reverse('HistComp:indiv', kwargs={'histcomp_pk': histcomp.pk}))
+                    bogen_indiv_18.append(tup)
+
+                try:
+                    histcomp = gevonden[('25', klasse)]
+                except KeyError:
+                    pass
+                else:
+                    tup = (klasse, reverse('HistComp:indiv', kwargs={'histcomp_pk': histcomp.pk}))
+                    bogen_indiv_25.append(tup)
+            # for
+
+        context['show_team'] = False
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (None, 'Uitslag vorig seizoen')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
-class HistCompBaseView(ListView):
-    """ Base view to handle database queries, filtering, pagination,
-        en load-all button.
-
-        Mandatory class variables to set:
-            reverse_name: HistComp:indiv or HistComp:team
-            is_team: True or False
-            query_class: HistCompetitieIndividueel or HistCompetitieTeam
+class HistCompIndivView(ListView):
+    """ View to handle database queries, filtering, pagination en load-all button.
     """
 
     # class variables shared by all instances
-    is_team = None                  # override in child class
-    reverse_name = None             # override in child class
-    query_class = None              # override in child class
+    # class variables shared by all instances
+    template_name = TEMPLATE_HISTCOMP_INDIV
+
     paginate_by = RESULTS_PER_PAGE  # enable Paginator built into ListView
     # ordering = ['rank']    # only works when pagination is active
 
@@ -137,7 +119,7 @@ class HistCompBaseView(ListView):
 
         # haal de GET parameters uit de request
         self.form = FilterForm(self.request.GET)
-        self.histcomp_pk = self.kwargs['histcomp_pk']
+        self.histcomp_pk = self.kwargs['histcomp_pk'][:6]       # afkappen voor de veiligheid
         self.base_url = reverse('HistComp:indiv', kwargs={'histcomp_pk': self.histcomp_pk})
         # pak het HistCompetitie object erbij
         try:
@@ -162,36 +144,24 @@ class HistCompBaseView(ListView):
                 except ValueError:
                     filter_is_nr = False
 
-                if self.is_team:
-                    if filter_is_nr:
-                        return self.query_class.objects.filter(
-                                    schutter_nr__exact=filter_nr,
-                                    histcompetitie=histcomp).order_by('rank')
-                    else:
-                        return self.query_class.objects.filter(
-                            vereniging_naam__icontains=self.get_filter,
-                            histcompetitie=histcomp).order_by('rank')
-                else:
-                    if filter_is_nr:
-                        if filter_nr < 100000:
-                            return self.query_class.objects.filter(
-                                                vereniging_nr__exact=filter_nr,
-                                                histcompetitie=histcomp).order_by('rank')
-                        else:
-                            return self.query_class.objects.filter(
-                                                schutter_nr__exact=filter_nr,
-                                                histcompetitie=histcomp).order_by('rank')
-                    else:
-                        return self.query_class.objects.filter(
-                                            Q(schutter_naam__icontains=self.get_filter) |
-                                            Q(vereniging_naam__icontains=self.get_filter),
+                if filter_is_nr:
+                    if filter_nr < 100000:
+                        return HistCompetitieIndividueel.objects.filter(
+                                            vereniging_nr__exact=filter_nr,
                                             histcompetitie=histcomp).order_by('rank')
+                    else:
+                        return HistCompetitieIndividueel.objects.filter(
+                                            schutter_nr__exact=filter_nr,
+                                            histcompetitie=histcomp).order_by('rank')
+                else:
+                    return HistCompetitieIndividueel.objects.filter(
+                                        Q(schutter_naam__icontains=self.get_filter) |
+                                        Q(vereniging_naam__icontains=self.get_filter),
+                                        histcompetitie=histcomp).order_by('rank')
 
-        self.all_count = self.query_class.objects.filter(
-                                histcompetitie=histcomp).count()
+        self.all_count = HistCompetitieIndividueel.objects.filter(histcompetitie=histcomp).count()
 
-        return self.query_class.objects.filter(
-                                histcompetitie=histcomp).order_by('rank')
+        return HistCompetitieIndividueel.objects.filter(histcompetitie=histcomp).order_by('rank')
 
     def _make_link_urls(self, context):
         # voorbereidingen voor een regel met volgende/vorige links
@@ -240,7 +210,7 @@ class HistCompBaseView(ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        self.histcomp.comp_type_str = HistCompetitie.comptype2str[self.histcomp.comp_type]
+        self.histcomp.comp_type_str = COMP_TYPE_STR[self.histcomp.comp_type]
         context['histcomp'] = self.histcomp
         context['form'] = self.form
         context['filter_url'] = self.base_url
@@ -260,163 +230,21 @@ class HistCompBaseView(ListView):
             context['all_count'] = self.all_count
         # else: we laten de 'all' lijst zien dus laat de 'all' knop weg
 
-        if not self.is_team:
-            for obj in context['object_list']:
-                obj.schutter_nr_str = str(obj.schutter_nr)
-            # for
+        for obj in context['object_list']:
+            obj.schutter_nr_str = str(obj.schutter_nr)
+        # for
 
-        menu_dynamics_competitie(self.request, context, actief='histcomp')
+        context['aantal_regels'] = 2 + len(context['object_list'])
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('HistComp:top'), 'Uitslag vorig seizoen'),
+            (None, COMP_TYPE_STR[self.histcomp.comp_type]),
+            (None, self.histcomp.klasse)
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
-
-class HistCompIndivView(HistCompBaseView):
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_HISTCOMP_INDIV
-    reverse_name = 'HistComp:indiv'
-    query_class = HistCompetitieIndividueel
-    is_team = False
-
-
-class HistCompTeamView(HistCompBaseView):
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_HISTCOMP_TEAM
-    reverse_name = 'HistComp:team'
-    query_class = HistCompetitieTeam
-    is_team = True
-
-
-class InterlandView(UserPassesTestMixin, TemplateView):
-
-    """ Deze view geeft de resultaten van de 25m1pijl die nodig zijn voor de Interland """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_HISTCOMP_INTERLAND
-    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu == Rollen.ROL_BB
-
-    @staticmethod
-    def maak_data(context):
-
-        # maak een cache aan van leden
-        lid_nr2sporter = dict()  # [lid_nr] = Sporter
-        for sporter in (Sporter
-                        .objects
-                        .filter(is_actief_lid=True)
-                        .select_related('bij_vereniging')
-                        .all()):
-            lid_nr2sporter[sporter.lid_nr] = sporter
-        # for
-
-        context['jeugd_min'] = MINIMALE_LEEFTIJD_JEUGD_INTERLAND
-        context['jeugd_max'] = MAXIMALE_LEEFTIJD_JEUGD_INTERLAND
-
-        context['klassen'] = list()
-
-        # zoek het nieuwste seizoen beschikbaar
-        qset = HistCompetitie.objects.order_by('-seizoen').distinct('seizoen')
-        if len(qset) > 0:
-            # neem de data van het nieuwste seizoen
-            context['seizoen'] = seizoen = qset[0].seizoen
-
-            # bepaal het jaar waarin de wedstrijdleeftijd bepaald moet worden
-            # dit is het tweede jaar van het seizoen
-            context['wedstrijd_jaar'] = wedstrijd_jaar = int(seizoen.split('/')[1])
-
-            for klasse in (HistCompetitie
-                           .objects
-                           .filter(comp_type='25', seizoen=seizoen, is_team=False)):
-                context['klassen'].append(klasse)
-
-                klasse.url_download = reverse('HistComp:interland-als-bestand',
-                                              kwargs={'klasse_pk': klasse.pk})
-
-                # zoek alle records erbij met minimaal 5 scores
-                klasse.indiv = list()
-
-                for indiv in (HistCompetitieIndividueel
-                              .objects
-                              .filter(histcompetitie=klasse,
-                                      gemiddelde__gt=Decimal('0.000'))
-                              .order_by('-gemiddelde')):
-
-                    if indiv.tel_aantal_scores() >= 5:
-
-                        # zoek de sporter erbij
-                        try:
-                            sporter = lid_nr2sporter[indiv.schutter_nr]
-                        except KeyError:
-                            sporter = None
-
-                        if sporter:
-                            indiv.sporter = sporter
-                            indiv.wedstrijd_leeftijd = sporter.bereken_wedstrijdleeftijd(wedstrijd_jaar)
-                            if indiv.wedstrijd_leeftijd >= MINIMALE_LEEFTIJD_JEUGD_INTERLAND:
-                                if indiv.wedstrijd_leeftijd <= MAXIMALE_LEEFTIJD_JEUGD_INTERLAND:
-                                    indiv.leeftijd_str = "%s (jeugd)" % indiv.wedstrijd_leeftijd
-                                else:
-                                    indiv.leeftijd_str = "Senior"
-
-                                klasse.indiv.append(indiv)
-            # for
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        self.maak_data(context)
-
-        menu_dynamics_competitie(self.request, context, actief='histcomp')
-        return context
-
-
-class InterlandAlsBestandView(InterlandView):
-
-    """ Deze klasse wordt gebruikt om de interland deelnemers lijst
-        te downloaden als csv bestand
-    """
-
-    def get(self, request, *args, **kwargs):
-
-        try:
-            klasse_pk = int(kwargs['klasse_pk'][:6])            # afkappen voor de veiligheid
-            klasse = HistCompetitie.objects.get(pk=klasse_pk)
-        except (ValueError, HistCompetitie.DoesNotExist):
-            raise Http404('Klasse niet gevonden')
-
-        context = dict()
-        self.maak_data(context)
-
-        indivs = None
-        for context_klasse in context['klassen']:
-            if context_klasse.pk == klasse.pk:
-                indivs = context_klasse.indiv
-                break   # from the for
-        # for
-
-        if indivs is None:
-            raise Http404('Geen sporters gevonden')
-
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="interland.csv"'
-
-        writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
-        writer.writerow(['Gemiddelde', 'Wedstrijdleeftijd', 'Geslacht', 'NHB nummer', 'Naam', 'Vereniging'])
-
-        for indiv in indivs:
-            writer.writerow([indiv.gemiddelde,
-                             indiv.leeftijd_str,
-                             indiv.sporter.geslacht,
-                             indiv.sporter.lid_nr,
-                             indiv.sporter.volledige_naam(),
-                             indiv.sporter.bij_vereniging])
-        # for
-
-        return response
 
 # end of file

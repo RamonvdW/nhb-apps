@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -26,10 +26,15 @@ class LedenLijstView(UserPassesTestMixin, ListView):
     template_name = TEMPLATE_LEDENLIJST
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+        self.huidige_jaar = 0
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        _, functie_nu = rol_get_huidige_functie(self.request)
-        return functie_nu and functie_nu.rol in ('SEC', 'HWL', 'WL')
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.functie_nu and self.functie_nu.rol in ('SEC', 'HWL', 'WL')
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -40,9 +45,17 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         now = timezone.localtime(now)  # convert to active timezone (say Europe/Amsterdam)
         huidige_jaar = now.year
         jeugdgrens = huidige_jaar - MAXIMALE_LEEFTIJD_JEUGD
-        self._huidige_jaar = huidige_jaar
+        self.huidige_jaar = huidige_jaar
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        lkls = list()
+        for lkl in (LeeftijdsKlasse  # pragma: no branch
+                    .objects
+                    .filter(geslacht='M',
+                            min_wedstrijdleeftijd=0)    # exclude veteraan, master
+                    .order_by('volgorde')):             # aspirant eerst
+
+            lkls.append(lkl)
+        # for
 
         prev_lkl = None
         prev_wedstrijdleeftijd = 0
@@ -51,9 +64,12 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         # sorteer op geboorte jaar en daarna naam
         for obj in (Sporter
                     .objects
-                    .filter(bij_vereniging=functie_nu.nhb_ver)
+                    .filter(bij_vereniging=self.functie_nu.nhb_ver)
                     .filter(geboorte_datum__year__gte=jeugdgrens)
-                    .order_by('-geboorte_datum__year', 'achternaam', 'voornaam')):
+                    .select_related('account')
+                    .order_by('-geboorte_datum__year',
+                              'achternaam',
+                              'voornaam')):
 
             # de wedstrijdleeftijd voor dit hele jaar
             wedstrijdleeftijd = huidige_jaar - obj.geboorte_datum.year
@@ -64,12 +80,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
-                for lkl in (LeeftijdsKlasse                         # pragma: no branch
-                            .objects
-                            .filter(geslacht='M',
-                                    min_wedstrijdleeftijd=0)        # exclude veteraan, master
-                            .order_by('volgorde')):                 # aspirant eerst
-
+                for lkl in lkls:
                     if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
                         obj.leeftijdsklasse = lkl
                         # stop op de eerste match: aspirant, cadet, junior, senior
@@ -82,14 +93,25 @@ class LedenLijstView(UserPassesTestMixin, ListView):
             objs.append(obj)
         # for
 
+        lkls = list()
+        for lkl in (LeeftijdsKlasse  # pragma: no branch
+                    .objects.filter(geslacht='M',
+                                    max_wedstrijdleeftijd=0)    # skip jeugd klassen
+                    .order_by('-volgorde')):                    # volgorde: veteraan, master, senior
+
+            lkls.append(lkl)
+        # for
+
         # volwassenen: sorteer op naam
         prev_lkl = None
         prev_wedstrijdleeftijd = 0
         for obj in (Sporter
                     .objects
-                    .filter(bij_vereniging=functie_nu.nhb_ver)
+                    .filter(bij_vereniging=self.functie_nu.nhb_ver)
                     .filter(geboorte_datum__year__lt=jeugdgrens)
-                    .order_by('achternaam', 'voornaam')):
+                    .select_related('account')
+                    .order_by('achternaam',
+                              'voornaam')):
 
             # de wedstrijdleeftijd voor dit hele jaar
             wedstrijdleeftijd = huidige_jaar - obj.geboorte_datum.year
@@ -99,10 +121,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
-                for lkl in (LeeftijdsKlasse                                 # pragma: no branch
-                            .objects.filter(geslacht='M',
-                                            max_wedstrijdleeftijd=0)        # skip jeugd klassen
-                            .order_by('-volgorde')):                        # volgorde: veteraan, master, senior
+                for lkl in lkls:
                     if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
                         obj.leeftijdsklasse = lkl
                         # stop op de eerste match: veteraan, master, senior
@@ -121,8 +140,9 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         # zoek de laatste-inlog bij elk lid
         for sporter in objs:
             # HWL mag de voorkeuren van de sporters aanpassen
-            if rol_nu == Rollen.ROL_HWL:
-                sporter.wijzig_url = reverse('Sporter:voorkeuren-sporter', kwargs={'sporter_pk': sporter.pk})
+            if self.rol_nu == Rollen.ROL_HWL:
+                sporter.wijzig_url = reverse('Sporter:voorkeuren-sporter',
+                                             kwargs={'sporter_pk': sporter.pk})
 
             if sporter.account:
                 if sporter.account.last_login:
@@ -139,8 +159,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-        context['nhb_ver'] = functie_nu.nhb_ver
+        context['nhb_ver'] = self.functie_nu.nhb_ver
 
         # splits the ledenlijst op in jeugd, senior en inactief
         jeugd = list()
@@ -158,10 +177,15 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         context['leden_jeugd'] = jeugd
         context['leden_senior'] = senior
         context['leden_inactief'] = inactief
-        context['wedstrijdklasse_jaar'] = self._huidige_jaar
-        context['toon_wijzig_kolom'] = (rol_nu == Rollen.ROL_HWL)
+        context['wedstrijdklasse_jaar'] = self.huidige_jaar
+        context['toon_wijzig_kolom'] = (self.rol_nu == Rollen.ROL_HWL)
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (None, 'Ledenlijst')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 

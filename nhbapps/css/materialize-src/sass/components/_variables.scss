@@ -38,19 +38,22 @@ $primary-color: #0aa0e1 !default;             // blauw
 $primary-color-light: #5ebde7 !default;
 $primary-color-dark: #03628c !default;
 
-//$secondary-color: #f94137 !default;         // rood
+$secondary-color: #f94137 !default;           // rood
 //$secondary-color: #0aa0e1 !default;         // medium blauw
-$secondary-color: #03628c !default;           // donker blauw
+//$secondary-color: #03628c !default;         // donker blauw
 
 $success-color: color("green", "base") !default;
 $error-color: color("red", "base") !default;
 $link-color: $primary-color-dark !default;
 
+$off-black: rgba(0, 0, 0, 0.87) !default;
+
 
 // 2. Badges
 // ==========================================================================
 
-$badge-bg-color: $secondary-color !default;
+//$badge-bg-color: $secondary-color !default;
+$badge-bg-color: $primary-color !default;
 $badge-height: 22px !default;
 
 
@@ -167,9 +170,11 @@ $timepicker-clock-plate-bg: #eee !default;
 // 9. Dropdown
 // ==========================================================================
 
-$dropdown-bg-color: #fff !default;
+//$dropdown-bg-color: #fff !default;
+$dropdown-bg-color: $nhb-grijs !default;
 $dropdown-hover-bg-color: #eee !default;
-$dropdown-color: $secondary-color !default;
+//$dropdown-color: $secondary-color !default;
+$dropdown-color: black !default;
 $dropdown-item-height: 50px !default;
 
 
@@ -178,7 +183,7 @@ $dropdown-item-height: 50px !default;
 
 // Text Inputs + Textarea
 $input-height: 3rem !default;
-$input-border-color: color("grey", "base") !default;
+$input-border-color: #757575 !default;              // meer contrast op wit dan: color("grey", "base") !default;
 $input-border: 1px solid $input-border-color !default;
 $input-background: #fff !default;
 $input-error-color: $error-color !default;
@@ -189,8 +194,8 @@ $input-margin-bottom: 8px;
 $input-margin: 0 0 $input-margin-bottom 0 !default;
 $input-padding: 0 !default;
 $label-font-size: .8rem !default;
-$input-disabled-color: rgba(0,0,0, .42) !default;
-$input-disabled-solid-color: #949494 !default;
+$input-disabled-color: rgba(0,0,0, .75) !default;   // meer contrast op wit dan: rgba(0,0,0, .42) !default;
+$input-disabled-solid-color: #757575 !default;      // meer contrast op wit dan: #949494 !default;
 $input-disabled-border: 1px dotted $input-disabled-color !default;
 $input-invalid-border: 1px solid $input-error-color !default;
 $input-icon-size: 2rem;
@@ -267,10 +272,12 @@ $element-bottom-margin: ($gutter-width*2)/3 !default;
 
 $navbar-height: 64px !default;
 $navbar-line-height: $navbar-height !default;
-$navbar-height-mobile: 56px !default;
+//$navbar-height-mobile: 56px !default;
+$navbar-height-mobile: $navbar-height;
 $navbar-line-height-mobile: $navbar-height-mobile !default;
 $navbar-font-size: 1rem !default;
-$navbar-font-color: #fff !default;
+//$navbar-font-color: #fff !default;
+$navbar-font-color: $off-black;
 $navbar-brand-font-size: 2.1rem !default;
 
 
@@ -329,7 +336,6 @@ $toast-action-color: #eeff41;
 // ==========================================================================
 
 $font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif !default;
-$off-black: rgba(0, 0, 0, 0.87) !default;
 // Header Styles
 $h1-fontsize: 4.2rem !default;
 $h2-fontsize: 3.56rem !default;

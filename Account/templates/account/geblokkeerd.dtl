@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -8,12 +8,27 @@
 
 {% block title %}Inlog mislukt{% endblock %}
 
+{% block broodkruimels %}
+{% endblock %}
+
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-geblokkeerd" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Inlog mislukt</h3>
+        </div>
+    </div>
 
-    <h4>Inlog mislukt</h4>
+    <!-- blauw balk met wit informatie vlak -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <div class="white" style="padding:10px">
+                <p>Het account {{ account.username }} is geblokkeerd tot {{ account.is_geblokkeerd_tot }} omdat te vaak een verkeerd wachtwoord ingevoerd is.</p>
+            </div>
+        </div>
+    </div>
 
-    <p>Het account {{ account.username }} is geblokkeerd tot {{ account.is_geblokkeerd_tot }} omdat te vaak een verkeerd wachtwoord ingevoerd is.</p>
+    {% include 'feedback/sidebar.dtl' with op_pagina="account-geblokkeerd" %}
 
 {% endblock %}

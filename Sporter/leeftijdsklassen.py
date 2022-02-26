@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """ ondersteuning voor de leeftijdsklassen binnen de NHB applicaties """
 
 from django.utils import timezone
-from BasisTypen.models import LeeftijdsKlasse
+from BasisTypen.models import LeeftijdsKlasse, GESLACHT_ALLE
 
 
 def alle_wedstrijdleeftijden_groepen():
@@ -15,13 +15,13 @@ def alle_wedstrijdleeftijden_groepen():
 
         Output: lijst van tuples: (min_leeftijd, max_leeftijd, leeftijdklasse, wedstrijdklasse),
 
-        [ ( 0,  11, 'Aspirant', 'Aspiranten <11 jaar'),
-          (12,  13, 'Aspirant', 'Aspiranten 11-12 jaar'),
-          (14,  17, 'Cadet',    'Cadetten'),
-          (18,  20, 'Junior',   'Junioren'),
-          (21,  49, 'Senior',   'Senioren'),
-          (50,  59, 'Master',   'Masters'),
-          (60, 150, 'Veteraan', 'Veteranen')
+        [ ( 0,  11, 'Onder 12', 'Onder 12 (aspiranten)'),
+          (12,  13, 'Onder 14', 'Onder 14 (aspiranten)'),
+          (14,  17, 'Onder 18', 'Onder 18 (cadetten)'),
+          (18,  20, 'Onder 21', 'Onder 21 (junioren)'),
+          (21,  49, '21+',      '21+ (senioren)'),
+          (50,  59, '50+',      '50+ (masters)'),
+          (60, 150, '60+',      '60+ (veteranen)')
         ]
     """
 
@@ -31,7 +31,7 @@ def alle_wedstrijdleeftijden_groepen():
     min_wedstrijdleeftijd = 0
     for lkl in (LeeftijdsKlasse
                 .objects
-                .filter(geslacht='M')
+                .filter(geslacht=GESLACHT_ALLE)
                 .order_by('volgorde')):
 
         if lkl.min_wedstrijdleeftijd == 0:
@@ -49,10 +49,7 @@ def alle_wedstrijdleeftijden_groepen():
 
     output = list()
     for lkl in alle_lkl:
-        tekst = lkl.beschrijving.split(', ')[0]
-        if lkl.klasse_kort == 'Aspirant':
-            tekst += ' jaar'            # Aspirant 11-12 jaar
-        tup = (lkl.min_wedstrijdleeftijd, lkl.max_wedstrijdleeftijd, lkl.klasse_kort, tekst)
+        tup = (lkl.min_wedstrijdleeftijd, lkl.max_wedstrijdleeftijd, lkl.klasse_kort, lkl.beschrijving)
         # print('lkl: %s' % repr(tup))
         output.append(tup)
     # for

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,10 +13,9 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (LAAG_REGIO, LAAG_RK, DeelCompetitie,
                                DeelcompetitieKlasseLimiet,
                                KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE)
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Handleiding.views import reverse_handleiding
-from Overig.background_sync import BackgroundSync
+from Plein.menu import menu_dynamics
 import csv
 
 
@@ -93,6 +92,9 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         context['regio_status'] = regio_status
 
         context['deelcomp_rk'] = deelcomp_rk
+
+        comp = deelcomp_rk.competitie
+        # TODO: check competitie fase
 
         if not deelcomp_rk.heeft_deelnemerslijst:
             # situatie 1)
@@ -178,7 +180,13 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
         context['wiki_rk_schutters'] = reverse_handleiding(self.request, settings.HANDLEIDING_RK_SELECTIE)
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp_rk.competitie.pk)
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'RK selectie')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 

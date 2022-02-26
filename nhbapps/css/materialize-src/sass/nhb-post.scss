@@ -1,5 +1,5 @@
 
-// Copyright (c) 2020-2021 Ramon van der Winkel.
+// Copyright (c) 2020-2022 Ramon van der Winkel.
 // All rights reserved.
 // Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,10 +14,36 @@
     color: $off-black;
 }
 
-.nhb-blauw-text {
-    color: $nhb-blauw-color;
+/* kleuren */
+.nhb-blauw {
+    background-color: $primary-color-dark;     /* NHB donker blauw */
 }
 
+.nhb-blauw-hoofd {
+    background-color: $primary-color;          /* NHB medium blauw */
+}
+
+.nhb-blauw-steun {
+    background-color: $primary-color-light;    /* NHB lightblauw */
+}
+
+.nhb-rood {
+    background-color: $secondary-color;        /* NHB hoofdkleur oranje */
+}
+
+.nhb-grijs {
+    /* standaard NHB achtergrondkleur is wat te donker
+    background-color: #f5f5f5;      grey lighten-4 == NHB achtergrondkleur */
+    background-color: #eee;      /* grey lighten-3 */
+}
+
+.nhb-blauw-text {
+    color: $primary-color;
+}
+
+.nhb-rood-text {
+    color: $secondary-color;
+}
 
 //-----------------------------------
 // blauwe button
@@ -78,8 +104,9 @@
 
   // laat de kaartjes naast elkaar komen (in het display=block van de row)
   display: inline-flex;
-  margin-right: 30px;
-  padding: 2px;
+  margin-right: 15px;
+  margin-left: 15px;
+  padding: 3px;
   border-radius: 5px;
 
   // forceer een vaste breedte van de kaartjes
@@ -90,7 +117,7 @@
 
   &:hover {
     padding: 0;
-    border-width: 2px;
+    border-width: 3px;
     border-style: solid;
     border-color: $nhb-card-focus-border-color;
   }
@@ -122,6 +149,46 @@
 }
 
 
+//--------------------------------------
+// blauw vlak op de witte achtergrond
+// voor het groeperen van content
+//
+.row-nhb-blauw {
+  @extend .row;
+  background-color: $primary-color;          /* NHB medium blauw */
+  color: white;
+  text-align: center;
+  padding: 50px;
+
+  @media #{$small-and-down} {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+
+//-----------------------------------
+// tabel decoration
+// blauw rand rondom + header
+//
+.nhb-table-header {
+  @extend .nhb-blauw-hoofd;
+  color: white;
+}
+
+.nhb-table-zijrand {
+  @extend .nhb-blauw-hoofd;
+  padding: 0;
+  width: 3px;
+}
+
+.nhb-table-onderrand {
+  @extend .nhb-blauw-hoofd;
+  padding: 0px;
+  height: 3px;
+}
+
+
 
 //-----------------------------------
 // grote klikbare oppervlakten
@@ -148,14 +215,245 @@
 
 
 //-----------------------------------
-// sidenav
+// broodkruimels
 //
-.sidenav {
-  @extend .sidenav;
+.broodkruimels-back {
+  padding: 3px;
+  margin-right:5px;
+  //font-size: 11px;
+  //vertical-align: middle;
+  border: 1px solid #03628c;
+  border-radius: $button-radius;
+  display: inline-block;
+  -webkit-tap-highlight-color: transparent; // Gets rid of tap active state
+  outline: 0;
+  box-shadow: none;
+  background-color: transparent;
+  color: #03628c;         // donker blauw;
+  cursor: pointer;
 
-  li > a {
-    &:hover { background-color: rgba(0,0,0,.15); }
+  &:focus, &:hover {
+    border: 2px solid #03628c;
+    padding: 2px;
+    transition: .25s;
   }
+}
+
+.broodkruimels-nolink {
+  //font-size:13px;
+  margin-right:5px;
+}
+
+.broodkruimels-link {
+  //font-size:13px;
+  margin-right:5px;
+
+  &:focus, &:hover {
+    color: #03628c;
+    text-decoration:underline;
+    transition: .25s;
+  }
+}
+
+/* fonts */
+html, button, input, optgroup, select, textarea {
+  font-family: 'Open Sans', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Fira Sans', sans-serif;
+}
+
+.page-banner {
+  color: $secondary-color;
+}
+
+a {
+    color: inherit;
+}
+
+.selectie-knoppen {
+    display: block;
+    margin-bottom: 10px;
+}
+
+
+/* pre-formatted / code block in de handleiding */
+.handleiding_code {
+    padding: 10px;
+    color: #000;             /* donker zwart */
+    background-color: #eee;  /* nhb-grijs */
+}
+
+/* gebruik: extra ruimte rond dicht op elkaar geplaatst buttons
+   die bij wrap elkaar zouden raken */
+.margin-5 {
+    margin: 5px;
+}
+
+/* voor doorkrassen score */
+del {
+    text-decoration: line-through;
+    text-decoration-style: double;
+    text-decoration-color: #0aa0e1;     /* NHB blauw default */
+}
+
+.decorate-nhb-rood {
+    text-decoration-color: #f94137;     /* NHB rood */
+}
+
+/* voor wie-schiet-waar */
+.kruisje {
+    text-align: center;
+    border-left: 1px black dashed;
+    border-right: 1px black dashed;
+    padding-left: 1px;
+    padding-right: 1px;
+}
+
+/* lagere regel in een grid */
+.small-row {
+    padding: 5px 10px 5px 10px;
+    margin-bottom: 0;
+}
+
+/* smal in de breedte */
+.smal {
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.in-table-icon {
+    vertical-align: middle;     /* betere alignment met text in andere td */
+    font-size: 22px;            /* deze maat aligned beter met de tekst */
+}
+
+/* invoerveld voor een zoek / filter veld boven aan de tabel */
+.table-filter {
+    padding: 0 5px;     /* deze padding komt voor en na het invoer veld */
+}
+
+input.table-filter {
+    font-size: 14px;
+    padding: 0;
+}
+
+/* gebruik voor witte achtergrond achter blok buttons */
+.shrink-wrap-5 {
+    display: inline-block;
+    padding: 5px;
+}
+
+/* een grijs kader om een witte tabel die in een wit vlak staat */
+.table-wrap-5 {
+    background-color: #eee;  /* nhb-grijs */
+    padding: 5px;
+    border-radius: 2px;
+}
+
+/* site feedback floater */
+.site-sidebar-box {
+    width: 180px;
+    float: left;
+    text-align: center;
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background-color: #fff;     /* wit */
+}
+
+/* de binnenkant van de feedback floater */
+.site-feedback {
+    display: inline-block;
+    font-size: 12px;
+}
+
+/* padding rond de main content */
+#content {
+    padding: 20px;
+}
+
+/* reduceer de padding rond de content op echt kleine schermen */
+@media only screen and (max-width: 500px) {
+    #content {
+        padding: 5px;
+    }
+}
+
+
+/*
+// -------------
+// KEEP IN SYNC
+// - this code: media query to show/hide labels
+// - site_layout.dtl: javascript checks for menu visible/hidden with media query
+// - materialize.js: cut-off point to show/hide sidebar (menu)
+// - variables.css: media query ranges
+// -------------
+*/
+
+/* toon content tegen de linker kan als het menu niet in beeld is */
+@media only screen and (max-width: 1020px) {
+    #container {
+        padding-left:0;
+    }
+}
+
+/* small: <=720 */
+@media only screen and (min-width: 721px) {
+    .hide-unless-small {
+        display: none;
+    }
+}
+
+/* medium: 720-1020 */
+@media only screen and (max-width : 720px) {
+    .hide-unless-medium {
+        display: none;
+    }
+}
+@media only screen and (min-width: 1021px) {
+    .hide-unless-medium {
+        display: none;
+    }
+}
+
+/* large: 1021-1350 */
+@media only screen and (max-width: 1020px) {
+    .hide-unless-large {
+        display: none;
+    }
+}
+@media only screen and (min-width: 1351px) {
+    .hide-unless-large {
+        display: none;
+    }
+}
+
+/* xlarge: >1330 */
+@media only screen and (max-width : 1350px) {
+    .hide-unless-xlarge {
+        display: none;
+    }
+}
+
+
+/* print support
+   without this, the content is one long page that doesn't fit on a printer page
+*/
+@media print {
+    // simulate "large" display when printing
+    .hide-unless-small, .hide-on-med-only, .hide-on-med-and-up, .hide-on-large-only, .hide-on-extra-large-only, .hide-on-large-and-down {
+        display: none !important;
+    }
+    .show-on-medium-and-up, .show-on-large {
+        display: block !important;
+    }
+
+    // hide the size labels
+    .hide-unless-small, .hide-unless-medium, .hide-unless-large, .hide-unless-xlarge {
+        display: none;
+    }
 }
 
 // end of file

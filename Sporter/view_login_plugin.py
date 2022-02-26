@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.shortcuts import render
+from django.contrib.auth import logout
 from Account.views import account_add_plugin_login
 from Logboek.models import schrijf_in_logboek
 from Plein.menu import menu_dynamics
@@ -39,7 +40,12 @@ def sporter_login_plugin(request, from_ip, account):
 
                 my_logger.info('%s LOGIN Geblokkeerde inlog voor inactief account %s' % (from_ip, repr(account.username)))
 
-                context = {'account': account}
+                context = {'account': account, 'verberg_login_knop': True}
+
+                # integratie met de authenticatie laag van Django
+                # dit wist ook de session data gekoppeld aan het cookie van de gebruiker
+                logout(request)
+
                 menu_dynamics(request, context)
                 return render(request, TEMPLATE_NHBSTRUCTUUR_IS_INACTIEF, context)
 

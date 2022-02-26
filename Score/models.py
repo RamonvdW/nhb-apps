@@ -21,9 +21,9 @@ SCORE_WAARDE_VERWIJDERD = 32767
 # gebruik 'geen score' om bij te houden dat gekozen is deze sporterboog te markeren als 'niet geschoten'
 # zonder een echt score record aan te maken. Elke sporterboog heeft genoeg aan 1 'geen score' record.
 SCORE_TYPE_SCORE = 'S'
-SCORE_TYPE_INDIV_AG = 'I'
-SCORE_TYPE_TEAM_AG = 'T'
-SCORE_TYPE_GEEN = 'G'
+SCORE_TYPE_INDIV_AG = 'I'       # voor de bondscompetities
+SCORE_TYPE_TEAM_AG = 'T'        # voor de bondscompetities
+SCORE_TYPE_GEEN = 'G'           # niet geschoten
 
 SCORE_CHOICES = (
     (SCORE_TYPE_SCORE, 'Score'),

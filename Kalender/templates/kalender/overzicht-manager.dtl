@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,43 +10,55 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="kalender-overzicht-manager" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Wedstrijdkalender</h3>
+            <p>Beheer door de Manager Competitiezaken</p>
+            <p>Wedstrijden worden aangemaakt door de verenigingen</p>
+        </div>
+    </div>
 
-    <h4>Manager Wedstrijdkalender</h4>
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Wanneer</th>
+                        <th>Vereniging</th>
+                        <th>Status</th>
+                        <th>Discipline</th>
+                        <th class="hide-on-small-only">Titel</th>
+                        <th><!-- kolom voor knoppen --></th>
+                    </tr>
+                </thead>
 
-    <p>Via deze pagina kan de Manager Competitiezaken de wedstrijdkalender beheren.</p>
-    <p>Wedstrijden worden aangemaakt door de verenigingen.</p>
+                {% for wed in wedstrijden %}
+                    <tr>
+                        <td>{{ wed.datum_begin }}{% if wed.datum_begin != wed.datum_einde %} - {{ wed.datum_einde }}{% endif %}</td>
+                        <td>[{{ wed.organiserende_vereniging.ver_nr }}]<span class="hide-on-med-and-down"> {{ wed.organiserende_vereniging.naam }}</span></td>
+                        <td{% if wed.status_val_op %} class="red-text"{% endif %}>{{ wed.status_str }}</td>
+                        <td>{{ wed.disc_str }}</td>
+                        <td class="hide-on-small-only">{% if wed.titel %}{{ wed.titel }}{% else %}<i class="nhb-blauw-text">Nog niet ingevuld</i>{% endif %}</td>
+                        <td>
+                            <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
+                                <a class="btn-nhb-rood" href="{{ wed.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">
+                                    <i class="material-icons-round">edit</i></a>
+                                <a class="btn-nhb-rood" href="{{ wed.url_sessies}}" style="padding:0; width:35px">
+                                    <i class="material-icons-round" style="font-size:33px">edit_note</i></a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6"><i>Geen wedstrijden gevonden</i></td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
 
-    <table class="white">
-        <thead>
-            <tr>
-                <th>Wanneer</th>
-                <th>Vereniging</th>
-                <th>Status</th>
-                <th>Discipline</th>
-                <th>Titel</th>
-                <th><!-- kolom voor knoppen --></th>
-            </tr>
-        </thead>
-
-        {% for wed in wedstrijden %}
-            <tr>
-                <td>{{ wed.datum_begin }}{% if wed.datum_begin != wed.datum_einde %} - {{ wed.datum_einde }}{% endif %}</td>
-                <td>{{ wed.organiserende_vereniging }}</td>
-                <td{% if wed.status_val_op %} class="red-text"{% endif %}>{{ wed.status_str }}</td>
-                <td>{{ wed.disc_str }}</td>
-                <td>{% if wed.titel %}{{ wed.titel }}{% else %}<i class="nhb-blauw-text">Nog niet ingevuld</i>{% endif %}</td>
-                <td>
-                    <a class="btn-nhb-blauw" href="{{ wed.url_wijzig }}">Wijzig</a>
-                    <span>&nbsp;&nbsp;</span>
-                    <a class="btn-nhb-blauw" href="{{ wed.url_sessies}}">Sessies</a>
-                </td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="6"><i>Geen wedstrijden gevonden</i></td>
-            </tr>
-        {% endfor %}
-    </table>
+    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-overzicht-manager" %}
 
 {% endblock %}

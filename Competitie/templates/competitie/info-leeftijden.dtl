@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,117 +10,152 @@
 
 {% block pagina %}
 
-    <h4>Leeftijdsgroepen</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Leeftijds<wbr>groepen</h3>
+        </div>
+    </div>
 
-    <p>Sporters worden in een wedstrijd ingedeeld in een wedstrijdklasse aan de hand van hun leeftijd en/of type boog. Vooral voor jonge sporters verandert de klasse waarin je uit mag komen regelmatig, daarom hebben we hieronder een overzicht gemaakt.</p>
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+                <p>Sporters worden in een wedstrijd ingedeeld in een wedstrijdklasse aan de hand van hun leeftijd en/of type boog. Vooral voor jonge sporters verandert de klasse waarin je uit mag komen regelmatig, daarom hebben we hieronder een overzicht gemaakt.</p>
 
-    {% if persoonlijke_leeftijdsklassen %}
-        <p>&nbsp;</p>
-        <p>Een persoonlijk overzicht kan je hier inzien: <a class="btn-nhb-blauw" href="{% url 'Sporter:leeftijdsklassen' %}"><i class="material-icons-round left">grade</i>Mijn leeftijdsklassen</a></p>
-    {% endif %}
+                {% if persoonlijke_leeftijdsklassen %}
+                    <p>Een persoonlijk overzicht kan je hier inzien:</p>
+                    <p>
+                        <a class="btn-nhb-rood" href="{% url 'Sporter:leeftijdsklassen' %}">
+                            <i class="material-icons-round left">grade</i>Mijn leeftijdsklassen</a>
+                    </p>
+                {% endif %}
 
-    <p>Wanneer je je inschrijft via deze website gaat dit allemaal automatisch goed.</p>
+                <p>Wanneer je je inschrijft via deze website gaat dit allemaal automatisch goed.</p>
+            </div>
+        </div>
+    </div>
 
-    <p>&nbsp;</p>
-    <h5>Leeftijdsklassen</h5>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Leeftijds<wbr>klassen World Archery</h4>
+            <p>Volgens het reglement van World Archery wordt de klasse bepaald door de leeftijd die je <b>bereikt</b> in een jaar.</p>
+        </div>
+    </div>
 
-    <p>Volgens het reglement van World Archery wordt de klasse bepaald door de leeftijd die je <b>bereikt</b> in een jaar.</p>
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Leeftijds<wbr>klasse</th>
+                        <th>Vanaf het jaar<br>waarin je deze leeftijd bereikt</th>
+                        <th>Tot en met het jaar<br>waarin je deze leeftijd bereikt</th>
+                        <th>Andere klassen waarin je uit mag komen</th>
+                    </tr>
+                </thead>
 
-    <table class="white">
-        <thead>
-            <tr>
-                <th>Leeftijdsklasse</th>
-                <th>Vanaf het jaar<br>waarin je deze leeftijd bereikt</th>
-                <th>Tot en met het jaar<br>waarin je deze leeftijd bereikt</th>
-                <th>Andere klassen waarin je uit mag komen</th>
-            </tr>
-        </thead>
+                <tr>
+                    <td>Aspirant</td>
+                    <td>-</td>
+                    <td>13</td>
+                    <td>Cadet, Junior, Senior</td>
+                </tr>
 
-        <tr>
-            <td>Aspirant</td>
-            <td>-</td>
-            <td>13</td>
-            <td>Cadet, Junior, Senior</td>
-        </tr>
+                <tr>
+                    <td>Cadet</td>
+                    <td>-</td>
+                    <td>17</td>
+                    <td>Junior, Senior</td>
+                </tr>
 
-        <tr>
-            <td>Cadet</td>
-            <td>-</td>
-            <td>17</td>
-            <td>Junior, Senior</td>
-        </tr>
+                <tr>
+                    <td>Junior</td>
+                    <td>-</td>
+                    <td>20</td>
+                    <td>Senior</td>
+                </tr>
 
-        <tr>
-            <td>Junior</td>
-            <td>-</td>
-            <td>20</td>
-            <td>Senior</td>
-        </tr>
+                <tr>
+                    <td>Senior</td>
+                    <td>21</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
 
-        <tr>
-            <td>Senior</td>
-            <td>21</td>
-            <td>-</td>
-            <td>-</td>
-        </tr>
+                <tr>
+                    <td>Master</td>
+                    <td>50</td>
+                    <td>-</td>
+                    <td>Senior</td>
+                </tr>
 
-        <tr>
-            <td>Master</td>
-            <td>50</td>
-            <td>-</td>
-            <td>Senior</td>
-        </tr>
+                <tr>
+                    <td>Veteraan</td>
+                    <td>60</td>
+                    <td>-</td>
+                    <td>Master, Senior</td>
+                </tr>
 
-        <tr>
-            <td>Veteraan</td>
-            <td>60</td>
-            <td>-</td>
-            <td>Master, Senior</td>
-        </tr>
-    </table>
+            </table>
+        </div>
+    </div>
 
-    <p>&nbsp;</p>
-    <h5>Bondscompetitie</h5>
 
-    <p>De bondscompetities (tijdens het winter-seizoen) lopen over 2 jaren. De finales worden in het tweede jaar gehouden. Daarom moet je de bondscompetitie beginnen in de klasse waarin je tijdens de finale hoort uit te komen.</p>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Bonds<wbr>competitie</h4>
+            <p>De bondscompetities (tijdens het winter-seizoen) lopen over 2 jaren. De finales worden in het tweede jaar gehouden.</p>
+            <p>Je moet de bondscompetitie beginnen in de klasse waarin je tijdens de finale hoort uit te komen.</p>
+        </div>
+    </div>
 
-    <table class="white">
-        <thead>
-            <tr>
-                <th>Leeftijdsklasse</th>
-                <th>Bondscompetitie {{ comp_1.seizoen }}</th>
-                <th>Bondscompetitie {{ comp_2.seizoen }}</th>
-            </tr>
 
-            <tr>
-                <td>Aspirant</td>
-                <td>Geboren {{ comp_1.asp }} of later</td>
-                <td>Geboren {{ comp_2.asp }} of later</td>
-            </tr>
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Leeftijds<wbr>klasse</th>
+                        <th>Bonds<wbr>competitie {{ comp_1.seizoen }}</th>
+                        <th>Bonds<wbr>competitie {{ comp_2.seizoen }}</th>
+                    </tr>
+                </thead>
 
-            <tr>
-                <td>Cadet</td>
-                <td>Geboren {{ comp_1.cadet }}</td>
-                <td>Geboren {{ comp_2.cadet }}</td>
-            </tr>
+                <tr>
+                    <td>Aspirant</td>
+                    <td>Geboren {{ comp_1.asp }} of later</td>
+                    <td>Geboren {{ comp_2.asp }} of later</td>
+                </tr>
 
-            <tr>
-                <td>Junior</td>
-                <td>Geboren {{ comp_1.junior }}</td>
-                <td>Geboren {{ comp_2.junior }}</td>
-            </tr>
+                <tr>
+                    <td>Cadet</td>
+                    <td>Geboren {{ comp_1.cadet }}</td>
+                    <td>Geboren {{ comp_2.cadet }}</td>
+                </tr>
 
-            <tr>
-                <td>Senior</td>
-                <td>Geboren {{ comp_1.senior }} of eerder</td>
-                <td>Geboren {{ comp_2.senior }} of eerder</td>
-            </tr>
+                <tr>
+                    <td>Junior</td>
+                    <td>Geboren {{ comp_1.junior }}</td>
+                    <td>Geboren {{ comp_2.junior }}</td>
+                </tr>
 
-        </thead>
-    </table>
+                <tr>
+                    <td>Senior</td>
+                    <td>Geboren {{ comp_1.senior }} of eerder</td>
+                    <td>Geboren {{ comp_2.senior }} of eerder</td>
+                </tr>
 
-    <p>De klassen Master en Veteraan zijn niet in gebruik in de bondscompetities.</p>
+            </table>
+        </div>
+    </div>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-info-leeftijden" %}
+    <p class="center">De klassen Master en Veteraan zijn niet in gebruik in de bondscompetities.</p>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-info-leeftijden" %}
 
 {% endblock %}

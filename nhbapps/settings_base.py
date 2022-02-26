@@ -26,11 +26,12 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2022-01-22'
+SITE_VERSIE = '2022-02-26'
 
 # modules van de site
 INSTALLED_APPS = [
-    'Beheer.apps.BeheerConfig',             # replaces admin
+    'Plein.apps.PleinConfig',           # must go first: provides admin template override
+    'Beheer.apps.BeheerConfig',         # uitbreiding op admin interface
     'Account.apps.AccountConfig',
     'BasisTypen.apps.BasisTypenConfig',
     'Bondspas.apps.BondspasConfig',
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     'CompRayon.apps.CompRayonConfig',
     'CompScores.apps.CompScoresConfig',
     'CompUitslagen.apps.CompUitslagenConfig',
+    'Feedback.apps.FeedbackConfig',
     'Functie.apps.FunctieConfig',
     'Handleiding.apps.HandleidingConfig',
     'HistComp.apps.HistCompConfig',
@@ -48,7 +50,6 @@ INSTALLED_APPS = [
     'Mailer.apps.MailerConfig',
     'NhbStructuur.apps.NhbStructuurConfig',
     'Overig.apps.OverigConfig',
-    'Plein.apps.PleinConfig',
     'Records.apps.RecordsConfig',
     'Score.apps.ScoreConfig',
     'Sporter.apps.SporterConfig',
@@ -95,6 +96,7 @@ AUTH_BAD_PASSWORD_LOCKOUT_MINS = 15
 # templates (django template language) processors
 TEMPLATES = [
     {
+        'NAME': 'dtl_loader',
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         # 'DIRS': [ str(APPS_DIR.path('templates')), ],
         # 'APP_DIRS': True,

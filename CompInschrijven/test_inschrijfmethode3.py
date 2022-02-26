@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.models import BoogType
+from BasisTypen.models import BoogType, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
@@ -29,6 +29,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
     url_behoefte3_bestand = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/dagdeel-behoefte-als-bestand/'  # comp_pk, regio_pk
 
     testdata = None
+    begin_jaar = 2019
 
     @classmethod
     def setUpTestData(cls):
@@ -83,7 +84,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         self.account_schutter = self._prep_beheerder_lid('Schutter')
 
         # creëer een competitie met deelcompetities
-        competities_aanmaken(jaar=2019)
+        competities_aanmaken(jaar=self.begin_jaar)
         # nu in fase A
 
         self.comp_18 = Competitie.objects.get(afstand='18')
@@ -124,10 +125,10 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
 
         # klassengrenzen vaststellen
         url_klassengrenzen = '/bondscompetities/%s/klassengrenzen/vaststellen/'
-        with self.assert_max_queries(86):
+        with self.assert_max_queries(91):
             resp = self.client.post(url_klassengrenzen % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
-        with self.assert_max_queries(86):
+        with self.assert_max_queries(91):
             resp = self.client.post(url_klassengrenzen % self.comp_25.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2
@@ -168,12 +169,15 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
                 sporter.bij_vereniging = nhb_ver
                 sporter.is_actief_lid = True
                 if barebow_boog_pk:
-                    sporter.geboorte_datum = datetime.date(2019-12, 1, 1)   # aspirant
+                    sporter.geboorte_datum = datetime.date(self.begin_jaar - 12, 1, 1)   # aspirant
                 else:
-                    sporter.geboorte_datum = datetime.date(2000, 1, 1)      # senior
-                sporter.sinds_datum = datetime.date(2010, 1, 1)
+                    sporter.geboorte_datum = datetime.date(self.begin_jaar - 19, 1, 1)   # senior
+                sporter.sinds_datum = datetime.date(self.begin_jaar - 9, 1, 1)
                 sporter.geslacht = 'M'
                 sporter.save()
+
+                if barebow_boog_pk:
+                    self.assertTrue(sporter.bereken_wedstrijdleeftijd(self.begin_jaar + 1) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
 
                 # haal de schutter voorkeuren op, zodat de schutterboog records aangemaakt worden
                 url_voorkeuren = '/sporter/voorkeuren/%s/' % lid_nr
@@ -213,7 +217,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
 
             # schrijf in voor de competitie
             post_params['dagdeel'] = dagdelen.pop(-1)
-            with self.assert_max_queries(23):
+            with self.assert_max_queries(22):
                 resp = self.client.post(url_inschrijven, post_params)
             self.assert_is_redirect_not_plein(resp)         # check for success
         # for
@@ -250,7 +254,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_behoefte3_bestand % (comp.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        csv_file = 'ver_nr;Naam;Blazoen;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n1000;Grote Club;60cm;0;0;1;1\r\n1000;Grote Club;Dutch Target;0;0;1;1\r\n1000;Grote Club;Dutch Target (wens);0;0;1;1\r\n1100;Kleine Club;40cm;0;1;0;1\r\n1100;Kleine Club;Dutch Target (wens);0;1;0;1\r\n-;-;Totalen;0;2;3;5\r\n-;-;-;-;-;-;-\r\n-;-;Blazoen;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n-;-;40cm;0;1;0;1\r\n-;-;60cm;0;0;1;1\r\n-;-;Dutch Target;0;0;1;1\r\n-;-;Dutch Target (wens);0;1;1;2\r\n'
+        csv_file = 'ver_nr;Naam;Blazoen;Geen;Za;Zo;Totaal\r\n1000;Grote Club;60cm;0;0;1;1\r\n1000;Grote Club;Dutch Target;0;0;1;1\r\n1000;Grote Club;Dutch Target (wens);0;0;1;1\r\n1100;Kleine Club;40cm;0;1;0;1\r\n1100;Kleine Club;Dutch Target (wens);0;1;0;1\r\n-;-;Totalen;0;2;3;5\r\n-;-;-;-;-;-;-\r\n-;-;Blazoen;Geen;Za;Zo;Totaal\r\n-;-;40cm;0;1;0;1\r\n-;-;60cm;0;0;1;1\r\n-;-;Dutch Target;0;0;1;1\r\n-;-;Dutch Target (wens);0;1;1;2\r\n'
         self.assertContains(resp, csv_file, msg_prefix="(was: %s)" % resp.content)
 
         # creëer een beetje puinhoop
@@ -287,7 +291,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_behoefte3_bestand % (comp.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        csv_file = 'ver_nr;Naam;Blazoen;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n1000;Grote Club;60cm;0;0;3;3\r\n1100;Kleine Club;60cm;0;2;0;2\r\n-;-;Totalen;0;2;3;5\r\n-;-;-;-;-;-;-\r\n-;-;Blazoen;Geen voorkeur;Zaterdag;Zondag;Totaal\r\n-;-;60cm;0;2;3;5\r\n'
+        csv_file = 'ver_nr;Naam;Blazoen;Geen;Za;Zo;Totaal\r\n1000;Grote Club;60cm;0;0;3;3\r\n1100;Kleine Club;60cm;0;2;0;2\r\n-;-;Totalen;0;2;3;5\r\n-;-;-;-;-;-;-\r\n-;-;Blazoen;Geen;Za;Zo;Totaal\r\n-;-;60cm;0;2;3;5\r\n'
         self.assertContains(resp, csv_file, msg_prefix="(was: %s)" % resp.content)
 
         # creëer een beetje puinhoop

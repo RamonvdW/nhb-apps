@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -85,17 +85,21 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.functie_rko.save()
 
     def _get_wissel_urls(self, resp):
-        return [url for url in self.extract_all_urls(resp) if url.startswith('/functie/activeer') or url == self.url_accountwissel]
+        urls = self.extract_all_urls(resp)
+        return [url for url in urls if url.startswith('/functie/activeer') or url == self.url_accountwissel]
 
     def test_admin(self):
         # controleer dat de link naar het wisselen van rol op de pagina staat
         self.account_admin.otp_is_actief = False
         self.account_admin.save()
 
+        # zonder gekoppelde tweede factor worden we niet meteen (meer) doorgestuurd naar de QR-code pagina
         self.e2e_login(self.account_admin)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
-        self.assert_is_redirect_not_plein(resp)
+        urls = self.extract_all_urls(resp, skip_menu=True)
+        urls = [url for url in urls if url.startswith('/functie/otp-koppelen-stap1/')]
+        self.assertEqual(urls, ['/functie/otp-koppelen-stap1/'])
 
         self.account_admin.otp_is_actief = True
         self.account_admin.save()
@@ -107,12 +111,9 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assertNotContains(resp, 'IT beheerder')
         self.assertNotContains(resp, 'Manager competitiezaken')
         self.assertContains(resp, 'Gebruiker')
-        self.assertContains(resp, 'Voordat je aan de slag kan moeten we eerst een paar afspraken maken over het omgaan met persoonsgegevens.')
-        # print(str(resp.content).replace('>', '>\n'))
-        self.assertContains(resp, 'Een aantal rollen komt beschikbaar nadat de controle van de tweede factor uitgevoerd is.')
+        self.assertContains(resp, 'Maak afspraken over het omgaan met persoonsgegevens.')
 
         # accepteer VHPG en login met OTP controle
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -199,6 +200,9 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_activeer_rol % 'BB', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        # response = het Plein
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wissel_van_rol)
         self.assertContains(resp, "Manager competitiezaken")
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_accountwissel, urls)
@@ -515,8 +519,10 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "(extra keuzescherm)")
-        self.assertContains(resp, "Secretaris")
+        self.assertContains(resp, "Wordt secretaris van een van de verenigingen")
+        urls = self.extract_all_urls(resp)
+        urls = [url for url in urls if url == '/functie/wissel-van-rol/secretaris/']
+        self.assertEqual(len(urls), 1)
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_naar_sec)
@@ -527,5 +533,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_sec)
         self.e2e_check_rol('SEC')
 
+
+    # TODO: test maken waarbij gebruiker aan 2x rol zit met dezelfde 'volgorde' (gaf sorteerprobleem), zowel 2xBKO als 2xHWL
 
 # end of file

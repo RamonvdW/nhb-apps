@@ -4,8 +4,11 @@
  * Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
  */
 
+/* jshint esversion: 6 */
+
 // helper functie om een opgeslagen cookie in te lezen
 function getCookie(name) {
+    'use strict';
     let cookieValue = null;
     if (document.cookie && document.cookie !== "") {
         let cookies = document.cookie.split(";");
@@ -14,7 +17,7 @@ function getCookie(name) {
             // Does this cookie string begin with the name we want?
             if (cookie.substring(0, name.length + 1) === (name + "=")) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break
+                break;
             }
         }
     }
@@ -25,13 +28,16 @@ function getCookie(name) {
 // geef 0 terug als het cookie niet gezet is
 // geef 0 terug als het cookie geen getal bevat
 function getCookieNumber(name) {
+    'use strict';
     let value = getCookie(name);
     let number = 0;
     if (value != null) {
         number = parseInt(value, 10);
-        if (isNaN(number)) number = 0
+        if (isNaN(number)) {
+            number = 0;
+        }
     }
-    return number
+    return number;
 }
 
 
@@ -68,61 +74,72 @@ function getCookieNumber(name) {
 
 function myTableFilter(zoekveld, tableId)
 {
+    'use strict';
     const table = document.getElementById(tableId);
-    if (table === undefined) return;
+    if (table === undefined) {
+        return;
+    }
 
     const filter = /[\u0300-\u036f]/g;         // precompiled regexp, for performance gain
     const filter_tekst = zoekveld.value.normalize("NFD").replace(filter, "").toLowerCase();
 
     // doorzoek de header kolommen op data-filter=on
-    const filter_kolommen = new Array();
+    const filter_kolommen = [];
     for (let row of table.tHead.rows)
     {
         let col_nr = 0;
         for (let cell of row.cells)
         {
-            if (cell.hasAttribute("data-filter")) filter_kolommen.push(col_nr);
+            if (cell.hasAttribute("data-filter")) {
+                filter_kolommen.push(col_nr);
+            }
 
             if (cell.hasAttribute("colSpan")) {
-                col_nr += cell.colSpan
+                col_nr += cell.colSpan;
             } else {
-                col_nr += 1
+                col_nr += 1;
             }
         }
     }
-    //console.log("kolom nummers met filter: ", filter_kolommen)
+    //window.console.log("kolom nummers met filter: ", filter_kolommen)
 
-    const row_deferred_hide = new Array();       // deferred updates, for performance gain
-    const row_deferred_show = new Array();
+    const row_deferred_hide = [];       // deferred updates, for performance gain
+    const row_deferred_show = [];
 
     const body = table.tBodies[0];
     for (let i=0; i < body.rows.length; i++)     // stops when row=null
     {
         const row = body.rows[i];
         const filter_cmd = row.dataset.tablefilter;
-        if (filter_cmd === "stop") break;        // from the for
+        if (filter_cmd === "stop") {
+            break;      // from the for
+        }
 
         // besluit om deze regel te tonen, of niet
         let show = false;
 
-        if (filter_tekst == "") {
+        if (filter_tekst === "") {
             // performance optimization: converteren van elke tabel string
             // stellen we uit tot de gebruiker een eerste letter invoert
-            show = true
+            show = true;
         } else {
             // kijk of de zoekterm in een van de gekozen kolommen voorkomt
             filter_kolommen.forEach(kolom_nr => {
                 const cell = row.cells[kolom_nr];
-                //if (cell === undefined) { console.log('missing cell in kolom_nr=', kolom_nr, "in row", i) }
+                if (cell === undefined) {
+                    window.console.log('missing cell in kolom_nr=', kolom_nr, "in row", i, "of row", row)
+                }
                 let clean_text = cell.dataset.clean_text;    // cached resultaat ophalen
-                //console.log("clean_text:", clean_text);
+                //window.console.log("clean_text:", clean_text);
                 if (typeof clean_text === "undefined") {
                     // eerste keer: voer de vervorming uit en cache het resultaat op
                     clean_text = cell.innerText.normalize("NFD").replace(filter, "").toLowerCase();
-                    cell.dataset.clean_text = clean_text
+                    cell.dataset.clean_text = clean_text;
                 }
-                if (clean_text.indexOf(filter_tekst) != -1) show = true;
-            })
+                if (clean_text.indexOf(filter_tekst) != -1) {
+                    show = true;
+                }
+            });
         }
 
         // onderzoek of een table row getoond of verstopt moet worden
@@ -130,23 +147,27 @@ function myTableFilter(zoekveld, tableId)
         // waarbij de browser steeds het hele scherm update voordat de read doorgang vindt
         // OLD: row.style.display = show ? "table-row" : "none";
         if (show) {
-            if (row.style.display == "none") row_deferred_show.push(i)
+            if (row.style.display == "none") {
+                row_deferred_show.push(i);
+            }
         }
         else {
-            if (row.style.display != "none") row_deferred_hide.push(i)
+            if (row.style.display != "none") {
+                row_deferred_hide.push(i);
+            }
         }
     }
 
-    //console.log("row_deferred_hide:", row_deferred_hide)
-    //console.log("row_deferred_show:", row_deferred_show)
+    //window.console.log("row_deferred_hide:", row_deferred_hide)
+    //window.console.log("row_deferred_show:", row_deferred_show)
 
     // voor de deferred updates uit
     row_deferred_hide.forEach(row_nr => {
-            body.rows[row_nr].style.display = "none"
+            body.rows[row_nr].style.display = "none";
         });
     row_deferred_show.forEach(row_nr => {
-            body.rows[row_nr].style.display = "table-row"
-        })
+            body.rows[row_nr].style.display = "table-row";
+        });
 }
 
 

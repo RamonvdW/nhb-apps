@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -66,8 +66,9 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
             raise Http404('Sporter of competitie niet gevonden')
 
         # controleer dat de competitie aanmeldingen accepteert
-        deelcomp.competitie.bepaal_fase()
-        if deelcomp.competitie.fase < 'B' or deelcomp.competitie.fase >= 'F':
+        comp = deelcomp.competitie
+        comp.bepaal_fase()
+        if comp.fase < 'B' or comp.fase >= 'F':
             raise Http404('Verkeerde competitie fase')
 
         # controleer dat sporterboog bij de ingelogde gebruiker hoort
@@ -91,12 +92,12 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         # urlconf parameters geaccepteerd
 
         # bepaal in welke wedstrijdklasse de sporter komt
-        age = sporterboog.sporter.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar + 1)
+        age = sporterboog.sporter.bereken_wedstrijdleeftijd(comp.begin_jaar + 1)
 
         # haal AG op, indien aanwezig
         scores = Score.objects.filter(sporterboog=sporterboog,
                                       type=SCORE_TYPE_INDIV_AG,
-                                      afstand_meter=deelcomp.competitie.afstand)
+                                      afstand_meter=comp.afstand)
         ag = Decimal(AG_NUL)
         if len(scores):
             score = scores[0]
@@ -111,7 +112,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                             sporterboog=sporterboog,
                             ag_voor_indiv=ag)
 
-        bepaler = KlasseBepaler(deelcomp.competitie)
+        bepaler = KlasseBepaler(comp)
         try:
             bepaler.bepaal_klasse_deelnemer(aanmelding)
         except LookupError as exc:
@@ -121,14 +122,14 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         context['is_klasse_onbekend'] = aanmelding.klasse.indiv.is_onbekend
         del aanmelding
 
-        udvl = deelcomp.competitie.uiterste_datum_lid       # uiterste datum van lidmaatschap
+        udvl = comp.uiterste_datum_lid                      # uiterste datum van lidmaatschap
         dvl = sporterboog.sporter.sinds_datum               # datum van lidmaatschap
 
         # geen aspirant, op tijd lid en op tijd aangemeld?
         mag_team_schieten = (deelcomp.regio_organiseert_teamcompetitie and
                              age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and
                              dvl < udvl
-                             and deelcomp.competitie.fase == 'B')
+                             and comp.fase == 'B')
         context['mag_team_schieten'] = mag_team_schieten
 
         # bepaal de inschrijfmethode voor deze regio
@@ -165,7 +166,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
             for cluster in (ver
                             .clusters
                             .prefetch_related('nhbvereniging_set')
-                            .filter(gebruik=deelcomp.competitie.afstand)
+                            .filter(gebruik=comp.afstand)
                             .all()):
                 ver_nrs = list(cluster.nhbvereniging_set.values_list('ver_nr', flat=True))
                 for ver_nr in ver_nrs:
@@ -205,11 +206,18 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                         context['dagdelen'].append(dagdeel)
                 # for
 
-        if deelcomp.competitie.afstand == '18':
+        # TODO: eigen blazoen is ook mogelijk voor 25m (4-spot)
+        if comp.afstand == '18':
             if sporterboog.boogtype.afkorting in ('R', 'BB'):
-                context['show_dt'] = True
+                context['eigen_blazoen'] = True
 
-        menu_dynamics(self.request, context, actief='sporter-profiel')
+        context['kruimels'] = (
+            (reverse('Sporter:profiel'), 'Mijn pagina'),
+            (None, comp.beschrijving.replace(' competitie', '')),
+            (None, 'Aanmelden')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 

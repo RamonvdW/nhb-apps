@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -122,10 +122,10 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
         # klassengrenzen vaststellen
         url_klassengrenzen = '/bondscompetities/%s/klassengrenzen/vaststellen/'
-        with self.assert_max_queries(86):
+        with self.assert_max_queries(91):
             resp = self.client.post(url_klassengrenzen % self.comp_18.pk)
             self.assert_is_redirect_not_plein(resp)  # check for success
-        with self.assert_max_queries(86):
+        with self.assert_max_queries(91):
             resp = self.client.post(url_klassengrenzen % self.comp_25.pk)
             self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2
@@ -202,7 +202,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             # for
 
             # schrijf in voor de competitie
-            with self.assert_max_queries(23):
+            with self.assert_max_queries(22):
                 resp = self.client.post(url_inschrijven, post_params)
             self.assert_is_redirect_not_plein(resp)         # check for success
         # for
@@ -238,7 +238,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_bko)
         self.e2e_wissel_naar_functie(functie_bko)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(self.url_overzicht % comp18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -251,7 +251,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rko)
         self.e2e_wissel_naar_functie(functie_rko)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(self.url_overzicht % comp25.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -262,7 +262,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rcl)
         self.e2e_wissel_naar_functie(functie_rcl)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(self.url_overzicht % comp18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

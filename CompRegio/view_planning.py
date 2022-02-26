@@ -16,10 +16,10 @@ from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1
                                DeelCompetitie, DeelcompetitieRonde,
                                CompetitieKlasse, RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from Competitie.operations import maak_deelcompetitie_ronde
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbCluster, NhbVereniging
+from Plein.menu import menu_dynamics
 from Taken.taken import maak_taak
 from Wedstrijden.models import CompetitieWedstrijd, WedstrijdLocatie
 from types import SimpleNamespace
@@ -235,7 +235,15 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             context['url_rayon'] = reverse('CompRayon:rayon-planning',
                                            kwargs={'rk_deelcomp_pk': rayon.pk})
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        comp = deelcomp.competitie
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Planning'),
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -264,8 +272,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             # nieuwe ronde is aangemaakt
             next_url = reverse('CompRegio:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
         else:
-            # er kan geen ronde meer bij
-            # TODO: nette melding geven
+            # er kan geen ronde meer bij - we hebben geen knop aangeboden dus waarom zijn we hier?
             next_url = reverse('CompRegio:regio-planning', kwargs={'deelcomp_pk': deelcomp.pk})
 
         return HttpResponseRedirect(next_url)
@@ -331,12 +338,18 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
                                                  kwargs={'deelcomp_pk': deelcomp.pk,
                                                          'cluster_pk': cluster.pk})
 
-        context['terug_url'] = reverse('CompRegio:regio-planning',
-                                       kwargs={'deelcomp_pk': deelcomp.pk})
-
         context['handleiding_planning_regio_url'] = reverse('Handleiding:Planning_Regio')
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        comp = deelcomp.competitie
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompRegio:regio-planning', kwargs={'deelcomp_pk': deelcomp.pk}), 'Planning'),
+            (None, 'Cluster')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -478,15 +491,6 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                 start_week += 1
         # while
 
-        if ronde.cluster:
-            terug_url = reverse('CompRegio:regio-cluster-planning',
-                                kwargs={'cluster_pk': ronde.cluster.pk,
-                                        'deelcomp_pk': ronde.deelcompetitie.pk})
-        else:
-            terug_url = reverse('CompRegio:regio-planning',
-                                kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
-        context['terug_url'] = terug_url
-
         context['heeft_wkl'] = heeft_wkl = (ronde.deelcompetitie.inschrijf_methode == INSCHRIJF_METHODE_2)
 
         klasse2schutters = dict()
@@ -563,7 +567,22 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         if self.rol_nu != Rollen.ROL_RCL:
             context['readonly'] = True
 
-        menu_dynamics_competitie(self.request, context, comp_pk=ronde.deelcompetitie.competitie.pk)
+        comp = ronde.deelcompetitie.competitie
+
+        context['kruimels'] = [
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompRegio:regio-planning', kwargs={'deelcomp_pk': ronde.deelcompetitie.pk}), 'Planning'),
+            (None, 'Week')
+        ]
+
+        if ronde.cluster:
+            tup = (reverse('CompRegio:regio-cluster-planning', kwargs={'cluster_pk': ronde.cluster.pk,
+                                                                       'deelcomp_pk': ronde.deelcompetitie.pk}),
+                   'Cluster')
+            context['kruimels'].insert(-1, tup)
+
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -741,14 +760,27 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
             # for
 
-        terug_url = reverse('CompRegio:regio-planning',
-                            kwargs={'deelcomp_pk': ronde.deelcompetitie.pk})
-        context['terug_url'] = terug_url
-
         if self.rol_nu != Rollen.ROL_RCL:
             context['readonly'] = True
 
-        menu_dynamics_competitie(self.request, context, comp_pk=ronde.deelcompetitie.competitie.pk)
+        comp = ronde.deelcompetitie.competitie
+
+        if ronde.cluster:
+            context['kruimels'] = [
+                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+                (reverse('CompRegio:regio-planning', kwargs={'deelcomp_pk': ronde.deelcompetitie.pk}), 'Planning'),
+                (None, 'Cluster wedstrijden')
+            ]
+        else:
+            context['kruimels'] = [
+                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+                (reverse('CompRegio:regio-planning', kwargs={'deelcomp_pk': ronde.deelcompetitie.pk}), 'Planning'),
+                (None, 'Wedstrijden')
+            ]
+
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -1030,11 +1062,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         context['url_opslaan'] = reverse('CompRegio:regio-wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         if ronde.deelcompetitie.inschrijf_methode == INSCHRIJF_METHODE_1:
-            context['url_terug'] = reverse('CompRegio:regio-methode1-planning',
-                                           kwargs={'ronde_pk': ronde.pk})
+            url_planning_week = reverse('CompRegio:regio-methode1-planning',
+                                        kwargs={'ronde_pk': ronde.pk})
         else:
-            context['url_terug'] = reverse('CompRegio:regio-ronde-planning',
-                                           kwargs={'ronde_pk': ronde.pk})
+            url_planning_week = reverse('CompRegio:regio-ronde-planning',
+                                        kwargs={'ronde_pk': ronde.pk})
 
         uitslag = wedstrijd.uitslag
         if uitslag and (uitslag.is_bevroren or uitslag.scores.count()):
@@ -1043,7 +1075,21 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             context['url_verwijderen'] = reverse('CompRegio:regio-verwijder-wedstrijd',
                                                  kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-        menu_dynamics_competitie(self.request, context, comp_pk=context['competitie'].pk)
+        context['kruimels'] = [
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompRegio:regio-planning', kwargs={'deelcomp_pk': ronde.deelcompetitie.pk}), 'Planning'),
+            (url_planning_week, 'Week'),
+            (None, 'Wijzig wedstrijd')
+        ]
+
+        if ronde.cluster:
+            tup = (reverse('CompRegio:regio-cluster-planning', kwargs={'cluster_pk': ronde.cluster.pk,
+                                                                       'deelcomp_pk': ronde.deelcompetitie.pk}),
+                   'Cluster')
+            context['kruimels'].insert(-2, tup)
+
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -1316,10 +1362,14 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
                 context['url_afsluiten'] = reverse('CompRegio:afsluiten-regiocomp',
                                                    kwargs={'deelcomp_pk': deelcomp.pk})
 
-        context['url_terug'] = reverse('Competitie:overzicht',
-                                       kwargs={'comp_pk': deelcomp.competitie.pk})
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': deelcomp.competitie.pk}),
+                deelcomp.competitie.beschrijving.replace(' competitie', '')),
+            (None, 'Sluit regiocompetitie')
+        )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

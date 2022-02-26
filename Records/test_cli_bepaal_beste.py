@@ -109,7 +109,7 @@ class TestRecordsCliBepaalBeste(E2EHelpers, TestCase):
         self.assertEqual(BesteIndivRecords.objects.count(), 0)
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(27):
             management.call_command('bepaal_beste_records', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())

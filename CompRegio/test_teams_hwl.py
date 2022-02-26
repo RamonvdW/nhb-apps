@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -29,7 +29,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 
     url_koppelen = '/bondscompetities/regio/teams-vereniging/koppelen/%s/'                      # team_pk
-    url_maak_team = '/bondscompetities/regio/teams-vereniging/%s/nieuw/'                        # deelcomp_pk
+    url_maak_team = '/bondscompetities/regio/teams-vereniging/%s/'                              # deelcomp_pk
     url_wijzig_team = '/bondscompetities/regio/teams-vereniging/%s/wijzig/%s/'                  # deelcomp_pk, team_pk
     url_regio_teams = '/bondscompetities/regio/teams-vereniging/%s/'                            # deelcomp_pk
     url_wijzig_ag = '/bondscompetities/regio/teams-vereniging/wijzig-aanvangsgemiddelde/%s/'    # deelnemer_pk
@@ -264,7 +264,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         elif lid_nr == 100013:
             with self.assert_max_queries(20):
                 resp = self.client.post(url_schutter_voorkeuren, {'sporter_pk': lid_nr,
-                                                                  'schiet_IB': 'on',
+                                                                  'schiet_TR': 'on',
                                                                   'voorkeur_meedoen_competitie': 'on'})
         else:
             with self.assert_max_queries(20):
@@ -279,7 +279,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         if lid_nr == 100003:
             afkorting = 'BB'
         elif lid_nr == 100013:
-            afkorting = 'IB'
+            afkorting = 'TR'
         else:
             afkorting = 'R'
         sporterboog = SporterBoog.objects.get(sporter__lid_nr=lid_nr, boogtype__afkorting=afkorting)
@@ -293,7 +293,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         self._zet_schutter_voorkeuren(100003)       # BB
         self._zet_schutter_voorkeuren(100004)       # R
         self._zet_schutter_voorkeuren(100012)       # R
-        self._zet_schutter_voorkeuren(100013)       # IB
+        self._zet_schutter_voorkeuren(100013)       # TR
 
         if do_18:           # pragma: no branch
             self._zet_ag(100002, 18)
@@ -302,12 +302,12 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
             self._zet_ag(100013, 18)
 
             url = url_inschrijven % self.comp_18.pk
-            with self.assert_max_queries(33):
+            with self.assert_max_queries(32):
                 resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
                                               'lid_100003_boogtype_3': 'on',    # 3=BB
                                               'lid_100004_boogtype_1': 'on',    # 1=R
                                               'lid_100012_boogtype_1': 'on',    # 1=R
-                                              'lid_100013_boogtype_4': 'on',    # 4=IB
+                                              'lid_100013_boogtype_6': 'on',    # 6=TR
                                               'wil_in_team': 'ja!'})
             self.assert_is_redirect_not_plein(resp)     # check success
 
@@ -333,7 +333,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
 
         if do_25:
             url = url_inschrijven % self.comp_25.pk
-            with self.assert_max_queries(23):
+            with self.assert_max_queries(22):
                 self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
                                        'lid_100004_boogtype_1': 'on',    # 1=R
                                        'lid_100012_boogtype_1': 'on',    # 1=R
@@ -410,10 +410,6 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert404(resp)     # 404 = Not found
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
-        self.assert404(resp)     # 404 = Not found
-
-        with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 999999))
         self.assert404(resp)     # 404 = Not found
 
@@ -458,15 +454,14 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.get(self.url_maak_team % self.deelcomp18_regio111.pk)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compregio/hwl-teams-wijzig.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('compregio/hwl-teams.dtl', 'plein/site_layout.dtl'))
 
         self.assertEqual(0, RegiocompetitieTeam.objects.count())
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
-                                    {'team_type': 'R'})
+            resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
+        self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assertEqual(1, RegiocompetitieTeam.objects.count())
         team = RegiocompetitieTeam.objects.all()[0]
-        self.assert_is_redirect(resp, self.url_koppelen % team.pk)
 
         self.nhbver1 = NhbVereniging.objects.get(pk=self.nhbver1.pk)
 
@@ -474,14 +469,14 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         self.assertEqual(team.deelcompetitie.pk, self.deelcomp18_regio111.pk)
         self.assertEqual(team.vereniging, self.nhbver1)
         self.assertEqual(team.volg_nr, 1)
-        self.assertEqual(team.team_type.afkorting, 'R')
+        self.assertEqual(team.team_type.afkorting, 'R2')
         self.assertTrue(team.maak_team_naam() != '')
         self.assertTrue(team.maak_team_naam_kort() != '')
         self.assertTrue(str(team) != '')
 
         # zet het team handmatig in een klasse en koppel een schutter
         klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=10,           # Recurve klasse ERE
+                                              team__volgorde=15,           # Rec ERE
                                               is_voor_teams_rk_bk=False)
         team.klasse = klasse
         team.aanvangsgemiddelde = 8.8
@@ -518,14 +513,13 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
 
         # maak het maximum aantal teams aan
         for lp in range(9):
-            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
-                                    {'team_type': 'R'})
+            resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
             self.assert_is_redirect_not_plein(resp)
         # for
 
         # nu zijn er 10 teams. Maak #11 aan
         resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
-                                {'team_type': 'R'})
+                                {'team_type': 'R2'})
         self.assert404(resp)     # 404 = Not found
 
         # haal het teams overzicht op
@@ -627,17 +621,16 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         self.deelcomp25_regio111.einde_teams_aanmaken = self.deelcomp25_regio111.competitie.einde_aanmeldingen
         self.deelcomp25_regio111.save()
 
-        # maak een team aan
+        # maak een 18m team aan
         self.assertEqual(0, RegiocompetitieTeam.objects.count())
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
-                                    {'team_type': 'R'})
+            resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
         self.assert_is_redirect_not_plein(resp)
         self.assertEqual(1, RegiocompetitieTeam.objects.count())
 
+        # maak een 25m team aan
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_wijzig_team % (self.deelcomp25_regio111.pk, 0),
-                                    {'team_type': 'R'})
+            resp = self.client.post(self.url_maak_team % self.deelcomp25_regio111.pk)
         self.assert_is_redirect_not_plein(resp)
         self.assertEqual(2, RegiocompetitieTeam.objects.count())
 
@@ -678,13 +671,13 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         deelnemer.save()
 
         obj = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                           team__volgorde=10,           # Recurve klasse ERE
+                                           team__volgorde=15,           # Rec ERE
                                            is_voor_teams_rk_bk=False)
         obj.min_ag = 29.5
         obj.save()
 
         obj = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                           team__volgorde=11,           # Recurve klasse A
+                                           team__volgorde=17,           # Rec A
                                            is_voor_teams_rk_bk=False)
         obj.min_ag = 21.340     # ondergrens = precies wat het team zal hebben
         obj.save()
@@ -703,7 +696,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
 
         # maak nog een team aan
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
+            resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk,
                                     {'team_type': 'BB'})
         self.assert_is_redirect_not_plein(resp)
 
@@ -724,8 +717,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         # probeer te koppelen van andere vereniging
         pks = list(RegiocompetitieTeam.objects.values_list('pk', flat=True))
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
-                                    {'team_type': 'C'})
+            resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
         self.assert_is_redirect_not_plein(resp)
         team = RegiocompetitieTeam.objects.exclude(pk__in=pks).all()[0]
         team.vereniging = self.nhbver2
@@ -766,11 +758,10 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
 
         # maak een team aan
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
-                                    {'team_type': 'R'})
+            resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
+        self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assertEqual(1, RegiocompetitieTeam.objects.count())
         team_18 = RegiocompetitieTeam.objects.filter(deelcompetitie=self.deelcomp18_regio111)[0]
-        self.assert_is_redirect(resp, self.url_koppelen % team_18.pk)
 
         # haal de wijzig-ag pagina op
         url = self.url_wijzig_ag % self.deelnemer_100002_18.pk
@@ -861,11 +852,11 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         # maak een team aan
         self.assertEqual(0, RegiocompetitieTeam.objects.count())
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
-                                    {'team_type': 'R'})
+            resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
+        self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
         self.assertEqual(1, RegiocompetitieTeam.objects.count())
         team = RegiocompetitieTeam.objects.all()[0]
-        self.assert_is_redirect(resp, self.url_koppelen % team.pk)
+        self.assertEqual(team.team_type.afkorting, 'R2')        # default = recurve team
 
         self.deelnemer_100003_18.inschrijf_voorkeur_team = True
         self.deelnemer_100003_18.save(update_fields=['inschrijf_voorkeur_team'])
@@ -883,11 +874,16 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
 
         # maak nog een team aan
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
-                                    {'team_type': 'IB'})
+            resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
         self.assert_is_redirect_not_plein(resp)
         self.assertEqual(2, RegiocompetitieTeam.objects.count())
         team2 = RegiocompetitieTeam.objects.exclude(pk=team.pk)[0]
+
+        # maak hier een TR team van
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team2.pk),
+                                    {'team_type': 'TR'})
+        self.assert_is_redirect_not_plein(resp)
 
         # koppel 100013 aan dit tweede team, dan is deze 'bezet' voor het 1e team
         with self.assert_max_queries(20):
@@ -919,7 +915,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, '/bondscompetities/%s/' % self.comp_18.pk)
 
-        self._verwerk_mutaties(41)
+        self._verwerk_mutaties(44)
         self.assertEqual(2, RegiocompetitieRondeTeam.objects.count())
 
         pks0 = [self.deelnemer_100002_18.pk, self.deelnemer_100003_18.pk, self.deelnemer_100004_18.pk]

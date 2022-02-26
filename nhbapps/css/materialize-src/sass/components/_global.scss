@@ -182,7 +182,8 @@ video.responsive-video {
 
     &.active a { color: #fff; }
 
-    &.active { background-color: $primary-color; }
+    //&.active { background-color: $primary-color; }
+    &.active { background-color: $secondary-color; }
 
     &.disabled a {
       cursor: default;
@@ -326,7 +327,7 @@ ul.staggered-list li {
     display: none !important;
   }
 }
-.hide-on-large-only {
+.hide-on-large-only, .hide-on-large-and-up {
   @media #{$large-and-up} {
     display: none !important;
   }
@@ -429,7 +430,7 @@ table {
   }
 
   &.centered {
-    thead tr th, tbody tr td {
+    thead tr th, tbody tr td, tbody tr th {
       text-align: center;
     }
   }

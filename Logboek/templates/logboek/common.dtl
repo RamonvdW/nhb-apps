@@ -1,72 +1,95 @@
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 
-<h4>Logboek</h4>
+<!-- dit bestand wordt ge-include in alle andere logboek pagina's -->
 
-<p>Focus:</p>
+<script type="application/javascript">
+    function activeer_deel() {
+        // vind de gekozen radiobutton
+        const el = document.querySelector("input[type='radio'][name='deel']:checked")
 
-<form method="get" action="{{ filter_url }}">
+        // haal de url op van het input element
+        const url = el.dataset.url
 
-    <div class="row">
-        <div class="col s12 m6">
-            <div class="white shrink-wrap-5">
-                <a class="margin-5 {% if filter == 'rest' %}btn-nhb-blauw{% else %}btn-outline{% endif %}" href="{{ url_rest }}">Rest</a>
-                <span>&nbsp;</span>
-                <a class="margin-5 {% if filter == 'records' %}btn-nhb-blauw{% else %}btn-outline{% endif %}" href="{{ url_records }}">Records</a>
-                <span>&nbsp;</span>
-                <a class="margin-5 {% if filter == 'accounts' %}btn-nhb-blauw{% else %}btn-outline{% endif %}" href="{{ url_accounts }}">Accounts</a>
-                <span>&nbsp;</span>
-                <a class="margin-5 {% if filter == 'rollen' %}btn-nhb-blauw{% else %}btn-outline{% endif %}" href="{{ url_rollen }}">Rollen</a>
-                <span>&nbsp;</span>
-                <a class="margin-5 {% if filter == 'accommodatie' %}btn-nhb-blauw{% else %}btn-outline{% endif %}" href="{{ url_accommodaties }}">Accommodaties</a>
-                <span>&nbsp;</span>
-                <a class="margin-5 {% if filter == 'nhbstructuur' %}btn-nhb-blauw{% else %}btn-outline{% endif %}" href="{{ url_nhbstructuur }}">CRM import</a>
-                <span>&nbsp;</span>
-                <a class="margin-5 {% if filter == 'clusters' %}btn-nhb-blauw{% else %}btn-outline{% endif %}" href="{{ url_clusters }}">Clusters</a>
-                <span>&nbsp;</span>
-                <a class="margin-5 {% if filter == 'competitie' %}btn-nhb-blauw{% else %}btn-outline{% endif %}" href="{{ url_competitie }}">Competitie</a>
-                <span>&nbsp;</span>
-                <a class="margin-5 {% if filter == 'uitrol' %}btn-nhb-blauw{% else %}btn-outline{% endif %}" href="{{ url_uitrol }}">Uitrol</a>
-            </div>
-        </div>
-        <div class="col s12 hide-on-med-and-up">
-            <br> <!-- spacing to input form -->
-        </div>
-        <div class="col s12 m6 white">
-            <div class="input-text" style="margin-left: 20px">
-                <span>Filter/zoek op:</span>
-                <input type="text" name="zoekterm" value="{{ zoekterm }}">
-            </div>
+        window.location.href = url
+    }
+</script>
 
-            <p class="center-align">
-                <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
-                {% if unfiltered_url %}
-                    <span>&nbsp;&nbsp;</span><a class="btn-nhb-blauw" href="{{ unfiltered_url }}"><i class="material-icons-round left">backspace</i>Leeg maken</a>
-                {% endif %}
+<!-- banner -->
+<div class="row center">
+    <div class="col s12">
+        <h3 class="page-banner">Logboek</h3>
+    </div>
+</div>
+
+<!-- blauwe balk -->
+<div class="row-nhb-blauw">
+
+    <!-- witte rechthoek voor radiobuttons -->
+    <div class="col s12 m5">
+        <div class="white left-align" style="padding:10px; margin-bottom:15px">
+            <ul>
+                {% for optie, url, titel, is_actief in filters %}
+                <li>
+                    <label class="black-text" for="id_{{ optie }}">
+                        <input class="with-gap" type="radio" name="deel" value="{{ optie }}" required id="id_{{ optie }}" data-url="{{ url }}" {% if is_actief %}checked{% endif %}>
+                        <span>{{ titel }}</span>
+                    </label>
+                </li>
+                {% endfor %}
+            </ul>
+            <p class="center">
+                <a class="btn-nhb-rood" onclick="activeer_deel()">Activeer</a>
             </p>
         </div>
     </div>
-</form>
 
-{% if is_paginated %}
-    <ul class="pagination">
-        {% for linkname, url in page_links %}
-            {% if linkname == active %}
-                <li class="active"><a href="{{ url }}">{{ linkname }}</a></li>
-            {% elif linkname == "vorige_disable" %}
-                <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_left</i></a></li>
-            {% elif linkname == "vorige" %}
-                <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_left</i></a></li>
-            {% elif linkname == "volgende" %}
-                <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_right</i></a></li>
-            {% elif linkname == "volgende_disable" %}
-                <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_right</i></a></li>
-            {% else %}
-                <li class="waves-effect"><a href="{{ url }}">{{ linkname }}</a></li>
-            {% endif %}
-        {% endfor %}
-    </ul>
-{% endif %}
+    <!-- dialoog venster voor zoekterm -->
+    <div class="col s12 m7">
+        <div class="white left-align z-depth-3" style="padding:50px 30px 30px 30px">
+            <!-- dialoog venster -->
+            <form method="get" action="{{ filter_url }}">
+                <div class="input-text">
+                    <span>Zoek naar:</span>
+                    <input type="text" name="zoekterm" value="{{ zoekterm }}">
+                </div>
+
+                <p>
+                    <button class="btn-nhb-rood" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
+                    {% if unfiltered_url %}
+                        <span>&nbsp;&nbsp;</span><a class="btn-nhb-rood" href="{{ unfiltered_url }}"><i class="material-icons-round left">backspace</i>Toon alles</a>
+                    {% endif %}
+                </p>
+        </div>
+    </div>
+</div>
+
+
+<!-- witruimte -->
+<div class="row center">
+    <div class="col s12">
+        <h4>Resultaten</h4>
+        {% if is_paginated %}
+            <ul class="pagination">
+                {% for linkname, url in page_links %}
+                    {% if linkname == active %}
+                        <li class="active"><a href="{{ url }}">{{ linkname }}</a></li>
+                    {% elif linkname == "vorige_disable" %}
+                        <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_left</i></a></li>
+                    {% elif linkname == "vorige" %}
+                        <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_left</i></a></li>
+                    {% elif linkname == "volgende" %}
+                        <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_right</i></a></li>
+                    {% elif linkname == "volgende_disable" %}
+                        <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_right</i></a></li>
+                    {% else %}
+                        <li class="waves-effect"><a href="{{ url }}">{{ linkname }}</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</div>

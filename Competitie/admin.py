@@ -97,7 +97,10 @@ class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
                      'sporterboog__sporter__lid_nr')
 
     list_filter = ('deelcompetitie__competitie',
-                   'deelcompetitie__nhb_regio',)
+                   'deelcompetitie__nhb_regio',
+                   'sporterboog__boogtype',
+                   ('sporterboog__sporter__bij_vereniging', admin.EmptyFieldListFilter),
+                   'sporterboog__sporter__bij_vereniging')
 
     list_select_related = ('deelcompetitie',
                            'deelcompetitie__nhb_regio',
@@ -120,11 +123,14 @@ class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
         return super().get_form(request, obj, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
-        if db_field.name == 'klasse':
+        if db_field.name == 'klasse' and self.obj:
             kwargs['queryset'] = (CompetitieKlasse
                                   .objects
-                                  .select_related('indiv', 'team')
-                                  .all())
+                                  .select_related('indiv')
+                                  .exclude(is_voor_teams_rk_bk=True)
+                                  .filter(competitie=self.obj.deelcompetitie.competitie,
+                                          team=None)
+                                  .order_by('indiv__volgorde'))
         elif db_field.name == 'deelcompetitie':
             kwargs['queryset'] = (DeelCompetitie
                                   .objects
@@ -178,6 +184,18 @@ class RegiocompetitieTeamAdmin(CreateOnlyAdmin):
         if obj:
             self.obj = obj
         return super().get_form(request, obj, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        if db_field.name == 'klasse' and self.obj:
+            kwargs['queryset'] = (CompetitieKlasse
+                                  .objects
+                                  .select_related('indiv')
+                                  .filter(competitie=self.obj.deelcompetitie.competitie,
+                                          indiv=None,
+                                          is_voor_teams_rk_bk=False)
+                                  .order_by('team__volgorde'))
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
         if db_field.name == 'gekoppelde_schutters' and self.obj:
@@ -360,14 +378,28 @@ class KampioenschapSchutterBoogAdmin(CreateOnlyAdmin):
 
     list_filter = ('deelcompetitie__competitie',
                    'deelcompetitie__nhb_rayon',
-                   'sporterboog__boogtype')
+                   'sporterboog__boogtype',
+                   ('sporterboog__sporter__bij_vereniging', admin.EmptyFieldListFilter),
+                   'sporterboog__sporter__bij_vereniging')
+
+    def __init__(self, model, admin_site):
+        super().__init__(model, admin_site)
+        self.obj = None
+
+    def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
+        if obj:
+            self.obj = obj
+        return super().get_form(request, obj, **kwargs)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
-        if db_field.name == 'klasse':
+        if db_field.name == 'klasse' and self.obj:
             kwargs['queryset'] = (CompetitieKlasse
                                   .objects
-                                  .select_related('indiv', 'team')
-                                  .all())
+                                  .select_related('indiv')
+                                  .filter(competitie=self.obj.deelcompetitie.competitie,
+                                          team=None,
+                                          is_voor_teams_rk_bk=False)
+                                  .order_by('indiv__volgorde'))
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 

@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.views.generic import TemplateView
+from django.urls import reverse
 from django.http import Http404
 from Competitie.models import Competitie, DeelCompetitie, LAAG_BK
-from Competitie.menu import menu_dynamics_competitie
+from Plein.menu import menu_dynamics
 
 
 TEMPLATE_COMPUITSLAGEN_BOND = 'compuitslagen/uitslagen-bond.dtl'
@@ -47,7 +48,13 @@ class UitslagenBondView(TemplateView):
         except DeelCompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Uitslagen BK')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 

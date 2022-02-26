@@ -179,18 +179,18 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         self.klasse_r = CompetitieKlasse.objects.filter(competitie=self.comp_18,
                                                         indiv__is_onbekend=False,
                                                         indiv__niet_voor_rk_bk=False,
-                                                        indiv__volgorde=100,            # Recurve klasse 1
+                                                        indiv__volgorde=1100,           # Recurve klasse 1
                                                         indiv__boogtype__afkorting='R')[0]
         self.klasse_c = CompetitieKlasse.objects.filter(competitie=self.comp_18,
                                                         indiv__is_onbekend=False,
                                                         indiv__niet_voor_rk_bk=False,
-                                                        indiv__volgorde=201,            # Compound klasse 2
+                                                        indiv__volgorde=1201,           # Compound klasse 2
                                                         indiv__boogtype__afkorting='C')[0]
         self.klasse_ib = CompetitieKlasse.objects.filter(competitie=self.comp_18,
                                                          indiv__is_onbekend=False,
                                                          indiv__niet_voor_rk_bk=False,
-                                                         indiv__volgorde=400,           # IB klasse 1
-                                                         indiv__boogtype__afkorting='IB')[0]
+                                                         indiv__volgorde=1400,          # TR klasse 1
+                                                         indiv__boogtype__afkorting='TR')[0]
 
         # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()
@@ -273,7 +273,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         wedstrijd_r1_pk = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0].pk
         url = self.url_wijzig_rk_wedstrijd % wedstrijd_r1_pk
 
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(22):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
@@ -318,14 +318,14 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         # haal de wedstrijd op
         wedstrijd_r1 = DeelCompetitie.objects.get(pk=self.deelcomp_rayon1_18.pk).plan.wedstrijden.all()[0]
         url_w = self.url_wijzig_rk_wedstrijd % wedstrijd_r1.pk
-        with self.assert_max_queries(29):
+        with self.assert_max_queries(27):
             resp = self.client.get(url_w)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('comprayon/wijzig-wedstrijd-rk.dtl', 'plein/site_layout.dtl'))
 
         # nog een keer ophalen, want dan zijn wedstrijd.vereniging en wedstrijd.locatie al gezet
-        with self.assert_max_queries(29):
+        with self.assert_max_queries(27):
             resp = self.client.get(url_w)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
@@ -467,7 +467,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         # hierbij lukt het niet om de wedstrijd.vereniging in te vullen
         wedstrijd_r2_pk = DeelCompetitie.objects.get(pk=self.deelcomp_rayon2_18.pk).plan.wedstrijden.all()[0].pk
         url = self.url_wijzig_rk_wedstrijd % wedstrijd_r2_pk
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -478,7 +478,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         ver.regio = self.regio_105  # verhuis naar rayon 2
         ver.save()
 
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(21):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 

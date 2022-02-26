@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,198 +10,250 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-uitslagen-regio-teams" %}
+    <script>
+        function keuze_gemaakt(groep) {
 
-    <h4>Uitslagen regiocompetitie teams</h4>
+            // TODO: sta wijziging in meerdere radiobuttons tegelijk toe: construeer de URL hier
 
-    <p>Deze pagina toont de {% if comp.alle_regiocompetities_afgesloten %}eindstand{% else %}tussenstand{% endif %} van de regiocompetities teams.</p>
+            const selector = "input[type='radio'][name=" + groep + "]:checked"
+            const el = document.querySelector(selector)
+            const url = el.dataset.url
 
+            // de radiobutton die bij het geladen geselecteerd werd heeft geen url
+            if (url.length > 0)
+                window.location.href = url
+        }
+    </script>
 
-    <p>Kies een team type:</p>
-
-    <div class="white shrink-wrap-5">
-        {% for teamtype in teamtype_filters %}
-            {% if teamtype.zoom_url %}
-                <a class="margin-5 btn-outline" href="{{ teamtype.zoom_url }}">{{ teamtype.beschrijving }}</a>
-            {% else %}
-                <a class="margin-5 btn-nhb-blauw" href="#">{{ teamtype.beschrijving }}</a>
-            {% endif %}
-        {% endfor %}
-    </div>
-
-
-    <p>Kies een regio:</p>
-
-    <div class="white shrink-wrap-5">
-        {% for regio in regio_filters %}
-            {% if regio.break_before %}
-                <br>
-            {% endif %}
-            {% if regio.zoom_url %}
-                <a class="margin-5 btn-outline" href="{{ regio.zoom_url }}">{{ regio.title_str }}</a>
-            {% else %}
-                <a class="margin-5 btn-nhb-blauw" href="#">{{ regio.title_str }}</a>
-            {% endif %}
-        {% endfor %}
-    </div>
-
-    {% if ver_filters %}
-        <br><br>
-        <div class="row">
-            <div class="col s12 m6" style="padding:0">
-                <ul class="collapsible" style="box-shadow: none; border:0">
-                    <li>
-                        <div class="collapsible-header white">Klik voor verenigingen</div>
-                        <div class="collapsible-body white">
-                            <span>Kies een vereniging:</span><br>
-                            {% for ver in ver_filters %}
-                                <p>
-                                <a class="btn-nhb-blauw" href="{{ ver.zoom_url }}">{{ ver.ver_nr }}</a>
-                                <span>&nbsp;&nbsp;{{ ver.naam }}</span>
-                                </p>
-                            {% endfor %}
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    {% endif %}
-
-    <p>&nbsp;</p>
-    <div class="row">
-
-        <!-- toon gegevens van de regio en competitie in een blauwe box -->
-        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-            <div class="white-text nhb-blauw z-depth-2">
-
-                <div class="row small-row">
-                    <div class="col s3">Competitie:</div>
-                    <div class="col s7">{{ deelcomp.competitie.beschrijving }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3">Team type:</div>
-                    <div class="col s7">{{ teamtype.beschrijving }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3">Regio:</div>
-                    <div class="col s7">{{ regio }}</div>
-                </div>
-            </div>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Uitslagen regiocompetitie teams</h3>
+            <p>{% if comp.alle_regiocompetities_afgesloten %}Eindstand{% else %}Tussenstand{% endif %} van de regiocompetities teams.</p>
         </div>
     </div>
 
-    <p>&nbsp;</p>
-
-    <table class="white">
-        {% for team in teams %}
-            {% if forloop.first %}      <!-- alleen toevoegen als er teams zijn, anders probleem met colspan=2 -->
-                <!-- forceer gelijkmatige layout in de Scores kolommen -->
-                <tr style="visibility: collapse">
-                    <td colspan="2"><!-- rank, naam --></td>
-                    <td class="right-align smal">888</td>
-                    <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
-                    <td class="right-align smal">888</td>
-                    <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
-                    <td class="right-align smal">888</td>
-                    <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
-                    <td class="right-align smal">888</td>
-                    <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
-                    <td class="right-align smal">888</td>
-                    <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
-                    <td class="right-align smal">888</td>
-                    <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
-                    <td class="right-align smal">888</td>
-                    <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
-                    <td class="right-align hide-on-small-only">8888</td>
-                    <td class="right-align">{% if toon_punten %}88{% else %}-{% endif %}</td>
+    <!-- blauwe balk met informatie -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Competitie</th>
+                    <td>{{ deelcomp.competitie.beschrijving }}</td>
                 </tr>
-            {% endif %}
+                <tr>
+                    <th>Team type</th>
+                    <td>{{ teamtype.beschrijving }}</td>
+                </tr>
+                <tr>
+                    <th>Regio</th>
+                    <td>{{ regio }}</td>
+                </tr>
 
-            {% if team.break_poule %}
-                {% if team.schema %}
-                    <tr class="nhb-grijs">
-                        <td colspan="18">
-                            <h6>Wedstrijdschema</h6>
-                        </td>
-                    </tr>
-
+                {% if not deelcomp.regio_organiseert_teamcompetitie %}
                     <tr>
-                        <td colspan="18" style="padding:0">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th class="center-align">Ronde</th>
+                        <td></td>
+                        <td class="nhb-rood-text">Deze regio organiseert geen team competitie</td>
+                    </tr>
+                {% endif %}
+
+            </table>
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Filters</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met filters -->
+    <div class="row-nhb-blauw">
+
+        <div class="col s12 m4 offset-m1 l3" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Kies een regio:</b></p>
+                <ul id="id_regio">
+                    {% for regio in regio_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ regio.sel }}">
+                                <input class="with-gap" type="radio" name="regio" value="{{ regio.sel }}" required id="id_{{ regio.sel }}" {% if regio.selected %}checked{% endif %} data-url="{{ regio.zoom_url }}">
+                                <span>{{ regio.title_str }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('regio')">Activeer</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="col s12 m5 l4" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Kies een team type:</b></p>
+                <ul id="id_boog">
+                    {% for teamtype in teamtype_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ teamtype.sel }}">
+                                <input class="with-gap" type="radio" name="teamtype" value="{{ teamtype.sel }}" required id="id_{{ teamtype.sel }}" {% if teamtype.selected %}checked{% endif %} data-url="{{ teamtype.zoom_url }}">
+                                <span>{{ teamtype.beschrijving }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('teamtype')">Activeer</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="col s12 m6 l5">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Kies een vereniging:</b></p>
+                <ul id="id_ver">
+                    <li>
+                        <label class="black-text" for="id_ver_0">
+                            <input class="with-gap" type="radio" name="ver" value="0" required id="id_ver_0" checked>
+                            <span>Alle</span>
+                        </label>
+                    </li>
+                    {% for ver in ver_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ ver.sel }}">
+                                <input class="with-gap" type="radio" name="ver" value="{{ ver.sel }}" required id="id_{{ ver.sel }}" data-url="{{ ver.zoom_url }}">
+                                <span>[{{ ver.ver_nr }}]&nbsp;&nbsp;{{ ver.naam }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('ver')">Activeer</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    {% if deelcomp.regio_organiseert_teamcompetitie %}
+
+        <table class="white">
+            {% for team in teams %}
+                {% if forloop.first %}      <!-- alleen toevoegen als er teams zijn, anders probleem met colspan=2 -->
+                    <!-- forceer gelijkmatige layout in de Scores kolommen -->
+                    <tr style="visibility: collapse">
+                        <td class="nhb-table-zijrand"></td>
+                        <td colspan="2"><!-- rank, naam --></td>
+                        <td class="right-align smal">888</td>
+                        <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
+                        <td class="right-align smal">888</td>
+                        <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
+                        <td class="right-align smal">888</td>
+                        <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
+                        <td class="right-align smal">888</td>
+                        <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
+                        <td class="right-align smal">888</td>
+                        <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
+                        <td class="right-align smal">888</td>
+                        <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
+                        <td class="right-align smal">888</td>
+                        <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}/ 10{% else %}-{% endif %}</span></td>
+                        <td class="right-align hide-on-small-only">8888</td>
+                        <td class="right-align">{% if toon_punten %}88{% else %}-{% endif %}</td>
+                        <td class="nhb-table-zijrand"></td>
+                    </tr>
+                {% endif %}
+
+                {% if team.break_poule %}
+                    {% if team.schema %}
+                        <tr>
+                            <td colspan="20" class="center">
+                                <h6>Wedstrijdschema</h6>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="20" style="padding:0">
+                                <table>
+                                    <tr class="nhb-table-header">
+                                        <td class="nhb-table-zijrand" rowspan="9"></td>
+                                        <th class="center">Ronde</th>
                                         <th>Thuis team</th>
                                         <th>Bezoekend team</th>
+                                        <td class="nhb-table-zijrand" rowspan="9"></td>
                                     </tr>
-                                </thead>
-                                {% for ronde_nr, wedstrijden in team.schema %}
+                                    {% for ronde_nr, wedstrijden in team.schema %}
+                                        <tr>
+                                            <td class="center">{{ ronde_nr }}{% if deelcomp.huidige_team_ronde == ronde_nr %}<br>(huidige){% endif %}</td>
+                                            <td>
+                                                {% for team1, team2 in wedstrijden %}{{ team1.team_str }}<br>{% endfor %}
+                                            </td>
+                                            <td>
+                                                {% for team1, team2 in wedstrijden %}{% if team2.team_str == '' %}<i class="grey-text">Bye</i>{% else %}{{ team2.team_str }}{% endif %}<br>{% endfor %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
                                     <tr>
-                                        <td class="center-align{% if deelcomp.huidige_team_ronde == ronde_nr %} nhb-blauw white-text{% endif %}">{{ ronde_nr }}</td>
-                                        <td>
-                                            {% for team1, team2 in wedstrijden %}{{ team1.team_str }}<br>{% endfor %}
-                                        </td>
-                                        <td>
-                                            {% for team1, team2 in wedstrijden %}{% if team2.team_str == '' %}<i class="grey-text">Bye</i>{% else %}{{ team2.team_str }}{% endif %}<br>{% endfor %}
-                                        </td>
+                                        <td colspan="18" class="nhb-table-onderrand"></td>
                                     </tr>
-                                {% endfor %}
-                            </table>
-                        </td>
+                                </table>
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                    {% if not team.is_afsluiter %}
+                        <tr>
+                            <td colspan="20" class="center">
+                                <br>
+                                {% if team.poule_str == '??' %}
+                                    <h5 class="nhb-rood-text">Nog niet in een poule geplaatst</h5>
+                                {% else %}
+                                    <h4 class="nhb-rood-text">Poule: {{ team.poule_str }}</h4>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endif %}
+
+                {% if team.break_klasse %}
+                    <tr>
+                        <td colspan="20" class="center"><h5>Klasse: {{ team.klasse_str }}</h5></td>
+                    </tr>
+                    <tr class="nhb-table-header">
+                        <td class="nhb-table-zijrand" rowspan="{{ team.aantal_in_groep }}"></td>
+                        <th><!-- rank --></th>
+                        <th>Team</th>
+                        <th class="center" colspan="14">{% if toon_punten %}Scores<span class="hide-on-small-only"> / Punten</span>{% else %}Scores{% endif %}</th>
+                        <th class="right-align hide-on-small-only">Totaal</th>
+                        <th class="right-align">{% if toon_punten %}Punten{% endif %}</th>
+                        <td class="nhb-table-zijrand" rowspan="{{ team.aantal_in_groep }}"></td>
                     </tr>
                 {% endif %}
 
                 {% if not team.is_afsluiter %}
-                    <tr class="nhb-grijs">
-                        <td colspan="18">
-                            <br>
-                            {% if team.poule_str == '??' %}
-                                <h5 class="red-text">Nog niet in een poule geplaatst</h5>
-                            {% else %}
-                                <h5>Poule: {{ team.poule_str }}</h5>
-                            {% endif %}
-                        </td>
+                    <tr>
+                        <td class="center smal">{{ team.rank }}</td>
+                        <td class="smal">{{ team.naam_str }}</td>
+                        {% for score, punten in team.ronde_scores %}
+                            <td class="right-align smal">{{ score }}</td>
+                            <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}{% if punten >= 0 %}/ {{ punten }}{% endif %}{% endif %}</span></td>
+                        {% endfor %}
+                        <td class="right-align hide-on-small-only">{{ team.totaal_score }}</td>
+                        <td class="right-align">{% if toon_punten %}{{ team.totaal_punten }}{% endif %}</td>
                     </tr>
+
+                    {% if team.onderrand %}
+                        <tr>
+                            <td colspan="18" class="nhb-table-onderrand"></td>
+                        </tr>
+                    {% endif %}
                 {% endif %}
-            {% endif %}
 
-            {% if team.break_klasse %}
-                <tr class="nhb-grijs">
-                    <td colspan="18"><h6>Klasse: {{ team.klasse_str }}</h6></td>
-                </tr>
-                <tr>
-                    <th><!-- rank --></th>
-                    <th>Team</th>
-                    <th class="center-align" colspan="14">{% if toon_punten %}Scores<span class="hide-on-small-only"> / Punten</span>{% else %}Scores{% endif %}</th>
-                    <th class="right-align hide-on-small-only">Totaal</th>
-                    <th class="right-align">{% if toon_punten %}Punten{% endif %}</th>
-                </tr>
-            {% endif %}
+            {% endfor %}
+        </table>
 
-            {% if not team.is_afsluiter %}
-                <tr>
-                    <td class="center-align smal">{{ team.rank }}</td>
-                    <td class="smal">{{ team.naam_str }}</td>
-                    {% for score, punten in team.ronde_scores %}
-                        <td class="right-align smal">{{ score }}</td>
-                        <td class="left-align smal"><span class="hide-on-small-only">{% if toon_punten %}{% if punten >= 0 %}/ {{ punten }}{% endif %}{% endif %}</span></td>
-                    {% endfor %}
-                    <td class="right-align hide-on-small-only">{{ team.totaal_score }}</td>
-                    <td class="right-align">{% if toon_punten %}{{ team.totaal_punten }}{% endif %}</td>
-                </tr>
-            {% endif %}
-
-        {% endfor %}
-    </table>
-
-    {% if not deelcomp.regio_organiseert_teamcompetitie %}
-        <p>Deze regio organiseert geen team competitie.</p>
     {% endif %}
 
-{% endblock %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-uitslagen-regio-teams" %}
 
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -143,6 +143,10 @@ class KalenderMaandView(TemplateView):
         # for
         context['wedstrijden'] = wedstrijden
 
+        context['kruimels'] = (
+            (None, 'Wedstrijdkalender'),
+        )
+
         menu_dynamics(self.request, context, 'kalender')
         return context
 
@@ -166,6 +170,15 @@ class WedstrijdInfoView(TemplateView):
             raise Http404('Wedstrijd niet gevonden')
 
         context['wedstrijd'] = wedstrijd
+
+        url_terug = reverse('Kalender:maand',
+                            kwargs={'jaar': wedstrijd.datum_begin.year,
+                                    'maand': MAAND2URL[wedstrijd.datum_begin.month]})
+
+        context['kruimels'] = (
+            (url_terug, 'Wedstrijdkalender'),
+            (None, 'Wedstrijd details'),
+        )
 
         menu_dynamics(self.request, context, 'kalender')
         return context

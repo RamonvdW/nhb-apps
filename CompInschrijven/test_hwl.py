@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -371,15 +371,15 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
 
         # stel 1 schutter in die op randje aspirant/cadet zit
         self._zet_sporter_voorkeuren(100004)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
 
-        self.assertContains(resp, '<td>Cadet de Jeugd</td>')
-        self.assertContains(resp, '<td>14</td>')            # leeftijd 2021
-        self.assertContains(resp, '<td class="hide-on-small-only">Cadet</td>')  # leeftijdsklasse competitie
+        self.assertContains(resp, '>Cadet de Jeugd</')
+        self.assertContains(resp, '>14</')                   # leeftijd 2021
+        self.assertContains(resp, '>Onder 18 (cadetten)</')  # leeftijdsklasse competitie
 
         # schrijf het jonge lid in en controleer de wedstrijdklasse
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
@@ -390,7 +390,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
 
         inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
         self.assertEqual(inschrijving.sporterboog.sporter.lid_nr, 100004)
-        self.assertTrue('Cadet' in inschrijving.klasse.indiv.beschrijving)
+        self.assertTrue('Onder 18' in inschrijving.klasse.indiv.beschrijving)
         inschrijving.delete()
 
         # zet het min_ag voor Recurve klassen
@@ -398,10 +398,10 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         for klasse in (CompetitieKlasse
                        .objects
                        .filter(competitie=self.comp_18,
-                               indiv__volgorde__in=(100, 101, 102, 103, 104, 105))):
-            if klasse.indiv.volgorde == 105:
+                               indiv__volgorde__in=(1100, 1101, 1102, 1103, 1104, 1105))):
+            if klasse.indiv.volgorde == 1105:
                 klasse.min_ag = 0.001
-            elif klasse.indiv.volgorde == 104:
+            elif klasse.indiv.volgorde == 1104:
                 klasse.min_ag = 7.420
                 klasse_5 = klasse
             else:
@@ -419,7 +419,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self._zet_ag(100003, 18)
         self._zet_ag(100003, 25)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(26):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -458,7 +458,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.assert404(resp)
 
         # haal het aanmeld-scherm op zodat er al ingeschreven leden bij staan
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(26):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -492,7 +492,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         url = self.url_aanmelden % self.comp_18.pk
         zet_competitie_fase(self.comp_18, 'B')
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(24):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -556,7 +556,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         url = self.url_aanmelden % self.comp_18.pk
         zet_competitie_fase(self.comp_18, 'B')
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(24):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -621,7 +621,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         url = self.url_aanmelden % self.comp_18.pk
         zet_competitie_fase(self.comp_18, 'B')
 
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(28):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -657,7 +657,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self._zet_ag(100004, 18)
         self._zet_ag(100003, 25)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(24):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -699,14 +699,14 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self._zet_ag(100004, 18)
         self._zet_ag(100003, 25)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(24):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         # nu de POST om een paar leden aan te melden
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on',        # 3=BB
                                           'wil_in_team': 'ja',
@@ -739,7 +739,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_18, 'B')
 
         url = self.url_aanmelden % self.comp_18.pk
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(24):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))

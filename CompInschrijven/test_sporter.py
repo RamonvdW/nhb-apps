@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -176,7 +176,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
         # 18m IB voor extra coverage
-        sporterboog = SporterBoog.objects.get(boogtype__afkorting='IB')
+        sporterboog = SporterBoog.objects.get(boogtype__afkorting='TR')
         url = self.url_bevestig_aanmelden % (deelcomp.pk, sporterboog.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -658,8 +658,9 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compinschrijven/sporter-bevestig-aanmelden.dtl', 'plein/site_layout.dtl'))
-        self.assertNotContains(resp, 'Aspirant')
-        self.assertContains(resp, 'Cadet')
+        self.assertNotContains(resp, 'Onder 12')
+        self.assertNotContains(resp, 'Onder 14')
+        self.assertContains(resp, 'Onder 18')
 
         # probeer in te schrijven en controleer daarna de wedstrijdklasse waarin de schutter geplaatst is
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
@@ -674,8 +675,9 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertEqual(inschrijving.sporterboog, sporterboog)
 
         klasse = inschrijving.klasse.indiv
-        self.assertFalse('Aspirant' in klasse.beschrijving)
-        self.assertTrue('Cadet' in klasse.beschrijving)
+        self.assertFalse('Onder 12' in klasse.beschrijving)
+        self.assertFalse('Onder 14' in klasse.beschrijving)
+        self.assertTrue('Onder 18' in klasse.beschrijving)
         self.assertFalse(klasse.buiten_gebruik)
         self.assertEqual(klasse.boogtype, sporterboog.boogtype)
 

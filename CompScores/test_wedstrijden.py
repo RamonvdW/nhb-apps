@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -241,7 +241,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
 
     def _maak_inschrijvingen(self):
         # schrijf iemand in
-        boog_ib = BoogType.objects.get(afkorting='IB')
+        boog_tr = BoogType.objects.get(afkorting='TR')
         boog_r = BoogType.objects.get(afkorting='R')
         boog_c = BoogType.objects.get(afkorting='C')
 
@@ -308,16 +308,17 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
 
         # aspirant schutter aanmelden
         self.sporter_100012.geboorte_datum = datetime.date(year=self.comp_18.begin_jaar - 10, month=1, day=1)
+        self.sporter_100012.geslacht = 'M'
         self.sporter_100012.save()
 
         klasse = (CompetitieKlasse
                   .objects
                   .filter(competitie=self.comp_18,
-                          indiv__boogtype=boog_ib,
-                          indiv__beschrijving__contains="Aspirant"))[0]
+                          indiv__boogtype=boog_tr,
+                          indiv__beschrijving__contains="Onder 12 jongens"))[0]
 
         sporterboog = SporterBoog(sporter=self.sporter_100012,
-                                  boogtype=boog_ib,
+                                  boogtype=boog_tr,
                                   voor_wedstrijd=True)
         sporterboog.save()
 
@@ -330,8 +331,8 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
         klasse = (CompetitieKlasse
                   .objects
                   .filter(competitie=self.comp_25,
-                          indiv__boogtype=boog_ib,
-                          indiv__beschrijving__contains="Aspirant"))[0]
+                          indiv__boogtype=boog_tr,
+                          indiv__beschrijving__contains="Onder 12 jongens"))[0]
 
         RegioCompetitieSchutterBoog(
                 deelcompetitie=self.deelcomp_regio_25,

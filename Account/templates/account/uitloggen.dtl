@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,15 +10,34 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="uitloggen" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Uitloggen</h3>
+        </div>
+    </div>
 
-    <h4>Uitloggen</h4>
+    <div class="row-nhb-blauw">
+        <div class="col s12 m8 offset-m2 l6 offset-l3">
 
-    <p>Druk op de knop om volledig uit te loggen, of maak een keuze in het menu om ingelogd te blijven.</p>
+            <!-- dialoog venster -->
+            <div class="white" style="padding:30px">
 
-    <form class="col s12" action="{% url 'Account:logout' %}" method="post">
-        {% csrf_token %}
-        <input class="btn-nhb-blauw" name="button_logout" type="submit" value="Uitloggen">
-    </form>
+                <p>Druk op de knop om volledig uit te loggen:</p>
+                <p>&nbsp;</p>
+
+                <form class="col s12" action="{% url 'Account:logout' %}" method="post">
+                    {% csrf_token %}
+                    <input class="btn-nhb-rood" name="button_logout" type="submit" value="Uitloggen">
+                </form>
+
+                <p>&nbsp;</p>
+                <p>Of klik op het logo in de linker bovenhoek om op de site te blijven.</p>
+
+            </div>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="uitloggen" %}
 
 {% endblock %}

@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from BasisTypen.models import BoogType, TeamType
+from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbVereniging
 from Competitie.models import (LAAG_REGIO, TEAM_PUNTEN_MODEL_SOM_SCORES, Competitie, DeelCompetitie,
-                               RegiocompetitieTeam, RegiocompetitieRondeTeam, RegioCompetitieSchutterBoog)
-from Competitie.menu import menu_dynamics_competitie
+                               RegiocompetitieTeam, RegiocompetitieRondeTeam, RegioCompetitieSchutterBoog,
+                               get_competitie_boog_typen, get_competitie_team_typen)
 from Functie.rol import rol_get_huidige_functie
+from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 
 
@@ -60,22 +61,24 @@ class UitslagenVerenigingIndivView(TemplateView):
     def _maak_filter_knoppen(context, comp, ver_nr, comp_boog):
         """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
 
-        # boogtype files
-        boogtypen = BoogType.objects.order_by('volgorde').all()
+        # boogtype filters
+        boogtypen = get_competitie_boog_typen(comp)
 
         context['comp_boog'] = None
         context['boog_filters'] = boogtypen
 
         for boogtype in boogtypen:
+            boogtype.sel = 'boog_' + boogtype.afkorting
             if boogtype.afkorting.upper() == comp_boog.upper():
+                boogtype.selected = True
                 context['comp_boog'] = boogtype
                 comp_boog = boogtype.afkorting.lower()
                 # geen url --> knop disabled
-            else:
-                boogtype.zoom_url = reverse('CompUitslagen:uitslagen-vereniging-indiv-n',
-                                            kwargs={'comp_pk': comp.pk,
-                                                    'comp_boog': boogtype.afkorting.lower(),
-                                                    'ver_nr': ver_nr})
+
+            boogtype.zoom_url = reverse('CompUitslagen:uitslagen-vereniging-indiv-n',
+                                        kwargs={'comp_pk': comp.pk,
+                                                'comp_boog': boogtype.afkorting.lower(),
+                                                'ver_nr': ver_nr})
         # for
 
     @staticmethod
@@ -187,8 +190,16 @@ class UitslagenVerenigingIndivView(TemplateView):
 
         context['deelnemers'] = deelnemers = self._get_deelnemers(deelcomp, boogtype, ver_nr)
         context['aantal_deelnemers'] = len(deelnemers)
+        context['aantal_regels'] = len(deelnemers) + 3
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (context['url_terug'], 'Uitslag regio individueel'),
+            (None, 'Vereniging')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -203,21 +214,20 @@ class UitslagenVerenigingTeamsView(TemplateView):
     def _maak_filter_knoppen(context, comp, ver_nr, teamtype_afkorting):
         """ filter knoppen voor de vereniging """
 
-        teamtypen = TeamType.objects.order_by('volgorde').all()
-
         context['teamtype'] = None
-        context['teamtype_filters'] = teamtypen
+        context['teamtype_filters'] = teamtypen = get_competitie_team_typen(comp)
 
         for team in teamtypen:
+            team.sel = 'team_' + team.afkorting
             if team.afkorting.upper() == teamtype_afkorting.upper():
+                team.selected = True
                 context['teamtype'] = team
                 teamtype_afkorting = team.afkorting.lower()
-                # geen url --> knop disabled
-            else:
-                team.zoom_url = reverse('CompUitslagen:uitslagen-vereniging-teams-n',
-                                        kwargs={'comp_pk': comp.pk,
-                                                'team_type': team.afkorting.lower(),
-                                                'ver_nr': ver_nr})
+
+            team.zoom_url = reverse('CompUitslagen:uitslagen-vereniging-teams-n',
+                                    kwargs={'comp_pk': comp.pk,
+                                            'team_type': team.afkorting.lower(),
+                                            'ver_nr': ver_nr})
         # for
 
     def get_context_data(self, **kwargs):
@@ -235,7 +245,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
         comp.bepaal_fase()
         context['comp'] = comp
 
-        teamtype_afkorting = kwargs['team_type'][:2]     # afkappen voor de veiligheid
+        teamtype_afkorting = kwargs['team_type'][:3]     # afkappen voor de veiligheid
 
         # ver_nr is optioneel en resulteert in het nummer van de sporter
         try:
@@ -446,7 +456,18 @@ class UitslagenVerenigingTeamsView(TemplateView):
 
         context['geen_teams'] = (len(teams) == 0)
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        context['aantal_regels'] = len(teams) * 3 + 4       # team, team score, punten
+        for team in teams:
+            context['aantal_regels'] += len(team.leden)
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (context['url_terug'], 'Uitslag regio teams'),
+            (None, 'Vereniging')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 

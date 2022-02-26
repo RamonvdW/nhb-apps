@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,15 +9,13 @@ from django.urls import reverse
 from django.views.generic import ListView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import (LeeftijdsKlasse, TeamType,
-                               MAXIMALE_LEEFTIJD_JEUGD,
-                               MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
+from BasisTypen.models import (MAXIMALE_LEEFTIJD_JEUGD, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
                                BLAZOEN_60CM_4SPOT, BLAZOEN_DT)
-from Competitie.models import (AG_NUL, DAGDELEN, DAGDEEL_AFKORTINGEN,
-                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
-                               Competitie, DeelCompetitie, DeelcompetitieRonde,
-                               RegioCompetitieSchutterBoog)
+from Competitie.models import (AG_NUL, DAGDELEN, DAGDEEL_AFKORTINGEN, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
+                               Competitie, DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog,
+                               get_competitie_indiv_leeftijdsklassen, get_competitie_team_typen)
 from Competitie.operations import KlasseBepaler
+from Competitie.operations import get_competitie_bogen
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Score.models import Score, SCORE_TYPE_INDIV_AG
@@ -76,39 +74,42 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             # niemand van deze vereniging mag zich inschrijven
             return objs
 
+        # bepaal de boogtypen die voorkomen in de competitie
+        boogtype_dict = get_competitie_bogen(comp)
+        boogtype_afkortingen = list(boogtype_dict.keys())
+
         prev_lkl = None
+        prev_geslacht = '?'
         prev_wedstrijdleeftijd = 0
         jeugdgrens = comp.begin_jaar - MAXIMALE_LEEFTIJD_JEUGD
+
+        leeftijdsklassen = get_competitie_indiv_leeftijdsklassen(comp)
 
         # sorteer jeugd op geboorte jaar en daarna naam
         for obj in (Sporter
                     .objects
                     .filter(bij_vereniging=functie_nu.nhb_ver)
                     .filter(geboorte_datum__year__gte=jeugdgrens)
-                    .order_by('-geboorte_datum__year', 'achternaam', 'voornaam')):
+                    .order_by('-geboorte_datum__year',
+                              'achternaam', 'voornaam')):
 
             # de wedstrijdleeftijd voor dit hele seizoen
             wedstrijdleeftijd = obj.bereken_wedstrijdleeftijd(comp.begin_jaar + 1)
             obj.leeftijd = wedstrijdleeftijd
 
             # de wedstrijdklasse voor dit hele seizoen
-            if wedstrijdleeftijd == prev_wedstrijdleeftijd:
+            if prev_lkl and wedstrijdleeftijd == prev_wedstrijdleeftijd and obj.geslacht == prev_geslacht:
                 obj.leeftijdsklasse = prev_lkl
             else:
-                for lkl in (LeeftijdsKlasse                         # pragma: no branch
-                            .objects
-                            .filter(geslacht='M',
-                                    min_wedstrijdleeftijd=0)        # exclude veteraan, master
-                            .order_by('volgorde')):                 # aspiranten eerst
-
-                    if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
+                for lkl in leeftijdsklassen:
+                    if lkl.geslacht_is_compatible(obj.geslacht) and lkl.leeftijd_is_compatible(wedstrijdleeftijd):
                         obj.leeftijdsklasse = lkl
+                        prev_lkl = obj.leeftijdsklasse
+                        prev_geslacht = obj.geslacht
+                        prev_wedstrijdleeftijd = wedstrijdleeftijd
                         # stop bij eerste passende klasse
                         break
                 # for
-
-                prev_lkl = obj.leeftijdsklasse
-                prev_wedstrijdleeftijd = wedstrijdleeftijd
 
             objs.append(obj)
         # for
@@ -167,7 +168,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         objs2 = list()
         for sporterboog in (SporterBoog
                             .objects
-                            .filter(voor_wedstrijd=True)
+                            .filter(voor_wedstrijd=True,
+                                    boogtype__afkorting__in=boogtype_afkortingen)
                             .select_related('sporter',
                                             'boogtype')
                             .order_by('boogtype__volgorde',                # groepeer op boogtype
@@ -327,7 +329,13 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                             context['dagdelen'].append(dagdeel)
                     # for
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
+            (None, self.comp.beschrijving.replace(' competitie', '')),
+            (None, 'Aanmelden')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -358,11 +366,6 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         deelcomp = DeelCompetitie.objects.get(competitie=comp,
                                               nhb_regio=hwl_regio)
         methode = deelcomp.inschrijf_methode
-
-        boog2teamtype = dict()
-        for obj in TeamType.objects.all():
-            boog2teamtype[obj.afkorting] = obj
-        # for
 
         # zoek eerst de voorkeuren op
         mag_team_schieten = comp.fase == 'B'
@@ -611,7 +614,13 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         if methode == INSCHRIJF_METHODE_3:
             context['toon_dagdeel'] = DAGDELEN
 
-        menu_dynamics(self.request, context, actief='vereniging')       # TODO: competitie
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (None, self.deelcomp.competitie.beschrijving.replace(' competitie', '')),
+            (None, 'Ingeschreven')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

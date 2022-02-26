@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -41,6 +41,10 @@ class HandleidingView(UserPassesTestMixin, View):
             page = request.resolver_match.url_name
 
         template = 'handleiding/%s.dtl' % page
+
+        context['kruimels'] = (
+            (None, 'Handleiding'),
+        )
 
         menu_dynamics(self.request, context)
         return render(request, template, context)

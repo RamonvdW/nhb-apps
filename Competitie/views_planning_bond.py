@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -61,7 +61,15 @@ class BondPlanningView(UserPassesTestMixin, TemplateView):
                                               competitie=deelcomp_bk.competitie)
                                       .order_by('nhb_rayon__rayon_nr'))
 
-        menu_dynamics(self.request, context, actief='competitie')
+        comp = deelcomp_bk.competitie
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Planning')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -135,7 +143,14 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
             context['url_doorzetten'] = reverse('Competitie:bko-doorzetten-naar-rk',
                                                 kwargs={'comp_pk': comp.pk})
 
-        menu_dynamics(self.request, context, actief='competitie')
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+                comp.beschrijving.replace(' competitie', '')),
+            (None, 'Doorzetten')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -203,10 +218,26 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
             # klaar om door te zetten
             context['url_doorzetten'] = reverse('Competitie:bko-doorzetten-naar-bk',
                                                 kwargs={'comp_pk': comp.pk})
+        else:
+            # bepaal de status van elk rayon
+            context['rk_status'] = deelcomps = DeelCompetitie.objects.select_related('nhb_rayon').filter(competitie=comp, laag=LAAG_RK)
+            for deelcomp in deelcomps:
+                deelcomp.rayon_str = 'Rayon %s' % deelcomp.nhb_rayon.rayon_nr
+                if deelcomp.is_afgesloten:
+                    deelcomp.status_str = "Afgesloten"
+                    deelcomp.status_groen = True
+                else:
+                    deelcomp.status_str = "Actief"
 
         context['comp'] = comp
 
-        menu_dynamics(self.request, context, actief='competitie')
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Competitie doorzetten')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
     @staticmethod
@@ -313,7 +344,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 #         if comp.fase < 'R' or comp.fase >= 'Z':
 #             raise Http404('Verkeerde competitie fase')
 #
-#         menu_dynamics(self.request, context, actief='competitie')
+#         menu_dynamics(self.request, context)
 #         return context
 #
 #     def post(self, request, *args, **kwargs):
