@@ -40,7 +40,7 @@ def _get_targets_indiv():
         for lkl in wedstrklasse.leeftijdsklassen.all():
             age_min = min(lkl.min_wedstrijdleeftijd, age_min)
             age_max = max(lkl.max_wedstrijdleeftijd, age_max)
-            geslacht = lkl.geslacht
+            geslacht = lkl.wedstrijd_geslacht
         # for
 
         tup = (age_min, age_max, geslacht, wedstrklasse.boogtype)
@@ -465,7 +465,7 @@ class KlasseBepaler(object):
                 self.boogtype2klassen[boog_afkorting] = [klasse]
 
             for lkl in indiv.leeftijdsklassen.all():
-                lkl_cache = self.lkl_cache[lkl.geslacht]
+                lkl_cache = self.lkl_cache[lkl.wedstrijd_geslacht]
                 try:
                     lkl_cache[klasse.pk].append(lkl)
                 except KeyError:

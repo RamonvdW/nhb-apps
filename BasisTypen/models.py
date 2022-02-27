@@ -117,7 +117,7 @@ class TeamType(models.Model):
     afkorting = models.CharField(max_length=3)
 
     # sorteervolgorde zodat order_by('volgorde') de juiste sortering oplevert
-    volgorde = models.CharField(max_length=1, default='?')          # TODO: waarom is dit geen getal?
+    volgorde = models.PositiveSmallIntegerField(default=0)
 
     # toegestane boogtypen
     boog_typen = models.ManyToManyField(BoogType)
@@ -156,7 +156,7 @@ class LeeftijdsKlasse(models.Model):
     beschrijving = models.CharField(max_length=80)      # CH Cadetten, mannen
 
     # man, vrouw of gender-neutraal
-    geslacht = models.CharField(max_length=1, choices=WEDSTRIJDGESLACHT_MVA)        # TODO: rename field
+    wedstrijd_geslacht = models.CharField(max_length=1, choices=WEDSTRIJDGESLACHT_MVA)
 
     # leeftijds grenzen voor de klassen: of ondergrens, of bovengrens
     #   de jeugdklassen hebben een leeftijd bovengrens
@@ -204,7 +204,7 @@ class LeeftijdsKlasse(models.Model):
             leeftijdsklasse 'A' (alle) past bij alle wedstrijdgeslachten
             anders moet het een 'M'/'V' match zijn
         """
-        return (self.geslacht == GESLACHT_ALLE) or (wedstrijd_geslacht == self.geslacht)
+        return (self.wedstrijd_geslacht == GESLACHT_ALLE) or (wedstrijd_geslacht == self.wedstrijd_geslacht)
 
     class Meta:
         """ meta data voor de admin interface """

@@ -214,7 +214,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
             klasse.gebruikt = (klasse.pk in klassen_gebruikt)
             klasse.selected = (klasse.pk in pks)
 
-            if klasse.leeftijdsklasse.geslacht == 'M':
+            if klasse.leeftijdsklasse.wedstrijd_geslacht == 'M':
                 opt_klasse_1.append(klasse)
             else:
                 opt_klasse_2.append(klasse)

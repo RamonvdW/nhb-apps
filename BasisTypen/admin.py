@@ -32,7 +32,7 @@ class BasisTypenReadonlyMetVolgordeAdmin(BasisTypenReadonlyAdmin):
 
 class BasisTypenLeeftijdsKlasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
 
-    list_filter = ('geslacht',)
+    list_filter = ('wedstrijd_geslacht',)
 
 
 class BasisTypenIndivWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):

@@ -17,11 +17,6 @@ class FeedbackForm(forms.Form):
                     required=False,
                     widget=forms.HiddenInput)
 
-    op_pagina = forms.CharField(                # TODO: niet nodig?
-                    max_length=50,
-                    required=False,
-                    widget=forms.HiddenInput)
-
     bevinding = forms.ChoiceField(
                     choices=Feedback.FEEDBACK,
                     label='Je mening over de website pagina',

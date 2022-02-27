@@ -50,7 +50,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         lkls = list()
         for lkl in (LeeftijdsKlasse  # pragma: no branch
                     .objects
-                    .filter(geslacht='M',
+                    .filter(wedstrijd_geslacht='M',
                             min_wedstrijdleeftijd=0)    # exclude veteraan, master
                     .order_by('volgorde')):             # aspirant eerst
 
@@ -95,7 +95,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
 
         lkls = list()
         for lkl in (LeeftijdsKlasse  # pragma: no branch
-                    .objects.filter(geslacht='M',
+                    .objects.filter(wedstrijd_geslacht='M',
                                     max_wedstrijdleeftijd=0)    # skip jeugd klassen
                     .order_by('-volgorde')):                    # volgorde: veteraan, master, senior
 

@@ -71,7 +71,7 @@ class TestBasisTypen(TestCase):
 
     def test_max_wedstrijdleeftijd(self):
         lkl = LeeftijdsKlasse(
-                    geslacht='M',
+                    wedstrijd_geslacht='M',
                     min_wedstrijdleeftijd=20,
                     max_wedstrijdleeftijd=30)
 
@@ -82,7 +82,7 @@ class TestBasisTypen(TestCase):
         self.assertFalse(lkl.leeftijd_is_compatible(31))
 
         lkl = LeeftijdsKlasse(
-                    geslacht='M',
+                    wedstrijd_geslacht='M',
                     min_wedstrijdleeftijd=20,
                     max_wedstrijdleeftijd=0)
 
@@ -94,7 +94,7 @@ class TestBasisTypen(TestCase):
 
     def test_geslacht(self):
         lkl = LeeftijdsKlasse(
-                    geslacht='M',
+                    wedstrijd_geslacht='M',
                     min_wedstrijdleeftijd=20,
                     max_wedstrijdleeftijd=30)
 
@@ -103,7 +103,7 @@ class TestBasisTypen(TestCase):
         self.assertFalse(lkl.geslacht_is_compatible('X'))
 
         lkl = LeeftijdsKlasse(
-                    geslacht='V',
+                    wedstrijd_geslacht='V',
                     min_wedstrijdleeftijd=20,
                     max_wedstrijdleeftijd=30)
 
@@ -112,7 +112,7 @@ class TestBasisTypen(TestCase):
         self.assertFalse(lkl.geslacht_is_compatible('X'))
 
         lkl = LeeftijdsKlasse(
-                    geslacht='A',
+                    wedstrijd_geslacht='A',
                     min_wedstrijdleeftijd=20,
                     max_wedstrijdleeftijd=30)
 
@@ -120,6 +120,5 @@ class TestBasisTypen(TestCase):
         self.assertTrue(lkl.geslacht_is_compatible('V'))
         self.assertTrue(lkl.geslacht_is_compatible('X'))
 
-#
-# end of file
 
+# end of file

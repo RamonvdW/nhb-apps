@@ -31,7 +31,7 @@ def alle_wedstrijdleeftijden_groepen():
     min_wedstrijdleeftijd = 0
     for lkl in (LeeftijdsKlasse
                 .objects
-                .filter(geslacht=GESLACHT_ALLE)
+                .filter(wedstrijd_geslacht=GESLACHT_ALLE)
                 .order_by('volgorde')):
 
         if lkl.min_wedstrijdleeftijd == 0:
