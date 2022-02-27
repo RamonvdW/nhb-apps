@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -28,7 +28,7 @@ class Command(BaseCommand):
         else:
             try:
                 lid = Sporter.objects.get(lid_nr=username)
-            except Sporter.DoesNotExist:
+            except (Sporter.DoesNotExist, ValueError):
                 self.stderr.write('Geen sporter met lid_nr %s gevonden' % repr(username))
             else:
                 lid.account = account

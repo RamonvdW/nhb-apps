@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.core import management
-from .models import HistCompetitie, HistCompetitieIndividueel
+from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTeam
 from .views import RESULTS_PER_PAGE
 from TestHelpers.e2ehelpers import E2EHelpers
 import io
@@ -58,6 +58,24 @@ class TestHistComp(E2EHelpers, TestCase):
         rec.save()
         self.indiv_rec_pk = rec.pk
 
+        HistCompetitieTeam(
+            histcompetitie=obj,
+            subklasse="test",
+            rank=1,
+            vereniging_nr=1234,
+            vereniging_naam="Test Club",
+            team_nr=1,
+            totaal_ronde1=100,
+            totaal_ronde2=200,
+            totaal_ronde3=300,
+            totaal_ronde4=400,
+            totaal_ronde5=500,
+            totaal_ronde6=600,
+            totaal_ronde7=700,
+            totaal=800,
+            gemiddelde=543.2
+        ).save()
+
         obj = HistCompetitie()
         obj.seizoen = '2017/2018'
         obj.comp_type = '18'
@@ -87,6 +105,9 @@ class TestHistComp(E2EHelpers, TestCase):
         obj = HistCompetitieIndividueel.objects.all()[0]
         obj.clean_fields()                  # run field validators
         obj.clean()                         # run model validator
+        self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
+
+        obj = HistCompetitieTeam.objects.all()[0]
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
 
     def test_view_allejaren(self):
