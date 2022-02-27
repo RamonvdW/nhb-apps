@@ -40,13 +40,13 @@
                     </tr>
                 {% endif %}
                 <tr>
-                    <th>Week nummer</th>
+                    <th>Week</th>
                     <td>
-                        {% for opt in opt_week_nrs %}
-                            {% if opt.actief %}
-                                <span>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</span>
-                            {% endif %}
-                        {% endfor %}
+                        {% if week_actief %}
+                            <span>{{ week_actief.week_nr }} ({{ week_actief.maandag|date:"l j F Y" }})</span>
+                        {% else %}
+                            <i class="red-text">Ongeldige week</i>
+                        {% endif %}
                     </td>
                 </tr>
                 <tr>
@@ -73,6 +73,69 @@
         }
     </script>
 
+    {% if not readonly %}
+
+        {% if ronde.beschrijving == '' %}
+
+            <!-- witruimte -->
+            <div class="row center">
+                <div class="col s12">
+                    <h4>Wijzig</h4>
+                    <p>Week nummer en beschrijving aanpassen</p>
+                </div>
+            </div>
+
+            <!-- blauwe balk met dialoog venster -->
+            <div class="row-nhb-blauw">
+                <div class="col s12 m10 offset-m1 l6 offset-l3">
+
+                    <!-- dialoog venster -->
+                    <div class="white left-align z-depth-3">
+                        <div style="padding:30px">
+
+                            <form method="post" action="{{ ronde_opslaan_url }}">
+                                {% csrf_token %}
+
+                                {% if readonly %}
+                                    {% for opt in opt_week_nrs %}
+                                        {% if opt.actief %}
+                                            <p>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</p>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <select name="ronde_week_nr" onchange="gewijzigd()">
+                                        {% for opt in opt_week_nrs %}
+                                            <option value="{{ opt.choice_name }}"{% if opt.actief %} selected{% endif %}>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</option>
+                                        {% endfor %}
+                                    </select>
+                                {% endif %}
+
+                                {% if readonly %}
+                                    <p>{{ ronde.beschrijving }}</p>
+                                {% else %}
+                                <td class="input-field">
+                                        <input type="text" name="ronde_naam" placeholder="Beschrijving" value="{{ ronde.beschrijving }}" oninput="gewijzigd()">
+                                    </td>
+                                {% endif %}
+
+                                {% if not readonly %}
+                                    <p class="center">
+                                        <button id="opslaan_knop" class="btn-nhb-rood disabled" type="submit">
+                                            <i class="material-icons-round left">check</i>Instellingen opslaan</button>
+                                    </p>
+                                {% endif %}
+
+                            </form>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        {% endif %}
+
+    {% endif %}
 
     <!-- witruimte -->
     <div class="row center">
@@ -175,61 +238,65 @@
 
     {% if not readonly %}
 
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <h4>Wijzig</h4>
-                <p>Week nummer en beschrijving aanpassen</p>
-            </div>
-        </div>
+        {% if ronde.beschrijving != '' %}
 
-        <!-- blauwe balk met dialoog venster -->
-        <div class="row-nhb-blauw">
-            <div class="col s12 m10 offset-m1 l6 offset-l3">
-
-                <!-- dialoog venster -->
-                <div class="white left-align z-depth-3">
-                    <div style="padding:30px">
-
-                        <form method="post" action="{{ ronde_opslaan_url }}">
-                            {% csrf_token %}
-
-                            {% if readonly %}
-                                {% for opt in opt_week_nrs %}
-                                    {% if opt.actief %}
-                                        <p>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</p>
-                                    {% endif %}
-                                {% endfor %}
-                            {% else %}
-                                <select name="ronde_week_nr" onchange="gewijzigd()">
-                                    {% for opt in opt_week_nrs %}
-                                        <option value="{{ opt.choice_name }}"{% if opt.actief %} selected{% endif %}>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</option>
-                                    {% endfor %}
-                                </select>
-                            {% endif %}
-
-                            {% if readonly %}
-                                <p>{{ ronde.beschrijving }}</p>
-                            {% else %}
-                            <td class="input-field">
-                                    <input type="text" name="ronde_naam" placeholder="Beschrijving" value="{{ ronde.beschrijving }}" oninput="gewijzigd()">
-                                </td>
-                            {% endif %}
-
-                            {% if not readonly %}
-                                <p class="center">
-                                    <button id="opslaan_knop" class="btn-nhb-rood disabled" type="submit">
-                                        <i class="material-icons-round left">check</i>Instellingen opslaan</button>
-                                </p>
-                            {% endif %}
-
-                        </form>
-
-                    </div>
+            <!-- witruimte -->
+            <div class="row center">
+                <div class="col s12">
+                    <h4>Wijzig</h4>
+                    <p>Week nummer en beschrijving aanpassen</p>
                 </div>
-
             </div>
-        </div>
+
+            <!-- blauwe balk met dialoog venster -->
+            <div class="row-nhb-blauw">
+                <div class="col s12 m10 offset-m1 l6 offset-l3">
+
+                    <!-- dialoog venster -->
+                    <div class="white left-align z-depth-3">
+                        <div style="padding:30px">
+
+                            <form method="post" action="{{ ronde_opslaan_url }}">
+                                {% csrf_token %}
+
+                                {% if readonly %}
+                                    {% for opt in opt_week_nrs %}
+                                        {% if opt.actief %}
+                                            <p>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</p>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <select name="ronde_week_nr" onchange="gewijzigd()">
+                                        {% for opt in opt_week_nrs %}
+                                            <option value="{{ opt.choice_name }}"{% if opt.actief %} selected{% endif %}>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</option>
+                                        {% endfor %}
+                                    </select>
+                                {% endif %}
+
+                                {% if readonly %}
+                                    <p>{{ ronde.beschrijving }}</p>
+                                {% else %}
+                                <td class="input-field">
+                                        <input type="text" name="ronde_naam" placeholder="Beschrijving" value="{{ ronde.beschrijving }}" oninput="gewijzigd()">
+                                    </td>
+                                {% endif %}
+
+                                {% if not readonly %}
+                                    <p class="center">
+                                        <button id="opslaan_knop" class="btn-nhb-rood disabled" type="submit">
+                                            <i class="material-icons-round left">check</i>Instellingen opslaan</button>
+                                    </p>
+                                {% endif %}
+
+                            </form>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        {% endif %}
 
         {% if url_verwijderen %}
             <!-- witruimte -->

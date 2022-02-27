@@ -234,7 +234,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
 
         CompetitieMutatie(mutatie=MUTATIE_INITIEEL,
                           deelcompetitie=self.deelcomp_rk).save()
-        self._verwerk_mutaties(279)
+        self._verwerk_mutaties(283)
         # self._dump_deelnemers()
         self._check_volgorde_en_rank()
 
@@ -242,7 +242,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         DeelcompetitieKlasseLimiet.objects.all().delete()
         CompetitieMutatie(mutatie=MUTATIE_INITIEEL,
                           deelcompetitie=self.deelcomp_rk).save()
-        self._verwerk_mutaties(279)
+        self._verwerk_mutaties(283)
 
     def test_rko_bevestigen(self):
         # bevestig deelname door een schutter en een reserve

@@ -363,7 +363,7 @@ class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assert_template_used(resp, ('comprayon/hwl-teams.dtl', 'plein/site_layout.dtl'))
 
             # team aanmaken pagina
-            with self.assert_max_queries(20):
+            with self.assert_max_queries(22):
                 resp = self.client.get(self.url_rk_teams_nieuw % deelcomp_rk3.pk)
                 self.assertEqual(resp.status_code, 200)
                 self.assert_html_ok(resp)

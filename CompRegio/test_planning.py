@@ -929,7 +929,7 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         resp = self.client.get(url_ronde)
         self.assert403(resp)
 
-    def test_maak_10_rondes(self):
+    def test_maak_max_rondes(self):
         # wissel naar RCL functie
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.deelcomp_regio101_18.functie)
@@ -947,7 +947,7 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         # controleer dat de 11e ronde niet aangemaakt mag worden
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_18.pk)
-        self.assert_is_redirect_not_plein(resp)  # check for success
+        self.assert404(resp, 'Limiet bereikt')
         self.assertEqual(DeelcompetitieRonde.objects.count(), 16)
 
     def test_rcl_maakt_cluster_planning(self):
@@ -1368,24 +1368,6 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)     # redirect naar regioplanning
-
-    def test_max_rondes(self):
-        self.e2e_login_and_pass_otp(self.account_rcl101_18)
-        self.e2e_wissel_naar_functie(self.functie_rcl101_18)
-
-        # maak het maximum aantal rondes aan plus een beetje meer
-        self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
-        for lp in range(19):
-            with self.assert_max_queries(20):
-                resp = self.client.post(self.url_planning_regio % self.deelcomp_regio101_25.pk)
-            self.assert_is_redirect_not_plein(resp)  # check for success
-        # for
-        self.assertEqual(DeelcompetitieRonde.objects.count(), 16)
-
-        with self.assert_max_queries(42):
-            resp = self.client.get(self.url_planning_regio % self.deelcomp_regio101_25.pk)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
 
     def test_competitie_week_nr_to_date(self):
         # test een paar corner-cases

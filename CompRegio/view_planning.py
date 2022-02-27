@@ -15,7 +15,7 @@ from Account.models import Account
 from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
                                DeelCompetitie, DeelcompetitieRonde,
                                CompetitieKlasse, RegioCompetitieSchutterBoog, RegiocompetitieTeam)
-from Competitie.operations import maak_deelcompetitie_ronde
+from Competitie.operations import maak_deelcompetitie_ronde, competitie_week_nr_to_date
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbCluster, NhbVereniging
@@ -109,6 +109,8 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
         if not regio_ronde:
             # maak de enige ronde automatisch aan
             regio_ronde = maak_deelcompetitie_ronde(deelcomp, cluster=None)
+            if not regio_ronde:
+                raise Http404('Limiet bereikt')
             regio_ronde.week_nr = 0
             regio_ronde.beschrijving = "Alle regio wedstrijden"
             regio_ronde.save()
@@ -258,8 +260,11 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor de veiligheid
             deelcomp = (DeelCompetitie
                         .objects
-                        .select_related('competitie', 'nhb_regio')
-                        .get(pk=deelcomp_pk, laag=LAAG_REGIO, nhb_regio=self.functie_nu.nhb_regio))
+                        .select_related('competitie',
+                                        'nhb_regio')
+                        .get(pk=deelcomp_pk,
+                             laag=LAAG_REGIO,
+                             nhb_regio=self.functie_nu.nhb_regio))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -273,7 +278,8 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             next_url = reverse('CompRegio:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
         else:
             # er kan geen ronde meer bij - we hebben geen knop aangeboden dus waarom zijn we hier?
-            next_url = reverse('CompRegio:regio-planning', kwargs={'deelcomp_pk': deelcomp.pk})
+            # next_url = reverse('CompRegio:regio-planning', kwargs={'deelcomp_pk': deelcomp.pk})
+            raise Http404('Limiet bereikt')
 
         return HttpResponseRedirect(next_url)
 
@@ -380,25 +386,15 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
 
         ronde = maak_deelcompetitie_ronde(deelcomp=deelcomp, cluster=cluster)
 
-        next_url = reverse('CompRegio:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
+        if ronde:
+            next_url = reverse('CompRegio:regio-ronde-planning', kwargs={'ronde_pk': ronde.pk})
+        else:
+            # maximum aantal rondes bereikt - zou hier niet eens moeten zijn
+            # next_url = reverse('CompRegio:regio-cluster-planning', kwargs={'deelcomp_pk': deelcomp.pk,
+            #                                                                'cluster_pk': cluster.pk})
+            raise Http404('Limiet bereikt')
 
         return HttpResponseRedirect(next_url)
-
-
-def competitie_week_nr_to_date(jaar, week_nr):
-    # de competitie begin na de zomer
-    # dus als het weeknummer voor de zomer valt, dan is het in het volgende jaar
-    if week_nr <= 26:
-        jaar += 1
-
-    # conversie volgen ISO 8601
-    # details: https://docs.python.org/3/library/datetime.html
-    # %G = jaar
-    # %V = met maandag als eerste dag van de week + week 1 bevat 4 januari
-    # %u = dag van de week met 1=maandag
-    when = datetime.datetime.strptime("%s-%s-1" % (jaar, week_nr), "%G-%V-%u")
-    when2 = datetime.date(year=when.year, month=when.month, day=when.day)
-    return when2
 
 
 class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
@@ -475,6 +471,8 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
         context['opt_week_nrs'] = opt_week_nrs = list()
 
+        context['week_actief'] = None
+
         while start_week != eind_week:
             when = competitie_week_nr_to_date(begin_jaar, start_week)
             obj = SimpleNamespace()
@@ -482,6 +480,9 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             obj.choice_name = start_week
             obj.maandag = when
             obj.actief = (start_week == ronde.week_nr)
+            if obj.actief:
+                context['week_actief'] = obj
+
             opt_week_nrs.append(obj)
 
             if start_week >= last_week_in_year:

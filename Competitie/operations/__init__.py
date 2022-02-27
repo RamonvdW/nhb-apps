@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 
-from .competitie_opstarten import bepaal_startjaar_nieuwe_competitie, competities_aanmaken, maak_deelcompetitie_ronde
+from .competitie_opstarten import (bepaal_startjaar_nieuwe_competitie, competities_aanmaken, maak_deelcompetitie_ronde,
+                                   competitie_week_nr_to_date)
 from .aanvangsgemiddelden import aanvangsgemiddelden_vaststellen_voor_afstand, get_competitie_bogen
 from .klassengrenzen import (competitie_klassengrenzen_vaststellen,
                              get_mappings_wedstrijdklasse_to_competitieklasse, bepaal_klassengrenzen_indiv, bepaal_klassengrenzen_teams,

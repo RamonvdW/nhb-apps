@@ -706,14 +706,19 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         return JsonResponse(out)
 
 
-class WedstrijdUitslagBekijkenView(TemplateView):
+class WedstrijdUitslagBekijkenView(UserPassesTestMixin, TemplateView):
 
     """ Deze view toont de uitslag van een wedstrijd """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPSCORES_BEKIJKEN
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
-    # TODO: pagina is alleen bereikbaar vanuit Beheer Vereniging --> UserPassesTestMixin toevoegen?
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        # pagina is alleen bereikbaar vanuit Beheer Vereniging
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

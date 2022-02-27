@@ -605,7 +605,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('compregio/hwl-teams.dtl', 'plein/site_layout.dtl'))
 
-    def test_koppel(self):
+    def test_koppel_hwl(self):
         # login als HWL
         self.e2e_login_and_pass_otp(self.account_hwl)
         self.e2e_wissel_naar_functie(self.functie_hwl)

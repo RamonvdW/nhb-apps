@@ -434,6 +434,7 @@ def get_competitie_boog_typen(comp):
                                                         .objects
                                                         .filter(competitie=comp)
                                                         .exclude(indiv=None)
+                                                        .select_related('indiv__boogtype')
                                                         .distinct('indiv__boogtype'))]
 
     # sorteer op volgorde, want order_by werkt niet (moet gelijk zijn aan distinct)
@@ -451,6 +452,7 @@ def get_competitie_team_typen(comp):
                                                         .objects
                                                         .filter(competitie=comp)
                                                         .exclude(team=None)
+                                                        .select_related('team__team_type')
                                                         .distinct('team__team_type'))]
 
     # sorteer op volgorde, want order_by werkt niet (moet gelijk zijn aan distinct)

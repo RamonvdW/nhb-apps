@@ -1022,7 +1022,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
             # for
 
             sporter = deelnemer.sporterboog.sporter
-            klasse = deelnemer.klasse.indiv
+            klasse = deelnemer.klasse.indiv.beschrijving
 
             writer.writerow([sporter.lid_nr, sporter.volledige_naam(), sporter.bij_vereniging, klasse] + kruisjes)
         # for

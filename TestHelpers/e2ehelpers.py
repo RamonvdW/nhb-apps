@@ -295,7 +295,6 @@ class E2EHelpers(TestCase):
         if link in self.SAFE_LINKS or link.startswith('/feedback/') or link.startswith('#'):
             return
 
-        print('test_link: %s' % repr(link))
         resp = self.client.head(link)
         if resp.status_code != 200:
             self.fail(msg='Link not usable (code %s) on page %s (%s)' % (resp.status_code, template_name, link))
@@ -491,6 +490,7 @@ class E2EHelpers(TestCase):
         self.assertNotIn('<thead><th>', html, msg='Missing <tr> between <thead> and <th> in %s' % dtl)
 
         self.assert_link_quality(html, dtl)
+        self.assert_broodkruimels(html, dtl)
         self.assert_scripts_clean(html, dtl)
         self._assert_no_div_in_p(response, html)
         self._assert_no_col_white(html, dtl)
