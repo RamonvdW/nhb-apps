@@ -27,7 +27,7 @@
         <title>{% block title %}{% endblock %}</title>
         <link rel="icon" href="{% static 'plein/logo_nhb_192x192.png' %}" sizes="192x192">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
-        <link rel="stylesheet" href="{% static 'materialize-new-100.css' %}">
+        <link rel="stylesheet" href="{% static 'materialize-new-102.css' %}">
     </head>
 
     <body class="white">

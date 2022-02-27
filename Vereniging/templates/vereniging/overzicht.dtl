@@ -114,21 +114,11 @@
         {% elif kaartje.beschikbaar_vanaf %}
 
                     <!-- toon disabled -->
-                    <div class="nhb-card-disabled">
-                        <div class="nhb-card-content">
-                            <div class="card-title center-align grey-text">{{ kaartje.titel }}</div>
-                            <div class="center-align" style="margin-bottom:8px; position: relative">
-                                {% if kaartje.img %}
-                                    <div><img src="{{ kaartje.img }}" height="60" alt="logo" style="opacity: 0.5"></div>
-                                    <div style="position:absolute; top:50%; width:100%" class="center-align white-text nhb-rood">VANAF {{ kaartje.beschikbaar_vanaf|upper }}</div>
-                                {% else %}
-                                    <div class="grey-text"><i class="material-icons-round medium">{{ kaartje.icon }}</i></div>
-                                    <div style="position:absolute; top:50%; width:100%" class="center-align white-text nhb-rood">VANAF {{ kaartje.beschikbaar_vanaf|upper }}</div>
-                                {% endif %}
-                            </div>
-                            <div class="card-text grey-text">{{ kaartje.tekst }}</div>
-                        </div>
-                    </div>
+                    {% if kaartje.img %}
+                        {% include 'plein/card_logo_nog-niet-beschikbaar.dtl' with title=kaartje.titel text=kaartje.tekst vanaf=kaartje.beschikbaar_vanaf img=kaartje.img %}
+                    {% else %}
+                        {% include 'plein/card_nog-niet-beschikbaar.dtl' with title=kaartje.titel text=kaartje.tekst vanaf=kaartje.beschikbaar_vanaf icon=kaartje.icon %}
+                    {% endif %}
 
         {% elif kaartje.img %}
 

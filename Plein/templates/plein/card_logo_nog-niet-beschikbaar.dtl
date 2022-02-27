@@ -1,0 +1,44 @@
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% comment %}
+
+    Deze file formateert een kaartje aan de hand van de vier parameters:
+
+        title = "Account activiteit"
+        img   = plaatje om te tonen
+        text  = "Toon overzicht van de recent gebruikte en aangemaakte accounts."
+        vanaf = datum wanneer kaartje beschikbaar komt (vanaf datum)
+
+    Hierdoor is mogelijk om centraal de code van een kaartje aan te passen.
+
+{% endcomment %}
+
+
+<!-- zet breedte, hoogte en side-by-side layout -->
+<!-- bij mouse-over licht de rand op -->
+<div class="nhb-card-disabled">
+
+    <!-- padding om bij de rand weg te blijven -->
+    <div class="nhb-card-content">
+
+        <!-- titel -->
+        <div class="card-title center-align grey-text">{{ title }}</div>
+
+        <!-- icoon -->
+        <div style="margin-bottom:8px">
+            <img src="{{ img }}" height="60" alt="logo" style="opacity: 0.5">
+        </div>
+
+        <div class="grey-text">{{ text }}</div>
+
+    </div>
+
+    <div class="nhb-card-vanaf">VANAF {{ vanaf|upper }}</div>
+
+</div>
+
+<!-- end of file -->
