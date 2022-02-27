@@ -202,7 +202,7 @@ class Loader(AppDirectoriesLoader):
             contents = contents[pos+7:]
 
             pos = contents.find('"')
-            if pos > 0:
+            if pos > 0:                     # pragma: no branch
                 style = contents[:pos]
                 contents = contents[pos:]
 

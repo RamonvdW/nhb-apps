@@ -48,8 +48,8 @@ class VhpgAfsprakenView(UserPassesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-        if self.vhpg:
-            context['acceptatie_datum'] = self.vhpg.acceptatie_datum
+
+        context['acceptatie_datum'] = self.vhpg.acceptatie_datum
 
         context['kruimels'] = (
             (reverse('Functie:wissel-van-rol'), 'Wissel van rol'),

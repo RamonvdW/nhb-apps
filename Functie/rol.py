@@ -162,7 +162,7 @@ def rol_zet_sessionvars(account, request):
 
     nhbver_cache = dict()          # wordt gevuld als er behoefte is
 
-    if account.is_authenticated:
+    if account.is_authenticated:        # pragma: no branch
         show_vhpg, _ = account_needs_vhpg(account)
         if account_rechten_is_otp_verified(request) and not show_vhpg:
             if account.is_staff or account.is_BB:
@@ -239,7 +239,7 @@ def rol_zet_sessionvars(account, request):
         request.session[SESSIONVAR_ROL_MAG_WISSELEN] = False
 
     rol = Rollen.ROL_NONE
-    if account.is_authenticated:
+    if account.is_authenticated:        # pragma: no branch
         if account.sporter_set.count():
             # koppeling met Sporter, dus dit is een (potentiële) Schutter
             rollen_vast.append(Rollen.ROL_SPORTER)
@@ -430,7 +430,7 @@ def rol_activeer_functie(request, functie_pk):
                     if account.is_staff or account.is_BB:
                         try:
                             functie = Functie.objects.get(pk=functie_pk)
-                        except Functie.DoesNotExist:
+                        except Functie.DoesNotExist:                # pragma: no branch
                             pass
                         else:
                             # we komen hier alleen voor rollen die niet al in het pallet zitten bij IT/BB

@@ -80,7 +80,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
-                for lkl in lkls:
+                for lkl in lkls:            # pragma: no branch
                     if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
                         obj.leeftijdsklasse = lkl
                         # stop op de eerste match: aspirant, cadet, junior, senior
