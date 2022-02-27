@@ -12,8 +12,6 @@ import datetime
 import io
 
 
-# TODO: test van status_mail_queue toevoegen
-
 TEST_EMAIL_ADRES = 'schutter@nhb.test'
 
 

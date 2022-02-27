@@ -107,7 +107,6 @@
 
         {% elif kaartje.geen_kaartjes %}
 
-                    <!-- TODO: is dit mooi genoeg? -->
                     <p class="white" style="padding:30px">
                         <i>Geen kaartjes voor deze competitie</i>
                     </p>

@@ -7,8 +7,8 @@
 from django.db import models
 
 
-# leden zijn aspirant tot en met het jaar waarin ze 13 worden
-MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT = 13                        # TODO: rename
+# leden zijn aspirant tot en met het jaar waarin ze 13 worden (=Onder 14)
+MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT = 13
 
 # leden zijn jeugdlid tot en met het jaar waarin ze 20 worden
 MAXIMALE_LEEFTIJD_JEUGD = 20
