@@ -7,12 +7,13 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from BasisTypen.models import BoogType, TeamType
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from BasisTypen.models import BoogType
+from NhbStructuur.models import NhbRayon
 from Competitie.models import (LAAG_REGIO, LAAG_RK, DEELNAME_NEE,
                                Competitie, DeelCompetitie, DeelcompetitieKlasseLimiet,
-                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam)
-from Competitie.menu import menu_dynamics_competitie
+                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam,
+                               get_competitie_boog_typen, get_competitie_team_typen)
+from Plein.menu import menu_dynamics
 from Wedstrijden.models import CompetitieWedstrijd
 from Functie.rol import Rollen, rol_get_huidige_functie
 
@@ -62,22 +63,24 @@ class UitslagenRayonIndivView(TemplateView):
     def _maak_filter_knoppen(context, comp, gekozen_rayon_nr, comp_boog):
         """ filter knoppen per rayon en per competitie boog type """
 
-        # boogtype files
-        boogtypen = BoogType.objects.order_by('volgorde').all()
+        # boogtype filters
+        boogtypen = get_competitie_boog_typen(comp)
 
         context['comp_boog'] = None
         context['boog_filters'] = boogtypen
 
         for boogtype in boogtypen:
+            boogtype.sel = boogtype.afkorting.lower()
+
             if boogtype.afkorting.upper() == comp_boog.upper():
+                boogtype.selected = True
                 context['comp_boog'] = boogtype
                 comp_boog = boogtype.afkorting.lower()
-                # geen url --> knop disabled
-            else:
-                boogtype.zoom_url = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
-                                            kwargs={'comp_pk': comp.pk,
-                                                    'comp_boog': boogtype.afkorting.lower(),
-                                                    'rayon_nr': gekozen_rayon_nr})
+
+            boogtype.zoom_url = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
+                                        kwargs={'comp_pk': comp.pk,
+                                                'comp_boog': boogtype.afkorting.lower(),
+                                                'rayon_nr': gekozen_rayon_nr})
         # for
 
         if context['comp_boog']:
@@ -91,14 +94,15 @@ class UitslagenRayonIndivView(TemplateView):
 
             for rayon in rayons:
                 rayon.title_str = 'Rayon %s' % rayon.rayon_nr
-                if rayon.rayon_nr != gekozen_rayon_nr:
-                    rayon.zoom_url = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
-                                             kwargs={'comp_pk': comp.pk,
-                                                     'comp_boog': comp_boog,
-                                                     'rayon_nr': rayon.rayon_nr})
-                else:
-                    # geen zoom_url --> knop disabled
+                rayon.sel = 'rayon_%s' % rayon.pk
+                rayon.zoom_url = reverse('CompUitslagen:uitslagen-rayon-indiv-n',
+                                         kwargs={'comp_pk': comp.pk,
+                                                 'comp_boog': comp_boog,
+                                                 'rayon_nr': rayon.rayon_nr})
+
+                if rayon.rayon_nr == gekozen_rayon_nr:
                     context['rayon'] = rayon
+                    rayon.selected = True
             # for
 
     def get_context_data(self, **kwargs):
@@ -148,7 +152,7 @@ class UitslagenRayonIndivView(TemplateView):
             raise Http404('Competitie niet gevonden')
 
         context['deelcomp'] = deelcomp
-        deelcomp.competitie.bepaal_fase()
+        deelcomp.competitie.bepaal_fase()           # TODO: kan weg? We hebben al comp (zie hierboven)
 
         # haal de planning erbij: competitieklasse --> competitiewedstrijd
         indiv2wedstrijd = dict()    # [indiv_pk] = competitiewedstrijd
@@ -219,9 +223,12 @@ class UitslagenRayonIndivView(TemplateView):
 
         klasse = -1
         limiet = 24
+        curr_teller = None
         for deelnemer in deelnemers:
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
+                if klasse == -1:
+                    deelnemer.is_eerste_break = True
                 indiv = deelnemer.klasse.indiv
                 deelnemer.klasse_str = indiv.beschrijving
                 try:
@@ -233,6 +240,10 @@ class UitslagenRayonIndivView(TemplateView):
                     limiet = wkl2limiet[deelnemer.klasse.pk]
                 except KeyError:
                     limiet = 24
+
+                curr_teller = deelnemer
+                curr_teller.aantal_regels = 2
+
             klasse = deelnemer.klasse.indiv.volgorde
 
             sporter = deelnemer.sporterboog.sporter
@@ -244,11 +255,19 @@ class UitslagenRayonIndivView(TemplateView):
             if deelcomp.heeft_deelnemerslijst:
                 if deelnemer.rank > limiet:
                     deelnemer.is_reserve = True
+
+            curr_teller.aantal_regels += 1
         # for
 
         context['deelnemers'] = deelnemers
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Uitslagen RK individueel')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -264,21 +283,22 @@ class UitslagenRayonTeamsView(TemplateView):
         """ filter knoppen per rayon en per competitie boog type """
 
         # team type filter
-        teamtypen = TeamType.objects.order_by('volgorde').all()
-
         context['teamtype'] = None
-        context['teamtype_filters'] = teamtypen
+        context['teamtype_filters'] = teamtypen = get_competitie_team_typen(comp)
 
         for team in teamtypen:
+            team.sel = 'team_' + team.afkorting
             if team.afkorting.upper() == teamtype_afkorting.upper():
                 context['teamtype'] = team
                 teamtype_afkorting = team.afkorting.lower()
-                # geen url --> knop disabled
+                team.selected = True
             else:
-                team.zoom_url = reverse('CompUitslagen:uitslagen-rayon-teams-n',
-                                        kwargs={'comp_pk': comp.pk,
-                                                'team_type': team.afkorting.lower(),
-                                                'rayon_nr': gekozen_rayon_nr})
+                team.selected = False
+
+            team.zoom_url = reverse('CompUitslagen:uitslagen-rayon-teams-n',
+                                    kwargs={'comp_pk': comp.pk,
+                                            'team_type': team.afkorting.lower(),
+                                            'rayon_nr': gekozen_rayon_nr})
         # for
 
         # als het team type correct was, maak dan de rayon knopppen
@@ -293,14 +313,15 @@ class UitslagenRayonTeamsView(TemplateView):
 
             for rayon in rayons:
                 rayon.title_str = 'Rayon %s' % rayon.rayon_nr
-                if rayon.rayon_nr != gekozen_rayon_nr:
-                    rayon.zoom_url = reverse('CompUitslagen:uitslagen-rayon-teams-n',
-                                             kwargs={'comp_pk': comp.pk,
-                                                     'team_type': teamtype_afkorting,
-                                                     'rayon_nr': rayon.rayon_nr})
-                else:
-                    # geen zoom_url --> knop disabled
+                rayon.sel = 'rayon_%s' % rayon.rayon_nr
+                rayon.selected = (rayon.rayon_nr == gekozen_rayon_nr)
+                if rayon.selected:
                     context['rayon'] = rayon
+
+                rayon.zoom_url = reverse('CompUitslagen:uitslagen-rayon-teams-n',
+                                         kwargs={'comp_pk': comp.pk,
+                                                 'team_type': teamtype_afkorting,
+                                                 'rayon_nr': rayon.rayon_nr})
             # for
 
     def get_context_data(self, **kwargs):
@@ -318,7 +339,7 @@ class UitslagenRayonTeamsView(TemplateView):
         comp.bepaal_fase()
         context['comp'] = comp
 
-        teamtype_afkorting = kwargs['team_type'][:2]     # afkappen voor de veiligheid
+        teamtype_afkorting = kwargs['team_type'][:3]     # afkappen voor de veiligheid
 
         # rayon_nr is optioneel (eerste binnenkomst zonder rayon nummer)
         try:
@@ -382,6 +403,7 @@ class UitslagenRayonTeamsView(TemplateView):
 
         prev_klasse = ""
         rank = 0
+        teller = None
         for team in rk_teams:
             if team.klasse != prev_klasse:
                 team.break_klasse = True
@@ -394,12 +416,18 @@ class UitslagenRayonTeamsView(TemplateView):
                 else:
                     team.klasse_str = "%s - Nog niet ingedeeld in een wedstrijdklasse" % team.team_type.beschrijving
 
+                teller = team
+                teller.aantal_regels = 2
+
                 prev_klasse = team.klasse
                 rank = 0
 
+            team.ver_nr = team.vereniging.ver_nr
             team.ver_str = str(team.vereniging)
             team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = team.ag_str.replace('.', ',')
+
+            teller.aantal_regels += 1
 
             # TODO: dit scherm is zowel een kandidaat-deelnemerslijst als de uitslag
 
@@ -414,7 +442,13 @@ class UitslagenRayonTeamsView(TemplateView):
         if rk_teams.count() == 0:
             context['geen_teams'] = True
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Uitslagen RK teams')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 

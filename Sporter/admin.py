@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -26,7 +26,7 @@ class SporterBoogAdmin(admin.ModelAdmin):
 
     search_fields = ('sporter__lid_nr', 'sporter__unaccented_naam')
 
-    list_select_related = True
+    list_select_related = ('sporter', 'boogtype')
 
     autocomplete_fields = ('sporter',)
 
@@ -49,7 +49,7 @@ class SecretarisAdmin(admin.ModelAdmin):
 
     list_filter = ('vereniging',)
 
-    list_select_related = True
+    list_select_related = ('vereniging', 'sporter')
 
     auto_complete = ('vereniging', 'sporter')
 

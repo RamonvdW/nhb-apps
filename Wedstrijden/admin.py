@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
+from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
 from .models import WedstrijdLocatie, CompetitieWedstrijd, CompetitieWedstrijdenPlan, CompetitieWedstrijdUitslag
 
 
@@ -51,8 +52,21 @@ class CompetitieWedstrijdAdmin(admin.ModelAdmin):             # pragma: no cover
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'locatie' and self.ver:
             kwargs['queryset'] = self.ver.wedstrijdlocatie_set.all()
-
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
+        if db_field.name == 'indiv_klassen':
+            kwargs['queryset'] = (IndivWedstrijdklasse
+                                  .objects
+                                  .select_related('boogtype')
+                                  .all())
+        elif db_field.name == 'team_klassen':
+            kwargs['queryset'] = (TeamWedstrijdklasse
+                                  .objects
+                                  .select_related('team_type')
+                                  .all())
+
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def get_queryset(self, request):
         """ deze functie is voor prestatieverbetering

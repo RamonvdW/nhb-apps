@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -11,77 +11,83 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-activiteit" %}
-
-    <h4>Account activiteit</h4>
-
-    <p>Spring naar een sectie op deze pagina:</p>
-    <div class="white shrink-wrap-5">
-
-        <a class="btn-nhb-blauw btn-small margin-5" href="#hulp">Mogelijk hulp nodig</a>
-        <a class="btn-nhb-blauw btn-small margin-5" href="#nieuwe">Nieuwe accounts</a>
-        <a class="btn-nhb-blauw btn-small margin-5" href="#recent">Recente activiteit</a>
-        <a class="btn-nhb-blauw btn-small margin-5" href="#poging">Mislukte inlog pogingen</a>
-        {% if accses %}
-            <a class="btn-nhb-blauw btn-small margin-5" href="#sessies">Sessies (experimenteel)</a>
-        {% endif %}
-        {% if age_groups %}
-            <a class="btn-nhb-blauw btn-small margin-5" href="#leeftijdsgroepen">Leeftijd gebruikers</a>
-        {% endif %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Account activiteit</h3>
+        </div>
     </div>
 
-    <p>&nbsp;</p>
-    <div class="row">
-        <!-- toon gegevens in een blauwe box -->
-        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-            <div class="white-text nhb-blauw z-depth-2">
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Totaal accounts aangemaakt</th>
+                    <td>{{ totaal }}</td>
+                </tr>
+                <tr>
+                    <th>Nieuw sinds {{ deze_maand|date }}</th>
+                    <td>{{ deze_maand_count }}</td>
+                </tr>
+                <tr>
+                    <th>Aantal actieve gebruikers</th>
+                    <td>{{ aantal_actieve_gebruikers }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
 
-                <div class="row small-row">
-                    <div class="col s5">Totaal accounts aangemaakt:</div>
-                    <div class="col s3">{{ totaal }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s5">Sinds {{ deze_maand|date }}:</div>
-                    <div class="col s3">{{ deze_maand_count }}</div>
-                </div>
-
-            </div>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Details specifieke gebruiker</h4>
+            <p>Gebruik het formulier om details op te vragen over een specifieke gebruiker</p>
         </div>
     </div>
 
     <!-- zoekformulier -->
-    <p>&nbsp;</p>
-    <h5>Details specifieke gebruiker</h5>
-    <p>Gebruik het formulier om details op te vragen over een specifieke gebruiker:</p>
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
 
-    <div class="container z-depth-2 white">
-        <div class="row nhb-blauw white-text">
-            <div class="col s12 center-align">
-                <h5>Zoek gebruiker</h5>
-                <p>Zoek op inlog naam of (deel van) volledige naam</p>
-            </div>
-        </div>
+            <!-- dialoog venster -->
+            <div style="margin:50px 30px 30px 30px" class="left-align">
+                <form action="{{ zoek_url }}" method="get">
+                    {% csrf_token %}
 
-        <div class="row">
-            <form class="col s12" action="{{ zoek_url }}" method="get">
-                <div class="row"><div class="input-field col s12">
-                    {{ zoekform.zoekterm.label_tag }}{{ zoekform.zoekterm }}
-                </div></div>
-
-                <div class="row"><div class="col s12"></div>
-                    <div class="center-align">
-                        <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
+                    <!-- form field -->
+                    <div class="input-field">
+                        {{ zoekform.zoekterm.label_tag }}{{ zoekform.zoekterm }}
                     </div>
-                </div>
-            </form>
+
+                    <!-- button -->
+                    <p class="center">
+                        <button class="btn-nhb-rood" type="submit">
+                            <i class="material-icons-round left">search</i>Zoek</button>
+                    </p>
+                </form>
+            </div>
+
         </div>
     </div>
 
-
+    <!-- zoekresultaten -->
     {% if zoekterm %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Zoekresultaten</h4>
+                {% if zoek_leden %}
+                    <p>{{ zoek_leden|length }} gebruikers gevonden</p>
+                {% else %}
+                    <p class="red-text">Niets gevonden</p>
+                {% endif %}
+            </div>
+        </div>
+
         {% if zoek_leden %}
-            <h6>Gevonden gebruikers</h6>
             <ul class="collapsible">
                 {% for obj in zoek_leden %}
                     <!-- obj is Account -->
@@ -100,27 +106,47 @@
                     </li>
                 {% endfor %}
             </ul>
-        {% else %}
-            <p class="red-text">Niets gevonden</p>
         {% endif %}
 
     {% endif %}
 
-
-    <p>&nbsp;</p>
-    <h5 id="hulp">Mogelijk hulp nodig</h5>
-
-    <div class="row white">
+    <div class="row center">
         <div class="col s12">
-            <p>De volgende {{ hulp|length }} accounts zijn aangemaakt en gekoppeld aan een rol, maar hebben nog geen 2FA gekoppeld of VHPG geaccepteerd.</p>
+            <p>Secties verderop op deze pagina:</p>
+            <!-- a class="btn-nhb-rood btn-small margin-5" href="#hulp">Mogelijk hulp nodig</a -->
+            <a class="btn-nhb-rood btn-small margin-5" href="#nieuwe">Nieuwe accounts</a>
+            <a class="btn-nhb-rood btn-small margin-5" href="#recent">Recente activiteit</a>
+            <a class="btn-nhb-rood btn-small margin-5" href="#poging">Mislukte inlog pogingen</a>
+            {% if accses %}
+                <a class="btn-nhb-rood btn-small margin-5" href="#sessies">Sessies (experimenteel)</a>
+            {% endif %}
+            {% if age_groups %}
+                <a class="btn-nhb-rood btn-small margin-5" href="#leeftijdsgroepen">Leeftijd gebruikers</a>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4 id="hulp">Mogelijk hulp nodig</h4>
+            <p>Onderstaande {{ hulp|length }} accounts zijn aangemaakt en gekoppeld aan een rol,<br>maar hebben nog geen 2FA gekoppeld of VHPG geaccepteerd.</p>
             {% if hulp_testserver %}
                 <p><i>(dit getal is hoger dan op de live server als er VHPG verlopen zijn sinds het kopi&euml;ren van de data)</i></p>
             {% endif %}
+        </div>
+    </div>
 
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
             <table class="white" id="tabel_hulp">
                 <thead>
                     <tr>        <!-- filter veld -->
-                        <td colspan="3" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'tabel_hulp')" placeholder="Zoeken"/></td>
+                        <td colspan="3" class="table-filter">
+                            <input class="table-filter" oninput="myTableFilter(this, 'tabel_hulp')" placeholder="Zoeken"/>
+                        </td>
                         <td colspan="3"></td>
                     </tr>
                     <tr>
@@ -133,39 +159,48 @@
                     </tr>
                 </thead>
 
-                {% for account in hulp %}
-                    <tr>
-                        <td>{{ account.username }}</td>
-                        <td>{{ account.volledige_naam }}</td>
-                        <td>{{ account.functies_str }}</td>
-                        <td>{{ account.tweede_factor_str }}</td>
-                        <td>{{ account.vhpg_str }}</td>
-                        <td>{{ account.last_login|date:"j b Y" }}</td>   <!--|date:"j b H:i"-->
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="6">
-                            <i>Geen accounts gevonden die hulp nodig hebben</i>
-                        </td>
-                    </tr>
-                {% endfor %}
+                <tbody>
+                    {% for account in hulp %}
+                        <tr>
+                            <td>{{ account.username }}</td>
+                            <td>{{ account.volledige_naam }}</td>
+                            <td>{{ account.functies_str }}</td>
+                            <td>{{ account.tweede_factor_str }}</td>
+                            <td>{{ account.vhpg_str }}</td>
+                            <td>{{ account.last_login|date:"j b Y" }}</td>   <!--|date:"j b H:i"-->
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6">
+                                <i>Geen accounts gevonden die hulp nodig hebben</i>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
     </div>
 
 
-    <p>&nbsp;</p>
-    <h5 id="nieuwe">Nieuwste accounts</h5>
-
-    <div class="row white">
+    <!-- witruimte -->
+    <div class="row center">
         <div class="col s12">
-            <p>Hieronder volgende nieuwe accounts (maximaal 50)</p>
+            <h4 id="nieuwe">Nieuwe accounts</h4>
+            <p>(nieuwste 50)</p>
+        </div>
+    </div>
 
-            <table class="white" id="table1">
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+
+            <table class="white" id="tabel_nieuwe">
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td></td>
-                        <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+                        <td colspan="2" class="table-filter">
+                            <input class="table-filter" oninput="myTableFilter(this, 'tabel_nieuwe')" placeholder="Zoeken"/>
+                        </td>
                         <td colspan="4"></td>
                     </tr>
                     <tr>
@@ -180,35 +215,41 @@
                 </thead>
 
                 <tbody>
-                {% for obj in nieuwe_accounts %}
-                    <tr>
-                        <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
-                        <td>{{ obj.account.username }}</td>
-                        <td>{{ obj.account.volledige_naam }}</td>
-                        <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
-                        <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
-                        <td>{{ obj.account.laatste_inlog_poging|date:"j b H:i" }}</td>
-                        <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
-                    </tr>
-                {% endfor %}
+                    {% for obj in nieuwe_accounts %}
+                        <tr>
+                            <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
+                            <td>{{ obj.account.username }}</td>
+                            <td>{{ obj.account.volledige_naam }}</td>
+                            <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
+                            <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
+                            <td>{{ obj.account.laatste_inlog_poging|date:"j b H:i" }}</td>
+                            <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
+                        </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 
-
-    <p>&nbsp;</p>
-    <h5 id="recent">Recente activiteit</h5>
-
-    <div class="row white">
+    <!-- witruimte -->
+    <div class="row center">
         <div class="col s12">
-            <p>Hieronder staan accounts waar recent op ingelogd is (maximaal 50)</p>
+            <h4 id="recent">Recente activiteit</h4>
+            <p>Accounts waar recent op ingelogd is (maximaal 50)</p>
+        </div>
+    </div>
 
-            <table class="white" id="table2">
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+
+            <table class="white" id="tabel_activiteit">
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td></td>
-                        <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/></td>
+                        <td colspan="2" class="table-filter">
+                            <input class="table-filter" oninput="myTableFilter(this, 'tabel_activiteit')" placeholder="Zoeken"/>
+                        </td>
                         <td colspan="3"></td>
                     </tr>
                     <tr>
@@ -236,18 +277,25 @@
     </div>
 
 
-    <p>&nbsp;</p>
-    <h5 id="poging">Mislukte inlog pogingen</h5>
-
-    <div class="row white">
+    <!-- witruimte -->
+    <div class="row center">
         <div class="col s12">
-            <p>Hieronder staan accounts waar recent geprobeerd is op in te loggen (maximaal 50). Dit zijn accounts waar de ooit op ingelogd is en daarna een mislukte inlogpoging.</p>
+            <h4 id="poging">Mislukte inlog pogingen</h4>
+            <p>Accounts waar recent geprobeerd is op in te loggen (maximaal 50)</p>
+            <p>(dit zijn accounts waar de ooit op ingelogd is en daarna een mislukte inlogpoging)</p>
+        </div>
+    </div>
 
-            <table class="white" id="table3">
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white" id="tabel_inlog">
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td colspan="2"></td>
-                        <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table3')" placeholder="Zoeken"/></td>
+                        <td colspan="2" class="table-filter">
+                            <input class="table-filter" oninput="myTableFilter(this, 'tabel_inlog')" placeholder="Zoeken"/>
+                        </td>
                         <td colspan="3"></td>
                     </tr>
                     <tr>
@@ -261,68 +309,78 @@
                     </tr>
                 </thead>
 
-                {% for obj in inlog_pogingen %}
-                    <tr>
-                        <td>{{ obj.account.laatste_inlog_poging|date:"j b Y H:i" }}</td>
-                        <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
-                        <td>{{ obj.account.username }}</td>
-                        <td>{{ obj.account.volledige_naam }}</td>
-                        <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
-                        <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
-                        <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
-                    </tr>
-                {% endfor %}
+                <tbody>
+                    {% for obj in inlog_pogingen %}
+                        <tr>
+                            <td>{{ obj.account.laatste_inlog_poging|date:"j b Y H:i" }}</td>
+                            <td>{{ obj.account.last_login|date:"j b H:i" }}</td>
+                            <td>{{ obj.account.username }}</td>
+                            <td>{{ obj.account.volledige_naam }}</td>
+                            <td>{% if obj.email_is_bevestigd %}Ja{% else %}Nee{% endif %}</td>
+                            <td>{% if obj.account.otp_is_actief %}Ja{% else %}Nee{% endif %}</td>
+                            <td>{{ obj.account.date_joined|date:"j b H:i" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
     </div>
 
+
     {% if accses %}
-        <p>&nbsp;</p>
-        <h5 id="sessies">Sessies (experimenteel)</h5>
-
-        <div class="row white">
+        <!-- witruimte -->
+        <div class="row center">
             <div class="col s12">
-                <p>Hieronder staan <i>alle</i> actieve sessies, oftewel mensen die ingelogd zijn.</p>
-
-                <table class="white">
-                    <thead>
-                        <tr>
-                            <th>Gebruiker</th>
-                            <th>Verloopt op</th>
-                            <th>Cookie naam</th>
-                            <th>Mag wisselen</th>
-                            <th>Laatste rol</th>
-                        </tr>
-                    </thead>
-
-                    {% for obj in accses %}
-                        <tr>
-                            <td>{{ obj.account.volledige_naam }}</td>
-                            <td>{{ obj.session.expire_date }}</td>
-                            <td>{{ obj.session.session_key }}</td>
-                            <td>{{ obj.mag_wisselen_str }}</td>
-                            <td>{{ obj.laatste_rol_str }}</td>
-                        </tr>
-                    {% endfor %}
-                </table>
+                <h4 id="sessies">Sessies (experimenteel)</h4>
+                <p>Alle {{ accses|length }} nog niet verlopen sessies (ook van bezoekers)</p>
             </div>
         </div>
+
+        <!-- scherm-brede tabel met dunne blauw rand -->
+        <table class="white">
+            <thead>
+                <tr class="nhb-table-header">
+                    <th>Gebruiker</th>
+                    <th>Verloopt op</th>
+                    <th>Cookie naam</th>
+                    <th>Mag wisselen</th>
+                    <th>Laatste rol</th>
+                </tr>
+            </thead>
+
+            {% for obj in accses %}
+                <tr>
+                    <td>{{ obj.account.volledige_naam }}</td>
+                    <td>{{ obj.session.expire_date }}</td>
+                    <td>{{ obj.session.session_key }}</td>
+                    <td>{{ obj.mag_wisselen_str }}</td>
+                    <td>{{ obj.laatste_rol_str }}</td>
+                </tr>
+            {% endfor %}
+
+            <tr>
+                <td colspan="5" class="nhb-table-onderrand"></td>
+            </tr>
+        </table>
     {% endif %}
 
     {% if age_groups %}
-        <p>&nbsp;</p>
-        <h5 id="leeftijdsgroepen">Leeftijd van de gebruikers (experimenteel)</h5>
-
-        <div class="row white">
+        <div class="row center">
             <div class="col s12">
+                <h4 id="leeftijdsgroepen">Leeftijd van de gebruikers</h4>
                 <p>Leeftijd van de gebruikers (inlog de afgelopen 30 dagen), gegroepeerd per 10 jaar.</p>
+            </div>
+        </div>
 
+        <!-- blauwe balk met informatie label : info -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
                 <table class="white">
                     <thead>
-                        <tr>
+                        <tr class="nhb-table-header">
                             <th>Leeftijdsgroep</th>
                             <th>Aantal</th>
-                            <th>Aandeel</th>
+                            <th class="right-align">Aandeel</th>
                             <th style="width:40%"><!-- chart --></th>
                         </tr>
                     </thead>
@@ -334,14 +392,18 @@
                                 {% else %}<span>{{ age1 }} .. {{ age2 }}</span>
                                 {% endif %}
                             <td>{{ count }}</td>
-                            <td>{{ perc }}%</td>
-                            <td style="padding: 5px"><div style="background: linear-gradient(to right, #03628c, #03628c {{ perc }}%, white {{ perc }}%, white 100%); height: 36px">&nbsp;</div></td>
+                            <td class="right-align">{{ perc }}%</td>
+                            <td style="padding: 5px"><div style="background: linear-gradient(to right, #f94137, #f94137 {{ perc }}%, white {{ perc }}%, white 100%); height: 36px">&nbsp;</div></td>
                         </tr>
                     {% endfor %}
                 </table>
             </div>
         </div>
+
+
     {% endif %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="account-activiteit" %}
 
 {% endblock %}
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -40,7 +40,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         cls.testdata.maak_bondscompetities()
 
         for regio_nr in range(cls.regio_nr_begin, cls.regio_nr_einde + 1):
-            ver_nr = cls.testdata.regio_ver_nrs[regio_nr]
+            ver_nr = cls.testdata.regio_ver_nrs[regio_nr][0]
             cls.testdata.maak_rk_deelnemers(18, ver_nr, regio_nr)
             cls.ver_nrs.append(ver_nr)
         # for
@@ -234,7 +234,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
 
         CompetitieMutatie(mutatie=MUTATIE_INITIEEL,
                           deelcompetitie=self.deelcomp_rk).save()
-        self._verwerk_mutaties(279)
+        self._verwerk_mutaties(283)
         # self._dump_deelnemers()
         self._check_volgorde_en_rank()
 
@@ -242,7 +242,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         DeelcompetitieKlasseLimiet.objects.all().delete()
         CompetitieMutatie(mutatie=MUTATIE_INITIEEL,
                           deelcompetitie=self.deelcomp_rk).save()
-        self._verwerk_mutaties(279)
+        self._verwerk_mutaties(283)
 
     def test_rko_bevestigen(self):
         # bevestig deelname door een schutter en een reserve

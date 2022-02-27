@@ -672,7 +672,13 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_bekijk_uitslag(self):
-        self._maak_uitslag(self.wedstrijd18_pk)
+        self._maak_uitslag(self.wedstrijd18_pk)     # logt uit
+
+        # log in als HWL
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.testdata.functie_hwl[self.ver_nr])
+        self.e2e_check_rol('HWL')
+
         url = self.url_bekijk_uitslag % self.wedstrijd18_pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -39,7 +39,7 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         cls.testdata.maak_clubs_en_sporters()
         cls.testdata.maak_bondscompetities()
 
-        cls.ver_nr = cls.testdata.regio_ver_nrs[cls.regio_nr]
+        cls.ver_nr = cls.testdata.regio_ver_nrs[cls.regio_nr][0]
         cls.ver = cls.testdata.vereniging[cls.ver_nr]
 
         cls.testdata.maak_inschrijvingen_regiocompetitie(18, cls.ver_nr)
@@ -119,8 +119,8 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # indiv + teams klassen
-        self.wedstrijd.team_klassen.set([self.testdata.comp18_klassen_team['R'][0].team,
-                                         self.testdata.comp18_klassen_team['R'][-1].team])
+        self.wedstrijd.team_klassen.set([self.testdata.comp18_klassen_team['R2'][0].team,
+                                         self.testdata.comp18_klassen_team['R2'][-1].team])
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -212,7 +212,7 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         self.assert404(resp, 'Verkeerde competitie')
 
     def test_download_teams(self):
-        klasse = self.testdata.comp18_klassen_team['R'][0]
+        klasse = self.testdata.comp18_klassen_team['R2'][0]
         url = self.url_forms_download_teams % (self.wedstrijd.pk, klasse.pk)
 
         # ophalen zonder inlog

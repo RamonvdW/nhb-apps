@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,7 +14,7 @@ class ZoekBeheerdersForm(forms.Form):
 
     # een simpel tekstveld waarin de gebruiker de zoek/filter tekst in kan voeren
     zoekterm = forms.CharField(
-                    label='Zoek op:',
+                    label='Zoeken naar:',
                     max_length=50,
                     required=False,
                     widget=forms.TextInput(attrs={'autofocus': True}))
@@ -75,7 +75,9 @@ class OTPControleForm(forms.Form):
 class WijzigEmailForm(forms.Form):
     """ Dit formulier wordt gebruikt om het e-mailadres van een rol aan te passen """
 
-    email = forms.EmailField()
+    email = forms.EmailField(
+                    label='Nieuwe e-mailadres',
+                    widget=forms.TextInput(attrs={'autofocus': True}))
 
 
 # end of file

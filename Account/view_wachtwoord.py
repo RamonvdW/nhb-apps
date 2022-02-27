@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -66,6 +66,12 @@ class WachtwoordVergetenView(TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+
+        context['kruimels'] = (
+            (reverse('Account:login'), 'Inloggen'),
+            (None, 'Wachtwoord vergeten')
+        )
+
         menu_dynamics(self.request, context)
         return context
 
@@ -184,9 +190,16 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
 
         account = self.request.user
         if account.sporter_set.count() > 0:      # FUTURE: ongewenste kennis over op Sporter.account
-            menu_dynamics(self.request, context, actief="sporter-profiel")
+            context['kruimels'] = (
+                (reverse('Sporter:profiel'), 'Mijn pagina'),
+                (None, 'Wachtwoord wijzigen')
+            )
         else:
-            menu_dynamics(self.request, context)
+            context['kruimels'] = (
+                (None, 'Wachtwoord wijzigen'),
+            )
+
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -227,10 +240,9 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
             except KeyError:
                 context['moet_oude_ww_weten'] = True
 
-            if account.sporter_set.count() > 0:  # FUTURE: ongewenste kennis over Sporter.account
-                menu_dynamics(self.request, context, actief="sporter-profiel")
-            else:
-                menu_dynamics(self.request, context)
+            #if account.sporter_set.count() > 0:  # FUTURE: ongewenste kennis over Sporter.account
+
+            menu_dynamics(self.request, context)
             return render(request, self.template_name, context)
 
         # wijzigen van het wachtwoord zorgt er ook voor dat alle sessies van deze gebruiker vervallen

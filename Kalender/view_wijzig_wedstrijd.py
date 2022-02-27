@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -214,7 +214,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
             klasse.gebruikt = (klasse.pk in klassen_gebruikt)
             klasse.selected = (klasse.pk in pks)
 
-            if klasse.leeftijdsklasse.geslacht == 'M':
+            if klasse.leeftijdsklasse.wedstrijd_geslacht == 'M':
                 opt_klasse_1.append(klasse)
             else:
                 opt_klasse_2.append(klasse)
@@ -253,11 +253,16 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
             context['url_verwijder'] = context['url_opslaan']
 
         if self.rol_nu == Rollen.ROL_HWL:
-            context['url_terug'] = reverse('Kalender:vereniging')
+            url_terug = reverse('Kalender:vereniging')
         else:
-            context['url_terug'] = reverse('Kalender:manager')
+            url_terug = reverse('Kalender:manager')
 
-        menu_dynamics(self.request, context, actief='kalender')
+        context['kruimels'] = (
+            (url_terug, 'Wedstrijdkalender'),
+            (None, 'Wijzig wedstrijd')
+        )
+
+        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
     @staticmethod

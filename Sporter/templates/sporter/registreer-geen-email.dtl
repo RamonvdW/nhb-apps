@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -8,67 +8,81 @@
 
 {% block title %}Geen email bekend{% endblock %}
 
+{% block broodkruimels %}
+{% endblock %}
+
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="schutter-registreer-geen-email" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Geen email bekend</h3>
+            <p>Je hebt zojuist geprobeerd een account aan te maken.</p>
+            <p>Jouw persoonlijke e-mailadres moet geregistreerd staan bij de bond.<br><span class="red-text">Dit is niet het geval</span></p>
 
-    <h4>Geen email bekend</h4>
+            {% if not sec_email %}
+                <br>
+                <p>Je staat waarschijnlijk niet (meer) geregistreerd als lid bij een vereniging.</p>
+                <p>Neem contact op met het bondsbureau via <code>{{ email_bb }}</code></p>
+                <p>
+                    <a class="btn-nhb-rood" href="mailto:{{ email_bb }}">
+                        <i class="material-icons-round">email</i></a>
+                </p>
 
-    <p>Je hebt zojuist geprobeerd een account aan te maken.</p>
+            {% else %}
 
-    <p>Om een account aan te maken moet jouw persoonlijke e-mailadres geregistreerd staan bij de bond. <span class="red-text">Dit is niet het geval!</span></p>
+                <p>De secretaris van jouw handboogvereniging kan dit oplossen.</p>
 
-    <p>De secretaris van jouw handboogvereniging kan dit oplossen.</p>
+            {% endif %}
+        </div>
+    </div>
 
-    <p>&nbsp;</p>
-    <h5>Contactgegevens secretaris</h5>
+    {% if sec_email %}
 
-    <table class="white">
-        <tr>
-            <td>Naam:</td>
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Contactgegevens secretaris</h4>
+            </div>
+        </div>
 
-            <td>
-                {% if sec_naam %}
-                    <span>{{ sec_naam }}</span>
-                {% else %}
-                    <i class="red-text">Onbekend</i>
-                {% endif %}
-            </td>
+        <!-- blauwe balk met informatie in een tabel -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
 
-            <td></td>
-        </tr>
+                <table class="white">
+                    <tr>
+                        <th>Naam</th>
 
-        <tr>
-            <td>E-mailadres:</td>
+                        <td>
+                            {% if sec_naam %}
+                                <span>{{ sec_naam }}</span>
+                            {% else %}
+                                <i class="red-text">Onbekend</i>
+                            {% endif %}
+                        </td>
 
-            <td>
-                {% if sec_email %}
-                    <code>{{ sec_email }}</code>{% else %}<i class="red-text">Onbekend</i>
-                {% endif %}
-            </td>
+                        <td></td>
+                    </tr>
 
-            <td>
-                {% if sec_email %}
-                    <a class="btn-nhb-blauw" href="mailto:{{ sec_email }}">
-                        <i class="material-icons-round left">email</i>{{ sec_email }}</a>
-                {% endif %}
-            </td>
-        </tr>
+                    <tr>
+                        <th>E-mailadres</th>
 
-        {% if not sec_email %}
-            <tr>
-                <td>Je staat waarschijnlijk niet (meer) geregistreerd als lid bij een vereniging.</td>
-                <td>Neem contact op met het bondsbureau via <code>{{ email_bb }}</code></td>
-                <td>
-                    <a class="btn-nhb-blauw" href="mailto:{{ email_bb }}">
-                        <i class="material-icons-round left">email</i>{{ email_bb }}</a>
-                </td>
-            </tr>
-        {% endif %}
-    </table>
+                        <td>
+                            <code>{{ sec_email }}</code>
+                        </td>
 
+                        <td>
+                            <a class="btn-nhb-rood" href="mailto:{{ sec_email }}">
+                                <i class="material-icons-round">email</i></a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
 
-    <p>&nbsp;</p>
-    <p><a class="btn-nhb-blauw" href="{% url 'Plein:plein' %}">Naar Het Plein</a></p>
+    {% endif %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="schutter-registreer-geen-email" %}
 
 {% endblock %}

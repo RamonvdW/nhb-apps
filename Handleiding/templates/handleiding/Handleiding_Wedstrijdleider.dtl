@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,21 +9,28 @@
 
 {% block pagina %}
 
-    <div class="white" style="padding:10px 30px 10px 30px">
-
-        <h4>Handleiding Wedstrijdleider</h4>
-
-        <p>De wedstrijdleider (WL) kan een wedstrijd 'draaien': deelnemerslijst inzien en scores invoeren.</p>
-
-        <p>&nbsp;</p>
-        <hr>
-        <h5>Verder</h5>
-        <p>Terug naar de <a class="btn-nhb-blauw" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
-
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Handleiding Wedstrijd<wbr>leider</h3>
+        </div>
     </div>
 
-{% endblock %}
 
-{% block menu %}
-    {% include 'handleiding/menu.dtl' %}
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+
+                <p>De wedstrijdleider (WL) kan een wedstrijd 'draaien': deelnemerslijst inzien en scores invoeren.</p>
+
+                <p>&nbsp;</p>
+                <hr>
+                <h5>Verder</h5>
+                <p>Terug naar de <a class="btn-nhb-rood" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
+
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

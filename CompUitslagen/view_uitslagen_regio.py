@@ -7,16 +7,16 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from BasisTypen.models import BoogType, TeamType
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (LAAG_REGIO,
                                TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES,
                                Competitie, DeelCompetitie,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               RegioCompetitieSchutterBoog)
+                               RegioCompetitieSchutterBoog,
+                               get_competitie_boog_typen, get_competitie_team_typen)
 from Competitie.operations.poules import maak_poule_schema
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
+from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 
 
@@ -69,19 +69,21 @@ class UitslagenRegioIndivView(TemplateView):
     order_gemiddelde = '-gemiddelde'
 
     def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, comp_boog, zes_scores):
-        """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
+        """ filter optie voor de regio """
 
-        # boogtype files
-        boogtypen = BoogType.objects.order_by('volgorde').all()
+        # boogtype filters
+        boogtypen = get_competitie_boog_typen(comp)
 
         context['comp_boog'] = None
         context['boog_filters'] = boogtypen
 
         for boogtype in boogtypen:
+            boogtype.sel = 'boog_' + boogtype.afkorting
             if boogtype.afkorting.upper() == comp_boog.upper():
                 context['comp_boog'] = boogtype
                 comp_boog = boogtype.afkorting.lower()
                 # geen url --> knop disabled
+                boogtype.selected = True
             else:
                 boogtype.zoom_url = reverse(self.url_name,
                                             kwargs={'comp_pk': comp.pk,
@@ -102,6 +104,7 @@ class UitslagenRegioIndivView(TemplateView):
 
             prev_rayon = 1
             for regio in regios:
+                regio.sel = 'regio_%s' % regio.regio_nr
                 regio.break_before = (prev_rayon != regio.rayon.rayon_nr)
                 prev_rayon = regio.rayon.rayon_nr
 
@@ -115,6 +118,7 @@ class UitslagenRegioIndivView(TemplateView):
                 else:
                     # geen zoom_url --> knop disabled
                     context['regio'] = regio
+                    regio.selected = True
             # for
 
         # vereniging filters
@@ -126,6 +130,7 @@ class UitslagenRegioIndivView(TemplateView):
                     .order_by('ver_nr'))
 
             for ver in vers:
+                ver.sel = 'ver_%s' % ver.ver_nr
                 ver.zoom_url = reverse('CompUitslagen:uitslagen-vereniging-indiv-n',
                                        kwargs={'comp_pk': comp.pk,
                                                'comp_boog': comp_boog,
@@ -155,21 +160,29 @@ class UitslagenRegioIndivView(TemplateView):
         rank_m = 0
         rank_v = 0
         asps_v = list()
+        count_v = None
+        count_m = None
         for deelnemer in asps:
             if deelnemer.sporterboog.sporter.geslacht == 'V':
                 if rank_v == 0:
                     deelnemer.klasse_str = klasse_str + ', meisjes'
                     deelnemer.break_klasse = True
+                    deelnemer.aantal_in_groep = 2
+                    count_v = deelnemer
                 rank_v += 1
                 deelnemer.rank = rank_v
                 asps_v.append(deelnemer)
+                count_v.aantal_in_groep += 1
             else:
                 if rank_m == 0:
                     deelnemer.klasse_str = klasse_str + ', jongens'
                     deelnemer.break_klasse = True
+                    deelnemer.aantal_in_groep = 2
+                    count_m = deelnemer
                 rank_m += 1
                 deelnemer.rank = rank_m
                 objs.append(deelnemer)
+                count_m.aantal_in_groep += 1
         # for
         if len(asps_v):
             objs.extend(asps_v)
@@ -203,7 +216,7 @@ class UitslagenRegioIndivView(TemplateView):
             # bepaal welke (initiële) regio bij de huidige gebruiker past
             regio_nr = get_sporter_regio_nr(self.request)
         except ValueError:
-            raise Http404('Verkeerd regionummer')
+            raise Http404('Verkeerde regionummer')
 
         # voorkom 404 voor leden in de administratieve regio
         if regio_nr == 100:
@@ -246,10 +259,15 @@ class UitslagenRegioIndivView(TemplateView):
         objs = list()
         asps = list()
         is_asp = False
+        deelnemer_count = None
         for deelnemer in deelnemers:
 
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
+                deelnemer_count = deelnemer
+                deelnemer.aantal_in_groep = 2   # 1 extra zodat balk doorloopt tot horizontale afsluiter
+                deelnemer.is_eerste_groep = (klasse == -1)
+
                 if len(asps):
                     self._split_aspiranten(asps, objs)
                     asps = list()
@@ -272,6 +290,8 @@ class UitslagenRegioIndivView(TemplateView):
             deelnemer.rank = rank
             deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
+
+            deelnemer_count.aantal_in_groep += 1
 
             # if deelnemer.score1 == 0:
             #     deelnemer.score1 = '-'
@@ -300,7 +320,13 @@ class UitslagenRegioIndivView(TemplateView):
 
         context['deelnemers'] = objs
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Uitslagen regio individueel')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -315,22 +341,23 @@ class UitslagenRegioTeamsView(TemplateView):
     def _maak_filter_knoppen(self, context, comp, gekozen_regio_nr, teamtype_afkorting):
         """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
 
-        teamtypen = TeamType.objects.order_by('volgorde').all()
-
         context['teamtype'] = None
-        context['teamtype_filters'] = teamtypen
+        context['teamtype_filters'] = teamtypen = get_competitie_team_typen(comp)
 
         for team in teamtypen:
+            team.sel = team.afkorting
             if team.afkorting.upper() == teamtype_afkorting.upper():
                 context['teamtype'] = team
                 teamtype_afkorting = team.afkorting.lower()
-                # geen url --> knop disabled
+                team.selected = True
             else:
                 team.zoom_url = reverse(self.url_name,
                                         kwargs={'comp_pk': comp.pk,
                                                 'team_type': team.afkorting.lower(),
                                                 'regio_nr': gekozen_regio_nr})
         # for
+
+        # TODO: wanneer komt het voor dat teamtype niet bestaat? Template laat altijd regios/verenigingen zien!
 
         # regio filters
         if context['teamtype']:
@@ -347,6 +374,8 @@ class UitslagenRegioTeamsView(TemplateView):
                 regio.break_before = (prev_rayon != regio.rayon.rayon_nr)
                 prev_rayon = regio.rayon.rayon_nr
 
+                regio.sel = 'regio_%s' % regio.regio_nr
+
                 regio.title_str = 'Regio %s' % regio.regio_nr
                 if regio.regio_nr != gekozen_regio_nr:
                     regio.zoom_url = reverse(self.url_name,
@@ -354,7 +383,7 @@ class UitslagenRegioTeamsView(TemplateView):
                                                      'team_type': teamtype_afkorting,
                                                      'regio_nr': regio.regio_nr})
                 else:
-                    # geen zoom_url --> knop disabled
+                    regio.selected = True
                     context['regio'] = regio
             # for
 
@@ -375,6 +404,7 @@ class UitslagenRegioTeamsView(TemplateView):
 
             if len(vers):
                 for ver in vers:
+                    ver.sel = 'ver_%s' % ver.ver_nr
                     ver.zoom_url = reverse('CompUitslagen:uitslagen-vereniging-teams-n',
                                            kwargs={'comp_pk': comp.pk,
                                                    'team_type': context['teamtype'].afkorting.lower(),
@@ -398,7 +428,7 @@ class UitslagenRegioTeamsView(TemplateView):
         comp.bepaal_fase()
         context['comp'] = comp
 
-        teamtype_afkorting = kwargs['team_type'][:2]     # afkappen voor de veiligheid
+        teamtype_afkorting = kwargs['team_type'][:3]     # afkappen voor de veiligheid
 
         # regio_nr is optioneel (eerste binnenkomst zonder regio nummer)
         try:
@@ -531,6 +561,7 @@ class UitslagenRegioTeamsView(TemplateView):
         prev_klasse = None
         prev_poule = None
         rank = 0
+        aantal_team = None
         for tup in unsorted_teams:
             poule = tup[-2]
             team = tup[-1]
@@ -541,29 +572,42 @@ class UitslagenRegioTeamsView(TemplateView):
                     team.poule_str = poule.beschrijving
                     if prev_poule:
                         team.schema = prev_poule.schema
+                        teams[-1].onderrand = True
                     prev_poule = poule
                     prev_klasse = None
 
             if team.klasse != prev_klasse:
                 team.break_klasse = True
                 team.klasse_str = team.klasse.team.beschrijving
+                team.aantal_in_groep = 3        # inclusief afsluitende blauwe regel
+                aantal_team = team
+                if prev_klasse:
+                    teams[-1].onderrand = True
                 prev_klasse = team.klasse
                 rank = 1
             else:
                 rank += 1
+                aantal_team.aantal_in_groep += 1
 
             team.rank = rank
             teams.append(team)
         # for
 
         if prev_poule:
+            teams[-1].onderrand = True
             afsluiter = SimpleNamespace(
                             is_afsluiter=True,
                             break_poule=True,
                             schema=prev_poule.schema)
             teams.append(afsluiter)
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Uitslagen regio teams')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 

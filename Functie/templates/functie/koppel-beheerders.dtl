@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,131 +10,193 @@
 {% block title %}Wijzig beheerder{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="functie-wijzig" %}
 
-<h4>Wijzig beheerder</h4>
+    <script type="application/javascript">
+        function do_wijzig(actie, id)
+        {
+            // voer een POST uit om toe te voegen
+            let form = document.createElement('form');
+            form.setAttribute('method', 'post');
+            form.setAttribute('action', '{{ wijzig_url }}');
 
-<p>Kies de beheerders voor de functie <b>{{ functie.beschrijving }}</b>.</p>
+            let inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = actie;
+            inp.value = id.getAttribute("data-pk");
+            form.appendChild(inp);
 
-<script type="application/javascript">
-    function do_wijzig(actie, id)
-    {
-        // voer een POST uit om toe te voegen
-        let form = document.createElement('form');
-        form.setAttribute('method', 'post');
-        form.setAttribute('action', '{{ wijzig_url }}');
+            inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = "csrfmiddlewaretoken";
+            inp.value = getCookie('csrftoken');
+            form.appendChild(inp);
 
-        let inp = document.createElement('input');
-        inp.type = "hidden";
-        inp.name = actie;
-        inp.value = id.getAttribute("data-pk");
-        form.appendChild(inp);
+            form.style.display = 'hidden';
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
 
-        inp = document.createElement('input');
-        inp.type = "hidden";
-        inp.name = "csrfmiddlewaretoken";
-        inp.value = getCookie('csrftoken');
-        form.appendChild(inp);
-
-        form.style.display = 'hidden';
-        document.body.appendChild(form);
-        form.submit();
-    }
-</script>
-
-{% if huidige_beheerders.count %}
-    <h5>Huidige beheerders ({{ huidige_beheerders.count }})</h5>
-    <ul class="collapsible">
-        {% for account in huidige_beheerders %}
-            <li>
-                <div class="collapsible-header white">
-                    <span>{{ account.volledige_naam }}</span>
-                    {% if account.geo_beschrijving %}
-                        <span>&nbsp;({{ account.geo_beschrijving }})</span>
-                    {% endif %}
-                    {% if account.let_op %}
-                        <span class="red-text">&nbsp;&nbsp;&nbsp;&nbsp;{{ account.let_op }}</span>
-                    {% endif %}
-                </div>
-                <div class="collapsible-body white">
-                    <button class="btn-nhb-rood" onclick="do_wijzig('drop', this)" data-pk="{{ account.pk }}">
-                        <i class="material-icons-round left">delete</i>Verwijder beheerder</button>
-                    <br><br><i>Let op: gebruiker zal via een e-mail automatisch op de hoogte gesteld worden van de verwijderde rol.</i>
-                </div>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>Er zijn nog geen beheerders gekoppeld. Gebruik het formulier om leden te zoeken en toe te voegen.</p>
-{% endif %}
-
-<p>Om een beheerder te verwijderen: klik op de naam, dan op de verwijder knop.</p>
-
-<h5>Beheerders toevoegen</h5>
-
-<p>Gebruik onderstaand formulier om naar bestuurders te zoeken.</p>
-
-<div class="container z-depth-2 white">
-    <div class="row nhb-blauw white-text">
-        <div class="col s12 center-align">
-            <h5>Zoeken beheerder</h5>
-            <p>Zoek op bondsnummer of een deel van de naam</p>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Wijzig beheerder</h3>
+            <p>Kies de beheerders voor de functie <b>{{ functie.beschrijving }}</b>.</p>
         </div>
     </div>
 
-    <div class="row">
-        <form class="col s12" action="{{ zoek_url }}" method="get">
-            <div class="row"><div class="input-field col s12">
-                {{ form.zoekterm.label_tag }}{{ form.zoekterm }}
-            </div></div>
-
-            <div class="row"><div class="col s12"></div>
-                <div class="center-align">
-                    <button class="btn-nhb-blauw" type="submit">
-                        <i class="material-icons-round left">search</i>Zoek</button>
-                </div>
-            </div>
-        </form>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Huidige beheerders</h4>
+            <p>Aantal: {{ huidige_beheerders.count }}</p>
+        </div>
     </div>
-</div>
+
+    <!-- blauwe balk -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                {% if huidige_beheerders.count %}
+                    <thead>
+                        <tr>
+                            <th>Naam</th>
+                            <th>Uit</th>
+                            <th colspan="2"></th>
+                        </tr>
+                    </thead>
+
+                    {% for account in huidige_beheerders %}
+                        <tr>
+                            <td>{{ account.volledige_naam }}</td>
+                            <td>{{ account.geo_beschrijving }}</td>
+                            <td class="nhb-red-text">{{ account.let_op }}</td>
+                            <td class="center">
+                                <a class="btn-nhb-rood modal-trigger" href="#bevestig_ontkoppel_{{ account.pk }}">
+                                    <i class="material-icons-round left">delete</i>Verwijder</a>
+
+                                <!-- modal dialog voor deze specifieke beheerder -->
+                                <div class="modal" id="bevestig_ontkoppel_{{ account.pk }}">
+                                    <div class="modal-content center">
+                                        <h5>Ontkoppel beheerder?</h5>
+                                        <p>Wil je <b>{{ account.volledige_naam }}</b> loskoppelen<br>van de functie <b>{{ functie.beschrijving }}</b>?</p>
+
+                                        <div class="modal-footer" style="text-align:center; display:block">
+                                            <div style="display:inline-block; width:50%">
+                                                <button class="btn-nhb-rood" onclick="do_wijzig('drop', this)" data-pk="{{ account.pk }}">Ja</button>
+                                            </div>
+                                            <div style="display:inline-block; width:50%">
+                                                <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                    <tr>
+                        <td colspan="4" class="center">
+                            <i>Let op: gebruikers worden via een e-mail automatisch op de hoogte gesteld worden van een verwijderde rol.</i>
+                        </td>
+                    </tr>
+
+                {% else %}
+                    <tr>
+                        <td class="center">Er zijn nog geen beheerders gekoppeld.<br>Gebruik het formulier om leden te zoeken en toe te voegen.</td>
+                    </tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
 
 
-{% if zoekterm %}
-    {% if object_list|length > 0 %}
-        <h5>Gevonden leden ({{ object_list|length }})</h5>
-        <ul class="collapsible">
-            {% for account in object_list %}
-                <li>
-                    <div class="collapsible-header white">
-                        <span>{{ account.volledige_naam|highlight:zoekterm }}</span>
-                        {% if account.geo_beschrijving %}
-                            <span>&nbsp;({{ account.geo_beschrijving }})</span>
-                        {% endif %}
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Zoeken</h4>
+            <p>Zoek naar bestuurders, op bondsnummer of een deel van de naam.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met zoek dialoog -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4 white z-depth-3">
+
+            <!-- dialoog venster -->
+            <div style="margin:50px 30px 30px 30px">
+                <form action="{{ zoek_url }}" method="get">
+
+                    <div class="input-field">
+                        {{ form.zoekterm.label_tag }}{{ form.zoekterm }}
                     </div>
-                    <div class="collapsible-body white">
-                        {% if is_vereniging_rol %}
-                            <span>Lid van {{ account.vereniging_naam }}</span>
-                            <p>Bondsnummer: {{ account.lid_nr_str|highlight:zoekterm }}</p>
-                        {% else %}
-                            <p style="margin-top:0">Bondsnummer: {{ account.lid_nr_str|highlight:zoekterm }}</p>
-                        {% endif %}
-                        <button class="btn-nhb-blauw" onclick="do_wijzig('add', this)" data-pk="{{ account.pk }}">
-                            <i class="material-icons-round left">add</i>Maak beheerder</button>
-                        <br><br><i>Let op: gebruiker zal via een e-mail automatisch op de hoogte gesteld worden van de nieuw gekoppelde rol.</i>
+
+                    <div class="row"> <!-- style="margin-top:90px">-->
+                        <div class="col s12">
+                            <button class="btn-nhb-rood" type="submit">
+                                <i class="material-icons-round left">search</i>Zoek</button>
+                        </div>
                     </div>
-                </li>
-            {% endfor %}
-        </ul>
-        <p>Om een beheerder te koppelen: klik op de naam, daarna op de knop 'maak beheerder'.</p>
-    {% else %}
-        <p class="red-text">Niets gevonden</p>
-    {% endif %}
 
-    <p>Staat de gezochte persoon er niet bij? Alleen personen met een account op deze website worden getoond.</p>
-{% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
 
-<p><a class="btn-nhb-blauw margin-5" href="{{ terug_url }}">
-    <i class="material-icons-round left">arrow_back</i>Terug</a></p>
+    <!-- zoekresultaten -->
+    {% if zoekterm %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Beheerders toevoegen</h4>
+                <p>Gevonden leden: {{ object_list|length }}</p>
+                <p>Staat de gezochte persoon er niet bij? Alleen personen met een <b>account</b> op deze website worden getoond.</p>
+            </div>
+        </div>
+
+
+        <!-- blauwe balk -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+                <table class="white">
+                    {% if object_list|length > 0 %}
+                        <thead>
+                            <tr>
+                                <th>Lid nummer</th>
+                                <th>Naam</th>
+                                <th>{% if is_vereniging_rol %}Van vereniging{% else %}Uit{% endif %}</th>
+                                <th><!-- kolom voor de knop --></th>
+                            </tr>
+                        </thead>
+                        {% for account in object_list %}
+                            <tr>
+                                <td>{{ account.lid_nr_str|highlight:zoekterm }}</td>
+                                <td>{{ account.volledige_naam|highlight:zoekterm }}</td>
+                                <td>{% if is_vereniging_rol %}{{ account.vereniging_naam }}{% else %}{{ account.geo_beschrijving }}{% endif %}</td>
+                                <td>
+                                    <button class="btn-nhb-rood" onclick="do_wijzig('add', this)" data-pk="{{ account.pk }}">
+                                        <i class="material-icons-round left">add</i>Koppel</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+
+                        <tr>
+                            <td colspan="4" class="center">
+                                <i>Let op: gebruikers worden via een e-mail automatisch op de hoogte gesteld van de nieuw gekoppelde rol.</i>
+                            </td>
+                        </tr>
+
+                    {% else %}
+                        <td colspan="4" class="center">Niemand gevonden</td>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+    {% endif %} <!-- zoekterm -->
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-koppel-beheerders" %}
 
 {% endblock %}
 

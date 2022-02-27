@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,9 +21,6 @@ class TestBasisTypen(TestCase):
         pass
 
     def test_basics(self):
-        obj = BoogType.objects.all()[0]
-        self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
-
         obj = LeeftijdsKlasse()
         self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
 
@@ -47,17 +44,24 @@ class TestBasisTypen(TestCase):
         obj.min_wedstrijdleeftijd = 60
         self.assertFalse(obj.is_aspirant_klasse())
 
-        obj = IndivWedstrijdklasse(beschrijving="Test")
-        self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
+        # use the __str__ method (only used by admin interface)
+        team_obj = TeamType(beschrijving='Test', afkorting='X')
+        self.assertIsNotNone(str(team_obj))
 
         obj = TeamWedstrijdklasse(beschrijving="Test")
-        self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
+        self.assertIsNotNone(str(obj))
+
+        obj.team_type = team_obj
+        self.assertIsNotNone(str(obj))
+
+        boog_obj = BoogType.objects.all()[0]
+        self.assertIsNotNone(str(boog_obj))
+
+        obj = IndivWedstrijdklasse(beschrijving="Test", boogtype=boog_obj)
+        self.assertIsNotNone(str(obj))
 
         obj = KalenderWedstrijdklasse(beschrijving="Test")
-        self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
-
-        obj = TeamType(beschrijving='Test', afkorting='X')
-        self.assertIsNotNone(str(obj))      # use the __str__ method (only used by admin interface)
+        self.assertIsNotNone(str(obj))
 
     def test_admin(self):
         adm = BasisTypenIndivWedstrijdklasseAdmin(IndivWedstrijdklasse, None)
@@ -67,7 +71,7 @@ class TestBasisTypen(TestCase):
 
     def test_max_wedstrijdleeftijd(self):
         lkl = LeeftijdsKlasse(
-                    geslacht='M',
+                    wedstrijd_geslacht='M',
                     min_wedstrijdleeftijd=20,
                     max_wedstrijdleeftijd=30)
 
@@ -78,7 +82,7 @@ class TestBasisTypen(TestCase):
         self.assertFalse(lkl.leeftijd_is_compatible(31))
 
         lkl = LeeftijdsKlasse(
-                    geslacht='M',
+                    wedstrijd_geslacht='M',
                     min_wedstrijdleeftijd=20,
                     max_wedstrijdleeftijd=0)
 
@@ -88,5 +92,33 @@ class TestBasisTypen(TestCase):
         self.assertTrue(lkl.leeftijd_is_compatible(31))
         self.assertTrue(lkl.leeftijd_is_compatible(100))
 
-# end of file
+    def test_geslacht(self):
+        lkl = LeeftijdsKlasse(
+                    wedstrijd_geslacht='M',
+                    min_wedstrijdleeftijd=20,
+                    max_wedstrijdleeftijd=30)
 
+        self.assertTrue(lkl.geslacht_is_compatible('M'))
+        self.assertFalse(lkl.geslacht_is_compatible('V'))
+        self.assertFalse(lkl.geslacht_is_compatible('X'))
+
+        lkl = LeeftijdsKlasse(
+                    wedstrijd_geslacht='V',
+                    min_wedstrijdleeftijd=20,
+                    max_wedstrijdleeftijd=30)
+
+        self.assertFalse(lkl.geslacht_is_compatible('M'))
+        self.assertTrue(lkl.geslacht_is_compatible('V'))
+        self.assertFalse(lkl.geslacht_is_compatible('X'))
+
+        lkl = LeeftijdsKlasse(
+                    wedstrijd_geslacht='A',
+                    min_wedstrijdleeftijd=20,
+                    max_wedstrijdleeftijd=30)
+
+        self.assertTrue(lkl.geslacht_is_compatible('M'))
+        self.assertTrue(lkl.geslacht_is_compatible('V'))
+        self.assertTrue(lkl.geslacht_is_compatible('X'))
+
+
+# end of file

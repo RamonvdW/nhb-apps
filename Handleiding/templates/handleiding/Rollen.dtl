@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,41 +9,48 @@
 
 {% block pagina %}
     
-    <div class="white" style="padding:10px 30px 10px 30px">
-
-        <h4>Rollen</h4>
-        
-        <p>De volgende rollen en bijbehorende afkortingen worden gebruikt:</p>
-        <ul style="padding-left: 20px">
-            <li style="list-style-type: disc; padding-left:0">BB = Bondsburo / Manager Competitiezaken (aantal: 1)</li>
-            <li style="list-style-type: disc; padding-left:0">BKO = Bondskampioenschappen Organisator (aantal: 1 per competitie = 2)</li>
-            <li style="list-style-type: disc; padding-left:0">RKO = Rayonkampioenschappen Organisator (aantal: 4 per rayon per competitie = 4 x 2=8)</li>
-            <li style="list-style-type: disc; padding-left:0">RCL = Regiocompetitieleider (aantal: 1 per regio per competitie = 16 x 2=32)</li>
-            <li style="list-style-type: disc; padding-left:0">SEC = Secretaris van een vereniging (aantal: 1 per verenging)</li>
-            <li style="list-style-type: disc; padding-left:0">HWL = Hoofd wedstrijdleider bij een vereniging (aantal: 1 per vereniging)</li>
-            <li style="list-style-type: disc; padding-left:0">WL = Wedstrijdleider bij een vereniging (aantal: 1 per vereniging)</li>
-        </ul>
-
-        <p>Er kunnen meerdere personen gekoppeld worden aan elke rol.</p>
-        <p>Een persoon kan aan meerdere rollen gekoppeld worden (bijvoorbeeld RCL voor Indoor <i>en</i> RCL voor 25m 1pijl)</p>
-        <p>Daarnaast is er de rol 'Sporter' die je altijd krijgt. Door deze rol te kiezen kan je de website persoonlijk gebruiken, bijvoorbeeld om jezelf in te schrijven voor een competitie.</p>
-
-        <p>&nbsp;</p>
-        <hr>
-        <h5>Verder</h5>
-           <p>Terug naar de <a class="btn-nhb-blauw" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
-           <p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_BB/">Handleiding_BB</a></p>
-           <p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_BKO/">Handleiding_BKO</a></p>
-           <p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_RKO/">Handleiding_RKO</a></p>
-           <p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_RCL/">Handleiding_RCL</a></p>
-           <p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_Secretaris/">Handleiding Secretaris</a></p>
-           <p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_Hoofdwedstrijdleider/">Handleiding Hoofdwedstrijdleider</a></p>
-           <p><a class="btn-nhb-blauw" href="/handleiding/Handleiding_Wedstrijdleider/">Handleiding Wedstrijdleider</a></p>
-
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Rollen</h3>
+        </div>
     </div>
 
-{% endblock %}
 
-{% block menu %}
-    {% include 'handleiding/menu.dtl' %}
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+
+                <p>De volgende rollen en bijbehorende afkortingen worden gebruikt:</p>
+                <ul style="padding-left: 20px">
+                    <li style="list-style-type: disc; padding-left:0">BB = Bondsburo / Manager Competitiezaken (aantal: 1)</li>
+                    <li style="list-style-type: disc; padding-left:0">BKO = Bondskampioenschappen Organisator (aantal: 1 per competitie = 2)</li>
+                    <li style="list-style-type: disc; padding-left:0">RKO = Rayonkampioenschappen Organisator (aantal: 4 per rayon per competitie = 4 x 2=8)</li>
+                    <li style="list-style-type: disc; padding-left:0">RCL = Regiocompetitieleider (aantal: 1 per regio per competitie = 16 x 2=32)</li>
+                    <li style="list-style-type: disc; padding-left:0">SEC = Secretaris van een vereniging (aantal: 1 per verenging)</li>
+                    <li style="list-style-type: disc; padding-left:0">HWL = Hoofd wedstrijdleider bij een vereniging (aantal: 1 per vereniging)</li>
+                    <li style="list-style-type: disc; padding-left:0">WL = Wedstrijdleider bij een vereniging (aantal: 1 per vereniging)</li>
+                </ul>
+
+                <p>Er kunnen meerdere personen gekoppeld worden aan elke rol.</p>
+                <p>Een persoon kan aan meerdere rollen gekoppeld worden (bijvoorbeeld RCL voor Indoor <i>en</i> RCL voor 25m 1pijl)</p>
+                <p>Daarnaast is er de rol 'Sporter' die je altijd krijgt. Door deze rol te kiezen kan je de website persoonlijk gebruiken, bijvoorbeeld om jezelf in te schrijven voor een competitie.</p>
+
+                <p>&nbsp;</p>
+                <hr>
+                <h5>Verder</h5>
+                <p>Terug naar de <a class="btn-nhb-rood" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
+                <p><a class="btn-nhb-rood" href="/handleiding/Handleiding_BB/">Handleiding_BB</a></p>
+                <p><a class="btn-nhb-rood" href="/handleiding/Handleiding_BKO/">Handleiding_BKO</a></p>
+                <p><a class="btn-nhb-rood" href="/handleiding/Handleiding_RKO/">Handleiding_RKO</a></p>
+                <p><a class="btn-nhb-rood" href="/handleiding/Handleiding_RCL/">Handleiding_RCL</a></p>
+                <p><a class="btn-nhb-rood" href="/handleiding/Handleiding_Secretaris/">Handleiding Secretaris</a></p>
+                <p><a class="btn-nhb-rood" href="/handleiding/Handleiding_Hoofdwedstrijdleider/">Handleiding Hoofdwedstrijdleider</a></p>
+                <p><a class="btn-nhb-rood" href="/handleiding/Handleiding_Wedstrijdleider/">Handleiding Wedstrijdleider</a></p>
+
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -8,66 +8,98 @@
 
 {% block title %}{{ naam_site }}{% endblock %}
 
+<!-- geen broodkruimels op de voorpagina -->
+{% block broodkruimels %}{% endblock %}
+
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-bezoeker" %}
-
-    <h4>Welkom op {{ naam_site }}</h4>
-
-    <p>Op deze website kan je informatie vinden over de handboogsport, zoals uitslagen van de competities en de Nederlandse Records.</p>
-
-    <!-- FUTURE: deze opmerking verwijderen -->
-    <p>Deze site is van de Nederlandse Handboog Bond (NHB) en is nog in ontwikkeling.</p>
-
-    {% if ga_naar_live_server %}
-        {% include 'plein/ga-naar-live-server.dtl' %}
+    <!-- banner om mensen weg te sturen van de test server -->
+    {% if is_test_server %}
+        <div class="row nhb-rood white-text center" style="padding-top:50px; padding-bottom:50px">
+            <div class="col s10 offset-s1 m8 offset-m2">
+                {% include 'plein/ga-naar-live-server.dtl' %}
+            </div>
+        </div>
     {% endif %}
 
+    <!-- MijnHandboogsport banner -->
+    <div class="row center">
+        <div class="col s12">
+            <p>&nbsp;</p>
+            <h4>Welkom op</h4>
+        </div>
 
-    <h5>Inloggen</h5>
-    <p>Heb je al een account?</p>
-    <p><a class="btn-nhb-blauw" href="{% url 'Account:login' %}">
-            <i class="material-icons-round left">login</i>Inloggen</a></p>
+        <div class="col s12 nhb-rood-text">
+            <h1 class="hide-on-small-only" style="margin:0; font-weight:bold">MijnHandboogsport</h1>
+            <h3 class="hide-on-med-and-up" style="margin:0; font-weight:bold">Mijn<wbr>Handboog<wbr>sport</h3>
+        </div>
 
-
-    <p>&nbsp;</p>
-    <h5>Account aanmaken</h5>
-    <p>Ben je lid van de NHB (heb je een bondsnummer?) maak dan een account aan en log in, dan tonen we informatie die voor jou relevant is.</p>
-    <p><a class="btn-nhb-blauw" href="{% url 'Sporter:registreer' %}">
-        <i class="material-icons-round left">add</i>Account aanmaken</a></p>
-
-
-    <p>&nbsp;</p>
-    <h5>Op deze site</h5>
-
-    <p>Klik op een van de onderstaande kaartjes om naar een ander deel van deze site te gaan.</p>
-    <p>Tip: klik in het menu (aan de linker kant) op 'Het Plein' om terug te komen naar deze pagina.</p>
-
-    <div class="row">
-        {% url 'Competitie:kies' as card_url %}
-        {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
-
-        {% url 'Records:overzicht' as card_url %}
-        {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
-
-        {% if toon_kalender %}      <!-- volg menu -->
-            {% url 'Kalender:landing-page' as card_url %}
-            {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
-        {% endif %}
+        <div class="col s12">
+            <p>Op deze website kan je informatie vinden over de handboogsport<br>zoals records, wedstrijden en uitslagen</p>
+            <p>&nbsp;</p>
+        </div>
     </div>
 
-    <p>
-        <span>Lees hier hoe we omgaan met jouw privacy: </span>
-        <a href="{% url 'Plein:privacy' %}" class="btn-nhb-blauw">
-            <i class="material-icons-round left">security</i>Privacyverklaring</a>
-    </p>
+    <!-- blauwe balk met kaartjes bondscompetities en records -->
+    <!--<div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">-->
+    <div class="row-nhb-blauw">
+        <!--
+        <div class="col s1">01</div>
+        <div class="col s1">02</div>
+        <div class="col s1">03</div>
+        <div class="col s1">04</div>
+        <div class="col s1">05</div>
+        <div class="col s1">06</div>
+        <div class="col s1">07</div>
+        <div class="col s1">08</div>
+        <div class="col s1">09</div>
+        <div class="col s1">10</div>
+        <div class="col s1">11</div>
+        <div class="col s1">12</div>
+        -->
 
-    <p>&nbsp;</p>
-    <h5>Verder</h5>
-    <p>De volgende websites zijn misschien ook interessant voor je.</p>
-    <div class="row">
-        <!-- andere sites van de NHB -->
-        {% include 'plein/andere-sites-van-de-nhb.dtl' %}
+        <div class="col s12 m6">
+            {% url 'Competitie:kies' as card_url %}
+            {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de<br>bondscompetities,<br> inclusief alle uitslagen." icon="my_location" url=card_url %}
+        </div>
+
+        <div class="col s12 m6">
+            {% url 'Records:overzicht' as card_url %}
+            {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records<br>van nederlandse sporters." icon="insights" url=card_url %}
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <p>&nbsp;</p>
+            <h4>Maak het persoonlijk</h4>
+            <p>Door een account aan te maken kunnen we informatie tonen die voor jou relevant is<br>en kan je je aanmelden voor wedstrijden.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met account aanmaken -->
+    <div class="row-nhb-blauw" style="padding-top:50px; padding-bottom:50px">
+        <div class="col s12">
+            {% url 'Sporter:registreer' as card_url %}
+            {% include 'plein/card.dtl' with title="Account aanmaken" text="Doorloop eenmalig de korte registratie procedure.<br><br>(<i>alleen voor NHB leden</i>)" icon="fingerprint" url=card_url %}
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <p>&nbsp;</p>
+            <h4>Andere sites van de NHB</h4>
+            <p>De volgende websites zijn misschien ook interessant voor je</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met links naar andere sites -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            {% include 'plein/andere-sites-van-de-nhb.dtl' %}
+        </div>
     </div>
 
 {% endblock %}

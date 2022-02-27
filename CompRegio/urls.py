@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -108,10 +108,6 @@ urlpatterns = [
     path('teams-vereniging/koppelen/<team_pk>/',
          view_teams_hwl.TeamsRegioKoppelLedenView.as_view(),
          name='teams-regio-koppelen'),
-
-    path('teams-vereniging/<deelcomp_pk>/nieuw/',
-         view_teams_hwl.WijzigRegioTeamsView.as_view(),
-         name='teams-regio-nieuw'),
 
     path('teams-vereniging/<deelcomp_pk>/wijzig/<team_pk>/',
          view_teams_hwl.WijzigRegioTeamsView.as_view(),

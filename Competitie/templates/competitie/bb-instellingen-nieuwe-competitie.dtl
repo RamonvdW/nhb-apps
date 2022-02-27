@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,91 +10,87 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="instellingen-nieuwe-competitie" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Instellingen volgende bondscompetitie</h3>
+            <p>Hieronder staan de klassen voor de individuele competitie en teamcompetitie.</p>
+            <p>Kijk deze nog een keer door voordat de nieuwe competitie opgestart wordt. Onder aan deze pagina vindt je een knop om de nieuwe competitie aan te maken.</p>
+        </div>
+    </div>
 
-    <h4>Instellingen volgende bondscompetitie</h4>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h5>Wedstrijdklassen voor de individuele competities</h5>
+        </div>
+    </div>
 
-    <p>Hieronder staan de klassen voor de individuele competitie en teamcompetitie.</p>
-    <p>Kijk deze nog een keer door voordat de nieuwe competitie opgestart wordt.
-    Onder aan deze pagina vindt je een knop om de nieuwe competitie aan te maken.</p>
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Beschrijving</th>
+                        <th>Boogtype</th>
+                        <th>Leeftijdsklassen</th>
+                    </tr>
+                </thead>
 
-    <div class="row">
-        <h5>Wedstrijdklassen voor de individuele competities</h5>
-        <div class="col s12 m12 l12 xl12">
-            <div class="white-text nhb-blauw z-depth-2">
-                <div class="row small-row">
-                    <div class="col s5"><b>Beschrijving</b></div>
-                    <div class="col s2"><b>Boogtype</b></div>
-                    <div class="col s3"><b>Leeftijdsklassen</b></div>
-                </div>
                 {% for obj in indivklassen %}
-                    {% if obj.separate_before %}
-                        <div class="divider">&nbsp;</div>
-                    {% endif %}
-                    <div class="row small-row">
-                        <div class="col s5">{{ obj.beschrijving }}</div>
-                        <div class="col s2">{{ obj.boogtype.beschrijving }}</div>
-                        <div class="col s3">
+                    <tr>
+                        <td>{{ obj.beschrijving }}</td>
+                        <td>{{ obj.boogtype.beschrijving }}</td>
+                        <td>
                             {% for lkl in obj.lkl_list %}
                                 <span>{{ lkl }}</span><br>
                             {% endfor %}
-                        </div>
-                    </div>
+                        </td>
+                    </tr>
                 {% endfor %}
-            </div>
+            </table>
         </div>
     </div>
 
-    <div class="row">
-        <h5>Wedstrijdklassen voor de team competities</h5>
-        <div class="col s12 m12 l12 xl12">
-            <div class="white-text nhb-blauw z-depth-2">
-                <div class="row small-row">
-                    <div class="col s5"><b>Beschrijving</b></div>
-                    <div class="col s3"><b>Boogtypen</b></div>
-                </div>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h5>Wedstrijdklassen voor de team competities</h5>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Beschrijving</th>
+                        <th>Boogtypen</th>
+                    </tr>
+                </thead>
+
                 {% for obj in teamklassen %}
-                    {% if obj.separate_before %}
-                        <div class="divider">&nbsp;</div>
-                    {% endif %}
-                    <div class="row small-row">
-                        <div class="col s5">{{ obj.beschrijving }}</div>
-                        <div class="col s3">
+                    <tr>
+                        <td>{{ obj.beschrijving }}</td>
+                        <td>
                             {% for boogtype in obj.boogtypen_list %}
                                 <span>{{ boogtype }}</span><br>
                             {% endfor %}
-                        </div>
-                    </div>
+                        </td>
+                    </tr>
                 {% endfor %}
-            </div>
+            </table>
         </div>
     </div>
 
-    <!-- niet nodig??
-    <div class="row">
-        <h5>Team typen</h5>
-        <div class="col s12 m10 l10 xl10">
-            <div class="white-text nhb-blauw z-depth-2">
-                <div class="row small-row">
-                    <div class="col s5"><b>Team type</b></div>
-                    <div class="col s3"><b>Boogtypen</b></div>
-                </div>
-                <div class="divider">&nbsp;</div>
-                {% for obj in teamtypen %}
-                    <div class="row small-row">
-                        <div class="col s5">{{ obj.beschrijving }}</div>
-                        <div class="col s3">{{ obj.boogtypen }}</div>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>  -->
+    <p class="center">
+        <a class="btn-nhb-rood" href="{% url 'Competitie:aanmaken' %}">Ik wil de nieuwe competities aanmaken</a>
+    </p>
 
-    <a class="btn-nhb-rood" href="{% url 'Competitie:aanmaken' %}">Ik wil de nieuwe competities aanmaken</a>
+    {% include 'feedback/sidebar.dtl' with op_pagina="instellingen-nieuwe-competitie" %}
 
-{% endblock %}
-
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}
 

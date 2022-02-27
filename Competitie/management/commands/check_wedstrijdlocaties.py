@@ -113,7 +113,7 @@ class Command(BaseCommand):
                 # kijk hoeveel wedstrijdlocaties deze vereniging heeft
                 if len(locs) > 1:
                     # als de gekozen locatie discipline_indoor is en banen_18m/banen_25m ingesteld heeft, dan is het goed
-                    if not loc.discipline_indoor or (loc.banen_18m == 0 and loc.banen_25m == 0):
+                    if (not loc.discipline_indoor) or (loc.banen_18m == 0 and loc.banen_25m == 0):
                         toon_loc = True
             else:
                 wedstrijd_fouten.append('geen vereniging')
@@ -132,7 +132,7 @@ class Command(BaseCommand):
                 self.stdout.write('        Wedstrijdklassen: %s' % klassen_str)
 
             if toon_loc:
-                if ver.ver_nr not in ver_gerapporteerd:
+                if ver.ver_nr not in ver_gerapporteerd:     # pragma: no branch
                     ver_gerapporteerd.append(ver.ver_nr)
 
                     self.stdout.write('[INFO] Vereniging %s heeft %s locaties:' % (ver.pk, len(locs)))

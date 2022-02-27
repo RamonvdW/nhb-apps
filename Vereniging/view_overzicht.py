@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,7 +12,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
 from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
                                LAAG_REGIO, LAAG_RK, INSCHRIJF_METHODE_1)
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Taken.taken import eval_open_taken
 from Wedstrijden.models import CompetitieWedstrijd, BAAN_TYPE_EXTERN
@@ -21,6 +21,26 @@ import datetime
 
 
 TEMPLATE_OVERZICHT = 'vereniging/overzicht.dtl'
+
+# korte beschrijving van de competitie fase voor de HWL
+comp_fase_kort = {
+    'A': 'opstarten',
+    'B': 'inschrijven',
+    'C': 'inschrijven teams',
+    'D': 'voorbereiding regiocompetitie',
+    'E': 'wedstrijden regio',
+    'F': 'vaststellen uitslag regio',
+    'G': 'afsluiten regiocompetitie',
+    'J': 'voorbereiding RK',
+    'K': 'voorbereiding RK',
+    'L': 'wedstrijden RK',
+    'M': 'uitslagen RK overnemen',
+    'N': 'afsluiten RK',
+    'P': 'voorbereiding BK',
+    'Q': 'wedstrijden BK',
+    'R': 'uitslagen BK overnemen',
+    'S': 'afsluiten competitie',
+}
 
 
 class OverzichtView(UserPassesTestMixin, TemplateView):
@@ -45,6 +65,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         context['nhb_ver'] = ver = self.functie_nu.nhb_ver
+        context['huidige_rol'] = rol_get_beschrijving(self.request)
 
         context['clusters'] = ver.clusters.all()
 
@@ -115,9 +136,15 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                     kaartje.geen_kaartjes = True
                     kaartjes.append(kaartje)
 
+                if prev_jaar != 0:
+                    kaartje = SimpleNamespace()
+                    kaartje.einde_blok = True
+                    kaartjes.append(kaartje)
+
                 # nieuwe heading aanmaken
                 kaartje = SimpleNamespace()
                 kaartje.heading = comp.beschrijving
+                kaartje.comp_fase = "%s (%s)" % (comp.fase, comp_fase_kort[comp.fase])
                 kaartjes.append(kaartje)
 
                 prev_jaar = begin_jaar
@@ -143,7 +170,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         # team invallers opgeven
                         kaartje = SimpleNamespace(
                                     titel="Team Invallers",
-                                    tekst="Invallers opgeven voor ronde %s van de regiocompetitie voor de %s." % (deelcomp.huidige_team_ronde, comp.beschrijving),
+                                    tekst="Invallers opgeven voor ronde %s van de regiocompetitie." % deelcomp.huidige_team_ronde,
                                     url=reverse('CompRegio:teams-regio-invallers', kwargs={'deelcomp_pk': deelcomp.pk}),
                                     icon='how_to_reg')
                         kaartjes.append(kaartje)
@@ -152,7 +179,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         if deelcomp.regio_organiseert_teamcompetitie and comp.fase <= 'E':
                             kaartje = SimpleNamespace()
                             kaartje.titel = "Teams Regio"
-                            kaartje.tekst = 'Verenigingsteams voor de regiocompetitie samenstellen voor de %s.' % comp.beschrijving
+                            kaartje.tekst = 'Verenigingsteams voor de regiocompetitie samenstellen.'
                             kaartje.url = reverse('CompRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
                             kaartje.icon = 'gamepad'
                             if comp.fase < 'B':
@@ -169,7 +196,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                             # RK voorbereidende fase
                             kaartje = SimpleNamespace()
                             kaartje.titel = "Deelnemers RK"
-                            kaartje.tekst = "Sporters van de vereniging aan-/afmelden voor het RK van de %s" % comp.beschrijving
+                            kaartje.tekst = "Sporters van de vereniging aan-/afmelden voor het RK"
                             kaartje.url = reverse('CompRayon:lijst-rk-ver',
                                                   kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
                             kaartje.icon = 'rule'
@@ -178,7 +205,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                     if 'E' <= comp.fase <= 'K' and self.rol_nu != Rollen.ROL_WL:
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Teams RK"
-                        kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen samenstellen voor de %s." % comp.beschrijving
+                        kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen samenstellen."
                         kaartje.url = reverse('CompRayon:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
                         kaartje.icon = 'api'
                         # niet beschikbaar maken tot een paar weken na de eerste regiowedstrijd
@@ -195,7 +222,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                     if 'B' <= comp.fase <= 'F':         # vanaf RK fase niet meer tonen
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Ingeschreven"
-                        kaartje.tekst = "Overzicht ingeschreven leden voor de %s." % comp.beschrijving
+                        kaartje.tekst = "Overzicht ingeschreven leden."
                         kaartje.url = reverse('CompInschrijven:leden-ingeschreven', kwargs={'deelcomp_pk': deelcomp.pk})
                         if comp.afstand == '18':
                             kaartje.img = static('plein/badge_nhb_indoor.png')
@@ -207,7 +234,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                     if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1 and 'B' <= comp.fase <= 'F':
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Wie schiet waar?"
-                        kaartje.tekst = 'Overzicht gekozen wedstrijden voor de %s.' % comp.beschrijving
+                        kaartje.tekst = 'Overzicht gekozen wedstrijden.'
                         kaartje.url = reverse('CompRegio:wie-schiet-waar', kwargs={'deelcomp_pk': deelcomp.pk})
                         kaartje.icon = 'gamepad'
                         if comp.fase < 'B':
@@ -217,9 +244,18 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         # for
 
+        if prev_jaar != 0:
+            kaartje = SimpleNamespace()
+            kaartje.einde_blok = True
+            kaartjes.append(kaartje)
+
         eval_open_taken(self.request)
 
-        menu_dynamics(self.request, context, actief='vereniging')
+        context['kruimels'] = (
+            (None, 'Beheer Vereniging'),
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 

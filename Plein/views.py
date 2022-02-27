@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, reverse
 from django.views.generic import TemplateView, View
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from Handleiding.views import reverse_handleiding
@@ -13,11 +13,11 @@ from Taken.taken import eval_open_taken
 from .menu import menu_dynamics
 
 
-TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'    # niet ingelogd
-TEMPLATE_PLEIN_SPORTER = 'plein/plein-sporter.dtl'      # sporter (ROL_SCHUTTER)
-TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'  # beheerder (ROL_BB/BKO/RKO/RCL/SEC/HWL/WL)
-TEMPLATE_PRIVACY = 'plein/privacy.dtl'
+TEMPLATE_PLEIN_SPORTER = 'plein/plein-sporter.dtl'       # sporter (ROL_SPORTER)
+TEMPLATE_PLEIN_BEZOEKER = 'plein/plein-bezoeker.dtl'     # niet ingelogd
+TEMPLATE_PLEIN_BEHEERDER = 'plein/plein-beheerder.dtl'   # beheerder (ROL_BB/BKO/RKO/RCL/SEC/HWL/WL)
 TEMPLATE_NIET_ONDERSTEUND = 'plein/niet-ondersteund.dtl'
+TEMPLATE_PRIVACY = 'plein/privacy.dtl'
 
 ROL2HANDLEIDING_PAGINA = {
     Rollen.ROL_BB: settings.HANDLEIDING_BB,
@@ -90,6 +90,7 @@ class PleinView(View):
 
             if rol_nu == Rollen.ROL_SPORTER:
                 template = TEMPLATE_PLEIN_SPORTER
+                context['url_profiel'] = reverse('Sporter:profiel')
 
             elif rol_nu == Rollen.ROL_NONE or rol_nu is None:
                 # gebruik de bezoeker pagina
@@ -128,6 +129,7 @@ class PleinView(View):
 
         context['naam_site'] = settings.NAAM_SITE
         context['email_support'] = settings.EMAIL_SUPPORT
+        context['url_email_support'] = 'mailto:' + settings.EMAIL_SUPPORT
 
         menu_dynamics(self.request, context)
         return render(request, template, context)
@@ -144,7 +146,13 @@ class PrivacyView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
         context['url_privacyverklaring'] = settings.PRIVACYVERKLARING_URL
-        context['email_bondsbureau'] = settings.EMAIL_BONDSBUREAU
+        context['email_bb'] = settings.EMAIL_BONDSBUREAU
+        context['url_email_bb'] = 'mailto:' + settings.EMAIL_BONDSBUREAU
+
+        context['kruimels'] = (
+            (None, 'Privacy'),
+        )
+
         menu_dynamics(self.request, context)
         return context
 

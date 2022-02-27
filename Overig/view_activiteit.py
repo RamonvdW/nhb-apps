@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -49,6 +49,10 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
 
         return False
 
+    @staticmethod
+    def tel_actieve_gebruikers():
+        return AccountSessions.objects.distinct('account').count()
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -72,6 +76,8 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         context['deze_maand'] = deze_maand
 
         context['totaal'] = Account.objects.count()
+
+        context['aantal_actieve_gebruikers'] = self.tel_actieve_gebruikers()
 
         context['recente_activiteit'] = (AccountEmail
                                          .objects
@@ -252,25 +258,26 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         # for
 
         # toon sessies
-        # accses = (AccountSessions
-        #           .objects
-        #           .select_related('account', 'session')
-        #           .order_by('account', 'session__expire_date'))
-        # for obj in accses:
-        #     # niet goed: onderstaande zorgt voor losse database hits voor elke sessie
-        #     session = SessionStore(session_key=obj.session.session_key)
-        #
-        #     try:
-        #         obj.mag_wisselen_str = session[SESSIONVAR_ROL_MAG_WISSELEN]
-        #     except KeyError:        # pragma: no cover
-        #         obj.mag_wisselen_str = '?'
-        #
-        #     try:
-        #         obj.laatste_rol_str = rol2url[session[SESSIONVAR_ROL_HUIDIGE]]
-        #     except KeyError:        # pragma: no cover
-        #         obj.laatste_rol_str = '?'
-        # # for
-        # context['accses'] = accses
+        if not context:     # aka "never without complains"
+            accses = (AccountSessions
+                      .objects
+                      .select_related('account', 'session')
+                      .order_by('account', 'session__expire_date'))
+            for obj in accses:
+                # niet goed: onderstaande zorgt voor losse database hits voor elke sessie
+                session = SessionStore(session_key=obj.session.session_key)
+
+                try:
+                    obj.mag_wisselen_str = session[SESSIONVAR_ROL_MAG_WISSELEN]
+                except KeyError:        # pragma: no cover
+                    obj.mag_wisselen_str = '?'
+
+                try:
+                    obj.laatste_rol_str = rol2url[session[SESSIONVAR_ROL_HUIDIGE]]
+                except KeyError:        # pragma: no cover
+                    obj.laatste_rol_str = '?'
+            # for
+            context['accses'] = accses
 
         age_group_counts = dict()       # [groep] = aantal
         for group in (1, 10, 20, 30, 40, 50, 60, 70, 80):
@@ -296,6 +303,10 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
             age_groups = [((age * 10), (age * 10)+9, count, int((count * 100) / total)) for age, count in age_group_counts.items()]
             age_groups.sort()
             context['age_groups'] = age_groups
+
+        context['kruimels'] = (
+            (None, 'Account activiteit'),
+        )
 
         menu_dynamics(self.request, context)
         return context

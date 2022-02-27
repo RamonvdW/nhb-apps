@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -95,8 +95,12 @@ class ToonBondspasView(UserPassesTestMixin, View):
         context['url_status_check'] = reverse('Bondspas:dynamic-check-status')
         context['url_terug'] = reverse('Sporter:profiel')
 
+        context['kruimels'] = (
+            (None, 'Bondspas'),
+        )
+
         # toon een pagina die wacht op de download
-        menu_dynamics(request, context, actief='sporter-profiel')
+        menu_dynamics(request, context)
         return render(request, self.template_name, context)
 
 

@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
 from django.core import management
-from .models import MailQueue, mailer_queue_email
+from .models import MailQueue, mailer_queue_email, mailer_notify_internal_error, mailer_opschonen
 from TestHelpers.e2ehelpers import E2EHelpers
+import datetime
 import io
 
-
-# TODO: test van status_mail_queue toevoegen
 
 TEST_EMAIL_ADRES = 'schutter@nhb.test'
 
@@ -27,6 +26,14 @@ class TestMailerCliBase(E2EHelpers, TestCase):
             management.call_command('stuur_mails', '1', '--quick', stderr=f1, stdout=f2)
         self.assertTrue('[INFO] Aantal oude mails geprobeerd te versturen: 0' in f2.getvalue())
         self.assertTrue('[INFO] Aantal nieuwe mails geprobeerd te versturen: 0' in f2.getvalue())
+        self.assertEqual(f1.getvalue(), '')
+
+    def test_status_mail_queue(self):
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20):
+            management.call_command('status_mail_queue', stderr=f1, stdout=f2)
+        self.assertTrue('MQ: 0' in f2.getvalue())
         self.assertEqual(f1.getvalue(), '')
 
     def test_deliver_faal(self):
@@ -120,6 +127,33 @@ class TestMailerCliBase(E2EHelpers, TestCase):
         obj = MailQueue.objects.all()[0]
         self.assertTrue(obj.is_verstuurd)
         self.assertTrue('(verstuurd)' in str(obj))
+
+    def test_notify_internal_error(self):
+        self.assertEqual(MailQueue.objects.count(), 0)
+
+        tb = "hoi\ndaar"
+        mailer_notify_internal_error(tb)
+        self.assertEqual(MailQueue.objects.count(), 1)
+
+        # zelfde melding wordt niet nog een keer verstuurd
+        mailer_notify_internal_error(tb)
+        self.assertEqual(MailQueue.objects.count(), 1)
+
+    def test_opschonen(self):
+
+        # maak een mail aan die lang geleden verstuurd is
+        mailer_queue_email('ergens@nergens.niet', 'Test', 'Test', enforce_whitelist=False)
+        mail = MailQueue.objects.all()[0]
+        mail.toegevoegd_op -= datetime.timedelta(days=92)
+        mail.save()
+
+        f1 = io.StringIO()
+        mailer_opschonen(f1)
+        self.assertTrue('[INFO] Verwijder 1 oude emails' in f1.getvalue())
+
+        f1 = io.StringIO()
+        mailer_opschonen(f1)
+        self.assertFalse('Verwijder' in f1.getvalue())
 
 
 class TestMailerCliBadBase(E2EHelpers, TestCase):

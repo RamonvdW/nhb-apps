@@ -1,54 +1,61 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block title %}Weekplanning regiocompetitie{% endblock %}
+{% block title %}Weekplanning{% endblock %}
 
 {% block pagina %}
 
-    <h4>Weekplanning regiocompetitie</h4>
-
-    <div class="row">
-
-        <!-- toon gegevens van de regio en competitie in een blauwe box -->
-        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-            <div class="white-text nhb-blauw z-depth-2">
-
-                <div class="row small-row">
-                    <div class="col s3">Competitie:</div>
-                    <div class="col s8">{{ ronde.deelcompetitie.competitie.beschrijving }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3">Rayon:</div>
-                    <div class="col s8">{{ ronde.deelcompetitie.nhb_regio.rayon }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3">Regio:</div>
-                    <div class="col s8">{{ ronde.deelcompetitie.nhb_regio }}</div>
-                </div>
-
-                {% if ronde.cluster %}
-                    <div class="row small-row">
-                        <div class="col s3">Cluster:</div>
-                        <div class="col s8">{{ ronde.cluster }}</div>
-                    </div>
-                {% endif %}
-
-            </div>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Weekplanning</h3>
         </div>
     </div>
 
-    <p>&nbsp;</p>
-    <p>
-        <a class="btn-nhb-blauw" href="{{ terug_url }}">
-            <i class="material-icons-round left">arrow_upward</i>Planning {% if ronde.cluster %}cluster{% else %}regio{% endif %}</a>
-    </p>
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Competitie</th>
+                    <td>{{ ronde.deelcompetitie.competitie.beschrijving }}</td>
+                </tr>
+                <tr>
+                    <th>Rayon</th>
+                    <td>{{ ronde.deelcompetitie.nhb_regio.rayon }}</td>
+                </tr>
+                <tr>
+                    <th>Regio</th>
+                    <td>{{ ronde.deelcompetitie.nhb_regio }}</td>
+                </tr>
+                {% if ronde.cluster %}
+                    <tr>
+                        <th>Cluster</th>
+                        <td>{{ ronde.cluster }}</td>
+                    </tr>
+                {% endif %}
+                <tr>
+                    <th>Week</th>
+                    <td>
+                        {% if week_actief %}
+                            <span>{{ week_actief.week_nr }} ({{ week_actief.maandag|date:"l j F Y" }})</span>
+                        {% else %}
+                            <i class="red-text">Ongeldige week</i>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Beschrijving</th>
+                    <td>{% if ronde.beschrijving %}{{ ronde.beschrijving }}{% else %}<i>Niet ingevuld</i>{% endif %}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
 
     <script type="application/javascript">
         function gewijzigd() {
@@ -66,178 +73,270 @@
         }
     </script>
 
+    {% if not readonly %}
 
-    <p>&nbsp;</p>
-    <h5>Instellingen competitieweek</h5>
+        {% if ronde.beschrijving == '' %}
 
-    <form method="post" action="{{ ronde_opslaan_url }}">
-        {% csrf_token %}
-
-        <table class="white">
-            <thead>
-                <tr>
-                    <th>Aspect</th>
-                    <th>Keuze</th>
-                </tr>
-            </thead>
-
-            <tr>
-                <td>Week nummer</td>
-                <td>
-                    {% if readonly %}
-                        {% for opt in opt_week_nrs %}
-                            {% if opt.actief %}
-                                <span>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</span>
-                            {% endif %}
-                        {% endfor %}
-                    {% else %}
-                        <select name="ronde_week_nr" onchange="gewijzigd()">
-                            {% for opt in opt_week_nrs %}
-                                <option value="{{ opt.choice_name }}"{% if opt.actief %} selected{% endif %}>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</option>
-                            {% endfor %}
-                        </select>
-                    {% endif %}
-                </td>
-            </tr>
-
-            <tr>
-                <td>Beschrijving</td>
-                {% if readonly %}
-                    <td>{{ ronde.beschrijving }}</td>
-                {% else %}
-                    <td class="input-field" oninput="gewijzigd()">
-                        <input type="text" name="ronde_naam" placeholder="Hier invoeren" value="{{ ronde.beschrijving }}">
-                    </td>
-                {% endif %}
-            </tr>
-        </table>
-
-        {% if readonly %}
-            <p>De RCL kan deze instellingen wijzigen</p>
-        {% else %}
-            <p>
-                <button id="opslaan_knop" class="btn-nhb-rood disabled" type="submit">
-                    <i class="material-icons-round left">check</i>Instellingen opslaan</button>
-            </p>
-        {% endif %}
-    </form>
-
-
-    <p>&nbsp;</p>
-    <h5>Wedstrijden</h5>
-
-    <table class="white">
-
-        <thead>
-            <tr>
-                <th>Wanneer</th>
-                <th>Organisatie</th>
-                {% if heeft_wkl %}
-                    <th>Wedstrijdklassen</th>
-                    <th>Bezetting</th>
-                {% endif %}
-                <th><!-- kolom voor wijzig knoppen --></th>
-            </tr>
-        </thead>
-
-        {% for wedstrijd in wedstrijden %}
-            <tr>
-                <td>{{ wedstrijd.datum_wanneer|date:"l j F Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }}</td>
-
-                <!-- Organisatie -->
-                <td>
-                    {% if wedstrijd.vereniging %}
-                        <span>{{ wedstrijd.vereniging }}</span>
-                    {% else %}
-                        <i class="red-text">Vereniging onbekend</i>
-                    {% endif %}
-                    <br>
-                    {% if wedstrijd.locatie %}
-                        <span>Locatie: {{ wedstrijd.locatie.plaats }}</span>
-                    {% else %}
-                        <i class="red-text">Locatie onbekend</i>
-                    {% endif %}
-                </td>
-
-                {% if heeft_wkl %}
-                    <td>
-                        {% for wkl in wedstrijd.wkl_lijst %}    <!-- team + indiv -->
-                            <span>{{ wkl.beschrijving }}</span><br>
-                        {% endfor %}
-                    </td>
-
-                    <td>Nodig: {{ wedstrijd.aantal_sporters }}<br>Limiet: {{ wedstrijd.max_sporters }}</td>
-                {% endif %}
-
-                <!-- knop om wedstrijd te wijzigen -->
-                <td>
-                    {% if wedstrijd.url_wijzig %}
-                        <a class="btn-nhb-blauw btn-small" href="{{ wedstrijd.url_wijzig }}">
-                            <i class="material-icons-round left">arrow_forward</i>Aanpassen</a>
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-
-        <!-- knop om een regel toe te voegen -->
-        {% if url_nieuwe_wedstrijd %}
-            <tr>
-                <td colspan="{% if heeft_wkl %}5{% else %}3{% endif %}">
-                    <form action="{{ url_nieuwe_wedstrijd }}" method="post">
-                        {% csrf_token %}
-                        <button class="btn-nhb-blauw vertrek_knop" type="submit">
-                            <i class="material-icons-round left">add</i>Wedstrijd toevoegen</button>
-                    </form>
-                </td>
-            </tr>
-        {% endif %}
-
-        {% if heeft_wkl %}
-            {% if wkl_niet_gebruikt %}
-                <tr>
-                    <td colspan="2"><i>De volgende klassen zijn nog niet gekoppeld aan een wedstrijd:</i></td>
-                    <td colspan="3">
-                        {% for wkl_beschrijving in wkl_niet_gebruikt %}
-                            <span>{{ wkl_beschrijving }}</span><br>
-                        {% endfor %}
-                    </td>
-                </tr>
-            {% endif %}
-        {% endif %}
-
-    </table>
-
-
-    {% if url_verwijderen %}
-        <p>&nbsp;</p>
-        <ul class="collapsible">
-            <li>
-                <div class="collapsible-header white">
-                    <span>Klik eerst hier als je de ronde wilt verwijderen</span>
+            <!-- witruimte -->
+            <div class="row center">
+                <div class="col s12">
+                    <h4>Wijzig</h4>
+                    <p>Week nummer en beschrijving aanpassen</p>
                 </div>
-                {% if heeft_wedstrijden %}
-                    <div class="collapsible-body white">
-                        <p>Verwijder eerst de wedstrijden</p>
+            </div>
+
+            <!-- blauwe balk met dialoog venster -->
+            <div class="row-nhb-blauw">
+                <div class="col s12 m10 offset-m1 l6 offset-l3">
+
+                    <!-- dialoog venster -->
+                    <div class="white left-align z-depth-3">
+                        <div style="padding:30px">
+
+                            <form method="post" action="{{ ronde_opslaan_url }}">
+                                {% csrf_token %}
+
+                                {% if readonly %}
+                                    {% for opt in opt_week_nrs %}
+                                        {% if opt.actief %}
+                                            <p>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</p>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <select name="ronde_week_nr" onchange="gewijzigd()">
+                                        {% for opt in opt_week_nrs %}
+                                            <option value="{{ opt.choice_name }}"{% if opt.actief %} selected{% endif %}>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</option>
+                                        {% endfor %}
+                                    </select>
+                                {% endif %}
+
+                                {% if readonly %}
+                                    <p>{{ ronde.beschrijving }}</p>
+                                {% else %}
+                                <td class="input-field">
+                                        <input type="text" name="ronde_naam" placeholder="Beschrijving" value="{{ ronde.beschrijving }}" oninput="gewijzigd()">
+                                    </td>
+                                {% endif %}
+
+                                {% if not readonly %}
+                                    <p class="center">
+                                        <button id="opslaan_knop" class="btn-nhb-rood disabled" type="submit">
+                                            <i class="material-icons-round left">check</i>Instellingen opslaan</button>
+                                    </p>
+                                {% endif %}
+
+                            </form>
+
+                        </div>
                     </div>
-                {% else %}
-                    <div class="collapsible-body white">
-                        <form method="post" action="{{ url_verwijderen }}">
-                            {% csrf_token %}
-                            <input type="hidden" name="verwijder_ronde" value="1">
-                            <p>Heb je deze ronde niet meer nodig?</p>
-                            <button class="btn-nhb-rood" type="submit">
-                                <i class="material-icons-round left">delete</i>Verwijder deze ronde</button>
-                        </form>
-                    </div>
-                {% endif %}
-            </li>
-        </ul>
+
+                </div>
+            </div>
+
+        {% endif %}
+
     {% endif %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-planning-regio-ronde" %}
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Wedstrijden</h4>
+        </div>
+    </div>
 
-{% endblock %}
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
 
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
+                <thead>
+                    <tr>
+                        <th>Wanneer</th>
+                        <th>Organisatie</th>
+                        {% if heeft_wkl %}
+                            <th>Wedstrijdklassen</th>
+                            <th>Bezetting</th>
+                        {% endif %}
+                        <th class="center"><!-- kolom voor wijzig knoppen --></th>
+                    </tr>
+                </thead>
+
+                {% for wedstrijd in wedstrijden %}
+                    <tr>
+                        <td>{{ wedstrijd.datum_wanneer|date:"l j F Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }}</td>
+
+                        <!-- Organisatie -->
+                        <td>
+                            {% if wedstrijd.vereniging %}
+                                <span>{{ wedstrijd.vereniging }}</span>
+                            {% else %}
+                                <i class="red-text">Vereniging onbekend</i>
+                            {% endif %}
+                            <br>
+                            {% if wedstrijd.locatie %}
+                                <span>Locatie: {{ wedstrijd.locatie.plaats }}</span>
+                            {% else %}
+                                <i class="red-text">Locatie onbekend</i>
+                            {% endif %}
+                        </td>
+
+                        {% if heeft_wkl %}
+                            <td>
+                                {% for wkl in wedstrijd.wkl_lijst %}    <!-- team + indiv -->
+                                    <span>{{ wkl.beschrijving }}</span><br>
+                                {% endfor %}
+                            </td>
+
+                            <td>Nodig: {{ wedstrijd.aantal_sporters }}<br>Limiet: {{ wedstrijd.max_sporters }}</td>
+                        {% endif %}
+
+                        <!-- knop om wedstrijd te wijzigen -->
+                        <td class="center">
+                            {% if wedstrijd.url_wijzig %}
+                                <a class="btn-nhb-rood" href="{{ wedstrijd.url_wijzig }}">
+                                    <i class="material-icons-round">edit</i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="{% if heeft_wkl %}5{% else %}3{% endif %}" class="center">
+                            <i>Nog geen wedstrijden</i>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                <!-- knop om een regel toe te voegen -->
+                {% if url_nieuwe_wedstrijd %}
+                    <tr>
+                        <td colspan="{% if heeft_wkl %}5{% else %}3{% endif %}" class="center">
+                            <form action="{{ url_nieuwe_wedstrijd }}" method="post">
+                                {% csrf_token %}
+                                <button class="btn-nhb-rood vertrek_knop" type="submit">
+                                    <i class="material-icons-round">add</i></button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endif %}
+
+                {% if heeft_wkl %}
+                    {% if wkl_niet_gebruikt %}
+                        <tr>
+                            <td colspan="2"><i>De volgende klassen zijn nog niet gekoppeld aan een wedstrijd:</i></td>
+                            <td colspan="3">
+                                {% for wkl_beschrijving in wkl_niet_gebruikt %}
+                                    <span>{{ wkl_beschrijving }}</span><br>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endif %}
+
+            </table>
+        </div>
+    </div>
+
+    {% if not readonly %}
+
+        {% if ronde.beschrijving != '' %}
+
+            <!-- witruimte -->
+            <div class="row center">
+                <div class="col s12">
+                    <h4>Wijzig</h4>
+                    <p>Week nummer en beschrijving aanpassen</p>
+                </div>
+            </div>
+
+            <!-- blauwe balk met dialoog venster -->
+            <div class="row-nhb-blauw">
+                <div class="col s12 m10 offset-m1 l6 offset-l3">
+
+                    <!-- dialoog venster -->
+                    <div class="white left-align z-depth-3">
+                        <div style="padding:30px">
+
+                            <form method="post" action="{{ ronde_opslaan_url }}">
+                                {% csrf_token %}
+
+                                {% if readonly %}
+                                    {% for opt in opt_week_nrs %}
+                                        {% if opt.actief %}
+                                            <p>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</p>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <select name="ronde_week_nr" onchange="gewijzigd()">
+                                        {% for opt in opt_week_nrs %}
+                                            <option value="{{ opt.choice_name }}"{% if opt.actief %} selected{% endif %}>Week {{ opt.week_nr }} ({{ opt.maandag|date:"l j F Y" }})</option>
+                                        {% endfor %}
+                                    </select>
+                                {% endif %}
+
+                                {% if readonly %}
+                                    <p>{{ ronde.beschrijving }}</p>
+                                {% else %}
+                                <td class="input-field">
+                                        <input type="text" name="ronde_naam" placeholder="Beschrijving" value="{{ ronde.beschrijving }}" oninput="gewijzigd()">
+                                    </td>
+                                {% endif %}
+
+                                {% if not readonly %}
+                                    <p class="center">
+                                        <button id="opslaan_knop" class="btn-nhb-rood disabled" type="submit">
+                                            <i class="material-icons-round left">check</i>Instellingen opslaan</button>
+                                    </p>
+                                {% endif %}
+
+                            </form>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        {% endif %}
+
+        {% if url_verwijderen %}
+            <!-- witruimte -->
+            <div class="row center">
+                <div class="col s12">
+                    <h4>Verwijder</h4>
+
+                    {% if heeft_wedstrijden %}
+                        <p>Blok kan nu niet verwijderd worden<br>Verwijder eerst de wedstrijden</p>
+                    {% else %}
+                        <a class="btn-nhb-rood modal-trigger vertrek_knop" href="#bevestig_verwijder_blok">Verwijder dit blok</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="modal" id="bevestig_verwijder_blok">
+                <div class="modal-content center">
+                    <h5>Verwijder blok?</h5>
+                    <p>Wil je dit blok echt verwijderen uit de planning?</p>
+
+                    <form method="post" action="{{ url_verwijderen }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="verwijder_ronde" value="1">
+
+                        <div class="modal-footer" style="text-align:center; display:block">
+                            <div style="display:inline-block; width:50%">
+                                <button class="btn-nhb-rood" type="submit">Ja</button>
+                            </div>
+                            <div style="display:inline-block; width:50%">
+                                <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        {% endif %}     <!-- if url_verwijderen -->
+
+    {% endif %}         <!-- not readonly -->
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-planning-regio-ronde" %}
+
 {% endblock %}

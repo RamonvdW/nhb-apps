@@ -51,6 +51,31 @@ DAGDELEN = [('GN', "Geen voorkeur"),
             ('ZOa', "Zondagavond"),
             ('WE', "Weekend")]
 
+DAGDEEL2LABEL = {
+    'GN': ("Geen", "Geen voorkeur"),
+    'AV': ("Avond", "'s Avonds"),
+    'MA': ("M", "Maandag"),
+    'MAa': ("M-Av", "Maandagavond"),
+    'DI': ("Di", "Dinsdag"),
+    'DIa': ("Di-Av", "Dinsdagavond"),
+    'WO': ("W", "Woensdag"),
+    'WOa': ("W-Av", "Woensdagavond"),
+    'DO': ("Do", "Donderdag"),
+    'DOa': ("Do-Av", "Donderdagavond"),
+    'VR': ("V", "Vrijdag"),
+    'VRa': ("V-Av", "Vrijdagavond"),
+    'ZAT': ("Za", "Zaterdag"),
+    'ZAo': ("Za-Och", "Zaterdagochtend"),
+    'ZAm': ("Zo-Mi", "Zaterdagmiddag"),
+    'ZAa': ("Za-Av", "Zaterdagavond"),
+    'ZON': ("Zo", "Zondag"),
+    'ZOo': ("Zo-Och", "Zondagochtend"),
+    'ZOm': ("Zo-Mi", "Zondagmiddag"),
+    'ZOa': ("Zo-Av", "Zondagavond"),
+    'WE': ("Weekend", "Weekend")
+}
+
+
 # Let op: DAGDEEL_AFKORTINGEN moet in dezelfde volgorde zijn als DAGDELEN
 DAGDEEL_AFKORTINGEN = tuple([afk for afk, _ in DAGDELEN])
 
@@ -362,9 +387,9 @@ class CompetitieKlasse(models.Model):
     def __str__(self):
         msg = "?"
         if self.indiv:
-            msg = self.indiv.beschrijving
+            msg = self.indiv.beschrijving + ' [' + self.indiv.boogtype.afkorting + ']'
         if self.team:
-            msg = self.team.beschrijving
+            msg = self.team.beschrijving + ' [' + self.team.team_type.afkorting + ']'
         msg += " (%.3f)" % self.min_ag
 
         if self.is_voor_teams_rk_bk:
@@ -378,6 +403,61 @@ class CompetitieKlasse(models.Model):
         verbose_name_plural = "Competitie klassen"
 
     objects = models.Manager()      # for the editor only
+
+
+def get_competitie_indiv_leeftijdsklassen(comp):
+    lijst = list()
+    pks = list()
+    for klasse in (CompetitieKlasse
+                   .objects
+                   .filter(competitie=comp)
+                   .exclude(indiv=None)
+                   .prefetch_related('indiv__leeftijdsklassen')):
+        for lkl in klasse.indiv.leeftijdsklassen.all():
+            if lkl.pk not in pks:
+                pks.append(lkl.pk)
+                tup = (lkl.volgorde, lkl.pk, lkl)
+                lijst.append(tup)
+        # for
+    # for
+
+    lijst.sort()        # op volgorde
+    return [lkl for _, _, lkl in lijst]
+
+
+def get_competitie_boog_typen(comp):
+    """ Geef een lijst van BoogType records terug die gebruikt worden in deze competitie,
+        gesorteerd op 'volgorde'.
+    """
+    boogtypen = [(klasse.indiv.boogtype.volgorde,
+                  klasse.indiv.boogtype) for klasse in (CompetitieKlasse
+                                                        .objects
+                                                        .filter(competitie=comp)
+                                                        .exclude(indiv=None)
+                                                        .select_related('indiv__boogtype')
+                                                        .distinct('indiv__boogtype'))]
+
+    # sorteer op volgorde, want order_by werkt niet (moet gelijk zijn aan distinct)
+    boogtypen.sort()
+    return [boogtype for _, boogtype in boogtypen]
+
+
+def get_competitie_team_typen(comp):
+    """ Geef een lijst van TeamType records terug die gebruikt worden in deze competitie,
+        gesorteerd op 'volgorde'.
+    """
+
+    teamtypen = [(klasse.team.team_type.volgorde,
+                  klasse.team.team_type) for klasse in (CompetitieKlasse
+                                                        .objects
+                                                        .filter(competitie=comp)
+                                                        .exclude(team=None)
+                                                        .select_related('team__team_type')
+                                                        .distinct('team__team_type'))]
+
+    # sorteer op volgorde, want order_by werkt niet (moet gelijk zijn aan distinct)
+    teamtypen.sort()
+    return [teamtype for _, teamtype in teamtypen]
 
 
 class DeelCompetitie(models.Model):
@@ -664,6 +744,9 @@ class RegiocompetitieTeam(models.Model):
 
     def __str__(self):
         return self.maak_team_naam()
+
+    class Meta:
+        ordering = ['vereniging__ver_nr', 'volg_nr']
 
 
 class RegiocompetitieTeamPoule(models.Model):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -54,7 +54,8 @@ def make_qr_code_image(text):
     """
     qr = qrcode.QRCode(
                 version=QRCODE_VERSION,
-                image_factory=SvgEmbeddedInHtmlImage)
+                image_factory=SvgEmbeddedInHtmlImage,
+                box_size=12, border=1)      # controls SVG image size
     qr.add_data(force_text(text))
     return qr.make_image()
 

@@ -10,44 +10,64 @@
 
 {% block pagina %}
 
-    <h4>AG controle</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">AG controle</h3>
+        </div>
+    </div>
 
-    <p>Op deze pagina kan je als RCL een controle uitvoeren van de aanvangsgemiddelden voor de teamcompetitie.</p>
-    <p>De aanvangsgemiddelden van de 3 beste sporters in een team bepalen de team sterkte en de klasse waarin het team uit mag komen.</p>
-    <p>&nbsp;</p>
-    <p>Sporters met voldoende geschoten competitiewedstrijden in het voorgaande seizoen hebben een automatisch aanvangsgemiddelde.</p>
-    <p>Voor alle andere sporters die mee willen doen in een team, moet de HWL een aanvangsgemiddelden invoeren.</p>
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+                <p>Op deze pagina kan je als RCL een controle uitvoeren van de aanvangsgemiddelden voor de teamcompetitie.</p>
+                <p>De aanvangsgemiddelden van de 3 beste sporters in een team bepalen de team sterkte en de klasse waarin het team uit mag komen.</p>
+                <p>&nbsp;</p>
+                <p>Sporters met voldoende geschoten competitiewedstrijden in het voorgaande seizoen hebben een automatisch aanvangsgemiddelde.</p>
+                <p>Voor alle andere sporters die mee willen doen in een team, moet de HWL een aanvangsgemiddelden invoeren.</p>
+            </div>
+        </div>
+    </div>
 
-    <table class="white">
-        <thead>
-            <tr>
-                <th>Vereniging</th>
-                <th>Sporter</th>
-                <th>Boog type</th>
-                <th colspan="2">Aanvangs<wbr>gemiddelde</th>
-            </tr>
-        </thead>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Controle</h4>
+        </div>
+    </div>
 
-        {% for obj in handmatige_ag %}
-            <tr>
-                <td>{{ obj.ver_str }}</td>
-                <td>{{ obj.naam_str }}</td>
-                <td>{{ obj.boog_str }}</td>
-                <td>{{ obj.ag_str }}</td>
-                <td><a class="btn-nhb-blauw" href="{{ obj.url_details }}">Details</a></td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="4"><i>Er zijn nog geen handmatige aanvangsgemiddelden ingevoerd</i></td>
-                <td></td>
-            </tr>
-        {% endfor %}
-    </table>
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Vereniging</th>
+                        <th>Sporter</th>
+                        <th>Boog type</th>
+                        <th colspan="2">Aanvangs<wbr>gemiddelde</th>
+                    </tr>
+                </thead>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-rcl-ag-controle" %}
+                {% for obj in handmatige_ag %}
+                    <tr>
+                        <td>{{ obj.ver_str }}</td>
+                        <td>{{ obj.naam_str }}</td>
+                        <td>{{ obj.boog_str }}</td>
+                        <td>{{ obj.ag_str }}</td>
+                        <td><a class="btn-nhb-rood" href="{{ obj.url_details }}">Details</a></td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4"><i>Er zijn nog geen handmatige aanvangsgemiddelden ingevoerd</i></td>
+                        <td></td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
 
-{% endblock %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compregio-rcl-ag-controle" %}
 
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}

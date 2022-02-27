@@ -10,8 +10,8 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import Competitie, CompetitieKlasse, KampioenschapTeam
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
+from Plein.menu import menu_dynamics
 
 
 TEMPLATE_COMPRAYON_KLASSENGRENZEN_TEAMS_VASTSTELLEN = 'comprayon/bko-klassengrenzen-vaststellen-rk-bk-teams.dtl'
@@ -82,7 +82,11 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
                 niet_compleet_team = True
             else:
                 team_type_pk = rk_team.team_type.pk
-                teamtype2sterktes[team_type_pk].append(rk_team.aanvangsgemiddelde)
+                try:
+                    teamtype2sterktes[team_type_pk].append(rk_team.aanvangsgemiddelde)
+                except KeyError:
+                    # abnormal: unexpected team type used in RK team
+                    pass
         # for
 
         return teamtypes, teamtype2wkl, teamtype2sterktes, niet_compleet_team
@@ -153,11 +157,11 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         context['comp'] = comp
         comp.bepaal_fase()
 
-        if comp.fase != 'J':
-            raise Http404('Competitie niet in de juist fase')
-
         if comp.klassengrenzen_vastgesteld_rk_bk:
             raise Http404('De klassengrenzen zijn al vastgesteld')
+
+        if comp.fase != 'J':
+            raise Http404('Competitie niet in de juiste fase')
 
         context['grenzen'], context['niet_compleet_team'] = self._bepaal_klassengrenzen(comp)
 
@@ -168,7 +172,13 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         context['url_vaststellen'] = reverse('CompRayon:klassengrenzen-vaststellen-rk-bk-teams',
                                              kwargs={'comp_pk': comp.pk})
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Doorzetten')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -186,11 +196,11 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
 
         comp.bepaal_fase()
 
-        if comp.fase != 'J':
-            raise Http404('Competitie niet in de juist fase')
-
         if comp.klassengrenzen_vastgesteld_rk_bk:
             raise Http404('De klassengrenzen zijn al vastgesteld')
+
+        if comp.fase != 'J':
+            raise Http404('Competitie niet in de juiste fase')
 
         # vul de klassengrenzen in voor RK/BK  teams
 
@@ -237,17 +247,20 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
                      .filter(deelcompetitie__competitie=comp)
                      .annotate(sporter_count=Count('gekoppelde_schutters'))):
 
+            team.klasse = None
             if 3 <= team.sporter_count <= 4:
                 # dit is een volledig team
-                klassen = teamtype_pk2klassen[team.team_type.pk]
-
-                for klasse in klassen:
-                    if team.aanvangsgemiddelde >= klasse.min_ag:
-                        team.klasse = klasse
-                        break       # from the for
-                # for
-            else:
-                team.klasse = None
+                try:
+                    klassen = teamtype_pk2klassen[team.team_type.pk]
+                except KeyError:
+                    # onverwacht team type (ignore, avoid crash)
+                    pass
+                else:
+                    for klasse in klassen:
+                        if team.aanvangsgemiddelde >= klasse.min_ag:
+                            team.klasse = klasse
+                            break       # from the for
+                    # for
 
             team.save(update_fields=['klasse'])
         # for

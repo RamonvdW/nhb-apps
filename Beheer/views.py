@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -23,6 +23,8 @@ from collections import OrderedDict
 class BeheerAdminSite(AdminSite):
 
     """ Replace all the functions that handle the urls for login/logout/password-change """
+
+    site_header = 'Admin site'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,7 +14,7 @@ from Functie.models import Functie
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from Sporter.models import Secretaris
-from Wedstrijden.models import WedstrijdLocatie, BAANTYPE2STR
+from Wedstrijden.models import WedstrijdLocatie, BAANTYPE2STR, BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
 from Logboek.models import schrijf_in_logboek
 from .forms import AccommodatieDetailsForm
 
@@ -55,11 +55,12 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         buiten_locatie = None
         externe_locaties = list()
         for loc in nhbver.wedstrijdlocatie_set.exclude(zichtbaar=False).all():
-            if loc.baan_type == 'E':
+            if loc.baan_type == BAAN_TYPE_EXTERN:
                 externe_locaties.append(loc)
-            elif loc.baan_type == 'B':
+            elif loc.baan_type == BAAN_TYPE_BUITEN:
                 buiten_locatie = loc
             else:
+                # BAAN_TYPE_BINNEN_VOLLEDIG_OVERDEKT, BAAN_TYPE_BINNEN_BUITEN of BAAN_TYPE_ONBEKEND
                 binnen_locatie = loc
         # for
 
@@ -158,13 +159,18 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
 
         # terug en opslaan knoppen voor in de template
         if 'is_ver' in kwargs:      # wordt gezet door VerenigingAccommodatieDetailsView
-            context['terug_url'] = reverse('Vereniging:overzicht')
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (None, 'Accommodatie')
+            )
+
             opslaan_urlconf = 'Vereniging:vereniging-accommodatie-details'
-            menu_actief = 'vereniging'
         else:
-            context['terug_url'] = reverse('Vereniging:lijst-verenigingen')
+            context['kruimels'] = (
+                (reverse('Vereniging:lijst-verenigingen'), 'Verenigingen'),
+                (None, 'Accommodatie')
+            )
             opslaan_urlconf = 'Vereniging:accommodatie-details'
-            menu_actief = 'hetplein'
 
         if binnen_locatie or buiten_locatie:
             context['opslaan_url'] = reverse(opslaan_urlconf,
@@ -175,31 +181,12 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
         if self._mag_wijzigen(nhbver, rol_nu, functie_nu):
             context['readonly'] = False
 
-            # geef ook meteen de mogelijkheid om leden te koppelen aan rollen
-            if rol_nu == Rollen.ROL_SEC:
-                context['url_koppel_sec'] = reverse('Functie:wijzig-beheerders',
-                                                    kwargs={'functie_pk': functie_sec.pk})
-            context['url_koppel_hwl'] = reverse('Functie:wijzig-beheerders',
-                                                kwargs={'functie_pk': functie_hwl.pk})
-            context['url_koppel_wl'] = reverse('Functie:wijzig-beheerders',
-                                               kwargs={'functie_pk': functie_wl.pk})
-
-            # geef ook meteen de mogelijkheid om de e-mailadressen van een functie aan te passen
-            context['url_email_hwl'] = reverse('Functie:wijzig-email',
-                                               kwargs={'functie_pk': functie_hwl.pk})
-            context['url_email_wl'] = reverse('Functie:wijzig-email',
-                                              kwargs={'functie_pk': functie_wl.pk})
-
             if buiten_locatie:
                 context['url_verwijder_buitenbaan'] = context['opslaan_url']
         else:
             context['readonly'] = True
 
-            if binnen_locatie:      # pragma: no branch
-                if binnen_locatie.banen_18m + binnen_locatie.banen_25m > 0:
-                    context['readonly_show_max_dt'] = True
-
-        menu_dynamics(self.request, context, actief=menu_actief)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -231,7 +218,7 @@ class AccommodatieDetailsView(UserPassesTestMixin, TemplateView):
                     buiten_locatie.save()
             elif binnen_locatie:
                 buiten = WedstrijdLocatie(
-                                baan_type='B',
+                                baan_type=BAAN_TYPE_BUITEN,
                                 adres_uit_crm=False,
                                 adres=binnen_locatie.adres,
                                 plaats=binnen_locatie.plaats,

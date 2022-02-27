@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import auth
-from django.utils import timezone
 from django.conf import settings
 from django.test import TestCase, Client
 from django.db import connection
@@ -20,6 +19,7 @@ import datetime
 import tempfile
 import vnujar
 import pyotp
+import time
 
 
 # debug optie: toon waar in de code de queries vandaan komen
@@ -39,7 +39,7 @@ class MyQueryTracer(object):
         # print('params:', params)      # params for the %s ?
         # print('many:', many)          # true/false
 
-        time_start = timezone.now()
+        time_start = time.monotonic_ns()
         call['now'] = time_start
 
         call['stack'] = stack = list()
@@ -59,9 +59,9 @@ class MyQueryTracer(object):
             except KeyError:
                 self.stack_counts[msg] = 1
 
-        time_end = timezone.now()
-        time_delta = time_end - time_start
-        duration_us = (time_delta.seconds * 1000000) + time_delta.microseconds
+        time_end = time.monotonic_ns()
+        time_delta_ns = time_end - time_start
+        duration_us = int(time_delta_ns / 1000)
         call['duration_us'] = duration_us
         self.total_duration_us += duration_us
 
@@ -150,10 +150,11 @@ class E2EHelpers(TestCase):
         self.assert_is_redirect(resp, expected_redirect)
 
     def e2e_wisselnaarrol_bb(self):
-        self._wissel_naar_rol('BB', '/functie/wissel-van-rol/')
+        #self._wissel_naar_rol('BB', '/functie/wissel-van-rol/')
+        self._wissel_naar_rol('BB', '/plein/')
 
     def e2e_wisselnaarrol_sporter(self):
-        self._wissel_naar_rol('sporter', '/functie/wissel-van-rol/')
+        self._wissel_naar_rol('sporter', '/plein/')
 
     def e2e_wisselnaarrol_gebruiker(self):
         self._wissel_naar_rol('geen', '/functie/wissel-van-rol/')
@@ -204,29 +205,42 @@ class E2EHelpers(TestCase):
             soup = BeautifulSoup(content, features="html.parser")
             print(soup.prettify())
 
-    def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True):
+    def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True, skip_broodkruimels=True, data_urls=True):
         content = str(resp.content)
         content = self._remove_debug_toolbar(content)
         if skip_menu:
-            # menu is the last part of the body
-            pos = content.find('<div id="menu">')
-            content = content[:pos]     # if not found, takes [:-1], which is OK
+            # menu is the in the navbar at the top of the page
+            # it ends with the nav-content-scrollbar div
+            pos = content.find('<div class="nav-content-scrollbar">')
+            if pos >= 0:
+                content = content[pos:]
+        else:
+            # skip the headers
+            pos = content.find('<body')
+            if pos > 0:                             # pragma: no branch
+                content = content[pos:]             # strip head section
 
-        # skip the headers
-        pos = content.find('<body')
-        if pos > 0:                             # pragma: no branch
-            content = content[pos:]             # strip header
+        if skip_broodkruimels:
+            pos = content.find('class="broodkruimels-')
+            if pos >= 0:
+                content = content[pos:]
+                pos = content.find('</div>')
+                content = content[pos:]
 
         urls = list()
         while len(content):
             # find the start of a new url
             pos1 = content.find('href="')
             pos2 = content.find('action="')
-            if pos1 >= 0 and (pos2 == -1 or pos2 > pos1):
+            pos3 = content.find('data-url="')
+            if pos1 >= 0 and (pos2 == -1 or pos2 > pos1) and (pos3 == -1 or pos3 > pos1):
                 content = content[pos1+6:]       # strip all before href
-            elif pos2 >= 0 and (pos1 == -1 or pos1 > pos2):
+            elif pos2 >= 0 and (pos1 == -1 or pos1 > pos2) and (pos3 == -1 or pos3 > pos2):
                 content = content[pos2+8:]       # strip all before action
+            elif pos3 >= 0:
+                content = content[pos3+10:]      # strip all before data-url
             else:
+                # all interesting aspects handled
                 content = ""
 
             # find the end of the new url
@@ -235,7 +249,7 @@ class E2EHelpers(TestCase):
                 url = content[:pos]
                 content = content[pos:]
                 if url != "#":
-                    if not (skip_smileys and url.startswith('/overig/feedback/')):
+                    if not (skip_smileys and url.startswith('/feedback/')):
                         urls.append(url)
         # while
         return urls
@@ -274,6 +288,27 @@ class E2EHelpers(TestCase):
         # while
         return checked, unchecked
 
+    SAFE_LINKS = ('/plein/', '/sporter/', '/bondscompetities/', '/records/', '/account/login/', '/account/logout/')
+
+    def _test_link(self, link, template_name):
+        """ make sure the link works """
+        if link in self.SAFE_LINKS or link.startswith('/feedback/') or link.startswith('#'):
+            return
+
+        resp = self.client.head(link)
+        if resp.status_code != 200:
+            self.fail(msg='Link not usable (code %s) on page %s (%s)' % (resp.status_code, template_name, link))
+
+    def assert_broodkruimels(self, content, template_name):
+        # find the start
+        pos = content.find('class="broodkruimels-link" href="')
+        while pos > 0:
+            content = content[pos+33:]
+            link = content[:content.find('"')]
+            self._test_link(link, template_name)
+            pos = content.find('class="broodkruimels-link" href="')
+        # while
+
     def assert_link_quality(self, content, template_name):
         """ assert the quality of links
             - links to external sites must have target="_blank" and rel="noopener noreferrer"
@@ -291,17 +326,19 @@ class E2EHelpers(TestCase):
                 pos = content.find('</a>')
                 link = content[:pos+4]
                 content = content[pos+4:]
-                # filter out website-internal links
-                if link.find('href="/') < 0 and link.find('href="#') < 0:
-                    if link.find('href=""') >= 0 or link.find('href="mailto:"') >= 0:   # pragma: no cover
-                        self.fail(msg='Unexpected empty link %s on page %s' % (link, template_name))
-                    elif link.find('href="mailto:') < 0:
-                        # remainder must be links that leave the website
-                        # these must target a blank window
-                        if 'target="_blank"' not in link:            # pragma: no cover
-                            self.fail(msg='Missing target="_blank" in link %s on page %s' % (link, template_name))
-                        if 'rel="noopener noreferrer"' not in link:  # pragma: no cover
-                            self.fail(msg='Missing rel="noopener noreferrer" in link %s on page %s' % (link, template_name))
+                # check the link (skip if plain button with onclick handler)
+                if link.find('href="') >= 0:
+                    # filter out website-internal links
+                    if link.find('href="/') < 0 and link.find('href="#') < 0:
+                        if link.find('href=""') >= 0 or link.find('href="mailto:"') >= 0:   # pragma: no cover
+                            self.fail(msg='Unexpected empty link %s on page %s' % (link, template_name))
+                        elif link.find('href="mailto:') < 0 and link.find('javascript:history.go(-1)') < 0:
+                            # remainder must be links that leave the website
+                            # these must target a blank window
+                            if 'target="_blank"' not in link:            # pragma: no cover
+                                self.fail(msg='Missing target="_blank" in link %s on page %s' % (link, template_name))
+                            if 'rel="noopener noreferrer"' not in link:  # pragma: no cover
+                                self.fail(msg='Missing rel="noopener noreferrer" in link %s on page %s' % (link, template_name))
             else:
                 content = ''
         # while
@@ -405,10 +442,29 @@ class E2EHelpers(TestCase):
                     msg = "Bad HTML (template: %s):" % self._get_useful_template_name(response)
                     msg += "\n   Found block-level element '%s' inside 'p'" % elem
                     msg = msg + "\n   ==> " + sub[elem_pos:elem_pos+40]
-                    self.fail(msg=msg)
+                    self.fail(msg)
             # for
             html = html[pos+3:]
             pos = html.find('<p')
+        # while
+
+    def _assert_no_col_white(self, text, dtl):
+        pos = text.find("class=")
+        while pos > 0:
+            text = text[pos + 6:]
+
+            # find the end of this tag
+            pos = text.find('>')
+            klass = text[:pos]
+
+            if klass.find("z-depth") < 0:
+                p1 = klass.find("col s10")
+                p2 = klass.find("white")
+                if p1 >= 0 and p2 >= 0:
+                    msg = 'Found grid col s10 + white (too much unused space on small) --> use separate div.white + padding:10px) in %s' % dtl
+                    self.fail(msg)
+
+            pos = text.find("class=")
         # while
 
     def assert_html_ok(self, response):
@@ -434,8 +490,10 @@ class E2EHelpers(TestCase):
         self.assertNotIn('<thead><th>', html, msg='Missing <tr> between <thead> and <th> in %s' % dtl)
 
         self.assert_link_quality(html, dtl)
+        self.assert_broodkruimels(html, dtl)
         self.assert_scripts_clean(html, dtl)
         self._assert_no_div_in_p(response, html)
+        self._assert_no_col_white(html, dtl)
 
         urls = self.extract_all_urls(response)
         for url in urls:
@@ -453,7 +511,6 @@ class E2EHelpers(TestCase):
                 self.fail(msg=msg)
 
     def assert_is_bestand(self, response):
-
         # check the headers that make this a download
         # print("response: ", repr([(a,b) for a,b in response.items()]))
         content_type_header = response['Content-Type']
@@ -599,9 +656,9 @@ class E2EHelpers(TestCase):
         finally:
             if check_duration:
                 duration = datetime.datetime.now() - tracer.started_at
-                duration_seconds = duration.seconds
+                duration_seconds = duration.seconds + (duration.microseconds / 1000000.0)
             else:
-                duration_seconds = 0
+                duration_seconds = 0.0
 
             count = len(tracer.trace)
 
@@ -663,26 +720,32 @@ class E2EHelpers(TestCase):
 
     def assert403(self, resp, expected_msg=''):
         # controleer dat we op de speciale code-403 handler pagina gekomen zijn
+        # of een redirect hebben gekregen naar de login pagina
 
         if isinstance(resp, str):
             self.fail(msg='Incorrect invocation: missing resp parameter?')          # pragma: no cover
 
-        if resp.status_code != 200:     # pragma: no cover
-            self.e2e_dump_resp(resp)
-            self.fail(msg="Unexpected status code %s instead of 200" % resp.status_code)
+        if resp.status_code == 302:
+            if resp.url != '/account/login/':
+                self.e2e_dump_resp(resp)
+                self.fail(msg="Unexpected redirect to %s" % resp.url)
+        else:
+            if resp.status_code != 200:     # pragma: no cover
+                self.e2e_dump_resp(resp)
+                self.fail(msg="Unexpected status code %s instead of 200" % resp.status_code)
 
-        self.assertEqual(resp.status_code, 200)
-        self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
+            self.assertEqual(resp.status_code, 200)
+            self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
 
-        if expected_msg:
-            pagina = str(resp.content)
-            if expected_msg not in pagina:                                          # pragma: no cover
-                # haal de nuttige regel informatie uit de 403 pagina en toon die
-                pos = pagina.find('<code>')
-                pagina = pagina[pos+6:]
-                pos = pagina.find('</code>')
-                pagina = pagina[:pos]
-                self.fail(msg='403 pagina contained %s instead of %s' % (repr(pagina), repr(expected_msg)))
+            if expected_msg:
+                pagina = str(resp.content)
+                if expected_msg not in pagina:                                          # pragma: no cover
+                    # haal de nuttige regel informatie uit de 403 pagina en toon die
+                    pos = pagina.find('<code>')
+                    pagina = pagina[pos+6:]
+                    pos = pagina.find('</code>')
+                    pagina = pagina[:pos]
+                    self.fail(msg='403 pagina contained %s instead of %s' % (repr(pagina), repr(expected_msg)))
 
     def assert404(self, resp, expected_msg=''):
         if isinstance(resp, str):

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.urls import Resolver404
-from django.shortcuts import render
+from django.shortcuts import render, reverse
 from django.views.generic import View
 from django.views.defaults import ERROR_PAGE_TEMPLATE
 from django.core.exceptions import PermissionDenied
@@ -35,6 +35,18 @@ def site_handler403_permission_denied(request, exception=None):
         Deze functie wordt aangeroepen voor de volgende excepties:
             PermissionDenied from django.core.exceptions
     """
+
+    # typische authenticatie fouten zijn omdat de gebruiker niet (meer) ingelogd is
+    if not request.user.is_authenticated:
+        url = reverse('Account:login')
+
+        # next_url werkt niet want er moet eerst nog van rol gewisseld worden
+        #   en het blokkeert redirect naar 2FA check
+        # from django.utils.http import urlencode
+        # url += '?%s' % urlencode({'next': request.path})
+
+        return HttpResponseRedirect(url)
+
     # print('site_handler403: exception=%s; info=%s' % (repr(exception), str(exception)))
     context = dict()
     info = str(exception)
@@ -69,7 +81,7 @@ def site_handler404_page_not_found(request, exception=None):
                 toplevel = [str(pat.pattern) for pat in urls.urlpatterns if str(pat.pattern) != '']
                 if sub in toplevel:
                     rauw = False
-        except (KeyError, IndexError):
+        except (KeyError, IndexError, TypeError):
             # typical for an internally raised Resolver404()
             rauw = False
 
@@ -161,7 +173,7 @@ class TestSpecialePagina(View):
             # nog geen exceptie gevonden die hiervoor gebruikt kan worden
             return site_handler500_internal_server_error(request, None)
 
-        raise Resolver404('Niet ondersteund code')
+        return site_handler404_page_not_found(request, 'Niet ondersteunde code')
 
 
 # end of file

@@ -7,17 +7,34 @@
 from django.db import models
 
 
-# leden zijn aspirant tot en met het jaar waarin ze 13 worden
+# leden zijn aspirant tot en met het jaar waarin ze 13 worden (=Onder 14)
 MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT = 13
 
 # leden zijn jeugdlid tot en met het jaar waarin ze 20 worden
 MAXIMALE_LEEFTIJD_JEUGD = 20
 
-GESLACHT_MAN = 'M'
-GESLACHT_VROUW = 'V'
+GESLACHT_MAN = 'M'          # geregistreerd geslacht / voor wedstrijdklassen
+GESLACHT_VROUW = 'V'        # geregistreerd geslacht / voor wedstrijdklassen
+GESLACHT_ANDERS = 'X'       # geregistreerd geslacht
+GESLACHT_ALLE = 'A'         # gender-neutraal voor wedstrijdklassen
 
-GESLACHT = [(GESLACHT_MAN, 'Man'),
-            (GESLACHT_VROUW, 'Vrouw')]
+# geregistreerde geslacht van sporters: M/V/X
+GESLACHT_MVX = [(GESLACHT_MAN, 'Man'),
+                (GESLACHT_VROUW, 'Vrouw'),
+                (GESLACHT_ANDERS, 'Anders')]
+
+# als voorkeur voor wedstrijden herkennen we alleen M/V
+GESLACHT_MV = [(GESLACHT_MAN, 'Man'),
+               (GESLACHT_VROUW, 'Vrouw')]
+
+# keuzemogelijkheden bij het instellen van bovenstaande
+GESLACHT_MV_MEERVOUD = [(GESLACHT_MAN, 'Mannen'),
+                        (GESLACHT_VROUW, 'Vrouwen')]
+
+# mogelijk geslacht van sporters in wedstrijden: M/V/A
+WEDSTRIJDGESLACHT_MVA = [(GESLACHT_MAN, 'Man'),
+                         (GESLACHT_VROUW, 'Vrouw'),
+                         (GESLACHT_ALLE, 'Alle')]       # gender-neutraal
 
 BLAZOEN_40CM = '40'
 BLAZOEN_60CM = '60'
@@ -59,7 +76,11 @@ BLAZOEN_CHOICES = [
 
 class BoogType(models.Model):
     """ boog typen: volledige naam en unique afkorting """
+
+    # Recurve, etc.
     beschrijving = models.CharField(max_length=50)
+
+    # R, C, etc.
     afkorting = models.CharField(max_length=5)
 
     # sorteervolgorde zodat order_by('volgorde') de juiste sortering oplevert
@@ -92,11 +113,11 @@ class TeamType(models.Model):
     # Recurve team, etc.
     beschrijving = models.CharField(max_length=50)
 
-    # R/C/BB/IB/LB
-    afkorting = models.CharField(max_length=2)
+    # R/R2/C/BB/BB2/IB/TR/LB
+    afkorting = models.CharField(max_length=3)
 
     # sorteervolgorde zodat order_by('volgorde') de juiste sortering oplevert
-    volgorde = models.CharField(max_length=1, default='?')
+    volgorde = models.PositiveSmallIntegerField(default=0)
 
     # toegestane boogtypen
     boog_typen = models.ManyToManyField(BoogType)
@@ -128,14 +149,14 @@ class LeeftijdsKlasse(models.Model):
     # SH = Senioren mannen, etc.
     afkorting = models.CharField(max_length=5)
 
-    # korte beschrijving: 'Cadet', etc.
+    # korte beschrijving: 'Onder 18', etc.
     klasse_kort = models.CharField(max_length=30)
 
-    # complete beschrijving: 'Cadetten, meisjes'
+    # complete beschrijving: 'Onder 18, meisjes'
     beschrijving = models.CharField(max_length=80)      # CH Cadetten, mannen
 
-    # man of vrouw
-    geslacht = models.CharField(max_length=1, choices=GESLACHT)
+    # man, vrouw of gender-neutraal
+    wedstrijd_geslacht = models.CharField(max_length=1, choices=WEDSTRIJDGESLACHT_MVA)
 
     # leeftijds grenzen voor de klassen: of ondergrens, of bovengrens
     #   de jeugdklassen hebben een leeftijd bovengrens
@@ -149,6 +170,7 @@ class LeeftijdsKlasse(models.Model):
     volgens_wa = models.BooleanField(default=True)
 
     # presentatie volgorde: aspirant als laagste, veteraan als hoogste
+    #  gender sub-volgorde: neutraal, man, vrouw
     volgorde = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
@@ -163,7 +185,6 @@ class LeeftijdsKlasse(models.Model):
         return 0 < self.max_wedstrijdleeftijd <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 
     def leeftijd_is_compatible(self, wedstrijdleeftijd):
-
         """ voldoet de wedstrijdleeftijd aan de eisen van deze wedstrijdklasse? """
 
         if wedstrijdleeftijd < self.min_wedstrijdleeftijd:
@@ -176,6 +197,14 @@ class LeeftijdsKlasse(models.Model):
 
         # voldoet aan de eisen
         return True
+
+    def geslacht_is_compatible(self, wedstrijd_geslacht):
+        """ past het wedstrijdgeslacht van de sporter bij deze leeftijdsklasse?
+
+            leeftijdsklasse 'A' (alle) past bij alle wedstrijdgeslachten
+            anders moet het een 'M'/'V' match zijn
+        """
+        return (self.wedstrijd_geslacht == GESLACHT_ALLE) or (wedstrijd_geslacht == self.wedstrijd_geslacht)
 
     class Meta:
         """ meta data voor de admin interface """
@@ -199,7 +228,7 @@ class IndivWedstrijdklasse(models.Model):
     boogtype = models.ForeignKey(BoogType, on_delete=models.PROTECT)
 
     # volgende voor gebruik bij het presenteren van een lijst van klassen
-    # lager nummer = betere schutters
+    # lager nummer = betere / oudere deelnemers
     volgorde = models.PositiveIntegerField()
 
     # de leeftijdsklassen: aspirant, cadet, junior, senior en mannen/vrouwen
@@ -232,7 +261,7 @@ class IndivWedstrijdklasse(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
-        return self.beschrijving
+        return "%s [%s]" % (self.beschrijving, self.boogtype.afkorting)
 
     class Meta:
         """ meta data voor de admin interface """
@@ -280,7 +309,10 @@ class TeamWedstrijdklasse(models.Model):
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
-        return self.beschrijving
+        msg = self.beschrijving
+        if self.team_type:
+            msg += ' [%s]' % self.team_type.afkorting
+        return msg
 
     class Meta:
         """ meta data voor de admin interface """

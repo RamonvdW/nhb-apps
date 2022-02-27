@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -42,6 +42,11 @@ class LogoutView(UserPassesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
+
+        context['kruimels'] = (
+            (None, 'Uitloggen'),
+        )
+
         menu_dynamics(self.request, context)
         return context
 

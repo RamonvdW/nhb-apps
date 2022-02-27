@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,16 +10,28 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="account-nieuwe-email" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Nieuwe e-mail bevestigen</h3>
+        </div>
+    </div>
 
-    <h4>E-mail bevestigen</h4>
+    <!-- blauw balk -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+                <p>We hebben een nieuw e-mailadres doorgekregen uit de administratie van de NHB.</p>
 
-    <p>We hebben een nieuw e-mailadres doorgekregen uit de administratie van de NHB.</p>
+                <p>We hebben een e-mail gestuurd naar <b><code>{{ partial_email }}</code></b> om zeker te zijn dat we je kunnen bereiken.</p>
 
-    <p>We hebben een e-mail gestuurd naar <b>{{ partial_email }}</b> om zeker te zijn dat we je kunnen bereiken.</p>
+                <p>Volg de instructies in de e-mail om de bevestiging af te ronden.</p>
 
-    <p>Volg de instructies in de e-mail om de bevestiging af te ronden.</p>
+                <p>Deze pagina kan je sluiten.</p>
+            </div>
+        </div>
+    </div>
 
-    <p>Deze pagina kan je sluiten.</p>
+    {% include 'feedback/sidebar.dtl' with op_pagina="account-email-bevestigen-nieuwe" %}
 
 {% endblock %}

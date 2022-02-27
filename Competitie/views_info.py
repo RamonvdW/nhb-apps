@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.views.generic import TemplateView
 from django.utils import timezone
+from django.urls import reverse
 from Plein.menu import menu_dynamics
 from BasisTypen.models import IndivWedstrijdklasse
 from NhbStructuur.models import NhbRegio
@@ -47,7 +48,12 @@ class InfoCompetitieView(TemplateView):
 
         context['klassen_count'] = IndivWedstrijdklasse.objects.exclude(is_onbekend=True).count()
 
-        menu_dynamics(self.request, context, actief='competitie')
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (None, 'Informatie')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -92,7 +98,12 @@ class InfoLeeftijdenView(TemplateView):
 
         context['persoonlijke_leeftijdsklassen'] = self.request.user.is_authenticated
 
-        menu_dynamics(self.request, context, actief='competitie')
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (None, 'Leeftijdsgroepen')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 

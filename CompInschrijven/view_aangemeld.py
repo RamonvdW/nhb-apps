@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,12 +12,12 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import (COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60CM_4SPOT,
                                BLAZOEN_WENS_4SPOT, BLAZOEN_WENS_DT,
                                BLAZOEN2STR, BLAZOEN2STR_COMPACT)
-from Competitie.menu import menu_dynamics_competitie
 from Competitie.models import (LAAG_REGIO, Competitie, DeelCompetitie, DeelcompetitieRonde,
-                               RegioCompetitieSchutterBoog,
+                               RegioCompetitieSchutterBoog, DAGDEEL2LABEL,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN)
 from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren
 from Wedstrijden.models import CompetitieWedstrijd
 import csv
@@ -117,6 +117,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
                 obj.nieuwe_klasse = True
                 if obj_aantal:
                     obj_aantal.aantal_in_klasse = aantal
+                    obj_aantal.aantal_regels = aantal + 2
                 aantal = 0
                 obj_aantal = obj
                 volgorde = obj.klasse.indiv.volgorde
@@ -125,13 +126,20 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
         # for
         if obj_aantal:
             obj_aantal.aantal_in_klasse = aantal
+            obj_aantal.aantal_regels = aantal + 2
 
         context['object_list'] = objs
 
         context['inhoud'] = 'landelijk'
         maak_regiocomp_zoom_knoppen(context, comp_pk)
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Inschrijvingen')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -194,6 +202,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
                 obj.nieuwe_klasse = True
                 if obj_aantal:
                     obj_aantal.aantal_in_klasse = aantal
+                    obj_aantal.aantal_regels = aantal + 2
                 aantal = 0
                 obj_aantal = obj
                 volgorde = obj.klasse.indiv.volgorde
@@ -202,12 +211,19 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
         # for
         if obj_aantal:
             obj_aantal.aantal_in_klasse = aantal
+            obj_aantal.aantal_regels = aantal + 2
 
         context['object_list'] = objs
 
         maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=rayon)
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Inschrijvingen')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -280,6 +296,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
                 obj.nieuwe_klasse = True
                 if obj_aantal:
                     obj_aantal.aantal_in_klasse = aantal
+                    obj_aantal.aantal_regels = aantal + 2
                 aantal = 0
                 obj_aantal = obj
                 volgorde = obj.klasse.indiv.volgorde
@@ -288,6 +305,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
         # for
         if obj_aantal:
             obj_aantal.aantal_in_klasse = aantal
+            obj_aantal.aantal_regels = aantal + 2
 
         context['object_list'] = objs
 
@@ -311,7 +329,13 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
         maak_regiocomp_zoom_knoppen(context, comp.pk, regio=regio)
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Inschrijvingen')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -385,7 +409,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
         context['dagdelen'] = dagdelen = list()
         for afkorting, beschrijving in DAGDELEN:
             if alles_mag or (afkorting in dagdelen_spl):
-                dagdelen.append(beschrijving)
+                dagdelen.append(afkorting)
         # for
 
         # maak een lijst van alle verenigingen in deze regio
@@ -598,7 +622,14 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                                           kwargs={'comp_pk': comp.pk,
                                                   'regio_pk': regio.pk})
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompInschrijven:lijst-regiocomp-regio', kwargs={'comp_pk': comp.pk, 'regio_pk': deelcomp.nhb_regio.regio_nr}), 'Inschrijvingen'),
+            (None, 'Benodigde dagdelen')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -668,13 +699,15 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         self._maak_data_dagdeel_behoefte(context, deelcomp, objs, regio)
         self._maak_data_blazoen_behoefte(context)
 
+        dagdelen = [DAGDEEL2LABEL[dagdeel][0] for dagdeel in context['dagdelen']]
+
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="behoefte-%s.csv"' % regio.regio_nr
 
         writer = csv.writer(response, delimiter=";")      # ; is good for import with dutch regional settings
 
         # voorkeur dagdelen per vereniging
-        writer.writerow(['ver_nr', 'Naam', 'Blazoen'] + context['dagdelen'] + ['Totaal'])
+        writer.writerow(['ver_nr', 'Naam', 'Blazoen'] + dagdelen + ['Totaal'])
 
         for nhb_ver in context['regio_verenigingen']:
             for blazoen_str, counts_list in nhb_ver.blazoen_list:
@@ -685,7 +718,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
 
         # blazoen behoefte
         writer.writerow(['-', '-', '-'] + ['-' for _ in context['totalen']])
-        writer.writerow(['-', '-', 'Blazoen'] + context['dagdelen'] + ['Totaal'])
+        writer.writerow(['-', '-', 'Blazoen'] + dagdelen + ['Totaal'])
 
         for blazoen_str, behoefte in context['blazoen_count']:
             writer.writerow(['-', '-', blazoen_str] + behoefte)
@@ -821,7 +854,14 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                                           kwargs={'comp_pk': comp.pk,
                                                   'regio_pk': regio.pk})
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk, actief='competitie')
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompInschrijven:lijst-regiocomp-regio', kwargs={'comp_pk': comp.pk, 'regio_pk': deelcomp.nhb_regio.regio_nr}), 'Inschrijvingen'),
+            (None, 'Gekozen wedstrijden')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -982,7 +1022,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
             # for
 
             sporter = deelnemer.sporterboog.sporter
-            klasse = deelnemer.klasse.indiv
+            klasse = deelnemer.klasse.indiv.beschrijving
 
             writer.writerow([sporter.lid_nr, sporter.volledige_naam(), sporter.bij_vereniging, klasse] + kruisjes)
         # for

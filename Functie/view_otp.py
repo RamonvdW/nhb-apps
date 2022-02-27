@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -46,7 +46,15 @@ class OTPControleView(TemplateView):
         next_url = request.GET.get('next', '')
 
         form = OTPControleForm(initial={'next_url': next_url})
-        context = {'form': form}
+
+        context = dict()
+        context['form'] = form
+
+        context['kruimels'] = (
+            (reverse('Functie:wissel-van-rol'), 'Wissel van rol'),
+            (None, 'Controle tweede factor')
+        )
+
         menu_dynamics(request, context, actief="wissel-van-rol")
         return render(request, TEMPLATE_OTP_CONTROLE, context)
 
@@ -124,7 +132,7 @@ class OTPKoppelenStap1View(OTPKoppelenStapView):
 
         context['url_stap_2'] = reverse('Functie:otp-koppelen-stap2')
 
-        menu_dynamics(self.request, context, actief="wissel-van-rol")
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -148,7 +156,7 @@ class OTPKoppelenStap2View(OTPKoppelenStapView):
         tmp = account.otp_code.lower()
         context['otp_secret'] = " ".join([tmp[i:i+4] for i in range(0, len(tmp), 4)])
 
-        menu_dynamics(self.request, context, actief="wissel-van-rol")
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -166,7 +174,7 @@ class OTPKoppelenStap3View(OTPKoppelenStapView):
         context['form'] = OTPControleForm()
         context['now'] = timezone.now()
 
-        menu_dynamics(self.request, context, actief="wissel-van-rol")
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

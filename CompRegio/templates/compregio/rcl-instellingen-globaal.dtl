@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,40 +10,51 @@
 
 {% block pagina %}
 
-    <h4>Regio keuzes</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Regio keuzes</h3>
+            <p>Overzicht van de keuzes in de verschillende regio's<br>voor de <b>{{ comp }}</b></p>
+        </div>
+    </div>
 
-    <p>Op deze pagina wordt een overzicht gegeven van de keuzes in de verschillende regio's voor de <b>{{ comp }}</b>.</p>
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
 
-    <table class="white">
-        <thead>
-            <tr>
-                <th class="center-align">Rayon</th>
-                <th class="center-align">Regio</th>
-                <th>Inschrijfmethode</th>
-                <th class="center-align">Teamcompetitie</th>
-                <th>Teams aanmaken tot</th>
-                <th>Team samenstelling</th>
-                <th>Team puntenmodel</th>
-            </tr>
-        </thead>
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th class="center hide-on-med-and-down">Rayon</th>
+                        <th class="center">Regio</th>
+                        <th class="center hide-on-large-and-up">Inschrijf<wbr>methode</th>
+                        <th class="hide-on-med-and-down">Inschrijf<wbr>methode</th>
+                        <th class="center">Team<wbr>competitie</th>
+                        <th>Teams aanmaken tot</th>
+                        <th class="center">Team samen<wbr>stelling</th>
+                        <th class="center hide-on-med-and-up">Team WP</th>
+                        <th class="hide-on-small-only">Team punten<wbr>model</th>
+                    </tr>
+                </thead>
 
-        {% for deelcomp in deelcomps %}
-            <tr{% if deelcomp.highlight %} class="nhb-blauw white-text"{% endif %}>
-                <td class="center-align">{{ deelcomp.rayon_str }}</td>
-                <td class="center-align">{{ deelcomp.regio_str }}</td>
-                <td>{{ deelcomp.inschrijfmethode_str }}</td>
-                <td class="center-align">{{ deelcomp.teamcomp_str }}</td>
-                <td>{{ deelcomp.einde_teams_aanmaken_str }}</td>
-                <td>{{ deelcomp.team_type_str }}</td>
-                <td>{{ deelcomp.puntenmodel_str }}</td>
-           </tr>
-        {% endfor %}
-    </table>
+                {% for deelcomp in deelcomps %}
+                    <tr{% if deelcomp.highlight %} class="nhb-blauw white-text"{% endif %}>
+                        <td class="center hide-on-med-and-down">{{ deelcomp.rayon_str }}</td>
+                        <td class="center">{{ deelcomp.regio_str }}</td>
+                        <td class="center hide-on-large-and-up">{{ deelcomp.short_inschrijfmethode_str }}</td>
+                        <td class="hide-on-med-and-down">{{ deelcomp.inschrijfmethode_str }}</td>
+                        <td class="center">{{ deelcomp.teamcomp_str }}</td>
+                        <td>{{ deelcomp.einde_teams_aanmaken_str }}</td>
+                        <td class="center">{{ deelcomp.team_type_str }}</td>
+                        <td class="center hide-on-med-and-up">{{ deelcomp.short_puntenmodel_str }}</td>
+                        <td class="hide-on-small-only">{{ deelcomp.puntenmodel_str }}</td>
+                   </tr>
+                {% endfor %}
+            </table>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="compregio-rcl-instellingen-globaal" %}
+        </div>
+    </div>
 
-{% endblock %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compregio-rcl-instellingen-globaal" %}
 
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}

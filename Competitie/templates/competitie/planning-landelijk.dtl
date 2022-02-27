@@ -1,78 +1,96 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block title %}Planning Landelijk{% endblock %}
+{% block title %}Planning{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="competitie-planning-landelijk" %}
 
-<h4>Planning Landelijk</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Planning</h3>
+        </div>
+    </div>
 
-<div class="row">
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Competitie</th>
+                    <td>{{ deelcomp_bk.competitie.beschrijving }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
 
-    <!-- toon gegevens van de regio en competitie in een blauwe box -->
-    <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-        <div class="white-text nhb-blauw z-depth-2">
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>BK wedstrijden</h4>
+        </div>
+    </div>
 
-            <div class="row small-row">
-                <div class="col s3">Competitie:</div>
-                <div class="col s7">{{ deelcomp_bk.competitie.beschrijving }}</div>
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+                <p>Hier volgt later de planning van de BK wedstrijden.</p>
+                <!-- FUTURE: BK wedstrijden toevoegen -->
             </div>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Rayon<wbr>kampioenschappen</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th class="center">Status</th>
+                        <th class="center">Gebied</th>
+                        <th><!-- kolom voor knoppen --></th>
+                    </tr>
+                </thead>
+
+                {% for deelcomp in rayon_deelcomps %}
+                    <tr>
+                        <td class="center">
+                            {% if deelcomp.is_afgesloten %}
+                                <span>Afgesloten</span>
+                            {% else %}
+                                <span>Actief</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="center">{{ deelcomp.nhb_rayon }}</td>
+
+                        <td class="center">
+                            <a class="btn-nhb-rood" href="{% url 'CompRayon:rayon-planning' deelcomp.pk %}">
+                                <img src="{% static 'plein/zoom_in.svg' %}" height="36px">
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
 
         </div>
     </div>
-</div>
 
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-planning-landelijk" %}
 
-<p>&nbsp;</p>
-<h5>BK wedstrijden</h5>
-<!-- FUTURE: BK wedstrijden toevoegen -->
-<p>Hier volgt later de planning van de BK wedstrijden.</p>
-
-
-<p>&nbsp;</p>
-<h5>Rayoncompetitie</h5>
-
-<table class="white">
-
-    <thead>
-        <tr>
-            <th>Status</th>
-            <th>Gebied</th>
-            <th><!-- kolom voor button --></th>
-        </tr>
-    </thead>
-
-    {% for deelcomp in rayon_deelcomps %}
-        <tr>
-            <td>
-                {% if deelcomp.is_afgesloten %}
-                    <span>Afgesloten</span>
-                {% else %}
-                    <span>Actief</span>
-                {% endif %}
-            </td>
-
-            <td>{{ deelcomp.nhb_rayon }}</td>
-
-            <!-- knop naar de details van de regioplanning -->
-            <td>
-                <a class="btn-nhb-blauw btn-small" href="{% url 'CompRayon:rayon-planning' deelcomp.pk %}">
-                    <i class="material-icons-round left">arrow_forward</i>Bekijk</a>
-            </td>
-        </tr>
-    {% endfor %}
-
-
-</table>
-
-{% endblock %}
-
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}

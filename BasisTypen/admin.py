@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -30,11 +30,18 @@ class BasisTypenReadonlyMetVolgordeAdmin(BasisTypenReadonlyAdmin):
     ordering = ('volgorde',)
 
 
+class BasisTypenLeeftijdsKlasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
+
+    list_filter = ('wedstrijd_geslacht',)
+
+
 class BasisTypenIndivWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
     """ filter voor IndivWedstrijdklasse """
 
     # lijstweergave
-    list_filter = ('buiten_gebruik',)
+    list_filter = ('buiten_gebruik', 'boogtype', 'is_aspirant_klasse')
+
+    list_select_related = ('boogtype',)
 
     # record weergave
     fieldsets = (
@@ -61,6 +68,8 @@ class BasisTypenTeamWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
     # lijstweergave
     list_filter = ('buiten_gebruik',)
 
+    list_select_related = ('team_type',)
+
     # record weergave
     fieldsets = (
         (None, {'fields': ('volgorde', 'beschrijving', 'team_type', 'buiten_gebruik')}),
@@ -76,7 +85,7 @@ class BasisTypenKalenderWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin)
 
 admin.site.register(BoogType, BasisTypenReadonlyMetVolgordeAdmin)
 admin.site.register(TeamType, BasisTypenReadonlyMetVolgordeAdmin)
-admin.site.register(LeeftijdsKlasse, BasisTypenReadonlyMetVolgordeAdmin)
+admin.site.register(LeeftijdsKlasse, BasisTypenLeeftijdsKlasseAdmin)
 admin.site.register(IndivWedstrijdklasse, BasisTypenIndivWedstrijdklasseAdmin)
 admin.site.register(TeamWedstrijdklasse, BasisTypenTeamWedstrijdklasseAdmin)
 admin.site.register(KalenderWedstrijdklasse, BasisTypenKalenderWedstrijdklasseAdmin)

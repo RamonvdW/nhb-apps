@@ -1,27 +1,24 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
 from django.urls import reverse
-from django.http import HttpResponseRedirect, Http404
+from django.http import Http404
 from django.db.models import Q
 from django.views.generic import ListView, TemplateView
 from django.templatetags.static import static
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
-from .models import IndivRecord, BesteIndivRecords
+from .models import IndivRecord
 from .forms import ZoekForm
-from types import SimpleNamespace
 
 
 TEMPLATE_RECORDS_OVERZICHT = 'records/records_overzicht.dtl'
 TEMPLATE_RECORDS_SPECIFIEK = 'records/records_specifiek.dtl'
 TEMPLATE_RECORDS_ZOEK = 'records/records_zoek.dtl'
-TEMPLATE_RECORDS_VERBETERBAAR_KIES_DISC = 'records/verbeterbaar_kies_disc.dtl'
-TEMPLATE_RECORDS_VERBETERBAAR_DISCIPLINE = 'records/verbeterbaar_discipline.dtl'
 
 
 DISCIPLINE_TO_ICON = {
@@ -49,41 +46,6 @@ lcat2str = {'M': 'Masters (50+)',
             'J': 'Junioren (t/m 20 jaar)',
             'C': 'Cadetten (t/m 17 jaar)',
             'U': 'Gecombineerd (bij para)'}     # alleen voor Outdoor
-
-disc2url = {'OD': 'outdoor',
-            '18': 'indoor',
-            '25': '25m1pijl'}
-
-gesl2url = {'M': 'mannen',
-            'V': 'vrouwen'}
-
-makl2url = {'R': 'recurve',
-            'C': 'compound',
-            'BB': 'barebow',
-            'IB': 'instinctive-bow',
-            'LB': 'longbow',
-            'O': 'para-klassen'}
-
-lcat2url = {'M': 'masters',
-            'S': 'senioren',
-            'J': 'junioren',
-            'C': 'cadetten',
-            'U': 'gecombineerd'}
-
-sel2url4arg = {'disc': disc2url,
-               'gesl': gesl2url,
-               'makl': makl2url,
-               'lcat': lcat2url}
-
-url2disc = {v: k for k, v in disc2url.items()}
-url2gesl = {v: k for k, v in gesl2url.items()}
-url2makl = {v: k for k, v in makl2url.items()}
-url2lcat = {v: k for k, v in lcat2url.items()}
-
-url2sel4arg = {'disc': url2disc,
-               'gesl': url2gesl,
-               'makl': url2makl,
-               'lcat': url2lcat}
 
 
 class RecordsOverzichtView(ListView):
@@ -140,7 +102,12 @@ class RecordsOverzichtView(ListView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-        menu_dynamics(self.request, context, actief='records')
+
+        context['kruimels'] = (
+            (None, 'Records'),
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -198,7 +165,12 @@ class RecordsIndivSpecifiekView(TemplateView):
         context['obj_record'] = spec
         context['object_list'] = objs
 
-        menu_dynamics(self.request, context, actief='records')
+        context['kruimels'] = (
+            (reverse('Records:overzicht'), 'Records'),
+            (None, 'Details')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -260,7 +232,7 @@ class RecordsZoekView(ListView):
                         .order_by('-datum',
                                   'soort_record'))[:settings.RECORDS_MAX_ZOEKRESULTATEN]
 
-        return None
+        return list()
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -269,189 +241,21 @@ class RecordsZoekView(ListView):
         context['have_searched'] = self.get_zoekterm != ""
         context['zoekterm'] = self.get_zoekterm
         context['records_zoek_url'] = reverse('Records:zoek')
-        menu_dynamics(self.request, context, actief='records')
-        return context
 
-
-class RecordsVerbeterbaarKiesDisc(ListView):
-
-    """ Deze view laat de gebruiker een discipline kiezen """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_RECORDS_VERBETERBAAR_KIES_DISC
-
-    def get_queryset(self):
-        """ called by the template system to get the queryset or list of objects for the template """
-
-        objs = (IndivRecord
-                .objects
-                .distinct('discipline')
-                .order_by('discipline'))
-
-        for obj in objs:
-            obj.beschrijving = disc2str[obj.discipline]
-            url_disc = disc2url[obj.discipline]
-            obj.url = reverse('Records:indiv-verbeterbaar-disc', kwargs={'disc': url_disc})
-        # for
-
-        return objs
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-        menu_dynamics(self.request, context, actief='records')
-        return context
-
-
-class RecordsVerbeterbaarInDiscipline(ListView):
-
-    """ Deze view laat de gebruiker de lijst van verbeterbare NL records zien binnen een discipline """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_RECORDS_VERBETERBAAR_DISCIPLINE
-
-    boogtype2filter = {'alles': '', 'recurve': 'R', 'compound': 'C', 'barebow': 'BB', 'longbow': 'LB', 'instinctive': 'IB'}
-    geslacht2filter = {'alles': '', 'man': 'M', 'vrouw': 'V'}
-    leeftijd2filter = {'alles': '', 'para': 'U', 'master': 'M', 'senior': 'S', 'junior': 'J', 'cadet': 'C'}
-
-    def dispatch(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen voor get_queryset
-            hier is het mogelijk om een redirect te doen.
-        """
-        url_disc = self.kwargs['disc']
-        try:
-            _ = url2disc[url_disc]      # check dat deze aanwezig is
-            _ = self.boogtype2filter[request.GET.get('boog', 'alles')]
-            _ = self.geslacht2filter[request.GET.get('geslacht', 'alles')]
-            _ = self.leeftijd2filter[request.GET.get('leeftijdsklasse', 'alles')]
-        except KeyError:
-            return HttpResponseRedirect(reverse('Records:indiv-verbeterbaar'))
-
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_queryset(self):
-        """ called by the template system to get the queryset or list of objects for the template """
-
-        url_disc = self.kwargs['disc']
-        discipline = url2disc[url_disc]
-
-        filter_boogtype = self.boogtype2filter[self.request.GET.get('boog', 'alles')]
-        filter_geslacht = self.geslacht2filter[self.request.GET.get('geslacht', 'alles')]
-        filter_leeftijd = self.leeftijd2filter[self.request.GET.get('leeftijdsklasse', 'alles')]
-
-        objs = (BesteIndivRecords
-                .objects
-                .filter(discipline=discipline)
-                .select_related('beste')
-                .order_by('volgorde'))
-
-        if filter_geslacht:
-            objs = objs.filter(geslacht=filter_geslacht)
-
-        if filter_boogtype:
-            objs = objs.filter(materiaalklasse=filter_boogtype)
-
-        if filter_leeftijd:
-            objs = objs.filter(leeftijdscategorie=filter_leeftijd)
-
-        for obj in objs:
-            obj.geslacht_str = gesl2str[obj.geslacht]
-            obj.materiaalklasse_str = makl2str[obj.materiaalklasse]
-            obj.leeftijdscategorie_str = lcat2str[obj.leeftijdscategorie]
-
-            obj.url_details = reverse('Records:specifiek', kwargs={'discipline': obj.discipline,
-                                                                   'nummer': obj.beste.volg_nr})
-        # for
-
-        return objs
-
-    @staticmethod
-    def maak_url(base_url, extra, param_type, param):
-        extra = extra[:]
-        if param != 'alles':
-            extra.append('%s=%s' % (param_type, param))
-        if len(extra):
-            extra.sort()
-            return base_url + '?' + '&'.join(extra)
-        return base_url
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        url_disc = self.kwargs['disc']
-        discipline = url2disc[url_disc]
-        context['beschrijving'] = disc2str[discipline]
-
-        boogtype = self.request.GET.get('boog', 'alles')
-        geslacht = self.request.GET.get('geslacht', 'alles')
-        leeftijd = self.request.GET.get('leeftijdsklasse', 'alles')
-
-        base_url = reverse('Records:indiv-verbeterbaar-disc', kwargs={'disc': url_disc})
-
-        extra = list()
-        if boogtype != 'alles':
-            extra.append('boog=' + boogtype)
-        if leeftijd != 'alles':
-            extra.append('leeftijdsklasse=' + leeftijd)
-        context['geslacht'] = list()
-        for geslacht_key in self.geslacht2filter.keys():
-            obj = SimpleNamespace()
-            obj.button_str = geslacht_key
-            if geslacht != geslacht_key:
-                obj.url = self.maak_url(base_url, extra, 'geslacht', geslacht_key)
-            else:
-                obj.url = None
-            context['geslacht'].append(obj)
-        # for
-
-        extra = list()
-        if geslacht != 'alles':
-            extra.append('geslacht=' + geslacht)
-        if leeftijd != 'alles':
-            extra.append('leeftijdsklasse=' + leeftijd)
-        context['bogen'] = list()
-        for boogtype_key in self.boogtype2filter.keys():
-            obj = SimpleNamespace()
-            obj.button_str = boogtype_key
-            if boogtype != boogtype_key:
-                obj.url = self.maak_url(base_url, extra, 'boog', boogtype_key)
-            else:
-                obj.url = None
-            context['bogen'].append(obj)
-        # for
-
-        extra = list()
-        if boogtype != 'alles':
-            extra.append('boog=' + boogtype)
-        if geslacht != 'alles':
-            extra.append('geslacht=' + geslacht)
-        context['leeftijd'] = list()
-        for leeftijd_key in self.leeftijd2filter.keys():
-
-            # skip de 'para' knop tenzij het voor Outdoor is
-            if leeftijd_key == 'para' and discipline != 'OD':
-                continue
-
-            obj = SimpleNamespace()
-            obj.button_str = leeftijd_key
-            if leeftijd != leeftijd_key:
-                obj.url = self.maak_url(base_url, extra, 'leeftijdsklasse', leeftijd_key)
-            else:
-                obj.url = None
-            context['leeftijd'].append(obj)
-        # for
-
-        context['is_alles'] = (boogtype == geslacht == leeftijd)
-
-        context['toon_para_kolom'] = False
         for obj in context['object_list']:
+            obj.para_str = ''
             if obj.para_klasse:
-                context['toon_para_kolom'] = True
-                break
+                obj.para_str = ' - para'
+                if obj.para_klasse != 'Ja':
+                    obj.para_str += ': ' + obj.para_klasse
         # for
 
-        menu_dynamics(self.request, context, actief='records')
+        context['kruimels'] = (
+            (reverse('Records:overzicht'), 'Records'),
+            (None, 'Zoeken')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 # end of file

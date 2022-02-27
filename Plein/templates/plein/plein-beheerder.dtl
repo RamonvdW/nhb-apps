@@ -1,120 +1,128 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
 {% load static %}
 
-{% block title %}Beheerders Plein{% endblock %}
+{% block title %}{{ naam_site }}{% endblock %}
+
+<!-- geen broodkruimels op de voorpagina -->
+{% block broodkruimels %}{% endblock %}
 
 {% block pagina %}
 
-    <h4>Beheerders Plein</h4>
-
-    <p>Als beheerder vind je op dit plein extra kaartjes die bij jouw rechten passen.</p>
-    <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
-    <p>Wissel naar de rol Sporter om het 'normale' plein te zien.</p>
-
-    <p>
-        <a class="btn-nhb-blauw" href="{% url 'Account:logout' %}" >
-            <i class="material-icons-round left">exit_to_app</i>Uitloggen</a>
-    </p>
-
-    <p>&nbsp;</p>
-    <h5>Op deze site</h5>
-
-    <p>Klik op een van de onderstaande kaartjes om naar een ander deel van deze site te gaan.</p>
-    <p>Tip: klik in het menu (aan de linker kant) op 'Het Plein' om terug te komen naar deze pagina.</p>
-
-    <div class="row">
-        {% url 'Competitie:kies' as card_url %}
-        {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
-
-        <!-- records -->
-        {% url 'Records:overzicht' as card_url %}
-        {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
-
-        <!-- vereniging menu -->
-        {% if rol_is_sec or rol_is_hwl or rol_is_wl %}
-            {% url 'Vereniging:overzicht' as card_url %}
-            {% include 'plein/card.dtl' with title="Beheer Vereniging" text="Extra functies voor beheerders van jouw vereniging." icon="store" url=card_url %}
-        {% endif %}
-
-        <!-- verenigingen/accommodaties overzicht IT/BB/BKO -->
-        {% if rol_is_bko or rol_is_bb %}
-            {% url 'Vereniging:lijst-verenigingen' as card_url %}
-            {% include 'plein/card.dtl' with title="Verenigingen" text="Toon landelijk overzicht van de verenigingen, accommodaties en indeling in clusters." icon="view_list" url=card_url %}
-        {% endif %}
-
-        <!-- verenigingen/accommodaties overzicht RKO -->
-        {% if rol_is_rko %}
-            {% url 'Vereniging:lijst-verenigingen' as card_url %}
-            {% include 'plein/card.dtl' with title="Verenigingen" text="Toon overzicht van de verenigingen, accommodaties en indeling in clusters in jouw rayon." icon="view_list" url=card_url %}
-        {% endif %}
-
-        <!-- verenigingen/accommodaties overzicht RCL en HWL -->
-        {% if rol_is_rcl %}
-            {% url 'Vereniging:lijst-verenigingen' as card_url %}
-            {% include 'plein/card.dtl' with title="Verenigingen" text="Toon overzicht van de verenigingen in jouw regio en mogelijkheid tot aanpassen accommodatie gegevens." icon="view_list" url=card_url %}
-        {% endif %}
-
-        <!-- verenigingen/accommodaties overzicht SEC en HWL -->
-        {% if rol_is_sec or rol_is_hwl %}
-            {% url 'Vereniging:lijst-verenigingen' as card_url %}
-            {% include 'plein/card.dtl' with title="Verenigingen" text="Toon overzicht van de verenigingen en accommodaties in jouw regio." icon="view_list" url=card_url %}
-        {% endif %}
-
-        <!-- wedstrijdkalender -->
-        {% if rol_is_hwl or rol_is_bb %}
-            {% url 'Kalender:landing-page' as card_url %}
-            {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
-        {% endif %}
-
-        <!-- handleiding -->
-        {% if handleiding_url %}
-            {% include 'plein/card.dtl' with title="Handleiding" text="Bekijk de handleiding." icon="help" url=handleiding_url extern_open=True %}
-        {% endif %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Beheerders Plein</h3>
+            <p>Als beheerder vind je op dit plein extra kaartjes die bij jouw rechten passen</p>
+            <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
+        </div>
     </div>
 
-    {% if rol_is_bb %}
-        <h5>Voor de Manager Competitiezaken</h5>
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
 
-        <div class="row">
-            <!-- account activiteit -->
-            {% url 'Overig:activiteit' as card_url %}
-            {% include 'plein/card.dtl' with title="Account activiteit" text="Toon overzicht van de recent gebruikte en aangemaakte accounts." icon="recent_actors" url=card_url %}
-
-            <!-- site feedback -->
-            {% url 'Overig:feedback-inzicht' as card_url %}
-            {% include 'plein/card.dtl' with title="Site feedback" text="Toon de feedback van de gebruikers." icon="feedback" url=card_url %}
-
-            <!-- logboek -->
-            {% url 'Logboek:alles' as card_url %}
-            {% include 'plein/card.dtl' with title="Logboek" text="Bekijk het logboek." icon="book" url=card_url %}
-
-            <!-- overzicht VHPG acceptatie -->
-            {% url 'Functie:vhpg-overzicht' as card_url %}
-            {% include 'plein/card.dtl' with title="VHPG status" text="Toon overzicht van beheerders die de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd hebben." icon="verified_user" url=card_url %}
-
-            <!-- Interland lijst -->
-            {% if rol_is_bb %}
-                {% url 'HistComp:interland' as card_url %}
-                {% include 'plein/card.dtl' with title="Interland lijst" text="Toon de lijst met kandidaat deelnemers voor de Interland." icon="outlined_flag" url=card_url %}
+            <!-- vereniging menu -->
+            {% if rol_is_sec or rol_is_hwl or rol_is_wl %}
+                {% url 'Vereniging:overzicht' as card_url %}
+                {% include 'plein/card.dtl' with title="Beheer Vereniging" text="Extra functies voor beheerders van jouw vereniging." icon="store" url=card_url %}
             {% endif %}
 
-            <!-- score geschiedenis -->
-            {% url 'Score:geschiedenis' as card_url %}
-            {% include 'plein/card.dtl' with title="Score Geschiedenis" text="Bekijk de wijzigingen / geschiedenis van de scores van een sporter." icon="history" url=card_url %}
+            <!-- bondscompetities -->
+            {% url 'Competitie:kies' as card_url %}
+            {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
+
+            <!-- records -->
+            {% url 'Records:overzicht' as card_url %}
+            {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
+
+            <!-- wedstrijdkalender -->
+            {% if rol_is_hwl or rol_is_bb %}
+                {% url 'Kalender:landing-page' as card_url %}
+                {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
+            {% endif %}
+
+            <!-- verenigingen/accommodaties overzicht IT/BB/BKO -->
+            {% if rol_is_bko or rol_is_bb %}
+                {% url 'Vereniging:lijst-verenigingen' as card_url %}
+                {% include 'plein/card.dtl' with title="Verenigingen" text="Landelijk overzicht van de verenigingen, accommodaties en indeling in clusters." icon="share_location" url=card_url %}
+            {% endif %}
+
+            <!-- verenigingen/accommodaties overzicht RKO -->
+            {% if rol_is_rko %}
+                {% url 'Vereniging:lijst-verenigingen' as card_url %}
+                {% include 'plein/card.dtl' with title="Verenigingen" text="Overzicht van de verenigingen, accommodaties en indeling in clusters in jouw rayon." icon="share_location" url=card_url %}
+            {% endif %}
+
+            <!-- verenigingen/accommodaties overzicht RCL en HWL -->
+            {% if rol_is_rcl %}
+                {% url 'Vereniging:lijst-verenigingen' as card_url %}
+                {% include 'plein/card.dtl' with title="Verenigingen" text="Overzicht van de verenigingen in jouw regio en mogelijkheid tot aanpassen accommodaties." icon="share_location" url=card_url %}
+            {% endif %}
+
+            <!-- verenigingen/accommodaties overzicht SEC en HWL -->
+            {% if rol_is_sec or rol_is_hwl %}
+                {% url 'Vereniging:lijst-verenigingen' as card_url %}
+                {% include 'plein/card.dtl' with title="Verenigingen" text="Overzicht van de verenigingen en accommodaties in jouw regio." icon="share_location" url=card_url %}
+            {% endif %}
+
+            <!-- wissel van rol -->
+            {% url 'Functie:wissel-van-rol' as card_url %}
+            {% include 'plein/card.dtl' with title="Wissel van Rol" text="Wissel naar een andere beheerdersrol of naar Sporter." icon="switch_account" url=card_url %}
+
+            <!-- handleiding -->
+            {% if handleiding_url %}
+                {% include 'plein/card.dtl' with title="Handleiding" text="Bekijk de handleiding." icon="help" url=handleiding_url extern_open=True %}
+            {% endif %}
         </div>
+    </div>
+
+
+    {% if rol_is_bb %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <p>&nbsp;</p>
+                <h4>Voor de manager</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+                <!-- account activiteit -->
+                {% url 'Overig:activiteit' as card_url %}
+                {% include 'plein/card.dtl' with title="Account activiteit" text="Toon overzicht van de recent gebruikte en aangemaakte accounts." icon="recent_actors" url=card_url %}
+
+                <!-- feedback -->
+                {% url 'Feedback:inzicht' as card_url %}
+                {% include 'plein/card.dtl' with title="Site feedback" text="Toon de feedback van de gebruikers." icon="feedback" url=card_url %}
+
+                <!-- logboek -->
+                {% url 'Logboek:alles' as card_url %}
+                {% include 'plein/card.dtl' with title="Logboek" text="Bekijk het logboek." icon="book" url=card_url %}
+
+                <!-- overzicht VHPG acceptatie -->
+                {% url 'Functie:vhpg-overzicht' as card_url %}
+                {% include 'plein/card.dtl' with title="VHPG status" text="Toon overzicht van beheerders die de verklaring geaccepteerd hebben." icon="verified_user" url=card_url %}
+
+                <!-- Interland lijst -->
+                {% url 'HistComp:interland' as card_url %}
+                {% include 'plein/card.dtl' with title="Interland lijst" text="Toon de lijst met kandidaat deelnemers voor de Interland." icon="outlined_flag" url=card_url %}
+
+                <!-- score geschiedenis -->
+                {% url 'Score:geschiedenis' as card_url %}
+                {% include 'plein/card.dtl' with title="Score geschiedenis" text="Bekijk de wijzigingen / geschiedenis van de scores van een sporter." icon="history" url=card_url %}
+            </div>
+        </div>
+
     {% endif %}
 
-    <p>Voor vragen en problemen kan je contact met ons opnemen via e-mail (druk op de knop om je mailprogramma te starten):</p>
-    <a href="mailto:{{ email_support }}" class="btn-nhb-blauw">
-        <i class="material-icons-round left">mail</i>{{ email_support }}</a>
-
-    <p>Voorstellen en feedback over deze site graag via de drie gekleurde smileys die op elke pagina te vinden zijn.</p>
-
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="plein-beheerder" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="plein-beheerder" %}
 
 {% endblock %}

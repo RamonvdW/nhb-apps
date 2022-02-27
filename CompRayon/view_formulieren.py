@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,8 +13,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (CompetitieKlasse, LAAG_RK, DeelcompetitieKlasseLimiet,
                                KampioenschapSchutterBoog, KampioenschapTeam,
                                DEELNAME_NEE, DEELNAME2STR)
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
+from Plein.menu import menu_dynamics
 from Wedstrijden.models import CompetitieWedstrijd
 from tempfile import NamedTemporaryFile
 from copy import copy
@@ -129,6 +129,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                           .objects
                           .filter(deelcompetitie=deelcomp,
                                   klasse__indiv__pk__in=klasse_indiv_pks)
+                          .exclude(deelname=DEELNAME_NEE)
                           .select_related('sporterboog',
                                           'sporterboog__sporter',
                                           'bij_vereniging',
@@ -195,7 +196,13 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                 # for
             # for
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('CompScores:wedstrijden'), 'Competitie wedstrijden'),
+            (None, 'RK programma')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 

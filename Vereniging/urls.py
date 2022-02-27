@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -37,6 +37,7 @@ urlpatterns = [
          view_accommodatie.VerenigingAccommodatieDetailsView.as_view(),
          name='vereniging-accommodatie-details'),
 
+
     path('externe-locaties/<vereniging_pk>/',
          view_externe_locaties.ExterneLocatiesView.as_view(),
          name='externe-locaties'),
@@ -46,6 +47,7 @@ urlpatterns = [
          name='locatie-details'),
 
 
+    # voor de BB
     path('contact-geen-beheerders/',
          view_lijst_verenigingen.GeenBeheerdersView.as_view(),
          name='contact-geen-beheerders')

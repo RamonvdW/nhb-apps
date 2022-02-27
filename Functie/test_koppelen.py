@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -162,7 +162,6 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, "Manager competitiezaken")
 
         # probeer de zoek functie
         with self.assert_max_queries(20):
@@ -172,7 +171,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'plein/site_layout.dtl'))
 
         # controleer aanwezigheid van toevoeg knoppen
-        self.assertContains(resp, 'Maak beheerder', count=2)
+        self.assertContains(resp, '</i>Koppel</button>', count=2)
         # controleer afwezigheid van verwijder knoppen
         self.assertNotContains(resp, 'Verwijder beheerder')
 
@@ -188,7 +187,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'plein/site_layout.dtl'))
 
         # controleer aanwezigheid van verwijder knoppen
-        self.assertContains(resp, 'Verwijder beheerder', count=2)
+        self.assertContains(resp, '</i>Verwijder</a>', count=2)
 
         self.e2e_assert_other_http_commands_not_supported(url)
 
@@ -203,7 +202,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         with self.assert_max_queries(21):
             resp = self.client.post(self.url_activeer_functie % self.functie_hwl.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "HWL")
+        self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
 
         # probeer de zoek functie: zoek 'er' --> vind 'beheerder' en 'ander'
         url = self.url_wijzig % self.functie_hwl.pk
@@ -214,9 +213,9 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'plein/site_layout.dtl'))
 
         # controleer aanwezigheid van toevoeg knoppen
-        self.assertContains(resp, 'Maak beheerder', count=2)         # 2 leden van de vereniging
+        self.assertContains(resp, '</i>Koppel</button>', count=2)         # 2 leden van de vereniging
         # controleer afwezigheid van verwijder knoppen
-        self.assertContains(resp, 'Verwijder beheerder', count=1)    # kan zichzelf verwijderen
+        self.assertContains(resp, '</i>Verwijder</a>', count=1)      # kan zichzelf verwijderen
 
     def test_koppel_ontkoppel_bb(self):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
@@ -284,7 +283,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # neem de BKO rol aan
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(20):
             resp = self.client.post('/functie/activeer-functie/%s/' % self.functie_bko.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "BKO ")
@@ -373,7 +372,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
 
         # neem de RCL rol aan
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(20):
             resp = self.client.post(self.url_activeer_functie % self.functie_rcl111.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "RCL ")
@@ -518,9 +517,9 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
         urls = self.extract_all_urls(resp, skip_menu=True)
-        # verwachting: 2x koppelen beheerders, 1x wijzig email, 1x 'terug'
+        # verwachting: 2x koppelen beheerders, 1x wijzig email
         # print('SEC urls: %s' % repr(urls))
-        self.assertEqual(len(urls), 4)
+        self.assertEqual(len(urls), 3)
 
         # poog een lid te koppelen aan de rol SEC
         url = self.url_wijzig % self.functie_sec.pk

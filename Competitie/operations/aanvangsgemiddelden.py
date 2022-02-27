@@ -1,16 +1,47 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from BasisTypen.models import BoogType, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
-from Competitie.models import AG_NUL
+from BasisTypen.models import TeamWedstrijdklasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
+from Competitie.models import AG_NUL, CompetitieKlasse
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Logboek.models import schrijf_in_logboek
 from Sporter.models import Sporter, SporterBoog
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
+
+
+def get_competitie_bogen(comp=None):
+    """ geeft een dictionary terug met alle BoogType records die van toepassing zijn op de competitie
+    """
+    boogtype_dict = dict()  # [afkorting] = BoogType
+
+    team_wkls = list()
+    if comp:
+        for klasse in (CompetitieKlasse
+                       .objects
+                       .filter(competitie=comp,
+                               indiv=None)
+                       .select_related('team__team_type')):
+            team_wkls.append(klasse.team)
+        # for
+    else:
+        team_wkls = TeamWedstrijdklasse.objects.exclude(buiten_gebruik=True).select_related('team_type')
+
+    # ALLE bogen van de bondscompetitie teams worden ook gebruikt voor de individuele wedstrijdklassen
+    teamtypen_done = list()
+    for team_wkl in team_wkls:
+        teamtype = team_wkl.team_type
+        if teamtype.pk not in teamtypen_done:
+            teamtypen_done.append(teamtype.pk)
+            for boogtype in teamtype.boog_typen.all():
+                boogtype_dict[boogtype.afkorting] = boogtype
+            # for
+    # for
+
+    return boogtype_dict
 
 
 def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
@@ -38,10 +69,7 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
     eindjaar = int(seizoen.split('/')[1])
 
     # maak een cache aan van boogtype
-    boogtype_dict = dict()  # [afkorting] = BoogType
-    for obj in BoogType.objects.all():
-        boogtype_dict[obj.afkorting] = obj
-    # for
+    boogtype_dict = get_competitie_bogen()
 
     # maak een cache aan van nhb leden
     # we filteren hier niet op inactieve leden
@@ -60,8 +88,10 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
     # verwijder alle bestaande aanvangsgemiddelden
     Score.objects.filter(type=SCORE_TYPE_INDIV_AG, afstand_meter=afstand).all().delete()
 
-    minimum_aantal_scores = {18: settings.COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG,
-                             25: settings.COMPETITIE_25M_MINIMUM_SCORES_VOOR_AG}
+    minimum_aantal_scores = {
+        18: settings.COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG,
+        25: settings.COMPETITIE_25M_MINIMUM_SCORES_VOOR_AG
+    }
 
     # doorloop alle individuele histcomp records die bij dit seizoen horen
     bulk_score = list()
@@ -70,6 +100,10 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
                     .objects
                     .select_related('histcompetitie')
                     .filter(histcompetitie=histcomp)):
+
+            # gebruik scores van IB voor gemiddelde van TR (overgang 2021/2022 --> 2022/2023)
+            if obj.boogtype == 'IB':
+                obj.boogtype = 'TR'
 
             if (obj.gemiddelde > AG_NUL
                     and obj.boogtype in boogtype_dict

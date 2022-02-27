@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -23,7 +23,6 @@ from .models import (Competitie, DeelCompetitie, CompetitieMutatie, LAAG_REGIO,
                      MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
 from .operations import (bepaal_startjaar_nieuwe_competitie, get_mappings_wedstrijdklasse_to_competitieklasse,
                          bepaal_klassengrenzen_indiv, bepaal_klassengrenzen_teams, competitie_klassengrenzen_vaststellen)
-from .menu import menu_dynamics_competitie
 import datetime
 import time
 
@@ -90,7 +89,13 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context['indivklassen'] = self._get_queryset_indivklassen()
         context['teamklassen'] = self._get_queryset_teamklassen()
-        menu_dynamics(self.request, context, actief='competitie')
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (None, 'Start competitie')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -153,7 +158,13 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
         if Competitie.objects.filter(begin_jaar=jaar).count() > 0:
             context['bestaat_al'] = True
 
-        menu_dynamics_competitie(self.request, context)
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:instellingen-volgende-competitie'), 'Start competitie'),
+            (None, 'Aanmaken')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -204,7 +215,14 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
         else:
             context['seizoen'] = histcomps[0].seizoen
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+                comp.beschrijving.replace(' competitie', '')),
+            (None, 'Aanvangsgemiddelden')
+        )
+
+        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
     @staticmethod
@@ -292,8 +310,17 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
         datum = wanneer_ag_vastgesteld(comp.afstand)
         if datum:
             context['bb_ag_nieuwste_datum'] = localize(datum.date())
+        else:
+            context['bb_ag_nieuwste_datum'] = '????'
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+                comp.beschrijving.replace(' competitie', '')),
+            (None, 'Klassegrenzen')
+        )
+
+        menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
 
     @staticmethod
@@ -357,7 +384,14 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
         comp.datum9 = comp.bk_eerste_wedstrijd
         comp.datum10 = comp.bk_laatste_wedstrijd
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+                comp.beschrijving.replace(' competitie', '')),
+            (None, 'Zet datums'),
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
     @staticmethod

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,42 +9,48 @@
 
 {% block pagina %}
 
-    <div class="white" style="padding:10px 30px 10px 30px">
-
-        <h4>Handleiding RCL</h4>
-
-        <p>De Regiocompetitieleider (RCL) is verantwoordelijk voor het organiseren van de competities.</p>
-        <p>De website kent 32 RCL rollen: voor elk van de 16 regios en per competitie type: Indoor / 25m 1pijl.</p>
-
-        <p>De RCL krijgt de volgende mogelijkheden:</p>
-        <ul style="padding-left: 20px">
-            <li style="list-style-type: disc; padding-left:0">Instellingen voor zijn regio aanpassen, zoals clusters en instellingen voor de teamcompetitie</li>
-            <li style="list-style-type: disc; padding-left:0">Wedstrijdkalender opstellen: in welke weeknummers en op welke locaties kan er geschoten worden?</li>
-            <li style="list-style-type: disc; padding-left:0">Van elke vereniging binnen de regio de HWL koppelen (de secretaris kan dit ook).</li>
-            <li style="list-style-type: disc; padding-left:0">Informatie inzien over de accommodaties van de verenigingen binnen de regio.</li>
-            <li style="list-style-type: disc; padding-left:0">De aangemaakte teams inzien.</li>
-            <li style="list-style-type: disc; padding-left:0">De handmatig ingevoerde aanvangsgemiddelde voor de teamcompetitie inzien en eventueel bijstellen.</li>
-            <li style="list-style-type: disc; padding-left:0">Poules aanmaken.</li>
-        </ul>
-
-        <p>&nbsp;</p>
-        <p>Noteer: Deze handleiding beschrijft alleen wat een RCL kan doen binnen de website.</p>
-
-        <p>&nbsp;</p>
-        <hr>
-        <h5>Verder</h5>
-        <p>Terug naar de <a class="btn-nhb-blauw" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
-        <p>Meer informatie over <a class="btn-nhb-blauw" href="/handleiding/Rollen/">Rollen</a></p>
-        <p><a class="btn-nhb-blauw" href="/handleiding/Clusters/">Clusters</a></p>
-        <p><a class="btn-nhb-blauw" href="/handleiding/Inschrijfmethodes_Regiocompetitie/">Inschrijfmethodes Regiocompetitie</a></p>
-        <p><a class="btn-nhb-blauw" href="/handleiding/RCL_instellingen_regio/">RCL instellingen regio</a></p>
-        <p><a class="btn-nhb-blauw" href="/handleiding/Planning_Regio/">Planning Regio</a></p>
-        <p><a class="btn-nhb-blauw" href="/handleiding/Poules/">Poules</a></p>
-
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Handleiding RCL</h3>
+        </div>
     </div>
 
-{% endblock %}
 
-{% block menu %}
-    {% include 'handleiding/menu.dtl' %}
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+
+                <p>De Regiocompetitieleider (RCL) is verantwoordelijk voor het organiseren van de competities.</p>
+                <p>De website kent 32 RCL rollen: voor elk van de 16 regios en per competitie type: Indoor / 25m 1pijl.</p>
+
+                <p>De RCL krijgt de volgende mogelijkheden:</p>
+                <ul style="padding-left: 20px">
+                    <li style="list-style-type: disc; padding-left:0">Instellingen voor zijn regio aanpassen, zoals clusters en instellingen voor de teamcompetitie</li>
+                    <li style="list-style-type: disc; padding-left:0">Wedstrijdkalender opstellen: in welke weeknummers en op welke locaties kan er geschoten worden?</li>
+                    <li style="list-style-type: disc; padding-left:0">Van elke vereniging binnen de regio de HWL koppelen (de secretaris kan dit ook).</li>
+                    <li style="list-style-type: disc; padding-left:0">Informatie inzien over de accommodaties van de verenigingen binnen de regio.</li>
+                    <li style="list-style-type: disc; padding-left:0">De aangemaakte teams inzien.</li>
+                    <li style="list-style-type: disc; padding-left:0">De handmatig ingevoerde aanvangsgemiddelde voor de teamcompetitie inzien en eventueel bijstellen.</li>
+                    <li style="list-style-type: disc; padding-left:0">Poules aanmaken.</li>
+                </ul>
+
+                <p>&nbsp;</p>
+                <p>Noteer: Deze handleiding beschrijft alleen wat een RCL kan doen binnen de website.</p>
+
+                <p>&nbsp;</p>
+                <hr>
+                <h5>Verder</h5>
+                <p>Terug naar de <a class="btn-nhb-rood" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
+                <p>Meer informatie over <a class="btn-nhb-rood" href="/handleiding/Rollen/">Rollen</a></p>
+                <p><a class="btn-nhb-rood" href="/handleiding/Clusters/">Clusters</a></p>
+                <p><a class="btn-nhb-rood" href="/handleiding/Inschrijfmethodes_Regiocompetitie/">Inschrijfmethodes Regiocompetitie</a></p>
+                <p><a class="btn-nhb-rood" href="/handleiding/RCL_instellingen_regio/">RCL instellingen regio</a></p>
+                <p><a class="btn-nhb-rood" href="/handleiding/Planning_Regio/">Planning Regio</a></p>
+                <p><a class="btn-nhb-rood" href="/handleiding/Poules/">Poules</a></p>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

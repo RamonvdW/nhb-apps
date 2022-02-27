@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -222,7 +222,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.get(self.url_profiel)
         self.assertContains(resp, 'De volgende competities worden georganiseerd')
         self.assertContains(resp, 'De inschrijving is open tot ')
-        self.assertContains(resp, 'De volgende competities passen bij de bogen waar jij mee schiet:')
+        self.assertContains(resp, 'De volgende competities passen bij de bogen waar jij mee schiet')
         urls = self.extract_all_urls(resp, skip_menu=True)
         # print('urls:', urls)
         urls = [url for url in urls if '/bondscompetities/deelnemen/aanmelden/' in url]
@@ -363,7 +363,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         # self._prep_voorkeuren()       --> niet aanroepen, dan geen sporterboog
 
         # haal de profiel pagina op
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(27):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

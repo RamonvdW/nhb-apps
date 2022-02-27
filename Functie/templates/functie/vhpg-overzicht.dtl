@@ -9,31 +9,41 @@
 {% block title %}Omgaan met persoonsgegevens{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vhpg-overzicht" %}
 
-<h4>Omgaan met persoons<wbr>gegevens</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">VHPG status</h3>
+            <p>Hieronder zie je wanneer elk van de {{ object_list|length }} beheerders<br>de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd heeft</p>
+        </div>
+    </div>
 
-<p>Hieronder kan je zien welke beheerders de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd hebben.</p>
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white" id="table1">
+                <thead>
+                    <tr>        <!-- filter veld -->
+                        <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th data-filter="on">Inlog naam</th>
+                        <th data-filter="on">Volledige naam</th>
+                        <th>Geaccepteerd op</th>
+                    </tr>
+                </thead>
+                {% for obj in object_list %}
+                    <tr>
+                        <td>{{ obj.account.username }}</td>
+                        <td>{{ obj.account.volledige_naam }}</td>
+                        <td>{{ obj.acceptatie_datum|date:"l j F Y \o\m H:i" }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
 
-<table class="white" id="table1">
-    <thead>
-        <tr>        <!-- filter veld -->
-            <td colspan="2" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
-            <td></td>
-        </tr>
-        <tr>
-            <th data-filter="on">Inlog naam</th>
-            <th data-filter="on">Volledige naam</th>
-            <th>Geaccepteerd op</th>
-        </tr>
-    </thead>
-    {% for obj in object_list %}
-        <tr>
-            <td>{{ obj.account.username }}</td>
-            <td>{{ obj.account.volledige_naam }}</td>
-            <td>{{ obj.acceptatie_datum|date:"l j F Y" }} om {{ obj.acceptatie_datum|date:"H:i" }}</td>
-        </tr>
-    {% endfor %}
-</table>
+    {% include 'feedback/sidebar.dtl' with op_pagina="vhpg-overzicht" %}
 
 {% endblock %}

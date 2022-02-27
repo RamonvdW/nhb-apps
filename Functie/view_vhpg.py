@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -30,11 +30,15 @@ class VhpgAfsprakenView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_VHPG_AFSPRAKEN
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.vhpg = None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         if self.request.user.is_authenticated:
-            needs_vhpg, _ = account_needs_vhpg(self.request.user, show_only=True)
-            return needs_vhpg
+            _, self.vhpg = account_needs_vhpg(self.request.user)
+            return True
         return False
 
     def handle_no_permission(self):
@@ -44,7 +48,15 @@ class VhpgAfsprakenView(UserPassesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-        menu_dynamics(self.request, context, actief='wissel-van-rol')
+
+        context['acceptatie_datum'] = self.vhpg.acceptatie_datum
+
+        context['kruimels'] = (
+            (reverse('Functie:wissel-van-rol'), 'Wissel van rol'),
+            (None, 'Afspraken inzien')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -53,10 +65,10 @@ def account_vhpg_is_geaccepteerd(account):
     """
     # Deze functie wordt aangeroepen vanuit een POST handler
     # concurrency beveiliging om te voorkomen dat 2 records gemaakt worden
-    obj, created = (VerklaringHanterenPersoonsgegevens
-                    .objects
-                    .update_or_create(account=account,
-                                      defaults={'acceptatie_datum': timezone.now()}))
+    _ = (VerklaringHanterenPersoonsgegevens
+         .objects
+         .update_or_create(account=account,
+                           defaults={'acceptatie_datum': timezone.now()}))
 
 
 class VhpgAcceptatieView(TemplateView):
@@ -77,7 +89,15 @@ class VhpgAcceptatieView(TemplateView):
             return HttpResponseRedirect(reverse('Plein:plein'))
 
         form = AccepteerVHPGForm()
-        context = {'form': form}
+
+        context = dict()
+        context['form'] = form
+
+        context['kruimels'] = (
+            (reverse('Functie:wissel-van-rol'), 'Wissel van rol'),
+            (None, 'Persoonsgegevens')
+        )
+
         menu_dynamics(request, context, actief="wissel-van-rol")
         return render(request, TEMPLATE_VHPG_ACCEPTATIE, context)
 
@@ -131,7 +151,12 @@ class VhpgOverzichtView(UserPassesTestMixin, ListView):
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
-        menu_dynamics(self.request, context, actief='hetplein')
+
+        context['kruimels'] = (
+            (None, 'VHPG status'),
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 

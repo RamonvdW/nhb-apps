@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -132,13 +132,13 @@ class TestCompRegioPoules(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=10,
+                                              team__volgorde=15,        # Rec ERE
                                               is_voor_teams_rk_bk=False)
         klasse.min_ag = 29.0
         klasse.save()
 
         klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=11,
+                                              team__volgorde=16,        # Rec A
                                               is_voor_teams_rk_bk=False)
         klasse.min_ag = 25.0
         klasse.save()
@@ -343,7 +343,7 @@ class TestCompRegioPoules(E2EHelpers, TestCase):
         poule = RegiocompetitieTeamPoule.objects.all()[0]
 
         # maak 9 teams aan
-        type_r = TeamType.objects.get(afkorting='R')
+        type_r = TeamType.objects.get(afkorting='R2')
         klasse_r_ere = CompetitieKlasse.objects.filter(team__team_type=type_r).order_by('team__volgorde')[0]
         for lp in range(9):
             # team zonder sporters maar wel in een klasse is genoeg voor een poule

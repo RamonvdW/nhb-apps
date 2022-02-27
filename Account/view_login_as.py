@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -137,7 +137,17 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         context['zoekterm'] = self.zoekterm
         context['form'] = self.form
 
-        menu_dynamics(self.request, context, actief='wissel-van-rol')
+        if context['object_list']:
+            context['aantal_gevonden'] = context['object_list'].count()
+        else:
+            context['aantal_gevonden'] = 0
+
+        context['kruimels'] = (
+            (reverse('Functie:wissel-van-rol'), 'Wissel van rol'),
+            (None, 'Account wissel'),
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -169,7 +179,13 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
         url = maak_tijdelijke_url_accountwissel(accountemail, naar_account=accountemail.account.username)
         context['login_as_url'] = url
 
-        menu_dynamics(self.request, context, actief='wissel-van-rol')
+        context['kruimels'] = (
+            (reverse('Functie:wissel-van-rol'), 'Wissel van rol'),
+            (reverse('Account:account-wissel'), 'Account wissel'),
+            (None, 'Activeer'),
+        )
+
+        menu_dynamics(self.request, context)
         return render(self.request, TEMPLATE_LOGIN_AS_GO, context)
 
 

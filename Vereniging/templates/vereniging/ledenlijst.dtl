@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -9,123 +9,165 @@
 {% block title %}Ledenlijst{% endblock %}
 
 {% block pagina %}
-{% include 'overig/site-feedback-sidebar.dtl' with op_pagina="vereniging-ledenlijst" %}
 
-<h4>Ledenlijst</h4>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Ledenlijst</h3>
+            <p>Van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }}.</p>
+        </div>
+    </div>
 
-<p>Deze pagina toont een overzicht van de jeugdleden en volwassen leden van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }}.</p>
+    {% if leden_jeugd %}
 
-{% if leden_jeugd %}
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Jeugdleden</h4>
+            </div>
+        </div>
 
-    <h5>Jeugd</h5>
+        <!-- blauwe balk -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
 
-    <table class="white" id="table1">
-        <thead>
-            <tr>        <!-- filter veld -->
-                <td colspan="4" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/></td>
-                <td colspan="3"></td>
-            </tr>
-            <tr>
-                <th data-filter="on">Bondsnummer</th>
-                <th>M/V</th>
-                <th data-filter="on">Voornaam</th>
-                <th data-filter="on">Achternaam</th>
-                <th>Leeftijd</th>
-                <th>Leeftijdsklasse {{ wedstrijdklasse_jaar }}</th>
-                <th>Laatste inlog</th>
-            </tr>
-        </thead>
+                <table class="white" id="table1">
+                    <thead>
+                        <tr>        <!-- filter veld -->
+                            <td colspan="4" class="table-filter">
+                                <input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/>
+                            </td>
+                            <td colspan="3"></td>
+                        </tr>
+                        <tr> <!-- class="nhb-table-header" -->
+                            <th data-filter="on">Bonds<wbr>nummer</th>
+                            <th>M/V/X</th>
+                            <th data-filter="on">Voor<wbr>naam</th>
+                            <th data-filter="on">Achter<wbr>naam</th>
+                            <th>Leeftijd</th>
+                            <th>Leeftijds<wbr>klasse {{ wedstrijdklasse_jaar }}</th>
+                            <th class="hide-on-small-only">Laatste inlog</th>
+                        </tr>
+                    </thead>
 
-        {% for obj in leden_jeugd %}
-            <tr>
-                <td>{{ obj.lid_nr }}</td>
-                <td>{{ obj.geslacht }}</td>
-                <td>{{ obj.voornaam }}</td>
-                <td>{{ obj.achternaam }}</td>
-                <td>{{ obj.leeftijd }}</td>
-                <td>{{ obj.leeftijdsklasse.klasse_kort }}</td>
-                <td>
-                    {% if obj.geen_inlog == 2 %}
-                        <i>Onvoltooid account</i>
-                    {% elif obj.geen_inlog %}
-                        <i>Nooit</i>
-                    {% else %}
-                        <span>{{ obj.laatste_inlog }}</span>
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
+                    {% for obj in leden_jeugd %}
+                        <tr>
+                            <td>{{ obj.lid_nr }}</td>
+                            <td>{{ obj.geslacht }}</td>
+                            <td>{{ obj.voornaam }}</td>
+                            <td>{{ obj.achternaam }}</td>
+                            <td>{{ obj.leeftijd }}</td>
+                            <td>{{ obj.leeftijdsklasse.klasse_kort }}</td>
+                            <td class="hide-on-small-only">
+                                {% if obj.geen_inlog == 2 %}
+                                    <i>Onvoltooid account</i>
+                                {% elif obj.geen_inlog %}
+                                    <i>Nooit</i>
+                                {% else %}
+                                    <span>{{ obj.laatste_inlog }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
 
-{% endif %}
+            </div>
+        </div>
 
-
-<h5>Senioren</h5>
-
-<table class="white" id="table2">
-    <thead>
-        <tr>        <!-- filter veld -->
-            <td colspan="4" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/></td>
-            <td></td>
-        </tr>
-        <tr>
-            <th data-filter="on">Bondsnummer</th>
-            <th>M/V</th>
-            <th data-filter="on">Voornaam</th>
-            <th data-filter="on">Achternaam</th>
-            <th>Leeftijdsklasse {{ wedstrijdklasse_jaar }}</th>
-            <th>Laatste inlog</th>
-        </tr>
-    </thead>
-
-    {% for obj in leden_senior %}
-        <tr>
-            <td>{{ obj.lid_nr }}</td>
-            <td>{{ obj.geslacht }}</td>
-            <td>{{ obj.voornaam }}</td>
-            <td>{{ obj.achternaam }}</td>
-            <td>{{ obj.leeftijdsklasse.klasse_kort }}</td>
-
-            <td>
-                {% if obj.geen_inlog == 2 %}
-                    <i>Onvoltooid account</i>
-                {% elif obj.geen_inlog %}
-                    <i>Nooit</i>
-                {% else %}
-                    <span>{{ obj.laatste_inlog }}</span>
-                {% endif %}
-            </td>
-        </tr>
-    {% endfor %}
-</table>
+    {% endif %}     <!-- jeugdleden -->
 
 
-{% if leden_inactief %}
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Volwassenen</h4>
+        </div>
+    </div>
 
-    <h5>Inactieve leden</h5>
+    <!-- blauwe balk -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
 
-    <table class="white">
-        <thead>
-            <tr>
-                <th>Bondsnummer</th>
-                <th>M/V</th>
-                <th>Voornaam</th>
-                <th>Achternaam</th>
-                <th>Geboortejaar</th>
-            </tr>
-        </thead>
+            <table class="white" id="table2">
+                <thead>
+                    <tr>        <!-- filter veld -->
+                        <td colspan="4" class="table-filter"><input class="table-filter" oninput="myTableFilter(this, 'table2')" placeholder="Zoeken"/></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th data-filter="on">Bonds<wbr>nummer</th>
+                        <th>M/V</th>
+                        <th data-filter="on">Voor<wbr>naam</th>
+                        <th data-filter="on">Achter<wbr>naam</th>
+                        <th>Leeftijds<wbr>klasse {{ wedstrijdklasse_jaar }}</th>
+                        <th class="hide-on-small-only">Laatste inlog</th>
+                    </tr>
+                </thead>
 
-        {% for obj in leden_inactief %}
-            <tr>
-                <td>{{ obj.lid_nr }}</td>
-                <td>{{ obj.geslacht }}</td>
-                <td>{{ obj.voornaam }}</td>
-                <td>{{ obj.achternaam }}</td>
-                <td>{{ obj.geboorte_datum.year }}</td>
-            </tr>
-        {% endfor %}
-    </table>
-{% endif %}
+                {% for obj in leden_senior %}
+                    <tr>
+                        <td>{{ obj.lid_nr }}</td>
+                        <td>{{ obj.geslacht }}</td>
+                        <td>{{ obj.voornaam }}</td>
+                        <td>{{ obj.achternaam }}</td>
+                        <td>{{ obj.leeftijdsklasse.klasse_kort }}</td>
 
+                        <td class="hide-on-small-only">
+                            {% if obj.geen_inlog == 2 %}
+                                <i>Onvoltooid account</i>
+                            {% elif obj.geen_inlog %}
+                                <i>Nooit</i>
+                            {% else %}
+                                <span>{{ obj.laatste_inlog }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+
+        </div>
+    </div>
+
+    {% if leden_inactief %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Inactieve leden</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+
+                <table class="white">
+                    <thead>
+                        <tr>
+                            <th>Bonds<wbr>nummer</th>
+                            <th>M/V</th>
+                            <th>Voor<wbr>naam</th>
+                            <th>Achter<wbr>naam</th>
+                            <th>Geboorte<wbr>jaar</th>
+                        </tr>
+                    </thead>
+
+                    {% for obj in leden_inactief %}
+                        <tr>
+                            <td>{{ obj.lid_nr }}</td>
+                            <td>{{ obj.geslacht }}</td>
+                            <td>{{ obj.voornaam }}</td>
+                            <td>{{ obj.achternaam }}</td>
+                            <td>{{ obj.geboorte_datum.year }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+            </div>
+        </div>
+
+    {% endif %}     <!-- inactieve leden -->
+
+{% include 'feedback/sidebar.dtl' with op_pagina="vereniging-ledenlijst" %}
 
 {% endblock %}

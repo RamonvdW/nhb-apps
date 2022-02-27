@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -33,7 +33,7 @@ urlpatterns = [
          name='overzicht'),
 
     path('overzicht/alle-lid-nrs/sec-hwl/',
-         view_overzicht.OverzichtLidNrsSecHwlView.as_view(),
+         view_overzicht.OverzichtEmailsSecHwlView.as_view(),
          name='sec-hwl-lid_nrs'),
 
 

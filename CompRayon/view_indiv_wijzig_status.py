@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,9 +12,9 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (KampioenschapSchutterBoog, CompetitieMutatie,
                                MUTATIE_AFMELDEN, MUTATIE_AANMELDEN)
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Overig.background_sync import BackgroundSync
+from Plein.menu import menu_dynamics
 import time
 
 
@@ -84,14 +84,22 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
                                         kwargs={'deelnemer_pk': deelnemer.pk})
 
         if self.rol_nu == Rollen.ROL_RKO:
-            context['url_terug'] = reverse('CompRayon:lijst-rk',
-                                           kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk})
+            context['kruimels'] = (
+                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+                (reverse('CompRayon:lijst-rk', kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk}), 'RK selectie'),
+                (None, 'Wijzig sporter status')
+            )
         else:
             # HWL
-            context['url_terug'] = reverse('CompRayon:lijst-rk-ver',
-                                           kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk})
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (None, comp.beschrijving.replace(' competitie', '')),
+                (reverse('CompRayon:lijst-rk-ver', kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk}), 'Deelnemers RK'),
+                (None, 'Wijzig sporter status')
+            )
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelnemer.deelcompetitie.competitie.pk)
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):

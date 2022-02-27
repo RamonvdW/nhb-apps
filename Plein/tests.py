@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -38,14 +38,14 @@ class TestPlein(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.e2e_assert_other_http_commands_not_supported(self.url_privacy)
 
-    def test_dynamic_menu_assert(self):
-        # test the assert in menu_dynamics
-        context = dict()
-        request = types.SimpleNamespace()      # creates an empty object
-        request.user = types.SimpleNamespace()
-        request.user.is_authenticated = False
-        with self.assertRaises(AssertionError):
-            menu_dynamics(request, context, actief='test-bestaat-niet')
+    # def test_dynamic_menu_assert(self):
+    #     # test the assert in menu_dynamics
+    #     context = dict()
+    #     request = types.SimpleNamespace()      # creates an empty object
+    #     request.user = types.SimpleNamespace()
+    #     request.user.is_authenticated = False
+    #     with self.assertRaises(AssertionError):
+    #         menu_dynamics(request, context, actief='test-bestaat-niet')
 
     def test_quick(self):
         # voor test.sh om met een snelle run in debug mode

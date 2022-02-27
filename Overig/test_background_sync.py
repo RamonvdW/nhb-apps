@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,7 +9,7 @@ from django.test import TestCase
 from Overig.background_sync import BackgroundSync
 
 
-class TestOverigFeedback(TestCase):
+class TestOverigBackgroundSync(TestCase):
 
     """ unit tests voor de Overig applicatie, module Background Sync """
 

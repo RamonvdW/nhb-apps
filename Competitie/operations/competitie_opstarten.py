@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,38 +18,93 @@ import logging
 my_logger = logging.getLogger('NHBApps.Competitie')
 
 
+def competitie_week_nr_to_date(jaar, week_nr):
+    # de competitie begin na de zomer
+    # dus als het weeknummer voor de zomer valt, dan is het in het volgende jaar
+    if week_nr <= 26:
+        jaar += 1
+
+    # conversie volgen ISO 8601
+    # details: https://docs.python.org/3/library/datetime.html
+    # %G = jaar
+    # %V = met maandag als eerste dag van de week + week 1 bevat 4 januari
+    # %u = dag van de week met 1=maandag
+    when = datetime.datetime.strptime("%s-%s-1" % (jaar, week_nr), "%G-%V-%u")
+    when2 = datetime.date(year=when.year, month=when.month, day=when.day)
+    return when2
+
+
+def bepaal_volgende_week_nummer(deelcomp, cluster):
+    """ bepaalt het nieuwe week nummer, opvolgend op de al gekozen week nummers
+        hanteer wrap-around aan het einde van het jaar.
+
+        Retourneert het nieuwe week nummer of None als de limiet van 16 rondes bereikt is.
+        De eerste keer wordt week 37 terug gegeven.
+    """
+
+    begin_jaar = deelcomp.competitie.begin_jaar
+
+    last_week_in_year = 52
+    when_wk53 = competitie_week_nr_to_date(begin_jaar, 53)
+    when_wk1 = competitie_week_nr_to_date(begin_jaar, 1)        # doet jaar+1 omdat week_nr <= 26
+    if when_wk53 != when_wk1:
+        # wk53 does exist
+        last_week_in_year = 53
+
+    # zoek de bestaande records
+    objs = (DeelcompetitieRonde
+            .objects
+            .filter(deelcompetitie=deelcomp,
+                    cluster=cluster))
+
+    nrs = list()
+    for obj in objs:
+        nr = obj.week_nr
+        # compenseer voor wrap-around aan het einde van het jaar
+        # waardoor week 1..26 na week 37..52 moeten komen
+        if nr < 26:
+            nr += 100
+        nrs.append(nr)
+    # for
+
+    # maximum bereikt?
+    if len(nrs) >= 16:
+        nieuwe_week_nr = None
+    else:
+        if len(nrs) > 0:
+            max_nr = max(nrs)
+            if max_nr > 100:
+                max_nr -= 100
+            nieuwe_week_nr = max_nr + 1
+            if nieuwe_week_nr > last_week_in_year:
+                nieuwe_week_nr = 1
+        else:
+            nieuwe_week_nr = 37
+
+    return nieuwe_week_nr
+
+
 def maak_deelcompetitie_ronde(deelcomp, cluster=None):
     """ Maak een nieuwe deelcompetitie ronde object aan
         geef er een uniek week nummer aan.
     """
 
-    # zoek de bestaande records
-    objs = (DeelcompetitieRonde
-            .objects
-            .filter(deelcompetitie=deelcomp, cluster=cluster)
-            .order_by('-week_nr'))
+    nieuwe_week_nr = bepaal_volgende_week_nummer(deelcomp, cluster)
 
-    objs = list(objs)
+    if nieuwe_week_nr:
+        # maak een eigen wedstrijdenplan aan voor deze ronde
+        plan = CompetitieWedstrijdenPlan()
+        plan.save()
 
-    if len(objs) > 0:
-        nieuwe_week_nr = objs[0].week_nr + 1
-
-        # maximum bereikt?
-        if len(objs) >= 16:
-            return
+        ronde = DeelcompetitieRonde()
+        ronde.deelcompetitie = deelcomp
+        ronde.cluster = cluster
+        ronde.week_nr = nieuwe_week_nr
+        ronde.plan = plan
+        ronde.save()
     else:
-        nieuwe_week_nr = 37
-
-    # maak een eigen wedstrijdenplan aan voor deze ronde
-    plan = CompetitieWedstrijdenPlan()
-    plan.save()
-
-    ronde = DeelcompetitieRonde()
-    ronde.deelcompetitie = deelcomp
-    ronde.cluster = cluster
-    ronde.week_nr = nieuwe_week_nr
-    ronde.plan = plan
-    ronde.save()
+        # maximum aantal rondes is al aangemaakt
+        ronde = None
 
     return ronde
 

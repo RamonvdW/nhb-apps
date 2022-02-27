@@ -28,163 +28,162 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans&amp;display=swap">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu&amp;display=swap">
-        <link rel="stylesheet" href="{% static 'materialize-new-52.css' %}">
-        <link rel="stylesheet" href="{% static 'site_layout_min-25.css' %}"> <!-- moet ná materialize css -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@500&display=swap">
+        <link rel="stylesheet" href="{% static 'materialize-new-102.css' %}">
         {% block extraheader %}{% endblock %}
     </head>
 
-    <body class="nhb-grijs">
-        <div id="container">        <!-- css manipulates this to make space for the menu -->
+    <body class="white">
 
-            <!-- main contents -->
-            <div id="content">      <!-- css manipulates this -->
+        <!-- top navbar -->
+        <div class="navbar-fixed">
+            <nav class="nhb-grijs">
+                <div class="nav-wrapper">
+                    <!-- logo aan de linker kant -->
+                    <a href="/plein/" class="brand-logo" style="left:0; transform:none; padding-left:7px; padding-top:7px">
+                        <img src="{% static 'plein/logo_with_text_nhb_jubileum.png' %}" height="50" width="213" alt="NHB logo" style="z-index:1">
+                    </a>
 
-                <!-- button to call-up the sidenav; hidden when not needed -->
-                <a id="discover-menu" href="#" data-target="slide-out" class="sidenav-trigger hide-on-large-only">
-                    <i class="material-icons-round black-text" style="line-height:1.2">menu</i>
-                </a>
-
-                <!-- aandachtstrekker: uitleg hoe in het menu te komen -->
-                <div class="tap-target" data-target="discover-menu" id="tap-target-voor-menu">
-                    <div class="tap-target-content white-text">
-                        <h5>Toegang tot het menu</h5>
-                        <p>Gebruik de drie streepjes om het menu op te roepen</p>
-                        <button class="btn-nhb-rood" onclick="closeTapTarget('tap-target-voor-menu')">Ik snap het</button>
-                    </div>
+                    <!-- login/quick access knop aan de rechter kant -->
+                    <ul id="nav-mobile" class="right">
+                        <!--
+                        <li><a class="btn-nhb-rood" href="{% url 'Competitie:kies' %}">Bondscompetities</a></li>
+                        <li><a class="btn-nhb-rood" href="{% url 'Records:overzicht' %}">Records</a></li>
+                        -->
+                        {% if menu_voornaam %}
+                            <li>
+                                <a href="#" class="btn-nhb-rood dropdown-trigger" data-target="navbar-dropdown" style="position:relative; z-index:2">
+                                    <i class="material-icons-round hide-on-small-only right" style="line-height:36px">expand_more</i>
+                                    <i class="material-icons-round hide-on-med-and-up" style="line-height:36px">expand_more</i>
+                                    <span class="hide-on-small-only">{{ menu_voornaam|escape }}</span></a>
+                            </li>
+                        {% elif not verberg_login_knop %}
+                            <li><a href="{% url 'Account:login' %}" class="btn-nhb-rood" style="position:relative; z-index:2">Inloggen</a></li>
+                        {% endif %}
+                    </ul>
                 </div>
 
-                <!-- screen-size indicator labels -->
-                {% if toon_schermgrootte %}
-                    <div style="position: fixed; left: 320px; top: 2px; font-size:10px">
-                        <span class="hide-unless-small">Small</span>
-                        <span class="hide-unless-medium">Medium</span>
-                        <span class="hide-unless-large">Large</span>
-                        <span class="hide-unless-xlarge">Extra-large</span>
-                    </div>
-                {% endif %}
+                <ul id="navbar-dropdown" class="dropdown-content">
+                    {% if menu_url_wissel_van_rol %}
+                        <li class="divider"></li>
+                        <li>
+                            <a href="{{ menu_url_wissel_van_rol }}">
+                                <i class="material-icons-round red-text">people_alt</i>Wissel van rol</a>
+                        </li>
+                    {% endif %}
 
-                <!-- echt pagina komt hier, vanuit de template -->
-                {% block pagina %}{% endblock %}
-            </div>
+                    {% if menu_url_admin_site %}
+                        <li class="divider"></li>
+                        <li>
+                            <a href="{{ menu_url_admin_site }}">
+                                <i class="material-icons-round red-text">build</i>Admin site</a>
+                        </li>
+                    {% endif %}
 
-            <!-- sidenav (als laatste zodat dit niet de eerste tabstop is) -->
-            <div id="menu">
-                <ul id="slide-out" class="sidenav sidenav-fixed">
-                    {% include 'plein/menu-1-head.dtl' %}
+                    {% if menu_url_taken %}
+                        <li class="divider"></li>
+                        <li>
+                            <a href="{{ menu_url_taken }}">
+                                <i class="material-icons-round red-text">inbox</i>Taken <span class="new badge" data-badge-caption="open">{{ menu_aantal_open_taken }}</span>
+                            </a>
+                        </li>
+                    {% endif %}
 
-                    <!-- vervangbaar deel van het menu -->
-                    {% block menu-competities %}
-                        {% include 'plein/menu-2-competities.dtl' %}
-                    {% endblock %}
+                    {% if menu_url_profiel %}
+                        <li class="divider"></li>
+                        <li>
+                            <a href="{{ menu_url_profiel }}">
+                                <i class="material-icons-round red-text">portrait</i>Mijn pagina</a>
+                        </li>
+                    {% endif %}
 
-                    {% include 'plein/menu-3.dtl' %}
-
-                    {% include 'plein/menu-9-tail.dtl' %}
+                    {% if menu_url_uitloggen %}
+                        <li class="divider"></li>
+                        <li>
+                            <a href="{{ menu_url_uitloggen }}">
+                                <i class="material-icons-round red-text">logout</i>Uitloggen</a>
+                        </li>
+                    {% endif %}
                 </ul>
-            </div>
+            </nav>
 
+            <!-- screen-size indicator labels -->
+            {% if menu_toon_schermgrootte %}
+                <div style="position: fixed; left: 350px; top: 2px; font-size:10px">
+                    <span class="hide-unless-small">Small</span>
+                    <span class="hide-unless-medium">Medium</span>
+                    <span class="hide-unless-large">Large</span>
+                    <span class="hide-unless-xlarge">Extra-large</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- main contents -->
+        <div class="nav-content-scrollbar">   <!-- css manipulates this to reduce padding on mobile -->
+
+            {% block broodkruimels %}
+                <div style="padding:10px">
+                    <a class="broodkruimels-back" id="id_kruimels_back" href="javascript:history.go(-1)"><!--&lt;&nbsp;&nbsp;VORIGE-->
+                        <i class="material-icons-round" style="font-size:19px;vertical-align:bottom;padding-bottom:2px;">arrow_back</i></a>
+
+                    {% if kruimels %}
+                        <a class="broodkruimels-link" href="{% url 'Plein:plein' %}">Plein</a>
+                        {% for url, kruimel in kruimels %}
+                            <span style="font-size:11px">&#12297;</span>
+                            {% if not url %}
+                                <span class="broodkruimels-nolink">{{ kruimel }}</span>
+                            {% else %}
+                                <a class="broodkruimels-link" href="{{ url }}">{{ kruimel }}</a>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endblock %}
+
+            <!-- echt pagina komt hier, vanuit de template -->
+            {% block pagina %}{% endblock %}
         </div>
 
         <script src="{% static 'materialize-new-10_min.js' %}"></script>
-        <script src="{% static 'site_layout-2_min.js' %}"></script>
+        <script src="{% static 'site_layout-9_min.js' %}"></script>
 
         <!-- framework init, after everything has been loaded and instantiated -->
         <script type="application/javascript">
-            function discover_popup_delayed_open()
-            {
-                // in de tussentijd kan het scherm al weer groter zijn geworden
-                let menu_is_hidden = window.matchMedia("(max-width: 985px)")
-                if (menu_is_hidden.matches)
-                {
-                    let elem = document.querySelector(".tap-target")
-                    M.TapTarget.getInstance(elem).open()
-                }
-            }
-
-            function discover_popup_show(mq_event)
-            {
-                // scherm is kleiner geworden (of initieel klein), dus toon de tap target
-                if (mq_event == null || mq_event.matches) {
-                    // cookie zorgt ervoor dat de pop-up maar 3x tonen
-                    let count = getCookieNumber("menu_discover")
-                    if (count < 3)
-                    {
-                        document.cookie = "menu_discover=" + (count + 1) + "; path=/"
-                        // toon met een kleine vertraging
-                        setTimeout(discover_popup_delayed_open, 2000)
-                    }
-                }
-            }
-
-            function discover_popup_hide(mq_event) {
-                // scherm is kleiner geworden, dus haal de tap-target uit beeld
-                if (mq_event.matches)
-                {
-                    let elem = document.querySelector(".tap-target")
-                    M.TapTarget.getInstance(elem).close()
-                }
-            }
-
-            function closeTapTarget(id)
-            {
-                // haal het tap-target element uit beeld
-                let elem = document.getElementById(id)
-                let inst = M.TapTarget.getInstance(elem)
-                inst.close()        // administratief
-                inst.destroy()      // verwijderd visuele elementen
-
-                // zet het cookie dat voorkomt dat de tap target weer getoond wordt
-                document.cookie = "menu_discover=9; path=/"
-            }
-
             document.addEventListener("DOMContentLoaded", function() {
-                // sidenav
-                let elems = document.querySelectorAll(".sidenav")
-                M.Sidenav.init(elems, {})
-
                 // accordeons
                 const options = { inDuration: 100,    // default is 300
                                   outDuration: 100    // default is 300
-                                }
-                elems = document.querySelectorAll(".collapsible")
-                M.Collapsible.init(elems, options)
+                                };
+                let elems;
+
+                // console.log('history.length:', history.length)
+                if (history.length < 2) {
+                    // nothing to go back to
+                    // typically happens when opening a manual page in a new window
+                    const el = document.getElementById("id_kruimels_back");
+                    el.style.display = "none"
+                };
+
+                elems = document.querySelectorAll(".collapsible");
+                M.Collapsible.init(elems, options);
+
+                // dropdown menu
+                elems = document.querySelectorAll(".dropdown-trigger");
+                M.Dropdown.init(elems, {coverTrigger: false, constrainWidth: false});
 
                 // tooltips
-                elems = document.querySelectorAll(".tooltipped")
-                M.Tooltip.init(elems, { enterDelay: 1000 })
-
-                // feature discovery
-                elems = document.querySelectorAll(".tap-target")
-                M.TapTarget.init(elems, {})
+                elems = document.querySelectorAll(".tooltipped");
+                M.Tooltip.init(elems, { enterDelay: 1000 });
 
                 // rolgordijnen
-                elems = document.querySelectorAll("select")
-                M.FormSelect.init(elems, {})
+                elems = document.querySelectorAll("select");
+                M.FormSelect.init(elems, {});
 
-                let count = getCookieNumber("menu_discover")
-                if (count < 3)
-                {
-                    // -------------
-                    // KEEP IN SYNC
-                    // - site_layout.css: media query to show/hide labels
-                    // - site_layout.dtl: javascript checks for menu visible/hidden with media query
-                    // - materialize.js: cut-off point to show/hide sidebar (menu)
-                    // - variables.css: media query ranges
-                    // -------------
-
-                    let menu_is_shown = window.matchMedia("(min-width: 1021px)")
-                    menu_is_shown.addEventListener("change", discover_popup_hide)
-
-                    let menu_is_hidden = window.matchMedia("(max-width: 1020px)")
-                    menu_is_hidden.addEventListener("change", discover_popup_show)
-                    if (menu_is_hidden.matches) {
-                        // show immediately
-                        discover_popup_show(null)
-                    }
-                }
-            })
+                // modals
+                elems = document.querySelectorAll(".modal");
+                M.Modal.init(elems, {'endingTop': '35%'});
+            });
 
             // zoek alle tabellen met een zoekveld en trigger de oninput method
             // dit is noodzakelijk bij gebruik van de browser 'back' knop
@@ -192,18 +191,29 @@
             window.addEventListener("load", function()
             {
                 //console.log("load!")
-                const tables = document.getElementsByTagName("table")
+                const tables = document.getElementsByTagName("table");
                 Array.from(tables).forEach(table => {
                     if (table.id !== "") {
-                        const inputs = table.getElementsByTagName("input")
-                        if (inputs.length >= 1) myTableFilter(inputs[0], table.id)
+                        const inputs = table.getElementsByTagName("input");
+                        if (inputs.length >= 1) myTableFilter(inputs[0], table.id);
                     }
-                })
+                });
 
                 // evalueer de posities van de labels van de forms
                 // zodat het label niet over het ingevulde input veld staat
-                M.updateTextFields()
-            })
+                M.updateTextFields();
+            });
+
+            // resize listener, om het dropdown menu automatisch te verstoppen
+            window.addEventListener('resize', function() {
+                const elems = document.querySelectorAll(".dropdown-trigger");
+                Array.from(elems).forEach(elem => {
+                    const instance = M.Dropdown.getInstance(elem);
+                    if (instance.isOpen) {
+                        instance.close();
+                    }
+                });
+            });
         </script>
 
     </body>

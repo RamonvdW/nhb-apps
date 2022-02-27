@@ -19,30 +19,30 @@
 
             if (!ignore_changes) {
                 // enable de 'opslaan' knop
-                const el = document.getElementById("opslaan_knop")
-                el.disabled = false
-                el.parentElement.style.display = "block"
+                const el = document.getElementById("opslaan_knop");
+                el.disabled = false;
+                el.parentElement.style.display = "block";
             }
         }
 
         // omdat materialize-css het option 'hidden' attribuut niet ondersteund, verwijderen we opties
         // hierin stoppen we de kopie om de lijst mee te herstellen
-        let locatie_keuzes_html = ''
+        let locatie_keuzes_html = '';
 
         function locatie_keuze_tonen() {
             // herstel de hele lijst
-            const el_td = document.getElementById('id_accommodatie_td')
-            el_td.innerHTML = locatie_keuzes_html
+            const el_td = document.getElementById('id_accommodatie_td');
+            el_td.innerHTML = locatie_keuzes_html;
 
             // haal de keuze op
-            const ver = document.getElementById('id_ver_sel').value
+            const ver = document.getElementById('id_ver_sel').value;
 
             // maak een selectie in het drop-down menu
-            const el_select = document.getElementById('id_loc_sel')
+            const el_select = document.getElementById('id_loc_sel');
             for (let i = 0; i < el_select.length;) {
-                let option = el_select.options[i]
+                let option = el_select.options[i];
                 if (option.dataset.ver !== ver) {
-                    option.remove()
+                    option.remove();
                 } else {
                     i++;
                 }
@@ -50,225 +50,230 @@
 
             if (el_select.length == 0) {
                 // vervang drop-down door statische text
-                el_td.innerHTML = '<i class="red-text">Geen accommodatie gegevens bekend</i>'
+                el_td.innerHTML = '<i class="red-text">Geen accommodatie gegevens bekend</i>';
             } else if (el_select.length == 1) {
                 // vervang drop-down door statische text
-                el_td.innerHTML = el_select.options[0].text + '<input type="hidden" name="loc_pk" value="' + el_select.options[0].value + '">'
+                el_td.innerHTML = el_select.options[0].text + '<input type="hidden" name="loc_pk" value="' + el_select.options[0].value + '">';
             } else {
-                M.FormSelect.init(el_select)
+                M.FormSelect.init(el_select);
             }
         }
 
         function locatie_keuzes_aanpassen() {
-            locatie_keuze_tonen()
-            gewijzigd()
+            locatie_keuze_tonen();
+            gewijzigd();
         }
 
         function locatie_keuzes_init() {
             // bewaar een kopie van de volledige data set
-            locatie_keuzes_html = document.getElementById('id_accommodatie_td').innerHTML
-            locatie_keuze_tonen()
+            locatie_keuzes_html = document.getElementById('id_accommodatie_td').innerHTML;
+            locatie_keuze_tonen();
         }
     </script>
 
-    <h4>Wijzig RK wedstrijd</h4>
-
-    <div class="row">
-
-        <!-- toon gegevens van de regio en competitie in een blauwe box -->
-        <div class="col s12 m10 l8 xl6 offset-m1 offset-l2 offset-xl3">
-            <div class="white-text nhb-blauw z-depth-2">
-
-                <div class="row small-row">
-                    <div class="col s3">Competitie:</div>
-                    <div class="col s8">{{ deelcomp_rk.competitie.beschrijving }}</div>
-                </div>
-
-                <div class="row small-row">
-                    <div class="col s3">Rayon:</div>
-                    <div class="col s8">{{ deelcomp_rk.nhb_rayon }}</div>
-                </div>
-
-            </div>
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Wijzig RK wedstrijd</h3>
         </div>
     </div>
 
-    <p>&nbsp;</p>
-    <p>Op deze pagina kunnen de details voor een RK wedstrijd aangepast worden.</p>
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Competitie</th>
+                    <td>{{ deelcomp_rk.competitie.beschrijving }}</td>
+                </tr>
+                <tr>
+                    <th>Rayon</th>
+                    <td>{{ deelcomp_rk.nhb_rayon }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
 
-    <form method="post" action="{{ url_opslaan }}">
-        {% csrf_token %}
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
 
-        <table class="white">
-            <tr>
-                <td>Datum wedstrijd:</td>
-                <td>
-                    <select name="weekdag" onchange="gewijzigd()">
-                        {% for opt in opt_weekdagen %}
-                            <option value="{{ opt.weekdag_nr }}"{% if opt.actief %} selected{% endif %}>{{ opt.datum|date:"l j F Y" }}</option>
-                        {% endfor %}
-                    </select>
-                </td>
-            </tr>
+            <!-- dialoog venster -->
+            <div class="white left-align z-depth-3">
+                <div style="padding:30px">
 
-            <tr>
-                <td>Aanvang wedstrijd:</td>
-                <td>
-                    <input id="tijd1" name="aanvang" type="text" class="timepicker" onchange="gewijzigd()">
-                </td>
-            </tr>
+                    <form method="post" action="{{ url_opslaan }}">
+                        {% csrf_token %}
 
-            <tr>
-                <td>Bij vereniging:</td>
-                <td>
-                    <select name="nhbver_pk" onchange="locatie_keuzes_aanpassen()" id="id_ver_sel">
-                        <option value="geen"{% if not wedstrijd.vereniging %} selected{% endif %}>-- nog niet afgesproken --</option>
-                        {% for opt in verenigingen %}
-                            <option value="{{ opt.pk }}"{% if opt.pk == wedstrijd.vereniging.pk %} selected{% endif %}>{{ opt }}</option>
-                        {% endfor %}
-                    </select>
-                </td>
-            </tr>
-
-            <tr>
-                <td>Accommodatie:</td>
-                <td id="id_accommodatie_td">
-                    <select name="loc_pk" id="id_loc_sel" onchange="gewijzigd()">
-                        {% for opt in all_locaties %}
-                            <option value="{{ opt.pk }}" data-ver="{{ opt.ver_pk }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
-                        {% endfor %}
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <!-- inline-block gives vertical align top -->
-                <td style="display: inline-block">Wedstrijdklassen individueel:</td>
-
-                <td>
-                    <table class="striped">
-                        <thead>
+                        <table class="white">
                             <tr>
-                                <th><!-- checkbox column --></th>
-                                <th>Klasse</th>
-                                <th>Aantal sporters</th>
-                            </tr>
-                        </thead>
-                        {% for obj in wkl_indiv %}
-                            <tr>
-                                <!-- {% if obj.break_before %}<br>{% endif %} -->
-                                <td><label>
-                                    <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.disable %} disabled{% endif %} onchange="gewijzigd()">
-                                    <span>&nbsp;</span>
-                                    </label>
+                                <th>Datum wedstrijd</th>
+                                <td>
+                                    <select name="weekdag" onchange="gewijzigd()">
+                                        {% for opt in opt_weekdagen %}
+                                            <option value="{{ opt.weekdag_nr }}"{% if opt.actief %} selected{% endif %}>{{ opt.datum|date:"l j F Y" }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </td>
-                                <td>{{ obj.short_str }}</td>
-                                <td>{{ obj.schutters }}</td>
                             </tr>
-                        {% endfor %}
-                    </table>
-                </td>
-            </tr>
 
-
-            <tr>
-                <!-- inline-block gives vertical align top -->
-                <td style="display: inline-block">Wedstrijdklassen teams:</td>
-                <td>
-                    <table class="striped">
-                        <thead>
                             <tr>
-                                <th><!-- checkbox column --></th>
-                                <th>Klasse</th>
-                                <th>Aantal teams</th>
+                                <th>Aanvang wedstrijd</th>
+                                <td>
+                                    <input id="tijd1" name="aanvang" type="text" class="timepicker" onchange="gewijzigd()">
+                                </td>
                             </tr>
-                        </thead>
-                        {% for obj in wkl_team %}
+
                             <tr>
-                                {% if obj.break_before %}
-                                    </tr><tr>
-                                {% endif %}
+                                <th>Bij vereniging</th>
+                                <td>
+                                    <select name="nhbver_pk" onchange="locatie_keuzes_aanpassen()" id="id_ver_sel">
+                                        <option value="geen"{% if not wedstrijd.vereniging %} selected{% endif %}>-- nog niet afgesproken --</option>
+                                        {% for opt in verenigingen %}
+                                            <option value="{{ opt.pk }}"{% if opt.pk == wedstrijd.vereniging.pk %} selected{% endif %}>{{ opt }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Accommodatie</th>
+                                <td id="id_accommodatie_td">
+                                    <select name="loc_pk" id="id_loc_sel" onchange="gewijzigd()">
+                                        {% for opt in all_locaties %}
+                                            <option value="{{ opt.pk }}" data-ver="{{ opt.ver_pk }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <!-- inline-block gives vertical align top -->
+                                <th style="display: inline-block">Wedstrijdklassen individueel</th>
 
                                 <td>
-                                    <label>
-                                        <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.disable %} disabled{% endif %} onchange="gewijzigd()">
-                                        <span>&nbsp;</span>
-                                    </label>
+                                    <table class="striped">
+                                        <thead>
+                                            <tr>
+                                                <th><!-- checkbox column --></th>
+                                                <th>Klasse</th>
+                                                <th>Aantal sporters</th>
+                                            </tr>
+                                        </thead>
+                                        {% for obj in wkl_indiv %}
+                                            <tr>
+                                                <!-- {% if obj.break_before %}<br>{% endif %} -->
+                                                <td><label>
+                                                    <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.disable %} disabled{% endif %} onchange="gewijzigd()">
+                                                    <span>&nbsp;</span>
+                                                    </label>
+                                                </td>
+                                                <td>{{ obj.short_str }}</td>
+                                                <td>{{ obj.schutters }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
                                 </td>
-                                <td>{{ obj.short_str }}</td>
-                                <td>{{ obj.teams_count }}</td>
                             </tr>
-                        {% endfor %}
-                    </table>
-                </td>
-            </tr>
 
-        </table>
 
-        <p>
-            <a class="btn-nhb-blauw" href="{{ url_terug }}">
-                <i class="material-icons-round left">close</i>Terug</a>
-        </p>
+                            <tr>
+                                <!-- inline-block gives vertical align top -->
+                                <th style="display: inline-block">Wedstrijdklassen teams</th>
+                                <td>
+                                    <table class="striped">
+                                        <thead>
+                                            <tr>
+                                                <th><!-- checkbox column --></th>
+                                                <th>Klasse</th>
+                                                <th>Aantal teams</th>
+                                            </tr>
+                                        </thead>
+                                        {% for obj in wkl_team %}
+                                            <tr>
+                                                {% if obj.break_before %}
+                                                    </tr><tr>
+                                                {% endif %}
 
-        <div class="fixed-action-btn" style="display: none">
-            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
-                <i class="material-icons-round left">check</i>Opslaan</button>
+                                                <td>
+                                                    <label>
+                                                        <input type="checkbox" class="filled-in" name="{{ obj.sel_str }}"{% if obj.geselecteerd %} checked{% endif %}{% if obj.disable %} disabled{% endif %} onchange="gewijzigd()">
+                                                        <span>&nbsp;</span>
+                                                    </label>
+                                                </td>
+                                                <td>{{ obj.short_str }}</td>
+                                                <td>{{ obj.teams_count }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </table>
+                                </td>
+                            </tr>
+
+                        </table>
+
+                        <div class="fixed-action-btn" style="display: none">
+                            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                                <i class="material-icons-round left">check</i>Opslaan</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
         </div>
+    </div>
 
-    </form>
 
     {% if kan_niet_verwijderen %}
-        <p>&nbsp;</p>
-        <ul class="collapsible">
-            <li>
-                <div class="collapsible-header white">
-                    <span>Klik eerst hier als je de wedstrijd wilt verwijderen</span>
-                </div>
-                <div class="collapsible-body white">
-                    <p>Deze wedstrijd kan niet meer verwijderd worden, want er hangt een uitslag aan</p>
-                </div>
-            </li>
-        </ul>
+
+        <p class="center">Deze wedstrijd kan niet meer verwijderd worden, want er hangt een uitslag aan</p>
+
     {% elif url_verwijderen %}
-        <p>&nbsp;</p>
-        <form method="post" action="{{ url_verwijderen }}">
-            {% csrf_token %}
-            <ul class="collapsible">
-                <li>
-                    <div class="collapsible-header white">
-                        <span>Klik eerst hier als je de wedstrijd wilt verwijderen</span>
+
+        <p class="center">
+            <a class="btn-nhb-blauw modal-trigger" href="#bevestig_verwijder_wedstrijd">Verwijder deze wedstrijd</a>
+        </p>
+
+        <div class="modal" id="bevestig_verwijder_wedstrijd">
+            <div class="modal-content center">
+                <h5>Verwijder RK wedstrijd?</h5>
+                <p>Heb je deze RK wedstrijd echt niet meer nodig?</p>
+
+                <form method="post" action="{{ url_verwijderen }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="verwijder" value="1">
+
+                    <div class="modal-footer" style="text-align:center; display:block">
+                        <div style="display:inline-block; width:50%">
+                            <button class="btn-nhb-rood" type="submit">Ja</button>
+                        </div>
+                        <div style="display:inline-block; width:50%">
+                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                        </div>
                     </div>
-                    <div class="collapsible-body white">
-                        <p>Heb je deze wedstrijd echt niet meer nodig?</p>
-                        <button class="btn-nhb-rood" type="submit">
-                            <i class="material-icons-round left">delete</i>Verwijder deze wedstrijd</button>
-                    </div>
-                </li>
-            </ul>
-        </form>
+                </form>
+            </div>
+        </div>
+
     {% endif %}
 
     <!-- initialisatie van de time pickers -->
     <script type="application/javascript">
         document.addEventListener('DOMContentLoaded', function() {
-            let el = document.querySelector('#tijd1')
+            let el = document.querySelector('#tijd1');
             let options = {
                     twelveHour: false,
                     defaultTime: "{{ wedstrijd.tijd_begin_wedstrijd_str }}",
-                  }
-            let inst = M.Timepicker.init(el, options)
-            inst._updateTimeFromInput()
-            inst.done()
+                  };
+            let inst = M.Timepicker.init(el, options);
+            inst._updateTimeFromInput();
+            inst.done();
 
-            locatie_keuzes_init()
+            locatie_keuzes_init();
 
-            ignore_changes = false
+            ignore_changes = false;
         })
     </script>
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="comprayon-wijzig-wedstrijd-rk" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="comprayon-wijzig-wedstrijd-rk" %}
 
-{% endblock %}
-
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}

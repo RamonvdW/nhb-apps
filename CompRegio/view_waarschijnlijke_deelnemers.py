@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,8 +11,8 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import RegiocompetitieTeam
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers, bepaal_blazoen_behoefte
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
+from Plein.menu import menu_dynamics
 from Wedstrijden.models import CompetitieWedstrijd
 import csv
 
@@ -78,6 +78,7 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
 
         sporters, teams = bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd)
         context['sporters'] = sporters
+        context['aantal_regels'] = 2 + len(sporters) + len(team_pk2naam.keys())
 
         for sporter in sporters:
             sporter.in_team_naam = team_pk2naam[sporter.team_pk]
@@ -95,7 +96,13 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
             nr += 1
         # for
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp.pk)
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('CompScores:wedstrijden'), 'Competitie wedstrijden'),
+            (None, 'Deelnemers')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 

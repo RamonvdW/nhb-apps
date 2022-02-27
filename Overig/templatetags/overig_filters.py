@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django import template
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
+from Competitie.models import DAGDEEL2LABEL
 
 
 def filter_highlight(text, search_for):
@@ -73,9 +74,41 @@ def filter_wbr_email(text):
     return mark_safe(new_text)
 
 
+def filter_wbr_dagdeel(text):
+    """  wbr_dagdeel filter voegt de <wbr> html tag in zodat dagdeel beschrijvingen kunnen wrappen,
+         zoals "woensdagavond" en "zaterdagochtend"
+    """
+
+    try:
+        tup = DAGDEEL2LABEL[text]
+    except KeyError:
+        new_text = text
+    else:
+        kort, lang = tup
+        new_text = '<span class="hide-on-med-and-up">' + escape(kort) + '</span>'
+        new_text += '<span class="hide-on-small-only">'
+
+        done = False
+        for suffix in ('avond', 'middag', 'ochtend'):
+            suffix_len = len(suffix)
+            if lang[-suffix_len:] == suffix:
+                new_text += escape(lang[:-suffix_len]) + '<wbr>' + escape(suffix)
+                done = True
+                break   # from the for
+        # for
+
+        if not done:
+            new_text += escape(lang)
+
+        new_text += '</span>'
+
+    return mark_safe(new_text)
+
+
 # register the filters
 register = template.Library()
 register.filter('highlight', filter_highlight)
 register.filter('wbr_email', filter_wbr_email)
+register.filter('wbr_dagdeel', filter_wbr_dagdeel)
 
 # end of file

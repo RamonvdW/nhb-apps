@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -19,7 +20,8 @@ from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Plein.menu import menu_dynamics
 from Records.models import IndivRecord, MATERIAALKLASSE
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
-from .models import SporterVoorkeuren, SporterBoog, Speelsterkte
+from .view_voorkeuren import get_sporter_voorkeuren
+from .models import SporterBoog, Speelsterkte
 from decimal import Decimal
 import logging
 import copy
@@ -318,46 +320,47 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         context['rcl18_namen'] = list()
         context['rcl25_namen'] = list()
 
-        if not sporter.bij_vereniging:
-            return
+        if sporter.bij_vereniging:
 
-        if sporter.bij_vereniging.geen_wedstrijden:
-            context['geen_wedstrijden'] = True
+            if sporter.bij_vereniging.geen_wedstrijden:
+                context['geen_wedstrijden'] = True
 
-        regio = sporter.bij_vereniging.regio
+            regio = sporter.bij_vereniging.regio
 
-        functies = (Functie
-                    .objects
-                    .prefetch_related('accounts')
-                    .filter(Q(rol='RCL',
-                              nhb_regio=regio) |
-                            Q(rol__in=('SEC', 'HWL'),
-                              nhb_ver=sporter.bij_vereniging))
-                    .all())
+            functies = (Functie
+                        .objects
+                        .prefetch_related('accounts')
+                        .filter(Q(rol='RCL',
+                                  nhb_regio=regio) |
+                                Q(rol__in=('SEC', 'HWL'),
+                                  nhb_ver=sporter.bij_vereniging))
+                        .all())
 
-        for functie in functies:
-            namen = [account.volledige_naam() for account in functie.accounts.all()]
-            namen.sort()
+            for functie in functies:
+                namen = [account.volledige_naam() for account in functie.accounts.all()]
+                namen.sort()
 
-            if functie.rol == 'SEC':
-                # nog geen account aangemaakt, dus haal de naam op van de secretaris volgens CRM
-                if len(namen) == 0 and sporter.bij_vereniging.secretaris_set.count() > 0:
-                    namen = [sec.sporter.volledige_naam() for sec in sporter.bij_vereniging.secretaris_set.all() if sec.sporter]
-                context['sec_namen'] = namen
-                context['sec_email'] = functie.bevestigde_email
-            elif functie.rol == 'HWL':
-                context['hwl_namen'] = namen
-                context['hwl_email'] = functie.bevestigde_email
-            else:
-                if functie.comp_type == '18':
-                    # RCL 18m
-                    context['rcl18_namen'] = namen
-                    context['rcl18_email'] = functie.bevestigde_email
+                if functie.rol == 'SEC':
+                    # nog geen account aangemaakt, dus haal de naam op van de secretaris volgens CRM
+                    if len(namen) == 0 and sporter.bij_vereniging.secretaris_set.count() > 0:
+                        namen = [sec.sporter.volledige_naam() for sec in sporter.bij_vereniging.secretaris_set.all() if sec.sporter]
+                    context['sec_namen'] = namen
+                    context['sec_email'] = functie.bevestigde_email
+                elif functie.rol == 'HWL':
+                    context['hwl_namen'] = namen
+                    context['hwl_email'] = functie.bevestigde_email
                 else:
-                    # RCL 25m
-                    context['rcl25_namen'] = namen
-                    context['rcl25_email'] = functie.bevestigde_email
-        # for
+                    if functie.comp_type == '18':
+                        # RCL 18m
+                        context['rcl18_namen'] = namen
+                        context['rcl18_email'] = functie.bevestigde_email
+                    else:
+                        # RCL 25m
+                        context['rcl25_namen'] = namen
+                        context['rcl25_email'] = functie.bevestigde_email
+            # for
+
+        context['bb_email'] = settings.EMAIL_BONDSBUREAU
 
     @staticmethod
     def _find_speelsterktes(sporter):
@@ -407,7 +410,7 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                                    'bij_vereniging__regio',
                                    'bij_vereniging__regio__rayon')
                    .all())[0]
-        voorkeuren, _ = SporterVoorkeuren.objects.get_or_create(sporter=sporter)
+        voorkeuren = get_sporter_voorkeuren(sporter)
 
         alle_bogen = BoogType.objects.all()
 
@@ -440,7 +443,11 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
         self._get_contact_gegevens(sporter, context)
 
-        menu_dynamics(self.request, context, actief='sporter-profiel')
+        context['kruimels'] = (
+            (None, 'Mijn pagina'),
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -104,11 +104,11 @@ class TestData(object):
 
         self.regio_cluster = dict()             # [regio_nr] = NhbCluster (alleen regio 101 en 107)
 
-        self.comp18_klassen_indiv = dict()      # [afkorting] = [klasse, ...]
-        self.comp25_klassen_indiv = dict()      # [afkorting] = [klasse, ...]
+        self.comp18_klassen_indiv = dict()      # [boogtype afkorting] = [klasse, ...]
+        self.comp25_klassen_indiv = dict()      # [boogtype afkorting] = [klasse, ...]
 
-        self.comp18_klassen_team = dict()       # [afkorting] = [klasse, ...]
-        self.comp25_klassen_team = dict()       # [afkorting] = [klasse, ...]
+        self.comp18_klassen_team = dict()       # [teamtype afkorting] = [klasse, ...]
+        self.comp25_klassen_team = dict()       # [teamtype afkorting] = [klasse, ...]
 
         # all inschrijvingen
         self.comp18_deelnemers = list()
@@ -436,7 +436,11 @@ class TestData(object):
         lid_nr = 300000
         bulk = list()
         for ver in self.vereniging.values():
-            self.regio_ver_nrs[ver.regio.regio_nr] = ver.ver_nr
+
+            try:
+                self.regio_ver_nrs[ver.regio.regio_nr].append(ver.ver_nr)
+            except KeyError:
+                self.regio_ver_nrs[ver.regio.regio_nr] = [ver.ver_nr]
 
             for _, _, voornaam, _, maak_account in soorten:
                 lid_nr += 1
@@ -955,6 +959,8 @@ class TestData(object):
         for afkorting, deelnemers in deelnemers_per_boog.items():
 
             # alle teams moeten in een klasse (maakt niet veel uit welke)
+            if afkorting in ('R', 'BB'):
+                afkorting += '2'        # R2 / BB2
             klasse = klassen[afkorting][0]
 
             aantal = len(deelnemers)
@@ -983,6 +989,10 @@ class TestData(object):
                              vereniging=ver)):
 
             afkorting = team.team_type.afkorting
+
+            # vertaal team type naar boog type
+            if afkorting in ('R2', 'BB2'):
+                afkorting = afkorting[:-1]      # R2/BB2 -> R/BB
 
             # selecteer de volgende 4 sporters voor dit team
             deelnemers = deelnemers_per_boog[afkorting][:4]
@@ -1168,8 +1178,11 @@ class TestData(object):
         # for
 
         # zet 1x BB en 1x LB in een recurve team
-        deelnemers_per_boog['R'].append(deelnemers_per_boog['BB'].pop(0))
-        deelnemers_per_boog['R'].append(deelnemers_per_boog['LB'].pop(0))
+        if 'BB' in deelnemers_per_boog and len(deelnemers_per_boog['BB']) > 0:
+            deelnemers_per_boog['R'].append(deelnemers_per_boog['BB'].pop(0))
+
+        if 'LB' in deelnemers_per_boog and len(deelnemers_per_boog['LB']) > 0:
+            deelnemers_per_boog['R'].append(deelnemers_per_boog['LB'].pop(0))
 
         ag = 21.0
         ag_step = 0.72

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,9 +14,9 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (LAAG_REGIO, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
                                TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES, TEAM_PUNTEN,
                                Competitie, DeelCompetitie)
-from Competitie.menu import menu_dynamics_competitie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Handleiding.views import reverse_handleiding
+from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 import datetime
 
@@ -51,7 +51,8 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor de veiligheid
             deelcomp = (DeelCompetitie
                         .objects
-                        .select_related('competitie', 'nhb_regio')
+                        .select_related('competitie',
+                                        'nhb_regio')
                         .get(competitie=comp_pk,
                              laag=LAAG_REGIO,
                              nhb_regio__regio_nr=regio_nr))
@@ -114,7 +115,15 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
 
         context['wiki_rcl_regio_instellingen_url'] = reverse_handleiding(self.request, settings.HANDLEIDING_RCL_INSTELLINGEN_REGIO)
 
-        menu_dynamics_competitie(self.request, context, comp_pk=deelcomp.competitie.pk)
+        comp = deelcomp.competitie
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (None, 'Instellingen teams'),
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -230,16 +239,25 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
             punten2str[punten] = beschrijving
         # for
 
+        punten2str_short = {
+            TEAM_PUNTEN_MODEL_TWEE: '2/1/0',
+            TEAM_PUNTEN_MODEL_SOM_SCORES: 'Cumulatief',
+            TEAM_PUNTEN_MODEL_FORMULE1: 'F1'
+        }
+
         for deelcomp in deelcomps:
 
             deelcomp.regio_str = str(deelcomp.nhb_regio.regio_nr)
             deelcomp.rayon_str = str(deelcomp.nhb_regio.rayon.rayon_nr)
 
             if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
+                deelcomp.short_inschrijfmethode_str = '1'
                 deelcomp.inschrijfmethode_str = '1: kies wedstrijden'
             elif deelcomp.inschrijf_methode == INSCHRIJF_METHODE_2:
+                deelcomp.short_inschrijfmethode_str = '2'
                 deelcomp.inschrijfmethode_str = '2: klasse naar locatie'
             else:
+                deelcomp.short_inschrijfmethode_str = '3'
                 deelcomp.inschrijfmethode_str = '3: voorkeur dagdelen'
 
             if deelcomp.regio_organiseert_teamcompetitie:
@@ -248,22 +266,31 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
                 deelcomp.einde_teams_aanmaken_str = localize(deelcomp.einde_teams_aanmaken)
 
                 if deelcomp.regio_heeft_vaste_teams:
-                    deelcomp.team_type_str = 'Statisch'
+                    deelcomp.team_type_str = 'Vast'
                 else:
                     deelcomp.team_type_str = 'Dynamisch'
 
+                deelcomp.short_puntenmodel_str = punten2str_short[deelcomp.regio_team_punten_model]
                 deelcomp.puntenmodel_str = punten2str[deelcomp.regio_team_punten_model]
             else:
                 deelcomp.teamcomp_str = 'Nee'
                 deelcomp.einde_teams_aanmaken_str = '-'
                 deelcomp.team_type_str = '-'
+                deelcomp.short_puntenmodel_str = '-'
                 deelcomp.puntenmodel_str = '-'
 
             if self.rol_nu == Rollen.ROL_RKO and deelcomp.nhb_regio.rayon == self.functie_nu.nhb_rayon:
                 deelcomp.highlight = True
         # for
 
-        menu_dynamics_competitie(self.request, context, comp_pk=comp_pk)
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
+                comp.beschrijving.replace(' competitie', '')),
+            (None, 'Regio keuzes overzicht')
+        )
+
+        menu_dynamics(self.request, context)
         return context
 
 

@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2021 Ramon van der Winkel.
+                Copyright (c) 2021-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -10,11 +10,14 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="kalender-overzicht-maand" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Wedstrijdkalender</h3>
+            <p>LET OP: Het is nog niet mogelijk om aan te melden.<br>De wedstrijdkalender is daarom voorlopig alleen in te zien door beheerders.</p>
+        </div>
+    </div>
 
-    <h4>Wedstrijdkalender</h4>
-
-    <p class="red-text">LET OP: Het is nog niet mogelijk om aan te melden. De wedstrijdkalender is daarom voorlopig alleen in te zien door beheerders.</p>
 
     <!-- TODO: filters -->
 
@@ -25,53 +28,62 @@
             <td><i class="material-icons-round">chevron_right</i></td>
         </tr>
         <tr>
-            <td class="right-align"><a class="btn-nhb-blauw" href="{{ url_prev_maand }}"><i class="material-icons-round">chevron_left</i></a></td>
-            <td class="center-align"><h5>{{ datum|date:'F Y' }}</h5></td>
-            <td class="left-align"><a class="btn-nhb-blauw" href="{{ url_next_maand }}"><i class="material-icons-round">chevron_right</i></a></td>
+            <td class="right-align"><a class="btn-nhb-rood" href="{{ url_prev_maand }}">
+                <i class="material-icons-round">chevron_left</i></a></td>
+            <td class="center"><h5>{{ datum|date:'F Y' }}</h5></td>
+            <td class="left-align"><a class="btn-nhb-rood" href="{{ url_next_maand }}">
+                <i class="material-icons-round">chevron_right</i></a></td>
         </tr>
         <!-- FUTURE: drop-down maken om direct naar een jaar/maand te springen -->
     </table>
 
     <br>
 
-    <table class="white">
-        <thead>
-            <tr>
-                <th>Wanneer</th>
-                <th>Beschrijving</th>
-                <th>Locatie</th>
-                <th><!-- kolom voor de knoppen --></th>
-            </tr>
-        </thead>
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Wanneer</th>
+                        <th>Beschrijving</th>
+                        <th>Locatie</th>
+                        <th><!-- kolom voor de knoppen --></th>
+                    </tr>
+                </thead>
 
-        <!-- forceer de breedte van de kolommen in alle maanden met een niet getoonde regel -->
-        <tr style="visibility:collapse">
-            <td>30 september 2021 - 31 september 2021</td>
-            <td>Dit is de titel van een best wel lange wedstrijd</td>
-            <td>Brede plaatnaam ergens</td>
-            <td><a class="btn-nhb-blauw" href="#">Details</a></td>
-        </tr>
+                <!-- forceer de breedte van de kolommen in alle maanden met een niet getoonde regel -->
+                <tr style="visibility:collapse">
+                    <td>30 september 2021 - 31 september 2021</td>
+                    <td>Dit is de titel van een best wel lange wedstrijd</td>
+                    <td>Brede plaatnaam ergens</td>
+                    <td><a class="btn-nhb-rood" href="#">Details</a></td>
+                </tr>
 
 
-        {% for wed in wedstrijden %}
-            <tr>
-                <td>{{ wed.datum_begin }}{% if wed.datum_begin != wed.datum_einde %} - {{ wed.datum_einde }}{% endif %}</td>
-                <td>{{ wed.titel }}</td>
-                <td>{{ wed.locatie.plaats }}</td>
-                <td>
-                    {% if url_details %}
-                        <a class="btn-nhb-blauw" href="{{ wed.url_details }}">Details</a>
-                    {% endif %}
-                </td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td></td>
-                <td><i>Geen wedstrijden gevonden</i></td>
-                <td colspan="2"></td>
-            </tr>
-        {% endfor %}
+                {% for wed in wedstrijden %}
+                    <tr>
+                        <td>{{ wed.datum_begin }}{% if wed.datum_begin != wed.datum_einde %} - {{ wed.datum_einde }}{% endif %}</td>
+                        <td>{{ wed.titel }}</td>
+                        <td>{{ wed.locatie.plaats }}</td>
+                        <td>
+                            {% if wed.url_details %}
+                                <a class="btn-nhb-rood" href="{{ wed.url_details }}">Details</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="center">
+                            <i>Geen wedstrijden gevonden</i>
+                        </td>
+                    </tr>
+                {% endfor %}
 
-    </table>
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-overzicht-maand" %}
 
 {% endblock %}

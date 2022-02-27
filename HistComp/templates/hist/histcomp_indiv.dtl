@@ -1,6 +1,6 @@
 {% extends 'plein/site_layout.dtl' %}
 {% comment %}
-                Copyright (c) 2019-2021 Ramon van der Winkel.
+                Copyright (c) 2019-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -11,153 +11,165 @@
 
 {% block pagina %}
 
-    {% include 'overig/site-feedback-sidebar.dtl' with op_pagina="histcomp_indiv" %}
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">{{ histcomp.klasse }}</h3>
+            <p>{{ histcomp.comp_type_str }} seizoen {{ histcomp.seizoen }}</p>
+        </div>
+    </div>
 
-    <h4>Uitslag individuele competitie</h4>
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
 
-    <!-- toon gekozen competitie in een blauwe box -->
-    <div class="row">
-        <div class="col s9 m8 l8 xl6 offset-s1 offset-m2 offset-l2 offset-xl3">
-            <div class="white-text nhb-blauw z-depth-2">
-                <div class="row small-row">
-                    <div class="col s4">Competitie:</div>
-                    <div class="col s5">{{ histcomp.comp_type_str }}</div>
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Seizoen:</div>
-                    <div class="col s5">{{ histcomp.seizoen }}</div>
-                </div>
-                <div class="row small-row">
-                    <div class="col s4">Klasse:</div>
-                    <div class="col s5">{{ histcomp.klasse }}</div>
+            <!-- dialoog venster -->
+            <div class="white left-align z-depth-3">
+                <div style="padding:30px">
+                    <form class="row" method="get" action="{{ filter_url }}">
+
+                        <div class="row">
+                            <div class="input-field col s12">
+                                {{ form.filter.label_tag }} {{ form.filter }}
+                            </div>
+                        </div>
+
+                        <div class="center">
+                            <button class="btn-nhb-rood" type="submit">
+                                <i class="material-icons-round left">search</i>Zoek</button>
+
+                            {% if unfiltered_url %}
+                                <span>&nbsp;&nbsp;</span>
+                                <a class="btn-nhb-rood" href="{{ unfiltered_url }}">
+                                    <i class="material-icons-round left">backspace</i>Leeg maken</a>
+                            {% endif %}
+                        </div>
+
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <p>&nbsp;</p>
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <p>Het totaal en de gemiddelde pijl zijn berekend over de 6 hoogste scores.<br>Bij 7 scores is de laagste score doorgestreept.</p>
 
-    <div class="container white z-depth-2">
-        <div class="row nhb-blauw white-text">
-            <div class="col s12 center-align">
-                <h5>Zoeken op naam</h5>
-                <p>of verenigingsnummer</p>
-            </div>
+            {% if is_paginated %}
+                <ul class="pagination">
+                    {% for linkname, url in page_links %}
+                        {% if linkname == active %}
+                            <li class="active"><a href="{{ url }}">{{ linkname }}</a></li>
+                        {% elif linkname == "vorige_disable" %}
+                            <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_left</i></a></li>
+                        {% elif linkname == "vorige" %}
+                            <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_left</i></a></li>
+                        {% elif linkname == "volgende" %}
+                            <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_right</i></a></li>
+                        {% elif linkname == "volgende_disable" %}
+                            <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_right</i></a></li>
+                        {% else %}
+                            <li class="waves-effect"><a href="{{ url }}">{{ linkname }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            {% endif %}
         </div>
-
-        <form class="row" method="get" action="{{ filter_url }}">
-
-            <div class="row">
-                <div class="input-field col s12">
-                    {{ form.filter.label_tag }} {{ form.filter }}
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="center-align">
-                    <button class="btn-nhb-blauw" type="submit"><i class="material-icons-round left">search</i>Zoek</button>
-                    {% if unfiltered_url %}
-                        <span>&nbsp;&nbsp;</span><a class="btn-nhb-blauw" href="{{ unfiltered_url }}"><i class="material-icons-round left">backspace</i>Leeg maken</a>
-                    {% endif %}
-                </div>
-            </div>
-        </form>
     </div>
-
-    <p>Het totaal en de gemiddelde pijl zijn berekend over de 6 hoogste scores. Bij 7 scores is de laagste score doorgestreept.</p>
-
-    {% if is_paginated %}
-        <ul class="pagination">
-            {% for linkname, url in page_links %}
-                {% if linkname == active %}
-                    <li class="active"><a href="{{ url }}">{{ linkname }}</a></li>
-                {% elif linkname == "vorige_disable" %}
-                    <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_left</i></a></li>
-                {% elif linkname == "vorige" %}
-                    <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_left</i></a></li>
-                {% elif linkname == "volgende" %}
-                    <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_right</i></a></li>
-                {% elif linkname == "volgende_disable" %}
-                    <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_right</i></a></li>
-                {% else %}
-                    <li class="waves-effect"><a href="{{ url }}">{{ linkname }}</a></li>
-                {% endif %}
-            {% endfor %}
-        </ul>
-    {% endif %}
 
     {% if object_list.count %}
+
         <table class="white">
-            <thead>
-                <tr>
-                    <th class="center-align">Rank</th>
-                    <th>Sporter</th>
-                    <th>Vereniging</th>
-                    <th class="center-align">Gemiddelde pijl</th>
-                    <th class="center-align" colspan="7">Scores</th>
-                    <th class="center-align">Totaal</th>
-                </tr>
-            </thead>
+            <!-- forceer gelijkmatige layout in de Scores kolommen -->
+            <tr style="visibility: collapse">
+                <td colspan="3"><!-- rank, naam, vereniging --></td>
+                <td><!-- gemiddelde --></td>
+                <td class="right-align smal hide-on-small-only">888</td>
+                <td class="right-align smal hide-on-small-only">888</td>
+                <td class="right-align smal hide-on-small-only">888</td>
+                <td class="right-align smal hide-on-small-only">888</td>
+                <td class="right-align smal hide-on-small-only">888</td>
+                <td class="right-align smal hide-on-small-only">888</td>
+                <td class="right-align smal hide-on-small-only">888</td>
+                <td class="right-align smal hide-on-med-and-up">888</td>    <!-- scores onder elkaar -->
+                <td class="right-align hide-on-small-only"><!-- totaal --></td>
+            </tr>
+
+            <tr class="nhb-table-header">
+                <td rowspan="{{ aantal_regels }}" class="nhb-table-zijrand"></td>
+                <th class="center">Rank</th>
+                <th>Sporter</th>
+                <th>Ver<span class="hide-on-small-only">eniging</span></th>
+                <th class="center">Gem<span class="hide-on-small-only">iddelde pijl</span></th>
+                <th class="center hide-on-small-only" colspan="7">Scores</th>
+                <th class="right-align hide-on-med-and-up">Scores</th>
+                <th class="center hide-on-small-only">Totaal</th>
+                <td rowspan="{{ aantal_regels }}" class="nhb-table-zijrand"></td>
+            </tr>
 
             {% for obj in object_list %}
-                {% if forloop.first %}      <!-- alleen toevoegen als er deelnemers zijn, anders probleem met colspan=2 -->
-                    <!-- forceer gelijkmatige layout in de Scores kolommen -->
-                    <tr style="visibility: collapse">
-                        <td colspan="3"><!-- rank, naam, vereniging --></td>
-                        <td><!-- gemiddelde --></td>
-                        <td class="right-align smal">888</td>
-                        <td class="right-align smal">888</td>
-                        <td class="right-align smal">888</td>
-                        <td class="right-align smal">888</td>
-                        <td class="right-align smal">888</td>
-                        <td class="right-align smal">888</td>
-                        <td class="right-align smal">888</td>
-                        <td class="right-align"><!-- totaal --></td>
-                    </tr>
-                {% endif %}
-
                 <tr>
-                    <td class="center-align">{{ obj.rank }}</td>
+                    <td class="center">{{ obj.rank }}</td>
                     <td>[{{ obj.schutter_nr_str|highlight:zoekterm }}] {{ obj.schutter_naam|highlight:zoekterm }}</td>
-                    <td>[{{ obj.vereniging_nr }}] {{ obj.vereniging_naam|highlight:zoekterm }}</td>
-                    <td class="center-align">{{ obj.gemiddelde }}</td>
+                    <td>[{{ obj.vereniging_nr }}]<span class="hide-on-med-and-down"> {{ obj.vereniging_naam|highlight:zoekterm }}</span></td>
+                    <td class="center">{{ obj.gemiddelde }}</td>
 
-                    <td class="right-align">{% if obj.laagste_score_nr == 1 %}<del>{{ obj.score1 }}</del>{% else %}{{ obj.score1 }}{% endif %}</td>
-                    <td class="right-align">{% if obj.laagste_score_nr == 2 %}<del>{{ obj.score2 }}</del>{% else %}{{ obj.score2 }}{% endif %}</td>
-                    <td class="right-align">{% if obj.laagste_score_nr == 3 %}<del>{{ obj.score3 }}</del>{% else %}{{ obj.score3 }}{% endif %}</td>
-                    <td class="right-align">{% if obj.laagste_score_nr == 4 %}<del>{{ obj.score4 }}</del>{% else %}{{ obj.score4 }}{% endif %}</td>
-                    <td class="right-align">{% if obj.laagste_score_nr == 5 %}<del>{{ obj.score5 }}</del>{% else %}{{ obj.score5 }}{% endif %}</td>
-                    <td class="right-align">{% if obj.laagste_score_nr == 6 %}<del>{{ obj.score6 }}</del>{% else %}{{ obj.score6 }}{% endif %}</td>
-                    <td class="right-align">{% if obj.laagste_score_nr == 7 %}<del>{{ obj.score7 }}</del>{% else %}{{ obj.score7 }}{% endif %}</td>
+                    <td class="right-align hide-on-small-only">{% if obj.laagste_score_nr == 1 %}<del>{{ obj.score1 }}</del>{% else %}{{ obj.score1 }}{% endif %}</td>
+                    <td class="right-align hide-on-small-only">{% if obj.laagste_score_nr == 2 %}<del>{{ obj.score2 }}</del>{% else %}{{ obj.score2 }}{% endif %}</td>
+                    <td class="right-align hide-on-small-only">{% if obj.laagste_score_nr == 3 %}<del>{{ obj.score3 }}</del>{% else %}{{ obj.score3 }}{% endif %}</td>
+                    <td class="right-align hide-on-small-only">{% if obj.laagste_score_nr == 4 %}<del>{{ obj.score4 }}</del>{% else %}{{ obj.score4 }}{% endif %}</td>
+                    <td class="right-align hide-on-small-only">{% if obj.laagste_score_nr == 5 %}<del>{{ obj.score5 }}</del>{% else %}{{ obj.score5 }}{% endif %}</td>
+                    <td class="right-align hide-on-small-only">{% if obj.laagste_score_nr == 6 %}<del>{{ obj.score6 }}</del>{% else %}{{ obj.score6 }}{% endif %}</td>
+                    <td class="right-align hide-on-small-only">{% if obj.laagste_score_nr == 7 %}<del>{{ obj.score7 }}</del>{% else %}{{ obj.score7 }}{% endif %}</td>
 
-                    <td class="right-align">{{ obj.totaal }}</td>
+                    <td class="right-align hide-on-med-and-up">{% if obj.laagste_score_nr == 1 %}<del>{{ obj.score1 }}</del>{% else %}{{ obj.score1 }}{% endif %}<br>
+{% if obj.laagste_score_nr == 2 %}<del>{{ obj.score2 }}</del>{% else %}{{ obj.score2 }}{% endif %}<br>
+{% if obj.laagste_score_nr == 3 %}<del>{{ obj.score3 }}</del>{% else %}{{ obj.score3 }}{% endif %}<br>
+{% if obj.laagste_score_nr == 4 %}<del>{{ obj.score4 }}</del>{% else %}{{ obj.score4 }}{% endif %}<br>
+{% if obj.laagste_score_nr == 5 %}<del>{{ obj.score5 }}</del>{% else %}{{ obj.score5 }}{% endif %}<br>
+{% if obj.laagste_score_nr == 6 %}<del>{{ obj.score6 }}</del>{% else %}{{ obj.score6 }}{% endif %}<br>
+{% if obj.laagste_score_nr == 7 %}<del>{{ obj.score7 }}</del>{% else %}{{ obj.score7 }}{% endif %}<br>
+                    </td>
+
+                    <td class="right-align hide-on-small-only">{{ obj.totaal }}</td>
                 </tr>
             {% endfor %}
+
+            <tr>
+                <td colspan="4" class="nhb-table-onderrand"><!-- rank, naam, vereniging, gemiddelde --></td>
+                <td colspan="7" class="nhb-table-onderrand hide-on-small-only"><!-- scores --></td>
+                <td class="nhb-table-onderrand hide-on-med-and-up"><!-- scores --></td>
+                <td class="nhb-table-onderrand hide-on-small-only"><!-- totaal --></td>
+            </tr>
+
         </table>
 
-        {% if is_paginated %}
-            <ul class="pagination">
-                {% for linkname, url in page_links %}
-                    {% if linkname == active %}
-                        <li class="active"><a href="{{ url }}">{{ linkname }}</a></li>
-                    {% elif linkname == "vorige_disable" %}
-                        <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_left</i></a></li>
-                    {% elif linkname == "vorige" %}
-                        <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_left</i></a></li>
-                    {% elif linkname == "volgende" %}
-                        <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_right</i></a></li>
-                    {% elif linkname == "volgende_disable" %}
-                        <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_right</i></a></li>
-                    {% else %}
-                        <li class="waves-effect"><a href="{{ url }}">{{ linkname }}</a></li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-        {% endif %}
+        <div class="center">
+            {% if is_paginated %}
+                <ul class="pagination">
+                    {% for linkname, url in page_links %}
+                        {% if linkname == active %}
+                            <li class="active"><a href="{{ url }}">{{ linkname }}</a></li>
+                        {% elif linkname == "vorige_disable" %}
+                            <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_left</i></a></li>
+                        {% elif linkname == "vorige" %}
+                            <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_left</i></a></li>
+                        {% elif linkname == "volgende" %}
+                            <li class="waves-effect"><a href="{{ url }}"><i class="material-icons-round">chevron_right</i></a></li>
+                        {% elif linkname == "volgende_disable" %}
+                            <li class="disabled"><a href="#!"><i class="material-icons-round">chevron_right</i></a></li>
+                        {% else %}
+                            <li class="waves-effect"><a href="{{ url }}">{{ linkname }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            {% endif %}
 
-        {% if all_url and not unfiltered_url %}
-            <p>Laad <a href="{{ all_url }}">alle {{ all_count }}</a> regels.</p>
-        {% endif %}
+            {% if all_url and not unfiltered_url %}
+                <p>Laad <a href="{{ all_url }}">alle {{ all_count }}</a> regels</p>
+            {% endif %}
+        </div>
 
     {% else %}
 
@@ -165,8 +177,6 @@
 
     {% endif %}
 
-{% endblock %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="histcomp_indiv" %}
 
-{% block menu-competities %}
-    {% include 'competitie/menu.dtl' %}
 {% endblock %}
