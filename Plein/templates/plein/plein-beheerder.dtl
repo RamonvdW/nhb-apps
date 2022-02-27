@@ -109,7 +109,7 @@
 
                 <!-- overzicht VHPG acceptatie -->
                 {% url 'Functie:vhpg-overzicht' as card_url %}
-                {% include 'plein/card.dtl' with title="VHPG status" text="Toon overzicht van beheerders die de Verklaring Hanteren Persoonsgegevens (VHPG) geaccepteerd hebben." icon="verified_user" url=card_url %}
+                {% include 'plein/card.dtl' with title="VHPG status" text="Toon overzicht van beheerders die de verklaring geaccepteerd hebben." icon="verified_user" url=card_url %}
 
                 <!-- Interland lijst -->
                 {% url 'HistComp:interland' as card_url %}

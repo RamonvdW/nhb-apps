@@ -76,7 +76,7 @@
         </div>
     </div>
 
-    <p class="center">Aspiranten schieten beide competities op 18 meter, op een 60cm blazoen.</p>
+    <p class="center">De jongste sporters schieten beide competities op 18 meter, op een 60cm blazoen.</p>
 
 
     <!-- sfeerfoto -->
@@ -214,8 +214,6 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
                 <p>De rayonkampioenschappen worden in elk van de 4 rayons georganiseerd voor de sporters uit de 4 regio's van het rayon.</p>
                 <p>In elke wedstrijdklasse nemen 24 sporters het tegen elkaar op, bestaande uit de 4 regiokampioenen aangevuld met de 20 beste sporters uit de regiocompetities.</p>
 
-                <p>Voor aspiranten geldt een open inschrijving (iedereen die wil mag meedoen).</p>
-
                 <!-- tabel met blauwe rand binnen het informatie vlak -->
                 <div class="row">
                     <div class="col s12 m10 offset-m1 l6 offset-l3">
@@ -247,8 +245,9 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
                     </div>
                 </div>
 
-                <p>Aspiranten schieten 1 ronde.</p>
                 <p>Compound en Recurve klasse 1 en 2 schieten de Indoor Rayonkampioenschappen op Dutch Target blazoen.</p>
+
+                <p>Voor de jongste sporters geldt een open inschrijving (iedereen die wil mag meedoen) en wordt de helft van het aantal pijlen geschoten.</p>
             </div>
         </div>
     </div>
@@ -387,7 +386,7 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
                 <p>De bondskampioenschappen worden landelijk georganiseerd.</p>
                 <p>In elke wedstrijdklasse nemen 24 sporters het tegen elkaar op, bestaande uit de 4 rayonkampioenen aangevuld met de 20 beste sporters uit de rayonkampioenschappen.</p>
 
-                <p>Voor aspiranten geldt een open inschrijving (iedereen die wil mag meedoen).</p>
+                <p>Voor de jongste sporters geldt een open inschrijving (iedereen die wil mag meedoen).</p>
 
                 <p>Overige details zijn gelijk aan de rayonkampioenschappen.</p>
             </div>
@@ -426,49 +425,50 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
                 <p>Als je voor het einde van de regiocompetitie begint met schieten, dan kan je individueel altijd nog aanmelden.</p>
 
                 <table>
-                    <tr class="nhb-table-header">
-                        <td rowspan="7" class="nhb-table-zijrand"></td>
-                        <th style="width:33%">Activiteit</th>
-                        <th style="width:33%">Indoor</th>
-                        <th style="width:33%">25m 1pijl</th>
-                        <td rowspan="7" class="nhb-table-zijrand"></td>
+                    <tr>
+                        <th style="width:40%"></th>
+                        <th style="width:30%">Indoor</th>
+                        <th style="width:30%">25m 1pijl</th>
                     </tr>
 
                     <tr>
-                        <td>Aanmelden</td>
+                        <th>Aanmelden</th>
                         <td>vanaf 15 juli</td>
                         <td>vanaf 15 juli</td>
                     </tr>
 
                     <tr>
-                        <td>Regio<span class="hide-on-small-only">competitie</span></td>
+                        <th>Regio<span class="hide-on-small-only">competitie</span>
+                        </th>
                         <td>september tot december</td>
                         <td>september tot maart</td>
                     </tr>
 
                     <tr>
-                        <td><span class="hide-on-small-only">Rayonkampioenschappen</span>
-                            <span class="hide-on-med-and-up">RK</span></td>
+                        <th>
+                            <span class="hide-on-small-only">Rayonkampioenschappen</span>
+                            <span class="hide-on-med-and-up">RK</span>
+                        </th>
                         <td>februari</td>
                         <td>april / mei</td>
                     </tr>
 
                     <tr>
-                        <td><span class="hide-on-small-only">Bondskampioenschappen Indoor</span>
-                            <span class="hide-on-med-and-up">BK Indoor</span></td>
+                        <th>
+                            <span class="hide-on-small-only">Bondskampioenschappen Indoor</span>
+                            <span class="hide-on-med-and-up">BK Indoor</span>
+                        </th>
                         <td>februari / maart</td>
                         <td></td>
                     </tr>
 
                     <tr>
-                        <td><span class="hide-on-small-only">Nederlandse Kampioenschappen 25m1 pijl</span>
-                            <span class="hide-on-med-and-up">NK 25m1 pijl</span></td>
+                        <th>
+                            <span class="hide-on-small-only">Nederlandse Kampioenschappen 25m1 pijl</span>
+                            <span class="hide-on-med-and-up">NK 25m1 pijl</span>
+                        </th>
                         <td></td>
                         <td>mei / juni</td>
-                    </tr>
-
-                    <tr>
-                        <td colspan="3" class="nhb-table-onderrand"></td>
                     </tr>
 
                 </table>
