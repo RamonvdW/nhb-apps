@@ -157,11 +157,11 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         context['comp'] = comp
         comp.bepaal_fase()
 
-        if comp.fase != 'J':
-            raise Http404('Competitie niet in de juist fase')
-
         if comp.klassengrenzen_vastgesteld_rk_bk:
             raise Http404('De klassengrenzen zijn al vastgesteld')
+
+        if comp.fase != 'J':
+            raise Http404('Competitie niet in de juiste fase')
 
         context['grenzen'], context['niet_compleet_team'] = self._bepaal_klassengrenzen(comp)
 
@@ -196,11 +196,11 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
 
         comp.bepaal_fase()
 
-        if comp.fase != 'J':
-            raise Http404('Competitie niet in de juist fase')
-
         if comp.klassengrenzen_vastgesteld_rk_bk:
             raise Http404('De klassengrenzen zijn al vastgesteld')
+
+        if comp.fase != 'J':
+            raise Http404('Competitie niet in de juiste fase')
 
         # vul de klassengrenzen in voor RK/BK  teams
 

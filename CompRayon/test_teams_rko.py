@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.core import management
 from django.utils import timezone
-from Competitie.models import DeelCompetitie, LAAG_RK
+from Competitie.models import Competitie, DeelCompetitie, LAAG_RK
 from Competitie.operations import competities_aanmaken
+from Competitie.test_fase import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers.testdata import TestData
 import io
@@ -23,6 +24,10 @@ class TestCompRayonTeams(E2EHelpers, TestCase):
 
     url_rko_teams = '/bondscompetities/rk/ingeschreven-teams/%s/'            # rk_deelcomp_pk
     url_rk_teams_alle = '/bondscompetities/rk/ingeschreven-teams/%s/%s/'     # comp_pk, subset
+    url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'                                       # comp_pk
+    url_teams_klassengrenzen_vaststellen = '/bondscompetities/rk/%s/rk-bk-teams-klassengrenzen/vaststellen/'     # comp_pk
+
+    ver_nr = 1012  # regio 101, vereniging 2
 
     testdata = None
 
@@ -46,6 +51,17 @@ class TestCompRayonTeams(E2EHelpers, TestCase):
         competities_aanmaken(jaar=2019)
 
         self.rk_deelcomp_1 = DeelCompetitie.objects.get(laag=LAAG_RK, competitie=self.testdata.comp18, nhb_rayon__rayon_nr=1)
+
+    @staticmethod
+    def _verwerk_mutaties(show_all=False):
+        # vraag de achtergrond taak om de mutaties te verwerken
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+
+        if show_all:                                    # pragma: no cover
+            print(f1.getvalue())
+            print(f2.getvalue())
 
     def test_rk_teams_alle(self):
         # BB en BKO mogen deze pagina ophalen
@@ -140,6 +156,54 @@ class TestCompRayonTeams(E2EHelpers, TestCase):
         url = self.url_rko_teams % self.testdata.deelcomp25_rk[2].pk
         resp = self.client.get(url)
         self.assert403(resp)
+
+    def test_rk_bk_klassengrenzen(self):
+        # maak een paar teams aan
+        self.testdata.maak_inschrijvingen_rk_teamcompetitie(25, self.ver_nr, ook_incomplete_teams=False)
+        self.testdata.geef_rk_team_tijdelijke_sporters_genoeg_scores(25, self.ver_nr)
+
+        # als BKO doorzetten naar RK fase (G --> J) en bepaal de klassengrenzen (fase J --> K)
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
+        zet_competitie_fase(self.testdata.comp25, 'G')
+
+        url = self.url_teams_klassengrenzen_vaststellen % 999999
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
+        resp = self.client.post(url)
+        self.assert404(resp, 'Competitie niet gevonden')
+
+        url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet in de juiste fase')
+        resp = self.client.post(url)
+        self.assert404(resp, 'Competitie niet in de juiste fase')
+
+        url = self.url_doorzetten_rk % self.testdata.comp25.pk
+        resp = self.client.post(url)
+        self.assert_is_redirect_not_plein(resp)
+        self._verwerk_mutaties()
+
+        comp = Competitie.objects.get(pk=self.testdata.comp25.pk)
+        comp.bepaal_fase()
+        self.assertEqual(comp.fase, 'J')
+
+        url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('comprayon/bko-klassengrenzen-vaststellen-rk-bk-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk
+        with self.assert_max_queries(28):
+            resp = self.client.post(url)
+        self.assert_is_redirect_not_plein(resp)
+
+        resp = self.client.get(url)
+        self.assert404(resp, 'De klassengrenzen zijn al vastgesteld')
+        resp = self.client.post(url)
+        self.assert404(resp, 'De klassengrenzen zijn al vastgesteld')
 
     def test_bk_lijst(self):
         # maak de BK lijst aan

@@ -14,6 +14,7 @@ included_templates = (
     'plein/site_layout_minimaal.dtl',
     'plein/card.dtl',
     'plein/card_logo.dtl',
+    'plein/card_button.dtl',
     'plein/andere-sites-van-de-nhb.dtl',
     'plein/ga-naar-live-server.dtl',
     'feedback/sidebar.dtl',
