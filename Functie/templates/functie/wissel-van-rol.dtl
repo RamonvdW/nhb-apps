@@ -317,7 +317,7 @@
         <div class="row-nhb-blauw">
             <div class="col s12">
                 {% url 'Functie:vhpg-afspraken' as card_url %}
-                {% include 'plein/card.dtl' with title="Afspraken inzien" text="Bekijk de genaakte afspraken over het omgaan met persoonsgegevens." icon="gavel" url=card_url %}
+                {% include 'plein/card.dtl' with title="Afspraken inzien" text="Bekijk de gemaakte afspraken over het omgaan met persoonsgegevens." icon="gavel" url=card_url %}
             </div>
         </div>
 
