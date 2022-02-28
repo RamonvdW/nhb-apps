@@ -7,44 +7,18 @@
 from django.db import migrations, models
 
 
-def migrate_feedback_from_overig(apps, _):
-    """ Maak de enige tabel regel aan die gebruikt wordt door het cron job
-        regiocomp_upd_tussenstand.
-    """
-
-    # haal de klassen op die van toepassing zijn tijdens deze migratie
-    old_klas = apps.get_model('Overig', 'SiteFeedback')
-    feedback_klas = apps.get_model('Feedback', 'Feedback')
-
-    bulk = list()
-
-    for old in old_klas.objects.all():              # pragma: no cover
-        feedback = feedback_klas(
-                        toegevoegd_op=old.toegevoegd_op,
-                        site_versie=old.site_versie,
-                        gebruiker=old.gebruiker,
-                        op_pagina=old.op_pagina,
-                        volledige_url='',
-                        bevinding=old.bevinding,
-                        is_afgehandeld=old.is_afgehandeld,
-                        feedback=old.feedback)
-        bulk.append(feedback)
-    # for
-
-    feedback_klas.objects.bulk_create(bulk)
-
-
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
+
+    replaces = [('Feedback', 'm0001_migrate'),
+                ('Feedback', 'm0002_in_rol')]
 
     # dit is de eerste
     initial = True
 
     # volgorde afdwingen
-    dependencies = [
-        ('Overig', 'm0009_squashed'),
-    ]
+    dependencies = []
 
     # migratie functies
     operations = [
@@ -55,8 +29,9 @@ class Migration(migrations.Migration):
                 ('toegevoegd_op', models.DateTimeField(null=True)),
                 ('site_versie', models.CharField(max_length=20)),
                 ('gebruiker', models.CharField(max_length=50)),
+                ('in_rol', models.CharField(blank=True, default='?', max_length=100)),
                 ('op_pagina', models.CharField(max_length=50)),
-                ('volledige_url', models.CharField(max_length=250, null=True, blank=True)),
+                ('volledige_url', models.CharField(blank=True, max_length=250, null=True)),
                 ('bevinding', models.CharField(choices=[('8', 'Tevreden'), ('6', 'Bruikbaar'), ('4', 'Moet beter')], max_length=1)),
                 ('is_afgehandeld', models.BooleanField(default=False)),
                 ('feedback', models.TextField()),
@@ -66,7 +41,6 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Feedback',
             },
         ),
-        migrations.RunPython(migrate_feedback_from_overig)
     ]
 
 # end of file
