@@ -12,8 +12,8 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Overig', 'm0007_squashed'),
-                ('Overig', 'm0008_feedback_optional_datetime')]
+    #replaces = [('Overig', 'm0007_squashed'),
+    #            ('Overig', 'm0008_feedback_optional_datetime')]
 
     # dit is de eerste
     initial = True
