@@ -22,8 +22,6 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    #replaces = [('Competitie', 'm0055_squashed')]
-
     # dit is de eerste
     initial = True
 
@@ -32,8 +30,8 @@ class Migration(migrations.Migration):
         ('BasisTypen', 'm0028_squashed'),
         ('Functie', 'm0012_squashed'),
         ('NhbStructuur', 'm0024_squashed'),
-        ('Score', 'm0011_squashed'),
-        ('Sporter', 'm0003_squashed'),
+        ('Score', 'm0014_squashed'),
+        ('Sporter', 'm0006_squashed'),
         ('Wedstrijden', 'm0020_squashed'),
     ]
 

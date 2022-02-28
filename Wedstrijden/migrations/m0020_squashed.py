@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('BasisTypen', 'm0028_squashed'),
         ('NhbStructuur', 'm0024_squashed'),
-        ('Score', 'm0011_squashed'),
+        ('Score', 'm0014_squashed'),
     ]
 
     # migratie functies

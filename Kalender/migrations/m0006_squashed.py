@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('BasisTypen', 'm0028_squashed'),
         ('NhbStructuur', 'm0024_squashed'),
-        ('Sporter', 'm0003_squashed'),
+        ('Sporter', 'm0006_squashed'),
         ('Wedstrijden', 'm0020_squashed'),
     ]
 
