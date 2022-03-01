@@ -192,6 +192,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
             for rol, functie_pk in child_tups:
                 url = reverse('Functie:activeer-functie', kwargs={'functie_pk': functie_pk})
                 if rol in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
+                    # voeg de beschrijving van de vereniging toe
                     functie = pk2func[functie_pk]
                     volgorde = self._functie_volgorde(functie)
 
@@ -208,11 +209,16 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                                  'kort': kort,
                                  'ver_naam': functie.nhb_ver.naam,
                                  'url': url,
-                                 'volgorde': volgorde})
+                                 'volgorde': volgorde,
+                                 'pk': functie.pk})
                 else:
                     functie = pk2func[functie_pk]
                     volgorde = self._functie_volgorde(functie)
-                    objs.append({'titel': functie.beschrijving, 'ver_naam': '', 'url': url, 'volgorde': volgorde})
+                    objs.append({'titel': functie.beschrijving,
+                                 'ver_naam': '',
+                                 'url': url,
+                                 'volgorde': volgorde,
+                                 'pk': functie.pk})
 
                 if rol == Rollen.ROL_HWL:
                     func = pk2func[functie_pk]
