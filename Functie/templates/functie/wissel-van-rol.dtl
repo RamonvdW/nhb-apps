@@ -132,7 +132,7 @@
                                 {% for obj in hwl_rollen %}
                                     <li>
                                         <label class="black-text" for="id_{{ obj.pk }}">
-                                            <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
+                                            <input class="with-gap" type="radio" name="rol" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
                                             <span>{{ obj.beschrijving }}</span>
                                         </label>
                                     </li>
@@ -270,24 +270,24 @@
 
                 <!-- witte rechthoek met de radiobuttons -->
                 {% if show_help_rollen %}
-                    <div class="col s12 m10 offset-m1 {% if url_wissel_naar_sec %}l6{% else %}l8 offset-l3{% endif %}" style="margin-bottom:50px">
+                    <div class="col s12 m10 offset-m1 {% if url_wissel_naar_sec %}l6 offset-l3{% else %}l8 offset-l2{% endif %}" style="margin-bottom:50px">
                         <div class="white left-align" style="padding:10px">
                             <ul>
-                            {% for obj in help_rollen %}
-                                <li>
-                                    <label class="black-text" for="id_{{ obj.pk }}">
-                                        <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
-                                        {% if obj.kort %}
-                                            <span>
-                                                <span class="hide-on-small-only">{{ obj.titel }}{% if obj.ver_naam %}&nbsp;&nbsp;{{ obj.ver_naam }}{% endif %}</span>
-                                                <span class="hide-unless-small">{{ obj.kort }}{% if obj.ver_naam %}&nbsp;&nbsp;{{ obj.ver_naam }}{% endif %}</span>
-                                            </span>
-                                        {% else %}
-                                            <span>{{ obj.titel }}{% if obj.ver_naam %}&nbsp;&nbsp;{{ obj.ver_naam }}{% endif %}</span>
-                                        {% endif %}
-                                    </label>
-                                </li>
-                            {% endfor %}
+                                {% for obj in help_rollen %}
+                                    <li>
+                                        <label class="black-text" for="id_help_{{ obj.pk }}">
+                                            <input class="with-gap" type="radio" name="rol" required id="id_help_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
+                                            {% if obj.kort %}
+                                                <span>
+                                                    <span class="hide-on-small-only">{{ obj.titel }}{% if obj.ver_naam %}&nbsp;&nbsp;{{ obj.ver_naam }}{% endif %}</span>
+                                                    <span class="hide-unless-small">{{ obj.kort }}{% if obj.ver_naam %}&nbsp;&nbsp;{{ obj.ver_naam }}{% endif %}</span>
+                                                </span>
+                                            {% else %}
+                                                <span>{{ obj.titel }}{% if obj.ver_naam %}&nbsp;&nbsp;{{ obj.ver_naam }}{% endif %}</span>
+                                            {% endif %}
+                                        </label>
+                                    </li>
+                                {% endfor %}
                             </ul>
                             <p class="center">
                                 <a class="btn-nhb-rood" onclick="wissel_naar_rol()">Activeer</a>
