@@ -7,7 +7,6 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRayon
 from Competitie.models import (LAAG_REGIO, LAAG_RK, DEELNAME_NEE,
                                Competitie, DeelCompetitie, DeelcompetitieKlasseLimiet,
@@ -41,13 +40,14 @@ def get_sporter_rayon_nr(request):
             # RKO
             rayon_nr = functie_nu.nhb_rayon.rayon_nr
     elif rol_nu == Rollen.ROL_SPORTER:
-        # sporter
+        # sporter?
         account = request.user
-        if account.sporter_set.count() > 0:
-            sporter = account.sporter_set.all()[0]
-            if sporter.is_actief_lid and sporter.bij_vereniging:
-                nhb_ver = sporter.bij_vereniging
-                rayon_nr = nhb_ver.regio.rayon.rayon_nr
+        if account.is_authenticated:
+            if account.sporter_set.count() > 0:
+                sporter = account.sporter_set.all()[0]
+                if sporter.is_actief_lid and sporter.bij_vereniging:
+                    nhb_ver = sporter.bij_vereniging
+                    rayon_nr = nhb_ver.regio.rayon.rayon_nr
 
     return rayon_nr
 
