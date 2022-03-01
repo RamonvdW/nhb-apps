@@ -249,14 +249,13 @@ def init_boogtype(apps, _):
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
 
-    # oud: boogtype IB
-
     # maak de standaard boogtypen aan
-    bulk = [boogtype_klas(afkorting='R',  volgorde='A', beschrijving='Recurve'),
-            boogtype_klas(afkorting='C',  volgorde='D', beschrijving='Compound'),
-            boogtype_klas(afkorting='BB', volgorde='I', beschrijving='Barebow'),
-            boogtype_klas(afkorting='TR', volgorde='K', beschrijving='Traditional'),
-            boogtype_klas(afkorting='LB', volgorde='S', beschrijving='Longbow')]
+    bulk = [boogtype_klas(pk=1, afkorting='R',  volgorde='A', beschrijving='Recurve'),
+            boogtype_klas(pk=2, afkorting='C',  volgorde='D', beschrijving='Compound'),
+            boogtype_klas(pk=3, afkorting='BB', volgorde='I', beschrijving='Barebow'),
+            # oud: boogtype IB met pk=4
+            boogtype_klas(pk=5, afkorting='LB', volgorde='S', beschrijving='Longbow'),
+            boogtype_klas(pk=6, afkorting='TR', volgorde='K', beschrijving='Traditional')]
     boogtype_klas.objects.bulk_create(bulk)
 
 
@@ -409,7 +408,7 @@ def init_leeftijdsklasse(apps, _):
             afkorting='AH2', wedstrijd_geslacht='M',
             klasse_kort='Onder 14',
             beschrijving='Onder 14 jongens (aspiranten)',
-            volgorde=15,
+            volgorde=16,
             min_wedstrijdleeftijd=0,
             max_wedstrijdleeftijd=13,
             volgens_wa=False),

@@ -393,7 +393,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                 resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
         # for
-        self.assertEqual(SporterBoog.objects.count(), 18)
+        self.assertEqual(SporterBoog.objects.count(), 15)
 
         # zet een aantal sporterboog records op gebruik voor wedstrijd
         # dit maakt een sporterboog-boog

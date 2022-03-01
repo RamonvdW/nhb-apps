@@ -214,7 +214,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
     def _maak_teams(self, deelcomp):
         """ schrijf een aantal teams in """
 
-        teamtype_r = TeamType.objects.get(afkorting='R')
+        teamtype_r = TeamType.objects.get(afkorting='R2')
         klasse_r_ere = CompetitieKlasse.objects.get(
                                     competitie=deelcomp.competitie,
                                     team__volgorde=15,                # Rec ERE

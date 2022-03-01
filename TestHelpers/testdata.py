@@ -1190,6 +1190,11 @@ class TestData(object):
         bulk = list()
         nieuwe_teams = list()
         for afkorting, deelnemers in deelnemers_per_boog.items():
+
+            # vertaal boogtype naar teamtype
+            if afkorting in ('R', 'BB'):
+                afkorting += '2'
+
             aantal = len(deelnemers)
             while aantal > 0:
                 aantal -= 4

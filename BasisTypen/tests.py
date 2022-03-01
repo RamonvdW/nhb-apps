@@ -65,7 +65,7 @@ class TestBasisTypen(TestCase):
 
     def test_admin(self):
         adm = BasisTypenIndivWedstrijdklasseAdmin(IndivWedstrijdklasse, None)
-        obj = IndivWedstrijdklasse.objects.get(volgorde=100)
+        obj = IndivWedstrijdklasse.objects.get(volgorde=1100)
         html = adm._leeftijdsklassen(obj)
         self.assertTrue(html.count('<p>') == obj.leeftijdsklassen.count())
 

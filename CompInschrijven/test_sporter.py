@@ -112,7 +112,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         sporterboog.heeft_interesse = False
         sporterboog.save()
 
-        for boog in ('C', 'IB', 'LB'):
+        for boog in ('C', 'TR', 'LB'):
             sporterboog = SporterBoog.objects.get(boogtype__afkorting=boog, sporter__lid_nr=lid_nr)
             sporterboog.heeft_interesse = False
             sporterboog.save()

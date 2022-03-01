@@ -120,7 +120,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
                                                           'info_BB': 'on',
                                                           'voorkeur_eigen_blazoen': 'on'})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
-        self.assertEqual(SporterBoog.objects.count(), 6)
+        self.assertEqual(SporterBoog.objects.count(), 5)
         self.assertEqual(SporterVoorkeuren.objects.count(), 1)
 
         obj = SporterBoog.objects.get(sporter=self.sporter1, boogtype=self.boog_R)
