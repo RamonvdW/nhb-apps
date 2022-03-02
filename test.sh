@@ -105,10 +105,11 @@ export COVERAGE_FILE="/tmp/.coverage.$$"
 python3 -m coverage erase
 
 echo "[INFO] Capturing output in $LOG"
-COLOR_DEFAULT=$(tput sgr0)
-COLOR_RED=$(tput setaf 1)
-tail -f "$LOG" | grep --color -E "FAIL$|ERROR$|" &
-PID_TAIL=$!
+# --pid=$$ means: stop when parent stops
+# -u = unbuffered stdin/stdout
+tail -f "$LOG" --pid=$$ | python -u ./number_tests.py | grep --color -E "FAIL$|ERROR$|" &
+PID_TAIL=$(jobs -p | tail -1)
+# echo "PID_TAIL=$PID_TAIL"
 
 echo "[INFO] Deleting test database"
 sudo -u postgres dropdb --if-exists test_data3

@@ -102,13 +102,13 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('sporter/voorkeuren.dtl', 'plein/site_layout.dtl'))
 
         # na bekijken voorkeuren zijn ze aangemaakt
-        self.assertEqual(SporterBoog.objects.count(), 6)
+        self.assertEqual(SporterBoog.objects.count(), 5)
 
         # controleer dat ze niet nog een keer aangemaakt worden
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertEqual(SporterBoog.objects.count(), 6)
+        self.assertEqual(SporterBoog.objects.count(), 5)
 
         obj = SporterBoog.objects.get(sporter=self.sporter1, boogtype=self.boog_R)
         self.assertTrue(obj.heeft_interesse)

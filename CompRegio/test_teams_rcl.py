@@ -268,7 +268,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_rcl112_18)
         self.e2e_wissel_naar_functie(self.functie_rcl112_18)
 
-        team_r = TeamType.objects.get(afkorting='R')
+        team_r = TeamType.objects.get(afkorting='R2')
         klasse_r_ere = CompetitieKlasse.objects.get(
                                     competitie=self.comp_18,
                                     team__volgorde=15,      # Rec ERE

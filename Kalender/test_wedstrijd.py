@@ -522,7 +522,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         self.assertEqual(1, KalenderWedstrijd.objects.count())
         wedstrijd = KalenderWedstrijd.objects.all()[0]
         self.assertEqual(wedstrijd.boogtypen.count(), 5)
-        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 49)
+        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 41)
 
         url = self.url_kalender_sessies % wedstrijd.pk
         resp = self.client.post(url, {'nieuwe_sessie': 'graag'})

@@ -176,7 +176,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         sporterboog.heeft_interesse = False
         sporterboog.save()
 
-        for boog in ('C', 'IB', 'LB'):
+        for boog in ('C', 'TR', 'LB'):
             sporterboog = SporterBoog.objects.get(boogtype__afkorting=boog)
             sporterboog.heeft_interesse = False
             sporterboog.save()

@@ -697,7 +697,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         # maak nog een team aan
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk,
-                                    {'team_type': 'BB'})
+                                    {'team_type': 'BB2'})
         self.assert_is_redirect_not_plein(resp)
 
         # haal het teams overzicht op, met gekoppelde leden
@@ -708,7 +708,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compregio/hwl-teams-koppelen.dtl', 'plein/site_layout.dtl'))
 
         # haal het teams overzicht op, met geblokkeerde leden
-        team_bb = RegiocompetitieTeam.objects.get(team_type__afkorting='BB')
+        team_bb = RegiocompetitieTeam.objects.get(team_type__afkorting='BB2')
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_koppelen % team_bb.pk)
         self.assertEqual(resp.status_code, 200)

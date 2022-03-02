@@ -120,7 +120,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.sporter_100002 = sporter
 
         boog_bb = BoogType.objects.get(afkorting='BB')
-        boog_ib = BoogType.objects.get(afkorting='IB')
+        boog_tr = BoogType.objects.get(afkorting='TR')
 
         # maak een sporterboog aan voor het jeugdlid (nodig om aan te melden)
         sporterboog = SporterBoog(sporter=self.sporter_100002, boogtype=boog_bb, voor_wedstrijd=False)
@@ -145,7 +145,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.sporterboog_100003 = sporterboog
 
         # maak een sporterboog aan voor het lid (nodig om aan te melden)
-        sporterboog = SporterBoog(sporter=self.sporter_100001, boogtype=boog_ib, voor_wedstrijd=True)
+        sporterboog = SporterBoog(sporter=self.sporter_100001, boogtype=boog_tr, voor_wedstrijd=True)
         sporterboog.save()
 
         # (strategisch gekozen) historische data om klassengrenzen uit te bepalen
@@ -213,7 +213,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         rec.schutter_naam = self.sporter_100001.volledige_naam()
         rec.vereniging_nr = ver.ver_nr
         rec.vereniging_naam = ver.naam
-        rec.boogtype = 'IB'
+        rec.boogtype = 'TR'
         rec.score1 = 11
         rec.score2 = 21
         rec.score3 = 31
@@ -525,7 +525,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # controleer dat er geen dubbele SporterBoog records aangemaakt zijn
         self.assertEqual(1, SporterBoog.objects.filter(sporter=self.sporter_100001, boogtype__afkorting='R').count())
         self.assertEqual(1, SporterBoog.objects.filter(sporter=self.sporter_100002, boogtype__afkorting='BB').count())
-        self.assertEqual(17835, SporterBoog.objects.count())
+        self.assertEqual(14954, SporterBoog.objects.count())
 
         # controleer dat het "ag vaststellen" kaartje er nog steeds is
         # dit keer met de "voor het laatst gedaan" notitie
