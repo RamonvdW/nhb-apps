@@ -76,7 +76,7 @@
                     {% if menu_url_admin_site %}
                         <li class="divider"></li>
                         <li>
-                            <a href="{{ menu_url_admin_site }}">
+                            <a href="{{ menu_url_admin_site }}" target="_blank" rel="noopener noreferrer">
                                 <i class="material-icons-round red-text">build</i>Admin site</a>
                         </li>
                     {% endif %}
