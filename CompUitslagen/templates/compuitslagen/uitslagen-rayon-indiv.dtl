@@ -116,7 +116,7 @@
     {% if regiocomp_nog_actief %}
         <div class="row">
             <div style="padding:10px">
-                <p class=center red-text">De regiocompetitie is nog niet afgesloten, dus onderstaande lijst kan nog wijzigingen.</p>
+                <p class="center red-text">De regiocompetitie is nog niet afgesloten, dus onderstaande lijst kan nog wijzigingen.</p>
                 <p class="center">Sporters worden in de lijst opgenomen als ze {{ comp.aantal_scores_voor_rk_deelname }} of meer scores hebben.</p>
             </div>
         </div>
