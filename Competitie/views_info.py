@@ -46,7 +46,11 @@ class InfoCompetitieView(TemplateView):
                             obj.mijn_regio = True
                     # for
 
-        context['klassen_count'] = IndivWedstrijdklasse.objects.exclude(is_onbekend=True).count()
+        context['klassen_count'] = (IndivWedstrijdklasse
+                                    .objects
+                                    .exclude(is_onbekend=True)
+                                    .exclude(buiten_gebruik=True)
+                                    .count())
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
