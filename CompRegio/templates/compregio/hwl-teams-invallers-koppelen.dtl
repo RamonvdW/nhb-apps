@@ -83,7 +83,7 @@
                 </tr>
                 <tr>
                     <th>Team wedstrijdklasse</th>
-                    <td>{{ team.klasse.team.beschrijving }}</td>
+                    <td>{{ team.team_klasse.beschrijving }}</td>
                 </tr>
                 <tr>
                     <th>Teamleden voor teamcompetitie ronde</th>

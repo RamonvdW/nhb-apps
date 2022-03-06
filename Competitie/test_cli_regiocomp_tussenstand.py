@@ -7,9 +7,8 @@
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, CompetitieKlasse, DeelCompetitie, DeelcompetitieRonde,
-                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
-                               LAAG_REGIO, LAAG_BK, update_uitslag_teamcompetitie)
+from Competitie.models import (Competitie, CompetitieIndivKlasse, DeelCompetitie, LAAG_REGIO, LAAG_BK,
+                               DeelcompetitieRonde, RegioCompetitieSchutterBoog)
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.operations import competities_aanmaken, competitie_klassengrenzen_vaststellen
 from NhbStructuur.models import NhbRegio, NhbVereniging
@@ -140,7 +139,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
         sporter.save()
         self.sporter_100004 = sporter
-        sporterboog = SporterBoog(sporter=self.sporter_100004, boogtype=self.boog_r, voor_wedstrijd=True) # TODO: migrate
+        sporterboog = SporterBoog(sporter=self.sporter_100004, boogtype=self.boog_r, voor_wedstrijd=True)
         sporterboog.save()
         self.sporterboog_100004 = sporterboog
 
@@ -156,7 +155,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         sporter.account = self.e2e_create_account(sporter.lid_nr, sporter.email, sporter.voornaam)
         sporter.save()
         self.sporter_100005 = sporter
-        sporterboog = SporterBoog(sporter=self.sporter_100005, boogtype=self.boog_r, voor_wedstrijd=True)  # TODO: migrate
+        sporterboog = SporterBoog(sporter=self.sporter_100005, boogtype=self.boog_r, voor_wedstrijd=True)
         sporterboog.save()
         self.sporterboog_100005 = sporterboog
 
@@ -166,21 +165,21 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
             sporterboog = sportersboog[0]
 
             # let op: de testen die een schutter doorschuiven vereisen dat schutter 100001 in klasse onbekend
-            klassen = (CompetitieKlasse
+            klassen = (CompetitieIndivKlasse
                        .objects
                        .filter(competitie=deelcomp.competitie,
-                               indiv__is_onbekend=(sporterboog.sporter.lid_nr == 100001),
-                               indiv__boogtype=sporterboog.boogtype)
-                       .order_by('indiv__volgorde'))
+                               is_onbekend=(sporterboog.sporter.lid_nr == 100001),
+                               boogtype=sporterboog.boogtype)
+                       .order_by('volgorde'))
 
             aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=deelcomp,
                                                      sporterboog=sporterboog)
             aanmelding.bij_vereniging = aanmelding.sporterboog.sporter.bij_vereniging
 
             if len(sportersboog) < len(klassen):
-                aanmelding.klasse = klassen[len(sportersboog)]
+                aanmelding.indiv_klasse = klassen[len(sportersboog)]
             else:
-                aanmelding.klasse = klassen[0]
+                aanmelding.indiv_klasse = klassen[0]
             aanmelding.save()
 
             sportersboog = sportersboog[skip:]
@@ -352,7 +351,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         # check het verplaatsen van een schutter uit klasse onbekend
 
         deelnemer = RegioCompetitieSchutterBoog.objects.filter(sporterboog=self.sporterboog_100001)[0]
-        self.assertTrue(deelnemer.klasse.indiv.is_onbekend)
+        self.assertTrue(deelnemer.indiv_klasse.is_onbekend)
 
         # 100001: 4 scores, gebruik eerste 3
         # 100002: nog maar 2 scores
@@ -362,23 +361,20 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         # verplaats 100004 naar Recurve klasse 4, Senioren Vrouwen
         # zodat deze straks niet verplaatst hoeft te worden
         klasse = None
-        for obj in (CompetitieKlasse                    # pragma: no branch
+        for obj in (CompetitieIndivKlasse               # pragma: no branch
                     .objects
                     .filter(competitie=self.comp,
-                            indiv__is_onbekend=False,
-                            indiv__boogtype__afkorting=self.boog_r.afkorting)):
-            for lkl in (obj.indiv.leeftijdsklassen      # pragma: no branch
-                        .filter(afkorting='SA')):
-                klasse = obj
-                break
-            # for
+                            is_onbekend=False,
+                            boogtype__afkorting=self.boog_r.afkorting)
+                    .prefetch_related('leeftijdsklassen')):
 
-            if klasse:                                  # pragma: no branch
+            if obj.leeftijdsklassen.filter(afkorting='SA').count() > 0:
+                klasse = obj
                 break
         # for
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog=self.sporterboog_100004)
-        deelnemer.klasse = klasse
+        deelnemer.indiv_klasse = klasse
         deelnemer.save()
 
         # pas het AG van 100005 aan
@@ -413,8 +409,8 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
 
         deelnemer = RegioCompetitieSchutterBoog.objects.filter(sporterboog=self.sporterboog_100001)[0]
         # print('deelnemer: %s (leeftijd: %s)' % (deelnemer, deelnemer.sporterboog.sporter.geboorte_datum))
-        self.assertTrue(deelnemer.klasse.indiv.is_onbekend)
-        # print('huidige klasse: %s (pk=%s)' % (deelnemer.klasse.indiv, deelnemer.klasse.pk))
+        self.assertTrue(deelnemer.indiv_klasse.is_onbekend)
+        # print('huidige klasse: %s (pk=%s)' % (deelnemer.indiv_klasse, deelnemer.indiv_klasse.pk))
 
         # 100001: 7 scores, gebruik eerste 3 voor bepalen AG voor overstap
         self._score_opslaan(self.uitslagen[0], self.sporterboog_100001, 123)

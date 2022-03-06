@@ -13,7 +13,7 @@ from BasisTypen.models import (MAXIMALE_LEEFTIJD_JEUGD, MAXIMALE_WEDSTRIJDLEEFTI
                                BLAZOEN_60CM_4SPOT, BLAZOEN_DT)
 from Competitie.models import (AG_NUL, DAGDELEN, DAGDEEL_AFKORTINGEN, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
                                Competitie, DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog,
-                               get_competitie_indiv_leeftijdsklassen, get_competitie_team_typen)
+                               get_competitie_indiv_leeftijdsklassen)
 from Competitie.operations import KlasseBepaler
 from Competitie.operations import get_competitie_bogen
 from Functie.rol import Rollen, rol_get_huidige_functie
@@ -550,11 +550,10 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                 .select_related('sporterboog',
                                 'sporterboog__sporter',
                                 'bij_vereniging',
-                                'klasse',
-                                'klasse__indiv')
+                                'indiv_klasse')
                 .filter(deelcompetitie=deelcomp,
                         bij_vereniging=self.functie_nu.nhb_ver)
-                .order_by('klasse__indiv__volgorde',
+                .order_by('indiv_klasse__volgorde',
                           'sporterboog__sporter__voornaam',
                           'sporterboog__sporter__achternaam'))
 
@@ -564,15 +563,15 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                 wkl = obj.klasse.indiv
                 if comp.afstand == '18':
                     # Indoor
-                    if wkl.blazoen1_18m_regio != wkl.blazoen2_18m_regio:
+                    if wkl.blazoen1_regio != wkl.blazoen2_regio:
                         # er is keuze
-                        if BLAZOEN_DT in (wkl.blazoen1_18m_regio, wkl.blazoen2_18m_regio):
+                        if BLAZOEN_DT in (wkl.blazoen1_regio, wkl.blazoen2_regio):
                             obj.eigen_blazoen_ja_nee = 'DT'
                 else:
                     # 25m1pijl
-                    if wkl.blazoen1_25m_regio != wkl.blazoen2_25m_regio:
+                    if wkl.blazoen1_regio != wkl.blazoen2_regio:
                         # er is keuze
-                        if BLAZOEN_60CM_4SPOT in (wkl.blazoen1_25m_regio, wkl.blazoen2_25m_regio):
+                        if BLAZOEN_60CM_4SPOT in (wkl.blazoen1_regio, wkl.blazoen2_regio):
                             obj.eigen_blazoen_ja_nee = '4spot'
 
             obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]

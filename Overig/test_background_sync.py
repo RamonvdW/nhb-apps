@@ -13,7 +13,7 @@ class TestOverigBackgroundSync(TestCase):
 
     """ unit tests voor de Overig applicatie, module Background Sync """
 
-    def test(self):
+    def test_background_sync(self):
         sync = BackgroundSync(settings.BACKGROUND_SYNC_POORT)
 
         got_ping = sync.wait_for_ping(timeout=0.01)

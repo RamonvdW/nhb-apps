@@ -58,45 +58,52 @@
                 </thead>
 
                 <tr>
-                    <td>Aspirant</td>
+                    <td>Onder 12 (aspirant)</td>
+                    <td>-</td>
+                    <td>11</td>
+                    <td>Onder 14, Onder 18, Onder 21, 21+</td>
+                </tr>
+
+                <tr>
+                    <td>Onder 14 (aspirant)</td>
                     <td>-</td>
                     <td>13</td>
-                    <td>Cadet, Junior, Senior</td>
+                    <td>Onder 18, Onder 21, 21+</td>
                 </tr>
 
                 <tr>
-                    <td>Cadet</td>
+                    <td>Onder 18 (cadet)</td>
                     <td>-</td>
                     <td>17</td>
-                    <td>Junior, Senior</td>
+                    <td>Onder 21, 21+</td>
                 </tr>
 
                 <tr>
-                    <td>Junior</td>
+                    <td>Onder 21 (junior)</td>
                     <td>-</td>
                     <td>20</td>
-                    <td>Senior</td>
+                    <td>21+</td>
                 </tr>
 
                 <tr>
-                    <td>Senior</td>
+                    <td>21+ (senior)</td>
                     <td>21</td>
                     <td>-</td>
                     <td>-</td>
                 </tr>
 
                 <tr>
-                    <td>Master</td>
+                    <td>50+ (master)</td>
                     <td>50</td>
                     <td>-</td>
-                    <td>Senior</td>
+                    <td>21+</td>
                 </tr>
 
                 <tr>
-                    <td>Veteraan</td>
+                    <td>60+ (veteraan)</td>
                     <td>60</td>
                     <td>-</td>
-                    <td>Master, Senior</td>
+                    <td>50+, 21+</td>
                 </tr>
 
             </table>
@@ -127,34 +134,40 @@
                 </thead>
 
                 <tr>
-                    <td>Aspirant</td>
-                    <td>Geboren {{ comp_1.asp }} of later</td>
-                    <td>Geboren {{ comp_2.asp }} of later</td>
+                    <td>Onder 12 (aspirant)</td>
+                    <td>Geboren {{ comp_1.onder12 }} of later</td>
+                    <td>Geboren {{ comp_2.onder12 }} of later</td>
                 </tr>
 
                 <tr>
-                    <td>Cadet</td>
-                    <td>Geboren {{ comp_1.cadet }}</td>
-                    <td>Geboren {{ comp_2.cadet }}</td>
+                    <td>Onder 14 (aspirant)</td>
+                    <td>Geboren {{ comp_1.onder14 }}</td>
+                    <td>Geboren {{ comp_2.onder14 }}</td>
                 </tr>
 
                 <tr>
-                    <td>Junior</td>
-                    <td>Geboren {{ comp_1.junior }}</td>
-                    <td>Geboren {{ comp_2.junior }}</td>
+                    <td>Onder 18 (cadet)</td>
+                    <td>Geboren {{ comp_1.onder18 }}</td>
+                    <td>Geboren {{ comp_2.onder18 }}</td>
                 </tr>
 
                 <tr>
-                    <td>Senior</td>
-                    <td>Geboren {{ comp_1.senior }} of eerder</td>
-                    <td>Geboren {{ comp_2.senior }} of eerder</td>
+                    <td>Onder 21 (junior)</td>
+                    <td>Geboren {{ comp_1.onder21 }}</td>
+                    <td>Geboren {{ comp_2.onder21 }}</td>
+                </tr>
+
+                <tr>
+                    <td>21+ (senior)</td>
+                    <td>Geboren {{ comp_1.vanaf21 }} of eerder</td>
+                    <td>Geboren {{ comp_2.vanaf21 }} of eerder</td>
                 </tr>
 
             </table>
         </div>
     </div>
 
-    <p class="center">De klassen Master en Veteraan zijn niet in gebruik in de bondscompetities.</p>
+    <p class="center">De klassen 50+ (master) en 60+ (veteraan) zijn niet in gebruik in de bondscompetities.</p>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="competitie-info-leeftijden" %}
 

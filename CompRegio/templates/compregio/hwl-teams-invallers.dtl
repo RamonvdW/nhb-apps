@@ -63,7 +63,7 @@
                         <tr>
                             <td class="hide-on-small-only">{{ team.team_type.beschrijving }}</td>
                             <td>{{ team.team_naam }}</td>
-                            <td>{{ team.klasse.team.beschrijving }}</td>
+                            <td>{{ team.team_klasse.beschrijving }}</td>
                             <td class="hide-on-small-only center{% if team.aantal < 3 or team.aantal > 4 %} red-text{% endif %}">{{ team.aantal }}</td>
                             <td class="center">
                                 {% if team.url_koppelen %}

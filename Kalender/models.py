@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from BasisTypen.models import IndivWedstrijdklasse, BoogType, KalenderWedstrijdklasse
+from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from NhbStructuur.models import NhbVereniging
 from Sporter.models import SporterBoog
 from Wedstrijden.models import WedstrijdLocatie

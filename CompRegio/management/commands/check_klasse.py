@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -24,16 +24,14 @@ class Command(BaseCommand):
         volgorde2klasse = dict()             # [(competitie.pk, volgorde)] = CompetitieKlasse
         volgorde2hogere_klasse = dict()      # [(competitie.pk, volgorde)] = CompetitieKlasse
 
-        for klasse in (CompetitieKlasse
+        for klasse in (CompetitieIndivKlasse
                        .objects
-                       .select_related('competitie',
-                                       'indiv')
-                       .exclude(indiv=None)
-                       .filter(indiv__is_onbekend=False)
-                       .order_by('indiv__volgorde')):
+                       .select_related('competitie')
+                       .filter(is_onbekend=False)
+                       .order_by('volgorde')):
 
             comp_pk = klasse.competitie.pk
-            volgorde = klasse.indiv.volgorde
+            volgorde = klasse.volgorde
 
             volgorde2klasse[(comp_pk, volgorde)] = klasse
 
@@ -43,7 +41,7 @@ class Command(BaseCommand):
                 # geen hogere klasse
                 pass
             else:
-                if not hogere_klasse.indiv.is_onbekend:         # pragma: no branch
+                if not hogere_klasse.is_onbekend:         # pragma: no branch
                     volgorde2hogere_klasse[(comp_pk, volgorde)] = hogere_klasse
         # for
 
@@ -58,12 +56,12 @@ class Command(BaseCommand):
 
         for deelnemer in (RegioCompetitieSchutterBoog
                           .objects
-                          .select_related('klasse__indiv',
+                          .select_related('indiv_klasse',
                                           'deelcompetitie__competitie')
                           .all()):                                          # pragma: no cover
 
             comp_pk = deelnemer.deelcompetitie.competitie.pk
-            volgorde = deelnemer.klasse.indiv.volgorde
+            volgorde = deelnemer.indiv_klasse.volgorde
 
             try:
                 hogere_klasse = volgorde2hogere_klasse[(comp_pk, volgorde)]
@@ -74,14 +72,15 @@ class Command(BaseCommand):
                 klasse_min_ag = hogere_klasse.min_ag
 
                 if indiv_ag >= klasse_min_ag:
-                    self.stdout.write('[WARNING] %s: klasse %s, indiv_ag %s < hogere klasse min_ag %s (%s)' % (deelnemer, deelnemer.klasse, indiv_ag, klasse_min_ag, hogere_klasse))
+                    self.stdout.write('[WARNING] %s: klasse %s, indiv_ag %s < hogere klasse min_ag %s (%s)' % (
+                                        deelnemer, deelnemer.klasse, indiv_ag, klasse_min_ag, hogere_klasse))
 
                     bepaler = KlasseBepaler(deelnemer.deelcompetitie.competitie)
                     bepaler.bepaal_klasse_deelnemer(deelnemer)
-                    self.stdout.write('          nieuwe klasse: %s' % deelnemer.klasse)
+                    self.stdout.write('          nieuwe indiv_klasse: %s' % deelnemer.indiv_klasse)
 
                     if do_save:
-                        deelnemer.save(update_fields=['klasse'])
+                        deelnemer.save(update_fields=['indiv_klasse'])
         # for
 
 # end of file

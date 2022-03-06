@@ -70,12 +70,12 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         deelnemers = (KampioenschapSchutterBoog
                       .objects
                       .select_related('deelcompetitie',
-                                      'klasse__indiv',
+                                      'indiv_klasse',
                                       'sporterboog__sporter',
                                       'bij_vereniging')
                       .filter(deelcompetitie=deelcomp_rk,
                               bij_vereniging=ver)
-                      .order_by('klasse__indiv__volgorde',  # groepeer per klasse
+                      .order_by('indiv_klasse__volgorde',   # groepeer per klasse
                                 'volgorde',                 # oplopend op volgorde
                                 '-gemiddelde'))             # aflopend op gemiddelde
 
@@ -86,11 +86,11 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
         klasse = -1
         for deelnemer in deelnemers:
-            deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
+            deelnemer.break_klasse = (klasse != deelnemer.indiv_klasse.volgorde)
             if deelnemer.break_klasse:
                 aantal_klassen += 1
-                deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
-                klasse = deelnemer.klasse.indiv.volgorde
+                deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
+                klasse = deelnemer.indiv_klasse.volgorde
 
             sporter = deelnemer.sporterboog.sporter
             deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())

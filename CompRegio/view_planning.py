@@ -14,7 +14,8 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
 from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
                                DeelCompetitie, DeelcompetitieRonde,
-                               CompetitieKlasse, RegioCompetitieSchutterBoog, RegiocompetitieTeam)
+                               CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from Competitie.operations import maak_deelcompetitie_ronde, competitie_week_nr_to_date
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
@@ -502,24 +503,26 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             for obj in (RegioCompetitieSchutterBoog
                         .objects
                         .filter(deelcompetitie=ronde.deelcompetitie)
-                        .select_related('klasse__indiv')):
+                        .select_related('indiv_klasse')):
                 try:
-                    klasse2schutters[obj.klasse.indiv.pk] += 1
+                    klasse2schutters[obj.indiv_klasse.pk] += 1
                 except KeyError:
-                    klasse2schutters[obj.klasse.indiv.pk] = 1
+                    klasse2schutters[obj.indiv_klasse.pk] = 1
             # for
 
-            for wkl in (CompetitieKlasse
+            for wkl in (CompetitieIndivKlasse
                         .objects
-                        .select_related('indiv',
-                                        'team')
-                        .filter(competitie=ronde.deelcompetitie.competitie,
-                                is_voor_teams_rk_bk=False)):
-                if wkl.indiv:
-                    niet_gebruikt[200000 + wkl.indiv.pk] = (2000 + wkl.indiv.volgorde, wkl.indiv.beschrijving)
-                if wkl.team and teams_tonen:
-                    niet_gebruikt[100000 + wkl.team.pk] = (1000 + wkl.team.volgorde, wkl.team.beschrijving)
+                        .filter(competitie=ronde.deelcompetitie.competitie)):
+                niet_gebruikt[200000 + wkl.pk] = (2000 + wkl.volgorde, wkl.beschrijving)
             # for
+
+            if teams_tonen:
+                for wkl in (CompetitieTeamKlasse
+                            .objects
+                            .filter(competitie=ronde.deelcompetitie.competitie,
+                                    is_voor_teams_rk_bk=False)):
+                    niet_gebruikt[100000 + wkl.pk] = (1000 + wkl.volgorde, wkl.beschrijving)
+                # for
 
         is_18m = ronde.deelcompetitie.competitie.afstand == '18'
 
@@ -849,33 +852,31 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         for obj in (RegioCompetitieSchutterBoog
                     .objects
                     .filter(deelcompetitie=deelcomp)
-                    .select_related('klasse')):
+                    .select_related('indiv_klasse')):
             try:
-                klasse2schutters[obj.klasse.indiv.pk] += 1
+                klasse2schutters[obj.indiv_klasse.pk] += 1
             except KeyError:
-                klasse2schutters[obj.klasse.indiv.pk] = 1
+                klasse2schutters[obj.indiv_klasse.pk] = 1
         # for
 
         wedstrijd_indiv_pks = [obj.pk for obj in wedstrijd.indiv_klassen.all()]
-        wkl_indiv = (CompetitieKlasse
+        wkl_indiv = (CompetitieIndivKlasse
                      .objects
-                     .filter(competitie=deelcomp.competitie,
-                             team=None)
-                     .select_related('indiv__boogtype')
-                     .order_by('indiv__volgorde')
-                     .all())
+                     .filter(competitie=deelcomp.competitie)
+                     .select_related('boogtype')
+                     .order_by('volgorde'))
         prev_boogtype = -1
         for obj in wkl_indiv:
-            if prev_boogtype != obj.indiv.boogtype:
-                prev_boogtype = obj.indiv.boogtype
+            if prev_boogtype != obj.boogtype:
+                prev_boogtype = obj.boogtype
                 obj.break_before = True
             try:
                 obj.aantal_sporters = klasse2schutters[obj.indiv.pk]
             except KeyError:
                 obj.aantal_sporters = 0
-            obj.short_str = obj.indiv.beschrijving
+            obj.short_str = obj.beschrijving
             obj.sel_str = "wkl_indiv_%s" % obj.indiv.pk
-            obj.geselecteerd = (obj.indiv.pk in wedstrijd_indiv_pks)
+            obj.geselecteerd = (obj.pk in wedstrijd_indiv_pks)
         # for
 
         # wedstrijdklassen teams
@@ -884,29 +885,26 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             for obj in (RegiocompetitieTeam
                         .objects
                         .filter(deelcompetitie=deelcomp)
-                        .exclude(klasse=None)
-                        .select_related('klasse',
-                                        'klasse__team')):
+                        .exclude(team_klasse=None)
+                        .select_related('team_klasse')):
                 try:
-                    klasse2teams[obj.klasse.team.pk] += 1
+                    klasse2teams[obj.team_klasse.pk] += 1
                 except KeyError:
-                    klasse2teams[obj.klasse.team.pk] = 1
+                    klasse2teams[obj.team_klasse.pk] = 1
             # for
 
             wedstrijd_team_pks = [obj.pk for obj in wedstrijd.team_klassen.all()]
-            wkl_team = (CompetitieKlasse
+            wkl_team = (CompetitieTeamKlasse
                         .objects
                         .filter(competitie=deelcomp.competitie,
-                                indiv=None,
                                 is_voor_teams_rk_bk=False)
-                        .select_related('team')
-                        .order_by('team__volgorde')
+                        .order_by('volgorde')
                         .all())
             for obj in wkl_team:
-                obj.short_str = obj.team.beschrijving
-                obj.sel_str = "wkl_team_%s" % obj.team.pk
+                obj.short_str = obj.beschrijving
+                obj.sel_str = "wkl_team_%s" % obj.pk
                 try:
-                    obj.aantal_teams = klasse2teams[obj.team.pk]
+                    obj.aantal_teams = klasse2teams[obj.pk]
                 except KeyError:
                     obj.aantal_teams = 0
                 obj.geselecteerd = (obj.team.pk in wedstrijd_team_pks)

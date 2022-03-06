@@ -10,8 +10,7 @@ from django.http import Http404
 from NhbStructuur.models import NhbRayon
 from Competitie.models import (LAAG_REGIO, LAAG_RK, DEELNAME_NEE,
                                Competitie, DeelCompetitie, DeelcompetitieKlasseLimiet,
-                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam,
-                               get_competitie_boog_typen, get_competitie_team_typen)
+                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam)
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import CompetitieWedstrijd
 from Functie.rol import Rollen, rol_get_huidige_functie
@@ -64,7 +63,7 @@ class UitslagenRayonIndivView(TemplateView):
         """ filter knoppen per rayon en per competitie boog type """
 
         # boogtype filters
-        boogtypen = get_competitie_boog_typen(comp)
+        boogtypen = comp.boogtypen.order_by('volgorde')
 
         context['comp_boog'] = None
         context['boog_filters'] = boogtypen
@@ -180,13 +179,13 @@ class UitslagenRayonIndivView(TemplateView):
                           .exclude(bij_vereniging__isnull=True)      # attentie gevallen
                           .exclude(deelname=DEELNAME_NEE)            # geen sporters die zich afgemeld hebben
                           .filter(deelcompetitie=deelcomp,
-                                  klasse__indiv__boogtype=boogtype,
+                                  indiv_klasse__boogtype=boogtype,
                                   volgorde__lte=48)                  # toon tot 48 sporters per klasse
-                          .select_related('klasse__indiv',
+                          .select_related('indiv_klasse',
                                           'sporterboog__sporter',
                                           'sporterboog__sporter__bij_vereniging',
                                           'bij_vereniging')
-                          .order_by('klasse__indiv__volgorde',
+                          .order_by('indiv_klasse__volgorde',
                                     'volgorde'))
 
             for limiet in (DeelcompetitieKlasseLimiet
@@ -215,17 +214,18 @@ class UitslagenRayonIndivView(TemplateView):
                           .filter(deelcompetitie__pk__in=deelcomp_pks,
                                   klasse__indiv__boogtype=boogtype,
                                   aantal_scores__gte=comp.aantal_scores_voor_rk_deelname)
-                          .select_related('klasse__indiv',
+                          .select_related('indiv_klasse',
                                           'sporterboog__sporter',
                                           'sporterboog__sporter__bij_vereniging',
                                           'bij_vereniging')
-                          .order_by('klasse__indiv__volgorde', '-gemiddelde'))
+                          .order_by('indiv_klasse__volgorde',
+                                    '-gemiddelde'))
 
         klasse = -1
         limiet = 24
         curr_teller = None
         for deelnemer in deelnemers:
-            deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
+            deelnemer.break_klasse = (klasse != deelnemer.indiv_klasse.volgorde)
             if deelnemer.break_klasse:
                 if klasse == -1:
                     deelnemer.is_eerste_break = True
@@ -244,7 +244,7 @@ class UitslagenRayonIndivView(TemplateView):
                 curr_teller = deelnemer
                 curr_teller.aantal_regels = 2
 
-            klasse = deelnemer.klasse.indiv.volgorde
+            klasse = deelnemer.indiv_klasse.volgorde
 
             sporter = deelnemer.sporterboog.sporter
             deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
@@ -284,7 +284,7 @@ class UitslagenRayonTeamsView(TemplateView):
 
         # team type filter
         context['teamtype'] = None
-        context['teamtype_filters'] = teamtypen = get_competitie_team_typen(comp)
+        context['teamtype_filters'] = teamtypen = comp.teamtypen.order_by('volgorde')
 
         for team in teamtypen:
             team.sel = 'team_' + team.afkorting
@@ -408,9 +408,9 @@ class UitslagenRayonTeamsView(TemplateView):
             if team.klasse != prev_klasse:
                 team.break_klasse = True
                 if team.klasse:
-                    team.klasse_str = team.klasse.team.beschrijving
+                    team.klasse_str = team.team_klasse.beschrijving
                     try:
-                        team.wedstrijd = team2wedstrijd[team.klasse.team.pk]
+                        team.wedstrijd = team2wedstrijd[team.team_klasse.pk]
                     except KeyError:
                         pass
                 else:

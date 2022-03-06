@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from Functie.models import maak_functie, Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse, RegioCompetitieSchutterBoog,
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, RegioCompetitieSchutterBoog,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, LAAG_REGIO, LAAG_RK,
                                DeelcompetitieRonde)
 from Competitie.operations import competities_aanmaken
@@ -232,7 +232,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        self.assertEqual(CompetitieKlasse.objects.count(), 0)
+        self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         competities_aanmaken()
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
@@ -390,18 +390,18 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
 
         inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
         self.assertEqual(inschrijving.sporterboog.sporter.lid_nr, 100004)
-        self.assertTrue('Onder 18' in inschrijving.klasse.indiv.beschrijving)
+        self.assertTrue('Onder 18' in inschrijving.indiv_klasse.beschrijving)
         inschrijving.delete()
 
         # zet het min_ag voor Recurve klassen
         klasse_5 = None
-        for klasse in (CompetitieKlasse
+        for klasse in (CompetitieIndivKlasse
                        .objects
                        .filter(competitie=self.comp_18,
                                indiv__volgorde__in=(1100, 1101, 1102, 1103, 1104, 1105))):
-            if klasse.indiv.volgorde == 1105:
+            if klasse.volgorde == 1105:
                 klasse.min_ag = 0.001
-            elif klasse.indiv.volgorde == 1104:
+            elif klasse.volgorde == 1104:
                 klasse.min_ag = 7.420
                 klasse_5 = klasse
             else:
@@ -827,15 +827,14 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         url = self.url_aanmelden % self.comp_18.pk
         zet_competitie_fase(self.comp_18, 'B')
         # zet het min_ag te hoog
-        for klasse in CompetitieKlasse.objects.filter(competitie=self.comp_18, indiv__boogtype__afkorting='R', min_ag__lt=8.0):
+        for klasse in CompetitieIndivKlasse.objects.filter(competitie=self.comp_18, boogtype__afkorting='R', min_ag__lt=8.0):
             klasse.min_ag = 8.0     # > 7.42 van zet_ag
             klasse.save(update_fields=['min_ag'])
         # for
         # verwijder alle klassen 'onbekend'
-        for klasse in CompetitieKlasse.objects.filter(indiv__is_onbekend=True):
-            indiv = klasse.indiv
-            indiv.is_onbekend = False
-            indiv.save(update_fields=['is_onbekend'])
+        for klasse in CompetitieIndivKlasse.objects.filter(is_onbekend=True):
+            klasse.is_onbekend = False
+            klasse.save(update_fields=['is_onbekend'])
         # for
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         with self.assert_max_queries(20):

@@ -12,8 +12,7 @@ from Competitie.models import (LAAG_REGIO,
                                TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_SOM_SCORES,
                                Competitie, DeelCompetitie,
                                RegiocompetitieTeamPoule, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               RegioCompetitieSchutterBoog,
-                               get_competitie_boog_typen, get_competitie_team_typen)
+                               RegioCompetitieSchutterBoog)
 from Competitie.operations.poules import maak_poule_schema
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -72,7 +71,7 @@ class UitslagenRegioIndivView(TemplateView):
         """ filter optie voor de regio """
 
         # boogtype filters
-        boogtypen = get_competitie_boog_typen(comp)
+        boogtypen = comp.boogtypen.order_by('volgorde')
 
         context['comp_boog'] = None
         context['boog_filters'] = boogtypen
@@ -247,9 +246,9 @@ class UitslagenRegioIndivView(TemplateView):
                       .filter(deelcompetitie=deelcomp)
                       .select_related('sporterboog__sporter',
                                       'bij_vereniging',
-                                      'klasse__indiv__boogtype')
-                      .filter(klasse__indiv__boogtype=boogtype)
-                      .order_by('klasse__indiv__volgorde', self.order_gemiddelde))
+                                      'indiv_klasse__boogtype')
+                      .filter(indiv_klasse__boogtype=boogtype)
+                      .order_by('indiv_klasse__volgorde', self.order_gemiddelde))
 
         if zes_scores == 'zes':
             deelnemers = self.filter_zes_scores(deelnemers)
@@ -262,7 +261,7 @@ class UitslagenRegioIndivView(TemplateView):
         deelnemer_count = None
         for deelnemer in deelnemers:
 
-            deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
+            deelnemer.break_klasse = (klasse != deelnemer.indiv_klasse.volgorde)
             if deelnemer.break_klasse:
                 deelnemer_count = deelnemer
                 deelnemer.aantal_in_groep = 2   # 1 extra zodat balk doorloopt tot horizontale afsluiter
@@ -272,18 +271,18 @@ class UitslagenRegioIndivView(TemplateView):
                     self._split_aspiranten(asps, objs)
                     asps = list()
 
-                deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
+                deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
                 is_asp = False
-                if deelnemer.klasse.indiv.niet_voor_rk_bk:
+                if deelnemer.indiv_klasse.niet_voor_rk_bk:
                     # dit is een aspiranten klassen of een klasse onbekend
-                    for lkl in deelnemer.klasse.indiv.leeftijdsklassen.all():
+                    for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all():
                         if lkl.is_aspirant_klasse():
                             is_asp = True
                             break
                     # for
 
                 rank = 0
-            klasse = deelnemer.klasse.indiv.volgorde
+            klasse = deelnemer.indiv_klasse.volgorde
 
             rank += 1
             sporter = deelnemer.sporterboog.sporter
@@ -342,7 +341,7 @@ class UitslagenRegioTeamsView(TemplateView):
         """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
 
         context['teamtype'] = None
-        context['teamtype_filters'] = teamtypen = get_competitie_team_typen(comp)
+        context['teamtype_filters'] = teamtypen = comp.teamtypen.order_by('volgorde')
 
         for team in teamtypen:
             team.sel = team.afkorting
@@ -544,7 +543,7 @@ class UitslagenRegioTeamsView(TemplateView):
                 # laat deze voorlopig uit de uitslag
                 pass
             else:
-                tup = (poule.pk, team.klasse.team.volgorde,
+                tup = (poule.pk, team.team_klasse.volgorde,
                        0-team.totaal_punten,        # hoogste WP bovenaan
                        0-team.totaal_score,         # hoogste score bovenaan
                        team.pk, poule, team)
@@ -578,7 +577,7 @@ class UitslagenRegioTeamsView(TemplateView):
 
             if team.klasse != prev_klasse:
                 team.break_klasse = True
-                team.klasse_str = team.klasse.team.beschrijving
+                team.klasse_str = team.team_klasse.beschrijving
                 team.aantal_in_groep = 3        # inclusief afsluitende blauwe regel
                 aantal_team = team
                 if prev_klasse:

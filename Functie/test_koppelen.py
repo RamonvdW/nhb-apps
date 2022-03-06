@@ -646,9 +646,8 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertContains(resp, 'LET OP: geen lid bij deze vereniging')
 
     def test_menu(self):
-        """ Controleer het het Wissel van Rol menu getoond wordt nadat een
-            gebruiker aan een eerste rol gekoppeld is.
-        """
+        # Controleer het het Wissel van Rol menu getoond wordt nadat een
+        # gebruiker aan een eerste rol gekoppeld is.
 
         # log in met aparte een aparte test client instantie, zodat de sessie behouden blijft
         client2 = Client()

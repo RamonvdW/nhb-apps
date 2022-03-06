@@ -214,7 +214,7 @@ class LeeftijdsKlasse(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-class IndivWedstrijdklasse(models.Model):
+class IndivWedstrijdklasse(models.Model):       # TODO: rename naar iets met Template
     """ definitie van een wedstrijdklasse voor de bondscompetities """
 
     # klassen die verouderd zijn krijgen worden op deze manier eruit gehaald
@@ -276,7 +276,7 @@ class IndivWedstrijdklasse(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-class TeamWedstrijdklasse(models.Model):
+class TeamWedstrijdklasse(models.Model):            # TODO: rename naar iets met Template
     """ definitie van een team wedstrijdklasse voor de bondscompetitie """
 
     # niet meer gebruiken?
@@ -303,7 +303,7 @@ class TeamWedstrijdklasse(models.Model):
 
     # op welk soort blazoen schiet deze klasse in de kampioenschappen
     blazoen1_18m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
-    blazoen2_18m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
+    blazoen2_18m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)       # TODO: kan weg
 
     blazoen_25m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_60CM)
 

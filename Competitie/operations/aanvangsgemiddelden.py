@@ -6,7 +6,7 @@
 
 from django.conf import settings
 from BasisTypen.models import TeamWedstrijdklasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
-from Competitie.models import AG_NUL, CompetitieKlasse
+from Competitie.models import AG_NUL, CompetitieTeamKlasse
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Logboek.models import schrijf_in_logboek
 from Sporter.models import Sporter, SporterBoog
@@ -18,28 +18,29 @@ def get_competitie_bogen(comp=None):
     """
     boogtype_dict = dict()  # [afkorting] = BoogType
 
-    team_wkls = list()
-    if comp:
-        for klasse in (CompetitieKlasse
-                       .objects
-                       .filter(competitie=comp,
-                               indiv=None)
-                       .select_related('team__team_type')):
-            team_wkls.append(klasse.team)
-        # for
-    else:
-        team_wkls = TeamWedstrijdklasse.objects.exclude(buiten_gebruik=True).select_related('team_type')
-
     # ALLE bogen van de bondscompetitie teams worden ook gebruikt voor de individuele wedstrijdklassen
-    teamtypen_done = list()
-    for team_wkl in team_wkls:
-        teamtype = team_wkl.team_type
-        if teamtype.pk not in teamtypen_done:
-            teamtypen_done.append(teamtype.pk)
-            for boogtype in teamtype.boog_typen.all():
+
+    if comp:
+        # haal de boogtypen op die gebruikt worden in deze competitie
+        for klasse in (CompetitieTeamKlasse
+                       .objects
+                       .filter(competitie=comp)
+                       .prefetch_related('boog_typen')):
+            for boogtype in klasse.boog_typen.all():
                 boogtype_dict[boogtype.afkorting] = boogtype
             # for
-    # for
+        # for
+    else:
+        # haal de boogtypen op voor de volgende competitie
+        teamtypen_done = list()
+        for team_wkl in TeamWedstrijdklasse.objects.exclude(buiten_gebruik=True).select_related('team_type'):
+            teamtype = team_wkl.team_type
+            if teamtype.pk not in teamtypen_done:
+                teamtypen_done.append(teamtype.pk)
+                for boogtype in teamtype.boog_typen.all():
+                    boogtype_dict[boogtype.afkorting] = boogtype
+                # for
+        # for
 
     return boogtype_dict
 

@@ -78,13 +78,13 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         niet_gebruikt = dict()
         for obj in (KampioenschapSchutterBoog
                     .objects
-                    .select_related('klasse__indiv')
+                    .select_related('indiv_klasse')
                     .filter(deelcompetitie=deelcomp_rk)
                     .select_related('klasse')):
             try:
-                klasse2schutters[obj.klasse.indiv.pk] += 1
+                klasse2schutters[obj.indiv_klasse.pk] += 1
             except KeyError:
-                klasse2schutters[obj.klasse.indiv.pk] = 1
+                klasse2schutters[obj.indiv_klasse.pk] = 1
         # for
 
         for wkl in (CompetitieKlasse
@@ -276,12 +276,11 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                     .objects
                     .exclude(deelname=DEELNAME_NEE)         # afgemelde schutters niet tellen
                     .filter(deelcompetitie=deelcomp_rk)
-                    .select_related('klasse',
-                                    'klasse__indiv')):
+                    .select_related('indiv_klasse')):
             try:
-                klasse2schutters[obj.klasse.indiv.pk] += 1
+                klasse2schutters[obj.indiv_klasse.pk] += 1
             except KeyError:
-                klasse2schutters[obj.klasse.indiv.pk] = 1
+                klasse2schutters[obj.indiv_klasse.pk] = 1
         # for
 
         # wedstrijdklassen

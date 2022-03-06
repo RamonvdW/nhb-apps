@@ -46,7 +46,12 @@ class InfoCompetitieView(TemplateView):
                             obj.mijn_regio = True
                     # for
 
-        context['klassen_count'] = IndivWedstrijdklasse.objects.exclude(is_onbekend=True).count()
+        # tel de template klassen, zodat dit ook werkt als er geen competitie actief is
+        context['klassen_count'] = (IndivWedstrijdklasse
+                                    .objects
+                                    .exclude(is_onbekend=True)
+                                    .exclude(buiten_gebruik=True)
+                                    .count())
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
@@ -81,10 +86,11 @@ class InfoLeeftijdenView(TemplateView):
         comp.klassen = dict()       # ['klasse'] = list(jaartal, jaartal, ..)
 
         jaar += 1       # informatie voor het tweede jaar produceren
-        comp.asp = self._maak_jaren(jaar, 13, 1)        # (10, 11, 12,) 13
-        comp.cadet = self._maak_jaren(jaar, 14, 4)      # 14, 15, 16, 17
-        comp.junior = self._maak_jaren(jaar, 18, 3)     # 18, 19, 20
-        comp.senior = str(jaar - 21)
+        comp.onder12 = self._maak_jaren(jaar, 11, 1)     # 10, 11
+        comp.onder14 = self._maak_jaren(jaar, 12, 2)     # 12, 13
+        comp.onder18 = self._maak_jaren(jaar, 14, 4)     # 14, 15, 16, 17
+        comp.onder21 = self._maak_jaren(jaar, 18, 3)     # 18, 19, 20
+        comp.vanaf21 = str(jaar - 21)
         return comp
 
     def get_context_data(self, **kwargs):

@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import Score, ScoreHist
+from .models import Score, ScoreHist, Uitslag
 
 
 class ScoreAdmin(admin.ModelAdmin):
@@ -34,6 +34,7 @@ class ScoreAdmin(admin.ModelAdmin):
 
 class ScoreHistAdmin(admin.ModelAdmin):
     """ Admin configuratie voor ScoreHist klasse """
+
     list_filter = ('when', 'score__afstand_meter')
 
     # voorkom trage admin interface (lange lijstjes die veel queries kosten)
@@ -42,7 +43,14 @@ class ScoreHistAdmin(admin.ModelAdmin):
     list_select_related = ('door_account',)
 
 
+class UitslagAdmin(admin.ModelAdmin):
+    """ Admin configuratie voor Uitslag klasse """
+
+    list_filter = ('afstand', )
+
+
 admin.site.register(Score, ScoreAdmin)
 admin.site.register(ScoreHist, ScoreHistAdmin)
+admin.site.register(Uitslag, UitslagAdmin)
 
 # end of file

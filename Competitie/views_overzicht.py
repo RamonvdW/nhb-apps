@@ -10,7 +10,6 @@ from django.http import Http404
 from django.views.generic import View, TemplateView
 from django.utils.formats import localize
 from django.templatetags.static import static
-from Competitie.models import get_competitie_boog_typen, get_competitie_team_typen
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
@@ -311,7 +310,7 @@ class CompetitieOverzichtView(View):
         # kijk of de uitslagen klaar zijn om te tonen
         context['toon_uitslagen'] = (comp.fase >= 'B')      # inschrijving is open
 
-        wed_boog = 'r'  # get_competitie_boog_typen(comp)[0].afkorting.lower()         # r
+        wed_boog = 'r'
 
         if request.user.is_authenticated:
             # als deze sporter ingeschreven is voor de competitie, pak dan het boogtype waarmee hij ingeschreven is
@@ -329,7 +328,7 @@ class CompetitieOverzichtView(View):
             # TODO: zoek ook het team type van het team waarin hij geplaatst is
             #team_type = wed_boog
 
-        team_type = get_competitie_team_typen(comp)[0].afkorting.lower()        # r/r2
+        team_type = list(comp.teamtypen.order_by('volgorde').values_list('afkorting', flat=True))[0].lower()    # r/r2
 
         context['url_regio_indiv'] = reverse('CompUitslagen:uitslagen-regio-indiv',
                                              kwargs={'comp_pk': comp.pk,

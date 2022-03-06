@@ -14,7 +14,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
 from Competitie.models import (CompetitieKlasse, AG_NUL, DeelCompetitie, LAAG_REGIO,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
-                               update_uitslag_teamcompetitie, get_competitie_team_typen)
+                               update_uitslag_teamcompetitie)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Score.models import ScoreHist, SCORE_TYPE_TEAM_AG
@@ -351,7 +351,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         context['team'] = team
 
-        context['opt_team_type'] = teamtypes = get_competitie_team_typen(deelcomp.competitie)
+        context['opt_team_type'] = teamtypes = (deelcomp.competitie.teamtypen.all())
         for obj in teamtypes:
             obj.choice_name = obj.afkorting
             obj.actief = (team.team_type == obj)

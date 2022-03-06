@@ -118,8 +118,8 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         except LookupError as exc:
             raise Http404(str(exc))
 
-        context['wedstrijdklasse'] = aanmelding.klasse.indiv.beschrijving
-        context['is_klasse_onbekend'] = aanmelding.klasse.indiv.is_onbekend
+        context['wedstrijdklasse'] = aanmelding.indiv_klasse.beschrijving
+        context['is_klasse_onbekend'] = aanmelding.indiv_klasse.is_onbekend
         del aanmelding
 
         udvl = comp.uiterste_datum_lid                      # uiterste datum van lidmaatschap

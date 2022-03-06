@@ -117,4 +117,33 @@ class ScoreHist(models.Model):
     objects = models.Manager()      # for the editor only
 
 
+class Uitslag(models.Model):
+
+    # de maximale score die gehaald (en ingevoerd) mag worden
+    # dit afhankelijk van het type wedstrijd
+    max_score = models.PositiveSmallIntegerField()      # max = 32767
+
+    # 18, 25, 70, etc.
+    afstand = models.PositiveSmallIntegerField()
+
+    # scores bevat SporterBoog en komt met ScoreHist
+    scores = models.ManyToManyField(Score, blank=True)  # mag leeg zijn / gemaakt worden
+
+    # False = uitslag mag door WL ingevoerd worden
+    # True  = uitslag is gecontroleerd en mag niet meer aangepast worden
+    is_bevroren = models.BooleanField(default=False)
+
+    def __str__(self):
+        msg = "(%s) afstand %s, max score %s" % (self.pk, self.afstand, self.max_score)
+        if self.is_bevroren:
+            msg += " (bevroren)"
+        return msg
+
+    # hier houden we geen klassen bij - het is geen inschrijflijst
+    class Meta:
+        """ meta data voor de admin interface """
+        verbose_name = "Uitslag"
+        verbose_name_plural = "Uitslagen"
+
+
 # end of file

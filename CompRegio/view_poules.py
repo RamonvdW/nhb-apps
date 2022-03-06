@@ -217,7 +217,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
                     team.in_andere_poule = True
 
             if team.klasse:
-                team.klasse_str = team.klasse.team.beschrijving
+                team.klasse_str = team.team_klasse.beschrijving
             else:
                 team.klasse_str = ''        # blokkeert selectie voor poule
         # for

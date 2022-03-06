@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, CompetitieKlasse,
+from Competitie.models import (Competitie, CompetitieIndivKlasse,
                                DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
 from Competitie.operations import competities_aanmaken
@@ -157,19 +157,19 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         boog_c = BoogType.objects.get(afkorting='C')
 
-        klasse_r = CompetitieKlasse.objects.filter(indiv__boogtype__afkorting='R',
-                                                   indiv__is_onbekend=False,
-                                                   indiv__niet_voor_rk_bk=False)[0]
+        klasse_r = CompetitieIndivKlasse.objects.filter(boogtype__afkorting='R',
+                                                        is_onbekend=False,
+                                                        is_voor_rk_bk=True)[0]
 
-        klasse_c = CompetitieKlasse.objects.filter(indiv__boogtype__afkorting='C',
-                                                   indiv__is_onbekend=False,
-                                                   indiv__niet_voor_rk_bk=False)[0]
+        klasse_c = CompetitieIndivKlasse.objects.filter(boogtype__afkorting='C',
+                                                        is_onbekend=False,
+                                                        is_voor_rk_bk=True)[0]
 
         # recurve, lid 1
         RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_101,
                                     sporterboog=self.sporterboog,
                                     bij_vereniging=self.sporterboog.sporter.bij_vereniging,
-                                    klasse=klasse_r,
+                                    indiv_klasse=klasse_r,
                                     aantal_scores=7).save()
 
         # compound, lid 1
@@ -181,7 +181,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_101,
                                     sporterboog=sporterboog,
                                     bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                    klasse=klasse_c,
+                                    indiv_klasse=klasse_c,
                                     aantal_scores=6).save()
 
         # compound, lid2
@@ -193,7 +193,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_101,
                                     sporterboog=sporterboog,
                                     bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                    klasse=klasse_c,
+                                    indiv_klasse=klasse_c,
                                     aantal_scores=6).save()
 
     def test_doorzetten_rk(self):
@@ -331,12 +331,6 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
                                                     laag=LAAG_BK)
         objs = KampioenschapSchutterBoog.objects.filter(deelcompetitie=deelcomp_bk_18)
         self.assertEqual(objs.count(), 0)       # worden nog niet gemaakt, dus 0
-
-        team_klasse = CompetitieKlasse.objects.filter(indiv=None)[0]
-        deeln_bk = KampioenschapSchutterBoog(deelcompetitie=deelcomp_bk_18,
-                                             sporterboog=self.sporterboog,
-                                             klasse=team_klasse)
-        self.assertTrue(str(deeln_bk) != '')
 
     def test_doorzetten_bad(self):
         # moet BKO zijn

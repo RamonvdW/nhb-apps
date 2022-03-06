@@ -97,8 +97,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
 
         objs = (RegioCompetitieSchutterBoog
                 .objects
-                .select_related('klasse',
-                                'klasse__indiv',
+                .select_related('indiv_klasse',
                                 'deelcompetitie',
                                 'deelcompetitie__nhb_regio',
                                 'sporterboog',
@@ -106,21 +105,21 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
                                 'bij_vereniging')
                 .filter(deelcompetitie__competitie=comp,
                         deelcompetitie__laag=LAAG_REGIO)
-                .order_by('klasse__indiv__volgorde',
+                .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
 
         obj_aantal = None
         aantal = 0
         volgorde = -1
         for obj in objs:
-            if volgorde != obj.klasse.indiv.volgorde:
+            if volgorde != obj.indiv_klasse.volgorde:
                 obj.nieuwe_klasse = True
                 if obj_aantal:
                     obj_aantal.aantal_in_klasse = aantal
                     obj_aantal.aantal_regels = aantal + 2
                 aantal = 0
                 obj_aantal = obj
-                volgorde = obj.klasse.indiv.volgorde
+                volgorde = obj.indiv_klasse.volgorde
 
             aantal += 1
         # for
@@ -181,8 +180,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
 
         objs = (RegioCompetitieSchutterBoog
                 .objects
-                .select_related('klasse',
-                                'klasse__indiv',
+                .select_related('indiv_klasse',
                                 'deelcompetitie',
                                 'deelcompetitie__nhb_regio__rayon',
                                 'sporterboog',
@@ -191,21 +189,21 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
                 .filter(deelcompetitie__competitie=comp,
                         deelcompetitie__laag=LAAG_REGIO,
                         deelcompetitie__nhb_regio__rayon=rayon)
-                .order_by('klasse__indiv__volgorde',
+                .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
 
         obj_aantal = None
         aantal = 0
         volgorde = -1
         for obj in objs:
-            if volgorde != obj.klasse.indiv.volgorde:
+            if volgorde != obj.indiv_klasse.volgorde:
                 obj.nieuwe_klasse = True
                 if obj_aantal:
                     obj_aantal.aantal_in_klasse = aantal
                     obj_aantal.aantal_regels = aantal + 2
                 aantal = 0
                 obj_aantal = obj
-                volgorde = obj.klasse.indiv.volgorde
+                volgorde = obj.indiv_klasse.volgorde
 
             aantal += 1
         # for
@@ -276,15 +274,14 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
         objs = (RegioCompetitieSchutterBoog
                 .objects
-                .select_related('klasse',
-                                'klasse__indiv',
+                .select_related('indiv_klasse',
                                 'deelcompetitie',
                                 'sporterboog',
                                 'sporterboog__sporter',
                                 'sporterboog__boogtype',
                                 'bij_vereniging')
                 .filter(deelcompetitie=deelcomp)
-                .order_by('klasse__indiv__volgorde',
+                .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
 
         obj_aantal = None
@@ -292,14 +289,14 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
         volgorde = -1
         for obj in objs:
             obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]
-            if volgorde != obj.klasse.indiv.volgorde:
+            if volgorde != obj.indiv_klasse.volgorde:
                 obj.nieuwe_klasse = True
                 if obj_aantal:
                     obj_aantal.aantal_in_klasse = aantal
                     obj_aantal.aantal_regels = aantal + 2
                 aantal = 0
                 obj_aantal = obj
-                volgorde = obj.klasse.indiv.volgorde
+                volgorde = obj.indiv_klasse.volgorde
 
             aantal += 1
         # for
@@ -435,22 +432,18 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                                   .values_list('sporter__lid_nr', flat=True))
 
         alle_blazoenen = list()
-        afstand = deelcomp.competitie.afstand
 
         for deelnemer in deelnemers:
             # bepaal welk blazoen deze sporter nodig heeft
-            klasse = deelnemer.klasse.indiv
-            if afstand == '18':
-                blazoenen = (klasse.blazoen1_18m_regio, klasse.blazoen2_18m_regio)
-            else:
-                blazoenen = (klasse.blazoen1_25m_regio, klasse.blazoen2_25m_regio)
+            klasse = deelnemer.indiv_klasse
+            blazoenen = (klasse.blazoen1_regio, klasse.blazoen2_regio)
 
-            if blazoenen[0] == blazoenen[1]:
-                blazoen_str = BLAZOEN2STR[blazoenen[0]]
+            if klasse.blazoen1_regio == klasse.blazoen2_regio:
+                blazoen_str = BLAZOEN2STR[klasse.blazoen1_regio]
             else:
                 # meerder mogelijkheden
-                blazoen_str = BLAZOEN2STR[blazoenen[0]]     # ga uit van eerste optie bij geen voorkeur
-                # blazoen_str = "%s of %s" % (BLAZOEN2STR[blazoenen[0]], BLAZOEN2STR[blazoenen[1]])
+                blazoen_str = BLAZOEN2STR[klasse.blazoen1_regio]     # ga uit van eerste optie bij geen voorkeur
+                # blazoen_str = "%s of %s" % (BLAZOEN2STR[klasse.blazoen1_regio], BLAZOEN2STR[klasse.blazoen2_regio])
                 if BLAZOEN_DT in blazoenen:
                     if deelnemer.sporterboog.sporter.lid_nr in voorkeur_eigen_blazoen:
                         blazoen_str = BLAZOEN2STR[BLAZOEN_WENS_DT]
@@ -602,8 +595,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
 
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
-                      .select_related('klasse',
-                                      'klasse__indiv',
+                      .select_related('indiv_klasse',
                                       'deelcompetitie',
                                       'bij_vereniging',
                                       'sporterboog',
@@ -611,7 +603,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                                       'sporterboog__sporter',
                                       'sporterboog__sporter__bij_vereniging')
                       .filter(deelcompetitie=deelcomp)
-                      .order_by('klasse__indiv__volgorde',
+                      .order_by('indiv_klasse__volgorde',
                                 'ag_voor_indiv'))
 
         # voeg de tabel met dagdeel-behoefte toe
@@ -680,15 +672,14 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
 
         objs = (RegioCompetitieSchutterBoog
                 .objects
-                .select_related('klasse',
-                                'klasse__indiv',
+                .select_related('indiv_klasse',
                                 'deelcompetitie',
                                 'bij_vereniging',
                                 'sporterboog',
                                 'sporterboog__sporter',
                                 'sporterboog__sporter__bij_vereniging')
                 .filter(deelcompetitie=deelcomp)
-                .order_by('klasse__indiv__volgorde',
+                .order_by('indiv_klasse__volgorde',
                           'ag_voor_indiv'))
 
         context['object_list'] = objs
@@ -825,18 +816,13 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                               .select_related('sporterboog',
                                               'sporterboog__boogtype',
                                               'sporterboog__sporter',
-                                              'klasse',
-                                              'klasse__indiv')
+                                              'indiv_klasse')
                               .filter(pk__in=deelnemer_pks)):
 
-                klasse = deelnemer.klasse.indiv
-                if afstand == '18':
-                    blazoenen = (klasse.blazoen1_18m_regio, klasse.blazoen2_18m_regio)
-                else:
-                    blazoenen = (klasse.blazoen1_25m_regio, klasse.blazoen2_25m_regio)
+                klasse = deelnemer.indiv_klasse
 
-                blazoen = blazoenen[0]
-                if blazoenen[0] != blazoenen[1]:
+                blazoen = klasse.blazoen1_regio
+                if klasse.blazoen1_regio != klasse.blazoen2_regio:
                     # meerder mogelijkheden
                     if BLAZOEN_DT in blazoenen_dict:
                         if deelnemer.sporterboog.sporter.lid_nr in voorkeur_eigen_blazoen:
@@ -967,18 +953,13 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
                               .select_related('sporterboog',
                                               'sporterboog__boogtype',
                                               'sporterboog__sporter',
-                                              'klasse',
-                                              'klasse__indiv')
+                                              'indiv_klasse')
                               .filter(pk__in=deelnemer_pks)):
 
-                klasse = deelnemer.klasse.indiv
-                if afstand == '18':
-                    blazoenen = (klasse.blazoen1_18m_regio, klasse.blazoen2_18m_regio)
-                else:
-                    blazoenen = (klasse.blazoen1_25m_regio, klasse.blazoen2_25m_regio)
+                klasse = deelnemer.indiv_klasse
 
-                blazoen = blazoenen[0]
-                if blazoenen[0] != blazoenen[1]:
+                blazoen = klasse.blazoen1_regio
+                if klasse.blazoen1_regio != klasse.blazoen2_regio:
                     # meerdere mogelijkheden
                     if BLAZOEN_DT in blazoenen_dict:
                         if deelnemer.sporterboog.sporter.lid_nr in voorkeur_eigen_blazoen:
@@ -1002,8 +983,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
         for deelnemer in (RegioCompetitieSchutterBoog
                           .objects
                           .prefetch_related('inschrijf_gekozen_wedstrijden')
-                          .select_related('klasse',
-                                          'klasse__indiv',
+                          .select_related('indiv_klasse',
                                           'bij_vereniging',
                                           'sporterboog',
                                           'sporterboog__sporter')
@@ -1022,7 +1002,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
             # for
 
             sporter = deelnemer.sporterboog.sporter
-            klasse = deelnemer.klasse.indiv.beschrijving
+            klasse = deelnemer.indiv_klasse.beschrijving
 
             writer.writerow([sporter.lid_nr, sporter.volledige_naam(), sporter.bij_vereniging, klasse] + kruisjes)
         # for

@@ -21,8 +21,8 @@ from Score.operations import wanneer_ag_vastgesteld
 from django.utils.formats import localize
 from .models import (Competitie, DeelCompetitie, CompetitieMutatie, LAAG_REGIO,
                      MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
-from .operations import (bepaal_startjaar_nieuwe_competitie, get_mappings_wedstrijdklasse_to_competitieklasse,
-                         bepaal_klassengrenzen_indiv, bepaal_klassengrenzen_teams, competitie_klassengrenzen_vaststellen)
+from .operations import (bepaal_startjaar_nieuwe_competitie, bepaal_klassengrenzen_indiv, bepaal_klassengrenzen_teams,
+                         competitie_klassengrenzen_vaststellen)
 import datetime
 import time
 
@@ -298,13 +298,11 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
         context['comp'] = comp
 
-        trans_indiv, trans_team = get_mappings_wedstrijdklasse_to_competitieklasse(comp)
-
         if comp.klassengrenzen_vastgesteld:
             context['al_vastgesteld'] = True
         else:
-            context['klassengrenzen_indiv'] = bepaal_klassengrenzen_indiv(comp, trans_indiv)
-            context['klassengrenzen_teams'] = bepaal_klassengrenzen_teams(comp, trans_team)
+            context['klassengrenzen_indiv'] = bepaal_klassengrenzen_indiv(comp)
+            context['klassengrenzen_teams'] = bepaal_klassengrenzen_teams(comp)
             context['wedstrijdjaar'] = comp.begin_jaar + 1
 
         datum = wanneer_ag_vastgesteld(comp.afstand)

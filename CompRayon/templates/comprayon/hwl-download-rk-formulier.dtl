@@ -79,7 +79,7 @@
                             {% endif %}
                             <tr>
                                 <td colspan="7" class="center">
-                                    <h5>{{ deelnemer.klasse.indiv.beschrijving }}</h5>
+                                    <h5>{{ deelnemer.indiv_klasse.beschrijving }}</h5>
                                     <br>
                                     <a class="btn-nhb-rood" href="{{ deelnemer.url_download_indiv }}">
                                         <i class="material-icons-round left">download</i>Download excel</a>
@@ -154,7 +154,7 @@
                             {% endif %}
                             <tr>
                                 <td colspan="5" class="center">
-                                    <h5>{{ team.klasse.team.beschrijving }}</h5>
+                                    <h5>{{ team.team_klasse.beschrijving }}</h5>
                                     <a class="btn-nhb-rood" href="{{ team.url_download_teams }}">
                                         <i class="material-icons-round left">download</i>Download excel</a>
                                 </td>

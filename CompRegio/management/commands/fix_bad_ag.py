@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -54,7 +54,7 @@ class Command(BaseCommand):
                           .objects
                           .select_related('sporterboog__sporter',
                                           'sporterboog__boogtype',
-                                          'klasse__indiv')
+                                          'indiv_klasse')
                           .filter(deelcompetitie__competitie=comp)):
 
             try:
@@ -77,11 +77,12 @@ class Command(BaseCommand):
                 do_save = True
 
                 # klasse opnieuw bepalen
-                klasse = deelnemer.klasse
+                indiv_klasse = deelnemer.indiv_klasse
                 bepaler.bepaal_klasse_deelnemer(deelnemer)
 
-                if klasse != deelnemer.klasse:
-                    self.stdout.write('deelnemer %s : klasse=%s --> %s' % (deelnemer, klasse, deelnemer.klasse))
+                if indiv_klasse != deelnemer.indiv_klasse:
+                    self.stdout.write('deelnemer %s : indiv_klasse=%s --> %s' % (
+                                        deelnemer, indiv_klasse, deelnemer.indiv_klasse))
                     do_save = True
 
             if do_save:

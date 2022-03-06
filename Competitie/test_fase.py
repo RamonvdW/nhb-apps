@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
 from django.test import TestCase
-from BasisTypen.models import IndivWedstrijdklasse
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse,
+from BasisTypen.models import IndivWedstrijdklasse, TeamType
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                LAAG_REGIO, LAAG_RK, LAAG_BK)
 import datetime
 
@@ -90,8 +90,11 @@ def zet_competitie_fase(comp, fase):
         comp.save()
         return
 
-    if comp.competitieklasse_set.count() == 0:      # pragma: no cover
-        raise NotImplementedError("Kan niet naar fase %s zonder competitie klassen!" % fase)
+    if comp.competitieindivklasse_set.count() == 0:      # pragma: no cover
+        raise NotImplementedError("Kan niet naar fase %s zonder competitie indiv klassen!" % fase)
+
+    if comp.competitieteamklasse_set.count() == 0:      # pragma: no cover
+        raise NotImplementedError("Kan niet naar fase %s zonder competitie team klassen!" % fase)
 
     comp.klassengrenzen_vastgesteld = True
     comp.begin_aanmeldingen = gister
@@ -141,6 +144,14 @@ class TestCompetitieFase(TestCase):
 
     """ tests voor de Competitie applicatie, hanteren van de competitie fases """
 
+    def _maak_twee_klassen(self, comp):
+        indiv = IndivWedstrijdklasse.objects.all()[0]
+        CompetitieIndivKlasse(competitie=comp, volgorde=1, boogtype=indiv.boogtype, min_ag=0.0).save()
+
+        teamtype = TeamType.objects.all()[0]
+        CompetitieTeamKlasse(competitie=comp, volgorde=1, min_ag=0.0, team_type=teamtype).save()
+
+
     def test_zet_fase(self):
         now = timezone.now()
         now = datetime.date(year=now.year, month=now.month, day=now.day)
@@ -184,8 +195,8 @@ class TestCompetitieFase(TestCase):
         self.assertEqual(comp.fase, 'A')
 
         # maak de klassen aan
-        indiv = IndivWedstrijdklasse.objects.all()[0]
-        CompetitieKlasse(competitie=comp, indiv=indiv, min_ag=0.0).save()
+        self._maak_twee_klassen(comp)
+
         comp.begin_aanmeldingen = comp.einde_aanmeldingen
         comp.bepaal_fase()
         self.assertEqual(comp.fase, 'A')
@@ -270,7 +281,7 @@ class TestCompetitieFase(TestCase):
         self.assertEqual(comp.fase, 'Z')
 
     def test_zet_competitie_fase(self):
-        """ test de helper functie die de competitie fase forceert """
+        # test de helper functie die de competitie fase forceert
         einde_jaar = datetime.date(year=2000, month=12, day=31)
         comp = Competitie()
         comp.begin_jaar = 2000
@@ -290,8 +301,7 @@ class TestCompetitieFase(TestCase):
         self.assertEqual(comp.fase, 'A')
 
         # maak de klassen aan en controleer de fase weer
-        indiv = IndivWedstrijdklasse.objects.all()[0]
-        CompetitieKlasse(competitie=comp, indiv=indiv, min_ag=0.0).save()
+        self._maak_twee_klassen(comp)
         zet_competitie_fase(comp, 'A')
         comp.bepaal_fase()
         self.assertEqual(comp.fase, 'A')

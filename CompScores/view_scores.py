@@ -874,7 +874,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                 regel.ronde_team = ronde_team
                 regel.team_str = ronde_team.team.maak_team_naam()
 
-                klasse_str = ronde_team.team.klasse.team.beschrijving
+                klasse_str = ronde_team.team.team_klasse.beschrijving
                 if klasse_str != prev_klasse:
                     regel.klasse_str = klasse_str
                     prev_klasse = klasse_str

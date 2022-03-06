@@ -85,7 +85,7 @@
 
                             <tr>
                                 <td>Team wedstrijdklasse</td>
-                                <td>{% if rk_team.klasse %}{{ rk_team.klasse.team.beschrijving }}{% else %}<i class="grey-text">Nog niet vastgesteld</i>{% endif %}</td>
+                                <td>{% if rk_team.klasse %}{{ rk_team.team_klasse.beschrijving }}{% else %}<i class="grey-text">Nog niet vastgesteld</i>{% endif %}</td>
                             </tr>
 
                             <tr>

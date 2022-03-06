@@ -7,11 +7,9 @@
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.http import Http404
-from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbVereniging
 from Competitie.models import (LAAG_REGIO, TEAM_PUNTEN_MODEL_SOM_SCORES, Competitie, DeelCompetitie,
-                               RegiocompetitieTeam, RegiocompetitieRondeTeam, RegioCompetitieSchutterBoog,
-                               get_competitie_boog_typen, get_competitie_team_typen)
+                               RegiocompetitieTeam, RegiocompetitieRondeTeam, RegioCompetitieSchutterBoog)
 from Functie.rol import rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from types import SimpleNamespace
@@ -62,7 +60,7 @@ class UitslagenVerenigingIndivView(TemplateView):
         """ filter knoppen per regio, gegroepeerd per rayon en per competitie boog type """
 
         # boogtype filters
-        boogtypen = get_competitie_boog_typen(comp)
+        boogtypen = comp.boogtypen.order_by('volgorde')
 
         context['comp_boog'] = None
         context['boog_filters'] = boogtypen
@@ -105,12 +103,11 @@ class UitslagenVerenigingIndivView(TemplateView):
                       .objects
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
-                                      'klasse',
-                                      'klasse__indiv',
-                                      'klasse__indiv__boogtype')
+                                      'indiv_klasse',
+                                      'indiv_klasse__boogtype')
                       .filter(deelcompetitie=deelcomp,
                               bij_vereniging__ver_nr=ver_nr,
-                              klasse__indiv__boogtype=boogtype)
+                              indiv_klasse__boogtype=boogtype)
                       .order_by('-gemiddelde'))
 
         rank = 1
@@ -118,7 +115,7 @@ class UitslagenVerenigingIndivView(TemplateView):
             sporter = deelnemer.sporterboog.sporter
             deelnemer.rank = rank
             deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
-            deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
+            deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
             rank += 1
 
             # if deelnemer.score1 == 0:
@@ -215,7 +212,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
         """ filter knoppen voor de vereniging """
 
         context['teamtype'] = None
-        context['teamtype_filters'] = teamtypen = get_competitie_team_typen(comp)
+        context['teamtype_filters'] = teamtypen = comp.teamtypen.order_by('volgorde')
 
         for team in teamtypen:
             team.sel = 'team_' + team.afkorting
@@ -435,7 +432,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
         # sorteer de teams
         unsorted_teams = list()
         for team in teams:
-            tup = (team.klasse.team.volgorde, team.totaal_punten, team.totaal_score, team.pk, team)
+            tup = (team.team_klasse.volgorde, team.totaal_punten, team.totaal_score, team.pk, team)
 
             while len(team.ronde_scores) < 7:
                 team.ronde_scores.append('-')
@@ -450,7 +447,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
         context['teams'] = teams = list()
         for tup in unsorted_teams:
             team = tup[-1]
-            team.klasse_str = team.klasse.team.beschrijving
+            team.klasse_str = team.team_klasse.beschrijving
             teams.append(team)
         # for
 

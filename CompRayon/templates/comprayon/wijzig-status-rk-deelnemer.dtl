@@ -32,7 +32,7 @@
                 </tr>
                 <tr>
                     <th>Klasse</th>
-                    <td>{{ deelnemer.klasse.indiv.beschrijving }}</td>
+                    <td>{{ deelnemer.indiv_klasse.beschrijving }}</td>
                 </tr>
                 <tr>
                     <th>Sporter</th>

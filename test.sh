@@ -142,6 +142,9 @@ sleep 0.1
 kill $PID_TAIL
 wait $PID_TAIL 2>/dev/null
 
+# launch log in editor
+[ $RES -eq 0 ] || geany --new-instance "$LOG" &
+
 if [ $RES -eq 0 -a "$FOCUS" != "" ]
 then
     echo "[INFO] Discovering all management commands in $FOCUS"

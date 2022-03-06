@@ -5,20 +5,20 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
-from BasisTypen.models import (BoogType, LeeftijdsKlasse, IndivWedstrijdklasse, TeamWedstrijdklasse,
-                               MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT, GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE)
-from Competitie.models import AG_NUL, AG_LAAGSTE_NIET_NUL, CompetitieKlasse
+from BasisTypen.models import (BoogType, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
+                               GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE)
+from Competitie.models import AG_NUL, AG_LAAGSTE_NIET_NUL, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Score.models import Score, SCORE_TYPE_INDIV_AG
 from Sporter.models import Sporter
 from decimal import Decimal
 import datetime
 
 
-def _get_targets_indiv():
+def _get_targets_indiv(comp):
     """ Retourneer een data structuur met daarin voor alle individuele wedstrijdklassen
         de toegestane boogtypen en leeftijden
 
-        out: target = dict() met [ (min_age, max_age, boogtype, geslacht, heeft_onbekend) ] = list(IndivWedstrijdklasse)
+        out: target = dict() met [(min_age, max_age, boogtype, geslacht, heeft_onbekend)] = list(CompetitieIndivKlasse)
 
         Voorbeeld: { (21,150,'R','A', True ): [obj1, obj2, etc.],
                      (21,150,'C','A', True ): [obj10, obj11],
@@ -27,65 +27,63 @@ def _get_targets_indiv():
                      (12, 14,'C','V', False): [obj31,] }            # alleen meisjes (vrouwen)
     """
     targets = dict()        # [ (min_age, max_age, boogtype) ] = list(wedstrijdklassen)
-    for wedstrklasse in (IndivWedstrijdklasse
-                         .objects
-                         .select_related('boogtype')
-                         .prefetch_related('leeftijdsklassen')
-                         .filter(buiten_gebruik=False)
-                         .order_by('volgorde')):
+    for klasse in (CompetitieIndivKlasse
+                   .objects
+                   .filter(competitie=comp)
+                   .select_related('boogtype')
+                   .prefetch_related('leeftijdsklassen')
+                   .order_by('volgorde')):
         # zoek de minimale en maximaal toegestane leeftijden voor deze wedstrijdklasse
         geslacht = GESLACHT_ALLE
         age_min = 999
         age_max = 0
-        for lkl in wedstrklasse.leeftijdsklassen.all():
+        for lkl in klasse.leeftijdsklassen.all():
             age_min = min(lkl.min_wedstrijdleeftijd, age_min)
             age_max = max(lkl.max_wedstrijdleeftijd, age_max)
             geslacht = lkl.wedstrijd_geslacht
         # for
 
-        tup = (age_min, age_max, geslacht, wedstrklasse.boogtype)
+        tup = (age_min, age_max, geslacht, klasse.boogtype)
         if tup not in targets:
             targets[tup] = list()
-        targets[tup].append(wedstrklasse)
+        targets[tup].append(klasse)
     # for
 
     targets2 = dict()
-    for tup, wedstrklassen in targets.items():
+    for tup, klassen in targets.items():
         age_min, age_max, geslacht, boogtype = tup
         # print("age=%s..%s, boogtype=%s, wkl=%s, %s" % (age_min, age_max, boogtype.afkorting, repr(wedstrklassen), wedstrklassen[-1].is_onbekend))
-        tup = (age_min, age_max, boogtype, geslacht, wedstrklassen[-1].is_onbekend)
-        targets2[tup] = wedstrklassen
+        tup = (age_min, age_max, boogtype, geslacht, klassen[-1].is_onbekend)
+        targets2[tup] = klassen
     # for
     return targets2
 
 
-def _get_targets_teams():
+def _get_targets_teams(comp):
     """ Retourneer een data structuur met daarin voor alle team wedstrijdklassen
 
-        out: target = dict() met [ team type afkorting ] = list(TeamWedstrijdklasse)
+        out: target = dict() met [team type afkorting] = list(CompetitieTeamKlasse)
 
         Voorbeeld: { 'R2': [obj1, obj2, etc.],
                      'C': [obj10, obj11],
                      'BB': [obj20]  }
     """
     targets = dict()
-    for obj in (TeamWedstrijdklasse
+    for obj in (CompetitieTeamKlasse
                 .objects
-                .filter(buiten_gebruik=False)
-                .select_related('team_type')
+                .filter(competitie=comp)
                 .order_by('volgorde')):        # hoogste klasse (=laagste volgnummer) eerst
 
-        afkorting = obj.team_type.afkorting
-
         try:
-            targets[afkorting].append(obj)
+            targets[obj.team_afkorting].append(obj)
         except KeyError:
-            targets[afkorting] = [obj]
+            targets[obj.team_afkorting] = [obj]
     # for
+
     return targets
 
 
-def bepaal_klassengrenzen_indiv(comp, trans_indiv):
+def bepaal_klassengrenzen_indiv(comp):
 
     """ retourneert een lijst van individuele wedstrijdenklassen, elk bestaande uit een dictionary:
             'beschrijving': tekst
@@ -93,8 +91,7 @@ def bepaal_klassengrenzen_indiv(comp, trans_indiv):
             'ag':           het AG van de laatste sporter in deze klasse
                             of 0.000 voor klasse onbekend
                             of 0.001 voor de laatste klasse voor klasse onbekend
-            'wedstrkl_obj': indiv klasse
-            'klasse':       competitieklasse
+            'klasse':       CompetitieIndivKlasse
             'volgorde':     nummer
 
         gesorteerd op volgorde (oplopend)
@@ -119,28 +116,28 @@ def bepaal_klassengrenzen_indiv(comp, trans_indiv):
     del boogtype
 
     lkl_pks = list()
-    unsorted = list()
+    lkl_unsorted = list()
     klasse2lkl = dict()     # [klasse.pk] = [lkl, lkl, lkl..]
-    for klasse in (IndivWedstrijdklasse
+    for klasse in (CompetitieIndivKlasse
                    .objects
-                   .exclude(buiten_gebruik=True)
+                   .filter(competitie=comp)
                    .prefetch_related('leeftijdsklassen')):
 
         klasse2lkl[klasse.pk] = lkls = list()
         for lkl in klasse.leeftijdsklassen.all():
+            lkls.append(lkl)
+
             if lkl.pk not in lkl_pks:
                 lkl_pks.append(lkl.pk)
                 tup = (lkl.volgorde, lkl)
-                unsorted.append(tup)
-
-            lkls.append(lkl)
+                lkl_unsorted.append(tup)
         # for
     # for
     del klasse
     del lkl_pks
-    unsorted.sort()
-    lkl_cache = [lkl for _, lkl in unsorted]
-    del unsorted
+    lkl_unsorted.sort()
+    lkl_cache = [lkl for _, lkl in lkl_unsorted]
+    del lkl_unsorted
 
     # verdeel de schuttersboog (waar we een AG van hebben) over boogtype-leeftijdsklasse groepjes
     done_nrs = list()
@@ -168,18 +165,19 @@ def bepaal_klassengrenzen_indiv(comp, trans_indiv):
     # for (boogtype)
 
     # wedstrijdklassen vs leeftijd + bogen
-    targets = _get_targets_indiv()
+    targets = _get_targets_indiv(comp)
+    # targets[(min_age, max_age, boogtype, geslacht, heeft_onbekend)] = list(CompetitieIndivKlasse)
 
     # creëer de resultatenlijst
     objs = list()
-    for tup, wedstrklassen in targets.items():
+    for tup, klassen in targets.items():
         _, _, boogtype, geslacht, heeft_klasse_onbekend = tup
         scores = boogtype2ags[boogtype.afkorting]
 
         # zoek alle sporters-boog die hier in passen (boog, leeftijd, geslacht)
         gemiddelden = list()
         index_gehad = list()
-        for klasse in wedstrklassen:
+        for klasse in klassen:
             for lkl in klasse2lkl[klasse.pk]:
                 index = boogtype.afkorting + '_' + lkl.afkorting
                 if index not in index_gehad:
@@ -195,7 +193,7 @@ def bepaal_klassengrenzen_indiv(comp, trans_indiv):
         if len(gemiddelden):
             gemiddelden.sort(reverse=True)  # in-place sort, highest to lowest
             count = len(gemiddelden)        # aantal schutters
-            aantal = len(wedstrklassen)     # aantal groepen
+            aantal = len(klassen)     # aantal groepen
             if heeft_klasse_onbekend:
                 stop = -2
                 aantal -= 1
@@ -203,61 +201,57 @@ def bepaal_klassengrenzen_indiv(comp, trans_indiv):
                 stop = -1
             step = int(count / aantal)      # omlaag afgerond = OK voor grote groepen
             pos = 0
-            for klasse in wedstrklassen[:stop]:
+            for klasse in klassen[:stop]:
                 pos += step
                 ag = gemiddelden[pos] / 1000        # conversie Score naar AG met 3 decimalen
                 res = {'beschrijving': klasse.beschrijving,
                        'count': step,
                        'ag': ag,
-                       'wedstrkl_obj': klasse,
+                       'klasse': klasse,
                        'volgorde': klasse.volgorde}
                 objs.append(res)
             # for
 
             # laatste klasse krijgt speciaal AG
-            klasse = wedstrklassen[stop]
+            klasse = klassen[stop]
             ag = AG_LAAGSTE_NIET_NUL if heeft_klasse_onbekend else AG_NUL
             res = {'beschrijving': klasse.beschrijving,
                    'count': count - (aantal - 1) * step,
                    'ag': ag,
-                   'wedstrkl_obj': klasse,
+                   'klasse': klasse,
                    'volgorde': klasse.volgorde}
             objs.append(res)
 
             # klasse onbekend met AG=0.000
             if heeft_klasse_onbekend:
-                klasse = wedstrklassen[-1]
+                klasse = klassen[-1]
                 res = {'beschrijving': klasse.beschrijving,
                        'count': 0,
                        'ag': AG_NUL,
-                       'wedstrkl_obj': klasse,
+                       'klasse': klasse,
                        'volgorde': klasse.volgorde}
                 objs.append(res)
         else:
             # geen historische gemiddelden
             # zet ag op 0,001 als er een klasse onbekend is, anders op 0,000
             ag = AG_LAAGSTE_NIET_NUL if heeft_klasse_onbekend else AG_NUL
-            for klasse in wedstrklassen:
+            for klasse in klassen:
                 if klasse.is_onbekend:  # is de laatste klasse
                     ag = AG_NUL
                 res = {'beschrijving': klasse.beschrijving,
                        'count': 0,
                        'ag': ag,
-                       'wedstrkl_obj': klasse,
+                       'klasse': klasse,
                        'volgorde': klasse.volgorde}
                 objs.append(res)
             # for
-    # for
-
-    for obj in objs:
-        obj['klasse'] = trans_indiv[obj['wedstrkl_obj'].pk]
     # for
 
     objs2 = sorted(objs, key=lambda k: k['volgorde'])
     return objs2
 
 
-def bepaal_klassengrenzen_teams(comp, trans_team):
+def bepaal_klassengrenzen_teams(comp):
 
     """ retourneert een lijst van team wedstrijdenklassen, elk bestaande uit een dictionary:
             'beschrijving': tekst
@@ -265,8 +259,7 @@ def bepaal_klassengrenzen_teams(comp, trans_team):
             'ag':           het Team-AG van de laatste team in deze klasse
                             of 0.001 voor de laatste klasse voor klasse onbekend
             'ag_str':       geformatteerd Team-AG als NNN.M
-            'wedstrkl_obj': team klasse
-            'klasse':       competitieklasse
+            'klasse':       CompetitieTeamKlasse
             'volgorde':     nummer
 
         gesorteerd op volgorde (oplopend)
@@ -311,7 +304,8 @@ def bepaal_klassengrenzen_teams(comp, trans_team):
     # for
 
     # wedstrijdklassen vs leeftijd + bogen
-    targets = _get_targets_teams()
+    targets = _get_targets_teams(comp)
+    # targets[team type afkorting] = list(CompetitieTeamKlasse)
 
     teamtype2boogtype = {
         'R2': 'R',
@@ -353,8 +347,8 @@ def bepaal_klassengrenzen_teams(comp, trans_team):
             for team_nr in range(teams):
                 index = team_nr * 4
                 team_score = sum(gemiddelden[index:index+3])    # totaal van beste 3 scores
-                team_score = team_score / 1000          # converteer terug van score.waarde = AG*1000
-                team_score = round(team_score, 3)       # round here, instead of letter database do it
+                team_score = team_score / 1000                  # converteer terug van score.waarde = AG*1000
+                team_score = round(team_score, 3)               # round here, instead of letter database do it
                 team_scores.append(team_score)
             # for
         # for
@@ -384,7 +378,7 @@ def bepaal_klassengrenzen_teams(comp, trans_team):
                        'count': step,
                        'ag': ag,
                        'ag_str': ag_str,
-                       'wedstrkl_obj': klasse,
+                       'klasse': klasse,
                        'volgorde': klasse.volgorde}  # voor sorteren
                 objs.append(res)
             # for
@@ -400,47 +394,24 @@ def bepaal_klassengrenzen_teams(comp, trans_team):
                'count': count - (aantal - 1) * step,
                'ag': ag,
                'ag_str': ag_str,
-               'wedstrkl_obj': klasse,
+               'klasse': klasse,
                'volgorde': klasse.volgorde}     # voor sorteren
         objs.append(res)
-    # for
-
-    for obj in objs:
-        obj['klasse'] = trans_team[obj['wedstrkl_obj'].pk]
     # for
 
     objs2 = sorted(objs, key=lambda k: k['volgorde'])
     return objs2
 
 
-def get_mappings_wedstrijdklasse_to_competitieklasse(comp):
-    """ geeft een look-up tabel terug van IndivWedstrijdklasse / TeamWedstrijdklasse naar CompetitieKlasse """
-    trans_indiv = dict()
-    trans_team = dict()
-
-    for klasse in (CompetitieKlasse
-                   .objects
-                   .filter(competitie=comp,
-                           is_voor_teams_rk_bk=False)       # deze volgen later
-                   .prefetch_related('indiv', 'team')):
-        if klasse.indiv:
-            trans_indiv[klasse.indiv.pk] = klasse
-        else:
-            trans_team[klasse.team.pk] = klasse
-    # for
-
-    return trans_indiv, trans_team
-
-
 class KlasseBepaler(object):
-    """ deze klasse helpt met het bepalen van de CompetitieKlasse voor een deelnemer """
+    """ deze klasse helpt met het bepalen van de CompetitieIndivKlasse voor een deelnemer """
 
-    def __init__(self, competitie):
-        self.competitie = competitie
-        self.boogtype2klassen = dict()      # [boogtype.afkorting] = [CompetitieKlasse, CompetitieKlasse, ..]
-        self.lkl_cache_mannen = dict()      # [CompetitieKlasse.pk] = [lkl, lkl, ...]
-        self.lkl_cache_vrouwen = dict()     # [CompetitieKlasse.pk] = [lkl, lkl, ...]
-        self.lkl_cache_neutraal = dict()    # [CompetitieKlasse.pk] = [lkl, lkl, ...]
+    def __init__(self, comp):
+        self.competitie = comp
+        self.boogtype2klassen = dict()      # [boogtype.afkorting] = [CompetitieIndivKlasse, ...]
+        self.lkl_cache_mannen = dict()      # [CompetitieIndivKlasse.pk] = [lkl, lkl, ...]
+        self.lkl_cache_vrouwen = dict()     # [CompetitieIndivKlasse.pk] = [lkl, lkl, ...]
+        self.lkl_cache_neutraal = dict()    # [CompetitieIndivKlasse.pk] = [lkl, lkl, ...]
         self.lkl_cache = {
             GESLACHT_MAN: self.lkl_cache_mannen,
             GESLACHT_ALLE: self.lkl_cache_neutraal,
@@ -448,23 +419,20 @@ class KlasseBepaler(object):
         }
 
         # vul de caches met individuele wedstrijdklassen
-        for klasse in (CompetitieKlasse
+        for klasse in (CompetitieIndivKlasse
                        .objects
-                       .filter(competitie=competitie)
-                       .exclude(indiv=None)
-                       .prefetch_related('indiv__leeftijdsklassen')
-                       .select_related('indiv',
-                                       'indiv__boogtype')
+                       .filter(competitie=comp)
+                       .prefetch_related('leeftijdsklassen')
+                       .select_related('boogtype')
                        .all()):
 
-            indiv = klasse.indiv
-            boog_afkorting = indiv.boogtype.afkorting
+            boog_afkorting = klasse.boogtype.afkorting
             try:
                 self.boogtype2klassen[boog_afkorting].append(klasse)
             except KeyError:
                 self.boogtype2klassen[boog_afkorting] = [klasse]
 
-            for lkl in indiv.leeftijdsklassen.all():
+            for lkl in klasse.leeftijdsklassen.all():
                 lkl_cache = self.lkl_cache[lkl.wedstrijd_geslacht]
                 try:
                     lkl_cache[klasse.pk].append(lkl)
@@ -496,7 +464,7 @@ class KlasseBepaler(object):
             raise LookupError('Boogtype %s wordt niet ondersteund' % sporterboog.boogtype.afkorting)
         else:
             for klasse in klassen:
-                if ag >= klasse.min_ag or klasse.indiv.is_onbekend:
+                if ag >= klasse.min_ag or klasse.is_onbekend:
                     for geslacht in (sporter.geslacht, GESLACHT_ALLE):
                         try:
                             lkls = self.lkl_cache[geslacht][klasse.pk]
@@ -518,27 +486,24 @@ class KlasseBepaler(object):
         # aspiranten mogen in alle klassen meedoen, maar we kiezen uiteindelijk de Asp klasse
         if len(mogelijkheden):
             _, _, _, klasse = mogelijkheden[-1]
-            deelnemer.klasse = klasse
+            deelnemer.indiv_klasse = klasse
         else:
             # niet vast kunnen stellen
-            # deelnemer.klasse = None       # werkt niet, want ForeignKey kan je niet testen op None (geen DoesNotExist exceptie)
             raise LookupError("Geen passende wedstrijdklasse")
 
 
 def competitie_klassengrenzen_vaststellen(comp):
     """ stel voor een specifieke Competitie alle klassengrenzen vast """
 
-    trans_indiv, trans_team = get_mappings_wedstrijdklasse_to_competitieklasse(comp)
-
     # individueel
-    for obj in bepaal_klassengrenzen_indiv(comp, trans_indiv):
+    for obj in bepaal_klassengrenzen_indiv(comp):
         klasse = obj['klasse']
         klasse.min_ag = obj['ag']
         klasse.save(update_fields=['min_ag'])
     # for
 
     # team (regio)
-    for obj in bepaal_klassengrenzen_teams(comp, trans_team):
+    for obj in bepaal_klassengrenzen_teams(comp):
         klasse = obj['klasse']
         klasse.min_ag = obj['ag']
         klasse.save(update_fields=['min_ag'])

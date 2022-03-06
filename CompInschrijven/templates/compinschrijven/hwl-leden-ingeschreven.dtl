@@ -122,7 +122,7 @@
                                         </td>
                                     {% endif %}
 
-                                    <td>{{ obj.klasse.indiv.beschrijving }}</td>
+                                    <td>{{ obj.indiv_klasse.beschrijving }}</td>
 
                                     <td>{{ obj.lid_nr }}</td>
                                     <td>{{ obj.naam_str }}</td>

@@ -903,7 +903,7 @@ class TestData(object):
                           .select_related('sporterboog__sporter',
                                           'sporterboog__boogtype',
                                           'bij_vereniging',
-                                          'klasse')
+                                          'indiv_klasse')
                           .filter(deelcompetitie__competitie=comp,
                                   sporterboog__pk__in=pks))
 

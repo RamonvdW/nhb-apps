@@ -28,8 +28,7 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
         # specifiek aangemelde individuele sporters
         deelnemers_indiv = (wedstrijd
                             .regiocompetitieschutterboog_set
-                            .select_related('klasse',
-                                            'klasse__indiv',
+                            .select_related('indiv_klasse',
                                             'sporterboog',
                                             'sporterboog__boogtype',
                                             'sporterboog__sporter',
@@ -42,8 +41,7 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                 .prefetch_related('team_type__boog_typen')
                                 .select_related('vereniging',
                                                 'team_type',
-                                                'klasse',
-                                                'klasse__team'))
+                                                'team_klasse'))
     else:
         # vereniging zit in 0 of 1 clusters voor deze competitie
         clusters = wedstrijd.vereniging.clusters.filter(gebruik=afstand)
@@ -55,8 +53,7 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                 .objects
                                 .filter(deelcompetitie=deelcomp,
                                         bij_vereniging__in=ver_pks)
-                                .select_related('klasse',
-                                                'klasse__indiv',
+                                .select_related('indiv_klasse',
                                                 'bij_vereniging',
                                                 'sporterboog',
                                                 'sporterboog__boogtype',
@@ -71,15 +68,13 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                     .prefetch_related('team_type__boog_typen')
                                     .select_related('vereniging',
                                                     'team_type',
-                                                    'klasse',
-                                                    'klasse__team'))
+                                                    'team_klasse'))
         else:
             # fall-back: alle sporters in de hele regio
             deelnemers_indiv = (RegioCompetitieSchutterBoog
                                 .objects
                                 .filter(deelcompetitie=deelcomp)
-                                .select_related('klasse',
-                                                'klasse__indiv',
+                                .select_related('indiv_klasse',
                                                 'bij_vereniging',
                                                 'sporterboog',
                                                 'sporterboog__boogtype',
@@ -93,8 +88,7 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                     .prefetch_related('team_type__boog_typen')
                                     .select_related('vereniging',
                                                     'team_type',
-                                                    'klasse',
-                                                    'klasse__team'))
+                                                    'team_klasse'))
 
         if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_2:
             # verder filteren, op gekoppelde wedstrijdklassen
@@ -102,7 +96,11 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
             if deelcomp.regio_organiseert_teamcompetitie:
                 # team klassen
                 team_pks = wedstrijd.team_klassen.values_list('pk', flat=True)
-                gekoppeld_pks = RegiocompetitieTeam.objects.filter(klasse__team__pk__in=team_pks).values_list('gekoppelde_schutters__pk', flat=True)    # TODO: moet dit feitelijke sporters zijn??
+                # TODO: moet dit feitelijke sporters zijn??
+                gekoppeld_pks = (RegiocompetitieTeam
+                                 .objects
+                                 .filter(klasse__team__pk__in=team_pks)
+                                 .values_list('gekoppelde_schutters__pk', flat=True))
             else:
                 gekoppeld_pks = list()
 
@@ -206,7 +204,7 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
                         schiet_boog_c=(boog.afkorting == 'C'),
                         voorkeur_dt=(sporter.lid_nr in wens_eigen_blazoen),
                         voorkeur_4spot=(sporter.lid_nr in wens_eigen_blazoen),
-                        is_aspirant=deelnemer.klasse.indiv.is_aspirant_klasse,
+                        is_aspirant=deelnemer.indiv_klasse.is_aspirant_klasse,
                         wil_team_schieten=deelnemer.inschrijf_voorkeur_team,
                         team_pk=0,
                         team_gem="",
@@ -250,9 +248,9 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
         sporter.blazoen_lijst = list()
 
         if afstand == '18':
-            blazoenen = (deelnemer.klasse.indiv.blazoen1_18m_regio, deelnemer.klasse.indiv.blazoen2_18m_regio)
+            blazoenen = (deelnemer.indiv_klasse.blazoen1_18m_regio, deelnemer.indiv_klasse.blazoen2_18m_regio)
         else:
-            blazoenen = (deelnemer.klasse.indiv.blazoen1_25m_regio, deelnemer.klasse.indiv.blazoen2_25m_regio)
+            blazoenen = (deelnemer.indiv_klasse.blazoen1_25m_regio, deelnemer.indiv_klasse.blazoen2_25m_regio)
         for blazoen in blazoenen:
             if blazoen not in sporter.blazoen_lijst:
                 sporter.blazoen_lijst.append(blazoen)

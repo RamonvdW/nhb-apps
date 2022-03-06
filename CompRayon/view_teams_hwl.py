@@ -11,9 +11,8 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.models import (AG_NUL, DeelCompetitie, LAAG_RK, CompetitieKlasse,
-                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam,
-                               get_competitie_team_typen)
+from Competitie.models import (AG_NUL, DeelCompetitie, LAAG_RK, CompetitieKlasse, CompetitieTeamKlasse,
+                               RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 import datetime
@@ -248,10 +247,10 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         comp = deelcomp_rk.competitie
 
         teamtype_default = None
-        context['opt_team_type'] = teamtypes = get_competitie_team_typen(comp)
+        context['opt_team_type'] = teamtypes = CompetitieTeamKlasse.objects.filter(competitie=comp).distinct('team_afkorting').order_by('volgorde')
         for teamtype in teamtypes:
-            teamtype.choice_name = teamtype.afkorting
-            if teamtype.afkorting[0] == 'R':        # R or R2
+            teamtype.choice_name = teamtype.team_afkorting
+            if teamtype.team_afkorting[0] == 'R':        # R or R2
                 teamtype_default = teamtype
         # for
 
@@ -330,7 +329,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
                           .objects
                           .select_related('team__team_type')
                           .filter(competitie=comp,
-                                  team__team_type__afkorting=afkorting))[0]
+                                  team__afkorting=afkorting))[0]
                 team_type = klasse.team.team_type
             except (IndexError, TeamType.DoesNotExist):
                 raise Http404('Onbekend team type')
@@ -481,7 +480,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
                                   # inschrijf_voorkeur_team=True,
                                   bij_vereniging=ver,
                                   sporterboog__boogtype__in=boog_pks)
-                          .exclude(klasse__indiv__is_aspirant_klasse=True)            # geen aspiranten
+                          .exclude(indiv_klasse__is_aspirant_klasse=True)            # geen aspiranten
                           .select_related('sporterboog',
                                           'sporterboog__sporter',
                                           'sporterboog__boogtype')

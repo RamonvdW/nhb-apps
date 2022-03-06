@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from Score.models import Score
-from Competitie.models import CompetitieKlasse, DeelcompetitieRonde
+from Competitie.models import CompetitieIndivKlasse, DeelcompetitieRonde
 from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -93,7 +93,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         #    self.client.post(self.url_planning_cluster % (self.testdata.deelcomp18_regio[101].pk, cluster.pk))
 
         # maak een wedstrijd aan in elke competitie
-        indiv_klassen = CompetitieKlasse.objects.exclude(indiv=None).values_list('indiv__pk', flat=True)
+        indiv_klassen = CompetitieIndivKlasse.objects.values_list('pk', flat=True)
 
         self.client.post(self.url_planning_regio_ronde % ronde18.pk, {})
         wedstrijd = CompetitieWedstrijd.objects.all()[0]

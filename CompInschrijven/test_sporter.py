@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Competitie.models import (Competitie, CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
+from Competitie.models import (Competitie, CompetitieIndivKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
                                DeelcompetitieRonde, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3)
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
@@ -164,9 +164,9 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertFalse(inschrijving.inschrijf_voorkeur_team)
         self.assertEqual(inschrijving.inschrijf_notitie, '')
         self.assertEqual(inschrijving.inschrijf_voorkeur_dagdeel, 'GN')
-        self.assertTrue(str(RegioCompetitieSchutterBoog) != '')     # coverage only
-        self.assertEqual(inschrijving.klasse.competitie.afstand, '18')           # juiste competitie?
-        self.assertEqual(inschrijving.klasse.indiv.boogtype.afkorting, 'R')      # klasse compatibel met boogtype?
+        self.assertTrue(str(RegioCompetitieSchutterBoog) != '')                  # coverage only
+        self.assertEqual(inschrijving.indiv_klasse.competitie.afstand, '18')     # juiste competitie?
+        self.assertEqual(inschrijving.indiv_klasse.boogtype.afkorting, 'R')      # klasse compatibel met boogtype?
 
         # geen bevestig formulier indien al ingeschreven
         url = self.url_bevestig_aanmelden % (deelcomp.pk, sporterboog.pk)
@@ -219,8 +219,8 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)
 
         inschrijving_25 = RegioCompetitieSchutterBoog.objects.exclude(pk=inschrijving.pk)[0]
-        self.assertEqual(inschrijving_25.klasse.competitie.afstand, '25')           # juiste competitie?
-        self.assertEqual(inschrijving_25.klasse.indiv.boogtype.afkorting, 'BB')     # klasse compatibel met boogtype?
+        self.assertEqual(inschrijving_25.indiv_klasse.competitie.afstand, '25')     # juiste competitie?
+        self.assertEqual(inschrijving_25.indiv_klasse.boogtype.afkorting, 'BB')     # klasse compatibel met boogtype?
 
         # probeer dubbel in te schrijven
         with self.assert_max_queries(20):
@@ -674,11 +674,10 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertEqual(inschrijving.deelcompetitie, deelcomp)
         self.assertEqual(inschrijving.sporterboog, sporterboog)
 
-        klasse = inschrijving.klasse.indiv
+        klasse = inschrijving.indiv_klasse
         self.assertFalse('Onder 12' in klasse.beschrijving)
         self.assertFalse('Onder 14' in klasse.beschrijving)
         self.assertTrue('Onder 18' in klasse.beschrijving)
-        self.assertFalse(klasse.buiten_gebruik)
         self.assertEqual(klasse.boogtype, sporterboog.boogtype)
 
     def test_inschrijven_methode1(self):
@@ -868,17 +867,16 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
 
         # extreem: aanmelden zonder passende klasse
         # zet het min_ag te hoog
-        for klasse in CompetitieKlasse.objects.filter(competitie=deelcomp.competitie,
-                                                      indiv__boogtype__afkorting='R',
-                                                      min_ag__lt=8.0):
+        for klasse in CompetitieIndivKlasse.objects.filter(competitie=deelcomp.competitie,
+                                                           boogtype__afkorting='R',
+                                                           min_ag__lt=8.0):
             klasse.min_ag = 8.2     # > 8.18 van zet_ag
             klasse.save(update_fields=['min_ag'])
         # for
         # verwijder alle klassen 'onbekend'
-        for klasse in CompetitieKlasse.objects.filter(indiv__is_onbekend=True):
-            indiv = klasse.indiv
-            indiv.is_onbekend = False
-            indiv.save(update_fields=['is_onbekend'])
+        for klasse in CompetitieIndivKlasse.objects.filter(is_onbekend=True):
+            klasse.is_onbekend = False
+            klasse.save(update_fields=['is_onbekend'])
         # for
 
         # haal de bevestig pagina op met het formulier

@@ -5,14 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-# from django.utils import timezone
-from BasisTypen.models import BoogType, TeamWedstrijdklasse
+from BasisTypen.models import BoogType
 from Functie.models import maak_functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse, CompetitieMutatie,
-                               INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3,
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               CompetitieMutatie, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2, INSCHRIJF_METHODE_3,
                                DAGDEEL_AFKORTINGEN)
 from Competitie.operations import (competities_aanmaken, aanvangsgemiddelden_vaststellen_voor_afstand,
                                    competitie_klassengrenzen_vaststellen)
@@ -500,7 +499,7 @@ class TestCompetitie(E2EHelpers, TestCase):
 
         # verander de fase van de 25m competitie zodat we verschillen hebben
         comp = Competitie.objects.get(afstand=25, is_afgesloten=False)
-        CompetitieKlasse(competitie=comp, min_ag=25.0).save()
+        CompetitieIndivKlasse(competitie=comp, volgorde=1, min_ag=25.0, boogtype=self.sporterboog_100002.boogtype).save()
         comp.klassengrenzen_vastgesteld = True
         comp.save()
 
@@ -593,12 +592,12 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/bb-klassengrenzen-vaststellen.dtl', 'plein/site_layout.dtl'))
 
         # nu kunnen we met een POST de klassengrenzen vaststellen
-        count = CompetitieKlasse.objects.filter(competitie=comp18, min_ag__gt=0).count()
+        count = CompetitieIndivKlasse.objects.filter(competitie=comp18, min_ag__gt=0).count()
         self.assertEqual(count, 0)
-        with self.assert_max_queries(91):
+        with self.assert_max_queries(97):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)        # redirect = success
-        count = CompetitieKlasse.objects.filter(competitie=comp18, min_ag__gt=0).count()
+        count = CompetitieIndivKlasse.objects.filter(competitie=comp18, min_ag__gt=0).count()
         self.assertTrue(count > 20)
         # TODO: check nog meer velden van de aangemaakte objecten
 
@@ -607,18 +606,18 @@ class TestCompetitie(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)             # 200 = OK
 
-        count1 = CompetitieKlasse.objects.filter(competitie=comp18).count()
+        count1 = CompetitieIndivKlasse.objects.filter(competitie=comp18).count()
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)        # redirect = success
-        count2 = CompetitieKlasse.objects.filter(competitie=comp18).count()
+        count2 = CompetitieIndivKlasse.objects.filter(competitie=comp18).count()
         self.assertEqual(count1, count2)
 
         # coverage
-        obj = CompetitieKlasse.objects.all()[0]
+        obj = CompetitieIndivKlasse.objects.all()[0]
         self.assertTrue(str(obj) != "")
         obj.indiv = None
-        obj.team = TeamWedstrijdklasse.objects.all()[0]
+        obj.team = CompetitieTeamKlasse.objects.all()[0]
         self.assertTrue(str(obj) != "")
 
     def test_klassengrenzen_vaststellen_cornercases(self):
@@ -661,12 +660,12 @@ class TestCompetitie(E2EHelpers, TestCase):
 
         # klassengrenzen vaststellen (18m en 25m)
         # s1 = timezone.now()
-        with self.assert_max_queries(91):
+        with self.assert_max_queries(97):
             resp = self.client.post(self.url_klassengrenzen_vaststellen % comp_18.pk)
         # s2 = timezone.now()
         # print('duration:', s2-s1)
         self.assert_is_redirect_not_plein(resp)        # redirect = success
-        with self.assert_max_queries(91):
+        with self.assert_max_queries(97):
             resp = self.client.post(self.url_klassengrenzen_vaststellen % comp_25.pk)
         self.assert_is_redirect_not_plein(resp)        # redirect = success
 
@@ -703,29 +702,6 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/klassengrenzen-tonen.dtl', 'plein/site_layout.dtl'))
         self.assertNotContains(resp, ' zijn nog niet vastgesteld')
         self.assertNotContains(resp, 'De klassengrenzen voor de ')
-
-    def test_team(self):
-        # slechts een test van een CompetitieKlasse() gekoppeld aan een TeamWedstrijdKlasse
-        datum = datetime.date(year=2015, month=11, day=12)
-        comp = Competitie(afstand='18', beschrijving='Test Competitie', begin_jaar=2015,
-                          uiterste_datum_lid=datum,
-                          begin_aanmeldingen=datum,
-                          einde_aanmeldingen=datum,
-                          einde_teamvorming=datum,
-                          eerste_wedstrijd=datum,
-                          laatst_mogelijke_wedstrijd=datum,
-                          datum_klassengrenzen_rk_bk_teams=datum,
-                          rk_eerste_wedstrijd=datum,
-                          rk_laatste_wedstrijd=datum,
-                          bk_eerste_wedstrijd=datum,
-                          bk_laatste_wedstrijd=datum)
-        comp.save()
-
-        wkl = TeamWedstrijdklasse.objects.all()[0]
-
-        obj = CompetitieKlasse(competitie=comp, team=wkl, min_ag=0.42)
-        obj.save()
-        self.assertTrue(wkl.beschrijving in str(obj))
 
 
 # TODO: gebruik assert_other_http_commands_not_supported

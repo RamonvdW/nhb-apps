@@ -108,12 +108,12 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
             deelnemers = (KampioenschapSchutterBoog
                           .objects
                           .select_related('deelcompetitie',
-                                          'klasse__indiv',
+                                          'indiv_klasse',
                                           'sporterboog__sporter',
                                           'bij_vereniging')
                           .filter(deelcompetitie=deelcomp_rk,
                                   volgorde__lte=48)             # max 48 schutters per klasse tonen
-                          .order_by('klasse__indiv__volgorde',  # groepeer per klasse
+                          .order_by('indiv_klasse__volgorde',   # groepeer per klasse
                                     'volgorde',                 # oplopend op volgorde (dubbelen mogelijk)
                                     '-gemiddelde'))             # aflopend op gemiddelde
 
@@ -137,11 +137,11 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         klasse = -1
         limiet = 24
         for deelnemer in deelnemers:
-            deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
+            deelnemer.break_klasse = (klasse != deelnemer.indiv_klasse.volgorde)
             if deelnemer.break_klasse:
                 aantal_klassen += 1
-                deelnemer.klasse_str = deelnemer.klasse.indiv.beschrijving
-                klasse = deelnemer.klasse.indiv.volgorde
+                deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
+                klasse = deelnemer.indiv_klasse.volgorde
                 try:
                     limiet = wkl2limiet[deelnemer.klasse.pk]
                 except KeyError:
@@ -217,22 +217,22 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
         deelnemers = (KampioenschapSchutterBoog
                       .objects
                       .select_related('deelcompetitie',
-                                      'klasse__indiv',
+                                      'indiv_klasse',
                                       'sporterboog__sporter',
                                       'bij_vereniging')
                       .exclude(deelname=DEELNAME_NEE)
                       .filter(deelcompetitie=deelcomp_rk,
                               rank__lte=48)                 # max 48 schutters
-                      .order_by('klasse__indiv__volgorde',  # groepeer per klasse
+                      .order_by('indiv_klasse__volgorde',   # groepeer per klasse
                                 'volgorde',                 # oplopend op volgorde (dubbelen mogelijk)
                                 '-gemiddelde'))             # aflopend op gemiddelde
 
         wkl2limiet = dict()    # [pk] = aantal
         for limiet in (DeelcompetitieKlasseLimiet
                        .objects
-                       .select_related('klasse')
+                       .select_related('indiv_klasse')
                        .filter(deelcompetitie=deelcomp_rk)):
-            wkl2limiet[limiet.klasse.pk] = limiet.limiet
+            wkl2limiet[limiet.indiv_klasse.pk] = limiet.limiet
         # for
 
         response = HttpResponse(content_type='text/csv')
@@ -244,7 +244,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
         for deelnemer in deelnemers:
 
             try:
-                limiet = wkl2limiet[deelnemer.klasse.pk]
+                limiet = wkl2limiet[deelnemer.indiv_klasse.pk]
             except KeyError:
                 limiet = 24
 
@@ -272,11 +272,10 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
                                  sporter.volledige_naam(),
                                  ver_str,                  # [nnnn] Naam
                                  label,
-                                 deelnemer.klasse.indiv.beschrijving,
+                                 deelnemer.indiv_klasse.beschrijving,
                                  gem_str])
         # for
 
         return response
-
 
 # end of file

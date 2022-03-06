@@ -67,7 +67,7 @@
                         <td class="hide-on-small-only center{% if rk_team.aantal < 3 or rk_team.aantal > 4 %} red-text{% endif %}">{{ rk_team.aantal }}</td>
 
                         <td class="hide-on-small-only center">{{ rk_team.ag_str }}</td>
-                        <td>{% if rk_bk_klassen_vastgesteld %}{{ rk_team.klasse.team.beschrijving }}{% else %}<i class="grey-text">Nog niet vastgesteld</i>{% endif %}</td>
+                        <td>{% if rk_bk_klassen_vastgesteld %}{{ rk_team.team_klasse.beschrijving }}{% else %}<i class="grey-text">Nog niet vastgesteld</i>{% endif %}</td>
 
                         <td>
                             {% if rk_team.url_wijzig %}

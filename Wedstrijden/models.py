@@ -7,7 +7,7 @@
 from django.db import models
 from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
 from NhbStructuur.models import NhbVereniging
-from Score.models import Score
+from Score.models import Score, Uitslag
 
 
 # accommodatie type
@@ -133,7 +133,7 @@ class WedstrijdLocatie(models.Model):
         verbose_name_plural = "Wedstrijd locaties"
 
 
-class CompetitieWedstrijdUitslag(models.Model):
+class CompetitieWedstrijdUitslag(models.Model):     # TODO: delete
 
     # de maximale score die gehaald (en ingevoerd) mag worden
     # dit afhankelijk van het type wedstrijd
@@ -148,6 +148,8 @@ class CompetitieWedstrijdUitslag(models.Model):
     # False = uitslag mag door WL ingevoerd worden
     # True  = uitslag is gecontroleerd en mag niet meer aangepast worden
     is_bevroren = models.BooleanField(default=False)
+
+    nieuwe_uitslag = models.ForeignKey(Uitslag, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         msg = "(%s) afstand %s, max score %s" % (self.pk, self.afstand_meter, self.max_score)
@@ -192,6 +194,7 @@ class CompetitieWedstrijd(models.Model):
     team_klassen = models.ManyToManyField(TeamWedstrijdklasse,
                                           blank=True)  # mag leeg zijn / gemaakt worden
 
+    # scores van deze uitslag
     uitslag = models.ForeignKey(CompetitieWedstrijdUitslag, on_delete=models.PROTECT,
                                 blank=True, null=True)
 
