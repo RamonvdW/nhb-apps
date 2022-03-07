@@ -556,6 +556,13 @@ def get_competitie_indiv_leeftijdsklassen(comp):
     return [lkl for _, _, lkl in lijst]
 
 
+def get_competitie_boog_typen(comp):
+    """ Geef een lijst van BoogType records terug die gebruikt worden in deze competitie,
+        gesorteerd op 'volgorde'.
+    """
+    return comp.boogtypen.order_by('volgorde')
+
+
 class CompetitieMatch(models.Model):
     """ CompetitieMatch is de kleinste planbare eenheid in de bondscompetitie """
 

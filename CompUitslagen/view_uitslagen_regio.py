@@ -273,7 +273,7 @@ class UitslagenRegioIndivView(TemplateView):
 
                 deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
                 is_asp = False
-                if deelnemer.indiv_klasse.niet_voor_rk_bk:
+                if not deelnemer.indiv_klasse.is_voor_rk_bk:
                     # dit is een aspiranten klassen of een klasse onbekend
                     for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all():
                         if lkl.is_aspirant_klasse():

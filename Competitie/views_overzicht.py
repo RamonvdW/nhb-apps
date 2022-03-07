@@ -10,6 +10,7 @@ from django.http import Http404
 from django.views.generic import View, TemplateView
 from django.utils.formats import localize
 from django.templatetags.static import static
+from Competitie.models import get_competitie_boog_typen
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
@@ -316,10 +317,14 @@ class CompetitieOverzichtView(View):
             # als deze sporter ingeschreven is voor de competitie, pak dan het boogtype waarmee hij ingeschreven is
 
             # kies de eerste wedstrijdboog uit de voorkeuren van sporter
+            comp_boogtypen = get_competitie_boog_typen(comp)
+            boog_pks = [boogtype.pk for boogtype in comp_boogtypen]
+
             all_bogen = (SporterBoog
                          .objects
                          .filter(sporter__account=request.user,
-                                 voor_wedstrijd=True)
+                                 voor_wedstrijd=True,
+                                 boogtype__pk__in=boog_pks)
                          .order_by('boogtype__volgorde'))
 
             if all_bogen.count():

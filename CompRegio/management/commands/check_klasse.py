@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Competitie.models import CompetitieKlasse, RegioCompetitieSchutterBoog
+from Competitie.models import CompetitieIndivKlasse, RegioCompetitieSchutterBoog
 from Competitie.operations.klassengrenzen import KlasseBepaler
 
 

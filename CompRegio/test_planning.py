@@ -6,9 +6,9 @@
 
 from django.conf import settings
 from django.test import TestCase
-from BasisTypen.models import BoogType, TeamWedstrijdklasse
+from BasisTypen.models import BoogType
 from Competitie.test_fase import zet_competitie_fase
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse,
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                DeelcompetitieRonde, LAAG_REGIO, LAAG_RK, LAAG_BK,
                                RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_1)
 from Competitie.operations import competities_aanmaken
@@ -143,24 +143,24 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         resp = self.client.post(self.url_klassengrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
-        klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=15,        # Rec ERE
-                                              is_voor_teams_rk_bk=False)
+        klasse = CompetitieTeamKlasse.objects.get(competitie=self.comp_18,
+                                                  volgorde=15,                  # Rec ERE
+                                                  is_voor_teams_rk_bk=False)
         klasse.min_ag = 29.0
         klasse.save()
 
-        klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=16,        # Rec A
-                                              is_voor_teams_rk_bk=False)
+        klasse = CompetitieTeamKlasse.objects.get(competitie=self.comp_18,
+                                                  volgorde=16,                  # Rec A
+                                                  is_voor_teams_rk_bk=False)
         klasse.min_ag = 25.0
         klasse.save()
 
         self.client.logout()
 
-        self.klasse_recurve_onbekend = (CompetitieKlasse
+        self.klasse_recurve_onbekend = (CompetitieIndivKlasse
                                         .objects
-                                        .filter(indiv__boogtype=self.boog_r,
-                                                indiv__is_onbekend=True)
+                                        .filter(boogtype=self.boog_r,
+                                                is_onbekend=True)
                                         .all())[0]
 
         self.deelcomp_bond_18 = DeelCompetitie.objects.filter(laag=LAAG_BK, competitie=self.comp_18)[0]
@@ -1472,14 +1472,6 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
 
     def test_inschrijving_team(self):
         # ivm coverage
-
-        wkl = TeamWedstrijdklasse.objects.all()[0]
-
-        klasse = CompetitieKlasse(competitie=self.deelcomp_regio101_18.competitie,
-                                  team=wkl,
-                                  min_ag=0.42)
-        klasse.save()
-
         boog_bb = BoogType.objects.get(afkorting='BB')
         sporterboog = SporterBoog(sporter=self.lid_sporter,
                                   boogtype=boog_bb,
@@ -1490,7 +1482,7 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         inschrijving.sporterboog = sporterboog
         inschrijving.bij_vereniging = sporterboog.sporter.bij_vereniging
         inschrijving.deelcompetitie = self.deelcomp_regio101_18
-        inschrijving.klasse = klasse
+        inschrijving.klasse = self.klasse_recurve_onbekend
         inschrijving.save()
 
         self.assertTrue(str(inschrijving) != "")

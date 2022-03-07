@@ -6,8 +6,8 @@
 
 from django.test import TestCase
 from django.core import management
-from BasisTypen.models import IndivWedstrijdklasse, BoogType, TeamType
-from Competitie.models import (Competitie, CompetitieKlasse,
+from BasisTypen.models import IndivWedstrijdklasse, BoogType, TeamType, LeeftijdsKlasse
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                DeelCompetitie, LAAG_REGIO,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from Competitie.test_fase import zet_competitie_fase
@@ -63,25 +63,37 @@ class TestCompRegioCli(E2EHelpers, TestCase):
         indiv_tr = IndivWedstrijdklasse.objects.filter(boogtype=boog_tr)[0]
         indiv_bb = IndivWedstrijdklasse.objects.filter(boogtype=boog_bb)[0]
 
-        klasse_r1 = CompetitieKlasse(
+        lkl_sa = LeeftijdsKlasse.objects.get(afkorting='SA')
+
+        # TODO: leeftijdsklassen nodig?
+        klasse_r1 = CompetitieIndivKlasse(
                         competitie=comp,
-                        indiv=indiv_r1,
+                        volgorde=indiv_r1.volgorde,
+                        boogtype=indiv_r1.boogtype,
                         min_ag=2.0)
         klasse_r1.save()
+        klasse_r1.leeftijdsklassen.add(lkl_sa)
 
-        CompetitieKlasse(
-                competitie=comp,
-                indiv=indiv_r2,
-                min_ag=1.0).save()
-
-        CompetitieKlasse(
-                competitie=comp,
-                indiv=indiv_bb,
-                min_ag=0.0).save()
-
-        klasse_tr = CompetitieKlasse(
+        klasse_r2 = CompetitieIndivKlasse(
                         competitie=comp,
-                        indiv=indiv_tr,
+                        volgorde=indiv_r2.volgorde,
+                        boogtype=indiv_r2.boogtype,
+                        min_ag=1.0)
+        klasse_r2.save()
+        klasse_r2.leeftijdsklassen.add(lkl_sa)
+
+        klasse_bb = CompetitieIndivKlasse(
+                        competitie=comp,
+                        volgorde=indiv_bb.volgorde,
+                        boogtype=indiv_bb.boogtype,
+                        min_ag=0.0)
+        klasse_bb.save()
+        klasse_bb.leeftijdsklassen.add(lkl_sa)
+
+        klasse_tr = CompetitieIndivKlasse(
+                        competitie=comp,
+                        volgorde=indiv_tr.volgorde,
+                        boogtype=indiv_tr.boogtype,
                         min_ag=0.0)
         klasse_tr.save()
 
@@ -131,7 +143,7 @@ class TestCompRegioCli(E2EHelpers, TestCase):
                             deelcompetitie=deelcomp,
                             sporterboog=sporterboog_r,
                             bij_vereniging=ver,
-                            klasse=klasse_r1,
+                            indiv_klasse=klasse_r1,
                             aantal_scores=1)
         deelnemer_r.save()
         self.deelnemer_r = deelnemer_r
@@ -140,16 +152,26 @@ class TestCompRegioCli(E2EHelpers, TestCase):
                             deelcompetitie=deelcomp,
                             sporterboog=sporterboog_tr,
                             bij_vereniging=ver,
-                            klasse=klasse_tr,
+                            indiv_klasse=klasse_tr,
                             aantal_scores=2)
         deelnemer_tr.save()
         self.deelnemer_tr = deelnemer_tr
+
+        team_klasse_r = CompetitieTeamKlasse(
+                            competitie=comp,
+                            volgorde=42,
+                            team_type=teamtype_r,
+                            team_afkorting='R2',
+                            min_ag=0.0)
+        team_klasse_r.save()
+        team_klasse_r.boog_typen.add(boog_r)
 
         team = RegiocompetitieTeam(
                             deelcompetitie=deelcomp,
                             vereniging=ver,
                             volg_nr=1,
                             team_type=teamtype_r,
+                            team_klasse=team_klasse_r,
                             team_naam='Test')
         team.save()
         self.team = team
@@ -439,7 +461,7 @@ class TestCompRegioCli(E2EHelpers, TestCase):
                     deelcompetitie=self.deelnemer_r.deelcompetitie,
                     sporterboog=self.deelnemer_r.sporterboog,
                     bij_vereniging=self.deelnemer_r.bij_vereniging,
-                    klasse=self.deelnemer_r.klasse)
+                    indiv_klasse=self.deelnemer_r.indiv_klasse)
         dupe.save()
 
         f1 = io.StringIO()
@@ -454,7 +476,7 @@ class TestCompRegioCli(E2EHelpers, TestCase):
                     deelcompetitie=self.deelnemer_r.deelcompetitie,
                     sporterboog=self.deelnemer_r.sporterboog,
                     bij_vereniging=self.deelnemer_r.bij_vereniging,
-                    klasse=self.deelnemer_r.klasse)
+                    indiv_klasse=self.deelnemer_r.indiv_klasse)
         dupe.save()
 
         f1 = io.StringIO()

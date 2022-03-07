@@ -109,7 +109,7 @@ class Command(BaseCommand):
         huidige_boog_afk = deelnemer.sporterboog.boogtype.afkorting
         self.stdout.write('[INFO] Huidige deelnemer pk = %s' % deelnemer.pk)
         self.stdout.write('[INFO] Huidige sporterboog pk = %s, boogtype = %s' % (deelnemer.sporterboog.pk, huidige_boog_afk))
-        self.stdout.write('[INFO] Huidige klasse: %s' % deelnemer.klasse)
+        self.stdout.write('[INFO] Huidige indiv_klasse: %s' % deelnemer.indiv_klasse)
 
         # controleer of de sporter in een team mee doet
         if deelnemer.regiocompetitieteam_set.count() > 0:
@@ -169,7 +169,7 @@ class Command(BaseCommand):
         # bepaal de nieuwe klasse
         bepaler = KlasseBepaler(comp)
         bepaler.bepaal_klasse_deelnemer(deelnemer)
-        self.stdout.write('[INFO] Nieuwe klasse: %s' % deelnemer.klasse)
+        self.stdout.write('[INFO] Nieuwe indiv_klasse: %s' % deelnemer.indiv_klasse)
 
         if not do_save:
             self.stdout.write('\nGebruik --commit om wijziging door te voeren')

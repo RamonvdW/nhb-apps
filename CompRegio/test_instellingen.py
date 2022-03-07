@@ -6,7 +6,9 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import Competitie, DeelCompetitie, CompetitieKlasse, LAAG_BK, LAAG_RK, LAAG_REGIO
+from Competitie.models import (Competitie, DeelCompetitie,
+                               CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               LAAG_BK, LAAG_RK, LAAG_REGIO)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
 from Functie.models import maak_functie
@@ -130,24 +132,24 @@ class TestCompRegioInstellingen(E2EHelpers, TestCase):
         resp = self.client.post(self.url_klassengrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
-        klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=15,        # Rec ERE
-                                              is_voor_teams_rk_bk=False)
+        klasse = CompetitieTeamKlasse.objects.get(competitie=self.comp_18,
+                                                  volgorde=15,                  # Rec ERE
+                                                  is_voor_teams_rk_bk=False)
         klasse.min_ag = 29.0
         klasse.save()
 
-        klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=16,        # Rec A
-                                              is_voor_teams_rk_bk=False)
+        klasse = CompetitieTeamKlasse.objects.get(competitie=self.comp_18,
+                                                  volgorde=16,                  # Rec A
+                                                  is_voor_teams_rk_bk=False)
         klasse.min_ag = 25.0
         klasse.save()
 
         self.client.logout()
 
-        self.klasse_recurve_onbekend = (CompetitieKlasse
+        self.klasse_recurve_onbekend = (CompetitieIndivKlasse
                                         .objects
-                                        .filter(indiv__boogtype=self.boog_r,
-                                                indiv__is_onbekend=True)
+                                        .filter(boogtype=self.boog_r,
+                                                is_onbekend=True)
                                         .all())[0]
 
         self.deelcomp_bond_18 = DeelCompetitie.objects.filter(laag=LAAG_BK, competitie=self.comp_18)[0]
