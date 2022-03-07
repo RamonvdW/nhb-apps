@@ -311,16 +311,20 @@ class CompetitieOverzichtView(View):
         # kijk of de uitslagen klaar zijn om te tonen
         context['toon_uitslagen'] = (comp.fase >= 'B')      # inschrijving is open
 
-        wed_boog = 'r'  # get_competitie_boog_typen(comp)[0].afkorting.lower()         # r
+        wed_boog = 'r'
 
         if request.user.is_authenticated:
             # als deze sporter ingeschreven is voor de competitie, pak dan het boogtype waarmee hij ingeschreven is
 
             # kies de eerste wedstrijdboog uit de voorkeuren van sporter
+            comp_boogtypen = get_competitie_boog_typen(comp)
+            boog_pks = [boogtype.pk for boogtype in comp_boogtypen]
+
             all_bogen = (SporterBoog
                          .objects
                          .filter(sporter__account=request.user,
-                                 voor_wedstrijd=True)
+                                 voor_wedstrijd=True,
+                                 boogtype__pk__in=boog_pks)
                          .order_by('boogtype__volgorde'))
 
             if all_bogen.count():
