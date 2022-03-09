@@ -13,7 +13,7 @@ from Functie.rol import Rollen
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Score.models import Score, ScoreHist, Uitslag
 from Sporter.models import SporterBoog
-from Wedstrijden.models import WedstrijdLocatie, CompetitieWedstrijdenPlan, CompetitieWedstrijd
+from Wedstrijden.models import WedstrijdLocatie
 from decimal import Decimal
 import datetime
 import logging
@@ -601,7 +601,6 @@ class DeelCompetitie(models.Model):
 
     # wedstrijden - alleen voor de RK en BK
     rk_bk_matches = models.ManyToManyField(CompetitieMatch, blank=True)
-    plan = models.ForeignKey(CompetitieWedstrijdenPlan, on_delete=models.PROTECT, null=True, blank=True)
 
     # specifieke instellingen voor deze regio
     inschrijf_methode = models.CharField(max_length=1,
@@ -654,40 +653,6 @@ class DeelCompetitie(models.Model):
         return "%s - %s" % (self.competitie, substr)
 
     objects = models.Manager()      # for the editor only
-
-
-class DeelcompetitieKlasseLimiet(models.Model):
-    """ Deze database tabel bevat de limieten voor het aantal deelnemers in een RK of BK
-        wedstrijdklasse. De RKO kan dit bijstellen specifiek voor zijn RK.
-    """
-
-    # voor welke deelcompetitie (ivm scheiding RKs)
-    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
-
-    # voor welke klasse is deze limiet
-    indiv_klasse = models.ForeignKey(CompetitieIndivKlasse,
-                                     on_delete=models.CASCADE,
-                                     blank=True, null=True)
-    team_klasse = models.ForeignKey(CompetitieTeamKlasse,
-                                    on_delete=models.CASCADE,
-                                    blank=True, null=True)
-
-    # maximum aantal deelnemers in deze klasse
-    limiet = models.PositiveSmallIntegerField(default=24)
-
-    def __str__(self):
-        if self.indiv_klasse:
-            beschrijving = self.indiv_klasse.beschrijving
-        elif self.team_klasse:
-            beschrijving = self.team_klasse.beschrijving
-        else:
-            beschrijving = '?'
-
-        return "%s : %s - %s" % (self.limiet, beschrijving, self.deelcompetitie)
-
-    class Meta:
-        verbose_name = "Deelcompetitie Klasse Limiet"
-        verbose_name_plural = "Deelcompetitie Klasse Limieten"
 
 
 class DeelcompetitieIndivKlasseLimiet(models.Model):
@@ -757,7 +722,6 @@ class DeelcompetitieRonde(models.Model):
     beschrijving = models.CharField(max_length=40)
 
     # wedstrijdenplan voor deze competitie ronde
-    plan = models.ForeignKey(CompetitieWedstrijdenPlan, on_delete=models.PROTECT, null=True, blank=True)
     matches = models.ManyToManyField(CompetitieMatch, blank=True)
 
     def __str__(self):
@@ -841,7 +805,6 @@ class RegioCompetitieSchutterBoog(models.Model):
     inschrijf_voorkeur_dagdeel = models.CharField(max_length=3, choices=DAGDELEN, default="GN")
 
     # voorkeur schietmomenten (methode 1)
-    inschrijf_gekozen_wedstrijden = models.ManyToManyField(CompetitieWedstrijd, blank=True)
     inschrijf_gekozen_matches = models.ManyToManyField(CompetitieMatch, blank=True)
 
     def __str__(self):

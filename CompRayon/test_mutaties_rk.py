@@ -8,7 +8,8 @@ from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
 from Competitie.test_fase import zet_competitie_fase
-from Competitie.models import (Competitie, CompetitieIndivKlasse, DeelcompetitieKlasseLimiet,
+from Competitie.models import (Competitie, CompetitieIndivKlasse,
+                               DeelcompetitieIndivKlasseLimiet, DeelcompetitieTeamKlasseLimiet,
                                CompetitieMutatie, MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AFMELDEN,
                                MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
                                KampioenschapSchutterBoog, DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
@@ -80,9 +81,9 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
                        .order_by('-min_ag'))[0]
 
         # zet de cut op 16 voor de gekozen klasse
-        self.cut = DeelcompetitieKlasseLimiet(deelcompetitie=self.deelcomp_rk,
-                                              indiv_klasse=self.klasse,
-                                              limiet=16)
+        self.cut = DeelcompetitieIndivKlasseLimiet(deelcompetitie=self.deelcomp_rk,
+                                                   indiv_klasse=self.klasse,
+                                                   limiet=16)
         self.cut.save()
 
     def _verwerk_mutaties(self, max_mutaties=20, show=False, check_duration=True):
@@ -239,7 +240,8 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         self._check_volgorde_en_rank()
 
         # nu zonder limiet
-        DeelcompetitieKlasseLimiet.objects.all().delete()
+        DeelcompetitieIndivKlasseLimiet.objects.all().delete()
+        DeelcompetitieTeamKlasseLimiet.objects.all().delete()
         CompetitieMutatie(mutatie=MUTATIE_INITIEEL,
                           deelcompetitie=self.deelcomp_rk).save()
         self._verwerk_mutaties(283)

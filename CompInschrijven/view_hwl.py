@@ -13,14 +13,13 @@ from BasisTypen.models import (MAXIMALE_LEEFTIJD_JEUGD, MAXIMALE_WEDSTRIJDLEEFTI
                                BLAZOEN_60CM_4SPOT, BLAZOEN_DT)
 from Competitie.models import (AG_NUL, DAGDELEN, DAGDEEL_AFKORTINGEN, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
                                Competitie, DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog,
-                               get_competitie_indiv_leeftijdsklassen)
+                               CompetitieMatch, get_competitie_indiv_leeftijdsklassen)
 from Competitie.operations import KlasseBepaler
 from Competitie.operations import get_competitie_bogen
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Score.models import Score, SCORE_TYPE_INDIV_AG
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
-from Wedstrijden.models import CompetitieWedstrijd
 from decimal import Decimal
 import copy
 
@@ -275,7 +274,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
                 # for
 
-                wedstrijden = (CompetitieWedstrijd
+                wedstrijden = (CompetitieMatch
                                .objects
                                .filter(pk__in=pks)
                                .exclude(vereniging__isnull=True)        # voorkom wedstrijd niet toegekend aan vereniging

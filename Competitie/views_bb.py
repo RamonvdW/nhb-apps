@@ -5,12 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.http import HttpResponseRedirect, Http404
-from django.shortcuts import render
-from django.urls import reverse
-from django.views.generic import TemplateView
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.shortcuts import redirect
 from django.conf import settings
+from django.urls import reverse
+from django.shortcuts import render, redirect
+from django.views.generic import TemplateView
+from django.utils.formats import localize
+from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
 from Functie.rol import Rollen, rol_get_huidige
 from HistComp.models import HistCompetitie
@@ -18,7 +18,6 @@ from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from Score.operations import wanneer_ag_vastgesteld
-from django.utils.formats import localize
 from .models import (Competitie, DeelCompetitie, CompetitieMutatie, LAAG_REGIO,
                      MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
 from .operations import (bepaal_startjaar_nieuwe_competitie, bepaal_klassengrenzen_indiv, bepaal_klassengrenzen_teams,

@@ -9,11 +9,10 @@ from django.http import Http404, HttpResponse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import RegiocompetitieTeam
+from Competitie.models import RegiocompetitieTeam, CompetitieMatch
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers, bepaal_blazoen_behoefte
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Wedstrijden.models import CompetitieWedstrijd
 import csv
 
 TEMPLATE_WAARSCHIJNLIJKE_DEELNEMERS = 'compregio/waarschijnlijke-deelnemers-regio.dtl'
@@ -42,31 +41,31 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])      # afkappen voor de veiligheid
-            wedstrijd = (CompetitieWedstrijd
-                         .objects
-                         .select_related('vereniging')
-                         .get(pk=wedstrijd_pk))
-        except (ValueError, CompetitieWedstrijd.DoesNotExist):
+            match_pk = int(kwargs['wedstrijd_pk'][:6])      # afkappen voor de veiligheid
+            match = (CompetitieMatch
+                     .objects
+                     .select_related('vereniging')
+                     .get(pk=match_pk))
+        except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        msg = wedstrijd.beschrijving
+        msg = match.beschrijving
         pos = msg.find(' - ')
         if pos > 0:
-            wedstrijd.beschrijving1 = msg[:pos].strip()
-            wedstrijd.beschrijving2 = msg[pos+3:].strip()
+            match.beschrijving1 = msg[:pos].strip()
+            match.beschrijving2 = msg[pos+3:].strip()
         else:
-            wedstrijd.beschrijving1 = msg
-            wedstrijd.beschrijving2 = ''
+            match.beschrijving1 = msg
+            match.beschrijving2 = ''
 
-        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
+        plan = match.competitiewedstrijdenplan_set.all()[0]
         ronde = plan.deelcompetitieronde_set.select_related('deelcompetitie', 'deelcompetitie__competitie').all()[0]
         deelcomp = ronde.deelcompetitie
         comp = deelcomp.competitie
         afstand = comp.afstand
 
         context['deelcomp'] = deelcomp
-        context['wedstrijd'] = wedstrijd
+        context['wedstrijd'] = match
         context['vastgesteld'] = timezone.now()
         context['is_25m1p'] = (afstand == '25')
 
@@ -76,7 +75,7 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
             team_pk2naam[team.pk] = team.maak_team_naam_kort()
         # for
 
-        sporters, teams = bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd)
+        sporters, teams = bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, match)
         context['sporters'] = sporters
         context['aantal_regels'] = 2 + len(sporters) + len(team_pk2naam.keys())
 
@@ -87,7 +86,7 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
         context['blazoenen'] = bepaal_blazoen_behoefte(afstand, sporters, teams)
 
         context['url_download'] = reverse('CompRegio:waarschijnlijke-deelnemers-als-bestand',
-                                          kwargs={'wedstrijd_pk': wedstrijd.pk})
+                                          kwargs={'wedstrijd_pk': match.pk})
 
         # prep de view
         nr = 1
@@ -127,15 +126,15 @@ class WaarschijnlijkeDeelnemersAlsBestandView(UserPassesTestMixin, TemplateView)
         """ Afhandelen van de GET request waarmee we een bestand terug geven. """
 
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])      # afkappen voor de veiligheid
-            wedstrijd = (CompetitieWedstrijd
-                         .objects
-                         .select_related('vereniging')
-                         .get(pk=wedstrijd_pk))
-        except (ValueError, CompetitieWedstrijd.DoesNotExist):
+            match_pk = int(kwargs['wedstrijd_pk'][:6])      # afkappen voor de veiligheid
+            match = (CompetitieMatch
+                     .objects
+                     .select_related('vereniging')
+                     .get(pk=match_pk))
+        except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
+        plan = match.competitiewedstrijdenplan_set.all()[0]
         ronde = plan.deelcompetitieronde_set.select_related('deelcompetitie', 'deelcompetitie__competitie').all()[0]
         deelcomp = ronde.deelcompetitie
         afstand = deelcomp.competitie.afstand
@@ -148,10 +147,10 @@ class WaarschijnlijkeDeelnemersAlsBestandView(UserPassesTestMixin, TemplateView)
 
         vastgesteld = timezone.now()
 
-        sporters, teams = bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd)
+        sporters, teams = bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, match)
 
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="waarschijnlijke-deelnemers-%s.csv"' % wedstrijd.pk
+        response['Content-Disposition'] = 'attachment; filename="waarschijnlijke-deelnemers-%s.csv"' % match.pk
 
         writer = csv.writer(response, delimiter=";")      # ; is good for import with dutch regional settings
 

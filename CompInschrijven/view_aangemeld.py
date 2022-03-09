@@ -12,14 +12,13 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import (COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60CM_4SPOT,
                                BLAZOEN_WENS_4SPOT, BLAZOEN_WENS_DT,
                                BLAZOEN2STR, BLAZOEN2STR_COMPACT)
-from Competitie.models import (LAAG_REGIO, Competitie, DeelCompetitie, DeelcompetitieRonde,
+from Competitie.models import (LAAG_REGIO, Competitie, DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
                                RegioCompetitieSchutterBoog, DAGDEEL2LABEL,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN)
 from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren
-from Wedstrijden.models import CompetitieWedstrijd
 import csv
 
 
@@ -787,11 +786,11 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                         .filter(deelcompetitie=deelcomp)
                         .values_list('plan__pk', flat=True))
 
-        wedstrijden = (CompetitieWedstrijd
+        wedstrijden = (CompetitieMatch
                        .objects
                        .select_related('vereniging')
                        .prefetch_related('regiocompetitieschutterboog_set')
-                       .filter(competitiewedstrijdenplan__pk__in=plan_pks)
+                       .filter(competitiewedstrijdenplan__pk__in=plan_pks)      # TODO: fix
                        .order_by('datum_wanneer',
                                  'tijd_begin_wedstrijd',
                                  'vereniging__ver_nr'))
@@ -923,10 +922,10 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
                         .filter(deelcompetitie=deelcomp)
                         .values_list('plan__pk', flat=True))
 
-        wedstrijden = (CompetitieWedstrijd
+        wedstrijden = (CompetitieMatch
                        .objects
                        .select_related('vereniging')
-                       .filter(competitiewedstrijdenplan__pk__in=plan_pks)
+                       .filter(competitiewedstrijdenplan__pk__in=plan_pks)      # TODO: fix
                        .order_by('datum_wanneer',
                                  'tijd_begin_wedstrijd',
                                  'vereniging__ver_nr'))

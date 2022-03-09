@@ -11,11 +11,10 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from .models import (Competitie,
+from .models import (Competitie, CompetitieMatch,
                      LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie,
                      CompetitieMutatie,
                      MUTATIE_AFSLUITEN_REGIOCOMP)
-from Wedstrijden.models import CompetitieWedstrijd
 
 
 TEMPLATE_COMPETITIE_PLANNING_BOND = 'competitie/planning-landelijk.dtl'
@@ -284,12 +283,12 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         """
         try:
             wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen voor de veiligheid
-            wedstrijd = (CompetitieWedstrijd
+            wedstrijd = (CompetitieMatch
                          .objects
                          .select_related('uitslag')
                          .prefetch_related('uitslag__scores')
                          .get(pk=wedstrijd_pk))
-        except (ValueError, CompetitieWedstrijd.DoesNotExist):
+        except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]

@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
 from NhbStructuur.models import NhbVereniging
 from Score.models import Score, Uitslag
 
@@ -131,98 +130,6 @@ class WedstrijdLocatie(models.Model):
         """ meta data voor de admin interface """
         verbose_name = "Wedstrijd locatie"
         verbose_name_plural = "Wedstrijd locaties"
-
-
-class CompetitieWedstrijdUitslag(models.Model):     # TODO: delete
-
-    # de maximale score die gehaald (en ingevoerd) mag worden
-    # dit afhankelijk van het type wedstrijd
-    max_score = models.PositiveSmallIntegerField()      # max = 32767
-
-    # 18, 25, 70, etc.
-    afstand_meter = models.PositiveSmallIntegerField()
-
-    # scores bevat SporterBoog en komt met ScoreHist
-    scores = models.ManyToManyField(Score, blank=True)  # mag leeg zijn / gemaakt worden
-
-    # False = uitslag mag door WL ingevoerd worden
-    # True  = uitslag is gecontroleerd en mag niet meer aangepast worden
-    is_bevroren = models.BooleanField(default=False)
-
-    nieuwe_uitslag = models.ForeignKey(Uitslag, null=True, on_delete=models.SET_NULL)
-
-    def __str__(self):
-        msg = "(%s) afstand %s, max score %s" % (self.pk, self.afstand_meter, self.max_score)
-        if self.is_bevroren:
-            msg += " (bevroren)"
-        return msg
-
-    # hier houden we geen klassen bij - het is geen inschrijflijst
-    class Meta:
-        """ meta data voor de admin interface """
-        verbose_name = "Competitie Wedstrijd Uitslag"
-        verbose_name_plural = "Competitie Wedstrijd Uitslagen"
-
-
-class CompetitieWedstrijd(models.Model):
-    """ CompetitieWedstrijd is de kleinste planbare eenheid in de bondscompetitie """
-
-    # beschrijving
-    beschrijving = models.CharField(max_length=100, blank=True)
-
-    # plan status
-    preliminair = models.BooleanField(default=True)
-
-    # organiserende vereniging
-    vereniging = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT,
-                                   blank=True, null=True)   # mag later ingevuld worden
-
-    # waar
-    locatie = models.ForeignKey(WedstrijdLocatie, on_delete=models.PROTECT,
-                                blank=True, null=True)      # mag later ingevuld worden
-
-    # datum en tijdstippen
-    datum_wanneer = models.DateField()
-    tijd_begin_aanmelden = models.TimeField()
-    tijd_begin_wedstrijd = models.TimeField()
-    tijd_einde_wedstrijd = models.TimeField()
-
-    # wedstrijdklassen individueel en teams
-    indiv_klassen = models.ManyToManyField(IndivWedstrijdklasse,
-                                           blank=True)  # mag leeg zijn / gemaakt worden
-
-    team_klassen = models.ManyToManyField(TeamWedstrijdklasse,
-                                          blank=True)  # mag leeg zijn / gemaakt worden
-
-    # scores van deze uitslag
-    uitslag = models.ForeignKey(CompetitieWedstrijdUitslag, on_delete=models.PROTECT,
-                                blank=True, null=True)
-
-    def __str__(self):
-        extra = ""
-        if self.vereniging:
-            extra = " bij %s" % self.vereniging
-        return "(%s) %s %s%s: %s" % (self.pk, self.datum_wanneer, self.tijd_begin_wedstrijd, extra, self.beschrijving)
-
-    class Meta:
-        """ meta data voor de admin interface """
-        verbose_name = "Competitie Wedstrijd"
-        verbose_name_plural = "Competitie Wedstrijden"
-
-
-class CompetitieWedstrijdenPlan(models.Model):
-    """ Planning voor een serie wedstrijden, zoals de competitierondes """
-
-    # lijst van wedstrijden
-    wedstrijden = models.ManyToManyField(CompetitieWedstrijd, blank=True)
-
-    # de hiaat vlag geeft snel weer of er een probleem in de planning zit
-    bevat_hiaat = models.BooleanField(default=True)
-
-    class Meta:
-        """ meta data voor de admin interface """
-        verbose_name = "Competitie Wedstrijden Plan"
-        verbose_name_plural = "Competitie Wedstrijden Plannen"
 
 
 # end of file

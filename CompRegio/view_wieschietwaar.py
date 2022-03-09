@@ -10,8 +10,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie
-from Competitie.models import INSCHRIJF_METHODE_1, DeelCompetitie, RegioCompetitieSchutterBoog
-from Wedstrijden.models import CompetitieWedstrijd
+from Competitie.models import INSCHRIJF_METHODE_1, DeelCompetitie, RegioCompetitieSchutterBoog, CompetitieMatch
 
 
 TEMPLATE_COMPREGIO_WIESCHIETWAAR = 'compregio/wieschietwaar-methode1.dtl'
@@ -78,32 +77,32 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
                     wedstrijd_pks.append(pk)
         # for
 
-        wedstrijden = (CompetitieWedstrijd
-                       .objects
-                       .filter(pk__in=wedstrijd_pks)
-                       .select_related('vereniging')
-                       .order_by('datum_wanneer',
-                                 'tijd_begin_wedstrijd'))
+        matches = (CompetitieMatch
+                   .objects
+                   .filter(pk__in=wedstrijd_pks)
+                   .select_related('vereniging')
+                   .order_by('datum_wanneer',
+                             'tijd_begin_wedstrijd'))
 
         index2pk = dict()
-        for index, wedstrijd in enumerate(wedstrijden):
-            index2pk[index] = wedstrijd.pk
+        for index, match in enumerate(matches):
+            index2pk[index] = match.pk
         # for
         aantal = len(index2pk)
 
         context['kruisjes'] = kruisjes = list()
-        context['wedstrijden'] = wedstrijden
-        for nummer, wedstrijd in enumerate(wedstrijden, start=1):
+        context['wedstrijden'] = matches
+        for nummer, match in enumerate(matches, start=1):
             nummer_str = str(nummer)
             kruisjes.append(nummer_str)
-            wedstrijd.nummer_str = nummer_str
+            match.nummer_str = nummer_str
 
-            wedstrijd.beschrijving_str = "%s om %s bij %s in %s" % (wedstrijd.datum_wanneer,
-                                                                    wedstrijd.tijd_begin_wedstrijd,
-                                                                    wedstrijd.vereniging.naam,
-                                                                    wedstrijd.vereniging.plaats)
+            match.beschrijving_str = "%s om %s bij %s in %s" % (match.datum_wanneer,
+                                                                match.tijd_begin_wedstrijd,
+                                                                match.vereniging.naam,
+                                                                match.vereniging.plaats)
 
-            wedstrijd.waar_str = "%s in %s" % (wedstrijd.vereniging.naam, wedstrijd.vereniging.plaats)      # TODO: moet locatie.plaats zijn?!
+            match.waar_str = "%s in %s" % (match.vereniging.naam, match.vereniging.plaats)      # TODO: moet locatie.plaats zijn?!
         # for
 
         herhaal = 0

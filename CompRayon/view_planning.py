@@ -7,12 +7,14 @@
 from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404
+from django.db.models import Count
 from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, DeelCompetitie,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               DeelcompetitieKlasseLimiet, DeelcompetitieRonde,
+                               DeelcompetitieIndivKlasseLimiet, DeelcompetitieTeamKlasseLimiet,
+                               DeelcompetitieRonde, CompetitieMatch,
                                KampioenschapSchutterBoog, KampioenschapTeam, CompetitieMutatie,
                                MUTATIE_CUT, DEELNAME_NEE)
 from Functie.rol import Rollen, rol_get_huidige_functie
@@ -21,7 +23,7 @@ from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
-from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdenPlan, WedstrijdLocatie
+from Wedstrijden.models import WedstrijdLocatie
 from types import SimpleNamespace
 import datetime
 import time
@@ -61,19 +63,15 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
             rk_deelcomp_pk = int(kwargs['rk_deelcomp_pk'][:6])  # afkappen voor de veiligheid
             deelcomp_rk = (DeelCompetitie
                            .objects
-                           .select_related('competitie', 'nhb_rayon')
-                           .get(pk=rk_deelcomp_pk, laag=LAAG_RK))
+                           .select_related('competitie',
+                                           'nhb_rayon')
+                           .get(pk=rk_deelcomp_pk,
+                                laag=LAAG_RK))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         context['deelcomp_rk'] = deelcomp_rk
         context['rayon'] = deelcomp_rk.nhb_rayon
-
-        # maak het plan aan, als deze nog niet aanwezig was
-        if not deelcomp_rk.plan:
-            deelcomp_rk.plan = CompetitieWedstrijdenPlan()
-            deelcomp_rk.plan.save()
-            deelcomp_rk.save()
 
         klasse2schutters = dict()
         niet_gebruikt = dict()
@@ -166,21 +164,15 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
 
         # zoek het aantal regiowedstrijden erbij
         for deelcomp in deelcomps:
-            plan_pks = (DeelcompetitieRonde
-                        .objects
-                        .filter(deelcompetitie=deelcomp)
-                        .values_list('plan__pk', flat=True))
+            rondes = (DeelcompetitieRonde
+                      .objects
+                      .filter(deelcompetitie=deelcomp)
+                      .annotate(aantal_matches=Count('matches')))
             if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
                 deelcomp.rondes_count = "-"
             else:
-                deelcomp.rondes_count = len(plan_pks)
-            deelcomp.wedstrijden_count = 0
-            for plan in (CompetitieWedstrijdenPlan
-                         .objects
-                         .prefetch_related('wedstrijden')
-                         .filter(pk__in=plan_pks)):
-                deelcomp.wedstrijden_count += plan.wedstrijden.count()
-            # for
+                deelcomp.rondes_count = len(rondes)
+            deelcomp.wedstrijden_count = sum(ronde.aantal_matches for ronde in rondes)
         # for
 
         comp = deelcomp_rk.competitie
@@ -213,23 +205,15 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
-        # maak het plan aan, als deze nog niet aanwezig was
-        if not deelcomp_rk.plan:
-            deelcomp_rk.plan = CompetitieWedstrijdenPlan()
-            deelcomp_rk.plan.save()
-            deelcomp_rk.save()
+        match = CompetitieMatch()
+        match.datum_wanneer = deelcomp_rk.competitie.rk_eerste_wedstrijd
+        match.tijd_begin_wedstrijd = datetime.time(hour=10, minute=0, second=0)
+        match.save()
 
-        wedstrijd = CompetitieWedstrijd()
-        wedstrijd.datum_wanneer = deelcomp_rk.competitie.rk_eerste_wedstrijd
-        wedstrijd.tijd_begin_aanmelden = datetime.time(hour=10, minute=0, second=0)
-        wedstrijd.tijd_begin_wedstrijd = wedstrijd.tijd_begin_aanmelden
-        wedstrijd.tijd_einde_wedstrijd = wedstrijd.tijd_begin_aanmelden
-        wedstrijd.save()
-
-        deelcomp_rk.plan.wedstrijden.add(wedstrijd)
+        deelcomp_rk.rk_bk_matches.add(match)
 
         return HttpResponseRedirect(reverse('CompRayon:rayon-wijzig-wedstrijd',
-                                            kwargs={'wedstrijd_pk': wedstrijd.pk}))
+                                            kwargs={'wedstrijd_pk': match.pk}))
 
 
 class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
@@ -266,7 +250,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         indiv_in_use = list()       # [indiv.pk, ..]
         team_in_use = list()        # [team.pk, ..]
-        for wed in CompetitieWedstrijd.objects.prefetch_related('indiv_klassen', 'team_klassen').filter(pk__in=wedstrijd_pks):
+        for wed in CompetitieMatch.objects.prefetch_related('indiv_klassen', 'team_klassen').filter(pk__in=wedstrijd_pks):
             indiv_pks = list(wed.indiv_klassen.values_list('pk', flat=True))
             indiv_in_use.extend(indiv_pks)
 
@@ -378,14 +362,14 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         try:
             wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])     # afkappen voor de veiligheid
-            wedstrijd = (CompetitieWedstrijd
+            wedstrijd = (CompetitieMatch
                          .objects
                          .select_related('uitslag')
                          .prefetch_related('uitslag__scores',
                                            'indiv_klassen',
                                            'team_klassen')
                          .get(pk=wedstrijd_pk))
-        except (ValueError, CompetitieWedstrijd.DoesNotExist):
+        except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         # zoek het weeknummer waarin deze wedstrijd gehouden moet worden
@@ -474,12 +458,12 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         try:
             wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])     # afkappen voor de veiligheid
-            wedstrijd = (CompetitieWedstrijd
+            wedstrijd = (CompetitieMatch
                          .objects
                          .select_related('uitslag')
                          .prefetch_related('uitslag__scores')
                          .get(pk=wedstrijd_pk))
-        except (ValueError, CompetitieWedstrijd.DoesNotExist):
+        except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
@@ -666,29 +650,38 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                                             .order_by('volgorde'))
 
         # zet de default limieten
-        pk2wkl = dict()
+        pk2wkl_indiv = dict()
         for wkl in wkl_indiv:
             wkl.limiet = 24     # default limiet
             wkl.sel = 'sel_%s' % wkl.pk
-            pk2wkl[wkl.pk] = wkl
+            pk2wkl_indiv[wkl.pk] = wkl
         # for
 
+        pk2wkl_team = dict()
         for wkl in wkl_teams:
             # ERE klasse: 12 teams
             # overige: 8 teams
-            wkl.limiet = 12 if "ERE" in wkl.team.beschrijving else 8
+            wkl.limiet = 12 if "ERE" in wkl.beschrijving else 8
             wkl.sel = 'sel_%s' % wkl.pk
-            pk2wkl[wkl.pk] = wkl
+            pk2wkl_team[wkl.pk] = wkl
         # for
 
         # aanvullen met de opgeslagen limieten
-        for limiet in (DeelcompetitieKlasseLimiet
+        for limiet in (DeelcompetitieIndivKlasseLimiet
                        .objects
-                       .select_related('indiv_klasse',
-                                       'team_klasse')
+                       .select_related('indiv_klasse')
                        .filter(deelcompetitie=deelcomp_rk,
-                               klasse__in=pk2wkl.keys())):
-            wkl = pk2wkl[limiet.klasse.pk]
+                               indiv_klasse__in=pk2wkl_indiv.keys())):
+            wkl = pk2wkl_indiv[limiet.indiv_klasse.pk]
+            wkl.limiet = limiet.limiet
+        # for
+
+        for limiet in (DeelcompetitieTeamKlasseLimiet
+                       .objects
+                       .select_related('team_klasse')
+                       .filter(deelcompetitie=deelcomp_rk,
+                               team_klasse__in=pk2wkl_team.keys())):
+            wkl = pk2wkl_team[limiet.team_klasse.pk]
             wkl.limiet = limiet.limiet
         # for
 
@@ -727,9 +720,10 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         comp = deelcomp_rk.competitie
         # TODO: check competitie fase
 
-        pk2ckli = dict()
-        pk2cklt = dict()
-        pk2keuze = dict()
+        pk2ckl_indiv = dict()
+        pk2ckl_team = dict()
+        pk2keuze_indiv = dict()
+        pk2keuze_team = dict()
 
         for ckl in (CompetitieIndivKlasse
                     .objects
@@ -740,12 +734,12 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
             keuze = request.POST.get(sel, None)
             if keuze:
                 try:
-                    pk2keuze[ckl.pk] = int(keuze[:2])   # afkappen voor de veiligheid
-                    pk2ckli[ckl.pk] = ckl
+                    pk2keuze_indiv[ckl.pk] = int(keuze[:2])   # afkappen voor de veiligheid
+                    pk2ckl_indiv[ckl.pk] = ckl
                 except ValueError:
                     pass
                 else:
-                    if pk2keuze[ckl.pk] not in (24, 20, 16, 12, 8, 4):
+                    if pk2keuze_indiv[ckl.pk] not in (24, 20, 16, 12, 8, 4):
                         raise Http404('Geen valide keuze')
         # for
 
@@ -758,53 +752,71 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
             keuze = request.POST.get(sel, None)
             if keuze:
                 try:
-                    pk2keuze[ckl.pk] = int(keuze[:2])   # afkappen voor de veiligheid
-                    pk2cklt[ckl.pk] = ckl
+                    pk2keuze_team[ckl.pk] = int(keuze[:2])   # afkappen voor de veiligheid
+                    pk2ckl_team[ckl.pk] = ckl
                 except ValueError:
                     pass
                 else:
-                    if pk2keuze[ckl.pk] not in (12, 10, 8, 6, 4):
+                    if pk2keuze_team[ckl.pk] not in (12, 10, 8, 6, 4):
                         raise Http404('Geen valide keuze')
         # for
 
-        wijzig_limiet_indiv = list()     # list of tup(klasse, nieuwe_limiet, oude_limiet)
-        wijzig_limiet_team = list()      # list of tup(klasse, nieuwe_limiet, oude_limiet)
+        wijzig_limiet_indiv = list()     # list of tup(indiv_klasse, nieuwe_limiet, oude_limiet)
+        wijzig_limiet_team = list()      # list of tup(team_klasse, nieuwe_limiet, oude_limiet)
 
-        for limiet in (DeelcompetitieKlasseLimiet
+        for limiet in (DeelcompetitieIndivKlasseLimiet
                        .objects
-                       .select_related('indiv_klasse',
-                                       'team_klasse')
+                       .select_related('indiv_klasse')
                        .filter(deelcompetitie=deelcomp_rk,
-                               team_klasse__in=list(pk2keuze.keys()))):
+                               indiv_klasse__in=list(pk2keuze_indiv.keys()))):
 
             pk = limiet.klasse.pk
-            keuze = pk2keuze[pk]
-            del pk2keuze[pk]
+            keuze = pk2keuze_indiv[pk]
+            del pk2keuze_indiv[pk]
+
+            tup = (limiet.indiv_klasse, keuze, limiet.limiet)
+            wijzig_limiet_indiv.append(tup)
+        # for
+
+        for limiet in (DeelcompetitieTeamKlasseLimiet
+                       .objects
+                       .select_related('team_klasse')
+                       .filter(deelcompetitie=deelcomp_rk,
+                               team_klasse__in=list(pk2keuze_team.keys()))):
+
+            pk = limiet.klasse.pk
+            keuze = pk2keuze_team[pk]
+            del pk2keuze_team[pk]
 
             tup = (limiet.klasse, keuze, limiet.limiet)
-            wijzig_limiet.append(tup)
+            wijzig_limiet_team.append(tup)
         # for
 
         # verwerk de overgebleven keuzes waar nog geen limiet voor was
-        for pk, keuze in pk2keuze.items():
+        for pk, keuze in pk2keuze_indiv.items():
             try:
-                klasse = pk2ckli[pk]
+                indiv_klasse = pk2ckl_indiv[pk]
             except KeyError:
-                try:
-                    klasse = pk2cklt[pk]
-                except KeyError:
-                    pass
-                else:
-                    # ERE klasse: 12 teams
-                    # overige: 8 teams
-                    default = 12 if "ERE" in klasse.team.beschrijving else 8
-                    tup = (klasse, keuze, default)
-                    wijzig_limiet.append(tup)
+                pass
             else:
                 # indiv klasse
                 default = 24
-                tup = (klasse, keuze, default)
-                wijzig_limiet.append(tup)
+                tup = (indiv_klasse, keuze, default)
+                wijzig_limiet_indiv.append(tup)
+        # for
+
+        # verwerk de overgebleven keuzes waar nog geen limiet voor was
+        for pk, keuze in pk2keuze_team.items():
+            try:
+                indiv_klasse = pk2ckl_team[pk]
+            except KeyError:
+                pass
+            else:
+                # ERE klasse: 12 teams
+                # overige: 8 teams
+                default = 12 if "ERE" in indiv_klasse.team.beschrijving else 8
+                tup = (indiv_klasse, keuze, default)
+                wijzig_limiet_team.append(tup)
         # for
 
         # laat opnieuw de deelnemers boven de cut bepalen en sorteer op gemiddelde
@@ -812,17 +824,33 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         door_str = "RKO %s" % account.volledige_naam()
 
         mutatie = None
-        for klasse, nieuwe_limiet, oude_limiet in wijzig_limiet:
+        for indiv_klasse, nieuwe_limiet, oude_limiet in wijzig_limiet_indiv:
             # schrijf in het logboek
             if oude_limiet != nieuwe_limiet:
                 msg = "De limiet (cut) voor klasse %s van de %s is aangepast van %s naar %s." % (
-                        str(klasse), str(deelcomp_rk), oude_limiet, nieuwe_limiet)
+                        str(indiv_klasse), str(deelcomp_rk), oude_limiet, nieuwe_limiet)
                 schrijf_in_logboek(self.request.user, "Competitie", msg)
 
                 mutatie = CompetitieMutatie(mutatie=MUTATIE_CUT,
                                             door=door_str,
                                             deelcompetitie=deelcomp_rk,
-                                            klasse=klasse,
+                                            indiv_klasse=indiv_klasse,
+                                            cut_oud=oude_limiet,
+                                            cut_nieuw=nieuwe_limiet)
+                mutatie.save()
+        # for
+
+        for team_klasse, nieuwe_limiet, oude_limiet in wijzig_limiet_team:
+            # schrijf in het logboek
+            if oude_limiet != nieuwe_limiet:
+                msg = "De limiet (cut) voor klasse %s van de %s is aangepast van %s naar %s." % (
+                        str(team_klasse), str(deelcomp_rk), oude_limiet, nieuwe_limiet)
+                schrijf_in_logboek(self.request.user, "Competitie", msg)
+
+                mutatie = CompetitieMutatie(mutatie=MUTATIE_CUT,
+                                            door=door_str,
+                                            deelcompetitie=deelcomp_rk,
+                                            team_klasse=team_klasse,
                                             cut_oud=oude_limiet,
                                             cut_nieuw=nieuwe_limiet)
                 mutatie.save()
@@ -870,12 +898,12 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         """
         try:
             wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen voor de veiligheid
-            wedstrijd = (CompetitieWedstrijd
+            wedstrijd = (CompetitieMatch
                          .objects
                          .select_related('uitslag')
                          .prefetch_related('uitslag__scores')
                          .get(pk=wedstrijd_pk))
-        except (ValueError, CompetitieWedstrijd.DoesNotExist):
+        except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]

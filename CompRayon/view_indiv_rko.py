@@ -10,8 +10,7 @@ from django.http import HttpResponse, Http404
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (LAAG_REGIO, LAAG_RK, DeelCompetitie,
-                               DeelcompetitieKlasseLimiet,
+from Competitie.models import (LAAG_REGIO, LAAG_RK, DeelCompetitie, DeelcompetitieIndivKlasseLimiet,
                                KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Handleiding.views import reverse_handleiding
@@ -121,7 +120,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
                                               kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
         wkl2limiet = dict()    # [pk] = aantal
-        for limiet in (DeelcompetitieKlasseLimiet
+        for limiet in (DeelcompetitieIndivKlasseLimiet
                        .objects
                        .select_related('indiv_klasse')
                        .filter(deelcompetitie=deelcomp_rk)):
@@ -228,7 +227,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
                                 '-gemiddelde'))             # aflopend op gemiddelde
 
         wkl2limiet = dict()    # [pk] = aantal
-        for limiet in (DeelcompetitieKlasseLimiet
+        for limiet in (DeelcompetitieIndivKlasseLimiet
                        .objects
                        .select_related('indiv_klasse')
                        .filter(deelcompetitie=deelcomp_rk)):

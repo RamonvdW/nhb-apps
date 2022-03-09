@@ -13,8 +13,8 @@ from django.utils import timezone
 from django.db.models import F
 from django.core.management.base import BaseCommand
 from BasisTypen.models import BoogType, TeamType
-from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse,
-                               DeelCompetitie, DeelcompetitieKlasseLimiet, LAAG_REGIO, LAAG_RK,
+from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse, LAAG_REGIO, LAAG_RK,
+                               DeelCompetitie, DeelcompetitieIndivKlasseLimiet, DeelcompetitieTeamKlasseLimiet,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                KampioenschapSchutterBoog, DEELNAME_JA, DEELNAME_NEE, DEELNAME_ONBEKEND,
                                KampioenschapTeam,
@@ -93,12 +93,12 @@ class Command(BaseCommand):
     def _get_limiet_indiv(deelcomp, indiv_klasse):
         # bepaal de limiet
         try:
-            limiet = (DeelcompetitieKlasseLimiet
+            limiet = (DeelcompetitieIndivKlasseLimiet
                       .objects
                       .get(deelcompetitie=deelcomp,
                            indiv_klasse=indiv_klasse)
                       ).limiet
-        except DeelcompetitieKlasseLimiet.DoesNotExist:
+        except DeelcompetitieIndivKlasseLimiet.DoesNotExist:
             limiet = 24
 
         return limiet
@@ -510,15 +510,15 @@ class Command(BaseCommand):
     def _verwerk_mutatie_cut_indiv(self, deelcomp, indiv_klasse, cut_oud, cut_nieuw):
         try:
             is_nieuw = False
-            limiet = (DeelcompetitieKlasseLimiet
+            limiet = (DeelcompetitieIndivKlasseLimiet
                       .objects
                       .get(deelcompetitie=deelcomp,
                            indiv_klasse=indiv_klasse))
-        except DeelcompetitieKlasseLimiet.DoesNotExist:
+        except DeelcompetitieIndivKlasseLimiet.DoesNotExist:
             # maak een nieuwe aan
             is_nieuw = True
-            limiet = DeelcompetitieKlasseLimiet(deelcompetitie=deelcomp,
-                                                indiv_klasse=indiv_klasse)
+            limiet = DeelcompetitieIndivKlasseLimiet(deelcompetitie=deelcomp,
+                                                     indiv_klasse=indiv_klasse)
 
         if cut_nieuw > cut_oud:
             # limiet verhogen is simpel, want deelnemers blijven deelnemers
@@ -544,18 +544,19 @@ class Command(BaseCommand):
         # else: cut_oud == cut_nieuw --> doe niets
         #   (dit kan voorkomen als 2 gebruikers tegelijkertijd de cut veranderen)
 
-    def _verwerk_mutatie_cut_team(self, deelcomp, team_klasse, cut_oud, cut_nieuw):
+    @staticmethod
+    def _verwerk_mutatie_cut_team(deelcomp, team_klasse, cut_oud, cut_nieuw):
         try:
             is_nieuw = False
-            limiet = (DeelcompetitieKlasseLimiet
+            limiet = (DeelcompetitieTeamKlasseLimiet
                       .objects
                       .get(deelcompetitie=deelcomp,
                            team_klasse=team_klasse))
-        except DeelcompetitieKlasseLimiet.DoesNotExist:
+        except DeelcompetitieTeamKlasseLimiet.DoesNotExist:
             # maak een nieuwe aan
             is_nieuw = True
-            limiet = DeelcompetitieKlasseLimiet(deelcompetitie=deelcomp,
-                                                team_klasse=team_klasse)
+            limiet = DeelcompetitieTeamKlasseLimiet(deelcompetitie=deelcomp,
+                                                    team_klasse=team_klasse)
 
         if cut_nieuw > cut_oud:
             # limiet verhogen is simpel, want deelnemers blijven deelnemers

@@ -11,14 +11,13 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from Functie.rol import Rollen, rol_get_huidige
-from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog,
+from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog, CompetitieMatch,
                                LAAG_REGIO, AG_NUL,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
                                DAGDELEN, DAGDEEL_AFKORTINGEN)
 from Competitie.operations import KlasseBepaler
 from Plein.menu import menu_dynamics
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
-from Wedstrijden.models import CompetitieWedstrijd
 from Sporter.models import SporterVoorkeuren, SporterBoog
 from decimal import Decimal
 
@@ -152,7 +151,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                 pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
             # for
 
-            wedstrijden = (CompetitieWedstrijd
+            wedstrijden = (CompetitieMatch
                            .objects
                            .filter(pk__in=pks)
                            .exclude(vereniging__isnull=True)  # voorkom wedstrijd niet toegekend aan vereniging

@@ -10,12 +10,12 @@ from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
-from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
+from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
                                LAAG_REGIO, LAAG_RK, INSCHRIJF_METHODE_1)
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Taken.taken import eval_open_taken
-from Wedstrijden.models import CompetitieWedstrijd, BAAN_TYPE_EXTERN
+from Wedstrijden.models import BAAN_TYPE_EXTERN
 from types import SimpleNamespace
 import datetime
 
@@ -113,7 +113,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                    .filter(deelcompetitie__is_afgesloten=False,
                            plan__wedstrijden__vereniging=ver)
                    .values_list('plan__wedstrijden', flat=True))
-            if CompetitieWedstrijd.objects.filter(pk__in=pks).count() > 0:
+            if CompetitieMatch.objects.filter(pk__in=pks).count() > 0:
                 context['heeft_wedstrijden'] = True
 
         # bepaal de volgorde waarin de kaartjes getoond worden

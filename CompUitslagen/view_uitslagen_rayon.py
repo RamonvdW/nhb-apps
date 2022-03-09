@@ -9,10 +9,9 @@ from django.urls import reverse
 from django.http import Http404
 from NhbStructuur.models import NhbRayon
 from Competitie.models import (LAAG_REGIO, LAAG_RK, DEELNAME_NEE,
-                               Competitie, DeelCompetitie, DeelcompetitieKlasseLimiet,
+                               Competitie, DeelCompetitie, DeelcompetitieIndivKlasseLimiet, CompetitieMatch,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam)
 from Plein.menu import menu_dynamics
-from Wedstrijden.models import CompetitieWedstrijd
 from Functie.rol import Rollen, rol_get_huidige_functie
 
 
@@ -156,7 +155,7 @@ class UitslagenRayonIndivView(TemplateView):
         # haal de planning erbij: competitieklasse --> competitiewedstrijd
         indiv2wedstrijd = dict()    # [indiv_pk] = competitiewedstrijd
         wedstrijd_pks = list(deelcomp.plan.wedstrijden.values_list('pk', flat=True))
-        for wedstrijd in (CompetitieWedstrijd
+        for wedstrijd in (CompetitieMatch
                           .objects
                           .prefetch_related('indiv_klassen')
                           .select_related('locatie')
@@ -188,9 +187,9 @@ class UitslagenRayonIndivView(TemplateView):
                           .order_by('indiv_klasse__volgorde',
                                     'volgorde'))
 
-            for limiet in (DeelcompetitieKlasseLimiet
+            for limiet in (DeelcompetitieIndivKlasseLimiet
                            .objects
-                           .select_related('klasse')
+                           .select_related('indiv_klasse')
                            .filter(deelcompetitie=deelcomp)):
                 wkl2limiet[limiet.klasse.pk] = limiet.limiet
             # for
@@ -375,7 +374,7 @@ class UitslagenRayonTeamsView(TemplateView):
         # haal de planning erbij: competitieklasse --> competitiewedstrijd
         team2wedstrijd = dict()     # [team_pk] = competitiewedstrijd
         wedstrijd_pks = list(deelcomp_rk.plan.wedstrijden.values_list('pk', flat=True))
-        for wedstrijd in (CompetitieWedstrijd
+        for wedstrijd in (CompetitieMatch
                           .objects
                           .prefetch_related('team_klassen')
                           .select_related('locatie')

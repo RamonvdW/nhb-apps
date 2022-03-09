@@ -10,11 +10,11 @@ from django.http import Http404, HttpResponse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, LAAG_RK, DeelcompetitieKlasseLimiet,
-                               KampioenschapSchutterBoog, KampioenschapTeam, DEELNAME_NEE, DEELNAME2STR)
+from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, LAAG_RK, DeelcompetitieIndivKlasseLimiet,
+                               KampioenschapSchutterBoog, KampioenschapTeam, DEELNAME_NEE, DEELNAME2STR,
+                               CompetitieMatch)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Wedstrijden.models import CompetitieWedstrijd
 from tempfile import NamedTemporaryFile
 from copy import copy
 import openpyxl
@@ -50,17 +50,17 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
 
         try:
             wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])      # afkappen voor de veiligheid
-            wedstrijd = (CompetitieWedstrijd
+            wedstrijd = (CompetitieMatch
                          .objects
                          .select_related('vereniging')
                          .prefetch_related('indiv_klassen',
                                            'team_klassen')
                          .get(pk=wedstrijd_pk,
                               vereniging=self.functie_nu.nhb_ver))
-        except (ValueError, CompetitieWedstrijd.DoesNotExist):
+        except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plannen = wedstrijd.competitiewedstrijdenplan_set.all()
+        plannen = wedstrijd.competitiewedstrijdenplan_set.all()     # TODO: fix
         if len(plannen) == 0:
             raise Http404('Geen wedstrijden plan')
         plan = plannen[0]
@@ -231,7 +231,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
                      .select_related('vereniging')
                      .get(pk=match_pk,
                           vereniging=self.functie_nu.nhb_ver))
-        except (ValueError, CompetitieWedstrijd.DoesNotExist):
+        except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         try:
@@ -242,7 +242,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieIndivKlasse.DoesNotExist):
             raise Http404('Klasse niet gevonden')
 
-        plannen = match.competitiewedstrijdenplan_set.all()
+        plannen = match.competitiewedstrijdenplan_set.all()     # TODO: fix
         if len(plannen) == 0:
             raise Http404('Geen wedstrijden plan')
         plan = plannen[0]
@@ -268,9 +268,9 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
         # TODO: haal de ingestelde limiet op (maximum aantal deelnemers)
         try:
-            lim = DeelcompetitieKlasseLimiet(deelcompetitie=deelcomp,
+            lim = DeelcompetitieIndivKlasseLimiet(deelcompetitie=deelcomp,
                                              indiv_klasse=klasse)
-        except DeelcompetitieKlasseLimiet.DoesNotExist:
+        except DeelcompetitieIndivKlasseLimiet.DoesNotExist:
             limiet = 24
         else:
             limiet = lim.limiet
@@ -427,7 +427,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieTeamKlasse.DoesNotExist):
             raise Http404('Klasse niet gevonden')
 
-        plannen = match.competitiewedstrijdenplan_set.all()
+        plannen = match.competitiewedstrijdenplan_set.all()     # TODO: fix
         if len(plannen) == 0:
             raise Http404('Geen wedstrijden plan')
         plan = plannen[0]

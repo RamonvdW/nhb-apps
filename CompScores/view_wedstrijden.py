@@ -7,10 +7,9 @@
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import DeelcompetitieRonde, DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK
+from Competitie.models import DeelcompetitieRonde, DeelCompetitie, CompetitieMatch, LAAG_REGIO, LAAG_RK, LAAG_BK
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
-from Wedstrijden.models import CompetitieWedstrijd
 
 TEMPLATE_WEDSTRIJDEN = 'compscores/wedstrijden.dtl'
 
@@ -60,10 +59,11 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
 
         is_mix = (1 <= len(pks2) < len(pks1))
 
-        wedstrijden = (CompetitieWedstrijd
+        wedstrijden = (CompetitieMatch
                        .objects
                        .filter(pk__in=pks)
-                       .order_by('datum_wanneer', 'tijd_begin_wedstrijd'))
+                       .order_by('datum_wanneer',
+                                 'tijd_begin_wedstrijd'))
 
         for wedstrijd in wedstrijden:
             # voor competitiewedstrijden wordt de beschrijving ingevuld

@@ -13,7 +13,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
 from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_2,
-                               DeelCompetitie, DeelcompetitieRonde,
+                               DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from Competitie.operations import maak_deelcompetitie_ronde, competitie_week_nr_to_date
@@ -22,7 +22,7 @@ from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbCluster, NhbVereniging
 from Plein.menu import menu_dynamics
 from Taken.taken import maak_taak
-from Wedstrijden.models import CompetitieWedstrijd, WedstrijdLocatie
+from Wedstrijden.models import WedstrijdLocatie
 from types import SimpleNamespace
 import datetime
 
@@ -664,9 +664,9 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                 diff = when2 - when1
 
                 # pas de datum van alle wedstrijden met evenveel aan
-                for wedstrijd in ronde.plan.wedstrijden.all():
-                    wedstrijd.datum_wanneer += diff
-                    wedstrijd.save()
+                for match in ronde.plan.wedstrijden.all():
+                    match.datum_wanneer += diff
+                    match.save()
                 # for
 
                 ronde.week_nr = week_nr
@@ -692,18 +692,16 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         else:
             # voeg een wedstrijd toe
             jaar = ronde.deelcompetitie.competitie.begin_jaar
-            wedstrijd = CompetitieWedstrijd()
-            wedstrijd.datum_wanneer = competitie_week_nr_to_date(jaar, ronde.week_nr)
-            wedstrijd.tijd_begin_aanmelden = datetime.time(hour=0, minute=0, second=0)
-            wedstrijd.tijd_begin_wedstrijd = wedstrijd.tijd_begin_aanmelden
-            wedstrijd.tijd_einde_wedstrijd = wedstrijd.tijd_begin_aanmelden
-            wedstrijd.save()
+            match = CompetitieMatch(
+                        datum_wanneer=competitie_week_nr_to_date(jaar, ronde.week_nr),
+                        tijd_begin_wedstrijd=datetime.time(hour=0, minute=0, second=0))
+            match.save()
 
-            ronde.plan.wedstrijden.add(wedstrijd)
+            ronde.plan.wedstrijden.add(match)
 
             # laat de nieuwe wedstrijd meteen wijzigen
             next_url = reverse('CompRegio:regio-wijzig-wedstrijd',
-                               kwargs={'wedstrijd_pk': wedstrijd.pk})
+                               kwargs={'wedstrijd_pk': match.pk})
 
         return HttpResponseRedirect(next_url)
 
@@ -807,7 +805,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
 
         # voeg een wedstrijd toe
         jaar = ronde.deelcompetitie.competitie.begin_jaar
-        wedstrijd = CompetitieWedstrijd()
+        wedstrijd = CompetitieMatch()
 
         # kies de datum voor de wedstrijd: vandaag, of de eerste dag van competitie wedstrijden
         datum = competitie_week_nr_to_date(jaar, settings.COMPETITIES_START_WEEK)
@@ -817,9 +815,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
             wedstrijd.datum_wanneer = datum_now
         else:
             wedstrijd.datum_wanneer = datum
-        wedstrijd.tijd_begin_aanmelden = datetime.time(hour=0, minute=0, second=0)
-        wedstrijd.tijd_begin_wedstrijd = wedstrijd.tijd_begin_aanmelden
-        wedstrijd.tijd_einde_wedstrijd = wedstrijd.tijd_begin_aanmelden
+        wedstrijd.tijd_begin_wedstrijd = datetime.time(hour=0, minute=0, second=0)
         wedstrijd.save()
 
         ronde.plan.wedstrijden.add(wedstrijd)
@@ -919,16 +915,16 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen voor de veiligheid
-            wedstrijd = (CompetitieWedstrijd
-                         .objects
-                         .select_related('uitslag')
-                         .prefetch_related('uitslag__scores')
-                         .get(pk=wedstrijd_pk))
-        except (ValueError, CompetitieWedstrijd.DoesNotExist):
+            match_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen voor de veiligheid
+            match = (CompetitieMatch
+                     .objects
+                     .select_related('uitslag')
+                     .prefetch_related('uitslag__scores')
+                     .get(pk=match_pk))
+        except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
+        plan = match.competitiewedstrijdenplan_set.all()[0]
         ronde = (DeelcompetitieRonde
                  .objects
                  .select_related('deelcompetitie',
@@ -946,7 +942,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         context['regio'] = ronde.deelcompetitie.nhb_regio
         context['ronde'] = ronde
-        context['wedstrijd'] = wedstrijd
+        context['wedstrijd'] = match
 
         if ronde.deelcompetitie.inschrijf_methode == INSCHRIJF_METHODE_1:
             jaar = ronde.deelcompetitie.competitie.begin_jaar
@@ -972,7 +968,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             when = competitie_week_nr_to_date(jaar, ronde.week_nr)
             ronde.maandag = when
 
-            verschil = wedstrijd.datum_wanneer - when
+            verschil = match.datum_wanneer - when
             dag_nr = verschil.days
 
             for weekdag_nr, weekdag_naam in WEEK_DAGEN:
@@ -986,7 +982,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                 when += datetime.timedelta(days=1)
             # for
 
-        wedstrijd.tijd_begin_wedstrijd_str = wedstrijd.tijd_begin_wedstrijd.strftime("%H:%M")
+        match.tijd_begin_wedstrijd_str = match.tijd_begin_wedstrijd.strftime("%H:%M")
         # wedstrijd.tijd_begin_aanmelden_str = wedstrijd.tijd_begin_aanmelden.strftime("%H%M")
         # wedstrijd.tijd_einde_wedstrijd_str = wedstrijd.tijd_einde_wedstrijd.strftime("%H%M")
 
@@ -996,32 +992,32 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             verenigingen = ronde.deelcompetitie.nhb_regio.nhbvereniging_set.order_by('ver_nr')
         context['verenigingen'] = verenigingen
 
-        if not wedstrijd.vereniging and verenigingen.count() > 0:
-            wedstrijd.vereniging = verenigingen[0]
-            wedstrijd.save()
+        if not match.vereniging and verenigingen.count() > 0:
+            match.vereniging = verenigingen[0]
+            match.save()
 
-        if not wedstrijd.locatie and wedstrijd.vereniging:
+        if not match.locatie and match.vereniging:
             # alle binnen accommodaties hebben discipline_indoor=True
             # externe locaties met dezelfde discipline komen ook mee
-            locaties = wedstrijd.vereniging.wedstrijdlocatie_set.exclude(zichtbaar=False).filter(discipline_indoor=True)
+            locaties = match.vereniging.wedstrijdlocatie_set.exclude(zichtbaar=False).filter(discipline_indoor=True)
 
             if is_25m:
                 # neem ook externe locaties mee met discipline=25m1pijl
-                locaties_25m1p = wedstrijd.vereniging.wedstrijdlocatie_set.exclude(zichtbaar=False).filter(discipline_25m1pijl=True)
+                locaties_25m1p = match.vereniging.wedstrijdlocatie_set.exclude(zichtbaar=False).filter(discipline_25m1pijl=True)
                 locaties = locaties.union(locaties_25m1p)
 
             if locaties.count() > 0:
-                wedstrijd.locatie = locaties[0]     # pak een default
+                match.locatie = locaties[0]     # pak een default
                 # maak een slimmere keuze
                 for locatie in locaties:
                     if is_25m:
                         if locatie.banen_25m > 0:
-                            wedstrijd.locatie = locatie
+                            match.locatie = locatie
                     else:
                         if locatie.banen_18m > 0:
-                            wedstrijd.locatie = locatie
+                            match.locatie = locatie
                 # for
-                wedstrijd.save()
+                match.save()
 
         context['all_locaties'] = all_locs = list()
         pks = [ver.pk for ver in verenigingen]
@@ -1049,16 +1045,16 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                     if not keuze:
                         keuze = 'Locatie zonder naam (%s)' % loc.pk
                     loc.keuze_str = keuze
-                    if wedstrijd.locatie == loc:
+                    if match.locatie == loc:
                         loc.selected = True
             # for
         # for
 
         context['heeft_wkl'] = heeft_wkl = (ronde.deelcompetitie.inschrijf_methode == INSCHRIJF_METHODE_2)
         if heeft_wkl:
-            context['wkl_indiv'], context['wkl_team'] = self._get_wedstrijdklassen(ronde.deelcompetitie, wedstrijd)
+            context['wkl_indiv'], context['wkl_team'] = self._get_wedstrijdklassen(ronde.deelcompetitie, match)
 
-        context['url_opslaan'] = reverse('CompRegio:regio-wijzig-wedstrijd', kwargs={'wedstrijd_pk': wedstrijd.pk})
+        context['url_opslaan'] = reverse('CompRegio:regio-wijzig-wedstrijd', kwargs={'wedstrijd_pk': match.pk})
 
         if ronde.deelcompetitie.inschrijf_methode == INSCHRIJF_METHODE_1:
             url_planning_week = reverse('CompRegio:regio-methode1-planning',
@@ -1067,12 +1063,12 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             url_planning_week = reverse('CompRegio:regio-ronde-planning',
                                         kwargs={'ronde_pk': ronde.pk})
 
-        uitslag = wedstrijd.uitslag
+        uitslag = match.uitslag
         if uitslag and (uitslag.is_bevroren or uitslag.scores.count()):
             context['kan_niet_verwijderen'] = True
         else:
             context['url_verwijderen'] = reverse('CompRegio:regio-verwijder-wedstrijd',
-                                                 kwargs={'wedstrijd_pk': wedstrijd.pk})
+                                                 kwargs={'wedstrijd_pk': match.pk})
 
         context['kruimels'] = [
             (reverse('Competitie:kies'), 'Bondscompetities'),
@@ -1096,12 +1092,12 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         """
 
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen voor de veiligheid
-            wedstrijd = CompetitieWedstrijd.objects.get(pk=wedstrijd_pk)
-        except (ValueError, CompetitieWedstrijd.DoesNotExist):
+            match_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen voor de veiligheid
+            match = CompetitieMatch.objects.get(pk=match_pk)
+        except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
+        plan = match.competitiewedstrijdenplan_set.all()[0]
         ronde = (DeelcompetitieRonde
                  .objects
                  .select_related('deelcompetitie',
@@ -1183,13 +1179,13 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             # voeg nu de offset toe uit de weekdag
             when += datetime.timedelta(days=weekdag)
 
-        wedstrijd.datum_wanneer = when
-        wedstrijd.tijd_begin_wedstrijd = datetime.time(hour=uur, minute=minuut)
-        wedstrijd.vereniging = nhbver
-        wedstrijd.locatie = loc
-        wedstrijd.save()
+        match.datum_wanneer = when
+        match.tijd_begin_wedstrijd = datetime.time(hour=uur, minute=minuut)
+        match.vereniging = nhbver
+        match.locatie = loc
+        match.save()
 
-        wkl_indiv, wkl_team = self._get_wedstrijdklassen(ronde.deelcompetitie, wedstrijd)
+        wkl_indiv, wkl_team = self._get_wedstrijdklassen(ronde.deelcompetitie, match)
         indiv_pks = [wkl.indiv.pk for wkl in wkl_indiv]
         teams_pks = [wkl.team.pk for wkl in wkl_team]
 
@@ -1209,18 +1205,18 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                     gekozen_klassen.append(pk)
         # for
 
-        for obj in wedstrijd.indiv_klassen.all():
+        for obj in match.indiv_klassen.all():
             if obj.pk in gekozen_klassen:
                 # was al gekozen
                 gekozen_klassen.remove(obj.pk)
             else:
                 # moet uitgezet worden
-                wedstrijd.indiv_klassen.remove(obj)
+                match.indiv_klassen.remove(obj)
         # for
 
         # alle nieuwe klassen toevoegen
         if len(gekozen_klassen):
-            wedstrijd.indiv_klassen.add(*gekozen_klassen)
+            match.indiv_klassen.add(*gekozen_klassen)
 
         # klassen koppelen - teams
 
@@ -1238,18 +1234,18 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                     gekozen_klassen.append(pk)
         # for
 
-        for obj in wedstrijd.team_klassen.all():
+        for obj in match.team_klassen.all():
             if obj.pk in gekozen_klassen:
                 # was al gekozen
                 gekozen_klassen.remove(obj.pk)
             else:
                 # moet uitgezet worden
-                wedstrijd.team_klassen.remove(obj)
+                match.team_klassen.remove(obj)
         # for
 
         # alle nieuwe klassen toevoegen
         if len(gekozen_klassen):
-            wedstrijd.team_klassen.add(*gekozen_klassen)
+            match.team_klassen.add(*gekozen_klassen)
 
         if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
             url = reverse('CompRegio:regio-methode1-planning',
@@ -1280,16 +1276,16 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         """ Deze functie wordt aangeroepen als de knop 'Verwijder' gebruikt wordt
         """
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen voor de veiligheid
-            wedstrijd = (CompetitieWedstrijd
-                         .objects
-                         .select_related('uitslag')
-                         .prefetch_related('uitslag__scores')
-                         .get(pk=wedstrijd_pk))
-        except (ValueError, CompetitieWedstrijd.DoesNotExist):
+            match_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen voor de veiligheid
+            match = (CompetitieMatch
+                     .objects
+                     .select_related('uitslag')
+                     .prefetch_related('uitslag__scores')
+                     .get(pk=match_pk))
+        except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
+        plan = match.competitiewedstrijdenplan_set.all()[0]
         try:
             ronde = DeelcompetitieRonde.objects.get(plan=plan,
                                                     deelcompetitie__laag=LAAG_REGIO)
@@ -1303,12 +1299,12 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
             raise PermissionDenied()
 
         # voorkom verwijderen van wedstrijden waar een uitslag aan hangt
-        if wedstrijd.uitslag:
-            uitslag = wedstrijd.uitslag
+        if match.uitslag:
+            uitslag = match.uitslag
             if uitslag and (uitslag.is_bevroren or uitslag.scores.count() > 0):
                 raise Http404('Uitslag mag niet meer gewijzigd worden')
 
-        wedstrijd.delete()
+        match.delete()
 
         if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
             url = reverse('CompRegio:regio-methode1-planning',

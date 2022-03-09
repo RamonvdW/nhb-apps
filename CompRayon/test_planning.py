@@ -8,7 +8,8 @@ from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
-                               KampioenschapSchutterBoog, CompetitieIndivKlasse, DeelcompetitieKlasseLimiet,
+                               KampioenschapSchutterBoog, CompetitieIndivKlasse,
+                               DeelcompetitieIndivKlasseLimiet, DeelcompetitieTeamKlasseLimiet,
                                CompetitieMutatie, DEELNAME_NEE, DEELNAME_JA, INSCHRIJF_METHODE_1)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
@@ -647,9 +648,9 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         management.call_command('regiocomp_mutaties', '1', '--quick', stderr=io.StringIO(), stdout=io.StringIO())
 
         # zet een limiet
-        limiet = DeelcompetitieKlasseLimiet(deelcompetitie=self.deelcomp_rayon1_18,
-                                            klasse=self.klasse_r,
-                                            limiet=20)
+        limiet = DeelcompetitieIndivKlasseLimiet(deelcompetitie=self.deelcomp_rayon1_18,
+                                                 indivklasse=self.klasse_r,
+                                                 limiet=20)
         limiet.save()
         self.assertTrue(str(limiet) != "")      # coverage only
 
@@ -951,33 +952,33 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         sel = 'sel_%s' % self.klasse_r.pk
 
         # limiet op default zetten
-        self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
+        self.assertEqual(DeelcompetitieIndivKlasseLimiet.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {sel: 24, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
-        self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
+        self.assertEqual(DeelcompetitieIndivKlasseLimiet.objects.count(), 0)
 
         # limiet zetten
-        self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
+        self.assertEqual(DeelcompetitieIndivKlasseLimiet.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {sel: 20, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self._verwerk_mutaties()
-        self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 1)
+        self.assertEqual(DeelcompetitieIndivKlasseLimiet.objects.count(), 1)
 
         # limiet opnieuw zetten, geen wijziging
         with self.assert_max_queries(20):
             resp = self.client.post(url, {sel: 20, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self._verwerk_mutaties()
-        self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 1)
+        self.assertEqual(DeelcompetitieIndivKlasseLimiet.objects.count(), 1)
 
         # limiet aanpassen
         with self.assert_max_queries(20):
             resp = self.client.post(url, {sel: 16, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self._verwerk_mutaties()
-        self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 1)
+        self.assertEqual(DeelcompetitieIndivKlasseLimiet.objects.count(), 1)
 
         # met limiet aanwezig
         url = self.url_wijzig_limiet % self.deelcomp_rayon1_18.pk
@@ -992,7 +993,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
             resp = self.client.post(url, {sel: 24})
         self.assert_is_redirect_not_plein(resp)  # check for success
         self._verwerk_mutaties()
-        self.assertEqual(DeelcompetitieKlasseLimiet.objects.count(), 0)
+        self.assertEqual(DeelcompetitieIndivKlasseLimiet.objects.count(), 0)
         time.sleep = sleep_oud
 
         # nu met een deelnemer, zodat de mutatie opgestart wordt

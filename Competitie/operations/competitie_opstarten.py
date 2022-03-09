@@ -11,7 +11,6 @@ from Competitie.models import (AG_NUL, LAAG_REGIO, LAAG_RK, AFSTANDEN,
                                DeelCompetitie, DeelcompetitieRonde)
 from Functie.models import Functie
 from NhbStructuur.models import NhbRayon, NhbRegio
-from Wedstrijden.models import CompetitieWedstrijdenPlan
 from datetime import date
 import datetime
 import logging

@@ -10,9 +10,8 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
-from Competitie.models import DeelcompetitieRonde, RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_1
+from Competitie.models import DeelcompetitieRonde, RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_1, CompetitieMatch
 from Plein.menu import menu_dynamics
-from Wedstrijden.models import CompetitieWedstrijd
 
 
 TEMPLATE_SPORTER_KEUZE7WEDSTRIJDEN = 'compregio/keuze-zeven-wedstrijden-methode1.dtl'
@@ -71,7 +70,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
             pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
         # for
 
-        wedstrijden = (CompetitieWedstrijd
+        wedstrijden = (CompetitieMatch
                        .objects
                        .filter(pk__in=pks)
                        .exclude(vereniging__isnull=True)  # voorkom wedstrijd niet toegekend aan vereniging
@@ -181,7 +180,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
         # for
 
         # zoek alle wedstrijden erbij
-        wedstrijden = (CompetitieWedstrijd
+        wedstrijden = (CompetitieMatch
                        .objects
                        .filter(pk__in=pks)
                        .select_related('vereniging')

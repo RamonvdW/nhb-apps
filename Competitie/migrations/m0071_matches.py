@@ -193,7 +193,21 @@ class Migration(migrations.Migration):
             name='inschrijf_gekozen_matches',
             field=models.ManyToManyField(blank=True, to='Competitie.CompetitieMatch'),
         ),
-        migrations.RunPython(migreer_matches)
+        migrations.RunPython(migreer_matches),
+
+        # verwijder de oude velden
+        migrations.RemoveField(
+            model_name='deelcompetitie',
+            name='plan',
+        ),
+        migrations.RemoveField(
+            model_name='deelcompetitieronde',
+            name='plan',
+        ),
+        migrations.RemoveField(
+            model_name='regiocompetitieschutterboog',
+            name='inschrijf_gekozen_wedstrijden',
+        ),
     ]
 
 # end of file
