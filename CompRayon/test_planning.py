@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
-                               KampioenschapSchutterBoog, CompetitieKlasse, DeelcompetitieKlasseLimiet,
+                               KampioenschapSchutterBoog, CompetitieIndivKlasse, DeelcompetitieKlasseLimiet,
                                CompetitieMutatie, DEELNAME_NEE, DEELNAME_JA, INSCHRIJF_METHODE_1)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
@@ -176,21 +176,21 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         self.functie_rcl101_25.accounts.add(self.account_rcl101_25)
         self.functie_rcl112_18.accounts.add(self.account_rcl112_18)
 
-        self.klasse_r = CompetitieKlasse.objects.filter(competitie=self.comp_18,
-                                                        indiv__is_onbekend=False,
-                                                        indiv__niet_voor_rk_bk=False,
-                                                        indiv__volgorde=1100,           # Recurve klasse 1
-                                                        indiv__boogtype__afkorting='R')[0]
-        self.klasse_c = CompetitieKlasse.objects.filter(competitie=self.comp_18,
-                                                        indiv__is_onbekend=False,
-                                                        indiv__niet_voor_rk_bk=False,
-                                                        indiv__volgorde=1201,           # Compound klasse 2
-                                                        indiv__boogtype__afkorting='C')[0]
-        self.klasse_ib = CompetitieKlasse.objects.filter(competitie=self.comp_18,
-                                                         indiv__is_onbekend=False,
-                                                         indiv__niet_voor_rk_bk=False,
-                                                         indiv__volgorde=1400,          # TR klasse 1
-                                                         indiv__boogtype__afkorting='TR')[0]
+        self.klasse_r = CompetitieIndivKlasse.objects.filter(competitie=self.comp_18,
+                                                             is_onbekend=False,
+                                                             is_voor_rk_bk=True,
+                                                             volgorde=1100,           # Recurve klasse 1
+                                                             boogtype__afkorting='R')[0]
+        self.klasse_c = CompetitieIndivKlasse.objects.filter(competitie=self.comp_18,
+                                                             is_onbekend=False,
+                                                             is_voor_rk_bk=True,
+                                                             volgorde=1201,           # Compound klasse 2
+                                                             boogtype__afkorting='C')[0]
+        self.klasse_ib = CompetitieIndivKlasse.objects.filter(competitie=self.comp_18,
+                                                              is_onbekend=False,
+                                                              is_voor_rk_bk=True,
+                                                              volgorde=1400,          # TR klasse 1
+                                                              boogtype__afkorting='TR')[0]
 
         # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()

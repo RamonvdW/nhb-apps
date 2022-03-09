@@ -7,7 +7,8 @@
 # verwijder onnodige (oude) data van voorgaande competities
 
 from django.core.management.base import BaseCommand
-from Competitie.models import Competitie, CompetitieKlasse, KampioenschapSchutterBoog, KampioenschapTeam
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               KampioenschapSchutterBoog, KampioenschapTeam)
 import openpyxl
 from openpyxl.styles import Alignment, Font, DEFAULT_FONT
 
@@ -46,18 +47,17 @@ class Command(BaseCommand):
         font_header = Font(name=FONT_NAME, size=FONT_SIZE, bold=True)
         font_titel = Font(name=FONT_NAME, size=FONT_SIZE + 2, bold=True)
 
-        for klasse in (CompetitieKlasse
+        for klasse in (CompetitieTeamKlasse
                        .objects
                        .filter(competitie=self.comp,
                                is_voor_teams_rk_bk=True)
-                       .select_related('team')
-                       .order_by('team__volgorde')):
+                       .order_by('volgorde')):
 
             self.stdout.write('[INFO] Team klasse: %s' % klasse)
             nr2ver = dict()  # [ver_nr] = vereniging
 
-            ws = wb.create_sheet(title=klasse.team.beschrijving[:31].strip())     # sheet title max length = 31
-            ws['A1'] = 'Team klasse: %s' % klasse.team.beschrijving
+            ws = wb.create_sheet(title=klasse.beschrijving[:31].strip())     # sheet title max length = 31
+            ws['A1'] = 'Team klasse: %s' % klasse.beschrijving
             ws['A1'].font = font_titel
 
             ws.column_dimensions['C'].width = COL_WIDTH_VERENIGING
@@ -92,7 +92,7 @@ class Command(BaseCommand):
             for team in (KampioenschapTeam
                          .objects
                          .filter(deelcompetitie__competitie=self.comp,
-                                 klasse=klasse)
+                                 team_klasse=klasse)
                          .select_related('vereniging')
                          .order_by('-aanvangsgemiddelde')):
 
@@ -212,18 +212,17 @@ class Command(BaseCommand):
         font_header = Font(name=FONT_NAME, size=FONT_SIZE, bold=True)
         font_titel = Font(name=FONT_NAME, size=FONT_SIZE + 2, bold=True)
 
-        for klasse in (CompetitieKlasse
+        for klasse in (CompetitieIndivKlasse
                        .objects
-                       .exclude(indiv=None)
                        .filter(competitie=self.comp)
-                       .exclude(indiv__niet_voor_rk_bk=True)        # aspiranten en klasse onbekend
+                       .exclude(is_voor_rk_bk=False)        # aspiranten en klasse onbekend
                        .select_related('indiv')
                        .order_by('indiv__volgorde')):
 
             self.stdout.write('[INFO] Individuele klasse: %s' % klasse)
 
-            ws = wb.create_sheet(title=klasse.indiv.beschrijving[:31].strip())     # sheet title max length = 31
-            ws['A1'] = 'Individuele klasse: %s' % klasse.indiv.beschrijving
+            ws = wb.create_sheet(title=klasse.beschrijving[:31].strip())     # sheet title max length = 31
+            ws['A1'] = 'Individuele klasse: %s' % klasse.beschrijving
             ws['A1'].font = font_titel
 
             ws['A3'] = 'Nr'

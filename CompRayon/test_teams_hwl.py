@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (DeelCompetitie, CompetitieKlasse, LAAG_REGIO, LAAG_RK,
+from Competitie.models import (DeelCompetitie, CompetitieIndivKlasse, LAAG_REGIO, LAAG_RK,
                                RegioCompetitieSchutterBoog, KampioenschapTeam)
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
@@ -225,7 +225,7 @@ class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        self.assertEqual(CompetitieKlasse.objects.count(), 0)
+        self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
 
         self.deelcomp18_regio111 = DeelCompetitie.objects.get(laag=LAAG_REGIO,

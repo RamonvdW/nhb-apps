@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
 from Competitie.test_fase import zet_competitie_fase
-from Competitie.models import (Competitie, CompetitieKlasse, DeelcompetitieKlasseLimiet,
+from Competitie.models import (Competitie, CompetitieIndivKlasse, DeelcompetitieKlasseLimiet,
                                CompetitieMutatie, MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AFMELDEN,
                                MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
                                KampioenschapSchutterBoog, DEELNAME_ONBEKEND, DEELNAME_JA, DEELNAME_NEE)
@@ -73,15 +73,15 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         self.url_lijst_rko = self.url_lijst_rk_rko % self.deelcomp_rk.pk
         self.url_lijst_hwl = self.url_lijst_rk_hwl % self.deelcomp_rk.pk
 
-        self.klasse = (CompetitieKlasse
+        self.klasse = (CompetitieIndivKlasse
                        .objects
                        .filter(competitie=self.comp,
-                               indiv__boogtype=self.boogtype)
+                               boogtype=self.boogtype)
                        .order_by('-min_ag'))[0]
 
         # zet de cut op 16 voor de gekozen klasse
         self.cut = DeelcompetitieKlasseLimiet(deelcompetitie=self.deelcomp_rk,
-                                              klasse=self.klasse,
+                                              indiv_klasse=self.klasse,
                                               limiet=16)
         self.cut.save()
 
@@ -108,7 +108,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         print('Deelnemers:')
         for obj in (KampioenschapSchutterBoog
                     .objects
-                    .filter(klasse=klasse)
+                    .filter(indiv_klasse=klasse)
                     .select_related('sporterboog__sporter')
                     .order_by('volgorde')):
             print('  rank=%s, volgorde=%s, sporterboog_pk=%s, lid_nr=%s, gem=%s, deelname=%s, label=%s' % (
@@ -135,7 +135,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
             # verwijder de kampioenen
             objs = KampioenschapSchutterBoog.objects.filter(kampioen_label='')  # pragma: no cover
 
-        objs = objs.filter(klasse=self.klasse).order_by('volgorde')
+        objs = objs.filter(indiv_klasse=self.klasse).order_by('volgorde')
 
         rank = list()
         volg = list()
@@ -179,7 +179,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         self.assertTrue(KampioenschapSchutterBoog.objects.count() > 0)
         # self._dump_deelnemers()
 
-        self.assertEqual(4 * 29, KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).count())
+        self.assertEqual(4 * 29, KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).count())
 
         self._check_volgorde_en_rank()
 
@@ -205,7 +205,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         # self._dump_deelnemers()
 
         # meld een paar schutters af: 1 kampioen + 1 schutter boven de cut
-        deelnemer = KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(volgorde=1)
+        deelnemer = KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).get(volgorde=1)
         url = self.url_wijzig_status % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
@@ -217,13 +217,13 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('comprayon/wijzig-status-rk-deelnemer.dtl', 'plein/site_layout.dtl'))
 
-        deelnemer = KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(volgorde=3)
+        deelnemer = KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).get(volgorde=3)
         url = self.url_wijzig_status % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)        # 302 = redirect = success
 
-        deelnemer = KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(volgorde=18)
+        deelnemer = KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).get(volgorde=18)
         url = self.url_wijzig_status % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
@@ -250,7 +250,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rko)
         self.assertTrue(KampioenschapSchutterBoog.objects.count() > 0)
 
-        deelnemer = KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(volgorde=4)
+        deelnemer = KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).get(volgorde=4)
         self.assertEqual(deelnemer.rank, 4)
         url = self.url_wijzig_status % deelnemer.pk
         with self.assert_max_queries(20):
@@ -259,7 +259,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
 
         self._verwerk_mutaties()
 
-        deelnemer = KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(pk=deelnemer.pk)
+        deelnemer = KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).get(pk=deelnemer.pk)
         self.assertEqual(deelnemer.deelname, DEELNAME_JA)
         self.assertEqual(deelnemer.rank, 4)
         self.assertEqual(deelnemer.volgorde, 4)
@@ -274,7 +274,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         self.assertTrue(KampioenschapSchutterBoog.objects.count() > 0)
 
         # self._dump_deelnemers()
-        deelnemer = KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(volgorde=10)
+        deelnemer = KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).get(volgorde=10)
         url = self.url_wijzig_status % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
@@ -299,12 +299,12 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         # self._dump_deelnemers()
 
         nr = 16 + 1   # cut ligt op 16
-        reserve = KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(volgorde=nr)
+        reserve = KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).get(volgorde=nr)
         self.assertEqual(reserve.deelname, DEELNAME_ONBEKEND)
         self.assertEqual(reserve.rank, nr)
         self.assertEqual(reserve.volgorde, nr)
 
-        deelnemer = KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(volgorde=4)
+        deelnemer = KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).get(volgorde=4)
         url = self.url_wijzig_status % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
@@ -334,7 +334,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
 
         # self._dump_deelnemers()
         nr = 18     # cut ligt op 16
-        reserve = KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(rank=nr)
+        reserve = KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=nr)
         self.assertEqual(reserve.volgorde, nr)
         url = self.url_wijzig_status % reserve.pk
         with self.assert_max_queries(20):
@@ -394,7 +394,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         self.assertTrue(KampioenschapSchutterBoog.objects.count() > 0)
         # self._dump_deelnemers()
 
-        deelnemer = KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(rank=3)    # cut ligt op 16
+        deelnemer = KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=3)    # cut ligt op 16
         self.assertEqual(deelnemer.volgorde, 3)
         url = self.url_wijzig_status % deelnemer.pk
         with self.assert_max_queries(20):
@@ -435,7 +435,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         self.assertTrue(KampioenschapSchutterBoog.objects.count() > 0)
 
         # bereik dit effect door nr 3 af te melden en daarna weer aan te melden
-        deelnemer = KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(rank=3)
+        deelnemer = KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=3)
         url = self.url_wijzig_status % deelnemer.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
@@ -451,7 +451,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         del deelnemer
 
         # meld nu iemand anders af zodat de eerste reserve opgeroepen wordt
-        afmelden = KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(rank=4)    # cut ligt op 16
+        afmelden = KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=4)    # cut ligt op 16
         url = self.url_wijzig_status % afmelden.pk
         # self._dump_deelnemers()
         self.client.post(url, {'afmelden': 1, 'snel': 1})
@@ -481,7 +481,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         # bereik dit effect door nr 14 af te melden en daarna weer aan te melden
         # dit is een regiokampioen met het laagste gemiddelde
         # self._dump_deelnemers()
-        kampioen = KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(rank=14)
+        kampioen = KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=14)
         url = self.url_wijzig_status % kampioen.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
@@ -510,7 +510,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         pks = (KampioenschapSchutterBoog
                .objects
                .exclude(kampioen_label='')
-               .filter(klasse=self.klasse)
+               .filter(indiv_klasse=self.klasse)
                .order_by('volgorde')
                .values_list('pk', flat=True))
         pks = list(pks)
@@ -576,7 +576,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         pks = (KampioenschapSchutterBoog
                .objects
                .exclude(kampioen_label='')
-               .filter(klasse=self.klasse)
+               .filter(indiv_klasse=self.klasse)
                .order_by('volgorde')
                .values_list('pk', flat=True))
         pks = list(pks)
@@ -633,7 +633,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         # en controleer dat de regiokampioenen weer deelnemer zijn, op de juiste plek
         temp_pks = (KampioenschapSchutterBoog
                     .objects
-                    .filter(klasse=self.klasse,
+                    .filter(indiv_klasse=self.klasse,
                             rank__gte=10)
                     .order_by('rank')
                     .values_list('pk', flat=True))
@@ -674,26 +674,26 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         # meld 3 sporters af: 1 kampioen en 1 niet-kampioen boven de cut + 1 onder cut
 
         # onder de cut
-        url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(rank=17).pk
+        url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=17).pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)  # 302 = redirect = success
 
         # normale deelnemer
-        url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(rank=2).pk
+        url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=2).pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)  # 302 = redirect = success
 
         # kampioen
-        url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(rank=1).pk
+        url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=1).pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)  # 302 = redirect = success
 
         # verplaats de cut naar 8
         url = self.url_wijzig_cut_rk % self.deelcomp_rk.pk
-        sel = 'sel_%s' % self.cut.klasse.pk
+        sel = 'sel_%s' % self.cut.indiv_klasse.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {sel: 8, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)     # check success
@@ -716,7 +716,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         # default cut is 16
         # verhoog de cut naar 24
         url = self.url_wijzig_cut_rk % self.deelcomp_rk.pk
-        sel = 'sel_%s' % self.cut.klasse.pk
+        sel = 'sel_%s' % self.cut.indiv_klasse.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {sel: 24, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)     # check success
@@ -724,14 +724,14 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         self._verwerk_mutaties(38)
 
         # meld iemand af
-        url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(rank=2).pk
+        url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=2).pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)  # 302 = redirect = success
 
         # verlaag de cut naar 20
         url = self.url_wijzig_cut_rk % self.deelcomp_rk.pk
-        sel = 'sel_%s' % self.cut.klasse.pk
+        sel = 'sel_%s' % self.cut.indiv_klasse.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {sel: 20, 'snel': 1})
         self.assert_is_redirect_not_plein(resp)     # check success
@@ -750,7 +750,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
     #     self.e2e_wissel_naar_functie(self.functie_rko)
     #     self.assertTrue(KampioenschapSchutterBoog.objects.count() > 0)
     #
-    #     pks = list(KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).values_list('pk', flat=True))
+    #     pks = list(KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).values_list('pk', flat=True))
     #     for pk in pks:
     #         url = self.url_wijzig_status % pk
     #         with self.assert_max_queries(20):
@@ -768,7 +768,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         self.assertTrue(KampioenschapSchutterBoog.objects.count() > 0)
 
         # dubbel afmelden
-        url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.filter(klasse=self.klasse).get(rank=2).pk
+        url = self.url_wijzig_status % KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).get(rank=2).pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)  # 302 = redirect = success
@@ -821,14 +821,14 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         # mutatie nieuw record van 24 wordt niet opgeslagen
         CompetitieMutatie(mutatie=MUTATIE_CUT,
                           deelcompetitie=self.deelcomp_rk,
-                          klasse=self.klasse,
+                          indiv_klasse=self.klasse,
                           cut_oud=23,
                           cut_nieuw=24,  # verwijder oude record
                           door='Tester').save()
 
         CompetitieMutatie(mutatie=MUTATIE_CUT,
                           deelcompetitie=self.deelcomp_rk,
-                          klasse=self.klasse,
+                          indiv_klasse=self.klasse,
                           cut_oud=23,
                           cut_nieuw=24,
                           door='Tester').save()
@@ -836,7 +836,7 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         # mutatie die geen wijziging is
         CompetitieMutatie(mutatie=MUTATIE_CUT,
                           deelcompetitie=self.deelcomp_rk,
-                          klasse=self.klasse,
+                          indiv_klasse=self.klasse,
                           cut_oud=24,
                           cut_nieuw=24,
                           door='Tester').save()

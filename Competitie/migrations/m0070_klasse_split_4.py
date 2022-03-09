@@ -42,6 +42,9 @@ class Migration(migrations.Migration):
             model_name='regiocompetitieteam',
             name='klasse',
         ),
+        migrations.DeleteModel(
+            name='CompetitieKlasse',
+        ),
     ]
 
 # end of file

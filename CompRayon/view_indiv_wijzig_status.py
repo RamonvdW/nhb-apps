@@ -108,7 +108,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
             deelnemer_pk = int(kwargs['deelnemer_pk'][:6])  # afkappen voor de veiligheid
             deelnemer = (KampioenschapSchutterBoog
                          .objects
-                         .select_related('klasse',
+                         .select_related('indiv_klasse',        # TODO: niet nodig?
                                          'deelcompetitie',
                                          'deelcompetitie__competitie')
                          .get(pk=deelnemer_pk))

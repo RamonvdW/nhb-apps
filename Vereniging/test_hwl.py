@@ -6,16 +6,15 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Functie.models import maak_functie, Functie
+from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse, DeelcompetitieRonde,
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse,
                                LAAG_REGIO, LAAG_RK,  INSCHRIJF_METHODE_1)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
-from Score.operations import score_indiv_ag_opslaan
-from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
-from Wedstrijden.models import WedstrijdLocatie, CompetitieWedstrijd
+from Sporter.models import Sporter, SporterBoog
+from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -239,7 +238,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        self.assertEqual(CompetitieKlasse.objects.count(), 0)
+        self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         competities_aanmaken()
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')

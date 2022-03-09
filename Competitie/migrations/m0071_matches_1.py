@@ -34,7 +34,7 @@ def migreer_matches(apps, _):
         comp_volgorde2team_pk[tup] = team.pk
     # for
 
-    # migreer DeelcompetitieRonde
+    # migreer DeelcompetitieRonde wedstrijden
     for ronde in (ronde_klas
                   .objects
                   .exclude(plan=None)
@@ -86,7 +86,7 @@ def migreer_matches(apps, _):
         ronde.matches.set(matches)
     # for
 
-    # migreer de RK/BK deelcompetities
+    # migreer de RK/BK deelcompetities wedstrijden
     for deelcomp in (deelcomp_klas
                      .objects
                      .exclude(plan=None)

@@ -109,7 +109,7 @@ class Command(BaseCommand):
         for obj in (KampioenschapSchutterBoog
                     .objects
                     .filter(deelcompetitie=deelcomp,
-                            klasse=klasse)
+                            indiv_klasse=klasse)
                     .order_by('volgorde')):
             if obj.deelname == DEELNAME_NEE:
                 obj.rank = 0
@@ -404,7 +404,7 @@ class Command(BaseCommand):
         for obj in (KampioenschapSchutterBoog
                     .objects
                     .filter(deelcompetitie=deelcomp,
-                            klasse=klasse,
+                            indiv_klasse=klasse,
                             rank__lte=cut_nieuw)):
             tup = (obj.gemiddelde, len(lijst), obj)
             lijst.append(tup)

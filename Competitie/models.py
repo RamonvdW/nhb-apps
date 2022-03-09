@@ -369,47 +369,6 @@ class Competitie(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-class CompetitieKlasse(models.Model):       # TODO: delete
-    """ Deze database tabel bevat de klassen voor een competitie,
-        met de vastgestelde aanvangsgemiddelden
-    """
-    # hoort bij
-    competitie = models.ForeignKey(Competitie, on_delete=models.CASCADE)
-
-    # koppeling aan een individuele OF team wedstrijdklasse
-    indiv = models.ForeignKey(IndivWedstrijdklasse, on_delete=models.PROTECT, null=True, blank=True)
-    team = models.ForeignKey(TeamWedstrijdklasse, on_delete=models.PROTECT, null=True, blank=True)
-
-    # klassengrens voor deze competitie
-    # individueel: 0.000 - 10.000
-    # team som van de 3 beste = 0.003 - 30.000
-    min_ag = models.DecimalField(max_digits=5, decimal_places=3)    # 10.000
-
-    # voor de RK/BK teams worden nieuwe klassengrenzen vastgesteld, dus houd ze uit elkaar
-    # niet van toepassing op individuele klassen
-    is_voor_teams_rk_bk = models.BooleanField(default=False)
-
-    def __str__(self):
-        msg = "?"
-        if self.indiv:
-            msg = self.indiv.beschrijving + ' [' + self.indiv.boogtype.afkorting + ']'
-        if self.team:
-            msg = self.team.beschrijving + ' [' + self.team.team_type.afkorting + ']'
-        msg += " (%.3f)" % self.min_ag
-
-        if self.is_voor_teams_rk_bk:
-            msg += ' (RK/BK)'
-        elif self.team:
-            msg += ' (regio)'
-        return msg
-
-    class Meta:
-        verbose_name = "Competitie klasse"
-        verbose_name_plural = "Competitie klassen"
-
-    objects = models.Manager()      # for the editor only
-
-
 class CompetitieIndivKlasse(models.Model):
     """ Deze database tabel bevat de klassen voor een competitie,
         met de vastgestelde aanvangsgemiddelden
@@ -729,6 +688,54 @@ class DeelcompetitieKlasseLimiet(models.Model):
     class Meta:
         verbose_name = "Deelcompetitie Klasse Limiet"
         verbose_name_plural = "Deelcompetitie Klasse Limieten"
+
+
+class DeelcompetitieIndivKlasseLimiet(models.Model):
+    """ Deze database tabel bevat de limieten voor het aantal deelnemers in een RK of BK
+        wedstrijdklasse. De RKO kan dit bijstellen specifiek voor zijn RK.
+    """
+
+    # voor welke deelcompetitie (ivm scheiding RKs)
+    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
+
+    # voor welke klasse is deze limiet
+    indiv_klasse = models.ForeignKey(CompetitieIndivKlasse,
+                                     on_delete=models.CASCADE,
+                                     blank=True, null=True)
+
+    # maximum aantal deelnemers in deze klasse
+    limiet = models.PositiveSmallIntegerField(default=24)
+
+    def __str__(self):
+        return "%s : %s - %s" % (self.limiet, self.indiv_klasse.beschrijving, self.deelcompetitie)
+
+    class Meta:
+        verbose_name = "Deelcompetitie IndivKlasse Limiet"
+        verbose_name_plural = "Deelcompetitie IndivKlasse Limieten"
+
+
+class DeelcompetitieTeamKlasseLimiet(models.Model):
+    """ Deze database tabel bevat de limieten voor het aantal teams in een RK of BK
+        wedstrijdklasse. De RKO kan dit bijstellen specifiek voor zijn RK.
+    """
+
+    # voor welke deelcompetitie (ivm scheiding RKs)
+    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
+
+    # voor welke klasse is deze limiet
+    team_klasse = models.ForeignKey(CompetitieTeamKlasse,
+                                    on_delete=models.CASCADE,
+                                    blank=True, null=True)
+
+    # maximum aantal deelnemers in deze klasse
+    limiet = models.PositiveSmallIntegerField(default=24)
+
+    def __str__(self):
+        return "%s : %s - %s" % (self.limiet, self.team_klasse.beschrijving, self.deelcompetitie)
+
+    class Meta:
+        verbose_name = "Deelcompetitie TeamKlasse Limiet"
+        verbose_name_plural = "Deelcompetitie TeamKlasse Limieten"
 
 
 class DeelcompetitieRonde(models.Model):

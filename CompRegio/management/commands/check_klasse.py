@@ -21,8 +21,8 @@ class Command(BaseCommand):
         if not do_save:
             self.stdout.write('Let op: gebruik --commit om voorgestelde wijzigingen op te slaan')
 
-        volgorde2klasse = dict()             # [(competitie.pk, volgorde)] = CompetitieKlasse
-        volgorde2hogere_klasse = dict()      # [(competitie.pk, volgorde)] = CompetitieKlasse
+        volgorde2klasse = dict()             # [(competitie.pk, volgorde)] = CompetitieIndivKlasse
+        volgorde2hogere_klasse = dict()      # [(competitie.pk, volgorde)] = CompetitieIndivKlasse
 
         for klasse in (CompetitieIndivKlasse
                        .objects

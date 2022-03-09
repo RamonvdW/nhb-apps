@@ -11,7 +11,8 @@ from django.core import management
 from django.utils import timezone
 from Account.models import Account, account_create, AccountEmail
 from BasisTypen.models import BoogType, TeamType
-from Competitie.models import (Competitie, CompetitieKlasse, DeelCompetitie, LAAG_BK, LAAG_RK,
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               DeelCompetitie, LAAG_BK, LAAG_RK,
                                RegioCompetitieSchutterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule,
                                KampioenschapSchutterBoog, KampioenschapTeam)
@@ -820,26 +821,35 @@ class TestData(object):
                     self.comp25_account_bko = account
         # for
 
-        for klasse in (CompetitieKlasse
+        for klasse in (CompetitieIndivKlasse
                        .objects
                        .select_related('competitie',
-                                       'indiv__boogtype',
-                                       'team__team_type')
+                                       'boogtype')
                        .all()):
 
-            if klasse.indiv:
-                afkorting = klasse.indiv.boogtype.afkorting
-                if klasse.competitie.afstand == '18':
-                    klassen = self.comp18_klassen_indiv
-                else:
-                    klassen = self.comp25_klassen_indiv
-
+            afkorting = klasse.boogtype.afkorting
+            if klasse.competitie.afstand == '18':
+                klassen = self.comp18_klassen_indiv
             else:
-                afkorting = klasse.team.team_type.afkorting
-                if klasse.competitie.afstand == '18':
-                    klassen = self.comp18_klassen_team
-                else:
-                    klassen = self.comp25_klassen_team
+                klassen = self.comp25_klassen_indiv
+
+            try:
+                klassen[afkorting].append(klasse)
+            except KeyError:
+                klassen[afkorting] = [klasse]
+        # for
+
+        for klasse in (CompetitieTeamKlasse
+                       .objects
+                       .select_related('competitie',
+                                       'team_type')
+                       .all()):
+
+            afkorting = klasse.team_type.afkorting
+            if klasse.competitie.afstand == '18':
+                klassen = self.comp18_klassen_team
+            else:
+                klassen = self.comp25_klassen_team
 
             try:
                 klassen[afkorting].append(klasse)
@@ -974,7 +984,7 @@ class TestData(object):
                             volg_nr=next_nr,
                             team_type=self.afkorting2teamtype[afkorting],
                             team_naam='%s-%s-%s' % (ver_nr, next_nr, afkorting),
-                            klasse=klasse)
+                            team_klasse=klasse)
                 bulk.append(team)
             # while
         # for
@@ -1092,7 +1102,7 @@ class TestData(object):
             deelnemer = KampioenschapSchutterBoog(
                                 deelcompetitie=deelcomp_rk,
                                 sporterboog=sporterboog,
-                                klasse=klasse,
+                                indiv_klasse=klasse,
                                 bij_vereniging=sporterboog.sporter.bij_vereniging,
                                 kampioen_label='',
                                 volgorde=0,
@@ -1122,12 +1132,12 @@ class TestData(object):
                          .objects
                          .filter(deelcompetitie__competitie__afstand=afstand,
                                  bij_vereniging__regio__regio_nr__in=regio_nrs)
-                         .select_related('klasse',
+                         .select_related('indiv_klasse',
                                          'bij_vereniging__regio')
                          .order_by('-gemiddelde',            # hoogste eerst
-                                   'klasse')):
+                                   'indiv_klasse__volgorde')):
 
-            klasse_pk = kampioen.klasse.pk
+            klasse_pk = kampioen.indiv_klasse.pk
             regio_nr = kampioen.bij_vereniging.regio.regio_nr
 
             try:
@@ -1219,7 +1229,7 @@ class TestData(object):
                                 volg_nr=next_nr,
                                 team_type=self.afkorting2teamtype[afkorting],
                                 team_naam='rk-%s-%s-%s' % (ver_nr, next_nr, afkorting),
-                                # klasse wordt later bepaald door de BKO
+                                # team_klasse wordt later bepaald door de BKO
                                 aanvangsgemiddelde=ag)
 
                     bulk.append(team)

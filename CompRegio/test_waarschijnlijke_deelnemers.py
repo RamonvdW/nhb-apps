@@ -8,7 +8,7 @@ from django.test import TestCase
 from BasisTypen.models import BoogType, IndivWedstrijdklasse
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbCluster
-from Competitie.models import (CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
+from Competitie.models import (CompetitieIndivKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
                                LAAG_REGIO, INSCHRIJF_METHODE_1)
 from Competitie.operations import maak_deelcompetitie_ronde
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
@@ -182,7 +182,7 @@ class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self._maak_inschrijvingen()
 
     def _maak_competitie(self):
-        self.assertEqual(CompetitieKlasse.objects.count(), 0)
+        self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
 
         self.deelcomp_regio_18 = DeelCompetitie.objects.get(laag=LAAG_REGIO,
@@ -253,37 +253,37 @@ class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
 
         SporterVoorkeuren(sporter=sporterboog.sporter, voorkeur_eigen_blazoen=True).save()
 
-        klasse = (CompetitieKlasse
+        klasse = (CompetitieIndivKlasse
                   .objects
                   .filter(competitie=self.comp_18,
-                          indiv__boogtype=boog_r,
-                          indiv__is_onbekend=True))[0]
+                          boogtype=boog_r,
+                          is_onbekend=True))[0]
 
         RegioCompetitieSchutterBoog(
                 deelcompetitie=self.deelcomp_regio_18,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
-                klasse=klasse).save()
+                indiv_klasse=klasse).save()
 
-        klasse = (CompetitieKlasse
+        klasse = (CompetitieIndivKlasse
                   .objects
                   .filter(competitie=self.comp_25,
-                          indiv__boogtype=boog_r,
-                          indiv__is_onbekend=True))[0]
+                          boogtype=boog_r,
+                          is_onbekend=True))[0]
 
         RegioCompetitieSchutterBoog(
                 deelcompetitie=self.deelcomp_regio_25,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
-                klasse=klasse).save()
+                indiv_klasse=klasse).save()
 
         # Schutter 2 aanmelden
 
-        klasse = (CompetitieKlasse
+        klasse = (CompetitieIndivKlasse
                   .objects
                   .filter(competitie=self.comp_18,
-                          indiv__boogtype=boog_c,
-                          indiv__is_onbekend=False))[0]
+                          boogtype=boog_c,
+                          is_onbekend=False))[0]
 
         sporterboog = SporterBoog(sporter=self.sporter_100002,
                                   boogtype=boog_c,
@@ -293,30 +293,30 @@ class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_18,
                                                  sporterboog=sporterboog,
                                                  bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                                 klasse=klasse)
+                                                 indiv_klasse=klasse)
         aanmelding.save()
 
-        klasse = (CompetitieKlasse
+        klasse = (CompetitieIndivKlasse
                   .objects
                   .filter(competitie=self.comp_25,
-                          indiv__boogtype=boog_c,
-                          indiv__is_onbekend=False))[0]
+                          boogtype=boog_c,
+                          is_onbekend=False))[0]
 
         aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_25,
                                                  sporterboog=sporterboog,
                                                  bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                                 klasse=klasse)
+                                                 indiv_klasse=klasse)
         aanmelding.save()
 
         # aspirant schutter aanmelden
         self.sporter_100012.geboorte_datum = datetime.date(year=self.comp_18.begin_jaar - 10, month=1, day=1)
         self.sporter_100012.save()
 
-        klasse = (CompetitieKlasse
+        klasse = (CompetitieIndivKlasse
                   .objects
                   .filter(competitie=self.comp_18,
-                          indiv__boogtype=boog_tr,
-                          indiv__beschrijving__contains="Onder 14"))[0]
+                          boogtype=boog_tr,
+                          beschrijving__contains="Onder 14"))[0]
 
         sporterboog = SporterBoog(sporter=self.sporter_100012,
                                   boogtype=boog_tr,
@@ -326,26 +326,26 @@ class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_18,
                                                  sporterboog=sporterboog,
                                                  bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                                 klasse=klasse)
+                                                 indiv_klasse=klasse)
         aanmelding.save()
 
-        klasse = (CompetitieKlasse
+        klasse = (CompetitieIndivKlasse
                   .objects
                   .filter(competitie=self.comp_25,
-                          indiv__boogtype=boog_tr,
-                          indiv__beschrijving__contains="Onder 14"))[0]
+                          boogtype=boog_tr,
+                          beschrijving__contains="Onder 14"))[0]
 
         RegioCompetitieSchutterBoog(
                 deelcompetitie=self.deelcomp_regio_25,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
-                klasse=klasse).save()
+                indiv_klasse=klasse).save()
 
         # Schutter 3 aanmelden
-        klasse = (CompetitieKlasse
+        klasse = (CompetitieIndivKlasse
                   .objects
                   .filter(competitie=self.comp_18,
-                          indiv__boogtype=boog_r))[0]
+                          boogtype=boog_r))[0]
 
         sporterboog = SporterBoog(sporter=self.sporter_100003,
                                   boogtype=boog_r,
@@ -356,7 +356,7 @@ class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
                 deelcompetitie=self.deelcomp_regio_18,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
-                klasse=klasse).save()
+                indiv_klasse=klasse).save()
 
     def test_wedstrijden_hwl(self):
         # login als HWL

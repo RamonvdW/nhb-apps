@@ -10,9 +10,8 @@ from django.http import Http404, HttpResponse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (CompetitieKlasse, LAAG_RK, DeelcompetitieKlasseLimiet,
-                               KampioenschapSchutterBoog, KampioenschapTeam,
-                               DEELNAME_NEE, DEELNAME2STR)
+from Competitie.models import (CompetitieIndivKlasse, CompetitieTeamKlasse, LAAG_RK, DeelcompetitieKlasseLimiet,
+                               KampioenschapSchutterBoog, KampioenschapTeam, DEELNAME_NEE, DEELNAME2STR)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import CompetitieWedstrijd
@@ -226,25 +225,24 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         """ Afhandelen van de GET request waarmee we een bestand terug geven. """
 
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])      # afkappen voor de veiligheid
-            wedstrijd = (CompetitieWedstrijd
-                         .objects
-                         .select_related('vereniging')
-                         .get(pk=wedstrijd_pk,
-                              vereniging=self.functie_nu.nhb_ver))
+            match_pk = int(kwargs['wedstrijd_pk'][:6])      # afkappen voor de veiligheid
+            match = (CompetitieMatch
+                     .objects
+                     .select_related('vereniging')
+                     .get(pk=match_pk,
+                          vereniging=self.functie_nu.nhb_ver))
         except (ValueError, CompetitieWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         try:
             klasse_pk = int(kwargs['klasse_pk'][:6])            # afkappen voor de veiligheid
-            klasse = (CompetitieKlasse
+            klasse = (CompetitieIndivKlasse
                       .objects
-                      .exclude(indiv=None)
                       .get(pk=klasse_pk))
-        except (ValueError, CompetitieKlasse.DoesNotExist):
+        except (ValueError, CompetitieIndivKlasse.DoesNotExist):
             raise Http404('Klasse niet gevonden')
 
-        plannen = wedstrijd.competitiewedstrijdenplan_set.all()
+        plannen = match.competitiewedstrijdenplan_set.all()
         if len(plannen) == 0:
             raise Http404('Geen wedstrijden plan')
         plan = plannen[0]
@@ -262,16 +260,16 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         klasse_str = klasse.indiv.beschrijving
 
         aantal_banen = 16
-        if wedstrijd.locatie:
+        if match.locatie:
             if comp.afstand == '18':
-                aantal_banen = wedstrijd.locatie.banen_18m
+                aantal_banen = match.locatie.banen_18m
             else:
-                aantal_banen = wedstrijd.locatie.banen_25m
+                aantal_banen = match.locatie.banen_25m
 
         # TODO: haal de ingestelde limiet op (maximum aantal deelnemers)
         try:
             lim = DeelcompetitieKlasseLimiet(deelcompetitie=deelcomp,
-                                             klasse=klasse)
+                                             indiv_klasse=klasse)
         except DeelcompetitieKlasseLimiet.DoesNotExist:
             limiet = 24
         else:
@@ -301,10 +299,10 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
         ws['C4'] = 'Rayonkampioenschappen %s, Rayon %s, %s' % (comp.beschrijving, deelcomp.nhb_rayon.rayon_nr, klasse.indiv.beschrijving)
 
-        ws['D5'] = wedstrijd.vereniging.naam     # organisatie
-        ws['F5'] = 'Datum: ' + wedstrijd.datum_wanneer.strftime('%Y-%m-%d')
-        if wedstrijd.locatie:
-            ws['H5'] = wedstrijd.locatie.adres       # adres van de wedstrijdlocatie
+        ws['D5'] = match.vereniging.naam     # organisatie
+        ws['F5'] = 'Datum: ' + match.datum_wanneer.strftime('%Y-%m-%d')
+        if match.locatie:
+            ws['H5'] = match.locatie.adres       # adres van de wedstrijdlocatie
         else:
             ws['H5'] = 'Onbekend'
 
@@ -411,26 +409,25 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         """ Afhandelen van de GET request waarmee we een bestand terug geven. """
 
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])      # afkappen voor de veiligheid
-            wedstrijd = (CompetitieWedstrijd
-                         .objects
-                         .select_related('vereniging',
-                                         'locatie')
-                         .get(pk=wedstrijd_pk,
-                              vereniging=self.functie_nu.nhb_ver))
-        except (ValueError, CompetitieWedstrijd.DoesNotExist):
+            match_pk = int(kwargs['wedstrijd_pk'][:6])      # afkappen voor de veiligheid
+            match = (CompetitieMatch
+                     .objects
+                     .select_related('vereniging',
+                                     'locatie')
+                     .get(pk=match_pk,
+                          vereniging=self.functie_nu.nhb_ver))
+        except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         try:
             klasse_pk = int(kwargs['klasse_pk'][:6])            # afkappen voor de veiligheid
-            klasse = (CompetitieKlasse
+            klasse = (CompetitieTeamKlasse
                       .objects
-                      .exclude(team=None)
                       .get(pk=klasse_pk))
-        except (ValueError, CompetitieKlasse.DoesNotExist):
+        except (ValueError, CompetitieTeamKlasse.DoesNotExist):
             raise Http404('Klasse niet gevonden')
 
-        plannen = wedstrijd.competitiewedstrijdenplan_set.all()
+        plannen = match.competitiewedstrijdenplan_set.all()
         if len(plannen) == 0:
             raise Http404('Geen wedstrijden plan')
         plan = plannen[0]
@@ -450,9 +447,9 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         vastgesteld = timezone.localtime(timezone.now())
 
-        klasse_str = klasse.team.beschrijving
+        klasse_str = klasse.beschrijving
 
-        boog_typen = klasse.team.team_type.boog_typen.all()
+        boog_typen = klasse.team_type.boog_typen.all()
         boog_pks = list(boog_typen.values_list('pk', flat=True))
 
         # bepaal de naam van het terug te geven bestand
@@ -483,10 +480,10 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         ws['B1'] = 'Rayonkampioenschappen Teams Rayon %s, %s' % (deelcomp.nhb_rayon.rayon_nr, comp.beschrijving)
         ws['B4'] = 'Klasse: ' + klasse_str
-        ws['D3'] = wedstrijd.datum_wanneer.strftime('%Y-%m-%d')
-        ws['E3'] = wedstrijd.vereniging.naam     # organisatie
-        if wedstrijd.locatie:
-            ws['H3'] = wedstrijd.locatie.adres       # adres van de wedstrijdlocatie
+        ws['D3'] = match.datum_wanneer.strftime('%Y-%m-%d')
+        ws['E3'] = match.vereniging.naam     # organisatie
+        if match.locatie:
+            ws['H3'] = match.locatie.adres       # adres van de wedstrijdlocatie
         else:
             ws['H3'] = 'Onbekend'
 

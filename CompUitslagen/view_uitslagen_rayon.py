@@ -232,7 +232,7 @@ class UitslagenRayonIndivView(TemplateView):
                 indiv = deelnemer.klasse.indiv
                 deelnemer.klasse_str = indiv.beschrijving
                 try:
-                    deelnemer.wedstrijd = indiv2wedstrijd[indiv.pk]
+                    deelnemer.match = indiv2wedstrijd[indiv.pk]
                 except KeyError:
                     pass
 
@@ -410,7 +410,7 @@ class UitslagenRayonTeamsView(TemplateView):
                 if team.klasse:
                     team.klasse_str = team.team_klasse.beschrijving
                     try:
-                        team.wedstrijd = team2wedstrijd[team.team_klasse.pk]
+                        team.match = team2wedstrijd[team.team_klasse.pk]
                     except KeyError:
                         pass
                 else:

@@ -13,7 +13,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (LAAG_REGIO, AG_NUL,
                                TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_F1,
-                               Competitie, CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
+                               Competitie, CompetitieTeamKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                                CompetitieMutatie, MUTATIE_TEAM_RONDE)
 from Competitie.operations.poules import maak_poule_schema
@@ -140,14 +140,12 @@ class RegioTeamsView(TemplateView):
 
         totaal_teams = 0
 
-        klassen = (CompetitieKlasse
+        klassen = (CompetitieTeamKlasse
                    .objects
                    .filter(competitie=comp,
-                           indiv=None,
                            is_voor_teams_rk_bk=False)
-                   .select_related('team',
-                                   'team__team_type')
-                   .order_by('team__volgorde'))
+                   .select_related('team_type')
+                   .order_by('volgorde'))
 
         klasse2teams = dict()       # [klasse] = list(teams)
         prev_sterkte = ''

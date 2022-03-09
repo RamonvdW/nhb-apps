@@ -11,7 +11,7 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.models import (AG_NUL, DeelCompetitie, LAAG_RK, CompetitieKlasse, CompetitieTeamKlasse,
+from Competitie.models import (AG_NUL, DeelCompetitie, LAAG_RK, CompetitieTeamKlasse,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -325,11 +325,11 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
 
             afkorting = request.POST.get('team_type', '')
             try:
-                klasse = (CompetitieKlasse
+                klasse = (CompetitieTeamKlasse
                           .objects
-                          .select_related('team__team_type')
+                          .select_related('team_type')
                           .filter(competitie=comp,
-                                  team__afkorting=afkorting))[0]
+                                  team_afkorting=afkorting))[0]
                 team_type = klasse.team.team_type
             except (IndexError, TeamType.DoesNotExist):
                 raise Http404('Onbekend team type')

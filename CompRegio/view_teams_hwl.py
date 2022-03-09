@@ -12,7 +12,7 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.models import (CompetitieKlasse, AG_NUL, DeelCompetitie, LAAG_REGIO,
+from Competitie.models import (CompetitieTeamKlasse, AG_NUL, DeelCompetitie, LAAG_REGIO,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
                                update_uitslag_teamcompetitie)
 from Functie.rol import Rollen, rol_get_huidige_functie
@@ -46,13 +46,13 @@ def bepaal_team_sterkte_en_klasse(team):
 
         # bepaal de wedstrijdklasse
         comp = team.deelcompetitie.competitie
-        for klasse in (CompetitieKlasse
+        for klasse in (CompetitieTeamKlasse
                        .objects
                        .filter(competitie=comp,
-                               team__team_type=team.team_type,
+                               team_type=team.team_type,
                                is_voor_teams_rk_bk=False)
                        .order_by('min_ag',
-                                 '-team__volgorde')):  # oplopend AG (=hogere klasse later)
+                                 '-volgorde')):  # oplopend AG (=hogere klasse later)
             if ag >= klasse.min_ag:
                 team.klasse = klasse
         # for

@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import Competitie, CompetitieKlasse, KampioenschapTeam
+from Competitie.models import Competitie, CompetitieTeamKlasse, KampioenschapTeam
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 
@@ -43,14 +43,13 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         teamtype_pks = list()
         teamtypes = list()
 
-        teamtype2wkl = dict()       # [team_type.pk] = list(CompetitieKlasse)
-        for rk_wkl in (CompetitieKlasse
+        teamtype2wkl = dict()       # [team_type.pk] = list(CompetitieTeamKlasse)
+        for rk_wkl in (CompetitieTeamKlasse
                        .objects
                        .filter(competitie=comp,
                                is_voor_teams_rk_bk=True)
-                       .select_related('team',
-                                       'team__team_type')
-                       .order_by('team__volgorde')):
+                       .select_related('team_type')
+                       .order_by('volgorde')):
 
             teamtype_pk = rk_wkl.team.team_type.pk
             if teamtype_pk not in teamtype_pks:
@@ -211,13 +210,11 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
 
         beschrijving2klasse = dict()
 
-        for klasse in (CompetitieKlasse
+        for klasse in (CompetitieTeamKlasse
                        .objects
-                       .exclude(team=None)
-                       .select_related('team')
                        .filter(is_voor_teams_rk_bk=True,
                                competitie=comp)):
-            beschrijving2klasse[klasse.team.beschrijving] = klasse
+            beschrijving2klasse[klasse.beschrijving] = klasse
         # for
 
         teamtype_pk2klassen = dict()        # hoogste klasse eerst
@@ -258,11 +255,11 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
                 else:
                     for klasse in klassen:
                         if team.aanvangsgemiddelde >= klasse.min_ag:
-                            team.klasse = klasse
+                            team.team_klasse = klasse
                             break       # from the for
                     # for
 
-            team.save(update_fields=['klasse'])
+            team.save(update_fields=['team_klasse'])
         # for
 
         # zet de competitie door naar fase K

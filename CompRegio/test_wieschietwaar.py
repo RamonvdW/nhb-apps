@@ -8,7 +8,7 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
+from Competitie.models import (CompetitieIndivKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
                                LAAG_REGIO, INSCHRIJF_METHODE_1)
 from Competitie.operations import maak_deelcompetitie_ronde
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
@@ -206,7 +206,7 @@ class TestCompRegioWieSchietWaar(E2EHelpers, TestCase):
     def _create_competitie(self):
         url_kies = '/bondscompetities/'
 
-        self.assertEqual(CompetitieKlasse.objects.count(), 0)
+        self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
 
         self.deelcomp_regio = DeelCompetitie.objects.get(laag=LAAG_REGIO,

@@ -123,9 +123,9 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         wkl2limiet = dict()    # [pk] = aantal
         for limiet in (DeelcompetitieKlasseLimiet
                        .objects
-                       .select_related('klasse')
+                       .select_related('indiv_klasse')
                        .filter(deelcompetitie=deelcomp_rk)):
-            wkl2limiet[limiet.klasse.pk] = limiet.limiet
+            wkl2limiet[limiet.indiv_klasse.pk] = limiet.limiet
         # for
 
         aantal_afgemeld = 0

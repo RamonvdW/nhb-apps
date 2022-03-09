@@ -10,7 +10,7 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import LAAG_RK, AG_NUL, Competitie, CompetitieKlasse, DeelCompetitie, KampioenschapTeam
+from Competitie.models import LAAG_RK, AG_NUL, Competitie, CompetitieTeamKlasse, DeelCompetitie, KampioenschapTeam
 from Functie.rol import Rollen, rol_get_huidige_functie
 from NhbStructuur.models import NhbRayon
 from Plein.menu import menu_dynamics
@@ -128,14 +128,12 @@ class RayonTeamsView(TemplateView):
 
         totaal_teams = 0
 
-        klassen = (CompetitieKlasse
+        klassen = (CompetitieTeamKlasse
                    .objects
                    .filter(competitie=comp,
-                           indiv=None,
                            is_voor_teams_rk_bk=True)
-                   .select_related('team',
-                                   'team__team_type')
-                   .order_by('team__volgorde'))
+                   .select_related('team_type')
+                   .order_by('volgorde'))
 
         klasse2teams = dict()       # [klasse] = list(teams)
         prev_sterkte = ''
@@ -143,9 +141,9 @@ class RayonTeamsView(TemplateView):
         for klasse in klassen:
             klasse2teams[klasse] = list()
 
-            if klasse.team.team_type != prev_team:
+            if klasse.team_type != prev_team:
                 prev_sterkte = ''
-                prev_team = klasse.team.team_type
+                prev_team = klasse.team_type
 
             min_ag_str = "%05.1f" % (klasse.min_ag * aantal_pijlen)
             min_ag_str = min_ag_str.replace('.', ',')
@@ -170,12 +168,11 @@ class RayonTeamsView(TemplateView):
                     .select_related('vereniging',
                                     'vereniging__regio',
                                     'team_type',
-                                    'klasse',
-                                    'klasse__team')
-                    .exclude(klasse=None)
+                                    'team_klasse')
+                    .exclude(team_klasse=None)
                     .filter(deelcompetitie__in=rk_deelcomp_pks)
                     .annotate(sporter_count=Count(tel_dit))
-                    .order_by('klasse__team__volgorde',
+                    .order_by('team_klasse__volgorde',
                               '-aanvangsgemiddelde',
                               'vereniging__ver_nr'))
 

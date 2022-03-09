@@ -6,11 +6,10 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Wedstrijden.models import CompetitieWedstrijd
+from Competitie.models import CompetitieMatch
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import zipfile
-import time
 import os
 
 
@@ -57,18 +56,17 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
             wordt als eerste aangeroepen
         """
         # maak een RK wedstrijd aan
-        self.wedstrijd = CompetitieWedstrijd(
+        self.match = CompetitieMatch(
+                            competitie=self.testdata.comp18,
                             beschrijving='test wedstrijd RK',
                             datum_wanneer='2020-01-01',
-                            tijd_begin_aanmelden='09:00',
                             tijd_begin_wedstrijd='10:00',
-                            tijd_einde_wedstrijd='16:00',
                             vereniging=self.ver)            # koppelt wedstrijd aan de vereniging
         # TODO: locatie koppelen
-        self.wedstrijd.save()
+        self.match.save()
 
         self.deelcomp18_rk_wedstrijden_plan = self.testdata.deelcomp18_rk[self.rayon_nr].plan
-        self.deelcomp18_rk_wedstrijden_plan.wedstrijden.add(self.wedstrijd.pk)
+        self.deelcomp18_rk_wedstrijden_plan.wedstrijden.add(self.match.pk)
 
         self.deelcomp25_rk_wedstrijden_plan = self.testdata.deelcomp25_rk[self.rayon_nr].plan
 
@@ -91,7 +89,7 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
             xlsm.writestr('hello.txt', 'Hello World')
 
     def test_get_forms(self):
-        url = self.url_forms % self.wedstrijd.pk
+        url = self.url_forms % self.match.pk
 
         # ophalen zonder inlog
         self.client.logout()
@@ -110,8 +108,8 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # alleen indiv klassen
-        self.wedstrijd.indiv_klassen.set([self.testdata.comp18_klassen_indiv['R'][0].indiv,
-                                          self.testdata.comp18_klassen_indiv['R'][-1].indiv])
+        self.match.indiv_klassen.set([self.testdata.comp18_klassen_indiv['R'][0],
+                                      self.testdata.comp18_klassen_indiv['R'][-1]])
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -119,8 +117,8 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # indiv + teams klassen
-        self.wedstrijd.team_klassen.set([self.testdata.comp18_klassen_team['R2'][0].team,
-                                         self.testdata.comp18_klassen_team['R2'][-1].team])
+        self.match.team_klassen.set([self.testdata.comp18_klassen_team['R2'][0],
+                                     self.testdata.comp18_klassen_team['R2'][-1]])
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -128,7 +126,7 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # alleen teams klassen
-        self.wedstrijd.indiv_klassen.set([])
+        self.match.indiv_klassen.set([])
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -136,21 +134,21 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # wedstrijd niet in een plan
-        self.deelcomp18_rk_wedstrijden_plan.wedstrijden.remove(self.wedstrijd.pk)
+        self.deelcomp18_rk_wedstrijden_plan.wedstrijden.remove(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Geen wedstrijden plan')
 
         # 25m1p plan
-        self.deelcomp25_rk_wedstrijden_plan.wedstrijden.add(self.wedstrijd.pk)
+        self.deelcomp25_rk_wedstrijden_plan.wedstrijden.add(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.deelcomp25_rk_wedstrijden_plan.wedstrijden.remove(self.wedstrijd.pk)
+        self.deelcomp25_rk_wedstrijden_plan.wedstrijden.remove(self.match.pk)
 
         # wedstrijd van een niet-RK deelcompetitie
         plan = self.testdata.deelcomp18_bk.plan
-        plan.wedstrijden.add(self.wedstrijd.pk)
+        plan.wedstrijden.add(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Verkeerde competitie')
@@ -162,7 +160,7 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
 
     def test_download_indiv(self):
         klasse = self.testdata.comp18_klassen_indiv['R'][0]
-        url = self.url_forms_download_indiv % (self.wedstrijd.pk, klasse.pk)
+        url = self.url_forms_download_indiv % (self.match.pk, klasse.pk)
 
         # ophalen zonder inlog
         self.client.logout()
@@ -195,25 +193,25 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
 
         # niet bestaande klasse
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_forms_download_indiv % (self.wedstrijd.pk, 'xxx'))
+            resp = self.client.get(self.url_forms_download_indiv % (self.match.pk, 'xxx'))
         self.assert404(resp, 'Klasse niet gevonden')
 
         # wedstrijd niet in een plan
-        self.deelcomp18_rk_wedstrijden_plan.wedstrijden.remove(self.wedstrijd.pk)
+        self.deelcomp18_rk_wedstrijden_plan.wedstrijden.remove(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Geen wedstrijden plan')
 
         # wedstrijd van een niet-RK deelcompetitie
         plan = self.testdata.deelcomp18_bk.plan
-        plan.wedstrijden.add(self.wedstrijd.pk)
+        plan.wedstrijden.add(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Verkeerde competitie')
 
     def test_download_teams(self):
         klasse = self.testdata.comp18_klassen_team['R2'][0]
-        url = self.url_forms_download_teams % (self.wedstrijd.pk, klasse.pk)
+        url = self.url_forms_download_teams % (self.match.pk, klasse.pk)
 
         # ophalen zonder inlog
         self.client.logout()
@@ -246,22 +244,20 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
 
         # niet bestaande klasse
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_forms_download_teams % (self.wedstrijd.pk, 'xxx'))
+            resp = self.client.get(self.url_forms_download_teams % (self.match.pk, 'xxx'))
         self.assert404(resp, 'Klasse niet gevonden')
 
         # wedstrijd niet in een plan
-        self.deelcomp18_rk_wedstrijden_plan.wedstrijden.remove(self.wedstrijd.pk)
+        self.deelcomp18_rk_wedstrijden_plan.wedstrijden.remove(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Geen wedstrijden plan')
 
         # wedstrijd van een niet-RK deelcompetitie
         plan = self.testdata.deelcomp18_bk.plan
-        plan.wedstrijden.add(self.wedstrijd.pk)
+        plan.wedstrijden.add(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Verkeerde competitie')
-
-
 
 # end of file

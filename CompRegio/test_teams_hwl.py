@@ -9,7 +9,7 @@ from django.core import management
 from django.utils import timezone
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (DeelCompetitie, CompetitieKlasse, AG_NUL, LAAG_REGIO,
+from Competitie.models import (DeelCompetitie, CompetitieTeamKlasse, AG_NUL, LAAG_REGIO,
                                RegiocompetitieTeam, RegioCompetitieSchutterBoog, RegiocompetitieRondeTeam)
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
@@ -231,7 +231,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        self.assertEqual(CompetitieKlasse.objects.count(), 0)
+        self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
 
         self.deelcomp18_regio111 = DeelCompetitie.objects.get(laag=LAAG_REGIO,
@@ -475,9 +475,9 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         self.assertTrue(str(team) != '')
 
         # zet het team handmatig in een klasse en koppel een schutter
-        klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=15,           # Rec ERE
-                                              is_voor_teams_rk_bk=False)
+        klasse = CompetitieTeamKlasse.objects.get(competitie=self.comp_18,
+                                                  volgorde=15,           # Rec ERE
+                                                  is_voor_teams_rk_bk=False)
         team.klasse = klasse
         team.aanvangsgemiddelde = 8.8
         team.save()
@@ -670,15 +670,15 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         deelnemer.ag_voor_team = 6.500
         deelnemer.save()
 
-        obj = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                           team__volgorde=15,           # Rec ERE
-                                           is_voor_teams_rk_bk=False)
+        obj = CompetitieTeamKlasse.objects.get(competitie=self.comp_18,
+                                               volgorde=15,           # Rec ERE
+                                               is_voor_teams_rk_bk=False)
         obj.min_ag = 29.5
         obj.save()
 
-        obj = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                           team__volgorde=17,           # Rec A
-                                           is_voor_teams_rk_bk=False)
+        obj = CompetitieTeamKlasse.objects.get(competitie=self.comp_18,
+                                               volgorde=17,           # Rec A
+                                               is_voor_teams_rk_bk=False)
         obj.min_ag = 21.340     # ondergrens = precies wat het team zal hebben
         obj.save()
 

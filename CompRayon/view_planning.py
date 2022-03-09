@@ -11,7 +11,8 @@ from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (LAAG_REGIO, LAAG_RK, LAAG_BK, INSCHRIJF_METHODE_1, DeelCompetitie,
-                               CompetitieKlasse, DeelcompetitieKlasseLimiet, DeelcompetitieRonde,
+                               CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               DeelcompetitieKlasseLimiet, DeelcompetitieRonde,
                                KampioenschapSchutterBoog, KampioenschapTeam, CompetitieMutatie,
                                MUTATIE_CUT, DEELNAME_NEE)
 from Functie.rol import Rollen, rol_get_huidige_functie
@@ -87,16 +88,18 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
                 klasse2schutters[obj.indiv_klasse.pk] = 1
         # for
 
-        for wkl in (CompetitieKlasse
+        for wkl in (CompetitieIndivKlasse
                     .objects
-                    .exclude(indiv__niet_voor_rk_bk=True)
-                    .select_related('indiv', 'team')
-                    .filter(competitie=deelcomp_rk.competitie)):
-            if wkl.indiv:
-                niet_gebruikt[100000 + wkl.indiv.pk] = wkl.indiv.beschrijving
-            if wkl.team:
-                if wkl.is_voor_teams_rk_bk:
-                    niet_gebruikt[200000 + wkl.team.pk] = wkl.team.beschrijving
+                    .filter(competitie=deelcomp_rk.competitie,
+                            is_voor_rk_bk=True)):             # verwijder regio-only klassen
+            niet_gebruikt[100000 + wkl.pk] = wkl.beschrijving
+        # for
+
+        for wkl in (CompetitieTeamKlasse
+                    .objects
+                    .filter(competitie=deelcomp_rk.competitie,
+                            is_voor_teams_rk_bk=True)):
+            niet_gebruikt[200000 + wkl.pk] = wkl.beschrijving
         # for
 
         # haal de RK wedstrijden op
@@ -285,11 +288,10 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
         # wedstrijdklassen
         wedstrijd_indiv_pks = [obj.pk for obj in wedstrijd.indiv_klassen.all()]
-        wkl_indiv = (CompetitieKlasse
+        wkl_indiv = (CompetitieIndivKlasse
                      .objects
-                     .exclude(indiv__niet_voor_rk_bk=True)      # verwijder regio-only klassen
                      .filter(competitie=deelcomp_rk.competitie,
-                             team=None)
+                             is_voor_rk_bk=True)      # verwijder regio-only klassen
                      .select_related('indiv',
                                      'indiv__boogtype')
                      .order_by('indiv__volgorde')
@@ -327,21 +329,19 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         # for
 
         wedstrijd_team_pks = [obj.pk for obj in wedstrijd.team_klassen.all()]
-        wkl_team = (CompetitieKlasse
+        wkl_team = (CompetitieTeamKlasse
                     .objects
                     .filter(competitie=deelcomp_rk.competitie,
-                            indiv=None,
                             is_voor_teams_rk_bk=True)
-                    .select_related('team')
-                    .order_by('team__volgorde'))
+                    .order_by('volgorde'))
 
         for obj in wkl_team:
-            obj.short_str = obj.team.beschrijving
-            obj.sel_str = "wkl_team_%s" % obj.team.pk
-            if obj.team.pk in team_in_use:
+            obj.short_str = obj.beschrijving
+            obj.sel_str = "wkl_team_%s" % obj.pk
+            if obj.pk in team_in_use:
                 obj.disable = True
             else:
-                obj.geselecteerd = (obj.team.pk in wedstrijd_team_pks)
+                obj.geselecteerd = (obj.pk in wedstrijd_team_pks)
 
             try:
                 obj.teams_count = klasse_count[obj.pk]
@@ -652,20 +652,18 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         if self.functie_nu != deelcomp_rk.functie:
             raise PermissionDenied()     # niet de juiste RKO
 
-        context['wkl_indiv'] = wkl_indiv = (CompetitieKlasse
+        context['wkl_indiv'] = wkl_indiv = (CompetitieIndivKlasse
                                             .objects
-                                            .exclude(indiv__niet_voor_rk_bk=True)
                                             .filter(competitie=deelcomp_rk.competitie,
-                                                    team=None)
-                                            .select_related('indiv__boogtype')
-                                            .order_by('indiv__volgorde'))
+                                                    is_voor_rk_bk=True)
+                                            .select_related('boogtype')
+                                            .order_by('volgorde'))
 
-        context['wkl_teams'] = wkl_teams = (CompetitieKlasse
+        context['wkl_teams'] = wkl_teams = (CompetitieTeamKlasse
                                             .objects
                                             .filter(competitie=deelcomp_rk.competitie,
-                                                    is_voor_teams_rk_bk=True,
-                                                    indiv=None)
-                                            .order_by('team__volgorde'))
+                                                    is_voor_teams_rk_bk=True)
+                                            .order_by('volgorde'))
 
         # zet de default limieten
         pk2wkl = dict()
@@ -686,7 +684,8 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         # aanvullen met de opgeslagen limieten
         for limiet in (DeelcompetitieKlasseLimiet
                        .objects
-                       .select_related('klasse')
+                       .select_related('indiv_klasse',
+                                       'team_klasse')
                        .filter(deelcompetitie=deelcomp_rk,
                                klasse__in=pk2wkl.keys())):
             wkl = pk2wkl[limiet.klasse.pk]
@@ -728,21 +727,21 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         comp = deelcomp_rk.competitie
         # TODO: check competitie fase
 
-        pk2ckl = dict()
+        pk2ckli = dict()
+        pk2cklt = dict()
         pk2keuze = dict()
 
-        for ckl in (CompetitieKlasse
+        for ckl in (CompetitieIndivKlasse
                     .objects
-                    .exclude(indiv__niet_voor_rk_bk=True)
                     .filter(competitie=comp,
-                            team=None)):
+                            is_voor_rk_bk=True)):
 
             sel = 'sel_%s' % ckl.pk
             keuze = request.POST.get(sel, None)
             if keuze:
                 try:
                     pk2keuze[ckl.pk] = int(keuze[:2])   # afkappen voor de veiligheid
-                    pk2ckl[ckl.pk] = ckl
+                    pk2ckli[ckl.pk] = ckl
                 except ValueError:
                     pass
                 else:
@@ -750,18 +749,17 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                         raise Http404('Geen valide keuze')
         # for
 
-        for ckl in (CompetitieKlasse
+        for ckl in (CompetitieTeamKlasse
                     .objects
                     .filter(competitie=comp,
-                            is_voor_teams_rk_bk=True,
-                            indiv=None)):
+                            is_voor_teams_rk_bk=True)):
 
             sel = 'sel_%s' % ckl.pk
             keuze = request.POST.get(sel, None)
             if keuze:
                 try:
                     pk2keuze[ckl.pk] = int(keuze[:2])   # afkappen voor de veiligheid
-                    pk2ckl[ckl.pk] = ckl
+                    pk2cklt[ckl.pk] = ckl
                 except ValueError:
                     pass
                 else:
@@ -769,13 +767,16 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                         raise Http404('Geen valide keuze')
         # for
 
-        wijzig_limiet = list()     # list of tup(klasse, nieuwe_limiet, oude_limiet)
+        wijzig_limiet_indiv = list()     # list of tup(klasse, nieuwe_limiet, oude_limiet)
+        wijzig_limiet_team = list()      # list of tup(klasse, nieuwe_limiet, oude_limiet)
 
         for limiet in (DeelcompetitieKlasseLimiet
                        .objects
-                       .select_related('klasse')
+                       .select_related('indiv_klasse',
+                                       'team_klasse')
                        .filter(deelcompetitie=deelcomp_rk,
-                               klasse__in=list(pk2keuze.keys()))):
+                               team_klasse__in=list(pk2keuze.keys()))):
+
             pk = limiet.klasse.pk
             keuze = pk2keuze[pk]
             del pk2keuze[pk]
@@ -786,15 +787,22 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
 
         # verwerk de overgebleven keuzes waar nog geen limiet voor was
         for pk, keuze in pk2keuze.items():
-            klasse = pk2ckl[pk]
-            if klasse.indiv:
-                default = 24
-                tup = (klasse, keuze, default)
-                wijzig_limiet.append(tup)
+            try:
+                klasse = pk2ckli[pk]
+            except KeyError:
+                try:
+                    klasse = pk2cklt[pk]
+                except KeyError:
+                    pass
+                else:
+                    # ERE klasse: 12 teams
+                    # overige: 8 teams
+                    default = 12 if "ERE" in klasse.team.beschrijving else 8
+                    tup = (klasse, keuze, default)
+                    wijzig_limiet.append(tup)
             else:
-                # ERE klasse: 12 teams
-                # overige: 8 teams
-                default = 12 if "ERE" in klasse.team.beschrijving else 8
+                # indiv klasse
+                default = 24
                 tup = (klasse, keuze, default)
                 wijzig_limiet.append(tup)
         # for

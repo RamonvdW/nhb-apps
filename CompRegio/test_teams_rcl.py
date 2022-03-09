@@ -7,7 +7,8 @@
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType, TeamType
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse, LAAG_BK, LAAG_RK, LAAG_REGIO,
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               LAAG_BK, LAAG_RK, LAAG_REGIO,
                                RegioCompetitieSchutterBoog,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                                TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_SOM_SCORES)
@@ -140,24 +141,24 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
         resp = self.client.post(self.url_klassengrenzen_vaststellen_18)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
-        klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=15,        # Rec ERE
-                                              is_voor_teams_rk_bk=False)
+        klasse = CompetitieTeamKlasse.objects.get(competitie=self.comp_18,
+                                                  volgorde=15,        # Rec ERE
+                                                  is_voor_teams_rk_bk=False)
         klasse.min_ag = 29.0
         klasse.save()
 
-        klasse = CompetitieKlasse.objects.get(competitie=self.comp_18,
-                                              team__volgorde=16,        # Rec A
-                                              is_voor_teams_rk_bk=False)
+        klasse = CompetitieTeamKlasse.objects.get(competitie=self.comp_18,
+                                                  volgorde=16,        # Rec A
+                                                  is_voor_teams_rk_bk=False)
         klasse.min_ag = 25.0
         klasse.save()
 
         self.client.logout()
 
-        self.klasse_recurve_onbekend = (CompetitieKlasse
+        self.klasse_recurve_onbekend = (CompetitieIndivKlasse
                                         .objects
-                                        .filter(indiv__boogtype=self.boog_r,
-                                                indiv__is_onbekend=True)
+                                        .filter(boogtype=self.boog_r,
+                                                is_onbekend=True)
                                         .all())[0]
 
         self.deelcomp_bond_18 = DeelCompetitie.objects.filter(laag=LAAG_BK, competitie=self.comp_18)[0]
@@ -215,9 +216,9 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
         """ schrijf een aantal teams in """
 
         teamtype_r = TeamType.objects.get(afkorting='R2')
-        klasse_r_ere = CompetitieKlasse.objects.get(
+        klasse_r_ere = CompetitieTeamKlasse.objects.get(
                                     competitie=deelcomp.competitie,
-                                    team__volgorde=15,                # Rec ERE
+                                    volgorde=15,                      # Rec ERE
                                     is_voor_teams_rk_bk=False)        # zie WKL_TEAM in BasisTypen migrations
 
         team1 = RegiocompetitieTeam(
@@ -227,7 +228,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
                     team_type=teamtype_r,
                     team_naam='Test team 1',
                     aanvangsgemiddelde=20.0,
-                    klasse=klasse_r_ere)
+                    team_klasse=klasse_r_ere)
         team1.save()
 
         team2 = RegiocompetitieTeam(
@@ -237,7 +238,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
                     team_type=teamtype_r,
                     team_naam='Test team 2',
                     aanvangsgemiddelde=21.123,
-                    klasse=klasse_r_ere)
+                    team_klasse=klasse_r_ere)
         team2.save()
 
         team3 = RegiocompetitieTeam(
@@ -247,7 +248,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
                     team_type=teamtype_r,
                     team_naam='Test team 3',
                     aanvangsgemiddelde=18.042,
-                    klasse=klasse_r_ere)
+                    team_klasse=klasse_r_ere)
         team3.save()
 
         # initiële schutters in het team
@@ -269,9 +270,9 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rcl112_18)
 
         team_r = TeamType.objects.get(afkorting='R2')
-        klasse_r_ere = CompetitieKlasse.objects.get(
+        klasse_r_ere = CompetitieTeamKlasse.objects.get(
                                     competitie=self.comp_18,
-                                    team__volgorde=15,      # Rec ERE
+                                    volgorde=15,      # Rec ERE
                                     is_voor_teams_rk_bk=False)
         # create two complete teams
         RegiocompetitieTeam(
@@ -281,7 +282,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
                 team_type=team_r,
                 team_naam='Test team 1',
                 aanvangsgemiddelde=25.0,
-                klasse=klasse_r_ere).save()
+                team_klasse=klasse_r_ere).save()
 
         RegiocompetitieTeam(
                 deelcompetitie=self.deelcomp_regio112_18,
@@ -290,7 +291,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
                 team_type=team_r,
                 team_naam='Test team 2',
                 aanvangsgemiddelde=24.5,
-                klasse=klasse_r_ere).save()
+                team_klasse=klasse_r_ere).save()
 
         # create a partial team
         RegiocompetitieTeam(
@@ -410,7 +411,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
                 sporterboog=self.sporterboog,
                 bij_vereniging=self.sporterboog.sporter.bij_vereniging,
                 deelcompetitie=self.deelcomp_regio112_18,
-                klasse=self.klasse_recurve_onbekend,
+                team_klasse=self.klasse_recurve_onbekend,
                 inschrijf_voorkeur_team=True,
                 ag_voor_team_mag_aangepast_worden=True,
                 ag_voor_team=5.0).save()
