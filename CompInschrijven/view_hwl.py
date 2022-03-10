@@ -269,9 +269,9 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 pks = list()
                 for ronde in (DeelcompetitieRonde
                               .objects
-                              .select_related('plan')
+                              .prefetch_related('matches')
                               .filter(deelcompetitie=deelcomp)):
-                    pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+                    pks.extend(ronde.matches.values_list('pk', flat=True))
                 # for
 
                 wedstrijden = (CompetitieMatch
@@ -377,10 +377,10 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             pks = list()
             for ronde in (DeelcompetitieRonde
                           .objects
-                          .select_related('plan')
+                          .prefetch_related('matches')
                           .filter(deelcompetitie=deelcomp)):
                 # sta alle wedstrijden in de regio toe, dus alle clusters
-                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+                pks.extend(ronde.matches.values_list('pk', flat=True))
             # for
             for pk in pks:
                 key = 'wedstrijd_%s' % pk
@@ -487,7 +487,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 aanmelding.save()
 
                 if methode == INSCHRIJF_METHODE_1:
-                    aanmelding.inschrijf_gekozen_wedstrijden.set(bulk_wedstrijden)
+                    aanmelding.inschrijf_gekozen_matches.set(bulk_wedstrijden)
 
             # else: silently ignore
         # for
@@ -544,51 +544,51 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                                   .filter(voorkeur_eigen_blazoen=True)
                                   .values_list('sporter__lid_nr', flat=True))
 
-        objs = (RegioCompetitieSchutterBoog
-                .objects
-                .select_related('sporterboog',
-                                'sporterboog__sporter',
-                                'bij_vereniging',
-                                'indiv_klasse')
-                .filter(deelcompetitie=deelcomp,
-                        bij_vereniging=self.functie_nu.nhb_ver)
-                .order_by('indiv_klasse__volgorde',
-                          'sporterboog__sporter__voornaam',
-                          'sporterboog__sporter__achternaam'))
+        deelnemers = (RegioCompetitieSchutterBoog
+                      .objects
+                      .select_related('sporterboog',
+                                      'sporterboog__sporter',
+                                      'bij_vereniging',
+                                      'indiv_klasse')
+                     .filter(deelcompetitie=deelcomp,
+                             bij_vereniging=self.functie_nu.nhb_ver)
+                     .order_by('indiv_klasse__volgorde',
+                               'sporterboog__sporter__voornaam',
+                               'sporterboog__sporter__achternaam'))
 
-        for obj in objs:
-            obj.eigen_blazoen_ja_nee = '-'
-            if obj.sporterboog.sporter.lid_nr in wens_eigen_blazoen:
-                wkl = obj.klasse.indiv
+        for deelnemer in deelnemers:
+            deelnemer.eigen_blazoen_ja_nee = '-'
+            if deelnemer.sporterboog.sporter.lid_nr in wens_eigen_blazoen:
+                wkl = deelnemer.indiv_klasse
                 if comp.afstand == '18':
                     # Indoor
                     if wkl.blazoen1_regio != wkl.blazoen2_regio:
                         # er is keuze
                         if BLAZOEN_DT in (wkl.blazoen1_regio, wkl.blazoen2_regio):
-                            obj.eigen_blazoen_ja_nee = 'DT'
+                            deelnemer.eigen_blazoen_ja_nee = 'DT'
                 else:
                     # 25m1pijl
                     if wkl.blazoen1_regio != wkl.blazoen2_regio:
                         # er is keuze
                         if BLAZOEN_60CM_4SPOT in (wkl.blazoen1_regio, wkl.blazoen2_regio):
-                            obj.eigen_blazoen_ja_nee = '4spot'
+                            deelnemer.eigen_blazoen_ja_nee = '4spot'
 
-            obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]
-            obj.dagdeel_str = dagdeel_str[obj.inschrijf_voorkeur_dagdeel]
-            obj.check = "pk_%s" % obj.pk
-            sporter = obj.sporterboog.sporter
-            obj.lid_nr = sporter.lid_nr
-            obj.naam_str = sporter.volledige_naam()
+            deelnemer.team_ja_nee = JA_NEE[deelnemer.inschrijf_voorkeur_team]
+            deelnemer.dagdeel_str = dagdeel_str[deelnemer.inschrijf_voorkeur_dagdeel]
+            deelnemer.check = "pk_%s" % deelnemer.pk
+            sporter = deelnemer.sporterboog.sporter
+            deelnemer.lid_nr = sporter.lid_nr
+            deelnemer.naam_str = sporter.volledige_naam()
 
-            if obj.inschrijf_voorkeur_team:
+            if deelnemer.inschrijf_voorkeur_team:
                 if mag_toggle:
-                    obj.maak_nee = True
+                    deelnemer.maak_nee = True
             else:
                 if mag_toggle:
-                    obj.maak_ja = True
+                    deelnemer.maak_ja = True
         # for
 
-        return objs
+        return deelnemers
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

@@ -981,7 +981,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
 
         for deelnemer in (RegioCompetitieSchutterBoog
                           .objects
-                          .prefetch_related('inschrijf_gekozen_wedstrijden')
+                          .prefetch_related('inschrijf_gekozen_matches')
                           .select_related('indiv_klasse',
                                           'bij_vereniging',
                                           'sporterboog',
@@ -990,7 +990,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
                           .order_by('bij_vereniging__ver_nr',
                                     'sporterboog__sporter__lid_nr')):
 
-            pks = list(deelnemer.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True))        # TODO: 1 query per deelnemer
+            pks = list(deelnemer.inschrijf_gekozen_matches.values_list('pk', flat=True))        # TODO: 1 query per deelnemer
 
             kruisjes = list()
             for pk in kolom_pks:

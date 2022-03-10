@@ -83,7 +83,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
                       .prefetch_related('plan__wedstrijden')
                       .filter(deelcompetitie=deelcomp)):
 
-            for wedstrijd in ronde.plan.wedstrijden.all():
+            for wedstrijd in ronde.matches.all():
                 wedstrijd_pks.append(wedstrijd.pk)
                 beschrijving = ronde.beschrijving
                 if not beschrijving and ronde.cluster:

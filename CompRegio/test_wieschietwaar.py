@@ -244,7 +244,7 @@ class TestCompRegioWieSchietWaar(E2EHelpers, TestCase):
 
             match.save()
             self.ronde_wedstrijd = match
-            ronde.plan.wedstrijden.add(match)
+            ronde.matches.add(match)
         # for
 
         # maak voor de vereniging een wedstrijd die niets met de competitie te doen heeft

@@ -650,7 +650,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
 
         # zet een limiet
         limiet = DeelcompetitieIndivKlasseLimiet(deelcompetitie=self.deelcomp_rayon1_18,
-                                                 indivklasse=self.klasse_r,
+                                                 indiv_klasse=self.klasse_r,
                                                  limiet=20)
         limiet.save()
         self.assertTrue(str(limiet) != "")      # coverage only
@@ -662,14 +662,14 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
                                               sporterboog=self.sporterboog,
                                               bij_vereniging=self.sporterboog.sporter.bij_vereniging,
-                                              klasse=self.klasse_r)
+                                              indiv_klasse=self.klasse_r)
         deelnemer.save()
         self.assertTrue(str(deelnemer) != "")      # coverage only
 
         deelnemer = KampioenschapSchutterBoog(deelcompetitie=self.deelcomp_rayon1_18,
                                               sporterboog=self.sporterboog,
                                               bij_vereniging=self.sporterboog.sporter.bij_vereniging,
-                                              klasse=self.klasse_c)
+                                              indiv_klasse=self.klasse_c)
         deelnemer.save()
 
         with self.assert_max_queries(20):

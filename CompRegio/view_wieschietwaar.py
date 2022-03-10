@@ -59,7 +59,7 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
                 .select_related('sporterboog',
                                 'sporterboog__sporter',
                                 'sporterboog__boogtype')
-                .prefetch_related('inschrijf_gekozen_wedstrijden')
+                .prefetch_related('inschrijf_gekozen_matches')
                 .filter(deelcompetitie=deelcomp,
                         bij_vereniging=self.functie_nu.nhb_ver)
                 .order_by('sporterboog__sporter__voornaam',
@@ -70,7 +70,7 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
         # toon alleen de wedstrijden die in gebruik zijn (anders wordt het zo veel)
         wedstrijd_pks = list()
         for obj in objs:
-            obj.pks = obj.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True)
+            obj.pks = obj.inschrijf_gekozen_matches.values_list('pk', flat=True)
 
             for pk in obj.pks:
                 if pk not in wedstrijd_pks:         # pragma: no branch

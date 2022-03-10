@@ -63,11 +63,10 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
         pks = list()
         for ronde in (DeelcompetitieRonde
                       .objects
-                      .select_related('deelcompetitie',
-                                      'plan')
-                      .prefetch_related('plan__wedstrijden')
+                      .select_related('deelcompetitie')
+                      .prefetch_related('matches')
                       .filter(deelcompetitie=deelnemer.deelcompetitie)):
-            pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+            pks.extend(ronde.matches.values_list('pk', flat=True))
         # for
 
         wedstrijden = (CompetitieMatch
@@ -78,7 +77,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
                        .order_by('datum_wanneer',
                                  'tijd_begin_wedstrijd'))
 
-        keuze = list(deelnemer.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True))
+        keuze = list(deelnemer.inschrijf_gekozen_matches.values_list('pk', flat=True))
 
         # splits de wedstrijden op naar in-cluster en out-of-cluster
         ver = deelnemer.sporterboog.sporter.bij_vereniging
@@ -172,11 +171,10 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
         pks = list()
         for ronde in (DeelcompetitieRonde
                       .objects
-                      .select_related('deelcompetitie',
-                                      'plan')
-                      .prefetch_related('plan__wedstrijden')
+                      .select_related('deelcompetitie')
+                      .prefetch_related('matches')
                       .filter(deelcompetitie=deelnemer.deelcompetitie)):
-            pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+            pks.extend(ronde.matches.values_list('pk', flat=True))
         # for
 
         # zoek alle wedstrijden erbij
@@ -187,7 +185,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
                        .order_by('datum_wanneer',
                                  'tijd_begin_wedstrijd'))
 
-        keuze = list(deelnemer.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True))
+        keuze = list(deelnemer.inschrijf_gekozen_matches.values_list('pk', flat=True))
         keuze_add = list()
         aanwezig = len(keuze)
 
@@ -205,14 +203,14 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
 
         # alle overgebleven wedstrijden zijn ongewenst
         aanwezig -= len(keuze)
-        deelnemer.inschrijf_gekozen_wedstrijden.remove(*keuze)
+        deelnemer.inschrijf_gekozen_matches.remove(*keuze)
 
         # controleer dat er maximaal 7 momenten gekozen worden
         if aanwezig + len(keuze_add) > 7:
             # begrens het aantal toe te voegen wedstrijden
             keuze_add = keuze_add[:7 - aanwezig]
 
-        deelnemer.inschrijf_gekozen_wedstrijden.add(*keuze_add)
+        deelnemer.inschrijf_gekozen_matches.add(*keuze_add)
 
         if rol_nu == Rollen.ROL_SPORTER:
             url = reverse('Sporter:profiel')

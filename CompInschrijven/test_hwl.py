@@ -632,7 +632,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)    # 1 schutter, 1 competitie
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog__sporter__lid_nr=100003)
-        self.assertEqual(deelnemer.inschrijf_gekozen_wedstrijden.count(), 1)
+        self.assertEqual(deelnemer.inschrijf_gekozen_matches.count(), 1)
 
     def test_aanmelden_team(self):
         url = self.url_aanmelden % self.comp_18.pk

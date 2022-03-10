@@ -152,11 +152,11 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
             teams = (KampioenschapTeam
                      .objects
                      .filter(deelcompetitie=deelcomp_rk,
-                             klasse__team__pk__in=klasse_team_pks)
+                             team_klasse__pk__in=klasse_team_pks)
                      .select_related('vereniging',
-                                     'klasse')
+                                     'team_klasse')
                      .prefetch_related('gekoppelde_schutters')
-                     .order_by('klasse',
+                     .order_by('team_klasse',               # TODO: volgorde?
                                '-aanvangsgemiddelde'))      # sterkste team bovenaan
             context['deelnemers_teams'] = teams
 
@@ -236,7 +236,11 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieIndivKlasse.DoesNotExist):
             raise Http404('Klasse niet gevonden')
 
-        deelcomp_rk = match.deelcompetitie_set.all()[0]
+        deelcomps = match.deelcompetitie_set.all()
+        if len(deelcomps) == 0:
+            raise Http404('Geen RK wedstrijd')
+
+        deelcomp_rk = deelcomps[0]
         if deelcomp_rk.laag != LAAG_RK:
             raise Http404('Verkeerde competitie')
 
@@ -306,7 +310,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         deelnemers = (KampioenschapSchutterBoog
                       .objects
                       .filter(deelcompetitie=deelcomp_rk,
-                              klasse=klasse.pk)
+                              indiv_klasse=klasse.pk)
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
                                       'bij_vereniging',
@@ -417,9 +421,9 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         deelcomps = match.deelcompetitie_set.all()
         if len(deelcomps) == 0:
-            raise Http404('Geen competitie')
+            raise Http404('Geen RK wedstrijd')
 
-        deelcomp_rk = match.deelcompetitie_set.all()[0]
+        deelcomp_rk = deelcomps[0]
         if deelcomp_rk.laag != LAAG_RK:
             raise Http404('Verkeerde competitie')
 

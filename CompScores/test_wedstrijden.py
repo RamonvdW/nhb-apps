@@ -220,7 +220,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                     uitslag.scores.add(score)
 
             match.save()
-            ronde.plan.wedstrijden.add(match)
+            ronde.matches.add(match)
 
             match.indiv_klassen.set(IndivWedstrijdklasse.objects.all())
 

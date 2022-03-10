@@ -222,7 +222,7 @@ class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
                     uitslag.scores.add(score)
 
             match.save()
-            ronde.plan.wedstrijden.add(match)
+            ronde.matches.add(match)
 
             match.indiv_klassen.set(IndivWedstrijdklasse.objects.all())
 
@@ -501,12 +501,12 @@ class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compregio/waarschijnlijke-deelnemers-regio.dtl', 'plein/site_layout.dtl'))
 
         # 25m1pijl wedstrijd
-        self.ronde.plan.wedstrijden.clear()
+        self.ronde.matches.clear()
         self.deelcomp_regio_18 = DeelCompetitie.objects.get(laag=LAAG_REGIO,
                                                             nhb_regio=self.regio_111,
                                                             competitie__afstand=25)
         ronde = maak_deelcompetitie_ronde(self.deelcomp_regio_18)
-        ronde.plan.wedstrijden.add(self.wedstrijden[0])
+        ronde.matches.add(self.wedstrijden[0])
 
         url = self.url_waarschijnlijke % self.wedstrijden[0].pk
         with self.assert_max_queries(20):

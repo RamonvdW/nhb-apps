@@ -643,9 +643,9 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         uitslag.scores.add(score)
 
         ronde = DeelcompetitieRonde.objects.filter(deelcompetitie=self.testdata.deelcomp18_regio[101])[0]
-        wedstrijd = ronde.plan.wedstrijden.all()[0]
-        wedstrijd.uitslag = uitslag
-        wedstrijd.save()
+        match = ronde.matches.all()[0]
+        match.uitslag = uitslag
+        match.save()
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)

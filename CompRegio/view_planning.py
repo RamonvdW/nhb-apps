@@ -116,7 +116,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
             regio_ronde.beschrijving = "Alle regio wedstrijden"
             regio_ronde.save()
 
-        regio_ronde.wedstrijden_count = regio_ronde.plan.wedstrijden.count()
+        regio_ronde.wedstrijden_count = regio_ronde.matches.count()
         regio_ronde.url = reverse('CompRegio:regio-methode1-planning',
                                   kwargs={'ronde_pk': regio_ronde.pk})
         context['regio_ronde'] = regio_ronde
@@ -150,7 +150,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
 
             if cluster.nhbvereniging_set.count() > 0:
                 ronde = cluster.deelcompetitieronde_set.all()[0]
-                cluster.wedstrijden_count = ronde.plan.wedstrijden.count()
+                cluster.wedstrijden_count = ronde.matches.count()
                 cluster.ronde_url = reverse('CompRegio:regio-methode1-planning',
                                             kwargs={'ronde_pk': ronde.pk})
 
@@ -170,7 +170,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
 
         context['rondes'] = list()
         for ronde in rondes:
-            ronde.wedstrijd_count = ronde.plan.wedstrijden.count()
+            ronde.wedstrijd_count = ronde.matches.count()
             context['rondes'].append(ronde)
         # for
 
@@ -336,7 +336,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
                                         cluster=cluster))
 
         for ronde in context['rondes']:
-            ronde.wedstrijd_count = ronde.plan.wedstrijden.count()
+            ronde.wedstrijd_count = ronde.matches.count()
         # for
 
         # alleen de RCL mag de planning uitbreiden
@@ -435,7 +435,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         context['ronde_opslaan_url'] = reverse('CompRegio:regio-ronde-planning',
                                                kwargs={'ronde_pk': ronde.pk})
 
-        context['wedstrijden'] = (ronde.plan.wedstrijden
+        context['wedstrijden'] = (ronde.matches
                                   .select_related('vereniging',
                                                   'locatie')
                                   .prefetch_related('indiv_klassen')
@@ -610,7 +610,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
         if request.POST.get('verwijder_ronde', None):
             # de ronde moet verwijderd worden
             # controleer nog een keer dat er geen wedstrijden aan hangen
-            if ronde.plan.wedstrijden.count() > 0:
+            if ronde.matches.count() > 0:
                 raise Http404('Wedstrijden aanwezig')
 
             next_url = reverse('CompRegio:regio-planning',
@@ -664,7 +664,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                 diff = when2 - when1
 
                 # pas de datum van alle wedstrijden met evenveel aan
-                for match in ronde.plan.wedstrijden.all():
+                for match in ronde.matches.all():
                     match.datum_wanneer += diff
                     match.save()
                 # for
@@ -742,7 +742,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
 
         context['ronde'] = ronde
 
-        wedstrijden = (ronde.plan.wedstrijden
+        wedstrijden = (ronde.matches
                        .select_related('vereniging')
                        .order_by('datum_wanneer',
                                  'tijd_begin_wedstrijd'))
@@ -820,7 +820,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
         wedstrijd.tijd_begin_wedstrijd = datetime.time(hour=0, minute=0, second=0)
         wedstrijd.save()
 
-        ronde.plan.wedstrijden.add(wedstrijd)
+        ronde.matches.add(wedstrijd)
 
         # laat de nieuwe wedstrijd meteen wijzigen
         next_url = reverse('CompRegio:regio-wijzig-wedstrijd',

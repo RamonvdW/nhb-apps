@@ -101,7 +101,7 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         # for
 
         # haal de RK wedstrijden op
-        context['wedstrijden_rk'] = (deelcomp_rk.plan.wedstrijden
+        context['wedstrijden_rk'] = (deelcomp_rk.rk_bk_matches
                                      .select_related('vereniging')
                                      .prefetch_related('indiv_klassen',
                                                        'team_klassen')
@@ -236,16 +236,12 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _get_wedstrijdklassen(deelcomp_rk, wedstrijd):
-        """ Geef een lijst van individuele en team wedstrijdklassen terug.
+        """ Retourneer een lijst van individuele en team wedstrijdklassen.
             Elke klasse bevat een telling van het aantal sporters / teams
         """
 
         # voorkom dubbel koppelen: zoek uit welke klassen al gekoppeld zijn aan een andere wedstrijd
-        wedstrijd_pks = list()
-        for plan in CompetitieWedstrijdenPlan.objects.prefetch_related('wedstrijden').filter(pk=deelcomp_rk.plan.pk):
-            pks = list(plan.wedstrijden.all().values_list('pk', flat=True))
-            wedstrijd_pks.extend(pks)
-        # for
+        wedstrijd_pks = list(deelcomp_rk.rk_bk_matches.all().values_list('pk', flat=True))
         if wedstrijd.pk in wedstrijd_pks:
             wedstrijd_pks.remove(wedstrijd.pk)
 

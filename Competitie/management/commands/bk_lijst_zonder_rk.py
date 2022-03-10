@@ -252,7 +252,7 @@ class Command(BaseCommand):
             for deelnemer in (KampioenschapSchutterBoog
                               .objects
                               .filter(deelcompetitie__competitie=self.comp,
-                                      klasse=klasse)
+                                      indiv_klasse=klasse)
                               .select_related('sporterboog__sporter',
                                               'bij_vereniging')
                               .order_by('-gemiddelde')):

@@ -136,25 +136,24 @@ class UitslagenRayonIndivView(TemplateView):
             raise Http404('Boogtype niet bekend')
 
         try:
-            deelcomp = (DeelCompetitie
-                        .objects
-                        .select_related('competitie',
-                                        'nhb_rayon',
-                                        'plan')
-                        .prefetch_related('plan__wedstrijden')
-                        .get(laag=LAAG_RK,
-                             competitie__is_afgesloten=False,
-                             competitie=comp,
-                             nhb_rayon__rayon_nr=rayon_nr))
+            deelcomp_rk = (DeelCompetitie
+                           .objects
+                           .select_related('competitie',
+                                           'nhb_rayon')
+                           .prefetch_related('rk_bk_wedstrijden')
+                           .get(laag=LAAG_RK,
+                                competitie__is_afgesloten=False,
+                                competitie=comp,
+                                nhb_rayon__rayon_nr=rayon_nr))
         except DeelCompetitie.DoesNotExist:
             raise Http404('Competitie niet gevonden')
 
-        context['deelcomp'] = deelcomp
-        deelcomp.competitie.bepaal_fase()           # TODO: kan weg? We hebben al comp (zie hierboven)
+        context['deelcomp'] = deelcomp_rk
+        deelcomp_rk.competitie.bepaal_fase()           # TODO: kan weg? We hebben al comp (zie hierboven)
 
         # haal de planning erbij: competitieklasse --> competitiewedstrijd
         indiv2wedstrijd = dict()    # [indiv_pk] = competitiewedstrijd
-        wedstrijd_pks = list(deelcomp.plan.wedstrijden.values_list('pk', flat=True))
+        wedstrijd_pks = list(deelcomp_rk.rk_bk_wedstrijden.values_list('pk', flat=True))
         for wedstrijd in (CompetitieMatch
                           .objects
                           .prefetch_related('indiv_klassen')
@@ -171,13 +170,13 @@ class UitslagenRayonIndivView(TemplateView):
 
         wkl2limiet = dict()    # [pk] = aantal
 
-        if deelcomp.heeft_deelnemerslijst:
+        if deelcomp_rk.heeft_deelnemerslijst:
             # deelnemers/reserveschutters van het RK tonen
             deelnemers = (KampioenschapSchutterBoog
                           .objects
                           .exclude(bij_vereniging__isnull=True)      # attentie gevallen
                           .exclude(deelname=DEELNAME_NEE)            # geen sporters die zich afgemeld hebben
-                          .filter(deelcompetitie=deelcomp,
+                          .filter(deelcompetitie=deelcomp_rk,
                                   indiv_klasse__boogtype=boogtype,
                                   volgorde__lte=48)                  # toon tot 48 sporters per klasse
                           .select_related('indiv_klasse',
@@ -190,8 +189,8 @@ class UitslagenRayonIndivView(TemplateView):
             for limiet in (DeelcompetitieIndivKlasseLimiet
                            .objects
                            .select_related('indiv_klasse')
-                           .filter(deelcompetitie=deelcomp)):
-                wkl2limiet[limiet.klasse.pk] = limiet.limiet
+                           .filter(deelcompetitie=deelcomp_rk)):
+                wkl2limiet[limiet.indiv_klasse.pk] = limiet.limiet
             # for
 
             context['is_lijst_rk'] = True
@@ -211,7 +210,7 @@ class UitslagenRayonIndivView(TemplateView):
             deelnemers = (RegioCompetitieSchutterBoog
                           .objects
                           .filter(deelcompetitie__pk__in=deelcomp_pks,
-                                  klasse__indiv__boogtype=boogtype,
+                                  indiv_klasse__boogtype=boogtype,
                                   aantal_scores__gte=comp.aantal_scores_voor_rk_deelname)
                           .select_related('indiv_klasse',
                                           'sporterboog__sporter',
@@ -228,7 +227,7 @@ class UitslagenRayonIndivView(TemplateView):
             if deelnemer.break_klasse:
                 if klasse == -1:
                     deelnemer.is_eerste_break = True
-                indiv = deelnemer.klasse.indiv
+                indiv = deelnemer.indiv_klasse
                 deelnemer.klasse_str = indiv.beschrijving
                 try:
                     deelnemer.match = indiv2wedstrijd[indiv.pk]
@@ -251,7 +250,7 @@ class UitslagenRayonIndivView(TemplateView):
 
             deelnemer.geen_deelname_risico = deelnemer.sporterboog.sporter.bij_vereniging != deelnemer.bij_vereniging
 
-            if deelcomp.heeft_deelnemerslijst:
+            if deelcomp_rk.heeft_deelnemerslijst:
                 if deelnemer.rank > limiet:
                     deelnemer.is_reserve = True
 
@@ -360,6 +359,7 @@ class UitslagenRayonTeamsView(TemplateView):
                            .objects
                            .select_related('competitie',
                                            'nhb_rayon')
+                           .prefetch_related('rk_bk_matches')
                            .get(laag=LAAG_RK,
                                 competitie=comp,
                                 competitie__is_afgesloten=False,
@@ -373,7 +373,7 @@ class UitslagenRayonTeamsView(TemplateView):
 
         # haal de planning erbij: competitieklasse --> competitiewedstrijd
         team2wedstrijd = dict()     # [team_pk] = competitiewedstrijd
-        wedstrijd_pks = list(deelcomp_rk.plan.wedstrijden.values_list('pk', flat=True))
+        wedstrijd_pks = list(deelcomp_rk.rk_bk_matches.values_list('pk', flat=True))
         for wedstrijd in (CompetitieMatch
                           .objects
                           .prefetch_related('team_klassen')
@@ -396,17 +396,17 @@ class UitslagenRayonTeamsView(TemplateView):
                     .objects
                     .filter(deelcompetitie=deelcomp_rk,
                             team_type=teamtype)
-                    .select_related('klasse__team')
-                    .order_by('klasse__team__volgorde',
+                    .select_related('team_klasse')
+                    .order_by('team_klasse__volgorde',
                               '-aanvangsgemiddelde'))       # sterkste team eerst
 
         prev_klasse = ""
         rank = 0
         teller = None
         for team in rk_teams:
-            if team.klasse != prev_klasse:
+            if team.team_klasse != prev_klasse:
                 team.break_klasse = True
-                if team.klasse:
+                if team.team_klasse:
                     team.klasse_str = team.team_klasse.beschrijving
                     try:
                         team.match = team2wedstrijd[team.team_klasse.pk]
@@ -418,7 +418,7 @@ class UitslagenRayonTeamsView(TemplateView):
                 teller = team
                 teller.aantal_regels = 2
 
-                prev_klasse = team.klasse
+                prev_klasse = team.team_klasse
                 rank = 0
 
             team.ver_nr = team.vereniging.ver_nr

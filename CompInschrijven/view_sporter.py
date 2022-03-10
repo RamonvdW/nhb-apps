@@ -146,9 +146,9 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
             pks = list()
             for ronde in (DeelcompetitieRonde
                           .objects
-                          .select_related('plan')
+                          .prefetch_related('matches')
                           .filter(deelcompetitie=deelcomp)):
-                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+                pks.extend(ronde.matches.values_list('pk', flat=True))
             # for
 
             wedstrijden = (CompetitieMatch
@@ -358,10 +358,10 @@ class RegiocompetitieAanmeldenView(View):
             pks = list()
             for ronde in (DeelcompetitieRonde
                           .objects
-                          .select_related('plan')
+                          .prefetch_related('matches')
                           .filter(deelcompetitie=deelcomp)):
                 # sta alle wedstrijden in de regio toe, dus alle clusters
-                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+                pks.extend(ronde.matches.values_list('pk', flat=True))
             # for
             wedstrijden = list()
             for pk in pks:
@@ -369,7 +369,7 @@ class RegiocompetitieAanmeldenView(View):
                 if request.POST.get(key, '') != '':
                     wedstrijden.append(pk)
             # for
-            aanmelding.inschrijf_gekozen_wedstrijden.set(wedstrijden)
+            aanmelding.inschrijf_gekozen_matches.set(wedstrijden)
 
         return HttpResponseRedirect(reverse('Sporter:profiel'))
 

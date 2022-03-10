@@ -244,7 +244,7 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
                      .filter(deelcompetitie__competitie=comp)
                      .annotate(sporter_count=Count('gekoppelde_schutters'))):
 
-            team.klasse = None
+            team.team_klasse = None
             if 3 <= team.sporter_count <= 4:
                 # dit is een volledig team
                 try:
