@@ -498,12 +498,11 @@ class CompetitieTeamKlasse(models.Model):
 def get_competitie_indiv_leeftijdsklassen(comp):
     lijst = list()
     pks = list()
-    for klasse in (CompetitieKlasse
+    for klasse in (CompetitieIndivKlasse
                    .objects
                    .filter(competitie=comp)
-                   .exclude(indiv=None)
-                   .prefetch_related('indiv__leeftijdsklassen')):
-        for lkl in klasse.indiv.leeftijdsklassen.all():
+                   .prefetch_related('leeftijdsklassen')):
+        for lkl in klasse.leeftijdsklassen.all():
             if lkl.pk not in pks:
                 pks.append(lkl.pk)
                 tup = (lkl.volgorde, lkl.pk, lkl)

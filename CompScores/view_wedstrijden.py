@@ -43,17 +43,17 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
         pks1 = list(DeelcompetitieRonde
                     .objects
                     .filter(deelcompetitie__is_afgesloten=False,
-                            plan__wedstrijden__vereniging=self.functie_nu.nhb_ver,
+                            matches__vereniging=self.functie_nu.nhb_ver,
                             deelcompetitie__laag=LAAG_REGIO)
-                    .values_list('plan__wedstrijden', flat=True))
+                    .values_list('matches', flat=True))
 
         pks2 = list(DeelCompetitie
                     .objects
                     .filter(is_afgesloten=False,
-                            plan__wedstrijden__vereniging=self.functie_nu.nhb_ver,
+                            rk_bk_matches__vereniging=self.functie_nu.nhb_ver,
                             laag__in=(LAAG_RK, LAAG_BK))
                     .exclude(plan__wedstrijden=None)                # excludes when ManyToMany is empty
-                    .values_list('plan__wedstrijden', flat=True))
+                    .values_list('rk_bk_matches', flat=True))
 
         pks = list(pks1) + list(pks2)
 

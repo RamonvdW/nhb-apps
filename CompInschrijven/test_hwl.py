@@ -10,13 +10,12 @@ from Functie.models import maak_functie, Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, RegioCompetitieSchutterBoog,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, LAAG_REGIO, LAAG_RK,
-                               DeelcompetitieRonde)
+                               DeelcompetitieRonde, CompetitieMatch)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
-from Wedstrijden.models import CompetitieWedstrijd
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -310,15 +309,15 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         # maak een wedstrijd aan
-        self.assertEqual(CompetitieWedstrijd.objects.count(), 0)
+        self.assertEqual(CompetitieMatch.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url_ronde)
         self.assert_is_redirect_not_plein(resp)
 
-        wedstrijd_pk = CompetitieWedstrijd.objects.all()[0].pk
+        match_pk = CompetitieMatch.objects.all()[0].pk
 
         # wijzig de instellingen van deze wedstrijd
-        url_wed = self.url_wijzig_wedstrijd % wedstrijd_pk
+        url_wed = self.url_wijzig_wedstrijd % match_pk
         with self.assert_max_queries(20):
             resp = self.client.post(url_wed, {'nhbver_pk': self.nhbver1.pk,
                                               'wanneer': '2020-12-11', 'aanvang': '12:34'})
@@ -331,7 +330,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
             self.assert_is_redirect_not_plein(resp)
         # for
 
-        return [wedstrijd_pk]
+        return [match_pk]
 
     def test_inschrijven(self):
         url = self.url_aanmelden % self.comp_18.pk

@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from Competitie.models import CompetitieMatch
 from Functie.models import maak_functie
-from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
+from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
-from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
+from .models import Score, ScoreHist, Uitslag, SCORE_WAARDE_VERWIJDERD
 from .operations import score_indiv_ag_opslaan
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
@@ -25,32 +25,26 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
     def _maak_uitslag(self, sporterboog):
         # maak 2x wedstrijd + uitslag + score voor deze schutterboog, met geschiedenis
         uur_00 = datetime.time(hour=0)
-        uur_18 = datetime.time(hour=18)
         uur_19 = datetime.time(hour=19)
-        uur_22 = datetime.time(hour=22)
 
-        uitslag18 = CompetitieWedstrijdUitslag(max_score=300,
-                                               afstand_meter=18)
+        uitslag18 = Uitslag(max_score=300,
+                            afstand_meter=18)
         uitslag18.save()
 
-        uitslag25 = CompetitieWedstrijdUitslag(max_score=250,
-                                               afstand_meter=25)
+        uitslag25 = Uitslag(max_score=250,
+                            afstand_meter=25)
         uitslag25.save()
 
-        CompetitieWedstrijd(beschrijving='Test wedstrijdje 18m',
-                            datum_wanneer=datetime.date(year=2020, month=10, day=10),
-                            tijd_begin_aanmelden=uur_18,
-                            tijd_begin_wedstrijd=uur_19,
-                            tijd_einde_wedstrijd=uur_22,
-                            uitslag=uitslag18,
-                            vereniging=self.nhbver1).save()
+        CompetitieMatch(beschrijving='Test wedstrijdje 18m',
+                        datum_wanneer=datetime.date(year=2020, month=10, day=10),
+                        tijd_begin_wedstrijd=uur_19,
+                        uitslag=uitslag18,
+                        vereniging=self.nhbver1).save()
 
-        CompetitieWedstrijd(beschrijving='Test wedstrijdje 25m',
-                            datum_wanneer=datetime.date(year=2020, month=10, day=11),
-                            tijd_begin_aanmelden=uur_00,
-                            tijd_begin_wedstrijd=uur_00,
-                            tijd_einde_wedstrijd=uur_00,
-                            uitslag=uitslag25).save()
+        CompetitieMatch(beschrijving='Test wedstrijdje 25m',
+                        datum_wanneer=datetime.date(year=2020, month=10, day=11),
+                        tijd_begin_wedstrijd=uur_00,
+                        uitslag=uitslag25).save()
 
         score = Score(sporterboog=sporterboog,
                       afstand_meter=18,

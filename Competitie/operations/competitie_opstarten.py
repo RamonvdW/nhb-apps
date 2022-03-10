@@ -93,14 +93,10 @@ def maak_deelcompetitie_ronde(deelcomp, cluster=None):
 
     if nieuwe_week_nr:
         # maak een eigen wedstrijdenplan aan voor deze ronde
-        plan = CompetitieWedstrijdenPlan()
-        plan.save()
-
         ronde = DeelcompetitieRonde()
         ronde.deelcompetitie = deelcomp
         ronde.cluster = cluster
         ronde.week_nr = nieuwe_week_nr
-        ronde.plan = plan
         ronde.save()
     else:
         # maximum aantal rondes is al aangemaakt
@@ -124,14 +120,6 @@ def _maak_deelcompetities(comp, rayons, regios, functies):
                              competitie__afstand=comp.afstand)):
         vorige_deelcomps[deelcomp.nhb_regio.regio_nr] = deelcomp
     # for
-
-    # maak wedstrijdplannen aan: voor de 4x LAAG_RK en 1x voor LAAG_BK
-    plannen = [CompetitieWedstrijdenPlan(),
-               CompetitieWedstrijdenPlan(),
-               CompetitieWedstrijdenPlan(),
-               CompetitieWedstrijdenPlan(),
-               CompetitieWedstrijdenPlan()]
-    CompetitieWedstrijdenPlan.objects.bulk_create(plannen)
 
     # maak de Deelcompetities aan voor Regio, RK, BK
     bulk = list()
@@ -165,8 +153,7 @@ def _maak_deelcompetities(comp, rayons, regios, functies):
                 deel = DeelCompetitie(competitie=comp,
                                       laag=laag,
                                       nhb_rayon=obj,
-                                      functie=functie,
-                                      plan=plannen[obj.rayon_nr])
+                                      functie=functie)
                 bulk.append(deel)
             # for
         else:
@@ -174,8 +161,7 @@ def _maak_deelcompetities(comp, rayons, regios, functies):
             functie = functies[("BKO", comp.afstand, 0)]
             deel = DeelCompetitie(competitie=comp,
                                   laag=laag,
-                                  functie=functie,
-                                  plan=plannen[0])
+                                  functie=functie)
             bulk.append(deel)
     # for
 

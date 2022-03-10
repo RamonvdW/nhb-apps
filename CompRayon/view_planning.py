@@ -205,9 +205,10 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
-        match = CompetitieMatch()
-        match.datum_wanneer = deelcomp_rk.competitie.rk_eerste_wedstrijd
-        match.tijd_begin_wedstrijd = datetime.time(hour=10, minute=0, second=0)
+        match = CompetitieMatch(
+                    competitie=deelcomp_rk.competitie,
+                    datum_wanneer=deelcomp_rk.competitie.rk_eerste_wedstrijd,
+                    tijd_begin_wedstrijd=datetime.time(hour=10, minute=0, second=0))
         match.save()
 
         deelcomp_rk.rk_bk_matches.add(match)
@@ -770,7 +771,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                        .filter(deelcompetitie=deelcomp_rk,
                                indiv_klasse__in=list(pk2keuze_indiv.keys()))):
 
-            pk = limiet.klasse.pk
+            pk = limiet.indiv_klasse.pk
             keuze = pk2keuze_indiv[pk]
             del pk2keuze_indiv[pk]
 
@@ -784,11 +785,11 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                        .filter(deelcompetitie=deelcomp_rk,
                                team_klasse__in=list(pk2keuze_team.keys()))):
 
-            pk = limiet.klasse.pk
+            pk = limiet.team_klasse.pk
             keuze = pk2keuze_team[pk]
             del pk2keuze_team[pk]
 
-            tup = (limiet.klasse, keuze, limiet.limiet)
+            tup = (limiet.team_klasse, keuze, limiet.limiet)
             wijzig_limiet_team.append(tup)
         # for
 

@@ -6,14 +6,13 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
+from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
                                INSCHRIJF_METHODE_1, LAAG_REGIO, LAAG_RK, LAAG_BK)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
-from Wedstrijden.models import CompetitieWedstrijd
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -168,24 +167,24 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk
 
         # maak 5 wedstrijden aan
-        self.assertEqual(CompetitieWedstrijd.objects.count(), 0)
+        self.assertEqual(CompetitieMatch.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url_ronde)
         self.assert_is_redirect_not_plein(resp)
         self.assertTrue(self.url_wijzig_wedstrijd[:-3] in resp.url)     # [:-3] cuts off %s/
-        self.assertEqual(CompetitieWedstrijd.objects.count(), 1)
+        self.assertEqual(CompetitieMatch.objects.count(), 1)
 
         self.client.post(url_ronde)
         self.client.post(url_ronde)
         self.client.post(url_ronde)
         self.client.post(url_ronde)
 
-        self.assertEqual(CompetitieWedstrijd.objects.count(), 5)
+        self.assertEqual(CompetitieMatch.objects.count(), 5)
 
         # zet de wedstrijden op de 15 van elke maand
         self.wedstrijd_pks = list()
         maand = 7
-        for wedstrijd in CompetitieWedstrijd.objects.all():
+        for wedstrijd in CompetitieMatch.objects.all():
             self.wedstrijd_pks.append(wedstrijd.pk)
 
             wedstrijd.datum_wanneer = '2019-%s-15' % maand
@@ -294,7 +293,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_geen_keuzes(self):
-        CompetitieWedstrijd.objects.all().delete()
+        CompetitieMatch.objects.all().delete()
 
         # haal het lege overzicht op
         with self.assert_max_queries(20):

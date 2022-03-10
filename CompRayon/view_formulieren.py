@@ -49,47 +49,41 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])      # afkappen voor de veiligheid
-            wedstrijd = (CompetitieMatch
-                         .objects
-                         .select_related('vereniging')
-                         .prefetch_related('indiv_klassen',
-                                           'team_klassen')
-                         .get(pk=wedstrijd_pk,
-                              vereniging=self.functie_nu.nhb_ver))
+            match_pk = int(kwargs['wedstrijd_pk'][:6])      # afkappen voor de veiligheid
+            match = (CompetitieMatch
+                     .objects
+                     .select_related('vereniging')
+                     .prefetch_related('indiv_klassen',
+                                       'team_klassen')
+                     .get(pk=match_pk,
+                          vereniging=self.functie_nu.nhb_ver))
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plannen = wedstrijd.competitiewedstrijdenplan_set.all()     # TODO: fix
-        if len(plannen) == 0:
-            raise Http404('Geen wedstrijden plan')
-        plan = plannen[0]
-        del plannen
-
-        deelcomp = plan.deelcompetitie_set.select_related('competitie', 'nhb_rayon').all()[0]
-        if deelcomp.laag != LAAG_RK:
+        deelcomp_rk = match.deelcompetitie_set.all()[0]
+        if deelcomp_rk.laag != LAAG_RK:
             raise Http404('Verkeerde competitie')
 
-        context['deelcomp'] = deelcomp
-        context['wedstrijd'] = wedstrijd
-        context['vereniging'] = wedstrijd.vereniging        # als we hier komen is dit altijd bekend
-        context['locatie'] = wedstrijd.locatie
+        context['deelcomp'] = deelcomp_rk
+        context['wedstrijd'] = match
+        context['vereniging'] = match.vereniging        # als we hier komen is dit altijd bekend
+        context['locatie'] = match.locatie
         context['aantal_banen'] = '?'
 
-        comp = deelcomp.competitie
+        comp = deelcomp_rk.competitie
         # TODO: check fase
         if comp.afstand == '18':
             aantal_pijlen = 30
-            if wedstrijd.locatie:
-                context['aantal_banen'] = wedstrijd.locatie.banen_18m
+            if match.locatie:
+                context['aantal_banen'] = match.locatie.banen_18m
         else:
             aantal_pijlen = 25
-            if wedstrijd.locatie:
-                context['aantal_banen'] = wedstrijd.locatie.banen_25m
+            if match.locatie:
+                context['aantal_banen'] = match.locatie.banen_25m
 
-        if deelcomp.laag == LAAG_RK:
-            wedstrijd.is_rk = True
-            wedstrijd.beschrijving = "Rayonkampioenschap"
+        if deelcomp_rk.laag == LAAG_RK:
+            match.is_rk = True
+            match.beschrijving = "Rayonkampioenschap"
         # else:
         #     wedstrijd.is_bk = True
         #     wedstrijd.beschrijving = "Bondskampioenschap"
@@ -99,15 +93,15 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
 
         klasse_indiv_pks = list()
         klasse_team_pks = list()
-        wedstrijd.klassen_lijst = klassen_lijst = list()
-        for klasse in wedstrijd.indiv_klassen.all():
+        match.klassen_lijst = klassen_lijst = list()
+        for klasse in match.indiv_klassen.all():
             klassen_lijst.append(str(klasse))
             klasse_indiv_pks.append(klasse.pk)
             if not heeft_indiv:
                 heeft_indiv = True
                 beschr.append('Individueel')
         # for
-        for klasse in wedstrijd.team_klassen.all():
+        for klasse in match.team_klassen.all():
             klassen_lijst.append(str(klasse))
             klasse_team_pks.append(klasse.pk)
             if not heeft_teams:
@@ -120,13 +114,13 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
 
         context['heeft_indiv'] = heeft_indiv
         context['heeft_teams'] = heeft_teams
-        context['beschrijving'] = "%s %s" % (wedstrijd.beschrijving, " en ".join(beschr))
+        context['beschrijving'] = "%s %s" % (match.beschrijving, " en ".join(beschr))
 
         # zoek de deelnemers erbij
         if heeft_indiv:
             deelnemers = (KampioenschapSchutterBoog
                           .objects
-                          .filter(deelcompetitie=deelcomp,
+                          .filter(deelcompetitie=deelcomp_rk,
                                   klasse__indiv__pk__in=klasse_indiv_pks)
                           .exclude(deelname=DEELNAME_NEE)
                           .select_related('sporterboog',
@@ -142,7 +136,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                 if deelnemer.klasse != prev_klasse:
                     deelnemer.break_before = True
                     deelnemer.url_download_indiv = reverse('CompRayon:formulier-indiv-als-bestand',
-                                                           kwargs={'wedstrijd_pk': wedstrijd.pk,
+                                                           kwargs={'wedstrijd_pk': match.pk,
                                                                    'klasse_pk': deelnemer.klasse.pk})
                     prev_klasse = deelnemer.klasse
 
@@ -157,7 +151,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
         if heeft_teams:
             teams = (KampioenschapTeam
                      .objects
-                     .filter(deelcompetitie=deelcomp,
+                     .filter(deelcompetitie=deelcomp_rk,
                              klasse__team__pk__in=klasse_team_pks)
                      .select_related('vereniging',
                                      'klasse')
@@ -175,7 +169,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                 if team.klasse != prev_klasse:
                     team.break_before = True
                     team.url_download_teams = reverse('CompRayon:formulier-teams-als-bestand',
-                                                      kwargs={'wedstrijd_pk': wedstrijd.pk,
+                                                      kwargs={'wedstrijd_pk': match.pk,
                                                               'klasse_pk': team.klasse.pk})
 
                     prev_klasse = team.klasse
@@ -242,22 +236,16 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieIndivKlasse.DoesNotExist):
             raise Http404('Klasse niet gevonden')
 
-        plannen = match.competitiewedstrijdenplan_set.all()     # TODO: fix
-        if len(plannen) == 0:
-            raise Http404('Geen wedstrijden plan')
-        plan = plannen[0]
-        del plannen
-
-        deelcomp = plan.deelcompetitie_set.select_related('competitie', 'nhb_rayon').all()[0]
-        if deelcomp.laag != LAAG_RK:
+        deelcomp_rk = match.deelcompetitie_set.all()[0]
+        if deelcomp_rk.laag != LAAG_RK:
             raise Http404('Verkeerde competitie')
 
-        comp = deelcomp.competitie
+        comp = deelcomp_rk.competitie
         # TODO: check fase
 
         vastgesteld = timezone.localtime(timezone.now())
 
-        klasse_str = klasse.indiv.beschrijving
+        klasse_str = klasse.beschrijving
 
         aantal_banen = 16
         if match.locatie:
@@ -268,15 +256,15 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
         # TODO: haal de ingestelde limiet op (maximum aantal deelnemers)
         try:
-            lim = DeelcompetitieIndivKlasseLimiet(deelcompetitie=deelcomp,
-                                             indiv_klasse=klasse)
+            lim = DeelcompetitieIndivKlasseLimiet(deelcompetitie=deelcomp_rk,
+                                                  indiv_klasse=klasse)
         except DeelcompetitieIndivKlasseLimiet.DoesNotExist:
             limiet = 24
         else:
             limiet = lim.limiet
 
         # bepaal de naam van het terug te geven bestand
-        fname = "rk-programma_individueel-rayon%s_" % deelcomp.nhb_rayon.rayon_nr
+        fname = "rk-programma_individueel-rayon%s_" % deelcomp_rk.nhb_rayon.rayon_nr
         fname += klasse_str.lower().replace(' ', '-')
         fname += '.xlsm'
 
@@ -297,7 +285,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         # maak wijzigingen in het RK programma
         ws = prg['Voorronde']
 
-        ws['C4'] = 'Rayonkampioenschappen %s, Rayon %s, %s' % (comp.beschrijving, deelcomp.nhb_rayon.rayon_nr, klasse.indiv.beschrijving)
+        ws['C4'] = 'Rayonkampioenschappen %s, Rayon %s, %s' % (comp.beschrijving, deelcomp_rk.nhb_rayon.rayon_nr, klasse.beschrijving)
 
         ws['D5'] = match.vereniging.naam     # organisatie
         ws['F5'] = 'Datum: ' + match.datum_wanneer.strftime('%Y-%m-%d')
@@ -317,7 +305,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
         deelnemers = (KampioenschapSchutterBoog
                       .objects
-                      .filter(deelcompetitie=deelcomp,
+                      .filter(deelcompetitie=deelcomp_rk,
                               klasse=klasse.pk)
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
@@ -421,23 +409,21 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         try:
             klasse_pk = int(kwargs['klasse_pk'][:6])            # afkappen voor de veiligheid
-            klasse = (CompetitieTeamKlasse
-                      .objects
-                      .get(pk=klasse_pk))
+            team_klasse = (CompetitieTeamKlasse
+                           .objects
+                           .get(pk=klasse_pk))
         except (ValueError, CompetitieTeamKlasse.DoesNotExist):
             raise Http404('Klasse niet gevonden')
 
-        plannen = match.competitiewedstrijdenplan_set.all()     # TODO: fix
-        if len(plannen) == 0:
-            raise Http404('Geen wedstrijden plan')
-        plan = plannen[0]
-        del plannen
+        deelcomps = match.deelcompetitie_set.all()
+        if len(deelcomps) == 0:
+            raise Http404('Geen competitie')
 
-        deelcomp = plan.deelcompetitie_set.select_related('competitie', 'nhb_rayon').all()[0]
-        if deelcomp.laag != LAAG_RK:
+        deelcomp_rk = match.deelcompetitie_set.all()[0]
+        if deelcomp_rk.laag != LAAG_RK:
             raise Http404('Verkeerde competitie')
 
-        comp = deelcomp.competitie
+        comp = deelcomp_rk.competitie
         # TODO: check fase
 
         if comp.afstand == '18':
@@ -447,13 +433,13 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         vastgesteld = timezone.localtime(timezone.now())
 
-        klasse_str = klasse.beschrijving
+        klasse_str = team_klasse.beschrijving
 
-        boog_typen = klasse.team_type.boog_typen.all()
+        boog_typen = team_klasse.team_type.boog_typen.all()
         boog_pks = list(boog_typen.values_list('pk', flat=True))
 
         # bepaal de naam van het terug te geven bestand
-        fname = "rk-programma_teams-rayon%s_" % deelcomp.nhb_rayon.rayon_nr
+        fname = "rk-programma_teams-rayon%s_" % deelcomp_rk.nhb_rayon.rayon_nr
         fname += klasse_str.lower().replace(' ', '-')
         fname += '.xlsm'
 
@@ -478,7 +464,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         ws = prg['Deelnemers en Scores']
 
-        ws['B1'] = 'Rayonkampioenschappen Teams Rayon %s, %s' % (deelcomp.nhb_rayon.rayon_nr, comp.beschrijving)
+        ws['B1'] = 'Rayonkampioenschappen Teams Rayon %s, %s' % (deelcomp_rk.nhb_rayon.rayon_nr, comp.beschrijving)
         ws['B4'] = 'Klasse: ' + klasse_str
         ws['D3'] = match.datum_wanneer.strftime('%Y-%m-%d')
         ws['E3'] = match.vereniging.naam     # organisatie
@@ -489,8 +475,8 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
         teams = (KampioenschapTeam
                  .objects
-                 .filter(deelcompetitie=deelcomp,
-                         klasse=klasse.pk)
+                 .filter(deelcompetitie=deelcomp_rk,
+                         team_klasse=team_klasse.pk)
                  .select_related('vereniging',
                                  'vereniging__regio')
                  .prefetch_related('gekoppelde_schutters')
@@ -606,7 +592,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         prev_ver = None
         for deelnemer in (KampioenschapSchutterBoog
                           .objects
-                          .filter(deelcompetitie=deelcomp,
+                          .filter(deelcompetitie=deelcomp_rk,
                                   bij_vereniging__ver_nr__in=ver_nrs,
                                   sporterboog__boogtype__pk__in=boog_pks)       # filter op toegestane boogtypen
                           .select_related('bij_vereniging__regio',

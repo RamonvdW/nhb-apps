@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from .models import CompetitieWedstrijd, WedstrijdLocatie, CompetitieWedstrijdUitslag
+from .models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
-import datetime
 
 
 class TestWedstrijden(E2EHelpers, TestCase):
@@ -30,17 +29,6 @@ class TestWedstrijden(E2EHelpers, TestCase):
         ver.save()
         self.nhbver1 = ver
 
-    def test_wedstrijd(self):
-        wedstrijd = CompetitieWedstrijd()
-        wedstrijd.datum_wanneer = datetime.date(year=2020, month=9, day=10)
-        wedstrijd.tijd_begin_aanmelden = datetime.time(hour=13, minute=59, second=59)
-        wedstrijd.tijd_begin_wedstrijd = wedstrijd.tijd_begin_aanmelden
-        wedstrijd.tijd_einde_wedstrijd = wedstrijd.tijd_begin_aanmelden
-        self.assertTrue(str(wedstrijd) != '')
-
-        wedstrijd.vereniging = self.nhbver1
-        self.assertTrue(str(wedstrijd) != '')
-
     def test_locatie(self):
         locatie = WedstrijdLocatie()
         locatie.adres = 'Hallo\ndaar'
@@ -57,12 +45,5 @@ class TestWedstrijden(E2EHelpers, TestCase):
 
         locatie.zichtbaar = False
         self.assertTrue(str(locatie) != '')
-
-    def test_uitslag(self):
-        uitslag = CompetitieWedstrijdUitslag(max_score=123, afstand_meter=45)
-        self.assertTrue(str(uitslag) != '')
-        uitslag.is_bevroren = True
-        self.assertTrue(str(uitslag) != '')
-
 
 # end of file

@@ -108,12 +108,11 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                     nhb_rayon=ver.regio.rayon)
                             .select_related('competitie'))
 
-            pks = (DeelcompetitieRonde
-                   .objects
-                   .filter(deelcompetitie__is_afgesloten=False,
-                           plan__wedstrijden__vereniging=ver)
-                   .values_list('plan__wedstrijden', flat=True))
-            if CompetitieMatch.objects.filter(pk__in=pks).count() > 0:
+            if (DeelcompetitieRonde
+                .objects
+                .filter(deelcompetitie__is_afgesloten=False,
+                        matches__vereniging=ver)).count() > 0:
+                # er zijn wedstrijden voor deze vereniging
                 context['heeft_wedstrijden'] = True
 
         # bepaal de volgorde waarin de kaartjes getoond worden

@@ -7,14 +7,13 @@
 from django.test import TestCase
 from django.utils import timezone
 from Competitie.models import (Competitie, CompetitieIndivKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
-                               DeelcompetitieRonde, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3)
+                               DeelcompetitieRonde, CompetitieMatch, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3)
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from Functie.models import Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
 from Score.operations import score_indiv_ag_opslaan
-from Wedstrijden.models import CompetitieWedstrijd
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -721,15 +720,15 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         # maak een wedstrijd aan
-        self.assertEqual(CompetitieWedstrijd.objects.count(), 0)
+        self.assertEqual(CompetitieMatch.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url_ronde)
         self.assert_is_redirect_not_plein(resp)
 
-        wedstrijd_pk = CompetitieWedstrijd.objects.all()[0].pk
+        match_pk = CompetitieMatch.objects.all()[0].pk
 
         # wijzig de instellingen van deze wedstrijd
-        url_wed = self.url_wijzig_wedstrijd % wedstrijd_pk
+        url_wed = self.url_wijzig_wedstrijd % match_pk
         with self.assert_max_queries(20):
             resp = self.client.post(url_wed, {'nhbver_pk': self.nhbver.pk,
                                               'wanneer': '2020-12-11', 'aanvang': '12:34'})
@@ -767,7 +766,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         # doe de inschrijving
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'wedstrijd_%s' % wedstrijd_pk: 'on',
+            resp = self.client.post(url, {'wedstrijd_%s' % match_pk: 'on',
                                           'wedstrijd_99999': 'on'})     # is ignored
         self.assert_is_redirect(resp, self.url_profiel)
 
@@ -785,7 +784,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         # doe de inschrijving
         url = self.url_aanmelden % (deelcomp.pk, sporterboog2.pk)
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'wedstrijd_%s' % wedstrijd_pk: 'on'})
+            resp = self.client.post(url, {'wedstrijd_%s' % match_pk: 'on'})
         self.assert_is_redirect(resp, self.url_profiel)
 
         aanmelding2 = RegioCompetitieSchutterBoog.objects.get(sporterboog=sporterboog2)
@@ -813,7 +812,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
 
         # wedstrijd behouden
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'wedstrijd_%s' % wedstrijd_pk: 'on'})
+            resp = self.client.post(url, {'wedstrijd_%s' % match_pk: 'on'})
         self.assert_is_redirect(resp, self.url_profiel)
 
         # wedstrijd verwijderen
@@ -823,12 +822,12 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
 
         # wedstrijd toevoegen
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'wedstrijd_%s' % wedstrijd_pk: 'on'})
+            resp = self.client.post(url, {'wedstrijd_%s' % match_pk: 'on'})
         self.assert_is_redirect(resp, self.url_profiel)
 
         # te veel wedstrijden toevoegen
         args = dict()
-        for obj in CompetitieWedstrijd.objects.all():
+        for obj in CompetitieMatch.objects.all():
             args['wedstrijd_%s' % obj.pk] = 'on'
         # for
         with self.assert_max_queries(20):
@@ -844,7 +843,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         zet_competitie_fase(deelcomp.competitie, 'K')
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'wedstrijd_%s' % wedstrijd_pk: 'on'})
+            resp = self.client.post(url, {'wedstrijd_%s' % match_pk: 'on'})
         self.assert404(resp)
 
     def test_geen_klasse(self):

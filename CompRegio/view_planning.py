@@ -675,11 +675,11 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
             # werk de beschrijvingen van alle wedstrijden bij
             comp_str = ronde.deelcompetitie.competitie.beschrijving
-            for obj in ronde.plan.wedstrijden.all():
+            for match in ronde.matches.all():
                 new_str = "%s - %s" % (comp_str, ronde.beschrijving)
-                if obj.beschrijving != new_str:
-                    obj.beschrijving = new_str
-                    obj.save(update_fields=['beschrijving'])
+                if match.beschrijving != new_str:
+                    match.beschrijving = new_str
+                    match.save(update_fields=['beschrijving'])
             # for
 
             if ronde.cluster:
@@ -693,11 +693,13 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             # voeg een wedstrijd toe
             jaar = ronde.deelcompetitie.competitie.begin_jaar
             match = CompetitieMatch(
+                        competitie=ronde.deelcompetitie.competitie,
                         datum_wanneer=competitie_week_nr_to_date(jaar, ronde.week_nr),
                         tijd_begin_wedstrijd=datetime.time(hour=0, minute=0, second=0))
+            # TODO: zet beschrijving?
             match.save()
 
-            ronde.plan.wedstrijden.add(match)
+            ronde.matches.add(match)
 
             # laat de nieuwe wedstrijd meteen wijzigen
             next_url = reverse('CompRegio:regio-wijzig-wedstrijd',

@@ -207,7 +207,7 @@ class RayonTeamsView(TemplateView):
                                     'team_type',
                                     'deelcompetitie')
                     .filter(deelcompetitie__in=rk_deelcomp_pks,
-                            klasse=None)
+                            team_klasse=None)
                     .annotate(sporter_count=Count(tel_dit))
                     .order_by('team_type__volgorde',
                               '-aanvangsgemiddelde',

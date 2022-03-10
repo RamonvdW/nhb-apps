@@ -8,14 +8,13 @@ from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, CompetitieIndivKlasse, DeelCompetitie, LAAG_REGIO, LAAG_BK,
-                               DeelcompetitieRonde, RegioCompetitieSchutterBoog)
+                               DeelcompetitieRonde, RegioCompetitieSchutterBoog, CompetitieMatch)
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.operations import competities_aanmaken, competitie_klassengrenzen_vaststellen
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog
-from Wedstrijden.models import CompetitieWedstrijd
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 import io
@@ -59,22 +58,22 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         self.client.post(self.url_planning_regio_ronde % ronde.pk, {})
         self.client.post(self.url_planning_regio_ronde % ronde.pk, {})
 
-        self.assertEqual(7, CompetitieWedstrijd.objects.count())
-        wedstrijd_pks = CompetitieWedstrijd.objects.all().values_list('pk', flat=True)
+        self.assertEqual(7, CompetitieMatch.objects.count())
+        match_pks = CompetitieMatch.objects.all().values_list('pk', flat=True)
 
         # laat de wedstrijd.uitslag aanmaken en pas de wedstrijd nog wat aan
         self.uitslagen = list()
         uur = 1
-        for pk in wedstrijd_pks[:]:     # copy to ensure stable
+        for pk in match_pks[:]:     # copy to ensure stable
             with self.assert_max_queries(20):
                 resp = self.client.get(self.url_uitslag_invoeren % pk)
-            wedstrijd = CompetitieWedstrijd.objects.get(pk=pk)
-            self.assertIsNotNone(wedstrijd.uitslag)
-            wedstrijd.vereniging = self.ver
-            wedstrijd.tijd_begin_wedstrijd = "%02d:00" % uur
+            match = CompetitieMatch.objects.get(pk=pk)
+            self.assertIsNotNone(match.uitslag)
+            match.vereniging = self.ver
+            match.tijd_begin_wedstrijd = "%02d:00" % uur
             uur = (uur + 1) % 24
-            wedstrijd.save()
-            self.uitslagen.append(wedstrijd.uitslag)
+            match.save()
+            self.uitslagen.append(match.uitslag)
         # for
 
         # maak nog een wedstrijd aan - die blijft zonder uitslag

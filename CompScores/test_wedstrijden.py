@@ -8,12 +8,12 @@ from django.test import TestCase
 from BasisTypen.models import BoogType, IndivWedstrijdklasse
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (CompetitieIndivKlasse, DeelCompetitie, RegioCompetitieSchutterBoog, LAAG_REGIO)
+from Competitie.models import (CompetitieIndivKlasse, DeelCompetitie, CompetitieMatch, LAAG_REGIO,
+                               RegioCompetitieSchutterBoog)
 from Competitie.operations import maak_deelcompetitie_ronde
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
-from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
-from Score.models import Score
+from Score.models import Score, Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -201,18 +201,16 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
 
         # maak binnen het plan drie wedstrijden voor deze vereniging
         for volgnr in range(3):
-            wedstrijd = CompetitieWedstrijd(
-                            vereniging=self.nhbver1,
-                            datum_wanneer=datetime.date(year=2020, month=1, day=5+volgnr*3),
-                            tijd_begin_aanmelden=de_tijd,
-                            tijd_begin_wedstrijd=de_tijd,
-                            tijd_einde_wedstrijd=de_tijd)
+            match = CompetitieMatch(
+                        vereniging=self.nhbver1,
+                        datum_wanneer=datetime.date(year=2020, month=1, day=5+volgnr*3),
+                        tijd_begin_wedstrijd=de_tijd)
 
             if volgnr <= 1:
-                uitslag = CompetitieWedstrijdUitslag(max_score=300, afstand_meter=12)
+                uitslag = Uitslag(max_score=300, afstand_meter=12)
                 uitslag.save()
-                wedstrijd.uitslag = uitslag
-                wedstrijd.beschrijving = "Test - Dit is een testje %s" % volgnr
+                match.uitslag = uitslag
+                match.beschrijving = "Test - Dit is een testje %s" % volgnr
 
                 if volgnr == 1:
                     score = Score(sporterboog=self.sporterboog_100001,
@@ -221,22 +219,20 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                     score.save()
                     uitslag.scores.add(score)
 
-            wedstrijd.save()
-            ronde.plan.wedstrijden.add(wedstrijd)
+            match.save()
+            ronde.plan.wedstrijden.add(match)
 
-            wedstrijd.indiv_klassen.set(IndivWedstrijdklasse.objects.all())
+            match.indiv_klassen.set(IndivWedstrijdklasse.objects.all())
 
-            self.wedstrijden.append(wedstrijd)
+            self.wedstrijden.append(match)
         # for
 
         # maak voor de vereniging een wedstrijd die niets met de competitie te doen heeft
-        wedstrijd = CompetitieWedstrijd(
-                        vereniging=self.nhbver1,
-                        datum_wanneer=datetime.date(year=2020, month=2, day=1),
-                        tijd_begin_aanmelden=de_tijd,
-                        tijd_begin_wedstrijd=de_tijd,
-                        tijd_einde_wedstrijd=de_tijd)
-        wedstrijd.save()
+        match = CompetitieMatch(
+                    vereniging=self.nhbver1,
+                    datum_wanneer=datetime.date(year=2020, month=2, day=1),
+                    tijd_begin_wedstrijd=de_tijd)
+        match.save()
 
     def _maak_inschrijvingen(self):
         # schrijf iemand in
@@ -379,11 +375,13 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'plein/site_layout.dtl'))
 
         urls2 = self.extract_all_urls(resp, skip_menu=True)
+        url = None
         for url in urls2:
             self.assertTrue("/waarschijnlijke-deelnemers/" in url or url.startswith('/bondscompetities/scores/uitslag-invoeren/'))
         # for
 
-        self.e2e_assert_other_http_commands_not_supported(url)
+        if url:
+            self.e2e_assert_other_http_commands_not_supported(url)
 
     def test_wedstrijden_wl(self):
         # login als WL
@@ -391,9 +389,9 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol('WL')
 
-        wedstrijd = CompetitieWedstrijd.objects.all()[0]
-        wedstrijd.beschrijving = 'Hallo'
-        wedstrijd.save(update_fields=['beschrijving'])
+        match = CompetitieMatch.objects.all()[0]
+        match.beschrijving = 'Hallo'
+        match.save(update_fields=['beschrijving'])
 
         # haal de lijst van wedstrijden
         with self.assert_max_queries(20):

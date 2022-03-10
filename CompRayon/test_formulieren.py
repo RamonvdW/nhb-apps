@@ -65,10 +65,10 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         # TODO: locatie koppelen
         self.match.save()
 
-        self.deelcomp18_rk_wedstrijden_plan = self.testdata.deelcomp18_rk[self.rayon_nr].plan
-        self.deelcomp18_rk_wedstrijden_plan.wedstrijden.add(self.match.pk)
+        self.deelcomp18_rk = self.testdata.deelcomp18_rk[self.rayon_nr]
+        self.deelcomp18_rk.rk_bk_matches.add(self.match.pk)
 
-        self.deelcomp25_rk_wedstrijden_plan = self.testdata.deelcomp25_rk[self.rayon_nr].plan
+        self.deelcomp25_rk = self.testdata.deelcomp25_rk[self.rayon_nr]
 
         bad_path = '/tmp/CompRayon/files/'
         os.makedirs(bad_path, exist_ok=True)
@@ -134,17 +134,17 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         # wedstrijd niet in een plan
-        self.deelcomp18_rk_wedstrijden_plan.wedstrijden.remove(self.match.pk)
+        self.deelcomp18_rk.rk_bk_matches.remove(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Geen wedstrijden plan')
 
         # 25m1p plan
-        self.deelcomp25_rk_wedstrijden_plan.wedstrijden.add(self.match.pk)
+        self.deelcomp25_rk.rk_bk_matches.add(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.deelcomp25_rk_wedstrijden_plan.wedstrijden.remove(self.match.pk)
+        self.deelcomp25_rk.rk_bk_matches.remove(self.match.pk)
 
         # wedstrijd van een niet-RK deelcompetitie
         plan = self.testdata.deelcomp18_bk.plan
@@ -197,7 +197,7 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         self.assert404(resp, 'Klasse niet gevonden')
 
         # wedstrijd niet in een plan
-        self.deelcomp18_rk_wedstrijden_plan.wedstrijden.remove(self.match.pk)
+        self.deelcomp18_rk.rk_bk_matches.remove(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Geen wedstrijden plan')
@@ -248,7 +248,7 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         self.assert404(resp, 'Klasse niet gevonden')
 
         # wedstrijd niet in een plan
-        self.deelcomp18_rk_wedstrijden_plan.wedstrijden.remove(self.match.pk)
+        self.deelcomp18_rk.rk_bk_matches.remove(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Geen wedstrijden plan')

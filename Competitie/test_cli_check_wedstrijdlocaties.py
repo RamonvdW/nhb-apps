@@ -7,10 +7,10 @@
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
-from Competitie.models import Competitie, DeelCompetitie
+from Competitie.models import Competitie, DeelCompetitie, CompetitieMatch
 from NhbStructuur.models import NhbRegio, NhbRayon, NhbVereniging
 from TestHelpers.e2ehelpers import E2EHelpers
-from Wedstrijden.models import CompetitieWedstrijdenPlan, CompetitieWedstrijd, WedstrijdLocatie
+from Wedstrijden.models import WedstrijdLocatie
 import io
 
 
@@ -28,7 +28,6 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
 
         regio_114 = NhbRegio.objects.get(regio_nr=114)
         rayon_1 = NhbRayon.objects.get(rayon_nr=1)
-        rayon_2 = NhbRayon.objects.get(rayon_nr=2)
         rayon_3 = NhbRayon.objects.get(rayon_nr=3)
 
         ver = NhbVereniging(
@@ -51,21 +50,15 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         loc.verenigingen.add(ver)
 
         # een paar wedstrijden
-        wed = CompetitieWedstrijd(
+        wed = CompetitieMatch(
                     beschrijving='wed1',
                     vereniging=ver,
                     locatie=loc,
                     datum_wanneer=dummy_datum,
-                    tijd_begin_aanmelden=dummy_tijd,
-                    tijd_begin_wedstrijd=dummy_tijd,
-                    tijd_einde_wedstrijd=dummy_tijd)
+                    tijd_begin_wedstrijd=dummy_tijd)
         wed.save()
         wed.indiv_klassen.add(indiv1)
         wed.team_klassen.add(team1)
-
-        plan_bk = CompetitieWedstrijdenPlan()
-        plan_bk.save()
-        plan_bk.wedstrijden.add(wed)
 
         loc = WedstrijdLocatie(
                 naam='loc2',
@@ -82,31 +75,23 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         loc.verenigingen.add(ver)
         self.loc2 = loc
 
-        wed = CompetitieWedstrijd(
+        wed = CompetitieMatch(
                     beschrijving='wed2',
                     vereniging=ver,
                     locatie=loc,
                     datum_wanneer=dummy_datum,
-                    tijd_begin_aanmelden=dummy_tijd,
-                    tijd_begin_wedstrijd=dummy_tijd,
-                    tijd_einde_wedstrijd=dummy_tijd)
+                    tijd_begin_wedstrijd=dummy_tijd)
         wed.save()
         # geen klassen
-        plan_rk = CompetitieWedstrijdenPlan()
-        plan_rk.save()
-        plan_rk.wedstrijden.add(wed)
 
         # locatie, geen vereniging
-        wed = CompetitieWedstrijd(
+        wed = CompetitieMatch(
                     beschrijving='wed3',
                     vereniging=None,
                     locatie=loc,
                     datum_wanneer=dummy_datum,
-                    tijd_begin_aanmelden=dummy_tijd,
-                    tijd_begin_wedstrijd=dummy_tijd,
-                    tijd_einde_wedstrijd=dummy_tijd)
+                    tijd_begin_wedstrijd=dummy_tijd)
         wed.save()
-        plan_rk.wedstrijden.add(wed)
 
         # wedstrijd met vereniging maar zonder locatie
         ver = NhbVereniging(
@@ -116,19 +101,15 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
                 regio=regio_114)
         ver.save()
 
-        wed = CompetitieWedstrijd(
+        wed = CompetitieMatch(
                     beschrijving='wed2',
                     vereniging=ver,
                     # locatie=None,
                     datum_wanneer=dummy_datum,
-                    tijd_begin_aanmelden=dummy_tijd,
-                    tijd_begin_wedstrijd=dummy_tijd,
-                    tijd_einde_wedstrijd=dummy_tijd)
+                    tijd_begin_wedstrijd=dummy_tijd)
         wed.save()
         wed.indiv_klassen.add(indiv2)
         wed.team_klassen.add(team2)
-
-        plan_rk.wedstrijden.add(wed)
 
         comp = Competitie(
             beschrijving='comp1',
@@ -149,32 +130,20 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
 
         deelcomp_bk = DeelCompetitie(
                         competitie=comp,
-                        laag='BK',
-                        plan=plan_bk)
+                        laag='BK')
         deelcomp_bk.save()
 
         deelcomp_rk = DeelCompetitie(
                         competitie=comp,
                         nhb_rayon=rayon_3,
-                        laag='RK',
-                        plan=plan_rk)
-        deelcomp_rk.save()
-
-        # deelcomp zonder plan
-        deelcomp_rk = DeelCompetitie(
-                        competitie=comp,
-                        nhb_rayon=rayon_2,
                         laag='RK')
         deelcomp_rk.save()
 
-        # deelcomp met plan, zonder wedstrijden
-        plan_rk_leeg = CompetitieWedstrijdenPlan()
-        plan_rk_leeg.save()
+        # deelcomp zonder wedstrijden
         deelcomp_rk = DeelCompetitie(
                         competitie=comp,
                         laag='RK',
-                        nhb_rayon=rayon_1,
-                        plan=plan_rk_leeg)
+                        nhb_rayon=rayon_1)
         deelcomp_rk.save()
 
     def test_basis(self):

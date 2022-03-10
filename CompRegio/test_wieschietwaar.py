@@ -8,13 +8,12 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (CompetitieIndivKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
+from Competitie.models import (CompetitieIndivKlasse, DeelCompetitie, RegioCompetitieSchutterBoog, CompetitieMatch,
                                LAAG_REGIO, INSCHRIJF_METHODE_1)
 from Competitie.operations import maak_deelcompetitie_ronde
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from Sporter.models import Sporter, SporterBoog
-from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
-from Score.models import Score
+from Score.models import Score, Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -225,18 +224,16 @@ class TestCompRegioWieSchietWaar(E2EHelpers, TestCase):
 
         # maak binnen het plan drie wedstrijden voor deze vereniging
         for volgnr in range(3):
-            wedstrijd = CompetitieWedstrijd(
-                            vereniging=self.nhbver1,
-                            datum_wanneer=datetime.date(year=2020, month=1, day=5+volgnr*3),
-                            tijd_begin_aanmelden=de_tijd,
-                            tijd_begin_wedstrijd=de_tijd,
-                            tijd_einde_wedstrijd=de_tijd)
+            match = CompetitieMatch(
+                        vereniging=self.nhbver1,
+                        datum_wanneer=datetime.date(year=2020, month=1, day=5+volgnr*3),
+                        tijd_begin_wedstrijd=de_tijd)
 
             if volgnr <= 1:
-                uitslag = CompetitieWedstrijdUitslag(max_score=300, afstand_meter=12)
+                uitslag = Uitslag(max_score=300, afstand_meter=12)
                 uitslag.save()
-                wedstrijd.uitslag = uitslag
-                wedstrijd.beschrijving = "Dit is een testje %s" % volgnr
+                match.uitslag = uitslag
+                match.beschrijving = "Dit is een testje %s" % volgnr
 
             if volgnr == 1:
                 score = Score(sporterboog=self.sporterboog_100001,
@@ -245,20 +242,18 @@ class TestCompRegioWieSchietWaar(E2EHelpers, TestCase):
                 score.save()
                 uitslag.scores.add(score)
 
-            wedstrijd.save()
-            self.ronde_wedstrijd = wedstrijd
-            ronde.plan.wedstrijden.add(wedstrijd)
+            match.save()
+            self.ronde_wedstrijd = match
+            ronde.plan.wedstrijden.add(match)
         # for
 
         # maak voor de vereniging een wedstrijd die niets met de competitie te doen heeft
-        wedstrijd = CompetitieWedstrijd(
-                        vereniging=self.nhbver1,
-                        datum_wanneer=datetime.date(year=2020, month=2, day=1),
-                        tijd_begin_aanmelden=de_tijd,
-                        tijd_begin_wedstrijd=de_tijd,
-                        tijd_einde_wedstrijd=de_tijd)
-        wedstrijd.save()
-        self.wedstrijd = wedstrijd
+        match = CompetitieMatch(
+                    vereniging=self.nhbver1,
+                    datum_wanneer=datetime.date(year=2020, month=2, day=1),
+                    tijd_begin_wedstrijd=de_tijd)
+        match.save()
+        self.wedstrijd = match
 
     def _maak_deelnemers(self):
         url = self.url_aanmelden % self.comp_18.pk

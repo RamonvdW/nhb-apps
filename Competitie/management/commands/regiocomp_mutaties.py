@@ -431,13 +431,13 @@ class Command(BaseCommand):
         # for
 
     @staticmethod
-    def _verwerk_mutatie_verlaag_cut(deelcomp, klasse, cut_oud, cut_nieuw):
+    def _verwerk_mutatie_verlaag_cut(deelcomp, indiv_klasse, cut_oud, cut_nieuw):
         # zoek de kampioenen die al deel mochten nemen (dus niet op reserve lijst)
         kampioenen = (KampioenschapSchutterBoog
                       .objects
                       .exclude(kampioen_label='')
                       .filter(deelcompetitie=deelcomp,
-                              klasse=klasse,
+                              indiv_klasse=indiv_klasse,
                               rank__lte=cut_oud))  # begrens tot deelnemerslijst
 
         aantal = 0  # telt het aantal deelnemers
@@ -455,8 +455,8 @@ class Command(BaseCommand):
         objs = (KampioenschapSchutterBoog
                 .objects
                 .filter(deelcompetitie=deelcomp,
-                        klasse=klasse,
-                        kampioen_label='',      # kampioenen hebben we al gedaan
+                        indiv_klasse=indiv_klasse,
+                        kampioen_label='',  # kampioenen hebben we al gedaan
                         rank__lte=cut_oud)
                 .order_by('-gemiddelde',        # hoogste boven
                           '-regio_scores'))     # hoogste boven (bij gelijk gemiddelde)
