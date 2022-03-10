@@ -17,7 +17,7 @@ BLAZOEN_STR_WENS_DT = 'DT (wens)'
 BLAZOEN_STR_WENS_4SPOT = '4-spot (wens)'
 
 
-def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
+def _query_wedstrijd_deelnemers(afstand, deelcomp, match):
 
     """ geef de lijst van deelnemers en teams terug voor deze wedstrijd,
         rekening houdend met de inschrijfmethode
@@ -26,7 +26,7 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
     # TODO: ondersteuning inschrijfmethode 3 toevoegen - maar hoe?
     if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
         # specifiek aangemelde individuele sporters
-        deelnemers_indiv = (wedstrijd
+        deelnemers_indiv = (match
                             .regiocompetitieschutterboog_set
                             .select_related('indiv_klasse',
                                             'sporterboog',
@@ -44,7 +44,7 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                                 'team_klasse'))
     else:
         # vereniging zit in 0 of 1 clusters voor deze competitie
-        clusters = wedstrijd.vereniging.clusters.filter(gebruik=afstand)
+        clusters = match.vereniging.clusters.filter(gebruik=afstand)
 
         if clusters.count() > 0:
             # vereniging zit in een cluster, dus toon alleen de deelnemers van dit cluster
@@ -95,21 +95,21 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
 
             if deelcomp.regio_organiseert_teamcompetitie:
                 # team klassen
-                team_pks = wedstrijd.team_klassen.values_list('pk', flat=True)
+                team_pks = match.team_klassen.values_list('pk', flat=True)
                 # TODO: moet dit feitelijke sporters zijn??
                 gekoppeld_pks = (RegiocompetitieTeam
                                  .objects
-                                 .filter(klasse__team__pk__in=team_pks)
+                                 .filter(team_klasse__pk__in=team_pks)
                                  .values_list('gekoppelde_schutters__pk', flat=True))
             else:
                 gekoppeld_pks = list()
 
             # individueel
-            indiv_pks = wedstrijd.indiv_klassen.values_list('pk', flat=True)
+            indiv_pks = match.indiv_klassen.values_list('pk', flat=True)
 
             # alleen filteren als er voor deze wedstrijd keuzes zijn gemaakt, anders alle sporters behouden
             if len(indiv_pks) + len(gekoppeld_pks) > 0:
-                deelnemers_indiv = deelnemers_indiv.filter(Q(klasse__indiv__pk__in=indiv_pks) | Q(pk__in=gekoppeld_pks))
+                deelnemers_indiv = deelnemers_indiv.filter(Q(indiv_klasse__pk__in=indiv_pks) | Q(pk__in=gekoppeld_pks))
 
     if not deelcomp.regio_organiseert_teamcompetitie:
         deelnemers_teams = list()

@@ -22,7 +22,12 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
 
         competities_aanmaken(2019)
 
+        comp = Competitie.objects.get(afstand='25')
+        comp.delete()
+
         comp = Competitie.objects.get(afstand='18')
+        comp.beschrijving = 'comp1'
+        comp.save(update_fields=['beschrijving'])
 
         dummy_datum = '2019-07-01'
         dummy_tijd = '10:00'
@@ -80,25 +85,25 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         loc.verenigingen.add(ver)
         self.loc2 = loc
 
-        wed = CompetitieMatch(
+        wed1 = CompetitieMatch(
                     competitie=comp,
                     beschrijving='wed2',
                     vereniging=ver,
                     locatie=loc,
                     datum_wanneer=dummy_datum,
                     tijd_begin_wedstrijd=dummy_tijd)
-        wed.save()
+        wed1.save()
         # geen klassen
 
         # locatie, geen vereniging
-        wed = CompetitieMatch(
+        wed2 = CompetitieMatch(
                     competitie=comp,
                     beschrijving='wed3',
                     vereniging=None,
                     locatie=loc,
                     datum_wanneer=dummy_datum,
                     tijd_begin_wedstrijd=dummy_tijd)
-        wed.save()
+        wed2.save()
 
         # wedstrijd met vereniging maar zonder locatie
         ver = NhbVereniging(
@@ -108,27 +113,23 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
                 regio=regio_114)
         ver.save()
 
-        wed = CompetitieMatch(
+        wed3 = CompetitieMatch(
                     competitie=comp,
                     beschrijving='wed2',
                     vereniging=ver,
                     # locatie=None,
                     datum_wanneer=dummy_datum,
                     tijd_begin_wedstrijd=dummy_tijd)
-        wed.save()
-        wed.indiv_klassen.add(indiv2)
-        wed.team_klassen.add(team2)
-
-        deelcomp_bk = DeelCompetitie(
-                        competitie=comp,
-                        laag='BK')
-        deelcomp_bk.save()
+        wed3.save()
+        wed3.indiv_klassen.add(indiv2)
+        wed3.team_klassen.add(team2)
 
         deelcomp_rk = DeelCompetitie(
                         competitie=comp,
                         nhb_rayon=rayon_3,
                         laag='RK')
         deelcomp_rk.save()
+        deelcomp_rk.rk_bk_matches.add(wed1)
 
         # deelcomp zonder wedstrijden
         deelcomp_rk = DeelCompetitie(
@@ -136,6 +137,12 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
                         laag='RK',
                         nhb_rayon=rayon_1)
         deelcomp_rk.save()
+
+        deelcomp_bk = DeelCompetitie(
+                        competitie=comp,
+                        laag='BK')
+        deelcomp_bk.save()
+        deelcomp_bk.rk_bk_matches.add(wed2)
 
     def test_basis(self):
         # no args
@@ -146,12 +153,12 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(36):
             management.call_command('check_wedstrijdlocaties', '--rk', stderr=f1, stdout=f2)
-        # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[WARNING] Geen plan of wedstrijden voor deelcompetitie comp1 - Rayon 2" in f2.getvalue())
-        self.assertTrue("[WARNING] Geen wedstrijden voor deelcompetitie comp1 - Rayon 1" in f2.getvalue())
-        self.assertTrue("zonder banen 18m/25m opgaaf en zonder discipline_indoor en geen vereniging" in f2.getvalue())
+        print("f2: %s" % f2.getvalue())
+        self.assertTrue("[WARNING] Geen rk_bk_matches voor deelcompetitie comp1 - Rayon 2" in f2.getvalue())
+        self.assertTrue("[WARNING] Geen rk_bk_matches voor deelcompetitie comp1 - Rayon 1" in f2.getvalue())
+        # TODO: self.assertTrue("zonder banen 18m/25m opgaaf en zonder discipline_indoor en geen vereniging" in f2.getvalue())
 
         # bk (geen fouten)
         f1 = io.StringIO()
@@ -159,7 +166,7 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             management.call_command('check_wedstrijdlocaties', '--bk', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
-        # print("f2: %s" % f2.getvalue())
+        print("f2: %s" % f2.getvalue())
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue(f2.getvalue() == '')
 

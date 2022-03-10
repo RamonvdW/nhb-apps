@@ -7,9 +7,8 @@
 # verwijder onnodige (oude) data van voorgaande competities
 
 from django.core.management.base import BaseCommand
-from Competitie.models import DeelCompetitie, LAAG_BK, LAAG_RK
+from Competitie.models import DeelCompetitie, LAAG_BK, LAAG_RK, CompetitieMatch
 from NhbStructuur.models import NhbVereniging
-from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdenPlan
 
 
 class Command(BaseCommand):
@@ -27,23 +26,21 @@ class Command(BaseCommand):
         if options['rk']:
             laag = LAAG_RK
 
-        wedstrijd2deelcomp = dict()     # [wedstrijd.pk] = deelcomp
+        match2deelcomp = dict()     # [wedstrijd.pk] = deelcomp
 
-        wedstrijd_pks = list()
+        match_pks = list()
         if laag:
-            for deelcomp in DeelCompetitie.objects.filter(laag=laag).select_related('plan'):
-                if deelcomp.plan:
-                    if deelcomp.plan.wedstrijden.count() == 0:
-                        self.stdout.write('[WARNING] Geen wedstrijden voor deelcompetitie %s' % deelcomp)
+            for deelcomp in DeelCompetitie.objects.filter(laag=laag).prefetch_related('rk_bk_matches'):
+                if deelcomp.rk_bk_matches.count() == 0:
+                    self.stdout.write('[WARNING] Geen rk_bk_matches voor deelcompetitie %s' % deelcomp)
 
-                    pks = list(deelcomp.plan.wedstrijden.values_list('pk', flat=True))
-                    wedstrijd_pks.extend(pks)
+                pks = list(deelcomp.rk_bk_matches.values_list('pk', flat=True))
+                match_pks.extend(pks)
 
-                    for pk in pks:
-                        wedstrijd2deelcomp[pk] = deelcomp
-                    # for
-                else:
-                    self.stdout.write('[WARNING] Geen plan of wedstrijden voor deelcompetitie %s' % deelcomp)
+                for pk in pks:
+                    match2deelcomp[pk] = deelcomp
+                # for
+            # for
 
         ver2locs = dict()   # [ver_nr] = (loc, loc, ..)
 
@@ -56,17 +53,23 @@ class Command(BaseCommand):
 
         ver_gerapporteerd = list()          # [ver_nr, ..]
 
-        wedstrijden = CompetitieWedstrijd.objects.select_related('locatie', 'vereniging').prefetch_related('indiv_klassen', 'team_klassen').all()
+        matches = (CompetitieMatch
+                   .objects
+                   .select_related('locatie',
+                                   'vereniging')
+                   .prefetch_related('indiv_klassen',
+                                     'team_klassen')
+                   .all())
         if laag:
-            wedstrijden = wedstrijden.filter(pk__in=wedstrijd_pks)
+            matches = matches.filter(pk__in=match_pks)
 
-        for wedstrijd in wedstrijden:
+        for match in matches:
 
-            loc = wedstrijd.locatie
-            ver = wedstrijd.vereniging
+            loc = match.locatie
+            ver = match.vereniging
             toon_loc = False
 
-            wed_str = 'CompetitieWedstrijd met pk=%s' % wedstrijd.pk
+            wed_str = 'CompetitieMatch met pk=%s' % match.pk
             if ver:
                 wed_str += ' bij vereniging %s' % ver.ver_nr
                 locs = ver2locs[ver.ver_nr]
@@ -74,10 +77,10 @@ class Command(BaseCommand):
                 locs = list()
 
             klassen = list()
-            for klasse in wedstrijd.indiv_klassen.all():
+            for klasse in match.indiv_klassen.all():
                 klassen.append(klasse.beschrijving)
             # for
-            for klasse in wedstrijd.team_klassen.all():
+            for klasse in match.team_klassen.all():
                 klassen.append(klasse.beschrijving)
             # for
             if len(klassen):
@@ -122,13 +125,13 @@ class Command(BaseCommand):
             if len(wedstrijd_fouten) > 0:
                 self.stdout.write('[ERROR] %s heeft %s' % (wed_str, " en ".join(wedstrijd_fouten)))
                 try:
-                    deelcomp = wedstrijd2deelcomp[wedstrijd.pk]
+                    deelcomp = match2deelcomp[match.pk]
                 except KeyError:
                     pass
                 else:
                     self.stdout.write('        Deelcompetitie: %s' % deelcomp)
 
-                self.stdout.write('        Wanneer: %s om %s' % (wedstrijd.datum_wanneer, wedstrijd.tijd_begin_wedstrijd))
+                self.stdout.write('        Wanneer: %s om %s' % (match.datum_wanneer, match.tijd_begin_wedstrijd))
                 self.stdout.write('        Wedstrijdklassen: %s' % klassen_str)
 
             if toon_loc:

@@ -806,25 +806,27 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
             raise PermissionDenied()
 
         # voeg een wedstrijd toe
-        jaar = ronde.deelcompetitie.competitie.begin_jaar
-        wedstrijd = CompetitieMatch()
+        comp = ronde.deelcompetitie.competitie
+        jaar = comp.begin_jaar
+        match = CompetitieMatch(
+                    competitie=comp,
+                    tijd_begin_wedstrijd=datetime.time(hour=0, minute=0, second=0))
 
         # kies de datum voor de wedstrijd: vandaag, of de eerste dag van competitie wedstrijden
         datum = competitie_week_nr_to_date(jaar, settings.COMPETITIES_START_WEEK)
         now = timezone.now()
         datum_now = datetime.date(now.year, now.month, now.day)
         if datum_now > datum:
-            wedstrijd.datum_wanneer = datum_now
+            match.datum_wanneer = datum_now
         else:
-            wedstrijd.datum_wanneer = datum
-        wedstrijd.tijd_begin_wedstrijd = datetime.time(hour=0, minute=0, second=0)
-        wedstrijd.save()
+            match.datum_wanneer = datum
+        match.save()
 
-        ronde.matches.add(wedstrijd)
+        ronde.matches.add(match)
 
         # laat de nieuwe wedstrijd meteen wijzigen
         next_url = reverse('CompRegio:regio-wijzig-wedstrijd',
-                           kwargs={'wedstrijd_pk': wedstrijd.pk})
+                           kwargs={'wedstrijd_pk': match.pk})
 
         return HttpResponseRedirect(next_url)
 

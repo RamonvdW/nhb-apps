@@ -179,7 +179,6 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         for deelcompetitie in (DeelCompetitie
                                .objects
                                .select_related('competitie')
-                               .prefetch_related('competitie__competitieklasse_set')
                                .exclude(competitie__is_afgesloten=True)
                                .filter(competitie__pk__in=comp_pks,
                                        laag=LAAG_REGIO,

@@ -140,7 +140,7 @@ class UitslagenRayonIndivView(TemplateView):
                            .objects
                            .select_related('competitie',
                                            'nhb_rayon')
-                           .prefetch_related('rk_bk_wedstrijden')
+                           .prefetch_related('rk_bk_matches')
                            .get(laag=LAAG_RK,
                                 competitie__is_afgesloten=False,
                                 competitie=comp,
@@ -153,12 +153,12 @@ class UitslagenRayonIndivView(TemplateView):
 
         # haal de planning erbij: competitieklasse --> competitiewedstrijd
         indiv2wedstrijd = dict()    # [indiv_pk] = competitiewedstrijd
-        wedstrijd_pks = list(deelcomp_rk.rk_bk_wedstrijden.values_list('pk', flat=True))
+        match_pks = list(deelcomp_rk.rk_bk_matches.values_list('pk', flat=True))
         for wedstrijd in (CompetitieMatch
                           .objects
                           .prefetch_related('indiv_klassen')
                           .select_related('locatie')
-                          .filter(pk__in=wedstrijd_pks)):
+                          .filter(pk__in=match_pks)):
 
             if wedstrijd.locatie:
                 wedstrijd.adres_str = ", ".join(wedstrijd.locatie.adres.split('\n'))

@@ -202,6 +202,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
         # maak binnen het plan drie wedstrijden voor deze vereniging
         for volgnr in range(3):
             match = CompetitieMatch(
+                        competitie=self.comp_18,
                         vereniging=self.nhbver1,
                         datum_wanneer=datetime.date(year=2020, month=1, day=5+volgnr*3),
                         tijd_begin_wedstrijd=de_tijd)
@@ -227,8 +228,9 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
             self.wedstrijden.append(match)
         # for
 
-        # maak voor de vereniging een wedstrijd die niets met de competitie te doen heeft
+        # maak voor de vereniging een wedstrijd die niets met de competitie te doen heeft       TODO: no such thing
         match = CompetitieMatch(
+                    competitie=self.comp_25,
                     vereniging=self.nhbver1,
                     datum_wanneer=datetime.date(year=2020, month=2, day=1),
                     tijd_begin_wedstrijd=de_tijd)

@@ -281,7 +281,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
         # zoek alle verenigingsteams erbij
         teams = (RegiocompetitieTeam
                  .objects
-                 .exclude(klasse=None)
+                 .exclude(team_klasse=None)
                  .filter(deelcompetitie=deelcomp,
                          team_type=context['teamtype'],
                          vereniging=ver)

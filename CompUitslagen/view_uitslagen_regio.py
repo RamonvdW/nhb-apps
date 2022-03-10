@@ -495,12 +495,12 @@ class UitslagenRegioTeamsView(TemplateView):
 
         teams = (RegiocompetitieTeam
                  .objects
-                 .exclude(klasse=None)
+                 .exclude(team_klasse=None)
                  .filter(deelcompetitie=deelcomp,
                          team_type=context['teamtype'])
                  .select_related('vereniging',
-                                 'klasse__team')
-                 .order_by('klasse__team__volgorde'))
+                                 'team_klasse')
+                 .order_by('team_klasse__volgorde'))
         pk2team = dict()
         for team in teams:
             pk2team[team.pk] = team

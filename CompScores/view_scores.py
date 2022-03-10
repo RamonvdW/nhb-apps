@@ -79,8 +79,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 
         for ronde in (DeelcompetitieRonde
                       .objects
-                      .select_related('plan')
-                      .prefetch_related('plan__wedstrijden')
+                      .prefetch_related('matches')
                       .filter(deelcompetitie=deelcomp)):
 
             for wedstrijd in ronde.matches.all():
@@ -450,16 +449,10 @@ class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
             # garbage in
             raise Http404('Geen valide verzoek')
 
-        plan = match.competitiewedstrijdenplan_set.all()[0]
-
-        # zoek de ronde erbij
-        # deze hoort al bij een competitie type (indoor / 25m1pijl)
-        ronde = (DeelcompetitieRonde
-                 .objects
-                 .select_related('deelcompetitie',
-                                 'deelcompetitie__nhb_regio',
-                                 'deelcompetitie__competitie')
-                 .get(plan=plan))
+        rondes = match.deelcompetitieronde_set.all()
+        if len(rondes) == 0:
+            raise Http404('Geen competitie wedstrijd')
+        ronde = rondes[0]
 
         # zoek schuttersboog die ingeschreven zijn voor deze competitie
         competitie = ronde.deelcompetitie.competitie
@@ -541,7 +534,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
         return rol_nu in (Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     @staticmethod
-    def laad_wedstrijd_of_404(data):
+    def laad_match_of_404(data):
         try:
             wedstrijd_pk = int(str(data['wedstrijd_pk'])[:6])   # afkappen voor de veiligheid
             wedstrijd = (CompetitieMatch
@@ -668,22 +661,19 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
 
         # print('data:', repr(data))
 
-        wedstrijd = self.laad_wedstrijd_of_404(data)
-        uitslag = wedstrijd.uitslag
+        match = self.laad_match_of_404(data)
+        uitslag = match.uitslag
         if not uitslag:
             raise Http404('Geen wedstrijduitslag')
 
         # controleer toestemming om scores op te slaan voor deze wedstrijd
-
-        plannen = wedstrijd.competitiewedstrijdenplan_set.all()
-        if plannen.count() < 1:
-            # wedstrijd met andere bedoeling
-            raise Http404('Geen wedstrijdenplan')
-
-        ronde = DeelcompetitieRonde.objects.get(plan=plannen[0])
+        rondes = match.deelcompetitieronde_set.all()
+        if len(rondes) == 0:
+            raise Http404('Geen competitie wedstrijd')
+        ronde = rondes[0]
 
         rol_nu, functie_nu = rol_get_huidige_functie(request)
-        if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, ronde.deelcompetitie):
+        if not mag_deelcomp_wedstrijd_wijzigen(match, functie_nu, ronde.deelcompetitie):
             raise PermissionDenied('Geen toegang')
 
         # voorkom wijzigingen bevroren wedstrijduitslag
@@ -840,7 +830,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                            .objects
                            .select_related('team',
                                            'team__vereniging',
-                                           'team__klasse__team')
+                                           'team__team_klasse')
                            .prefetch_related('deelnemers_feitelijk',
                                              'scores_feitelijk')
                            .filter(team__in=team_pks,

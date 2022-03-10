@@ -172,7 +172,7 @@ class Command(BaseCommand):
         rondes = list()
         for ronde in (DeelcompetitieRonde
                       .objects
-                      .select_related('deelcompetitie', 'plan')
+                      .select_related('deelcompetitie')
                       .filter(deelcompetitie__is_afgesloten=False,
                               deelcompetitie__laag=LAAG_REGIO)
                       .all()):
@@ -192,8 +192,7 @@ class Command(BaseCommand):
         for _, _, ronde in rondes:
             # sorteer de beschikbare scores op het moment van de wedstrijd
             for wedstrijd in (ronde
-                              .plan
-                              .wedstrijden
+                              .matches
                               .select_related('uitslag')
                               .order_by('datum_wanneer',
                                         'tijd_begin_wedstrijd',
@@ -207,7 +206,7 @@ class Command(BaseCommand):
                                   .select_related('sporterboog')
                                   .exclude(waarde=0)                # 0 scores zijn voor team competitie only
                                   .all()):
-                        tup = (uitslag.afstand_meter, score)
+                        tup = (uitslag.afstand, score)
                         pk = score.sporterboog.pk
                         if pk in allowed_sporterboog_pks:   # presumed better than huge __in
                             try:

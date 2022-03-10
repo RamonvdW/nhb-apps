@@ -208,13 +208,13 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         if niet_compleet_team:
             raise Http404('Niet alle teams zijn compleet')
 
-        beschrijving2klasse = dict()
+        beschrijving2team_klasse = dict()
 
-        for klasse in (CompetitieTeamKlasse
+        for team_klasse in (CompetitieTeamKlasse
                        .objects
                        .filter(is_voor_teams_rk_bk=True,
                                competitie=comp)):
-            beschrijving2klasse[klasse.beschrijving] = klasse
+            beschrijving2team_klasse[team_klasse.beschrijving] = team_klasse
         # for
 
         teamtype_pk2klassen = dict()        # hoogste klasse eerst
@@ -223,18 +223,18 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         for _, _, _, klassen_lijst in grenzen:
             for beschrijving, _, min_ag, _ in klassen_lijst:
                 try:
-                    klasse = beschrijving2klasse[beschrijving]
+                    team_klasse = beschrijving2team_klasse[beschrijving]
                 except KeyError:
                     raise Http404('Kan competitie klasse %s niet vinden' % repr(beschrijving))
 
-                klasse.min_ag = min_ag
-                klasse.save(update_fields=['min_ag'])
+                team_klasse.min_ag = min_ag
+                team_klasse.save(update_fields=['min_ag'])
 
-                teamtype_pk = klasse.team.team_type.pk
+                teamtype_pk = team_klasse.team_type.pk
                 try:
-                    teamtype_pk2klassen[teamtype_pk].append(klasse)
+                    teamtype_pk2klassen[teamtype_pk].append(team_klasse)
                 except KeyError:
-                    teamtype_pk2klassen[teamtype_pk] = [klasse]
+                    teamtype_pk2klassen[teamtype_pk] = [team_klasse]
             # for
         # for
 
@@ -253,9 +253,9 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
                     # onverwacht team type (ignore, avoid crash)
                     pass
                 else:
-                    for klasse in klassen:
-                        if team.aanvangsgemiddelde >= klasse.min_ag:
-                            team.team_klasse = klasse
+                    for team_klasse in klassen:
+                        if team.aanvangsgemiddelde >= team_klasse.min_ag:
+                            team.team_klasse = team_klasse
                             break       # from the for
                     # for
 
