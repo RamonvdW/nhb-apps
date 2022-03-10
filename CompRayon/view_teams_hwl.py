@@ -255,7 +255,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         # for
 
         try:
-            rk_team_pk = int(kwargs['rk_team_pk'][:6])      # afkappen voor de veiligheid
+            rk_team_pk = int(kwargs['team_pk'][:6])      # afkappen voor de veiligheid
             rk_team = (KampioenschapTeam
                        .objects
                        .get(pk=rk_team_pk,

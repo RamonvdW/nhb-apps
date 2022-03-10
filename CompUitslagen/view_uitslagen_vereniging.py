@@ -285,7 +285,7 @@ class UitslagenVerenigingTeamsView(TemplateView):
                  .filter(deelcompetitie=deelcomp,
                          team_type=context['teamtype'],
                          vereniging=ver)
-                 .order_by('klasse__team__volgorde'))
+                 .order_by('team_klasse__volgorde'))
 
         pk2team = dict()
         for team in teams:

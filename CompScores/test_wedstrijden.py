@@ -223,7 +223,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
             match.save()
             ronde.matches.add(match)
 
-            match.indiv_klassen.set(IndivWedstrijdklasse.objects.all())
+            match.indiv_klassen.set(CompetitieIndivKlasse.objects.filter(competitie=self.comp_18))
 
             self.wedstrijden.append(match)
         # for

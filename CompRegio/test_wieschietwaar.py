@@ -250,6 +250,7 @@ class TestCompRegioWieSchietWaar(E2EHelpers, TestCase):
 
         # maak voor de vereniging een wedstrijd die niets met de competitie te doen heeft
         match = CompetitieMatch(
+                    competitie=self.deelcomp_regio.competitie,
                     vereniging=self.nhbver1,
                     datum_wanneer=datetime.date(year=2020, month=2, day=1),
                     tijd_begin_wedstrijd=de_tijd)

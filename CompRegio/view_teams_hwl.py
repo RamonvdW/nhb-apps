@@ -54,13 +54,13 @@ def bepaal_team_sterkte_en_klasse(team):
                        .order_by('min_ag',
                                  '-volgorde')):  # oplopend AG (=hogere klasse later)
             if ag >= klasse.min_ag:
-                team.klasse = klasse
+                team.team_klasse = klasse
         # for
     else:
         ag = AG_NUL
 
     team.aanvangsgemiddelde = ag
-    team.save(update_fields=['klasse', 'aanvangsgemiddelde'])
+    team.save(update_fields=['team_klasse', 'aanvangsgemiddelde'])
 
 
 class TeamsRegioView(UserPassesTestMixin, TemplateView):

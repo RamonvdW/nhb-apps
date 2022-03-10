@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    <script>
+    <script type="application/javascript">
         function keuze_gemaakt(groep) {
 
             // TODO: sta wijziging in meerdere radiobuttons tegelijk toe: construeer de URL hier

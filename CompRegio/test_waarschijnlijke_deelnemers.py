@@ -204,6 +204,7 @@ class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         # maak binnen het plan drie wedstrijden voor deze vereniging
         for volgnr in range(3):
             match = CompetitieMatch(
+                        competitie=self.comp_18,
                         vereniging=self.nhbver1,
                         datum_wanneer=datetime.date(year=2020, month=1, day=5+volgnr*3),
                         tijd_begin_wedstrijd=de_tijd)

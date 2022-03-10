@@ -1037,14 +1037,14 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         with self.assert_max_queries(21):
             resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk,
                                     {'weekdag': 1, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34',
-                                     'wkl_indiv_%s' % self.klasse_recurve_onbekend.indiv.pk: 'on'})
+                                     'wkl_indiv_%s' % self.klasse_recurve_onbekend.pk: 'on'})
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # nog een keer hetzelfde
         with self.assert_max_queries(21):
             resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk,
                                     {'weekdag': 1, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34',
-                                     'wkl_indiv_%s' % self.klasse_recurve_onbekend.indiv.pk: 'on'})
+                                     'wkl_indiv_%s' % self.klasse_recurve_onbekend.pk: 'on'})
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # haal het ronde overzicht op met daarin de wedstrijdklassen genoemd
@@ -1478,12 +1478,12 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
                                   voor_wedstrijd=True)
         sporterboog.save()
 
-        inschrijving = RegioCompetitieSchutterBoog()
-        inschrijving.sporterboog = sporterboog
-        inschrijving.bij_vereniging = sporterboog.sporter.bij_vereniging
-        inschrijving.deelcompetitie = self.deelcomp_regio101_18
-        inschrijving.klasse = self.klasse_recurve_onbekend
-        inschrijving.save()
+        inschrijving = RegioCompetitieSchutterBoog(
+                            sporterboog=sporterboog,
+                            bij_vereniging=sporterboog.sporter.bij_vereniging,
+                            deelcompetitie=self.deelcomp_regio101_18,
+                            indiv_klasse=self.klasse_recurve_onbekend)
+        # inschrijving.save()
 
         self.assertTrue(str(inschrijving) != "")
 
@@ -1515,8 +1515,8 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_planning_regio_ronde % ronde_pk, {})
         self.assert_is_redirect_not_plein(resp)  # check for success
-        plan = DeelcompetitieRonde.objects.get(deelcompetitie=self.deelcomp_regio112_18).plan
-        wedstrijd112_pk = plan.wedstrijden.all()[0].pk
+        ronde = DeelcompetitieRonde.objects.get(deelcompetitie=self.deelcomp_regio112_18)
+        wedstrijd112_pk = ronde.matches.all()[0].pk
         url = self.url_wijzig_wedstrijd % wedstrijd112_pk
 
         self.e2e_login_and_pass_otp(self.account_rcl101_18)

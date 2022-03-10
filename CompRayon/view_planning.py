@@ -277,23 +277,23 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                      .all())
         prev_boogtype = -1
         for obj in wkl_indiv:
-            if prev_boogtype != obj.indiv.boogtype:
-                prev_boogtype = obj.indiv.boogtype
+            if prev_boogtype != obj.boogtype:
+                prev_boogtype = obj.boogtype
                 obj.break_before = True
             try:
-                schutters = klasse2schutters[obj.indiv.pk]
+                schutters = klasse2schutters[obj.pk]
                 if schutters > 24:
                     schutters = 24
             except KeyError:
                 schutters = 0
-            obj.short_str = obj.indiv.beschrijving
+            obj.short_str = obj.beschrijving
             obj.schutters = schutters
 
-            if obj.indiv.pk in indiv_in_use:
+            if obj.pk in indiv_in_use:
                 obj.disable = True
             else:
-                obj.geselecteerd = (obj.indiv.pk in wedstrijd_indiv_pks)
-            obj.sel_str = "wkl_indiv_%s" % obj.indiv.pk
+                obj.geselecteerd = (obj.pk in wedstrijd_indiv_pks)
+            obj.sel_str = "wkl_indiv_%s" % obj.pk
         # for
 
         klasse_count = dict()   # [klasse.pk] = count

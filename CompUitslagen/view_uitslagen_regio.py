@@ -575,14 +575,14 @@ class UitslagenRegioTeamsView(TemplateView):
                     prev_poule = poule
                     prev_klasse = None
 
-            if team.klasse != prev_klasse:
+            if team.team_klasse != prev_klasse:
                 team.break_klasse = True
                 team.klasse_str = team.team_klasse.beschrijving
                 team.aantal_in_groep = 3        # inclusief afsluitende blauwe regel
                 aantal_team = team
                 if prev_klasse:
                     teams[-1].onderrand = True
-                prev_klasse = team.klasse
+                prev_klasse = team.team_klasse
                 rank = 1
             else:
                 rank += 1

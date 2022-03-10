@@ -345,7 +345,7 @@ class TestCompRegioPoules(E2EHelpers, TestCase):
 
         # maak 9 teams aan
         type_r = TeamType.objects.get(afkorting='R2')
-        klasse_r_ere = CompetitieTeamKlasse.objects.filter(team_type=type_r).order_by('team__volgorde')[0]
+        klasse_r_ere = CompetitieTeamKlasse.objects.filter(team_type=type_r).order_by('volgorde')[0]
         for lp in range(9):
             # team zonder sporters maar wel in een klasse is genoeg voor een poule
             RegiocompetitieTeam(
@@ -360,7 +360,7 @@ class TestCompRegioPoules(E2EHelpers, TestCase):
 
         # maak een compound team aan
         type_c = TeamType.objects.get(afkorting='C')
-        klasse_c_ere = CompetitieTeamKlasse.objects.filter(team_type=type_c).order_by('team__volgorde')[0]
+        klasse_c_ere = CompetitieTeamKlasse.objects.filter(team_type=type_c).order_by('volgorde')[0]
         team_c = RegiocompetitieTeam(
                         deelcompetitie=deelcomp,
                         vereniging=self.nhbver_112,

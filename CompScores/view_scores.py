@@ -558,7 +558,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
 
         score_obj = Score(sporterboog=sporterboog,
                           waarde=waarde,
-                          afstand_meter=uitslag.afstand_meter)
+                          afstand_meter=uitslag.afstand)
         score_obj.save()
         uitslag.scores.add(score_obj)
 
@@ -901,21 +901,23 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         # bepaal welke relevant kunnen zijn
         score2wedstrijd = dict()
 
-        # haal alle wedstrijdplannen van deze deelcompetitie op
-        plan_pks = (DeelcompetitieRonde
-                    .objects
-                    .filter(deelcompetitie=deelcomp)
-                    .values_list('plan__pk', flat=True))
+        match_pks = list()
+        for ronde in (DeelcompetitieRonde
+                      .objects
+                      .filter(deelcompetitie=deelcomp)
+                      .prefetch_related('matches')):
+            match_pks.extend(list(ronde.matches.values_list('pk', flat=True)))
+        # for
 
         # doorloop alle wedstrijden van deze plannen
         # de wedstrijd heeft een datum en uitslag met scores
         for wedstrijd in (CompetitieMatch
                           .objects
+                          .exclude(uitslag=None)
                           .select_related('uitslag',
                                           'vereniging')
-                          .prefetch_related('uitslag__scores')
-                          .exclude(uitslag=None)
-                          .filter(competitiewedstrijdenplan__in=plan_pks)):     # TODO: fix
+                          .filter(pk__in=match_pks)
+                          .prefetch_related('uitslag__scores')):
 
             # noteer welke scores interessant zijn
             # en de koppeling naar de wedstrijd, voor de datum

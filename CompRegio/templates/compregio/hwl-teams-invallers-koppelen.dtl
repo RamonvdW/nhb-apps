@@ -180,7 +180,7 @@
         </div>
     </div>
 
-    <script>
+    <script type="application/javascript">
         window.addEventListener("load", function() { invallers_grijs_maken() })
     </script>
 

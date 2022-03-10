@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    <script>
+    <script type="application/javascript">
         function copy_to_clipboard() {
             const el = document.getElementById('copy_source')
             navigator.clipboard.writeText(el.innerText)

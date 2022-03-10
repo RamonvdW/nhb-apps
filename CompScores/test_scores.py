@@ -88,9 +88,9 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         ronde25 = DeelcompetitieRonde.objects.all()[1]
 
         # maak een cluster planning aan
-        #cluster = self.testdata.regio_cluster[101]
-        #with self.assert_max_queries(20):
-        #    self.client.post(self.url_planning_cluster % (self.testdata.deelcomp18_regio[101].pk, cluster.pk))
+        # cluster = self.testdata.regio_cluster[101]
+        # with self.assert_max_queries(20):
+        #     self.client.post(self.url_planning_cluster % (self.testdata.deelcomp18_regio[101].pk, cluster.pk))
 
         # maak een wedstrijd aan in elke competitie
         indiv_klassen = CompetitieIndivKlasse.objects.values_list('pk', flat=True)
@@ -508,6 +508,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         wedstrijd = CompetitieMatch.objects.get(pk=self.wedstrijd18_pk)
         wedstrijd2 = CompetitieMatch(
+                            competitie=self.testdata.comp18,
                             beschrijving="niet in een plan",
                             datum_wanneer=wedstrijd.datum_wanneer,
                             tijd_begin_wedstrijd=wedstrijd.tijd_begin_wedstrijd,

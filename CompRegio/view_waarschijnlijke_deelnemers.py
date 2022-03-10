@@ -58,8 +58,7 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
             match.beschrijving1 = msg
             match.beschrijving2 = ''
 
-        plan = match.competitiewedstrijdenplan_set.all()[0]
-        ronde = plan.deelcompetitieronde_set.select_related('deelcompetitie', 'deelcompetitie__competitie').all()[0]
+        ronde = match.deelcompetitieronde_set.select_related('deelcompetitie', 'deelcompetitie__competitie').all()[0]
         deelcomp = ronde.deelcompetitie
         comp = deelcomp.competitie
         afstand = comp.afstand

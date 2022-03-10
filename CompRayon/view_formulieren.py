@@ -121,24 +121,24 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
             deelnemers = (KampioenschapSchutterBoog
                           .objects
                           .filter(deelcompetitie=deelcomp_rk,
-                                  klasse__indiv__pk__in=klasse_indiv_pks)
+                                  indiv_klasse__pk__in=klasse_indiv_pks)
                           .exclude(deelname=DEELNAME_NEE)
                           .select_related('sporterboog',
                                           'sporterboog__sporter',
                                           'bij_vereniging',
-                                          'klasse')
-                          .order_by('klasse',
+                                          'indiv_klasse')
+                          .order_by('indiv_klasse',
                                     'rank'))
             context['deelnemers_indiv'] = deelnemers
 
             prev_klasse = None
             for deelnemer in deelnemers:
-                if deelnemer.klasse != prev_klasse:
+                if deelnemer.indiv_klasse != prev_klasse:
                     deelnemer.break_before = True
                     deelnemer.url_download_indiv = reverse('CompRayon:formulier-indiv-als-bestand',
                                                            kwargs={'wedstrijd_pk': match.pk,
-                                                                   'klasse_pk': deelnemer.klasse.pk})
-                    prev_klasse = deelnemer.klasse
+                                                                   'klasse_pk': deelnemer.indiv_klasse.pk})
+                    prev_klasse = deelnemer.indiv_klasse
 
                 deelnemer.ver_nr = deelnemer.bij_vereniging.ver_nr
                 deelnemer.ver_naam = deelnemer.bij_vereniging.naam

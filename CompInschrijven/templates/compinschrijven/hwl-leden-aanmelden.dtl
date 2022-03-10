@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    <script>
+    <script type="application/javascript">
         function tel_wedstrijden() {
             // tel hoeveel checkboxes aangekruist zijn
             const count = document.querySelectorAll('input[name^="wedstrijd_"]:checked').length

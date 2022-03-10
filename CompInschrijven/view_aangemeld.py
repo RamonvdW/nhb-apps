@@ -785,7 +785,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                       .objects
                       .filter(deelcompetitie=deelcomp)
                       .prefetch_related('matches')):
-            match_pks.append(ronde.matches.values_list('pk', flat=True))
+            match_pks.extend(ronde.matches.values_list('pk', flat=True))
         # for
 
         matches = (CompetitieMatch
@@ -918,25 +918,27 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
         # wedstrijden header
         writer.writerow(['Nummer', 'Wedstrijd', 'Locatie', 'Blazoenen:'] + blazoen_headers)
 
-        # zoek alle wedstrijdplannen in deze deelcompetitie (1 per cluster + 1 voor de regio)
-        plan_pks = list(DeelcompetitieRonde
-                        .objects
-                        .filter(deelcompetitie=deelcomp)
-                        .values_list('plan__pk', flat=True))
+        match_pks = list()
+        for ronde in (DeelcompetitieRonde
+                      .objects
+                      .filter(deelcompetitie=deelcomp)
+                      .prefetch_related('matches')):
+            match_pks.extend(ronde.matches.values_list('pk', flat=True))
+        # for
 
-        wedstrijden = (CompetitieMatch
-                       .objects
-                       .select_related('vereniging')
-                       .filter(competitiewedstrijdenplan__pk__in=plan_pks)      # TODO: fix
-                       .order_by('datum_wanneer',
-                                 'tijd_begin_wedstrijd',
-                                 'vereniging__ver_nr'))
+        matches = (CompetitieMatch
+                   .objects
+                   .select_related('vereniging')
+                   .filter(pk__in=match_pks)
+                   .order_by('datum_wanneer',
+                             'tijd_begin_wedstrijd',
+                             'vereniging__ver_nr'))
 
         # maak een blok met genummerde wedstrijden
         # deze nummers komen verderop terug in de kruisjes met de sporters
         nr = 0
         kolom_pks = list()
-        for wedstrijd in wedstrijden:
+        for wedstrijd in matches:
             kolom_pks.append(wedstrijd.pk)
             nr += 1
             beschrijving_str = "%s om %s" % (date_format(wedstrijd.datum_wanneer, "l j E Y"),

@@ -247,11 +247,7 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
 
         sporter.blazoen_lijst = list()
 
-        if afstand == '18':
-            blazoenen = (deelnemer.indiv_klasse.blazoen1_18m_regio, deelnemer.indiv_klasse.blazoen2_18m_regio)
-        else:
-            blazoenen = (deelnemer.indiv_klasse.blazoen1_25m_regio, deelnemer.indiv_klasse.blazoen2_25m_regio)
-        for blazoen in blazoenen:
+        for blazoen in (deelnemer.indiv_klasse.blazoen1_regio, deelnemer.indiv_klasse.blazoen2_regio):
             if blazoen not in sporter.blazoen_lijst:
                 sporter.blazoen_lijst.append(blazoen)
         # for
@@ -348,8 +344,8 @@ def bepaal_blazoen_behoefte(afstand, sporters, deelnemers_teams):
                 ver2teams[ver_nr] = 1
 
             if afstand == '18':
-                if team_klasse.blazoen1_18m_regio == team_klasse.blazoen2_18m_regio:
-                    blazoen = team_klasse.blazoen1_18m_regio
+                if team_klasse.blazoen1_regio == team_klasse.blazoen2_regio:
+                    blazoen = team_klasse.blazoen1_regio
                     if blazoen == BLAZOEN_40CM:
                         blazoenen.teams_40cm += 1
                     elif blazoen == BLAZOEN_DT:
@@ -357,8 +353,8 @@ def bepaal_blazoen_behoefte(afstand, sporters, deelnemers_teams):
                 else:
                     blazoenen.teams_dt_of_40cm += 1
             else:
-                if team_klasse.blazoen1_25m_regio == team_klasse.blazoen2_25m_regio:
-                    if team_klasse.blazoen1_25m_regio == BLAZOEN_60CM:
+                if team_klasse.blazoen1_regio == team_klasse.blazoen2_regio:
+                    if team_klasse.blazoen1_regio == BLAZOEN_60CM:
                         blazoenen.teams_60cm += 1
                     else:
                         blazoenen.teams_60cm_4spot += 1

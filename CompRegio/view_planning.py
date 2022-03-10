@@ -907,7 +907,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                     wkl.aantal_teams = klasse2teams[wkl.pk]
                 except KeyError:
                     wkl.aantal_teams = 0
-                wkl.geselecteerd = (wkl.team.pk in wedstrijd_team_pks)
+                wkl.geselecteerd = (wkl.pk in wedstrijd_team_pks)
             # for
         else:
             wkl_team = list()
@@ -1184,8 +1184,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         match.save()
 
         wkl_indiv, wkl_team = self._get_wedstrijdklassen(ronde.deelcompetitie, match)
-        indiv_pks = [wkl.indiv.pk for wkl in wkl_indiv]
-        teams_pks = [wkl.team.pk for wkl in wkl_team]
+        indiv_pks = [wkl.pk for wkl in wkl_indiv]
+        teams_pks = [wkl.pk for wkl in wkl_team]
 
         # klassen koppelen - individueel
 

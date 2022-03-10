@@ -411,7 +411,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
                 sporterboog=self.sporterboog,
                 bij_vereniging=self.sporterboog.sporter.bij_vereniging,
                 deelcompetitie=self.deelcomp_regio112_18,
-                team_klasse=self.klasse_recurve_onbekend,
+                indiv_klasse=self.klasse_recurve_onbekend,
                 inschrijf_voorkeur_team=True,
                 ag_voor_team_mag_aangepast_worden=True,
                 ag_voor_team=5.0).save()
