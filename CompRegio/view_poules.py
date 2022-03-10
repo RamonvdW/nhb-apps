@@ -86,9 +86,8 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
         teams = (RegiocompetitieTeam
                  .objects
                  .filter(deelcompetitie=deelcomp)
-                 .select_related('klasse',
-                                 'klasse__team')
-                 .order_by('klasse__team__volgorde'))
+                 .select_related('team_klasse')
+                 .order_by('taem_klasse__volgorde'))
 
         for team in teams:
             try:

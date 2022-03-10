@@ -253,8 +253,7 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         self.assert404(resp, 'Geen RK wedstrijd')
 
         # wedstrijd van een niet-RK deelcompetitie
-        plan = self.testdata.deelcomp18_bk.plan
-        plan.wedstrijden.add(self.match.pk)
+        plan = self.testdata.deelcomp18_bk.rk_bk_matches.add(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Verkeerde competitie')

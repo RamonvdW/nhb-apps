@@ -247,7 +247,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         comp = deelcomp_rk.competitie
 
         teamtype_default = None
-        context['opt_team_type'] = teamtypes = CompetitieTeamKlasse.objects.filter(competitie=comp).distinct('team_afkorting').order_by('volgorde')
+        context['opt_team_type'] = teamtypes = CompetitieTeamKlasse.objects.filter(competitie=comp).order_by('volgorde')
         for teamtype in teamtypes:
             teamtype.choice_name = teamtype.team_afkorting
             if teamtype.team_afkorting[0] == 'R':        # R or R2

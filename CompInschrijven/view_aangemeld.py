@@ -780,24 +780,26 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                                   .filter(voorkeur_eigen_blazoen=True)
                                   .values_list('sporter__lid_nr', flat=True))
 
-        # zoek alle wedstrijdplannen in deze deelcompetitie (1 per cluster + 1 voor de regio)
-        plan_pks = list(DeelcompetitieRonde
-                        .objects
-                        .filter(deelcompetitie=deelcomp)
-                        .values_list('plan__pk', flat=True))
+        match_pks = list()
+        for ronde in (DeelcompetitieRonde
+                      .objects
+                      .filter(deelcompetitie=deelcomp)
+                      .prefetch_related('matches')):
+            match_pks.append(ronde.matches.values_list('pk', flat=True))
+        # for
 
-        wedstrijden = (CompetitieMatch
-                       .objects
-                       .select_related('vereniging')
-                       .prefetch_related('regiocompetitieschutterboog_set')
-                       .filter(competitiewedstrijdenplan__pk__in=plan_pks)      # TODO: fix
-                       .order_by('datum_wanneer',
-                                 'tijd_begin_wedstrijd',
-                                 'vereniging__ver_nr'))
+        matches = (CompetitieMatch
+                   .objects
+                   .select_related('vereniging')
+                   .prefetch_related('regiocompetitieschutterboog_set')
+                   .filter(pk__in=match_pks)
+                   .order_by('datum_wanneer',
+                             'tijd_begin_wedstrijd',
+                             'vereniging__ver_nr'))
 
-        context['wedstrijden'] = wedstrijden
+        context['wedstrijden'] = matches
 
-        for wedstrijd in wedstrijden:
+        for wedstrijd in matches:
             wedstrijd.beschrijving_str = "%s om %s" % (date_format(wedstrijd.datum_wanneer, "l j E Y"),
                                                        wedstrijd.tijd_begin_wedstrijd.strftime("%H:%M"))
             wedstrijd.locatie_str = str(wedstrijd.vereniging)

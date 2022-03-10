@@ -200,7 +200,7 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         RegioCompetitieSchutterBoog(sporterboog=self.sporterboog,
                                     bij_vereniging=self.sporterboog.sporter.bij_vereniging,
                                     deelcompetitie=deelcomp,
-                                    klasse=self.klasse_recurve_onbekend).save()
+                                    indiv_klasse=self.klasse_recurve_onbekend).save()
 
     def test_overzicht_anon(self):
         with self.assert_max_queries(20):

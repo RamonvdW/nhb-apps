@@ -272,9 +272,8 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
                      .objects
                      .filter(competitie=deelcomp_rk.competitie,
                              is_voor_rk_bk=True)      # verwijder regio-only klassen
-                     .select_related('indiv',
-                                     'indiv__boogtype')
-                     .order_by('indiv__volgorde')
+                     .select_related('boogtype')
+                     .order_by('volgorde')
                      .all())
         prev_boogtype = -1
         for obj in wkl_indiv:
@@ -301,7 +300,7 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         for klasse_pk in (KampioenschapTeam
                           .objects
                           .filter(deelcompetitie=deelcomp_rk)
-                          .values_list('klasse__pk', flat=True)):
+                          .values_list('team_klasse__pk', flat=True)):
             try:
                 klasse_count[klasse_pk] += 1
             except KeyError:

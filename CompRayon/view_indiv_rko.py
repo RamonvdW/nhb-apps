@@ -142,7 +142,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
                 deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
                 klasse = deelnemer.indiv_klasse.volgorde
                 try:
-                    limiet = wkl2limiet[deelnemer.klasse.pk]
+                    limiet = wkl2limiet[deelnemer.indiv_klasse.pk]
                 except KeyError:
                     limiet = 24
 

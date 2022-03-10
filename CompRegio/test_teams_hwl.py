@@ -9,7 +9,7 @@ from django.core import management
 from django.utils import timezone
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (DeelCompetitie, CompetitieTeamKlasse, AG_NUL, LAAG_REGIO,
+from Competitie.models import (DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse, AG_NUL, LAAG_REGIO,
                                RegiocompetitieTeam, RegioCompetitieSchutterBoog, RegiocompetitieRondeTeam)
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.test_competitie import maak_competities_en_zet_fase_b

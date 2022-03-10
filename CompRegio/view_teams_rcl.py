@@ -140,32 +140,32 @@ class RegioTeamsView(TemplateView):
 
         totaal_teams = 0
 
-        klassen = (CompetitieTeamKlasse
-                   .objects
-                   .filter(competitie=comp,
-                           is_voor_teams_rk_bk=False)
-                   .select_related('team_type')
-                   .order_by('volgorde'))
+        team_klassen = (CompetitieTeamKlasse
+                        .objects
+                        .filter(competitie=comp,
+                                is_voor_teams_rk_bk=False)
+                        .select_related('team_type')
+                        .order_by('volgorde'))
 
-        klasse2teams = dict()       # [klasse] = list(teams)
+        team_klasse2teams = dict()       # [team_klasse] = list(teams)
         prev_sterkte = ''
         prev_team = None
-        for klasse in klassen:
-            klasse2teams[klasse] = list()
+        for team_klasse in team_klassen:
+            team_klasse2teams[team_klasse] = list()
 
-            if klasse.team.team_type != prev_team:
+            if team_klasse.team_type != prev_team:
                 prev_sterkte = ''
-                prev_team = klasse.team.team_type
+                prev_team = team_klasse.team_type
 
-            min_ag_str = "%05.1f" % (klasse.min_ag * aantal_pijlen)
+            min_ag_str = "%05.1f" % (team_klasse.min_ag * aantal_pijlen)
             min_ag_str = min_ag_str.replace('.', ',')
             if prev_sterkte:
-                if klasse.min_ag > AG_NUL:
-                    klasse.sterkte_str = "sterkte " + min_ag_str + " tot " + prev_sterkte
+                if team_klasse.min_ag > AG_NUL:
+                    team_klasse.sterkte_str = "sterkte " + min_ag_str + " tot " + prev_sterkte
                 else:
-                    klasse.sterkte_str = "sterkte tot " + prev_sterkte
+                    team_klasse.sterkte_str = "sterkte tot " + prev_sterkte
             else:
-                klasse.sterkte_str = "sterkte " + min_ag_str + " en hoger"
+                team_klasse.sterkte_str = "sterkte " + min_ag_str + " en hoger"
 
             prev_sterkte = min_ag_str
         # for
@@ -175,19 +175,18 @@ class RegioTeamsView(TemplateView):
                       .select_related('vereniging',
                                       'vereniging__regio',
                                       'team_type',
-                                      'klasse',
-                                      'klasse__team')
-                      .exclude(klasse=None)
+                                      'team_klasse')
+                      .exclude(team_klasse=None)
                       .filter(deelcompetitie__in=deelcomp_pks)
-                      .order_by('klasse__team__volgorde',
+                      .order_by('team_klasse__volgorde',
                                 '-aanvangsgemiddelde',
                                 'vereniging__ver_nr'))
 
         prev_klasse = None
         for team in regioteams:
-            if team.klasse != prev_klasse:
+            if team.team_klasse != prev_klasse:
                 team.break_before = True
-                prev_klasse = team.klasse
+                prev_klasse = team.team_klasse
 
             # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
             ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
@@ -198,13 +197,13 @@ class RegioTeamsView(TemplateView):
                                              kwargs={'team_pk': team.pk})
             totaal_teams += 1
 
-            klasse2teams[team.klasse].append(team)
+            team_klasse2teams[team.team_klasse].append(team)
         # for
 
-        context['regioteams'] = klasse2teams
+        context['regioteams'] = team_klasse2teams
 
-        for klasse, teams in klasse2teams.items():
-            klasse.aantal_regels = max(len(teams), 1) + 2
+        for team_klasse, teams in team_klasse2teams.items():
+            team_klasse.aantal_regels = max(len(teams), 1) + 2
         # for
 
         # zoek de teams die niet 'af' zijn
@@ -215,7 +214,7 @@ class RegioTeamsView(TemplateView):
                                       'team_type',
                                       'deelcompetitie')
                       .filter(deelcompetitie__in=deelcomp_pks,
-                              klasse=None)
+                              team_klasse=None)
                       .order_by('team_type__volgorde',
                                 '-aanvangsgemiddelde',
                                 'vereniging__ver_nr'))
@@ -589,7 +588,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
             for team in regioteams:
                 team.aantal_sporters = team.gekoppelde_schutters.count()
 
-                if not team.klasse:
+                if not team.team_klasse:
                     probleem_met_teams = True
                     team.is_niet_af = True
 

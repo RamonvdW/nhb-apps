@@ -849,14 +849,14 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         # wedstrijdklassen individueel
         klasse2schutters = dict()
-        for obj in (RegioCompetitieSchutterBoog
+        for wkl in (RegioCompetitieSchutterBoog
                     .objects
                     .filter(deelcompetitie=deelcomp)
                     .select_related('indiv_klasse')):
             try:
-                klasse2schutters[obj.indiv_klasse.pk] += 1
+                klasse2schutters[wkl.indiv_klasse.pk] += 1
             except KeyError:
-                klasse2schutters[obj.indiv_klasse.pk] = 1
+                klasse2schutters[wkl.indiv_klasse.pk] = 1
         # for
 
         wedstrijd_indiv_pks = [obj.pk for obj in wedstrijd.indiv_klassen.all()]
@@ -866,31 +866,31 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                      .select_related('boogtype')
                      .order_by('volgorde'))
         prev_boogtype = -1
-        for obj in wkl_indiv:
-            if prev_boogtype != obj.boogtype:
-                prev_boogtype = obj.boogtype
-                obj.break_before = True
+        for wkl in wkl_indiv:
+            if prev_boogtype != wkl.boogtype:
+                prev_boogtype = wkl.boogtype
+                wkl.break_before = True
             try:
-                obj.aantal_sporters = klasse2schutters[obj.indiv.pk]
+                wkl.aantal_sporters = klasse2schutters[wkl.pk]
             except KeyError:
-                obj.aantal_sporters = 0
-            obj.short_str = obj.beschrijving
-            obj.sel_str = "wkl_indiv_%s" % obj.indiv.pk
-            obj.geselecteerd = (obj.pk in wedstrijd_indiv_pks)
+                wkl.aantal_sporters = 0
+            wkl.short_str = wkl.beschrijving
+            wkl.sel_str = "wkl_indiv_%s" % wkl.pk
+            wkl.geselecteerd = (wkl.pk in wedstrijd_indiv_pks)
         # for
 
         # wedstrijdklassen teams
         if deelcomp.regio_organiseert_teamcompetitie:
             klasse2teams = dict()
-            for obj in (RegiocompetitieTeam
+            for wkl in (RegiocompetitieTeam
                         .objects
                         .filter(deelcompetitie=deelcomp)
                         .exclude(team_klasse=None)
                         .select_related('team_klasse')):
                 try:
-                    klasse2teams[obj.team_klasse.pk] += 1
+                    klasse2teams[wkl.team_klasse.pk] += 1
                 except KeyError:
-                    klasse2teams[obj.team_klasse.pk] = 1
+                    klasse2teams[wkl.team_klasse.pk] = 1
             # for
 
             wedstrijd_team_pks = [obj.pk for obj in wedstrijd.team_klassen.all()]
@@ -900,14 +900,14 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                                 is_voor_teams_rk_bk=False)
                         .order_by('volgorde')
                         .all())
-            for obj in wkl_team:
-                obj.short_str = obj.beschrijving
-                obj.sel_str = "wkl_team_%s" % obj.pk
+            for wkl in wkl_team:
+                wkl.short_str = wkl.beschrijving
+                wkl.sel_str = "wkl_team_%s" % wkl.pk
                 try:
-                    obj.aantal_teams = klasse2teams[obj.pk]
+                    wkl.aantal_teams = klasse2teams[wkl.pk]
                 except KeyError:
-                    obj.aantal_teams = 0
-                obj.geselecteerd = (obj.team.pk in wedstrijd_team_pks)
+                    wkl.aantal_teams = 0
+                wkl.geselecteerd = (wkl.team.pk in wedstrijd_team_pks)
             # for
         else:
             wkl_team = list()
@@ -928,13 +928,10 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = match.competitiewedstrijdenplan_set.all()[0]
-        ronde = (DeelcompetitieRonde
-                 .objects
-                 .select_related('deelcompetitie',
-                                 'deelcompetitie__competitie',
-                                 'deelcompetitie__nhb_regio')
-                 .get(plan=plan))
+        rondes = match.deelcompetitieronde_set.all()
+        if len(rondes) == 0:
+            raise Http404('Geen regio wedstrijd')
+        ronde = rondes[0]
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
         if ronde.deelcompetitie.functie != functie_nu:
@@ -1101,13 +1098,10 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = match.competitiewedstrijdenplan_set.all()[0]
-        ronde = (DeelcompetitieRonde
-                 .objects
-                 .select_related('deelcompetitie',
-                                 'deelcompetitie__competitie',
-                                 'deelcompetitie__nhb_regio')
-                 .get(plan=plan))
+        rondes = match.deelcompetitieronde_set.all()
+        if len(rondes) == 0:
+            raise Http404('Geen regio wedstrijd')
+        ronde = rondes[0]
 
         deelcomp = ronde.deelcompetitie
 
@@ -1289,12 +1283,10 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = match.competitiewedstrijdenplan_set.all()[0]
-        try:
-            ronde = DeelcompetitieRonde.objects.get(plan=plan,
-                                                    deelcompetitie__laag=LAAG_REGIO)
-        except DeelcompetitieRonde.DoesNotExist:
-            raise Http404('Ronde niet gevonden')
+        rondes = match.deelcompetitieronde_set.all()
+        if len(rondes) == 0:
+            raise Http404('Geen regio wedstrijd')
+        ronde = rondes[0]
 
         deelcomp = ronde.deelcompetitie
 
