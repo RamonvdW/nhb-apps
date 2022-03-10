@@ -63,7 +63,7 @@ def bepaal_rk_team_tijdelijke_sterkte_en_klasse(rk_team, open_inschrijving):
     else:
         rk_team.aanvangsgemiddelde = AG_NUL
 
-    rk_team.save(update_fields=['aanvangsgemiddelde', 'klasse'])
+    rk_team.save(update_fields=['aanvangsgemiddelde', 'team_klasse'])
 
 
 class TeamsRkView(UserPassesTestMixin, TemplateView):
@@ -330,7 +330,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
                           .select_related('team_type')
                           .filter(competitie=comp,
                                   team_afkorting=afkorting))[0]
-                team_type = klasse.team.team_type
+                team_type = klasse.team_type
             except (IndexError, TeamType.DoesNotExist):
                 raise Http404('Onbekend team type')
 

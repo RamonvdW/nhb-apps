@@ -12,7 +12,7 @@ def zet_competitie_typen(apps, _):
     comp_klas = apps.get_model('Competitie', 'Competitie')
     klasse_klas = apps.get_model('Competitie', 'CompetitieKlasse')
 
-    for comp in comp_klas.objects.all():
+    for comp in comp_klas.objects.all():                # pragma: no cover
         boogtypen_pks = list()
         teamtypen_pks = list()
 

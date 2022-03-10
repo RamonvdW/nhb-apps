@@ -216,8 +216,7 @@ class Command(BaseCommand):
                        .objects
                        .filter(competitie=self.comp)
                        .exclude(is_voor_rk_bk=False)        # aspiranten en klasse onbekend
-                       .select_related('indiv')
-                       .order_by('indiv__volgorde')):
+                       .order_by('volgorde')):
 
             self.stdout.write('[INFO] Individuele klasse: %s' % klasse)
 

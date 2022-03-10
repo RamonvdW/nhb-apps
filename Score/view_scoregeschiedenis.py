@@ -66,7 +66,7 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                          .select_related('score',
                                          'score__sporterboog',
                                          'score__sporterboog__boogtype')
-                         .prefetch_related('score__competitiewedstrijduitslag_set')
+                         .prefetch_related('score__uitslag_set')
                          .filter(score__sporterboog__in=pks)
                          .order_by('-when'))
 
@@ -114,8 +114,8 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                                     afstanden.append(score.afstand_meter)
 
                                 try:
-                                    uitslag = score.competitiewedstrijduitslag_set.prefetch_related('competitiewedstrijd_set').all()[0]
-                                    wedstrijd = uitslag.competitiewedstrijd_set.all()[0]
+                                    uitslag = score.uitslag_set.prefetch_related('competitiematch_set').all()[0]
+                                    wedstrijd = uitslag.competitiematch_set.all()[0]
                                     score.wedstrijd_str = str(wedstrijd.datum_wanneer)
                                     tijd = str(wedstrijd.tijd_begin_wedstrijd)[:5]
                                     if tijd != "00:00":

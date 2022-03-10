@@ -77,9 +77,8 @@ class RayonPlanningView(UserPassesTestMixin, TemplateView):
         niet_gebruikt = dict()
         for obj in (KampioenschapSchutterBoog
                     .objects
-                    .select_related('indiv_klasse')
                     .filter(deelcompetitie=deelcomp_rk)
-                    .select_related('klasse')):
+                    .select_related('indiv_klasse')):
             try:
                 klasse2schutters[obj.indiv_klasse.pk] += 1
             except KeyError:
@@ -370,8 +369,10 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
             raise Http404('Wedstrijd niet gevonden')
 
         # zoek het weeknummer waarin deze wedstrijd gehouden moet worden
-        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
-        deelcomp_rk = plan.deelcompetitie_set.all()[0]
+        deelcomps = wedstrijd.deelcompetitie_set.all()
+        if len(deelcomps) == 0:
+            raise Http404('Geen RK wedstrijd')
+        deelcomp_rk = deelcomps[0]
         comp = deelcomp_rk.competitie
         is_25m = (comp.afstand == '25')
 
@@ -463,8 +464,10 @@ class WijzigRayonWedstrijdView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
-        deelcomp_rk = plan.deelcompetitie_set.all()[0]
+        deelcomps = wedstrijd.deelcompetitie_set.all()
+        if len(deelcomps) == 0:
+            raise Http404('Geen RK wedstrijd')
+        deelcomp_rk = deelcomps[0]
 
         # is dit de beheerder?
         if deelcomp_rk.functie != self.functie_nu:
@@ -903,14 +906,16 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
-        try:
-            deelcomp = DeelCompetitie.objects.get(plan=plan, laag=LAAG_RK)
-        except DeelCompetitie.DoesNotExist:
+        deelcomps = wedstrijd.deelcompetitie_set.all()
+        if len(deelcomps) == 0:
+            raise Http404('Geen RK wedstrijd')
+
+        deelcomp_rk = deelcomps[0]
+        if deelcomp_rk.laag != LAAG_RK:
             raise Http404('Competitie niet gevonden')
 
         # correcte beheerder?
-        if deelcomp.functie != self.functie_nu:
+        if deelcomp_rk.functie != self.functie_nu:
             raise PermissionDenied()
 
         # voorkom verwijderen van wedstrijden waar een uitslag aan hangt
@@ -921,7 +926,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
 
         wedstrijd.delete()
 
-        url = reverse('CompRayon:rayon-planning', kwargs={'rk_deelcomp_pk': deelcomp.pk})
+        url = reverse('CompRayon:rayon-planning', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
         return HttpResponseRedirect(url)
 
 

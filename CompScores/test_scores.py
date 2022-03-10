@@ -638,7 +638,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         score.save()
 
         uitslag = Uitslag(max_score=300,
-                          afstand_meter=18)
+                          afstand=18)
         uitslag.save()
         uitslag.scores.add(score)
 

@@ -24,18 +24,18 @@ def migreer_matches(apps, _):
     comp_volgorde2team_pk = dict()     # [(comp.pk, volgorde)] = CompetitieTeamKlasse
     wedstrijd_pk2match_pk = dict()     # [CompetitieWedstrijd.pk] = CompetitieMatch.pk
 
-    for indiv in indiv_klas.objects.prefetch_related('competitie'):
+    for indiv in indiv_klas.objects.prefetch_related('competitie'):     # pragma: no cover
         tup = (indiv.competitie.pk, indiv.volgorde)
         comp_volgorde2indiv_pk[tup] = indiv.pk
     # for
 
-    for team in team_klas.objects.prefetch_related('competitie'):
+    for team in team_klas.objects.prefetch_related('competitie'):       # pragma: no cover
         tup = (team.competitie.pk, team.volgorde)
         comp_volgorde2team_pk[tup] = team.pk
     # for
 
     # migreer DeelcompetitieRonde wedstrijden
-    for ronde in (ronde_klas
+    for ronde in (ronde_klas                                            # pragma: no cover
                   .objects
                   .exclude(plan=None)
                   .select_related('plan',
@@ -87,7 +87,7 @@ def migreer_matches(apps, _):
     # for
 
     # migreer de RK/BK deelcompetities wedstrijden
-    for deelcomp in (deelcomp_klas
+    for deelcomp in (deelcomp_klas                                      # pragma: no cover
                      .objects
                      .exclude(plan=None)
                      .select_related('competitie',
@@ -133,7 +133,7 @@ def migreer_matches(apps, _):
     # for
 
     # migreer gekozen wedstrijden inschrijfmethode 1
-    for deelnemer in (deelnemer_klas
+    for deelnemer in (deelnemer_klas                                    # pragma: no cover
                       .objects
                       .prefetch_related('inschrijf_gekozen_wedstrijden')):
 

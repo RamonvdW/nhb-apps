@@ -51,9 +51,9 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
                        .select_related('team_type')
                        .order_by('volgorde')):
 
-            teamtype_pk = rk_wkl.team.team_type.pk
+            teamtype_pk = rk_wkl.team_type.pk
             if teamtype_pk not in teamtype_pks:
-                teamtypes.append(rk_wkl.team.team_type)
+                teamtypes.append(rk_wkl.team_type)
                 teamtype_pks.append(teamtype_pk)
 
             try:
@@ -131,7 +131,7 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
                         min_ag_str = "%05.1f" % (min_ag * aantal_pijlen)
                         min_ag_str = min_ag_str.replace('.', ',')
 
-                    tup = (klasse.team.beschrijving, step, min_ag, min_ag_str)
+                    tup = (klasse.beschrijving, step, min_ag, min_ag_str)
                     klassen_lijst.append(tup)
                 # for
 

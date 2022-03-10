@@ -6,8 +6,8 @@
 
 from django.test import TestCase
 from django.core import management
-from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
-from Competitie.models import Competitie, DeelCompetitie, CompetitieMatch
+from Competitie.models import Competitie, DeelCompetitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.operations import competities_aanmaken
 from NhbStructuur.models import NhbRegio, NhbRayon, NhbVereniging
 from TestHelpers.e2ehelpers import E2EHelpers
 from Wedstrijden.models import WedstrijdLocatie
@@ -20,11 +20,15 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
 
+        competities_aanmaken(2019)
+
+        comp = Competitie.objects.get(afstand='18')
+
         dummy_datum = '2019-07-01'
         dummy_tijd = '10:00'
 
-        indiv1, indiv2 = IndivWedstrijdklasse.objects.all()[:2]
-        team1, team2 = TeamWedstrijdklasse.objects.all()[:2]
+        indiv1, indiv2 = CompetitieIndivKlasse.objects.filter(competitie=comp)[:2]
+        team1, team2 = CompetitieTeamKlasse.objects.filter(competitie=comp)[:2]
 
         regio_114 = NhbRegio.objects.get(regio_nr=114)
         rayon_1 = NhbRayon.objects.get(rayon_nr=1)
@@ -51,6 +55,7 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
 
         # een paar wedstrijden
         wed = CompetitieMatch(
+                    competitie=comp,
                     beschrijving='wed1',
                     vereniging=ver,
                     locatie=loc,
@@ -76,6 +81,7 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         self.loc2 = loc
 
         wed = CompetitieMatch(
+                    competitie=comp,
                     beschrijving='wed2',
                     vereniging=ver,
                     locatie=loc,
@@ -86,6 +92,7 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
 
         # locatie, geen vereniging
         wed = CompetitieMatch(
+                    competitie=comp,
                     beschrijving='wed3',
                     vereniging=None,
                     locatie=loc,
@@ -102,6 +109,7 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         ver.save()
 
         wed = CompetitieMatch(
+                    competitie=comp,
                     beschrijving='wed2',
                     vereniging=ver,
                     # locatie=None,
@@ -110,23 +118,6 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         wed.save()
         wed.indiv_klassen.add(indiv2)
         wed.team_klassen.add(team2)
-
-        comp = Competitie(
-            beschrijving='comp1',
-            afstand='18',
-            begin_jaar=2019,
-            uiterste_datum_lid=dummy_datum,
-            begin_aanmeldingen=dummy_datum,
-            einde_aanmeldingen=dummy_datum,
-            einde_teamvorming=dummy_datum,
-            eerste_wedstrijd=dummy_datum,
-            laatst_mogelijke_wedstrijd=dummy_datum,
-            datum_klassengrenzen_rk_bk_teams=dummy_datum,
-            rk_eerste_wedstrijd=dummy_datum,
-            rk_laatste_wedstrijd=dummy_datum,
-            bk_eerste_wedstrijd=dummy_datum,
-            bk_laatste_wedstrijd=dummy_datum)
-        comp.save()
 
         deelcomp_bk = DeelCompetitie(
                         competitie=comp,

@@ -163,28 +163,22 @@ def bepaal_wedstrijd_en_deelcomp_of_404(match_pk):
     except (ValueError, CompetitieMatch.DoesNotExist):
         raise Http404('Wedstrijd niet gevonden')
 
-    plan = match.competitiewedstrijdenplan_set.all()[0]
-
-    # zoek de ronde erbij
-    # deze hoort al bij een competitie type (indoor / 25m1pijl)
-    ronde = (DeelcompetitieRonde
-             .objects
-             .select_related('deelcompetitie',
-                             'deelcompetitie__nhb_regio',
-                             'deelcompetitie__competitie')
-             .get(plan=plan))
+    rondes = match.deelcompetitieronde_set.all()
+    if len(rondes) == 0:
+        raise Http404('Geen regio wedstrijd')
+    ronde = rondes[0]
 
     deelcomp = ronde.deelcompetitie
 
-    # maak de WedstrijdUitslag aan indien nog niet gedaan
+    # maak de uitslag aan indien nog niet gedaan
     if not match.uitslag:
         uitslag = Uitslag()
         if deelcomp.competitie.afstand == '18':
             uitslag.max_score = 300
-            uitslag.afstand_meter = 18
+            uitslag.afstand = 18
         else:
             uitslag.max_score = 250
-            uitslag.afstand_meter = 25
+            uitslag.afstand = 25
         uitslag.save()
         match.uitslag = uitslag
         match.save()

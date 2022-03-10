@@ -12,7 +12,7 @@ def migreer_uitslag(apps, _):
     uitslag_klas = apps.get_model('Score', 'Uitslag')
     old_klas = apps.get_model('Wedstrijden', 'CompetitieWedstrijdUitslag')
 
-    for old in old_klas.objects.prefetch_related('scores').all():
+    for old in old_klas.objects.prefetch_related('scores').all():       # pragma: no cover
         score_pks = list(old.scores.values_list('pk', flat=True))
 
         uitslag = uitslag_klas(

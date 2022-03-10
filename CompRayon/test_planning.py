@@ -377,7 +377,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         # bevries de uitslag
         wedstrijd = self.deelcomp_rayon1_18.rk_bk_matches.all()[0]
         uitslag = Uitslag(max_score=300,
-                          afstand_meter=18,
+                          afstand=18,
                           is_bevroren=True)
         uitslag.save()
         wedstrijd.uitslag = uitslag

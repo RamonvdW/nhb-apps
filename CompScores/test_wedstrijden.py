@@ -207,7 +207,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                         tijd_begin_wedstrijd=de_tijd)
 
             if volgnr <= 1:
-                uitslag = Uitslag(max_score=300, afstand_meter=12)
+                uitslag = Uitslag(max_score=300, afstand=12)
                 uitslag.save()
                 match.uitslag = uitslag
                 match.beschrijving = "Test - Dit is een testje %s" % volgnr

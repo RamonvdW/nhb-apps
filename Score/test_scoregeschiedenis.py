@@ -5,8 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
 from BasisTypen.models import BoogType
-from Competitie.models import CompetitieMatch
+from Competitie.models import Competitie, CompetitieMatch
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -27,21 +28,41 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         uur_00 = datetime.time(hour=0)
         uur_19 = datetime.time(hour=19)
 
+        now = timezone.now()
+        einde_jaar = datetime.date(year=now.year, month=12, day=31)
+
         uitslag18 = Uitslag(max_score=300,
-                            afstand_meter=18)
+                            afstand=18)
         uitslag18.save()
 
         uitslag25 = Uitslag(max_score=250,
-                            afstand_meter=25)
+                            afstand=25)
         uitslag25.save()
 
-        CompetitieMatch(beschrijving='Test wedstrijdje 18m',
+        comp = Competitie(
+                    begin_jaar=2000,
+                    uiterste_datum_lid=datetime.date(year=2000, month=1, day=1),
+                    begin_aanmeldingen=einde_jaar,
+                    einde_aanmeldingen=einde_jaar,
+                    einde_teamvorming=einde_jaar,
+                    eerste_wedstrijd=einde_jaar,
+                    laatst_mogelijke_wedstrijd=einde_jaar,
+                    datum_klassengrenzen_rk_bk_teams=einde_jaar,
+                    rk_eerste_wedstrijd=einde_jaar,
+                    rk_laatste_wedstrijd=einde_jaar,
+                    bk_eerste_wedstrijd=einde_jaar,
+                    bk_laatste_wedstrijd=einde_jaar)
+        comp.save()
+
+        CompetitieMatch(competitie=comp,
+                        beschrijving='Test wedstrijdje 18m',
                         datum_wanneer=datetime.date(year=2020, month=10, day=10),
                         tijd_begin_wedstrijd=uur_19,
                         uitslag=uitslag18,
                         vereniging=self.nhbver1).save()
 
-        CompetitieMatch(beschrijving='Test wedstrijdje 25m',
+        CompetitieMatch(competitie=comp,
+                        beschrijving='Test wedstrijdje 25m',
                         datum_wanneer=datetime.date(year=2020, month=10, day=11),
                         tijd_begin_wedstrijd=uur_00,
                         uitslag=uitslag25).save()
