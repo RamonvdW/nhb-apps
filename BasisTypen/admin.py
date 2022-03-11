@@ -10,7 +10,7 @@ from django.utils.safestring import mark_safe
 
 # all klassen zijn hard-coded
 from .models import (BoogType, TeamType, LeeftijdsKlasse,
-                     IndivWedstrijdklasse, TeamWedstrijdklasse,
+                     TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse,
                      KalenderWedstrijdklasse)
 
 
@@ -29,14 +29,16 @@ class BasisTypenReadonlyAdmin(admin.ModelAdmin):
 class BasisTypenReadonlyMetVolgordeAdmin(BasisTypenReadonlyAdmin):
     ordering = ('volgorde',)
 
+    lister_filter = ('organisatie',)
+
 
 class BasisTypenLeeftijdsKlasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
 
-    list_filter = ('wedstrijd_geslacht',)
+    list_filter = ('organisatie', 'wedstrijd_geslacht',)
 
 
-class BasisTypenIndivWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
-    """ filter voor IndivWedstrijdklasse """
+class BasisTypenTemplateCompetitieIndivKlasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
+    """ filter voor TemplateCompetitieIndivKlasse """
 
     # lijstweergave
     list_filter = ('buiten_gebruik', 'boogtype', 'is_aspirant_klasse')
@@ -62,8 +64,8 @@ class BasisTypenIndivWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
         return mark_safe(html)
 
 
-class BasisTypenTeamWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
-    """ filter voor TeamWedstrijdklasse """
+class BasisTypenTemplateCompetitieTeamKlasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
+    """ filter voor TemplateCompetitieTeamKlasse """
 
     # lijstweergave
     list_filter = ('buiten_gebruik',)
@@ -80,14 +82,19 @@ class BasisTypenTeamWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
 
 class BasisTypenKalenderWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
 
-    list_filter = ('boogtype', 'leeftijdsklasse__klasse_kort')
+    list_filter = ('organisatie', 'boogtype', 'leeftijdsklasse__klasse_kort', 'leeftijdsklasse__wedstrijd_geslacht')
+
+    # record weergave
+    fieldsets = (
+        (None, {'fields': ('organisatie', 'beschrijving', 'volgorde', 'boogtype', 'leeftijdsklasse', 'buiten_gebruik')}),
+    )
 
 
 admin.site.register(BoogType, BasisTypenReadonlyMetVolgordeAdmin)
 admin.site.register(TeamType, BasisTypenReadonlyMetVolgordeAdmin)
 admin.site.register(LeeftijdsKlasse, BasisTypenLeeftijdsKlasseAdmin)
-admin.site.register(IndivWedstrijdklasse, BasisTypenIndivWedstrijdklasseAdmin)
-admin.site.register(TeamWedstrijdklasse, BasisTypenTeamWedstrijdklasseAdmin)
+admin.site.register(TemplateCompetitieIndivKlasse, BasisTypenTemplateCompetitieIndivKlasseAdmin)
+admin.site.register(TemplateCompetitieTeamKlasse, BasisTypenTemplateCompetitieTeamKlasseAdmin)
 admin.site.register(KalenderWedstrijdklasse, BasisTypenKalenderWedstrijdklasseAdmin)
 
 # end of file

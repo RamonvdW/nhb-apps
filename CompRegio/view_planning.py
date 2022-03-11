@@ -848,15 +848,15 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
     def _get_wedstrijdklassen(deelcomp, wedstrijd):
 
         # wedstrijdklassen individueel
-        klasse2schutters = dict()
-        for wkl in (RegioCompetitieSchutterBoog
-                    .objects
-                    .filter(deelcompetitie=deelcomp)
-                    .select_related('indiv_klasse')):
+        klasse2aantal_sporters = dict()
+        for deelnemer in (RegioCompetitieSchutterBoog
+                          .objects
+                          .filter(deelcompetitie=deelcomp)
+                          .select_related('indiv_klasse')):
             try:
-                klasse2schutters[wkl.indiv_klasse.pk] += 1
+                klasse2aantal_sporters[deelnemer.indiv_klasse.pk] += 1
             except KeyError:
-                klasse2schutters[wkl.indiv_klasse.pk] = 1
+                klasse2aantal_sporters[deelnemer.indiv_klasse.pk] = 1
         # for
 
         wedstrijd_indiv_pks = [obj.pk for obj in wedstrijd.indiv_klassen.all()]
@@ -871,7 +871,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
                 prev_boogtype = wkl.boogtype
                 wkl.break_before = True
             try:
-                wkl.aantal_sporters = klasse2schutters[wkl.pk]
+                wkl.aantal_sporters = klasse2aantal_sporters[wkl.pk]
             except KeyError:
                 wkl.aantal_sporters = 0
             wkl.short_str = wkl.beschrijving
@@ -984,8 +984,6 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             # for
 
         match.tijd_begin_wedstrijd_str = match.tijd_begin_wedstrijd.strftime("%H:%M")
-        # wedstrijd.tijd_begin_aanmelden_str = wedstrijd.tijd_begin_aanmelden.strftime("%H%M")
-        # wedstrijd.tijd_einde_wedstrijd_str = wedstrijd.tijd_einde_wedstrijd.strftime("%H%M")
 
         if ronde.cluster:
             verenigingen = ronde.cluster.nhbvereniging_set.order_by('ver_nr')

@@ -332,9 +332,9 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)  # 200 = OK
 
         # wijzig de wedstrijd en zet een aantal wedstrijdklassen
-        sel_indiv_1 = "wkl_indiv_%s" % self.klasse_r.indiv.pk
-        sel_indiv_2 = "wkl_indiv_%s" % self.klasse_c.indiv.pk
-        sel_indiv_3 = "wkl_indiv_%s" % self.klasse_ib.indiv.pk
+        sel_indiv_1 = "wkl_indiv_%s" % self.klasse_r.pk
+        sel_indiv_2 = "wkl_indiv_%s" % self.klasse_c.pk
+        sel_indiv_3 = "wkl_indiv_%s" % self.klasse_ib.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url_w, {'weekdag': 1,
                                             'aanvang': '12:34',

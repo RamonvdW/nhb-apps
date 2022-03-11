@@ -60,7 +60,10 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        deelcomp_rk = match.deelcompetitie_set.all()[0]
+        deelcomps = match.deelcompetitie_set.all()
+        if len(deelcomps) == 0:
+            raise Http404('Verkeerde competitie')
+        deelcomp_rk = deelcomps[0]
         if deelcomp_rk.laag != LAAG_RK:
             raise Http404('Verkeerde competitie')
 

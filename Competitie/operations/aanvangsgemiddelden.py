@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from BasisTypen.models import TeamWedstrijdklasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
+from BasisTypen.models import TemplateCompetitieTeamKlasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from Competitie.models import AG_NUL, CompetitieTeamKlasse
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Logboek.models import schrijf_in_logboek
@@ -33,7 +33,10 @@ def get_competitie_bogen(comp=None):
     else:
         # haal de boogtypen op voor de volgende competitie
         teamtypen_done = list()
-        for team_wkl in TeamWedstrijdklasse.objects.exclude(buiten_gebruik=True).select_related('team_type'):
+        for team_wkl in (TemplateCompetitieTeamKlasse
+                         .objects
+                         .exclude(buiten_gebruik=True)
+                         .select_related('team_type')):
             teamtype = team_wkl.team_type
             if teamtype.pk not in teamtypen_done:
                 teamtypen_done.append(teamtype.pk)
@@ -95,6 +98,7 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
     }
 
     # doorloop alle individuele histcomp records die bij dit seizoen horen
+    histcomp = None
     bulk_score = list()
     for histcomp in histcomps:
         for obj in (HistCompetitieIndividueel

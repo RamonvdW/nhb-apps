@@ -11,7 +11,7 @@ from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 from django.utils.formats import localize
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
+from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
 from Functie.rol import Rollen, rol_get_huidige
 from HistComp.models import HistCompetitie
 from Logboek.models import schrijf_in_logboek
@@ -51,7 +51,7 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _get_queryset_indivklassen():
-        objs = (IndivWedstrijdklasse
+        objs = (TemplateCompetitieIndivKlasse
                 .objects
                 .filter(buiten_gebruik=False)
                 .select_related('boogtype')
@@ -68,7 +68,7 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _get_queryset_teamklassen():
-        objs = (TeamWedstrijdklasse
+        objs = (TemplateCompetitieTeamKlasse
                 .objects
                 .filter(buiten_gebruik=False)
                 .select_related('team_type')

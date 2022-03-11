@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.models import BoogType, IndivWedstrijdklasse
+from BasisTypen.models import BoogType
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbCluster
 from Competitie.models import (CompetitieIndivKlasse, DeelCompetitie, RegioCompetitieSchutterBoog, CompetitieMatch,
@@ -225,13 +225,14 @@ class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
             match.save()
             ronde.matches.add(match)
 
-            match.indiv_klassen.set(IndivWedstrijdklasse.objects.all())
+            match.indiv_klassen.set(CompetitieIndivKlasse.objects.filter(competitie=self.comp_18))
 
             self.wedstrijden.append(match)
         # for
 
         # maak voor de vereniging een wedstrijd die niets met de competitie te doen heeft
         match = CompetitieMatch(
+                    competitie=self.comp_18,
                     vereniging=self.nhbver1,
                     datum_wanneer=datetime.date(year=2020, month=2, day=1),
                     tijd_begin_wedstrijd=de_tijd)

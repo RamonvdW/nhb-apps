@@ -8,7 +8,7 @@ from django.views.generic import TemplateView
 from django.utils import timezone
 from django.urls import reverse
 from Plein.menu import menu_dynamics
-from BasisTypen.models import IndivWedstrijdklasse
+from BasisTypen.models import TemplateCompetitieIndivKlasse
 from NhbStructuur.models import NhbRegio
 from types import SimpleNamespace
 
@@ -47,7 +47,7 @@ class InfoCompetitieView(TemplateView):
                     # for
 
         # tel de template klassen, zodat dit ook werkt als er geen competitie actief is
-        context['klassen_count'] = (IndivWedstrijdklasse
+        context['klassen_count'] = (TemplateCompetitieIndivKlasse
                                     .objects
                                     .exclude(is_onbekend=True)
                                     .exclude(buiten_gebruik=True)

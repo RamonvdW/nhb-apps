@@ -87,7 +87,7 @@ class RegioPoulesView(UserPassesTestMixin, TemplateView):
                  .objects
                  .filter(deelcompetitie=deelcomp)
                  .select_related('team_klasse')
-                 .order_by('taem_klasse__volgorde'))
+                 .order_by('team_klasse__volgorde'))
 
         for team in teams:
             try:
@@ -202,11 +202,11 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
 
         teams = (RegiocompetitieTeam
                  .objects
-                 .select_related('klasse__team',
+                 .select_related('team_klasse',
                                  'team_type')
                  .prefetch_related('regiocompetitieteampoule_set')
                  .filter(deelcompetitie=deelcomp)
-                 .order_by('klasse__team__volgorde'))
+                 .order_by('team_klasse__volgorde'))
         for team in teams:
             team.sel_str = 'team_%s' % team.pk
             if team.pk in team_pks:
@@ -215,7 +215,7 @@ class WijzigPouleView(UserPassesTestMixin, TemplateView):
                 if team.regiocompetitieteampoule_set.count():
                     team.in_andere_poule = True
 
-            if team.klasse:
+            if team.team_klasse:
                 team.klasse_str = team.team_klasse.beschrijving
             else:
                 team.klasse_str = ''        # blokkeert selectie voor poule

@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.core import management
-from BasisTypen.models import IndivWedstrijdklasse, BoogType, TeamType, LeeftijdsKlasse
+from BasisTypen.models import TemplateCompetitieIndivKlasse, BoogType, TeamType, LeeftijdsKlasse
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                DeelCompetitie, LAAG_REGIO,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam)
@@ -58,10 +58,10 @@ class TestCompRegioCli(E2EHelpers, TestCase):
                             nhb_regio=regio_111)
         deelcomp.save()
 
-        indiv_r1 = IndivWedstrijdklasse.objects.filter(boogtype=boog_r)[1]
-        indiv_r2 = IndivWedstrijdklasse.objects.filter(boogtype=boog_r)[2]
-        indiv_tr = IndivWedstrijdklasse.objects.filter(boogtype=boog_tr)[0]
-        indiv_bb = IndivWedstrijdklasse.objects.filter(boogtype=boog_bb)[0]
+        indiv_r1 = TemplateCompetitieIndivKlasse.objects.filter(boogtype=boog_r)[1]
+        indiv_r2 = TemplateCompetitieIndivKlasse.objects.filter(boogtype=boog_r)[2]
+        indiv_tr = TemplateCompetitieIndivKlasse.objects.filter(boogtype=boog_tr)[0]
+        indiv_bb = TemplateCompetitieIndivKlasse.objects.filter(boogtype=boog_bb)[0]
 
         lkl_sa = LeeftijdsKlasse.objects.get(afkorting='SA')
 

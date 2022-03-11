@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.models import BoogType, IndivWedstrijdklasse
+from BasisTypen.models import BoogType
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (CompetitieIndivKlasse, DeelCompetitie, CompetitieMatch, LAAG_REGIO,

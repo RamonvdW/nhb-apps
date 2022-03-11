@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
-from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
+from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
 from Competitie.models import (AG_NUL, LAAG_REGIO, LAAG_RK, AFSTANDEN,
                                Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                DeelCompetitie, DeelcompetitieRonde)
@@ -179,7 +179,7 @@ def _maak_competitieklassen(comp):
         volgorde2lkl_pks = dict()     # [volgorde] = [LeeftijdsKlasse.pk, ...]
         bulk = list()
 
-        for indiv in (IndivWedstrijdklasse
+        for indiv in (TemplateCompetitieIndivKlasse
                       .objects
                       .prefetch_related('leeftijdsklassen')
                       .exclude(buiten_gebruik=True)):
@@ -218,7 +218,7 @@ def _maak_competitieklassen(comp):
     if True:
         bulk = list()
 
-        for team in (TeamWedstrijdklasse
+        for team in (TemplateCompetitieTeamKlasse
                      .objects
                      .exclude(buiten_gebruik=True)):
 
@@ -330,13 +330,13 @@ def competities_aanmaken(jaar=None):
 
         comp.save()
 
-        pks = list(IndivWedstrijdklasse
+        pks = list(TemplateCompetitieIndivKlasse
                    .objects
                    .exclude(buiten_gebruik=True)
                    .values_list('boogtype__pk', flat=True))
         comp.boogtypen.set(pks)
 
-        pks = list(TeamWedstrijdklasse
+        pks = list(TemplateCompetitieTeamKlasse
                    .objects
                    .exclude(buiten_gebruik=True)
                    .values_list('team_type__pk', flat=True))

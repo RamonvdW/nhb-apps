@@ -6,8 +6,8 @@
 
 from django.test import TestCase
 from .models import (BoogType, TeamType, LeeftijdsKlasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
-                     IndivWedstrijdklasse, TeamWedstrijdklasse, KalenderWedstrijdklasse)
-from .admin import BasisTypenIndivWedstrijdklasseAdmin
+                     TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse, KalenderWedstrijdklasse)
+from .admin import BasisTypenTemplateCompetitieIndivKlasseAdmin
 
 
 class TestBasisTypen(TestCase):
@@ -48,7 +48,7 @@ class TestBasisTypen(TestCase):
         team_obj = TeamType(beschrijving='Test', afkorting='X')
         self.assertIsNotNone(str(team_obj))
 
-        obj = TeamWedstrijdklasse(beschrijving="Test")
+        obj = TemplateCompetitieTeamKlasse(beschrijving="Test")
         self.assertIsNotNone(str(obj))
 
         obj.team_type = team_obj
@@ -57,15 +57,15 @@ class TestBasisTypen(TestCase):
         boog_obj = BoogType.objects.all()[0]
         self.assertIsNotNone(str(boog_obj))
 
-        obj = IndivWedstrijdklasse(beschrijving="Test", boogtype=boog_obj)
+        obj = TemplateCompetitieIndivKlasse(beschrijving="Test", boogtype=boog_obj)
         self.assertIsNotNone(str(obj))
 
         obj = KalenderWedstrijdklasse(beschrijving="Test")
         self.assertIsNotNone(str(obj))
 
     def test_admin(self):
-        adm = BasisTypenIndivWedstrijdklasseAdmin(IndivWedstrijdklasse, None)
-        obj = IndivWedstrijdklasse.objects.get(volgorde=1100)
+        adm = BasisTypenTemplateCompetitieIndivKlasseAdmin(TemplateCompetitieIndivKlasse, None)
+        obj = TemplateCompetitieIndivKlasse.objects.get(volgorde=1100)
         html = adm._leeftijdsklassen(obj)
         self.assertTrue(html.count('<p>') == obj.leeftijdsklassen.count())
 

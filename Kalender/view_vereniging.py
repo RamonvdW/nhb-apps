@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import BoogType, KalenderWedstrijdklasse
+from BasisTypen.models import BoogType, KalenderWedstrijdklasse, ORGANISATIE_WA
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from .models import (KalenderWedstrijd,
@@ -90,11 +90,12 @@ class VerenigingKalenderWedstrijdenView(UserPassesTestMixin, View):
                 wed.save()
 
                 # default alle bogen aan zetten
-                bogen = BoogType.objects.all()      # TODO: exclude IB
+                # TODO: schakelen tussen WA, IFAA en NAT bogen
+                bogen = BoogType.objects.exclude(afkorting='IB')        # IB=obsolete
                 wed.boogtypen.set(bogen)
 
-                # default alle wedstrijdklassen kiezen die onder A-status vallen
-                klassen = KalenderWedstrijdklasse.objects.exclude(leeftijdsklasse__volgens_wa=False).all()
+                # default alle wedstrijdklassen kiezen die WA-erkend zijn en dus onder A-status vallen
+                klassen = KalenderWedstrijdklasse.objects.filter(organisatie=ORGANISATIE_WA).all()
                 wed.wedstrijdklassen.set(klassen)
 
         url = reverse('Kalender:vereniging')

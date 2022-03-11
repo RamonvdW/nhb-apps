@@ -496,7 +496,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
 
         team = RegiocompetitieTeam.objects.get(pk=team.pk)
         self.assertTrue(team.aanvangsgemiddelde < 0.0005)
-        self.assertIsNone(team.klasse)
+        self.assertIsNone(team.team_klasse)
         self.assertEqual(0, team.gekoppelde_schutters.count())
 
         with self.assert_max_queries(20):
@@ -663,7 +663,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         team_18 = RegiocompetitieTeam.objects.get(pk=team_18.pk)
         self.assertEqual(2, team_18.gekoppelde_schutters.count())
         self.assertEqual(team_18.aanvangsgemiddelde, AG_NUL)
-        self.assertEqual(None, team_18.klasse)
+        self.assertEqual(None, team_18.team_klasse)
 
         # koppel nog meer leden
         deelnemer = RegioCompetitieSchutterBoog.objects.get(pk=self.deelnemer_100012_18.pk)
@@ -692,7 +692,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         team_18 = RegiocompetitieTeam.objects.get(pk=team_18.pk)
         self.assertEqual(3, team_18.gekoppelde_schutters.count())
         self.assertEqual(str(team_18.aanvangsgemiddelde), '21.340')        # 7.42 + 7.42 + 6.5
-        self.assertEqual(team_18.klasse, obj)
+        self.assertEqual(team_18.team_klasse, obj)
 
         # maak nog een team aan
         with self.assert_max_queries(20):

@@ -137,7 +137,7 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         self.deelcomp18_rk.rk_bk_matches.remove(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp, 'Geen wedstrijden plan')
+        self.assert404(resp, 'Verkeerde competitie')
 
         # 25m1p plan
         self.deelcomp25_rk.rk_bk_matches.add(self.match.pk)
@@ -147,8 +147,7 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         self.deelcomp25_rk.rk_bk_matches.remove(self.match.pk)
 
         # wedstrijd van een niet-RK deelcompetitie
-        plan = self.testdata.deelcomp18_bk.plan
-        plan.wedstrijden.add(self.match.pk)
+        self.testdata.deelcomp18_bk.rk_bk_matches.add(self.match.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Verkeerde competitie')

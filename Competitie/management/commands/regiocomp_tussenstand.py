@@ -92,7 +92,7 @@ class Command(BaseCommand):
         self._verwerk_overstappers_regio(regio_comp_pks)
 
     def _prep_caches(self):
-        # maak een structuur om gerelateerde IndivWedstrijdklassen te vinden
+        # maak een structuur om gerelateerde klassen te vinden
         indiv_alike = dict()     # [(boogtype.pk, leeftijdsklasse.pk, ...)] = [indiv, ..]
         klassen_qset = (CompetitieIndivKlasse
                         .objects

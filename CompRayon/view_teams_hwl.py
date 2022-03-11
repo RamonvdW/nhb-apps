@@ -247,15 +247,19 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         comp = deelcomp_rk.competitie
 
         teamtype_default = None
-        context['opt_team_type'] = teamtypes = CompetitieTeamKlasse.objects.filter(competitie=comp).order_by('volgorde')
-        for teamtype in teamtypes:
-            teamtype.choice_name = teamtype.team_afkorting
-            if teamtype.team_afkorting[0] == 'R':        # R or R2
-                teamtype_default = teamtype
+        context['opt_team_type'] = team_klassen = (CompetitieTeamKlasse
+                                                   .objects
+                                                   .filter(competitie=comp)
+                                                   .select_related('team_type')
+                                                   .order_by('volgorde'))
+        for team_klasse in team_klassen:
+            team_klasse.choice_name = team_klasse.team_afkorting
+            if team_klasse.team_afkorting[0] == 'R':        # R or R2
+                teamtype_default = team_klasse.team_type
         # for
 
         try:
-            rk_team_pk = int(kwargs['team_pk'][:6])      # afkappen voor de veiligheid
+            rk_team_pk = int(kwargs['rk_team_pk'][:6])      # afkappen voor de veiligheid
             rk_team = (KampioenschapTeam
                        .objects
                        .get(pk=rk_team_pk,
@@ -272,7 +276,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
 
         context['rk_team'] = rk_team
 
-        for obj in teamtypes:
+        for obj in team_klassen:
             obj.actief = rk_team.team_type == obj
         # for
 

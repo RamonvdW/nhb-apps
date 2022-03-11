@@ -6,7 +6,8 @@
 
 from django.db import models
 from django.utils import timezone
-from BasisTypen.models import (BoogType, LeeftijdsKlasse, TeamType, IndivWedstrijdklasse, TeamWedstrijdklasse,
+from BasisTypen.models import (BoogType, LeeftijdsKlasse, TeamType,
+                               TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse,
                                BLAZOEN_CHOICES, BLAZOEN_40CM)
 from Functie.models import Functie
 from Functie.rol import Rollen
@@ -373,7 +374,7 @@ class CompetitieIndivKlasse(models.Model):
     """ Deze database tabel bevat de klassen voor een competitie,
         met de vastgestelde aanvangsgemiddelden
 
-        Deze tabel wordt aangemaakt aan de hand van de templates: BasisTypen::IndivWedstrijdklasse
+        Deze tabel wordt aangemaakt aan de hand van de templates: BasisTypen::TemplateCompetitieIndivKlasse
     """
 
     # hoort bij
@@ -436,7 +437,7 @@ class CompetitieTeamKlasse(models.Model):
     """ Deze database tabel bevat de klassen voor de teamcompetitie,
         met de vastgestelde aanvangsgemiddelden.
 
-        Deze tabel wordt aangemaakt aan de hand van de templates: BasisTypen::TeamWedstrijdklasse
+        Deze tabel wordt aangemaakt aan de hand van de templates: BasisTypen::TemplateCompetitieTeamKlasse
         en de gerefereerde TeamType wordt hierin ook plat geslagen om het aantal database accesses te begrenzen.
     """
 

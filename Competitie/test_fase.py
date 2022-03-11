@@ -6,7 +6,7 @@
 
 from django.utils import timezone
 from django.test import TestCase
-from BasisTypen.models import IndivWedstrijdklasse, TeamType
+from BasisTypen.models import TemplateCompetitieIndivKlasse, TeamType
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                LAAG_REGIO, LAAG_RK, LAAG_BK)
 import datetime
@@ -144,13 +144,13 @@ class TestCompetitieFase(TestCase):
 
     """ tests voor de Competitie applicatie, hanteren van de competitie fases """
 
-    def _maak_twee_klassen(self, comp):
-        indiv = IndivWedstrijdklasse.objects.all()[0]
+    @staticmethod
+    def _maak_twee_klassen(comp):
+        indiv = TemplateCompetitieIndivKlasse.objects.all()[0]
         CompetitieIndivKlasse(competitie=comp, volgorde=1, boogtype=indiv.boogtype, min_ag=0.0).save()
 
         teamtype = TeamType.objects.all()[0]
         CompetitieTeamKlasse(competitie=comp, volgorde=1, min_ag=0.0, team_type=teamtype).save()
-
 
     def test_zet_fase(self):
         now = timezone.now()

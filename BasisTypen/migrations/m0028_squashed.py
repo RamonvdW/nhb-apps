@@ -627,6 +627,7 @@ def init_wedstrijdklassen_team(apps, _):
 def init_kalenderwedstrijdklassen(apps, _):
     """ Maak de kalender wedstrijdklassen aan """
 
+    # haal de klassen op die van toepassing zijn tijdens deze migratie
     kalenderwedstrijdklasse_klas = apps.get_model('BasisTypen', 'KalenderWedstrijdklasse')
     leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
     boogtype_klas = apps.get_model('BasisTypen', 'BoogType')

@@ -133,8 +133,10 @@ class WaarschijnlijkeDeelnemersAlsBestandView(UserPassesTestMixin, TemplateView)
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        plan = match.competitiewedstrijdenplan_set.all()[0]
-        ronde = plan.deelcompetitieronde_set.select_related('deelcompetitie', 'deelcompetitie__competitie').all()[0]
+        rondes = match.deelcompetitieronde_set.select_related('deelcompetitie', 'deelcompetitie__competitie').all()
+        if len(rondes) == 0:
+            raise Http404('Verkeerde competitie')
+        ronde = rondes[0]
         deelcomp = ronde.deelcompetitie
         afstand = deelcomp.competitie.afstand
 
