@@ -5,10 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.core import management
 from BasisTypen.models import BoogType, TeamType
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               LAAG_BK, LAAG_RK, LAAG_REGIO,
-                               RegiocompetitieTeam, RegiocompetitieTeamPoule)
+                               LAAG_BK, LAAG_RK, LAAG_REGIO, TEAM_PUNTEN_MODEL_FORMULE1,
+                               RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
 from Functie.models import maak_functie
@@ -18,6 +19,7 @@ from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
+import io
 
 
 class TestCompRegioPoules(E2EHelpers, TestCase):
@@ -405,5 +407,29 @@ class TestCompRegioPoules(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
         poule = RegiocompetitieTeamPoule.objects.prefetch_related('teams').get(pk=poule.pk)
         self.assertEqual(8, poule.teams.count())
+
+        # CLI test: Formule1 wedstrijdpunten
+        deelcomp.regio_team_punten_model = TEAM_PUNTEN_MODEL_FORMULE1
+        deelcomp.save(update_fields=['regio_team_punten_model'])
+
+        # maak een RegiocompetitieRondeTeam aan
+        teams = poule.teams.all()
+        bulk = list()
+        for team in teams:
+            bulk.extend([
+                RegiocompetitieRondeTeam(team=team, ronde_nr=1, team_score=5, team_punten=5),  # triggert melding
+                RegiocompetitieRondeTeam(team=team, ronde_nr=2, team_score=5, team_punten=team.pk),
+                RegiocompetitieRondeTeam(team=team, ronde_nr=3)])
+        # for
+        RegiocompetitieRondeTeam.objects.bulk_create(bulk)
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(22):
+            management.call_command('check_wp_f1', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue(f1.getvalue() == '')
+        self.assertTrue('[WARNING] ' in f2.getvalue())
 
 # end of file

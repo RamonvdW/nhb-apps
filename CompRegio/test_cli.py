@@ -435,6 +435,7 @@ class TestCompRegioCli(E2EHelpers, TestCase):
         # print("f2: %s" % f2.getvalue())
 
         self.assertTrue(f1.getvalue() == '')
+        # zie test_poules voor nog een test van dit commando
 
     def test_ronde_teams_check(self):
         f1 = io.StringIO()
