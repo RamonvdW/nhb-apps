@@ -34,114 +34,125 @@
                     <th>Huidige ronde</th>
                     <td>{{ deelcomp.huidige_team_ronde }}</td>
                 </tr>
-            </div>
+            </table>
         </div>
     </div>
 
-    <p>&nbsp;</p>
-
-    {% if aantal_keuzes_nodig > 0 %}
-        <p class="red-text">Je moet nog {{ aantal_keuzes_nodig }} keuzes maken. Klik daarna op Opslaan.</p>
-        {% if anchor %}<p><a class="btn-nhb-rood" href="#{{ anchor }}">Spring naar de eerste</a>{% endif %}</p>
-    {% else %}
-        <p>Alle keuzes zijn al gemaakt. Je kan nog aanpassingen doen - vergeet niet om op te staan!</p>
-    {% endif %}
-
+    <div class="center">
+        {% if aantal_keuzes_nodig > 0 %}
+            <p class="red-text">Je moet nog {{ aantal_keuzes_nodig }} keuzes maken. Klik daarna op Opslaan.</p>
+            {% if anchor %}<p><a class="btn-nhb-rood" href="#{{ anchor }}">Spring naar de eerste</a>{% endif %}</p>
+        {% else %}
+            <p>Alle keuzes zijn al gemaakt. Je kan nog aanpassingen doen - vergeet niet om op te staan!</p>
+        {% endif %}
+    </div>
 
     {% if deelcomp.huidige_team_ronde >= 1 and deelcomp.huidige_team_ronde <= 7 %}
 
-        <form method="post" action="{{ url_opslaan }}">
-            {% csrf_token %}
+        <!-- blauwe balk met dialoog venster -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
 
-            <table class="white">
-                {% for regel in alle_regels %}
-                    {% if regel.poule_str %}
-                        <tr class="nhb-grijs">
-                            <td colspan="3"><h5>Poule: {{ regel.poule_str }}</h5></td>
-                        </tr>
-                    {% endif %}
+                <!-- dialoog venster -->
+                <div class="white left-align z-depth-3">
+                    <div style="padding:30px">
+                        <form method="post" action="{{ url_opslaan }}">
+                            {% csrf_token %}
 
-                    {% if regel.klasse_str %}
-                        <tr class="nhb-grijs">
-                            <td colspan="3"><h6>Klasse: {{ regel.klasse_str }}</h6></td>
-                        </tr>
-
-                        <tr>
-                            <th>Team, sporters</th>
-                            <th>Beschikbare score</th>
-                            <th>Van wedstrijd</th>
-                        </tr>
-                    {% endif %}
-
-                    <tr>
-                        <td colspan="3">{{ regel.team_str }}</td>
-                    </tr>
-
-                    {% for deelnemer in regel.deelnemers %}
-                        <tr{% if deelnemer.anchor %} id="{{ deelnemer.anchor }}"{% endif %}>
-                            <td style="padding-left: 50px">{{ deelnemer.naam_str }}</td>
-
-                            <!-- scores -->
-                            <td>
-                                {% if deelnemer.kan_kiezen %}
-                                    {% if deelnemer.keuze_nodig %}
-                                        <span class="red-text">Keuze nodig:</span><br>
+                            <table class="white">
+                                {% for regel in alle_regels %}
+                                    {% if regel.poule_str %}
+                                        <tr>
+                                            <td colspan="3" class="center red-text"><h5>Poule: {{ regel.poule_str }}</h5></td>
+                                        </tr>
                                     {% endif %}
-                                    <ul id="{{ deelnemer.id_radio }}">
-                                        {% for wedstrijd, score in deelnemer.gevonden_scores %}
-                                            <li>
-                                                <label class="black-text" for="{{ score.id_radio }}">
-                                                    <input class="with-gap" type="radio" name="{{ deelnemer.id_radio }}" value="{{ score.pk }}" {% if score.block_selection %}disabled{% else %}id="{{ score.id_radio }}"{% endif %}{% if score.is_selected %} checked{% endif %}>
-                                                    <span>{{ score.waarde }}</span><br>
-                                                </label>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                {% else %}
-                                    {% for wedstrijd, score in deelnemer.gevonden_scores %}
-                                        <span{% if score.block_selection %} class="grey-text"{% endif %}>{{ score.waarde }}</span><br>
-                                    {% empty %}
-                                        <span>0</span>
-                                    {% endfor %}
-                                {% endif %}
-                            </td>
 
-                            <!-- datums -->
-                            <td>
-                                {% if deelnemer.kan_kiezen %}
-                                    {% if deelnemer.keuze_nodig %}
-                                        <!-- Keuze maken: --><br>
+                                    {% if regel.klasse_str %}
+                                        <tr>
+                                            <td colspan="3" class="center"><h6>Klasse: {{ regel.klasse_str }}</h6></td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Team, sporters</th>
+                                            <th>Beschikbare score</th>
+                                            <th>Van wedstrijd</th>
+                                        </tr>
                                     {% endif %}
-                                    {% for wedstrijd, score in deelnemer.gevonden_scores %}
-                                        <!-- TODO: extra class nodig voor line-height compatible met input -->
-                                        {% if wedstrijd %}
-                                            <span class="input{% if score.block_selection %} grey-text{% endif %}" style="line-height:25px">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij {{ wedstrijd.vereniging.naam }}</span><br>
-                                        {% else %}
-                                            <span class="input" style="line-height:25px"><i>Niet geschoten</i></span><br>
-                                        {% endif %}
-                                    {% endfor %}
-                                {% else %}
-                                    {% for wedstrijd, score in deelnemer.gevonden_scores %}
-                                        {% if wedstrijd %}
-                                            <span{% if score.block_selection %} class="grey-text"{% endif %}>{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij {{ wedstrijd.vereniging.naam }}</span><br>
-                                        {% else %}
-                                            <i>Niet geschoten</i>
-                                        {% endif %}
-                                    {% empty %}
-                                        <i>Niet geschoten</i>
-                                    {% endfor %}
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                {% endfor %}
-            </table>
 
-            <div class="fixed-action-btn">
-                <button class="btn-nhb-rood" type="submit">
-                    <i class="material-icons-round left">check</i>Opslaan</button>
+                                    <tr>
+                                        <th colspan="3" class="nhb-table-header">{{ regel.team_str }}</th>
+                                    </tr>
+
+                                    {% for deelnemer in regel.deelnemers %}
+                                        <tr{% if deelnemer.anchor %} id="{{ deelnemer.anchor }}"{% endif %}>
+                                            <td style="padding-left: 50px">{{ deelnemer.naam_str }}</td>
+
+                                            <!-- scores -->
+                                            <td>
+                                                {% if deelnemer.kan_kiezen %}
+                                                    {% if deelnemer.keuze_nodig %}
+                                                        <span class="red-text">Keuze nodig:</span><br>
+                                                    {% endif %}
+                                                    <ul id="{{ deelnemer.id_radio }}">
+                                                        {% for wedstrijd, score in deelnemer.gevonden_scores %}
+                                                            <li>
+                                                                <label class="black-text" for="{{ score.id_radio }}">
+                                                                    <input class="with-gap" type="radio" name="{{ deelnemer.id_radio }}" value="{{ score.pk }}" {% if score.block_selection %}disabled{% else %}id="{{ score.id_radio }}"{% endif %}{% if score.is_selected %} checked{% endif %}>
+                                                                    <span>{{ score.waarde }}</span><br>
+                                                                </label>
+                                                            </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% else %}
+                                                    {% for wedstrijd, score in deelnemer.gevonden_scores %}
+                                                        <span{% if score.block_selection %} class="grey-text"{% endif %}>{{ score.waarde }}</span><br>
+                                                    {% empty %}
+                                                        <span>0</span>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </td>
+
+                                            <!-- datums -->
+                                            <td>
+                                                {% if deelnemer.kan_kiezen %}
+                                                    {% if deelnemer.keuze_nodig %}
+                                                        <!-- Keuze maken: --><br>
+                                                    {% endif %}
+                                                    {% for wedstrijd, score in deelnemer.gevonden_scores %}
+                                                        <!-- TODO: extra class nodig voor line-height compatible met input -->
+                                                        {% if wedstrijd %}
+                                                            <span class="input{% if score.block_selection %} grey-text{% endif %}" style="line-height:25px">{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij {{ wedstrijd.vereniging.naam }}</span><br>
+                                                        {% else %}
+                                                            <span class="input" style="line-height:25px"><i>Niet geschoten</i></span><br>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% else %}
+                                                    {% for wedstrijd, score in deelnemer.gevonden_scores %}
+                                                        {% if wedstrijd %}
+                                                            <span{% if score.block_selection %} class="grey-text"{% endif %}>{{ wedstrijd.datum_wanneer }} om {{ wedstrijd.tijd_begin_wedstrijd }} bij {{ wedstrijd.vereniging.naam }}</span><br>
+                                                        {% else %}
+                                                            <i>Niet geschoten</i>
+                                                        {% endif %}
+                                                    {% empty %}
+                                                        <i>Niet geschoten</i>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endfor %}
+                            </table>
+
+                            <div class="fixed-action-btn">
+                                <button class="btn-nhb-rood" type="submit">
+                                    <i class="material-icons-round left">check</i>Opslaan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
             </div>
-        </form>
+        </div>
     {% else %}
         <p>Deze pagina is niet beschikbaar voor de huidige team ronde</p>
     {% endif %}
