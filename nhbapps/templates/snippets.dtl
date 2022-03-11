@@ -287,5 +287,16 @@
     </div>
 
 
+
+    <!-- rood bordje -->
+    <div class="row">
+        <div style="padding:10px">
+            <div class="col s12 m8 offset-m2 nhb-rood white-text center">
+                <p>Er is besloten een uitzondering te maken voor deze competitie.<br>Om deel te mogen nemen aan de Rayonkampioenschappen moeten 5 scores neergezet zijn.<br>Het totaal en gemiddelde hieronder is daarom berekend over de beste 5 scores</p>
+            </div>
+        </div>
+    </div>
+
+
 {% include 'feedback/sidebar.dtl' with op_pagina="functie-wijzig-email" %}
 

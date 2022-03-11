@@ -93,7 +93,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         sporter.account = self.account_lid
         sporter.save()
         self.sporter_100001 = sporter
-        sporterboog = SporterBoog(sporter=self.sporter_100001, boogtype=self.boog_r, voor_wedstrijd=True)  # TODO: migrate
+        sporterboog = SporterBoog(sporter=self.sporter_100001, boogtype=self.boog_r, voor_wedstrijd=True)
         sporterboog.save()
         self.sporterboog_100001 = sporterboog
 
@@ -110,7 +110,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         sporter.account = self.account_jeugdlid
         sporter.save()
         self.sporter_100002 = sporter
-        sporterboog = SporterBoog(sporter=self.sporter_100002, boogtype=self.boog_r, voor_wedstrijd=True)  # TODO: migrate
+        sporterboog = SporterBoog(sporter=self.sporter_100002, boogtype=self.boog_r, voor_wedstrijd=True)
         sporterboog.save()
         self.sporterboog_100002 = sporterboog
 
