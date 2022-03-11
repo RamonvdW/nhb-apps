@@ -14,9 +14,26 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">RK Teams</h3>
+            {% if not subset_filter  %}
+                <p>Verenigingsteams aangemeld voor de rayonkampioenschappen</p>
+            {% endif %}
         </div>
     </div>
 
+    <script type="application/javascript">
+        function keuze_gemaakt(groep) {
+
+            // TODO: sta wijziging in meerdere radiobuttons tegelijk toe: construeer de URL hier
+
+            const selector = "input[type='radio'][name=" + groep + "]:checked"
+            const el = document.querySelector(selector)
+            const url = el.dataset.url
+
+            // de radiobutton die bij het geladen geselecteerd werd heeft geen url
+            if (url.length > 0)
+                window.location.href = url
+        }
+    </script>
 
     <!-- blauwe balk met informatie label : info -->
     <div class="row-nhb-blauw">
@@ -32,53 +49,42 @@
                 </tr>
             </table>
         </div>
-    </div>
 
-    <!-- TODO: conversie naar new look afronden -->
-    {% if subset_filter %}
+        {% if subset_filter %}
 
-        <p>&nbsp;</p>
-        <div class="white shrink-wrap-5">
-            {% for filter in filters %}
-                {% if filter.url %}
-                    <a class="margin-5 btn-outline" href="{{ filter.url }}">{{ filter.label }}</a>
-                {% else %}
-                    <a class="margin-5 btn-nhb-blauw" href="#">{{ filter.label }}</a>
-                {% endif %}
-            {% endfor %}
-        </div>
-
-    {% else %}
-
-        <!-- blauw balk met wit informatie veld -->
-        <div class="row-nhb-blauw">
-            <div class="col s12">
-                <div class="white" style="padding:10px">
-                    <p>Op deze pagina kan de RKO de verenigingsteams inzien voor de rayonkampioenschappen.</p>
-                </div>
-            </div>
-        </div>
-
-    {% endif %}
-
-    {% if not toon_klassen %}
-        <!-- blauw balk met wit informatie veld -->
-        <div class="row-nhb-blauw">
-            <div class="col s12">
-                <div class="white" style="padding:10px">
-                    <p>
-                        <b>De teams worden in een wedstrijdklasse geplaatst zodra de BKO de klassengrenzen heeft vastgesteld.</b>
+            <!-- filter: rayon -->
+            <div class="col s6 offset-s3 m4 offset-m4 xl2 offset-xl5" style="margin-bottom:15px; margin-top:50px">
+                <div class="white left-align" style="padding:10px">
+                    <p><b>Kies een rayon:</b></p>
+                    <ul id="id_rayon">
+                        {% for obj in filters %}
+                            <li>
+                                <label class="black-text" for="id_{{ obj.sel }}">
+                                    <input class="with-gap" type="radio" name="rayon" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.url }}">
+                                    <span>{{ obj.beschrijving }}</span>
+                                </label>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <p style="margin-left:35px">
+                        <a class="btn-nhb-rood" onclick="keuze_gemaakt('rayon')">Activeer</a>
                     </p>
                 </div>
             </div>
-        </div>
-    {% endif %}
+
+        {% endif %}
+
+    </div>
 
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
             <h4>Teams</h4>
             <p>Aantal: {{ totaal_teams }}</p>
+
+            {% if not toon_klassen %}
+                <p class="red-text">De teams worden in een wedstrijdklasse geplaatst zodra de BKO de klassengrenzen heeft vastgesteld</p>
+            {% endif %}
         </div>
     </div>
 
@@ -121,12 +127,13 @@
                         <td class="center">{{ team.vereniging.regio.regio_nr }}</td>
                         <td>{{ team.vereniging }}</td>
                         <td>{{ team.team_naam }}</td>
-                        <td{% if team.sporter_count < 3 %} class="red-text"{% endif %}>{{ team.sporter_count }}</td>
-                        <td{% if team.ag_str == "000,0" %} class="red-text"{% endif %}>{{ team.ag_str }}</td>
+                        <td class="center{% if team.sporter_count < 3 %} red-text{% endif %}">{{ team.sporter_count }}</td>
+                        <td class="center{% if team.ag_str == "000,0" %} red-text{% endif %}">{{ team.ag_str }}</td>
                         <td>{{ team.team_type.beschrijving }}</td>
                         <td class="center">
                             {% if team.url_aanpassen %}
-                                <a class="btn-nhb-blauw" href="{{ team.url_aanpassen }}">Aanpassen</a>
+                                <a class="btn-nhb-rood" href="{{ team.url_aanpassen }}">
+                                    <i class="material-icons-round">edit</i></a>
                             {% endif %}
                             {% if team.url_verwijder %}
                                 <span>&nbsp;&nbsp;</span>

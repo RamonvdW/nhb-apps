@@ -80,18 +80,20 @@ class RayonTeamsView(TemplateView):
                                    .values_list('pk', flat=True))
 
             context['filters'] = filters = list()
-            alle_filter = {'label': 'Alles'}
-            if subset != 'alle':
-                alle_filter['url'] = reverse('CompRayon:rayon-teams-alle',
-                                             kwargs={'comp_pk': comp.pk,
-                                                     'subset': 'alle'})
+            alle_filter = dict(beschrijving='Alles',
+                               sel='alle',
+                               selected=(subset == 'alle'),
+                               url=reverse('CompRayon:rayon-teams-alle',
+                                           kwargs={'comp_pk': comp.pk,
+                                                   'subset': 'alle'}))
             filters.append(alle_filter)
 
             for rayon in NhbRayon.objects.all():
-                rayon.label = 'Rayon %s' % rayon.rayon_nr
-                if str(rayon.rayon_nr) != subset:
-                    rayon.url = reverse('CompRayon:rayon-teams-alle',
-                                        kwargs={'comp_pk': comp.pk, 'subset': rayon.rayon_nr})
+                rayon.beschrijving = 'Rayon %s' % rayon.rayon_nr
+                rayon.sel = 'rayon_%s' % rayon.rayon_nr
+                rayon.url = reverse('CompRayon:rayon-teams-alle',
+                                    kwargs={'comp_pk': comp.pk, 'subset': rayon.rayon_nr})
+                rayon.selected = (str(rayon.rayon_nr) == subset)
                 filters.append(rayon)
             # for
 

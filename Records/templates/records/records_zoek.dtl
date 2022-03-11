@@ -73,7 +73,7 @@
                             <th>Wanneer</th>
                             <th class="hide-on-small-only">Waar</th>
                             <th>Discipline</th>
-                            <th class="hide-on-small-only">Score</th>
+                            <th class="hide-on-small-only right-align">Score</th>
                             <th><!-- knoppen --></th>
                       </tr>
                     </thead>
@@ -84,8 +84,8 @@
                             <td>{% if obj.datum.year >= 1950 %}{{ obj.datum }}{% else %}-{% endif %}</td>
                             <td class="hide-on-small-only">{% if obj.plaats %}{{ obj.plaats|highlight:zoekterm }}{% else %}-{% endif %}</td>
                             <td>{{ obj.soort_record }}{{ obj.para_str }}</td>
-                            <td class="hide-on-small-only">{{ obj.score_str }}</td>
-                            <td>
+                            <td class="hide-on-small-only right-align">{{ obj.score_str }}</td>
+                            <td class="center">
                                 <a class="btn-nhb-rood" href="{% url 'Records:specifiek' obj.discipline obj.volg_nr %}">Toon</a>
                             </td>
                         </tr>

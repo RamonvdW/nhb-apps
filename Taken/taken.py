@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,7 +14,7 @@ from datetime import timedelta
 SESSIONVAR_TAAK_AANTAL_OPEN = "taak_aantal_open"
 SESSIONVAR_TAAK_EVAL_AFTER = "taak_eval_after"
 
-TAAK_EVAL_INTERVAL_MINUTES = 5
+TAAK_EVAL_INTERVAL_MINUTES = 1
 
 
 def aantal_open_taken(request):

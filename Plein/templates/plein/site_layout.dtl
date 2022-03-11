@@ -162,7 +162,8 @@
                     // nothing to go back to
                     // typically happens when opening a manual page in a new window
                     const el = document.getElementById("id_kruimels_back");
-                    el.style.display = "none"
+                    // element bestaat niet als broodkruimels uitgezet zijn, zoals op het Plein zelf
+                    if (el) el.style.display = "none";
                 };
 
                 elems = document.querySelectorAll(".collapsible");
