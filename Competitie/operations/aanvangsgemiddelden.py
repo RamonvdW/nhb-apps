@@ -6,7 +6,7 @@
 
 from django.conf import settings
 from BasisTypen.models import TemplateCompetitieTeamKlasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
-from Competitie.models import AG_NUL, CompetitieTeamKlasse
+from Competitie.models import AG_NUL, get_competitie_boog_typen
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Logboek.models import schrijf_in_logboek
 from Sporter.models import Sporter, SporterBoog
@@ -21,15 +21,8 @@ def get_competitie_bogen(comp=None):
     # ALLE bogen van de bondscompetitie teams worden ook gebruikt voor de individuele wedstrijdklassen
 
     if comp:
-        # haal de boogtypen op die gebruikt worden in deze competitie
-        for klasse in (CompetitieTeamKlasse
-                       .objects
-                       .filter(competitie=comp)
-                       .prefetch_related('boog_typen')):
-            for boogtype in klasse.boog_typen.all():
-                boogtype_dict[boogtype.afkorting] = boogtype
-            # for
-        # for
+        for boogtype in get_competitie_boog_typen(comp):
+            boogtype_dict[boogtype.afkorting] = boogtype
     else:
         # haal de boogtypen op voor de volgende competitie
         teamtypen_done = list()

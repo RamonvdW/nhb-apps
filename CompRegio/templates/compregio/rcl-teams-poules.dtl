@@ -130,7 +130,7 @@
                     <tr>
                         <td>{{ team.team_naam }}</td>
                         <td>{% if team.poule %}{{ team.poule.beschrijving }}{% else %}<i class="red-text">Geen</i>{% endif %}</td>
-                        <td>{% if team.klasse %}{{ team.team_klasse.beschrijving }}{% else %}<i>Onbekend</i><span class="red-text">&nbsp;&nbsp;(team is niet compleet)</span>{% endif %}</td>
+                        <td>{% if team.team_klasse %}{{ team.team_klasse.beschrijving }}{% else %}<i>Onbekend</i><span class="red-text">&nbsp;&nbsp;(team is niet compleet)</span>{% endif %}</td>
                     </tr>
                 {% endfor %}
 

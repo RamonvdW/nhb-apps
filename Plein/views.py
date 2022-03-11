@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
+from django.http import Http404
 from django.shortcuts import redirect, render, reverse
 from django.views.generic import TemplateView, View
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
@@ -120,7 +121,7 @@ class PleinView(View):
                     context['rol_is_sec'] = True
                 else:                               # pragma: no cover
                     # vangnet voor nieuwe rollen
-                    raise ValueError("PleinView: onbekende rol %s" % rol_nu)
+                    raise Http404("Onbekende rol %s" % rol_nu)
 
                 context['huidige_rol'] = rol_get_beschrijving(request)
 

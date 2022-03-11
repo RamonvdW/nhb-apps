@@ -1349,6 +1349,7 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.post(url)
+        self.e2e_dump_resp(resp)
         self.assert404(resp)     # 404 = Not found
 
         self.deelcomp_regio101_18.laag = LAAG_REGIO

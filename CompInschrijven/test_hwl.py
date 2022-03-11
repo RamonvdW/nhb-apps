@@ -397,7 +397,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         for klasse in (CompetitieIndivKlasse
                        .objects
                        .filter(competitie=self.comp_18,
-                               indiv__volgorde__in=(1100, 1101, 1102, 1103, 1104, 1105))):
+                               volgorde__in=(1100, 1101, 1102, 1103, 1104, 1105))):
             if klasse.volgorde == 1105:
                 klasse.min_ag = 0.001
             elif klasse.volgorde == 1104:
@@ -439,7 +439,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog__sporter__lid_nr=100003)
         # print('deelnemer:', deelnemer, 'klasse:', deelnemer.klasse)
-        self.assertEqual(deelnemer.klasse, klasse_5)
+        self.assertEqual(deelnemer.indiv_klasse, klasse_5)
 
         # dubbele inschrijving
         with self.assert_max_queries(20):

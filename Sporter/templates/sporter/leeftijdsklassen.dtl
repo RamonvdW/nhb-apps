@@ -21,7 +21,7 @@
     <div class="row center">
         <div class="col s12">
             <h4>Wedstrijden World Archery</h4>
-            <p>Dit jaar bereik je de leeftijd <b class="red-text">{{ leeftijd }} jaar</b>, daarom kom je het hele jaar uit in de klasse <b class="red-text">{{ wlst.1 }}.</b></p>
+            <p>Dit jaar bereik je de leeftijd <b class="red-text">{{ leeftijd }} jaar</b>, daarom kom je het hele jaar uit in de klasse <b class="red-text">{{ wlst.1 }}</b></p>
         </div>
     </div>
 
@@ -90,7 +90,7 @@
     <div class="row center">
         <div class="col s12">
             <h4>Bondscompetitie</h4>
-            <p>Voor seizoen {{ huidige_jaar }}/{{ huidige_jaar|add:"1" }} schiet je de bondscompetitie als <b>{{ lkl_volgende_competitie }}</b>.</p>
+            <p>Voor seizoen {{ huidige_jaar }}/{{ huidige_jaar|add:"1" }} schiet je de bondscompetitie als <b>{{ lkl_volgende_competitie }}</b></p>
         </div>
     </div>
 
