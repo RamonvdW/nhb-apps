@@ -370,7 +370,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
 
         # stel 1 schutter in die op randje aspirant/cadet zit
         self._zet_sporter_voorkeuren(100004)
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -491,7 +491,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         url = self.url_aanmelden % self.comp_18.pk
         zet_competitie_fase(self.comp_18, 'B')
 
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -555,7 +555,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         url = self.url_aanmelden % self.comp_18.pk
         zet_competitie_fase(self.comp_18, 'B')
 
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -620,7 +620,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         url = self.url_aanmelden % self.comp_18.pk
         zet_competitie_fase(self.comp_18, 'B')
 
-        with self.assert_max_queries(28):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -656,7 +656,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self._zet_ag(100004, 18)
         self._zet_ag(100003, 25)
 
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -698,7 +698,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self._zet_ag(100004, 18)
         self._zet_ag(100003, 25)
 
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -738,7 +738,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_18, 'B')
 
         url = self.url_aanmelden % self.comp_18.pk
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))

@@ -585,7 +585,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         comp18_pk = comp18.pk
         url = self.url_klassengrenzen_vaststellen % comp18_pk
 
-        with self.assert_max_queries(32, check_duration=False):
+        with self.assert_max_queries(22, check_duration=False):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

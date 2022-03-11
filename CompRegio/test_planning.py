@@ -270,7 +270,7 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/planning-landelijk.dtl', 'plein/site_layout.dtl'))
 
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(20):
             resp = self.client.get(self.url_planning_rayon % self.deelcomp_rayon2_18.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -759,7 +759,7 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
 
         # haal de (lege) planning op. Dit maakt ook meteen de enige ronde aan
         self.assertEqual(DeelcompetitieRonde.objects.count(), 0)
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -906,7 +906,7 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_rcl101_25)
 
         # haal de (lege) planning op. Dit maakt ook meteen de enige ronde aan in de regio en 1 cluster
-        with self.assert_max_queries(25):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -1446,7 +1446,7 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
         ronde.beschrijving = 'Derde'
         ronde.save()
 
-        with self.assert_max_queries(23):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
