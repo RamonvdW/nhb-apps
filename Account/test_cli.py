@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.contrib.auth import get_user_model
-from django.utils import timezone
 from django.test import TestCase
 from django.core import management
+from django.utils import timezone
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
 from .models import Account, AccountEmail
 from Logboek.models import LogboekRegel
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -60,7 +61,7 @@ class TestAccountCli(E2EHelpers, TestCase):
         self.assertEqual(f1.getvalue(), 'Account matching query does not exist.\n')
 
     def test_maak_account(self):
-        with self.assertRaises(Account.DoesNotExist):
+        with self.assertRaises(ObjectDoesNotExist):
             Account.objects.get(username='nieuwelogin')
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -164,6 +165,15 @@ class TestAccountCli(E2EHelpers, TestCase):
         self.assertEqual(f1.getvalue(), 'Account matching query does not exist.\n')
 
     def test_zet_geheim(self):
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20):
+            management.call_command('zet_2fa_geheim', '--zet-actief', 'normaal', '1234567890123456', stderr=f1, stdout=f2)
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+        self.assertTrue("2FA is opgeslagen voor account 'normaal'" in f2.getvalue())
+
+        # zonder zet-actief
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):

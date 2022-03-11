@@ -367,7 +367,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
                             boogtype__afkorting=self.boog_r.afkorting)
                     .prefetch_related('leeftijdsklassen')):
 
-            if obj.leeftijdsklassen.filter(afkorting='SA').count() > 0:
+            if obj.leeftijdsklassen.filter(afkorting='SA').count() > 0:     # pragma: no branch
                 klasse = obj
                 break
         # for

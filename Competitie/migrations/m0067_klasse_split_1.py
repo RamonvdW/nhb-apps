@@ -19,13 +19,13 @@ def split_klassen(apps, _):
     # indiv klassen
     bulk = list()
     volgorde2lkl_pks = dict()   # [volgorde] = [pk, ...]
-    for klasse in (klasse_klas                                              # pragma: no cover
+    for klasse in (klasse_klas
                    .objects
                    .exclude(indiv=None)
                    .select_related('indiv',
                                    'indiv__boogtype')
                    .prefetch_related('indiv__leeftijdsklassen')
-                   .all()):
+                   .all()):                                         # pragma: no cover
 
         volgorde2lkl_pks[klasse.indiv.volgorde] = list(klasse.indiv.leeftijdsklassen.values_list('pk', flat=True))
 
@@ -66,13 +66,13 @@ def split_klassen(apps, _):
     # team klassen
     bulk = list()
     volgorde2boog_pks = dict()  # [volgorde] = [pk, ...]
-    for klasse in (klasse_klas                                              # pragma: no cover
+    for klasse in (klasse_klas
                    .objects
                    .exclude(team=None)
                    .select_related('team',
                                    'team__team_type')
                    .prefetch_related('team__team_type__boog_typen')
-                   .all()):
+                   .all()):                                                 # pragma: no cover
 
         volgorde2boog_pks[klasse.team.volgorde] = \
             volgorde2boog_pks[klasse.team.volgorde + 100] = \

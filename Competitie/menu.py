@@ -15,9 +15,9 @@ def get_url_voor_competitie(functie_nu):
     afstand = functie_nu.comp_type  # 18/25
     comps = Competitie.objects.filter(afstand=afstand).order_by('begin_jaar')  # laagste (oudste) eerst
 
-    if len(comps) == 1:
+    if len(comps) == 1:         # pragma: no branch
         url = reverse('Competitie:overzicht', kwargs={'comp_pk': comps[0].pk})
-    else:
+    else:                       # pragma: no cover
         # er zijn geen competities, of er zijn meerdere competities om uit te kiezen
         url = reverse('Competitie:kies')
 

@@ -19,12 +19,12 @@ def migreer_limieten(apps, _):
     bulk_indiv = list()
     bulk_team = list()
 
-    for limiet in (limiet_klas                                  # pragma: no cover
+    for limiet in (limiet_klas
                    .objects
                    .select_related('deelcompetitie',
                                    'indiv_klasse',
                                    'team_klasse')
-                   .all()):
+                   .all()):                                     # pragma: no cover
         if limiet.indiv_klasse:
             indiv = indiv_klas(
                         deelcompetitie=limiet.deelcompetitie,

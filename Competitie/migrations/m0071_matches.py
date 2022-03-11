@@ -35,14 +35,14 @@ def migreer_matches(apps, _):
     # for
 
     # migreer DeelcompetitieRonde wedstrijden
-    for ronde in (ronde_klas                                            # pragma: no cover
+    for ronde in (ronde_klas
                   .objects
                   .exclude(plan=None)
                   .select_related('plan',
                                   'deelcompetitie',
                                   'deelcompetitie__competitie')
                   .prefetch_related('plan__wedstrijden')
-                  .all()):
+                  .all()):                                              # pragma: no cover
 
         comp = ronde.deelcompetitie.competitie
 
@@ -87,11 +87,11 @@ def migreer_matches(apps, _):
     # for
 
     # migreer de RK/BK deelcompetities wedstrijden
-    for deelcomp in (deelcomp_klas                                      # pragma: no cover
+    for deelcomp in (deelcomp_klas
                      .objects
                      .exclude(plan=None)
                      .select_related('competitie',
-                                     'plan')):
+                                     'plan')):                          # pragma: no cover
 
         comp = deelcomp.competitie
 
@@ -133,9 +133,9 @@ def migreer_matches(apps, _):
     # for
 
     # migreer gekozen wedstrijden inschrijfmethode 1
-    for deelnemer in (deelnemer_klas                                    # pragma: no cover
+    for deelnemer in (deelnemer_klas
                       .objects
-                      .prefetch_related('inschrijf_gekozen_wedstrijden')):
+                      .prefetch_related('inschrijf_gekozen_wedstrijden')):      # pragma: no cover
 
         pks = list()
         for pk in deelnemer.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True):

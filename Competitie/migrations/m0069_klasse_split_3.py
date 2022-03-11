@@ -22,12 +22,12 @@ def migreer_klassen(apps, _):
     comp_volgorde2indiv = dict()     # [(comp.pk, volgorde)] = CompetitieIndivKlasse
 
     if True:
-        for indiv in indiv_klas.objects.all():
+        for indiv in indiv_klas.objects.all():                      # pragma: no cover
             tup = (indiv.competitie.pk, indiv.volgorde)
             comp_volgorde2indiv[tup] = indiv
         # for
 
-        for team in team_klas.objects.all():
+        for team in team_klas.objects.all():                        # pragma: no cover
             tup = (team.competitie.pk, team.volgorde)
             comp_volgorde2team[tup] = team
         # for
@@ -35,7 +35,7 @@ def migreer_klassen(apps, _):
     klasse_pk2team = dict()     # [klasse.pk] = CompetitieTeamKlasse
     klasse_pk2indiv = dict()    # [klasse.pk] = CompetitieIndivKlasse
     if True:
-        for klasse in klasse_klas.objects.select_related('competitie', 'indiv', 'team').all():
+        for klasse in klasse_klas.objects.select_related('competitie', 'indiv', 'team').all():      # pragma: no cover
             if klasse.team:
                 volgorde = klasse.team.volgorde
                 if klasse.is_voor_teams_rk_bk:
@@ -51,7 +51,7 @@ def migreer_klassen(apps, _):
     if True:
         mutatie_klas = apps.get_model('Competitie', 'CompetitieMutatie')
 
-        for mutatie in mutatie_klas.objects.exclude(klasse=None).select_related('klasse').all():
+        for mutatie in mutatie_klas.objects.exclude(klasse=None).select_related('klasse').all():    # pragma: no cover
             if mutatie.klasse:
                 try:
                     mutatie.indiv_klasse = klasse_pk2indiv[mutatie.klasse.pk]
@@ -72,7 +72,7 @@ def migreer_klassen(apps, _):
     if True:
         limiet_klas = apps.get_model('Competitie', 'DeelCompetitieKlasseLimiet')
 
-        for limiet in limiet_klas.objects.select_related('klasse').all():
+        for limiet in limiet_klas.objects.select_related('klasse').all():                           # pragma: no cover
             if limiet.klasse:
                 try:
                     limiet.indiv_klasse = klasse_pk2indiv[limiet.klasse.pk]
@@ -93,7 +93,7 @@ def migreer_klassen(apps, _):
     if True:
         deelnemer_klas = apps.get_model('Competitie', 'RegioCompetitieSchutterBoog')
 
-        for deelnemer in deelnemer_klas.objects.select_related('klasse').all():
+        for deelnemer in deelnemer_klas.objects.select_related('klasse').all():                     # pragma: no cover
             deelnemer.indiv_klasse = klasse_pk2indiv[deelnemer.klasse.pk]
             deelnemer.save(update_fields=['indiv_klasse'])
         # for
@@ -102,7 +102,7 @@ def migreer_klassen(apps, _):
     if True:
         kampioen_klas = apps.get_model('Competitie', 'KampioenschapSchutterBoog')
 
-        for kampioen in kampioen_klas.objects.select_related('klasse').all():
+        for kampioen in kampioen_klas.objects.select_related('klasse').all():                       # pragma: no cover
             kampioen.indiv_klasse = klasse_pk2indiv[kampioen.klasse.pk]
             kampioen.save(update_fields=['indiv_klasse'])
         # for
@@ -111,7 +111,7 @@ def migreer_klassen(apps, _):
     if True:
         regioteam_klas = apps.get_model('Competitie', 'RegioCompetitieTeam')
 
-        for regioteam in regioteam_klas.objects.select_related('klasse').all():
+        for regioteam in regioteam_klas.objects.select_related('klasse').all():                     # pragma: no cover
             regioteam.team_klasse = klasse_pk2team[regioteam.klasse.pk]
             regioteam.save(update_fields=['team_klasse'])
         # for
@@ -120,7 +120,7 @@ def migreer_klassen(apps, _):
     if True:
         kampteam_klas = apps.get_model('Competitie', 'KampioenschapTeam')
 
-        for kampteam in kampteam_klas.objects.select_related('klasse').all():
+        for kampteam in kampteam_klas.objects.select_related('klasse').all():                       # pragma: no cover
             if kampteam.klasse:
                 kampteam.team_klasse = klasse_pk2team[kampteam.klasse.pk]
                 kampteam.save(update_fields=['team_klasse'])
