@@ -27,7 +27,7 @@ class Command(BaseCommand):
 
         self.taken = CompetitieTaken.objects.all()[0]
 
-        self.pk2scores = dict()         # [RegioCompetitieSchutterBoog.pk] = [tup, ..] with tup = (afstand, score)
+        self.index2scores = dict()      # [(DeelCompetitie.pk, RegioCompetitieSchutterBoog.pk)] = [(afstand, score), ..]
 
         self._onbekend2beter = dict()   # [CompetitieIndivKlasse.pk] = [klasse, ..] met oplopend AG
 
@@ -135,9 +135,9 @@ class Command(BaseCommand):
     def _vind_scores(self):
         """ zoek alle recent ingevoerde scores en bepaal van welke schuttersboog
             de tussenstand bijgewerkt moet worden.
-            Vult pk2scores.
+            Vult index2scores.
         """
-        self.pk2scores = dict()
+        self.index2scores = dict()
 
         scorehist_latest = ScoreHist.objects.latest('pk')
         # als hierna een extra ScoreHist aangemaakt wordt dan verwerken we een record
@@ -208,16 +208,17 @@ class Command(BaseCommand):
                                   .all()):
                         tup = (uitslag.afstand, score)
                         pk = score.sporterboog.pk
+                        index = (ronde.deelcompetitie.pk, score.sporterboog.pk)
                         if pk in allowed_sporterboog_pks:   # presumed better than huge __in
                             try:
-                                self.pk2scores[pk].append(tup)
+                                self.index2scores[index].append(tup)
                             except KeyError:
-                                self.pk2scores[pk] = [tup]
+                                self.index2scores[index] = [tup]
                     # for
             # for
         # for
 
-        self.stdout.write('[INFO] Aantallen: pk2scores=%s' % len(self.pk2scores))
+        self.stdout.write('[INFO] Aantal unieke (deelcomp + sporterboog) in index2scores: %s' % len(self.index2scores))
 
     @staticmethod
     def _bepaal_laagste_nr(waardes):
@@ -282,16 +283,12 @@ class Command(BaseCommand):
                               .prefetch_related('scores')
                               .all()):
 
-                pk = deelnemer.sporterboog.pk
-                tups = list()
-                found = False
+                index = (deelcomp.pk, deelnemer.sporterboog.pk)
                 try:
-                    tups.extend(self.pk2scores[pk])
-                    found = True
+                    tups = self.index2scores[index]
                 except KeyError:
                     pass
-
-                if found:
+                else:
                     # tot nu toe hebben we de verwijderde scores meegenomen zodat we deze
                     # change-trigger krijgen. Nu moeten de verwijderde scores eruit
                     scores = [score for afstand, score in tups if score.waarde != SCORE_WAARDE_VERWIJDERD and afstand == comp_afstand]
@@ -309,14 +306,9 @@ class Command(BaseCommand):
                             deelnemer.scores.remove(score)
                     # for
 
-                    try:
-                        tups = self.pk2scores[pk]
-                    except KeyError:
-                        waardes = list()
-                    else:
-                        # door waarde te filteren op max_score voorkomen we problemen
-                        # die anders pas naar boven komen tijdens de save()
-                        waardes = [score.waarde for afstand, score in tups if score.waarde <= max_score and afstand == comp_afstand]
+                    # door waarde te filteren op max_score voorkomen we problemen
+                    # die anders pas naar boven komen tijdens de save()
+                    waardes = [score.waarde for afstand, score in tups if score.waarde <= max_score and afstand == comp_afstand]
 
                     waardes.extend([0, 0, 0, 0, 0, 0, 0])
                     waardes = waardes[:7]
@@ -361,7 +353,7 @@ class Command(BaseCommand):
                     deelnemer.save()
                     count += 1
         # for
-        self.stdout.write('[INFO] Scores voor %s schuttersboog bijgewerkt' % count)
+        self.stdout.write('[INFO] Scores voor %s deelnemers bijgewerkt' % count)
 
     @staticmethod
     def _update_team_scores():

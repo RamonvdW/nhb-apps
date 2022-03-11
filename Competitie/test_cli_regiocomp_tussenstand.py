@@ -263,7 +263,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(176):
             management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
-        self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
+        self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog=self.sporterboog_100001)
         self.assertEqual(deelnemer.score1, 123)
@@ -281,7 +281,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(173):
             management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
-        self.assertTrue('Scores voor 0 schuttersboog bijgewerkt' in f2.getvalue())
+        self.assertTrue('Scores voor 0 deelnemers bijgewerkt' in f2.getvalue())
 
         # nog een keer met 'all'
         f1 = io.StringIO()
@@ -290,7 +290,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
             management.call_command('regiocomp_tussenstand', '2', '--quick', '--all', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
+        self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
     def test_zeven(self):
         # maak een paar score + scorehist
@@ -307,7 +307,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
             management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
+        self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog=self.sporterboog_100001)
         # print('scores: %s %s %s %s %s %s %s, laagste_nr=%s, totaal=%s, gem=%s' % (deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7, deelnemer.laagste_score_nr, deelnemer.totaal, deelnemer.gemiddelde))
@@ -334,7 +334,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
             management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
+        self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog=self.sporterboog_100001)
         # print('scores: %s %s %s %s %s %s %s, laagste_nr=%s, totaal=%s, gem=%s' % (deelnemer.score1, deelnemer.score2, deelnemer.score3, deelnemer.score4, deelnemer.score5, deelnemer.score6, deelnemer.score7, deelnemer.laagste_score_nr, deelnemer.totaal, deelnemer.gemiddelde))
@@ -437,7 +437,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(176):
             management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
-        self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
+        self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
         deelnemer = RegioCompetitieSchutterBoog.objects.get(sporterboog=self.sporterboog_100001)
         self.assertEqual(deelnemer.bij_vereniging.ver_nr, self.ver.ver_nr)
@@ -510,7 +510,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(176):
             management.call_command('regiocomp_tussenstand', '2', '--quick', stderr=f1, stdout=f2)
-        self.assertTrue('Scores voor 1 schuttersboog bijgewerkt' in f2.getvalue())
+        self.assertTrue('Scores voor 1 deelnemers bijgewerkt' in f2.getvalue())
 
         # schrijf een schutter uit
         sporter = self.sporterboog_100001.sporter

@@ -78,11 +78,6 @@ class CompetitieMatchAdmin(admin.ModelAdmin):
     # TODO: filter toepasselijke indiv_klassen / team_klassen aan de hand van obj.competitie
 
 
-class CompetitieMatchesPlanAdmin(admin.ModelAdmin):
-
-    filter_horizontal = ('matches',)
-
-
 class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
 
     fieldsets = (
@@ -170,7 +165,7 @@ class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
             pks = list()
             for ronde in (DeelcompetitieRonde
                           .objects
-                          .select_related('plan')
+                          .prefetch_related('matches')
                           .filter(deelcompetitie=self.obj.deelcompetitie)):
                 # sta alle matches in de regio toe, dus alle clusters
                 pks.extend(ronde.matches.values_list('pk', flat=True))
