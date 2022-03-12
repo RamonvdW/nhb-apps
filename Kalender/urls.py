@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,6 +11,8 @@ from . import (views, view_maand, view_manager, view_vereniging, view_wijzig_wed
 app_name = 'Kalender'
 
 urlpatterns = [
+
+    # wedstrijden en inschrijven
     path('',
          views.KalenderLandingPageView.as_view(),
          name='landing-page'),
@@ -23,13 +25,22 @@ urlpatterns = [
          view_maand.WedstrijdInfoView.as_view(),
          name='wedstrijd-info'),
 
+
+    # vereniging
     path('vereniging/',
          view_vereniging.VerenigingKalenderWedstrijdenView.as_view(),
          name='vereniging'),
 
+    # wedstrijd
+    path('vereniging/kies-type/',
+         view_vereniging.NieuweWedstrijdKiesType.as_view(),
+         name='nieuwe-wedstrijd-kies-type'),
+
+    # manager competitiezaken
     path('manager/',
          view_manager.KalenderManagerView.as_view(),
          name='manager'),
+
 
     path('<wedstrijd_pk>/wijzig/',
          view_wijzig_wedstrijd.WijzigKalenderWedstrijdView.as_view(),

@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from BasisTypen.models import BoogType, KalenderWedstrijdklasse
+from BasisTypen.models import BoogType, KalenderWedstrijdklasse, ORGANISATIES, ORGANISATIE_WA
 from NhbStructuur.models import NhbVereniging
 from Sporter.models import SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
@@ -155,6 +155,9 @@ class KalenderWedstrijd(models.Model):
 
     # begrenzing
     begrenzing = models.CharField(max_length=1, default=WEDSTRIJD_BEGRENZING_LANDELIJK, choices=WEDSTRIJD_BEGRENZING)
+
+    # WA, IFAA of nationaal
+    organisatie = models.CharField(max_length=1, choices=ORGANISATIES, default=ORGANISATIE_WA)
 
     # welke discipline is dit? (indoor/outdoor/veld, etc.)
     discipline = models.CharField(max_length=2, choices=WEDSTRIJD_DISCIPLINES, default='OD')

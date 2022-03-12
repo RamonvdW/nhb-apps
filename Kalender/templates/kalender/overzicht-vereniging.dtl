@@ -61,12 +61,8 @@
                     {% if url_nieuwe_wedstrijd %}
                         <tr>
                             <td colspan="5" class="center">
-                                <form action="{{ url_nieuwe_wedstrijd }}" method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="nieuwe_wedstrijd" value="1">
-                                    <button class="btn-nhb-rood">
-                                        <i class="material-icons-round">add</i></button>
-                                </form>
+                                <a class="btn-nhb-rood" href="{{ url_nieuwe_wedstrijd }}">
+                                    <i class="material-icons-round">add</i></a>
                             </td>
                         </tr>
                     {% endif %}
