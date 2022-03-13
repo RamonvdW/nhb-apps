@@ -113,13 +113,13 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
             # vereniging heeft een wedstrijdlocatie
 
             keuze = request.POST.get('keuze', '')
-            if keuze in ('wa', 'ifaa', 'nat'):
+            if keuze in ('wa', 'ifaa', 'nhb'):
                 now = timezone.now()
                 begin = date(now.year, now.month, now.day)
 
                 keuze2organisatie = {
                     'wa': ORGANISATIE_WA,
-                    'nat': ORGANISATIE_NHB,
+                    'nhb': ORGANISATIE_NHB,
                     'ifaa': ORGANISATIE_IFAA,
                 }
 

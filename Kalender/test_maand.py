@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -20,6 +20,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
     url_kalender = '/kalender/'
     url_kalender_maand = '/kalender/pagina-%s-%s/'  # jaar, maand
     url_kalender_vereniging = '/kalender/vereniging/'
+    url_kalender_maak_nieuw = '/kalender/vereniging/kies-type/'
     url_kalender_info = '/kalender/%s/info/'  # wedstrijd_pk
 
     def setUp(self):
@@ -124,7 +125,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
 
         # maak een wedstrijd en sessie aan
         self._maak_externe_locatie(self.nhbver1)
-        resp = self.client.post(self.url_kalender_vereniging, {'nieuwe_wedstrijd': 'ja'})
+        resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'wa'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
         self.assertEqual(1, KalenderWedstrijd.objects.count())
         wedstrijd = KalenderWedstrijd.objects.all()[0]
@@ -162,7 +163,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
 
         # maak een wedstrijd en sessie aan
         self._maak_externe_locatie(self.nhbver1)
-        resp = self.client.post(self.url_kalender_vereniging, {'nieuwe_wedstrijd': 'ja'})
+        resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
         self.assertEqual(1, KalenderWedstrijd.objects.count())
         wedstrijd = KalenderWedstrijd.objects.all()[0]

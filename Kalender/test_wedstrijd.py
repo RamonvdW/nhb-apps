@@ -20,6 +20,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
 
     url_kalender_manager = '/kalender/manager/'
     url_kalender_vereniging = '/kalender/vereniging/'
+    url_kalender_maak_nieuw = '/kalender/vereniging/kies-type/'
     url_kalender_wijzig_wedstrijd = '/kalender/%s/wijzig/'  # wedstrijd_pk
     url_kalender_zet_status = '/kalender/%s/zet-status/'  # wedstrijd_pk
     url_kalender_sessies = '/kalender/%s/sessies/'  # wedstrijd_pk
@@ -98,7 +99,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         # wissel naar HWL en maak een wedstrijd aan
         self._maak_externe_locatie(self.nhbver1)            # locatie is noodzakelijk
         self.e2e_wissel_naar_functie(self.functie_hwl)
-        resp = self.client.post(self.url_kalender_vereniging, {'nieuwe_wedstrijd': 'ja'})
+        resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
 
         self.assertEqual(1, KalenderWedstrijd.objects.count())
@@ -324,7 +325,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         # wissel naar HWL en maak een wedstrijd aan
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self._maak_externe_locatie(self.nhbver1)
-        resp = self.client.post(self.url_kalender_vereniging, {'nieuwe_wedstrijd': 'ja'})
+        resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
 
         self.assertEqual(1, KalenderWedstrijd.objects.count())
@@ -390,7 +391,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         # wissel naar HWL en maak een wedstrijd aan
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self._maak_externe_locatie(self.nhbver1)
-        resp = self.client.post(self.url_kalender_vereniging, {'nieuwe_wedstrijd': 'ja'})
+        resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
 
         self.assertEqual(1, KalenderWedstrijd.objects.count())
@@ -487,7 +488,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
 
         # maak een wedstrijd en sessie aan
         self._maak_externe_locatie(self.nhbver1)
-        resp = self.client.post(self.url_kalender_vereniging, {'nieuwe_wedstrijd': 'ja'})
+        resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
         self.assertEqual(1, KalenderWedstrijd.objects.count())
         wedstrijd = KalenderWedstrijd.objects.all()[0]
@@ -517,7 +518,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
 
         # maak een wedstrijd met twee sessies aan
         self._maak_externe_locatie(self.nhbver1)
-        resp = self.client.post(self.url_kalender_vereniging, {'nieuwe_wedstrijd': 'ja'})
+        resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
         self.assertEqual(1, KalenderWedstrijd.objects.count())
         wedstrijd = KalenderWedstrijd.objects.all()[0]

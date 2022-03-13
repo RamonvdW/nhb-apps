@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import (views, view_maand, view_manager, view_vereniging, view_wijzig_wedstrijd,
+from . import (view_landing_page, view_maand, view_manager, view_vereniging, view_wijzig_wedstrijd,
                view_wijzig_sessies)
 
 app_name = 'Kalender'
@@ -14,7 +14,7 @@ urlpatterns = [
 
     # wedstrijden en inschrijven
     path('',
-         views.KalenderLandingPageView.as_view(),
+         view_landing_page.KalenderLandingPageView.as_view(),
          name='landing-page'),
 
     path('pagina-<int:jaar>-<str:maand>/',
