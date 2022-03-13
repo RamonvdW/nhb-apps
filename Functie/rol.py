@@ -142,6 +142,7 @@ def rol_zet_sessionvars(account, request):
         func.pk = obj.pk
         func.obj = obj
         func.rol = obj.rol
+        func.koppel_aan_bb = False
         if func.rol == "BKO":
             func.comp_type = obj.comp_type
         elif func.rol == "RKO":
@@ -157,6 +158,8 @@ def rol_zet_sessionvars(account, request):
                 functie_rcl[func.regio_nr] = [func.pk]
         elif func.rol in ("HWL", "WL", "SEC"):
             func.ver_nr = obj.nhb_ver.ver_nr
+            if rol == 'HWL' and obj.nhb_ver.regio.regio_nr == 100:
+                func.koppel_aan_bb = True
         functie_cache[obj.pk] = func
     # for
 
@@ -466,6 +469,12 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
         for pk, obj in functie_cache.items():
             if obj.rol == 'BKO':
                 yield Rollen.ROL_BKO, obj.pk
+        # for
+
+        # deze functie mag de HWL van vereniging in regio 100 aannemen
+        for pk, obj in functie_cache.items():
+            if obj.rol == 'HWL' and obj.koppel_aan_bb:
+                yield Rollen.ROL_HWL, obj.pk
         # for
 
     if functie_in:
