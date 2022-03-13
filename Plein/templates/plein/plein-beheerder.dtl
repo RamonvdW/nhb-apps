@@ -25,13 +25,6 @@
     <!-- blauwe balk met kaartjes -->
     <div class="row-nhb-blauw">
         <div class="col s12">
-
-            <!-- vereniging menu -->
-            {% if rol_is_sec or rol_is_hwl or rol_is_wl %}
-                {% url 'Vereniging:overzicht' as card_url %}
-                {% include 'plein/card.dtl' with title="Beheer Vereniging" text="Extra functies voor beheerders van jouw vereniging." icon="store" url=card_url %}
-            {% endif %}
-
             <!-- bondscompetities -->
             {% url 'Competitie:kies' as card_url %}
             {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
@@ -44,6 +37,25 @@
             {% if rol_is_hwl or rol_is_bb %}
                 {% url 'Kalender:landing-page' as card_url %}
                 {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <p>&nbsp;</p>
+            <h4>Voor de beheerder</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <!-- vereniging menu -->
+            {% if rol_is_sec or rol_is_hwl or rol_is_wl %}
+                {% url 'Vereniging:overzicht' as card_url %}
+                {% include 'plein/card.dtl' with title="Beheer Vereniging" text="Extra functies voor beheerders van jouw vereniging." icon="store" url=card_url %}
             {% endif %}
 
             <!-- verenigingen/accommodaties overzicht IT/BB/BKO -->
