@@ -49,6 +49,13 @@
                         </td>
                     </tr>
                 {% endif %}
+
+                {% if nhb_ver.geen_wedstrijden %}
+                    <tr>
+                        <th>Speciale status</th>
+                        <td>Geen wedstrijden</td>
+                    </tr>
+                {% endif %}
                 <tr>
             </table>
         </div>

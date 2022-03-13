@@ -158,7 +158,7 @@ def rol_zet_sessionvars(account, request):
                 functie_rcl[func.regio_nr] = [func.pk]
         elif func.rol in ("HWL", "WL", "SEC"):
             func.ver_nr = obj.nhb_ver.ver_nr
-            if rol == 'HWL' and obj.nhb_ver.regio.regio_nr == 100:
+            if func.rol == 'HWL' and obj.nhb_ver.regio.regio_nr == 100:
                 func.koppel_aan_bb = True
         functie_cache[obj.pk] = func
     # for
