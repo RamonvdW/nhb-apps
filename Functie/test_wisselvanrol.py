@@ -534,6 +534,28 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_sec)
         self.e2e_check_rol('SEC')
 
+    def test_bb_to_hwl_regio_100(self):
+        # maak een test vereniging
+        ver = NhbVereniging(
+            naam="Bondsbureau",
+            ver_nr="1001",
+            regio=NhbRegio.objects.get(pk=100))
+        ver.save()
+
+        functie_hwl = maak_functie('HWL ver 1001', 'HWL')
+        functie_hwl.nhb_ver = ver
+        functie_hwl.save()
+
+        self.e2e_account_accepteert_vhpg(self.account_admin)
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wissel_van_rol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        urls = self._get_wissel_urls(resp)
+        self.assertIn(self.url_activeer_functie % functie_hwl.pk, urls)
 
     # TODO: test maken waarbij gebruiker aan 2x rol zit met dezelfde 'volgorde' (gaf sorteerprobleem), zowel 2xBKO als 2xHWL
 

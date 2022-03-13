@@ -132,12 +132,17 @@ def rol_zet_sessionvars(account, request):
 
     for obj in (Functie
                 .objects
-                .select_related('nhb_rayon', 'nhb_regio', 'nhb_regio__rayon', 'nhb_ver')
+                .select_related('nhb_rayon',
+                                'nhb_regio',
+                                'nhb_regio__rayon',
+                                'nhb_ver',
+                                'nhb_ver__regio')
                 .only('rol', 'comp_type',
                       'nhb_regio__regio_nr',
                       'nhb_rayon__rayon_nr',
                       'nhb_regio__rayon__rayon_nr',
-                      'nhb_ver__ver_nr')):
+                      'nhb_ver__ver_nr',
+                      'nhb_ver__regio__regio_nr')):
         func = SimpleNamespace()
         func.pk = obj.pk
         func.obj = obj
@@ -310,7 +315,7 @@ def rol_get_huidige_functie(request) -> Tuple[Rollen, Functie]:
     functie = None
     try:
         functie_pk = request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK]
-    except KeyError:
+    except KeyError:                    # pragma: no cover
         # geen functie opgeslagen
         pass
     else:
@@ -433,7 +438,7 @@ def rol_activeer_functie(request, functie_pk):
                     if account.is_staff or account.is_BB:
                         try:
                             functie = Functie.objects.get(pk=functie_pk)
-                        except Functie.DoesNotExist:                # pragma: no branch
+                        except Functie.DoesNotExist:                # pragma: no cover
                             pass
                         else:
                             # we komen hier alleen voor rollen die niet al in het pallet zitten bij IT/BB
