@@ -46,14 +46,14 @@
     <!-- blauwe balk met kaartjes -->
     <div class="row-nhb-blauw">
         <div class="col s12">
-            {% static 'plein/logo_world_archery.png' as img_src %}
+            {% static 'plein/logo_world_archery_225x246.png' as img_src %}
             {% include 'plein/card_logo.dtl' with text="Volgens de regels, bogen en klassen van World Archery. Bij A-status kunnen records aangevraagd worden" img_height=112 img_src=img_src onclick="keuze('wa')" %}
 
             {% static 'plein/logo_nhb_192x192.png' as img_src %}
             {% include 'plein/card_logo.dtl' with text="Meer leeftijdsklassen dan World Archery en eventueel gender-neutraal.<br>Voor verenigingswedstijden" img_height=112 img_src=img_src onclick="keuze('nat')" %}
 
-            {% static 'plein/logo_ifaa.png' as img_src %}
-            {% include 'plein/card_logo.dtl' with text="Volgens de regels, bogen en klassen van de IFAA.<br>Gebruik voor 3D wedstrijden." img_height=132 img_reduce_top=4 img_src=img_src onclick="keuze('ifaa')" %}
+            {% static 'plein/logo_ifaa_128x200.png' as img_src %}
+            {% include 'plein/card_logo.dtl' with text="Volgens de regels, bogen en klassen van de IFAA.<br>Gebruik voor 3D wedstrijden" img_height=132 img_reduce_top=4 img_src=img_src onclick="keuze('ifaa')" %}
         </div>
     </div>
 
@@ -70,11 +70,9 @@
         <div class="col s12">
             <div class="white" style="padding:10px">
                 <h5>World Archery</h5>
-                <p>Bla bla informatie</p>
-                <p>Bla bla informatie</p>
-                <p>Bla bla informatie</p>
-                <p>Bla bla informatie</p>
-                <p>Bla bla informatie</p>
+                <p>Vijf bogentypen: Recurve, Compound, Barebow, Traditional en Longbow</p>
+                <p>Vier leeftijdsklassen: Onder 18, Onder 21, 21+ en 50+</p>
+                <p>Scheiding in Heren en Vrouwen</p>
 
                 <br>
                 <h5>IFAA</h5>
@@ -85,12 +83,10 @@
                 <p>Bla bla informatie</p>
 
                 <br>
-                <h5>Nationaal</h5>
-                <p>Bla bla informatie</p>
-                <p>Bla bla informatie</p>
-                <p>Bla bla informatie</p>
-                <p>Bla bla informatie</p>
-                <p>Bla bla informatie</p>
+                <h5>NHB</h5>
+                <p>Dezelfde boogtypen als Word Archery</p>
+                <p>Zeven leeftijdsklassen: Onder 12, Onder 14, Onder 18, Onder 21, 21+, 50+ en 60+</p>
+                <p>Heren, Vrouwen en Gender-neutrale klassen (ondersteuning voor geslacht X)</p>
             </div>
         </div>
     </div>

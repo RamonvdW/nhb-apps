@@ -75,12 +75,12 @@ BLAZOEN_CHOICES = [
 
 # organisatie, om boogtype, leeftijdsklassen etc. uit elkaar te kunnen houden binnen 1 tabel
 ORGANISATIE_WA = 'W'      # World Archery
-ORGANISATIE_NAT = 'N'     # Nationale toevoeging
+ORGANISATIE_NHB = 'N'     # NHB
 ORGANISATIE_IFAA = 'F'    # International Field Archery Association
 
 ORGANISATIES = [
     (ORGANISATIE_WA, 'World Archery'),
-    (ORGANISATIE_NAT, 'Nationaal'),
+    (ORGANISATIE_NHB, 'NHB'),
     (ORGANISATIE_IFAA, 'IFAA'),
 ]
 

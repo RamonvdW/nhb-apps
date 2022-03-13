@@ -269,10 +269,10 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
                 <table>
                     <tr>
                         <td class="center">
-                            <img src="{% static 'plein/blazoen_dt.png' %}" style="max-height:300px; height:auto" loading="lazy" alt="Dutch Target blazoen">
+                            <img src="{% static 'plein/blazoen_dt_134x394.png' %}" style="max-height:300px; height:auto" loading="lazy" alt="Dutch Target blazoen">
                         </td>
                         <td class="center">
-                            <img src="{% static 'plein/blazoen_40cm.png' %}" style="max-height:220px; height:auto; border:1px solid gray" loading="lazy" alt="40cm / 60cm blazoen" >
+                            <img src="{% static 'plein/blazoen_40cm_330x328.png' %}" style="max-height:220px; height:auto; border:1px solid gray" loading="lazy" alt="40cm / 60cm blazoen" >
                         </td>
                     </tr>
                     <tr>

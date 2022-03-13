@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import BoogType, KalenderWedstrijdklasse, ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_NAT
+from BasisTypen.models import BoogType, KalenderWedstrijdklasse, ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_NHB
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from .models import (KalenderWedstrijd,
@@ -119,7 +119,7 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
 
                 keuze2organisatie = {
                     'wa': ORGANISATIE_WA,
-                    'nat': ORGANISATIE_NAT,
+                    'nat': ORGANISATIE_NHB,
                     'ifaa': ORGANISATIE_IFAA,
                 }
 
@@ -133,9 +133,9 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
                 wed.save()
 
                 # default alle bogen aan zetten
-                if wed.organisatie == ORGANISATIE_NAT:
+                if wed.organisatie == ORGANISATIE_NHB:
                     # nationaal is combinatie van WA en NAT
-                    bogen = BoogType.objects.filter(organisatie__in=(ORGANISATIE_WA, ORGANISATIE_NAT))
+                    bogen = BoogType.objects.filter(organisatie__in=(ORGANISATIE_WA, ORGANISATIE_NHB))
                 else:
                     bogen = BoogType.objects.filter(organisatie=wed.organisatie)
 

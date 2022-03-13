@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-from BasisTypen.models import ORGANISATIE_NAT
+from BasisTypen.models import ORGANISATIE_NHB
 
 
 def zet_organisatie(apps, _):
@@ -21,7 +21,7 @@ def zet_organisatie(apps, _):
 
         for teamtype in teamtype_klas.objects.filter(volgorde__in=(4, 5)):
             # volgorde: 4 = IB en TR; 5 = LB
-            teamtype.organisatie = ORGANISATIE_NAT
+            teamtype.organisatie = ORGANISATIE_NHB
             teamtype.save(update_fields=['organisatie'])
         # for
 
@@ -32,7 +32,7 @@ def zet_organisatie(apps, _):
 
         for lkl in leeftijd_klas.objects.all():
             if not lkl.volgens_wa:
-                lkl.organisatie = ORGANISATIE_NAT
+                lkl.organisatie = ORGANISATIE_NHB
                 lkl.save(update_fields=['organisatie'])
         # for
 
@@ -43,7 +43,7 @@ def zet_organisatie(apps, _):
 
         for kal in kalender_klas.objects.select_related('leeftijdsklasse'):
             if not kal.leeftijdsklasse.volgens_wa:
-                kal.organisatie = ORGANISATIE_NAT
+                kal.organisatie = ORGANISATIE_NHB
                 kal.save(update_fields=['organisatie'])
         # for
 
