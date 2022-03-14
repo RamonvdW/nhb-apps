@@ -1,0 +1,90 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Uitslagen regiocompetitie{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Uitslagen regiocompetitie</h3>
+            <p>{% if comp.alle_regiocompetities_afgesloten %}Eindstand{% else %}Tussenstand{% endif %} van de individuele regiocompetities.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Competitie</th>
+                    <td>{{ deelcomp.competitie.beschrijving }}</td>
+                </tr>
+                <tr>
+                    <th>Regio</th>
+                    <td>{{ regio }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Medailles</h4>
+            <p>Tot 4 deelnemers: 1 medaille<br>Tot 8 deelnemers: 2 medailles<br>9 of meer deelnemers: 3 medailles</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+
+                {% for obj in deelnemers %}
+                    {% if obj.break_klasse %}
+                        {% if not obj.is_eerste_groep %}
+                            <tr class="nhb-table-header">
+                                <td colspan="5" style="height:50px"></td>
+                            </tr>
+                        {% endif %}
+
+                        <tr>
+                            <td class="center" colspan="5"><h5>{{ obj.klasse_str }}</h5></td>
+                        </tr>
+
+                        <tr>
+                            <th><!-- medaille --></th>
+                            <th><!-- rank --></th>
+                            <th>Sporter</th>
+                            <th>Vereniging</th>
+                            <th class="center">Gemiddelde</th>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <td class="center">
+                            {% if obj.toon_goud %}<i class="material-icons-round" style="color:#d6c372;font-size:30px">looks_one</i>{% endif %}
+                            {% if obj.toon_zilver %}<i class="material-icons-round" style="color:#bec7c7;font-size:30px">looks_two</i>{% endif %}
+                            {% if obj.toon_brons %}<i class="material-icons-round" style="color:#cd7f32;font-size:30px">looks_3</i>{% endif %}
+                        </td>
+                        <td class="center">{{ obj.rank }}</td>
+                        <td>{{ obj.naam_str }}</td>
+                        <td>{{ obj.ver_str }}</td>
+                        <td class="center">{{ obj.gemiddelde }}</td>
+                    </tr>
+
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-regio-medailles" %}
+
+{% endblock %}

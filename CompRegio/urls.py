@@ -6,7 +6,7 @@
 
 from django.urls import path
 from . import (view_clusters, view_planning, view_instellingen, view_teams_rcl, view_poules, view_teams_hwl,
-               view_keuze_zeven_wedstrijden, view_wieschietwaar, view_waarschijnlijke_deelnemers)
+               view_keuze_zeven_wedstrijden, view_wieschietwaar, view_waarschijnlijke_deelnemers, view_medailles)
 
 app_name = 'CompRegio'
 
@@ -125,11 +125,15 @@ urlpatterns = [
          view_teams_hwl.TeamsRegioView.as_view(),
          name='teams-regio'),
 
-
     # sporter / HWL
     path('keuze-zeven-wedstrijden/<deelnemer_pk>/',
          view_keuze_zeven_wedstrijden.KeuzeZevenWedstrijdenView.as_view(),
          name='keuze-zeven-wedstrijden'),
+
+    # RCL
+    path('medailles/regio-<regio>',
+         view_medailles.ToonMedailles.as_view(),
+         name='medailles')
 ]
 
 

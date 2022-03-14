@@ -268,7 +268,7 @@ class UitslagenRegioIndivView(TemplateView):
                 deelnemer.is_eerste_groep = (klasse == -1)
 
                 if len(asps):
-                    self._split_aspiranten(asps, objs)
+                    self._split_aspiranten(asps, objs)      # TODO: niet meer nodig in seizoen 2022/2023
                     asps = list()
 
                 deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
