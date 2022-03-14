@@ -127,7 +127,7 @@
 
             <!-- medailles -->
             {% if url_medailles %}
-                {% include 'plein/card.dtl' with title="Medailles" text="blabla" icon="edit" url=url_medailles %}
+                {% include 'plein/card.dtl' with title="Medailles" text="Toon de toegekende medailles voor elke klasse." icon="military_tech" url=url_medailles %}
             {% endif %}
 
             {% if comp.url_regio_instellingen and comp.fase >= 'B' %}
