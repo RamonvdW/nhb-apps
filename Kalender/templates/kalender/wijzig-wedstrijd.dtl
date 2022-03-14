@@ -82,17 +82,17 @@
                         <table class="white">
 
                             <tr>
-                                <td>Titel:</td>
+                                <th>Titel</th>
                                 <td colspan="2"><input type="text" name="titel" value="{{ wed.titel }}" oninput="gewijzigd()"></td>
                             </tr>
 
                             <tr>
-                                <td>Organiserende vereniging:</td>
+                                <th>Organiserende vereniging</th>
                                 <td colspan="2">{{ wed.organiserende_vereniging }}</td>
                             </tr>
 
                             <tr>
-                                <td>Status:</td>
+                                <th>Status</th>
                                 <td>
                                     {% for opt in opt_status %}
                                         <span class="{% if opt.selected %}nhb-blauw-text{% else %}grey-text{% endif %}" style="white-space: nowrap">{{ opt.status_str }}</span><br>
@@ -110,7 +110,7 @@
                             </tr>
 
                             <tr>
-                                <td>Datum begin wedstrijd:</td>
+                                <th>Datum begin wedstrijd</th>
                                 <td>
                                     {% if limit_edits %}
                                         <span>{{ wed.datum_begin }}</span>
@@ -123,7 +123,7 @@
                             </tr>
 
                             <tr>
-                                <td>Duur van de wedstrijd:</td>
+                                <th>Duur van de wedstrijd</th>
                                 <td>
                                     {% if limit_edits %}
                                         <span>{{ duur_dagen }} dagen</span>
@@ -139,7 +139,7 @@
                             </tr>
 
                             <tr>
-                                <td>Bijzonderheden:</td>
+                                <th>Bijzonderheden</th>
                                 <td colspan="2">
                                     {% if block_edits %}
                                         <span>{{ wed.bijzonderheden|linebreaksbr }}</span>
@@ -150,11 +150,12 @@
                             </tr>
 
                             <tr>
-                                <td>Discipline:</td>
+                                <th>Discipline</th>
                                 <td colspan="2">
                                     {% if limit_edits %}
                                         <span>{{ wed.disc_str }}</span>
                                     {% else %}
+                                        <span>Beschikbare disciplines van {{ wed.org_str }}:</span>
                                         <ul id="id_discipline">
                                             {% for opt in opt_disc %}
                                                 <li>
@@ -170,7 +171,7 @@
                             </tr>
 
                             <tr>
-                                <td>WA-status</td>
+                                <th>WA-status</th>
                                 <td>
                                     {% if limit_edits %}
                                         <span>{{ wed.wa_status_str }}</span>
@@ -211,7 +212,7 @@
                             </tr>
 
                             <tr>
-                                <td>Wedstrijd locatie:</td>
+                                <th>Wedstrijd locatie</th>
                                 <td colspan="2">
                                     {% if block_edits %}
                                         <span>{{ wed.locatie }}</span>
@@ -226,7 +227,7 @@
                             </tr>
 
                             <tr>
-                                <td>Doelgroep:</td>
+                                <th>Doelgroep</th>
                                 <td colspan="2">
                                     {% if block_edits %}
                                         <span>{{ wed.begrenzing_str }}</span>
@@ -246,7 +247,7 @@
                             </tr>
 
                             <tr>
-                                <td>Toegestane bogen:</td>
+                                <th>Toegestane bogen</th>
                                 <td colspan="2">
                                     {% if limit_edits %}
                                         {% for boog in opt_bogen %}
@@ -266,11 +267,11 @@
                             </tr>
 
                             <tr>
-                                <td>Contactgegevens organisatie:</td>
+                                <th>Contactgegevens organisatie</th>
                                 <td colspan="2">
                                     <table>
                                         <tr>
-                                            <td{% if block_edits %} style="width:50%"{% endif %}>Naam</td>
+                                            <th{% if block_edits %} style="width:50%"{% endif %}>Naam</th>
                                             <td>
                                                 {% if block_edits %}
                                                     <span>{{ wed.contact_naam }}</span>
@@ -281,7 +282,7 @@
                                         </tr>
 
                                         <tr>
-                                            <td>Telefoonnummer</td>
+                                            <th>Telefoonnummer</th>
                                             <td>
                                                 {% if block_edits %}
                                                     <span>{{ wed.contact_telefoon }}</span>
@@ -292,7 +293,7 @@
                                         </tr>
 
                                         <tr>
-                                            <td>E-mailadres</td>
+                                            <th>E-mailadres</th>
                                             <td>
                                                 {% if block_edits %}
                                                     <span>{{ wed.contact_email }}</span>
@@ -303,7 +304,7 @@
                                         </tr>
 
                                         <tr>
-                                            <td>Website</td>
+                                            <th>Website</th>
                                             <td>
                                                 {% if block_edits %}
                                                     <span>{{ wed.contact_website }}</span>
@@ -314,7 +315,7 @@
                                         </tr>
 
                                         <tr>
-                                            <td>Extern beheer:</td>
+                                            <th>Extern beheer:</th>
                                             <td>
                                                 {% if block_edits %}
                                                     <span>{% if wed.extern_beheerd %}Ja{% else %}Nee{% endif %}</span>
@@ -332,7 +333,7 @@
                             </tr>
 
                             <tr>
-                                <td>Aanwezig melden:</td>
+                                <th>Aanwezig melden</th>
                                 <td>
                                     {% if block_edits %}
                                         <span>{{ wed.minuten_voor_begin_sessie_aanwezig_zijn }} minuten van te voren</span>
@@ -349,12 +350,12 @@
                             </tr>
 
                             <tr>
-                                <td>Scheidsrechter behoefte:</td>
+                                <th>Scheidsrechter behoefte</th>
                                 <td colspan="2">
                                     <table>
 
                                         <tr>
-                                            <td{% if block_edits %} style="width:50%"{% endif %}>Aantal banen tegelijk actief:</td>
+                                            <th{% if block_edits %} style="width:50%"{% endif %}>Aantal banen tegelijk actief</th>
                                             <td>
                                                 {% if limit_edits %}
                                                     <span>{{ wed.aantal_banen }} banen</span>
@@ -370,7 +371,7 @@
                                         </tr>
 
                                         <tr>
-                                            <td>Eigen scheidsrechters (namen):</td>
+                                            <th>Eigen scheidsrechters (namen)</th>
                                             <td>
                                                 {% if limit_edits %}
                                                     <span>{{ wed.scheidsrechters|linebreaksbr }}</span>
@@ -385,7 +386,7 @@
                             </tr>
 
                             <tr>
-                                <td>Wedstrijdklassen:</td>
+                                <th>Wedstrijdklassen</th>
                                 <td style="width:40%">
                                     {% for klasse in opt_klasse_1 %}
                                         <label class="black-text">

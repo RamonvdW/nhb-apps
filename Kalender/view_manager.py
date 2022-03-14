@@ -8,10 +8,11 @@ from django.views.generic import View
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.rol import Rollen, rol_get_huidige_functie
+from BasisTypen.models import ORGANISATIES2SHORT_STR
+from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from .models import (KalenderWedstrijd,
-                     WEDSTRIJD_DISCIPLINE_TO_STR, WEDSTRIJD_STATUS_TO_STR,
+                     ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR,
                      WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING)
 
 TEMPLATE_KALENDER_OVERZICHT_MANAGER = 'kalender/overzicht-manager.dtl'
@@ -43,7 +44,8 @@ class KalenderManagerView(UserPassesTestMixin, View):
                        .order_by('-datum_begin')[:50])
 
         for wed in wedstrijden:
-            wed.disc_str = WEDSTRIJD_DISCIPLINE_TO_STR[wed.discipline]
+            disc2str = ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS[wed.organisatie]
+            wed.disc_str = ORGANISATIES2SHORT_STR[wed.organisatie] + ' / ' + disc2str[wed.discipline]
             wed.status_str = WEDSTRIJD_STATUS_TO_STR[wed.status]
             wed.status_val_op = (wed.status == WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING)
             wed.url_wijzig = reverse('Kalender:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wed.pk})
@@ -51,6 +53,8 @@ class KalenderManagerView(UserPassesTestMixin, View):
         # for
 
         context['wedstrijden'] = wedstrijden
+
+        context['huidige_rol'] = rol_get_beschrijving(request)
 
         context['kruimels'] = (
             (None, 'Wedstrijdkalender'),

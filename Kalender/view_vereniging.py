@@ -10,11 +10,12 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import BoogType, KalenderWedstrijdklasse, ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_NHB
-from Functie.rol import Rollen, rol_get_huidige_functie
+from BasisTypen.models import (BoogType, KalenderWedstrijdklasse,
+                               ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_NHB, ORGANISATIES2SHORT_STR)
+from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from .models import (KalenderWedstrijd,
-                     WEDSTRIJD_DISCIPLINE_TO_STR, WEDSTRIJD_STATUS_TO_STR)
+                     ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR)
 from datetime import date
 
 TEMPLATE_KALENDER_OVERZICHT_VERENIGING = 'kalender/overzicht-vereniging.dtl'
@@ -49,7 +50,12 @@ class VerenigingKalenderWedstrijdenView(UserPassesTestMixin, View):
                        .order_by('-datum_begin'))
 
         for wed in wedstrijden:
-            wed.disc_str = WEDSTRIJD_DISCIPLINE_TO_STR[wed.discipline]
+            disc2str = ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS[wed.organisatie]
+            wed.disc_str = ORGANISATIES2SHORT_STR[wed.organisatie] + ' / '
+            try:
+                wed.disc_str += disc2str[wed.discipline]
+            except KeyError:
+                wed.disc_str += '## FOUT ##'
             wed.status_str = WEDSTRIJD_STATUS_TO_STR[wed.status]
             wed.url_wijzig = reverse('Kalender:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wed.pk})
             wed.url_sessies = reverse('Kalender:wijzig-sessies', kwargs={'wedstrijd_pk': wed.pk})
@@ -62,6 +68,8 @@ class VerenigingKalenderWedstrijdenView(UserPassesTestMixin, View):
             context['url_nieuwe_wedstrijd'] = reverse('Kalender:nieuwe-wedstrijd-kies-type')
         else:
             context['geen_locatie'] = True
+
+        context['huidige_rol'] = rol_get_beschrijving(request)
 
         context['kruimels'] = (
             (None, 'Wedstrijdkalender'),
@@ -91,7 +99,7 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de GET request af te handelen """
         context = dict()
-        ver = self.functie_nu.nhb_ver
+        #ver = self.functie_nu.nhb_ver
 
         context['url_nieuwe_wedstrijd'] = reverse('Kalender:nieuwe-wedstrijd-kies-type')
 

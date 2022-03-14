@@ -84,6 +84,17 @@ ORGANISATIES = [
     (ORGANISATIE_IFAA, 'IFAA'),
 ]
 
+ORGANISATIES2SHORT_STR = {
+    ORGANISATIE_WA: 'WA',
+    ORGANISATIE_NHB: 'NHB',
+    ORGANISATIE_IFAA: 'IFAA',
+}
+
+ORGANISATIES2LONG_STR = {
+    ORGANISATIE_WA: 'World Archery',
+    ORGANISATIE_NHB: 'NHB',
+    ORGANISATIE_IFAA: 'IFAA',
+}
 
 class BoogType(models.Model):
     """ boog typen: volledige naam en unique afkorting """

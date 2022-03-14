@@ -194,6 +194,10 @@ class CompetitieOverzichtView(View):
 
             context['regio_instellingen_globaal'] = False
 
+            if context['rol_is_klaar']:
+                context['url_medailles'] = reverse('CompRegio:medailles',
+                                                   kwargs={'regio': self.functie_nu.nhb_regio.regio_nr})
+
         elif self.rol_nu == Rollen.ROL_RKO:
             deelcomp_rks = (DeelCompetitie
                             .objects

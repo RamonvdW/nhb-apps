@@ -125,6 +125,11 @@
 
             {% endfor %}
 
+            <!-- medailles -->
+            {% if url_medailles %}
+                {% include 'plein/card.dtl' with title="Medailles" text="blabla" icon="edit" url=url_medailles %}
+            {% endif %}
+
             {% if comp.url_regio_instellingen and comp.fase >= 'B' %}
                 {% include 'plein/card.dtl' with title="Instelling teams" text="Instellingen voor de teamcompetitie in de regio." icon="flaky" url=comp.url_regio_instellingen %}
             {% endif %}

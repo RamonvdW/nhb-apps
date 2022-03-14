@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
-from BasisTypen.models import BoogType, KalenderWedstrijdklasse, ORGANISATIES, ORGANISATIE_WA
+from BasisTypen.models import (BoogType, KalenderWedstrijdklasse,
+                               ORGANISATIES, ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_NHB)
 from NhbStructuur.models import NhbVereniging
 from Sporter.models import SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
@@ -30,15 +31,32 @@ WEDSTRIJD_DISCIPLINES = (
 )
 
 # let op: dit is ook de volgorde waarin ze getoond worden
-WEDSTRIJD_DISCIPLINE_TO_STR = {
+WEDSTRIJD_DISCIPLINE_TO_STR_WA = {
     WEDSTRIJD_DISCIPLINES_OUTDOOR: 'Outdoor',
-    WEDSTRIJD_DISCIPLINES_3D: '3D',
+    WEDSTRIJD_DISCIPLINES_INDOOR: 'Indoor',
     WEDSTRIJD_DISCIPLINES_VELD: 'Veld',
-    WEDSTRIJD_DISCIPLINES_RUN: 'Run Archery',
-    WEDSTRIJD_DISCIPLINES_CLOUT: 'Clout',
+}
+
+WEDSTRIJD_DISCIPLINE_TO_STR_NHB = {
+    WEDSTRIJD_DISCIPLINES_OUTDOOR: 'Outdoor',
     WEDSTRIJD_DISCIPLINES_INDOOR: 'Indoor',
     WEDSTRIJD_DISCIPLINES_25M1P: '25m 1pijl',
+    WEDSTRIJD_DISCIPLINES_CLOUT: 'Clout',
+    WEDSTRIJD_DISCIPLINES_VELD: 'Veld',
+    WEDSTRIJD_DISCIPLINES_RUN: 'Run Archery',
+    WEDSTRIJD_DISCIPLINES_3D: '3D',
 }
+
+WEDSTRIJD_DISCIPLINE_TO_STR_IFAA = {
+    WEDSTRIJD_DISCIPLINES_3D: '3D',
+}
+
+ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS = {
+    ORGANISATIE_WA: WEDSTRIJD_DISCIPLINE_TO_STR_WA,
+    ORGANISATIE_NHB: WEDSTRIJD_DISCIPLINE_TO_STR_NHB,
+    ORGANISATIE_IFAA: WEDSTRIJD_DISCIPLINE_TO_STR_IFAA
+}
+
 
 WEDSTRIJD_STATUS_ONTWERP = 'O'
 WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING = 'W'
@@ -92,6 +110,12 @@ WEDSTRIJD_BEGRENZING_TO_STR = {
     WEDSTRIJD_BEGRENZING_RAYON: 'Sporters in het rayon',
     WEDSTRIJD_BEGRENZING_REGIO: 'Sporters in de regio',
     WEDSTRIJD_BEGRENZING_VERENIGING: 'Sporters van de organiserende vereniging',
+}
+
+WEDSTRIJD_ORGANISATIE_TO_STR = {
+    ORGANISATIE_WA: 'WA',
+    ORGANISATIE_NHB: 'NHB',
+    ORGANISATIE_IFAA: 'IFAA'
 }
 
 

@@ -85,8 +85,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             # HWL of WL
             context['toon_competities'] = True
 
-            # if rol_nu == Rollen.ROL_HWL:
-            #     context['toon_wedstrijdkalender'] = True
+            if self.rol_nu == Rollen.ROL_HWL:
+                context['toon_wedstrijdkalender'] = True
 
             comps = (Competitie
                      .objects

@@ -13,13 +13,13 @@ from django.views.generic import View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
-from BasisTypen.models import BoogType, KalenderWedstrijdklasse
+from BasisTypen.models import BoogType, KalenderWedstrijdklasse, ORGANISATIES2LONG_STR
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Taken.taken import maak_taak
 from Wedstrijden.models import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, WedstrijdLocatie
 from .models import (KalenderWedstrijd,
-                     WEDSTRIJD_DISCIPLINE_TO_STR, WEDSTRIJD_STATUS_TO_STR, WEDSTRIJD_WA_STATUS_TO_STR,
+                     ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR, WEDSTRIJD_WA_STATUS_TO_STR,
                      WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING, WEDSTRIJD_STATUS_GEACCEPTEERD,
                      WEDSTRIJD_STATUS_GEANNULEERD, WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
                      WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_BEGRENZING_TO_STR)
@@ -169,9 +169,14 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
             max_banen = max(locatie.banen_18m, locatie.banen_25m, locatie.buiten_banen, max_banen)
         # for
 
-        wedstrijd.disc_str = WEDSTRIJD_DISCIPLINE_TO_STR[wedstrijd.discipline]
+        wedstrijd.org_str = ORGANISATIES2LONG_STR[wedstrijd.organisatie]
+
+        disc2str = ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS[wedstrijd.organisatie]
+
+        wedstrijd.disc_str = (ORGANISATIES2LONG_STR[wedstrijd.organisatie] + ' / ' + disc2str[wedstrijd.discipline])
+
         context['opt_disc'] = opt_disc = list()
-        for afk, disc in WEDSTRIJD_DISCIPLINE_TO_STR.items():
+        for afk, disc in disc2str.items():
             opt = SimpleNamespace()
             opt.sel = 'disc_%s' % afk
             opt.keuze_str = disc
