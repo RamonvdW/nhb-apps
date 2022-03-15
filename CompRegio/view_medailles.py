@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2022 Ramon van der Winkel.
+#  Copyright (c) 2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -92,7 +92,8 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
 
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
-                      .filter(deelcompetitie=deelcomp)
+                      .filter(deelcompetitie=deelcomp,
+                              aantal_scores__gte=6)
                       .exclude(indiv_klasse__is_onbekend=True)
                       .select_related('sporterboog__sporter',
                                       'bij_vereniging',
