@@ -4,25 +4,13 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
-from django.http import HttpResponseRedirect, Http404
+from django.http import Http404
 from django.urls import reverse
-from django.db.models import Count
 from django.views.generic import TemplateView
-from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import (LAAG_REGIO, AG_NUL,
-                               TEAM_PUNTEN_MODEL_FORMULE1, TEAM_PUNTEN_MODEL_TWEE, TEAM_PUNTEN_F1,
-                               Competitie, CompetitieTeamKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
-                               RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
-                               CompetitieMutatie, MUTATIE_TEAM_RONDE)
-from Competitie.operations.poules import maak_poule_schema
+from Competitie.models import DeelCompetitie, RegioCompetitieSchutterBoog
 from Functie.rol import Rollen, rol_get_huidige_functie
-from Logboek.models import schrijf_in_logboek
-from NhbStructuur.models import NhbRayon
 from Plein.menu import menu_dynamics
-from types import SimpleNamespace
-import time
 
 
 TEMPLATE_COMPREGIO_MEDAILLES = 'compregio/medailles.dtl'
@@ -44,6 +32,41 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu == Rollen.ROL_RCL
+
+    @staticmethod
+    def _split_aspiranten(asps, objs):
+        klasse_str = asps[0].klasse_str
+        rank_m = 0
+        rank_v = 0
+        asps_v = list()
+        for deelnemer in asps:
+            if deelnemer.sporterboog.sporter.geslacht == 'V':
+                if rank_v == 0:
+                    deelnemer.klasse_str = klasse_str + ', meisjes'
+                    deelnemer.break_klasse = True
+                rank_v += 1
+                deelnemer.rank = rank_v
+                asps_v.append(deelnemer)
+            else:
+                if rank_m == 0:
+                    deelnemer.klasse_str = klasse_str + ', jongens'
+                    deelnemer.break_klasse = True
+                rank_m += 1
+                deelnemer.rank = rank_m
+                objs.append(deelnemer)
+
+            # aspiranten klassen krijgen altijd medaille, onafhankelijk van aantal deelnemers
+            if deelnemer.rank <= 3:
+                if deelnemer.rank == 1:
+                    deelnemer.toon_goud = True
+                elif deelnemer.rank == 2:
+                    deelnemer.toon_zilver = True
+                elif deelnemer.rank == 3:
+                    deelnemer.toon_brons = True
+        # for
+
+        if len(asps_v):
+            objs.extend(asps_v)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -70,6 +93,7 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
                       .filter(deelcompetitie=deelcomp)
+                      .exclude(indiv_klasse__is_onbekend=True)
                       .select_related('sporterboog__sporter',
                                       'bij_vereniging',
                                       'indiv_klasse__boogtype')
@@ -80,30 +104,42 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
 
         klasse = -1
         rank = 0
-        deelnemer_count = deelnemer_een = deelnemer_twee = deelnemer_drie = None
+        asps = list()
+        is_asp = False
+        deelnemer_een = deelnemer_twee = deelnemer_drie = None
         for deelnemer in deelnemers:
 
             deelnemer.break_klasse = (klasse != deelnemer.indiv_klasse.volgorde)
             if deelnemer.break_klasse:
-                if rank >= 9:
-                    # vanaf 9 deelnemers: 3 medailles
-                    deelnemer_drie.toon_brons = True
+                if len(asps):
+                    self._split_aspiranten(asps, uitslag)      # TODO: niet meer nodig in seizoen 2022/2023
+                    asps = list()
+                else:
+                    if rank >= 9:
+                        # vanaf 9 deelnemers: 3 medailles
+                        deelnemer_drie.toon_brons = True
 
-                if rank >= 5:
-                    # tot 8 deelnemers: 2 medailles
-                    deelnemer_twee.toon_zilver = True
+                    if rank >= 5:
+                        # tot 8 deelnemers: 2 medailles
+                        deelnemer_twee.toon_zilver = True
 
-                if rank > 0:
-                    # tot 4 deelnemers: 1 medaille
-                    deelnemer_een.toon_goud = True
-
-                deelnemer_count = deelnemer
-                deelnemer_count.aantal_in_groep = 2   # 1 extra zodat balk doorloopt tot horizontale afsluiter
+                    if rank > 0:
+                        # tot 4 deelnemers: 1 medaille
+                        deelnemer_een.toon_goud = True
 
                 deelnemer.is_eerste_groep = (klasse == -1)
                 deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
-                rank = 0
 
+                is_asp = False
+                if not deelnemer.indiv_klasse.is_voor_rk_bk:
+                    # dit is een aspiranten klassen of een klasse onbekend
+                    for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all():
+                        if lkl.is_aspirant_klasse():
+                            is_asp = True
+                            break
+                    # for
+
+                rank = 0
                 deelnemer_een = deelnemer_twee = deelnemer_drie = None
 
             klasse = deelnemer.indiv_klasse.volgorde
@@ -115,8 +151,10 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
                 deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
                 deelnemer.ver_str = str(deelnemer.bij_vereniging)
 
-                deelnemer_count.aantal_in_groep += 1
-                uitslag.append(deelnemer)
+                if is_asp:
+                    asps.append(deelnemer)
+                else:
+                    uitslag.append(deelnemer)
 
                 if rank == 1:
                     deelnemer_een = deelnemer
@@ -126,17 +164,21 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
                     deelnemer_drie = deelnemer
         # for
 
-        if rank >= 9:
-            # vanaf 9 deelnemers: 3 medailles
-            deelnemer_drie.toon_brons = True
+        if len(asps):
+            # aspiranten opsplitsen in jongens en meisjes klasse
+            self._split_aspiranten(asps, uitslag)
+        else:
+            if rank >= 9:
+                # vanaf 9 deelnemers: 3 medailles
+                deelnemer_drie.toon_brons = True
 
-        if rank >= 5:
-            # tot 8 deelnemers: 2 medailles
-            deelnemer_twee.toon_zilver = True
+            if rank >= 5:
+                # tot 8 deelnemers: 2 medailles
+                deelnemer_twee.toon_zilver = True
 
-        if rank > 0:
-            # tot 4 deelnemers: 1 medaille
-            deelnemer_een.toon_goud = True
+            if rank > 0:
+                # tot 4 deelnemers: 1 medaille
+                deelnemer_een.toon_goud = True
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
