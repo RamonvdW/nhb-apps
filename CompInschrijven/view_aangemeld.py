@@ -369,7 +369,7 @@ class LijstAangemeldRegiocompAlsBestandView(LijstAangemeldRegiocompRegioView):
             ver = deelnemer.bij_vereniging
             sporter = deelnemer.sporterboog.sporter
             boog = deelnemer.sporterboog.boogtype
-            klasse = deelnemer.klasse.indiv
+            klasse = deelnemer.indiv_klasse
             team_str = 'Ja' if deelnemer.inschrijf_voorkeur_team else 'Nee'
             eigen_str = 'Ja' if sporter.lid_nr in voorkeur_eigen_blazoen else 'Nee'
 

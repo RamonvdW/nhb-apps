@@ -235,7 +235,7 @@ class UitslagenRayonIndivView(TemplateView):
                     pass
 
                 try:
-                    limiet = wkl2limiet[deelnemer.klasse.pk]
+                    limiet = wkl2limiet[deelnemer.indiv_klasse.pk]
                 except KeyError:
                     limiet = 24
 

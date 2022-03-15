@@ -73,7 +73,7 @@ class Command(BaseCommand):
 
                 if indiv_ag >= klasse_min_ag:
                     self.stdout.write('[WARNING] %s: klasse %s, indiv_ag %s < hogere klasse min_ag %s (%s)' % (
-                                        deelnemer, deelnemer.klasse, indiv_ag, klasse_min_ag, hogere_klasse))
+                                        deelnemer, deelnemer.indiv_klasse, indiv_ag, klasse_min_ag, hogere_klasse))
 
                     bepaler = KlasseBepaler(deelnemer.deelcompetitie.competitie)
                     bepaler.bepaal_klasse_deelnemer(deelnemer)

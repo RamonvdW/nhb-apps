@@ -131,7 +131,7 @@ urlpatterns = [
          name='keuze-zeven-wedstrijden'),
 
     # RCL
-    path('medailles/regio-<regio>',
+    path('medailles/regio-<regio>/',
          view_medailles.ToonMedailles.as_view(),
          name='medailles')
 ]
