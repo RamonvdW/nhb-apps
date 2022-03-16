@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    <script>
+    <script type="application/javascript">
         function keuze_gemaakt(groep) {
 
             // TODO: sta wijziging in meerdere radiobuttons tegelijk toe: construeer de URL hier
@@ -94,11 +94,11 @@
         <div class="col s12 m6 l4 xl3" style="margin-bottom:15px">
             <div class="white left-align" style="padding:10px">
                 <p><b>Kies een rayon:</b></p>
-                <ul id="id_regio">
+                <ul id="id_rayon">
                     {% for rayon in rayon_filters %}
                         <li>
                             <label class="black-text" for="id_{{ rayon.sel }}">
-                                <input class="with-gap" type="radio" name="regio" value="{{ rayon.sel }}" required id="id_{{ rayon.sel }}" {% if rayon.selected %}checked{% endif %} data-url="{{ rayon.zoom_url }}">
+                                <input class="with-gap" type="radio" name="rayon" value="{{ rayon.sel }}" required id="id_{{ rayon.sel }}" {% if rayon.selected %}checked{% endif %} data-url="{{ rayon.zoom_url }}">
                                 <span>{{ rayon.title_str }}</span>
                             </label>
                         </li>
