@@ -331,6 +331,8 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                 # for
             # for
 
+            disc2str = ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS[wedstrijd.organisatie]
+
             wedstrijd.titel = request.POST.get('titel', wedstrijd.titel)[:50]
 
             if not limit_edits:
@@ -363,7 +365,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
 
             if not limit_edits:
                 disc = request.POST.get('discipline', '')
-                for afk in WEDSTRIJD_DISCIPLINE_TO_STR.keys():
+                for afk in disc2str.keys():
                     if disc == 'disc_' + afk:
                         wedstrijd.discipline = afk
                 # for

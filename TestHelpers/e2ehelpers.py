@@ -124,12 +124,13 @@ class E2EHelpers(TestCase):
         account.save()
         return account
 
-    def e2e_login_no_check(self, account, wachtwoord=None):
+    def e2e_login_no_check(self, account, wachtwoord=None, follow=False):
         """ log in op de website via de voordeur, zodat alle rechten geëvalueerd worden """
         if not wachtwoord:
             wachtwoord = self.WACHTWOORD
         resp = self.client.post('/account/login/', {'login_naam': account.username,
-                                                    'wachtwoord': wachtwoord})
+                                                    'wachtwoord': wachtwoord},
+                                follow=follow)
         return resp
 
     def e2e_login(self, account, wachtwoord=None):

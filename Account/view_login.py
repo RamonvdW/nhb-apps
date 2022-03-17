@@ -99,7 +99,7 @@ def account_check_geblokkeerd(request, from_ip, account):
     return None
 
 
-account_add_plugin_login(10, account_check_geblokkeerd, True)
+account_add_plugin_login(40, account_check_geblokkeerd, True)
 
 
 def receive_bevestiging_accountemail(request, obj):
