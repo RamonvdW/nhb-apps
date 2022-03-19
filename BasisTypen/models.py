@@ -96,6 +96,7 @@ ORGANISATIES2LONG_STR = {
     ORGANISATIE_IFAA: 'IFAA',
 }
 
+
 class BoogType(models.Model):
     """ boog typen: volledige naam en unique afkorting """
 
@@ -110,6 +111,11 @@ class BoogType(models.Model):
 
     # sorteervolgorde zodat order_by('volgorde') de juiste sortering oplevert
     volgorde = models.CharField(max_length=1, default='?')
+
+    # is dit boogtypen nog actueel?
+    # zolang in gebruik blijft een boogtype bestaan
+    # True = niet meer gebruiken voor nieuwe wedstrijden
+    buiten_gebruik = models.BooleanField(default=False)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
