@@ -18,11 +18,11 @@ django==3.2.12
     #   -r requirements.in
 et-xmlfile==1.1.0
     # via openpyxl
-google-api-core==2.5.0
+google-api-core==2.7.1
     # via google-api-python-client
-google-api-python-client==2.38.0
+google-api-python-client==2.41.0
     # via -r requirements.in
-google-auth==2.6.0
+google-auth==2.6.2
     # via
     #   -r requirements.in
     #   google-api-core
@@ -30,7 +30,7 @@ google-auth==2.6.0
     #   google-auth-httplib2
 google-auth-httplib2==0.1.0
     # via google-api-python-client
-googleapis-common-protos==1.55.0
+googleapis-common-protos==1.56.0
     # via google-api-core
 httplib2==0.20.4
     # via
@@ -72,5 +72,5 @@ sqlparse==0.4.2
     # via django
 uritemplate==4.1.1
     # via google-api-python-client
-urllib3==1.26.8
+urllib3==1.26.9
     # via requests
