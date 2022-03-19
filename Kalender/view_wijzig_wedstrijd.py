@@ -13,7 +13,7 @@ from django.views.generic import View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
-from BasisTypen.models import BoogType, KalenderWedstrijdklasse, ORGANISATIES2LONG_STR
+from BasisTypen.models import BoogType, KalenderWedstrijdklasse, ORGANISATIES2LONG_STR, ORGANISATIE_WA
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Taken.taken import maak_taak
@@ -23,6 +23,7 @@ from .models import (KalenderWedstrijd,
                      WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING, WEDSTRIJD_STATUS_GEACCEPTEERD,
                      WEDSTRIJD_STATUS_GEANNULEERD, WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
                      WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_BEGRENZING_TO_STR)
+from .operations import get_toegestane_boogtypen, get_toegestane_klassen
 import datetime
 from types import SimpleNamespace
 
@@ -163,7 +164,8 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
 
             locatie.sel = "loc_%s" % locatie.pk
             locatie.selected = (wedstrijd.locatie == locatie)
-            locatie.keuze_str += ': ' + locatie.adres.replace('\n', ', ') + ' [disciplines: %s]' % locatie.disciplines_str()
+            locatie.keuze_str += ' [disciplines: %s]\n' % locatie.disciplines_str()
+            locatie.keuze_str += locatie.adres.replace('\n', ', ')
             opt_locatie.append(locatie)
 
             max_banen = max(locatie.banen_18m, locatie.banen_25m, locatie.buiten_banen, max_banen)
@@ -197,44 +199,37 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
         # for
 
         context['opt_bogen'] = opt_bogen = list()
-        pks = list(wedstrijd.boogtypen.values_list('pk', flat=True))
-        for obj in BoogType.objects.order_by('volgorde'):
+        gekozen_boog_pks = list(wedstrijd.boogtypen.values_list('pk', flat=True))
+        for obj in get_toegestane_boogtypen(wedstrijd.organisatie):
             obj.sel = 'boog_%s' % obj.afkorting
             obj.gebruikt = (obj.pk in bogen_gebruikt)
-            obj.selected = (obj.pk in pks)
+            obj.selected = (obj.pk in gekozen_boog_pks)
             opt_bogen.append(obj)
         # for
 
-        context['opt_klasse_1'] = opt_klasse_1 = list()
-        context['opt_klasse_2'] = opt_klasse_2 = list()
+        context['opt_klasse'] = opt_klasse = list()
         context['wedstrijd_is_a_status'] = (wedstrijd.wa_status == WEDSTRIJD_WA_STATUS_A)
-        pks = list(wedstrijd.wedstrijdklassen.values_list('pk', flat=True))
-        for klasse in (KalenderWedstrijdklasse
-                       .objects
-                       .exclude(buiten_gebruik=True)
-                       .select_related('leeftijdsklasse')
-                       .order_by('volgorde')):
-
+        gekozen_pks = list(wedstrijd.wedstrijdklassen.values_list('pk', flat=True))
+        for klasse in get_toegestane_klassen(wedstrijd.organisatie, gekozen_boog_pks):
             klasse.sel = 'klasse_%s' % klasse.pk
             klasse.gebruikt = (klasse.pk in klassen_gebruikt)
-            klasse.selected = (klasse.pk in pks)
+            klasse.selected = (klasse.pk in gekozen_pks)
 
-            if klasse.leeftijdsklasse.wedstrijd_geslacht == 'M':
-                opt_klasse_1.append(klasse)
-            else:
-                opt_klasse_2.append(klasse)
+            opt_klasse.append(klasse)
         # for
 
-        wedstrijd.wa_status_str = WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
-        context['opt_wa'] = opt_wa = list()
-        for afk, descr in WEDSTRIJD_WA_STATUS_TO_STR.items():
-            opt = SimpleNamespace()
-            opt.sel = 'wa_%s' % afk
-            opt.keuze_str = descr
-            opt.selected = (wedstrijd.wa_status == afk)
-            opt.disabled = (afk == WEDSTRIJD_WA_STATUS_A and not wedstrijd.voorwaarden_a_status_acceptatie)
-            opt_wa.append(opt)
-        # for
+        if wedstrijd.organisatie == ORGANISATIE_WA:
+            context['toon_wa_status'] = True
+            wedstrijd.wa_status_str = WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
+            context['opt_wa'] = opt_wa = list()
+            for afk, descr in WEDSTRIJD_WA_STATUS_TO_STR.items():
+                opt = SimpleNamespace()
+                opt.sel = 'wa_%s' % afk
+                opt.keuze_str = descr
+                opt.selected = (wedstrijd.wa_status == afk)
+                opt.disabled = (afk == WEDSTRIJD_WA_STATUS_A and not wedstrijd.voorwaarden_a_status_acceptatie)
+                opt_wa.append(opt)
+            # for
 
         context['opt_aanwezig'] = aanwezig = list()
         for mins in (10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60):

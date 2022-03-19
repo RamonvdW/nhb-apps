@@ -192,21 +192,17 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
 
         pks = list(sessie.wedstrijdklassen.values_list('pk', flat=True))
 
-        klassen_m = list()
-        klassen_v = list()
-        for klasse in (wedstrijd
-                       .wedstrijdklassen
-                       .select_related('leeftijdsklasse')
-                       .order_by('volgorde')):
+        klassen = (wedstrijd
+                   .wedstrijdklassen
+                   .select_related('leeftijdsklasse')
+                   .order_by('volgorde'))
+
+        for klasse in klassen:
             klasse.sel = 'klasse_%s' % klasse.pk
             klasse.selected = (klasse.pk in pks)
-
-            if klasse.leeftijdsklasse.wedstrijd_geslacht == 'M':
-                klassen_m.append(klasse)
-            else:
-                klassen_v.append(klasse)
         # for
-        return klassen_m, klassen_v
+
+        return klassen
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de GET request af te handelen """
@@ -243,7 +239,7 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
 
         context['opt_duur'] = self._maak_opt_duur(sessie)
 
-        context['opt_klassen_m'], context['opt_klassen_v'] = self._maak_opt_klassen(wedstrijd, sessie)
+        context['opt_klassen'] = self._maak_opt_klassen(wedstrijd, sessie)
 
         context['url_opslaan'] = reverse('Kalender:wijzig-sessie',
                                          kwargs={'wedstrijd_pk': wedstrijd.pk,

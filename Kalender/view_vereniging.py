@@ -10,12 +10,13 @@ from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import (BoogType, KalenderWedstrijdklasse,
+from BasisTypen.models import (BoogType, KalenderWedstrijdklasse, GESLACHT_ALLE,
                                ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_NHB, ORGANISATIES2SHORT_STR)
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from .models import (KalenderWedstrijd,
                      ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR)
+from .operations import get_toegestane_boogtypen, get_toegestane_klassen
 from datetime import date
 
 TEMPLATE_KALENDER_OVERZICHT_VERENIGING = 'kalender/overzicht-vereniging.dtl'
@@ -47,7 +48,8 @@ class VerenigingKalenderWedstrijdenView(UserPassesTestMixin, View):
         wedstrijden = (KalenderWedstrijd
                        .objects
                        .filter(organiserende_vereniging=ver)
-                       .order_by('-datum_begin'))
+                       .order_by('-datum_begin',
+                                 'pk'))
 
         for wed in wedstrijden:
             disc2str = ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS[wed.organisatie]
@@ -140,20 +142,15 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
                             locatie=locaties[0])
                 wed.save()
 
-                # default alle bogen aan zetten
-                if wed.organisatie == ORGANISATIE_NHB:
-                    # nationaal is combinatie van WA en NAT
-                    bogen = BoogType.objects.filter(organisatie__in=(ORGANISATIE_WA, ORGANISATIE_NHB))
-                else:
-                    bogen = BoogType.objects.filter(organisatie=wed.organisatie)
-
-                # IB=obsolete
-                bogen = bogen.exclude(afkorting='IB')       # TODO: kan weg als IB uit het systeem gehaald is
-
+                bogen = get_toegestane_boogtypen(wed.organisatie)
                 wed.boogtypen.set(bogen)
 
-                # default alle wedstrijdklassen kiezen die WA-erkend zijn en dus onder A-status vallen
-                klassen = KalenderWedstrijdklasse.objects.filter(organisatie=ORGANISATIE_WA).all()
+                klassen = get_toegestane_klassen(wed.organisatie)
+
+                if wed.organisatie == ORGANISATIE_NHB:
+                    # voorkom zowel gender-neutrale als man/vrouw klassen
+                    klassen = klassen.exclude(leeftijdsklasse__wedstrijd_geslacht=GESLACHT_ALLE)
+
                 wed.wedstrijdklassen.set(klassen)
 
         url = reverse('Kalender:vereniging')
