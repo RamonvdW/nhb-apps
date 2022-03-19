@@ -25,6 +25,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_LEDENLIJST
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    kruimel = 'Ledenlijst'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -182,7 +183,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, 'Ledenlijst')
+            (None, self.kruimel)
         )
 
         menu_dynamics(self.request, context)
@@ -199,6 +200,7 @@ class LedenVoorkeurenView(LedenLijstView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_LEDEN_VOORKEUREN
+    kruimel = 'Voorkeuren leden'
 
     def get_queryset(self):
         objs = super().get_queryset()

@@ -102,25 +102,25 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('sporter/voorkeuren.dtl', 'plein/site_layout.dtl'))
 
         # na bekijken voorkeuren zijn ze aangemaakt
-        self.assertEqual(SporterBoog.objects.count(), 5)
+        self.assertEqual(SporterBoog.objects.count(), 17)
 
         # controleer dat ze niet nog een keer aangemaakt worden
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertEqual(SporterBoog.objects.count(), 5)
+        self.assertEqual(SporterBoog.objects.count(), 17)
 
         obj = SporterBoog.objects.get(sporter=self.sporter1, boogtype=self.boog_R)
         self.assertTrue(obj.heeft_interesse)
         self.assertFalse(obj.voor_wedstrijd)
 
         # maak wat wijzigingen
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.post(self.url_voorkeuren, {'schiet_R': 'on',
                                                           'info_BB': 'on',
                                                           'voorkeur_eigen_blazoen': 'on'})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
-        self.assertEqual(SporterBoog.objects.count(), 5)
+        self.assertEqual(SporterBoog.objects.count(), 17)
         self.assertEqual(SporterVoorkeuren.objects.count(), 1)
 
         obj = SporterBoog.objects.get(sporter=self.sporter1, boogtype=self.boog_R)
@@ -199,7 +199,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertTrue(obj_c.heeft_interesse)
 
         # post een wijziging
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(24):
             resp = self.client.post(self.url_voorkeuren, {'sporter_pk': '100001', 'schiet_R': 'on', 'info_C': 'on'})
         self.assert_is_redirect(resp, '/vereniging/leden-voorkeuren/')
 
@@ -313,7 +313,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertTrue(voorkeuren.voorkeur_discipline_3d)
 
         # alle disciplines 'uit' zetten
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(24):
             resp = self.client.post(self.url_voorkeuren, {})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
         voorkeuren = SporterVoorkeuren.objects.get(pk=voorkeuren.pk)
@@ -357,7 +357,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         voorkeuren = SporterVoorkeuren.objects.all()[0]
         self.assertEqual(voorkeuren.opmerking_para_sporter, '')
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(24):
             resp = self.client.post(self.url_voorkeuren, {'para_notitie': 'Hallo test'})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
@@ -396,7 +396,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertFalse(email.optout_herinnering_taken)
 
         # wijzig zonder opt-out te doen
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(25):
             resp = self.client.post(self.url_voorkeuren, {})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 

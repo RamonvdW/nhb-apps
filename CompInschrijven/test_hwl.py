@@ -246,7 +246,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
 
         # haal als HWL de voorkeuren pagina op van een lid van de vereniging
         # dit maakt ook de SporterBoog records aan
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.get(self.url_sporter_voorkeuren % lid_nr)
         self.assertEqual(resp.status_code, 200)
 
@@ -268,7 +268,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
             # verwijder de SchutterVoorkeur records
             SporterVoorkeuren.objects.filter(sporter__lid_nr=100012).delete()
         else:
-            with self.assert_max_queries(20):
+            with self.assert_max_queries(23):
                 resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_R': 'on',
                                                                  'info_C': 'on',

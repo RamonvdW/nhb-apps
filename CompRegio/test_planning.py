@@ -1039,7 +1039,6 @@ class TestCompRegioPlanning(E2EHelpers, TestCase):
             resp = self.client.post(self.url_wijzig_wedstrijd % wedstrijd_pk,
                                     {'weekdag': 1, 'nhbver_pk': self.nhbver_101.pk, 'aanvang': '12:34',
                                      'wkl_indiv_%s' % self.klasse_recurve_onbekend.pk: 'on'})
-        self.e2e_dump_resp(resp)
         self.assert_is_redirect_not_plein(resp)  # check for success
 
         # nog een keer hetzelfde

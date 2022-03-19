@@ -46,13 +46,7 @@
 
                     <table class="white">
 
-                    {% if bogen %}
-                        <tr>
-                            <td colspan="2">
-                                <h5>Bogen</h5>
-                            </td>
-                        </tr>
-
+                    {% if bogen_wa %}
                         {% if not is_hwl %}
                             <tr>
                                 <td colspan="2">
@@ -67,13 +61,18 @@
                             </tr>
                         {% endif %}
 
+                        <tr>
+                            <td colspan="2">
+                                <h5>Bogen World Archery</h5>
+                            </td>
+                        </tr>
 
                         <tr>
                             <th>Hier schiet ik mee</th>
                             <th>Alleen informatie</th>
                         </tr>
 
-                        {% for obj in bogen %}
+                        {% for obj in bogen_wa %}
                             <tr>
                                 <td>
                                     <label>
@@ -90,6 +89,37 @@
                                 </td>
                             </tr>
                         {% endfor %}
+
+
+                        <tr>
+                            <td colspan="2">
+                                <h5>Bogen IFAA</h5>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Hier schiet ik mee</th>
+                            <th>Alleen informatie</th>
+                        </tr>
+
+                        {% for obj in bogen_ifaa %}
+                            <tr>
+                                <td>
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="{{ obj.check_schiet }}" {% if obj.voor_wedstrijd %}checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
+                                    </label>
+                                </td>
+
+                                <td>
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="{{ obj.check_info }}" {% if obj.heeft_interesse %}checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
+                                    </label>
+                                </td>
+                            </tr>
+                        {% endfor %}
+
 
 
                         <tr>

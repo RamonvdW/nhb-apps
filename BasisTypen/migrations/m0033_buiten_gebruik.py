@@ -10,16 +10,18 @@ def zet_buiten_gebruik_ib(apps, _):
 
     boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
 
-    ib_boog = boogtype_klas.objects.get(afkorting='IB')
-    ib_boog.buiten_gebruik = True
-    ib_boog.save(update_fields=['buiten_gebruik'])
+    if boogtype_klas.objects.filter(afkorting='IB').count() > 0:            # pragma: no cover
 
-    kalenderwedstrijdklasse_klas = apps.get_model('BasisTypen', 'KalenderWedstrijdklasse')
+        ib_boog = boogtype_klas.objects.get(afkorting='IB')
+        ib_boog.buiten_gebruik = True
+        ib_boog.save(update_fields=['buiten_gebruik'])
 
-    for kal in kalenderwedstrijdklasse_klas.objects.filter(boogtype=ib_boog):
-        kal.buiten_gebruik = True
-        kal.save(update_fields=['buiten_gebruik'])
-    # for
+        kalenderwedstrijdklasse_klas = apps.get_model('BasisTypen', 'KalenderWedstrijdklasse')
+
+        for kal in kalenderwedstrijdklasse_klas.objects.filter(boogtype=ib_boog):
+            kal.buiten_gebruik = True
+            kal.save(update_fields=['buiten_gebruik'])
+        # for
 
 
 class Migration(migrations.Migration):

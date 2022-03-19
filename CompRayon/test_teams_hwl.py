@@ -261,7 +261,7 @@ class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
                                                                   'schiet_TR': 'on',
                                                                   'voorkeur_meedoen_competitie': 'on'})
         else:
-            with self.assert_max_queries(20):
+            with self.assert_max_queries(23):
                 resp = self.client.post(url_schutter_voorkeuren, {'sporter_pk': lid_nr,
                                                                   'schiet_R': 'on',
                                                                   'info_C': 'on',

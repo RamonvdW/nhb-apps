@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import BoogType, GESLACHT_ANDERS, GESLACHT_MV_MEERVOUD
+from BasisTypen.models import BoogType, GESLACHT_ANDERS, GESLACHT_MV_MEERVOUD, ORGANISATIE_IFAA
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_mag_wisselen
 from Plein.menu import menu_dynamics
 from .models import Sporter, SporterVoorkeuren, SporterBoog
@@ -250,7 +250,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             # sporter mag niet aan wedstrijden deelnemen
             # verwijder daarom alle SporterBoog records
             SporterBoog.objects.filter(sporter=sporter).delete()
-            return None
+            return None, None
 
         # haal de SporterBoog records op van deze gebruiker
         objs = (SporterBoog
@@ -260,7 +260,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 .order_by('boogtype__volgorde'))
 
         # maak ontbrekende SporterBoog records aan, indien nodig
-        boogtypen = BoogType.objects.all()
+        boogtypen = BoogType.objects.exclude(buiten_gebruik=True)
         if len(objs) < len(boogtypen):
             aanwezig = objs.values_list('boogtype__pk', flat=True)
             bulk = list()
@@ -279,12 +279,20 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                     .select_related('boogtype')
                     .order_by('boogtype__volgorde'))
 
-        # voeg de checkbox velden toe
+        # voeg de checkbox velden toe en opsplitsen in WA/IFAA
+        objs_wa = list()
+        objs_ifaa = list()
         for obj in objs:
             obj.check_schiet = 'schiet_' + obj.boogtype.afkorting
             obj.check_info = 'info_' + obj.boogtype.afkorting
+
+            if obj.boogtype.organisatie == ORGANISATIE_IFAA:
+                objs_ifaa.append(obj)
+            else:
+                objs_wa.append(obj)
         # for
-        return objs
+
+        return objs_wa, objs_ifaa
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -298,7 +306,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
 
         context['geen_wedstrijden'] = geen_wedstrijden = sporter.bij_vereniging and sporter.bij_vereniging.geen_wedstrijden
 
-        context['bogen'] = self._get_bogen(sporter, geen_wedstrijden)
+        context['bogen_wa'], context['bogen_ifaa'] = self._get_bogen(sporter, geen_wedstrijden)
         context['sporter'] = sporter
         context['voorkeuren'] = voorkeuren = get_sporter_voorkeuren(sporter)
 
@@ -328,10 +336,17 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
 
         context['opslaan_url'] = reverse('Sporter:voorkeuren')
 
-        context['kruimels'] = (
-            (reverse('Sporter:profiel'), 'Mijn pagina'),
-            (None, 'Voorkeuren')
-        )
+        if self.rol_nu == Rollen.ROL_HWL:
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:leden-voorkeuren'), 'Voorkeuren leden'),
+                (None, 'Voorkeuren')
+            )
+        else:
+            context['kruimels'] = (
+                (reverse('Sporter:profiel'), 'Mijn pagina'),
+                (None, 'Voorkeuren')
+            )
 
         menu_dynamics(self.request, context)
         return context

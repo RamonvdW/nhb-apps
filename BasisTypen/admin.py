@@ -27,14 +27,21 @@ class BasisTypenReadonlyAdmin(admin.ModelAdmin):
 
 
 class BasisTypenReadonlyMetVolgordeAdmin(BasisTypenReadonlyAdmin):
+
     ordering = ('volgorde',)
 
-    lister_filter = ('organisatie',)
+    list_filter = ('organisatie',)
+
+
+class BoogTypeAdmin(BasisTypenReadonlyAdmin):
+
+    list_filter = ('organisatie', 'buiten_gebruik')
 
 
 class BasisTypenLeeftijdsKlasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
 
     list_filter = ('organisatie', 'wedstrijd_geslacht',)
+
 
 
 class BasisTypenTemplateCompetitieIndivKlasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
@@ -90,7 +97,7 @@ class BasisTypenKalenderWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin)
     )
 
 
-admin.site.register(BoogType, BasisTypenReadonlyMetVolgordeAdmin)
+admin.site.register(BoogType, BoogTypeAdmin)
 admin.site.register(TeamType, BasisTypenReadonlyMetVolgordeAdmin)
 admin.site.register(LeeftijdsKlasse, BasisTypenLeeftijdsKlasseAdmin)
 admin.site.register(TemplateCompetitieIndivKlasse, BasisTypenTemplateCompetitieIndivKlasseAdmin)
