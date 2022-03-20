@@ -16,7 +16,7 @@ from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_kla
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from .models import (KalenderWedstrijd,
-                     ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR)
+                     WEDSTRIJD_DISCIPLINE_3D, ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR)
 from datetime import date
 
 TEMPLATE_KALENDER_OVERZICHT_VERENIGING = 'kalender/overzicht-vereniging.dtl'
@@ -140,6 +140,10 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
                             organisatie=keuze2organisatie[keuze],
                             voorwaarden_a_status_when=now,
                             locatie=locaties[0])
+
+                if wed.organisatie == ORGANISATIE_IFAA:
+                    wed.discipline = WEDSTRIJD_DISCIPLINE_3D
+
                 wed.save()
 
                 bogen = get_organisatie_boogtypen(wed.organisatie)

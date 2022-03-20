@@ -20,6 +20,64 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
+            <h4>Bondscompetitie</h4>
+            <p>Voor seizoen {{ huidige_jaar }}/{{ huidige_jaar|add:"1" }} schiet je de bondscompetitie als <b>{{ lkl_volgende_competitie }}</b></p>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px; margin-bottom:50px">
+                <h5>Uitleg</h5>
+                <p>Omdat de finales van de bondscompetitie in het nieuwe jaar plaatsvinden, moet je de bondscompetitie beginnen in de klasse waarin je volgend jaar uit moet komen. Daarnaast gebruikt de bondscompetitie niet alle leeftijdsklassen.</p>
+            </div>
+        </div>
+
+        <div class="col s12">
+
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Seizoen bondscompetitie</th>
+                        <th>Jouw wedstrijdklasse voor het gehele seizoen</th>
+                    </tr>
+                </thead>
+
+                <tr>
+                    <td>{{ huidige_jaar|add:"-1" }}/{{ huidige_jaar }}</td>
+                    <td>{{ clst.0 }}</td>
+                </tr>
+
+                <tr class="nhb-rood white-text">
+                    <td>{{ huidige_jaar }}/{{ huidige_jaar|add:"1" }}</td>
+                    <td>{{ clst.1 }}</td>
+                </tr>
+
+                <tr>
+                    <td>{{ huidige_jaar|add:"1" }}/{{ huidige_jaar|add:"2" }}</td>
+                    <td>{{ clst.2 }}</td>
+                </tr>
+
+                <tr>
+                    <td>{{ huidige_jaar|add:"2" }}/{{ huidige_jaar|add:"3" }}</td>
+                    <td>{{ clst.3 }}</td>
+                </tr>
+
+                <tr>
+                    <td>{{ huidige_jaar|add:"3" }}/{{ huidige_jaar|add:"4" }}</td>
+                    <td>{{ clst.4 }}</td>
+                </tr>
+
+            </table>
+
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
             <h4>Wedstrijden World Archery</h4>
             <p>Dit jaar bereik je de leeftijd <b class="red-text">{{ leeftijd }} jaar</b>, daarom kom je het hele jaar uit in de klasse <b class="red-text">{{ wlst.1 }}</b></p>
         </div>
@@ -89,17 +147,24 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Bondscompetitie</h4>
-            <p>Voor seizoen {{ huidige_jaar }}/{{ huidige_jaar|add:"1" }} schiet je de bondscompetitie als <b>{{ lkl_volgende_competitie }}</b></p>
+            <h4>Wedstrijden IFAA</h4>
+            <p>Dit jaar bereik je de leeftijd <b class="red-text">{{ leeftijd }} jaar</b></p>
         </div>
     </div>
 
-    <!-- blauw balk met wit informatie veld -->
+
     <div class="row-nhb-blauw">
+
+        <!-- blauw balk met wit informatie veld -->
         <div class="col s12">
             <div class="white" style="padding:10px; margin-bottom:50px">
-                <h5>Uitleg</h5>
-                <p>Omdat de finales van de bondscompetitie in het nieuwe jaar plaatsvinden, moet je de bondscompetitie beginnen in de klasse waarin je volgend jaar uit moet komen. Daarnaast gebruikt de bondscompetitie niet alle leeftijdsklassen.</p>
+                <p>Sporters worden in een wedstrijd ingedeeld in een <i>wedstrijdklasse</i> aan de hand van hun leeftijd en schietstijl.</p>
+
+                <p>Volgens het reglement van IFAA wordt de klasse bepaald door je leeftijd op de eerste dag van de wedstrijd.</p>
+
+                <p>Vooral voor jonge sporters verandert de klasse waarin je uit mag komen regelmatig, daarom hebben we hieronder een overzicht gemaakt.</p>
+
+                <p>De jongste sporters beginnen als Welp, daarna word je Junior, Jong volwassen, Volwassen en uiteindelijk Veteraan en Senior.</p>
             </div>
         </div>
 
@@ -108,40 +173,24 @@
             <table class="white">
                 <thead>
                     <tr>
-                        <th>Seizoen bondscompetitie</th>
-                        <th>Jouw wedstrijdklasse voor het gehele seizoen</th>
+                        <th>Jaartal</th>
+                        <th>Wedstrijdklasse tot je verjaardag</th>
+                        <th>Wedstrijdklasse vanaf je verjaardag</th>
                     </tr>
+
+                    {% for jaar, kl1, kl2 in wlst_ifaa %}
+                        <tr{% if jaar == huidige_jaar %} class="nhb-rood white-text"{% endif %}>
+                            <td>{{ jaar }}</td>
+                            <td>{{ kl1 }}</td>
+                            <td>{{ kl2 }}</td>
+                        </tr>
+                    {% endfor %}
                 </thead>
-
-                <tr>
-                    <td>{{ huidige_jaar|add:"-1" }}/{{ huidige_jaar }}</td>
-                    <td>{{ clst.0 }}</td>
-                </tr>
-
-                <tr class="nhb-rood white-text">
-                    <td>{{ huidige_jaar }}/{{ huidige_jaar|add:"1" }}</td>
-                    <td>{{ clst.1 }}</td>
-                </tr>
-
-                <tr>
-                    <td>{{ huidige_jaar|add:"1" }}/{{ huidige_jaar|add:"2" }}</td>
-                    <td>{{ clst.2 }}</td>
-                </tr>
-
-                <tr>
-                    <td>{{ huidige_jaar|add:"2" }}/{{ huidige_jaar|add:"3" }}</td>
-                    <td>{{ clst.3 }}</td>
-                </tr>
-
-                <tr>
-                    <td>{{ huidige_jaar|add:"3" }}/{{ huidige_jaar|add:"4" }}</td>
-                    <td>{{ clst.4 }}</td>
-                </tr>
-
             </table>
 
         </div>
     </div>
+
 
     {% include 'feedback/sidebar.dtl' with op_pagina="sporter-leeftijdsklassen" %}
 

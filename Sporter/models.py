@@ -214,8 +214,9 @@ class SporterVoorkeuren(models.Model):
     voorkeur_discipline_run = models.BooleanField(default=True)
     voorkeur_discipline_3d = models.BooleanField(default=True)
 
-    # het gekozen geslacht voor wedstrijden
-    # alleen van toepassing op sporters met geslacht='X'
+    # het geslacht voor wedstrijden
+    # alleen te kiezen voor sporters met geslacht='X'
+    # automatisch gelijk gesteld aan het geslacht voor sporters met geslacht='M' of 'V'
     wedstrijd_geslacht_gekozen = models.BooleanField(default=True)
     wedstrijd_geslacht = models.CharField(max_length=1, choices=GESLACHT_MV, default=GESLACHT_MAN)
 

@@ -210,10 +210,14 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
         context['opt_klasse'] = opt_klasse = list()
         context['wedstrijd_is_a_status'] = (wedstrijd.wa_status == WEDSTRIJD_WA_STATUS_A)
         gekozen_pks = list(wedstrijd.wedstrijdklassen.values_list('pk', flat=True))
+        volg_nr = 0
         for klasse in get_organisatie_klassen(wedstrijd.organisatie, gekozen_boog_pks):
             klasse.sel = 'klasse_%s' % klasse.pk
             klasse.gebruikt = (klasse.pk in klassen_gebruikt)
             klasse.selected = (klasse.pk in gekozen_pks)
+
+            volg_nr += 1
+            klasse.volg_nr = volg_nr
 
             opt_klasse.append(klasse)
         # for

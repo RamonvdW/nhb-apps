@@ -7,8 +7,8 @@
 from django.test import TestCase
 from django.utils import timezone
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from .leeftijdsklassen import bereken_leeftijdsklassen
-from .models import Sporter
+from .leeftijdsklassen import bereken_leeftijdsklassen_nhb
+from .models import Sporter, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
@@ -65,7 +65,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         # check de 5 persoonlijke indicaties: -1 t/m +3 jaar ronde de huidige leeftijd
 
         # onder 12 / aspirant
-        tup = bereken_leeftijdsklassen(huidige_jaar - 9)
+        tup = bereken_leeftijdsklassen_nhb(huidige_jaar - 9)
         self.assertEqual(tup, (huidige_jaar,
                                9,
                                # wedstrijden
@@ -75,7 +75,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                                'Onder 12'))
 
         # onder 18 / cadet (14..17)
-        tup = bereken_leeftijdsklassen(huidige_jaar - 13)
+        tup = bereken_leeftijdsklassen_nhb(huidige_jaar - 13)
         self.assertEqual(tup, (huidige_jaar,
                                13,
                                ['Onder 14', 'Onder 14', 'Onder 18', 'Onder 18', 'Onder 18'],
@@ -83,7 +83,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                                'Onder 18'))
 
         # junior (18..20)
-        tup = bereken_leeftijdsklassen(huidige_jaar - 18)
+        tup = bereken_leeftijdsklassen_nhb(huidige_jaar - 18)
         self.assertEqual(tup, (huidige_jaar,
                                18,
                                ['Onder 18', 'Onder 21', 'Onder 21', 'Onder 21', '21+'],
@@ -91,7 +91,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                                'Onder 21'))
 
         # senior
-        tup = bereken_leeftijdsklassen(huidige_jaar - 21)
+        tup = bereken_leeftijdsklassen_nhb(huidige_jaar - 21)
         self.assertEqual(tup, (huidige_jaar,
                                21,
                                ['Onder 21', '21+', '21+', '21+', '21+'],
@@ -99,7 +99,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                                '21+'))
 
         # master
-        tup = bereken_leeftijdsklassen(huidige_jaar - 50)
+        tup = bereken_leeftijdsklassen_nhb(huidige_jaar - 50)
         self.assertEqual(tup, (huidige_jaar,
                                50,
                                ['21+', '50+', '50+', '50+', '50+'],
@@ -107,7 +107,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                                '21+'))
 
         # veteraan
-        tup = bereken_leeftijdsklassen(huidige_jaar - 60)
+        tup = bereken_leeftijdsklassen_nhb(huidige_jaar - 60)
         self.assertEqual(tup, (huidige_jaar,
                                60,
                                ['50+', '60+', '60+', '60+', '60+'],
@@ -128,6 +128,25 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
 
         # schutter
         self.e2e_login(self.account_normaal)
+        with self.assert_max_queries(20):
+            resp = self.client.get('/sporter/leeftijdsklassen/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
+
+        # met voorkeuren
+        voorkeur = SporterVoorkeuren(
+                        sporter=self.sporter1)
+        voorkeur.save()
+        with self.assert_max_queries(20):
+            resp = self.client.get('/sporter/leeftijdsklassen/')
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
+
+        # met geslacht X, geen keuze gemaakt
+        voorkeur.wedstrijd_geslacht_gekozen = False
+        voorkeur.save(update_fields=['wedstrijd_geslacht_gekozen'])
         with self.assert_max_queries(20):
             resp = self.client.get('/sporter/leeftijdsklassen/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK

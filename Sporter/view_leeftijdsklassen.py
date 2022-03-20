@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige
-from .leeftijdsklassen import bereken_leeftijdsklassen
+from .leeftijdsklassen import bereken_leeftijdsklassen_nhb, bereken_leeftijdsklassen_ifaa
 import logging
 
 
@@ -38,14 +38,24 @@ class LeeftijdsklassenView(UserPassesTestMixin, TemplateView):
         account = self.request.user
         sporter = account.sporter_set.all()[0]
 
+        geslacht = 'M'
+        voorkeuren = sporter.sportervoorkeuren_set.all()
+        if len(voorkeuren):
+            voorkeur = voorkeuren[0]
+            if voorkeur.wedstrijd_geslacht_gekozen:
+                geslacht = voorkeur.wedstrijd_geslacht
+                # else: geslacht X, maar geen keuze gemaakt --> toon mannen
+
         geboorte_jaar = sporter.geboorte_datum.year
 
-        huidige_jaar, leeftijd, wlst, clst, lkl_volgende_competitie = bereken_leeftijdsklassen(geboorte_jaar)
+        huidige_jaar, leeftijd, wlst, clst, lkl_volgende_competitie = bereken_leeftijdsklassen_nhb(geboorte_jaar)
         context['huidige_jaar'] = huidige_jaar
         context['leeftijd'] = leeftijd
         context['wlst'] = wlst
         context['clst'] = clst
         context['lkl_volgende_competitie'] = lkl_volgende_competitie
+
+        context['wlst_ifaa'] = bereken_leeftijdsklassen_ifaa(geboorte_jaar, geslacht)
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),

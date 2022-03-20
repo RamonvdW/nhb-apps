@@ -28,12 +28,14 @@ class BasisTypenReadonlyAdmin(admin.ModelAdmin):
 
 class BasisTypenReadonlyMetVolgordeAdmin(BasisTypenReadonlyAdmin):
 
-    ordering = ('volgorde',)
+    ordering = ('-volgorde',)       # oudste bovenaan
 
     list_filter = ('organisatie',)
 
 
 class BoogTypeAdmin(BasisTypenReadonlyAdmin):
+
+    ordering = ('volgorde',)        # alfanumeriek
 
     list_filter = ('organisatie', 'buiten_gebruik')
 

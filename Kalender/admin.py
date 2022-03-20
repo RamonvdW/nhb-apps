@@ -11,7 +11,7 @@ from .models import KalenderWedstrijd, KalenderWedstrijdSessie, KalenderWedstrij
 class KalenderWedstrijdAdmin(admin.ModelAdmin):                 # pragma: no cover
     """ Admin configuratie voor KalenderWedstrijd """
 
-    list_filter = ('discipline', 'status', 'wa_status')
+    list_filter = ('organisatie', 'discipline', 'status', 'wa_status')
 
     readonly_fields = ('sessies', 'deeluitslagen', 'boogtypen', 'wedstrijdklassen')
 

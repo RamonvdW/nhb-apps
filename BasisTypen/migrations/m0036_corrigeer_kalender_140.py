@@ -26,7 +26,7 @@ def corrigeer_kalender_klasse_140(apps, _):
         lkl = leeftijdsklasse_klas.objects.get(afkorting='CA')
         kal.leeftijdsklasse = lkl
         kal.organisatie = ORGANISATIE_NHB
-        kal.save(update_fields=['leeftijdsklasse'])
+        kal.save(update_fields=['leeftijdsklasse', 'organisatie'])
 
 
 class Migration(migrations.Migration):

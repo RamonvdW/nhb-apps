@@ -255,8 +255,8 @@
                                 </td>
                             </tr>
 
-                            <tr>
-                                <th>Toegestane bogen</th>
+                            <tr>                         <!-- F = IFAA -->
+                                <th>{% if wed.organisatie == 'F' %}Toegestane schietstijlen{% else %}Toegestane bogen{% endif %}</th>
                                 <td colspan="2">
                                     {% if limit_edits %}
                                         {% for boog in opt_bogen %}
@@ -389,6 +389,7 @@
                             <tr>
                                 <td colspan="3" class="center">
                                     <h6 class="nhb-blauw-text">Wedstrijdklassen</h6>
+                                                         <!-- N = NHB -->
                                     {% if wed.organisatie == 'N' %}
                                         <p>Klassen zonder man/vrouw benoeming zijn gender-neutraal</p>
                                     {% endif %}
@@ -401,22 +402,20 @@
                                     {% for klasse in opt_klasse %}
                                         <label class="black-text">
                                             <input type="checkbox" name="{{ klasse.sel }}" {% if klasse.gebruikt %}disabled checked{% else %}class="filled-in" {% if klasse.selected %} checked{% endif %}{% endif %} onchange="gewijzigd()">
-                                            <span>{{ klasse.beschrijving }}</span>
+                                            <span>{{ klasse.volg_nr }}: {{ klasse.beschrijving }}</span>
                                         </label><br>
                                     {% endfor %}
                                 </td>
                             </tr>
-
-                            {% if wedstrijd_is_a_status %}
-                                <tr>
-                                    <td></td>
-                                    <td colspan="2">Let op! Onder 14 en 60+ klassen mogen op A-status wedstrijd, maar kunnen geen records claimen.</td>
-                                </tr>
-                            {% endif %}
-
                         </table>
 
+
                         <div class="center">
+                                                 <!-- N = NHB -->
+                            {% if wed.organisatie == 'N' and wedstrijd_is_a_status %}
+                                <p>Let op! Onder 14 en 60+ klassen mogen op A-status wedstrijd, maar kunnen geen records claimen.</p>
+                            {% endif %}
+
                             <p>De wedstrijdklasse senioren is altijd de 'open' klasse waarin alle andere leeftijdsklassen mee mogen doen.</p>
                             <p>Wedstrijdklassen en bogen die niet aangepast kunnen worden, zijn in gebruik in een sessie.</p>
                         </div>

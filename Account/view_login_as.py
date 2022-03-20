@@ -67,8 +67,8 @@ def receiver_account_wissel(request, obj):
     account.save(update_fields=['last_login'])
 
     # gebruiker mag NIET aangemeld blijven
-    # zorg dat de session-cookie snel verloopt
-    request.session.set_expiry(0)
+    # zorg dat de session-cookie snel verloopt --> nergens voor nodig
+    # request.session.set_expiry(0)
 
     # schrijf in het logboek
     schrijf_in_logboek(account=None,
