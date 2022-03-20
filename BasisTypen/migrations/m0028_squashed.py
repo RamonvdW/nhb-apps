@@ -131,7 +131,7 @@ KALENDERWEDSTRIJDENKLASSEN = (
     (131, 'R', 'JH', 'Recurve Onder 21 mannen (junior)'),
     (132, 'R', 'JV', 'Recurve Onder 21 vrouwen (junior)'),
 
-    (140, 'R', 'CH', 'Recurve Onder 18 (cadet)'),
+    (140, 'R', 'CA', 'Recurve Onder 18 (cadet)'),
     (141, 'R', 'CH', 'Recurve Onder 18 jongens (cadet)'),
     (142, 'R', 'CV', 'Recurve Onder 18 meisjes (cadet)'),
 

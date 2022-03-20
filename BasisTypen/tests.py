@@ -6,8 +6,10 @@
 
 from django.test import TestCase
 from .models import (BoogType, TeamType, LeeftijdsKlasse, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
-                     TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse, KalenderWedstrijdklasse)
+                     TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse, KalenderWedstrijdklasse,
+                     ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA)
 from .admin import BasisTypenTemplateCompetitieIndivKlasseAdmin
+from .operations import get_organisatie_boogtypen, get_organisatie_teamtypen, get_organisatie_klassen
 
 
 class TestBasisTypen(TestCase):
@@ -120,5 +122,31 @@ class TestBasisTypen(TestCase):
         self.assertTrue(lkl.geslacht_is_compatible('V'))
         self.assertTrue(lkl.geslacht_is_compatible('X'))
 
+    def test_operations(self):
+        self.assertEqual(get_organisatie_boogtypen(ORGANISATIE_WA).count(), 5)
+        self.assertEqual(get_organisatie_boogtypen(ORGANISATIE_NHB).count(), 5)
+        self.assertEqual(get_organisatie_boogtypen(ORGANISATIE_IFAA).count(), 12)
+
+        self.assertEqual(get_organisatie_teamtypen(ORGANISATIE_WA).count(), 3)
+        self.assertEqual(get_organisatie_teamtypen(ORGANISATIE_NHB).count(), 5)
+        self.assertEqual(get_organisatie_teamtypen(ORGANISATIE_IFAA).count(), 0)
+
+        self.assertEqual(get_organisatie_klassen(ORGANISATIE_WA).count(), 40)
+        self.assertEqual(get_organisatie_klassen(ORGANISATIE_NHB).count(), 90)
+        self.assertEqual(get_organisatie_klassen(ORGANISATIE_IFAA).count(), 0)
+
+        bogen_pks = [BoogType.objects.get(afkorting='R').pk]
+        klassen = get_organisatie_klassen(ORGANISATIE_WA, filter_bogen=bogen_pks)
+        self.assertEqual(klassen.count(), 8)
+
+        bogen_pks = BoogType.objects.filter(afkorting__in=('R', 'C')).values_list('pk', flat=True)
+        klassen = get_organisatie_klassen(ORGANISATIE_WA, filter_bogen=bogen_pks)
+        self.assertEqual(klassen.count(), 16)
+
+        bogen_pks = BoogType.objects.filter(afkorting__in=('R', 'C')).values_list('pk', flat=True)
+        klassen = get_organisatie_klassen(ORGANISATIE_NHB, filter_bogen=bogen_pks)
+        # for klasse in klassen:
+        #     print(klasse)
+        self.assertEqual(klassen.count(), 36)
 
 # end of file
