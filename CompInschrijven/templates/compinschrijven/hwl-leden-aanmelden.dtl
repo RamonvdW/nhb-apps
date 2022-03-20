@@ -153,7 +153,8 @@
 
                     {% if leden_jeugd %}
 
-                        <h5 class="center">Jeugd</h5>
+                        <br>
+                        <h5 class="center nhb-blauw-text">Jeugd</h5>
 
                         <table class="white" id="table1">
                             <thead>
@@ -212,7 +213,8 @@
 
                     {% endif %}
 
-                    <h5 class="center">Senioren</h5>
+                    <br>
+                    <h5 class="center nhb-blauw-text">Senioren</h5>
 
                     <table class="white" id="table2">
                         <thead>
@@ -273,6 +275,8 @@
             </div>
         </div>
     </div>
+
+    <p class="center">Sporters met grijze naam hebben aangegeven niet mee te willen doen met de bondscompetities.</p>
 
     {% if mag_aanmelden %}
             <div class="fixed-action-btn">

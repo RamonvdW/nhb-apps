@@ -115,7 +115,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             if (old_voor_wedstrijd != obj.voor_wedstrijd or
                     old_heeft_interesse != obj.heeft_interesse):
                 # wijzigingen opslaan
-                obj.save()
+                obj.save(update_fields=['heeft_interesse', 'voor_wedstrijd'])
         # for
 
         voorkeuren = get_sporter_voorkeuren(sporter)

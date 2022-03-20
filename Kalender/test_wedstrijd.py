@@ -523,7 +523,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         self.assertEqual(1, KalenderWedstrijd.objects.count())
         wedstrijd = KalenderWedstrijd.objects.all()[0]
         self.assertEqual(wedstrijd.boogtypen.count(), 5)
-        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 41)
+        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 61)
 
         url = self.url_kalender_sessies % wedstrijd.pk
         resp = self.client.post(url, {'nieuwe_sessie': 'graag'})
@@ -555,7 +555,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
 
         self.assertEqual(wedstrijd.boogtypen.count(), 2)                # alleen R en C
-        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 17)        # alleen R en C klassen
+        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 25)        # alleen R en C klassen
 
         # kies een wedstrijdklasse in een sessie
         sessie.wedstrijdklassen.add(wkl)

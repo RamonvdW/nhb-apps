@@ -178,6 +178,13 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         self.assertFormError(resp, 'form', None, 'De combinatie van NHB nummer en email worden niet herkend. Probeer het nog eens.')
 
     def test_registreer(self):
+
+        # maak een andere sporter secretaris van de vereniging
+        Secretaris(
+            sporter=self.sporter_100002,
+            vereniging=self.nhbver).save()
+
+        # doorloop de registratie
         with self.assert_max_queries(20):
             resp = self.client.post('/sporter/registreer/',
                                     {'nhb_nummer': '100001',

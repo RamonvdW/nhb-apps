@@ -5,8 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
-from BasisTypen.models import (BoogType, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
-                               GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE)
+from BasisTypen.models import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT, GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE
 from Competitie.models import AG_NUL, AG_LAAGSTE_NIET_NUL, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Score.models import Score, SCORE_TYPE_INDIV_AG
 from Sporter.models import Sporter
@@ -103,7 +102,7 @@ def bepaal_klassengrenzen_indiv(comp):
 
     # haal de scores 1x op per boogtype
     boogtype2ags = dict()        # [boogtype.afkorting] = scores
-    for boogtype in BoogType.objects.all():
+    for boogtype in comp.boogtypen.all():
         boogtype2ags[boogtype.afkorting] = (Score
                                             .objects
                                             .select_related('sporterboog',
@@ -290,7 +289,7 @@ def bepaal_klassengrenzen_teams(comp):
 
     # haal de AG's op per boogtype
     boogtype2ags = dict()        # [boogtype.afkorting] = AG's
-    for boogtype in BoogType.objects.all():
+    for boogtype in comp.boogtypen.all():
         boogtype2ags[boogtype.afkorting] = (Score
                                             .objects
                                             .select_related('sporterboog',
@@ -513,7 +512,7 @@ def competitie_klassengrenzen_vaststellen(comp):
     comp.save(update_fields=['klassengrenzen_vastgesteld'])
 
 
-# klassengrenzen vaststellen voor RK/BK teams staat in CompRayon/view_teams_bko.py
+# klassengrenzen vaststellen voor RK/BK teams staat in CompLaagRayon/view_teams_bko.py
 
 
 # end of file

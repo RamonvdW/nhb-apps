@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2022-03-19'
+SITE_VERSIE = '2022-03-20'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -37,8 +37,8 @@ INSTALLED_APPS = [
     'Bondspas.apps.BondspasConfig',
     'Competitie.apps.CompetitieConfig',
     'CompInschrijven.apps.CompInschrijvenConfig',
-    'CompRegio.apps.CompRegioConfig',
-    'CompRayon.apps.CompRayonConfig',
+    'CompLaagRegio.apps.CompRegioConfig',
+    'CompLaagRayon.apps.CompRayonConfig',
     'CompScores.apps.CompScoresConfig',
     'CompUitslagen.apps.CompUitslagenConfig',
     'Feedback.apps.FeedbackConfig',

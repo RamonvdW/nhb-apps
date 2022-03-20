@@ -1,0 +1,117 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Wijzig sporter status{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Wijzig sporter status</h3>
+            <p>De status van een sporter voor deelname aan het RK aanpassen.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Competitie</th>
+                    <td>{{ deelnemer.deelcompetitie.competitie.beschrijving }}</td>
+                </tr>
+                <tr>
+                    <th>Rayon</th>
+                    <td>{{ deelnemer.deelcompetitie.nhb_rayon }}</td>
+                </tr>
+                <tr>
+                    <th>Klasse</th>
+                    <td>{{ deelnemer.indiv_klasse.beschrijving }}</td>
+                </tr>
+                <tr>
+                    <th>Sporter</th>
+                    <td>{{ deelnemer.naam_str }}</td>
+                </tr>
+                <tr>
+                    <th>Vereniging</th>
+                    <td>{{ deelnemer.ver_str }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+
+            <!-- dialoog venster -->
+            <div class="white left-align z-depth-3">
+                <div class="center" style="padding:30px">
+
+                    <p>
+                        <span>De status van deelname voor deze sporter is: </span>
+                        {% if not deelnemer.bij_vereniging %}
+                            <span class="red-text">ATTENTIE</span>
+                        {% elif deelnemer.deelname == 'N' %}
+                            <span class="grey-text">AFGEMELD</span>
+                        {% elif deelnemer.deelname == 'J' %}
+                            <span class="green-text">DEELNAME BEVESTIGD</span>
+                        {% else %}
+                            <span class="nhb-blauw-text"><i>ONBEKEND</i></span>
+                        {% endif %}
+                    </p>
+
+                    {% if not deelnemer.bij_vereniging %}
+
+                        <p>
+                            <span class="red-text">Deze sporter is niet aangemeld bij een vereniging en mag zo niet deelnemen aan het RK.</span>
+                            <br>
+                            <br>
+                            <span>Laat het bondsbureau uitzoeken of dit een niet-afgeronde overschrijving is.</span>
+                        </p>
+
+                    {% else %}
+
+                        <!-- als de keuze onbekend is, toon dan twee knoppen (blauw en rood)
+                             toon anders maar 1 knop (de andere keuze)
+                        -->
+
+                        {% if deelnemer.deelname != 'J' %}
+                            <p>Klik op de blauwe knop om deelname aan het RK te bevestigen</p>
+                            <br>
+                            <form method="post" action="{{ url_wijzig }}">
+                                {% csrf_token %}
+                                <input name="bevestig" type="hidden" value="1">
+                                <button class="btn-nhb-blauw" type="submit">
+                                    <i class="material-icons-round left">thumb_up</i>Bevestig deelname</button>
+                            </form>
+                        {% endif %}
+
+                        {% if deelnemer.deelname != 'N' %}
+                            <p>Klik op de rode knop om de sporter af te melden voor het RK</p>
+                            <br>
+                            <form method="post" action="{{ url_wijzig }}">
+                                {% csrf_token %}
+                                <input name="afmelden" type="hidden" value="1">
+                                <button class="btn-nhb-rood" type="submit">
+                                    <i class="material-icons-round left">report_problem</i>Afmelden</button>
+                            </form>
+                        {% endif %}
+
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="complaagrayon-wijzig-status-rk-deelnemer" %}
+
+{% endblock %}

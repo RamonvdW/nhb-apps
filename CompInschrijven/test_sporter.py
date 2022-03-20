@@ -808,7 +808,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compregio/keuze-zeven-wedstrijden-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/keuze-zeven-wedstrijden-methode1.dtl', 'plein/site_layout.dtl'))
 
         # wedstrijd behouden
         with self.assert_max_queries(20):

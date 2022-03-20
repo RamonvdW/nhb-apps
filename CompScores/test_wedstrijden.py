@@ -382,7 +382,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
             self.assertTrue("/waarschijnlijke-deelnemers/" in url or url.startswith('/bondscompetities/scores/uitslag-invoeren/'))
         # for
 
-        if url:
+        if url:     # pragma: no branch
             self.e2e_assert_other_http_commands_not_supported(url)
 
     def test_wedstrijden_wl(self):

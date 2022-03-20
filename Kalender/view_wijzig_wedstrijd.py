@@ -14,6 +14,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse, ORGANISATIES2LONG_STR, ORGANISATIE_WA
+from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Taken.taken import maak_taak
@@ -23,7 +24,6 @@ from .models import (KalenderWedstrijd,
                      WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING, WEDSTRIJD_STATUS_GEACCEPTEERD,
                      WEDSTRIJD_STATUS_GEANNULEERD, WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
                      WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_BEGRENZING_TO_STR)
-from .operations import get_toegestane_boogtypen, get_toegestane_klassen
 import datetime
 from types import SimpleNamespace
 
@@ -200,7 +200,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
 
         context['opt_bogen'] = opt_bogen = list()
         gekozen_boog_pks = list(wedstrijd.boogtypen.values_list('pk', flat=True))
-        for obj in get_toegestane_boogtypen(wedstrijd.organisatie):
+        for obj in get_organisatie_boogtypen(wedstrijd.organisatie):
             obj.sel = 'boog_%s' % obj.afkorting
             obj.gebruikt = (obj.pk in bogen_gebruikt)
             obj.selected = (obj.pk in gekozen_boog_pks)
@@ -210,7 +210,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
         context['opt_klasse'] = opt_klasse = list()
         context['wedstrijd_is_a_status'] = (wedstrijd.wa_status == WEDSTRIJD_WA_STATUS_A)
         gekozen_pks = list(wedstrijd.wedstrijdklassen.values_list('pk', flat=True))
-        for klasse in get_toegestane_klassen(wedstrijd.organisatie, gekozen_boog_pks):
+        for klasse in get_organisatie_klassen(wedstrijd.organisatie, gekozen_boog_pks):
             klasse.sel = 'klasse_%s' % klasse.pk
             klasse.gebruikt = (klasse.pk in klassen_gebruikt)
             klasse.selected = (klasse.pk in gekozen_pks)

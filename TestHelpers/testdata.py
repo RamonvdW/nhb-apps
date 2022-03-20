@@ -10,7 +10,8 @@ from django.test import Client
 from django.core import management
 from django.utils import timezone
 from Account.models import Account, account_create, AccountEmail
-from BasisTypen.models import BoogType, TeamType
+from BasisTypen.models import TeamType, ORGANISATIE_NHB
+from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_teamtypen
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                DeelCompetitie, LAAG_BK, LAAG_RK,
                                RegioCompetitieSchutterBoog,
@@ -141,15 +142,15 @@ class TestData(object):
 
         self._accounts_beheerders = list()      # 1 per vereniging, voor BKO, RKO, RCL
 
-        self.afkorting2teamtype = dict()        # [team afkorting] = TeamType()
-        self.afkorting2boogtype = dict()        # [boog afkorting] = BoogType()
+        self.afkorting2teamtype_nhb = dict()    # [team afkorting] = TeamType()
+        self.afkorting2boogtype_nhb = dict()    # [boog afkorting] = BoogType()
 
-        for teamtype in TeamType.objects.all():
-            self.afkorting2teamtype[teamtype.afkorting] = teamtype
+        for teamtype in get_organisatie_teamtypen(ORGANISATIE_NHB):
+            self.afkorting2teamtype_nhb[teamtype.afkorting] = teamtype
         # for
         del teamtype
-        for boogtype in BoogType.objects.all():
-            self.afkorting2boogtype[boogtype.afkorting] = boogtype
+        for boogtype in get_organisatie_boogtypen(ORGANISATIE_NHB):
+            self.afkorting2boogtype_nhb[boogtype.afkorting] = boogtype
         # for
         del boogtype
 
@@ -187,12 +188,15 @@ class TestData(object):
             self._dump_resp(resp)
             raise ValueError('Wissel naar functie HWL failed')
 
-    @staticmethod
-    def _verwerk_mutaties(show_warnings=True, show_all=False):
+    def _verwerk_regiocomp_mutaties(self, show_warnings=True, show_all=False):
         # vraag de achtergrond taak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+
+        err_msg = f1.getvalue()
+        if '[ERROR]' in err_msg:                                                # pragma: no cover
+            print('Unexpected error from regiocomp_mutaties:\n' + err_msg)
 
         if show_all:                                                            # pragma: no cover
             print(f1.getvalue())
@@ -225,7 +229,7 @@ class TestData(object):
         url = self.url_volgende_ronde % deelcomp.pk
         client.post(url, {'snel': 1})
 
-        self._verwerk_mutaties()
+        self._verwerk_regiocomp_mutaties()
 
     def maak_accounts(self):
         """
@@ -544,7 +548,7 @@ class TestData(object):
         del lid_nr2account
 
         # maak voor elke Sporter nu de SporterBoog records aan
-        boogtypen = self.afkorting2boogtype.values()
+        boogtypen = self.afkorting2boogtype_nhb.values()
 
         bulk_voorkeuren = list()
         bulk_sporter = list()
@@ -982,7 +986,7 @@ class TestData(object):
                             deelcompetitie=deelcomp,
                             vereniging=ver,
                             volg_nr=next_nr,
-                            team_type=self.afkorting2teamtype[afkorting],
+                            team_type=self.afkorting2teamtype_nhb[afkorting],
                             team_naam='%s-%s-%s' % (ver_nr, next_nr, afkorting),
                             team_klasse=klasse)
                 bulk.append(team)
@@ -1227,7 +1231,7 @@ class TestData(object):
                                 deelcompetitie=deelcomp_rk,
                                 vereniging=ver,
                                 volg_nr=next_nr,
-                                team_type=self.afkorting2teamtype[afkorting],
+                                team_type=self.afkorting2teamtype_nhb[afkorting],
                                 team_naam='rk-%s-%s-%s' % (ver_nr, next_nr, afkorting),
                                 # team_klasse wordt later bepaald door de BKO
                                 aanvangsgemiddelde=ag)

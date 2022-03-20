@@ -102,19 +102,19 @@ class CompetitieOverzichtView(View):
             # vanaf fase E laten we dit niet meer zien en komen de RK Teams in beeld
             if 'B' <= comp.fase <= 'E':
                 context['tekst_regio_teams_alle'] = "Alle aangemelde teams voor de regio teamcompetitie"
-                context['url_regio_teams_alle'] = reverse('CompRegio:regio-teams-alle',
+                context['url_regio_teams_alle'] = reverse('CompLaagRegio:regio-teams-alle',
                                                           kwargs={'comp_pk': comp.pk,
                                                                   'subset': 'auto'})
 
         if comp.fase == 'J' and not comp.klassengrenzen_vastgesteld_rk_bk and self.rol_nu == Rollen.ROL_BKO:
             context['tekst_klassengrenzen_rk_bk_vaststellen'] = "Open inschrijving RK teams sluiten en de klassengrenzen voor het RK teams en BK teams vaststellen."
-            context['url_klassengrenzen_rk_bk_vaststellen'] = reverse('CompRayon:klassengrenzen-vaststellen-rk-bk-teams',
+            context['url_klassengrenzen_rk_bk_vaststellen'] = reverse('CompLaagRayon:klassengrenzen-vaststellen-rk-bk-teams',
                                                                       kwargs={'comp_pk': comp.pk})
 
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
             if comp.fase < 'L':
                 context['tekst_rayon_teams_alle'] = "Alle aangemelde teams voor de rayonkampioenschappen teams"
-                context["url_rayon_teams_alle"] = reverse('CompRayon:rayon-teams-alle',
+                context["url_rayon_teams_alle"] = reverse('CompLaagRayon:rayon-teams-alle',
                                                           kwargs={'comp_pk': comp.pk,
                                                                   'subset': 'auto'})
 
@@ -132,13 +132,13 @@ class CompetitieOverzichtView(View):
 
                 obj.titel = 'Planning Regio %s' % obj.nhb_regio.regio_nr
                 obj.tekst = 'Planning van de wedstrijden voor deze competitie.'
-                obj.url = reverse('CompRegio:regio-planning',
+                obj.url = reverse('CompLaagRegio:regio-planning',
                                   kwargs={'deelcomp_pk': obj.pk})
 
                 if obj.regio_organiseert_teamcompetitie and 'E' <= comp.fase <= 'F':
                     obj.titel_team_ronde = "Team Ronde"
                     obj.tekst_team_ronde = "Stel de team punten vast en zet de teamcompetitie door naar de volgende ronde."
-                    obj.url_team_ronde = reverse('CompRegio:start-volgende-team-ronde',
+                    obj.url_team_ronde = reverse('CompLaagRegio:start-volgende-team-ronde',
                                                  kwargs={'deelcomp_pk': obj.pk})
 
                 obj.tekst_scores = "Scores invoeren en aanpassen voor %s voor deze competitie." % obj.nhb_regio.naam
@@ -147,13 +147,13 @@ class CompetitieOverzichtView(View):
 
                 if obj.regio_organiseert_teamcompetitie:
                     obj.tekst_regio_teams = "Teams voor de regiocompetitie inzien voor deze competitie."
-                    obj.url_regio_teams = reverse('CompRegio:regio-teams',
+                    obj.url_regio_teams = reverse('CompLaagRegio:regio-teams',
                                                   kwargs={'deelcomp_pk': obj.pk})
 
                     # poules kaartje alleen het head-to-head puntenmodel gekozen is
                     if obj.heeft_poules_nodig():
                         obj.tekst_poules = "Poules voor directe teamwedstrijden tussen teams in deze regiocompetitie."
-                        obj.url_poules = reverse('CompRegio:regio-poules',
+                        obj.url_poules = reverse('CompLaagRegio:regio-poules',
                                                  kwargs={'deelcomp_pk': obj.pk})
 
                     toon_handmatige_ag = True
@@ -162,12 +162,12 @@ class CompetitieOverzichtView(View):
             # for
 
             if comp.fase <= 'F':
-                comp.url_regio_instellingen = reverse('CompRegio:regio-instellingen',
+                comp.url_regio_instellingen = reverse('CompLaagRegio:regio-instellingen',
                                                       kwargs={'comp_pk': comp.pk,
                                                               'regio_nr': self.functie_nu.nhb_regio.regio_nr})
 
                 if toon_handmatige_ag:
-                    comp.url_regio_handmatige_ag = reverse('CompRegio:regio-ag-controle',
+                    comp.url_regio_handmatige_ag = reverse('CompLaagRegio:regio-ag-controle',
                                                            kwargs={'comp_pk': comp.pk,
                                                                    'regio_nr': self.functie_nu.nhb_regio.regio_nr})
 
@@ -188,14 +188,14 @@ class CompetitieOverzichtView(View):
 
                     obj.titel = 'Sluit Regiocompetitie'
                     obj.tekst = 'Bevestig eindstand %s voor de %s.' % (obj.nhb_regio.naam, obj.competitie.beschrijving)
-                    obj.url_afsluiten = reverse('CompRegio:afsluiten-regiocomp',
+                    obj.url_afsluiten = reverse('CompLaagRegio:afsluiten-regiocomp',
                                                 kwargs={'deelcomp_pk': obj.pk})
                 # for
 
             context['regio_instellingen_globaal'] = False
 
             if context['rol_is_klaar']:
-                context['url_medailles'] = reverse('CompRegio:medailles',
+                context['url_medailles'] = reverse('CompLaagRegio:medailles',
                                                    kwargs={'regio': self.functie_nu.nhb_regio.regio_nr})
 
         elif self.rol_nu == Rollen.ROL_RKO:
@@ -212,20 +212,20 @@ class CompetitieOverzichtView(View):
 
                 deelcomp_rk.titel = 'Planning %s' % deelcomp_rk.nhb_rayon.naam
                 deelcomp_rk.tekst = 'Planning voor %s voor deze competitie.' % deelcomp_rk.nhb_rayon.naam
-                deelcomp_rk.url = reverse('CompRayon:rayon-planning',
+                deelcomp_rk.url = reverse('CompLaagRayon:rayon-planning',
                                           kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
                 deelcomp_rk.tekst_rayon_teams = "Aangemelde teams voor de Rayonkampioenschappen in Rayon %s." % deelcomp_rk.nhb_rayon.rayon_nr
-                deelcomp_rk.url_rayon_teams = reverse('CompRayon:rayon-teams',
+                deelcomp_rk.url_rayon_teams = reverse('CompLaagRayon:rayon-teams',
                                                       kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
                 context['planning_deelcomp'] = [deelcomp_rk, ]
 
                 # geeft de RKO de mogelijkheid om de deelnemerslijst voor het RK te bewerken
-                context['url_lijst_rk'] = reverse('CompRayon:lijst-rk',
+                context['url_lijst_rk'] = reverse('CompLaagRayon:lijst-rk',
                                                   kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
-                context['url_limieten_rk'] = reverse('CompRayon:rayon-limieten',
+                context['url_limieten_rk'] = reverse('CompLaagRayon:rayon-limieten',
                                                      kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
             if 'B' <= comp.fase <= 'E':

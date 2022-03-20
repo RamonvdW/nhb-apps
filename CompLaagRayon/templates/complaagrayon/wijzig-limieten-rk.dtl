@@ -1,0 +1,134 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}RK limieten{% endblock %}
+
+{% block pagina %}
+
+    <script type="application/javascript">
+        function gewijzigd() {
+            // het formulier is aangepast en moet opgeslagen worden
+
+            // enable de 'opslaan' knop
+            const el = document.getElementById("opslaan_knop")
+            el.disabled = false
+            el.parentElement.style.display = "block"
+        }
+    </script>
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">RK limieten</h3>
+            <p>De cut' instellen voor elke wedstrijdklasse van jouw RK.<br>Hiermee begrens je het aantal deelnemers dat uitgenodigd wordt.</p>
+            <p>
+                <a class="btn-small btn-nhb-rood" href="{{ wiki_rk_schutters }}" target="_blank" rel="noopener noreferrer">
+                    <i class="material-icons-round left white-text">help_outline</i>Handleiding</a>
+            </p>
+        </div>
+    </div>
+
+
+    <form action="{{ url_opslaan }}" method="post">
+        {% csrf_token %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Individueel</h4>
+            </div>
+        </div>
+
+
+        <!-- blauwe balk met dialoog venster -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+
+                <!-- dialoog venster -->
+                <div class="white left-align z-depth-3">
+                    <div style="padding:30px">
+
+                        <table class="white">
+                            <tr>
+                                <th>Klasse</th>
+                                <th>Limiet</th>
+                            </tr>
+
+                            {% for wkl in wkl_indiv %}
+                                <tr>
+                                    <td>{{ wkl.indiv.beschrijving }}</td>
+                                    <td>
+                                        <select name="{{ wkl.sel }}" onchange="gewijzigd()">
+                                            <option value="24"{%if wkl.limiet == 24 %} selected{% endif %}>24 sporters (standaard)</option>
+                                            <option value="20"{%if wkl.limiet == 20 %} selected{% endif %}>20 sporters</option>
+                                            <option value="16"{%if wkl.limiet == 16 %} selected{% endif %}>16 sporters</option>
+                                            <option value="12"{%if wkl.limiet == 12 %} selected{% endif %}>12 sporters</option>
+                                            <option value="8"{%if wkl.limiet == 8 %} selected{% endif %}>8 sporters</option>
+                                            <option value="4"{%if wkl.limiet == 4 %} selected{% endif %}>4 sporters</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Teams</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met dialoog venster -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+
+                <!-- dialoog venster -->
+                <div class="white left-align z-depth-3">
+                    <div style="padding:30px">
+                        <table class="white">
+                            <tr>
+                                <th>Klasse</th>
+                                <th>Limiet</th>
+                            </tr>
+
+                            {% for wkl in wkl_teams %}
+                                <tr>
+                                    <td>{{ wkl.team.beschrijving }}</td>
+                                    <td>
+                                        <select name="{{ wkl.sel }}" onchange="gewijzigd()">
+                                            <option value="12"{%if wkl.limiet == 12 %} selected{% endif %}>12 teams</option>
+                                            <option value="10"{%if wkl.limiet == 10 %} selected{% endif %}>10 teams</option>
+                                            <option value="8"{%if wkl.limiet == 8 %} selected{% endif %}>8 teams</option>
+                                            <option value="6"{%if wkl.limiet == 6 %} selected{% endif %}>6 teams</option>
+                                            <option value="4"{%if wkl.limiet == 4 %} selected{% endif %}>4 teams</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="fixed-action-btn" style="display: none">
+            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                <i class="material-icons-round left">check</i>Wijzigingen opslaan</button>
+        </div>
+    </form>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="complaagrayon-wijzig-limieten-rk" %}
+
+{% endblock %}

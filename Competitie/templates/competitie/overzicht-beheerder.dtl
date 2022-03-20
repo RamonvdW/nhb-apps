@@ -185,13 +185,13 @@
             {% endif %}
 
             {% if regio_instellingen_globaal %}
-                {% url 'CompRegio:regio-instellingen-globaal' comp_pk=comp.pk as card_url %}
+                {% url 'CompLaagRegio:regio-instellingen-globaal' comp_pk=comp.pk as card_url %}
                 {% include 'plein/card.dtl' with title="Regio keuzes" text="Overzicht van de keuzes gemaakt per regio" icon="flaky" url=card_url %}
             {% endif %}
 
             <!-- clusters RCL -->
             {% if toon_clusters %}
-                {% url 'CompRegio:clusters' as card_url %}
+                {% url 'CompLaagRegio:clusters' as card_url %}
                 {% include 'plein/card.dtl' with title="Clusters" text="Verenigingen groeperen in geografische clusters." icon="group_work" url=card_url %}
             {% endif %}
 

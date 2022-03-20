@@ -170,7 +170,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje = SimpleNamespace(
                                     titel="Team Invallers",
                                     tekst="Invallers opgeven voor ronde %s van de regiocompetitie." % deelcomp.huidige_team_ronde,
-                                    url=reverse('CompRegio:teams-regio-invallers', kwargs={'deelcomp_pk': deelcomp.pk}),
+                                    url=reverse('CompLaagRegio:teams-regio-invallers', kwargs={'deelcomp_pk': deelcomp.pk}),
                                     icon='how_to_reg')
                         kaartjes.append(kaartje)
                     else:
@@ -179,7 +179,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                             kaartje = SimpleNamespace()
                             kaartje.titel = "Teams Regio"
                             kaartje.tekst = 'Verenigingsteams voor de regiocompetitie samenstellen.'
-                            kaartje.url = reverse('CompRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
+                            kaartje.url = reverse('CompLaagRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
                             kaartje.icon = 'gamepad'
                             if comp.fase < 'B':
                                 kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)
@@ -196,7 +196,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                             kaartje = SimpleNamespace()
                             kaartje.titel = "Deelnemers RK"
                             kaartje.tekst = "Sporters van de vereniging aan-/afmelden voor het RK"
-                            kaartje.url = reverse('CompRayon:lijst-rk-ver',
+                            kaartje.url = reverse('CompLaagRayon:lijst-rk-ver',
                                                   kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
                             kaartje.icon = 'rule'
                             kaartjes.append(kaartje)
@@ -205,7 +205,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Teams RK"
                         kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen samenstellen."
-                        kaartje.url = reverse('CompRayon:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+                        kaartje.url = reverse('CompLaagRayon:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
                         kaartje.icon = 'api'
                         # niet beschikbaar maken tot een paar weken na de eerste regiowedstrijd
                         vanaf = comp.eerste_wedstrijd + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
@@ -234,7 +234,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Wie schiet waar?"
                         kaartje.tekst = 'Overzicht gekozen wedstrijden.'
-                        kaartje.url = reverse('CompRegio:wie-schiet-waar', kwargs={'deelcomp_pk': deelcomp.pk})
+                        kaartje.url = reverse('CompLaagRegio:wie-schiet-waar', kwargs={'deelcomp_pk': deelcomp.pk})
                         kaartje.icon = 'gamepad'
                         if comp.fase < 'B':
                             kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)

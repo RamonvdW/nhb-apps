@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import auth
+from django.core import management
 from django.conf import settings
 from django.test import TestCase, Client
 from django.db import connection
@@ -20,6 +21,7 @@ import tempfile
 import vnujar
 import pyotp
 import time
+import io
 
 
 # debug optie: toon waar in de code de queries vandaan komen
@@ -780,6 +782,27 @@ class E2EHelpers(TestCase):
         header = resp['Content-Disposition']
         if not header.startswith('attachment; filename'):           # pragma: no cover
             self.fail(msg="Response is not a file attachment")
+
+    def verwerk_regiocomp_mutaties(self, show_warnings=True, show_all=False):
+        # vraag de achtergrond taak om de mutaties te verwerken
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+
+        err_msg = f1.getvalue()
+        if '[ERROR]' in err_msg:                        # pragma: no cover
+            self.fail(msg='Unexpected error from regiocomp_mutaties:\n' + err_msg)
+
+        if show_all:                                                            # pragma: no cover
+            print(f1.getvalue())
+            print(f2.getvalue())
+
+        elif show_warnings:
+            lines = f1.getvalue() + '\n' + f2.getvalue()
+            for line in lines.split('\n'):
+                if line.startswith('[WARNING] '):                               # pragma: no cover
+                    print(line)
+            # for
 
 
 # end of file

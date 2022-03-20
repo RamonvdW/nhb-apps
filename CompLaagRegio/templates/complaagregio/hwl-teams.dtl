@@ -1,0 +1,155 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021-2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Teams Regio{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Teams Regio</h3>
+            {% if not deelcomp.regio_organiseert_teamcompetitie %}
+                <p>In jullie regio wordt geen team competitie gehouden</p>
+                <p>Voor meer informatie: neem contact op met de RCL</p>
+            {% else %}
+                <p>HWL kan teams opgeven voor de regiocompetitie<br>van de <b>{{ deelcomp }}</b></p>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Teams</h4>
+            {% if mag_wijzigen %}
+                <p>Wijzigen kan tot <b>{{ deelcomp.einde_teams_aanmaken }}</b></p>
+            {% else %}
+                <p >De deadline is gepasseerd, dus de teams kunnen niet meer aangepast worden<br>Zodra de eerste ronde geopend wordt door de RCL is het mogelijk om invallers te selecteren</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+
+                <thead>
+                    <tr>
+                        <th class="hide-on-small-only">Soort team</th>
+                        <th class="hide-on-med-and-up">Soort</th>
+                        <th>Naam</th>
+                        <th class="hide-on-small-only center">Gekoppeld</th>
+                        <th class="hide-on-small-only">Sterkte</th>
+                        <th>Wedstrijd<wbr>klasse</th>
+                        <th><!-- kolom voor de knoppen --></th>
+                    </tr>
+                </thead>
+
+                {% for team in teams %}
+                    <tr>
+                        <td class="hide-on-small-only">{{ team.team_type.beschrijving }}</td>
+                        <td class="hide-on-med-and-up">{{ team.team_type.afkorting }}</td>
+                        <td>{{ team.team_naam }}</td>
+                        <td class="hide-on-small-only center{% if team.aantal < 3 or team.aantal > 4 %} red-text{% endif %}">{{ team.aantal }}</td>
+
+                        {% if team.klasse %}
+                            <td class="hide-on-small-only">{{ team.ag_str }}</td>
+                            <td>{{ team.team_klasse.beschrijving }}</td>
+                        {% else %}
+                            <td class="hide-on-small-only"></td>
+                            <td><i class="red-text">team is niet compleet</i></td>
+                        {% endif %}
+
+                        <td>
+                            {% if mag_wijzigen %}
+                                <a class="btn-nhb-rood" href="{{ team.url_koppelen }}">
+                                    <i class="material-icons-round">group</i></a>
+                            {% endif %}
+                            {% if team.url_wijzig %}
+                                <span>&nbsp;&nbsp;</span>
+                                <a class="btn-nhb-rood" href="{{ team.url_wijzig }}">
+                                    <i class="material-icons-round">edit</i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="center">
+                            <i>Er zijn nog geen teams</i>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                <!-- knop om een team toe te voegen -->
+                {% if url_nieuw_team %}
+                    <tr>
+                        <td colspan="6" class="center">
+                            <form method="post" action="{{ url_nieuw_team }}">
+                                {% csrf_token %}
+                                <button class="btn-nhb-rood" type="submit">
+                                    <i class="material-icons-round">add</i></button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endif %}
+
+            </table>
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Teamleden</h4>
+            <p>Onderstaande leden van de vereniging zijn ingeschreven voor de regiocompetitie<br>en hebben voorkeur opgegeven voor schieten in een team</p>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Boogtype</th>
+                        <th>Naam</th>
+                        <th>In team</th>
+                        <th>Aanvangsgemiddelde</th>
+                        <th><!-- kolom voor de knoppen --></th>
+                    </tr>
+                </thead>
+
+                {% for deelnemer in deelnemers %}
+                    <tr>
+                        <td>{{ deelnemer.boog_str }}</td>
+                        <td>{{ deelnemer.naam_str }}</td>
+                        <td>{{ deelnemer.in_team_str }}</td>
+                        <td{% if deelnemer.rood_ag %} class="red-text"{% endif %}>{{ deelnemer.ag_str }}</td>
+                        <td>
+                            {% if deelnemer.url_wijzig_ag %}
+                                <a class="btn-nhb-rood" href="{{ deelnemer.url_wijzig_ag }}">
+                                    <i class="material-icons-round">edit</i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3"><i>Geen leden gevonden</i></td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="complaagregio-hwl-teams-regio" %}
+
+{% endblock %}

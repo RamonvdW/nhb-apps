@@ -12,7 +12,8 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models import F
 from django.core.management.base import BaseCommand
-from BasisTypen.models import BoogType, TeamType
+from BasisTypen.models import ORGANISATIE_NHB
+from BasisTypen.operations import get_organisatie_teamtypen
 from Competitie.models import (CompetitieMutatie, Competitie, CompetitieIndivKlasse, LAAG_REGIO, LAAG_RK,
                                DeelCompetitie, DeelcompetitieIndivKlasseLimiet, DeelcompetitieTeamKlasseLimiet,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam,
@@ -29,7 +30,9 @@ from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
 from Taken.taken import maak_taak
 import django.db.utils
+import traceback
 import datetime
+import sys
 
 VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
 
@@ -70,10 +73,7 @@ class Command(BaseCommand):
                        geen sporters meer over hebben voor het LB team.
         """
 
-        for team_type in (TeamType
-                          .objects
-                          .prefetch_related('boog_typen')
-                          .all()):
+        for team_type in get_organisatie_teamtypen(ORGANISATIE_NHB):
 
             self._team_boogtypen[team_type.pk] = boog_lijst = list()
 
@@ -737,7 +737,7 @@ class Command(BaseCommand):
             objs.delete()
 
         bulk = list()
-        for boogtype in BoogType.objects.all():
+        for boogtype in comp.boogtypen.all():
             histcomp = HistCompetitie(seizoen=seizoen,
                                       comp_type=comp.afstand,
                                       klasse=boogtype.beschrijving,     # 'Recurve'
@@ -1245,7 +1245,11 @@ class Command(BaseCommand):
         try:
             self._monitor_nieuwe_mutaties()
         except django.db.utils.DataError as exc:        # pragma: no cover
+            _, _, tb = sys.exc_info()
+            lst = traceback.format_tb(tb)
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
+            self.stderr.write('Traceback:')
+            self.stderr.write(''.join(lst))
         except KeyboardInterrupt:                       # pragma: no cover
             pass
 

@@ -174,7 +174,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
                 # zet de recurve boog aan
                 if lp == 1:
                     # zet de DT voorkeur aan voor een paar sporters
-                    with self.assert_max_queries(20):
+                    with self.assert_max_queries(25):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_R': 'on',
                                                                  'voorkeur_eigen_blazoen': 'on'})
@@ -182,18 +182,18 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
                     # 'lid_NNNNNN_boogtype_MM'
                     post_params['lid_%s_boogtype_%s' % (lid_nr, recurve_boog_pk)] = 'on'
                 elif lp == 2:
-                    with self.assert_max_queries(20):
+                    with self.assert_max_queries(25):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_C': 'on'})
                     post_params['lid_%s_boogtype_%s' % (lid_nr, compound_boog_pk)] = 'on'
                 elif barebow_boog_pk:
-                    with self.assert_max_queries(20):
+                    with self.assert_max_queries(25):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_BB': 'on'})
                     post_params['lid_%s_boogtype_%s' % (lid_nr, barebow_boog_pk)] = 'on'
                     barebow_boog_pk = None
                 else:
-                    with self.assert_max_queries(20):
+                    with self.assert_max_queries(25):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_R': 'on'})
                     post_params['lid_%s_boogtype_%s' % (lid_nr, recurve_boog_pk)] = 'on'

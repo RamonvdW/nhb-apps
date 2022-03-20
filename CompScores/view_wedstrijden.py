@@ -124,10 +124,10 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
             # link naar de waarschijnlijke deelnemerslijst
             if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and not (match.uitslag and match.uitslag.is_bevroren):
                 if match.is_rk or match.is_bk:
-                    match.url_waarschijnlijke_deelnemers = reverse('CompRayon:download-formulier',
+                    match.url_waarschijnlijke_deelnemers = reverse('CompLaagRayon:download-formulier',
                                                                    kwargs={'wedstrijd_pk': match.pk})
                 else:
-                    match.url_waarschijnlijke_deelnemers = reverse('CompRegio:waarschijnlijke-deelnemers',
+                    match.url_waarschijnlijke_deelnemers = reverse('CompLaagRegio:waarschijnlijke-deelnemers',
                                                                    kwargs={'wedstrijd_pk': match.pk})
 
             context['geen_wedstrijden'] = False

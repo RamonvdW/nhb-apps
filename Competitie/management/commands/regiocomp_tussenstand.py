@@ -14,8 +14,10 @@ from Competitie.models import (CompetitieTaken,
                                LAAG_REGIO, Competitie, CompetitieIndivKlasse, DeelCompetitie, DeelcompetitieRonde,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Score.models import ScoreHist, SCORE_WAARDE_VERWIJDERD
+import traceback
 import datetime
 import time
+import sys
 
 
 class Command(BaseCommand):
@@ -489,7 +491,11 @@ class Command(BaseCommand):
         try:
             self._monitor_nieuwe_scores()
         except django.db.utils.DataError as exc:        # pragma: no cover
+            _, _, tb = sys.exc_info()
+            lst = traceback.format_tb(tb)
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
+            self.stderr.write('Traceback:')
+            self.stderr.write(''.join(lst))
         except KeyboardInterrupt:                       # pragma: no cover
             pass
 

@@ -22,7 +22,7 @@ def repair_tr(apps, _):
     for kal in (kalender_klas
                 .objects
                 .filter(volgorde__range=(500, 599),
-                        boogtype__afkorting='IB')):
+                        boogtype__afkorting='IB')):         # pragma: no cover
         kal.boogtype = tr_boog
         kal.save(update_fields=['boogtype'])
     # for

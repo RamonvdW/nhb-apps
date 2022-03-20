@@ -80,7 +80,7 @@
                         <td class="center">{{ deelcomp.nhb_rayon }}</td>
 
                         <td class="center">
-                            <a class="btn-nhb-rood" href="{% url 'CompRayon:rayon-planning' deelcomp.pk %}">
+                            <a class="btn-nhb-rood" href="{% url 'CompLaagRayon:rayon-planning' deelcomp.pk %}">
                                 <img src="{% static 'plein/zoom_in.svg' %}" height="36px">
                             </a>
                         </td>
