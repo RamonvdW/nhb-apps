@@ -114,7 +114,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
 
             # geef RCL de mogelijkheid om te scores aan te passen
             # de HWL/WL krijgen deze link vanuit Vereniging::Wedstrijden
-            if heeft_uitslag:
+            if heeft_uitslag and not wedstrijd.uitslag.is_bevroren:
                 wedstrijd.url_uitslag_controleren = reverse('CompScores:uitslag-controleren',
                                                             kwargs={'wedstrijd_pk': wedstrijd.pk})
             else:
