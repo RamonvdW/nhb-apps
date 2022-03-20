@@ -54,10 +54,7 @@ class VerenigingKalenderWedstrijdenView(UserPassesTestMixin, View):
         for wed in wedstrijden:
             disc2str = ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS[wed.organisatie]
             wed.disc_str = ORGANISATIES2SHORT_STR[wed.organisatie] + ' / '
-            try:
-                wed.disc_str += disc2str[wed.discipline]
-            except KeyError:
-                wed.disc_str += '## FOUT ##'
+            wed.disc_str += disc2str[wed.discipline]
             wed.status_str = WEDSTRIJD_STATUS_TO_STR[wed.status]
             wed.url_wijzig = reverse('Kalender:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wed.pk})
             wed.url_sessies = reverse('Kalender:wijzig-sessies', kwargs={'wedstrijd_pk': wed.pk})
@@ -150,6 +147,8 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
                 wed.boogtypen.set(bogen)
 
                 klassen = get_organisatie_klassen(wed.organisatie)
+                print('organisatie: %s' % wed.organisatie)
+                print('klassen: %s' % klassen)
 
                 if wed.organisatie == ORGANISATIE_NHB:
                     # voorkom zowel gender-neutrale als man/vrouw klassen

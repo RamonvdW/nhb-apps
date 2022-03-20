@@ -5,11 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from BasisTypen.models import ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter
 from Wedstrijden.models import WedstrijdLocatie
-from .models import KalenderWedstrijd
+from .models import KalenderWedstrijd, WEDSTRIJD_DISCIPLINE_3D
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
@@ -120,6 +121,9 @@ class TestKalenderVereniging(E2EHelpers, TestCase):
             resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'wa'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
         self.assertEqual(1, KalenderWedstrijd.objects.count())
+        wedstrijd = KalenderWedstrijd.objects.get(organisatie=ORGANISATIE_WA)
+        self.assertEqual(wedstrijd.boogtypen.count(), 5)
+        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 40)
 
         # maak een nieuwe wedstrijd aan
         with self.assert_max_queries(20):
@@ -132,6 +136,19 @@ class TestKalenderVereniging(E2EHelpers, TestCase):
             resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
         self.assertEqual(2, KalenderWedstrijd.objects.count())
+        wedstrijd = KalenderWedstrijd.objects.get(organisatie=ORGANISATIE_NHB)
+        self.assertEqual(wedstrijd.boogtypen.count(), 5)
+        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 60)        # gender-neutrale klassen zijn niet gekozen
+
+        # maak nog een wedstrijd aan
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'ifaa'})
+        self.assert_is_redirect(resp, self.url_kalender_vereniging)
+        self.assertEqual(3, KalenderWedstrijd.objects.count())
+        wedstrijd = KalenderWedstrijd.objects.get(organisatie=ORGANISATIE_IFAA)
+        self.assertEqual(wedstrijd.boogtypen.count(), 12)
+        self.assertEqual(wedstrijd.discipline, WEDSTRIJD_DISCIPLINE_3D)
+        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 0)     # TODO: corrigeer
 
         # haal het overzicht opnieuw op (met de 2 wedstrijden)
         with self.assert_max_queries(20):
