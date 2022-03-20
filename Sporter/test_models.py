@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -92,6 +92,8 @@ class TestSporterModels(TestCase):
 
         sporter = Sporter.objects.get(lid_nr=100001)     # geboren 1972; bereikt leeftijd 40 in 2012
         self.assertEqual(sporter.bereken_wedstrijdleeftijd(2012), 40)
+
+        self.assertTrue(sporter.lid_nr_en_volledige_naam() != '')
 
     def test_str(self):
         # dekking van speciale functies

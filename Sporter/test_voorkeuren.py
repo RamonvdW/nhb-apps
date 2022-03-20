@@ -20,6 +20,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
 
     url_voorkeuren = '/sporter/voorkeuren/'
     url_wijzig = '/account/nieuw-wachtwoord/'
+    url_profiel = '/sporter/'
 
     testdata = None
 
@@ -33,6 +34,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_hwl = self.e2e_create_account('hwl', 'hwl@test.com', 'Secretaris')
         self.e2e_account_accepteert_vhpg(self.account_hwl)
+        self.account_100003 = self.e2e_create_account('100003', 'sporterx@test.com', 'Geslacht X')
 
         # maak een test vereniging
         ver = NhbVereniging()
@@ -80,6 +82,21 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         sporter.bij_vereniging = ver
         sporter.account = self.account_hwl
         sporter.save()
+        self.sporter_100002 = sporter
+
+        # maak een test lid aan
+        sporter = Sporter()
+        sporter.lid_nr = 100003
+        sporter.geslacht = "X"
+        sporter.voornaam = "RamonX"
+        sporter.achternaam = "de Xester"
+        sporter.email = ""
+        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
+        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
+        sporter.bij_vereniging = ver
+        sporter.account = self.account_100003
+        sporter.save()
+        self.sporter_100003 = sporter
 
         self.boog_R = BoogType.objects.get(afkorting='R')
 
@@ -420,5 +437,83 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         email = self.account_hwl.accountemail_set.all()[0]
         self.assertFalse(email.optout_nieuwe_taak)
         self.assertTrue(email.optout_herinnering_taken)
+
+    def test_geslacht_anders(self):
+
+        # begin met de sporter met geslacht man
+        self.e2e_login(self.account_hwl)
+
+        # voorkeuren worden aangemaakt bij ophalen
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        # controleer de voorkeuren
+        voorkeur = self.sporter_100002.sportervoorkeuren_set.all()[0]
+        self.assertTrue(voorkeur.wedstrijd_geslacht_gekozen)
+        self.assertEqual(self.sporter_100002.geslacht, voorkeur.wedstrijd_geslacht)
+
+        # door een post zonder parameters worden alle bogen uitgezet
+        # doe dit eenmalig zodat we de database accesses maar gehad hebben
+        resp = self.client.post(self.url_voorkeuren)
+        self.assert_is_redirect(resp, self.url_profiel)
+
+        # probeer het wedstrijdgeslacht aan te passen
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_voorkeuren, {'wedstrijd_mv': 'V'})
+        self.assert_is_redirect(resp, self.url_profiel)
+
+        voorkeur = self.sporter_100002.sportervoorkeuren_set.all()[0]
+        self.assertTrue(voorkeur.wedstrijd_geslacht_gekozen)
+        self.assertEqual(self.sporter_100002.geslacht, voorkeur.wedstrijd_geslacht)
+
+
+        # wissel naar de sporter met geslacht anders
+
+        self.client.logout()
+        self.e2e_login(self.account_100003)
+
+        self.assertEqual(self.sporter_100003.geslacht, 'X')
+
+        # voorkeuren worden aangemaakt bij ophalen
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+
+        # door een post zonder parameters worden alle bogen uitgezet
+        # doe dit eenmalig zodat we de database accesses maar gehad hebben
+        resp = self.client.post(self.url_voorkeuren)
+        self.assert_is_redirect(resp, self.url_profiel)
+
+        voorkeur = self.sporter_100003.sportervoorkeuren_set.all()[0]
+        self.assertFalse(voorkeur.wedstrijd_geslacht_gekozen)
+
+        # pas het wedstrijdgeslacht aan naar vrouw
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_voorkeuren, {'wedstrijd_mv': 'V'})
+        self.assert_is_redirect(resp, self.url_profiel)
+
+        voorkeur = self.sporter_100003.sportervoorkeuren_set.all()[0]
+        self.assertTrue(voorkeur.wedstrijd_geslacht_gekozen)
+        self.assertEqual(voorkeur.wedstrijd_geslacht, 'V')
+
+        # pas het wedstrijdgeslacht aan naar man
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_voorkeuren, {'wedstrijd_mv': 'M'})
+        self.assert_is_redirect(resp, self.url_profiel)
+
+        voorkeur = self.sporter_100003.sportervoorkeuren_set.all()[0]
+        self.assertTrue(voorkeur.wedstrijd_geslacht_gekozen)
+        self.assertEqual(voorkeur.wedstrijd_geslacht, 'M')
+
+        # pas het wedstrijdgeslacht aan naar 'geen keuze'
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_voorkeuren)
+        self.assert_is_redirect(resp, self.url_profiel)
+
+        voorkeur = self.sporter_100003.sportervoorkeuren_set.all()[0]
+        self.assertFalse(voorkeur.wedstrijd_geslacht_gekozen)
+
+
 
 # end of file

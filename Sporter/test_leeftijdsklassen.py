@@ -6,6 +6,7 @@
 
 from django.test import TestCase
 from django.utils import timezone
+from BasisTypen.models import GESLACHT_ANDERS
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from .leeftijdsklassen import bereken_leeftijdsklassen_nhb
 from .models import Sporter, SporterVoorkeuren
@@ -126,7 +127,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
             resp = self.client.get('/sporter/leeftijdsklassen/')
         self.assert403(resp)
 
-        # schutter
+        # sporter
         self.e2e_login(self.account_normaal)
         with self.assert_max_queries(20):
             resp = self.client.get('/sporter/leeftijdsklassen/')
@@ -135,9 +136,6 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('sporter/leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
 
         # met voorkeuren
-        voorkeur = SporterVoorkeuren(
-                        sporter=self.sporter1)
-        voorkeur.save()
         with self.assert_max_queries(20):
             resp = self.client.get('/sporter/leeftijdsklassen/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -145,8 +143,12 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('sporter/leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
 
         # met geslacht X, geen keuze gemaakt
+        self.sporter1.geslacht = GESLACHT_ANDERS
+        self.sporter1.save(update_fields=['geslacht'])
+        voorkeur = self.sporter1.sportervoorkeuren_set.all()[0]
         voorkeur.wedstrijd_geslacht_gekozen = False
         voorkeur.save(update_fields=['wedstrijd_geslacht_gekozen'])
+
         with self.assert_max_queries(20):
             resp = self.client.get('/sporter/leeftijdsklassen/')
         self.assertEqual(resp.status_code, 200)     # 200 = OK

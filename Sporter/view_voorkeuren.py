@@ -9,7 +9,9 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import BoogType, GESLACHT_ANDERS, GESLACHT_MV_MEERVOUD, ORGANISATIE_IFAA
+from BasisTypen.models import (BoogType,
+                               GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS,
+                               GESLACHT_MV_MEERVOUD, ORGANISATIE_IFAA)
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_mag_wisselen
 from Plein.menu import menu_dynamics
 from .models import Sporter, SporterVoorkeuren, SporterBoog
@@ -196,10 +198,11 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         if sporter.geslacht == GESLACHT_ANDERS:
             keuze = request.POST.get('wedstrijd_mv', None)
 
-            if keuze in ('M', 'V'):
+            if keuze in (GESLACHT_MAN, GESLACHT_VROUW):
                 gekozen = True
             else:
-                keuze = 'M'         # veld accepteert alleen M of V
+                # veld accepteert alleen man of vrouw
+                keuze = GESLACHT_MAN
                 gekozen = False
 
             if gekozen != voorkeuren.wedstrijd_geslacht_gekozen or voorkeuren.wedstrijd_geslacht != keuze:

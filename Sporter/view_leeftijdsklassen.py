@@ -10,6 +10,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige
 from .leeftijdsklassen import bereken_leeftijdsklassen_nhb, bereken_leeftijdsklassen_ifaa
+from .view_voorkeuren import get_sporter_voorkeuren
 import logging
 
 
@@ -37,14 +38,15 @@ class LeeftijdsklassenView(UserPassesTestMixin, TemplateView):
         # gegarandeerd ingelogd door test_func()
         account = self.request.user
         sporter = account.sporter_set.all()[0]
+        voorkeur = get_sporter_voorkeuren(sporter)
 
-        geslacht = 'M'
-        voorkeuren = sporter.sportervoorkeuren_set.all()
-        if len(voorkeuren):
-            voorkeur = voorkeuren[0]
-            if voorkeur.wedstrijd_geslacht_gekozen:
-                geslacht = voorkeur.wedstrijd_geslacht
-                # else: geslacht X, maar geen keuze gemaakt --> toon mannen
+        if voorkeur.wedstrijd_geslacht_gekozen:
+            # geslacht M/V of
+            # geslacht X + keuze voor M/V gemaakt
+            geslacht = voorkeur.wedstrijd_geslacht
+        else:
+            # geslacht X, geen keuze gemaakt --> neem mannen
+            geslacht = 'M'
 
         geboorte_jaar = sporter.geboorte_datum.year
 
