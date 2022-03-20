@@ -71,6 +71,7 @@ class VerenigingKalenderWedstrijdenView(UserPassesTestMixin, View):
         context['huidige_rol'] = rol_get_beschrijving(request)
 
         context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
             (None, 'Wedstrijdkalender'),
         )
 
@@ -103,6 +104,7 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
         context['url_nieuwe_wedstrijd'] = reverse('Kalender:nieuwe-wedstrijd-kies-type')
 
         context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
             (reverse('Kalender:vereniging'), 'Wedstrijdkalender'),
             (None, 'Nieuwe wedstrijd')
         )
@@ -147,8 +149,6 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
                 wed.boogtypen.set(bogen)
 
                 klassen = get_organisatie_klassen(wed.organisatie)
-                print('organisatie: %s' % wed.organisatie)
-                print('klassen: %s' % klassen)
 
                 if wed.organisatie == ORGANISATIE_NHB:
                     # voorkom zowel gender-neutrale als man/vrouw klassen

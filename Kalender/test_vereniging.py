@@ -148,7 +148,7 @@ class TestKalenderVereniging(E2EHelpers, TestCase):
         wedstrijd = KalenderWedstrijd.objects.get(organisatie=ORGANISATIE_IFAA)
         self.assertEqual(wedstrijd.boogtypen.count(), 12)
         self.assertEqual(wedstrijd.discipline, WEDSTRIJD_DISCIPLINE_3D)
-        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 0)     # TODO: corrigeer
+        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 144)
 
         # haal het overzicht opnieuw op (met de 2 wedstrijden)
         with self.assert_max_queries(20):

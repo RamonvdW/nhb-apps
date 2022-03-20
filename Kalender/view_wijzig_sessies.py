@@ -77,14 +77,16 @@ class KalenderWedstrijdSessiesView(UserPassesTestMixin, View):
                                                    kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         if self.rol_nu == Rollen.ROL_HWL:
-            url_terug = reverse('Kalender:vereniging')
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Kalender:vereniging'), 'Wedstrijdkalender'),
+                (None, 'Wedstrijd sessies'),
+            )
         else:
-            url_terug = reverse('Kalender:manager')
-
-        context['kruimels'] = (
-            (url_terug, 'Wedstrijdkalender'),
-            (None, 'Wedstrijd sessies'),
-        )
+            context['kruimels'] = (
+                (reverse('Kalender:manager'), 'Wedstrijdkalender'),
+                (None, 'Wedstrijd sessies'),
+            )
 
         menu_dynamics(self.request, context)
         return render(request, self.template_name, context)

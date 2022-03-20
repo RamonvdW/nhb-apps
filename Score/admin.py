@@ -48,6 +48,8 @@ class UitslagAdmin(admin.ModelAdmin):
 
     list_filter = ('afstand', )
 
+    readonly_fields = ('scores', )
+
 
 admin.site.register(Score, ScoreAdmin)
 admin.site.register(ScoreHist, ScoreHistAdmin)

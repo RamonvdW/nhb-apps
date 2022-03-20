@@ -45,7 +45,6 @@ class BasisTypenLeeftijdsKlasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
     list_filter = ('organisatie', 'wedstrijd_geslacht',)
 
 
-
 class BasisTypenTemplateCompetitieIndivKlasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
     """ filter voor TemplateCompetitieIndivKlasse """
 
@@ -90,6 +89,8 @@ class BasisTypenTemplateCompetitieTeamKlasseAdmin(BasisTypenReadonlyMetVolgordeA
 
 
 class BasisTypenKalenderWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin):
+
+    ordering = ('volgorde',)
 
     list_filter = ('organisatie', 'boogtype', 'leeftijdsklasse__klasse_kort', 'leeftijdsklasse__wedstrijd_geslacht')
 
