@@ -1061,8 +1061,11 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         try:
             deelcomp_pk = int(kwargs['deelcomp_pk'][:6])  # afkappen voor de veiligheid
-            deelcomp = DeelCompetitie.objects.get(pk=deelcomp_pk,
-                                                  laag=LAAG_REGIO)
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie')
+                        .get(pk=deelcomp_pk,
+                             laag=LAAG_REGIO))
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
@@ -1080,6 +1083,14 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
             context['alle_regels'], context['aantal_keuzes_nodig'], context['anchor'] = self._bepaal_teams_en_scores(deelcomp)
             context['url_opslaan'] = reverse('CompScores:selecteer-team-scores',
                                              kwargs={'deelcomp_pk': deelcomp.pk})
+
+        comp = deelcomp.competitie
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
+            (reverse('CompRegio:start-volgende-team-ronde', kwargs={'deelcomp_pk': deelcomp.pk}), 'Team Ronde'),
+            (None, 'Team scores')
+        )
 
         menu_dynamics(self.request, context)
         return context
@@ -1147,7 +1158,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
         # trigger de achtergrondtaak om de team scores opnieuw te berekenen
         update_uitslag_teamcompetitie()
 
-        url = reverse('CompScores:scores-rcl', kwargs={'deelcomp_pk': deelcomp.pk})
+        url = reverse('CompRegio:start-volgende-team-ronde', kwargs={'deelcomp_pk': deelcomp.pk})
         return HttpResponseRedirect(url)
 
 

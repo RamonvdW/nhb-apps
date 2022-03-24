@@ -109,7 +109,12 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
                 obj.status_str = "Afgesloten"
                 obj.status_groen = True
             else:
+                # nog actief
                 obj.status_str = "Actief"
+                if obj.regio_organiseert_teamcompetitie:
+                    # check hoever deze regio is met de teamcompetitie rondes
+                    if obj.huidige_team_ronde < 8:
+                        obj.status_str += ' (team ronde %s)' % obj.huidige_team_ronde
         # for
 
         return regio_deelcomps
