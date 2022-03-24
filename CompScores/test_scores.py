@@ -705,16 +705,16 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
         deelcomp = self.testdata.deelcomp18_regio[101]
 
-        with self.assert_max_queries(49):       # TODO: reduceer
+        with self.assert_max_queries(49):
             resp = self.client.get(self.url_regio_teams % deelcomp.pk)
         self.assertEqual(resp.status_code, 200)       # 200 = OK
         self.assert_template_used(resp, ('compscores/rcl-scores-regio-teams.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # do een post
-        with self.assert_max_queries(62):       # TODO: reduceer
+        with self.assert_max_queries(62):
             resp = self.client.post(self.url_regio_teams % deelcomp.pk)
-        self.assert_is_redirect(resp, self.url_scores_regio % deelcomp.pk)
+        self.assert_is_redirect_not_plein(resp)
 
         # verkeerde deelcomp
         bad_deelcomp = self.testdata.deelcomp25_regio[101]
