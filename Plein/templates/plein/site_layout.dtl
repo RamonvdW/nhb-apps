@@ -47,15 +47,18 @@
 
                     <!-- login/quick access knop aan de rechter kant -->
                     <ul id="nav-mobile" class="right">
-                        <!--
-                        <li><a class="btn-nhb-rood" href="{% url 'Competitie:kies' %}">Bondscompetities</a></li>
-                        <li><a class="btn-nhb-rood" href="{% url 'Records:overzicht' %}">Records</a></li>
-                        -->
+                        {% if menu_toon_mandje %}
+                            <li>
+                                <a href="#" class="btn-nhb-rood">
+                                    <i class="material-icons-round" style="line-height:36px">shopping_cart</i></a>
+                            </li>
+                        {% endif %}
+
                         {% if menu_voornaam %}
                             <li>
                                 <a href="#" class="btn-nhb-rood dropdown-trigger" data-target="navbar-dropdown" style="position:relative; z-index:2">
                                     <i class="material-icons-round hide-on-small-only right" style="line-height:36px">expand_more</i>
-                                    <i class="material-icons-round hide-on-med-and-up" style="line-height:36px">expand_more</i>
+                                    <i class="material-icons-round hide-on-med-and-up"       style="line-height:36px">expand_more</i>
                                     <span class="hide-on-small-only">{{ menu_voornaam|escape }}</span></a>
                             </li>
                         {% elif not verberg_login_knop %}
@@ -65,6 +68,7 @@
                 </div>
 
                 <ul id="navbar-dropdown" class="dropdown-content">
+
                     {% if menu_url_wissel_van_rol %}
                         <li class="divider"></li>
                         <li>

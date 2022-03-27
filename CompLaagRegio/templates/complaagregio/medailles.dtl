@@ -39,6 +39,7 @@
         <div class="col s12">
             <h4>Medailles</h4>
             <p>Tot 4 deelnemers: 1 medaille<br>Tot 8 deelnemers: 2 medailles<br>9 of meer deelnemers: 3 medailles</p>
+            <p>Sporters moeten <b>{{ min_aantal_scores }} of meer</b> scores hebben om in aanmerking te komen.</p>
         </div>
     </div>
 

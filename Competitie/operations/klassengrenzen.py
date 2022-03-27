@@ -153,7 +153,7 @@ def bepaal_klassengrenzen_indiv(comp):
                 nr = sporterboog.pk
                 if nr not in done_nrs:
                     sporter = sporterboog.sporter
-                    age = sporter.bereken_wedstrijdleeftijd(jaar)
+                    age = sporter.bereken_wedstrijdleeftijd_wa(jaar)
                     # volgorde lkl is Aspirant .. Senior
                     # pak de eerste de beste klasse die compatible is
                     if lkl.geslacht_is_compatible(sporter.geslacht) and lkl.leeftijd_is_compatible(age):
@@ -284,7 +284,7 @@ def bepaal_klassengrenzen_teams(comp):
 
     was_aspirant = dict()     # [ lid_nr ] = True/False
     for sporter in Sporter.objects.filter(geboorte_datum__gte=geboren_na):
-        was_aspirant[sporter.lid_nr] = sporter.bereken_wedstrijdleeftijd(jaar) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
+        was_aspirant[sporter.lid_nr] = sporter.bereken_wedstrijdleeftijd_wa(jaar) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
     # for
 
     # haal de AG's op per boogtype
@@ -446,7 +446,7 @@ class KlasseBepaler(object):
         ag = deelnemer.ag_voor_indiv
         sporterboog = deelnemer.sporterboog
         sporter = sporterboog.sporter
-        age = sporter.bereken_wedstrijdleeftijd(self.competitie.begin_jaar + 1)
+        age = sporter.bereken_wedstrijdleeftijd_wa(self.competitie.begin_jaar + 1)
 
         if not isinstance(ag, Decimal):
             raise LookupError('Verkeerde type')

@@ -10,7 +10,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige
 from .leeftijdsklassen import bereken_leeftijdsklassen_nhb, bereken_leeftijdsklassen_ifaa
-from .view_voorkeuren import get_sporter_voorkeuren
+from .models import get_sporter_voorkeuren
 import logging
 
 

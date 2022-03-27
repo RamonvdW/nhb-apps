@@ -5,10 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
+from Account.models import Account
 from BasisTypen.models import (BoogType, KalenderWedstrijdklasse,
                                ORGANISATIES, ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_NHB)
 from NhbStructuur.models import NhbVereniging
-from Sporter.models import SporterBoog
+from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
 
 
@@ -118,6 +119,14 @@ WEDSTRIJD_ORGANISATIE_TO_STR = {
     ORGANISATIE_IFAA: 'IFAA'
 }
 
+KALENDER_MUTATIE_INSCHRIJVEN = 1
+KALENDER_MUTATIE_AFMELDEN = 2
+
+KALENDER_MUTATIE_TO_STR = {
+    KALENDER_MUTATIE_INSCHRIJVEN: "Inschrijven",
+    KALENDER_MUTATIE_AFMELDEN: "Afmelden"
+}
+
 
 class KalenderWedstrijdDeeluitslag(models.Model):
     """  deel van de uitslag van een wedstrijd """
@@ -146,14 +155,19 @@ class KalenderWedstrijdSessie(models.Model):
     tijd_begin = models.TimeField()
     tijd_einde = models.TimeField()
 
+    # prijs
+    prijs_euro = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)     # max 999,99
+
     # toegestane wedstrijdklassen
     wedstrijdklassen = models.ManyToManyField(KalenderWedstrijdklasse, blank=True)
 
     # maximum aantal deelnemers
     max_sporters = models.PositiveSmallIntegerField(default=1)
 
-    # aangemelde sporters
-    sporters = models.ManyToManyField(SporterBoog, blank=True)
+    # het aantal inschrijvingen: de som van reserveringen en betaalde deelnemers
+    aantal_inschrijvingen = models.PositiveSmallIntegerField(default=0)
+
+    # inschrijvingen: zie KalenderInschrijving
 
     class Meta:
         verbose_name = "Kalender wedstrijd sessie"
@@ -242,5 +256,109 @@ class KalenderWedstrijd(models.Model):
     def __str__(self):
         """ geef een beschrijving terug voor de admin interface """
         return "%s [%s] %s" % (self.datum_begin, WEDSTRIJD_STATUS_TO_STR[self.status], self.titel)
+
+
+class KalenderWedstrijdKortingscode(models.Model):
+
+    """ Een kortingscode voor een specifieke sporter voor een of meerdere wedstrijden """
+
+    # de te gebruiken code
+    code = models.CharField(max_length=20, default='')
+
+    # tot wanneer geldig?
+    geldig_tot_en_met = models.DateField()
+
+    # de kortingscode kan voor 1 of meerdere wedstrijden gelden
+    # de kortingscode kan voor een specifieke sporter zijn (voorbeeld: winnaar van vorige jaar)
+    # de kortingscode kan voor alle leden van een vereniging zijn (voorbeeld: de organiserende vereniging)
+
+    # voor welke wedstrijden is deze geldig?
+    voor_wedstrijd = models.ManyToManyField(KalenderWedstrijd)
+
+    # voor welke sporter is deze kortingscode?
+    voor_sporter = models.ForeignKey(Sporter, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # voor leden van welke vereniging is deze kortingscode?
+    voor_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # hoeveel korting (0% .. 100%)
+    percentage = models.PositiveSmallIntegerField(default=100)
+
+    class Meta:
+        verbose_name = "Kalender kortingscode"
+
+
+class KalenderInschrijving(models.Model):
+
+    """ Een inschrijving op een wedstrijd sessie, inclusief koper, betaal-status en gebruikte kortingscode """
+
+    # wanneer is deze reservering gemaakt?
+    wanneer = models.DateTimeField()
+
+    # voor welke wedstrijd is dit?
+    wedstrijd = models.ForeignKey(KalenderWedstrijd, on_delete=models.PROTECT)
+
+    # voor welke sessie?
+    sessie = models.ForeignKey(KalenderWedstrijdSessie, on_delete=models.PROTECT)
+
+    # voor wie is deze inschrijving
+    sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT)
+
+    # wie is de koper?
+    koper = models.ForeignKey(Account, on_delete=models.PROTECT)
+
+    # welke kortingscode is gebruikt
+    gebruikte_code = models.ForeignKey(KalenderWedstrijdKortingscode, on_delete=models.SET_NULL, blank=True, null=True)
+
+    # is de betaling voldaan?
+    betaling_voldaan = models.BooleanField(default=False)
+
+    # de transactie
+    #transactie = models.ForeignKey(MandjeTransactie, on_delete.models.PROTECT)
+
+    # TODO: traceer de gestuurde emails
+
+    class Meta:
+        verbose_name = "Kalender inschrijving"
+        verbose_name_plural = "Kalender inschrijvingen"
+
+        constraints = [
+            models.UniqueConstraint(fields=('sessie', 'sporterboog'), name='Geen dubbele inschrijving'),
+        ]
+
+
+class KalenderMutatie(models.Model):
+    """ Deze tabel houdt de mutaties bij de lijst van (reserve-)schutters van
+        de RK en BK wedstrijden.
+        Alle verzoeken tot mutaties worden hier aan toegevoegd en na afhandelen bewaard
+        zodat er een geschiedenis is.
+    """
+
+    # datum/tijdstip van mutatie
+    when = models.DateTimeField(auto_now_add=True)      # automatisch invullen
+
+    # wat is de wijziging (zie KALENDER_MUTATIE_*)
+    code = models.PositiveSmallIntegerField(default=0)
+
+    # is deze mutatie al verwerkt?
+    is_verwerkt = models.BooleanField(default=False)
+
+    # waar heeft mutatie op betrekking?
+    inschrijving = models.ForeignKey(KalenderInschrijving, on_delete=models.CASCADE, null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Kalender mutatie"
+
+    def __str__(self):
+        msg = "[%s]" % self.when
+        if not self.is_verwerkt:
+            msg += " (nog niet verwerkt)"
+        try:
+            msg += " %s (%s)" % (self.code, KALENDER_MUTATIE_TO_STR[self.code])
+        except KeyError:
+            msg += " %s (???)" % self.code
+
+        return msg
+
 
 # end of file

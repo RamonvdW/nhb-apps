@@ -59,19 +59,20 @@
 
                 <thead>
                     <tr>
-                        <th>Wanneer</th>
-                        <th>Aanm<span class="hide-on-small-only">eldingen</span></th>
-                        <th>Max<span class="hide-on-small-only">imum</span></th>
+                        <th class="center">Wanneer</th>
+                        <th class="center">Aanm<span class="hide-on-small-only">eldingen</span></th>
+                        <th class="center">Max<span class="hide-on-small-only">imum</span></th>
                         <th>Wedstrijdklassen</th>
+                        <th class="center">Prijs</th>
                         <th><!-- kolom voor de knoppen --></th>
                     </tr>
                 </thead>
 
                 {% for sessie in sessies %}
                     <tr>
-                        <td>{% if wed.datum_begin != wed.datum_einde %}{{ sessie.datum }} {% endif %}[{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}]</td>
-                        <td>{{ sessie.aanmeldingen_count }}</td>
-                        <td>{{ sessie.max_sporters }}</td>
+                        <td class="center">{% if wed.datum_begin != wed.datum_einde %}{{ sessie.datum }} {% endif %}[{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}]</td>
+                        <td class="center">{{ sessie.aantal_inschrijvingen }}</td>
+                        <td class="center">{{ sessie.max_sporters }}</td>
                         <td>
                             {% for klasse in sessie.klassen_ordered %}
                                 <span>{{ klasse.beschrijving }}</span><br>
@@ -79,14 +80,15 @@
                                 <span><i>Nog geen klassen</i></span>
                             {% endfor %}
                         </td>
-                        <td>
+                        <td class="center">&euro;{{ sessie.prijs_euro }}</td>
+                        <td class="center">
                             <a class="btn-nhb-rood" href="{{ sessie.url_wijzig }}">
                                 <i class="material-icons-round">edit</i></a>
                         </td>
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="5" class="center">
+                        <td colspan="6" class="center">
                             <i>Er zijn nog geen sessies</i>
                         </td>
                     </tr>
@@ -94,7 +96,7 @@
 
                 {% if url_nieuwe_sessie %}
                     <tr>
-                        <td colspan="5" class="center">
+                        <td colspan="6" class="center">
                             <form action="{{ url_nieuwe_sessie }}" method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="nieuwe_sessie" value="1">

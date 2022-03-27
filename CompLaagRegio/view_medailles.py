@@ -90,10 +90,12 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
         comp.bepaal_fase()
         # TODO: check fase
 
+        context['min_aantal_scores'] = min_aantal_scores = comp.aantal_scores_voor_rk_deelname
+
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
                       .filter(deelcompetitie=deelcomp,
-                              aantal_scores__gte=6)
+                              aantal_scores__gte=min_aantal_scores)
                       .exclude(indiv_klasse__is_onbekend=True)
                       .select_related('sporterboog__sporter',
                                       'bij_vereniging',

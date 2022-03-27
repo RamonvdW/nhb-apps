@@ -1,0 +1,149 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Inschrijven{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Inschrijven</h3>
+        </div>
+    </div>
+
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+            <table class="white"
+                <tr>
+                    <th>Titel</th>
+                    <td>{{ wed.titel }}</td>
+                </tr>
+
+                <tr>
+                    <th>Organiserende vereniging</th>
+                    <td>{{ wed.organiserende_vereniging }}</td>
+                </tr>
+
+                <tr>
+                    <th>Wedstrijd locatie</th>
+                    <td>{{ wed.locatie.adres|linebreaksbr }}</td>
+                </tr>
+
+                <tr>
+                    <th>Bijzonder<wbr>heden</th>
+                    <td>{{ wed.bijzonderheden|linebreaksbr }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Gevonden sporter</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+            <table class="white"
+                <tr>
+                    <th>Sporter</th>
+                    <td>{{ sporter.lid_nr_en_volledige_naam }}</td>
+                </tr>
+
+                <tr>
+                    <th>Lid bij vereniging</th>
+                    <td>{{ sporter.bij_vereniging }}</td>
+                </tr>
+
+                <tr>
+                    <th>Wedstrijdleeftijd</th>
+                    <td>{{ leeftijd }} jaar</td>
+                </tr>
+
+                {% if uitleg_geslacht %}
+                    <tr>
+                        <th>Keuze voor mannen of vrouwen</th>
+                        <td class="red-text">Om in te kunnen schrijven op deze wedstrijd moet je kiezen<br>of je met de mannen of vrouwen meedoet.<br>Maak deze keuze op Mijn pagina, Voorkeuren.</td>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <th>Mogelijke klassen voor deze wedstrijd</th>
+                    <td>{% for beschrijving in leeftijdsklassen %}{{ beschrijving }}<br>{% empty %}<span class="red-text">Geen</span>{% endfor %}</td>
+                </tr>
+
+                <tr>
+                    <th>Wedstrijdbogen</th>
+                    <td>{% for boog in bogen %}{{ boog.beschrijving }}<br>{% empty %}<span class="red-text">Geen</span>{% endfor %}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Kies een sessie</h4>
+                                 <!-- N = NHB -->
+            {% if wed.organisatie == 'N' %}
+                <p>Klassen zonder man/vrouw benoeming zijn gender-neutraal</p>
+            {% endif %}
+
+            {% if not kan_aanmelden %}
+                <p class="red-text">Je kan niet inschrijven op deze wedstrijd.<br>Dit kan komen door je leeftijd en/of de gekozen bogen onder Mijn pagina, Voorkeuren.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <tr>
+                    <th class="center">Wanneer</th>
+                    <th class="center">Wedstrijdklassen</th>
+                    <th class="center">Nog beschikbaar</th>
+                    <th class="center">Prijs</th>
+                    <th><!-- kolom voor de knoppen --></th>
+                </tr>
+
+                {% for sessie in sessies %}
+                    <tr{% if not sessie.kan_aanmelden %} class="grey-text"{% endif %}>
+                        <td class="center">{{ sessie.datum }}<br>{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</td>
+                        <td class="center">
+                            {% for klasse in sessie.klassen %}
+                                <span>{{ klasse.beschrijving }}</span><br>
+                            {% endfor %}
+                        </td>
+                        <td class="center">{{ sessie.aantal_beschikbaar }} (van de {{ sessie.max_sporters }})</td>
+                        <td class="center">&euro;{{ sessie.prijs_euro }}</td>
+                        <td class="center">
+                            {% if sessie.kan_aanmelden %}
+                                <a class="btn-nhb-rood" href="#">
+                                    <i class="material-icons-round">add</i><i class="material-icons-round">shopping_cart</i></a>
+                            {% else %}
+                                {% if not sessie.compatible_leeftijd %}<span>(leeftijd)</span><br>{% endif %}
+                                {% if not sessie.compatible_boog %}<span>(boog)</span><br>{% endif %}
+                                {% if not sessie.compatible_geslacht %}<span>(M/V)</span><br{% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-inschrijven-sporter" %}
+
+{% endblock %}

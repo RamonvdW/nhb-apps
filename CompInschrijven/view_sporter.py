@@ -91,7 +91,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         # urlconf parameters geaccepteerd
 
         # bepaal in welke wedstrijdklasse de sporter komt
-        age = sporterboog.sporter.bereken_wedstrijdleeftijd(comp.begin_jaar + 1)
+        age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(comp.begin_jaar + 1)
 
         # haal AG op, indien aanwezig
         scores = Score.objects.filter(sporterboog=sporterboog,
@@ -292,7 +292,7 @@ class RegiocompetitieAanmeldenView(View):
         methode = deelcomp.inschrijf_methode
 
         # bepaal in welke wedstrijdklasse de sporter komt
-        age = sporterboog.sporter.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar + 1)
+        age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(deelcomp.competitie.begin_jaar + 1)
 
         aanmelding = RegioCompetitieSchutterBoog(
                             deelcompetitie=deelcomp,

@@ -17,8 +17,8 @@ from Plein.menu import menu_dynamics
 from .models import (KalenderWedstrijd, KalenderWedstrijdSessie,
                      WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_DUUR_MAX_UREN,
                      WEDSTRIJD_STATUS_GEANNULEERD)
-import datetime
 from types import SimpleNamespace
+import datetime
 
 TEMPLATE_KALENDER_WIJZIG_SESSIES = 'kalender/wijzig-sessies.dtl'
 TEMPLATE_KALENDER_WIJZIG_SESSIE = 'kalender/wijzig-sessie.dtl'
@@ -60,7 +60,6 @@ class KalenderWedstrijdSessiesView(UserPassesTestMixin, View):
         sessies = (wedstrijd
                    .sessies
                    .prefetch_related('wedstrijdklassen')
-                   .annotate(aanmeldingen_count=Count('sporters'))
                    .order_by('datum',
                              'tijd_begin'))
         for sessie in sessies:
@@ -233,10 +232,14 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
 
         context['sessie'] = sessie
 
+        sessie.prijs_euro_str = str(sessie.prijs_euro).replace('.', ',')
+
         if wedstrijd.sessies.filter(pk=sessie.pk).count() != 1:
             raise Http404('Sessie hoort niet bij wedstrijd')
 
-        context['opt_datums'] = self._maak_opt_datums(wedstrijd, sessie)
+        if wedstrijd.datum_begin != wedstrijd.datum_einde:
+            context['opt_datums'] = self._maak_opt_datums(wedstrijd, sessie)
+
         sessie.tijd_begin_str = sessie.tijd_begin.strftime('%H:%M')
 
         context['opt_duur'] = self._maak_opt_duur(sessie)
@@ -356,6 +359,20 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
 
                 sessie.max_sporters = sporters
                 updated.append('max_sporters')
+
+            prijs = request.POST.get('prijs', '')
+            if prijs:
+                prijs = prijs.replace(',', '.')   # regionale verschillen afvangen
+                try:
+                    prijs = float(prijs[:6])      # afkappen voor de veiligheid
+                except ValueError:
+                    raise Http404('Geen toegestane prijs')
+
+                if prijs < 0.0 or prijs > 999.99:
+                    raise Http404('Geen toegestane prijs')
+
+                sessie.prijs_euro = prijs
+                updated.append('prijs_euro')
 
             sessie.save(update_fields=updated)
 

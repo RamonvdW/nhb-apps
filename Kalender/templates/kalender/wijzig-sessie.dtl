@@ -71,16 +71,20 @@
                             <tr>
                                 <th>Datum</th>
                                 <td>
-                                    <ul>
-                                        {% for opt in opt_datums %}
-                                            <li>
-                                                <label class="black-text" for="id_{{ opt.sel }}">
-                                                    <input class="with-gap" type="radio" name="datum" value="{{ opt.sel }}" required id="id_{{ opt.sel }}"{% if opt.selected %} checked{% endif %} onchange="gewijzigd()">
-                                                    <span>{{ opt.datum|date:"l j F Y" }}</span>
-                                                </label>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
+                                    {% if wedstrijd.datum_begin != wedstrijd.datum_einde %}
+                                        <ul>
+                                            {% for opt in opt_datums %}
+                                                <li>
+                                                    <label class="black-text" for="id_{{ opt.sel }}">
+                                                        <input class="with-gap" type="radio" name="datum" value="{{ opt.sel }}" required id="id_{{ opt.sel }}"{% if opt.selected %} checked{% endif %} onchange="gewijzigd()">
+                                                        <span>{{ opt.datum|date:"l j F Y" }}</span>
+                                                    </label>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <span>{{ wedstrijd.datum_begin }}</span>
+                                    {% endif %}
                                 </td>
                             </tr>
 
@@ -106,6 +110,15 @@
                                 <th>Maximum aantal sporters</th>
                                 <td>
                                     <input type="number" min="1" max="999" name="max_sporters" value="{{ sessie.max_sporters }}" oninput="gewijzigd()">
+                                    <br>
+                                    <span>(aantal aanmeldingen tot nu toe: {{ sessie.aantal_inschrijvingen }})</span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Prijs in &euro; (123,45)</th>
+                                <td>
+                                    <input type="text" name="prijs" value="{{ sessie.prijs_euro_str }}" pattern="^\d+(,\d{2})?$" oninput="gewijzigd()">
                                 </td>
                             </tr>
 

@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import KalenderWedstrijd, KalenderWedstrijdSessie, KalenderWedstrijdDeeluitslag
+from .models import (KalenderWedstrijd, KalenderWedstrijdSessie, KalenderWedstrijdDeeluitslag,
+                     KalenderWedstrijdKortingscode, KalenderInschrijving, KalenderMutatie)
 
 
 class KalenderWedstrijdAdmin(admin.ModelAdmin):                 # pragma: no cover
@@ -54,7 +55,7 @@ class KalenderWedstrijdSessieAdmin(admin.ModelAdmin):             # pragma: no c
 
     search_fields = ('pk',)
 
-    readonly_fields = ('wedstrijdklassen', 'sporters')
+    readonly_fields = ('wedstrijdklassen',)
 
     def get_queryset(self, request):
         """ deze functie is voor prestatieverbetering
@@ -63,7 +64,7 @@ class KalenderWedstrijdSessieAdmin(admin.ModelAdmin):             # pragma: no c
         # qs = super().get_queryset(request)
         return (KalenderWedstrijdSessie
                 .objects
-                .prefetch_related('wedstrijdklassen', 'sporters')
+                .prefetch_related('wedstrijdklassen')
                 .all())
 
 
@@ -73,8 +74,23 @@ class KalenderWedstrijdDeeluitslagAdmin(admin.ModelAdmin):          # pragma: no
     search_fields = ('pk',)
 
 
+class KalenderWedstrijdKortingscodeAdmin(admin.ModelAdmin):
+    pass
+
+
+class KalenderInschrijvingAdmin(admin.ModelAdmin):
+    pass
+
+
+class KalenderMutatieAdmin(admin.ModelAdmin):
+    pass
+
+
 admin.site.register(KalenderWedstrijd, KalenderWedstrijdAdmin)
 admin.site.register(KalenderWedstrijdSessie, KalenderWedstrijdSessieAdmin)
 admin.site.register(KalenderWedstrijdDeeluitslag, KalenderWedstrijdDeeluitslagAdmin)
+admin.site.register(KalenderWedstrijdKortingscode, KalenderWedstrijdKortingscodeAdmin)
+admin.site.register(KalenderInschrijving, KalenderInschrijvingAdmin)
+admin.site.register(KalenderMutatie, KalenderMutatieAdmin)
 
 # end of file

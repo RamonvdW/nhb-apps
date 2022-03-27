@@ -14,7 +14,7 @@ from BasisTypen.models import (BoogType,
                                GESLACHT_MV_MEERVOUD, ORGANISATIE_IFAA)
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_mag_wisselen
 from Plein.menu import menu_dynamics
-from .models import Sporter, SporterVoorkeuren, SporterBoog
+from .models import Sporter, SporterBoog, get_sporter_voorkeuren
 from types import SimpleNamespace
 import logging
 
@@ -22,24 +22,6 @@ import logging
 TEMPLATE_VOORKEUREN = 'sporter/voorkeuren.dtl'
 
 my_logger = logging.getLogger('NHBApps.Sporter')
-
-
-def get_sporter_voorkeuren(sporter):
-    """ zoek het SporterVoorkeuren object erbij, of maak een nieuwe aan
-    """
-
-    voorkeuren, was_created = SporterVoorkeuren.objects.get_or_create(sporter=sporter)
-    if was_created:
-        # default voor wedstrijd_geslacht_gekozen = True
-        if sporter.geslacht != GESLACHT_ANDERS:
-            if sporter.geslacht != voorkeuren.wedstrijd_geslacht:  # default is Man
-                voorkeuren.wedstrijd_geslacht = sporter.geslacht
-                voorkeuren.save(update_fields=['wedstrijd_geslacht'])
-        else:
-            voorkeuren.wedstrijd_geslacht_gekozen = False  # laat de sporter kiezen
-            voorkeuren.save(update_fields=['wedstrijd_geslacht_gekozen'])
-
-    return voorkeuren
 
 
 class VoorkeurenView(UserPassesTestMixin, TemplateView):

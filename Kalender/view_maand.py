@@ -8,8 +8,12 @@ from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView
+from BasisTypen.models import ORGANISATIE_WA
+from Mandje.mandje import eval_mandje_is_leeg
 from Plein.menu import menu_dynamics
-from .models import KalenderWedstrijd, WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD
+from .models import (KalenderWedstrijd, KalenderWedstrijdSessie,
+                     WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD,
+                     WEDSTRIJD_ORGANISATIE_TO_STR, WEDSTRIJD_WA_STATUS_TO_STR, WEDSTRIJD_BEGRENZING_TO_STR)
 from datetime import date
 
 TEMPLATE_KALENDER_MAAND = 'kalender/overzicht-maand.dtl'
@@ -46,12 +50,28 @@ MAAND2URL = {
 }
 
 
-def get_url_huidige_maand():
-    """ Geeft de URL terug voor de huidige maand, met een 'mooie' maand """
+def get_url_eerstvolgende_maand_met_wedstrijd():
+    """ Geeft de URL terug voor de eerstvolgende maand met een wedstrijd """
     now = timezone.now()
+
+    # we willen in de eerstvolgende maand komen met een wedstrijd
+    wedstrijden = (KalenderWedstrijd
+                   .objects
+                   .filter(status=WEDSTRIJD_STATUS_GEACCEPTEERD,
+                           datum_begin__gte=now)
+                   .order_by('datum_begin'))
+
+    if wedstrijden.count() > 0:
+        jaar = wedstrijden[0].datum_begin.year
+        maand = wedstrijden[0].datum_begin.month
+    else:
+        jaar = now.year
+        maand = now.month
+
     url = reverse('Kalender:maand',
-                  kwargs={'jaar': now.year,
-                          'maand': MAAND2URL[now.month]})
+                  kwargs={'jaar': jaar,
+                          'maand': MAAND2URL[maand]})
+
     return url
 
 
@@ -127,13 +147,15 @@ class KalenderMaandView(TemplateView):
             maand += 1
         datum_voor = date(year=jaar, month=maand, day=1)
 
-        wedstrijden = (KalenderWedstrijd
-                       .objects
-                       .select_related('locatie')
-                       .filter(datum_begin__gte=datum_vanaf,
-                               datum_begin__lt=datum_voor,
-                               status__in=(WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD))
-                       .order_by('datum_begin'))
+        context['wedstrijden'] = wedstrijden = (KalenderWedstrijd
+                                                .objects
+                                                .select_related('locatie')
+                                                .filter(datum_begin__gte=datum_vanaf,
+                                                        datum_begin__lt=datum_voor,
+                                                        status__in=(WEDSTRIJD_STATUS_GEACCEPTEERD,
+                                                                    WEDSTRIJD_STATUS_GEANNULEERD))
+                                                .order_by('datum_begin'))
+
         for wed in wedstrijden:
             if wed.status == WEDSTRIJD_STATUS_GEANNULEERD:
                 wed.titel = '[GEANNULEERD] ' + wed.titel
@@ -141,7 +163,11 @@ class KalenderMaandView(TemplateView):
                 wed.url_details = reverse('Kalender:wedstrijd-info',
                                           kwargs={'wedstrijd_pk': wed.pk})
         # for
-        context['wedstrijden'] = wedstrijden
+
+        context['kan_aanmelden'] = self.request.user.is_authenticated
+
+        # bepaal of het knopje voor het mandje getoond moet worden
+        eval_mandje_is_leeg(self.request)
 
         context['kruimels'] = (
             (None, 'Wedstrijdkalender'),
@@ -165,11 +191,46 @@ class WedstrijdInfoView(TemplateView):
 
         try:
             wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
-            wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd_pk)
+            wedstrijd = (KalenderWedstrijd
+                         .objects
+                         .select_related('organiserende_vereniging',
+                                         'locatie')
+                         .prefetch_related('boogtypen',
+                                           'sessies')
+                         .get(pk=wedstrijd_pk))
         except KalenderWedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
-        context['wedstrijd'] = wedstrijd
+        context['wed'] = wedstrijd
+
+        wedstrijd.organisatie_str = WEDSTRIJD_ORGANISATIE_TO_STR[wedstrijd.organisatie]
+
+        wedstrijd.begrenzing_str = WEDSTRIJD_BEGRENZING_TO_STR[wedstrijd.begrenzing]
+
+        if wedstrijd.organisatie == ORGANISATIE_WA:
+            context['toon_wa_status'] = True
+            wedstrijd.wa_status_str = WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
+
+        sessie_pks = list(wedstrijd.sessies.values_list('pk', flat=True))
+        context['sessies'] = sessies = (KalenderWedstrijdSessie
+                                        .objects
+                                        .filter(pk__in=sessie_pks)
+                                        .prefetch_related('wedstrijdklassen')
+                                        .order_by('datum',
+                                                  'tijd_begin',
+                                                  'pk'))
+
+        for sessie in sessies:
+            sessie.aantal_beschikbaar = sessie.max_sporters - sessie.aantal_inschrijvingen
+            sessie.klassen = sessie.wedstrijdklassen.all()
+        # for
+
+        context['kan_aanmelden'] = self.request.user.is_authenticated
+
+        if context['kan_aanmelden']:
+            context['url_inschrijven_sporter'] = reverse('Kalender:inschrijven-sporter', kwargs={'wedstrijd_pk': wedstrijd.pk})
+            context['url_inschrijven_groepje'] = reverse('Kalender:inschrijven-groepje', kwargs={'wedstrijd_pk': wedstrijd.pk})
+            context['url_inschrijven_familie'] = reverse('Kalender:inschrijven-familie', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         url_terug = reverse('Kalender:maand',
                             kwargs={'jaar': wedstrijd.datum_begin.year,

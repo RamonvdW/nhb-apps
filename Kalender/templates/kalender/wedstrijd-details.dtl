@@ -14,9 +14,191 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Wedstrijd details</h3>
-            <p>{{ wedstrijd }}</p>
+
+            {% if not kan_aanmelden %}
+                <p>Om aan te melden voor een wedstrijd moet je een account aanmaken en inloggen</p>
+            {% endif %}
         </div>
     </div>
+
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white" <!--style="table-layout:fixed"--> >
+
+                <tr>
+                    <td colspan="2" class="center nhb-blauw-text">
+                        <h6>Informatie</h6>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Titel</th>
+                    <td>{{ wed.titel }}</td>
+                </tr>
+
+                <tr>
+                    <th>Organiserende vereniging</th>
+                    <td>{{ wed.organiserende_vereniging }}</td>
+                </tr>
+
+                {% if wed.datum_begin == wed.datum_einde %}
+                    <tr>
+                        <th>Datum wedstrijd</th>
+                        <td>{{ wed.datum_begin }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <th>Datums wedstrijd</th>
+                        <td>{{ wed.datum_begin }} - {{ wed.datum_einde }}</td>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <th>Volgens regels van</th>
+                    <td>{{ wed.organisatie_str }}</td>
+                </tr>
+
+                {% if toon_wa_status %}
+                    <tr>
+                        <th>WA-status</th>
+                        <td>{{ wed.wa_status_str }}</td>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <th>Wedstrijd locatie</th>
+                    <td>{{ wed.locatie.adres|linebreaksbr }}</td>
+                </tr>
+
+                <tr>
+                    <th>Doelgroep</th>
+                    <td>{{ wed.begrenzing_str }}</td>
+                </tr>
+
+                <tr>
+                    <th>Bijzonder<wbr>heden</th>
+                    <td>{{ wed.bijzonderheden|linebreaksbr }}</td>
+                </tr>
+
+                <tr>                         <!-- F = IFAA -->
+                    <th>{% if wed.organisatie == 'F' %}Toegestane schietstijlen{% else %}Toegestane bogen{% endif %}</th>
+                    <td>
+                        {% for boog in wed.boogtypen.all %}
+                            <span>{{ boog.beschrijving }}</span><br>
+                        {% endfor %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Aanwezig melden</th>
+                    <td>{{ wed.minuten_voor_begin_sessie_aanwezig_zijn }} minuten van te voren</td>
+                </tr>
+
+
+                <tr>
+                    <td colspan="2" class="center nhb-blauw-text">
+                        <h6>Contactgegevens organisatie</h6>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th>Naam</th>
+                    <td>{{ wed.contact_naam }}</td>
+                </tr>
+
+                <tr>
+                    <th>Telefoon<wbr>nummer</th>
+                    <td>{{ wed.contact_telefoon }}</td>
+                </tr>
+
+                <tr>
+                    <th>E-mailadres</th>
+                    <td>{{ wed.contact_email }}</td>
+                </tr>
+
+                {% if wed.extern_beheerd %}
+                    <tr>
+                        <th>Website voor inschrijven</th>
+                        <td>
+                            <a href="{{ wed.contact_website }}" target="_blank" rel="noopener noreferrer">
+                                <i class="material-icons-round left nhb-blauw-text">open_in_new</i>
+                                <code>{{ wed.contact_website }}</code>
+                            </a>
+                        </td>
+                    </tr>
+                {% endif %}
+            </table>
+
+            <table class="white">
+                <tr>
+                    <td colspan="5" class="center">
+                        <h6 class="nhb-blauw-text">Sessies</h6>
+                                             <!-- N = NHB -->
+                        {% if wed.organisatie == 'N' %}
+                            <p>Klassen zonder man/vrouw benoeming zijn gender-neutraal</p>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
+                    <th class="center">Wanneer</th>
+                    <th class="center">Wedstrijdklassen</th>
+                    <th class="center">Nog beschikbaar</th>
+                    <th class="center">Prijs</th>
+                    <th><!-- kolom voor de knoppen --></th>
+                </tr>
+
+                {% for sessie in sessies %}
+                    <tr>
+                        <td class="center">{{ sessie.datum }}<br>{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</td>
+                        <td class="center">
+                            {% for klasse in sessie.klassen %}
+                                <span>{{ klasse.beschrijving }}</span><br>
+                            {% endfor %}
+                        </td>
+                        <td class="center">{{ sessie.aantal_beschikbaar }} (van de {{ sessie.max_sporters }})</td>
+                        <td class="center">&euro;{{ sessie.prijs_euro }}</td>
+                        <td class="center">
+                            {% if sessie.kan_aanmelden %}
+                                <a class="btn-nhb-rood" href="#">
+                                    <i class="material-icons-round">add_shopping_cart</i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+
+        </div>
+    </div>
+
+
+    {% if kan_aanmelden %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Inschrijven</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+
+                <!-- inschrijven sporter -->
+                {% include 'plein/card.dtl' with title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" url=url_inschrijven_sporter %}
+
+                <!-- inschrijven groepje -->
+                {% include 'plein/card.dtl' with title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." icon="group" url=url_inschrijven_groepje %}
+
+                <!-- inschrijven familie -->
+                {% include 'plein/card.dtl' with title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." icon="family_restroom" url=url_inschrijven_familie %}
+
+            </div>
+        </div>
+
+    {% endif %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="kalender-wedstrijd-details" %}
 

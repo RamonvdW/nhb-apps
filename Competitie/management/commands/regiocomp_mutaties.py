@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """ achtergrondtaak om mutaties te verwerken zodat concurrency voorkomen kan worden
-    deze komen binnen via CompetitieMutaties
+    deze komen binnen via CompetitieMutatie
 """
 
 from django.conf import settings

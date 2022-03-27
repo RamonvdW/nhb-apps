@@ -8,7 +8,7 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from Account.models import Account
-from BasisTypen.models import BoogType, GESLACHT_MVX, GESLACHT_MV, GESLACHT_MAN
+from BasisTypen.models import BoogType, GESLACHT_MVX, GESLACHT_MV, GESLACHT_MAN, GESLACHT_ANDERS, ORGANISATIE_IFAA
 # mag niet afhankelijk zijn van Competitie
 from NhbStructuur.models import NhbVereniging
 import datetime
@@ -121,12 +121,38 @@ class Sporter(models.Model):
         if self.sinds_datum.year - self.geboorte_datum.year < 5:
             raise ValidationError('datum van lidmaatschap moet minimaal 5 jaar na geboortejaar zijn')
 
-    def bereken_wedstrijdleeftijd(self, jaar):
-        """ Bereken de wedstrijdleeftijd voor dit lid in het opgegeven jaar
-            De wedstrijdleeftijd is de leeftijd die je bereikt in dat jaar
+    def bereken_wedstrijdleeftijd_wa(self, jaar):
+        """ Bereken de wedstrijdleeftijd voor dit lid volgens de WA regels
+            De wedstrijdleeftijd is de leeftijd die je bereikt in het opgegeven jaar
         """
         # voorbeeld: geboren 2001, huidig jaar = 2019 --> leeftijd 18 wordt bereikt
         return jaar - self.geboorte_datum.year
+
+    def bereken_wedstrijdleeftijd_ifaa(self, datum_eerste_wedstrijddag):
+        """ Bereken de wedstrijdleeftijd voor dit lid volgens de IFAA regels
+            De wedstrijdleeftijd is je leeftijd op de eerste dag van de wedstrijd
+        """
+        # voorbeeld: geboren 2001-10-08, datum_eerste_wedstrijddag = 2019-10-07 --> wedstrijdleeftijd is 17
+        # voorbeeld: geboren 2001-10-08, datum_eerste_wedstrijddag = 2019-10-08 --> wedstrijdleeftijd is 18
+
+        # ga uit van de te bereiken leeftijd dit jaar
+        wedstrijdleeftijd = datum_eerste_wedstrijddag.year - self.geboorte_datum.year
+
+        # vergelijk de wedstrijd datum en de verjaardag
+        tup1 = (datum_eerste_wedstrijddag.month, datum_eerste_wedstrijddag.day)
+        tup2 = (self.geboorte_datum.month, self.geboorte_datum.day)
+        if tup1 < tup2:
+            # nog voor de verjaardag
+            wedstrijdleeftijd -= 1
+
+        return wedstrijdleeftijd
+
+    def bereken_wedstrijdleeftijd(self, datum_eerste_wedstrijd, organisatie):
+        if organisatie == ORGANISATIE_IFAA:
+            wedstrijdleeftijd = self.bereken_wedstrijdleeftijd_ifaa(datum_eerste_wedstrijd)
+        else:
+            wedstrijdleeftijd = self.bereken_wedstrijdleeftijd_wa(datum_eerste_wedstrijd.year)
+        return wedstrijdleeftijd
 
     def volledige_naam(self):
         return self.voornaam + " " + self.achternaam
@@ -203,7 +229,7 @@ class SporterVoorkeuren(models.Model):
     voorkeur_meedoen_competitie = models.BooleanField(default=True)
 
     # sporters met para-classificatie mogen een opmerking toevoegen voor de wedstrijdleiding
-    opmerking_para_sporter = models.CharField(max_length=256, default='')
+    opmerking_para_sporter = models.CharField(max_length=256, default='', blank=True)
 
     # (opt-out) voorkeur voor wedstrijden van specifieke disciplines
     voorkeur_discipline_25m1pijl = models.BooleanField(default=True)
@@ -264,6 +290,49 @@ class SporterBoog(models.Model):
             return "sporter? - %s" % self.boogtype.beschrijving
 
     objects = models.Manager()      # for the editor only
+
+
+def get_sporter_voorkeuren(sporter):
+    """ zoek het SporterVoorkeuren object erbij, of maak een nieuwe aan
+    """
+
+    voorkeuren, was_created = SporterVoorkeuren.objects.get_or_create(sporter=sporter)
+    if was_created:
+        # default voor wedstrijd_geslacht_gekozen = True
+        if sporter.geslacht != GESLACHT_ANDERS:
+            if sporter.geslacht != voorkeuren.wedstrijd_geslacht:  # default is Man
+                voorkeuren.wedstrijd_geslacht = sporter.geslacht
+                voorkeuren.save(update_fields=['wedstrijd_geslacht'])
+        else:
+            voorkeuren.wedstrijd_geslacht_gekozen = False  # laat de sporter kiezen
+            voorkeuren.save(update_fields=['wedstrijd_geslacht_gekozen'])
+
+    return voorkeuren
+
+
+def get_sporter_voorkeuren_wedstrijdbogen(lid_nr):
+    """ retourneer de sporter, voorkeuren en pk's van de boogtypen geselecteerd voor wedstrijden """
+    pks = list()
+    sporter = None
+    voorkeuren = None
+    try:
+        sporter = (Sporter
+                   .objects
+                   .prefetch_related('sportervoorkeuren_set')
+                   .get(lid_nr=lid_nr))
+    except Sporter.DoesNotExist:
+        pass
+    else:
+        voorkeuren = get_sporter_voorkeuren(sporter)
+
+        for sporterboog in (SporterBoog
+                            .objects
+                            .filter(sporter__lid_nr=lid_nr,
+                                    voor_wedstrijd=True)):
+            pks.append(sporterboog.boogtype.id)
+        # for
+
+    return sporter, voorkeuren, pks
 
 
 # end of file

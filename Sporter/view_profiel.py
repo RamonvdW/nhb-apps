@@ -20,8 +20,7 @@ from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Plein.menu import menu_dynamics
 from Records.models import IndivRecord, MATERIAALKLASSE
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
-from .view_voorkeuren import get_sporter_voorkeuren
-from .models import SporterBoog, Speelsterkte
+from .models import SporterBoog, Speelsterkte, get_sporter_voorkeuren
 from decimal import Decimal
 import logging
 import copy

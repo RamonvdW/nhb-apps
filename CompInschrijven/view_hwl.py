@@ -93,7 +93,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                               'achternaam', 'voornaam')):
 
             # de wedstrijdleeftijd voor dit hele seizoen
-            wedstrijdleeftijd = obj.bereken_wedstrijdleeftijd(comp.begin_jaar + 1)
+            wedstrijdleeftijd = obj.bereken_wedstrijdleeftijd_wa(comp.begin_jaar + 1)
             obj.leeftijd = wedstrijdleeftijd
 
             # de wedstrijdklasse voor dit hele seizoen
@@ -450,7 +450,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     raise Http404('Sporter is al ingeschreven')
 
                 # bepaal in welke wedstrijdklasse de schutter komt
-                age = sporterboog.sporter.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar + 1)
+                age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(deelcomp.competitie.begin_jaar + 1)
                 dvl = sporterboog.sporter.sinds_datum
 
                 aanmelding = RegioCompetitieSchutterBoog()

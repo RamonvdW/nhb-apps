@@ -5,14 +5,15 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import (view_landing_page, view_maand, view_manager, view_vereniging, view_wijzig_wedstrijd,
-               view_wijzig_sessies)
+from . import (view_vereniging, view_manager,
+               view_wijzig_wedstrijd, view_wijzig_sessies,
+               view_landing_page, view_maand, view_inschrijven)
 
 app_name = 'Kalender'
 
 urlpatterns = [
 
-    # wedstrijden en inschrijven
+    # wedstrijden
     path('',
          view_landing_page.KalenderLandingPageView.as_view(),
          name='landing-page'),
@@ -24,6 +25,19 @@ urlpatterns = [
     path('<wedstrijd_pk>/info/',
          view_maand.WedstrijdInfoView.as_view(),
          name='wedstrijd-info'),
+
+    # inschrijven
+    path('inschrijven/<wedstrijd_pk>/sporter/',
+         view_inschrijven.WedstrijdInschrijvenSporter.as_view(),
+         name='inschrijven-sporter'),
+
+    path('inschrijven/<wedstrijd_pk>/groep/',
+         view_inschrijven.WedstrijdInschrijvenGroepje.as_view(),
+         name='inschrijven-groepje'),
+
+    path('inschrijven/<wedstrijd_pk>/familie/',
+         view_inschrijven.WedstrijdInschrijvenFamilie.as_view(),
+         name='inschrijven-familie'),
 
 
     # vereniging

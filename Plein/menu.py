@@ -8,6 +8,7 @@ from django.conf import settings
 from django.shortcuts import reverse
 from Account.rechten import account_rechten_is_otp_verified
 from Functie.rol import Rollen, rol_mag_wisselen, rol_get_huidige
+from Mandje.mandje import mandje_is_leeg
 from Taken.taken import aantal_open_taken
 
 
@@ -33,7 +34,12 @@ def menu_dynamics(request, context, actief=None):
         # naam voor op de knop
         context['menu_voornaam'] = request.user.get_first_name()
 
-        # wissel van rol toegestaan?
+        # mandje tonen?
+        if not mandje_is_leeg(request):
+            # we zetten deze niet terug op False zodat views deze ook op True kunnen zetten
+            context['menu_toon_mandje'] = True
+
+            # wissel van rol toegestaan?
         if rol_mag_wisselen(request):
             context['menu_url_wissel_van_rol'] = reverse('Functie:wissel-van-rol')
 

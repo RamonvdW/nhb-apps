@@ -1096,7 +1096,7 @@ class CompetitieMutatie(models.Model):
     # wat is de wijziging (zie MUTATIE_*)
     mutatie = models.PositiveSmallIntegerField(default=0)
 
-    # zijn de lijsten bijgewerkt?
+    # is deze mutatie al verwerkt?
     is_verwerkt = models.BooleanField(default=False)
 
     # door wie is de mutatie geïnitieerd
