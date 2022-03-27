@@ -292,7 +292,7 @@ class KalenderInschrijving(models.Model):
 
     """ Een inschrijving op een wedstrijd sessie, inclusief koper, betaal-status en gebruikte kortingscode """
 
-    # wanneer is deze reservering gemaakt?
+    # wanneer is deze inschrijving aangemaakt?
     wanneer = models.DateTimeField()
 
     # voor welke wedstrijd is dit?
@@ -312,9 +312,6 @@ class KalenderInschrijving(models.Model):
 
     # is de betaling voldaan?
     betaling_voldaan = models.BooleanField(default=False)
-
-    # de transactie
-    #transactie = models.ForeignKey(MandjeTransactie, on_delete.models.PROTECT)
 
     # TODO: traceer de gestuurde emails
 

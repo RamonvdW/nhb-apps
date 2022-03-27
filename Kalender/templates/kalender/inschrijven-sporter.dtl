@@ -10,6 +10,54 @@
 
 {% block pagina %}
 
+    <script type="application/javascript">
+        function toevoegen(id)
+        {
+            console.log('toevoegen: id=', id)
+            const el = document.getElementById(id)
+            console.log('el=', el)
+
+            // voer een POST uit om toe te voegen
+            let form = document.createElement('form');
+            form.setAttribute('method', 'post');
+            form.setAttribute('action', '{{ url_toevoegen }}');
+
+            let inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = "csrfmiddlewaretoken";
+            inp.value = getCookie('csrftoken');
+            form.appendChild(inp);
+
+            inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = 'wedstrijd';
+            inp.value = el.dataset.wedstrijd;
+            form.appendChild(inp);
+
+            inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = 'sessie';
+            inp.value = el.dataset.sessie;
+            form.appendChild(inp);
+
+            inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = 'sporter';
+            inp.value = el.dataset.sporter;
+            form.appendChild(inp);
+
+            inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = 'boog';
+            inp.value = el.dataset.boog;
+            form.appendChild(inp);
+
+            form.style.display = 'hidden';
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
+
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
@@ -55,7 +103,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-nhb-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <table class="white"
+            <table class="white">
                 <tr>
                     <th>Sporter</th>
                     <td>{{ sporter.lid_nr_en_volledige_naam }}</td>
@@ -119,7 +167,7 @@
                 </tr>
 
                 {% for sessie in sessies %}
-                    <tr{% if not sessie.kan_aanmelden %} class="grey-text"{% endif %}>
+                    <tr{% if not sessie.kan_aanmelden and not sessie.al_ingeschreven %} class="grey-text"{% endif %}>
                         <td class="center">{{ sessie.datum }}<br>{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</td>
                         <td class="center">
                             {% for klasse in sessie.klassen %}
@@ -130,8 +178,10 @@
                         <td class="center">&euro;{{ sessie.prijs_euro }}</td>
                         <td class="center">
                             {% if sessie.kan_aanmelden %}
-                                <a class="btn-nhb-rood" href="#">
-                                    <i class="material-icons-round">add</i><i class="material-icons-round">shopping_cart</i></a>
+                                <button class="btn-nhb-rood" id="id_toevoegen_{{ sessie.pk }}" onclick="toevoegen('id_toevoegen_{{ sessie.pk }}')" data-wedstrijd="{{ wed.pk }}" data-sessie="{{ sessie.pk }}" data-sporter={{ sporter.lid_nr }} data-boog="{{ sessie.boogtype_pk }}">
+                                    <i class="material-icons-round">add</i><i class="material-icons-round">shopping_cart</i></button>
+                            {% elif sessie.al_ingeschreven %}
+                                <span class="green-text">Ingeschreven</span>{% if not sessie.inschrijving.betaling_voldaan %}<br><span>(nog niet betaald)</span>{% endif %}
                             {% else %}
                                 {% if not sessie.compatible_leeftijd %}<span>(leeftijd)</span><br>{% endif %}
                                 {% if not sessie.compatible_boog %}<span>(boog)</span><br>{% endif %}

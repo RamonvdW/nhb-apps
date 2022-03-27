@@ -39,6 +39,11 @@ urlpatterns = [
          view_inschrijven.WedstrijdInschrijvenFamilie.as_view(),
          name='inschrijven-familie'),
 
+    # toevoegen aan winkelwagentje
+    path('inschrijven/toevoegen/',
+         view_inschrijven.ToevoegenView.as_view(),
+         name='inschrijven-toevoegen'),
+
 
     # vereniging
     path('vereniging/',

@@ -20,6 +20,11 @@ STATIC_DIR="nhbapps/.static"
 rm -rf "$STATIC_DIR"/*
 ./manage.py collectstatic -l
 
+echo "[INFO] Starting kalender_mutaties (runtime: 60 minutes)"
+pkill -f kalender_mutaties
+./manage.py kalender_mutaties 60 &
+# sleep 1
+
 # start the background processes
 echo "[INFO] Starting regiocomp_mutaties (runtime: 60 minutes)"
 pkill -f regiocomp_mutaties
@@ -45,6 +50,7 @@ fi
 
 # kill the background processes
 echo "[INFO] Stopping background tasks"
+pkill -f kalender_mutaties
 pkill -f regiocomp_mutaties
 pkill -f regiocomp_tussenstand
 

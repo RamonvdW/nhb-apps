@@ -10,6 +10,7 @@ from django.shortcuts import redirect, render, reverse
 from django.views.generic import TemplateView, View
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from Handleiding.views import reverse_handleiding
+from Mandje.mandje import eval_mandje_inhoud
 from Taken.taken import eval_open_taken
 from .menu import menu_dynamics
 
@@ -93,6 +94,9 @@ class PleinView(View):
                 template = TEMPLATE_PLEIN_SPORTER
                 context['url_profiel'] = reverse('Sporter:profiel')
 
+                # kijk of we iets in het mandje zit, zodat we het knopje kunnen tonen
+                eval_mandje_inhoud(request)
+
             elif rol_nu == Rollen.ROL_NONE or rol_nu is None:
                 # gebruik de bezoeker pagina
                 pass
@@ -127,6 +131,9 @@ class PleinView(View):
 
                 # kijk hoeveel taken er open staan
                 eval_open_taken(request)
+
+                # kijk of we iets in het mandje zit, zodat we het knopje kunnen tonen
+                eval_mandje_inhoud(request)
 
         context['naam_site'] = settings.NAAM_SITE
         context['email_support'] = settings.EMAIL_SUPPORT

@@ -6,59 +6,69 @@
 
 from django.utils import timezone
 from datetime import timedelta
+from .models import MandjeInhoud
 
 
-SESSIONVAR_MANDJE_IS_LEEG = 'mandje_is_leeg'
+SESSIONVAR_MANDJE_INHOUD_AANTAL = 'mandje_inhoud_aantal'
 SESSIONVAR_MANDJE_EVAL_AFTER = 'mandje_eval_after'
 
 MANDJE_EVAL_INTERVAL_MINUTES = 1
 
 
-def mandje_is_leeg(request):
-
-    try:
-        is_leeg = request.session[SESSIONVAR_MANDJE_IS_LEEG]
-    except KeyError:
-        is_leeg = True
-
-    return is_leeg
-
-
-def eval_mandje_is_leeg(request):
-    """ Als de gebruiker een tijdje weggeweest is dan kan de achtergrondtaak het mandje leeg gemaakt
-        hebben. Als er dus iets in het mandje zit van deze gebruiker, kijk dan 1x per minuut of dit
-        nog steeds zo is. Actief toevoegen/verwijderen resulteert ook in de evaluatie.
+def mandje_inhoud_aantal(request):
+    """ retourneer hoeveel items in het mandje zitten
+        dit wordt onthouden in de sessie
     """
 
     try:
-        is_leeg = request.session[SESSIONVAR_MANDJE_IS_LEEG]
+        aantal = request.session[SESSIONVAR_MANDJE_INHOUD_AANTAL]
     except KeyError:
-        # niets in het mandje
-        pass
+        aantal = 0
+
+    return aantal
+
+
+def mandje_heeft_toevoeging(request):
+    """ zet de vlag die onthoudt dat er iets in het mandje zit """
+
+    aantal = (MandjeInhoud
+              .objects
+              .filter(account=request.user)
+              .count())
+    request.session[SESSIONVAR_MANDJE_INHOUD_AANTAL] = aantal
+
+    next_eval = timezone.now() + timedelta(seconds=60 * MANDJE_EVAL_INTERVAL_MINUTES)
+    eval_after = str(next_eval.timestamp())     # number of seconds since 1-1-1970
+    request.session[SESSIONVAR_MANDJE_EVAL_AFTER] = eval_after
+
+
+def eval_mandje_inhoud(request):
+    """ Als de gebruiker een tijdje weggeweest is dan kan de achtergrondtaak het mandje geleegd hebben.
+        Als er dus iets in het mandje zit van deze gebruiker, kijk dan 1x per minuut of dit nog steeds zo is.
+        Actief toevoegen/verwijderen resulteert ook in de evaluatie.
+    """
+
+    # kijk of het al weer tijd is
+    try:
+        eval_after = request.session[SESSIONVAR_MANDJE_EVAL_AFTER]
+    except KeyError:
+        eval_after = None
     else:
-        # kijk of het al weer tijd is
-        try:
-            eval_after = request.session[SESSIONVAR_MANDJE_EVAL_AFTER]
-        except KeyError:
+        # TODO: verwijder deze tijdelijke code
+        if eval_after.find('.') < 0:
             eval_after = None
 
-        now_str = str(timezone.now().toordinal())
-        if eval_after and now_str <= eval_after:
-            # nog niet
-            return
+    now_str = str(timezone.now().timestamp())
 
-        # update het aantal open taken in de sessie
-        # en zet het volgende evaluatie moment
-        next_eval = timezone.now() + timedelta(seconds=60*MANDJE_EVAL_INTERVAL_MINUTES)
-        eval_after = str(next_eval.toordinal())
-        request.session[SESSIONVAR_MANDJE_EVAL_AFTER] = eval_after
+    # print('eval_after=%s, now=%s' % (eval_after, now_str))
 
-        aantal = (Mandje
-                  .objects
-                  .exclude(is_afgerond=True)
-                  .filter(toegekend_aan=request.user)
-                  .count())
-        request.session[SESSIONVAR_MANDJE_IS_LEEG] = (aantal == 0)
+    if eval_after and now_str <= eval_after:
+        # nog niet
+        return
+
+    # update het aantal open taken in de sessie
+    # en zet het volgende evaluatie moment
+    mandje_heeft_toevoeging(request)
 
 
 # end of file

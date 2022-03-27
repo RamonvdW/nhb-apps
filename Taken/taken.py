@@ -34,16 +34,20 @@ def eval_open_taken(request, forceer=False):
         eval_after = request.session[SESSIONVAR_TAAK_EVAL_AFTER]
     except KeyError:
         eval_after = None
+    else:
+        if eval_after.find('.') < 0:
+            # oud formaat - weggooien
+            eval_after = None
 
     if not forceer:
-        now_str = str(timezone.now().toordinal())
+        now_str = str(timezone.now().timestamp())
         if eval_after and now_str <= eval_after:
             return
 
     # update het aantal open taken in de sessie
     # en zet het volgende evaluatie moment
     next_eval = timezone.now() + timedelta(seconds=60*TAAK_EVAL_INTERVAL_MINUTES)
-    eval_after = str(next_eval.toordinal())
+    eval_after = str(next_eval.timestamp())
     request.session[SESSIONVAR_TAAK_EVAL_AFTER] = eval_after
 
     aantal_open = (Taak

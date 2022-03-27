@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from BasisTypen.models import ORGANISATIE_WA
-from Mandje.mandje import eval_mandje_is_leeg
+from Mandje.mandje import eval_mandje_inhoud
 from Plein.menu import menu_dynamics
 from .models import (KalenderWedstrijd, KalenderWedstrijdSessie,
                      WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD,
@@ -167,7 +167,7 @@ class KalenderMaandView(TemplateView):
         context['kan_aanmelden'] = self.request.user.is_authenticated
 
         # bepaal of het knopje voor het mandje getoond moet worden
-        eval_mandje_is_leeg(self.request)
+        eval_mandje_inhoud(self.request)
 
         context['kruimels'] = (
             (None, 'Wedstrijdkalender'),

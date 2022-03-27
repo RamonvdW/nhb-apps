@@ -79,11 +79,13 @@ class KalenderWedstrijdKortingscodeAdmin(admin.ModelAdmin):
 
 
 class KalenderInschrijvingAdmin(admin.ModelAdmin):
-    pass
+
+    readonly_fields = ('wanneer', 'wedstrijd', 'sessie', 'sporterboog', 'koper')
 
 
 class KalenderMutatieAdmin(admin.ModelAdmin):
-    pass
+
+    readonly_fields = ('code', 'inschrijving',)
 
 
 admin.site.register(KalenderWedstrijd, KalenderWedstrijdAdmin)

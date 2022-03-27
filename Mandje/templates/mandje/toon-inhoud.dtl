@@ -1,0 +1,95 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Inhoud mandje{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Mandje</h3>
+        </div>
+    </div>
+
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+
+            <!-- dialoog venster -->
+            <div class="white left-align z-depth-3">
+                <div style="padding:0 30px 30px 30px">
+
+                    <form method="post" action="{{ url_opslaan }}">
+                        {% csrf_token %}
+
+                        <table class="white">
+
+                            {% if inhoud|length == 0 %}
+                                <tr><td>hoi</td></tr>
+                            {% else %}
+                                <tr><td>gek</td></tr>
+                            {% endif %}
+
+
+                            {% for regel in inhoud %}
+                                <tr>
+                                    <td>{{ regel }}</td>
+                                </tr>
+                            {% endfor %}
+
+                        </table>
+
+                        <div class="fixed-action-btn" style="display: none">
+                            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                                <i class="material-icons-round left">check</i>Wijzigen opslaan</button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- annuleren van de wedstrijd -->
+
+    {% if url_annuleer %}
+
+        <p style="margin-left:10px">
+            <a class="btn-nhb-rood modal-trigger" href="#bevestig_annuleer">Annuleer deze wedstrijd</a>
+        </p>
+
+        <div class="modal" id="bevestig_annuleer">
+            <div class="modal-content center">
+                <h5>Annuleren?</h5>
+                <p>Wil je deze wedstrijd echt annuleren?</p>
+
+                <form method="post" action="{{ url_annuleer }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="annuleer" value="1">
+
+                    <div class="modal-footer" style="text-align:center; display:block">
+                        <div style="display:inline-block; width:50%">
+                            <button class="btn-nhb-rood" type="submit">Ja</button>
+                        </div>
+                        <div style="display:inline-block; width:50%">
+                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    {% endif %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="mandje-toon-inhoud" %}
+
+{% endblock %}

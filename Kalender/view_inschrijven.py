@@ -4,22 +4,31 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import Http404
+from django.conf import settings
+from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse
-from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils import timezone
-from django.views.generic import TemplateView
-from BasisTypen.models import BoogType, ORGANISATIE_WA, ORGANISATIE_IFAA
+from django.db import IntegrityError
+from django.db.models import ObjectDoesNotExist
+from django.views.generic import TemplateView, View
+from django.contrib.auth.mixins import UserPassesTestMixin
+from BasisTypen.models import BoogType
 from Functie.rol import Rollen, rol_get_huidige
-from Mandje.mandje import eval_mandje_is_leeg
+from Mandje.mandje import mandje_heeft_toevoeging
+from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
-from Sporter.models import get_sporter_voorkeuren_wedstrijdbogen
-from .models import KalenderWedstrijd, KalenderWedstrijdSessie
+from Sporter.models import SporterBoog, get_sporter_voorkeuren_wedstrijdbogen
+from .models import (KalenderWedstrijd, KalenderWedstrijdSessie, KalenderInschrijving,
+                     KalenderMutatie, KALENDER_MUTATIE_INSCHRIJVEN)
 from Kalender.view_maand import MAAND2URL
+import time
+
 
 TEMPLATE_KALENDER_INSCHRIJVEN_SPORTER = 'kalender/inschrijven-sporter.dtl'
 TEMPLATE_KALENDER_INSCHRIJVEN_GROEPJE = 'kalender/inschrijven-groepje.dtl'
 TEMPLATE_KALENDER_INSCHRIJVEN_FAMILIE = 'kalender/inschrijven-familie.dtl'
+
+kalender_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__KALENDER_MUTATIES)
 
 
 def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pks):
@@ -42,6 +51,21 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pks):
                          'tijd_begin',
                          'pk'))
 
+    # kijk of de sporter al ingeschreven is
+    sessie_pk2inschrijving = dict()       # [sessie.pk] = inschrijving
+    if sporter:
+        for inschrijving in (KalenderInschrijving
+                             .objects
+                             .select_related('sessie',
+                                             'sporterboog',
+                                             'sporterboog__sporter')
+                             .filter(sessie__pk__in=sessie_pks,
+                                     sporterboog__sporter=sporter)):
+
+            sessie_pk = inschrijving.sessie.pk
+            sessie_pk2inschrijving[sessie_pk] = inschrijving
+        # for
+
     wedstrijdklassen = list()
     for sessie in sessies:
         sessie.aantal_beschikbaar = sessie.max_sporters - sessie.aantal_inschrijvingen
@@ -58,6 +82,7 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pks):
 
             if klasse.boogtype.id in wedstrijdboog_pks:
                 compatible_boog = True
+                sessie.boogtype_pk = klasse.boogtype.id
 
             # check geslacht is compatible
             if lkl.geslacht_is_compatible(wedstrijd_geslacht):
@@ -75,7 +100,14 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pks):
         # for
 
         if compatible_boog and compatible_leeftijd and compatible_geslacht:
-            sessie.kan_aanmelden = True
+            try:
+                sessie.inschrijving = sessie_pk2inschrijving[sessie.pk]
+            except KeyError:
+                # nog niet in geschreven
+                sessie.kan_aanmelden = True
+            else:
+                # al ingeschreven
+                sessie.al_ingeschreven = True
 
         sessie.compatible_boog = compatible_boog
         sessie.compatible_leeftijd = compatible_leeftijd
@@ -151,6 +183,8 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
                 context['uitleg_geslacht'] = False
 
         context['menu_toon_mandje'] = True
+
+        context['url_toevoegen'] = reverse('Kalender:inschrijven-toevoegen')
 
         url_terug = reverse('Kalender:maand',
                             kwargs={'jaar': wedstrijd.datum_begin.year,
@@ -240,6 +274,8 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
 
         context['menu_toon_mandje'] = True
 
+        context['url_toevoegen'] = reverse('Kalender:inschrijven-toevoegen')
+
         context['url_zoek'] = reverse('Kalender:inschrijven-groepje', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         url_terug = reverse('Kalender:maand',
@@ -294,6 +330,8 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
 
         context['menu_toon_mandje'] = True
 
+        context['url_toevoegen'] = reverse('Kalender:inschrijven-toevoegen')
+
         url_terug = reverse('Kalender:maand',
                             kwargs={'jaar': wedstrijd.datum_begin.year,
                                     'maand': MAAND2URL[wedstrijd.datum_begin.month]})
@@ -306,5 +344,87 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
 
         menu_dynamics(self.request, context, 'kalender')
         return context
+
+
+class ToevoegenView(UserPassesTestMixin, View):
+
+    # class variables shared by all instances
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu != Rollen.ROL_NONE
+
+    def post(self, request, *args, **kwargs):
+        wedstrijd_str = request.POST.get('wedstrijd', '')[:6]   # afkappen voor de veiligheid
+        sporter_str = request.POST.get('sporter', '')[:6]       # afkappen voor de veiligheid
+        sessie_str = request.POST.get('sessie', '')[:6]         # afkappen voor de veiligheid
+        boog_str = request.POST.get('boog', '')[:6]             # afkappen voor de veiligheid
+
+        try:
+            wedstrijd_pk = int(wedstrijd_str)
+            sporter_pk = int(sporter_str)
+            sessie_pk = int(sessie_str)
+            boog_pk = int(boog_str)
+        except (ValueError, TypeError):
+            raise Http404('Slecht verzoek')
+
+        try:
+            wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd_pk)
+            sessie = KalenderWedstrijdSessie.objects.get(pk=sessie_pk)
+            sporterboog = SporterBoog.objects.get(sporter__pk=sporter_pk, boogtype__pk=boog_pk)
+        except ObjectDoesNotExist:
+            raise Http404('Onderdeel van verzoek niet gevonden')
+
+        account_koper = request.user
+
+        now = timezone.now()
+
+        # maak de inschrijving aan en voorkom dubbelen
+        inschrijving = KalenderInschrijving(
+                            wanneer=now,
+                            wedstrijd=wedstrijd,
+                            sessie=sessie,
+                            sporterboog=sporterboog,
+                            koper=account_koper)
+
+        try:
+            inschrijving.save()
+        except IntegrityError:
+            # er is niet voldaan aan de uniqueness constraint (sessie, sporterboog)
+            # ga uit van user-error (dubbelklik op knop) en skip de rest gewoon
+            pass
+        else:
+            # zet dit verzoek door naar het mutaties process
+            mutatie = KalenderMutatie(
+                            code=KALENDER_MUTATIE_INSCHRIJVEN,
+                            inschrijving=inschrijving)
+            mutatie.save()
+
+            # ping het achtergrond process
+            kalender_mutaties_ping.ping()
+
+            snel = str(request.POST.get('snel', ''))[:1]
+            if snel != '1':         # pragma: no cover
+                # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
+                interval = 0.2      # om steeds te verdubbelen
+                total = 0.0         # om een limiet te stellen
+                while not mutatie.is_verwerkt and total + interval <= 3.0:
+                    time.sleep(interval)
+                    total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0
+                    interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
+                    mutatie = KalenderMutatie.objects.get(pk=mutatie.pk)
+                # while
+
+            mandje_heeft_toevoeging(self.request)
+
+        url = reverse('Kalender:wedstrijd-info', kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+        return HttpResponseRedirect(url)
 
 # end of file

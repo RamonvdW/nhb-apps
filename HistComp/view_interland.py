@@ -95,7 +95,7 @@ class InterlandView(UserPassesTestMixin, TemplateView):
 
                         if sporter:
                             indiv.sporter = sporter
-                            indiv.wedstrijd_leeftijd = sporter.bereken_wedstrijdleeftijd(wedstrijd_jaar)
+                            indiv.wedstrijd_leeftijd = sporter.bereken_wedstrijdleeftijd_wa(wedstrijd_jaar)
                             if indiv.wedstrijd_leeftijd >= MINIMALE_LEEFTIJD_JEUGD_INTERLAND:
                                 if indiv.wedstrijd_leeftijd <= MAXIMALE_LEEFTIJD_JEUGD_INTERLAND:
                                     indiv.leeftijd_str = "Jeugd (%s)" % indiv.wedstrijd_leeftijd

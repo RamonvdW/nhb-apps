@@ -12,7 +12,8 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models import F
 from django.core.management.base import BaseCommand
-from Kalender.models import KalenderMutatie
+from Kalender.models import KalenderMutatie, KALENDER_MUTATIE_INSCHRIJVEN, KALENDER_MUTATIE_AFMELDEN
+from Mandje.models import MandjeInhoud
 from Overig.background_sync import BackgroundSync
 from Taken.taken import maak_taak
 import django.db.utils
@@ -31,7 +32,7 @@ class Command(BaseCommand):
 
         self.stop_at = datetime.datetime.now()
 
-        self._sync = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
+        self._sync = BackgroundSync(settings.BACKGROUND_SYNC__KALENDER_MUTATIES)
         self._count_ping = 0
 
         self._hoogste_mutatie_pk = None
@@ -42,52 +43,35 @@ class Command(BaseCommand):
                             help="Aantal minuten actief blijven")
         parser.add_argument('--quick', action='store_true')     # for testing
 
+    def _verwerk_mutatie_inschrijven(self, mutatie):
+        # voeg deze inschrijving toe aan het mandje van de koper
+        inschrijving = mutatie.inschrijving
+        sessie = inschrijving.sessie
+
+        if True or sessie.prijs_euro > 0.0:
+            # leg deze bestelling in het mandje zodat er afgerekend kan worden
+            MandjeInhoud(
+                    account=inschrijving.koper,
+                    inschrijving=inschrijving,
+                    prijs_euro=sessie.prijs_euro).save()
+        # else:
+        #     # gratis deelname loopt niet via het mandje
+        #     inschrijving.betaling_voldaan = True
+        #     inschrijving.save(update_fields=['betaling_voldaan'])
+
+        # verhoog het aantal inschrijvingen op deze sessie
+        sessie.aantal_inschrijvingen += 1
+        sessie.save(update_fields=['aantal_inschrijvingen'])
+
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.code
 
-        if code == MUTATIE_COMPETITIE_OPSTARTEN:
-            self.stdout.write('[INFO] Verwerk mutatie %s: Competitie opstarten' % mutatie.pk)
-            self._verwerk_mutatie_competitie_opstarten()
-
-        elif code == MUTATIE_AG_VASTSTELLEN_18M:
-            self.stdout.write('[INFO] Verwerk mutatie %s: AG vaststellen 18m' % mutatie.pk)
-            aanvangsgemiddelden_vaststellen_voor_afstand(18)
-
-        elif code == MUTATIE_AG_VASTSTELLEN_25M:
-            self.stdout.write('[INFO] Verwerk mutatie %s: AG vaststellen 25m' % mutatie.pk)
-            aanvangsgemiddelden_vaststellen_voor_afstand(25)
-
-        elif code == MUTATIE_INITIEEL:
-            self.stdout.write('[INFO] Verwerk mutatie %s: initieel' % mutatie.pk)
-            self._verwerk_mutatie_initieel(mutatie.deelcompetitie.competitie, mutatie.deelcompetitie.laag)
-
-        elif code == MUTATIE_CUT:
-            self.stdout.write('[INFO] Verwerk mutatie %s: aangepaste limiet (cut)' % mutatie.pk)
-            if mutatie.indiv_klasse:
-                self._verwerk_mutatie_cut_indiv(mutatie.deelcompetitie, mutatie.indiv_klasse,
-                                                mutatie.cut_oud, mutatie.cut_nieuw)
-            else:
-                self._verwerk_mutatie_cut_team(mutatie.deelcompetitie, mutatie.team_klasse,
-                                               mutatie.cut_oud, mutatie.cut_nieuw)
-
-        elif code == MUTATIE_AANMELDEN:
-            self.stdout.write('[INFO] Verwerk mutatie %s: aanmelden' % mutatie.pk)
-            self._verwerk_mutatie_aanmelden(mutatie.deelnemer)
-
-        elif code == MUTATIE_AFMELDEN:
-            self.stdout.write('[INFO] Verwerk mutatie %s: afmelden' % mutatie.pk)
-            self._verwerk_mutatie_afmelden_indiv(mutatie.deelnemer)
-
-        elif code == MUTATIE_TEAM_RONDE:
-            self.stdout.write('[INFO] Verwerk mutatie %s: team ronde' % mutatie.pk)
-            self._verwerk_mutatie_team_ronde(mutatie.deelcompetitie)
-
-        elif code == MUTATIE_AFSLUITEN_REGIOCOMP:
-            self.stdout.write('[INFO] Verwerk mutatie %s: afsluiten regiocompetitie' % mutatie.pk)
-            self._verwerk_mutatie_afsluiten_regiocomp(mutatie.competitie)
+        if code == KALENDER_MUTATIE_INSCHRIJVEN:
+            self.stdout.write('[INFO] Verwerk mutatie %s: Inschrijven' % mutatie.pk)
+            self._verwerk_mutatie_inschrijven(mutatie)
 
         else:
-            self.stdout.write('[ERROR] Onbekende mutatie code %s door %s (pk=%s)' % (code, mutatie.door, mutatie.pk))
+            self.stdout.write('[ERROR] Onbekende mutatie code %s (pk=%s)' % (code, mutatie.pk))
 
     def _verwerk_nieuwe_mutaties(self):
         begin = datetime.datetime.now()
@@ -101,10 +85,12 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] vorige hoogste KalenderMutatie pk is %s' % self._hoogste_mutatie_pk)
             qset = (KalenderMutatie
                     .objects
+                    .select_related('inschrijving')
                     .filter(pk__gt=self._hoogste_mutatie_pk))
         else:
             qset = (KalenderMutatie
                     .objects
+                    .select_related('inschrijving')
                     .all())
 
         mutatie_pks = qset.values_list('pk', flat=True)
@@ -117,14 +103,12 @@ class Command(BaseCommand):
             #         zodat we verse informatie hebben inclusief de vorige mutatie
             mutatie = (KalenderMutatie
                        .objects
-                       .select_related('competitie',
-                                       'deelcompetitie',
-                                       'indiv_klasse',
-                                       'team_klasse',
-                                       'deelnemer',
-                                       'deelnemer__deelcompetitie',
-                                       'deelnemer__sporterboog__sporter',
-                                       'deelnemer__indiv_klasse')
+                       .select_related('inschrijving',
+                                       'inschrijving__wedstrijd',
+                                       'inschrijving__sessie',
+                                       'inschrijving__sporterboog',
+                                       'inschrijving__sporterboog__sporter',
+                                       'inschrijving__koper')
                        .get(pk=pk))
             if not mutatie.is_verwerkt:
                 self._verwerk_mutatie(mutatie)
@@ -134,7 +118,7 @@ class Command(BaseCommand):
         # for
 
         if did_useful_work:
-            self.stdout.write('[INFO] nieuwe hoogste KampioenschapMutatie pk is %s' % self._hoogste_mutatie_pk)
+            self.stdout.write('[INFO] nieuwe hoogste KalenderMutatie pk is %s' % self._hoogste_mutatie_pk)
 
             klaar = datetime.datetime.now()
             self.stdout.write('[INFO] Mutaties verwerkt in %s seconden' % (klaar - begin))
