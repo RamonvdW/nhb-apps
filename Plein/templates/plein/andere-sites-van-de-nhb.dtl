@@ -15,7 +15,7 @@
 
 <!-- Lowlands Archery Series -->
 {% static 'plein/logo_lowlands_130x85.png' as img_src %}
-{% include 'plein/card_logo.dtl' with title="Lowlands Series" text="Wedstrijden volgens internationaal format,<br>met finales en prijzengeld." img_src=img_src img_height=85 img_width=130 img_style="padding:10px" url="https://www.handboogsport.nl/lowlands-shootout/home/" extern_open=True %}
+{% include 'plein/card_logo.dtl' with title="Lowlands Series" text="Wedstrijden volgens internationaal format,<br>met finales en prijzengeld." img_src=img_src img_height=85 img_width=130 img_style="padding:10px" url="https://www.handboogsport.nl/lowlands-shootout/" extern_open=True %}
 
 
 <!-- JeugdFita Cup -->
