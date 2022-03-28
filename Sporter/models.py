@@ -82,6 +82,10 @@ class Sporter(models.Model):
     # geslacht (M/V/X)
     geslacht = models.CharField(max_length=1, choices=GESLACHT_MVX)
 
+    # code waarmee leden die op hetzelfde adres wonen gevonden kunnen worden
+    # let op: niet gebruiken als deze leeg is
+    adres_code = models.CharField(max_length=30, default='', blank=True)
+
     # officieel geregistreerde para classificatie
     para_classificatie = models.CharField(max_length=30, blank=True)
 

@@ -735,6 +735,19 @@ class Command(BaseCommand):
             if not is_valid:
                 continue
 
+            lid_adres_code = ''
+            postcode = member['postal_code']
+            postadres = member['address']
+            if postcode is not None and postadres is not None:
+                postcode = postcode.upper()     # sommige postcodes zijn kleine letters
+                pos = postadres.find(postcode)
+                if pos < 0:
+                    self.stderr.write('[ERROR] Postcode %s niet gevonden in adres %s' % (repr(postcode), repr(postadres)))
+                else:
+                    postadres = postadres[:pos].strip()
+                    spl = postadres.split(' ')
+                    lid_adres_code = postcode.replace(' ', '') + spl[-1]
+
             # try:
             #     lid_edu = member['educations']
             #     print('lid: %s, edu: %s' % (lid_nr, repr(lid_edu)))
@@ -869,6 +882,14 @@ class Command(BaseCommand):
                                                 lid_nr, repr(obj.para_classificatie), repr(lid_para)))
                         obj.para_classificatie = lid_para
                         updated.append('para_classificatie')
+                        self._count_wijzigingen += 1
+
+                    if obj.adres_code != lid_adres_code:
+                        if obj.adres_code != '':        # laat toegevoegd veld: voorkom duizenden regels in de log
+                            self.stdout.write('[INFO] Lid %s: adres_code %s --> %s' % (
+                                                lid_nr, repr(obj.adres_code), repr(lid_adres_code)))
+                        obj.adres_code = lid_adres_code
+                        updated.append('adres_code')
                         self._count_wijzigingen += 1
 
                     if not self.dryrun:
