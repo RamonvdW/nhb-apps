@@ -10,10 +10,13 @@ from . import view_mandje
 app_name = 'Mandje'
 
 urlpatterns = [
+    path('verwijderen/<inhoud_pk>/',
+         view_mandje.VerwijderInschrijving.as_view(),
+         name='verwijder-inschrijving'),
+
     path('',
          view_mandje.ToonInhoudMandje.as_view(),
          name='toon-inhoud'),
-
 ]
 
 # end of file

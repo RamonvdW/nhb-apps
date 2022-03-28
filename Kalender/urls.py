@@ -35,6 +35,10 @@ urlpatterns = [
          view_inschrijven.WedstrijdInschrijvenGroepje.as_view(),
          name='inschrijven-groepje'),
 
+    path('inschrijven/<wedstrijd_pk>/familie/<lid_nr>/',
+         view_inschrijven.WedstrijdInschrijvenFamilie.as_view(),
+         name='inschrijven-familie-lid-nr'),
+
     path('inschrijven/<wedstrijd_pk>/familie/',
          view_inschrijven.WedstrijdInschrijvenFamilie.as_view(),
          name='inschrijven-familie'),

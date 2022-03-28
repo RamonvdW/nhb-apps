@@ -14,10 +14,10 @@ from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import BoogType
 from Functie.rol import Rollen, rol_get_huidige
-from Mandje.mandje import mandje_heeft_toevoeging
+from Mandje.mandje import mandje_is_gewijzigd
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
-from Sporter.models import SporterBoog, get_sporter_voorkeuren_wedstrijdbogen
+from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren_wedstrijdbogen
 from .models import (KalenderWedstrijd, KalenderWedstrijdSessie, KalenderInschrijving,
                      KalenderMutatie, KALENDER_MUTATIE_INSCHRIJVEN)
 from Kalender.view_maand import MAAND2URL
@@ -257,13 +257,34 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
         context['sessies'], _, context['leeftijdsklassen'], geslacht = tups
 
         if context['sporter']:
+
+            # kijk of deze sporter al ingeschreven is
+            sessie_pk2inschrijving = dict()
+            for inschrijving in (KalenderInschrijving
+                                 .objects.filter(wedstrijd=wedstrijd,
+                                                 sporterboog__sporter=sporter)
+                                 .select_related('sessie',
+                                                 'sporterboog',
+                                                 'sporterboog__sporter')):
+                sessie_pk2inschrijving[inschrijving.sessie.pk] = inschrijving
+            # for
+
             kan_aanmelden = False
+            al_ingeschreven = False
             for sessie in context['sessies']:
-                if sessie.kan_aanmelden:
-                    kan_aanmelden = True
-                    break
+                try:
+                    inschrijving = sessie_pk2inschrijving[sessie.pk]
+                except KeyError:
+                    # sporter is nog niet ingeschreven
+                    if sessie.kan_aanmelden:
+                        kan_aanmelden = True
+                else:
+                    # sporter is ingeschreven
+                    al_ingeschreven = True
+                    context['inschrijving'] = inschrijving
             # for
             context['kan_aanmelden'] = kan_aanmelden
+            context['al_ingeschreven'] = al_ingeschreven
 
             # als de sporter geslacht 'anders' heeft en nog geen keuze gemaakt heeft voor wedstrijden
             # kijk dan of er een gender-neutrale sessie is waar op ingeschreven kan worden
@@ -327,6 +348,85 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
             raise Http404('Wedstrijd niet gevonden')
 
         context['wed'] = wedstrijd
+
+        account = self.request.user
+        sporter = Sporter.objects.get(account=account)
+        adres_code = sporter.adres_code
+
+        try:
+            lid_nr = str(kwargs['lid_nr'])[:6]                  # afkappen voor de veiligheid
+            lid_nr = int(lid_nr)
+        except (KeyError, TypeError, ValueError):
+            # val terug op de ingelogde gebruiker
+            lid_nr = sporter.lid_nr
+        else:
+            # controleer de range
+            if not (100000 <= lid_nr <= 999999):
+                # val terug op de ingelogde gebruiker
+                lid_nr = sporter.lid_nr
+
+        context['familie'] = (SporterBoog
+                              .objects
+                              .filter(sporter__adres_code=adres_code,
+                                      voor_wedstrijd=True)
+                              .select_related('sporter',
+                                              'boogtype')
+                              .order_by('sporter__sinds_datum'))
+
+        sporter, voorkeuren, wedstrijdboog_pks = None, None, list()
+        for sporterboog in context['familie']:
+            if sporterboog.sporter.lid_nr == lid_nr:
+                sporterboog.is_geselecteerd = True
+                sporter, voorkeuren, wedstrijdboog_pks = get_sporter_voorkeuren_wedstrijdbogen(lid_nr)
+            else:
+                sporterboog.is_geselecteerd = False
+                sporterboog.url_selecteer = reverse('Kalender:inschrijven-familie-lid-nr',
+                                                    kwargs={'wedstrijd_pk': wedstrijd.pk,
+                                                            'lid_nr': sporterboog.sporter.lid_nr})
+        # for
+
+        if sporter:
+            context['sporter'] = sporter
+
+            context['bogen'] = BoogType.objects.filter(pk__in=wedstrijdboog_pks).order_by('volgorde')
+
+            tups = get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pks)
+            context['sessies'], _, context['leeftijdsklassen'], geslacht = tups
+
+            # kijk of deze sporter al ingeschreven is
+            sessie_pk2inschrijving = dict()
+            for inschrijving in (KalenderInschrijving
+                                 .objects.filter(wedstrijd=wedstrijd,
+                                                 sporterboog__sporter=sporter)
+                                 .select_related('sessie',
+                                                 'sporterboog',
+                                                 'sporterboog__sporter')):
+                sessie_pk2inschrijving[inschrijving.sessie.pk] = inschrijving
+            # for
+
+            kan_aanmelden = False
+            al_ingeschreven = False
+            for sessie in context['sessies']:
+                try:
+                    inschrijving = sessie_pk2inschrijving[sessie.pk]
+                except KeyError:
+                    # sporter is nog niet ingeschreven
+                    if sessie.kan_aanmelden:
+                        kan_aanmelden = True
+                else:
+                    # sporter is ingeschreven
+                    al_ingeschreven = True
+                    context['inschrijving'] = inschrijving
+            # for
+            context['kan_aanmelden'] = kan_aanmelden
+            context['al_ingeschreven'] = al_ingeschreven
+
+            # als de sporter geslacht 'anders' heeft en nog geen keuze gemaakt heeft voor wedstrijden
+            # kijk dan of er een gender-neutrale sessie is waar op ingeschreven kan worden
+            if geslacht == '?':
+                context['uitleg_geslacht'] = True
+                if kan_aanmelden:
+                    context['uitleg_geslacht'] = False
 
         context['menu_toon_mandje'] = True
 
@@ -421,7 +521,7 @@ class ToevoegenView(UserPassesTestMixin, View):
                     mutatie = KalenderMutatie.objects.get(pk=mutatie.pk)
                 # while
 
-            mandje_heeft_toevoeging(self.request)
+            mandje_is_gewijzigd(self.request)
 
         url = reverse('Kalender:wedstrijd-info', kwargs={'wedstrijd_pk': wedstrijd.pk})
 

@@ -28,7 +28,7 @@ def mandje_inhoud_aantal(request):
     return aantal
 
 
-def mandje_heeft_toevoeging(request):
+def mandje_is_gewijzigd(request):
     """ zet de vlag die onthoudt dat er iets in het mandje zit """
 
     aantal = (MandjeInhoud
@@ -66,7 +66,7 @@ def eval_mandje_inhoud(request):
 
     # update het aantal open taken in de sessie
     # en zet het volgende evaluatie moment
-    mandje_heeft_toevoeging(request)
+    mandje_is_gewijzigd(request)
 
 
 # end of file

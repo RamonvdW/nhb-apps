@@ -10,6 +10,30 @@
 
 {% block pagina %}
 
+    <script type="application/javascript">
+        function verwijder(id)
+        {
+            const el = document.getElementById(id)
+            const url = el.dataset.url
+            console.log('url=', url)
+
+            // voer een POST uit om toe te voegen
+            let form = document.createElement('form');
+            form.setAttribute('method', 'post');
+            form.setAttribute('action', url);
+
+            let inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = "csrfmiddlewaretoken";
+            inp.value = getCookie('csrftoken');
+            form.appendChild(inp);
+
+            form.style.display = 'hidden';
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
+
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
@@ -30,61 +54,57 @@
                 <div class="white left-align z-depth-3">
                     <div style="padding:0 30px 30px 30px">
 
-                        <form method="post" action="{{ url_opslaan }}">
-                            {% csrf_token %}
+                        <table class="white">
 
-                            <table class="white">
+                            <tr><td colspan="4" class="center"><h6>Gekozen producten</h6></td></tr>
 
-                                <tr><td colspan="4" class="center"><h6>Gekozen producten</h6></td></tr>
+                            {% for inhoud in mandje_inhoud %}
+                                <tr>
+                                    <td>{% for hdr, lijn in inhoud.beschrijving %}{{ hdr }}<br>{% endfor %}</td>
+                                    <td>{% for hdr, lijn in inhoud.beschrijving %}{{ lijn }}<br>{% endfor %}</td>
+                                    <td class="right-align">&euro;&nbsp;{{ inhoud.prijs_euro }}</td>
+                                    <td class="right-align">
+                                        <button class="btn-nhb-blauw" id="id_verwijder_{{ inhoud.pk }}" onclick="verwijder('id_verwijder_{{ inhoud.pk }}')" data-url="{{ inhoud.url_verwijder }}">
+                                            <i class="material-icons-round">delete</i></button>
+                                    </td>
+                                </tr>
 
-                                {% for regel in inhoud %}
+                                {% if inhoud.gebruikte_code_str %}
                                     <tr>
-                                        <td>{% for hdr, lijn in regel.beschrijving %}{{ hdr }}<br>{% endfor %}</td>
-                                        <td>{% for hdr, lijn in regel.beschrijving %}{{ lijn }}<br>{% endfor %}</td>
-                                        <td class="right-align">&euro;&nbsp;{{ regel.prijs_euro }}</td>
-                                        <td class="right-align">
-                                            <button class="btn-nhb-blauw">
-                                                <i class="material-icons-round">delete</i></button>
-                                        </td>
+                                        <td>Korting</td>
+                                        <td>{{ inhoud.gebruikte_code_str }}</td>
+                                        <td class="right-align">&euro;&nbsp;{{ inhoud.korting_euro }}</td>
+                                        <td><!--knoppen--></td>
                                     </tr>
+                                {% endif %}
+                            {% endfor %}
 
-                                    {% if regel.gebruikte_code_str %}
-                                        <tr>
-                                            <td>Korting</td>
-                                            <td>{{ regel.gebruikte_code_str }}</td>
-                                            <td class="right-align">&euro;&nbsp;{{ regel.korting_euro }}</td>
-                                            <td><!--knoppen--></td>
-                                        </tr>
-                                    {% endif %}
-                                {% endfor %}
+                            <tr>
+                                <td colspan="2" class="right-align"><b>Totaal:</b></td>
+                                <td class="right-align"><b>&euro;&nbsp;{{ totaal_euro }}</b></td>
+                            </tr>
 
-                                <tr>
-                                    <td colspan="2" class="right-align"><b>Totaal:</b></td>
-                                    <td class="right-align"><b>&euro;&nbsp;{{ totaal_euro }}</b></td>
-                                </tr>
+                            <tr>
+                                <td colspan="4">
+                                    <button class="btn-nhb-blauw"><i class="material-icons-round">add</i></button>
+                                    <span style="margin-left:20px">Kortingscode invoeren</span>
+                                </td>
+                            </tr>
 
-                                <tr>
-                                    <td colspan="4">
-                                        <button class="btn-nhb-blauw"><i class="material-icons-round">add</i></button>
-                                        <span style="margin-left:20px">Kortingscode invoeren</span>
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td colspan="3" class="right-align">
+                                    <button class="btn-nhb-rood">{% if moet_afrekenen %}Afrekenen{% else %}Bestelling afronden{% endif %}</button>
+                                </td>
+                                <td><!--knoppen--></td>
+                            </tr>
 
-                                <tr>
-                                    <td colspan="3" class="right-align">
-                                        <button class="btn-nhb-rood">{% if moet_afrekenen %}Afrekenen{% else %}Bestelling afronden{% endif %}</button>
-                                    </td>
-                                    <td><!--knoppen--></td>
-                                </tr>
+                        </table>
 
-                            </table>
+                        <div class="fixed-action-btn" style="display: none">
+                            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                                <i class="material-icons-round left">check</i>Wijzigen opslaan</button>
+                        </div>
 
-                            <div class="fixed-action-btn" style="display: none">
-                                <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
-                                    <i class="material-icons-round left">check</i>Wijzigen opslaan</button>
-                            </div>
-
-                        </form>
                     </div>
                 </div>
 

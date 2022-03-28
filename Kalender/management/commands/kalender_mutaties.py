@@ -63,12 +63,53 @@ class Command(BaseCommand):
         sessie.aantal_inschrijvingen += 1
         sessie.save(update_fields=['aantal_inschrijvingen'])
 
+    def _verwerk_mutatie_afmelden(self, mutatie):
+
+        # verwijder de inschrijving bij de wedstrijd
+        inschrijving = mutatie.inschrijving
+        sessie = inschrijving.sessie
+
+        # verwijder deze inschrijving uit het mandje
+        try:
+            inhoud = (MandjeInhoud
+                      .objects
+                      .select_related('account')
+                      .get(account=inschrijving.koper,
+                           inschrijving=inschrijving))
+
+        except MandjeInhoud.DoesNotExist:
+            # vaag, maar niets aan te doen --> klaag in de log
+            self.stderr.write('[ERROR] Kan inschrijving pk=%s van koper pk=%s niet in een mandje vinden' % (
+                                inschrijving.pk, inschrijving.koper.pk))
+        else:
+            if inschrijving.betaling_voldaan:
+                # TODO: restitutie opzetten
+                self.stderr.write('[ERROR] Kan restitutie nog niet doen')
+
+            self.stdout.write('[INFO] Inhoud pk=%s verwijderd uit het mandje van account %s' % (
+                                inhoud.pk, inhoud.account.pk))
+            inhoud.delete()
+
+        # schrijf de sporter uit bij de sessie
+        sessie.aantal_inschrijvingen -= 1
+        sessie.save(update_fields=['aantal_inschrijvingen'])
+
+        mutatie.inschrijving = None
+        mutatie.save(update_fields=['inschrijving'])
+
+        self.stdout.write('[INFO] Verwijder inschrijving pk=%s' % inschrijving.pk)
+        inschrijving.delete()
+
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.code
 
         if code == KALENDER_MUTATIE_INSCHRIJVEN:
             self.stdout.write('[INFO] Verwerk mutatie %s: Inschrijven' % mutatie.pk)
             self._verwerk_mutatie_inschrijven(mutatie)
+
+        elif code == KALENDER_MUTATIE_AFMELDEN:
+            self.stdout.write('[INFO] Verwerk mutatie %s: Afmelden' % mutatie.pk)
+            self._verwerk_mutatie_afmelden(mutatie)
 
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s (pk=%s)' % (code, mutatie.pk))
