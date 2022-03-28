@@ -167,7 +167,8 @@ class KalenderMaandView(TemplateView):
         context['kan_aanmelden'] = self.request.user.is_authenticated
 
         # bepaal of het knopje voor het mandje getoond moet worden
-        eval_mandje_inhoud(self.request)
+        if self.request.user.is_authenticated:
+            eval_mandje_inhoud(self.request)
 
         context['kruimels'] = (
             (None, 'Wedstrijdkalender'),
