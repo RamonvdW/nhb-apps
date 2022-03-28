@@ -18,8 +18,10 @@ class MandjeInhoud(models.Model):
     inschrijving = models.ForeignKey(KalenderInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
 
     # prijs van deze regel
-    # als een kortingscode toegepast is, dan is deze prijs al verlaagd
-    prijs_euro = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)     # max 999,99
+    prijs_euro = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)       # max 999,99
+
+    # een negatief bedrag: de korting op deze regel
+    korting_euro = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)     # max 999,99
 
     class Meta:
         verbose_name_plural = verbose_name = "Mandje inhoud"

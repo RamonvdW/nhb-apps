@@ -39,6 +39,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('prijs_euro', models.DecimalField(decimal_places=2, default=0.0, max_digits=5)),
+                ('korting_euro', models.DecimalField(decimal_places=2, default=0.0, max_digits=5)),
                 ('account', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='Account.account')),
                 ('inschrijving', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='Kalender.kalenderinschrijving')),
             ],

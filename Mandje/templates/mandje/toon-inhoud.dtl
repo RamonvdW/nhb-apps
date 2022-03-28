@@ -14,49 +14,83 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Mandje</h3>
+            {% if mandje_is_leeg %}
+                <p class="center">Je mandje is leeg</p>
+            {% endif %}
         </div>
     </div>
 
-    <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
-        <div class="col s12">
+    {% if not mandje_is_leeg %}
 
-            <!-- dialoog venster -->
-            <div class="white left-align z-depth-3">
-                <div style="padding:0 30px 30px 30px">
+        <!-- blauwe balk met dialoog venster -->
+        <div class="row-nhb-blauw">
+            <div class="col s12 l10 offset-l1 xl8 offset-xl2">
 
-                    <form method="post" action="{{ url_opslaan }}">
-                        {% csrf_token %}
+                <!-- dialoog venster -->
+                <div class="white left-align z-depth-3">
+                    <div style="padding:0 30px 30px 30px">
 
-                        <table class="white">
+                        <form method="post" action="{{ url_opslaan }}">
+                            {% csrf_token %}
 
-                            {% if inhoud|length == 0 %}
-                                <tr><td>hoi</td></tr>
-                            {% else %}
-                                <tr><td>gek</td></tr>
-                            {% endif %}
+                            <table class="white">
 
+                                <tr><td colspan="4" class="center"><h6>Gekozen producten</h6></td></tr>
 
-                            {% for regel in inhoud %}
+                                {% for regel in inhoud %}
+                                    <tr>
+                                        <td>{% for hdr, lijn in regel.beschrijving %}{{ hdr }}<br>{% endfor %}</td>
+                                        <td>{% for hdr, lijn in regel.beschrijving %}{{ lijn }}<br>{% endfor %}</td>
+                                        <td class="right-align">&euro;&nbsp;{{ regel.prijs_euro }}</td>
+                                        <td class="right-align">
+                                            <button class="btn-nhb-blauw">
+                                                <i class="material-icons-round">delete</i></button>
+                                        </td>
+                                    </tr>
+
+                                    {% if regel.gebruikte_code_str %}
+                                        <tr>
+                                            <td>Korting</td>
+                                            <td>{{ regel.gebruikte_code_str }}</td>
+                                            <td class="right-align">&euro;&nbsp;{{ regel.korting_euro }}</td>
+                                            <td><!--knoppen--></td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+
                                 <tr>
-                                    <td>{{ regel }}</td>
+                                    <td colspan="2" class="right-align"><b>Totaal:</b></td>
+                                    <td class="right-align"><b>&euro;&nbsp;{{ totaal_euro }}</b></td>
                                 </tr>
-                            {% endfor %}
 
-                        </table>
+                                <tr>
+                                    <td colspan="4">
+                                        <button class="btn-nhb-blauw"><i class="material-icons-round">add</i></button>
+                                        <span style="margin-left:20px">Kortingscode invoeren</span>
+                                    </td>
+                                </tr>
 
-                        <div class="fixed-action-btn" style="display: none">
-                            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
-                                <i class="material-icons-round left">check</i>Wijzigen opslaan</button>
-                        </div>
+                                <tr>
+                                    <td colspan="3" class="right-align">
+                                        <button class="btn-nhb-rood">{% if moet_afrekenen %}Afrekenen{% else %}Bestelling afronden{% endif %}</button>
+                                    </td>
+                                    <td><!--knoppen--></td>
+                                </tr>
 
-                    </form>
+                            </table>
 
+                            <div class="fixed-action-btn" style="display: none">
+                                <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
+                                    <i class="material-icons-round left">check</i>Wijzigen opslaan</button>
+                            </div>
+
+                        </form>
+                    </div>
                 </div>
-            </div>
 
+            </div>
         </div>
-    </div>
+    {% endif %}     <!-- mandje niet leeg -->
 
 
     <!-- annuleren van de wedstrijd -->

@@ -175,7 +175,7 @@
                             {% endfor %}
                         </td>
                         <td class="center">{{ sessie.aantal_beschikbaar }} (van de {{ sessie.max_sporters }})</td>
-                        <td class="center">&euro;{{ sessie.prijs_euro }}</td>
+                        <td class="center">&euro;&nbsp;{{ sessie.prijs_euro }}</td>
                         <td class="center">
                             {% if sessie.kan_aanmelden %}
                                 <button class="btn-nhb-rood" id="id_toevoegen_{{ sessie.pk }}" onclick="toevoegen('id_toevoegen_{{ sessie.pk }}')" data-wedstrijd="{{ wed.pk }}" data-sessie="{{ sessie.pk }}" data-sporter={{ sporter.lid_nr }} data-boog="{{ sessie.boogtype_pk }}">

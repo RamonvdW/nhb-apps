@@ -60,8 +60,6 @@ def eval_mandje_inhoud(request):
 
     now_str = str(timezone.now().timestamp())
 
-    # print('eval_after=%s, now=%s' % (eval_after, now_str))
-
     if eval_after and now_str <= eval_after:
         # nog niet
         return
