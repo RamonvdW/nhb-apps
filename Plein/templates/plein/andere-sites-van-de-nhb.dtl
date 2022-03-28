@@ -1,5 +1,5 @@
 {% comment %}
-                Copyright (c) 2020-2021 Ramon van der Winkel.
+                Copyright (c) 2020-2022 Ramon van der Winkel.
                 All rights reserved.
                 Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 {% endcomment %}
@@ -15,7 +15,7 @@
 
 <!-- Lowlands Archery Series -->
 {% static 'plein/logo_lowlands.png' as img_src %}
-{% include 'plein/card_logo.dtl' with title="Lowlands Series" text="Wedstrijden volgens internationaal format,<br>met finales en prijzengeld." img_src=img_src img_height=85 img_width=120 img_style="padding:10px" url="https://www.handboogsport.nl/lowlands-shootout/home/" extern_open=True %}
+{% include 'plein/card_logo.dtl' with title="Lowlands Series" text="Wedstrijden volgens internationaal format,<br>met finales en prijzengeld." img_src=img_src img_height=85 img_width=120 img_style="padding:10px" url="https://www.handboogsport.nl/lowlands-shootout/" extern_open=True %}
 
 
 <!-- JeugdFita Cup -->
