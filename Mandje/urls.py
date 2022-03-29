@@ -14,6 +14,10 @@ urlpatterns = [
          view_mandje.VerwijderInschrijving.as_view(),
          name='verwijder-inschrijving'),
 
+    path('code-toevoegen/',
+         view_mandje.CodeToevoegenView.as_view(),
+         name='code-toevoegen'),
+
     path('',
          view_mandje.ToonInhoudMandje.as_view(),
          name='toon-inhoud'),

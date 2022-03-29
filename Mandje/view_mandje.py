@@ -8,22 +8,25 @@ from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.utils import timezone
-from django.shortcuts import render
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige
-from Kalender.models import KalenderMutatie, KALENDER_MUTATIE_AFMELDEN
+from Kalender.models import (KalenderMutatie, KALENDER_MUTATIE_AFMELDEN,
+                             KalenderWedstrijdKortingscode, KALENDER_MUTATIE_KORTING)
 from Mandje.models import MandjeInhoud
-from Mandje.mandje import mandje_is_gewijzigd
+from Mandje.mandje import mandje_is_gewijzigd, eval_mandje_inhoud
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from decimal import Decimal
+import datetime
 import time
 
 
 TEMPLATE_MANDJE_TOON_INHOUD = 'mandje/toon-inhoud.dtl'
 
 kalender_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__KALENDER_MUTATIES)
+
+MINIMUM_CODE_LENGTH = 8
 
 
 class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
@@ -46,6 +49,8 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
     def get_context_data(self, **kwargs):
 
         context = super().get_context_data(**kwargs)
+
+        eval_mandje_inhoud(self.request)
 
         account = self.request.user
 
@@ -107,12 +112,83 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         context['totaal_euro'] = totaal_euro
         context['moet_afrekenen'] = (totaal_euro > 0)
 
+        context['url_code_toevoegen'] = reverse('Mandje:code-toevoegen')
+
         context['kruimels'] = (
             (None, 'Mandje'),
         )
 
         menu_dynamics(self.request, context)
         return context
+
+
+class CodeToevoegenView(UserPassesTestMixin, View):
+
+    # class variables shared by all instances
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu != Rollen.ROL_NONE
+
+    def post(self, request, *args, **kwargs):
+        """ Voeg de code toe aan het mandje """
+
+        # TODO: rate limiter
+
+        code = ''
+        for char in request.POST.get('code', '')[:40]:        # afkappen voor de veiligheid:
+            if char.isalnum():
+                code += char
+        # for
+
+        account = request.user
+        now = timezone.now()
+        today = now.date()
+
+        if len(code) >= MINIMUM_CODE_LENGTH:
+            # doe een sanity-check of de code gebruikt mag worden
+            for korting in (KalenderWedstrijdKortingscode
+                            .objects
+                            .filter(code__iexact=code,                  # case insensitive
+                                    geldig_tot_en_met__gte=today)):
+
+                # laat het achtergrond process de code toepassen
+                mutatie = KalenderMutatie(
+                                code=KALENDER_MUTATIE_KORTING,
+                                korting=korting,
+                                korting_voor_account=account)
+                mutatie.save()
+
+                # ping het achtergrond process
+                kalender_mutaties_ping.ping()
+
+                snel = str(request.POST.get('snel', ''))[:1]
+                if snel != '1':  # pragma: no cover
+                    # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
+                    interval = 0.2  # om steeds te verdubbelen
+                    total = 0.0  # om een limiet te stellen
+                    while not mutatie.is_verwerkt and total + interval <= 3.0:
+                        time.sleep(interval)
+                        total += interval  # 0.0 --> 0.2, 0.6, 1.4, 3.0
+                        interval *= 2  # 0.2 --> 0.4, 0.8, 1.6, 3.2
+                        mutatie = KalenderMutatie.objects.get(pk=mutatie.pk)
+                    # while
+
+                mandje_is_gewijzigd(self.request)
+
+                break       # from the for
+            # for
+
+        # terug naar het mandje
+        url = reverse('Mandje:toon-inhoud')
+
+        return HttpResponseRedirect(url)
 
 
 class VerwijderInschrijving(UserPassesTestMixin, View):

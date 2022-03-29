@@ -74,7 +74,7 @@ class Migration(migrations.Migration):
                 ('when', models.DateTimeField(auto_now_add=True)),
                 ('code', models.PositiveSmallIntegerField(default=0)),
                 ('is_verwerkt', models.BooleanField(default=False)),
-                ('inschrijving', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='Kalender.kalenderinschrijving')),
+                ('inschrijving', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='Kalender.kalenderinschrijving')),
             ],
             options={
                 'verbose_name': 'Kalender mutatie',

@@ -15,7 +15,6 @@
         {
             const el = document.getElementById(id)
             const url = el.dataset.url
-            console.log('url=', url)
 
             // voer een POST uit om toe te voegen
             let form = document.createElement('form');
@@ -26,6 +25,46 @@
             inp.type = "hidden";
             inp.name = "csrfmiddlewaretoken";
             inp.value = getCookie('csrftoken');
+            form.appendChild(inp);
+
+            form.style.display = 'hidden';
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function code_openen()
+        {
+            const el_knopje = document.getElementById('id_code_knopje')
+            el_knopje.style.display = "none"
+
+            const el_invoer = document.getElementById('id_code_invoeren')
+            el_invoer.style.display = "block"
+
+            const el_input = document.getElementById('id_code_invoer')
+            el_input.focus()
+        }
+
+        function code_toevoegen()
+        {
+            const el = document.getElementById('id_code_invoer')
+            const url = el.dataset.url
+            console.log('url:', url)
+
+            // voer een POST uit om toe te voegen
+            let form = document.createElement('form');
+            form.setAttribute('method', 'post');
+            form.setAttribute('action', url);
+
+            let inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = "csrfmiddlewaretoken";
+            inp.value = getCookie('csrftoken');
+            form.appendChild(inp);
+
+            inp = document.createElement('input');
+            inp.type = "hidden";
+            inp.name = "code";
+            inp.value = el.value;
             form.appendChild(inp);
 
             form.style.display = 'hidden';
@@ -79,31 +118,43 @@
                                 {% endif %}
                             {% endfor %}
 
+                            <!-- totaal -->
                             <tr>
                                 <td colspan="2" class="right-align"><b>Totaal:</b></td>
                                 <td class="right-align"><b>&euro;&nbsp;{{ totaal_euro }}</b></td>
                             </tr>
 
+                            <!-- kortingscode invoeren -->
                             <tr>
                                 <td colspan="4">
-                                    <button class="btn-nhb-blauw"><i class="material-icons-round">add</i></button>
-                                    <span style="margin-left:20px">Kortingscode invoeren</span>
+                                    <div>
+                                        <button id="id_code_knopje" class="btn-nhb-blauw" onclick="code_openen()">
+                                            <i class="material-icons-round">add_circle_outline</i></button>
+                                        <span style="margin-left:20px">Kortingscode toevoegen</span>
+                                    </div>
+
+                                    <div id="id_code_invoeren" class="row" style="display:none; margin-left:10px">
+                                        <div class="col s8 m6 l4">
+                                            <input id="id_code_invoer" type="text" name="code" size="40" maxlength="40" autocomplete="off" data-url="{{ url_code_toevoegen }}">
+                                        </div>
+                                        <div class="col s4 m6 l8">
+                                            <button class="btn-nhb-rood" onclick="code_toevoegen()">
+                                                <i class="material-icons-round">add</i></button>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
 
+                            <!-- afrekenen -->
                             <tr>
                                 <td colspan="3" class="right-align">
-                                    <button class="btn-nhb-rood">{% if moet_afrekenen %}Afrekenen{% else %}Bestelling afronden{% endif %}</button>
+                                    <button id="id_afrekenen" class="btn-nhb-rood">
+                                        <i class="material-icons-round right">shopping_cart_checkout</i>{% if moet_afrekenen %}Afrekenen{% else %}Bestelling afronden{% endif %}</button>
                                 </td>
                                 <td><!--knoppen--></td>
                             </tr>
 
                         </table>
-
-                        <div class="fixed-action-btn" style="display: none">
-                            <button class="btn-nhb-rood" type="submit" id="opslaan_knop" disabled>
-                                <i class="material-icons-round left">check</i>Wijzigen opslaan</button>
-                        </div>
 
                     </div>
                 </div>
@@ -111,38 +162,6 @@
             </div>
         </div>
     {% endif %}     <!-- mandje niet leeg -->
-
-
-    <!-- annuleren van de wedstrijd -->
-
-    {% if url_annuleer %}
-
-        <p style="margin-left:10px">
-            <a class="btn-nhb-rood modal-trigger" href="#bevestig_annuleer">Annuleer deze wedstrijd</a>
-        </p>
-
-        <div class="modal" id="bevestig_annuleer">
-            <div class="modal-content center">
-                <h5>Annuleren?</h5>
-                <p>Wil je deze wedstrijd echt annuleren?</p>
-
-                <form method="post" action="{{ url_annuleer }}">
-                    {% csrf_token %}
-                    <input type="hidden" name="annuleer" value="1">
-
-                    <div class="modal-footer" style="text-align:center; display:block">
-                        <div style="display:inline-block; width:50%">
-                            <button class="btn-nhb-rood" type="submit">Ja</button>
-                        </div>
-                        <div style="display:inline-block; width:50%">
-                            <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-    {% endif %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="mandje-toon-inhoud" %}
 

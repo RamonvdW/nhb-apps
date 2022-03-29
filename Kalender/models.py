@@ -121,6 +121,7 @@ WEDSTRIJD_ORGANISATIE_TO_STR = {
 
 KALENDER_MUTATIE_INSCHRIJVEN = 1
 KALENDER_MUTATIE_AFMELDEN = 2
+KALENDER_MUTATIE_KORTING = 3
 
 KALENDER_MUTATIE_TO_STR = {
     KALENDER_MUTATIE_INSCHRIJVEN: "Inschrijven",
@@ -273,7 +274,7 @@ class KalenderWedstrijdKortingscode(models.Model):
     # de kortingscode kan voor alle leden van een vereniging zijn (voorbeeld: de organiserende vereniging)
 
     # voor welke wedstrijden is deze geldig?
-    voor_wedstrijd = models.ManyToManyField(KalenderWedstrijd)
+    voor_wedstrijd = models.ManyToManyField(KalenderWedstrijd)      # TODO: hernoemen naar wedstrijden (meervoud)
 
     # voor welke sporter is deze kortingscode?
     voor_sporter = models.ForeignKey(Sporter, on_delete=models.SET_NULL, null=True, blank=True)
@@ -341,7 +342,11 @@ class KalenderMutatie(models.Model):
     is_verwerkt = models.BooleanField(default=False)
 
     # waar heeft mutatie op betrekking?
-    inschrijving = models.ForeignKey(KalenderInschrijving, on_delete=models.CASCADE, null=True, blank=True)
+    inschrijving = models.ForeignKey(KalenderInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # kortingscode om toe te passen
+    korting = models.ForeignKey(KalenderWedstrijdKortingscode, on_delete=models.SET_NULL, null=True, blank=True)
+    korting_voor_account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         verbose_name = "Kalender mutatie"

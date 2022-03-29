@@ -62,7 +62,6 @@
                     <td><a class="btn-nhb-rood" href="#">Details</a></td>
                 </tr>
 
-
                 {% for wed in wedstrijden %}
                     <tr>
                         <td>{{ wed.datum_begin }}{% if wed.datum_begin != wed.datum_einde %} - {{ wed.datum_einde }}{% endif %}</td>
@@ -70,7 +69,8 @@
                         <td>{{ wed.locatie.plaats }}</td>
                         <td>
                             {% if wed.url_details %}
-                                <a class="btn-nhb-rood" href="{{ wed.url_details }}">Details</a>
+                                <a class="btn-nhb-rood" href="{{ wed.url_details }}">
+                                    <i class="material-icons-round">play_arrow</i></a>
                             {% endif %}
                         </td>
                     </tr>

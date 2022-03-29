@@ -371,7 +371,8 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
                                       voor_wedstrijd=True)
                               .select_related('sporter',
                                               'boogtype')
-                              .order_by('sporter__sinds_datum'))
+                              .order_by('sporter__sinds_datum',
+                                        'sporter__lid_nr'))
 
         sporter, voorkeuren, wedstrijdboog_pks = None, None, list()
         for sporterboog in context['familie']:
@@ -418,8 +419,10 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
                     al_ingeschreven = True
                     context['inschrijving'] = inschrijving
             # for
-            context['kan_aanmelden'] = kan_aanmelden
             context['al_ingeschreven'] = al_ingeschreven
+
+            # toon ook de sessie als de sporter geen compatibele boog heeft
+            context['kan_aanmelden'] = not al_ingeschreven  # kan_aanmelden
 
             # als de sporter geslacht 'anders' heeft en nog geen keuze gemaakt heeft voor wedstrijden
             # kijk dan of er een gender-neutrale sessie is waar op ingeschreven kan worden
@@ -465,6 +468,7 @@ class ToevoegenView(UserPassesTestMixin, View):
         sporter_str = request.POST.get('sporter', '')[:6]       # afkappen voor de veiligheid
         sessie_str = request.POST.get('sessie', '')[:6]         # afkappen voor de veiligheid
         boog_str = request.POST.get('boog', '')[:6]             # afkappen voor de veiligheid
+        goto_str = request.POST.get('goto', '')[:6]             # afkappen voor de veiligheid
 
         try:
             wedstrijd_pk = int(wedstrijd_str)
@@ -477,7 +481,7 @@ class ToevoegenView(UserPassesTestMixin, View):
         try:
             wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd_pk)
             sessie = KalenderWedstrijdSessie.objects.get(pk=sessie_pk)
-            sporterboog = SporterBoog.objects.get(sporter__pk=sporter_pk, boogtype__pk=boog_pk)
+            sporterboog = SporterBoog.objects.select_related('sporter').get(sporter__pk=sporter_pk, boogtype__pk=boog_pk)
         except ObjectDoesNotExist:
             raise Http404('Onderdeel van verzoek niet gevonden')
 
@@ -523,7 +527,12 @@ class ToevoegenView(UserPassesTestMixin, View):
 
             mandje_is_gewijzigd(self.request)
 
-        url = reverse('Kalender:wedstrijd-info', kwargs={'wedstrijd_pk': wedstrijd.pk})
+        if goto_str == 'F':
+            # ga terug naar de familie pagina met dezelfde sporter geselecteerd
+            url = reverse('Kalender:inschrijven-familie-lid-nr', kwargs={'wedstrijd_pk': wedstrijd.pk,
+                                                                         'lid_nr': sporterboog.sporter.lid_nr})
+        else:
+            url = reverse('Kalender:wedstrijd-info', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         return HttpResponseRedirect(url)
 

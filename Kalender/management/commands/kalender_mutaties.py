@@ -12,7 +12,8 @@ from django.conf import settings
 from django.utils import timezone
 from django.db.models import F
 from django.core.management.base import BaseCommand
-from Kalender.models import KalenderMutatie, KALENDER_MUTATIE_INSCHRIJVEN, KALENDER_MUTATIE_AFMELDEN
+from Kalender.models import (KalenderMutatie, KALENDER_MUTATIE_INSCHRIJVEN, KALENDER_MUTATIE_AFMELDEN,
+                             KALENDER_MUTATIE_KORTING)
 from Mandje.models import MandjeInhoud
 from Overig.background_sync import BackgroundSync
 from Taken.taken import maak_taak
@@ -46,6 +47,10 @@ class Command(BaseCommand):
     def _verwerk_mutatie_inschrijven(self, mutatie):
         # voeg deze inschrijving toe aan het mandje van de koper
         inschrijving = mutatie.inschrijving
+        if inschrijving is None:
+            self.stderr.write('[WARNING] Inschrijf mutatie heeft geen inschrijving (meer) - skipping')
+            return
+
         sessie = inschrijving.sessie
 
         if True or sessie.prijs_euro > 0.0:
@@ -67,6 +72,10 @@ class Command(BaseCommand):
 
         # verwijder de inschrijving bij de wedstrijd
         inschrijving = mutatie.inschrijving
+        if inschrijving is None:
+            self.stderr.write('[WARNING] Afmeld mutatie heeft geen inschrijving (meer) - skipping')
+            return
+
         sessie = inschrijving.sessie
 
         # verwijder deze inschrijving uit het mandje
@@ -100,6 +109,62 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Verwijder inschrijving pk=%s' % inschrijving.pk)
         inschrijving.delete()
 
+    def _verwerk_mutatie_korting(self, mutatie):
+        """ Deze functie controleert of een kortingscode toegepast mag worden op de inschrijvingen
+            die in het mandje van het account staan.
+        """
+        korting = mutatie.korting
+        account = mutatie.korting_voor_account
+
+        # controleer de geldigheidsdatum
+        if korting.geldig_tot_en_met < timezone.now().date():
+            self.stdout.write('[WARNING] Kortingscode pk=%s is niet meer geldig' % korting.pk)
+            return
+
+        # zoek regels in het mandje en kijk of de code toegepast kan worden
+        for inhoud in (MandjeInhoud
+                       .objects
+                       .exclude(inschrijving=None)      # alleen kalender inschrijvingen vinden
+                       .filter(account=account)
+                       .select_related('inschrijving')):
+
+            toepassen = False
+
+            if korting.voor_sporter:
+                self.stdout.write('[DEBUG] Korting: voor_sporter=%s' % korting.voor_sporter)
+                # code voor een specifiek sporter
+                if korting.voor_sporter == inhoud.inschrijving.sporterboog.sporter:
+                    toepassen = True
+                    self.stdout.write('[DEBUG] Korting: juiste voor_sporter')
+
+            if korting.voor_vereniging:
+                self.stdout.write('[DEBUG] Korting: voor_vereniging=%s' % korting.voor_vereniging)
+                # alle sporters van deze vereniging mogen deze code gebruiken
+                # (bijvoorbeeld de organiserende vereniging)
+                if korting.voor_sporter.bij_vereniging == inhoud.inschrijving.sporterboog.sporter.bij_vereniging:
+                    toepassen = True
+                    self.stdout.write('[DEBUG] Korting: juiste voor_vereniging')
+
+            if korting.voor_wedstrijd.all().count() > 0:
+                # korting is begrensd tot 1 wedstrijd of een serie wedstrijden
+                if korting.voor_wedstrijd.filter(id=inhoud.inschrijving.wedstrijd.id).exists():
+                    # code voor een specifieke wedstrijd
+                    toepassen = True
+                    self.stdout.write('[DEBUG] Korting: juiste wedstrijd %s' % inhoud.inschrijving.wedstrijd)
+                else:
+                    # leuke code, maar niet bedoeld voor deze wedstrijd
+                    toepassen = False
+                    self.stdout.write('[DEBUG] Korting: verkeerde wedstrijd')
+
+            if toepassen:
+                # TODO: bij gebruik meerdere codes alleen de hoogste korting geven
+                self.stdout.write('[INFO] Korting pk=%s toepassen op mandje inhoud pk=%s' % (korting.pk, inhoud.pk))
+            else:
+                # self.stdout.write('[INFO] Korting pk=%s niet toepassen' % korting.pk)
+                pass
+
+        # for
+
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.code
 
@@ -110,6 +175,10 @@ class Command(BaseCommand):
         elif code == KALENDER_MUTATIE_AFMELDEN:
             self.stdout.write('[INFO] Verwerk mutatie %s: Afmelden' % mutatie.pk)
             self._verwerk_mutatie_afmelden(mutatie)
+
+        elif code == KALENDER_MUTATIE_KORTING:
+            self.stdout.write('[INFO] Verwerk mutatie %s: Korting' % mutatie.pk)
+            self._verwerk_mutatie_korting(mutatie)
 
         else:
             self.stdout.write('[ERROR] Onbekende mutatie code %s (pk=%s)' % (code, mutatie.pk))
@@ -126,12 +195,18 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] vorige hoogste KalenderMutatie pk is %s' % self._hoogste_mutatie_pk)
             qset = (KalenderMutatie
                     .objects
-                    .select_related('inschrijving')
+                    .select_related('inschrijving',
+                                    'inschrijving__sporterboog__sporter'
+                                    'korting',
+                                    'korting__voor_sporter',
+                                    'korting__voor_vereniging',
+                                    'korting__voor_wedstrijd')
                     .filter(pk__gt=self._hoogste_mutatie_pk))
         else:
             qset = (KalenderMutatie
                     .objects
-                    .select_related('inschrijving')
+                    .select_related('inschrijving',
+                                    'korting')
                     .all())
 
         mutatie_pks = qset.values_list('pk', flat=True)
