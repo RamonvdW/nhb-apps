@@ -131,6 +131,7 @@
         </div>
     </div>
 
+    <!-- rood bordje -->
     {% if comp.aantal_scores_voor_rk_deelname != 6 %}
         <p>&nbsp;</p>
 

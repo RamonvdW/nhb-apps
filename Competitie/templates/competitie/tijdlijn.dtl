@@ -35,7 +35,7 @@
 
             <tr>
                 <td class="center{% if comp.fase == 'A' %} nhb-rood white-text{% endif %}">A</td>
-                <td>Vaststellen klassengrenzen (Bondsburo)<br>Instellingen regio en planning regiocompetitie wedstrijden (RCL)</td>
+                <td>Vaststellen klassengrenzen (Bondsbureau)<br>Instellingen regio en planning regiocompetitie wedstrijden (RCL)</td>
                 <td>
                     {% if comp.fase > 'A' %}
                         <span class="green-text">Afgerond</span>
@@ -225,7 +225,7 @@
 
             <tr>
                 <td {% if comp.fase == 'R' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>R</td>
-                <td>Uitslagen BK wedstrijden overgenomen</td>
+                <td>Uitslagen BK wedstrijden overgenomen (BKO)</td>
                 <td>
                     {% if comp.fase > 'R' %}
                         <span class="green-text">Afgerond</span>
@@ -235,7 +235,7 @@
 
             <tr>
                 <td {% if comp.fase == 'S' %} class="nhb-rood white-text center"{% else %}class="center"{% endif %}>S</td>
-                <td>Afsluiten competitie (BKO)</td>
+                <td>Afsluiten competitie seizoen (Bondsbureau)</td>
                 <td></td>
             </tr>
         </table>

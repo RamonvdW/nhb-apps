@@ -244,8 +244,12 @@ class Competitie(models.Model):
 
         # fase A was totdat dit object gemaakt werd
 
-        if self.alle_bks_afgesloten:
+        if self.is_afgesloten:
             self.fase = 'Z'
+            return
+
+        if self.alle_bks_afgesloten:
+            self.fase = 'S'
             return
 
         now = timezone.now()

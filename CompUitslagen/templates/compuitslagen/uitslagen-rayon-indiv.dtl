@@ -120,6 +120,18 @@
                 <p class="center">Sporters worden in de lijst opgenomen als ze {{ comp.aantal_scores_voor_rk_deelname }} of meer scores hebben</p>
             </div>
         </div>
+    {% else %}
+
+        <!-- rood bordje -->
+        <div class="row">
+            <div style="padding:10px">
+                <div class="col s12 m8 offset-m2 nhb-rood white-text center">
+                    <p class="">Aanmelden of afmelden voor de RK wedstrijd kan bij je eigen vereniging tot en met <b>{{ bevestig_tot_datum }}</b></p>
+                </div>
+            </div>
+        </div>
+
+
     {% endif %}
 
 
@@ -134,7 +146,7 @@
                 {% endif %}
 
                 <tr>
-                    <td colspan="6" class="center">
+                    <td colspan="8" class="center">
                         <h5>{{ obj.klasse_str }}</h5>
                         {% if obj.wedstrijd %}
                             {% if comp.rk_is_afgelast %}<s>{% endif %}

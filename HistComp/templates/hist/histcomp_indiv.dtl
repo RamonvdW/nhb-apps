@@ -104,7 +104,7 @@
                 <th class="center">Gem<span class="hide-on-small-only">iddelde pijl</span></th>
                 <th class="center hide-on-small-only" colspan="7">Scores</th>
                 <th class="right-align hide-on-med-and-up">Scores</th>
-                <th class="center hide-on-small-only">Totaal</th>
+                <th class="right-align hide-on-small-only">Totaal</th>
                 <td rowspan="{{ aantal_regels }}" class="nhb-table-zijrand"></td>
             </tr>
 

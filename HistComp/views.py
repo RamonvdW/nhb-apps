@@ -18,7 +18,7 @@ TEMPLATE_HISTCOMP_INDIV = 'hist/histcomp_indiv.dtl'
 
 RESULTS_PER_PAGE = 100
 
-KLASSEN_VOLGORDE = ("Recurve", "Compound", "Barebow", "Instinctive Bow", "Traditional", "Longbow")
+KLASSEN_VOLGORDE = ("Recurve", "Compound", "Barebow", "Instinctive bow", "Instinctive Bow", "Traditional", "Longbow")
 
 COMP_TYPE_STR = {
     '18': 'Indoor',
