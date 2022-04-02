@@ -15,7 +15,7 @@ from Competitie.models import (LAAG_REGIO, LAAG_RK, DEELNAME_NEE,
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import CompetitieWedstrijd
 from Functie.rol import Rollen, rol_get_huidige_functie
-
+import datetime
 
 TEMPLATE_COMPUITSLAGEN_RAYON_INDIV = 'compuitslagen/uitslagen-rayon-indiv.dtl'
 TEMPLATE_COMPUITSLAGEN_RAYON_TEAMS = 'compuitslagen/uitslagen-rayon-teams.dtl'
