@@ -257,11 +257,11 @@ class CompetitieOverzichtView(View):
                                                   kwargs={'comp_pk': comp.pk})
                     comp.titel_doorzetten = '%s doorzetten naar de volgende fase (RK naar BK)' % comp.beschrijving
                     context['bko_doorzetten'] = comp
-                elif 'R' <= comp.fase < 'Z':
-                    comp.url_afsluiten = reverse('Competitie:bko-competitie-afsluiten',
-                                                 kwargs={'comp_pk': comp.pk})
-                    comp.titel_afsluiten = '%s helemaal afsluiten' % comp.beschrijving
-                    context['bko_afsluiten'] = comp
+                #elif comp.fase == 'R':
+                #    comp.url_afsluiten = reverse('Competitie:bko-competitie-afsluiten',
+                #                                 kwargs={'comp_pk': comp.pk})
+                #    comp.titel_afsluiten = '%s helemaal afsluiten' % comp.beschrijving
+                #    context['bko_afsluiten'] = comp
             # for
 
         if kan_beheren:
