@@ -120,17 +120,17 @@
                 <p class="center">Sporters worden in de lijst opgenomen als ze {{ comp.aantal_scores_voor_rk_deelname }} of meer scores hebben</p>
             </div>
         </div>
-    {% else %}
+
+    {% elif bevestig_tot_datum %}
 
         <!-- rood bordje -->
         <div class="row">
             <div style="padding:10px">
-                <div class="col s12 m8 offset-m2 nhb-rood white-text center">
+                <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
                     <p class="">Aanmelden of afmelden voor de RK wedstrijd kan bij je eigen vereniging tot en met <b>{{ bevestig_tot_datum }}</b></p>
                 </div>
             </div>
         </div>
-
 
     {% endif %}
 
