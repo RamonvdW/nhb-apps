@@ -120,6 +120,9 @@ class UitslagenRayonIndivView(TemplateView):
         comp.bepaal_fase()
         context['comp'] = comp
 
+        if comp.fase == 'J':
+            context['bevestig_tot_datum'] = comp.rk_eerste_wedstrijd - datetime.timedelta(days=14)
+
         comp_boog = kwargs['comp_boog'][:2]          # afkappen voor de veiligheid
 
         # rayon_nr is optioneel (eerste binnenkomst zonder rayon nummer)
