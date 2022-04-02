@@ -68,7 +68,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
     def test_alles(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(28):
+        with self.assert_max_queries(29):
             management.call_command('database_opschonen', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())

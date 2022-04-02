@@ -41,7 +41,7 @@
     </div>
 
 
-    {% if bb_kan_competitie_aanmaken %}
+    {% if toon_management_competitie %}
 
         <!-- witruimte -->
         <div class="row center">
@@ -55,8 +55,13 @@
         <div class="row-nhb-blauw">
             <div class="col s12">
                 <!-- competities opstarten -->
-                {% url 'Competitie:instellingen-volgende-competitie' as card_url %}
-                {% include 'plein/card.dtl' with title="Start competitie" text="Instellingen voor seizoen "|add:nieuwe_seizoen|add:" controleren en nieuwe competities aanmaken." icon="playlist_add" url=card_url %}
+                {% if url_seizoen_opstarten %}
+                    {% include 'plein/card.dtl' with title="Start competitie" text="Instellingen voor seizoen "|add:nieuwe_seizoen|add:" controleren en nieuwe competities aanmaken." icon="playlist_add" url=url_seizoen_opstarten %}
+                {% endif %}
+
+                {% if url_seizoen_afsluiten %}
+                    {% include 'plein/card.dtl' with title="Seizoen afsluiten" text="Sluit het competitie seizoen af (Indoor + 25m1pijl)." icon="waving_hand" url=url_seizoen_afsluiten %}
+                {% endif %}
             </div>
         </div>
 

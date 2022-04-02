@@ -13,7 +13,11 @@ def get_url_voor_competitie(functie_nu):
 
     # bepaal bij welke competitie deze rol hoort
     afstand = functie_nu.comp_type  # 18/25
-    comps = Competitie.objects.filter(afstand=afstand).order_by('begin_jaar')  # laagste (oudste) eerst
+    comps = (Competitie
+             .objects
+             .exclude(is_afgesloten=True)
+             .filter(afstand=afstand)
+             .order_by('begin_jaar'))     # laagste (oudste) eerst
 
     if len(comps) == 1:         # pragma: no branch
         url = reverse('Competitie:overzicht', kwargs={'comp_pk': comps[0].pk})

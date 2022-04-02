@@ -7,12 +7,10 @@
 from django.shortcuts import render
 from django.urls import reverse
 from django.http import Http404
-from django.views.generic import View, TemplateView
+from django.views.generic import View
 from django.utils.formats import localize
-from django.templatetags.static import static
 from Competitie.models import get_competitie_boog_typen
-from Competitie.operations import bepaal_startjaar_nieuwe_competitie
-from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
+from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Score.operations import wanneer_ag_vastgesteld
 from Sporter.models import SporterBoog
@@ -21,12 +19,9 @@ from .models import LAAG_REGIO, LAAG_BK, Competitie, DeelCompetitie
 import datetime
 
 
-TEMPLATE_COMPETITIE_KIES_SEIZOEN = 'competitie/kies.dtl'
 TEMPLATE_COMPETITIE_OVERZICHT = 'competitie/overzicht.dtl'
 TEMPLATE_COMPETITIE_OVERZICHT_HWL = 'competitie/overzicht-hwl.dtl'
 TEMPLATE_COMPETITIE_OVERZICHT_BEHEERDER = 'competitie/overzicht-beheerder.dtl'
-
-JA_NEE = {False: 'Nee', True: 'Ja'}
 
 
 class CompetitieOverzichtView(View):
@@ -261,11 +256,11 @@ class CompetitieOverzichtView(View):
                                                   kwargs={'comp_pk': comp.pk})
                     comp.titel_doorzetten = '%s doorzetten naar de volgende fase (RK naar BK)' % comp.beschrijving
                     context['bko_doorzetten'] = comp
-                elif 'R' <= comp.fase < 'Z':
-                    comp.url_afsluiten = reverse('Competitie:bko-competitie-afsluiten',
-                                                 kwargs={'comp_pk': comp.pk})
-                    comp.titel_afsluiten = '%s helemaal afsluiten' % comp.beschrijving
-                    context['bko_afsluiten'] = comp
+                elif comp.fase == 'R':
+                    comp.url_doorzetten = reverse('Competitie:bko-doorzetten-voorbij-bk',
+                                                  kwargs={'comp_pk': comp.pk})
+                    comp.titel_doorzetten = '%s doorzetten voorbij het BK' % comp.beschrijving
+                    context['bko_doorzetten'] = comp
             # for
 
         if kan_beheren:
@@ -426,72 +421,6 @@ class CompetitieOverzichtView(View):
 
         menu_dynamics(self.request, context)
         return render(request, template, context)
-
-
-class CompetitieKiesView(TemplateView):
-
-    """ deze view wordt gebruik om een keuze te laten maken uit de beschikbare bondscompetities. """
-
-    # class variables shared by all instances
-    template_name = TEMPLATE_COMPETITIE_KIES_SEIZOEN
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        rol_nu = rol_get_huidige(self.request)
-
-        context['competities'] = comps = list()
-
-        eerdere_comp = dict()
-
-        for comp in (Competitie
-                     .objects
-                     .exclude(is_afgesloten=True)
-                     .order_by('afstand', 'begin_jaar')):
-
-            comp.bepaal_openbaar(rol_nu)
-
-            if comp.is_openbaar:
-                comps.append(comp)
-
-                if comp.afstand == '18':
-                    comp.img_src = static('plein/badge_nhb_indoor.png')
-                else:
-                    comp.img_src = static('plein/badge_nhb_25m1p.png')
-
-                comp.card_url = reverse('Competitie:overzicht',
-                                        kwargs={'comp_pk': comp.pk})
-                comp.bepaal_fase()
-                if comp.fase < 'B':
-                    comp.text = "Hier worden de voorbereidingen voor getroffen voor de volgende bondscompetitie."
-                else:
-                    comp.text = "Alle informatie en uitslagen van de actuele bondscompetitie."
-
-            try:
-                if comp.afstand in eerdere_comp:
-                    comp.is_volgend_seizoen = True
-            except KeyError:
-                pass
-            eerdere_comp[comp.afstand] = True
-        # for
-
-        if rol_nu == Rollen.ROL_BB:
-            # als er nog geen competitie is voor het huidige jaar, geeft de BB dan de optie om deze op te starten
-            beginjaar = bepaal_startjaar_nieuwe_competitie()
-            context['nieuwe_seizoen'] = "%s/%s" % (beginjaar, beginjaar+1)
-            context['bb_kan_competitie_aanmaken'] = (0 == Competitie.objects.filter(begin_jaar=beginjaar).count())
-
-        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
-            context['toon_beheerders'] = True
-            context['huidige_rol'] = rol_get_beschrijving(self.request)
-
-        context['kruimels'] = (
-            (None, 'Bondscompetities'),
-        )
-
-        menu_dynamics(self.request, context)
-        return context
 
 
 # end of file

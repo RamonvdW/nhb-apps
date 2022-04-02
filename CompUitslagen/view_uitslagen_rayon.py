@@ -13,7 +13,7 @@ from Competitie.models import (LAAG_REGIO, LAAG_RK, DEELNAME_NEE,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam)
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie
-
+import datetime
 
 TEMPLATE_COMPUITSLAGEN_RAYON_INDIV = 'compuitslagen/uitslagen-rayon-indiv.dtl'
 TEMPLATE_COMPUITSLAGEN_RAYON_TEAMS = 'compuitslagen/uitslagen-rayon-teams.dtl'
@@ -118,6 +118,9 @@ class UitslagenRayonIndivView(TemplateView):
         comp.bepaal_fase()
         context['comp'] = comp
 
+        if comp.fase == 'J':
+            context['bevestig_tot_datum'] = comp.rk_eerste_wedstrijd - datetime.timedelta(days=14)
+
         comp_boog = kwargs['comp_boog'][:2]          # afkappen voor de veiligheid
 
         # rayon_nr is optioneel (eerste binnenkomst zonder rayon nummer)
@@ -149,22 +152,21 @@ class UitslagenRayonIndivView(TemplateView):
             raise Http404('Competitie niet gevonden')
 
         context['deelcomp'] = deelcomp_rk
-        deelcomp_rk.competitie.bepaal_fase()           # TODO: kan weg? We hebben al comp (zie hierboven)
 
-        # haal de planning erbij: competitieklasse --> competitiewedstrijd
-        indiv2wedstrijd = dict()    # [indiv_pk] = competitiewedstrijd
+        # haal de planning erbij: competitie klasse --> competitie match
+        indiv2match = dict()    # [indiv_pk] = CompetitieMatch
         match_pks = list(deelcomp_rk.rk_bk_matches.values_list('pk', flat=True))
-        for wedstrijd in (CompetitieMatch
+        for match in (CompetitieMatch
                           .objects
                           .prefetch_related('indiv_klassen')
                           .select_related('locatie')
                           .filter(pk__in=match_pks)):
 
-            if wedstrijd.locatie:
-                wedstrijd.adres_str = ", ".join(wedstrijd.locatie.adres.split('\n'))
+            if match.locatie:
+                match.adres_str = ", ".join(match.locatie.adres.split('\n'))
 
-            for indiv in wedstrijd.indiv_klassen.all():
-                indiv2wedstrijd[indiv.pk] = wedstrijd
+            for indiv in match.indiv_klassen.all():
+                indiv2match[indiv.pk] = match
             # for
         # for
 
@@ -230,7 +232,7 @@ class UitslagenRayonIndivView(TemplateView):
                 indiv = deelnemer.indiv_klasse
                 deelnemer.klasse_str = indiv.beschrijving
                 try:
-                    deelnemer.match = indiv2wedstrijd[indiv.pk]
+                    deelnemer.match = indiv2match[indiv.pk]
                 except KeyError:
                     pass
 
