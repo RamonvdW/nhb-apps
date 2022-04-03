@@ -14,10 +14,17 @@ import datetime
 
 def zet_competitie_fase(comp, fase):
     """ deze helper weet hoe de competitie datums gemanipuleerd moeten worden
-        zodat models.Competitie.zet_fase() de gevraagde fase terug zal geven
+        zodat models.Competitie.bepaal_fase() de gevraagde fase terug zal geven
     """
 
     if fase == 'Z':
+        comp.is_afgesloten = True
+        comp.save()
+        return
+
+    comp.is_afgesloten = False
+
+    if fase == 'S':
         comp.alle_bks_afgesloten = True
         comp.save()
         return
@@ -277,6 +284,10 @@ class TestCompetitieFase(TestCase):
         self.assertEqual(comp.fase, 'S')
 
         comp.alle_bks_afgesloten = True
+        comp.bepaal_fase()
+        self.assertEqual(comp.fase, 'S')
+
+        comp.is_afgesloten = True
         comp.bepaal_fase()
         self.assertEqual(comp.fase, 'Z')
 
