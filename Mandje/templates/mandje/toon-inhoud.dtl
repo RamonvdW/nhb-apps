@@ -112,7 +112,7 @@
                                     <tr>
                                         <td>Korting</td>
                                         <td>{{ inhoud.gebruikte_code_str }}</td>
-                                        <td class="right-align">&euro;&nbsp;{{ inhoud.korting_euro }}</td>
+                                        <td class="right-align">{% if inhoud.korting_euro > 0.0001 %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ inhoud.korting_euro }}</td>
                                         <td><!--knoppen--></td>
                                     </tr>
                                 {% endif %}
@@ -121,7 +121,7 @@
                             <!-- totaal -->
                             <tr>
                                 <td colspan="2" class="right-align"><b>Totaal:</b></td>
-                                <td class="right-align"><b>&euro;&nbsp;{{ totaal_euro }}</b></td>
+                                <td class="right-align"><b>&euro;&nbsp;{{ totaal_euro|floatformat:2 }}</b></td>
                             </tr>
 
                             <!-- kortingscode invoeren -->
@@ -135,7 +135,7 @@
 
                                     <div id="id_code_invoeren" class="row" style="display:none; margin-left:10px">
                                         <div class="col s8 m6 l4">
-                                            <input id="id_code_invoer" type="text" name="code" size="40" maxlength="40" autocomplete="off" data-url="{{ url_code_toevoegen }}">
+                                            <input id="id_code_invoer" type="text" name="code" size="40" maxlength="40" autocomplete="off" data-url="{{ url_code_toevoegen }}" onchange="code_toevoegen()">
                                         </div>
                                         <div class="col s4 m6 l8">
                                             <button class="btn-nhb-rood" onclick="code_toevoegen()">

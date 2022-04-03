@@ -353,6 +353,9 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
         sporter = Sporter.objects.get(account=account)
         adres_code = sporter.adres_code
 
+        # fall-back als dit de geselecteerde sporter is
+        context['sporter'] = sporter
+
         try:
             lid_nr = str(kwargs['lid_nr'])[:6]                  # afkappen voor de veiligheid
             lid_nr = int(lid_nr)
@@ -365,17 +368,21 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
                 # val terug op de ingelogde gebruiker
                 lid_nr = sporter.lid_nr
 
-        context['familie'] = (SporterBoog
-                              .objects
-                              .filter(sporter__adres_code=adres_code,
-                                      voor_wedstrijd=True)
-                              .select_related('sporter',
-                                              'boogtype')
-                              .order_by('sporter__sinds_datum',
-                                        'sporter__lid_nr'))
+        context['familie'] = list(SporterBoog
+                                  .objects
+                                  .filter(sporter__adres_code=adres_code,
+                                          voor_wedstrijd=True)
+                                  .select_related('sporter',
+                                                  'boogtype')
+                                  .order_by('sporter__sinds_datum',
+                                            'sporter__lid_nr'))
 
         sporter, voorkeuren, wedstrijdboog_pks = None, None, list()
+        sporter_pks = list()
         for sporterboog in context['familie']:
+            if sporterboog.sporter.pk not in sporter_pks:
+                sporter_pks.append(sporterboog.sporter.pk)
+
             if sporterboog.sporter.lid_nr == lid_nr:
                 sporterboog.is_geselecteerd = True
                 sporter, voorkeuren, wedstrijdboog_pks = get_sporter_voorkeuren_wedstrijdbogen(lid_nr)
@@ -430,6 +437,19 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
                 context['uitleg_geslacht'] = True
                 if kan_aanmelden:
                     context['uitleg_geslacht'] = False
+        else:
+            # sporter heeft geen boog voorkeur, dus mag waarschijnlijk niet schieten
+            # context['sporter'] is al ingevuld (nodig in de template)
+            pass
+
+        # voeg niet-schietende sporters toe aan de lijst
+        for sporter in Sporter.objects.filter(adres_code=adres_code).order_by('sinds_datum', 'lid_nr'):
+            if sporter.pk not in sporter_pks:
+                dummy = SporterBoog(sporter=sporter)
+                dummy.geen_boog = True
+                dummy.is_geselecteerd = (sporter.lid_nr == lid_nr)
+                context['familie'].append(dummy)
+        # for
 
         context['menu_toon_mandje'] = True
 

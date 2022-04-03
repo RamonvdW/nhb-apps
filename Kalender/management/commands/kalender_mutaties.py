@@ -13,10 +13,11 @@ from django.utils import timezone
 from django.db.models import F
 from django.core.management.base import BaseCommand
 from Kalender.models import (KalenderMutatie, KALENDER_MUTATIE_INSCHRIJVEN, KALENDER_MUTATIE_AFMELDEN,
-                             KALENDER_MUTATIE_KORTING)
+                             KalenderWedstrijdKortingscode, KALENDER_MUTATIE_KORTING)
 from Mandje.models import MandjeInhoud
 from Overig.background_sync import BackgroundSync
 from Taken.taken import maak_taak
+from decimal import Decimal
 import django.db.utils
 import traceback
 import datetime
@@ -141,13 +142,13 @@ class Command(BaseCommand):
                 self.stdout.write('[DEBUG] Korting: voor_vereniging=%s' % korting.voor_vereniging)
                 # alle sporters van deze vereniging mogen deze code gebruiken
                 # (bijvoorbeeld de organiserende vereniging)
-                if korting.voor_sporter.bij_vereniging == inhoud.inschrijving.sporterboog.sporter.bij_vereniging:
+                if korting.voor_vereniging == inhoud.inschrijving.sporterboog.sporter.bij_vereniging:
                     toepassen = True
                     self.stdout.write('[DEBUG] Korting: juiste voor_vereniging')
 
-            if korting.voor_wedstrijd.all().count() > 0:
+            if korting.voor_wedstrijden.all().count() > 0:
                 # korting is begrensd tot 1 wedstrijd of een serie wedstrijden
-                if korting.voor_wedstrijd.filter(id=inhoud.inschrijving.wedstrijd.id).exists():
+                if korting.voor_wedstrijden.filter(id=inhoud.inschrijving.wedstrijd.id).exists():
                     # code voor een specifieke wedstrijd
                     toepassen = True
                     self.stdout.write('[DEBUG] Korting: juiste wedstrijd %s' % inhoud.inschrijving.wedstrijd)
@@ -157,8 +158,33 @@ class Command(BaseCommand):
                     self.stdout.write('[DEBUG] Korting: verkeerde wedstrijd')
 
             if toepassen:
-                # TODO: bij gebruik meerdere codes alleen de hoogste korting geven
-                self.stdout.write('[INFO] Korting pk=%s toepassen op mandje inhoud pk=%s' % (korting.pk, inhoud.pk))
+                vervang = True
+                if inhoud.inschrijving.gebruikte_code:
+                    try:
+                        huidige_code = inhoud.inschrijving.gebruikte_code
+                    except KalenderWedstrijdKortingscode.DoesNotExist:
+                        # huidige code is niet valide --> vervang
+                        pass
+                    else:
+                        # ga er vanuit dat de code nog geldig is omdat het mandje een korte levensduur heeft
+                        # controleer welke de hoogste korting geeft
+                        if huidige_code.percentage > korting.percentage:
+                            vervang = False
+
+                if vervang:
+                    # pas de code toe op deze inschrijving
+                    inschrijving = inhoud.inschrijving
+                    inschrijving.gebruikte_code = korting
+                    inschrijving.save(update_fields=['gebruikte_code'])
+
+                    self.stdout.write('[INFO] Korting pk=%s toepassen op inschrijving pk=%s in mandje inhoud pk=%s' % (
+                                            korting.pk, inschrijving.pk, inhoud.pk))
+
+                    # bereken de korting voor het mandje
+                    procent = korting.percentage / Decimal(100.0)
+                    inhoud.korting_euro = inhoud.prijs_euro * procent
+                    inhoud.korting_euro = min(inhoud.korting_euro, inhoud.prijs_euro)  # voorkom korting > prijs
+                    inhoud.save(update_fields=['korting_euro'])
             else:
                 # self.stdout.write('[INFO] Korting pk=%s niet toepassen' % korting.pk)
                 pass

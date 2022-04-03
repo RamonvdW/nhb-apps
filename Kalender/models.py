@@ -274,7 +274,7 @@ class KalenderWedstrijdKortingscode(models.Model):
     # de kortingscode kan voor alle leden van een vereniging zijn (voorbeeld: de organiserende vereniging)
 
     # voor welke wedstrijden is deze geldig?
-    voor_wedstrijd = models.ManyToManyField(KalenderWedstrijd)      # TODO: hernoemen naar wedstrijden (meervoud)
+    voor_wedstrijden = models.ManyToManyField(KalenderWedstrijd)
 
     # voor welke sporter is deze kortingscode?
     voor_sporter = models.ForeignKey(Sporter, on_delete=models.SET_NULL, null=True, blank=True)
@@ -284,6 +284,9 @@ class KalenderWedstrijdKortingscode(models.Model):
 
     # hoeveel korting (0% .. 100%)
     percentage = models.PositiveSmallIntegerField(default=100)
+
+    def __str__(self):
+        return "%s: %s" % (self.pk, self.code)
 
     class Meta:
         verbose_name = "Kalender kortingscode"

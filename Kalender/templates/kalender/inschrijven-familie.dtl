@@ -121,7 +121,7 @@
                 {% for sporterboog in familie %}
                     <tr>
                         <td>{{ sporterboog.sporter.lid_nr_en_volledige_naam }}</td>
-                        <td>{{ sporterboog.boogtype.beschrijving }}</td>
+                        <td>{% if sporterboog.geen_boog %}<i>Geen</i>{% else %}{{ sporterboog.boogtype.beschrijving }}{% endif %}</td>
                         <td class="center">
                             {% if sporterboog.is_geselecteerd %}
                                 <i>Geselecteerd</i>

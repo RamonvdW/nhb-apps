@@ -17,10 +17,10 @@ class MandjeInhoud(models.Model):
     # inschrijving voor een wedstrijd
     inschrijving = models.ForeignKey(KalenderInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
 
-    # prijs van deze regel
+    # prijs van deze regel (een positief bedrag)
     prijs_euro = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)       # max 999,99
 
-    # een negatief bedrag: de korting op deze regel
+    # de korting op deze regel (ook een positief bedrag!)
     korting_euro = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)     # max 999,99
 
     class Meta:
@@ -45,6 +45,9 @@ class MandjeTransactie(models.Model):
 
     class Meta:
         verbose_name = "Mandje transactie"
+
+
+# TODO: boekhouding: betaald bedrag, ingehouden transactiekosten door CPSP, ontvangen bedrag, uitbetaalde bedragen, opsplitsing btw/transactiekosten
 
 
 # end of file

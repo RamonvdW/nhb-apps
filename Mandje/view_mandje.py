@@ -68,7 +68,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
         context['mandje_is_leeg'] = True
 
-        totaal_euro = Decimal(0)
+        totaal_euro = Decimal()
         for inhoud in mandje_inhoud:
             # maak een beschrijving van deze regel
             inhoud.beschrijving = beschrijving = list()
@@ -91,14 +91,14 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                 tup = ('Boog', '%s' % sporterboog.boogtype.beschrijving)
                 beschrijving.append(tup)
 
-                if inhoud.korting_euro:
+                if inschrijving.gebruikte_code:
+                    code = inschrijving.gebruikte_code
+                    inhoud.gebruikte_code_str = "code %s (korting: %d%%)" % (code.code, code.percentage)
+                elif inhoud.korting_euro:
                     inhoud.gebruikte_code_str = "Onbekende code"
-                    if inschrijving.gebruikte_code:
-                        code = inschrijving.gebruikte_code
-                        inhoud.gebruikte_code_str = "code %s (korting: %d%%)" % (code.code, code.percentage)
 
                 totaal_euro += inhoud.prijs_euro
-                totaal_euro += inhoud.korting_euro
+                totaal_euro -= inhoud.korting_euro
             else:
                 beschrijving.append('Onbekend product')
 
@@ -108,6 +108,10 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
             context['mandje_is_leeg'] = False
         # for
+
+        # nooit een negatief totaalbedrag tonen want we geven geen geld weg
+        if totaal_euro < 0.0:
+            totaal_euro = 0.0
 
         context['totaal_euro'] = totaal_euro
         context['moet_afrekenen'] = (totaal_euro > 0)
