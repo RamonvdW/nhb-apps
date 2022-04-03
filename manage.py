@@ -63,6 +63,7 @@ def my_format(self):
 
 
 def main():
+    # eigen formatteer functie voor de stack trace, zodat we alleen nuttige regels kunnen tonen
     StackSummary.format = my_format
 
     try:

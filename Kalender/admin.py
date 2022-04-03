@@ -76,7 +76,11 @@ class KalenderWedstrijdDeeluitslagAdmin(admin.ModelAdmin):          # pragma: no
 
 class KalenderWedstrijdKortingscodeAdmin(admin.ModelAdmin):
 
-    autocomplete_fields = ('voor_wedstrijden', 'voor_sporter', 'voor_vereniging')
+    list_filter = (
+                   ('uitgegeven_door', admin.RelatedOnlyFieldListFilter),
+                  )
+
+    autocomplete_fields = ('voor_wedstrijden', 'voor_sporter', 'voor_vereniging', 'uitgegeven_door')
 
 
 class KalenderInschrijvingAdmin(admin.ModelAdmin):

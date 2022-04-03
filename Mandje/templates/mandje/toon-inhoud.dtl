@@ -48,7 +48,7 @@
         {
             const el = document.getElementById('id_code_invoer')
             const url = el.dataset.url
-            console.log('url:', url)
+            // console.log('url:', url)
 
             // voer een POST uit om toe te voegen
             let form = document.createElement('form');

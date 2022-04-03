@@ -493,6 +493,11 @@ class SeizoenAfsluitenView(UserPassesTestMixin, TemplateView):
                 context['url_afsluiten'] = None
         # for
 
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (None, 'Seizoen afsluiten'),
+        )
+
         menu_dynamics(self.request, context)
         return context
 

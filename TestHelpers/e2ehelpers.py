@@ -804,5 +804,25 @@ class E2EHelpers(TestCase):
                     print(line)
             # for
 
+    def verwerk_kalender_mutaties(self, show_warnings=True, show_all=False):
+        # vraag de achtergrond taak om de mutaties te verwerken
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('kalender_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+
+        err_msg = f1.getvalue()
+        if '[ERROR]' in err_msg:                        # pragma: no cover
+            self.fail(msg='Unexpected error from kalender_mutaties:\n' + err_msg)
+
+        if show_all:                                                            # pragma: no cover
+            print(f1.getvalue())
+            print(f2.getvalue())
+
+        elif show_warnings:
+            lines = f1.getvalue() + '\n' + f2.getvalue()
+            for line in lines.split('\n'):
+                if line.startswith('[WARNING] '):                               # pragma: no cover
+                    print(line)
+            # for
 
 # end of file

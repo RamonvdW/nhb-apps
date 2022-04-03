@@ -13,20 +13,17 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige
 from Kalender.models import (KalenderMutatie, KALENDER_MUTATIE_AFMELDEN,
                              KalenderWedstrijdKortingscode, KALENDER_MUTATIE_KORTING)
-from Mandje.models import MandjeInhoud
+from Mandje.models import MandjeInhoud, MINIMUM_CODE_LENGTH
 from Mandje.mandje import mandje_is_gewijzigd, eval_mandje_inhoud
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from decimal import Decimal
-import datetime
 import time
 
 
 TEMPLATE_MANDJE_TOON_INHOUD = 'mandje/toon-inhoud.dtl'
 
 kalender_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__KALENDER_MUTATIES)
-
-MINIMUM_CODE_LENGTH = 8
 
 
 class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
@@ -47,12 +44,10 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         return self.rol_nu != Rollen.ROL_NONE
 
     def get_context_data(self, **kwargs):
-
         context = super().get_context_data(**kwargs)
+        account = self.request.user
 
         eval_mandje_inhoud(self.request)
-
-        account = self.request.user
 
         mandje_inhoud = (MandjeInhoud
                          .objects
@@ -65,7 +60,6 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                                          'inschrijving__sporterboog__sporter'))
 
         context['mandje_inhoud'] = mandje_inhoud
-
         context['mandje_is_leeg'] = True
 
         totaal_euro = Decimal()
@@ -86,8 +80,15 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                 sporterboog = inschrijving.sporterboog
                 tup = ('Sporter', '%s' % sporterboog.sporter.lid_nr_en_volledige_naam())
                 beschrijving.append(tup)
-                tup = ('Van vereniging', '%s' % sporterboog.sporter.bij_vereniging.ver_nr_en_naam())
+
+                sporter_ver = sporterboog.sporter.bij_vereniging
+                if sporter_ver:
+                    ver_naam = sporter_ver.ver_nr_en_naam()
+                else:
+                    ver_naam = 'Onbekend'
+                tup = ('Van vereniging', ver_naam)
                 beschrijving.append(tup)
+
                 tup = ('Boog', '%s' % sporterboog.boogtype.beschrijving)
                 beschrijving.append(tup)
 
@@ -100,7 +101,8 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                 totaal_euro += inhoud.prijs_euro
                 totaal_euro -= inhoud.korting_euro
             else:
-                beschrijving.append('Onbekend product')
+                tup = ('Fout', 'Onbekend product')
+                beschrijving.append(tup)
 
             # maak een knop om deze bestelling te verwijderen uit het mandje
             inhoud.url_verwijder = reverse('Mandje:verwijder-inschrijving',
@@ -157,7 +159,7 @@ class CodeToevoegenView(UserPassesTestMixin, View):
 
         if len(code) >= MINIMUM_CODE_LENGTH:
             # doe een sanity-check of de code gebruikt mag worden
-            for korting in (KalenderWedstrijdKortingscode
+            for korting in (KalenderWedstrijdKortingscode               # pragma: no branch
                             .objects
                             .filter(code__iexact=code,                  # case insensitive
                                     geldig_tot_en_met__gte=today)):
@@ -173,14 +175,14 @@ class CodeToevoegenView(UserPassesTestMixin, View):
                 kalender_mutaties_ping.ping()
 
                 snel = str(request.POST.get('snel', ''))[:1]
-                if snel != '1':  # pragma: no cover
+                if snel != '1':                                             # pragma: no cover
                     # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
-                    interval = 0.2  # om steeds te verdubbelen
-                    total = 0.0  # om een limiet te stellen
+                    interval = 0.2                  # om steeds te verdubbelen
+                    total = 0.0                     # om een limiet te stellen
                     while not mutatie.is_verwerkt and total + interval <= 3.0:
                         time.sleep(interval)
-                        total += interval  # 0.0 --> 0.2, 0.6, 1.4, 3.0
-                        interval *= 2  # 0.2 --> 0.4, 0.8, 1.6, 3.2
+                        total += interval           # 0.0 --> 0.2, 0.6, 1.4, 3.0
+                        interval *= 2               # 0.2 --> 0.4, 0.8, 1.6, 3.2
                         mutatie = KalenderMutatie.objects.get(pk=mutatie.pk)
                     # while
 
@@ -195,7 +197,7 @@ class CodeToevoegenView(UserPassesTestMixin, View):
         return HttpResponseRedirect(url)
 
 
-class VerwijderInschrijving(UserPassesTestMixin, View):
+class VerwijderUitMandje(UserPassesTestMixin, View):
 
     # class variables shared by all instances
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
@@ -249,9 +251,7 @@ class VerwijderInschrijving(UserPassesTestMixin, View):
         mandje_is_gewijzigd(self.request)
 
         url = reverse('Mandje:toon-inhoud')
-
         return HttpResponseRedirect(url)
-
 
 
 # end of file

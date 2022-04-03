@@ -101,8 +101,9 @@ class Command(BaseCommand):
             inhoud.delete()
 
         # schrijf de sporter uit bij de sessie
-        sessie.aantal_inschrijvingen -= 1
-        sessie.save(update_fields=['aantal_inschrijvingen'])
+        if sessie.aantal_inschrijvingen > 0:            # voorkom ongelukken: kan negatief niet opslaan
+            sessie.aantal_inschrijvingen -= 1
+            sessie.save(update_fields=['aantal_inschrijvingen'])
 
         mutatie.inschrijving = None
         mutatie.save(update_fields=['inschrijving'])
@@ -123,6 +124,7 @@ class Command(BaseCommand):
             return
 
         # zoek regels in het mandje en kijk of de code toegepast kan worden
+        aantal = 0
         for inhoud in (MandjeInhoud
                        .objects
                        .exclude(inschrijving=None)      # alleen kalender inschrijvingen vinden
@@ -130,13 +132,14 @@ class Command(BaseCommand):
                        .select_related('inschrijving')):
 
             toepassen = False
+            aantal += 1
 
             if korting.voor_sporter:
                 self.stdout.write('[DEBUG] Korting: voor_sporter=%s' % korting.voor_sporter)
                 # code voor een specifiek sporter
                 if korting.voor_sporter == inhoud.inschrijving.sporterboog.sporter:
                     toepassen = True
-                    self.stdout.write('[DEBUG] Korting: juiste voor_sporter')
+                    self.stdout.write('[DEBUG] Korting: juiste voor_sporter lid_nr=%s' % korting.voor_sporter.lid_nr)
 
             if korting.voor_vereniging:
                 self.stdout.write('[DEBUG] Korting: voor_vereniging=%s' % korting.voor_vereniging)
@@ -144,14 +147,14 @@ class Command(BaseCommand):
                 # (bijvoorbeeld de organiserende vereniging)
                 if korting.voor_vereniging == inhoud.inschrijving.sporterboog.sporter.bij_vereniging:
                     toepassen = True
-                    self.stdout.write('[DEBUG] Korting: juiste voor_vereniging')
+                    self.stdout.write('[DEBUG] Korting: juiste voor_vereniging %s' % korting.voor_vereniging.ver_nr)
 
             if korting.voor_wedstrijden.all().count() > 0:
                 # korting is begrensd tot 1 wedstrijd of een serie wedstrijden
                 if korting.voor_wedstrijden.filter(id=inhoud.inschrijving.wedstrijd.id).exists():
                     # code voor een specifieke wedstrijd
                     toepassen = True
-                    self.stdout.write('[DEBUG] Korting: juiste wedstrijd %s' % inhoud.inschrijving.wedstrijd)
+                    self.stdout.write('[DEBUG] Korting: juiste wedstrijd pk=%s' % inhoud.inschrijving.wedstrijd.pk)
                 else:
                     # leuke code, maar niet bedoeld voor deze wedstrijd
                     toepassen = False
@@ -190,6 +193,8 @@ class Command(BaseCommand):
                 pass
 
         # for
+
+        self.stdout.write('[DEBUG] Aantal mandje inhoud bekeken: %s' % aantal)
 
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.code

@@ -54,10 +54,18 @@ urlpatterns = [
          view_vereniging.VerenigingKalenderWedstrijdenView.as_view(),
          name='vereniging'),
 
-    # wedstrijd
     path('vereniging/kies-type/',
          view_vereniging.NieuweWedstrijdKiesType.as_view(),
          name='nieuwe-wedstrijd-kies-type'),
+
+    path('vereniging/kortingscodes/',
+         view_vereniging.VerenigingKortingcodesView.as_view(),
+         name='vereniging-codes'),
+
+    path('vereniging/kortingscodes/<korting_pk>/wijzig/',
+         view_vereniging.VerenigingWijzigKortingcodesView.as_view(),
+         name='vereniging-wijzig-code'),
+
 
     # manager competitiezaken
     path('manager/',

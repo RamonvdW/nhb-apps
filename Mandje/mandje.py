@@ -54,8 +54,9 @@ def eval_mandje_inhoud(request):
     except KeyError:
         eval_after = None
     else:
-        # TODO: verwijder deze tijdelijke code
-        if eval_after.find('.') < 0:
+        # FUTURE: verwijder deze tijdelijke code
+        # als er geen punt in staat, dan is het type verkeerd
+        if eval_after.find('.') < 0:            # pragma: no cover
             eval_after = None
 
     now_str = str(timezone.now().timestamp())

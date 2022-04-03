@@ -269,6 +269,11 @@ class KalenderWedstrijdKortingscode(models.Model):
     # tot wanneer geldig?
     geldig_tot_en_met = models.DateField()
 
+    # welke vereniging heeft deze code uitgegeven? (en mag deze dus wijzigen)
+    uitgegeven_door = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT,
+                                        null=True, blank=True,
+                                        related_name='korting_uitgever')
+
     # de kortingscode kan voor 1 of meerdere wedstrijden gelden
     # de kortingscode kan voor een specifieke sporter zijn (voorbeeld: winnaar van vorige jaar)
     # de kortingscode kan voor alle leden van een vereniging zijn (voorbeeld: de organiserende vereniging)

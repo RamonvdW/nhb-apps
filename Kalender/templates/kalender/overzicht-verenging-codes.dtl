@@ -1,0 +1,81 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Kortingscodes{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Kortingscodes</h3>
+            <p>Kortingscodes voor wedstrijden bij jullie vereniging</p>
+            <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white" id="tabel1">
+                <thead>
+                    <tr>        <!-- filter veld -->
+                        <td></td>
+                        <td colspan="3" class="table-filter">
+                            <input class="table-filter" oninput="myTableFilter(this, 'tabel1')" placeholder="Zoeken"/>
+                        </td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr>
+                        <th>Geldig tot en met</th>
+                        <th data-filter="on">Code</th>
+                        <th data-filter="on">Voor wie</th>
+                        <th data-filter="on">Geldig op wedstrijden</th>
+                        <th>Percentage</th>
+                        <th><!-- kolom voor knoppen --></th>
+                    </tr>
+                </thead>
+
+                {% for code in codes %}
+                    <tr>
+                        <td>{{ code.geldig_tot_en_met }}</td>
+                        <td>{{ code.code }}</td>
+                        <td>{{ code.voor_wie_str|linebreaksbr }}</td>
+                        <td>{{ code.voor_wedstrijden_str|linebreaksbr }}</td>
+                        <td>{{ code.percentage }}%</td>
+
+                        <td>
+                            <a class="btn-nhb-rood" href="{{ code.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">
+                                <i class="material-icons-round">edit</i></a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6"><i>Er zijn nog geen codes</i></td>
+                    </tr>
+                {% endfor %}
+
+                {% if url_nieuwe_code %}
+                    <tr data-tablefilter="stop">
+                        <td colspan="6" class="center">
+                            <form action="{{ url_nieuwe_code }}" method="post">
+                                {% csrf_token %}
+                                <button class="btn-nhb-rood">
+                                    <i class="material-icons-round">add</i></button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endif %}
+
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-overzicht-vereniging-codes" %}
+
+{% endblock %}

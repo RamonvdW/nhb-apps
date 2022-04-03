@@ -9,6 +9,9 @@ from Account.models import Account
 from Kalender.models import KalenderInschrijving
 
 
+MINIMUM_CODE_LENGTH = 8
+
+
 class MandjeInhoud(models.Model):
 
     # bij wie liggen deze items in het mandje?

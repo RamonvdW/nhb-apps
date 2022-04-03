@@ -11,7 +11,7 @@ app_name = 'Mandje'
 
 urlpatterns = [
     path('verwijderen/<inhoud_pk>/',
-         view_mandje.VerwijderInschrijving.as_view(),
+         view_mandje.VerwijderUitMandje.as_view(),
          name='verwijder-inschrijving'),
 
     path('code-toevoegen/',

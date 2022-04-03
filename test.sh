@@ -45,6 +45,7 @@ python3 ./manage.py check || exit $?
 FORCE_REPORT=0
 if [[ "$ARGS" =~ "--force" ]]
 then
+    echo "[INFO] Forcing coverage report"
     FORCE_REPORT=1
     # remove from ARGS used to decide focus
     # will still be given to ./manage.py where --force has no effect

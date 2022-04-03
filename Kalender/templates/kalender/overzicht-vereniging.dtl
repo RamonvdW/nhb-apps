@@ -71,6 +71,30 @@
                 </table>
             </div>
         </div>
+
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Korting</h4>
+                <p>Geef korting voor specifieke sporters of alle leden van jouw vereniging</p>
+            </div>
+        </div>
+
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+
+                <!-- vereniging menu -->
+                {% url 'Kalender:vereniging-codes' as card_url %}
+                {% include 'plein/card.dtl' with title="Kortingscodes" text="Kortingscodes aanmaken of aanpassen." icon="sell" url=card_url %}
+
+            </div>
+        </div>
+
+
+
     {% endif %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="kalender-overzicht-vereniging" %}
