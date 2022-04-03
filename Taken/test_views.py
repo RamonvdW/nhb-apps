@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,7 +18,7 @@ class TestTakenViews(E2EHelpers, TestCase):
 
     test_after = ('Functie',)
 
-    url_overzicht = '/taken/overzicht/'
+    url_overzicht = '/taken/'
     url_details = '/taken/details/%s/'  # taak_pk
 
     @classmethod
