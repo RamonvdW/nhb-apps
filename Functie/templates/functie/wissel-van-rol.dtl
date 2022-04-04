@@ -50,7 +50,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Wissel van rol</h3>
-            <p>Je huidige rol is: <b>{{ huidige_rol }}</b>.</p>
+            <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
         </div>
     </div>
 
@@ -199,7 +199,7 @@
             <div class="row center">
                 <div class="col s12">
                     <h4>Eigen rollen</h4>
-                    <p>Wissel naar een van de aan jou toegekende rollen.</p>
+                    <p>Wissel naar een van de aan jou toegekende rollen</p>
                 </div>
             </div>
 

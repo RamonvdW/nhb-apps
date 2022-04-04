@@ -282,6 +282,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
                                       .filter(is_BB=True)
                                       .order_by('username'))
 
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
             context['url_sec_hwl'] = reverse('Functie:sec-hwl-lid_nrs')
 
         context['kruimels'] = (
@@ -305,23 +306,47 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.rol_nu = None
+        self.rol_nu, self.functie_nu = None, None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # alle competitie beheerders + HWL
-        self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu == Rollen.ROL_BB
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        emails = (Functie
-                  .objects
-                  .filter(rol__in=('HWL', 'SEC'))
-                  .exclude(bevestigde_email='')
-                  .values_list('bevestigde_email', flat=True))
+        emails = list()
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
+            context['geo_str'] = ''
+            print('hoi!')
+            emails = (Functie
+                      .objects
+                      .filter(rol__in=('HWL', 'SEC'))
+                      .exclude(bevestigde_email='')
+                      .values_list('bevestigde_email', flat=True))
+
+        elif self.rol_nu == Rollen.ROL_RKO:
+            rayon_nr = self.functie_nu.nhb_rayon.rayon_nr
+            context['geo_str'] = ' in Rayon %s' % rayon_nr
+            emails = (Functie
+                      .objects
+                      .filter(rol__in=('HWL', 'SEC'),
+                              nhb_ver__regio__rayon__rayon_nr=rayon_nr)
+                      .exclude(bevestigde_email='')
+                      .values_list('bevestigde_email', flat=True))
+
+        elif self.rol_nu == Rollen.ROL_RCL:
+            regio_nr = self.functie_nu.nhb_regio.regio_nr
+            context['geo_str'] = ' in regio %s' % regio_nr
+            emails = (Functie
+                      .objects
+                      .filter(rol__in=('HWL', 'SEC'),
+                              nhb_ver__regio__regio_nr=regio_nr)
+                      .exclude(bevestigde_email='')
+                      .values_list('bevestigde_email', flat=True))
 
         context['aantal'] = len(emails)
         context['emails'] = "; ".join(emails)
