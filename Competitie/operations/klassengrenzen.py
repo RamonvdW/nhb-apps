@@ -21,7 +21,7 @@ def _get_targets_indiv(comp):
 
         Voorbeeld: { (21,150,'R','A', True ): [obj1, obj2, etc.],
                      (21,150,'C','A', True ): [obj10, obj11],
-                     (14, 17,'C','A', False): [obj20,],             # gender-neutraal
+                     (14, 17,'C','A', False): [obj20,],             # genderneutraal
                      (12, 14,'C','M', False): [obj30,],             # alleen jongens (mannen)
                      (12, 14,'C','V', False): [obj31,] }            # alleen meisjes (vrouwen)
     """

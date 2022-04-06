@@ -146,7 +146,7 @@
             <h4>Kies een sessie</h4>
                                  <!-- N = NHB -->
             {% if wed.organisatie == 'N' %}
-                <p>Klassen zonder man/vrouw benoeming zijn gender-neutraal</p>
+                <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
             {% endif %}
 
             {% if not kan_aanmelden %}

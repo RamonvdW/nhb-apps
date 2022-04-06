@@ -136,7 +136,7 @@
                         <h6 class="nhb-blauw-text">Sessies</h6>
                                              <!-- N = NHB -->
                         {% if wed.organisatie == 'N' %}
-                            <p>Klassen zonder man/vrouw benoeming zijn gender-neutraal</p>
+                            <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
                         {% endif %}
                     </td>
                 </tr>

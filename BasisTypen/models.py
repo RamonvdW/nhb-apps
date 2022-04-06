@@ -16,7 +16,7 @@ MAXIMALE_LEEFTIJD_JEUGD = 20
 GESLACHT_MAN = 'M'          # geregistreerd geslacht / voor wedstrijdklassen
 GESLACHT_VROUW = 'V'        # geregistreerd geslacht / voor wedstrijdklassen
 GESLACHT_ANDERS = 'X'       # geregistreerd geslacht
-GESLACHT_ALLE = 'A'         # gender-neutraal voor wedstrijdklassen
+GESLACHT_ALLE = 'A'         # genderneutraal voor wedstrijdklassen
 
 # geregistreerde geslacht van sporters: M/V/X
 GESLACHT_MVX = [(GESLACHT_MAN, 'Man'),
@@ -34,7 +34,7 @@ GESLACHT_MV_MEERVOUD = [(GESLACHT_MAN, 'Mannen'),
 # mogelijk geslacht van sporters in wedstrijden: M/V/A
 WEDSTRIJDGESLACHT_MVA = [(GESLACHT_MAN, 'Man'),
                          (GESLACHT_VROUW, 'Vrouw'),
-                         (GESLACHT_ALLE, 'Gender neutraal')]
+                         (GESLACHT_ALLE, 'Genderneutraal')]
 
 BLAZOEN_40CM = '40'
 BLAZOEN_60CM = '60'
@@ -201,7 +201,7 @@ class LeeftijdsKlasse(models.Model):
     # korte beschrijving: 'Onder 18', etc.
     klasse_kort = models.CharField(max_length=30)
 
-    # man, vrouw of gender-neutraal
+    # man, vrouw of genderneutraal
     wedstrijd_geslacht = models.CharField(max_length=1, choices=WEDSTRIJDGESLACHT_MVA)
 
     # leeftijds grenzen voor de klassen: of ondergrens, of bovengrens
@@ -392,6 +392,9 @@ class KalenderWedstrijdklasse(models.Model):
 
     # volgende voor gebruik bij het presenteren van een lijst van klassen
     volgorde = models.PositiveIntegerField()
+
+    # officiele (internationale) afkorting voor deze wedstrijdklasse
+    afkorting = models.CharField(max_length=10, default='?')
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """

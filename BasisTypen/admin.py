@@ -96,7 +96,7 @@ class BasisTypenKalenderWedstrijdklasseAdmin(BasisTypenReadonlyMetVolgordeAdmin)
 
     # record weergave
     fieldsets = (
-        (None, {'fields': ('organisatie', 'beschrijving', 'volgorde', 'boogtype', 'leeftijdsklasse', 'buiten_gebruik')}),
+        (None, {'fields': ('organisatie', 'beschrijving', 'volgorde', 'boogtype', 'leeftijdsklasse', 'afkorting', 'buiten_gebruik')}),
     )
 
 
