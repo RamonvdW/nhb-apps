@@ -11,19 +11,29 @@
 {% block pagina %}
 
     <script type="application/javascript">
-        function gewijzigd() {
+        function gewijzigd(code_blokkeer) {
             // het formulier is aangepast en moet opgeslagen worden
 
             // disable alle knoppen waarmee de invoer verloren zou gaan
-            const els = document.getElementsByClassName("vertrek_knop")
+            const els = document.getElementsByClassName("vertrek_knop");
             Array.prototype.forEach.call(els, function (el) {
-                el.classList.add('disabled')
+                el.classList.add('disabled');
             })
 
             // enable de 'opslaan' knop
-            const el = document.getElementById("opslaan_knop")
-            el.disabled = false
-            el.parentElement.style.display = "block"
+            const el = document.getElementById("opslaan_knop");
+            el.disabled = false;
+            el.parentElement.style.display = "block";
+
+            // sluit mutually-exclusive klassen uit
+            if (code_blokkeer !== undefined) {
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]')
+                checkboxes.forEach(function(checkbox) {
+                    if (checkbox.dataset.code === code_blokkeer) {
+                        checkbox.checked = false;
+                    }
+                })
+            }
         }
 
         let ignore_datum_changes = true;
@@ -391,7 +401,7 @@
                                     <h6 class="nhb-blauw-text">Wedstrijdklassen</h6>
                                                          <!-- N = NHB -->
                                     {% if wed.organisatie == 'N' %}
-                                        <p>Klassen zonder man/vrouw benoeming zijn gender-neutraal</p>
+                                        <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -401,8 +411,8 @@
                                 <td colspan="2">
                                     {% for klasse in opt_klasse %}
                                         <label class="black-text">
-                                            <input type="checkbox" name="{{ klasse.sel }}" {% if klasse.gebruikt %}disabled checked{% else %}class="filled-in" {% if klasse.selected %} checked{% endif %}{% endif %} onchange="gewijzigd()">
-                                            <span>{{ klasse.volg_nr }}: {{ klasse.beschrijving }}</span>
+                                            <input type="checkbox" name="{{ klasse.sel }}" {% if klasse.gebruikt %}disabled checked{% else %}class="filled-in" {% if klasse.selected %} checked{% endif %}{% endif %} onchange="gewijzigd('{{ klasse.code_blokkeer }}')" data-code="{{ klasse.code }}">
+                                            <span>{{ klasse.volg_nr }}: {{ klasse.beschrijving }} ({{ klasse.code }} --> {{ klasse.code_blokkeer }})</span>
                                         </label><br>
                                     {% endfor %}
                                 </td>

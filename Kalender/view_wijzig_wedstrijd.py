@@ -13,7 +13,8 @@ from django.views.generic import View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
-from BasisTypen.models import BoogType, KalenderWedstrijdklasse, ORGANISATIES2LONG_STR, ORGANISATIE_WA
+from BasisTypen.models import (BoogType, KalenderWedstrijdklasse, GESLACHT_ALLE,
+                               ORGANISATIES2LONG_STR, ORGANISATIE_WA, ORGANISATIE_IFAA)
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -211,15 +212,37 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
         context['wedstrijd_is_a_status'] = (wedstrijd.wa_status == WEDSTRIJD_WA_STATUS_A)
         gekozen_pks = list(wedstrijd.wedstrijdklassen.values_list('pk', flat=True))
         volg_nr = 0
+        code = 0
+        blokkeer2klasse = dict()
         for klasse in get_organisatie_klassen(wedstrijd.organisatie, gekozen_boog_pks):
             klasse.sel = 'klasse_%s' % klasse.pk
             klasse.gebruikt = (klasse.pk in klassen_gebruikt)
             klasse.selected = (klasse.pk in gekozen_pks)
 
+            if klasse.leeftijdsklasse.wedstrijd_geslacht == GESLACHT_ALLE:
+                code += 1
+                klasse.code = code
+                code += 1
+                klasse.code_blokkeer = code
+                blokkeer2klasse[code] = klasse
+            else:
+                klasse.code = code
+                klasse.code_blokkeer = 0
+
+            if wedstrijd.organisatie == ORGANISATIE_IFAA:
+                klasse.beschrijving += ' [%s]' % klasse.afkorting
+
             volg_nr += 1
             klasse.volg_nr = volg_nr
 
             opt_klasse.append(klasse)
+        # for
+
+        for klasse in opt_klasse:
+            if klasse.code_blokkeer == 0:
+                # verwijs terug naar de klasse die deze blokkeert
+                klasse2 = blokkeer2klasse[klasse.code]
+                klasse.code_blokkeer = klasse2.code
         # for
 
         if wedstrijd.organisatie == ORGANISATIE_WA:
