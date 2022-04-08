@@ -134,14 +134,17 @@
 
     {% endif %}
 
-    <div class="row">
-        <div style="padding:10px">
-            <div class="col s12 center">
-                <p>Hieronder genoemde tijdstippen zijn "aanvang wedstrijd". De accommodatie is een uur eerder open. Zorg dat je op tijd bent!</p>
+
+    <!-- uitleg over tijdstippen -->
+    {% if not comp.rk_is_afgelast %}
+        <div class="row">
+            <div style="padding:10px">
+                <div class="col s12 center">
+                    <p>Hieronder genoemde tijdstippen zijn "aanvang wedstrijd". De accommodatie is een uur eerder open. Zorg dat je op tijd bent!</p>
+                </div>
             </div>
         </div>
-    </div>
-
+    {% endif %}
 
 
     <table class="white">
