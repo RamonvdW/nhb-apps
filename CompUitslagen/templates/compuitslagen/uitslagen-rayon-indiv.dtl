@@ -127,11 +127,23 @@
         <div class="row">
             <div style="padding:10px">
                 <div class="col s12 m8 offset-m2 nhb-rood white-text z-depth-3 center">
-                    <p class="">Aanmelden of afmelden voor de RK wedstrijd kan bij je eigen vereniging tot en met <b>{{ bevestig_tot_datum }}</b></p>
+                    <p>Aanmelden of afmelden voor de RK wedstrijd kan bij je eigen vereniging tot en met <b>{{ bevestig_tot_datum }}</b></p>
                 </div>
             </div>
         </div>
 
+    {% endif %}
+
+
+    <!-- uitleg over tijdstippen -->
+    {% if not comp.rk_is_afgelast %}
+        <div class="row">
+            <div style="padding:10px">
+                <div class="col s12 center">
+                    <p>Hieronder genoemde tijdstippen zijn "aanvang wedstrijd". De accommodatie is een uur eerder open. Zorg dat je op tijd bent!</p>
+                </div>
+            </div>
+        </div>
     {% endif %}
 
 
