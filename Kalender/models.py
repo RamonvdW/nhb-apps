@@ -125,12 +125,13 @@ KALENDER_MUTATIE_KORTING = 3
 
 KALENDER_MUTATIE_TO_STR = {
     KALENDER_MUTATIE_INSCHRIJVEN: "Inschrijven",
-    KALENDER_MUTATIE_AFMELDEN: "Afmelden"
+    KALENDER_MUTATIE_AFMELDEN: "Afmelden",
+    KALENDER_MUTATIE_KORTING: "Korting",
 }
 
 
 class KalenderWedstrijdDeeluitslag(models.Model):
-    """  deel van de uitslag van een wedstrijd """
+    """ Deel van de uitslag van een wedstrijd """
 
     # na verwijderen wordt deze vlag gezet, voor opruimen door achtergrondtaak
     buiten_gebruik = models.BooleanField(default=False)

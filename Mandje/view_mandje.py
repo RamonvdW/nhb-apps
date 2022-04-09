@@ -7,18 +7,15 @@
 from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
-from django.utils import timezone
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige
-from Kalender.models import (KalenderMutatie, KALENDER_MUTATIE_AFMELDEN,
-                             KalenderWedstrijdKortingscode, KALENDER_MUTATIE_KORTING)
+from Kalender.mutaties import kalender_kortingscode_toepassen, kalender_verwijder_reservering
 from Mandje.models import MandjeInhoud, MINIMUM_CODE_LENGTH
 from Mandje.mandje import mandje_is_gewijzigd, eval_mandje_inhoud
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from decimal import Decimal
-import time
 
 
 TEMPLATE_MANDJE_TOON_INHOUD = 'mandje/toon-inhoud.dtl'
@@ -153,43 +150,13 @@ class CodeToevoegenView(UserPassesTestMixin, View):
                 code += char
         # for
 
-        account = request.user
-        now = timezone.now()
-        today = now.date()
-
         if len(code) >= MINIMUM_CODE_LENGTH:
-            # doe een sanity-check of de code gebruikt mag worden
-            for korting in (KalenderWedstrijdKortingscode               # pragma: no branch
-                            .objects
-                            .filter(code__iexact=code,                  # case insensitive
-                                    geldig_tot_en_met__gte=today)):
+            account = request.user
+            snel = str(request.POST.get('snel', ''))[:1]
 
-                # laat het achtergrond process de code toepassen
-                mutatie = KalenderMutatie(
-                                code=KALENDER_MUTATIE_KORTING,
-                                korting=korting,
-                                korting_voor_account=account)
-                mutatie.save()
-
-                # ping het achtergrond process
-                kalender_mutaties_ping.ping()
-
-                snel = str(request.POST.get('snel', ''))[:1]
-                if snel != '1':                                             # pragma: no cover
-                    # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
-                    interval = 0.2                  # om steeds te verdubbelen
-                    total = 0.0                     # om een limiet te stellen
-                    while not mutatie.is_verwerkt and total + interval <= 3.0:
-                        time.sleep(interval)
-                        total += interval           # 0.0 --> 0.2, 0.6, 1.4, 3.0
-                        interval *= 2               # 0.2 --> 0.4, 0.8, 1.6, 3.2
-                        mutatie = KalenderMutatie.objects.get(pk=mutatie.pk)
-                    # while
-
+            if kalender_kortingscode_toepassen(account, code, snel == '1'):
+                # gelukt
                 mandje_is_gewijzigd(self.request)
-
-                break       # from the for
-            # for
 
         # terug naar het mandje
         url = reverse('Mandje:toon-inhoud')
@@ -226,27 +193,8 @@ class VerwijderUitMandje(UserPassesTestMixin, View):
         except MandjeInhoud.DoesNotExist:
             raise Http404('Niet gevonden in mandje')
 
-        # zet dit verzoek door naar het mutaties process
-        inschrijving = inhoud.inschrijving
-        mutatie = KalenderMutatie(
-                        code=KALENDER_MUTATIE_AFMELDEN,
-                        inschrijving=inschrijving)
-        mutatie.save()
-
-        # ping het achtergrond process
-        kalender_mutaties_ping.ping()
-
         snel = str(request.POST.get('snel', ''))[:1]
-        if snel != '1':         # pragma: no cover
-            # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
-            interval = 0.2      # om steeds te verdubbelen
-            total = 0.0         # om een limiet te stellen
-            while not mutatie.is_verwerkt and total + interval <= 3.0:
-                time.sleep(interval)
-                total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0
-                interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
-                mutatie = KalenderMutatie.objects.get(pk=mutatie.pk)
-            # while
+        kalender_verwijder_reservering(inhoud.inschrijving, snel == '1')
 
         mandje_is_gewijzigd(self.request)
 

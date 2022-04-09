@@ -20,6 +20,8 @@ class MandjeInhoud(models.Model):
     # inschrijving voor een wedstrijd
     inschrijving = models.ForeignKey(KalenderInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
 
+    # FUTURE: andere mogelijke regels in dit mandje
+
     # prijs van deze regel (een positief bedrag)
     prijs_euro = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)       # max 999,99
 
