@@ -22,4 +22,7 @@ qrcode
 google-auth
 google-api-python-client
 
+# collecting payment service provide
+mollie-api-python
+
 # end of file
