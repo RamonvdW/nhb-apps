@@ -67,12 +67,17 @@ urlpatterns = [
          name='vereniging-wijzig-code'),
 
 
-    # manager competitiezaken
+    # manager
     path('manager/',
          view_manager.KalenderManagerView.as_view(),
          name='manager'),
 
+    path('manager/<status>/',
+         view_manager.KalenderManagerView.as_view(),
+         name='manager-status'),
 
+
+    # gedeeld
     path('<wedstrijd_pk>/wijzig/',
          view_wijzig_wedstrijd.WijzigKalenderWedstrijdView.as_view(),
          name='wijzig-wedstrijd'),

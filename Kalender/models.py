@@ -335,10 +335,8 @@ class KalenderInschrijving(models.Model):
 
 
 class KalenderMutatie(models.Model):
-    """ Deze tabel houdt de mutaties bij de lijst van (reserve-)schutters van
-        de RK en BK wedstrijden.
-        Alle verzoeken tot mutaties worden hier aan toegevoegd en na afhandelen bewaard
-        zodat er een geschiedenis is.
+    """ Deze tabel voedt de achtergrondtaak die de mutaties op de inschrijvingen doet
+        waardoor alles netjes geserialiseerd wordt.
     """
 
     # datum/tijdstip van mutatie

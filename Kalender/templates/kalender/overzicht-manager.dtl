@@ -10,6 +10,19 @@
 
 {% block pagina %}
 
+    <script type="application/javascript">
+        function keuze_gemaakt(groep) {
+
+            const selector = "input[type='radio'][name=" + groep + "]:checked"
+            const el = document.querySelector(selector)
+            const url = el.dataset.url
+
+            // de radiobutton die bij het geladen geselecteerd werd heeft geen url
+            if (url.length > 0)
+                window.location.href = url
+        }
+    </script>
+
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
@@ -20,6 +33,31 @@
         </div>
     </div>
 
+    <!-- blauwe balk filters -->
+    <div class="row-nhb-blauw">
+
+        <!-- filter: status -->
+        <div class="col s4 offset-s4" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Kies een status:</b></p>
+                <ul id="id_status">
+                    {% for obj in status_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ obj.sel }}">
+                                <input class="with-gap" type="radio" name="status" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.zoom_url }}">
+                                <span>{{ obj.beschrijving }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('status')">Activeer</a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-nhb-blauw">
         <div class="col s12">
@@ -27,16 +65,16 @@
                 <thead>
                     <tr>        <!-- filter veld -->
                         <td></td>
-                        <td colspan="2" class="table-filter">
+                        <td colspan="3" class="table-filter">
                             <input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/>
                         </td>
-                        <td colspan="3"></td>
+                        <td colspan="2"></td>
                     </tr>
                     <tr>
                         <th>Wanneer</th>
                         <th data-filter="on">Vereniging</th>
                         <th data-filter="on">Titel</th>
-                        <th>Discipline</th>
+                        <th data-filter="on">Discipline</th>
                         <th>Status</th>
                         <th><!-- kolom voor knoppen --></th>
                     </tr>
@@ -47,8 +85,8 @@
                         <td>{{ wed.datum_begin }}{% if wed.datum_begin != wed.datum_einde %} - {{ wed.datum_einde }}{% endif %}</td>
                         <td>[{{ wed.organiserende_vereniging.ver_nr }}]<span class="hide-on-med-and-down"> {{ wed.organiserende_vereniging.naam }}</span></td>
                         <td>{% if wed.titel %}{{ wed.titel }}{% else %}<i class="nhb-blauw-text">Nog niet ingevuld</i>{% endif %}</td>
-                        <td{% if wed.status_val_op %} class="red-text"{% endif %}>{{ wed.status_str }}</td>
                         <td>{{ wed.disc_str }}</td>
+                        <td{% if wed.status_val_op %} class="red-text"{% endif %}>{{ wed.status_str }}</td>
                         <td>
                             <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
                                 <a class="btn-nhb-rood" href="{{ wed.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">

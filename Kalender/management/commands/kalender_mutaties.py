@@ -16,14 +16,11 @@ from Kalender.models import (KalenderMutatie, KALENDER_MUTATIE_INSCHRIJVEN, KALE
                              KalenderWedstrijdKortingscode, KALENDER_MUTATIE_KORTING)
 from Mandje.models import MandjeInhoud
 from Overig.background_sync import BackgroundSync
-from Taken.taken import maak_taak
 from decimal import Decimal
 import django.db.utils
 import traceback
 import datetime
 import sys
-
-VOLGORDE_PARKEER = 22222        # hoog en past in PositiveSmallIntegerField
 
 
 class Command(BaseCommand):
@@ -226,18 +223,10 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] vorige hoogste KalenderMutatie pk is %s' % self._hoogste_mutatie_pk)
             qset = (KalenderMutatie
                     .objects
-                    .select_related('inschrijving',
-                                    'inschrijving__sporterboog__sporter'
-                                    'korting',
-                                    'korting__voor_sporter',
-                                    'korting__voor_vereniging',
-                                    'korting__voor_wedstrijd')
                     .filter(pk__gt=self._hoogste_mutatie_pk))
         else:
             qset = (KalenderMutatie
                     .objects
-                    .select_related('inschrijving',
-                                    'korting')
                     .all())
 
         mutatie_pks = qset.values_list('pk', flat=True)
@@ -248,6 +237,7 @@ class Command(BaseCommand):
         for pk in mutatie_pks:
             # LET OP: we halen de records hier 1 voor 1 op
             #         zodat we verse informatie hebben inclusief de vorige mutatie
+            #         en zodat we 1 plek hebben voor select/prefetch
             mutatie = (KalenderMutatie
                        .objects
                        .select_related('inschrijving',
@@ -257,6 +247,7 @@ class Command(BaseCommand):
                                        'inschrijving__sporterboog__sporter',
                                        'inschrijving__koper')
                        .get(pk=pk))
+
             if not mutatie.is_verwerkt:
                 self._verwerk_mutatie(mutatie)
                 mutatie.is_verwerkt = True

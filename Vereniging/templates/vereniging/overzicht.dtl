@@ -158,7 +158,7 @@
 
             <!-- instellingen leden -->
             {% url 'Vereniging:leden-voorkeuren' as card_url %}
-            {% include 'plein/card.dtl' with title="Voorkeuren" text="Voorkeuren van de leden inzien en boog type instellen." icon="tune" url=card_url %}
+            {% include 'plein/card.dtl' with title="Voorkeuren leden" text="Voorkeuren van de leden inzien en boog type instellen." icon="tune" url=card_url %}
 
             <!-- accommodatie details -->
             {% if accommodatie_details_url %}
