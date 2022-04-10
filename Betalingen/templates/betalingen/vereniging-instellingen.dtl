@@ -1,0 +1,84 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Geld ontvangen{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Financieel</h3>
+            <p>Voor vereniging <b>{{ ver.ver_nr_en_naam }}</b></p>
+        </div>
+    </div>
+
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <div class="white" style="padding:10px">
+                <p>Sporters die zich inschrijven op een wedstrijd via MijnHandboogsport kunnen direct afrekenen, bijvoorbeeld via iDEAL.</p>
+                <p>Hiervoor maakt MijnHandboogsport gebruik van de betaaldienst <b>Mollie</b>.</p>
+                <p>Met een eigen (gratis) account bij Mollie kunnen jullie inschrijfgelden van een wedstrijd innen, zonder tussenkomst van verdere partijen. Ook terugbetalingen bij afmelding worden via Mollie afgehandeld.</p>
+                <p>Het bondsbureau heeft meer informatie beschikbaar.</p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+
+            <!-- dialoog venster -->
+            <div class="white left-align z-depth-3">
+                <div style="padding:30px">
+                    <form action="{{ url }}" method="post">
+                        {% csrf_token %}
+
+                        <div class="center" style="margin-bottom:50px">
+                            <h6 class="nhb-blauw-text">Koppeling met Mollie</h6>
+                            <p>Alleen invullen als jullie vereniging een account bij Mollie heeft</p>
+                        </div>
+
+                        <table>
+                            <tr>
+                                <th>Ingestelde API-key</th>
+                                <td>{{ huidige_api_key }}</td>
+                            </tr>
+
+                            <tr>
+                                <th>Nieuwe API-key</th>
+                                <td>
+                                    <div class="input-field">
+                                        <input type="text" name="apikey">
+                                    </div>
+                                </td>
+                            </tr>
+
+                        </table>
+
+                        <!-- button -->
+                        <div class="center" style="margin-top:40px">
+                            <p>
+                                <button class="btn-nhb-rood" type="submit">
+                                    <i class="material-icons-round left">check</i>Opslaan</button>
+                            </p>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="betalingen-vereniging-instellingen" %}
+
+{% endblock %}

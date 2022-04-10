@@ -169,6 +169,10 @@
             {% if url_externe_locaties %}
                 {% include 'plein/card.dtl' with title="Wedstrijdlocaties" text="Externe locaties waar jullie vereniging wedstrijden kan organiseren." icon="hiking" url=url_externe_locaties %}
             {% endif %}
+
+            {% if url_betalingen %}
+                {% include 'plein/card.dtl' with title="Financieel" text="Instellingen om inschrijf-gelden van wedstrijden direct te kunnen ontvangen." icon="euro_symbol" url=url_betalingen %}
+            {% endif %}
         </div>
     </div>
 

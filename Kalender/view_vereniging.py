@@ -62,6 +62,7 @@ class VerenigingKalenderWedstrijdenView(UserPassesTestMixin, View):
             wed.status_str = WEDSTRIJD_STATUS_TO_STR[wed.status]
             wed.url_wijzig = reverse('Kalender:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wed.pk})
             wed.url_sessies = reverse('Kalender:wijzig-sessies', kwargs={'wedstrijd_pk': wed.pk})
+            wed.url_aanmeldingen = reverse('Kalender:aanmeldingen', kwargs={'wedstrijd_pk': wed.pk})
         # for
 
         context['wedstrijden'] = wedstrijden

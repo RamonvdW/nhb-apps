@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -23,7 +22,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='kalenderwedstrijdkortingscode',
             name='uitgegeven_door',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='korting_uitgever', to='NhbStructuur.nhbvereniging'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT, related_name='korting_uitgever', to='NhbStructuur.nhbvereniging'),
         ),
     ]
 

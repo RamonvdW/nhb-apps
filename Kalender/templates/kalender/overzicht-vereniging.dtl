@@ -48,8 +48,11 @@
                                 <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
                                     <a class="btn-nhb-rood" href="{{ wed.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">
                                         <i class="material-icons-round">edit</i></a>
-                                    <a class="btn-nhb-rood" href="{{ wed.url_sessies}}" style="padding:0; width:35px">
+                                    <a class="btn-nhb-rood" href="{{ wed.url_sessies}}" style="padding:0; width:35px; margin-right:5px">
                                         <i class="material-icons-round" style="font-size:33px">edit_note</i></a>
+                                    <a class="btn-nhb-rood" href="{{ wed.url_aanmeldingen }}" style="padding:0; width:35px">
+                                        <i class="material-icons-round">people_alt</i>
+                                    </a>
                                 </div>
                             </td>
                         </tr>

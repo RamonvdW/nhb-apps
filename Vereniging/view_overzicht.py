@@ -243,6 +243,11 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         # for
 
+        if self.rol_nu != Rollen.ROL_WL:
+            # SEC of HWL
+            context['url_betalingen'] = reverse('Betalingen:vereniging-instellingen')
+
+        # TODO: wat doet dit?
         if prev_jaar != 0:
             kaartje = SimpleNamespace()
             kaartje.einde_blok = True

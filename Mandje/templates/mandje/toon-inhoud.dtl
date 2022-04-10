@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Inhoud mandje{% endblock %}
+{% block title %}product mandje{% endblock %}
 
 {% block pagina %}
 
@@ -97,22 +97,22 @@
 
                             <tr><td colspan="4" class="center"><h6>Gekozen producten</h6></td></tr>
 
-                            {% for inhoud in mandje_inhoud %}
+                            {% for product in producten %}
                                 <tr>
-                                    <td>{% for hdr, lijn in inhoud.beschrijving %}{{ hdr }}<br>{% endfor %}</td>
-                                    <td>{% for hdr, lijn in inhoud.beschrijving %}{{ lijn }}<br>{% endfor %}</td>
-                                    <td class="right-align">&euro;&nbsp;{{ inhoud.prijs_euro }}</td>
+                                    <td>{% for hdr, lijn in product.beschrijving %}{{ hdr }}<br>{% endfor %}</td>
+                                    <td>{% for hdr, lijn in product.beschrijving %}{{ lijn }}<br>{% endfor %}</td>
+                                    <td class="right-align">&euro;&nbsp;{{ product.prijs_euro }}</td>
                                     <td class="right-align">
-                                        <button class="btn-nhb-blauw" id="id_verwijder_{{ inhoud.pk }}" onclick="verwijder('id_verwijder_{{ inhoud.pk }}')" data-url="{{ inhoud.url_verwijder }}">
+                                        <button class="btn-nhb-blauw" id="id_verwijder_{{ product.pk }}" onclick="verwijder('id_verwijder_{{ product.pk }}')" data-url="{{ product.url_verwijder }}">
                                             <i class="material-icons-round">delete</i></button>
                                     </td>
                                 </tr>
 
-                                {% if inhoud.gebruikte_code_str %}
+                                {% if product.gebruikte_code_str %}
                                     <tr>
                                         <td>Korting</td>
-                                        <td>{{ inhoud.gebruikte_code_str }}</td>
-                                        <td class="right-align">{% if inhoud.korting_euro > 0.0001 %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ inhoud.korting_euro }}</td>
+                                        <td>{{ product.gebruikte_code_str }}</td>
+                                        <td class="right-align">{% if product.korting_euro > 0.0001 %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ product.korting_euro }}</td>
                                         <td><!--knoppen--></td>
                                     </tr>
                                 {% endif %}
@@ -121,7 +121,7 @@
                             <!-- totaal -->
                             <tr>
                                 <td colspan="2" class="right-align"><b>Totaal:</b></td>
-                                <td class="right-align"><b>&euro;&nbsp;{{ totaal_euro|floatformat:2 }}</b></td>
+                                <td class="right-align"><b>&euro;&nbsp;{{ bestelling.totaal_euro }}</b></td>
                             </tr>
 
                             <!-- kortingscode invoeren -->
@@ -147,11 +147,18 @@
 
                             <!-- afrekenen -->
                             <tr>
-                                <td colspan="3" class="right-align">
-                                    <button id="id_afrekenen" class="btn-nhb-rood">
-                                        <i class="material-icons-round right">shopping_cart_checkout</i>{% if moet_afrekenen %}Afrekenen{% else %}Bestelling afronden{% endif %}</button>
-                                </td>
-                                <td><!--knoppen--></td>
+                                {% if bevat_fout %}
+                                    <td colspan="4" class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
+                                {% else %}
+                                    <td colspan="3" class="right-align">
+                                        <form action="{{ url_afrekenen }}" method="post">
+                                            {% csrf_token %}
+                                            <button id="id_afrekenen" class="btn-nhb-rood">
+                                                <i class="material-icons-round right">shopping_cart_checkout</i>{% if moet_afrekenen %}Afrekenen{% else %}Bestelling afronden{% endif %}</button>
+                                        </form>
+                                    </td>
+                                    <td><!--knoppen--></td>
+                                {% endif %}
                             </tr>
 
                         </table>
@@ -163,6 +170,6 @@
         </div>
     {% endif %}     <!-- mandje niet leeg -->
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="mandje-toon-inhoud" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="mandje-toon-product" %}
 
 {% endblock %}

@@ -13,7 +13,7 @@ from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Wedstrijden.models import WedstrijdLocatie
-from .models import MandjeInhoud
+from .models import MandjeProduct
 
 
 class TestMandje(E2EHelpers, TestCase):
@@ -114,10 +114,10 @@ class TestMandje(E2EHelpers, TestCase):
     def _maak_inhoud(self, account):
 
         # geen koppeling aan een inschrijving
-        MandjeInhoud(
+        MandjeProduct(
             account=account).save()
 
-        inhoud = MandjeInhoud(
+        inhoud = MandjeProduct(
                     account=account,
                     inschrijving=self.inschrijving,
                     prijs_euro=10.00)

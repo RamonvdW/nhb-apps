@@ -23,6 +23,7 @@ urlpatterns = [
     path('',                                site_root_view),
     path('account/',                        include('Account.urls')),
     path('beheer/',                         admin.site.urls),
+    path('betalingen/',                     include('Betalingen.urls')),
     path('bondscompetities/deelnemen/',     include('CompInschrijven.urls')),
     path('bondscompetities/regio/',         include('CompLaagRegio.urls')),
     path('bondscompetities/rk/',            include('CompLaagRayon.urls')),

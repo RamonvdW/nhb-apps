@@ -84,7 +84,7 @@ class KalenderManagerView(UserPassesTestMixin, View):
             status = None
 
         # pak de 50 meest recente wedstrijden
-        wedstrijden = (KalenderWedstrijdw
+        wedstrijden = (KalenderWedstrijd
                        .objects
                        .order_by('-datum_begin'))
 

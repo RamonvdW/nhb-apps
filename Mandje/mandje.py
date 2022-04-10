@@ -6,7 +6,7 @@
 
 from django.utils import timezone
 from datetime import timedelta
-from .models import MandjeInhoud
+from .models import MandjeProduct
 
 
 SESSIONVAR_MANDJE_INHOUD_AANTAL = 'mandje_inhoud_aantal'
@@ -31,7 +31,7 @@ def mandje_inhoud_aantal(request):
 def mandje_is_gewijzigd(request):
     """ zet de vlag die onthoudt dat er iets in het mandje zit """
 
-    aantal = (MandjeInhoud
+    aantal = (MandjeProduct
               .objects
               .filter(account=request.user)
               .count())

@@ -9,9 +9,10 @@ from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from Betalingen.mutaties import betaling_get_volgende_boekingsnummer
 from Functie.rol import Rollen, rol_get_huidige
 from Kalender.mutaties import kalender_kortingscode_toepassen, kalender_verwijder_reservering
-from Mandje.models import MandjeInhoud, MINIMUM_CODE_LENGTH
+from Mandje.models import MandjeProduct, MandjeBestelling, MINIMUM_CODE_LENGTH, MANDJE_NOG_GEEN_BESTELLING
 from Mandje.mandje import mandje_is_gewijzigd, eval_mandje_inhoud
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
@@ -40,15 +41,24 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         self.rol_nu = rol_get_huidige(self.request)
         return self.rol_nu != Rollen.ROL_NONE
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        account = self.request.user
+    @staticmethod
+    def _beschrijf_inhoud_mandje(account, maak_urls=True):
+        """ gezamenlijke code voor het tonen van de inhoud van het mandje en het afrekenen """
 
-        eval_mandje_inhoud(self.request)
+        mandje_is_leeg = True
+        bevat_fout = False
 
-        mandje_inhoud = (MandjeInhoud
-                         .objects
-                         .filter(account=account)
+        bestellingen = (MandjeBestelling
+                        .objects
+                        .filter(account=account,
+                                boekingsnummer=MANDJE_NOG_GEEN_BESTELLING)
+                        .prefetch_related('producten'))
+
+        if bestellingen.count() > 0:
+            bestelling = bestellingen[0]
+
+            producten = (bestelling
+                         .producten
                          .select_related('inschrijving',
                                          'inschrijving__wedstrijd',
                                          'inschrijving__sessie',
@@ -56,66 +66,90 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                                          'inschrijving__sporterboog__boogtype',
                                          'inschrijving__sporterboog__sporter'))
 
-        context['mandje_inhoud'] = mandje_inhoud
-        context['mandje_is_leeg'] = True
+            controleer_euro = Decimal()
+            for product in producten:
+                # maak een beschrijving van deze regel
+                product.beschrijving = beschrijving = list()
 
-        totaal_euro = Decimal()
-        for inhoud in mandje_inhoud:
-            # maak een beschrijving van deze regel
-            inhoud.beschrijving = beschrijving = list()
+                if product.inschrijving:
+                    inschrijving = product.inschrijving
 
-            if inhoud.inschrijving:
-                inschrijving = inhoud.inschrijving
+                    tup = ('Reserveringsnummer', settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk)
+                    beschrijving.append(tup)
 
-                tup = ('Wedstrijd', inschrijving.wedstrijd.titel)
-                beschrijving.append(tup)
+                    tup = ('Wedstrijd', inschrijving.wedstrijd.titel)
+                    beschrijving.append(tup)
 
-                sessie = inschrijving.sessie
-                tup = ('Sessie', '%s om %s' % (sessie.datum, sessie.tijd_begin.strftime('%H:%M')))
-                beschrijving.append(tup)
+                    sessie = inschrijving.sessie
+                    tup = ('Sessie', '%s om %s' % (sessie.datum, sessie.tijd_begin.strftime('%H:%M')))
+                    beschrijving.append(tup)
 
-                sporterboog = inschrijving.sporterboog
-                tup = ('Sporter', '%s' % sporterboog.sporter.lid_nr_en_volledige_naam())
-                beschrijving.append(tup)
+                    sporterboog = inschrijving.sporterboog
+                    tup = ('Sporter', '%s' % sporterboog.sporter.lid_nr_en_volledige_naam())
+                    beschrijving.append(tup)
 
-                sporter_ver = sporterboog.sporter.bij_vereniging
-                if sporter_ver:
-                    ver_naam = sporter_ver.ver_nr_en_naam()
+                    sporter_ver = sporterboog.sporter.bij_vereniging
+                    if sporter_ver:
+                        ver_naam = sporter_ver.ver_nr_en_naam()
+                    else:
+                        ver_naam = 'Onbekend'
+                    tup = ('Van vereniging', ver_naam)
+                    beschrijving.append(tup)
+
+                    tup = ('Boog', '%s' % sporterboog.boogtype.beschrijving)
+                    beschrijving.append(tup)
+
+                    if inschrijving.gebruikte_code:
+                        code = inschrijving.gebruikte_code
+                        product.gebruikte_code_str = "code %s (korting: %d%%)" % (code.code, code.percentage)
+                    elif product.korting_euro:
+                        product.gebruikte_code_str = "Onbekende code"
+                        bevat_fout = True
+
+                    controleer_euro += product.prijs_euro
+                    controleer_euro -= product.korting_euro
                 else:
-                    ver_naam = 'Onbekend'
-                tup = ('Van vereniging', ver_naam)
-                beschrijving.append(tup)
+                    tup = ('Fout', 'Onbekend product')
+                    beschrijving.append(tup)
+                    bevat_fout = True
 
-                tup = ('Boog', '%s' % sporterboog.boogtype.beschrijving)
-                beschrijving.append(tup)
+                if maak_urls:
+                    # maak een knop om deze bestelling te verwijderen uit het mandje
+                    product.url_verwijder = reverse('Mandje:verwijder-inschrijving',
+                                                    kwargs={'inhoud_pk': product.pk})
 
-                if inschrijving.gebruikte_code:
-                    code = inschrijving.gebruikte_code
-                    inhoud.gebruikte_code_str = "code %s (korting: %d%%)" % (code.code, code.percentage)
-                elif inhoud.korting_euro:
-                    inhoud.gebruikte_code_str = "Onbekende code"
-
-                totaal_euro += inhoud.prijs_euro
-                totaal_euro -= inhoud.korting_euro
-            else:
-                tup = ('Fout', 'Onbekend product')
-                beschrijving.append(tup)
-
-            # maak een knop om deze bestelling te verwijderen uit het mandje
-            inhoud.url_verwijder = reverse('Mandje:verwijder-inschrijving',
-                                           kwargs={'inhoud_pk': inhoud.pk})
-
-            context['mandje_is_leeg'] = False
-        # for
+                mandje_is_leeg = False
+            # for
+        else:
+            bestelling = None
+            producten = None
 
         # nooit een negatief totaalbedrag tonen want we geven geen geld weg
-        if totaal_euro < 0.0:
-            totaal_euro = 0.0
+        if controleer_euro < 0.0:
+            controleer_euro = 0.0
 
-        context['totaal_euro'] = totaal_euro
-        context['moet_afrekenen'] = (totaal_euro > 0)
+        if controleer_euro != bestelling.totaal_euro:
+            bevat_fout = True
+
+        return bestelling, producten, mandje_is_leeg, bevat_fout
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        account = self.request.user
+
+        eval_mandje_inhoud(self.request)
+
+        bestelling, producten, mandje_is_leeg, bevat_fout = self._beschrijf_inhoud_mandje(account)
+
+        context['mandje_is_leeg'] = mandje_is_leeg
+        context['bestelling'] = bestelling
+        context['producten'] = producten
+        context['bevat_fout'] = bevat_fout
 
         context['url_code_toevoegen'] = reverse('Mandje:code-toevoegen')
+        if not bevat_fout:
+            if bestelling.totaal_euro > 0:
+                context['url_afrekenen'] = reverse('Mandje:toon-inhoud')
 
         context['kruimels'] = (
             (None, 'Mandje'),
@@ -123,6 +157,19 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
         menu_dynamics(self.request, context)
         return context
+
+    def post(self, request, *args, **kwargs):
+
+        account = self.request.user
+        mandje_inhoud, mandje_is_leeg, totaal_euro, bevat_fout = self._beschrijf_inhoud_mandje(account, maak_urls=False)
+        if bevat_fout:
+            raise Http404('Afrekenen is niet mogelijk')
+
+        # neem een boekingsnummer uit
+        boekeingsnummer = betaling_get_volgende_boekingsnummer()
+
+        url = reverse('Mandje:toon-inhoud')
+        return HttpResponseRedirect(url)
 
 
 class CodeToevoegenView(UserPassesTestMixin, View):
@@ -188,9 +235,9 @@ class VerwijderUitMandje(UserPassesTestMixin, View):
         # zoek de regel op in het mandje van de ingelogde gebruiker
         account = request.user
         try:
-            inhoud = MandjeInhoud.objects.get(pk=inhoud_pk,
-                                              account=account)
-        except MandjeInhoud.DoesNotExist:
+            inhoud = MandjeProduct.objects.get(pk=inhoud_pk,
+                                               account=account)
+        except MandjeProduct.DoesNotExist:
             raise Http404('Niet gevonden in mandje')
 
         snel = str(request.POST.get('snel', ''))[:1]

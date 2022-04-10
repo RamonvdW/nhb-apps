@@ -11,6 +11,7 @@ from BasisTypen.models import (BoogType, KalenderWedstrijdklasse,
 from NhbStructuur.models import NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
+from decimal import Decimal
 
 
 WEDSTRIJD_DISCIPLINE_OUTDOOR = 'OD'
@@ -119,6 +120,22 @@ WEDSTRIJD_ORGANISATIE_TO_STR = {
     ORGANISATIE_IFAA: 'IFAA'
 }
 
+INSCHRIJVING_STATUS_RESERVERING = 'R'
+INSCHRIJVING_STATUS_DEFINITIEF = 'D'
+INSCHRIJVING_STATUS_AFGEMELD = 'A'
+
+INSCHRIJVING_STATUS_CHOICES = (
+    (INSCHRIJVING_STATUS_RESERVERING, "Reservering"),
+    (INSCHRIJVING_STATUS_DEFINITIEF, "Definitief"),
+    (INSCHRIJVING_STATUS_AFGEMELD, "Afgemeld")
+)
+
+INSCHRIJVING_STATUS_TO_STR = {
+    INSCHRIJVING_STATUS_RESERVERING: 'Reservering',
+    INSCHRIJVING_STATUS_DEFINITIEF: 'Definitief',
+    INSCHRIJVING_STATUS_AFGEMELD: 'Afgemeld',
+}
+
 KALENDER_MUTATIE_INSCHRIJVEN = 1
 KALENDER_MUTATIE_AFMELDEN = 2
 KALENDER_MUTATIE_KORTING = 3
@@ -158,7 +175,7 @@ class KalenderWedstrijdSessie(models.Model):
     tijd_einde = models.TimeField()
 
     # prijs
-    prijs_euro = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)     # max 999,99
+    prijs_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))     # max 999,99
 
     # toegestane wedstrijdklassen
     wedstrijdklassen = models.ManyToManyField(KalenderWedstrijdklasse, blank=True)
@@ -170,6 +187,10 @@ class KalenderWedstrijdSessie(models.Model):
     aantal_inschrijvingen = models.PositiveSmallIntegerField(default=0)
 
     # inschrijvingen: zie KalenderInschrijving
+
+    def __str__(self):
+        """ geef een beschrijving terug voor de admin interface """
+        return "%s %s (%s)" % (self.datum, self.tijd_begin, self.max_sporters)
 
     class Meta:
         verbose_name = "Kalender wedstrijd sessie"
@@ -305,6 +326,9 @@ class KalenderInschrijving(models.Model):
     # wanneer is deze inschrijving aangemaakt?
     wanneer = models.DateTimeField()
 
+    # status
+    status = models.CharField(max_length=2, default=INSCHRIJVING_STATUS_RESERVERING, choices=INSCHRIJVING_STATUS_CHOICES)
+
     # voor welke wedstrijd is dit?
     wedstrijd = models.ForeignKey(KalenderWedstrijd, on_delete=models.PROTECT)
 
@@ -320,10 +344,17 @@ class KalenderInschrijving(models.Model):
     # welke kortingscode is gebruikt
     gebruikte_code = models.ForeignKey(KalenderWedstrijdKortingscode, on_delete=models.SET_NULL, blank=True, null=True)
 
-    # is de betaling voldaan?
-    betaling_voldaan = models.BooleanField(default=False)
+    # bedragen ontvangen en terugbetaald
+    ontvangen_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
+    retour_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
+
+    # TODO: boekingsnummer toevoegen
 
     # TODO: traceer de gestuurde emails
+
+    def __str__(self):
+        """ beschrijving voor de admin interface """
+        return "Inschrijving voor %s" % self.sporterboog.sporter.lid_nr_en_volledige_naam()
 
     class Meta:
         verbose_name = "Kalender inschrijving"

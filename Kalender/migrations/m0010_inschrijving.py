@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -38,8 +37,8 @@ class Migration(migrations.Migration):
                 ('code', models.CharField(default='', max_length=20)),
                 ('geldig_tot_en_met', models.DateField()),
                 ('percentage', models.PositiveSmallIntegerField(default=100)),
-                ('voor_sporter', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='Sporter.sporter')),
-                ('voor_vereniging', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='NhbStructuur.nhbvereniging')),
+                ('voor_sporter', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Sporter.sporter')),
+                ('voor_vereniging', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='NhbStructuur.nhbvereniging')),
                 ('voor_wedstrijd', models.ManyToManyField(to='Kalender.KalenderWedstrijd')),
             ],
             options={
@@ -52,11 +51,11 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('wanneer', models.DateTimeField()),
                 ('betaling_voldaan', models.BooleanField(default=False)),
-                ('gebruikte_code', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='Kalender.kalenderwedstrijdkortingscode')),
-                ('koper', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='Account.Account')),
-                ('sessie', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='Kalender.kalenderwedstrijdsessie')),
-                ('sporterboog', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='Sporter.sporterboog')),
-                ('wedstrijd', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='Kalender.kalenderwedstrijd')),
+                ('gebruikte_code', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Kalender.kalenderwedstrijdkortingscode')),
+                ('koper', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Account.Account')),
+                ('sessie', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Kalender.kalenderwedstrijdsessie')),
+                ('sporterboog', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Sporter.sporterboog')),
+                ('wedstrijd', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Kalender.kalenderwedstrijd')),
             ],
             options={
                 'verbose_name': 'Kalender inschrijving',
@@ -74,7 +73,7 @@ class Migration(migrations.Migration):
                 ('when', models.DateTimeField(auto_now_add=True)),
                 ('code', models.PositiveSmallIntegerField(default=0)),
                 ('is_verwerkt', models.BooleanField(default=False)),
-                ('inschrijving', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='Kalender.kalenderinschrijving')),
+                ('inschrijving', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Kalender.kalenderinschrijving')),
             ],
             options={
                 'verbose_name': 'Kalender mutatie',

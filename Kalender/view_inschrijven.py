@@ -19,7 +19,7 @@ from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren_wedstrijdbogen
 from .models import (KalenderWedstrijd, KalenderWedstrijdSessie, KalenderInschrijving,
-                     KalenderMutatie, KALENDER_MUTATIE_INSCHRIJVEN)
+                     KalenderMutatie, KALENDER_MUTATIE_INSCHRIJVEN, INSCHRIJVING_STATUS_AFGEMELD)
 from Kalender.view_maand import MAAND2URL
 import time
 
@@ -60,7 +60,8 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pks):
                                              'sporterboog',
                                              'sporterboog__sporter')
                              .filter(sessie__pk__in=sessie_pks,
-                                     sporterboog__sporter=sporter)):
+                                     sporterboog__sporter=sporter)
+                             .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)):
 
             sessie_pk = inschrijving.sessie.pk
             sessie_pk2inschrijving[sessie_pk] = inschrijving
@@ -375,7 +376,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
                                   .select_related('sporter',
                                                   'boogtype')
                                   .order_by('sporter__sinds_datum',
-                                            'sporter__lid_nr'))
+                                            'sporter__lid_nr')[:10])
 
         sporter, voorkeuren, wedstrijdboog_pks = None, None, list()
         sporter_pks = list()
@@ -404,8 +405,10 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
             # kijk of deze sporter al ingeschreven is
             sessie_pk2inschrijving = dict()
             for inschrijving in (KalenderInschrijving
-                                 .objects.filter(wedstrijd=wedstrijd,
-                                                 sporterboog__sporter=sporter)
+                                 .objects
+                                 .filter(wedstrijd=wedstrijd,
+                                         sporterboog__sporter=sporter)
+                                 .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)
                                  .select_related('sessie',
                                                  'sporterboog',
                                                  'sporterboog__sporter')):
@@ -443,7 +446,11 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
             pass
 
         # voeg niet-schietende sporters toe aan de lijst
-        for sporter in Sporter.objects.filter(adres_code=adres_code).order_by('sinds_datum', 'lid_nr'):
+        for sporter in (Sporter
+                        .objects
+                        .filter(adres_code=adres_code)
+                        .order_by('sinds_datum',
+                                  'lid_nr'))[:10]:
             if sporter.pk not in sporter_pks:
                 dummy = SporterBoog(sporter=sporter)
                 dummy.geen_boog = True

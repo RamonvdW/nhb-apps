@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -76,8 +75,8 @@ class Migration(migrations.Migration):
                 ('scheidsrechters', models.TextField(blank=True, default='', max_length=500)),
                 ('boogtypen', models.ManyToManyField(blank=True, to='BasisTypen.BoogType')),
                 ('deeluitslagen', models.ManyToManyField(blank=True, to='Kalender.KalenderWedstrijdDeeluitslag')),
-                ('locatie', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='Wedstrijden.wedstrijdlocatie')),
-                ('organiserende_vereniging', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='NhbStructuur.nhbvereniging')),
+                ('locatie', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Wedstrijden.wedstrijdlocatie')),
+                ('organiserende_vereniging', models.ForeignKey(on_delete=models.deletion.PROTECT, to='NhbStructuur.nhbvereniging')),
                 ('sessies', models.ManyToManyField(blank=True, to='Kalender.KalenderWedstrijdSessie')),
                 ('extern_beheerd', models.BooleanField(default=False)),
                 ('wedstrijdklassen', models.ManyToManyField(blank=True, to='BasisTypen.KalenderWedstrijdklasse')),

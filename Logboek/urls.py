@@ -46,6 +46,10 @@ urlpatterns = [
          views.LogboekClustersView.as_view(),
          name='clusters'),
 
+    path('betalingen/',
+         views.LogboekBetalingenView.as_view(),
+         name='betalingen'),
+
     path('uitrol/',
          views.LogboekUitrolView.as_view(),
          name='uitrol'),
