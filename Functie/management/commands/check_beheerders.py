@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,16 +13,24 @@ from Functie.models import Functie
 class Command(BaseCommand):
     help = "Check aan de functies gekoppelde beheerders"
 
+    def add_arguments(self, parser):
+        parser.add_argument('--all', action='store_true', help="Toon alle")
+
     def handle(self, *args, **options):
+
+        toon_alle = options['all']
+
         for functie in (Functie
                         .objects
                         .prefetch_related('accounts')
+                        .select_related('nhb_ver')
                         .order_by('nhb_ver', 'rol')):
-            self.stdout.write('Functie: %s' % functie.beschrijving)
-            for account in functie.accounts.all():
+
+            functie_getoond = False
+            for account in functie.accounts.prefetch_related('sporter_set').all():
                 let_op = ''
                 try:
-                    sporter = account.sporter_set.all()[0]
+                    sporter = account.sporter_set.prefetch_related('bij_vereniging').all()[0]
                 except IndexError:
                     sporter = None
                     let_op = 'LET OP: geen koppeling met NHB lid'
@@ -35,7 +43,12 @@ class Command(BaseCommand):
                         # lid is overgestapt
                         let_op = 'LET OP: geen lid bij deze vereniging'
 
-                self.stdout.write('  %s (%s) %s' % (account.username, account.volledige_naam(), let_op))
+                if toon_alle or len(let_op) > 0:
+                    if not functie_getoond:
+                        self.stdout.write('Functie: %s' % functie.beschrijving)
+                        functie_getoond = True
+
+                    self.stdout.write('  %s (%s) %s' % (account.username, account.volledige_naam(), let_op))
             # for
         # for
 
