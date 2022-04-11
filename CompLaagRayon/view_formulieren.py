@@ -169,13 +169,13 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
             volg_nr = 0
             prev_klasse = None
             for team in teams:
-                if team.klasse != prev_klasse:
+                if team.team_klasse != prev_klasse:
                     team.break_before = True
                     team.url_download_teams = reverse('CompLaagRayon:formulier-teams-als-bestand',
                                                       kwargs={'wedstrijd_pk': match.pk,
-                                                              'klasse_pk': team.klasse.pk})
+                                                              'klasse_pk': team.team_klasse.pk})
 
-                    prev_klasse = team.klasse
+                    prev_klasse = team.team_klasse
                     volg_nr = 0
 
                 volg_nr += 1
