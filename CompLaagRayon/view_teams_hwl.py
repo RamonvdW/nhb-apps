@@ -247,15 +247,11 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
         comp = deelcomp_rk.competitie
 
         teamtype_default = None
-        context['opt_team_type'] = team_klassen = (CompetitieTeamKlasse
-                                                   .objects
-                                                   .filter(competitie=comp)
-                                                   .select_related('team_type')
-                                                   .order_by('volgorde'))
-        for team_klasse in team_klassen:
-            team_klasse.choice_name = team_klasse.team_afkorting
-            if team_klasse.team_afkorting[0] == 'R':        # R or R2
-                teamtype_default = team_klasse.team_type
+        context['opt_team_type'] = team_typen = comp.teamtypen.order_by('volgorde')
+        for team_type in team_typen:
+            team_type.choice_name = team_type.afkorting
+            if team_type.afkorting[0] == 'R':        # R or R2
+                teamtype_default = team_type
         # for
 
         try:
@@ -276,7 +272,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
 
         context['rk_team'] = rk_team
 
-        for obj in team_klassen:
+        for obj in team_typen:
             obj.actief = rk_team.team_type == obj
         # for
 
@@ -329,12 +325,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
 
             afkorting = request.POST.get('team_type', '')
             try:
-                klasse = (CompetitieTeamKlasse
-                          .objects
-                          .select_related('team_type')
-                          .filter(competitie=comp,
-                                  team_afkorting=afkorting))[0]
-                team_type = klasse.team_type
+                team_type = comp.teamtypen.get(afkorting=afkorting)
             except (IndexError, TeamType.DoesNotExist):
                 raise Http404('Onbekend team type')
 
