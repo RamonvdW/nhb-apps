@@ -152,7 +152,7 @@
                         {% endif %}
                         <tr>
                             <td colspan="7" class="center">
-                                <h5>{{ klasse.team.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
+                                <h5>{{ klasse.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
                         </tr>
                         <tr>
                             <th class="center">Regio</th>

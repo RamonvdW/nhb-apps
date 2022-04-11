@@ -180,9 +180,9 @@ class RayonTeamsView(TemplateView):
 
         prev_klasse = None
         for team in rk_teams:
-            if team.klasse != prev_klasse:
+            if team.team_klasse != prev_klasse:
                 team.break_before = True
-                prev_klasse = team.klasse
+                prev_klasse = team.team_klasse
 
             # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
             ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
@@ -191,7 +191,7 @@ class RayonTeamsView(TemplateView):
             totaal_teams += 1
 
             try:
-                klasse2teams[team.klasse].append(team)
+                klasse2teams[team.team_klasse].append(team)
             except KeyError:
                 # dit is geen acceptabele klasse (waarschijnlijk een regio klasse)
                 # pas dit meteen even aan
