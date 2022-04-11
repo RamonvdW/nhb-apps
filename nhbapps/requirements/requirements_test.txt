@@ -20,7 +20,7 @@ charset-normalizer==2.0.12
     # via
     #   -r requirements.txt
     #   requests
-django==3.2.12
+django==3.2.13
     # via -r requirements.txt
 et-xmlfile==1.1.0
     # via
@@ -81,7 +81,7 @@ pyasn1-modules==0.2.8
     #   google-auth
 pyotp==2.6.0
     # via -r requirements.txt
-pyparsing==3.0.7
+pyparsing==3.0.8
     # via
     #   -r requirements.txt
     #   httplib2
