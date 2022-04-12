@@ -42,7 +42,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _get_regio_status(competitie):
-        # schutter moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
+        # deelnemers moeten uit LAAG_REGIO gehaald worden, uit de 4 regio's van het rayon
         regio_deelcomps = (DeelCompetitie
                            .objects
                            .filter(laag=LAAG_REGIO,

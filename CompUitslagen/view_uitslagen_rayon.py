@@ -373,6 +373,21 @@ class UitslagenRayonTeamsView(TemplateView):
         comp = deelcomp_rk.competitie
         comp.bepaal_fase()
 
+        # als de gebruiker ingelogd is, laat dan de voor de teams van zijn vereniging zien wie er in de teams zitten
+        toon_team_leden_van_ver_nr = None
+        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
+        account = self.request.user
+        if account.is_authenticated:
+            if functie_nu and functie_nu.nhb_ver:
+                # HWL, WL
+                toon_team_leden_van_ver_nr = functie_nu.nhb_ver.ver_nr
+            else:
+                # geen beheerder, dus sporter
+                if account.sporter_set.count() > 0:
+                    sporter = account.sporter_set.all()[0]
+                    if sporter.is_actief_lid and sporter.bij_vereniging:
+                        toon_team_leden_van_ver_nr = sporter.bij_vereniging.ver_nr
+
         # haal de planning erbij: competitieklasse --> competitiewedstrijd
         team2wedstrijd = dict()     # [team_pk] = competitiewedstrijd
         wedstrijd_pks = list(deelcomp_rk.rk_bk_matches.values_list('pk', flat=True))
@@ -398,7 +413,9 @@ class UitslagenRayonTeamsView(TemplateView):
                     .objects
                     .filter(deelcompetitie=deelcomp_rk,
                             team_type=teamtype)
-                    .select_related('team_klasse')
+                    .select_related('team_klasse',
+                                    'vereniging')
+                    .prefetch_related('gekoppelde_schutters')
                     .order_by('team_klasse__volgorde',
                               '-aanvangsgemiddelde'))       # sterkste team eerst
 
@@ -428,7 +445,20 @@ class UitslagenRayonTeamsView(TemplateView):
             team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = team.ag_str.replace('.', ',')
 
-            teller.aantal_regels += 1
+            if team.ver_nr == toon_team_leden_van_ver_nr:
+                team.toon_team_leden = True
+                team.team_leden = list()
+                for deelnemer in (team
+                                  .gekoppelde_schutters
+                                  .select_related('sporterboog__sporter')
+                                  .order_by('-gemiddelde')):                      # hoogste eerst
+                    team.team_leden.append(deelnemer)
+                    deelnemer.sporter_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
+                # for
+                teller.aantal_regels += 2
+            else:
+                team.toon_team_leden = False
+                teller.aantal_regels += 1
 
             # TODO: dit scherm is zowel een kandidaat-deelnemerslijst als de uitslag
 
