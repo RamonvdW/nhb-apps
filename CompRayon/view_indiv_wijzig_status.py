@@ -121,7 +121,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
         if comp.fase < 'J':
             raise Http404('Mag nog niet wijzigen')
 
-        if comp.fase > 'K':
+        if comp.fase > 'L':
             raise Http404('Mag niet meer wijzigen')
 
         bevestig = str(request.POST.get('bevestig', ''))[:2]
