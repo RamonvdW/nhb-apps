@@ -105,7 +105,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
                 beschr.append('Individueel')
         # for
         for klasse in match.team_klassen.all():
-            klassen_lijst.append(str(klasse))
+            klassen_lijst.append(klasse.beschrijving)
             klasse_team_pks.append(klasse.pk)
             if not heeft_teams:
                 heeft_teams = True
