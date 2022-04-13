@@ -73,10 +73,13 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         bad_path = '/tmp/CompLaagRayon/files/'
         os.makedirs(bad_path, exist_ok=True)
 
-        self.xlsm_fpath_indiv = bad_path + 'template-excel-rk-indiv.xlsm'
-        self.xlsm_fpath_teams = bad_path + 'template-excel-rk-teams.xlsm'
+        self.xlsm_fpath_18_indiv = bad_path + 'template-excel-rk-indoor-indiv.xlsm'
+        self.xlsm_fpath_18_teams = bad_path + 'template-excel-rk-indoor-teams.xlsm'
+        self.xlsm_fpath_25_indiv = bad_path + 'template-excel-rk-25m1pijl-indiv.xlsm'
+        self.xlsm_fpath_25_teams = bad_path + 'template-excel-rk-25m1pijl-teams.xlsm'
 
-        for fpath in (self.xlsm_fpath_indiv, self.xlsm_fpath_teams):
+        for fpath in (self.xlsm_fpath_18_indiv, self.xlsm_fpath_18_teams,
+                      self.xlsm_fpath_25_indiv, self.xlsm_fpath_25_teams):
             try:
                 os.remove(fpath)
             except FileNotFoundError:
@@ -180,7 +183,7 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         self.assert404(resp, 'Kan RK programma niet vinden')
 
         # kapot RK programma
-        self._make_bad_xlsm_file(self.xlsm_fpath_indiv)
+        self._make_bad_xlsm_file(self.xlsm_fpath_18_indiv)
         with self.settings(INSTALL_PATH='/tmp'):
             resp = self.client.get(url)
         self.assert404(resp, 'Kan RK programma niet openen')
@@ -230,7 +233,7 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
         self.assert404(resp, 'Kan RK programma niet vinden')
 
         # kapot RK programma
-        self._make_bad_xlsm_file(self.xlsm_fpath_teams)
+        self._make_bad_xlsm_file(self.xlsm_fpath_18_teams)
         with self.settings(INSTALL_PATH='/tmp'):
             resp = self.client.get(url)
         self.assert404(resp, 'Kan RK programma niet openen')

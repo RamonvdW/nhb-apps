@@ -270,13 +270,18 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
         else:
             limiet = lim.limiet
 
+        if comp.afstand == '18':
+            excel_name = 'template-excel-rk-indoor-indiv.xlsm'
+        else:
+            excel_name = 'template-excel-rk-25m1pijl-indiv.xlsm'
+
         # bepaal de naam van het terug te geven bestand
         fname = "rk-programma_individueel-rayon%s_" % deelcomp_rk.nhb_rayon.rayon_nr
         fname += klasse_str.lower().replace(' ', '-')
         fname += '.xlsm'
 
         # make een kopie van het RK programma in een tijdelijk bestand
-        fpath = os.path.join(settings.INSTALL_PATH, 'CompLaagRayon', 'files', 'template-excel-rk-indiv.xlsm')
+        fpath = os.path.join(settings.INSTALL_PATH, 'CompLaagRayon', 'files', excel_name)
         tmp_file = NamedTemporaryFile()
         try:
             shutil.copyfile(fpath, tmp_file.name)
@@ -450,8 +455,13 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
         fname += klasse_str.lower().replace(' ', '-')
         fname += '.xlsm'
 
+        if comp.afstand == '18':
+            excel_name = 'template-excel-rk-indoor-teams.xlsm'
+        else:
+            excel_name = 'template-excel-rk-25m1pijl-teams.xlsm'
+
         # make een kopie van het RK programma in een tijdelijk bestand
-        fpath = os.path.join(settings.INSTALL_PATH, 'CompLaagRayon', 'files', 'template-excel-rk-teams.xlsm')
+        fpath = os.path.join(settings.INSTALL_PATH, 'CompLaagRayon', 'files', excel_name)
         tmp_file = NamedTemporaryFile()
 
         try:
