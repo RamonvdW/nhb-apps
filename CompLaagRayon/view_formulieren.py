@@ -272,8 +272,10 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
         if comp.afstand == '18':
             excel_name = 'template-excel-rk-indoor-indiv.xlsm'
+            ws_name = 'Voorronde'
         else:
             excel_name = 'template-excel-rk-25m1pijl-indiv.xlsm'
+            ws_name = 'Wedstrijd'
 
         # bepaal de naam van het terug te geven bestand
         fname = "rk-programma_individueel-rayon%s_" % deelcomp_rk.nhb_rayon.rayon_nr
@@ -295,7 +297,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
             raise Http404('Kan RK programma niet openen')
 
         # maak wijzigingen in het RK programma
-        ws = prg['Voorronde']
+        ws = prg[ws_name]
 
         ws['C4'] = 'Rayonkampioenschappen %s, Rayon %s, %s' % (comp.beschrijving, deelcomp_rk.nhb_rayon.rayon_nr, klasse.beschrijving)
 
