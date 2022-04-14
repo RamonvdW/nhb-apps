@@ -230,6 +230,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                 klasse.code_blokkeer = 0
 
             if wedstrijd.organisatie == ORGANISATIE_IFAA:
+                # zet de internationale klasse afkorting erachter
                 klasse.beschrijving += ' [%s]' % klasse.afkorting
 
             volg_nr += 1
@@ -241,8 +242,13 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
         for klasse in opt_klasse:
             if klasse.code_blokkeer == 0:
                 # verwijs terug naar de klasse die deze blokkeert
-                klasse2 = blokkeer2klasse[klasse.code]
-                klasse.code_blokkeer = klasse2.code
+                try:
+                    klasse2 = blokkeer2klasse[klasse.code]
+                except KeyError:
+                    # niet nodig
+                    pass
+                else:
+                    klasse.code_blokkeer = klasse2.code
         # for
 
         if wedstrijd.organisatie == ORGANISATIE_WA:

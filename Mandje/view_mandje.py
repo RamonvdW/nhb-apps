@@ -47,6 +47,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
         mandje_is_leeg = True
         bevat_fout = False
+        controleer_euro = Decimal()
 
         bestellingen = (MandjeBestelling
                         .objects
@@ -66,7 +67,6 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                                          'inschrijving__sporterboog__boogtype',
                                          'inschrijving__sporterboog__sporter'))
 
-            controleer_euro = Decimal()
             for product in producten:
                 # maak een beschrijving van deze regel
                 product.beschrijving = beschrijving = list()

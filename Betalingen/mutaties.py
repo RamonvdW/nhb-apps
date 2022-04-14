@@ -4,8 +4,8 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.db import transaction
 from django.conf import settings
-from django.utils import timezone
 from Betalingen.models import (BetalingenMutatie, BETALINGEN_MUTATIE_AFREKENEN,
                                BetalingenHoogsteBoekingsnummer, BETALINGEN_HOOGSTE_PK)
 from Overig.background_sync import BackgroundSync
@@ -18,16 +18,19 @@ betalingen_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__BETALINGEN_M
 def betaling_get_volgende_boekingsnummer():
     """ Neem een uniek boekingsnummer uit """
 
-    hoogste = (BetalingenHoogsteBoekingsnummer
-               .objects
-               .select_for_update()         # lock tegen concurrency
-               .get(pk=BETALINGEN_HOOGSTE_PK))
+    with transaction.atomic():
+        hoogste = (BetalingenHoogsteBoekingsnummer
+                   .objects
+                   .select_for_update()         # lock tegen concurrency
+                   .get(pk=BETALINGEN_HOOGSTE_PK))
 
-    # het volgende nummer is het nieuwe unieke nummer
-    hoogste.hoogste_gebruikte_boekingsnummer += 1
-    hoogste.save()
+        # het volgende nummer is het nieuwe unieke nummer
+        hoogste.hoogste_gebruikte_boekingsnummer += 1
+        hoogste.save()
 
-    return hoogste.hoogste_gebruikte_boekingsnummer
+        nummer = hoogste.hoogste_gebruikte_boekingsnummer
+
+    return nummer
 
 
 def betalingen_start_afrekenen(boekingsnummer, snel):
