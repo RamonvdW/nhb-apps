@@ -216,11 +216,18 @@ def _maak_competitieklassen(comp):
         # for
 
     if True:
-        bulk = list()
 
+        teamtype_pk2boog_pks = dict()        # [teamtype.pk] = [boogtype.pk, ...]
+
+        bulk = list()
         for team in (TemplateCompetitieTeamKlasse
                      .objects
-                     .exclude(buiten_gebruik=True)):
+                     .exclude(buiten_gebruik=True)
+                     .select_related('team_type')
+                     .prefetch_related('team_type__boog_typen')):
+
+            boog_pks = list(team.team_type.boog_typen.all().values_list('pk', flat=True))
+            teamtype_pk2boog_pks[team.team_type.pk] = boog_pks
 
             # voor de regiocompetitie teams
             klasse = CompetitieTeamKlasse(
@@ -266,6 +273,12 @@ def _maak_competitieklassen(comp):
         # for
 
         CompetitieTeamKlasse.objects.bulk_create(bulk)
+
+        # zet de boogtypen
+        for team in bulk:
+            boog_pks = teamtype_pk2boog_pks[team.team_type.pk]
+            team.boog_typen.set(boog_pks)
+        # for
 
 
 def bepaal_startjaar_nieuwe_competitie():

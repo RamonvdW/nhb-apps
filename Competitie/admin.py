@@ -53,6 +53,11 @@ class DeelcompetitieRondeAdmin(CreateOnlyAdmin):
     # TODO: filter matches op verenigingen in de regio
 
 
+class CompetitieAdmin(admin.ModelAdmin):
+
+    filter_horizontal = ('boogtypen', 'teamtypen')
+
+
 class CompetitieIndivKlasseAdmin(admin.ModelAdmin):
 
     list_filter = ('competitie', 'boogtype', 'is_voor_rk_bk')
@@ -69,6 +74,8 @@ class CompetitieTeamKlasseAdmin(admin.ModelAdmin):
     list_select_related = ('competitie',)
 
     ordering = ('volgorde',)
+
+    filter_horizontal = ('boog_typen',)
 
 
 class CompetitieMatchAdmin(admin.ModelAdmin):
@@ -565,7 +572,7 @@ class DeelcompetitieTeamKlasseLimietAdmin(CreateOnlyAdmin):
     ordering = ('team_klasse__volgorde',)
 
 
-admin.site.register(Competitie)
+admin.site.register(Competitie, CompetitieAdmin)
 admin.site.register(DeelCompetitie, DeelCompetitieAdmin)
 admin.site.register(CompetitieIndivKlasse, CompetitieIndivKlasseAdmin)
 admin.site.register(CompetitieTeamKlasse, CompetitieTeamKlasseAdmin)
