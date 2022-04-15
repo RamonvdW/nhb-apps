@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -55,6 +56,7 @@ class InterlandView(UserPassesTestMixin, TemplateView):
 
         context['jeugd_min'] = MINIMALE_LEEFTIJD_JEUGD_INTERLAND
         context['jeugd_max'] = MAXIMALE_LEEFTIJD_JEUGD_INTERLAND
+        context['minimum_aantal_scores'] = settings.INTERLAND_25M_MINIMUM_SCORES_VOOR_DEELNAME
 
         context['klassen'] = list()
 
@@ -85,7 +87,7 @@ class InterlandView(UserPassesTestMixin, TemplateView):
                                       gemiddelde__gt=Decimal('0.000'))
                               .order_by('-gemiddelde')):
 
-                    if indiv.tel_aantal_scores() >= 5:
+                    if indiv.tel_aantal_scores() >= settings.INTERLAND_25M_MINIMUM_SCORES_VOOR_DEELNAME:
 
                         # zoek de sporter erbij
                         try:

@@ -167,7 +167,7 @@ class Command(BaseCommand):
                           .get(account=account,
                                boekingsnummer=MANDJE_NOG_GEEN_BESTELLING))
         except MandjeBestelling.DoesNotExist:
-            self.stdout.write('[WARNING] Geen mandje voor account pk=%s om kortingscode pk=%sop toe te passen' %
+            self.stdout.write('[WARNING] Geen mandje voor account pk=%s om kortingscode pk=%s op toe te passen' %
                               (account.pk, korting.pk))
             return
 

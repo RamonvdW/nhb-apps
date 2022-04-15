@@ -47,7 +47,6 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
         mandje_is_leeg = True
         bevat_fout = False
-        controleer_euro = Decimal()
 
         bestellingen = (MandjeBestelling
                         .objects
@@ -57,6 +56,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
         if bestellingen.count() > 0:
             bestelling = bestellingen[0]
+            controleer_euro = Decimal()
 
             producten = (bestelling
                          .producten
@@ -120,16 +120,16 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
                 mandje_is_leeg = False
             # for
+
+            # nooit een negatief totaalbedrag tonen want we geven geen geld weg
+            if controleer_euro < 0.0:
+                controleer_euro = 0.0
+
+            if controleer_euro != bestelling.totaal_euro:
+                bevat_fout = True
         else:
             bestelling = None
             producten = None
-
-        # nooit een negatief totaalbedrag tonen want we geven geen geld weg
-        if controleer_euro < 0.0:
-            controleer_euro = 0.0
-
-        if controleer_euro != bestelling.totaal_euro:
-            bevat_fout = True
 
         return bestelling, producten, mandje_is_leeg, bevat_fout
 

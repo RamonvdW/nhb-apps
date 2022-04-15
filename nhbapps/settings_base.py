@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2022-04-14'
+SITE_VERSIE = '2022-04-15'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -209,6 +209,7 @@ MINIMUM_LEEFTIJD_LID = 5
 # minimum aantal scores in uitslag vorige seizoen nodig om te gebruiken als AG voor nieuwe seizoen
 COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG = 6
 COMPETITIE_25M_MINIMUM_SCORES_VOOR_AG = 6
+INTERLAND_25M_MINIMUM_SCORES_VOOR_DEELNAME = 6
 
 # week waarin de laatste wedstrijden geschoten mogen worden
 COMPETITIES_START_WEEK = 37

@@ -937,6 +937,11 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagrayon/hwl-rk-selectie.dtl', 'plein/site_layout.dtl'))
 
+        zet_competitie_fase(comp, 'M')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_lijst_hwl)
+        self.assert404(resp, 'Pagina kan niet meer gebruikt worden')
+
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig_status % deelnemer_pks[1])
         self.assert404(resp, 'Mag niet meer wijzigen')
