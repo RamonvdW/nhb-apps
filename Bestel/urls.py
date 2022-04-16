@@ -7,20 +7,20 @@
 from django.urls import path
 from . import view_mandje
 
-app_name = 'Mandje'
+app_name = 'Bestel'
 
 urlpatterns = [
-    path('verwijderen/<inhoud_pk>/',
-         view_mandje.VerwijderUitMandje.as_view(),
-         name='verwijder-inschrijving'),
+    path('mandje/verwijderen/<product_pk>/',
+         view_mandje.VerwijderProductUitMandje.as_view(),
+         name='mandje-verwijder-product'),
 
-    path('code-toevoegen/',
+    path('mandje/code-toevoegen/',
          view_mandje.CodeToevoegenView.as_view(),
-         name='code-toevoegen'),
+         name='mandje-code-toevoegen'),
 
-    path('',
+    path('mandje/',
          view_mandje.ToonInhoudMandje.as_view(),
-         name='toon-inhoud'),
+         name='toon-inhoud-mandje'),
 ]
 
 # end of file

@@ -14,7 +14,7 @@ from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import BoogType
 from Functie.rol import Rollen, rol_get_huidige
-from Mandje.mandje import mandje_is_gewijzigd
+from Bestel.mandje import mandje_tel_inhoud
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren_wedstrijdbogen
@@ -552,7 +552,7 @@ class ToevoegenView(UserPassesTestMixin, View):
                     mutatie = KalenderMutatie.objects.get(pk=mutatie.pk)
                 # while
 
-            mandje_is_gewijzigd(self.request)
+            mandje_tel_inhoud(self.request)
 
         if goto_str == 'F':
             # ga terug naar de familie pagina met dezelfde sporter geselecteerd

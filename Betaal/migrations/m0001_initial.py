@@ -5,19 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-from Betalingen.models import BETALINGEN_HOOGSTE_PK
-
-
-def init_hoogste_boekingsnummer(apps, _):
-    """ maak het enige record aan in deze tabel """
-
-    # haal de klassen op die van toepassing zijn tijdens deze migratie
-    hoogste_klas = apps.get_model('Betalingen', 'BetalingenHoogsteBoekingsnummer')
-
-    # maak het enige record aan met het startnummer voor de boekingsnummers
-    hoogste_klas(
-            pk=BETALINGEN_HOOGSTE_PK,
-            hoogste_gebruikte_boekingsnummer=1000000).save()
 
 
 class Migration(migrations.Migration):
@@ -35,49 +22,59 @@ class Migration(migrations.Migration):
     # migratie functies
     operations = [
         migrations.CreateModel(
-            name='BetalingenActieveTransacties',
+            name='BetaalActief',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('when', models.DateTimeField(auto_now_add=True)),
-                ('payment_id', models.CharField(max_length=32)),
+                ('payment_id', models.CharField(max_length=64)),
             ],
             options={
-                'verbose_name': 'Betalingen actieve transacties',
+                'verbose_name': 'Actief payment_id',
+                'verbose_name_plural': "Actieve payment_id's",
             },
         ),
         migrations.CreateModel(
-            name='BetalingenMutatie',
+            name='BetaalMutatie',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('when', models.DateTimeField(auto_now_add=True)),
                 ('code', models.PositiveSmallIntegerField(default=0)),
-                ('boekingsnummer', models.PositiveIntegerField(default=0)),
                 ('is_verwerkt', models.BooleanField(default=False)),
-                ('payment_id', models.CharField(max_length=32)),
+                ('beschrijving', models.CharField(max_length=100)),
+                ('bedrag_euro', models.DecimalField(decimal_places=2, default=0.0, max_digits=7)),
+                ('payment_id', models.CharField(max_length=64)),
             ],
             options={
-                'verbose_name': 'Betalingen mutatie',
+                'verbose_name': 'Betaal mutatie',
             },
         ),
         migrations.CreateModel(
-            name='BetalingenVerenigingInstellingen',
+            name='BetaalTransactie',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('payment_id', models.CharField(max_length=64)),
+                ('when', models.DateTimeField()),
+                ('beschrijving', models.CharField(max_length=100)),
+                ('is_restitutie', models.BooleanField(default=False)),
+                ('bedrag_euro', models.DecimalField(decimal_places=2, default=0.0, max_digits=7)),
+                ('klant_naam', models.CharField(max_length=100)),
+                ('klant_iban', models.CharField(max_length=18)),
+                ('klant_bic', models.CharField(max_length=11)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='BetaalInstellingenVereniging',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('mollie_api_key', models.CharField(max_length=50)),
+                ('akkoord_via_nhb', models.BooleanField(default=False)),
                 ('vereniging', models.ForeignKey(on_delete=models.deletion.CASCADE, to='NhbStructuur.nhbvereniging')),
             ],
             options={
-                'verbose_name': 'Betalingen vereniging instellingen',
+                'verbose_name': 'Betaal instellingen vereniging',
+                'verbose_name_plural': 'Betaal instellingen verenigingen',
             },
         ),
-        migrations.CreateModel(
-            name='BetalingenHoogsteBoekingsnummer',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('hoogste_gebruikte_boekingsnummer', models.PositiveIntegerField(default=0)),
-            ],
-        ),
-        migrations.RunPython(init_hoogste_boekingsnummer),
     ]
 
 # end of file

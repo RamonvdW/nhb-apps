@@ -7,22 +7,23 @@
 from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
+from Bestel.models import BestelProduct, BestelMandje
 from Kalender.models import (KalenderWedstrijd, KalenderWedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD,
                              KalenderInschrijving, KalenderWedstrijdKortingscode)
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Wedstrijden.models import WedstrijdLocatie
-from .models import MandjeProduct
+from decimal import Decimal
 
 
 class TestMandje(E2EHelpers, TestCase):
 
     """ tests voor de Kalender applicatie """
 
-    url_mandje_toon = '/mandje/'
-    url_mandje_verwijder = '/mandje/verwijderen/%s/'        # inhoud_pk
-    url_mandje_code_toevoegen = '/mandje/code-toevoegen/'
+    url_mandje_toon = '/bestel/mandje/'
+    url_mandje_verwijder = '/bestel/mandje/verwijderen/%s/'        # inhoud_pk
+    url_mandje_code_toevoegen = '/bestel/mandje/code-toevoegen/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -57,7 +58,7 @@ class TestMandje(E2EHelpers, TestCase):
         sporterboog.save()
 
         now = timezone.now()
-        datum = now.date()
+        datum = now.date()      # pas op met testen ronde 23:59
 
         locatie = WedstrijdLocatie(
                         naam='Test locatie',
@@ -111,18 +112,20 @@ class TestMandje(E2EHelpers, TestCase):
         korting.voor_wedstrijden.add(wedstrijd)
         self.korting = korting
 
-    def _maak_inhoud(self, account):
+    def _vul_mandje(self, account):
 
-        # geen koppeling aan een inschrijving
-        MandjeProduct(
-            account=account).save()
+        mandje, is_created = BestelMandje.objects.get_or_create(account=account)
 
-        inhoud = MandjeProduct(
-                    account=account,
+        # geen koppeling aan een mandje
+        product = BestelProduct(
                     inschrijving=self.inschrijving,
-                    prijs_euro=10.00)
-        inhoud.save()
-        return inhoud
+                    prijs_euro=Decimal(10.0))
+        product.save()
+
+        # stop het product in het mandje
+        mandje.producten.add(product)
+
+        return product
 
     def test_anon(self):
         self.client.logout()
@@ -147,18 +150,18 @@ class TestMandje(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('mandje/toon-inhoud.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(url, post=False)
 
         # vul het mandje
-        inhoud = self._maak_inhoud(self.account_admin)
+        inhoud = self._vul_mandje(self.account_admin)
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('mandje/toon-inhoud.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
 
         # corner case: sporter zonder vereniging
         self.sporter.bij_vereniging = None
@@ -172,7 +175,7 @@ class TestMandje(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('mandje/toon-inhoud.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
 
         # koppel een korting
         self.inschrijving.gebruikte_code = self.korting
@@ -182,14 +185,14 @@ class TestMandje(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('mandje/toon-inhoud.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
 
     def test_kortingscode(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
 
         # vul het mandje
-        inhoud = self._maak_inhoud(self.account_admin)
+        product = self._vul_mandje(self.account_admin)
 
         # zonder code
         with self.assert_max_queries(20):
@@ -212,8 +215,9 @@ class TestMandje(E2EHelpers, TestCase):
 
         # pas de code toe, inclusief garbage
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_mandje_code_toevoegen, {'code': '@@' + self.code + '!',
-                                                                     'snel': 1})
+            resp = self.client.post(self.url_mandje_code_toevoegen,
+                                    {'code': '@@' + self.code + '!',   # troep wordt verwijderd
+                                     'snel': 1})
         self.assert_is_redirect(resp, self.url_mandje_toon)
 
         self.verwerk_kalender_mutaties()
@@ -228,7 +232,7 @@ class TestMandje(E2EHelpers, TestCase):
             resp = self.client.get(self.url_mandje_toon)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('mandje/toon-inhoud.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
 
         self.assertContains(resp, '10,00')    # prijs sessie
         self.assertContains(resp, '4,20')     # korting
@@ -248,21 +252,21 @@ class TestMandje(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_mandje_verwijder % 999999)
-        self.assert404(resp, 'Niet gevonden in mandje')
+        self.assert404(resp, 'Niet gevonden in jouw mandje')
 
         # vul het mandje
-        inhoud = self._maak_inhoud(self.account_admin)
+        product = self._vul_mandje(self.account_admin)
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_mandje_verwijder % inhoud.pk, {'snel': 1})
+            resp = self.client.post(self.url_mandje_verwijder % product.pk, {'snel': 1})
         self.assert_is_redirect(resp, self.url_mandje_toon)
 
         self.verwerk_kalender_mutaties()
 
         # nog een keer verwijderen
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_mandje_verwijder % inhoud.pk, {'snel': 1})
-        self.assert404(resp, 'Niet gevonden in mandje')
+            resp = self.client.post(self.url_mandje_verwijder % product.pk, {'snel': 1})
+        self.assert404(resp, 'Niet gevonden in jouw mandje')
 
 
 # end of file

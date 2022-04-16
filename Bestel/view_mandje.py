@@ -9,17 +9,18 @@ from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Betalingen.mutaties import betaling_get_volgende_boekingsnummer
+from Account.operations import account_controleer_snelheid_verzoeken
+from Bestel.operations import bestel_get_volgende_bestel_nr
 from Functie.rol import Rollen, rol_get_huidige
 from Kalender.mutaties import kalender_kortingscode_toepassen, kalender_verwijder_reservering
-from Mandje.models import MandjeProduct, MandjeBestelling, MINIMUM_CODE_LENGTH, MANDJE_NOG_GEEN_BESTELLING
-from Mandje.mandje import mandje_is_gewijzigd, eval_mandje_inhoud
+from Bestel.models import BestelMandje, BestelProduct, BESTEL_KORTINGSCODE_MINLENGTH
+from Bestel.mandje import mandje_tel_inhoud, eval_mandje_inhoud
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from decimal import Decimal
 
 
-TEMPLATE_MANDJE_TOON_INHOUD = 'mandje/toon-inhoud.dtl'
+TEMPLATE_MANDJE_TOON_INHOUD = 'bestel/toon-mandje.dtl'
 
 kalender_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__KALENDER_MUTATIES)
 
@@ -48,17 +49,16 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         mandje_is_leeg = True
         bevat_fout = False
 
-        bestellingen = (MandjeBestelling
-                        .objects
-                        .filter(account=account,
-                                boekingsnummer=MANDJE_NOG_GEEN_BESTELLING)
-                        .prefetch_related('producten'))
+        try:
+            mandje = BestelMandje.objects.prefetch_related('producten').get(account=account)
+        except BestelMandje.DoesNotExist:
+            # geen mandje
+            mandje = None
+            producten = None
+        else:
+            controleer_euro = Decimal(0)
 
-        if bestellingen.count() > 0:
-            bestelling = bestellingen[0]
-            controleer_euro = Decimal()
-
-            producten = (bestelling
+            producten = (mandje
                          .producten
                          .select_related('inschrijving',
                                          'inschrijving__wedstrijd',
@@ -115,8 +115,8 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
                 if maak_urls:
                     # maak een knop om deze bestelling te verwijderen uit het mandje
-                    product.url_verwijder = reverse('Mandje:verwijder-inschrijving',
-                                                    kwargs={'inhoud_pk': product.pk})
+                    product.url_verwijder = reverse('Bestel:mandje-verwijder-product',
+                                                    kwargs={'product_pk': product.pk})
 
                 mandje_is_leeg = False
             # for
@@ -125,13 +125,10 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
             if controleer_euro < 0.0:
                 controleer_euro = 0.0
 
-            if controleer_euro != bestelling.totaal_euro:
+            if controleer_euro != mandje.totaal_euro:
                 bevat_fout = True
-        else:
-            bestelling = None
-            producten = None
 
-        return bestelling, producten, mandje_is_leeg, bevat_fout
+        return mandje, producten, mandje_is_leeg, bevat_fout
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -146,10 +143,10 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         context['producten'] = producten
         context['bevat_fout'] = bevat_fout
 
-        context['url_code_toevoegen'] = reverse('Mandje:code-toevoegen')
+        context['url_code_toevoegen'] = reverse('Bestel:mandje-code-toevoegen')
         if not bevat_fout:
-            if bestelling.totaal_euro > 0:
-                context['url_afrekenen'] = reverse('Mandje:toon-inhoud')
+            if bestelling and bestelling.totaal_euro > 0:
+                context['url_afrekenen'] = reverse('Bestel:toon-inhoud-mandje')
 
         context['kruimels'] = (
             (None, 'Mandje'),
@@ -165,10 +162,12 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         if bevat_fout:
             raise Http404('Afrekenen is niet mogelijk')
 
-        # neem een boekingsnummer uit
-        boekeingsnummer = betaling_get_volgende_boekingsnummer()
+        # neem een bestelnummer uit
+        bestel_nr = bestel_get_volgende_bestel_nr()
 
-        url = reverse('Mandje:toon-inhoud')
+        # TODO: conversie mandje naar bestelling afronden
+
+        url = reverse('Bestel:toon-inhoud-mandje')
         return HttpResponseRedirect(url)
 
 
@@ -189,7 +188,7 @@ class CodeToevoegenView(UserPassesTestMixin, View):
     def post(self, request, *args, **kwargs):
         """ Voeg de code toe aan het mandje """
 
-        # TODO: rate limiter
+        snel = str(request.POST.get('snel', ''))[:1]
 
         code = ''
         for char in request.POST.get('code', '')[:40]:        # afkappen voor de veiligheid:
@@ -197,21 +196,21 @@ class CodeToevoegenView(UserPassesTestMixin, View):
                 code += char
         # for
 
-        if len(code) >= MINIMUM_CODE_LENGTH:
+        if len(code) >= BESTEL_KORTINGSCODE_MINLENGTH:
             account = request.user
-            snel = str(request.POST.get('snel', ''))[:1]
 
-            if kalender_kortingscode_toepassen(account, code, snel == '1'):
-                # gelukt
-                mandje_is_gewijzigd(self.request)
+            if account_controleer_snelheid_verzoeken(account):
+                kalender_kortingscode_toepassen(account, code, snel == '1')
+
+                mandje_tel_inhoud(self.request)
 
         # terug naar het mandje
-        url = reverse('Mandje:toon-inhoud')
+        url = reverse('Bestel:toon-inhoud-mandje')
 
         return HttpResponseRedirect(url)
 
 
-class VerwijderUitMandje(UserPassesTestMixin, View):
+class VerwijderProductUitMandje(UserPassesTestMixin, View):
 
     # class variables shared by all instances
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
@@ -226,26 +225,38 @@ class VerwijderUitMandje(UserPassesTestMixin, View):
         return self.rol_nu != Rollen.ROL_NONE
 
     def post(self, request, *args, **kwargs):
+
+        snel = str(request.POST.get('snel', ''))[:1]
+
         try:
-            inhoud_pk = str(kwargs['inhoud_pk'])[:6]        # afkappen voor de veiligheid
-            inhoud_pk = int(inhoud_pk)
+            product_pk = str(kwargs['product_pk'])[:6]        # afkappen voor de veiligheid
+            product_pk = int(product_pk)
         except (KeyError, ValueError, TypeError):
             raise Http404('Verkeerde parameter')
 
         # zoek de regel op in het mandje van de ingelogde gebruiker
         account = request.user
         try:
-            inhoud = MandjeProduct.objects.get(pk=inhoud_pk,
-                                               account=account)
-        except MandjeProduct.DoesNotExist:
-            raise Http404('Niet gevonden in mandje')
+            mandje, is_created = BestelMandje.objects.prefetch_related('producten').get_or_create(account=account)
+        except BestelMandje.DoesNotExist:
+            raise Http404('Niet gevonden')
+        else:
+            qset = mandje.producten.filter(pk=product_pk)
+            if qset.exists():
+                # product zit in het mandje
+                product = qset[0]
 
-        snel = str(request.POST.get('snel', ''))[:1]
-        kalender_verwijder_reservering(inhoud.inschrijving, snel == '1')
+                # verwijderen uit het mandje
+                mandje.producten.remove(product)
 
-        mandje_is_gewijzigd(self.request)
+                # maak de inschrijving ongedaan
+                kalender_verwijder_reservering(product.inschrijving, snel == '1')
 
-        url = reverse('Mandje:toon-inhoud')
+                mandje_tel_inhoud(self.request)
+            else:
+                raise Http404('Niet gevonden in jouw mandje')
+
+        url = reverse('Bestel:toon-inhoud-mandje')
         return HttpResponseRedirect(url)
 
 

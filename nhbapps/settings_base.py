@@ -32,9 +32,10 @@ SITE_VERSIE = '2022-04-16'
 INSTALLED_APPS = [
     'Plein.apps.PleinConfig',           # must go first: provides admin template override
     'Beheer.apps.BeheerConfig',         # uitbreiding op admin interface
-    'Betalingen.apps.BetalingenConfig',
     'Account.apps.AccountConfig',
     'BasisTypen.apps.BasisTypenConfig',
+    'Bestel.apps.BestelConfig',
+    'Betaal.apps.BetaalConfig',
     'Bondspas.apps.BondspasConfig',
     'Competitie.apps.CompetitieConfig',
     'CompInschrijven.apps.CompInschrijvenConfig',
@@ -49,7 +50,6 @@ INSTALLED_APPS = [
     'Kalender.apps.KalenderConfig',
     'Logboek.apps.LogboekConfig',
     'Mailer.apps.MailerConfig',
-    'Mandje.apps.MandjeConfig',
     'NhbStructuur.apps.NhbStructuurConfig',
     'Overig.apps.OverigConfig',
     'Records.apps.RecordsConfig',

@@ -7,10 +7,10 @@
 from django.apps import AppConfig
 
 
-class MandjeConfig(AppConfig):
+class BestelConfig(AppConfig):
     """ Configuratie object van deze applicatie """
 
-    name = 'Mandje'
+    name = 'Bestel'
 
     default_auto_field = 'django.db.models.BigAutoField'
 

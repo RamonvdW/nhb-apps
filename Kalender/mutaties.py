@@ -28,10 +28,6 @@ def kalender_kortingscode_toepassen(account, code, snel):
             False = geen valide code, niet toegepast
     """
 
-    # TODO: rate limiter
-
-    result = False
-
     now = timezone.now()
     today = now.date()
 
@@ -45,10 +41,8 @@ def kalender_kortingscode_toepassen(account, code, snel):
         mutatie = KalenderMutatie(
                         code=KALENDER_MUTATIE_KORTING,
                         korting=korting,
-                        korting_voor_account=account)
+                        korting_voor_koper=account)
         mutatie.save()
-
-        result = True
 
         # ping het achtergrond process
         kalender_mutaties_ping.ping()
@@ -66,8 +60,6 @@ def kalender_kortingscode_toepassen(account, code, snel):
 
         break       # from the for
     # for
-
-    return result
 
 
 def kalender_verwijder_reservering(inschrijving, snel):

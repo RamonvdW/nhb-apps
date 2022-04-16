@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.http import Http404, HttpResponseRedirect
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Betalingen.models import BetalingenVerenigingInstellingen, MOLLIE_API_KEY_MAXLENGTH
+from Betaal.models import BetaalInstellingenVereniging, MOLLIE_API_KEY_MAXLENGTH
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from mollie.api.client import RequestSetupError, Client
@@ -40,8 +40,7 @@ class BetalingenInstellenView(UserPassesTestMixin, TemplateView):
         context['ver'] = ver = self.functie_nu.nhb_ver
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
-        #instellingen, is_created = BetalingenVerenigingInstellingen.objects.get_or_create(vereniging=ver)   # TODO
-        instellingen = BetalingenVerenigingInstellingen(vereniging=ver, mollie_api_key='test_wrtrTr153Rewr36WrTUA162Ag')
+        instellingen, is_created = BetaalInstellingenVereniging.objects.get_or_create(vereniging=ver)
 
         context['huidige_api_key'] = instellingen.obfuscated_mollie_api_key()
 
@@ -68,7 +67,7 @@ class BetalingenInstellenView(UserPassesTestMixin, TemplateView):
             # hoe moeilijk is knippen & plakken? Niet veel moeite in stoppen
             raise Http404('Niet geaccepteerd')
 
-        instellingen, is_created = BetalingenVerenigingInstellingen.objects.get_or_create(vereniging=ver)
+        instellingen, is_created = BetaalInstellingenVereniging.objects.get_or_create(vereniging=ver)
         instellingen.mollie_api_key = apikey
         instellingen.save()
 

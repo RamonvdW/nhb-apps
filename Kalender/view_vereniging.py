@@ -14,7 +14,7 @@ from BasisTypen.models import (GESLACHT_ALLE,
                                ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_NHB, ORGANISATIES2SHORT_STR)
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
-from Mandje.models import MINIMUM_CODE_LENGTH
+from Bestel.models import BESTEL_KORTINGSCODE_MINLENGTH
 from Sporter.models import Sporter
 from Plein.menu import menu_dynamics
 from .models import (KalenderWedstrijd, KalenderWedstrijdKortingscode,
@@ -294,7 +294,7 @@ class VerenigingWijzigKortingcodesView(UserPassesTestMixin, View):
             wedstrijden.append(wedstrijd)
         # for
 
-        context['min_code_len'] = MINIMUM_CODE_LENGTH
+        context['min_code_len'] = BESTEL_KORTINGSCODE_MINLENGTH
 
         # nodig voor de datum picker
         context['now'] = now = timezone.now()
@@ -340,7 +340,7 @@ class VerenigingWijzigKortingcodesView(UserPassesTestMixin, View):
             code = request.POST.get('code', '')
             # filter slechte tekens + forceer hoofdletters
             code = "".join([char.upper() for char in code if char.isalnum()])
-            if len(code) < MINIMUM_CODE_LENGTH:
+            if len(code) < BESTEL_KORTINGSCODE_MINLENGTH:
                 raise Http404('Te korte code')
 
             korting.code = code[:20]        # maximum lengte in database

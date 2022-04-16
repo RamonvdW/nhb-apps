@@ -8,7 +8,7 @@ from django.conf import settings
 from django.shortcuts import reverse
 from Account.rechten import account_rechten_is_otp_verified
 from Functie.rol import Rollen, rol_mag_wisselen, rol_get_huidige
-from Mandje.mandje import mandje_inhoud_aantal
+from Bestel.mandje import cached_aantal_in_mandje_get
 from Taken.taken import aantal_open_taken
 
 
@@ -35,7 +35,7 @@ def menu_dynamics(request, context, actief=None):
         context['menu_voornaam'] = request.user.get_first_name()
 
         # mandje tonen?
-        context['menu_mandje_aantal'] = mandje_inhoud_aantal(request)
+        context['menu_mandje_aantal'] = cached_aantal_in_mandje_get(request)
         if context['menu_mandje_aantal'] > 0:
             # we zetten deze niet terug op False,
             # zodat views deze ook op True kunnen zetten (ook al is het mandje leeg)

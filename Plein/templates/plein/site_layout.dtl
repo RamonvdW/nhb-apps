@@ -49,7 +49,7 @@
                     <ul id="nav-mobile" class="right">
                         {% if menu_toon_mandje %}
                             <li>
-                                <a href="{% url 'Mandje:toon-inhoud' %}" class="btn-nhb-rood">
+                                <a href="{% url 'Bestel:toon-inhoud-mandje' %}" class="btn-nhb-rood">
                                     <i class="material-icons-round left" style="line-height:36px">shopping_cart</i>{{ menu_mandje_aantal }}</a>
                             </li>
                         {% endif %}

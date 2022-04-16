@@ -245,7 +245,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu != Rollen.ROL_WL:
             # SEC of HWL
-            context['url_betalingen'] = reverse('Betalingen:vereniging-instellingen')
+            context['url_betalingen'] = reverse('Betaal:vereniging-instellingen')
 
         # maak een afsluiter (wordt gebruikt in de template)
         if prev_jaar != 0:

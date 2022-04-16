@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from BasisTypen.models import ORGANISATIE_WA
-from Mandje.mandje import eval_mandje_inhoud
+from Bestel.mandje import eval_mandje_inhoud
 from Plein.menu import menu_dynamics
 from .models import (KalenderWedstrijd, KalenderWedstrijdSessie,
                      WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD,

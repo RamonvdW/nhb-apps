@@ -170,6 +170,6 @@
         </div>
     {% endif %}     <!-- mandje niet leeg -->
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="mandje-toon-product" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="bestel-toon-mandje %}
 
 {% endblock %}

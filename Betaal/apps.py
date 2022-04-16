@@ -7,11 +7,11 @@
 from django.apps import AppConfig
 
 
-class BetalingenConfig(AppConfig):
+class BetaalConfig(AppConfig):
 
     """ Configuratie object van deze applicatie """
 
-    name = 'Betalingen'
+    name = 'Betaal'
 
     default_auto_field = 'django.db.models.BigAutoField'
 

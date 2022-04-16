@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.core import management
-from Account.models import account_create
+from Account.operations import account_create
 from Feedback.models import Feedback
 from Feedback.feedback_opslaan import store_feedback
 from Logboek.models import LogboekRegel, schrijf_in_logboek

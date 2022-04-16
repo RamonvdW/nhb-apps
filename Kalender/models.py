@@ -384,7 +384,7 @@ class KalenderMutatie(models.Model):
 
     # kortingscode om toe te passen
     korting = models.ForeignKey(KalenderWedstrijdKortingscode, on_delete=models.SET_NULL, null=True, blank=True)
-    korting_voor_account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
+    korting_voor_koper = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         verbose_name = "Kalender mutatie"

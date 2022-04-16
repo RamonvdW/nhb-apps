@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='kalenderwedstrijd',
             name='organisatie',
-            field=models.CharField(choices=[('W', 'World Archery'), ('N', 'Nationaal'), ('F', 'IFAA')], default='W', max_length=1),
+            field=models.CharField(choices=[('W', 'World Archery'), ('N', 'NHB'), ('F', 'IFAA')], default='W', max_length=1),
         ),
         migrations.RunPython(zet_organisatie)
     ]
