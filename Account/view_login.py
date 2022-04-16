@@ -11,11 +11,11 @@ from django.urls import reverse, resolve, Resolver404
 from django.contrib.auth import authenticate, login
 from django.views.generic import TemplateView
 from django.utils import timezone
-from .forms import LoginForm
-from .models import (Account, AccountEmail,
-                     account_check_gewijzigde_email, account_email_bevestiging_ontvangen)
-from .rechten import account_rechten_login_gelukt
-from .views import account_plugins_login, account_add_plugin_login
+from Account.forms import LoginForm
+from Account.models import Account, AccountEmail
+from Account.operations import account_email_bevestiging_ontvangen, account_check_gewijzigde_email
+from Account.rechten import account_rechten_login_gelukt
+from Account.views import account_plugins_login, account_add_plugin_login
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_ACCOUNT_EMAIL
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek

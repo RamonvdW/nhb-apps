@@ -9,7 +9,8 @@
 from django.test import Client
 from django.core import management
 from django.utils import timezone
-from Account.models import Account, account_create, AccountEmail
+from Account.models import Account, AccountEmail
+from Account.operations import account_create
 from BasisTypen.models import TeamType, ORGANISATIE_NHB
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_teamtypen
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,

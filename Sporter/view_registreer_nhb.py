@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import TemplateView
-from Account.models import AccountCreateError, account_create
+from Account.operations import AccountCreateError, account_create
 from Account.views import account_vraag_email_bevestiging
 from Functie.models import Functie
 from Logboek.models import schrijf_in_logboek

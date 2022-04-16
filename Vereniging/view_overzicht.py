@@ -247,7 +247,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             # SEC of HWL
             context['url_betalingen'] = reverse('Betalingen:vereniging-instellingen')
 
-        # TODO: wat doet dit?
+        # maak een afsluiter (wordt gebruikt in de template)
         if prev_jaar != 0:
             kaartje = SimpleNamespace()
             kaartje.einde_blok = True

@@ -9,7 +9,8 @@ from django.core import management
 from django.conf import settings
 from django.test import TestCase, Client
 from django.db import connection
-from Account.models import Account, account_create
+from Account.models import Account
+from Account.operations import account_create
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
 from TestHelpers.e2estatus import validated_templates, included_templates
 from contextlib import contextmanager

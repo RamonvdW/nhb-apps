@@ -11,16 +11,17 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from .models import AccountEmail, account_test_wachtwoord_sterkte
-from .rechten import account_rechten_login_gelukt
-from .view_login import account_plugins_login
+from Account.models import AccountEmail
+from Account.operations import account_test_wachtwoord_sterkte
+from Account.rechten import account_rechten_login_gelukt
+from Account.view_login import account_plugins_login
+from Logboek.models import schrijf_in_logboek
+from Mailer.models import mailer_queue_email, mailer_email_is_valide
+from Overig.helpers import get_safe_from_ip
 from Overig.tijdelijke_url import (set_tijdelijke_url_receiver,
                                    RECEIVER_WACHTWOORD_VERGETEN,
                                    maak_tijdelijke_url_wachtwoord_vergeten)
 from Plein.menu import menu_dynamics
-from Logboek.models import schrijf_in_logboek
-from Overig.helpers import get_safe_from_ip
-from Mailer.models import mailer_queue_email, mailer_email_is_valide
 import logging
 
 
