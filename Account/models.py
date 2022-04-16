@@ -169,16 +169,21 @@ class AccountSessions(models.Model):
     session = models.ForeignKey(Session, on_delete=models.CASCADE)
 
 
-class AccountSessions(models.Model):
-    """ Speciale table om bij te houden welke sessies bij een account horen
-        zodat we deze eenvoudig kunnen benaderen.
+class AccountVerzoekenTeller(models.Model):
+    """ Deze tabel wordt gebruikt om voor elk account bij te houden hoe snel de verzoeken binnen komen.
+        Als het te snel gaat, dan kunnen we een begrenzing stellen en daarmee misbruik voorkomen.
+
+        We tellen een aantal verzoeken per uur. Als het uur nummer verandert, dan beginnen we weer op 0.
     """
 
-    # helaas gaat dit niet met een ManyToMany relatie, dus moet het zo
-    # (based on https://gavinballard.com/associating-django-users-sessions/)
-
+    # bij welk account hoort deze administratie?
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
-    session = models.ForeignKey(Session, on_delete=models.CASCADE)
+
+    # bij welk uur nummer hoort deze telling?
+    uur_nummer = models.PositiveBigIntegerField(default=0)
+
+    # aantal getelde verzoeken
+    teller = models.PositiveIntegerField(default=0)
 
 
 def accounts_opschonen(stdout):
