@@ -48,7 +48,7 @@
                 </tr>
                 <tr>
                     <th>Financieel</th>
-                    <td>&euro;&nbsp;{{ totaal_euro }} (&euro;&nbsp;{{ totaal_ontvangen_euro }} ontvangen, &euro;&nbsp;{{ totaal_retour_euro }} retour)</td>
+                    <td>&euro;&nbsp;{{ totaal_euro }}<span style="margin-left:10px">(&euro;&nbsp;{{ totaal_ontvangen_euro }} ontvangen; &euro;&nbsp;{{ totaal_retour_euro }} retour)</span></td>
                 </tr>
             </table>
         </div>
@@ -58,7 +58,7 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
-            <h4>Status</h4>
+            <h4>Lijst</h4>
         </div>
     </div>
 
@@ -96,7 +96,7 @@
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="5"><i>Er zijn nog geen wedstrijden</i></td>
+                        <td colspan="10" class="center"><i>Er zijn nog geen aanmeldingen</i></td>
                     </tr>
                 {% endfor %}
 

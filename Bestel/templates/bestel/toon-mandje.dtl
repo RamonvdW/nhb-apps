@@ -110,8 +110,8 @@
 
                                 {% if product.gebruikte_code_str %}
                                     <tr>
-                                        <td>Korting</td>
-                                        <td>{{ product.gebruikte_code_str }}</td>
+                                        <td>{% if product.is_combi_korting %}Automatische combi-korting{% else %}Korting{% endif %}</td>
+                                        <td>{{ product.gebruikte_code_str }}{% if product.is_combi_korting %}{% for titel in product.combi_reden %}<br>{{ titel }}{% endfor %}{% endif %}</td>
                                         <td class="right-align">{% if product.korting_euro > 0.0001 %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ product.korting_euro }}</td>
                                         <td><!--knoppen--></td>
                                     </tr>
@@ -170,6 +170,6 @@
         </div>
     {% endif %}     <!-- mandje niet leeg -->
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="bestel-toon-mandje %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="bestel-toon-mandje" %}
 
 {% endblock %}

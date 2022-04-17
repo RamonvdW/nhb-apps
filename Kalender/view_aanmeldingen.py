@@ -63,8 +63,8 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
                                   'status'))
         context['aanmeldingen'] = aanmeldingen
 
-        totaal_ontvangen_euro = Decimal('0')
-        totaal_retour_euro = Decimal('0')
+        totaal_ontvangen_euro = Decimal('000.00')
+        totaal_retour_euro = Decimal('000.00')
 
         aantal_aanmeldingen = 0
         aantal_afmeldingen = 0

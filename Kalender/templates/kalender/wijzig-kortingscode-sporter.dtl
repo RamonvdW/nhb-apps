@@ -24,7 +24,7 @@
 
         function datum_omzetten(is_initial=false) {
             // nieuwe datum gekozen met de datepicker
-            let el1 = document.querySelector('#id_datum_begin')
+            let el1 = document.querySelector('#id_datum_geldig')
             let el2 = document.querySelector('#id_datum')
             el1.value = el2.M_Datepicker.toString('yyyy-mm-dd')
 
@@ -37,7 +37,8 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Wijzig kortingscode</h3>
+            <h3 class="page-banner">Wijzig korting</h3>
+            <p>Voor een specifieke sporter</p>
         </div>
     </div>
 
@@ -62,7 +63,7 @@
                             </tr>
 
                             <tr>
-                                <th>Geldig tot en met</th>
+                                <th>Bruikbaar tot en met</th>
                                 <td>
                                     <input type="text" class="nl_datepicker" id="id_datum" onchange="datum_omzetten()">
                                     <input type="hidden" name="geldig_tm" id="id_datum_geldig"> <!-- voor POST, in juiste formaat -->
@@ -70,7 +71,7 @@
                             </tr>
 
                             <tr>
-                                <th>Geldig voor wedstrijden</th>
+                                <th>Bruikbaar voor wedstrijd(en)</th>
                                 <td>
                                     {% for wedstrijd in wedstrijden %}
                                         <label>
@@ -83,7 +84,20 @@
                             </tr>
 
                             <tr>
-                                <th>Voor alle leden van vereniging</th>
+                                <th>Combinatie-korting</th>
+                                <td>Indien ingeschreven voor al deze wedstrijden:<br>
+                                    {% for wedstrijd in combi_wedstrijden %}
+                                        <label>
+                                            <input type="checkbox" class="filled-in" name="combi_{{ wedstrijd.pk }}" onchange="gewijzigd()"{% if wedstrijd.is_gekozen %} checked{% endif %}>
+                                            <span class="black-text">{{ wedstrijd.titel }}</span>
+                                        </label>
+                                        <br>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Begrens gebruik tot leden van vereniging</th>
                                 <td>
                                     <label>
                                         <input type="checkbox" class="filled-in" name="voor_onze_ver" onchange="gewijzigd()"{% if check_ver %} checked{% endif %}>
@@ -93,7 +107,7 @@
                             </tr>
 
                             <tr>
-                                <th>Voor sporter</th>
+                                <th>Begrens gebruik tot deze sporter</th>
                                 <td>
                                     <table>
                                         <tr>

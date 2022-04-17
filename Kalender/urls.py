@@ -6,7 +6,7 @@
 
 from django.urls import path
 from . import (view_vereniging, view_manager, view_wijzig_wedstrijd, view_wijzig_sessies,
-               view_landing_page, view_maand, view_inschrijven, view_aanmeldingen)
+               view_landing_page, view_maand, view_inschrijven, view_aanmeldingen, view_kortingscodes)
 
 app_name = 'Kalender'
 
@@ -57,12 +57,18 @@ urlpatterns = [
          view_vereniging.NieuweWedstrijdKiesType.as_view(),
          name='nieuwe-wedstrijd-kies-type'),
 
+
+    # kortingscodes
     path('vereniging/kortingscodes/',
-         view_vereniging.VerenigingKortingcodesView.as_view(),
+         view_kortingscodes.VerenigingKortingcodesView.as_view(),
          name='vereniging-codes'),
 
-    path('vereniging/kortingscodes/<korting_pk>/wijzig/',
-         view_vereniging.VerenigingWijzigKortingcodesView.as_view(),
+    path('vereniging/kortingscodes/nieuw/',
+         view_kortingscodes.NieuweKortingcodesView.as_view(),
+         name='vereniging-codes-nieuw-kies'),
+
+    path('vereniging/kortingscodes/wijzig/<korting_pk>/',
+         view_kortingscodes.VerenigingWijzigKortingcodesView.as_view(),
          name='vereniging-wijzig-code'),
 
 

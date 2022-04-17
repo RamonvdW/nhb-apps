@@ -262,8 +262,10 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
             # kijk of deze sporter al ingeschreven is
             sessie_pk2inschrijving = dict()
             for inschrijving in (KalenderInschrijving
-                                 .objects.filter(wedstrijd=wedstrijd,
-                                                 sporterboog__sporter=sporter)
+                                 .objects
+                                 .filter(wedstrijd=wedstrijd,
+                                         sporterboog__sporter=sporter)
+                                 .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)
                                  .select_related('sessie',
                                                  'sporterboog',
                                                  'sporterboog__sporter')):
@@ -515,6 +517,15 @@ class ToevoegenView(UserPassesTestMixin, View):
         account_koper = request.user
 
         now = timezone.now()
+
+        # misschien dat de sporter al ingeschreven staat, maar afgemeld is
+        qset = (KalenderInschrijving
+                .objects
+                .filter(wedstrijd=wedstrijd,
+                        sporterboog=sporterboog,
+                        status=INSCHRIJVING_STATUS_AFGEMELD))
+        if qset.count() > 0:
+            qset.delete()
 
         # maak de inschrijving aan en voorkom dubbelen
         inschrijving = KalenderInschrijving(

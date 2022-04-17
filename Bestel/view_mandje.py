@@ -100,8 +100,11 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                     beschrijving.append(tup)
 
                     if inschrijving.gebruikte_code:
-                        code = inschrijving.gebruikte_code
-                        product.gebruikte_code_str = "code %s (korting: %d%%)" % (code.code, code.percentage)
+                        korting = inschrijving.gebruikte_code
+                        product.gebruikte_code_str = "code %s (korting: %d%%)" % (korting.code, korting.percentage)
+                        if korting.combi_basis_wedstrijd:
+                            product.is_combi_korting = True
+                            product.combi_reden = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
                     elif product.korting_euro:
                         product.gebruikte_code_str = "Onbekende code"
                         bevat_fout = True

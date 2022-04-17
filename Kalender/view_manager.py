@@ -4,9 +4,10 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.views.generic import View
-from django.shortcuts import render
 from django.urls import reverse
+from django.utils import timezone
+from django.shortcuts import render
+from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import ORGANISATIES2SHORT_STR
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
@@ -15,6 +16,7 @@ from .models import (KalenderWedstrijd,
                      ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR, WEDSTRIJD_STATUS,
                      WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING)
 from types import SimpleNamespace
+import datetime
 
 TEMPLATE_KALENDER_OVERZICHT_MANAGER = 'kalender/overzicht-manager.dtl'
 
@@ -83,10 +85,14 @@ class KalenderManagerView(UserPassesTestMixin, View):
         except KeyError:
             status = None
 
+        # begin 2 weken terug in tijd (oudere wedstrijden zijn niet interessant)
+        datum_vanaf = timezone.now().date() - datetime.timedelta(days=14)
+
         # pak de 50 meest recente wedstrijden
         wedstrijden = (KalenderWedstrijd
                        .objects
-                       .order_by('-datum_begin'))
+                       .filter(datum_begin__gte=datum_vanaf)
+                       .order_by('datum_begin'))
 
         if status:
             wedstrijden = wedstrijden.filter(status=status)

@@ -12,13 +12,14 @@ from django.db import transaction
 from django.conf import settings
 from django.utils import timezone
 from django.core.management.base import BaseCommand
-from Kalender.models import (KalenderMutatie,
+from Kalender.models import (KalenderMutatie, KalenderWedstrijdKortingscode, KalenderInschrijving,
                              KALENDER_MUTATIE_INSCHRIJVEN, KALENDER_MUTATIE_AFMELDEN, KALENDER_MUTATIE_KORTING,
                              INSCHRIJVING_STATUS_RESERVERING, INSCHRIJVING_STATUS_DEFINITIEF,
                              INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_TO_STR)
 from Bestel.mandje import (mandje_toevoegen_inschrijving, mandje_verwijder_inschrijving, mandje_enum_inschrijvingen,
                            mandje_korting_toepassen, mandje_totaal_opnieuw_bepalen)
 from Overig.background_sync import BackgroundSync
+from decimal import Decimal
 import django.db.utils
 import traceback
 import datetime
@@ -44,9 +45,105 @@ class Command(BaseCommand):
                             help="Aantal minuten actief blijven")
         parser.add_argument('--quick', action='store_true')     # for testing
 
-    def _automatische_kortingscodes_toepassen(self, product):
-        # TODO
-        pass
+    def _automatische_kortingscodes_toepassen(self, account):
+
+        totaal_opnieuw_bepalen = False
+
+        # analyseer de inhoud van het mandje
+        inschrijvingen = dict()      # [lid_nr] = [wedstrijd.pk, ...]
+        in_mandje = dict()           # [(lid_nr, wedstrijd_pk)] = inschrijving
+        ver_nrs = list()
+        for inschrijving, product in mandje_enum_inschrijvingen(account):
+
+            # verwijder automatische kortingen
+            if inschrijving.gebruikte_code:
+                korting = inschrijving.gebruikte_code
+                if korting.combi_basis_wedstrijd:
+                    inschrijving.gebruikte_code = None
+                    inschrijving.save(update_fields=['gebruikte_code'])
+
+                    product.korting_euro = Decimal(0)
+                    product.save(update_fields=['korting_euro'])
+
+                    totaal_opnieuw_bepalen = True
+
+            ver_nr = inschrijving.wedstrijd.organiserende_vereniging.ver_nr
+            if ver_nr not in ver_nrs:
+                ver_nrs.append(ver_nr)
+
+            lid_nr = inschrijving.sporterboog.sporter.lid_nr
+
+            try:
+                inschrijvingen[lid_nr].append(inschrijving.wedstrijd.pk)
+            except KeyError:
+                inschrijvingen[lid_nr] = [inschrijving.wedstrijd.pk]
+
+            tup = (lid_nr, inschrijving.wedstrijd.pk)
+            in_mandje[tup] = inschrijving
+        # for
+
+        # naast wat er in het mandje ligt ook kijken waar al op ingeschreven is
+        for lid_nr, nieuwe_pks in inschrijvingen.items():
+            pks = list(KalenderInschrijving
+                       .objects
+                       .filter(sporterboog__sporter__lid_nr=lid_nr)
+                       .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)
+                       .exclude(wedstrijd__pk__in=nieuwe_pks)
+                       .values_list('wedstrijd__pk', flat=True))
+            inschrijvingen[lid_nr].extend(pks)
+        # for
+
+        # doorloop alle combi-kortingen van de organiserende vereniging
+        for korting in (KalenderWedstrijdKortingscode
+                        .objects
+                        .exclude(combi_basis_wedstrijd=None)
+                        .filter(uitgegeven_door__ver_nr__in=ver_nrs)):
+
+            vereiste_pks = list(korting.voor_wedstrijden.all().values_list('pk', flat=True))
+
+            for lid_nr, pks in inschrijvingen.items():
+                alle_gevonden = True
+                for pk in vereiste_pks:
+                    if pk not in pks:
+                        alle_gevonden = False
+                        break
+                # for
+
+                if alle_gevonden:
+                    tup = (lid_nr, korting.combi_basis_wedstrijd.pk)
+                    try:
+                        inschrijving = in_mandje[tup]
+                    except KeyError:
+                        # toch niet..
+                        pass
+                    else:
+                        vervang = True
+                        if inschrijving.gebruikte_code:
+                            huidige_code = inschrijving.gebruikte_code
+
+                            # ga er vanuit dat de code nog geldig is omdat het mandje een korte levensduur heeft
+
+                            # controleer welke de hoogste korting geeft
+                            if huidige_code.percentage > korting.percentage:
+                                vervang = False
+
+                        if vervang:
+                            # pas de code toe op deze inschrijving
+                            self.stdout.write('[INFO] Combi-korting pk=%s toepassen op inschrijving pk=%s' % (
+                                                korting.pk, inschrijving.pk))
+
+                            inschrijving.gebruikte_code = korting
+                            inschrijving.save(update_fields=['gebruikte_code'])
+
+                            # bereken de korting voor het mandje
+                            mandje_korting_toepassen(product, korting.percentage)
+                            totaal_opnieuw_bepalen = True
+            # for
+        # for
+
+        if totaal_opnieuw_bepalen:
+            # door het toepassen van de kortingscode moet het totaal opnieuw berekend worden
+            mandje_totaal_opnieuw_bepalen(account)
 
     def _verwerk_mutatie_inschrijven(self, mutatie):
         # voeg deze inschrijving toe aan het mandje van de koper
@@ -66,7 +163,7 @@ class Command(BaseCommand):
         product = mandje_toevoegen_inschrijving(inschrijving.koper, inschrijving, sessie.prijs_euro)
 
         # kijk of er automatische kortingscodes zijn die toegepast kunnen worden
-        self._automatische_kortingscodes_toepassen(product)
+        self._automatische_kortingscodes_toepassen(inschrijving.koper)
 
     def _verwerk_mutatie_afmelden(self, mutatie):
         """ een sporter heeft zich afgemeld voor de wedstrijd """
@@ -93,6 +190,9 @@ class Command(BaseCommand):
         # verwijder deze inschrijving uit het mandje
         account = inschrijving.koper
         mandje_verwijder_inschrijving(account, inschrijving)
+
+        # kijk of er automatische kortingscodes zijn die niet meer toegepast mag worden
+        self._automatische_kortingscodes_toepassen(account)
 
         # TODO: als er al een betaling gestart is, annuleer deze dan (cancel payment)
         # TODO: als er al een betaling ontvangen is, initieer dan een restitutie (of willen we dit altijd handmatig laten doen?)
@@ -130,39 +230,42 @@ class Command(BaseCommand):
                     toepassen = True
                     self.stdout.write('[DEBUG] Korting: juiste voor_vereniging %s' % korting.voor_vereniging.ver_nr)
 
-            if korting.voor_wedstrijden.count() > 0:
+            if korting.combi_basis_wedstrijd:
+                # check later of er voldaan wordt aan de eisen voor een combinatie-korting
+                toepassen = False
+
+            elif korting.voor_wedstrijden.count() > 0:
                 # korting is begrensd tot 1 wedstrijd of een serie wedstrijden
                 if korting.voor_wedstrijden.filter(id=inschrijving.wedstrijd.id).exists():
                     # code voor een specifieke wedstrijd
-                    toepassen = True
-                    self.stdout.write('[DEBUG] Korting: juiste wedstrijd pk=%s' % product.inschrijving.wedstrijd.pk)
+                    pass
                 else:
                     # leuke code, maar niet bedoeld voor deze wedstrijd
                     toepassen = False
                     self.stdout.write('[DEBUG] Korting: verkeerde wedstrijd')
 
-                if toepassen:
-                    vervang = True
-                    if inschrijving.gebruikte_code:
-                        huidige_code = inschrijving.gebruikte_code
+            if toepassen:
+                vervang = True
+                if inschrijving.gebruikte_code:
+                    huidige_code = inschrijving.gebruikte_code
 
-                        # ga er vanuit dat de code nog geldig is omdat het mandje een korte levensduur heeft
+                    # ga er vanuit dat de code nog geldig is omdat het mandje een korte levensduur heeft
 
-                        # controleer welke de hoogste korting geeft
-                        if huidige_code.percentage > korting.percentage:
-                            vervang = False
+                    # controleer welke de hoogste korting geeft
+                    if huidige_code.percentage > korting.percentage:
+                        vervang = False
 
-                    if vervang:
-                        # pas de code toe op deze inschrijving
-                        self.stdout.write('[INFO] Korting pk=%s toepassen op inschrijving pk=%s' % (
-                                                korting.pk, inschrijving.pk))
+                if vervang:
+                    # pas de code toe op deze inschrijving
+                    self.stdout.write('[INFO] Korting pk=%s toepassen op inschrijving pk=%s' % (
+                                            korting.pk, inschrijving.pk))
 
-                        inschrijving.gebruikte_code = korting
-                        inschrijving.save(update_fields=['gebruikte_code'])
+                    inschrijving.gebruikte_code = korting
+                    inschrijving.save(update_fields=['gebruikte_code'])
 
-                        # bereken de korting voor het mandje
-                        mandje_korting_toepassen(product, korting.percentage)
-                        totaal_opnieuw_bepalen = True
+                    # bereken de korting voor het mandje
+                    mandje_korting_toepassen(product, korting.percentage)
+                    totaal_opnieuw_bepalen = True
         # for
 
         if totaal_opnieuw_bepalen:

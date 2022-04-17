@@ -147,6 +147,23 @@ KALENDER_MUTATIE_TO_STR = {
 }
 
 
+KALENDER_KORTING_SPORTER = 's'
+KALENDER_KORTING_VERENIGING = 'v'
+KALENDER_KORTING_COMBI = 'c'
+
+KALENDER_KORTING_SOORT_CHOICES = (
+    (KALENDER_KORTING_SPORTER, 'Sporter'),
+    (KALENDER_KORTING_VERENIGING, 'Vereniging'),
+    (KALENDER_KORTING_COMBI, 'Combi')
+)
+
+KALENDER_KORTING_SOORT_TO_STR = {
+    KALENDER_KORTING_SPORTER: 'Sporter',
+    KALENDER_KORTING_VERENIGING: 'Vereniging',
+    KALENDER_KORTING_COMBI: 'Combi'
+}
+
+
 class KalenderWedstrijdDeeluitslag(models.Model):
     """ Deel van de uitslag van een wedstrijd """
 
@@ -296,21 +313,27 @@ class KalenderWedstrijdKortingscode(models.Model):
                                         null=True, blank=True,
                                         related_name='korting_uitgever')
 
-    # de kortingscode kan voor 1 of meerdere wedstrijden gelden
+    # hoeveel korting (0% .. 100%)
+    percentage = models.PositiveSmallIntegerField(default=100)
+
     # de kortingscode kan voor een specifieke sporter zijn (voorbeeld: winnaar van vorige jaar)
     # de kortingscode kan voor alle leden van een vereniging zijn (voorbeeld: de organiserende vereniging)
+    # de kortingscode kan een combinatie-korting geven (meerdere wedstrijden)
+    soort = models.CharField(max_length=1, choices=KALENDER_KORTING_SOORT_CHOICES, default=KALENDER_KORTING_VERENIGING)
 
     # voor welke wedstrijden is deze geldig?
+    # bij combi-korting: lijst van alle wedstrijden waar op ingeschreven moeten zijn
     voor_wedstrijden = models.ManyToManyField(KalenderWedstrijd)
 
-    # voor welke sporter is deze kortingscode?
+    # voor welke individuele sporter is deze kortingscode?
     voor_sporter = models.ForeignKey(Sporter, on_delete=models.SET_NULL, null=True, blank=True)
 
     # voor leden van welke vereniging is deze kortingscode?
     voor_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.SET_NULL, null=True, blank=True)
 
-    # hoeveel korting (0% .. 100%)
-    percentage = models.PositiveSmallIntegerField(default=100)
+    # bij combi-korting: geldig op deze wedstrijd, indien gecombineerd met ALLE 'voor_wedstrijden'
+    combi_basis_wedstrijd = models.ForeignKey(KalenderWedstrijd, on_delete=models.SET_NULL, null=True, blank=True,
+                                              related_name='combi_korting')
 
     def __str__(self):
         return "%s: %s" % (self.pk, self.code)

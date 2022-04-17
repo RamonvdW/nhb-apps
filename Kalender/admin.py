@@ -87,6 +87,10 @@ class KalenderInschrijvingAdmin(admin.ModelAdmin):
 
     readonly_fields = ('wanneer', 'wedstrijd', 'sessie', 'sporterboog', 'koper')
 
+    list_filter = ('status',)
+
+    search_fields = ('sporterboog__sporter__lid_nr',)
+
 
 class KalenderMutatieAdmin(admin.ModelAdmin):
 
