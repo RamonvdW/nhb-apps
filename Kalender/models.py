@@ -93,7 +93,7 @@ WEDSTRIJD_WA_STATUS_TO_STR = {
 }
 
 WEDSTRIJD_DUUR_MAX_DAGEN = 5
-WEDSTRIJD_DUUR_MAX_UREN = 5         # maximale keuze voor de duur van een sessie
+WEDSTRIJD_DUUR_MAX_UREN = 8         # maximale keuze voor de duur van een sessie
 
 WEDSTRIJD_BEGRENZING_LANDELIJK = 'L'
 WEDSTRIJD_BEGRENZING_VERENIGING = 'V'

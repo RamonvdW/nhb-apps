@@ -97,36 +97,6 @@
                             </tr>
 
                             <tr>
-                                <th>Begrens gebruik tot leden van vereniging</th>
-                                <td>
-                                    <label>
-                                        <input type="checkbox" class="filled-in" name="voor_onze_ver" onchange="gewijzigd()"{% if check_ver %} checked{% endif %}>
-                                        <span class="black-text">{{ ver.ver_nr_en_naam }}</span>
-                                    </label>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>Begrens gebruik tot deze sporter</th>
-                                <td>
-                                    <table>
-                                        <tr>
-                                            <td>Lid nr:{% if voor_sporter_str %}<br>(000000 = verwijder){% endif %}</td>
-                                            <td>
-                                                <input type="text" name="voor_lid_nr" placeholder="Lid nr" value="{{ korting.sporter.lid_nr }}" oninput="gewijzigd()">
-                                            </td>
-                                        </tr>
-                                        {% if voor_sporter_str %}
-                                            <tr>
-                                                <td>Gekozen sporter:</td>
-                                                <td>{{ voor_sporter_str }}</td>
-                                            </tr>
-                                        {% endif %}
-                                    </table>
-                                </td>
-                            </tr>
-
-                            <tr>
                                 <th>Kortingspercentage 0..100%</th>
                                 <td>
                                     <input type="number" min="0" max="100" name="percentage" value="{{ korting.percentage }}" oninput="gewijzigd()">

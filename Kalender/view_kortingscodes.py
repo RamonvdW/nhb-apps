@@ -67,7 +67,8 @@ class VerenigingKortingcodesView(UserPassesTestMixin, TemplateView):
 
             elif korting.soort == KALENDER_KORTING_VERENIGING:
                 korting.icon_name = 'home'
-                korting.voor_wie_str = 'Leden van onze vereniging'
+                korting.voor_wie_str = 'Leden van vereniging %s' % ver.ver_nr
+                korting.voor_vereniging = ver
 
             elif korting.soort == KALENDER_KORTING_COMBI:
                 korting.icon_name = 'join_full'

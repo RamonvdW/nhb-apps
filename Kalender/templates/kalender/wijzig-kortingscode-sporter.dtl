@@ -84,29 +84,6 @@
                             </tr>
 
                             <tr>
-                                <th>Combinatie-korting</th>
-                                <td>Indien ingeschreven voor al deze wedstrijden:<br>
-                                    {% for wedstrijd in combi_wedstrijden %}
-                                        <label>
-                                            <input type="checkbox" class="filled-in" name="combi_{{ wedstrijd.pk }}" onchange="gewijzigd()"{% if wedstrijd.is_gekozen %} checked{% endif %}>
-                                            <span class="black-text">{{ wedstrijd.titel }}</span>
-                                        </label>
-                                        <br>
-                                    {% endfor %}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>Begrens gebruik tot leden van vereniging</th>
-                                <td>
-                                    <label>
-                                        <input type="checkbox" class="filled-in" name="voor_onze_ver" onchange="gewijzigd()"{% if check_ver %} checked{% endif %}>
-                                        <span class="black-text">{{ ver.ver_nr_en_naam }}</span>
-                                    </label>
-                                </td>
-                            </tr>
-
-                            <tr>
                                 <th>Begrens gebruik tot deze sporter</th>
                                 <td>
                                     <table>
@@ -119,7 +96,7 @@
                                         {% if voor_sporter_str %}
                                             <tr>
                                                 <td>Gekozen sporter:</td>
-                                                <td>{{ voor_sporter_str }}</td>
+                                                <td class="nhb-blauw-text">{{ voor_sporter_str }}</td>
                                             </tr>
                                         {% endif %}
                                     </table>

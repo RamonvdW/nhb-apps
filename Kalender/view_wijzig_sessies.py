@@ -112,6 +112,10 @@ class KalenderWedstrijdSessiesView(UserPassesTestMixin, View):
                             max_sporters=50)
             sessie.save()
             wedstrijd.sessies.add(sessie)
+
+            # zet alle klassen default 'aan'
+            wkl_pks = wedstrijd.wedstrijdklassen.all().values_list('pk', flat=True)
+            sessie.wedstrijdklassen.set(wkl_pks)
         else:
             pass
 

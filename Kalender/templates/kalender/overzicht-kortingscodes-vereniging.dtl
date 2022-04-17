@@ -45,7 +45,7 @@
                 {% for korting in codes %}
                     <tr>
                         <td>{{ korting.geldig_tot_en_met }}</td>
-                        <td><i class="material-icons-round nhb-rood-text">{{ korting.icon_name }}</i></td>
+                        <td><i class="material-icons-round nhb-blauw-text">{{ korting.icon_name }}</i></td>
                         <td>{{ korting.code }}</td>
                         <td>{{ korting.voor_wie_str|linebreaksbr }}</td>
                         <td>{{ korting.voor_wedstrijden_str|linebreaksbr }}</td>
