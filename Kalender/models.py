@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
+from django.conf import settings
 from Account.models import Account
 from BasisTypen.models import (BoogType, KalenderWedstrijdklasse,
                                ORGANISATIES, ORGANISATIE_WA, ORGANISATIE_IFAA, ORGANISATIE_NHB)
@@ -378,6 +379,15 @@ class KalenderInschrijving(models.Model):
     def __str__(self):
         """ beschrijving voor de admin interface """
         return "Inschrijving voor %s" % self.sporterboog.sporter.lid_nr_en_volledige_naam()
+
+    def korte_beschrijving(self):
+        """ geef een one-liner terug met een korte beschrijving van deze inschrijving """
+
+        titel = self.wedstrijd.titel
+        if len(titel) > 30:
+            titel = titel[:28] + '..'
+
+        return "%s - %s" % (self.sporterboog.sporter.lid_nr, titel)
 
     class Meta:
         verbose_name = "Kalender inschrijving"

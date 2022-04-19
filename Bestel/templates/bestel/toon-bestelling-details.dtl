@@ -1,0 +1,93 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Bestelling{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Bestelling</h3>
+            <p>Bestel nummer: {{ bestelling.bestel_nr }}</p>
+        </div>
+    </div>
+
+    <p>Bestelling: {{ bestelling }}</p>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+
+                <tr>
+                    <td colspan="4" class="center">
+                        <h6>Bestelde producten</h6>
+                    </td>
+                </tr>
+
+                {% for product in producten %}
+                    <tr>
+                        <td class="hide-on-small-only">{% for hdr, lijn in product.beschrijving %}{{ hdr }}<br>{% endfor %}</td>
+                        <td>{% for hdr, lijn in product.beschrijving %}{{ lijn }}<br>{% endfor %}</td>
+                        <td class="right-align">&euro;&nbsp;{{ product.prijs_euro }}</td>
+                        <td class="right-align">
+                            <button class="btn-nhb-blauw" id="id_verwijder_{{ product.pk }}" onclick="verwijder('id_verwijder_{{ product.pk }}')" data-url="{{ product.url_verwijder }}">
+                                <i class="material-icons-round">delete</i></button>
+                        </td>
+                    </tr>
+
+                    {% if product.gebruikte_code_str %}
+                        <tr>
+                            <td class="hide-on-small-only">{% if product.is_combi_korting %}Automatische combi-korting{% else %}Korting{% endif %}</td>
+                            <td>{{ product.gebruikte_code_str }}{% if product.is_combi_korting %}{% for titel in product.combi_reden %}<br>{{ titel }}{% endfor %}{% endif %}</td>
+                            <td class="right-align">{% if product.korting_euro > 0.0001 %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ product.korting_euro }}</td>
+                            <td><!--knoppen--></td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- totaal -->
+                <tr>
+                    <td class="hide-on-small-only"></td>
+                    <td class="right-align"><b>Totaal:</b></td>
+                    <td class="right-align"><b>&euro;&nbsp;{{ bestelling.totaal_euro }}</b></td>
+                </tr>
+
+                <!-- transacties -->
+                {% for transactie in bestelling.transacties.all %}
+                    <tr>
+                        <td class="hide-on-small-only"></td>
+                        <td
+                    </tr>
+                {% endfor %}
+
+                <!-- afrekenen -->
+                <tr>
+                    {% if bevat_fout or True %}
+                        <td colspan="4" class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
+                    {% else %}
+                        <td class="hide-on-small-only"></td>
+                        <td colspan="2" class="right-align">
+                            <form action="{{ url_afrekenen }}" method="post">
+                                {% csrf_token %}
+                                <button id="id_afrekenen" class="btn-nhb-rood">
+                                    <i class="material-icons-round right">shopping_cart_checkout</i>{% if moet_afrekenen %}Afrekenen{% else %}Bestelling afronden{% endif %}</button>
+                            </form>
+                        </td>
+                        <td><!--knoppen--></td>
+                    {% endif %}
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="toon-bestelling-details" %}
+
+{% endblock %}

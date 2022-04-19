@@ -49,6 +49,11 @@ class BestelProduct(models.Model):
 
         return msg
 
+    def korte_beschrijving(self):
+        if self.inschrijving:
+            return self.inschrijving.korte_beschrijving()
+        return "?"
+
     class Meta:
         verbose_name = "Bestel product"
         verbose_name_plural = "Bestel producten"

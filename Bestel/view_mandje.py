@@ -13,7 +13,7 @@ from Account.operations import account_controleer_snelheid_verzoeken
 from Bestel.operations import bestel_get_volgende_bestel_nr
 from Functie.rol import Rollen, rol_get_huidige
 from Kalender.mutaties import kalender_kortingscode_toepassen, kalender_verwijder_reservering
-from Bestel.models import BestelMandje, BestelProduct, BESTEL_KORTINGSCODE_MINLENGTH
+from Bestel.models import BestelMandje, Bestelling, BESTEL_KORTINGSCODE_MINLENGTH
 from Bestel.mandje import mandje_tel_inhoud, eval_mandje_inhoud
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
@@ -139,16 +139,16 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
         eval_mandje_inhoud(self.request)
 
-        bestelling, producten, mandje_is_leeg, bevat_fout = self._beschrijf_inhoud_mandje(account)
+        mandje, producten, mandje_is_leeg, bevat_fout = self._beschrijf_inhoud_mandje(account)
 
         context['mandje_is_leeg'] = mandje_is_leeg
-        context['bestelling'] = bestelling
+        context['mandje'] = mandje
         context['producten'] = producten
         context['bevat_fout'] = bevat_fout
 
         context['url_code_toevoegen'] = reverse('Bestel:mandje-code-toevoegen')
-        if not bevat_fout:
-            if bestelling and bestelling.totaal_euro > 0:
+        if not (bevat_fout or mandje_is_leeg):
+            if mandje and mandje.totaal_euro > 0:           # TODO: ondersteuning voor prijs=0
                 context['url_afrekenen'] = reverse('Bestel:toon-inhoud-mandje')
 
         context['kruimels'] = (
@@ -159,16 +159,34 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-
+        """ Deze functie wordt aangeroepen als de koper op de knop BESTELLING AFRONDEN gedrukt heeft
+            Hier converteren we het mandje in een bevroren bestelling die afgerekend kan worden.
+        """
         account = self.request.user
-        mandje_inhoud, mandje_is_leeg, totaal_euro, bevat_fout = self._beschrijf_inhoud_mandje(account, maak_urls=False)
-        if bevat_fout:
+        mandje, producten, mandje_is_leeg, bevat_fout = self._beschrijf_inhoud_mandje(account, maak_urls=False)
+        if bevat_fout or mandje_is_leeg or mandje is None:
             raise Http404('Afrekenen is niet mogelijk')
 
         # neem een bestelnummer uit
         bestel_nr = bestel_get_volgende_bestel_nr()
+        product_pks = [product.pk for product in producten]
 
-        # TODO: conversie mandje naar bestelling afronden
+        bestelling = Bestelling(
+                            bestel_nr=bestel_nr,
+                            account=account,
+                            totaal_euro=mandje.totaal_euro,
+        )
+        bestelling.save()
+
+        bestelling.producten.set(product_pks)
+
+        msg = "[%s] Bestelling aangemaakt met %s producten, totaal euro=%s" % (bestelling.aangemaakt, len(producten), bestelling.totaal_euro)
+        bestelling.log = msg
+        bestelling.save(update_fields=['log'])
+
+        # maak het mandje leeg
+        #mandje.producten.clear()
+        #mandje.delete()
 
         url = reverse('Bestel:toon-inhoud-mandje')
         return HttpResponseRedirect(url)

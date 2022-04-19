@@ -22,7 +22,7 @@ class BestelMandjeAdmin(admin.ModelAdmin):
 
 class BestellingAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('account', 'bestel_nr', 'aangemaakt', 'producten')
+    readonly_fields = ('account', 'bestel_nr', 'aangemaakt',)
 
     search_fields = ('bestel_nr', 'account__username', 'account__unaccented_naam')
 
@@ -32,16 +32,11 @@ class BestellingAdmin(admin.ModelAdmin):
         ('Koper',
             {'fields': ('bestel_nr',
                         'account',
-                        'aangemaakt')
+                        'aangemaakt',
+                        'totaal_euro')
              }),
-        ('Producten',
-            {'fields': (('producten',),),
-             }),
-        ('Betaling',
-            {'fields': ('totaal_euro',
-                        'is_betaald',
-                        'wanneer_betaald'),
-             }),
+        ('Log', {'fields': ('log',)}),
+        ('Niet wijzigen!', {'fields': ('producten', 'transacties')}),
     )
 
 

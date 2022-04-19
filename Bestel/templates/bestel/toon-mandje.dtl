@@ -6,7 +6,7 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}product mandje{% endblock %}
+{% block title %}Mandje{% endblock %}
 
 {% block pagina %}
 
@@ -99,7 +99,7 @@
 
                             {% for product in producten %}
                                 <tr>
-                                    <td>{% for hdr, lijn in product.beschrijving %}{{ hdr }}<br>{% endfor %}</td>
+                                    <td class="hide-on-small-only">{% for hdr, lijn in product.beschrijving %}{{ hdr }}<br>{% endfor %}</td>
                                     <td>{% for hdr, lijn in product.beschrijving %}{{ lijn }}<br>{% endfor %}</td>
                                     <td class="right-align">&euro;&nbsp;{{ product.prijs_euro }}</td>
                                     <td class="right-align">
@@ -110,7 +110,7 @@
 
                                 {% if product.gebruikte_code_str %}
                                     <tr>
-                                        <td>{% if product.is_combi_korting %}Automatische combi-korting{% else %}Korting{% endif %}</td>
+                                        <td class="hide-on-small-only">{% if product.is_combi_korting %}Automatische combi-korting{% else %}Korting{% endif %}</td>
                                         <td>{{ product.gebruikte_code_str }}{% if product.is_combi_korting %}{% for titel in product.combi_reden %}<br>{{ titel }}{% endfor %}{% endif %}</td>
                                         <td class="right-align">{% if product.korting_euro > 0.0001 %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ product.korting_euro }}</td>
                                         <td><!--knoppen--></td>
@@ -120,13 +120,14 @@
 
                             <!-- totaal -->
                             <tr>
-                                <td colspan="2" class="right-align"><b>Totaal:</b></td>
-                                <td class="right-align"><b>&euro;&nbsp;{{ bestelling.totaal_euro }}</b></td>
+                                <td class="hide-on-small-only"></td>
+                                <td class="right-align"><b>Totaal:</b></td>
+                                <td class="right-align"><b>&euro;&nbsp;{{ mandje.totaal_euro }}</b></td>
                             </tr>
 
                             <!-- kortingscode invoeren -->
                             <tr>
-                                <td colspan="4">
+                                <td colspan="3">
                                     <div>
                                         <button id="id_code_knopje" class="btn-nhb-blauw" onclick="code_openen()">
                                             <i class="material-icons-round">add_circle_outline</i></button>
@@ -143,14 +144,16 @@
                                         </div>
                                     </div>
                                 </td>
+                                <td class="hide-on-small-only"></td>
                             </tr>
 
                             <!-- afrekenen -->
                             <tr>
+                                <td class="hide-on-small-only"></td>
                                 {% if bevat_fout %}
-                                    <td colspan="4" class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
+                                    <td colspan="3" class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
                                 {% else %}
-                                    <td colspan="3" class="right-align">
+                                    <td colspan="2" class="right-align">
                                         <form action="{{ url_afrekenen }}" method="post">
                                             {% csrf_token %}
                                             <button id="id_afrekenen" class="btn-nhb-rood">

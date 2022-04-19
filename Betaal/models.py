@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import models
+from django.utils.timezone import localtime
 from Account.models import Account
 from NhbStructuur.models import NhbVereniging
 
@@ -34,6 +35,10 @@ class BetaalActief(models.Model):
 
     # het nummer dat ooit teruggegeven is toen de transactie aangemaakt werd
     payment_id = models.CharField(max_length=BETAAL_PAYMENT_ID_MAXLENGTH)
+
+    def __str__(self):
+        """ Lever een tekstuele beschrijving voor de admin interface """
+        return "%s - %s" % (self.payment_id, localtime(self.when).strftime('%Y-%m-%d %H:%M:%S'))
 
     class Meta:
         verbose_name = "Actief payment_id"
@@ -68,6 +73,14 @@ class BetaalTransactie(models.Model):
     klant_iban = models.CharField(max_length=18)
     klant_bic = models.CharField(max_length=11)
 
+    def __str__(self):
+        """ Lever een tekstuele beschrijving voor de admin interface """
+        return "%s - %s - %s" % (self.payment_id, self.when, self.beschrijving)
+
+    class Meta:
+        verbose_name = "Betaal transactie"
+        verbose_name_plural = "Betaal transacties"
+
 
 class BetaalInstellingenVereniging(models.Model):
 
@@ -75,7 +88,7 @@ class BetaalInstellingenVereniging(models.Model):
     vereniging = models.ForeignKey(NhbVereniging, on_delete=models.CASCADE)
 
     # de API key van deze vereniging voor Mollie
-    mollie_api_key = models.CharField(max_length=MOLLIE_API_KEY_MAXLENGTH)
+    mollie_api_key = models.CharField(max_length=MOLLIE_API_KEY_MAXLENGTH, blank=True)
 
     # mag deze vereniging betalingen ontvangen via de NHB?
     akkoord_via_nhb = models.BooleanField(default=False)
@@ -86,6 +99,10 @@ class BetaalInstellingenVereniging(models.Model):
         key = self.mollie_api_key
         key = key[:5+2] + '[...]' + key[-2:]
         return key
+
+    def __str__(self):
+        """ Lever een tekstuele beschrijving voor de admin interface """
+        return str(self.vereniging)
 
     class Meta:
         verbose_name = "Betaal instellingen vereniging"
@@ -125,6 +142,7 @@ class BetaalMutatie(models.Model):
         verbose_name = "Betaal mutatie"
 
     def __str__(self):
+        """ Lever een tekstuele beschrijving voor de admin interface """
         msg = "[%s]" % self.when
         if not self.is_verwerkt:
             msg += " (nog niet verwerkt)"
