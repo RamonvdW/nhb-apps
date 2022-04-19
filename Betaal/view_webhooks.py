@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.http import Http404, HttpResponse
-from django.views.generic import View
 from django.views.decorators.csrf import csrf_exempt
 from Betaal.models import BetaalActief, BETAAL_PAYMENT_ID_MAXLENGTH
 from Betaal.mutaties import betaal_payment_status_changed
@@ -19,7 +18,6 @@ def simple_view_mollie_webhook(request):
         Noteer dat geen csrf-token gebruikt wordt.
     """
 
-    snel = request.POST.get('snel', '')
     data = request.POST.get('id', '')[:BETAAL_PAYMENT_ID_MAXLENGTH]     # afkappen voor de veiligheid
 
     # filter rare tekens eruit
@@ -30,10 +28,10 @@ def simple_view_mollie_webhook(request):
     # for
 
     # herkennen we deze betaling?
-    if not BetaalActief.objects.filter(payment_id=payment_id).count() > 0:
+    if BetaalActief.objects.filter(payment_id=payment_id).count() < 1:
         raise Http404('Onbekend')
 
-    betaal_payment_status_changed(payment_id, snel == '1')
+    betaal_payment_status_changed(payment_id)
 
     # geef een status 200 terug (binnen 15 seconden) dan stoppen de callbacks
     return HttpResponse()

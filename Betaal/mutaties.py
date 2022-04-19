@@ -11,7 +11,7 @@ from Overig.background_sync import BackgroundSync
 import time
 
 
-betalingen_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__BETALINGEN_MUTATIES)
+betaal_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__BETAAL_MUTATIES)
 
 
 def betaal_start_ontvangst(bestelling, instellingen, beschrijving, bedrag_euro, url_betaling_gedaan, snel):
@@ -38,7 +38,7 @@ def betaal_start_ontvangst(bestelling, instellingen, beschrijving, bedrag_euro, 
 
     if is_created:
         # ping het achtergrond process
-        betalingen_mutaties_ping.ping()
+        betaal_mutaties_ping.ping()
 
         if not snel:         # pragma: no cover
             # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
@@ -54,7 +54,7 @@ def betaal_start_ontvangst(bestelling, instellingen, beschrijving, bedrag_euro, 
     return mutatie
 
 
-def betaal_payment_status_changed(payment_id, snel):
+def betaal_payment_status_changed(payment_id):
     """
         De status van een betaling is gewijzigd
 
@@ -69,18 +69,7 @@ def betaal_payment_status_changed(payment_id, snel):
     mutatie.save()
 
     # ping het achtergrond process
-    betalingen_mutaties_ping.ping()
-
-    if not snel:         # pragma: no cover
-        # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
-        interval = 0.2      # om steeds te verdubbelen
-        total = 0.0         # om een limiet te stellen
-        while not mutatie.is_verwerkt and total + interval <= 3.0:
-            time.sleep(interval)
-            total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0
-            interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
-            mutatie = BetaalMutatie.objects.get(pk=mutatie.pk)
-        # while
+    betaal_mutaties_ping.ping()
 
 
 # end of file

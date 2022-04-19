@@ -34,7 +34,7 @@ class Command(BaseCommand):
 
         self.stop_at = datetime.datetime.now()
 
-        self._sync = BackgroundSync(settings.BACKGROUND_SYNC__BETALINGEN_MUTATIES)
+        self._sync = BackgroundSync(settings.BACKGROUND_SYNC__BETAAL_MUTATIES)
         self._count_ping = 0
 
         self._hoogste_mutatie_pk = None

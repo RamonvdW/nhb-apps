@@ -197,7 +197,7 @@ BACKGROUND_SYNC_POORT = 3000
 BACKGROUND_SYNC__REGIOCOMP_MUTATIES = BACKGROUND_SYNC_POORT + 1
 BACKGROUND_SYNC__BONDSPAS_DOWNLOADER = BACKGROUND_SYNC_POORT + 2
 BACKGROUND_SYNC__KALENDER_MUTATIES = BACKGROUND_SYNC_POORT + 3
-BACKGROUND_SYNC__BETALINGEN_MUTATIES = BACKGROUND_SYNC_POORT + 4
+BACKGROUND_SYNC__BETAAL_MUTATIES = BACKGROUND_SYNC_POORT + 4
 
 # our own test runner that executes the tests ordered by application hierarchy indicators to ensure that
 # low-level errors are reported before applications depending that (broken) functionality report failures
