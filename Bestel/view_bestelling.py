@@ -209,11 +209,11 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
         # zoek de betaling erbij
         if bestelling.actief_transactie:
             # betaling is al opgestart; transactie is al actief, dus ga daar mee door
-            print('POST: door gaan met actieve transactie nog niet gemaakt')
+            print('POST: doorgaan met actieve transactie nog niet gemaakt')
 
         elif bestelling.actief_mutatie:
             # betaling is al opgestart; we wachten op de achtergrond taak
-            print('POST: door gaan met actieve mutatie is nog niet gemaakt')
+            print('POST: doorgaan met actieve mutatie is nog niet gemaakt')
 
         else:
             # start een nieuwe transactie op

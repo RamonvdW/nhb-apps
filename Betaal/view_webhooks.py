@@ -23,7 +23,7 @@ def simple_view_mollie_webhook(request):
     # filter rare tekens eruit
     payment_id = ''
     for char in data:
-        if char.isalnum():
+        if char.isalnum() or char == '_':
             payment_id += char
     # for
 
