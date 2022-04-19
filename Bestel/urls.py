@@ -24,7 +24,11 @@ urlpatterns = [
 
     path('details/<bestel_nr>/',
          view_bestelling.ToonBestellingDetailsView.as_view(),
-         name='toon-bestelling-details')
+         name='toon-bestelling-details'),
+
+    path('afrekenen/<bestel_nr>/',
+         view_bestelling.BestellingAfrekenenView.as_view(),
+         name='bestelling-afrekenen'),
 ]
 
 # end of file

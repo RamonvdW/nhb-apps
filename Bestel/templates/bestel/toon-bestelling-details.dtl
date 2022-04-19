@@ -18,8 +18,6 @@
         </div>
     </div>
 
-    <p>Bestelling: {{ bestelling }}</p>
-
     <!-- blauwe balk met informatie in een tabel -->
     <div class="row-nhb-blauw">
         <div class="col s12">
@@ -55,29 +53,36 @@
                 <!-- totaal -->
                 <tr>
                     <td class="hide-on-small-only"></td>
-                    <td class="right-align"><b>Totaal:</b></td>
+                    <td class="right-align"><b>Totale kosten:</b></td>
                     <td class="right-align"><b>&euro;&nbsp;{{ bestelling.totaal_euro }}</b></td>
                 </tr>
 
                 <!-- transacties -->
-                {% for transactie in bestelling.transacties.all %}
+                {% for transactie in transacties %}
                     <tr>
-                        <td class="hide-on-small-only"></td>
-                        <td
+                        <td class="hide-on-small-only">Transactie</td>
+                        <td>{% for regel in transactie.regels %}{{ regel }}<br>{% endfor %}</td>
+                        <td class="right-align">{% if not transactie.is_restitutie %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ transactie.bedrag_euro }}</td>
                     </tr>
                 {% endfor %}
 
+                <tr>
+                    <td class="hide-on-small-only"></td>
+                    <td class="right-align"><b>Nog te voldoen:</b></td>
+                    <td class="right-align"><b>&euro;&nbsp;{{ rest_euro }}</b></td>
+                </tr>
+
                 <!-- afrekenen -->
                 <tr>
-                    {% if bevat_fout or True %}
+                    {% if bevat_fout %}
                         <td colspan="4" class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
-                    {% else %}
+                    {% elif url_afrekenen %}
                         <td class="hide-on-small-only"></td>
                         <td colspan="2" class="right-align">
                             <form action="{{ url_afrekenen }}" method="post">
                                 {% csrf_token %}
                                 <button id="id_afrekenen" class="btn-nhb-rood">
-                                    <i class="material-icons-round right">shopping_cart_checkout</i>{% if moet_afrekenen %}Afrekenen{% else %}Bestelling afronden{% endif %}</button>
+                                    <i class="material-icons-round right">shopping_cart_checkout</i>Betalen</button>
                             </form>
                         </td>
                         <td><!--knoppen--></td>
@@ -88,6 +93,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="toon-bestelling-details" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="bestel-toon-bestelling-details" %}
 
 {% endblock %}

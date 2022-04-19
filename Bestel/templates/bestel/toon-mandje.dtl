@@ -154,10 +154,10 @@
                                     <td colspan="3" class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
                                 {% else %}
                                     <td colspan="2" class="right-align">
-                                        <form action="{{ url_afrekenen }}" method="post">
+                                        <form action="{{ url_bestellen }}" method="post">
                                             {% csrf_token %}
-                                            <button id="id_afrekenen" class="btn-nhb-rood">
-                                                <i class="material-icons-round right">shopping_cart_checkout</i>{% if moet_afrekenen %}Afrekenen{% else %}Bestelling afronden{% endif %}</button>
+                                            <button id="id_bestellen" class="btn-nhb-rood">
+                                                <i class="material-icons-round right">shopping_cart_checkout</i>Bestelling afronden</button>
                                         </form>
                                     </td>
                                     <td><!--knoppen--></td>

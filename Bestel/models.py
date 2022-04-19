@@ -6,7 +6,7 @@
 
 from django.db import models
 from Account.models import Account
-from Betaal.models import BetaalTransactie
+from Betaal.models import BetaalActief, BetaalTransactie, BetaalMutatie
 from Kalender.models import KalenderInschrijving
 from decimal import Decimal
 
@@ -98,8 +98,7 @@ class BestelMandje(models.Model):
 
 class Bestelling(models.Model):
 
-    """ een volledige bestelling die afgerekend kan worden / afgerekend is
-    """
+    """ een volledige bestelling die afgerekend kan worden / afgerekend is """
 
     # het unieke bestelnummer
     bestel_nr = models.PositiveIntegerField()
@@ -117,7 +116,12 @@ class Bestelling(models.Model):
     # het af te rekenen totaalbedrag
     totaal_euro = models.DecimalField(max_digits=7, decimal_places=2, default=Decimal(0))       # max 99999,99
 
-    # betalingen: ontvangst en restitutie
+    # de opgestarte betaling/restitutie wordt hier bijgehouden
+    # begint als een mutatie, daarin zet de achtergrond taak een payment_id en daarmee kunnen we de transactie vinden
+    actief_mutatie = models.ForeignKey(BetaalMutatie, on_delete=models.SET_NULL, null=True, blank=True)
+    actief_transactie = models.ForeignKey(BetaalActief, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # de afgeronde betalingen: ontvangst en restitutie
     transacties = models.ManyToManyField(BetaalTransactie)
 
     # logboek van hoeveel en wanneer er ontvangen en terugbetaald is

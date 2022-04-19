@@ -149,7 +149,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         context['url_code_toevoegen'] = reverse('Bestel:mandje-code-toevoegen')
         if not (bevat_fout or mandje_is_leeg):
             if mandje and mandje.totaal_euro > 0:           # TODO: ondersteuning voor prijs=0
-                context['url_afrekenen'] = reverse('Bestel:toon-inhoud-mandje')
+                context['url_bestellen'] = reverse('Bestel:toon-inhoud-mandje')
 
         context['kruimels'] = (
             (None, 'Mandje'),
@@ -185,6 +185,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         bestelling.save(update_fields=['log'])
 
         # maak het mandje leeg
+        # TODO: mandje echt leeg maken
         #mandje.producten.clear()
         #mandje.delete()
 

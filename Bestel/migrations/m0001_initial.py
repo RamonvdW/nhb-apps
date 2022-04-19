@@ -22,6 +22,7 @@ def init_hoogste_bestel_nr(apps, _):
 
 
 class Migration(migrations.Migration):
+
     """ Migratie class voor dit deel van de applicatie """
 
     # dit is de eerste

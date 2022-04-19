@@ -14,8 +14,7 @@ import time
 betalingen_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__BETALINGEN_MUTATIES)
 
 
-
-def betalingen_start_ontvangst(tbd, snel):
+def betaal_start_ontvangst(beschrijving, bedrag_euro, snel):
     """
         Begin het afrekenen van een bestelling.
 
@@ -24,23 +23,29 @@ def betalingen_start_ontvangst(tbd, snel):
     """
 
     # zet dit verzoek door naar het mutaties process
-    mutatie = BetaalMutatie(
-                    code=BETAAL_MUTATIE_START_ONTVANGST)        # TODO: more fields
+    # voorkom duplicates
+    mutatie, is_created = BetaalMutatie.objects.get_or_create(
+                                    code=BETAAL_MUTATIE_START_ONTVANGST,
+                                    beschrijving=beschrijving,
+                                    bedrag_euro=bedrag_euro)
     mutatie.save()
 
-    # ping het achtergrond process
-    betalingen_mutaties_ping.ping()
+    if is_created:
+        # ping het achtergrond process
+        betalingen_mutaties_ping.ping()
 
-    if not snel:         # pragma: no cover
-        # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
-        interval = 0.2      # om steeds te verdubbelen
-        total = 0.0         # om een limiet te stellen
-        while not mutatie.is_verwerkt and total + interval <= 3.0:
-            time.sleep(interval)
-            total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0
-            interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
-            mutatie = BetaalMutatie.objects.get(pk=mutatie.pk)
-        # while
+        if not snel:         # pragma: no cover
+            # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
+            interval = 0.2      # om steeds te verdubbelen
+            total = 0.0         # om een limiet te stellen
+            while not mutatie.is_verwerkt and total + interval <= 3.0:
+                time.sleep(interval)
+                total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0
+                interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
+                mutatie = BetaalMutatie.objects.get(pk=mutatie.pk)
+            # while
+
+    return mutatie
 
 
 def betaal_payment_status_changed(payment_id, snel):
