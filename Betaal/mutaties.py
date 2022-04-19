@@ -14,7 +14,7 @@ import time
 betalingen_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__BETALINGEN_MUTATIES)
 
 
-def betaal_start_ontvangst(instellingen, beschrijving, bedrag_euro, url_betaling_gedaan, snel):
+def betaal_start_ontvangst(bestelling, instellingen, beschrijving, bedrag_euro, url_betaling_gedaan, snel):
     """
         Begin het afrekenen van een bestelling.
 
@@ -31,6 +31,10 @@ def betaal_start_ontvangst(instellingen, beschrijving, bedrag_euro, url_betaling
                                     bedrag_euro=bedrag_euro,
                                     url_betaling_gedaan=url_betaling_gedaan)
     mutatie.save()
+
+    # voorkom dat we nog een keer hetzelfde pad doorlopen
+    bestelling.actief_mutatie = mutatie
+    bestelling.save(update_fields=['actief_mutatie'])
 
     if is_created:
         # ping het achtergrond process

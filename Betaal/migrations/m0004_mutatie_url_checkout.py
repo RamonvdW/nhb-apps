@@ -13,19 +13,15 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Betaal', 'm0001_initial'),
+        ('Betaal', 'm0003_betaalmutatie_ontvanger'),
     ]
 
     # migratie functies
     operations = [
-        migrations.AlterModelOptions(
-            name='betaaltransactie',
-            options={'verbose_name': 'Betaal transactie', 'verbose_name_plural': 'Betaal transacties'},
-        ),
-        migrations.AlterField(
-            model_name='betaalinstellingenvereniging',
-            name='mollie_api_key',
-            field=models.CharField(blank=True, max_length=50),
+        migrations.AddField(
+            model_name='betaalmutatie',
+            name='url_checkout',
+            field=models.CharField(default='', max_length=200),
         ),
     ]
 

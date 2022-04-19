@@ -98,10 +98,14 @@ class Command(BaseCommand):
                 self.stderr.write('[ERROR] Unexpected exception from Mollie create payment: %s' % str(exc))
             else:
                 self.stdout.write('[DEBUG] Create payment response: %s' % repr(payment))
+
                 payment_id = payment['id']
+                url_checkout = payment['checkout']['href']
+                self.stdout.write('[DEBUG] url_checkout: %s' % repr(url_checkout))
 
                 mutatie.payment_id = payment_id
-                mutatie.save(update_fields=['payment_id'])
+                mutatie.url_checkout = url_checkout
+                mutatie.save(update_fields=['payment_id', 'url_checkout'])
 
                 # houd de actieve betalingen bij
                 BetaalActief(payment_id=payment_id).save()

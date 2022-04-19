@@ -230,16 +230,15 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
             url_betaling_gedaan = settings.SITE_URL + reverse('Bestel:bestelling-afrekenen',
                                                               kwargs={'bestel_nr': bestelling.bestel_nr})
 
+            # start de bestelling via de achtergrond taak
+            # deze slaat de referentie naar de mutatie op in de bestelling
             mutatie = betaal_start_ontvangst(
+                            bestelling,
                             bestelling.ontvanger,
                             beschrijving,
                             rest_euro,
                             url_betaling_gedaan,
                             snel == '1')
-
-            # voorkom dat we nog een keer hetzelfde pad doorlopen
-            bestelling.actief_mutatie = mutatie
-            bestelling.save(update_fields=['actief_mutatie'])
 
         # go to the "show progress" screen
         url = reverse('Bestel:bestelling-afrekenen',

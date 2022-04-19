@@ -27,7 +27,7 @@ MOLLIE_API_KEY_MAXLENGTH = 50           # geen limiet gevonden in docs
 class BetaalActief(models.Model):
 
     """ Deze tabel houdt bij welke payment_id actief zijn
-        Hiermee kunnen we al in de POST handler van de webhook rommel filteren.
+        Hiermee kunnen we rommel filteren in de POST handler van de webhook.
     """
 
     # datum/tijdstip van aanmaak (wordt gebruikt voor opschonen)
@@ -137,6 +137,9 @@ class BetaalMutatie(models.Model):
 
     # waar naartoe als de betaling gedaan is?
     url_betaling_gedaan = models.CharField(max_length=100, default='')
+
+    # waar naartoe om de betaling te doen (bij de CPSP)
+    url_checkout = models.CharField(max_length=200, default='')
 
     # BETAAL_MUTATIE_START_RESTITUTIE:
     # BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED:
