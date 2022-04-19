@@ -64,7 +64,8 @@ def betaal_payment_status_changed(payment_id, snel):
 
     # zet dit verzoek door naar het mutaties process
     mutatie = BetaalMutatie(
-                    code=BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED)     # TODO: more fields
+                    code=BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED,
+                    payment_id=payment_id)
     mutatie.save()
 
     # ping het achtergrond process

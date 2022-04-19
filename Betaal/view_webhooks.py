@@ -6,35 +6,37 @@
 
 from django.http import Http404, HttpResponse
 from django.views.generic import View
+from django.views.decorators.csrf import csrf_exempt
 from Betaal.models import BetaalActief, BETAAL_PAYMENT_ID_MAXLENGTH
 from Betaal.mutaties import betaal_payment_status_changed
 
 
-class MollieWebhookView(View):
+@csrf_exempt
+def simple_view_mollie_webhook(request):
+    """ Deze functie wordt aangeroepen om de POST request af te handelen.
+        Dit wordt gebruikt als webhook om status changes van Mollie te ontvangen.
 
-    @staticmethod
-    def post(request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen om de POST request af te handelen.
-            Dit wordt gebruikt als Webhook om status changes van Mollie te ontvangen.
-        """
+        Noteer dat geen csrf-token gebruikt wordt.
+    """
 
-        data = request.POST.get('id', '')[:BETAAL_PAYMENT_ID_MAXLENGTH]     # afkappen voor de veiligheid
+    snel = request.POST.get('snel', '')
+    data = request.POST.get('id', '')[:BETAAL_PAYMENT_ID_MAXLENGTH]     # afkappen voor de veiligheid
 
-        # filter rare tekens eruit
-        payment_id = ''
-        for char in data:
-            if char.isalnum():
-                payment_id += char
-        # for
+    # filter rare tekens eruit
+    payment_id = ''
+    for char in data:
+        if char.isalnum():
+            payment_id += char
+    # for
 
-        # herkennen we deze betaling?
-        if not BetaalActief.objects.filter(payment_id=payment_id).count() > 0:
-            raise Http404('Onbekend')
+    # herkennen we deze betaling?
+    if not BetaalActief.objects.filter(payment_id=payment_id).count() > 0:
+        raise Http404('Onbekend')
 
-        betaal_payment_status_changed(payment_id)
+    betaal_payment_status_changed(payment_id, snel == '1')
 
-        # geef een status 200 terug (binnen 15 seconden) dan stoppen de callbacks
-        return HttpResponse()
+    # geef een status 200 terug (binnen 15 seconden) dan stoppen de callbacks
+    return HttpResponse()
 
 
 # end of file

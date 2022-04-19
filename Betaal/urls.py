@@ -14,7 +14,7 @@ urlpatterns = [
 
     # wedstrijden
     path('webhooks/mollie/',
-         view_webhooks.MollieWebhookView.as_view(),
+         view_webhooks.simple_view_mollie_webhook,
          name='mollie-webhook'),
 
     path('vereniging/instellingen/',
