@@ -137,7 +137,11 @@ class Command(BaseCommand):
     def _verwerk_nieuwe_mutaties(self):
         begin = datetime.datetime.now()
 
-        mutatie_latest = BetaalMutatie.objects.latest('pk')
+        try:
+            mutatie_latest = BetaalMutatie.objects.latest('pk')
+        except BetaalMutatie.DoesNotExist:
+            # alle mutatie records zijn verwijderd
+            return
         # als hierna een extra mutatie aangemaakt wordt dan verwerken we een record
         # misschien dubbel, maar daar kunnen we tegen
 
@@ -150,9 +154,9 @@ class Command(BaseCommand):
         else:
             qset = (BetaalMutatie
                     .objects
-                    .all())
+                    .all())         # deferred
 
-        mutatie_pks = qset.values_list('pk', flat=True)
+        mutatie_pks = qset.values_list('pk', flat=True)     # deferred
 
         self._hoogste_mutatie_pk = mutatie_latest.pk
 

@@ -28,13 +28,16 @@ def simple_view_mollie_webhook(request):
     # for
 
     # herkennen we deze betaling?
-    if BetaalActief.objects.filter(payment_id=payment_id).count() < 1:
-        raise Http404('Onbekend')
-
-    betaal_payment_status_changed(payment_id)
+    if BetaalActief.objects.filter(payment_id=payment_id).count() > 0:
+        betaal_payment_status_changed(payment_id)
+        status = 200
+    else:
+        # 404 or 403 gives too much content
+        # 400 becomes a plain and empty response
+        status = 400
 
     # geef een status 200 terug (binnen 15 seconden) dan stoppen de callbacks
-    return HttpResponse()
+    return HttpResponse(status=status)
 
 
 # end of file
