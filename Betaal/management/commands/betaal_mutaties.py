@@ -100,7 +100,7 @@ class Command(BaseCommand):
                 self.stdout.write('[DEBUG] Create payment response: %s' % repr(payment))
 
                 payment_id = payment['id']
-                url_checkout = payment['checkout']['href']
+                url_checkout = payment['_links']['checkout']['href']
                 self.stdout.write('[DEBUG] url_checkout: %s' % repr(url_checkout))
 
                 mutatie.payment_id = payment_id
