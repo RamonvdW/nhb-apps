@@ -227,8 +227,8 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
                     rest_euro -= transactie.bedrag_euro
             # for
 
-            url_betaling_gedaan = reverse('Bestel:bestelling-afrekenen',
-                                          kwargs={'bestel_nr': bestelling.bestel_nr})
+            url_betaling_gedaan = settings.SITE_URL + reverse('Bestel:bestelling-afrekenen',
+                                                              kwargs={'bestel_nr': bestelling.bestel_nr})
 
             mutatie = betaal_start_ontvangst(
                             bestelling.ontvanger,

@@ -59,7 +59,7 @@ class Command(BaseCommand):
         #  - OS, hostname, kernel versie + distributie, machine arch
         self._mollie_client.UNAME = settings.NAAM_SITE      # MijnHandboogsport [test]
 
-        self._mollie_webhook_url = reverse('Betaal:mollie-webhook')
+        self._mollie_webhook_url = settings.SITE_URL + reverse('Betaal:mollie-webhook')
 
     def add_arguments(self, parser):
         parser.add_argument('duration', type=int,
