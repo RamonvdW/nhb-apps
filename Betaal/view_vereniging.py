@@ -13,7 +13,7 @@ from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from mollie.api.client import RequestSetupError, Client
 
-TEMPLATE_BETALINGEN_INSTELLEN = 'betalingen/vereniging-instellingen.dtl'
+TEMPLATE_BETALINGEN_INSTELLEN = 'betaal/vereniging-instellingen.dtl'
 
 
 class BetalingenInstellenView(UserPassesTestMixin, TemplateView):
@@ -42,7 +42,11 @@ class BetalingenInstellenView(UserPassesTestMixin, TemplateView):
 
         instellingen, is_created = BetaalInstellingenVereniging.objects.get_or_create(vereniging=ver)
 
-        context['huidige_api_key'] = instellingen.obfuscated_mollie_api_key()
+        if instellingen.mollie_api_key:
+            context['huidige_api_key'] = instellingen.obfuscated_mollie_api_key()
+
+        if instellingen.akkoord_via_nhb:
+            context['akkoord_via_nhb'] = True
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),

@@ -481,6 +481,11 @@ TICKET_NUMMER_START__OPLEIDING = 3000000
 TICKET_NUMMER_START__WEDSTRIJD = 7000000
 
 
+# het verenigingsnummer van de NHB
+# wordt gebruikt als verenigingen via de NHB betalingen mogen ontvangen
+BETAAL_VIA_NHB_VER_NR = 1368
+
+
 # defaults for 'dev' and 'test' options
 
 # SECURITY WARNING: don't run with debug turned on in production!

@@ -98,13 +98,11 @@ def mandje_toevoegen_inschrijving(account, inschrijving, prijs_euro):
         mandje.totaal_euro += prijs_euro
         mandje.save()
 
-    return product
-
 
 def mandje_verwijder_inschrijving(account, inschrijving):
 
     try:
-        product = BestelProduct(inschrijving=inschrijving)
+        product = BestelProduct.objects.get(inschrijving=inschrijving)
     except BestelProduct.DoesNotExist:
         # inschrijving niet gevonden, dus geen onderdeel van een bestelling of een mandje
         pass
@@ -120,8 +118,8 @@ def mandje_verwijder_inschrijving(account, inschrijving):
                 pass
             else:
                 # mandje gevonden, product gevonden
-                # verwijder het product uit het mandje, of het er nou in zit of niet
-                mandje.producten.remove(product)
+                # verwijder het product, dan verdwijnt deze ook uit het mandje
+                product.delete()
 
                 # omdat er nu een product uit verwijderd is en een korting vervallen is:
                 # bepaal opnieuw de totaal prijs van de inhoud van het mandje en sla deze op
@@ -144,27 +142,45 @@ def mandje_enum_inschrijvingen(account):
                         .exclude(inschrijving=None)
                         .select_related('inschrijving',
                                         'inschrijving__sporterboog__sporter',
-                                        'inschrijving__sporterboog__sporter__bij_vereniging')):
+                                        'inschrijving__sporterboog__sporter__bij_vereniging')
+                        .order_by('inschrijving__pk')):
             product.komt_uit_mandje = True
             yield product.inschrijving, product
         # for
 
 
-def mandje_korting_toepassen(product, percentage):
+def mandje_korting_toepassen_op_inschrijving(inschrijving, percentage, koper):
     """ Pas een gegeven kortingspercentage (positive integer) toe op de prijs van een product in het mandje
         De aanroeper heeft al gecontroleerd dat de korting toegepast mag worden.
         Deze functie mag alleen aangeroepen worden voor producten die door een van de mandje_enum_ functies
         geretourneerd is.
 
         Na aanroep moet de totaal_prijs van het mandje opnieuw vastgesteld worden
+
+        Returns:
+            True: korting is toegepast op een product in het mandje
+            False: product niet gevonden in het mandje van de koper
     """
 
-    if product.komt_uit_mandje:
-        procent = percentage / Decimal(100.0)
-        product.korting_euro = product.prijs_euro * procent
-        product.korting_euro = min(product.korting_euro, product.prijs_euro)  # voorkom korting > prijs
-        product.save(update_fields=['korting_euro'])
+    result = False
 
+    # zoek het bijbehorende product op en het mandje waar deze in zou moeten liggen
+    try:
+        product = BestelProduct.objects.get(inschrijving=inschrijving)
+        mandje = BestelMandje.objects.get(account=koper)
+    except (BestelProduct.DoesNotExist, BestelMandje.DoesNotExist):
+        # een van de twee niet gevonden
+        pass
+    else:
+        if product in mandje.producten.all():
+            procent = percentage / Decimal(100.0)
+            product.korting_euro = product.prijs_euro * procent
+            product.korting_euro = min(product.korting_euro, product.prijs_euro)  # voorkom korting > prijs
+            product.save(update_fields=['korting_euro'])
+
+            result = True
+
+    return result
 
 def mandje_totaal_opnieuw_bepalen(account):
     """ bereken het totaal_euro veld opnieuw voor de inhoud van het mandje """

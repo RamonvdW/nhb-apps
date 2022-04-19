@@ -85,7 +85,7 @@ class BetaalTransactie(models.Model):
 class BetaalInstellingenVereniging(models.Model):
 
     # bij welke vereniging hoort deze informatie?
-    vereniging = models.ForeignKey(NhbVereniging, on_delete=models.CASCADE)
+    vereniging = models.OneToOneField(NhbVereniging, on_delete=models.CASCADE)
 
     # de API key van deze vereniging voor Mollie
     mollie_api_key = models.CharField(max_length=MOLLIE_API_KEY_MAXLENGTH, blank=True)
@@ -129,14 +129,20 @@ class BetaalMutatie(models.Model):
     # hierin staat normaal het bestelnummer
     beschrijving = models.CharField(max_length=BETAAL_BESCHRIJVING_MAXLENGTH)
 
+    # referentie naar de instellingen voor de vereniging waar de betaling heen moet
+    ontvanger = models.ForeignKey(BetaalInstellingenVereniging, on_delete=models.PROTECT, blank=True, null=True)
+
     # het bedrag
     bedrag_euro = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)         # max 99999,99
+
+    # waar naartoe als de betaling gedaan is?
+    url_betaling_gedaan = models.CharField(max_length=100, default='')
 
     # BETAAL_MUTATIE_START_RESTITUTIE:
     # BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED:
 
     # Mollie id ontvangen met de payment status changed webhook aanroep
-    payment_id = models.CharField(max_length=BETAAL_PAYMENT_ID_MAXLENGTH)
+    payment_id = models.CharField(max_length=BETAAL_PAYMENT_ID_MAXLENGTH, blank=True)
 
     class Meta:
         verbose_name = "Betaal mutatie"

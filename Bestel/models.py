@@ -6,7 +6,7 @@
 
 from django.db import models
 from Account.models import Account
-from Betaal.models import BetaalActief, BetaalTransactie, BetaalMutatie
+from Betaal.models import BetaalActief, BetaalTransactie, BetaalMutatie, BetaalInstellingenVereniging
 from Kalender.models import KalenderInschrijving
 from decimal import Decimal
 
@@ -110,6 +110,11 @@ class Bestelling(models.Model):
     # van wie is deze bestelling
     account = models.ForeignKey(Account, on_delete=models.CASCADE, null=True, blank=True)
 
+    # welke vereniging is ontvanger van de gelden voor deze bestelling?
+    # per bestelling kan er maar 1 ontvanger zijn
+    ontvanger = models.ForeignKey(BetaalInstellingenVereniging, on_delete=models.PROTECT,
+                                  null=True, blank=True)        # alleen nodig voor migratie
+
     # de bestelde producten met prijs en korting
     producten = models.ManyToManyField(BestelProduct)
 
@@ -122,7 +127,7 @@ class Bestelling(models.Model):
     actief_transactie = models.ForeignKey(BetaalActief, on_delete=models.SET_NULL, null=True, blank=True)
 
     # de afgeronde betalingen: ontvangst en restitutie
-    transacties = models.ManyToManyField(BetaalTransactie)
+    transacties = models.ManyToManyField(BetaalTransactie, blank=True)
 
     # logboek van hoeveel en wanneer er ontvangen en terugbetaald is
     log = models.TextField()

@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.operations import account_controleer_snelheid_verzoeken
+from Betaal.models import BetaalInstellingenVereniging
 from Bestel.operations import bestel_get_volgende_bestel_nr
 from Functie.rol import Rollen, rol_get_huidige
 from Kalender.mutaties import kalender_kortingscode_toepassen, kalender_verwijder_reservering
@@ -49,6 +50,26 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         mandje_is_leeg = True
         bevat_fout = False
 
+        ontvanger2product_pks = dict()      # [ver_nr] = [product.pk, ...]
+        ver_nr2instellingen = dict()        # [ver_nr] = BetaalInstellingenVereniging
+
+        for instellingen in BetaalInstellingenVereniging.objects.select_related('vereniging').all():
+            ver_nr = instellingen.vereniging.ver_nr
+            ver_nr2instellingen[ver_nr] = instellingen
+        # for
+
+        try:
+            instellingen_nhb = ver_nr2instellingen[settings.BETAAL_VIA_NHB_VER_NR]
+        except KeyError:
+            # nog niet aangemaakt
+            instellingen_nhb = None
+
+        # zet de verenigingen om die akkoord hebben
+        for ver_nr, instellingen in ver_nr2instellingen.items():
+            if instellingen.akkoord_via_nhb:
+                ver_nr2instellingen[ver_nr] = instellingen_nhb
+        # for
+
         try:
             mandje = BestelMandje.objects.prefetch_related('producten').get(account=account)
         except BestelMandje.DoesNotExist:
@@ -65,11 +86,13 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                                          'inschrijving__sessie',
                                          'inschrijving__sporterboog',
                                          'inschrijving__sporterboog__boogtype',
-                                         'inschrijving__sporterboog__sporter'))
+                                         'inschrijving__sporterboog__sporter')
+                         .order_by('inschrijving__pk'))
 
             for product in producten:
                 # maak een beschrijving van deze regel
                 product.beschrijving = beschrijving = list()
+                product.kan_afrekenen = True
 
                 if product.inschrijving:
                     inschrijving = product.inschrijving
@@ -78,6 +101,9 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                     beschrijving.append(tup)
 
                     tup = ('Wedstrijd', inschrijving.wedstrijd.titel)
+                    beschrijving.append(tup)
+
+                    tup = ('Bij vereniging', inschrijving.wedstrijd.organiserende_vereniging.ver_nr_en_naam())
                     beschrijving.append(tup)
 
                     sessie = inschrijving.sessie
@@ -93,7 +119,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                         ver_naam = sporter_ver.ver_nr_en_naam()
                     else:
                         ver_naam = 'Onbekend'
-                    tup = ('Van vereniging', ver_naam)
+                    tup = ('Lid bij', ver_naam)
                     beschrijving.append(tup)
 
                     tup = ('Boog', '%s' % sporterboog.boogtype.beschrijving)
@@ -111,10 +137,32 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
                     controleer_euro += product.prijs_euro
                     controleer_euro -= product.korting_euro
+
+                    if product.inschrijving:
+                        ver_nr = product.inschrijving.wedstrijd.organiserende_vereniging.ver_nr
+                        try:
+                            instellingen = ver_nr2instellingen[ver_nr]
+                        except KeyError:
+                            # geen instellingen, dus kan geen betaling ontvangen
+                            product.kan_afrekenen = False
+                        else:
+                            # check of de betalingen via de NHB mogen lopen
+                            if instellingen is None:
+                                # is None als er geen NHB instellingen zijn
+                                product.kan_afrekenen = False
+                            else:
+                                if instellingen.akkoord_via_nhb:
+                                    ver_nr = settings.BETAAL_VIA_NHB_VER_NR
+
+                        try:
+                            ontvanger2product_pks[ver_nr].append(product.pk)
+                        except KeyError:
+                            ontvanger2product_pks[ver_nr] = [product.pk]
                 else:
                     tup = ('Fout', 'Onbekend product')
                     beschrijving.append(tup)
                     bevat_fout = True
+                    product.kan_afrekenen = False
 
                 if maak_urls:
                     # maak een knop om deze bestelling te verwijderen uit het mandje
@@ -131,7 +179,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
             if controleer_euro != mandje.totaal_euro:
                 bevat_fout = True
 
-        return mandje, producten, mandje_is_leeg, bevat_fout
+        return mandje, producten, ontvanger2product_pks, mandje_is_leeg, bevat_fout
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -139,12 +187,13 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
         eval_mandje_inhoud(self.request)
 
-        mandje, producten, mandje_is_leeg, bevat_fout = self._beschrijf_inhoud_mandje(account)
+        mandje, producten, ontvanger2product_pks, mandje_is_leeg, bevat_fout = self._beschrijf_inhoud_mandje(account)
 
         context['mandje_is_leeg'] = mandje_is_leeg
         context['mandje'] = mandje
         context['producten'] = producten
         context['bevat_fout'] = bevat_fout
+        context['aantal_betalingen'] = len(ontvanger2product_pks.keys())
 
         context['url_code_toevoegen'] = reverse('Bestel:mandje-code-toevoegen')
         if not (bevat_fout or mandje_is_leeg):
@@ -163,31 +212,48 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
             Hier converteren we het mandje in een bevroren bestelling die afgerekend kan worden.
         """
         account = self.request.user
-        mandje, producten, mandje_is_leeg, bevat_fout = self._beschrijf_inhoud_mandje(account, maak_urls=False)
+        mandje, producten, ontvanger2product_pks, mandje_is_leeg, bevat_fout = self._beschrijf_inhoud_mandje(account, maak_urls=False)
         if bevat_fout or mandje_is_leeg or mandje is None:
             raise Http404('Afrekenen is niet mogelijk')
 
-        # neem een bestelnummer uit
-        bestel_nr = bestel_get_volgende_bestel_nr()
-        product_pks = [product.pk for product in producten]
+        for ver_nr, product_pks in ontvanger2product_pks.items():
 
-        bestelling = Bestelling(
-                            bestel_nr=bestel_nr,
-                            account=account,
-                            totaal_euro=mandje.totaal_euro,
-        )
-        bestelling.save()
+            try:
+                instellingen = BetaalInstellingenVereniging.objects.get(vereniging__ver_nr=ver_nr)
+            except BetaalInstellingenVereniging.DoesNotExist:
+                # vereniging kan niet betaald krijgen!
+                # skip deze producten
+                # TODO: hier zouden we een taak aan moeten maken en een paniek-mail sturen
+                pass
+            else:
+                # neem een bestelnummer uit
+                bestel_nr = bestel_get_volgende_bestel_nr()
 
-        bestelling.producten.set(product_pks)
+                totaal_euro = Decimal(0)
+                for product in producten:
+                    if product.pk in product_pks:
+                        totaal_euro += product.prijs_euro
+                        totaal_euro -= product.korting_euro
+                # for
 
-        msg = "[%s] Bestelling aangemaakt met %s producten, totaal euro=%s" % (bestelling.aangemaakt, len(producten), bestelling.totaal_euro)
-        bestelling.log = msg
-        bestelling.save(update_fields=['log'])
+                bestelling = Bestelling(
+                                    bestel_nr=bestel_nr,
+                                    account=account,
+                                    ontvanger=instellingen,
+                                    totaal_euro=totaal_euro)
+                bestelling.save()
 
-        # maak het mandje leeg
-        # TODO: mandje echt leeg maken
-        #mandje.producten.clear()
-        #mandje.delete()
+                bestelling.producten.set(product_pks)
+
+                msg = "[%s] Bestelling aangemaakt met %s producten voor totaal euro=%s" % (
+                                                bestelling.aangemaakt, len(product_pks), totaal_euro)
+                bestelling.log = msg
+                bestelling.save(update_fields=['log'])
+
+                # haal deze producten uit het mandje
+                to_be_removed = mandje.producten.filter(pk__in=product_pks)
+                mandje.producten.remove(*to_be_removed)
+        # for
 
         url = reverse('Bestel:toon-inhoud-mandje')
         return HttpResponseRedirect(url)

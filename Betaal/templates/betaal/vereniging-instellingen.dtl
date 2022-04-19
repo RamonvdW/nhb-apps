@@ -48,9 +48,17 @@
                         </div>
 
                         <table>
+
+                            {% if akkoord_via_nhb %}
+                                <tr>
+                                    <th>Akkoord voor betalingen via NHB</th>
+                                    <td>Ja, betalingen aan jullie lopen via de NHB rekening</td>
+                                </tr>
+                            {% endif %}
+
                             <tr>
                                 <th>Ingestelde API-key</th>
-                                <td>{{ huidige_api_key }}</td>
+                                <td>{% if huidige_api_key %}{{ huidige_api_key }}{% else %}<i>Geen</i>{% endif %}</td>
                             </tr>
 
                             <tr>

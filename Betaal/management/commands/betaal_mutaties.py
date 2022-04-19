@@ -13,16 +13,17 @@ from django.urls import reverse
 from django.utils import timezone
 from django.db.models import F
 from django.core.management.base import BaseCommand
-from Betalingen.models import (BetalingenMutatie,
-                               BETALINGEN_MUTATIE_AFREKENEN, BETALINGEN_MUTATIE_CREATE_PAYMENT_RESPONSE,
-                               BETALINGEN_MUTATIE_PAYMENT_STATUS_CHANGED)
+from Betaal.models import (BetaalMutatie, BetaalActief, BetaalInstellingenVereniging,
+                           BETAAL_MUTATIE_START_ONTVANGST, BETAAL_MUTATIE_START_RESTITUTIE,
+                           BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED)
 from Mailer.models import mailer_queue_email
 from Overig.background_sync import BackgroundSync
 import django.db.utils
 import traceback
 import datetime
 import sys
-from mollie.api.client import Client
+from mollie.api.client import Client, RequestSetupError, RequestError
+from mollie.api.error import ResponseError
 
 
 class Command(BaseCommand):
@@ -38,9 +39,16 @@ class Command(BaseCommand):
 
         self._hoogste_mutatie_pk = None
 
+        try:
+            self._instellingen_nhb = (BetaalInstellingenVereniging
+                                      .objects
+                                      .get(vereniging__ver_nr=settings.BETAAL_VIA_NHB_VER_NR))
+        except BetaalInstellingenVereniging.DoesNotExist:
+            self._instellingen_nhb = None
+
         # maak de Mollie client instantie aan
         # de API key zetten we later, afhankelijk van de vereniging waar we deze transactie voor doen
-        self._mollie = Client()
+        self._mollie_client = Client()
 
         # limiteer hoeveel informatie er over ons platform doorgegeven wordt
         # verder wordt doorgegeven:
@@ -49,9 +57,9 @@ class Command(BaseCommand):
         #  - OpenSSL versie: "OpenSSL 1.1.1n  15 Mar 2022"
         # standaard werd doorgegeven:
         #  - OS, hostname, kernel versie + distributie, machine arch
-        self._mollie.UNAME = settings.NAAM_SITE      # MijnHandboogsport [test]
+        self._mollie_client.UNAME = settings.NAAM_SITE      # MijnHandboogsport [test]
 
-        self._mollie_webhook_url = reverse('Betalingen:mollie-webhook')
+        self._mollie_webhook_url = reverse('Betaal:mollie-webhook')
 
     def add_arguments(self, parser):
         parser.add_argument('duration', type=int,
@@ -59,10 +67,46 @@ class Command(BaseCommand):
                             help="Aantal minuten actief blijven")
         parser.add_argument('--quick', action='store_true')     # for testing
 
-    def _verwerk_mutatie_afrekenen(self, mutatie):
-        pass
+    def _verwerk_mutatie_start_ontvangst(self, mutatie):
+        instellingen = mutatie.ontvanger
+        if instellingen.akkoord_via_nhb and self._instellingen_nhb:
+            instellingen = self._instellingen_nhb
 
-    def _verwerk_mutatie_create_payment_response(self, mutatie):
+        beschrijving = mutatie.beschrijving
+        bedrag_euro_str = str(mutatie.bedrag_euro)      # moet decimale punt geven
+
+        # schakel de Mollie client over op de API key van deze vereniging
+        # als de betaling via de NHB loopt, dan zijn dit al de instellingen van de NHB
+        try:
+            self._mollie_client.set_api_key(instellingen.mollie_api_key)
+        except (RequestError, RequestSetupError) as exc:
+            self.stderr.write('[ERROR] Unexpected exception from Mollie set API key: %s' % str(exc))
+        else:
+            # vraag Mollie om de betaling op te zetten
+            # sla het payment_id op in de mutatie en in BetaalActief
+
+            data = {
+                'amount': {'currency': 'EUR', 'value': bedrag_euro_str},
+                'description': beschrijving,
+                'webhookUrl': self._mollie_webhook_url,
+                'redirectUrl': mutatie.url_betaling_gedaan,
+            }
+
+            try:
+                payment = self._mollie_client.payments.create(data)
+            except (RequestError, RequestSetupError, ResponseError) as exc:
+                self.stderr.write('[ERROR] Unexpected exception from Mollie create payment: %s' % str(exc))
+            else:
+                self.stdout.write('[DEBUG] Create payment response: %s' % repr(payment))
+                payment_id = payment['id']
+
+                mutatie.payment_id = payment_id
+                mutatie.save(update_fields=['payment_id'])
+
+                # houd de actieve betalingen bij
+                BetaalActief(payment_id=payment_id).save()
+
+    def _verwerk_mutatie_start_restitutie(self, mutatie):
         pass
 
     def _verwerk_mutatie_payment_status_changed(self, mutatie):
@@ -71,15 +115,15 @@ class Command(BaseCommand):
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.code
 
-        if code == BETALINGEN_MUTATIE_AFREKENEN:
-            self.stdout.write('[INFO] Verwerk mutatie %s: Afrekenen' % mutatie.pk)
-            self._verwerk_mutatie_afrekenen(mutatie)
+        if code == BETAAL_MUTATIE_START_ONTVANGST:
+            self.stdout.write('[INFO] Verwerk mutatie %s: Start ontvangst' % mutatie.pk)
+            self._verwerk_mutatie_start_ontvangst(mutatie)
 
-        elif code == BETALINGEN_MUTATIE_CREATE_PAYMENT_RESPONSE:
-            self.stdout.write('[INFO] Verwerk mutatie %s: Create payment response' % mutatie.pk)
-            self._verwerk_mutatie_create_payment_response(mutatie)
+        elif code == BETAAL_MUTATIE_START_RESTITUTIE:
+            self.stdout.write('[INFO] Verwerk mutatie %s: Start restitutie' % mutatie.pk)
+            self._verwerk_mutatie_start_restitutie(mutatie)
 
-        elif code == BETALINGEN_MUTATIE_PAYMENT_STATUS_CHANGED:
+        elif code == BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED:
             self.stdout.write('[INFO] Verwerk mutatie %s: payment status changed' % mutatie.pk)
             self._verwerk_mutatie_payment_status_changed(mutatie)
 
@@ -89,18 +133,18 @@ class Command(BaseCommand):
     def _verwerk_nieuwe_mutaties(self):
         begin = datetime.datetime.now()
 
-        mutatie_latest = BetalingenMutatie.objects.latest('pk')
+        mutatie_latest = BetaalMutatie.objects.latest('pk')
         # als hierna een extra mutatie aangemaakt wordt dan verwerken we een record
         # misschien dubbel, maar daar kunnen we tegen
 
         if self._hoogste_mutatie_pk:
             # gebruik deze informatie om te filteren
             self.stdout.write('[INFO] vorige hoogste BetalingenMutatie pk is %s' % self._hoogste_mutatie_pk)
-            qset = (BetalingenMutatie
+            qset = (BetaalMutatie
                     .objects
                     .filter(pk__gt=self._hoogste_mutatie_pk))
         else:
-            qset = (BetalingenMutatie
+            qset = (BetaalMutatie
                     .objects
                     .all())
 
@@ -113,9 +157,8 @@ class Command(BaseCommand):
             # LET OP: we halen de records hier 1 voor 1 op
             #         zodat we verse informatie hebben inclusief de vorige mutatie
             #         en zodat we 1 plek hebben voor select/prefetch
-            mutatie = (BetalingenMutatie
-                       .objects
-                       #.select_related()        # TODO
+            mutatie = (BetaalMutatie
+                       .objects             # geen select_related nodig
                        .get(pk=pk))
 
             if not mutatie.is_verwerkt:
@@ -137,7 +180,7 @@ class Command(BaseCommand):
         now = datetime.datetime.now()
         while now < self.stop_at:                   # pragma: no branch
             # self.stdout.write('tick')
-            new_count = BetalingenMutatie.objects.count()
+            new_count = BetaalMutatie.objects.count()
             if new_count != mutatie_count:
                 mutatie_count = new_count
                 self._verwerk_nieuwe_mutaties()

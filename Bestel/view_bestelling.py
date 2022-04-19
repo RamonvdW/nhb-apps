@@ -220,15 +220,24 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
             beschrijving = "MijnHandboogsport bestelling %s" % bestelling.bestel_nr
 
             rest_euro = bestelling.totaal_euro
-            for transactie in bestelling.transacties:
+            for transactie in bestelling.transacties.all():
                 if transactie.is_restitutie:
                     rest_euro += transactie.bedrag_euro
                 else:
                     rest_euro -= transactie.bedrag_euro
             # for
 
-            mutatie = betaal_start_ontvangst(beschrijving, rest_euro, snel == '1')
+            url_betaling_gedaan = reverse('Bestel:bestelling-afrekenen',
+                                          kwargs={'bestel_nr': bestelling.bestel_nr})
 
+            mutatie = betaal_start_ontvangst(
+                            bestelling.ontvanger,
+                            beschrijving,
+                            rest_euro,
+                            url_betaling_gedaan,
+                            snel == '1')
+
+            # voorkom dat we nog een keer hetzelfde pad doorlopen
             bestelling.actief_mutatie = mutatie
             bestelling.save(update_fields=['actief_mutatie'])
 

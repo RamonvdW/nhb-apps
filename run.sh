@@ -20,21 +20,22 @@ STATIC_DIR="nhbapps/.static"
 rm -rf "$STATIC_DIR"/*
 ./manage.py collectstatic -l
 
+echo "[INFO] Starting betaal_mutaties (runtime: 60 minutes)"
+pkill -f betaal_mutaties
+./manage.py betaal_mutaties 60 &
+
 echo "[INFO] Starting kalender_mutaties (runtime: 60 minutes)"
 pkill -f kalender_mutaties
 ./manage.py kalender_mutaties 60 &
-# sleep 1
 
 # start the background processes
 echo "[INFO] Starting regiocomp_mutaties (runtime: 60 minutes)"
 pkill -f regiocomp_mutaties
 ./manage.py regiocomp_mutaties 60 &
-# sleep 1
 
 echo "[INFO] Starting regiocomp_tussenstand (runtime: 60 minutes)"
 pkill -f regiocomp_tussenstand
 ./manage.py regiocomp_tussenstand 60 &
-# sleep 1
 
 # start the development webserver
 if [ $DEBUG -eq 1 ]
@@ -50,6 +51,7 @@ fi
 
 # kill the background processes
 echo "[INFO] Stopping background tasks"
+pkill -f betaal_mutaties
 pkill -f kalender_mutaties
 pkill -f regiocomp_mutaties
 pkill -f regiocomp_tussenstand

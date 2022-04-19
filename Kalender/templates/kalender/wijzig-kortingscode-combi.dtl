@@ -71,11 +71,11 @@
                             </tr>
 
                             <tr>
-                                <th>Bruikbaar voor wedstrijd(en)</th>
-                                <td>
-                                    {% for wedstrijd in wedstrijden %}
+                                <th>Combinatie-korting</th>
+                                <td>Indien ingeschreven voor al deze wedstrijden:<br>
+                                    {% for wedstrijd in combi_wedstrijden %}
                                         <label>
-                                            <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="gewijzigd()"{% if wedstrijd.is_gekozen %} checked{% endif %}>
+                                            <input type="checkbox" class="filled-in" name="combi_{{ wedstrijd.pk }}" onchange="gewijzigd()"{% if wedstrijd.is_gekozen %} checked{% endif %}>
                                             <span class="black-text">{{ wedstrijd.titel }}</span>
                                         </label>
                                         <br>
@@ -84,11 +84,11 @@
                             </tr>
 
                             <tr>
-                                <th>Combinatie-korting</th>
-                                <td>Indien ingeschreven voor al deze wedstrijden:<br>
-                                    {% for wedstrijd in combi_wedstrijden %}
+                                <th>Geeft korting op deze wedstrijd</th>
+                                <td>
+                                    {% for wedstrijd in wedstrijden %}
                                         <label>
-                                            <input type="checkbox" class="filled-in" name="combi_{{ wedstrijd.pk }}" onchange="gewijzigd()"{% if wedstrijd.is_gekozen %} checked{% endif %}>
+                                            <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="gewijzigd()"{% if wedstrijd.is_gekozen %} checked{% endif %}>
                                             <span class="black-text">{{ wedstrijd.titel }}</span>
                                         </label>
                                         <br>
