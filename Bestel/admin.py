@@ -35,7 +35,12 @@ class BestellingAdmin(admin.ModelAdmin):
                         'aangemaakt',
                         'totaal_euro')
              }),
-        ('Log', {'fields': ('log',)}),
+        ('Transactie',
+            {'fields': ('ontvanger',
+                        'actief_mutatie',           # BetaalMutatie
+                        'actief_transactie',        # BetaalActief
+                        'log')
+             }),
         ('Niet wijzigen!', {'fields': ('producten', 'transacties')}),
     )
 

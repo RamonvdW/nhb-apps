@@ -66,7 +66,7 @@ class MyServer(BaseHTTPRequestHandler):
 
     # noinspection PyTypeChecker
     def do_GET(self):
-        # print("[DEBUG] {websim} GET request,\nPath: %s\nHeaders:\n%s" % (str(self.path), str(self.headers)))
+        print("[DEBUG] {websim} GET request,\nPath: %s\nHeaders:\n%s" % (str(self.path), str(self.headers)))
 
         if self.path.startswith('/v2/payments'):
             data = self._read_json_body()
@@ -104,7 +104,7 @@ class MyServer(BaseHTTPRequestHandler):
 
         if self.path.startswith('/v2/payments'):
             data = self._read_json_body()
-            print('[DEBUG] {websim} POST data: %s' % repr(data))
+            # print('[DEBUG] {websim} POST data: %s' % repr(data))
 
             try:
                 webhook_url = data['webhookUrl']
@@ -116,7 +116,7 @@ class MyServer(BaseHTTPRequestHandler):
             except KeyError:
                 self.send_response(400)     # 400 = bad request
             else:
-                print('[DEBUG] {websim} POST: description=%s' % description)
+                # print('[DEBUG] {websim} POST: description=%s' % description)
 
                 payment_id = '1234AbcdEFGH'
 

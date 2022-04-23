@@ -95,7 +95,7 @@ class Command(BaseCommand):
             try:
                 payment = self._mollie_client.payments.create(data)
             except (RequestError, RequestSetupError, ResponseError, ResponseHandlingError) as exc:
-                self.stderr.write('[ERROR] Unexpected exception from Mollie create payment: %s' % str(exc))
+                self.stderr.write('[ERROR] Unexpected exception from Mollie payments.create: %s' % str(exc))
             else:
                 self.stdout.write('[DEBUG] Create payment response: %s' % repr(payment))
 
@@ -119,12 +119,30 @@ class Command(BaseCommand):
         """
 
         # zoek de bijbehorende API key op
-        BetaalMutatie.objects.get()
+        try:
+            actief = BetaalActief.objects.get(payment_id=mutatie.payment_id)
+        except BetaalActief.DoesNotExist:
+            # niet (meer) gevonden --> we kunnen niets doen
+            pass
+        else:
+            # schakel de Mollie client over op de API key van deze vereniging
+            # als de betaling via de NHB loopt, dan zijn dit al de instellingen van de NHB
+            instellingen = actief.ontvanger
+            if instellingen.akkoord_via_nhb and self._instellingen_nhb:
+                instellingen = self._instellingen_nhb
 
-
-        # als er al een BetaalTransactie voor is, dan is deze transactie afgerond en doen we niets meer
-
-        pass
+            try:
+                self._mollie_client.set_api_key(instellingen.mollie_api_key)
+            except (RequestError, RequestSetupError) as exc:
+                self.stderr.write('[ERROR] Unexpected exception from Mollie set API key: %s' % str(exc))
+            else:
+                # vraag Mollie om de status van de betaling
+                try:
+                    payment = self._mollie_client.payments.get(actief.payment_id)
+                except (RequestError, RequestSetupError, ResponseError, ResponseHandlingError) as exc:
+                    self.stderr.write('[ERROR] Unexpected exception from Mollie payments.get: %s' % str(exc))
+                else:
+                    self.stdout.write('[DEBUG] Get payment response: %s' % repr(payment))
 
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.code

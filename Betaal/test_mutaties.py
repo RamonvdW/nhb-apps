@@ -87,7 +87,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertFalse(mutatie.is_verwerkt, False)
         self.assertEqual(BetaalActief.objects.count(), 0)
 
-        self._run_achtergrondtaak(debug=True)
+        self._run_achtergrondtaak()
 
         mutatie = BetaalMutatie.objects.get(pk=mutatie.pk)
         self.assertTrue(mutatie.is_verwerkt, False)
@@ -99,6 +99,9 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         # genereer het payment status-changed event
         resp = self.client.post(self.url_betaal_webhook, {'id': actief.payment_id})
         self.assertEqual(resp.status_code, 200)
+
+        self._run_achtergrondtaak(debug=True)
+
 
     def test_bad(self):
         bestelling = Bestelling(
