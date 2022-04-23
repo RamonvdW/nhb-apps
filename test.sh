@@ -93,6 +93,32 @@ fi
 
 ABORTED=0
 
+export COVERAGE_FILE="/tmp/.coverage.$$"
+
+python3 -m coverage erase
+
+echo "[INFO] Capturing output in $LOG"
+# --pid=$$ means: stop when parent stops
+# -u = unbuffered stdin/stdout
+tail -f "$LOG" --pid=$$ | python -u ./number_tests.py | grep --color -E "FAIL$|ERROR$|" &
+PID_TAIL=$(jobs -p | tail -1)
+# echo "PID_TAIL=$PID_TAIL"
+
+if [ $KEEP_DB -ne 1 ]
+then
+    echo "[INFO] Deleting test database"
+    sudo -u postgres dropdb --if-exists test_data3
+    echo "[INFO] Creating clean database; running migrations and performing run with nodebug"
+else
+    echo "[INFO] Running potential migrations and performing run with nodebug"
+fi
+
+# add coverage with nodebug
+python3 -u $PYCOV ./manage.py test --keepdb --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.TestPlein.test_quick &>>"$LOG"
+RES=$?
+#echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
+[ $RES -eq 3 ] && ABORTED=1
+
 # start the mail transport service simulator
 python3 ./Mailer/test_tools/websim_mailer.py &
 PID_WEBSIM1=$!
@@ -128,23 +154,6 @@ then
     exit
 fi
 
-export COVERAGE_FILE="/tmp/.coverage.$$"
-
-python3 -m coverage erase
-
-echo "[INFO] Capturing output in $LOG"
-# --pid=$$ means: stop when parent stops
-# -u = unbuffered stdin/stdout
-tail -f "$LOG" --pid=$$ | python -u ./number_tests.py | grep --color -E "FAIL$|ERROR$|" &
-PID_TAIL=$(jobs -p | tail -1)
-# echo "PID_TAIL=$PID_TAIL"
-
-if [ $KEEP_DB -ne 1 ]
-then
-    echo "[INFO] Deleting test database"
-    sudo -u postgres dropdb --if-exists test_data3
-fi
-
 # -u = unbuffered stdin/stdout --> also ensures the order of stdout/stderr lines
 # -v = verbose
 # note: double quotes not supported around $*
@@ -156,16 +165,6 @@ RES=$?
 
 echo >>"$LOG"
 echo "[INFO] Finished main test run" >>"$LOG"
-
-if [ $RES -eq 0 -a $# -eq 0 ]
-then
-    # add coverage with nodebug
-    echo "[INFO] Performing run with nodebug"
-    python3 -u $PYCOV ./manage.py test --keepdb --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.TestPlein.test_quick &>>"$LOG"
-    RES=$?
-    #echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
-    [ $RES -eq 3 ] && ABORTED=1
-fi
 
 # stop showing the additions to the logfile, because the rest is less interesting
 # use bash construct to prevent the Terminated message on the console

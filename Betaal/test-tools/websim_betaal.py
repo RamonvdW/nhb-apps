@@ -68,11 +68,11 @@ class MyServer(BaseHTTPRequestHandler):
 
     # noinspection PyTypeChecker
     def do_GET(self):
-        #print("[DEBUG] {websim} GET request,\nPath: %s\nHeaders:\n%s" % (str(self.path), str(self.headers)))
+        # print("[DEBUG] {websim} GET request,\nPath: %s\nHeaders:\n%s" % (str(self.path), str(self.headers)))
 
         if self.path.startswith('/v2/payments/'):
             payment_id = self.path[13:13+30]
-            print('[DEBUG] {websim} GET payment_id: %s' % repr(payment_id))
+            # print('[DEBUG] {websim} GET payment_id: %s' % repr(payment_id))
 
             payment_id = '1234AbcdEFGH'
 
@@ -110,6 +110,26 @@ class MyServer(BaseHTTPRequestHandler):
                     del resp['isCancelable']
                     del resp['_links']['checkout']
                     # '_links': {'changePaymentState': {'href': 'https://www.mollie.com/checkout/test-mode?method=ideal&token=3.210mge', 'type': 'text/html'},
+
+                elif test_code == "43":
+                    # transition to 'failed'
+                    resp['status'] = 'failed'
+                    resp['failedAt'] = self._get_timestamp()
+                    resp['locale'] = 'en_NL'
+                    resp['countryCode'] = 'NL'
+                    del resp['isCancelable']
+                    del resp['expiresAt']
+                    del resp['_links']['checkout']
+
+                elif test_code == "44":
+                    # transition to 'expired'
+                    resp['status'] = 'expired'
+                    del resp['expiresAt']
+                    resp['expiredAt'] = self._get_timestamp()
+                    resp['locale'] = 'en_NL'
+                    resp['countryCode'] = 'NL'
+                    del resp['_links']['checkout']
+                    del resp['_links']['dashboard']
 
             self._write_response(200, resp)
             return
@@ -165,12 +185,13 @@ class MyServer(BaseHTTPRequestHandler):
                 if description.startswith('Test betaling '):
                     test_code = description[14:]
 
-                if test_code == "42":
+                if test_code in ("42", "43", "44"):
                     self._write_response(200, resp)
 
         # internal server error
         self.send_response(500)
         self.end_headers()
+
 
 def main():
     print('[INFO] Starting test payment http server on port %s' % MY_PORT)

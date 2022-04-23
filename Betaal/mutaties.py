@@ -10,7 +10,6 @@ from Betaal.models import (BetaalMutatie, BETAAL_MUTATIE_START_ONTVANGST, BETAAL
 from Overig.background_sync import BackgroundSync
 import time
 
-
 betaal_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__BETAAL_MUTATIES)
 
 

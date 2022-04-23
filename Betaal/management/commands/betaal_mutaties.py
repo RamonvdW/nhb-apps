@@ -28,7 +28,7 @@ import sys
 
 
 class Command(BaseCommand):
-    help = "Kalender mutaties verwerken"
+    help = "Betaal mutaties verwerken"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
@@ -171,14 +171,22 @@ class Command(BaseCommand):
 
                     try:
                         status = payment['status']
-                        # remove some keys we don't need in the log
-                        del payment['webhookUrl']
-                        del payment['redirectUrl']
-                        del payment['_links']['dashboard']
-                        del payment['_links']['documentation']
                     except KeyError as exc:
                         self.stderr.write('[ERROR] Missing mandatory information in get payment response: %s' % str(exc))
                     else:
+                        # remove some keys we don't need in the log
+                        try:
+                            del payment['webhookUrl']
+                            del payment['redirectUrl']
+                            del payment['_links']['dashboard']
+                            del payment['_links']['documentation']
+                        except KeyError:
+                            pass
+
+                        self.stdout.write('[INFO] Payment %s status aangepast: %s --> %s' % (actief.payment_id,
+                                                                                             actief.payment_status,
+                                                                                             status))
+
                         actief.log += "[%s]: payment status %s --> %s\n" % (timezone.localtime(timezone.now()),
                                                                             actief.payment_status,
                                                                             status)

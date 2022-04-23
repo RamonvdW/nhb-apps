@@ -79,7 +79,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         mutatie = betaal_start_ontvangst(
                         bestelling,
-                        "Test betaling 42",
+                        "Test betaling 42",     # 42 triggered 'paid'
                         bestelling.totaal_euro,
                         url_betaling_gedaan,
                         True)       # snel
@@ -100,8 +100,92 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         resp = self.client.post(self.url_betaal_webhook, {'id': actief.payment_id})
         self.assertEqual(resp.status_code, 200)
 
+        self._run_achtergrondtaak()
+
+        actief = BetaalActief.objects.get(pk=actief.pk)
+        self.assertEqual(actief.payment_status, 'paid')
+
+    def test_betaal_failed(self):
+        bestelling = Bestelling(
+                            bestel_nr=1,
+                            account=self.account,
+                            ontvanger=self.instellingen,
+                            totaal_euro=Decimal('42.42'))
+        bestelling.save()
+
+        # de bestelde producten met prijs en korting
+        # producten = models.ManyToManyField(BestelProduct)
+
+        url_betaling_gedaan = settings.SITE_URL + '/plein/'
+
+        mutatie = betaal_start_ontvangst(
+                        bestelling,
+                        "Test betaling 43",     # 43 triggert 'failed'
+                        bestelling.totaal_euro,
+                        url_betaling_gedaan,
+                        True)       # snel
+
+        self.assertFalse(mutatie.is_verwerkt)
+        self.assertEqual(BetaalActief.objects.count(), 0)
+
         self._run_achtergrondtaak(debug=True)
-        # TODO: complete
+
+        mutatie = BetaalMutatie.objects.get(pk=mutatie.pk)
+        self.assertTrue(mutatie.is_verwerkt)
+
+        self.assertEqual(BetaalActief.objects.count(), 1)
+        actief = BetaalActief.objects.all()[0]
+        self.assertEqual(actief.ontvanger.pk, bestelling.ontvanger.pk)
+
+        # genereer het payment status-changed event
+        resp = self.client.post(self.url_betaal_webhook, {'id': actief.payment_id})
+        self.assertEqual(resp.status_code, 200)
+
+        self._run_achtergrondtaak()
+
+        actief = BetaalActief.objects.get(pk=actief.pk)
+        self.assertEqual(actief.payment_status, 'failed')
+
+    def test_betaal_expired(self):
+        bestelling = Bestelling(
+                            bestel_nr=1,
+                            account=self.account,
+                            ontvanger=self.instellingen,
+                            totaal_euro=Decimal('42.42'))
+        bestelling.save()
+
+        # de bestelde producten met prijs en korting
+        # producten = models.ManyToManyField(BestelProduct)
+
+        url_betaling_gedaan = settings.SITE_URL + '/plein/'
+
+        mutatie = betaal_start_ontvangst(
+                        bestelling,
+                        "Test betaling 44",     # 43 triggert 'expired'
+                        bestelling.totaal_euro,
+                        url_betaling_gedaan,
+                        True)       # snel
+
+        self.assertFalse(mutatie.is_verwerkt)
+        self.assertEqual(BetaalActief.objects.count(), 0)
+
+        self._run_achtergrondtaak(debug=True)
+
+        mutatie = BetaalMutatie.objects.get(pk=mutatie.pk)
+        self.assertTrue(mutatie.is_verwerkt)
+
+        self.assertEqual(BetaalActief.objects.count(), 1)
+        actief = BetaalActief.objects.all()[0]
+        self.assertEqual(actief.ontvanger.pk, bestelling.ontvanger.pk)
+
+        # genereer het payment status-changed event
+        resp = self.client.post(self.url_betaal_webhook, {'id': actief.payment_id})
+        self.assertEqual(resp.status_code, 200)
+
+        self._run_achtergrondtaak()
+
+        actief = BetaalActief.objects.get(pk=actief.pk)
+        self.assertEqual(actief.payment_status, 'expired')
 
     def test_bad(self):
         bestelling = Bestelling(
