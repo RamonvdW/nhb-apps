@@ -58,13 +58,20 @@ class BetaalActief(models.Model):
     """
 
     # datum/tijdstip van aanmaak (wordt gebruikt voor opschonen)
+    # de online betaal methoden verlopen na 3 uur, iDEAL al na 15 minuten
     when = models.DateTimeField(auto_now_add=True)      # automatisch invullen
+
+    # referentie naar de instellingen voor de vereniging waar de betaling bij hoort
+    ontvanger = models.ForeignKey(BetaalInstellingenVereniging, on_delete=models.PROTECT)
 
     # het nummer dat ooit teruggegeven is toen de transactie aangemaakt werd
     payment_id = models.CharField(max_length=BETAAL_PAYMENT_ID_MAXLENGTH)
 
-    # referentie naar de instellingen voor de vereniging waar de betaling bij hoort
-    ontvanger = models.ForeignKey(BetaalInstellingenVereniging, on_delete=models.PROTECT, blank=True, null=True)
+    # de laatste ontvangen status
+    payment_status = models.CharField(max_length=15, default='')
+
+    # logboek met status veranderingen
+    log = models.TextField(default='')
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """

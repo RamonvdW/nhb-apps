@@ -18,12 +18,13 @@ from Betaal.models import (BetaalMutatie, BetaalActief, BetaalInstellingenVereni
                            BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED)
 from Mailer.models import mailer_queue_email
 from Overig.background_sync import BackgroundSync
+from mollie.api.client import Client, RequestSetupError, RequestError
+from mollie.api.error import ResponseError, ResponseHandlingError
 import django.db.utils
 import traceback
 import datetime
+import json
 import sys
-from mollie.api.client import Client, RequestSetupError, RequestError
-from mollie.api.error import ResponseError, ResponseHandlingError
 
 
 class Command(BaseCommand):
@@ -99,16 +100,35 @@ class Command(BaseCommand):
             else:
                 self.stdout.write('[DEBUG] Create payment response: %s' % repr(payment))
 
-                payment_id = payment['id']
-                url_checkout = payment['_links']['checkout']['href']
-                self.stdout.write('[DEBUG] url_checkout: %s' % repr(url_checkout))
+                try:
+                    payment_id = payment['id']
+                    url_checkout = payment['_links']['checkout']['href']
+                    status = payment['status']
+                except KeyError as exc:
+                    self.stderr.write('[ERROR] Missing mandatory information in create payment response: %s' % str(exc))
+                else:
+                    mutatie.payment_id = payment_id
+                    mutatie.url_checkout = url_checkout
+                    mutatie.save(update_fields=['payment_id', 'url_checkout'])
 
-                mutatie.payment_id = payment_id
-                mutatie.url_checkout = url_checkout
-                mutatie.save(update_fields=['payment_id', 'url_checkout'])
+                    # remove some keys we don't need in the log
+                    try:
+                        del payment['webhookUrl']
+                        del payment['redirectUrl']
+                        del payment['_links']['dashboard']
+                        del payment['_links']['documentation']
+                    except KeyError:
+                        pass
 
-                # houd de actieve betalingen bij
-                BetaalActief(payment_id=payment_id, ontvanger=instellingen).save()
+                    # houd de actieve betalingen bij
+                    actief = BetaalActief(
+                                    payment_id=payment_id,
+                                    ontvanger=instellingen,
+                                    payment_status=status)
+                    actief.log += "[%s]: created\n" % timezone.localtime(timezone.now())
+                    actief.log += json.dumps(payment)
+                    actief.log += '\n'
+                    actief.save()
 
     def _verwerk_mutatie_start_restitutie(self, mutatie):
         pass
@@ -125,6 +145,8 @@ class Command(BaseCommand):
             # niet (meer) gevonden --> we kunnen niets doen
             pass
         else:
+            actief.log += '\n\n'
+
             # schakel de Mollie client over op de API key van deze vereniging
             # als de betaling via de NHB loopt, dan zijn dit al de instellingen van de NHB
             instellingen = actief.ontvanger
@@ -141,8 +163,29 @@ class Command(BaseCommand):
                     payment = self._mollie_client.payments.get(actief.payment_id)
                 except (RequestError, RequestSetupError, ResponseError, ResponseHandlingError) as exc:
                     self.stderr.write('[ERROR] Unexpected exception from Mollie payments.get: %s' % str(exc))
+
+                    actief.log += "[%s]: Mollie exception\n" % timezone.localtime(timezone.now())
+                    actief.save(update_fields=['log'])
                 else:
                     self.stdout.write('[DEBUG] Get payment response: %s' % repr(payment))
+
+                    try:
+                        status = payment['status']
+                        # remove some keys we don't need in the log
+                        del payment['webhookUrl']
+                        del payment['redirectUrl']
+                        del payment['_links']['dashboard']
+                        del payment['_links']['documentation']
+                    except KeyError as exc:
+                        self.stderr.write('[ERROR] Missing mandatory information in get payment response: %s' % str(exc))
+                    else:
+                        actief.log += "[%s]: payment status %s --> %s\n" % (timezone.localtime(timezone.now()),
+                                                                            actief.payment_status,
+                                                                            status)
+                        actief.log += json.dumps(payment)
+                        actief.log += '\n'
+                        actief.payment_status = status
+                        actief.save(update_fields=['payment_status', 'log'])
 
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.code

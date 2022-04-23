@@ -84,13 +84,13 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
                         url_betaling_gedaan,
                         True)       # snel
 
-        self.assertFalse(mutatie.is_verwerkt, False)
+        self.assertFalse(mutatie.is_verwerkt)
         self.assertEqual(BetaalActief.objects.count(), 0)
 
         self._run_achtergrondtaak()
 
         mutatie = BetaalMutatie.objects.get(pk=mutatie.pk)
-        self.assertTrue(mutatie.is_verwerkt, False)
+        self.assertTrue(mutatie.is_verwerkt)
 
         self.assertEqual(BetaalActief.objects.count(), 1)
         actief = BetaalActief.objects.all()[0]
@@ -101,7 +101,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
 
         self._run_achtergrondtaak(debug=True)
-
+        # TODO: complete
 
     def test_bad(self):
         bestelling = Bestelling(
@@ -157,7 +157,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 400)
 
         # model str() functies
-        betaal = BetaalActief(payment_id="test")
+        betaal = BetaalActief(payment_id="test", ontvanger=self.instellingen)
         betaal.save()
         self.assertTrue(str(betaal) != '')
 

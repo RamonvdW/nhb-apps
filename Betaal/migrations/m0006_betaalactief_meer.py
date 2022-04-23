@@ -8,20 +8,29 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     """ Migratie class voor dit deel van de applicatie """
 
     # volgorde afdwingen
     dependencies = [
-        ('Betaal', 'm0004_mutatie_url_checkout'),
+        ('Betaal', 'm0005_betaalactief_ontvanger'),
     ]
 
     # migratie functies
     operations = [
         migrations.AddField(
             model_name='betaalactief',
+            name='log',
+            field=models.TextField(default=''),
+        ),
+        migrations.AddField(
+            model_name='betaalactief',
+            name='payment_status',
+            field=models.CharField(default='', max_length=15),
+        ),
+        migrations.AlterField(
+            model_name='betaalactief',
             name='ontvanger',
-            field=models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT, to='Betaal.betaalinstellingenvereniging'),
+            field=models.ForeignKey(on_delete=models.deletion.PROTECT, to='Betaal.betaalinstellingenvereniging'),
         ),
     ]
 

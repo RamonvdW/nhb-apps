@@ -24,6 +24,8 @@ MY_URL_SELF = MY_URL_BASE + '/v2/payments/tr_%s'                              # 
 MY_URL_CHECKOUT = MY_URL_BASE + '/checkout/select-issuer/ideal/%s'            # payment_id
 MY_URL_DASHBOARD = MY_URL_BASE + '/dashboard/org_12345677/payments/tr_%s'     # payment_id
 
+payments = dict()       # [payment_id] = dict()
+
 
 class MyServer(BaseHTTPRequestHandler):
 
@@ -36,7 +38,7 @@ class MyServer(BaseHTTPRequestHandler):
         stamp = datetime.datetime.now()
         if minutes != 0:
             stamp += datetime.timedelta(minutes=minutes)
-        return stamp.isoformat()
+        return stamp.isoformat()        # 2022-04-23T16:54:51.953365
 
     def _read_json_body(self):
         json_data = dict()
@@ -66,34 +68,51 @@ class MyServer(BaseHTTPRequestHandler):
 
     # noinspection PyTypeChecker
     def do_GET(self):
-        print("[DEBUG] {websim} GET request,\nPath: %s\nHeaders:\n%s" % (str(self.path), str(self.headers)))
+        #print("[DEBUG] {websim} GET request,\nPath: %s\nHeaders:\n%s" % (str(self.path), str(self.headers)))
 
-        if self.path.startswith('/v2/payments'):
-            data = self._read_json_body()
-            print('[DEBUG] {websim} GET data: %s' % repr(data))
+        if self.path.startswith('/v2/payments/'):
+            payment_id = self.path[13:13+30]
+            print('[DEBUG] {websim} GET payment_id: %s' % repr(payment_id))
 
-            # else:
-            #     special = self.path.split('/')[-2]
-            #     # print('[DEBUG] {websim} spl=%s, special=%s' % (self.path.split('/'), repr(special)))
-            #     if special in ('404', '500'):
-            #         # /bondspas/404/<bondsnummer>
-            #         special = int(special)
-            #         self.send_response(special)
-            #         # noinspection PyTypeChecker
-            #         self.send_header('Content-length', 0)
-            #         self.end_headers()
-            #
-            #     elif special == '43':
-            #
-            #         self.send_response(200)
-            #         self.send_header('Content-type', 'application/pdf')
-            #         # skip content-type header
-            #         self.end_headers()
-            #
-            #     else:
-            #         # geen valide bondsnummer
-            #         self.send_response(404)
-            #         self.end_headers()
+            payment_id = '1234AbcdEFGH'
+
+            try:
+                resp = payments[payment_id]
+            except KeyError:
+                # onbekende payment_id
+                self.send_response(404)
+                self.end_headers()
+                return
+
+            if resp['status'] == 'open':
+                # transition to another state
+                test_code = 0
+                description = resp['description']
+                if description.startswith('Test betaling '):
+                    test_code = description[14:]
+
+                if test_code == '42':
+                    # transition to 'paid'
+                    resp['status'] = 'paid'
+                    resp['paidAt'] = self._get_timestamp()
+                    resp['amountRefunded'] = refund = dict()
+                    refund['currency'] = resp['amount']['currency']
+                    refund['value'] = '0.00'
+                    resp['amountRemaining'] = remaining = dict()
+                    remaining['currency'] = resp['amount']['currency']
+                    remaining['value'] = resp['amount']['value']
+                    resp['locale'] = 'en_NL'
+                    resp['countryCode'] = 'NL'
+                    resp['details'] = details = dict()
+                    details['consumerName'] = 'T. TEST'
+                    details['consumerAccount'] = 'NL72RABO0110438885'
+                    details['consumerBic'] = 'RABONL2U'
+                    del resp['isCancelable']
+                    del resp['_links']['checkout']
+                    # '_links': {'changePaymentState': {'href': 'https://www.mollie.com/checkout/test-mode?method=ideal&token=3.210mge', 'type': 'text/html'},
+
+            self._write_response(200, resp)
+            return
 
         # internal server error
         self.send_response(500)
@@ -120,7 +139,7 @@ class MyServer(BaseHTTPRequestHandler):
 
                 payment_id = '1234AbcdEFGH'
 
-                resp = dict()
+                payments[payment_id] = resp = dict()
                 resp['resource'] = 'payment'
                 resp['id'] = 'tr_%s' % payment_id
                 resp['mode'] = 'test'
@@ -148,7 +167,6 @@ class MyServer(BaseHTTPRequestHandler):
 
                 if test_code == "42":
                     self._write_response(200, resp)
-
 
         # internal server error
         self.send_response(500)
