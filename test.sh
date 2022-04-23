@@ -12,19 +12,26 @@ LOG="/tmp/test_out.txt"
 [ -e "$LOG" ] && rm "$LOG"
 touch "$LOG"
 
+# include a specific third party package
+COV_INCLUDE_3RD_PARTY=""
+#COV_INCLUDE_3RD_PARTY="mollie"
+
 PYCOV=""
-PYCOV="-m coverage run --append --branch"
+PYCOV="-m coverage run --append --branch"       # --pylib
+[ ! -z "$COV_INCLUDE_3RD_PARTY" ] && PYCOV+=" --include=*${COV_INCLUDE_3RD_PARTY}*"
 
 export PYTHONDONTWRITEBYTECODE=1
 
-OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
+#OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
 # show all saml2 and djangosaml2idp source files
 #OMIT="--omit=data3/wsgi.py,manage.py,/usr/local/lib64/*,/usr/lib/*,/usr/local/lib/python3.6/site-packages/c*,/usr/local/lib/python3.6/site-packages/da*,/usr/local/lib/python3.6/site-packages/de*,/usr/local/lib/python3.6/site-packages/i*,/usr/local/lib/python3.6/site-packages/p*,/usr/local/lib/python3.6/site-packages/q*,/usr/local/lib/python3.6/site-packages/r*,/usr/local/lib/python3.6/site-packages/si*,/usr/local/lib/python3.6/site-packages/u*,/usr/local/lib/python3.6/site-packages/django/*"
+OMIT=""
 
 # set high performance
 sudo cpupower frequency-set --governor performance > /dev/null
 
 # kill the http simulator if still running in the background
+# -f check entire commandline program name is python and does not match
 pgrep -f websim > /dev/null
 if [ $? -eq 0 ]
 then
@@ -52,6 +59,16 @@ then
     ARGS=$(echo "$ARGS" | sed 's/--force//')
 fi
 
+KEEP_DB=0
+if [[ "$ARGS" =~ "--keep" ]]
+then
+    echo "[INFO] Keeping database"
+    KEEP_DB=1
+    # remove from ARGS used to decide focus
+    # will still be given to ./manage.py where --force has no effect
+    ARGS=$(echo "$ARGS" | sed 's/--keep//')
+fi
+
 FOCUS=""
 if [ ! -z "$ARGS" ]
 then
@@ -70,34 +87,44 @@ then
     echo "[INFO] Focus set to $FOCUS"
 
     COV_INCLUDE=$(for opt in $FOCUS1; do echo -n "$opt/*,"; done)
+    [ ! -z "$COV_INCLUDE_3RD_PARTY" ] && COV_INCLUDE+="*${COV_INCLUDE_3RD_PARTY}*"
     #echo "[DEBUG] COV_INCLUDE set to $COV_INCLUDE"
 fi
 
 ABORTED=0
 
-# start the simulator for the mailer
+# start the mail transport service simulator
 python3 ./Mailer/test_tools/websim_mailer.py &
 PID_WEBSIM1=$!
+
+# start the bondspas service simulator
+python3 ./Bondspas/test-tools/websim_bondspas.py &
+PID_WEBSIM2=$!
+
+# start the payment service simulator
+python3 ./Betaal/test-tools/websim_betaal.py &
+PID_WEBSIM3=$!
+
+# check all websim programs have started properly
 sleep 0.5               # give python some time to load everything
 kill -0 $PID_WEBSIM1    # check the simulator is running
-RES=$?
-#echo "RES=$RES"
-if [ $RES -ne 0 ]
+if [ $? -ne 0 ]
 then
-    echo "[ERROR] Mail server simulator failed to start"
+    echo "[ERROR] Mail transport service simulator failed to start"
     exit
 fi
 
-# start the simulator for the bondspas downloader
-python3 ./Bondspas/test-tools/websim_bondspas.py &
-PID_WEBSIM2=$!
-sleep 0.5               # give python some time to load everything
 kill -0 $PID_WEBSIM2    # check the simulator is running
-RES=$?
-#echo "RES=$RES"
-if [ $RES -ne 0 ]
+if [ $? -ne 0 ]
 then
-    echo "[ERROR] Bondspas server simulator failed to start"
+    echo "[ERROR] Bondspas service simulator failed to start"
+    exit
+fi
+
+kill -0 $PID_WEBSIM3    # check the simulator is running
+if [ $? -ne 0 ]
+then
+    echo "[ERROR] Betaal service simulator failed to start"
     exit
 fi
 
@@ -112,8 +139,11 @@ tail -f "$LOG" --pid=$$ | python -u ./number_tests.py | grep --color -E "FAIL$|E
 PID_TAIL=$(jobs -p | tail -1)
 # echo "PID_TAIL=$PID_TAIL"
 
-echo "[INFO] Deleting test database"
-sudo -u postgres dropdb --if-exists test_data3
+if [ $KEEP_DB -ne 1 ]
+then
+    echo "[INFO] Deleting test database"
+    sudo -u postgres dropdb --if-exists test_data3
+fi
 
 # -u = unbuffered stdin/stdout --> also ensures the order of stdout/stderr lines
 # -v = verbose
@@ -178,6 +208,8 @@ kill $PID_WEBSIM1
 wait $PID_WEBSIM1 2>/dev/null
 kill $PID_WEBSIM2
 wait $PID_WEBSIM2 2>/dev/null
+kill $PID_WEBSIM3
+wait $PID_WEBSIM3 2>/dev/null
 
 ASK_LAUNCH=0
 COVERAGE_RED=0

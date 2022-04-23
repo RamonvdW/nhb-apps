@@ -24,6 +24,33 @@ BETAAL_BESCHRIJVING_MAXLENGTH = 100     # aantal taken voor beschrijving op afsc
 MOLLIE_API_KEY_MAXLENGTH = 50           # geen limiet gevonden in docs
 
 
+class BetaalInstellingenVereniging(models.Model):
+
+    # bij welke vereniging hoort deze informatie?
+    vereniging = models.OneToOneField(NhbVereniging, on_delete=models.CASCADE)
+
+    # de API key van deze vereniging voor Mollie
+    mollie_api_key = models.CharField(max_length=MOLLIE_API_KEY_MAXLENGTH, blank=True)
+
+    # mag deze vereniging betalingen ontvangen via de NHB?
+    akkoord_via_nhb = models.BooleanField(default=False)
+
+    def obfuscated_mollie_api_key(self):
+        # mollie key heeft een prefix live_ of test_ gevolgd door iets van 20 letters/cijfers
+        # verwijder het middelste stuk
+        key = self.mollie_api_key
+        key = key[:5+2] + '[...]' + key[-2:]
+        return key
+
+    def __str__(self):
+        """ Lever een tekstuele beschrijving voor de admin interface """
+        return str(self.vereniging)
+
+    class Meta:
+        verbose_name = "Betaal instellingen vereniging"
+        verbose_name_plural = "Betaal instellingen verenigingen"
+
+
 class BetaalActief(models.Model):
 
     """ Deze tabel houdt bij welke payment_id actief zijn
@@ -35,6 +62,9 @@ class BetaalActief(models.Model):
 
     # het nummer dat ooit teruggegeven is toen de transactie aangemaakt werd
     payment_id = models.CharField(max_length=BETAAL_PAYMENT_ID_MAXLENGTH)
+
+    # referentie naar de instellingen voor de vereniging waar de betaling bij hoort
+    ontvanger = models.ForeignKey(BetaalInstellingenVereniging, on_delete=models.PROTECT, blank=True, null=True)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
@@ -80,33 +110,6 @@ class BetaalTransactie(models.Model):
     class Meta:
         verbose_name = "Betaal transactie"
         verbose_name_plural = "Betaal transacties"
-
-
-class BetaalInstellingenVereniging(models.Model):
-
-    # bij welke vereniging hoort deze informatie?
-    vereniging = models.OneToOneField(NhbVereniging, on_delete=models.CASCADE)
-
-    # de API key van deze vereniging voor Mollie
-    mollie_api_key = models.CharField(max_length=MOLLIE_API_KEY_MAXLENGTH, blank=True)
-
-    # mag deze vereniging betalingen ontvangen via de NHB?
-    akkoord_via_nhb = models.BooleanField(default=False)
-
-    def obfuscated_mollie_api_key(self):
-        # mollie key heeft een prefix live_ of test_ gevolgd door iets van 20 letters/cijfers
-        # verwijder het middelste stuk
-        key = self.mollie_api_key
-        key = key[:5+2] + '[...]' + key[-2:]
-        return key
-
-    def __str__(self):
-        """ Lever een tekstuele beschrijving voor de admin interface """
-        return str(self.vereniging)
-
-    class Meta:
-        verbose_name = "Betaal instellingen vereniging"
-        verbose_name_plural = "Betaal instellingen verenigingen"
 
 
 class BetaalMutatie(models.Model):

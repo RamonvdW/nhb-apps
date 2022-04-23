@@ -14,7 +14,7 @@ import time
 betaal_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__BETAAL_MUTATIES)
 
 
-def betaal_start_ontvangst(bestelling, instellingen, beschrijving, bedrag_euro, url_betaling_gedaan, snel):
+def betaal_start_ontvangst(bestelling, beschrijving, bedrag_euro, url_betaling_gedaan, snel):
     """
         Begin het afrekenen van een bestelling.
 
@@ -26,7 +26,7 @@ def betaal_start_ontvangst(bestelling, instellingen, beschrijving, bedrag_euro, 
     # voorkom duplicates
     mutatie, is_created = BetaalMutatie.objects.get_or_create(
                                     code=BETAAL_MUTATIE_START_ONTVANGST,
-                                    ontvanger=instellingen,
+                                    ontvanger=bestelling.ontvanger,
                                     beschrijving=beschrijving,
                                     bedrag_euro=bedrag_euro,
                                     url_betaling_gedaan=url_betaling_gedaan)

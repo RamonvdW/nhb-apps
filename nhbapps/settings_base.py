@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2022-04-19'
+SITE_VERSIE = '2022-04-23'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -485,6 +485,8 @@ TICKET_NUMMER_START__WEDSTRIJD = 7000000
 # wordt gebruikt als verenigingen via de NHB betalingen mogen ontvangen
 BETAAL_VIA_NHB_VER_NR = 1368
 
+# implementation uses this instead of built-in default, to allow override during testing
+BETAAL_API = 'https://api.mollie.com'
 
 # defaults for 'dev' and 'test' options
 

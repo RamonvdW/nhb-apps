@@ -23,7 +23,7 @@ import traceback
 import datetime
 import sys
 from mollie.api.client import Client, RequestSetupError, RequestError
-from mollie.api.error import ResponseError
+from mollie.api.error import ResponseError, ResponseHandlingError
 
 
 class Command(BaseCommand):
@@ -48,7 +48,7 @@ class Command(BaseCommand):
 
         # maak de Mollie client instantie aan
         # de API key zetten we later, afhankelijk van de vereniging waar we deze transactie voor doen
-        self._mollie_client = Client()
+        self._mollie_client = Client(api_endpoint=settings.BETAAL_API)
 
         # limiteer hoeveel informatie er over ons platform doorgegeven wordt
         # verder wordt doorgegeven:
@@ -94,7 +94,7 @@ class Command(BaseCommand):
 
             try:
                 payment = self._mollie_client.payments.create(data)
-            except (RequestError, RequestSetupError, ResponseError) as exc:
+            except (RequestError, RequestSetupError, ResponseError, ResponseHandlingError) as exc:
                 self.stderr.write('[ERROR] Unexpected exception from Mollie create payment: %s' % str(exc))
             else:
                 self.stdout.write('[DEBUG] Create payment response: %s' % repr(payment))
@@ -108,12 +108,22 @@ class Command(BaseCommand):
                 mutatie.save(update_fields=['payment_id', 'url_checkout'])
 
                 # houd de actieve betalingen bij
-                BetaalActief(payment_id=payment_id).save()
+                BetaalActief(payment_id=payment_id, ontvanger=instellingen).save()
 
     def _verwerk_mutatie_start_restitutie(self, mutatie):
         pass
 
     def _verwerk_mutatie_payment_status_changed(self, mutatie):
+        """ Een voor ons bekende transactie is van status gewijzigd
+            Haal de laatste stand van zaken op bij Mollie.
+        """
+
+        # zoek de bijbehorende API key op
+        BetaalMutatie.objects.get()
+
+
+        # als er al een BetaalTransactie voor is, dan is deze transactie afgerond en doen we niets meer
+
         pass
 
     def _verwerk_mutatie(self, mutatie):

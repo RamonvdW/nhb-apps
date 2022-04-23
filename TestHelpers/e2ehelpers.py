@@ -602,14 +602,13 @@ class E2EHelpers(TestCase):
                 self.fail(msg='Onverwachte status code %s bij PATCH command' % resp.status_code)
 
     def assert_is_redirect(self, resp, expected_url):
-        if resp.status_code != 302:
-            if resp.status_code != 302:  # pragma: no cover
-                # geef een iets uitgebreider antwoord
-                msg = "status_code: %s != 302" % resp.status_code
-                if resp.status_code == 200:
-                    self.e2e_dump_resp(resp)
-                    msg += "; templates used: %s" % repr([tmpl.name for tmpl in resp.templates])
-                self.fail(msg=msg)
+        if resp.status_code != 302:  # pragma: no cover
+            # geef een iets uitgebreider antwoord
+            msg = "status_code: %s != 302" % resp.status_code
+            if resp.status_code == 200:
+                self.e2e_dump_resp(resp)
+                msg += "; templates used: %s" % repr([tmpl.name for tmpl in resp.templates])
+            self.fail(msg=msg)
         pos = expected_url.find('##')
         if pos > 0:
             self.assertTrue(resp.url.startswith(expected_url[:pos]))

@@ -234,7 +234,6 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
             # deze slaat de referentie naar de mutatie op in de bestelling
             mutatie = betaal_start_ontvangst(
                             bestelling,
-                            bestelling.ontvanger,
                             beschrijving,
                             rest_euro,
                             url_betaling_gedaan,
