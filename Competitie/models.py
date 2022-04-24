@@ -866,8 +866,14 @@ class KampioenschapSchutterBoog(models.Model):
     # sporters met gelijk gemiddelde moeten in de juiste volgorde gehouden worden door te kijken naar
     # de regio scores: hoogste score gaat voor
     # scores zijn als string opgeslagen zodat er gesorteerd kan worden
-    # "AAAbbbCCCdddEEEfffGGG" met AAA..GGG=7 scores van 3 cijfers, gesorteerd van beste naar slechtste score
+    # "AAABBBCCCDDDEEEFFFGGG" met AAA..GGG=7 scores van 3 cijfers, gesorteerd van beste naar slechtste score
     regio_scores = models.CharField(max_length=24, default='', blank=True)
+
+    # resultaat van het kampioenschap
+    result_rank = models.PositiveSmallIntegerField(default=0)
+    result_score_1 = models.PositiveSmallIntegerField(default=0)                # max = 32767
+    result_score_2 = models.PositiveSmallIntegerField(default=0)
+    result_counts = models.CharField(max_length=20, default='', blank=True)     # 5x10 3x9
 
     def __str__(self):
         if self.deelcompetitie.nhb_rayon:
@@ -966,7 +972,7 @@ class CompetitieMutatie(models.Model):
     # wat is de wijziging (zie MUTATIE_*)
     mutatie = models.PositiveSmallIntegerField(default=0)
 
-    # zijn de lijsten bijgewerkt?
+    # is deze mutatie al verwerkt?
     is_verwerkt = models.BooleanField(default=False)
 
     # door wie is de mutatie geïnitieerd

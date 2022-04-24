@@ -175,6 +175,7 @@ class UitslagenRayonIndivView(TemplateView):
         # for
 
         wkl2limiet = dict()    # [pk] = aantal
+        is_lijst_rk = False
 
         if deelcomp.heeft_deelnemerslijst:
             # deelnemers/reserveschutters van het RK tonen
@@ -190,6 +191,7 @@ class UitslagenRayonIndivView(TemplateView):
                                           'sporterboog__sporter__bij_vereniging',
                                           'bij_vereniging')
                           .order_by('klasse__indiv__volgorde',
+                                    'result_rank',                   # is 0 zolang er geen resultaat is
                                     'volgorde'))
 
             for limiet in (DeelcompetitieKlasseLimiet
@@ -199,7 +201,7 @@ class UitslagenRayonIndivView(TemplateView):
                 wkl2limiet[limiet.klasse.pk] = limiet.limiet
             # for
 
-            context['is_lijst_rk'] = True
+            context['is_lijst_rk'] = is_lijst_rk = True
         else:
             # competitie is nog in de regiocompetitie fase
             context['regiocomp_nog_actief'] = True
@@ -224,9 +226,20 @@ class UitslagenRayonIndivView(TemplateView):
                                           'bij_vereniging')
                           .order_by('klasse__indiv__volgorde', '-gemiddelde'))
 
+        # bepaal in welke klassen we de uitslag gaan tonen
+        klasse2toon_uitslag = dict()        # [klasse volgorde] = True/False
+        klasse = -1
+        if is_lijst_rk:
+            for deelnemer in deelnemers:
+                if deelnemer.result_rank > 0:
+                    klasse = deelnemer.klasse.indiv.volgorde
+                    klasse2toon_uitslag[klasse] = True
+            # for
+
         klasse = -1
         limiet = 24
         curr_teller = None
+        toon_uitslag = False
         for deelnemer in deelnemers:
             deelnemer.break_klasse = (klasse != deelnemer.klasse.indiv.volgorde)
             if deelnemer.break_klasse:
@@ -248,6 +261,11 @@ class UitslagenRayonIndivView(TemplateView):
                 curr_teller.aantal_regels = 2
 
             klasse = deelnemer.klasse.indiv.volgorde
+            try:
+                toon_uitslag = klasse2toon_uitslag[klasse]
+            except KeyError:
+                toon_uitslag = False
+            deelnemer.toon_uitslag = toon_uitslag
 
             sporter = deelnemer.sporterboog.sporter
             deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
@@ -258,6 +276,19 @@ class UitslagenRayonIndivView(TemplateView):
             if deelcomp.heeft_deelnemerslijst:
                 if deelnemer.rank > limiet:
                     deelnemer.is_reserve = True
+
+            if toon_uitslag:
+                # TODO: ondersteuning Indoor
+                if 0 < deelnemer.result_rank < 1000:
+                    # 25m1pijl
+                    deelnemer.scores_str_1 = "%s (%s+%s)" % (deelnemer.result_score_1 + deelnemer.result_score_2,
+                                                             deelnemer.result_score_1,
+                                                             deelnemer.result_score_2)
+                    deelnemer.scores_str_2 = deelnemer.result_counts
+                else:
+                    deelnemer.geen_deelname = True
+                    deelnemer.scores_str_1 = "-"
+                    deelnemer.scores_str_2 = ""
 
             curr_teller.aantal_regels += 1
         # for

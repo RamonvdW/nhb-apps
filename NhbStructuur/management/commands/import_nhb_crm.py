@@ -20,8 +20,10 @@ from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord
 from Sporter.models import Sporter, Secretaris, Speelsterkte
 from Wedstrijden.models import WedstrijdLocatie, BAAN_TYPE_EXTERN, BAAN_TYPE_BUITEN
+import traceback
 import datetime
 import json
+import sys
 
 
 def get_secretaris_str(sporter):
@@ -1202,7 +1204,11 @@ class Command(BaseCommand):
             self._import_clubs_secretaris(data['clubs'])
             self._import_wedstrijdlocaties(data['clubs'])
         except DataError as exc:        # pragma: no cover
+            _, _, tb = sys.exc_info()
+            lst = traceback.format_tb(tb)
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
+            self.stderr.write('Traceback:')
+            self.stderr.write(''.join(lst))
 
         self.stdout.write('Import van CRM data is klaar')
         # self.stdout.write("Read %s lines; skipped %s dupes; skipped %s errors; added %s records" % (line_nr, dupe_count, error_count, added_count))
