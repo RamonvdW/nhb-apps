@@ -59,7 +59,8 @@ class Command(BaseCommand):
         fname = options['bestand']
         self.stdout.write('[INFO] Lees bestand %s' % repr(fname))
         try:
-            prg = openpyxl.load_workbook(fname)
+            prg = openpyxl.load_workbook(fname,
+                                         data_only=True)        # do not evaluate formulas; use last calculated values
         except (OSError, zipfile.BadZipFile, KeyError):
             self.stderr.write('Kan het excel bestand niet openen')
             return
