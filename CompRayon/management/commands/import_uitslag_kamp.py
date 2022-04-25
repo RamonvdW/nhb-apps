@@ -90,6 +90,7 @@ class Command(BaseCommand):
         klasse_pk = -1
         rank = 0
         prev_totaal = 999
+        prev_counts_str = ""
         while nix_count < 10:
             row_nr += 1
             row = str(row_nr)
@@ -176,7 +177,7 @@ class Command(BaseCommand):
 
                             totaal = score1 + score2
                             if totaal > 0:                  # soms wordt 0,0 ingevuld bij niet aanwezig
-                                if totaal == prev_totaal:
+                                if totaal == prev_totaal and counts_str == prev_counts_str:
                                     # zelfde score, zelf rank
                                     pass
                                 elif totaal > prev_totaal:
@@ -184,13 +185,14 @@ class Command(BaseCommand):
                                 else:
                                     rank += 1
                                 prev_totaal = totaal
+                                prev_counts_str = counts_str
 
                                 self.stdout.write('%s: %s, scores: %s %s %s' % (rank, deelnemer, score1, score2, counts_str))
 
                                 do_report = False
                                 if dupe_check:
-                                    is_dupe = (rank == deelnemer.result_rank
-                                               and deelnemer.result_score_1 == score1
+                                    # allow result_rank change
+                                    is_dupe = (deelnemer.result_score_1 == score1
                                                and deelnemer.result_score_2 == score2
                                                and deelnemer.result_counts == counts_str)
                                     if not is_dupe:
