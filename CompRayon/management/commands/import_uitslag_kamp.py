@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
-        self.deelnemers = dict()        # [lid_nr] = KampioenschapSchutterBoog
+        self.deelnemers = dict()        # [lid_nr] = [KampioenschapSchutterBoog, ...]
 
     def add_arguments(self, parser):
         parser.add_argument('--dryrun', action='store_true')
@@ -40,7 +40,10 @@ class Command(BaseCommand):
                                           'klasse')):
 
             lid_nr = deelnemer.sporterboog.sporter.lid_nr
-            self.deelnemers[lid_nr] = deelnemer
+            try:
+                self.deelnemers[lid_nr].append(deelnemer)
+            except KeyError:
+                self.deelnemers[lid_nr] = [deelnemer]
         # for
 
     def handle(self, *args, **options):
@@ -48,13 +51,13 @@ class Command(BaseCommand):
         dryrun = options['dryrun']
 
         afstand = options['afstand']
-        print(repr(afstand))
         if afstand not in ('18', '25'):
             self.stderr.write('Afstand moet 18 of 25 zijn')
             return
 
         # open de kopie, zodat we die aan kunnen passen
         fname = options['bestand']
+        self.stdout.write('[INFO] Lees bestand %s' % repr(fname))
         try:
             prg = openpyxl.load_workbook(fname)
         except (OSError, zipfile.BadZipFile, KeyError):
@@ -100,10 +103,29 @@ class Command(BaseCommand):
                     pass
                 else:
                     try:
-                        deelnemer = self.deelnemers[lid_nr]
+                        deelnemers = self.deelnemers[lid_nr]
                     except KeyError:
                         self.stderr.write('[ERROR] Geen RK deelnemer op regel %s: %s' % (row, lid_nr))
                     else:
+                        if len(deelnemers) == 1:
+                            deelnemer = deelnemers[0]
+                        else:
+                            deelnemer = None
+                            if klasse_pk:
+                                for kandidaat in deelnemers:
+                                    if kandidaat.klasse.pk == klasse_pk:
+                                        deelnemer = kandidaat
+                                # for
+                            if deelnemer is None:
+                                # probeer het nog een keer, maar kijk nu ook naar afgemeld status
+                                for kandidaat in deelnemers:
+                                    if kandidaat.deelname != DEELNAME_NEE:
+                                        deelnemer = kandidaat
+                                # for
+                        if deelnemer is None:
+                            self.stderr.write('[ERROR] Kan deelnemer niet bepalen voor regel %s. Keuze uit %s' % (row, repr(deelnemers)))
+                            continue    # met de while
+
                         dupe_check = False
                         if deelnemer.result_rank > 0:
                             dupe_check = True
@@ -119,8 +141,6 @@ class Command(BaseCommand):
                                 if deelcomp_pk not in deelcomp_pks:
                                     deelcomp_pks.append(deelnemer.deelcompetitie.pk)
 
-                        rank += 1
-
                         score1 = ws[col_score1 + row].value
                         score2 = ws[col_score2 + row].value
                         c10 = ws[col_10s + row].value
@@ -132,7 +152,10 @@ class Command(BaseCommand):
                             score2 = int(score2)
                         except (TypeError, ValueError):
                             # if deelnemer.deelname != DEELNAME_NEE:      # afgemeld?
-                            self.stderr.write('[ERROR] Probleem met scores op regel %s: %s en %s' % (row, repr(score1), repr(score2)))
+                            if score1 is None and score2 is None:
+                                self.stdout.write('[WARNING] Regel %s wordt overgeslagen (geen scores)' % row)
+                            else:
+                                self.stderr.write('[ERROR] Probleem met scores op regel %s: %s en %s' % (row, repr(score1), repr(score2)))
                         else:
                             counts = list()
                             try:
@@ -145,35 +168,41 @@ class Command(BaseCommand):
                                 if c8:
                                     c8 = int(c8)
                                     counts.append('%sx8' % c8)
-                            except (TypeError, ValueError):
-                                self.stderr.write('[ERROR] Probleem met 10/9/8 count op regel %s' % row)
+                            except (TypeError, ValueError) as err:
+                                self.stderr.write('[ERROR] Probleem met 10/9/8 count op regel %s: %s' % (row, str(err)))
                                 counts_str = ''
                             else:
                                 counts_str = ", ".join(counts)
 
-                            self.stdout.write('%s: %s, scores: %s %s %s' % (rank, deelnemer, score1, score2, counts_str))
-
                             totaal = score1 + score2
-                            if totaal >= prev_totaal:
-                                self.stderr.write('[WARNING] Score is niet aflopend!')
-                            prev_totaal = totaal
+                            if totaal > 0:                  # soms wordt 0,0 ingevuld bij niet aanwezig
+                                if totaal == prev_totaal:
+                                    # zelfde score, zelf rank
+                                    pass
+                                elif totaal > prev_totaal:
+                                    self.stderr.write('[ERROR] Score is niet aflopend!')
+                                else:
+                                    rank += 1
+                                prev_totaal = totaal
 
-                            do_report = False
-                            if dupe_check:
-                                is_dupe = (rank == deelnemer.result_rank
-                                           and deelnemer.result_score_1 == score1
-                                           and deelnemer.result_score_2 == score2
-                                           and deelnemer.result_counts == counts_str)
-                                if not is_dupe:
-                                    do_report = True
+                                self.stdout.write('%s: %s, scores: %s %s %s' % (rank, deelnemer, score1, score2, counts_str))
 
-                            if do_report:
-                                self.stderr.write('[ERROR] Deelnemer pk=%s heeft al andere resultaten! (%s)' % (deelnemer.pk, deelnemer))
-                            else:
-                                deelnemer.result_rank = rank
-                                deelnemer.result_score_1 = score1
-                                deelnemer.result_score_2 = score2
-                                deelnemer.result_counts = counts_str
+                                do_report = False
+                                if dupe_check:
+                                    is_dupe = (rank == deelnemer.result_rank
+                                               and deelnemer.result_score_1 == score1
+                                               and deelnemer.result_score_2 == score2
+                                               and deelnemer.result_counts == counts_str)
+                                    if not is_dupe:
+                                        do_report = True
+
+                                if do_report:
+                                    self.stderr.write('[ERROR] Deelnemer pk=%s heeft al andere resultaten! (%s)' % (deelnemer.pk, deelnemer))
+                                else:
+                                    deelnemer.result_rank = rank
+                                    deelnemer.result_score_1 = score1
+                                    deelnemer.result_score_2 = score2
+                                    deelnemer.result_counts = counts_str
 
                         if not dryrun:
                             deelnemer.save(update_fields=['result_rank',
@@ -184,17 +213,18 @@ class Command(BaseCommand):
         # while
 
         # zet deelnemers die niet meegedaan hebben op een hoog rank nummer
-        for deelnemer in self.deelnemers.values():
-            if deelnemer.deelcompetitie.pk in deelcomp_pks:
-                if deelnemer.klasse.pk in klasse_pks:
-                    if deelnemer.result_rank in (0, 32000, 32001):
-                        if deelnemer.deelname != DEELNAME_NEE:
-                            self.stdout.write('[WARNING] No-show voor deelnemer %s' % deelnemer)
-                            deelnemer.result_rank = 32000
-                        else:
-                            deelnemer.result_rank = 32001
-                        deelnemer.save(update_fields=['result_rank'])
+        for deelnemers in self.deelnemers.values():
+            for deelnemer in deelnemers:
+                if deelnemer.deelcompetitie.pk in deelcomp_pks:
+                    if deelnemer.klasse.pk in klasse_pks:
+                        if deelnemer.result_rank in (0, 32000, 32001):
+                            if deelnemer.deelname != DEELNAME_NEE:
+                                self.stdout.write('[WARNING] No-show voor deelnemer %s' % deelnemer)
+                                deelnemer.result_rank = 32000
+                            else:
+                                deelnemer.result_rank = 32001
+                            deelnemer.save(update_fields=['result_rank'])
+            # for
         # for
-
 
 # end of file
