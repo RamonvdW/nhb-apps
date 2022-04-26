@@ -30,7 +30,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Uitslagen RK individueel</h3>
-            <p>Tussenstand/eindstand van de individuele rayonkampioenschappen</p>
+            <p>{% if comp.fase > 'L' %}Eindstand van{% else %}Planning/tussenstand voor{% endif %} de individuele rayonkampioenschappen</p>
         </div>
     </div>
 
@@ -136,7 +136,8 @@
 
 
     <!-- uitleg over tijdstippen -->
-    {% if not comp.rk_is_afgelast %}
+    {% if not comp.rk_is_afgelast and comp.fase <= 'L' %}
+
         <div class="row">
             <div style="padding:10px">
                 <div class="col s12 center">
@@ -144,6 +145,7 @@
                 </div>
             </div>
         </div>
+
     {% endif %}
 
 
