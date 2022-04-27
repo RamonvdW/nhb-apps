@@ -22,9 +22,8 @@
     <div class="row-nhb-blauw">
         <div class="col s12">
             <table class="white">
-
                 <tr>
-                    <td colspan="4" class="center">
+                    <td colspan="3" class="center">
                         <h6>Bestelde producten</h6>
                     </td>
                 </tr>
@@ -34,10 +33,6 @@
                         <td class="hide-on-small-only">{% for hdr, lijn in product.beschrijving %}{{ hdr }}<br>{% endfor %}</td>
                         <td>{% for hdr, lijn in product.beschrijving %}{{ lijn }}<br>{% endfor %}</td>
                         <td class="right-align">&euro;&nbsp;{{ product.prijs_euro }}</td>
-                        <td class="right-align">
-                            <button class="btn-nhb-blauw" id="id_verwijder_{{ product.pk }}" onclick="verwijder('id_verwijder_{{ product.pk }}')" data-url="{{ product.url_verwijder }}">
-                                <i class="material-icons-round">delete</i></button>
-                        </td>
                     </tr>
 
                     {% if product.gebruikte_code_str %}
@@ -45,7 +40,6 @@
                             <td class="hide-on-small-only">{% if product.is_combi_korting %}Automatische combi-korting{% else %}Korting{% endif %}</td>
                             <td>{{ product.gebruikte_code_str }}{% if product.is_combi_korting %}{% for titel in product.combi_reden %}<br>{{ titel }}{% endfor %}{% endif %}</td>
                             <td class="right-align">{% if product.korting_euro > 0.0001 %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ product.korting_euro }}</td>
-                            <td><!--knoppen--></td>
                         </tr>
                     {% endif %}
                 {% endfor %}
@@ -75,17 +69,17 @@
                 <!-- afrekenen -->
                 <tr>
                     {% if bevat_fout %}
-                        <td colspan="4" class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
+                        <td colspan="3" class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
                     {% elif url_afrekenen %}
                         <td class="hide-on-small-only"></td>
-                        <td colspan="2" class="right-align">
+                        <td class="right-align">
                             <form action="{{ url_afrekenen }}" method="post">
                                 {% csrf_token %}
                                 <button id="id_afrekenen" class="btn-nhb-rood">
                                     <i class="material-icons-round right">shopping_cart_checkout</i>Betalen</button>
                             </form>
                         </td>
-                        <td><!--knoppen--></td>
+                        <td><!-- bedragen --></td>
                     {% endif %}
                 </tr>
 
