@@ -102,8 +102,8 @@ class TestCompRayonImportUitslagKampioenschap(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('import_uitslag_kamp', '25', real_file, 'Wedstrijd', 'D', 'J', 'K', 'M', 'N', 'O', stderr=f1, stdout=f2)
-        print('f1:', f1.getvalue())
-        print('f2:', f2.getvalue())
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
         self.assertTrue(' heeft al andere resultaten!' in f1.getvalue())
         self.assertTrue(' [301966] ' in f1.getvalue())
 

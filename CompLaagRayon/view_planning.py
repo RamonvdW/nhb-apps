@@ -652,7 +652,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         pk2wkl_indiv = dict()
         for wkl in wkl_indiv:
             wkl.limiet = 24     # default limiet
-            wkl.sel = 'sel_%s' % wkl.pk
+            wkl.sel = 'isel_%s' % wkl.pk
             pk2wkl_indiv[wkl.pk] = wkl
         # for
 
@@ -661,7 +661,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
             # ERE klasse: 12 teams
             # overige: 8 teams
             wkl.limiet = 12 if "ERE" in wkl.beschrijving else 8
-            wkl.sel = 'sel_%s' % wkl.pk
+            wkl.sel = 'tsel_%s' % wkl.pk
             pk2wkl_team[wkl.pk] = wkl
         # for
 
@@ -729,7 +729,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                     .filter(competitie=comp,
                             is_voor_rk_bk=True)):
 
-            sel = 'sel_%s' % ckl.pk
+            sel = 'isel_%s' % ckl.pk
             keuze = request.POST.get(sel, None)
             if keuze:
                 try:
@@ -739,7 +739,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                     pass
                 else:
                     if pk2keuze_indiv[ckl.pk] not in (24, 20, 16, 12, 8, 4):
-                        raise Http404('Geen valide keuze')
+                        raise Http404('Geen valide keuze voor indiv')
         # for
 
         for ckl in (CompetitieTeamKlasse
@@ -747,7 +747,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                     .filter(competitie=comp,
                             is_voor_teams_rk_bk=True)):
 
-            sel = 'sel_%s' % ckl.pk
+            sel = 'tsel_%s' % ckl.pk
             keuze = request.POST.get(sel, None)
             if keuze:
                 try:
@@ -757,7 +757,7 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
                     pass
                 else:
                     if pk2keuze_team[ckl.pk] not in (12, 10, 8, 6, 4):
-                        raise Http404('Geen valide keuze')
+                        raise Http404('Geen valide keuze voor team')
         # for
 
         wijzig_limiet_indiv = list()     # list of tup(indiv_klasse, nieuwe_limiet, oude_limiet)
@@ -807,14 +807,14 @@ class RayonLimietenView(UserPassesTestMixin, TemplateView):
         # verwerk de overgebleven keuzes waar nog geen limiet voor was
         for pk, keuze in pk2keuze_team.items():
             try:
-                indiv_klasse = pk2ckl_team[pk]
+                team_klasse = pk2ckl_team[pk]
             except KeyError:
                 pass
             else:
                 # ERE klasse: 12 teams
                 # overige: 8 teams
-                default = 12 if "ERE" in indiv_klasse.team.beschrijving else 8
-                tup = (indiv_klasse, keuze, default)
+                default = 12 if "ERE" in team_klasse.beschrijving else 8
+                tup = (team_klasse, keuze, default)
                 wijzig_limiet_team.append(tup)
         # for
 

@@ -7,7 +7,7 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
-                               KampioenschapSchutterBoog, CompetitieIndivKlasse,
+                               KampioenschapSchutterBoog, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                DeelcompetitieIndivKlasseLimiet,
                                CompetitieMutatie, DEELNAME_NEE, DEELNAME_JA, INSCHRIJF_METHODE_1)
 from Competitie.operations import competities_aanmaken
@@ -180,6 +180,10 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
                                                               is_voor_rk_bk=True,
                                                               volgorde=1400,          # TR klasse 1
                                                               boogtype__afkorting='TR')[0]
+
+        self.klasse_r_ere = CompetitieTeamKlasse.objects.get(competitie=self.comp_18,
+                                                             beschrijving='Recurve klasse ERE',
+                                                             is_voor_teams_rk_bk=True)
 
         # maak nog een test vereniging, zonder HWL functie
         ver = NhbVereniging()
@@ -901,14 +905,23 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         self.assert404(resp)  # 404 = Not allowed
 
         url = self.url_wijzig_limiet % self.deelcomp_rayon1_18.pk
+        isel = 'isel_%s' % self.klasse_c.pk
+        tsel = 'tsel_%s' % self.klasse_r_ere.pk
 
-        sel = 'sel_%s' % self.klasse_c.pk
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {sel: 'xx'})
+            resp = self.client.post(url, {isel: 'xx'})
         self.assertEqual(resp.status_code, 302)     # doorloopt alles
 
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {sel: '19'})
+            resp = self.client.post(url, {tsel: 'xx'})
+        self.assertEqual(resp.status_code, 302)     # doorloopt alles
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {isel: '19'})
+        self.assert404(resp)     # 404 = Not allowed
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {tsel: '19'})
         self.assert404(resp)     # 404 = Not allowed
 
         # verkeerde RKO
@@ -938,7 +951,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagrayon/wijzig-limieten-rk.dtl', 'plein/site_layout.dtl'))
 
-        sel = 'sel_%s' % self.klasse_r.pk
+        sel = 'isel_%s' % self.klasse_r.pk
 
         # limiet op default zetten
         self.assertEqual(DeelcompetitieIndivKlasseLimiet.objects.count(), 0)

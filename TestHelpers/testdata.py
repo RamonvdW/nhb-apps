@@ -11,7 +11,7 @@ from django.core import management
 from django.utils import timezone
 from Account.models import Account, AccountEmail
 from Account.operations import account_create
-from BasisTypen.models import TeamType, ORGANISATIE_NHB
+from BasisTypen.models import ORGANISATIE_NHB, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_teamtypen
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                DeelCompetitie, LAAG_BK, LAAG_RK,
@@ -1105,34 +1105,35 @@ class TestData(object):
             ag = 7000 if ag > max_ag else ag + 25
 
             leeftijd = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(wedstrijd_jaar)
-            afk = sporterboog.boogtype.afkorting
+            if leeftijd > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT:
+                afk = sporterboog.boogtype.afkorting
 
-            deelnemer_klasse = None
-            for klasse in reversed(klassen[afk]):
-                if klasse.is_voor_rk_bk:
-                    for lkl in klasse.leeftijdsklassen.all():
-                        if lkl.leeftijd_is_compatible(leeftijd):
-                            deelnemer_klasse = klasse
-                            break
-                        # for
+                deelnemer_klasse = None
+                for klasse in reversed(klassen[afk]):
+                    if klasse.is_voor_rk_bk:
+                        for lkl in klasse.leeftijdsklassen.all():
+                            if lkl.leeftijd_is_compatible(leeftijd):
+                                deelnemer_klasse = klasse
+                                break
+                            # for
+                    if deelnemer_klasse:
+                        break
+                # for
+
                 if deelnemer_klasse:
-                    break
-            # for
-
-            if deelnemer_klasse:
-                deelnemer = KampioenschapSchutterBoog(
-                                    deelcompetitie=deelcomp_rk,
-                                    sporterboog=sporterboog,
-                                    indiv_klasse=deelnemer_klasse,
-                                    bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                    kampioen_label='',
-                                    volgorde=0,
-                                    rank=0,
-                                    # bevestiging_gevraagd_op (date/time) = None
-                                    # deelname=DEELNAME_ONBEKEND
-                                    gemiddelde=Decimal(ag) / 1000)
-                bulk.append(deelnemer)
-                print(deelnemer, ' --> ', deelnemer.indiv_klasse)
+                    deelnemer = KampioenschapSchutterBoog(
+                                        deelcompetitie=deelcomp_rk,
+                                        sporterboog=sporterboog,
+                                        indiv_klasse=deelnemer_klasse,
+                                        bij_vereniging=sporterboog.sporter.bij_vereniging,
+                                        kampioen_label='',
+                                        volgorde=0,
+                                        rank=0,
+                                        # bevestiging_gevraagd_op (date/time) = None
+                                        # deelname=DEELNAME_ONBEKEND
+                                        gemiddelde=Decimal(ag) / 1000)
+                    bulk.append(deelnemer)
+                    # print(deelnemer, ' --> ', deelnemer.indiv_klasse)
         # for
 
         KampioenschapSchutterBoog.objects.bulk_create(bulk)

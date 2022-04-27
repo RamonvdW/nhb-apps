@@ -77,8 +77,8 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         self.klasse = (CompetitieIndivKlasse
                        .objects
                        .filter(competitie=self.comp,
-                               boogtype=self.boogtype)
-                       .order_by('-min_ag'))[0]
+                               boogtype=self.boogtype,
+                               beschrijving__contains="Recurve klasse 6"))[0]
 
         # zet de cut op 16 voor de gekozen klasse
         self.cut = DeelcompetitieIndivKlasseLimiet(deelcompetitie=self.deelcomp_rk,
@@ -165,14 +165,14 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         self.assertTrue(KampioenschapSchutterBoog.objects.count() > 0)
         # self._dump_deelnemers()
 
-        self.assertEqual(4 * 29, KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).count())
+        self.assertEqual(64, KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).count())
 
         self._check_volgorde_en_rank()
 
         # controleer dat de regiokampioenen boven de cut staan
         # self._dump_deelnemers()
         rank, volg = self._get_rank_volg(alleen_kampioenen=True)
-        self.assertEqual(rank, [1, 11, 12, 14])
+        self.assertEqual(rank, [1, 11, 12, 13])
         self.assertEqual(rank, volg)
 
         with self.assert_max_queries(20):
@@ -514,8 +514,8 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
 
         # de laatste regiokampioen staat nog steeds onderaan in de lijst
         kampioen = KampioenschapSchutterBoog.objects.get(pk=pks[3])
-        self.assertEqual(kampioen.rank, 11)
-        self.assertEqual(kampioen.volgorde, 14)
+        self.assertEqual(kampioen.rank, 10)
+        self.assertEqual(kampioen.volgorde, 13)
 
         # meld de drie kampioenen weer aan
         url = self.url_wijzig_status % pks[0]
@@ -579,8 +579,8 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
 
         # de laatste kampioen staat nog steeds in de lijst en boven de cut
         kampioen = KampioenschapSchutterBoog.objects.get(pk=pks[3])
-        self.assertEqual(kampioen.rank, 11)
-        self.assertEqual(kampioen.volgorde, 14)
+        self.assertEqual(kampioen.rank, 10)
+        self.assertEqual(kampioen.volgorde, 13)
 
         # meld de drie kampioenen weer aan
         url = self.url_wijzig_status % pks[0]
@@ -655,8 +655,8 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
 
         # self._dump_deelnemers()
         rank, volg = self._get_rank_volg(alleen_kampioenen=True)
-        self.assertEqual(rank, [1, 11, 12, 14])
-        self.assertEqual(volg, [1, 11, 12, 14])
+        self.assertEqual(rank, [1, 11, 12, 13])
+        self.assertEqual(volg, [1, 11, 12, 13])
 
         # meld 3 sporters af: 1 kampioen en 1 niet-kampioen boven de cut + 1 onder cut
 
@@ -689,8 +689,8 @@ class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
         # self._dump_deelnemers()
 
         rank, volg = self._get_rank_volg(alleen_kampioenen=True)
-        self.assertEqual(rank, [0, 6, 7, 8])            # kampioenen boven de cut
-        self.assertEqual(volg, [1, 8, 9, 10])           # volgorde iets hoger dan cut ivm 2 afmeldingen boven de cut
+        self.assertEqual(rank, [0, 9, 10, 11])          # kampioenen boven de cut
+        self.assertEqual(volg, [1, 11, 12, 13])
 
         self._check_volgorde_en_rank()
 
