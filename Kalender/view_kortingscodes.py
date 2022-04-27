@@ -70,10 +70,13 @@ class VerenigingKortingcodesView(UserPassesTestMixin, TemplateView):
                 korting.voor_wie_str = 'Leden van vereniging %s' % ver.ver_nr
                 korting.voor_vereniging = ver
 
-            elif korting.soort == KALENDER_KORTING_COMBI:
+            elif korting.soort == KALENDER_KORTING_COMBI:       # pragma: no branch
                 korting.icon_name = 'join_full'
                 if korting.combi_basis_wedstrijd:
                     korting.voor_wedstrijden_str = korting.combi_basis_wedstrijd.titel
+
+            else:       # pragma: no cover
+                korting.voor_wie_str = "?"
 
             korting.url_wijzig = reverse('Kalender:vereniging-wijzig-code', kwargs={'korting_pk': korting.pk})
         # for
@@ -194,9 +197,9 @@ class VerenigingWijzigKortingcodesView(UserPassesTestMixin, View):
             template_name = TEMPLATE_KALENDER_WIJZIG_KORTINGSCODE_SPORTER
         elif korting.soort == KALENDER_KORTING_VERENIGING:
             template_name = TEMPLATE_KALENDER_WIJZIG_KORTINGSCODE_VERENIGING
-        elif korting.soort == KALENDER_KORTING_COMBI:
+        elif korting.soort == KALENDER_KORTING_COMBI:                           # pragma: no branch
             template_name = TEMPLATE_KALENDER_WIJZIG_KORTINGSCODE_COMBI
-        else:
+        else:                                                                   # pragma: no cover
             raise Http404('Niet ondersteund')
 
         if korting.voor_vereniging:
