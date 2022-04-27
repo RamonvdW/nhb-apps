@@ -26,13 +26,13 @@ et-xmlfile==1.1.0
     # via
     #   -r requirements.txt
     #   openpyxl
-google-api-core==2.7.1
+google-api-core==2.7.2
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.43.0
+google-api-python-client==2.46.0
     # via -r requirements.txt
-google-auth==2.6.3
+google-auth==2.6.6
     # via
     #   -r requirements.txt
     #   google-api-core
@@ -63,7 +63,7 @@ oauthlib==3.2.0
     #   requests-oauthlib
 openpyxl==3.0.9
     # via -r requirements.txt
-protobuf==3.20.0
+protobuf==3.20.1
     # via
     #   -r requirements.txt
     #   google-api-core

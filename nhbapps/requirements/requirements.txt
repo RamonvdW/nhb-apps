@@ -18,11 +18,11 @@ django==3.2.13
     #   -r requirements.in
 et-xmlfile==1.1.0
     # via openpyxl
-google-api-core==2.7.1
+google-api-core==2.7.2
     # via google-api-python-client
-google-api-python-client==2.43.0
+google-api-python-client==2.46.0
     # via -r requirements.in
-google-auth==2.6.3
+google-auth==2.6.6
     # via
     #   -r requirements.in
     #   google-api-core
@@ -44,7 +44,7 @@ oauthlib==3.2.0
     # via requests-oauthlib
 openpyxl==3.0.9
     # via -r requirements.in
-protobuf==3.20.0
+protobuf==3.20.1
     # via google-api-core
 psycopg2-binary==2.9.3
     # via -r requirements.in
