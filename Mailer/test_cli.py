@@ -139,8 +139,24 @@ class TestMailerCliBase(E2EHelpers, TestCase):
         mailer_notify_internal_error(tb)
         self.assertEqual(MailQueue.objects.count(), 1)
 
-    def test_opschonen(self):
+    def test_outdated(self):
+        # maak een outbound mail aan die meer dan een maand out is
+        self.assertEqual(0, MailQueue.objects.count(), 0)
+        mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
+        obj = MailQueue.objects.all()[0]
+        obj.toegevoegd_op -= datetime.timedelta(days=60)
+        obj.is_blocked = True
+        obj.save(update_fields=['toegevoegd_op', 'is_blocked'])
 
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20, check_duration=False):
+            management.call_command('stuur_mails', '1', '--quick', stderr=f1, stdout=f2)
+        # print('f1: %s' % f1.getvalue())
+        # print('f2: %s' % f2.getvalue())
+        self.assertTrue('blocked mails over 1 month old' in f2.getvalue())
+
+    def test_opschonen(self):
         # maak een mail aan die lang geleden verstuurd is
         mailer_queue_email('ergens@nergens.niet', 'Test', 'Test', enforce_whitelist=False)
         mail = MailQueue.objects.all()[0]

@@ -100,7 +100,8 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
                     .filter(histcompetitie=histcomp)):
 
             # gebruik scores van IB voor gemiddelde van TR (overgang 2021/2022 --> 2022/2023)
-            if obj.boogtype == 'IB':
+            # TODO: alternatief: bij aanmaken AG's, sla IB AG op als TR AG
+            if obj.boogtype == 'IB':                        # FUTURE: verwijder
                 obj.boogtype = 'TR'
 
             if (obj.gemiddelde > AG_NUL

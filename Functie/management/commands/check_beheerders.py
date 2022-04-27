@@ -44,7 +44,7 @@ class Command(BaseCommand):
                         let_op = 'LET OP: geen lid bij deze vereniging'
 
                 if toon_alle or len(let_op) > 0:
-                    if not functie_getoond:
+                    if not functie_getoond:                                         # pragma: no branch
                         self.stdout.write('Functie: %s' % functie.beschrijving)
                         functie_getoond = True
 

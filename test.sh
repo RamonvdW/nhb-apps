@@ -222,7 +222,7 @@ then
 
     if [ -z "$FOCUS" ]
     then
-        python3 -m coverage report --precision=1 --skip-covered --fail-under=98 $OMIT
+        python3 -m coverage report --precision=1 --skip-covered --fail-under=98 $OMIT 2>&1 | tee -a "$LOG"
         res=$?
 
         python3 -m coverage html -d "$REPORT_DIR" --precision=1 --skip-covered $OMIT &>>"$LOG"
