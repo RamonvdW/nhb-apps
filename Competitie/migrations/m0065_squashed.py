@@ -25,7 +25,8 @@ class Migration(migrations.Migration):
     replaces = [('Competitie', 'm0061_squashed'),
                 ('Competitie', 'm0062_indexes'),
                 ('Competitie', 'm0063_afgelast'),
-                ('Competitie', 'm0064_order')]
+                ('Competitie', 'm0064_order'),
+                ('Competitie', 'm0065_rk_resultaat')]
 
     # dit is de eerste
     initial = True
@@ -182,6 +183,10 @@ class Migration(migrations.Migration):
                 ('deelname', models.CharField(choices=[('?', 'Onbekend'), ('J', 'Bevestigd'), ('N', 'Afgemeld')], default='?', max_length=1)),
                 ('sporterboog', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='Sporter.sporterboog')),
                 ('regio_scores', models.CharField(blank=True, default='', max_length=24)),
+                ('result_counts', models.CharField(blank=True, default='', max_length=20)),
+                ('result_rank', models.PositiveSmallIntegerField(default=0)),
+                ('result_score_1', models.PositiveSmallIntegerField(default=0)),
+                ('result_score_2', models.PositiveSmallIntegerField(default=0)),
             ],
             options={
                 'verbose_name': 'Kampioenschap Schutterboog',

@@ -22,8 +22,8 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
     url_kalender_vereniging = '/kalender/vereniging/'
     url_kalender_maak_nieuw = '/kalender/vereniging/kies-type/'
     url_kalender_wijzig_wedstrijd = '/kalender/%s/wijzig/'  # wedstrijd_pk
-    url_kalender_zet_status = '/kalender/%s/zet-status/'  # wedstrijd_pk
-    url_kalender_sessies = '/kalender/%s/sessies/'  # wedstrijd_pk
+    url_kalender_zet_status = '/kalender/%s/zet-status/'    # wedstrijd_pk
+    url_kalender_sessies = '/kalender/%s/sessies/'          # wedstrijd_pk
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -525,6 +525,27 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.boogtypen.count(), 5)
         self.assertEqual(wedstrijd.wedstrijdklassen.count(), 60)
 
+        # wedstrijd wordt aangemaakt met alle bogen en wedstrijdklassen aangevinkt
+        wkl_pks = list(wedstrijd.wedstrijdklassen.values_list('pk', flat=True))
+
+        # zet een paar boogtypen uit
+        url = self.url_kalender_wijzig_wedstrijd % wedstrijd.pk
+        post_data = dict()
+        post_data['boog_R'] = 'on'
+        post_data['boog_C'] = 'on'
+        # wedstrijdklassen waarvoor geen boog aangevinkt is, die verdwijnen
+        for pk in wkl_pks:
+            post_data['klasse_%s' % pk] = 'on'
+        # for
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, post_data)
+        self.assert_is_redirect_not_plein(resp)
+
+        self.assertEqual(wedstrijd.boogtypen.count(), 2)                # alleen R en C
+        # wedstrijdklassen waarvoor geen boog aangevinkt is, die verdwijnen
+        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 24)        # alleen R en C klassen
+
+        # sessie wordt aangemaakt met alle wedstrijdklassen van de wedstrijd
         url = self.url_kalender_sessies % wedstrijd.pk
         resp = self.client.post(url, {'nieuwe_sessie': 'graag'})
         self.assert_is_redirect(resp, url)
@@ -534,33 +555,15 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         sessie = KalenderWedstrijdSessie.objects.all()[0]
         sessie2 = KalenderWedstrijdSessie.objects.all()[1]
 
-        wkl = wedstrijd.wedstrijdklassen.get(beschrijving='Recurve 50+ vrouwen (master)')
-        sessie2.wedstrijdklassen.add(wkl)
-
         wkl = wedstrijd.wedstrijdklassen.get(beschrijving='Recurve 50+ mannen (master)')
-        wkl_pks = list(wedstrijd.wedstrijdklassen.values_list('pk', flat=True))
-        sessie.wedstrijdklassen.add(wkl)
-        sessie2.wedstrijdklassen.add(wkl)
+        sessie.wedstrijdklassen.set([wkl])        # alle uit, behalve deze
+        sessie2.wedstrijdklassen.set([wkl])       # alle uit, behalve deze
 
-        # zet een paar boogtypen uit
-        url = self.url_kalender_wijzig_wedstrijd % wedstrijd.pk
-        post_data = dict()
-        post_data['boog_R'] = 'on'
-        post_data['boog_C'] = 'on'
-        for pk in wkl_pks:
-            post_data['klasse_%s' % pk] = 'on'
-        # for
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, post_data)
-        self.assert_is_redirect_not_plein(resp)
-
-        self.assertEqual(wedstrijd.boogtypen.count(), 2)                # alleen R en C
-        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 24)        # alleen R en C klassen
-
-        # kies een wedstrijdklasse in een sessie
-        sessie.wedstrijdklassen.add(wkl)
+        wkl = wedstrijd.wedstrijdklassen.get(beschrijving='Recurve 50+ vrouwen (master)')
+        sessie2.wedstrijdklassen.add(wkl)         # nu 2 klassen
 
         # probeer nu de recurve boog uit te zetten
+        url = self.url_kalender_wijzig_wedstrijd % wedstrijd.pk
         del post_data['boog_R']
         with self.assert_max_queries(20):
             resp = self.client.post(url, post_data)

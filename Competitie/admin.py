@@ -376,6 +376,12 @@ class KampioenschapSchutterBoogAdmin(CreateOnlyAdmin):
                         'volgorde',
                         'rank'),
              }),
+        ('Resultaat',
+            {'fields': ('result_rank',
+                        'result_score_1',
+                        'result_score_2',
+                        'result_counts')
+             }),
     )
 
     readonly_fields = ('deelcompetitie',

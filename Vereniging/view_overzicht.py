@@ -243,6 +243,12 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         # for
 
+        if len(kaartjes) and hasattr(kaartjes[-1], 'heading'):
+            # er waren geen kaartjes voor die competitie - meld dat
+            kaartje = SimpleNamespace()
+            kaartje.geen_kaartjes = True
+            kaartjes.append(kaartje)
+
         if self.rol_nu != Rollen.ROL_WL:
             # SEC of HWL
             context['url_betalingen'] = reverse('Betaal:vereniging-instellingen')

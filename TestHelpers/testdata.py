@@ -391,7 +391,7 @@ class TestData(object):
             (19, 'V', 'Jun19b', 'C',  True),            # account
             (20, 'M', 'Jun20',  'R',  False),
             (20, 'M', 'Jun20b', 'LB', False),
-            (21, 'V', 'Sen21',  'R',  False),
+            (21, 'V', 'Sen21',  'R+C',  False),         # schiet twee bogen
             (21, 'V', 'Sen21b', 'C',  False),
             (22, 'M', 'Sen22',  'R',  False),
             (22, 'M', 'Sen22b', 'C',  False),
@@ -402,7 +402,7 @@ class TestData(object):
             (33, 'V', 'Sen33',  'R',  False),
             (33, 'V', 'Sen33b', 'BB', False),
             (34, 'M', 'Sen34',  'LB', True),            # Sen34 = HWL
-            (35, 'V', 'Sen35',  'R',  False),
+            (35, 'V', 'Sen35',  'R+C+BB',  False),      # schiet 3 bogen
             (36, 'M', 'Sen36',  'C',  False),
             (36, 'M', 'Sen36b', 'BB', False),
             (37, 'V', 'Sen37',  'R',  False),
@@ -428,12 +428,12 @@ class TestData(object):
             (80, 'V', 'Vet80',  'R',  False),
         ]
 
-        geslacht_voornaam2boogtype = dict()
+        geslacht_voornaam2boogtypen = dict()        # [geslacht + voornaam] = [boogtype1, boogtype2, ...]
         for _, geslacht, voornaam, boogtype, _ in soorten:
             try:
-                _ = geslacht_voornaam2boogtype[geslacht + voornaam]
+                _ = geslacht_voornaam2boogtypen[geslacht + voornaam]
             except KeyError:
-                geslacht_voornaam2boogtype[geslacht + voornaam] = boogtype
+                geslacht_voornaam2boogtypen[geslacht + voornaam] = boogtype.split('+')
             else:
                 raise IndexError('TestData: combinatie geslacht %s + voornaam %s komt meerdere keren voor' % (geslacht, voornaam))      # pragma: no cover
         # for
@@ -565,19 +565,20 @@ class TestData(object):
             if sporter.account:
                 self.ver_sporters_met_account[ver_nr].append(sporter)
 
-            gewenst_boogtype = geslacht_voornaam2boogtype[sporter.geslacht + sporter.voornaam]
+            gewenste_boogtypen = geslacht_voornaam2boogtypen[sporter.geslacht + sporter.voornaam]
 
             # voorkeuren
             voorkeuren = SporterVoorkeuren(
                                 sporter=sporter)
 
-            if gewenst_boogtype.islower():
-                voorkeuren.voorkeur_meedoen_competitie = False
-                gewenst_boogtype = gewenst_boogtype.upper()
+            for gewenst_boogtype in gewenste_boogtypen:
+                if gewenst_boogtype.islower():
+                    voorkeuren.voorkeur_meedoen_competitie = False
+                    gewenst_boogtype = gewenst_boogtype.upper()
 
-            # alle junioren willen een eigen blazoen
-            if gewenst_boogtype == 'R' and sporter.voornaam.startswith('Jun'):
-                voorkeuren.voorkeur_eigen_blazoen = True
+                # alle junioren willen een eigen blazoen
+                if gewenst_boogtype == 'R' and sporter.voornaam.startswith('Jun'):
+                    voorkeuren.voorkeur_eigen_blazoen = True
 
             bulk_voorkeuren.append(voorkeuren)
             if len(bulk_voorkeuren) > 100:
@@ -592,7 +593,7 @@ class TestData(object):
                                     # voor_wedstrijd=False
                                     boogtype=boogtype)
 
-                if boogtype.afkorting == gewenst_boogtype:
+                if boogtype.afkorting in gewenste_boogtypen:
                     sporterboog.voor_wedstrijd = True
 
                 bulk_sporter.append(sporterboog)
@@ -1092,6 +1093,8 @@ class TestData(object):
         if (regio_nr % 4) == 0:
             max_ag = 9500           # zorg dat de regiokampioenen niet allemaal bovenaan staan
 
+        wedstrijd_jaar = deelcomp_rk.competitie.begin_jaar + 1
+
         bulk = list()
         for sporterboog in (SporterBoog
                             .objects
@@ -1101,21 +1104,35 @@ class TestData(object):
 
             ag = 7000 if ag > max_ag else ag + 25
 
+            leeftijd = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(wedstrijd_jaar)
             afk = sporterboog.boogtype.afkorting
-            klasse = klassen[afk][0]
 
-            deelnemer = KampioenschapSchutterBoog(
-                                deelcompetitie=deelcomp_rk,
-                                sporterboog=sporterboog,
-                                indiv_klasse=klasse,
-                                bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                kampioen_label='',
-                                volgorde=0,
-                                rank=0,
-                                # bevestiging_gevraagd_op (date/time) = None
-                                # deelname=DEELNAME_ONBEKEND
-                                gemiddelde=Decimal(ag) / 1000)
-            bulk.append(deelnemer)
+            deelnemer_klasse = None
+            for klasse in reversed(klassen[afk]):
+                if klasse.is_voor_rk_bk:
+                    for lkl in klasse.leeftijdsklassen.all():
+                        if lkl.leeftijd_is_compatible(leeftijd):
+                            deelnemer_klasse = klasse
+                            break
+                        # for
+                if deelnemer_klasse:
+                    break
+            # for
+
+            if deelnemer_klasse:
+                deelnemer = KampioenschapSchutterBoog(
+                                    deelcompetitie=deelcomp_rk,
+                                    sporterboog=sporterboog,
+                                    indiv_klasse=deelnemer_klasse,
+                                    bij_vereniging=sporterboog.sporter.bij_vereniging,
+                                    kampioen_label='',
+                                    volgorde=0,
+                                    rank=0,
+                                    # bevestiging_gevraagd_op (date/time) = None
+                                    # deelname=DEELNAME_ONBEKEND
+                                    gemiddelde=Decimal(ag) / 1000)
+                bulk.append(deelnemer)
+                print(deelnemer, ' --> ', deelnemer.indiv_klasse)
         # for
 
         KampioenschapSchutterBoog.objects.bulk_create(bulk)

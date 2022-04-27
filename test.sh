@@ -114,7 +114,7 @@ else
 fi
 
 # add coverage with nodebug
-python3 -u $PYCOV ./manage.py test --keepdb --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.TestPlein.test_quick &>>"$LOG"
+python3 -u $PYCOV ./manage.py test --keepdb --noinput --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.TestPlein.test_quick &>>"$LOG"
 RES=$?
 #echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
 [ $RES -eq 3 ] && ABORTED=1
@@ -158,7 +158,7 @@ fi
 # -v = verbose
 # note: double quotes not supported around $*
 echo "[INFO] Starting main test run" >>"$LOG"
-python3 -u $PYCOV ./manage.py test --keepdb --settings=nhbapps.settings_autotest -v 2 --noinput $* &>>"$LOG"
+python3 -u $PYCOV ./manage.py test --keepdb --settings=nhbapps.settings_autotest -v 2 $* &>>"$LOG"
 RES=$?
 #echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
 [ $RES -eq 3 ] && ABORTED=1

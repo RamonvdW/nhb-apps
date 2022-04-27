@@ -1002,6 +1002,12 @@ class KampioenschapSchutterBoog(models.Model):
     # "AAABBBCCCDDDEEEFFFGGG" met AAA..GGG=7 scores van 3 cijfers, gesorteerd van beste naar slechtste score
     regio_scores = models.CharField(max_length=24, default='', blank=True)
 
+    # resultaat van het kampioenschap
+    result_rank = models.PositiveSmallIntegerField(default=0)
+    result_score_1 = models.PositiveSmallIntegerField(default=0)           # max = 32767
+    result_score_2 = models.PositiveSmallIntegerField(default=0)
+    result_counts = models.CharField(max_length=20, default='', blank=True)     # 5x10 3x9
+
     def __str__(self):
         if self.deelcompetitie.nhb_rayon:
             substr = "RK rayon %s" % self.deelcompetitie.nhb_rayon.rayon_nr
