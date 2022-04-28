@@ -182,6 +182,7 @@ def mandje_korting_toepassen_op_inschrijving(inschrijving, percentage, koper):
 
     return result
 
+
 def mandje_totaal_opnieuw_bepalen(account):
     """ bereken het totaal_euro veld opnieuw voor de inhoud van het mandje """
     # zoek het mandje van de koper erbij

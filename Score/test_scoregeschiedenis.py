@@ -170,6 +170,11 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'plein/site_layout.dtl'))
 
+        uitslag = Uitslag.objects.all()[0]
+        self.assertTrue(str(uitslag) != '')
+        uitslag.is_bevroren = True
+        self.assertTrue(str(uitslag) != '')
+
     def test_zoek(self):
         # login als BB
         self.e2e_login_and_pass_otp(self.account_admin)

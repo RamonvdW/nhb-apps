@@ -192,7 +192,8 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
         self.rol_nu = rol_get_huidige(self.request)
         return self.rol_nu != Rollen.ROL_NONE
 
-    def post(self, request, *args, **kwargs):
+    @staticmethod
+    def post(request, *args, **kwargs):
         """ Voeg de code toe aan het mandje """
 
         account = request.user
@@ -232,12 +233,12 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
 
             # start de bestelling via de achtergrond taak
             # deze slaat de referentie naar de mutatie op in de bestelling
-            mutatie = betaal_start_ontvangst(
-                            bestelling,
-                            beschrijving,
-                            rest_euro,
-                            url_betaling_gedaan,
-                            snel == '1')
+            betaal_start_ontvangst(
+                        bestelling,
+                        beschrijving,
+                        rest_euro,
+                        url_betaling_gedaan,
+                        snel == '1')
 
         # go to the "show progress" screen
         url = reverse('Bestel:bestelling-afrekenen',
@@ -257,7 +258,6 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
             raise Http404('Niet gevonden')
 
         context['bestelling'] = bestelling
-
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),

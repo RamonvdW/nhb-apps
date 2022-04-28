@@ -15,7 +15,7 @@ from Bestel.operations import bestel_get_volgende_bestel_nr
 from Functie.rol import Rollen, rol_get_huidige
 from Kalender.mutaties import kalender_kortingscode_toepassen, kalender_verwijder_reservering
 from Bestel.models import BestelMandje, Bestelling, BESTEL_KORTINGSCODE_MINLENGTH
-from Bestel.mandje import mandje_tel_inhoud, eval_mandje_inhoud
+from Bestel.mandje import mandje_tel_inhoud, eval_mandje_inhoud, mandje_totaal_opnieuw_bepalen
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from decimal import Decimal
@@ -254,6 +254,9 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                 to_be_removed = mandje.producten.filter(pk__in=product_pks)
                 mandje.producten.remove(*to_be_removed)
         # for
+
+        # bereken opnieuw het totaal voor het mandje
+        mandje_totaal_opnieuw_bepalen(account)
 
         url = reverse('Bestel:toon-inhoud-mandje')
         return HttpResponseRedirect(url)
