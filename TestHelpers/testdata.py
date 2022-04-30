@@ -1100,7 +1100,8 @@ class TestData(object):
                             .objects
                             .filter(sporter__bij_vereniging__ver_nr=ver_nr,
                                     voor_wedstrijd=True)
-                            .select_related('boogtype')):
+                            .select_related('boogtype')
+                            .order_by('sporter__lid_nr')):          # ensure consistent results
 
             ag = 7000 if ag > max_ag else ag + 25
 
