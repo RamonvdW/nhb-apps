@@ -7,7 +7,7 @@
 from django.http import Http404, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from Betaal.models import BetaalActief, BETAAL_PAYMENT_ID_MAXLENGTH
-from Betaal.mutaties import betaal_payment_status_changed
+from Betaal.mutaties import betaal_mutatieverzoek_payment_status_changed
 
 
 @csrf_exempt
@@ -29,7 +29,7 @@ def simple_view_mollie_webhook(request):
 
     # herkennen we deze betaling?
     if BetaalActief.objects.filter(payment_id=payment_id).count() > 0:
-        betaal_payment_status_changed(payment_id)
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
         status = 200
     else:
         # 404 or 403 gives too much content

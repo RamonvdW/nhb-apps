@@ -727,16 +727,16 @@ class E2EHelpers(TestCase):
         # of een redirect hebben gekregen naar de login pagina
 
         if isinstance(resp, str):
-            self.fail(msg='Incorrect invocation: missing resp parameter?')          # pragma: no cover
+            self.fail(msg='Verkeerde aanroep: resp parameter vergeten?')          # pragma: no cover
 
         if resp.status_code == 302:
             if resp.url != '/account/login/':
                 self.e2e_dump_resp(resp)
-                self.fail(msg="Unexpected redirect to %s" % resp.url)
+                self.fail(msg="Onverwachte redirect naar %s" % resp.url)
         else:
             if resp.status_code != 200:     # pragma: no cover
                 self.e2e_dump_resp(resp)
-                self.fail(msg="Unexpected status code %s instead of 200" % resp.status_code)
+                self.fail(msg="Onverwachte status code %s; verwacht: 200" % resp.status_code)
 
             self.assertEqual(resp.status_code, 200)
             self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
@@ -749,16 +749,16 @@ class E2EHelpers(TestCase):
                     pagina = pagina[pos+6:]
                     pos = pagina.find('</code>')
                     pagina = pagina[:pos]
-                    self.fail(msg='403 pagina contained %s instead of %s' % (repr(pagina), repr(expected_msg)))
+                    self.fail(msg='403 pagina bevat %s in plaats van %s' % (repr(pagina), repr(expected_msg)))
 
     def assert404(self, resp, expected_msg=''):
         if isinstance(resp, str):
-            self.fail(msg='Incorrect invocation: missing resp parameter?')          # pragma: no cover
+            self.fail(msg='Verkeerde aanroep: resp parameter vergeten?')          # pragma: no cover
 
         # controleer dat we op de speciale code-404 handler pagina gekomen zijn
         if resp.status_code != 200:     # pragma: no cover
             self.e2e_dump_resp(resp)
-            self.fail(msg="Unexpected status code %s instead of 200" % resp.status_code)
+            self.fail(msg="Onverwachte status code %s; verwacht: 200" % resp.status_code)
 
         # controleer dat we op de speciale code-404 handler pagina gekomen zijn
         self.assertEqual(resp.status_code, 200)
@@ -772,26 +772,26 @@ class E2EHelpers(TestCase):
                 pagina = pagina[pos+6:]
                 pos = pagina.find('</code>')
                 pagina = pagina[:pos]
-                self.fail(msg='404 pagina contained %s instead of %s' % (repr(pagina), repr(expected_msg)))
+                self.fail(msg='404 pagina bevat %s; verwacht: %s' % (repr(pagina), repr(expected_msg)))
 
     def assert200_file(self, resp):
         if resp.status_code != 200:                                 # pragma: no cover
             self.e2e_dump_resp(resp)
-            self.fail(msg="Unexpected status code %s instead of 200" % resp.status_code)
+            self.fail(msg="Onverwachte foutcode %s in plaats van 200" % resp.status_code)
 
         header = resp['Content-Disposition']
         if not header.startswith('attachment; filename'):           # pragma: no cover
-            self.fail(msg="Response is not a file attachment")
+            self.fail(msg="Response is geen file attachment")
 
     def verwerk_regiocomp_mutaties(self, show_warnings=True, show_all=False):
-        # vraag de achtergrond taak om de mutaties te verwerken
+        # vraag de achtergrondtaak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
         err_msg = f1.getvalue()
         if '[ERROR]' in err_msg:                        # pragma: no cover
-            self.fail(msg='Unexpected error from regiocomp_mutaties:\n' + err_msg)
+            self.fail(msg='Onverwachte fout van regiocomp_mutaties:\n' + err_msg)
 
         if show_all:                                                            # pragma: no cover
             print(f1.getvalue())
@@ -804,15 +804,15 @@ class E2EHelpers(TestCase):
                     print(line)
             # for
 
-    def verwerk_kalender_mutaties(self, show_warnings=True, show_all=False):
-        # vraag de achtergrond taak om de mutaties te verwerken
+    def verwerk_bestel_mutaties(self, show_warnings=True, show_all=False):
+        # vraag de achtergrondtaak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('kalender_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+        management.call_command('bestel_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
         err_msg = f1.getvalue()
         if '[ERROR]' in err_msg:                        # pragma: no cover
-            self.fail(msg='Unexpected error from kalender_mutaties:\n' + err_msg)
+            self.fail(msg='Onverwachte fout van bestel_mutaties:\n' + err_msg)
 
         if show_all:                                                            # pragma: no cover
             print(f1.getvalue())

@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2022-04-30'
+SITE_VERSIE = '2022-05-01'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -196,7 +196,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 BACKGROUND_SYNC_POORT = 3000
 BACKGROUND_SYNC__REGIOCOMP_MUTATIES = BACKGROUND_SYNC_POORT + 1
 BACKGROUND_SYNC__BONDSPAS_DOWNLOADER = BACKGROUND_SYNC_POORT + 2
-BACKGROUND_SYNC__KALENDER_MUTATIES = BACKGROUND_SYNC_POORT + 3
+BACKGROUND_SYNC__BESTEL_MUTATIES = BACKGROUND_SYNC_POORT + 3
 BACKGROUND_SYNC__BETAAL_MUTATIES = BACKGROUND_SYNC_POORT + 4
 
 # our own test runner that executes the tests ordered by application hierarchy indicators to ensure that

@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 """ achtergrondtaak om mutaties te verwerken zodat concurrency voorkomen kan worden
-    deze komen binnen via BetalingenMutatie
+    deze komen binnen via BetaalMutatie
 """
 
 from django.conf import settings
@@ -40,6 +40,7 @@ class Command(BaseCommand):
 
         self._hoogste_mutatie_pk = None
 
+        # cache de redelijke statische instellingen (voor 1 uur)
         try:
             self._instellingen_nhb = (BetaalInstellingenVereniging
                                       .objects
@@ -51,7 +52,7 @@ class Command(BaseCommand):
         # de API key zetten we later, afhankelijk van de vereniging waar we deze transactie voor doen
         self._mollie_client = Client(api_endpoint=settings.BETAAL_API)
 
-        # limiteer hoeveel informatie er over ons platform doorgegeven wordt
+        # begrens hoeveel informatie er over ons platform doorgegeven wordt
         # verder wordt doorgegeven:
         #  - Mollie pakket versie: "2.12.0"
         #  - Python versie: "3.9.2"
@@ -226,7 +227,7 @@ class Command(BaseCommand):
 
         if self._hoogste_mutatie_pk:
             # gebruik deze informatie om te filteren
-            self.stdout.write('[INFO] vorige hoogste BetalingenMutatie pk is %s' % self._hoogste_mutatie_pk)
+            self.stdout.write('[INFO] vorige hoogste BetaalMutatie pk is %s' % self._hoogste_mutatie_pk)
             qset = (BetaalMutatie
                     .objects
                     .filter(pk__gt=self._hoogste_mutatie_pk))
@@ -256,7 +257,7 @@ class Command(BaseCommand):
         # for
 
         if did_useful_work:
-            self.stdout.write('[INFO] nieuwe hoogste KalenderMutatie pk is %s' % self._hoogste_mutatie_pk)
+            self.stdout.write('[INFO] nieuwe hoogste BetaalMutatie pk is %s' % self._hoogste_mutatie_pk)
 
             klaar = datetime.datetime.now()
             self.stdout.write('[INFO] Mutaties verwerkt in %s seconden' % (klaar - begin))

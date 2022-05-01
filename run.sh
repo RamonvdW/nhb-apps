@@ -20,15 +20,15 @@ STATIC_DIR="nhbapps/.static"
 rm -rf "$STATIC_DIR"/*
 ./manage.py collectstatic -l
 
+# start the background processes
 echo "[INFO] Starting betaal_mutaties (runtime: 60 minutes)"
 pkill -f betaal_mutaties
 ./manage.py betaal_mutaties 60 &
 
-echo "[INFO] Starting kalender_mutaties (runtime: 60 minutes)"
-pkill -f kalender_mutaties
-./manage.py kalender_mutaties 60 &
+echo "[INFO] Starting bestel_mutaties (runtime: 60 minutes)"
+pkill -f bestel_mutaties
+./manage.py bestel_mutaties 60 &
 
-# start the background processes
 echo "[INFO] Starting regiocomp_mutaties (runtime: 60 minutes)"
 pkill -f regiocomp_mutaties
 ./manage.py regiocomp_mutaties 60 &
@@ -51,10 +51,10 @@ fi
 
 # kill the background processes
 echo "[INFO] Stopping background tasks"
-pkill -f betaal_mutaties
-pkill -f kalender_mutaties
-pkill -f regiocomp_mutaties
 pkill -f regiocomp_tussenstand
+pkill -f regiocomp_mutaties
+pkill -f bestel_mutaties
+pkill -f betaal_mutaties
 
 # set normal performance
 sudo cpupower frequency-set --governor schedutil > /dev/null

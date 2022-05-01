@@ -10,20 +10,16 @@ from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.operations import account_controleer_snelheid_verzoeken
+from Bestel.mandje import mandje_tel_inhoud, eval_mandje_inhoud
+from Bestel.models import BestelMandje, BESTEL_KORTINGSCODE_MINLENGTH
+from Bestel.mutaties import bestel_mutatieverzoek_maak_bestellingen, bestel_mutatieverzoek_verwijder_product_uit_mandje, bestel_mutatieverzoek_kortingscode_toepassen
 from Betaal.models import BetaalInstellingenVereniging
-from Bestel.operations import bestel_get_volgende_bestel_nr
 from Functie.rol import Rollen, rol_get_huidige
-from Kalender.mutaties import kalender_kortingscode_toepassen, kalender_verwijder_reservering
-from Bestel.models import BestelMandje, Bestelling, BESTEL_KORTINGSCODE_MINLENGTH
-from Bestel.mandje import mandje_tel_inhoud, eval_mandje_inhoud, mandje_totaal_opnieuw_bepalen
-from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from decimal import Decimal
 
 
 TEMPLATE_MANDJE_TOON_INHOUD = 'bestel/toon-mandje.dtl'
-
-kalender_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__KALENDER_MUTATIES)
 
 
 class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
@@ -194,10 +190,11 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         context['producten'] = producten
         context['bevat_fout'] = bevat_fout
         context['aantal_betalingen'] = len(ontvanger2product_pks.keys())
-
         context['url_code_toevoegen'] = reverse('Bestel:mandje-code-toevoegen')
+        context['toon_kortingscode_invoer'] = (mandje.totaal_euro > 0)
+
         if not (bevat_fout or mandje_is_leeg):
-            if mandje and mandje.totaal_euro > 0:           # TODO: ondersteuning voor prijs=0
+            if mandje:
                 context['url_bestellen'] = reverse('Bestel:toon-inhoud-mandje')
 
         context['kruimels'] = (
@@ -211,54 +208,19 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         """ Deze functie wordt aangeroepen als de koper op de knop BESTELLING AFRONDEN gedrukt heeft
             Hier converteren we het mandje in een bevroren bestelling die afgerekend kan worden.
         """
+
+        snel = str(request.POST.get('snel', ''))[:1]
+
         account = self.request.user
-        mandje, producten, ontvanger2product_pks, mandje_is_leeg, bevat_fout = self._beschrijf_inhoud_mandje(account, maak_urls=False)
-        if bevat_fout or mandje_is_leeg or mandje is None:
-            raise Http404('Afrekenen is niet mogelijk')
 
-        for ver_nr, product_pks in ontvanger2product_pks.items():
+        bestel_mutatieverzoek_maak_bestellingen(account, snel == '1')
+        # achtergrondtaak zet het mandje om in bestellingen
 
-            try:
-                instellingen = BetaalInstellingenVereniging.objects.get(vereniging__ver_nr=ver_nr)
-            except BetaalInstellingenVereniging.DoesNotExist:
-                # vereniging kan niet betaald krijgen!
-                # skip deze producten
-                # TODO: hier zouden we een taak aan moeten maken en een paniek-mail sturen
-                pass
-            else:
-                # neem een bestelnummer uit
-                bestel_nr = bestel_get_volgende_bestel_nr()
+        # zorg dat de knop het juiste aantal toont
+        mandje_tel_inhoud(request)
 
-                totaal_euro = Decimal(0)
-                for product in producten:
-                    if product.pk in product_pks:
-                        totaal_euro += product.prijs_euro
-                        totaal_euro -= product.korting_euro
-                # for
-
-                bestelling = Bestelling(
-                                    bestel_nr=bestel_nr,
-                                    account=account,
-                                    ontvanger=instellingen,
-                                    totaal_euro=totaal_euro)
-                bestelling.save()
-
-                bestelling.producten.set(product_pks)
-
-                msg = "[%s] Bestelling aangemaakt met %s producten voor totaal euro=%s" % (
-                                                bestelling.aangemaakt, len(product_pks), totaal_euro)
-                bestelling.log = msg
-                bestelling.save(update_fields=['log'])
-
-                # haal deze producten uit het mandje
-                to_be_removed = mandje.producten.filter(pk__in=product_pks)
-                mandje.producten.remove(*to_be_removed)
-        # for
-
-        # bereken opnieuw het totaal voor het mandje
-        mandje_totaal_opnieuw_bepalen(account)
-
-        url = reverse('Bestel:toon-inhoud-mandje')
+        # ga naar de pagina met alle bestellingen, zodat de betaling gestart kan worden
+        url = reverse('Bestel:toon-bestellingen')
         return HttpResponseRedirect(url)
 
 
@@ -291,13 +253,13 @@ class CodeToevoegenView(UserPassesTestMixin, View):
             account = request.user
 
             if account_controleer_snelheid_verzoeken(account):
-                kalender_kortingscode_toepassen(account, code, snel == '1')
+                bestel_mutatieverzoek_kortingscode_toepassen(account, code, snel == '1')
+                # achtergrondtaak past de korting toe
 
                 mandje_tel_inhoud(self.request)
 
         # terug naar het mandje
         url = reverse('Bestel:toon-inhoud-mandje')
-
         return HttpResponseRedirect(url)
 
 
@@ -337,11 +299,8 @@ class VerwijderProductUitMandje(UserPassesTestMixin, View):
                 # product zit in het mandje
                 product = qset[0]
 
-                # verwijderen uit het mandje
-                mandje.producten.remove(product)
-
-                # maak de inschrijving ongedaan
-                kalender_verwijder_reservering(product.inschrijving, snel == '1')
+                bestel_mutatieverzoek_verwijder_product_uit_mandje(account, product, snel == '1')
+                # achtergrondtaak geeft dit door aan de kalender/opleiding
 
                 mandje_tel_inhoud(self.request)
             else:

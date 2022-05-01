@@ -10,6 +10,7 @@ from . import view_mandje, view_bestelling
 app_name = 'Bestel'
 
 urlpatterns = [
+
     path('mandje/verwijderen/<product_pk>/',
          view_mandje.VerwijderProductUitMandje.as_view(),
          name='mandje-verwijder-product'),
@@ -21,6 +22,11 @@ urlpatterns = [
     path('mandje/',
          view_mandje.ToonInhoudMandje.as_view(),
          name='toon-inhoud-mandje'),
+
+
+    path('overzicht/',
+         view_bestelling.ToonBestellingenView.as_view(),
+         name='toon-bestellingen'),
 
     path('details/<bestel_nr>/',
          view_bestelling.ToonBestellingDetailsView.as_view(),

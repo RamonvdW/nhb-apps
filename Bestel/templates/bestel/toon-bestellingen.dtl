@@ -1,0 +1,55 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Bestellingen{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Bestellingen</h3>
+            <p>Eerdere bestellingen, tot 18 maanden terug</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th class="center">Bestelnummer</th>
+                        <th class="center">Status</th>
+                        <th>Beschrijving</th>
+                        <th class="center">Bedrag</th>
+                        <th class="center"><!-- kolom voor knop --></th>
+                    </tr>
+                </thead>
+
+                {% for bestelling in bestellingen %}
+                    <tr>
+                        <td>{{ bestelling.aangemaakt }}</td>
+                        <td class="center">{{ bestelling.bestel_nr }}</td>
+                        <td class="center{% if bestelling.status_aandacht %} red-text{% endif %}">{{ bestelling.status_str }}</td>
+                        <td>{% for regel in bestelling.beschrijving %}{{ regel }}<br>{% endfor %}</td>
+                        <td class="center">&euro;&nbsp;{{ bestelling.totaal_euro }}</td>
+                        <td class="center">
+                            <a class="btn-nhb-rood" href="{{ bestelling.url_details }}">
+                                <i class="material-icons-round">play_arrow</i></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="bestel-toon-bestellingen" %}
+
+{% endblock %}

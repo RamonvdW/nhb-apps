@@ -126,26 +126,28 @@
                             </tr>
 
                             <!-- kortingscode invoeren -->
-                            <tr>
-                                <td colspan="3">
-                                    <div>
-                                        <button id="id_code_knopje" class="btn-nhb-blauw" onclick="code_openen()">
-                                            <i class="material-icons-round">add_circle_outline</i></button>
-                                        <span style="margin-left:20px">Kortingscode toevoegen</span>
-                                    </div>
+                            {% if toon_kortingscode_invoer %}
+                                <tr>
+                                    <td colspan="3">
+                                        <div>
+                                            <button id="id_code_knopje" class="btn-nhb-blauw" onclick="code_openen()">
+                                                <i class="material-icons-round">add_circle_outline</i></button>
+                                            <span style="margin-left:20px">Kortingscode toevoegen</span>
+                                        </div>
 
-                                    <div id="id_code_invoeren" class="row" style="display:none; margin-left:10px">
-                                        <div class="col s8 m6 l4">
-                                            <input id="id_code_invoer" type="text" name="code" size="40" maxlength="40" autocomplete="off" data-url="{{ url_code_toevoegen }}" onchange="code_toevoegen()">
+                                        <div id="id_code_invoeren" class="row" style="display:none; margin-left:10px">
+                                            <div class="col s8 m6 l4">
+                                                <input id="id_code_invoer" type="text" name="code" size="40" maxlength="40" autocomplete="off" data-url="{{ url_code_toevoegen }}" onchange="code_toevoegen()">
+                                            </div>
+                                            <div class="col s4 m6 l8">
+                                                <button class="btn-nhb-rood" onclick="code_toevoegen()">
+                                                    <i class="material-icons-round">add</i></button>
+                                            </div>
                                         </div>
-                                        <div class="col s4 m6 l8">
-                                            <button class="btn-nhb-rood" onclick="code_toevoegen()">
-                                                <i class="material-icons-round">add</i></button>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="hide-on-small-only"></td>
-                            </tr>
+                                    </td>
+                                    <td class="hide-on-small-only"></td>
+                                </tr>
+                            {% endif %}
 
                             <!-- afrekenen -->
                             <tr>

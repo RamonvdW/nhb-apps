@@ -44,8 +44,13 @@ urlpatterns = [
 
     # toevoegen aan winkelwagentje
     path('inschrijven/toevoegen/',
-         view_inschrijven.ToevoegenView.as_view(),
+         view_inschrijven.ToevoegenAanMandjeView.as_view(),
          name='inschrijven-toevoegen'),
+
+    # afmelden
+    path('afmelden/<inschrijving_pk>/',
+         view_aanmeldingen.AfmeldenView.as_view(),
+         name='afmelden'),
 
 
     # vereniging
@@ -102,6 +107,10 @@ urlpatterns = [
     path('<wedstrijd_pk>/aanmeldingen/',
          view_aanmeldingen.KalenderAanmeldingenView.as_view(),
          name='aanmeldingen'),
+
+    path('sporter/<sporter_lid_nr>/',
+         view_aanmeldingen.KalenderDetailsSporterView.as_view(),
+         name='details-sporter'),
 ]
 
 # end of file

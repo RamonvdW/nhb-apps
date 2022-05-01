@@ -70,14 +70,12 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>BIB</th>
-                        <th>Aangemeld op</th>
+                        <th class="hide-on-small-only">BIB</th>
+                        <th class="hide-on-small-only">Aangemeld op</th>
                         <th>Sporter</th>
                         <th>Boog</th>
                         <th>Status</th>
-                        <th>Korting</th>
-                        <th>Betaald</th>
-                        <th>Retour</th>
+                        <th class="hide-on-small-only">Korting</th>
                         <th><!-- kolom voor knoppen --></th>
                     </tr>
                 </thead>
@@ -85,14 +83,18 @@
                 {% for aanmelding in aanmeldingen %}
                     <tr>
                         <td>{% if aanmelding.volg_nr %}{{ aanmelding.volg_nr }}{% endif %}</td>
-                        <td>{% if aanmelding.bib %}{{ aanmelding.bib }}{% endif %}</td>
-                        <td>{{ aanmelding.wanneer }}</td>
+                        <td class="hide-on-small-only">{% if aanmelding.bib %}{{ aanmelding.bib }}{% endif %}</td>
+                        <td class="hide-on-small-only">{{ aanmelding.wanneer }}</td>
                         <td>{{ aanmelding.sporter_str }}</td>
                         <td>{{ aanmelding.boog_str }}</td>
                         <td>{{ aanmelding.status_str }}</td>
-                        <td>{{ aanmelding.korting_str }}</td>
-                        <td>&euro;&nbsp;{{ aanmelding.ontvangen_euro }}</td>
-                        <td>&euro;&nbsp;{{ aanmelding.retour_euro }}</td>
+                        <td class="hide-on-small-only">{{ aanmelding.korting_str }}</td>
+                        <td>
+                            {% if aanmelding.url_sporter %}
+                                <a class="btn-nhb-rood" href="{{ aanmelding.url_sporter }}">
+                                    <i class="material-icons-round">play_arrow</i></a>
+                            {% endif %}
+                        </td>
                     </tr>
                 {% empty %}
                     <tr>

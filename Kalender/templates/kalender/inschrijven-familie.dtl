@@ -168,13 +168,7 @@
                     </tr>
                     <tr>
                         <th>Status</th>
-                        <td>
-                            {% if inschrijving.betaling_voldaan %}
-                                <span class="green-text">Ingeschreven</span>
-                            {% else %}
-                                <span>Gereserveerd (in mandje)</span>
-                            {% endif %}
-                        </td>
+                        <td>{{ inschrijving.status_str }}</td>
                     </tr>
 
                 {% else %}

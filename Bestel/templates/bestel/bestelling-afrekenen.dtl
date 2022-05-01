@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Bestelling afrekenen</h3>
-            <p>Bestel nummer: {{ bestelling.bestel_nr }}</p>
+            <p>Bestelnummer: {{ bestelling.bestel_nr }}</p>
         </div>
     </div>
 
@@ -48,6 +48,11 @@
                         <th>Payment ID</th>
                         <td>{{ bestelling.actief_transactie.payment_id }}</td>
                     </tr>
+
+                    <tr>
+                        <th>Payment status</th>
+                        <td>{{ bestelling.actief_transactie.payment_status }}</td>
+                    </tr>
                 {% endif %}
 
                 {% if bestelling.actief_mutatie %}
@@ -57,12 +62,18 @@
                     </tr>
                     <tr>
                         <th>Checkout</th>
-                        <td>{% if bestelling.actief_mutatie.url_checkout %}<code>{{ bestelling.actief_mutatie.url_checkout }}</code>{% else %}<i>We wachten op actie</i>{% endif %}</td>
+                        <td>
+                            {% if bestelling.actief_mutatie.url_checkout %}
+                                <a class="btn-nhb-rood" href="{{ bestelling.actief_mutatie.url_checkout }}">Nu betalen</a>
+                            {% else %}
+                                <i>Nog niet beschikbaar</i>
+                            {% endif %}
+                        </td>
                     </tr>
                 {% else %}
                     <tr>
                         <th>Betaling</th>
-                        <td>We wachten op actie<br><br><i>Ververs deze pagina handmatig</i></td>
+                        <td><i>Nog niet opgestart</i></td>
                     </tr>
                 {% endif %}
             </table>

@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
@@ -15,11 +14,11 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import BoogType
 from Functie.rol import Rollen, rol_get_huidige
 from Bestel.mandje import mandje_tel_inhoud
-from Overig.background_sync import BackgroundSync
+from Bestel.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren_wedstrijdbogen
 from .models import (KalenderWedstrijd, KalenderWedstrijdSessie, KalenderInschrijving,
-                     KalenderMutatie, KALENDER_MUTATIE_INSCHRIJVEN, INSCHRIJVING_STATUS_AFGEMELD)
+                     INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_TO_STR)
 from Kalender.view_maand import MAAND2URL
 import time
 
@@ -27,8 +26,6 @@ import time
 TEMPLATE_KALENDER_INSCHRIJVEN_SPORTER = 'kalender/inschrijven-sporter.dtl'
 TEMPLATE_KALENDER_INSCHRIJVEN_GROEPJE = 'kalender/inschrijven-groepje.dtl'
 TEMPLATE_KALENDER_INSCHRIJVEN_FAMILIE = 'kalender/inschrijven-familie.dtl'
-
-kalender_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__KALENDER_MUTATIES)
 
 
 def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pks):
@@ -197,7 +194,7 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
             (None, 'Inschrijven sporter')
         )
 
-        menu_dynamics(self.request, context, 'kalender')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -312,7 +309,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
             (None, 'Inschrijven groepje')
         )
 
-        menu_dynamics(self.request, context, 'kalender')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -430,6 +427,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
                     # sporter is ingeschreven
                     al_ingeschreven = True
                     context['inschrijving'] = inschrijving
+                    inschrijving.status_str = INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
             # for
             context['al_ingeschreven'] = al_ingeschreven
 
@@ -474,11 +472,13 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
             (None, 'Wedstrijd details'),
         )
 
-        menu_dynamics(self.request, context, 'kalender')
+        menu_dynamics(self.request, context)
         return context
 
 
-class ToevoegenView(UserPassesTestMixin, View):
+class ToevoegenAanMandjeView(UserPassesTestMixin, View):
+
+    """ Met deze view wordt het toevoegen van een wedstrijd aan het mandje van de koper afgehandeld """
 
     # class variables shared by all instances
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
@@ -519,6 +519,8 @@ class ToevoegenView(UserPassesTestMixin, View):
         now = timezone.now()
 
         # misschien dat de sporter al ingeschreven staat, maar afgemeld is
+        # verwijder deze inschrijving omdat het nu een andere koper kan zijn
+        # TODO: afmeldingen verplaatsen naar een andere tabel
         qset = (KalenderInschrijving
                 .objects
                 .filter(wedstrijd=wedstrijd,
@@ -542,26 +544,9 @@ class ToevoegenView(UserPassesTestMixin, View):
             # ga uit van user-error (dubbelklik op knop) en skip de rest gewoon
             pass
         else:
-            # zet dit verzoek door naar het mutaties process
-            mutatie = KalenderMutatie(
-                            code=KALENDER_MUTATIE_INSCHRIJVEN,
-                            inschrijving=inschrijving)
-            mutatie.save()
-
-            # ping het achtergrond process
-            kalender_mutaties_ping.ping()
-
+            # zet dit verzoek door naar de achtergrondtaak
             snel = str(request.POST.get('snel', ''))[:1]
-            if snel != '1':         # pragma: no cover
-                # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
-                interval = 0.2      # om steeds te verdubbelen
-                total = 0.0         # om een limiet te stellen
-                while not mutatie.is_verwerkt and total + interval <= 3.0:
-                    time.sleep(interval)
-                    total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0
-                    interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
-                    mutatie = KalenderMutatie.objects.get(pk=mutatie.pk)
-                # while
+            bestel_mutatieverzoek_inschrijven_wedstrijd(account_koper, inschrijving, snel == '1')
 
             mandje_tel_inhoud(self.request)
 

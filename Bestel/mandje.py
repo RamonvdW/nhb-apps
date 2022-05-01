@@ -5,10 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
-from django.db import transaction
 from datetime import timedelta
-from Bestel.models import BestelProduct, BestelMandje
-from decimal import Decimal
+from Bestel.models import BestelMandje
 
 
 SESSIONVAR_MANDJE_INHOUD_AANTAL = 'mandje_inhoud_aantal'
@@ -72,128 +70,5 @@ def eval_mandje_inhoud(request):
     # update het aantal open taken in de sessie
     # en zet het volgende evaluatie moment
     mandje_tel_inhoud(request)
-
-
-def mandje_toevoegen_inschrijving(account, inschrijving, prijs_euro):
-
-    """ Deze functie wordt gebruikt van de achtergrondtaak van de kalender om een bestelling toe te voegen
-        aan een mandje.
-    """
-
-    # maak een product regel aan voor de bestelling
-    product = BestelProduct(
-                    inschrijving=inschrijving,
-                    prijs_euro=prijs_euro)
-    product.save()
-
-    # zoek het mandje van de koper erbij (of maak deze aan)
-    mandje, is_created = BestelMandje.objects.get_or_create(account=account)
-
-    # leg het product in het mandje
-    mandje.producten.add(product)
-
-    # verhoog de totale prijs
-    with transaction.atomic():
-        mandje = BestelMandje.objects.select_for_update().get(pk=mandje.pk)
-        mandje.totaal_euro += prijs_euro
-        mandje.save()
-
-
-def mandje_verwijder_inschrijving(account, inschrijving):
-
-    try:
-        product = BestelProduct.objects.get(inschrijving=inschrijving)
-    except BestelProduct.DoesNotExist:
-        # inschrijving niet gevonden, dus geen onderdeel van een bestelling of een mandje
-        pass
-    else:
-        # product gevonden
-
-        # zoek het mandje van de koper erbij
-        with transaction.atomic():
-            try:
-                mandje = BestelMandje.objects.select_for_update().get(account=account)
-            except BestelMandje.DoesNotExist:
-                # mandje is er niet meer
-                pass
-            else:
-                # mandje gevonden, product gevonden
-                # verwijder het product, dan verdwijnt deze ook uit het mandje
-                product.delete()
-
-                # omdat er nu een product uit verwijderd is en een korting vervallen is:
-                # bepaal opnieuw de totaal prijs van de inhoud van het mandje en sla deze op
-                mandje.bepaal_totaalprijs_opnieuw()           # adviseert select_for_update
-
-
-def mandje_enum_inschrijvingen(account):
-    """ iterator voor de inschrijvingen die in het mandje van het gevraagde account te vinden zijn
-        yield een KalenderWedstrijdInschrijving, MandjeProduct (met het veld inschrijving)
-    """
-    # haal het mandje op
-    try:
-        mandje = BestelMandje.objects.get(account=account)
-    except BestelMandje.DoesNotExist:
-        # geen mandje, dus ook geen producten om over te itereren
-        pass
-    else:
-        for product in (mandje
-                        .producten
-                        .exclude(inschrijving=None)
-                        .select_related('inschrijving',
-                                        'inschrijving__sporterboog__sporter',
-                                        'inschrijving__sporterboog__sporter__bij_vereniging')
-                        .order_by('inschrijving__pk')):
-            product.komt_uit_mandje = True
-            yield product.inschrijving, product
-        # for
-
-
-def mandje_korting_toepassen_op_inschrijving(inschrijving, percentage, koper):
-    """ Pas een gegeven kortingspercentage (positive integer) toe op de prijs van een product in het mandje
-        De aanroeper heeft al gecontroleerd dat de korting toegepast mag worden.
-        Deze functie mag alleen aangeroepen worden voor producten die door een van de mandje_enum_ functies
-        geretourneerd is.
-
-        Na aanroep moet de totaal_prijs van het mandje opnieuw vastgesteld worden
-
-        Returns:
-            True: korting is toegepast op een product in het mandje
-            False: product niet gevonden in het mandje van de koper
-    """
-
-    result = False
-
-    # zoek het bijbehorende product op en het mandje waar deze in zou moeten liggen
-    try:
-        product = BestelProduct.objects.get(inschrijving=inschrijving)
-        mandje = BestelMandje.objects.get(account=koper)
-    except (BestelProduct.DoesNotExist, BestelMandje.DoesNotExist):
-        # een van de twee niet gevonden
-        pass
-    else:
-        if product in mandje.producten.all():
-            procent = percentage / Decimal(100.0)
-            product.korting_euro = product.prijs_euro * procent
-            product.korting_euro = min(product.korting_euro, product.prijs_euro)  # voorkom korting > prijs
-            product.save(update_fields=['korting_euro'])
-
-            result = True
-
-    return result
-
-
-def mandje_totaal_opnieuw_bepalen(account):
-    """ bereken het totaal_euro veld opnieuw voor de inhoud van het mandje """
-    # zoek het mandje van de koper erbij
-    with transaction.atomic():
-        try:
-            mandje = BestelMandje.objects.select_for_update().get(account=account)
-        except BestelMandje.DoesNotExist:
-            # mandje is er niet meer
-            pass
-        else:
-            # mandje gevonden
-            mandje.bepaal_totaalprijs_opnieuw()     # adviseert select_for_update
 
 # end of file

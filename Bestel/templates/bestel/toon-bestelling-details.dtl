@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Bestelling</h3>
-            <p>Bestel nummer: {{ bestelling.bestel_nr }}</p>
+            <p>Bestelnummer: {{ bestelling.bestel_nr }}</p>
         </div>
     </div>
 
@@ -60,11 +60,13 @@
                     </tr>
                 {% endfor %}
 
-                <tr>
-                    <td class="hide-on-small-only"></td>
-                    <td class="right-align"><b>Nog te voldoen:</b></td>
-                    <td class="right-align"><b>&euro;&nbsp;{{ rest_euro }}</b></td>
-                </tr>
+                {% if rest_euro %}
+                    <tr>
+                        <td class="hide-on-small-only"></td>
+                        <td class="right-align"><b>Nog te voldoen:</b></td>
+                        <td class="right-align"><b>&euro;&nbsp;{{ rest_euro }}</b></td>
+                    </tr>
+                {% endif %}
 
                 <!-- afrekenen -->
                 <tr>

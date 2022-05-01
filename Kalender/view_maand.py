@@ -170,11 +170,13 @@ class KalenderMaandView(TemplateView):
         if self.request.user.is_authenticated:
             eval_mandje_inhoud(self.request)
 
+        context['menu_toon_mandje'] = True
+
         context['kruimels'] = (
             (None, 'Wedstrijdkalender'),
         )
 
-        menu_dynamics(self.request, context, 'kalender')
+        menu_dynamics(self.request, context)
         return context
 
 
@@ -242,7 +244,7 @@ class WedstrijdInfoView(TemplateView):
             (None, 'Wedstrijd details'),
         )
 
-        menu_dynamics(self.request, context, 'kalender')
+        menu_dynamics(self.request, context)
         return context
 
 # end of file

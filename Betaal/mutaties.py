@@ -10,10 +10,31 @@ from Betaal.models import (BetaalMutatie, BETAAL_MUTATIE_START_ONTVANGST, BETAAL
 from Overig.background_sync import BackgroundSync
 import time
 
+
+""" Interface naar de achtergrondtaak, waar de mutaties uitgevoerd worden zonder concurrency gevaren """
+
+
 betaal_mutaties_ping = BackgroundSync(settings.BACKGROUND_SYNC__BETAAL_MUTATIES)
 
 
-def betaal_start_ontvangst(bestelling, beschrijving, bedrag_euro, url_betaling_gedaan, snel):
+def _betaal_ping_achtergrondtaak(mutatie, snel):
+
+    # ping het achtergrond process
+    betaal_mutaties_ping.ping()
+
+    if not snel:  # pragma: no cover
+        # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
+        interval = 0.2  # om steeds te verdubbelen
+        total = 0.0  # om een limiet te stellen
+        while not mutatie.is_verwerkt and total + interval <= 3.0:
+            time.sleep(interval)
+            total += interval  # 0.0 --> 0.2, 0.6, 1.4, 3.0
+            interval *= 2  # 0.2 --> 0.4, 0.8, 1.6, 3.2
+            mutatie = BetaalMutatie.objects.get(pk=mutatie.pk)
+        # while
+
+
+def betaal_mutatieverzoek_start_ontvangst(bestelling, beschrijving, bedrag_euro, url_betaling_gedaan, snel):
     """
         Begin het afrekenen van een bestelling.
 
@@ -22,7 +43,7 @@ def betaal_start_ontvangst(bestelling, beschrijving, bedrag_euro, url_betaling_g
     """
 
     # zet dit verzoek door naar het mutaties process
-    # voorkom duplicates
+    # voorkom duplicates (niet 100%)
     mutatie, is_created = BetaalMutatie.objects.get_or_create(
                                     code=BETAAL_MUTATIE_START_ONTVANGST,
                                     ontvanger=bestelling.ontvanger,
@@ -36,24 +57,13 @@ def betaal_start_ontvangst(bestelling, beschrijving, bedrag_euro, url_betaling_g
     bestelling.save(update_fields=['actief_mutatie'])
 
     if is_created:
-        # ping het achtergrond process
-        betaal_mutaties_ping.ping()
-
-        if not snel:         # pragma: no cover
-            # wacht maximaal 3 seconden tot de mutatie uitgevoerd is
-            interval = 0.2      # om steeds te verdubbelen
-            total = 0.0         # om een limiet te stellen
-            while not mutatie.is_verwerkt and total + interval <= 3.0:
-                time.sleep(interval)
-                total += interval   # 0.0 --> 0.2, 0.6, 1.4, 3.0
-                interval *= 2       # 0.2 --> 0.4, 0.8, 1.6, 3.2
-                mutatie = BetaalMutatie.objects.get(pk=mutatie.pk)
-            # while
+        # wacht kort op de achtergrondtaak
+        _betaal_ping_achtergrondtaak(mutatie, snel)
 
     return mutatie
 
 
-def betaal_payment_status_changed(payment_id):
+def betaal_mutatieverzoek_payment_status_changed(payment_id):
     """
         De status van een betaling is gewijzigd
 
@@ -67,7 +77,7 @@ def betaal_payment_status_changed(payment_id):
                     payment_id=payment_id)
     mutatie.save()
 
-    # ping het achtergrond process
+    # ping het achtergrond process maar wacht niet op een reactie
     betaal_mutaties_ping.ping()
 
 

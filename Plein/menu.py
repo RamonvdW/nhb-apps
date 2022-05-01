@@ -12,15 +12,10 @@ from Bestel.mandje import cached_aantal_in_mandje_get
 from Taken.taken import aantal_open_taken
 
 
-def menu_dynamics(request, context, actief=None):
+def menu_dynamics(request, context):
     """ Deze functie update the template context voor het dynamische gedrag van
         menu zoals de 'Andere rollen' en het menu item dat actief is.
     """
-
-    # # welke regel van het menu op laten lichten?
-    # context['menu_actief'] = actief
-    # if not (actief in ACTIEF_OPTIES or actief.startswith('competitie-')):
-    #     raise AssertionError("menu_dynamics: Onbekende 'actief' waarde: %s" % repr(actief))
 
     # test server banner tonen?
     context['is_test_server'] = settings.IS_TEST_SERVER

@@ -8,7 +8,7 @@ from django.test import TestCase, override_settings
 from django.core import management
 from django.conf import settings
 from Betaal.models import BetaalMutatie, BetaalActief, BetaalTransactie, BetaalInstellingenVereniging
-from Betaal.mutaties import betaal_start_ontvangst, betaal_payment_status_changed
+from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst, betaal_mutatieverzoek_payment_status_changed
 from Bestel.models import Bestelling
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbVereniging, NhbRegio

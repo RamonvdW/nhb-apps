@@ -16,6 +16,42 @@ BESTEL_KORTINGSCODE_MINLENGTH = 8
 BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK = 1
 
 
+BESTELLING_STATUS_NIEUW = 'N'
+BESTELLING_STATUS_WACHT_OP_BETALING = 'B'
+BESTELLING_STATUS_AFGEROND = 'A'
+
+BESTELLING_STATUS_CHOICES = (
+    (BESTELLING_STATUS_NIEUW, 'N'),
+    (BESTELLING_STATUS_WACHT_OP_BETALING, 'B'),
+    (BESTELLING_STATUS_AFGEROND, 'A'),
+)
+
+BESTELLING_STATUS2STR = {
+    BESTELLING_STATUS_NIEUW: 'Nieuw',
+    BESTELLING_STATUS_WACHT_OP_BETALING: 'Te betalen',
+    BESTELLING_STATUS_AFGEROND: 'Afgerond',
+}
+
+
+BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN = 1        # inschrijven op wedstrijd
+BESTEL_MUTATIE_VERWIJDER = 2                    # product verwijderen uit mandje
+BESTEL_MUTATIE_KORTINGSCODE = 3                 # kortingcode toepassen op mandje
+BESTEL_MUTATIE_MAAK_BESTELLING = 4              # mandje omzetten in bestelling(en)
+BESTEL_MUTATIE_BETALING_ONTVANGEN = 5           # betaling ontvangen
+BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN = 6           # afmelden (na betaling)
+BESTEL_MUTATIE_RESTITUTIE_UITBETAALD = 7        # restitutie uitbetaald
+
+BESTEL_MUTATIE_TO_STR = {
+    BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN: "Inschrijven op wedstrijd",
+    BESTEL_MUTATIE_VERWIJDER: "Product verwijderen uit mandje",
+    BESTEL_MUTATIE_KORTINGSCODE: "Kortingscode toepassen op mandje",
+    BESTEL_MUTATIE_MAAK_BESTELLING: "Mandje omzetten in bestelling",
+    BESTEL_MUTATIE_BETALING_ONTVANGEN: "Betaling ontvangen",
+    BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN: "Afmelden voor wedstrijd",
+    BESTEL_MUTATIE_RESTITUTIE_UITBETAALD: "Restitutie uitbetaald",
+}
+
+
 class BestelProduct(models.Model):
 
     """ Een product dat opgenomen kan worden in een bestelling en in een mandje geplaatst kan worden,
@@ -121,6 +157,9 @@ class Bestelling(models.Model):
     # het af te rekenen totaalbedrag
     totaal_euro = models.DecimalField(max_digits=7, decimal_places=2, default=Decimal(0))       # max 99999,99
 
+    # de status van de hele bestelling
+    status = models.CharField(max_length=1, default=BESTELLING_STATUS_NIEUW, choices=BESTELLING_STATUS_CHOICES)
+
     # de opgestarte betaling/restitutie wordt hier bijgehouden
     # begint als een mutatie, daarin zet de achtergrond taak een payment_id en daarmee kunnen we de transactie vinden
     actief_mutatie = models.ForeignKey(BetaalMutatie, on_delete=models.SET_NULL, null=True, blank=True)
@@ -151,7 +190,53 @@ class BestelHoogsteBestelNr(models.Model):
     hoogste_gebruikte_bestel_nr = models.PositiveIntegerField(default=0)
 
 
-# TODO: boekhouding: betaald bedrag, ingehouden transactiekosten door CPSP, ontvangen bedrag, uitbetaalde bedragen, opsplitsing btw/transactiekosten
+class BestelMutatie(models.Model):
+
+    """ Deze tabel voedt de achtergrondtaak die de interactie met het mandje en bestellingen doet """
+
+    # datum/tijdstip van mutatie
+    when = models.DateTimeField(auto_now_add=True)      # automatisch invullen
+
+    # wat is de wijziging (zie BESTEL_MUTATIE_*)
+    code = models.PositiveSmallIntegerField(default=0)
+
+    # is deze mutatie al verwerkt?
+    is_verwerkt = models.BooleanField(default=False)
+
+    # BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN      account(=mandje), inschrijving
+    # BESTEL_MUTATIE_VERWIJDER:                 account(=mandje), product
+    # BESTEL_MUTATIE_KORTINGSCODE:              account(=mandje), kortingscode
+    # BESTEL_MUTATIE_MAAK_BESTELLING:           account(=mandje)
+    # BESTEL_MUTATIE_BETALING_ONTVANGEN:
+    # BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN:        inschrijving
+    # BESTEL_MUTATIE_RESTITUTIE_UITBETAALD:
+
+    # wiens mandje moet omgezet worden?
+    account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # de kalender inschrijving
+    inschrijving = models.ForeignKey(KalenderInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # het product waar deze mutatie betrekking op heeft
+    product = models.ForeignKey(BestelProduct, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # gevraagde kortingscode om toe te passen
+    kortingscode = models.CharField(max_length=20, default='', blank=True)
+
+    class Meta:
+        verbose_name = "Bestel mutatie"
+
+    def __str__(self):
+        """ Lever een tekstuele beschrijving voor de admin interface """
+        msg = "[%s]" % self.when
+        if not self.is_verwerkt:
+            msg += " (nog niet verwerkt)"
+        try:
+            msg += " %s (%s)" % (self.code, BESTEL_MUTATIE_TO_STR[self.code])
+        except KeyError:
+            msg += " %s (???)" % self.code
+
+        return msg
 
 
 # end of file

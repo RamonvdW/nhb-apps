@@ -220,7 +220,7 @@ class TestMandje(E2EHelpers, TestCase):
                                      'snel': 1})
         self.assert_is_redirect(resp, self.url_mandje_toon)
 
-        self.verwerk_kalender_mutaties()
+        self.verwerk_bestel_mutaties()
 
         # controleer dat de code toegepast is
         inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
@@ -261,7 +261,7 @@ class TestMandje(E2EHelpers, TestCase):
             resp = self.client.post(self.url_mandje_verwijder % product.pk, {'snel': 1})
         self.assert_is_redirect(resp, self.url_mandje_toon)
 
-        self.verwerk_kalender_mutaties()
+        self.verwerk_bestel_mutaties()
 
         # nog een keer verwijderen
         with self.assert_max_queries(20):

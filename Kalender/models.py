@@ -121,30 +121,28 @@ WEDSTRIJD_ORGANISATIE_TO_STR = {
     ORGANISATIE_IFAA: 'IFAA'
 }
 
-INSCHRIJVING_STATUS_RESERVERING = 'R'
-INSCHRIJVING_STATUS_DEFINITIEF = 'D'
+INSCHRIJVING_STATUS_RESERVERING_MANDJE = 'R'        # moet nog omgezet worden in een bestelling
+INSCHRIJVING_STATUS_RESERVERING_BESTELD = 'B'       # moet nog betaald worden
+INSCHRIJVING_STATUS_DEFINITIEF = 'D'                # is betaald
 INSCHRIJVING_STATUS_AFGEMELD = 'A'
 
 INSCHRIJVING_STATUS_CHOICES = (
-    (INSCHRIJVING_STATUS_RESERVERING, "Reservering"),
+    (INSCHRIJVING_STATUS_RESERVERING_MANDJE, "Reservering"),
+    (INSCHRIJVING_STATUS_RESERVERING_BESTELD, "Besteld"),
     (INSCHRIJVING_STATUS_DEFINITIEF, "Definitief"),
     (INSCHRIJVING_STATUS_AFGEMELD, "Afgemeld")
 )
 
 INSCHRIJVING_STATUS_TO_STR = {
-    INSCHRIJVING_STATUS_RESERVERING: 'Reservering',
-    INSCHRIJVING_STATUS_DEFINITIEF: 'Definitief',
+    INSCHRIJVING_STATUS_RESERVERING_MANDJE: 'Gereserveerd, nog niet definitief',
+    INSCHRIJVING_STATUS_DEFINITIEF: 'Inschrijving is definitief',
     INSCHRIJVING_STATUS_AFGEMELD: 'Afgemeld',
 }
 
-KALENDER_MUTATIE_INSCHRIJVEN = 1
-KALENDER_MUTATIE_AFMELDEN = 2
-KALENDER_MUTATIE_KORTING = 3
-
-KALENDER_MUTATIE_TO_STR = {
-    KALENDER_MUTATIE_INSCHRIJVEN: "Inschrijven",
-    KALENDER_MUTATIE_AFMELDEN: "Afmelden",
-    KALENDER_MUTATIE_KORTING: "Korting",
+INSCHRIJVING_STATUS_TO_SHORT_STR = {
+    INSCHRIJVING_STATUS_RESERVERING_MANDJE: 'Gereserveerd',
+    INSCHRIJVING_STATUS_DEFINITIEF: 'Definitief',
+    INSCHRIJVING_STATUS_AFGEMELD: 'Afgemeld',
 }
 
 
@@ -163,6 +161,7 @@ KALENDER_KORTING_SOORT_TO_STR = {
     KALENDER_KORTING_VERENIGING: 'Vereniging',
     KALENDER_KORTING_COMBI: 'Combi'
 }
+
 
 
 class KalenderWedstrijdDeeluitslag(models.Model):
@@ -347,11 +346,13 @@ class KalenderInschrijving(models.Model):
 
     """ Een inschrijving op een wedstrijd sessie, inclusief koper, betaal-status en gebruikte kortingscode """
 
+    # TODO: afmeldingen verplaatsen naar een andere tabel, voor de geschiedenis
+
     # wanneer is deze inschrijving aangemaakt?
     wanneer = models.DateTimeField()
 
     # status
-    status = models.CharField(max_length=2, default=INSCHRIJVING_STATUS_RESERVERING, choices=INSCHRIJVING_STATUS_CHOICES)
+    status = models.CharField(max_length=2, default=INSCHRIJVING_STATUS_RESERVERING_MANDJE, choices=INSCHRIJVING_STATUS_CHOICES)
 
     # voor welke wedstrijd is dit?
     wedstrijd = models.ForeignKey(KalenderWedstrijd, on_delete=models.PROTECT)
@@ -396,42 +397,5 @@ class KalenderInschrijving(models.Model):
         constraints = [
             models.UniqueConstraint(fields=('sessie', 'sporterboog'), name='Geen dubbele inschrijving'),
         ]
-
-
-class KalenderMutatie(models.Model):
-    """ Deze tabel voedt de achtergrondtaak die de mutaties op de inschrijvingen doet
-        waardoor alles netjes geserialiseerd wordt.
-    """
-
-    # datum/tijdstip van mutatie
-    when = models.DateTimeField(auto_now_add=True)      # automatisch invullen
-
-    # wat is de wijziging (zie KALENDER_MUTATIE_*)
-    code = models.PositiveSmallIntegerField(default=0)
-
-    # is deze mutatie al verwerkt?
-    is_verwerkt = models.BooleanField(default=False)
-
-    # waar heeft mutatie op betrekking?
-    inschrijving = models.ForeignKey(KalenderInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
-
-    # kortingscode om toe te passen
-    korting = models.ForeignKey(KalenderWedstrijdKortingscode, on_delete=models.SET_NULL, null=True, blank=True)
-    korting_voor_koper = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
-
-    class Meta:
-        verbose_name = "Kalender mutatie"
-
-    def __str__(self):
-        msg = "[%s]" % self.when
-        if not self.is_verwerkt:
-            msg += " (nog niet verwerkt)"
-        try:
-            msg += " %s (%s)" % (self.code, KALENDER_MUTATIE_TO_STR[self.code])
-        except KeyError:
-            msg += " %s (???)" % self.code
-
-        return msg
-
 
 # end of file

@@ -32,7 +32,7 @@ class SiteTijdelijkeUrlView(View):
             Hiervoor bieden we een pagina met een knop aan.
         """
         context = {}
-        menu_dynamics(request, context, 'hetplein')
+        menu_dynamics(request, context)
 
         url_code = kwargs['code']
         context['url'] = reverse('Overig:tijdelijke-url', kwargs={'code': url_code})

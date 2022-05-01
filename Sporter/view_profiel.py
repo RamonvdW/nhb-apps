@@ -398,37 +398,6 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         # for
         return scores
 
-    @staticmethod
-    def _get_bestellingen(account, context):
-
-        context['bestellingen'] = bestellingen = (Bestelling
-                                                  .objects
-                                                  .filter(account=account)
-                                                  .prefetch_related('producten')
-                                                  .order_by('aangemaakt'))
-
-        for bestelling in bestellingen:
-
-            bestelling.beschrijving = beschrijving = list()
-
-            for product in (bestelling
-                            .producten
-                            .select_related('inschrijving',
-                                            'inschrijving__wedstrijd',
-                                            'inschrijving__sporterboog__sporter')):
-
-                if product.inschrijving:
-                    beschrijving.append(product.inschrijving.korte_beschrijving())
-                else:
-                    beschrijving.append("??")
-            # for
-
-            bestelling.status_str = "?"
-
-            bestelling.url_details = reverse('Bestel:toon-bestelling-details',
-                                             kwargs={'bestel_nr': bestelling.bestel_nr})
-        # for
-
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -471,8 +440,10 @@ class ProfielView(UserPassesTestMixin, TemplateView):
 
             context['speelsterktes'] = self._find_speelsterktes(sporter)
 
+        if Bestelling.objects.filter(account=account).count() > 0:
+            context['toon_bestellingen'] = True
+
         self._get_contact_gegevens(sporter, context)
-        self._get_bestellingen(account, context)
 
         context['kruimels'] = (
             (None, 'Mijn pagina'),

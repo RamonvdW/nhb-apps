@@ -8,7 +8,7 @@ from django.test import TestCase, override_settings
 from django.core import management
 from django.conf import settings
 from Betaal.models import BetaalMutatie, BetaalActief, BetaalTransactie, BetaalInstellingenVereniging
-from Betaal.mutaties import betaal_start_ontvangst, betaal_payment_status_changed
+from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst, betaal_mutatieverzoek_payment_status_changed
 from Bestel.models import Bestelling
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbVereniging, NhbRegio
@@ -77,7 +77,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         url_betaling_gedaan = settings.SITE_URL + '/plein/'
 
-        mutatie = betaal_start_ontvangst(
+        mutatie = betaal_mutatieverzoek_start_ontvangst(
                         bestelling,
                         "Test betaling 42",     # 42 triggered 'paid'
                         bestelling.totaal_euro,
@@ -118,7 +118,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         url_betaling_gedaan = settings.SITE_URL + '/plein/'
 
-        mutatie = betaal_start_ontvangst(
+        mutatie = betaal_mutatieverzoek_start_ontvangst(
                         bestelling,
                         "Test betaling 43",     # 43 triggert 'failed'
                         bestelling.totaal_euro,
@@ -159,7 +159,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         url_betaling_gedaan = settings.SITE_URL + '/plein/'
 
-        mutatie = betaal_start_ontvangst(
+        mutatie = betaal_mutatieverzoek_start_ontvangst(
                         bestelling,
                         "Test betaling 44",     # 43 triggert 'expired'
                         bestelling.totaal_euro,
@@ -200,7 +200,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         url_betaling_gedaan = settings.SITE_URL + '/plein/'
 
-        betaal_start_ontvangst(
+        betaal_mutatieverzoek_start_ontvangst(
                         bestelling,
                         "Test beschrijving",
                         bestelling.totaal_euro,
@@ -211,7 +211,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         f1, f2 = self._run_achtergrondtaak(betaal_api=self.url_websim_api[:-2] + '99')
         self.assertTrue('Unable to communicate' in f1.getvalue())
 
-        mutatie1 = betaal_start_ontvangst(
+        mutatie1 = betaal_mutatieverzoek_start_ontvangst(
                         bestelling,
                         "Dit geeft code 500",
                         bestelling.totaal_euro,
@@ -221,7 +221,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertTrue('API response (status code: 500)' in f1.getvalue())
 
         # doe een dubbele aanvraag
-        mutatie2 = betaal_start_ontvangst(
+        mutatie2 = betaal_mutatieverzoek_start_ontvangst(
                         bestelling,
                         "Dit geeft code 500",
                         bestelling.totaal_euro,

@@ -11,13 +11,79 @@ from django.views.generic import TemplateView
 from django.utils.timezone import localtime
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige
-from Bestel.models import Bestelling
-from Betaal.mutaties import betaal_start_ontvangst
+from Bestel.models import Bestelling, BESTELLING_STATUS2STR, BESTELLING_STATUS_WACHT_OP_BETALING
+from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Plein.menu import menu_dynamics
 from decimal import Decimal
 
+
+TEMPLATE_TOON_BESTELLINGEN = 'bestel/toon-bestellingen.dtl'
 TEMPLATE_BESTELLING_DETAILS = 'bestel/toon-bestelling-details.dtl'
 TEMPLATE_BESTELLING_AFREKENEN = 'bestel/bestelling-afrekenen.dtl'
+
+
+class ToonBestellingenView(UserPassesTestMixin, TemplateView):
+
+    """ Via deze view kan een gebruiker zijn eigen bestellingen terug zien en een betaling opstarten """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_TOON_BESTELLINGEN
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu != Rollen.ROL_NONE
+
+    @staticmethod
+    def _get_bestellingen(account, context):
+
+        context['bestellingen'] = bestellingen = (Bestelling
+                                                  .objects
+                                                  .filter(account=account)
+                                                  .prefetch_related('producten')
+                                                  .order_by('-aangemaakt'))     # nieuwste eerst
+
+        for bestelling in bestellingen:
+
+            bestelling.beschrijving = beschrijving = list()
+
+            for product in (bestelling
+                            .producten
+                            .select_related('inschrijving',
+                                            'inschrijving__wedstrijd',
+                                            'inschrijving__sporterboog__sporter')):
+
+                if product.inschrijving:
+                    beschrijving.append(product.inschrijving.korte_beschrijving())
+                else:
+                    beschrijving.append("??")
+            # for
+
+            bestelling.status_str = BESTELLING_STATUS2STR[bestelling.status]
+            bestelling.status_aandacht = (bestelling.status == BESTELLING_STATUS_WACHT_OP_BETALING)
+
+            bestelling.url_details = reverse('Bestel:toon-bestelling-details',
+                                             kwargs={'bestel_nr': bestelling.bestel_nr})
+        # for
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        account = self.request.user
+
+        self._get_bestellingen(account, context)
+
+        context['kruimels'] = (
+            (reverse('Sporter:profiel'), 'Mijn pagina'),
+            (None, 'Bestellingen'),
+        )
+
+        menu_dynamics(self.request, context)
+        return context
 
 
 class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
@@ -156,7 +222,8 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
         context['transacties'], transacties_euro = self._beschrijf_transacties(bestelling)
 
         rest_euro = bestelling.totaal_euro - transacties_euro
-        context['rest_euro'] = rest_euro
+        if rest_euro > 0:
+            context['rest_euro'] = rest_euro
 
         if rest_euro >= Decimal('0.01'):
             context['url_afrekenen'] = reverse('Bestel:bestelling-afrekenen',
@@ -166,6 +233,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),
+            (reverse('Bestel:toon-bestellingen'), 'Bestellingen'),
             (None, 'Bestelling'),
         )
 
@@ -233,7 +301,7 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
 
             # start de bestelling via de achtergrond taak
             # deze slaat de referentie naar de mutatie op in de bestelling
-            betaal_start_ontvangst(
+            betaal_mutatieverzoek_start_ontvangst(
                         bestelling,
                         beschrijving,
                         rest_euro,
@@ -258,6 +326,9 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
             raise Http404('Niet gevonden')
 
         context['bestelling'] = bestelling
+
+        # analyseer de stand van zaken
+
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),

@@ -6,7 +6,7 @@
 
 from django.contrib import admin
 from .models import (KalenderWedstrijd, KalenderWedstrijdSessie, KalenderWedstrijdDeeluitslag,
-                     KalenderWedstrijdKortingscode, KalenderInschrijving, KalenderMutatie)
+                     KalenderWedstrijdKortingscode, KalenderInschrijving)
 
 
 class KalenderWedstrijdAdmin(admin.ModelAdmin):                 # pragma: no cover
@@ -92,16 +92,11 @@ class KalenderInschrijvingAdmin(admin.ModelAdmin):
     search_fields = ('sporterboog__sporter__lid_nr',)
 
 
-class KalenderMutatieAdmin(admin.ModelAdmin):
-
-    readonly_fields = ('when', 'code', 'inschrijving', 'korting', 'korting_voor_koper')
-
 
 admin.site.register(KalenderWedstrijd, KalenderWedstrijdAdmin)
 admin.site.register(KalenderWedstrijdSessie, KalenderWedstrijdSessieAdmin)
 admin.site.register(KalenderWedstrijdDeeluitslag, KalenderWedstrijdDeeluitslagAdmin)
 admin.site.register(KalenderWedstrijdKortingscode, KalenderWedstrijdKortingscodeAdmin)
 admin.site.register(KalenderInschrijving, KalenderInschrijvingAdmin)
-admin.site.register(KalenderMutatie, KalenderMutatieAdmin)
 
 # end of file
