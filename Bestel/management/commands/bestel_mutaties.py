@@ -34,6 +34,7 @@ import sys
 
 
 class Command(BaseCommand):
+
     help = "Betaal mutaties verwerken"
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
@@ -56,17 +57,12 @@ class Command(BaseCommand):
         parser.add_argument('--quick', action='store_true')     # for testing
 
     def _get_mandje(self, mutatie):
-        mandje = None
-
         account = mutatie.account
         if not account:
             self.stderr.write('[ERROR] Mutatie pk=%s met code=%s heeft geen account' % (mutatie.pk, mutatie.code))
+            mandje = None
         else:
-            try:
-                mandje = BestelMandje.objects.prefetch_related('producten').get(account=account)
-            except BestelMandje.DoesNotExist:
-                # geen mandje
-                self.stderr.write('[ERROR] Kan mandje niet vinden voor mutatie pk=%s met account pk=%s' % (mutatie.pk, account.pk))
+            mandje, is_created = BestelMandje.objects.prefetch_related('producten').get_or_create(account=account)
 
         return mandje
 

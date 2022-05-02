@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import BestelProduct, BestelMandje, Bestelling
+from .models import BestelProduct, BestelMandje, Bestelling, BestelMutatie
 
 
 class BestelProductAdmin(admin.ModelAdmin):
@@ -28,6 +28,8 @@ class BestellingAdmin(admin.ModelAdmin):
 
     ordering = ('aangemaakt',)
 
+    auto_complete = ('account', 'ontvanger', 'actief_mutatie', 'actief_transactie')
+
     fieldsets = (
         ('Koper',
             {'fields': ('bestel_nr',
@@ -45,8 +47,16 @@ class BestellingAdmin(admin.ModelAdmin):
     )
 
 
+class BestelMutatieAdmin(admin.ModelAdmin):
+
+    readonly_fields = ('when', 'account')
+
+    auto_complete = ('inschrijving', 'product')
+
+
 admin.site.register(BestelProduct, BestelProductAdmin)
 admin.site.register(BestelMandje, BestelMandjeAdmin)
 admin.site.register(Bestelling, BestellingAdmin)
+admin.site.register(BestelMutatie, BestelMutatieAdmin)
 
 # end of file
