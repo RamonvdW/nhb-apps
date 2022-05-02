@@ -19,9 +19,9 @@ from Wedstrijden.models import WedstrijdLocatie
 from decimal import Decimal
 
 
-class TestMandje(E2EHelpers, TestCase):
+class TestBestelMandje(E2EHelpers, TestCase):
 
-    """ tests voor de Kalender applicatie """
+    """ tests voor de Bestel applicatie, module mandje """
 
     url_mandje_toon = '/bestel/mandje/'
     url_mandje_verwijder = '/bestel/mandje/verwijderen/%s/'        # inhoud_pk
