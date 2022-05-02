@@ -164,8 +164,8 @@ def kalender_plugin_kortingscode_toepassen(stdout, kortingscode_str, producten):
     for korting in (KalenderWedstrijdKortingscode
                     .objects
                     .exclude(soort=KALENDER_KORTING_COMBI)      # wordt apart bekeken
-                    .filter(code=kortingscode_str,
-                            geldig_tot_en_met__lte=timezone.now().date())):
+                    .filter(code__iexact=kortingscode_str,
+                            geldig_tot_en_met__gte=timezone.now().date())):
 
         # korting = mutatie.korting
         # account = mutatie.korting_voor_koper

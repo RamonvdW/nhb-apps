@@ -62,7 +62,8 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Mutatie pk=%s met code=%s heeft geen account' % (mutatie.pk, mutatie.code))
             mandje = None
         else:
-            mandje, is_created = BestelMandje.objects.prefetch_related('producten').get_or_create(account=account)
+            # let op: geen prefetch_related('producten') gebruiken ivm mutaties
+            mandje, is_created = BestelMandje.objects.get_or_create(account=account)
 
         return mandje
 
