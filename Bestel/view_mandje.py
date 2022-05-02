@@ -15,6 +15,7 @@ from Bestel.models import BestelMandje, BESTEL_KORTINGSCODE_MINLENGTH
 from Bestel.mutaties import bestel_mutatieverzoek_maak_bestellingen, bestel_mutatieverzoek_verwijder_product_uit_mandje, bestel_mutatieverzoek_kortingscode_toepassen
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.rol import Rollen, rol_get_huidige
+from Kalender.models import KALENDER_KORTING_COMBI
 from Plein.menu import menu_dynamics
 from decimal import Decimal
 
@@ -40,7 +41,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         return self.rol_nu != Rollen.ROL_NONE
 
     @staticmethod
-    def _beschrijf_inhoud_mandje(account, maak_urls=True):
+    def _beschrijf_inhoud_mandje(account):
         """ gezamenlijke code voor het tonen van de inhoud van het mandje en het afrekenen """
 
         mandje_is_leeg = True
@@ -59,12 +60,6 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         except KeyError:
             # nog niet aangemaakt
             instellingen_nhb = None
-
-        # zet de verenigingen om die akkoord hebben
-        for ver_nr, instellingen in ver_nr2instellingen.items():
-            if instellingen.akkoord_via_nhb:
-                ver_nr2instellingen[ver_nr] = instellingen_nhb
-        # for
 
         try:
             mandje = BestelMandje.objects.prefetch_related('producten').get(account=account)
@@ -124,7 +119,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                     if inschrijving.gebruikte_code:
                         korting = inschrijving.gebruikte_code
                         product.gebruikte_code_str = "code %s (korting: %d%%)" % (korting.code, korting.percentage)
-                        if korting.combi_basis_wedstrijd:
+                        if korting.soort == KALENDER_KORTING_COMBI:
                             product.is_combi_korting = True
                             product.combi_reden = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
                     elif product.korting_euro:
@@ -134,36 +129,31 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                     controleer_euro += product.prijs_euro
                     controleer_euro -= product.korting_euro
 
-                    if product.inschrijving:
-                        ver_nr = product.inschrijving.wedstrijd.organiserende_vereniging.ver_nr
-                        try:
-                            instellingen = ver_nr2instellingen[ver_nr]
-                        except KeyError:
-                            # geen instellingen, dus kan geen betaling ontvangen
-                            product.kan_afrekenen = False
-                        else:
-                            # check of de betalingen via de NHB mogen lopen
-                            if instellingen is None:
-                                # is None als er geen NHB instellingen zijn
+                    ver_nr = product.inschrijving.wedstrijd.organiserende_vereniging.ver_nr
+                    try:
+                        instellingen = ver_nr2instellingen[ver_nr]
+                    except KeyError:
+                        # geen instellingen, dus kan geen betaling ontvangen
+                        product.kan_afrekenen = False
+                    else:
+                        if instellingen.akkoord_via_nhb:
+                            ver_nr = settings.BETAAL_VIA_NHB_VER_NR
+                            if instellingen_nhb is None or instellingen_nhb.mollie_api_key == '':
                                 product.kan_afrekenen = False
-                            else:
-                                if instellingen.akkoord_via_nhb:
-                                    ver_nr = settings.BETAAL_VIA_NHB_VER_NR
 
-                        try:
-                            ontvanger2product_pks[ver_nr].append(product.pk)
-                        except KeyError:
-                            ontvanger2product_pks[ver_nr] = [product.pk]
+                    try:
+                        ontvanger2product_pks[ver_nr].append(product.pk)
+                    except KeyError:
+                        ontvanger2product_pks[ver_nr] = [product.pk]
                 else:
                     tup = ('Fout', 'Onbekend product')
                     beschrijving.append(tup)
                     bevat_fout = True
                     product.kan_afrekenen = False
 
-                if maak_urls:
-                    # maak een knop om deze bestelling te verwijderen uit het mandje
-                    product.url_verwijder = reverse('Bestel:mandje-verwijder-product',
-                                                    kwargs={'product_pk': product.pk})
+                # maak een knop om deze bestelling te verwijderen uit het mandje
+                product.url_verwijder = reverse('Bestel:mandje-verwijder-product',
+                                                kwargs={'product_pk': product.pk})
 
                 mandje_is_leeg = False
             # for
@@ -196,8 +186,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
             context['toon_kortingscode_invoer'] = (mandje.totaal_euro > 0)
 
         if not (bevat_fout or mandje_is_leeg):
-            if mandje:
-                context['url_bestellen'] = reverse('Bestel:toon-inhoud-mandje')
+            context['url_bestellen'] = reverse('Bestel:toon-inhoud-mandje')
 
         context['kruimels'] = (
             (None, 'Mandje'),
@@ -254,7 +243,7 @@ class CodeToevoegenView(UserPassesTestMixin, View):
         if len(code) >= BESTEL_KORTINGSCODE_MINLENGTH:
             account = request.user
 
-            if account_controleer_snelheid_verzoeken(account):
+            if account_controleer_snelheid_verzoeken(account):      # pragma: no branch
                 bestel_mutatieverzoek_kortingscode_toepassen(account, code, snel == '1')
                 # achtergrondtaak past de korting toe
 
@@ -292,7 +281,7 @@ class VerwijderProductUitMandje(UserPassesTestMixin, View):
         # zoek de regel op in het mandje van de ingelogde gebruiker
         account = request.user
         try:
-            mandje, is_created = BestelMandje.objects.prefetch_related('producten').get_or_create(account=account)
+            mandje = BestelMandje.objects.prefetch_related('producten').get(account=account)
         except BestelMandje.DoesNotExist:
             raise Http404('Niet gevonden')
         else:

@@ -5,11 +5,13 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType
-from Bestel.models import BestelProduct, BestelMandje
+from Bestel.models import BestelProduct, BestelMandje, BestelMutatie, Bestelling
+from Betaal.models import BetaalInstellingenVereniging
 from Kalender.models import (KalenderWedstrijd, KalenderWedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD,
-                             KalenderInschrijving, KalenderWedstrijdKortingscode)
+                             KalenderInschrijving, KalenderWedstrijdKortingscode, KALENDER_KORTING_COMBI)
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -24,6 +26,7 @@ class TestMandje(E2EHelpers, TestCase):
     url_mandje_toon = '/bestel/mandje/'
     url_mandje_verwijder = '/bestel/mandje/verwijderen/%s/'        # inhoud_pk
     url_mandje_code_toevoegen = '/bestel/mandje/code-toevoegen/'
+    url_bestellingen_overzicht = '/bestel/overzicht/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -32,11 +35,31 @@ class TestMandje(E2EHelpers, TestCase):
         self.account_admin.is_BB = True
         self.account_admin.save()
 
+        ver_nhb = NhbVereniging(
+                    ver_nr=settings.BETAAL_VIA_NHB_VER_NR,
+                    naam='Bondsbureau',
+                    plaats='Schietstad',
+                    regio=NhbRegio.objects.get(regio_nr=100))
+        ver_nhb.save()
+        self.ver_nhb = ver_nhb
+
+        instellingen = BetaalInstellingenVereniging(
+                            vereniging=ver_nhb,
+                            mollie_api_key='test_1234')
+        instellingen.save()
+        self.instellingen_nhb = instellingen
+
         ver = NhbVereniging(
                     ver_nr=1000,
                     naam="Grote Club",
                     regio=NhbRegio.objects.get(regio_nr=112))
         ver.save()
+
+        instellingen = BetaalInstellingenVereniging(
+                            vereniging=ver,
+                            akkoord_via_nhb=True)
+        instellingen.save()
+        self.instellingen = instellingen
 
         sporter = Sporter(
                         lid_nr=100000,
@@ -181,6 +204,42 @@ class TestMandje(E2EHelpers, TestCase):
         self.inschrijving.gebruikte_code = self.korting
         self.inschrijving.save()
 
+        # veroorzaak een uitzondering
+        self.instellingen_nhb.mollie_api_key = ''
+        self.instellingen_nhb.save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
+
+        # verander de korting in een combi-korting
+        self.korting.soort = KALENDER_KORTING_COMBI
+        self.korting.save()
+
+        # leg een product in het mandje wat geen wedstrijd inschrijving is
+        product = BestelProduct()
+        product.save()
+        self.assertTrue(str(product) != '')
+        self.assertTrue(product.korte_beschrijving() != '')
+
+        mandje = BestelMandje.objects.get(account=self.account_admin)
+        mandje.producten.add(product)
+        self.assertTrue(str(mandje) != '')
+
+        self.instellingen.akkoord_via_nhb = False
+        self.instellingen.save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Onbekend product')
+
+        # veroorzaak een exception
+        BetaalInstellingenVereniging.objects.all().delete()
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -227,6 +286,9 @@ class TestMandje(E2EHelpers, TestCase):
         self.assertIsNotNone(inschrijving.gebruikte_code)
         self.assertEqual(inschrijving.gebruikte_code.code, self.code)
 
+        product = BestelProduct.objects.get(pk=product.pk)
+        self.assertTrue(str(product) != '')
+
         # mandje tonen met kortingscode
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_mandje_toon)
@@ -250,12 +312,14 @@ class TestMandje(E2EHelpers, TestCase):
             resp = self.client.post(self.url_mandje_verwijder % '1=5')
         self.assert404(resp, 'Verkeerde parameter')
 
+        # vul het mandje
+        product = self._vul_mandje(self.account_admin)
+        self.assertTrue(str(product) != '')
+        self.assertTrue(product.korte_beschrijving() != '')
+
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_mandje_verwijder % 999999)
         self.assert404(resp, 'Niet gevonden in jouw mandje')
-
-        # vul het mandje
-        product = self._vul_mandje(self.account_admin)
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_mandje_verwijder % product.pk, {'snel': 1})
@@ -267,6 +331,52 @@ class TestMandje(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_mandje_verwijder % product.pk, {'snel': 1})
         self.assert404(resp, 'Niet gevonden in jouw mandje')
+
+        # verwijderen zonder mandje
+        product = self._vul_mandje(self.account_admin)
+        mandje = BestelMandje.objects.get(account=self.account_admin)
+        mandje.producten.clear()
+        mandje.delete()
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_mandje_verwijder % product.pk, {'snel': 1})
+        self.assert404(resp, 'Niet gevonden')
+
+    def test_bestellen(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+        url = self.url_mandje_toon
+
+        # vul het mandje
+        self._vul_mandje(self.account_admin)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
+
+        # doe de bestelling
+        self.assertEqual(0, BestelMutatie.objects.count())
+        self.assertEqual(0, Bestelling.objects.count())
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+        self.assertEqual(1, BestelMutatie.objects.count())
+        self.assertEqual(0, Bestelling.objects.count())
+
+        mutatie = BestelMutatie.objects.all()[0]
+        self.assertTrue(str(mutatie) != '')
+        mutatie.code = 99999
+        mutatie.is_verwerkt = True
+        self.assertTrue(str(mutatie) != '')
+
+        self.verwerk_bestel_mutaties()
+
+        self.assertEqual(1, Bestelling.objects.count())
+
+        bestelling = Bestelling.objects.all()[0]
+        self.assertTrue(str(bestelling) != '')
 
 
 # end of file

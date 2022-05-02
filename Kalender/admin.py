@@ -92,7 +92,6 @@ class KalenderInschrijvingAdmin(admin.ModelAdmin):
     search_fields = ('sporterboog__sporter__lid_nr',)
 
 
-
 admin.site.register(KalenderWedstrijd, KalenderWedstrijdAdmin)
 admin.site.register(KalenderWedstrijdSessie, KalenderWedstrijdSessieAdmin)
 admin.site.register(KalenderWedstrijdDeeluitslag, KalenderWedstrijdDeeluitslagAdmin)

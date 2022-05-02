@@ -150,14 +150,21 @@ class Command(BaseCommand):
             product = qset[0]
 
             if product.inschrijving:
-                kalender_plugin_verwijder_reservering(self.stdout, product.inschrijving)
+                mandje.producten.remove(product)
 
-                # verwijder de hele inschrijving, want bewaren heeft geen waarde op dit punt
+                inschrijving = product.inschrijving
+
+                kalender_plugin_verwijder_reservering(self.stdout, inschrijving)
+
                 mutatie.inschrijving = None
-                product.inschrijving.delete()
+                mutatie.product = None
+                mutatie.save()
 
                 # verwijder het product, dan verdwijnt deze ook uit het mandje
                 product.delete()
+
+                # verwijder de hele inschrijving, want bewaren heeft geen waarde op dit punt
+                # inschrijving.delete()     # geeft db integratie error ivm referenties die nog ergens bestaan
             else:
                 self.stderr.write('[ERROR] Verwijder product pk=%s uit mandje pk=%s: Type niet ondersteund' % (
                                     product.pk, mandje.pk))
@@ -296,7 +303,7 @@ class Command(BaseCommand):
                 for product in BestelProduct.objects.filter(inschrijving=inschrijving):
                     # doorloop het mandje (typisch 0 of 1)
                     for mandje in product.bestelmandje_set.all():
-
+                        # product ligt in een mandje
                         self.stdout.write('[DEBUG] Inschrijving pk=%s in product pk=%s verwijderd uit mandje pk=%s' % (
                                             inschrijving.pk, product.pk, mandje.pk))
 
@@ -462,7 +469,7 @@ class Command(BaseCommand):
         # vang generieke fouten af
         try:
             self._monitor_nieuwe_mutaties()
-        except django.db.utils.DataError as exc:        # pragma: no cover
+        except (django.db.utils.DataError, django.db.utils.IntegrityError) as exc:        # pragma: no cover
             _, _, tb = sys.exc_info()
             lst = traceback.format_tb(tb)
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
