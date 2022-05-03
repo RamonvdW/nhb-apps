@@ -38,7 +38,7 @@ def report_validated_templates():
         # for
 
 
-def my_format(self):
+def my_format(self):            # pragma: no cover
     """ variant of StackSummary.format that skips all django site-package files in the output
         so focus is on the application source files. This saves ~75% of the output.
     """
