@@ -7,7 +7,7 @@
 from django.db import migrations, models
 
 
-def zet_organisatie(apps, _):
+def zet_organisatie(apps, _):                 # pragma: no cover
     """ Pas het nieuwe 'organisatie' veld aan voor situaties waar de default (WA) niet kan """
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie

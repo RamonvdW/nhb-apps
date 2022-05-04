@@ -49,7 +49,7 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
                          .objects
                          .select_related('organiserende_vereniging')
                          .get(pk=wedstrijd_pk))
-        except KalenderWedstrijd.DoesNotExist:
+        except (ValueError, TypeError, KalenderWedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         context['wed'] = wedstrijd

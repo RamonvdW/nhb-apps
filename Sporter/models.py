@@ -331,6 +331,7 @@ def get_sporter_voorkeuren_wedstrijdbogen(lid_nr):
 
         for sporterboog in (SporterBoog
                             .objects
+                            .select_related('boogtype')
                             .filter(sporter__lid_nr=lid_nr,
                                     voor_wedstrijd=True)):
             pks.append(sporterboog.boogtype.id)

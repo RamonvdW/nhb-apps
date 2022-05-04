@@ -393,7 +393,7 @@ class KalenderWedstrijdklasse(models.Model):
     # volgende voor gebruik bij het presenteren van een lijst van klassen
     volgorde = models.PositiveIntegerField()
 
-    # officiele (internationale) afkorting voor deze wedstrijdklasse
+    # officiële (internationale) afkorting voor deze wedstrijdklasse
     afkorting = models.CharField(max_length=10, default='?')
 
     def __str__(self):

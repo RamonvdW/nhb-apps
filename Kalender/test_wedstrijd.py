@@ -497,6 +497,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, url)
         self.assertEqual(1, KalenderWedstrijdSessie.objects.count())
         sessie = KalenderWedstrijdSessie.objects.all()[0]
+        self.assertTrue(str(sessie) != '')
 
         # wijzig de wedstrijd datum en controleer dat de sessie mee gaat
         self.assertEqual(sessie.datum, wedstrijd.datum_begin)

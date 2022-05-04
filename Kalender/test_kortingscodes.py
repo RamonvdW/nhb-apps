@@ -161,6 +161,7 @@ class TestKalenderKortingscodes(E2EHelpers, TestCase):
         korting_sporter.voor_sporter = self.sporter
         korting_sporter.save(update_fields=['voor_sporter'])
         korting_sporter.voor_wedstrijden.add(self.wedstrijd2)
+        self.assertTrue(str(korting_sporter) != '')
 
         korting_ver = KalenderWedstrijdKortingscode.objects.get(soort=KALENDER_KORTING_VERENIGING)
         self.assertEqual(korting_ver.uitgegeven_door, self.nhbver1)

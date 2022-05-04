@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 #  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
@@ -7,7 +6,7 @@
 from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.db.models import ObjectDoesNotExist
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -67,7 +66,7 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pks):
     wedstrijdklassen = list()
     for sessie in sessies:
         sessie.aantal_beschikbaar = sessie.max_sporters - sessie.aantal_inschrijvingen
-        sessie.klassen = sessie.wedstrijdklassen.select_related('leeftijdsklasse').all()
+        sessie.klassen = sessie.wedstrijdklassen.select_related('leeftijdsklasse', 'boogtype').all()
 
         sessie.kan_aanmelden = False
 
@@ -151,11 +150,11 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
 
         context['wed'] = wedstrijd
 
-        if self.request.user.is_authenticated:
-            account = self.request.user
-            lid_nr = account.username
-        else:
-            lid_nr = -1
+        account = self.request.user
+        try:
+            lid_nr = int(account.username)
+        except ValueError:
+            raise Http404('Bondsnummer ontbreekt')
 
         sporter, voorkeuren, wedstrijdboog_pks = get_sporter_voorkeuren_wedstrijdbogen(lid_nr)
 
@@ -538,8 +537,9 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
                             koper=account_koper)
 
         try:
-            inschrijving.save()
-        except IntegrityError:
+            with transaction.atomic():
+                inschrijving.save()
+        except IntegrityError:          # pragma: no cover
             # er is niet voldaan aan de uniqueness constraint (sessie, sporterboog)
             # ga uit van user-error (dubbelklik op knop) en skip de rest gewoon
             pass

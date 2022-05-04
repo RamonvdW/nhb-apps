@@ -13,9 +13,9 @@
     <script type="application/javascript">
         function toevoegen(id)
         {
-            console.log('toevoegen: id=', id)
+            // console.log('toevoegen: id=', id)
             const el = document.getElementById(id)
-            console.log('el=', el)
+            // console.log('el=', el)
 
             // voer een POST uit om toe te voegen
             let form = document.createElement('form');
