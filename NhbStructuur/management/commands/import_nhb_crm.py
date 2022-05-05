@@ -747,6 +747,7 @@ class Command(BaseCommand):
                     postadres = postadres[:pos].strip()
                     spl = postadres.split(' ')
                     lid_adres_code = postcode.replace(' ', '') + spl[-1]
+            # self.stdout.write('[DEBUG] lid_nr=%s, lid_adres_code=%s' % (lid_nr, repr(lid_adres_code)))
 
             # try:
             #     lid_edu = member['educations']
@@ -942,6 +943,7 @@ class Command(BaseCommand):
                 obj.sinds_datum = lid_sinds
                 obj.bij_vereniging = lid_ver
                 obj.lid_tot_einde_jaar = self.lidmaatschap_jaar
+                obj.adres_code = lid_adres_code
                 if lid_blocked:
                     obj.is_actief_lid = False
                 if not self.dryrun:

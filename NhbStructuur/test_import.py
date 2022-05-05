@@ -10,7 +10,7 @@ from BasisTypen.models import BoogType
 from Functie.models import Functie
 from Records.models import IndivRecord
 from Score.operations import score_indiv_ag_opslaan
-from Sporter.models import Sporter, SporterBoog
+from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from .models import NhbRegio, NhbVereniging
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
@@ -181,14 +181,17 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
 
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
         sporter = Sporter.objects.get(lid_nr=100098)
         self.assertEqual(sporter.bij_vereniging.ver_nr, 1000)
         self.assertTrue(sporter.is_actief_lid)
         self.assertEqual(sporter.lid_tot_einde_jaar, 2020)
+        self.assertEqual(sporter.adres_code, "1111AA111")
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(49):
+        if True: #with self.assert_max_queries(49):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_09.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
         # print('f1:', f1.getvalue())
@@ -203,12 +206,14 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Lid 100024: para_classificatie: 'W1' --> ''" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100025: is_actief_lid ja --> nee (want blocked)" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100025: vereniging 1000 Grote Club --> 1001 HBS Dichtbij" in f2.getvalue())
+        self.assertTrue("[INFO] Lid 100098: adres_code '1111AA111' --> '1115AB5'" in f2.getvalue())
 
         # 100099 is geen lid meer, maar moet toch nog gebruik kunnen blijven maken van de diensten
         sporter = Sporter.objects.get(lid_nr=100098)
         self.assertNotEqual(sporter.bij_vereniging, None)
         self.assertTrue(sporter.is_actief_lid)
         self.assertEqual(sporter.lid_tot_einde_jaar, 2020)
+        self.assertEqual(sporter.adres_code, "1115AB5")
 
     def test_haakjes(self):
         # sommige leden hebben de toevoeging " (Erelid NHB)" aan hun achternaam toegevoegd
@@ -290,7 +295,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(31):
+        with self.assert_max_queries(32):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_13.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
@@ -300,6 +305,49 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         sporter = Sporter.objects.get(pk=sporter.pk)
         self.assertTrue(sporter.bij_vereniging is not None)
         self.assertTrue(sporter.is_actief_lid)
+
+    def test_wijzig_geslacht(self):
+        # mutatie van geslacht M naar X voor sporter 100001
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(33):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_13.json',
+                                    '--sim_now=2020-07-01', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[INFO] Lid 100001 geslacht: M --> X" in f2.getvalue())
+
+        sporter = Sporter.objects.get(lid_nr=100001)
+        self.assertEqual(sporter.geslacht, 'X')
+
+        # nog een keer, nu met sporter voorkeuren
+        sporter.geslacht = 'V'
+        sporter.save(update_fields=['geslacht'])
+
+        voorkeuren = SporterVoorkeuren(sporter=sporter,
+                                       wedstrijd_geslacht_gekozen=True,
+                                       wedstrijd_geslacht='V')
+        voorkeuren.save()
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_13.json',
+                                    '--sim_now=2020-07-01', stderr=f1, stdout=f2)
+        self.assertTrue("[INFO] Lid 100001 geslacht: V --> X" in f2.getvalue())
+        self.assertTrue("[INFO] Lid 100001 voorkeuren: wedstrijd geslacht instelbaar gemaakt" in f2.getvalue())
+
+        # nu weer de andere kant op (X --> M)
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(61):
+            management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json',
+                                    '--sim_now=2020-07-01', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[INFO] Lid 100001 geslacht: X --> M" in f2.getvalue())
+        self.assertTrue("[INFO] Lid 100001 voorkeuren: wedstrijd geslacht vastgezet" in f2.getvalue())
 
     def test_maak_secretaris(self):
         # een lid secretaris maken
