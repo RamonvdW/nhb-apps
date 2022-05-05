@@ -56,10 +56,6 @@ urlpatterns = [
          views_planning_bond.BondPlanningView.as_view(),
          name='bond-planning'),
 
-    path('planning/bk/wedstrijd/verwijder/<wedstrijd_pk>/',
-         views_planning_bond.VerwijderWedstrijdView.as_view(),
-         name='bond-verwijder-wedstrijd'),
-
 
     # BKO
     path('<comp_pk>/doorzetten/rk/',

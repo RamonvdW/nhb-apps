@@ -773,6 +773,13 @@ class E2EHelpers(TestCase):
                 pos = pagina.find('</code>')
                 pagina = pagina[:pos]
                 self.fail(msg='404 pagina bevat %s; verwacht: %s' % (repr(pagina), repr(expected_msg)))
+        else:
+            pagina = str(resp.content)
+            pos = pagina.find('<code>')
+            pagina = pagina[pos + 6:]
+            pos = pagina.find('</code>')
+            pagina = pagina[:pos]
+            print('\nassert404: geen expected msg! Inhoud pagina: %s' % repr(pagina))
 
     def assert200_file(self, resp):
         if resp.status_code != 200:                                 # pragma: no cover
