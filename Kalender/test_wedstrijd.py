@@ -273,9 +273,9 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
 
         # niet bestaande wedstrijd
         resp = self.client.get(self.url_kalender_wijzig_wedstrijd % 999999)
-        self.assert404(resp)
+        self.assert404(resp, 'Wedstrijd niet gevonden')
         resp = self.client.post(self.url_kalender_wijzig_wedstrijd % 999999)
-        self.assert404(resp)
+        self.assert404(resp, 'Wedstrijd niet gevonden')
 
         # nu als BB
         self.e2e_wisselnaarrol_bb()
@@ -340,7 +340,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         # geen valide datum (parsing exception)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'datum_begin': 'not-a-date'})
-        self.assert404(resp)
+        self.assert404(resp, 'Geen valide datum')
 
         # te ver in het verleden
         with self.assert_max_queries(20):
@@ -349,12 +349,12 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'wedstrijd_duur': 'duur_'})
-        self.assert404(resp)
+        self.assert404(resp, 'Fout in wedstrijd duur')
 
         # illegaal aantal banen
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'aantal_banen': 'x'})
-        self.assert404(resp)
+        self.assert404(resp, 'Fout in aantal banen')
 
         # niet bestaande locatie
         # en niet bekende aanwezigheid
@@ -479,7 +479,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         # slechte wedstrijd_pk
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_kalender_zet_status % 999999, {})
-        self.assert404(resp)
+        self.assert404(resp, 'Wedstrijd niet gevonden')
 
     def test_wijzig_wedstrijd_datum(self):
         # wordt HWL

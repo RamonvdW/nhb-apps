@@ -350,7 +350,7 @@ class TestCompRegioWieSchietWaar(E2EHelpers, TestCase):
         self.e2e_check_rol('HWL')
 
         resp = self.client.get(self.url_wieschietwaar % 999999)
-        self.assert404(resp)     # 404 = Not found
+        self.assert404(resp, 'Geen valide competitie')
 
         # maak een hoop extra schutters aan
         basis = self.deelnemer_100001

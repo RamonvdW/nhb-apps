@@ -305,7 +305,7 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
 
         # niet bestaande deelcomp
         resp = self.client.get(self.url_regio_teams % 999999)
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # logout
 
@@ -405,12 +405,12 @@ class TestCompRegioTeams(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_18, 'K')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp)
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         # bad pk
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_ag_controle % (999999, 999999))
-        self.assert404(resp)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # verkeerde regio
         with self.assert_max_queries(20):

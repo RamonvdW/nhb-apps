@@ -237,17 +237,17 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         # haal als HWL 'de' voorkeuren pagina op, zonder specifiek sporter_pk
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren)
-        self.assert404(resp)     # 404 = Not allowed
+        self.assert404(resp, 'Sporter niet gevonden')
 
         # haal als HWL de voorkeuren pagina op met een niet-numeriek sporter_pk
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren + 'snuiter/')
-        self.assert404(resp)     # 404 = Not allowed
+        self.assert404(resp, 'Sporter niet gevonden')
 
         # haal als HWL de voorkeuren pagina op met een niet bestaand sporter_pk
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren + '999999/')
-        self.assert404(resp)     # 404 = Not allowed
+        self.assert404(resp, 'Sporter niet gevonden')
 
         # haal als HWL de voorkeuren pagina op van een lid van een andere vereniging
         with self.assert_max_queries(20):

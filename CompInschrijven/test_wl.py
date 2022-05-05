@@ -233,6 +233,6 @@ class TestCompInschrijvenWL(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_ingeschreven % 9999999)
-        self.assert404(resp)         # 404 = Not found
+        self.assert404(resp, 'Verkeerde parameters')
 
 # end of file

@@ -482,7 +482,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # trigger de permissie check (want: geen competitie aangemaakt)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_ag_vaststellen_afstand % '18')
-        self.assert404(resp)
+        self.assert404(resp, 'Geen competitie in de juiste fase')
 
         # maak de competities aan - de voorwaarde om AG's vast te stellen
         competities_aanmaken()
@@ -515,7 +515,7 @@ class TestCompetitie(E2EHelpers, TestCase):
         # probeer de AG's te laten vaststellen terwijl dat niet meer mag
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_ag_vaststellen_afstand % '25', {'snel': 1})
-        self.assert404(resp)
+        self.assert404(resp, 'Geen competitie in de juiste fase')
 
         # aanmaken wordt gedaan door de achtergrondtaak, maar die draait nu niet
         aanvangsgemiddelden_vaststellen_voor_afstand(18)
@@ -628,17 +628,14 @@ class TestCompetitie(E2EHelpers, TestCase):
         competities_aanmaken()
 
         # illegale competitie
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_klassengrenzen_vaststellen % 'xx')
-        self.assert404(resp)
+        resp = self.client.get(self.url_klassengrenzen_vaststellen % 'xx')
+        self.assert404(resp, 'Competitie niet gevonden')
 
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_klassengrenzen_vaststellen % 'xx')
-        self.assert404(resp)
+        resp = self.client.post(self.url_klassengrenzen_vaststellen % 'xx')
+        self.assert404(resp, 'Competitie niet gevonden')
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_klassengrenzen_tonen % 999999)
-        self.assert404(resp)
+        resp = self.client.get(self.url_klassengrenzen_tonen % 999999)
+        self.assert404(resp, 'Competitie niet gevonden')
 
     def test_klassengrenzen_tonen(self):
         # competitie opstarten

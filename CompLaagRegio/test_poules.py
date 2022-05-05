@@ -218,9 +218,9 @@ class TestCompRegioPoules(E2EHelpers, TestCase):
         # bad deelcomp
         bad_url = self.url_regio_poules % 999999
         resp = self.client.get(bad_url)
-        self.assert404(resp)
+        self.assert404(resp, 'Competitie niet gevonden')
         resp = self.client.post(bad_url)
-        self.assert404(resp)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # verkeerde beheerder
         bad_url = self.url_regio_poules % self.deelcomp_regio101_18.pk
@@ -250,9 +250,9 @@ class TestCompRegioPoules(E2EHelpers, TestCase):
         # bad poule
         bad_url = self.url_wijzig_poule % 999999
         resp = self.client.get(bad_url)
-        self.assert404(resp)
+        self.assert404(resp, 'Poule bestaat niet')
         resp = self.client.post(bad_url)
-        self.assert404(resp)
+        self.assert404(resp, 'Poule bestaat niet')
 
         # verkeerde beheerder
         poule.deelcompetitie = self.deelcomp_regio101_25
@@ -287,7 +287,7 @@ class TestCompRegioPoules(E2EHelpers, TestCase):
         self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assert404(resp)
+        self.assert404(resp, 'Poules kunnen niet meer aangepast worden')
         self.assertEqual(1, RegiocompetitieTeamPoule.objects.count())
 
         # fase E: wijzig de poule
@@ -309,11 +309,11 @@ class TestCompRegioPoules(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp)
+        self.assert404(resp, 'Poules kunnen niet meer aangepast worden')
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'beschrijving': 'nieuwe test'})
-        self.assert404(resp)
+        self.assert404(resp, 'Poules kunnen niet meer aangepast worden')
 
         # terug naar fase D
         comp = deelcomp.competitie

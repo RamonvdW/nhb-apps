@@ -358,24 +358,22 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         # alle datums verplicht
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'datum1': '2019-08-09'})
-        self.assert404(resp)     # 404 = Not found
+        self.assert404(resp, 'Verplichte parameter ontbreekt')
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'datum1': 'null',
                                           'datum2': 'hallo',
                                           'datum3': '0',
                                           'datum4': '2019-13-42'})
-        self.assert404(resp)     # 404 = Not found
+        self.assert404(resp, 'Geen valide datum')
 
         # foute comp_pk bij get
         url = self.url_wijzigdatums % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # foute comp_pk bij post
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.post(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
 # end of file

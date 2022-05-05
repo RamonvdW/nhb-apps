@@ -258,23 +258,23 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
         url = self.url_aangemeld_alles % comp.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found/allowed
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         url = self.url_aangemeld_rayon % (comp.pk, self.rayon_1.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found/allowed
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         url = self.url_aangemeld_regio % (comp.pk, self.regio_101.pk)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found/allowed
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         # regio 100: niet bestaand als deelcompetitie
         url = self.url_aangemeld_regio % (comp.pk, 100)
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp)  # 404 = Not found
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         # coverage voor models __str__
         obj = RegioCompetitieSchutterBoog.objects.filter(deelcompetitie__laag=LAAG_REGIO).all()[0]
@@ -405,29 +405,24 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
         # bad keys
         url = self.url_aangemeld_alles % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         url = self.url_aangemeld_rayon % (999999, 999999)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         url = self.url_aangemeld_rayon % (comp.pk, 999999)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         url = self.url_aangemeld_regio % (999999, 999999)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         url = self.url_aangemeld_regio % (comp.pk, 999999)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde competitie fase')
 
     @staticmethod
     def _vind_tabel_regel_met(resp, zoekterm):

@@ -141,7 +141,7 @@ class TestHistComp(E2EHelpers, TestCase):
         url = self.url_hist_indiv % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp)
+        self.assert404(resp, 'Competitie niet gevonden')
 
     def test_view_indiv_few(self):
         url = self.url_hist_indiv % self.indiv_histcomp_pk

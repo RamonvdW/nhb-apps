@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -249,7 +249,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         # illegale klasse_pk
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_interland_download % 999999)
-        self.assert404(resp)     # 404 = Not found
+        self.assert404(resp, 'Klasse niet gevonden')
 
         # bestaande klasse_pk, maar verkeerd seizoen
         obj = HistCompetitie()
@@ -260,7 +260,7 @@ class TestHistCompInterland(E2EHelpers, TestCase):
         obj.save()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_interland_download % obj.pk)
-        self.assert404(resp)     # 404 = Not found
+        self.assert404(resp, 'Geen sporters gevonden')
 
         # verwijder de hele histcomp
         HistCompetitie.objects.all().delete()

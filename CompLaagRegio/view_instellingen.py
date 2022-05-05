@@ -57,7 +57,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
                              laag=LAAG_REGIO,
                              nhb_regio__regio_nr=regio_nr))
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Http404()
+            raise Http404('Competitie niet gevonden')
 
         if deelcomp.functie != self.functie_nu:
             # niet de beheerder
@@ -139,7 +139,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
                              laag=LAAG_REGIO,
                              nhb_regio__regio_nr=regio_nr))
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Http404()
+            raise Http404('Competitie niet gevonden')
 
         if deelcomp.functie != self.functie_nu:
             # niet de beheerder
@@ -148,7 +148,7 @@ class RegioInstellingenView(UserPassesTestMixin, TemplateView):
         deelcomp.competitie.bepaal_fase()
         if deelcomp.competitie.fase > 'D':
             # niet meer te wijzigen
-            raise Http404()
+            raise Http404('Verkeerde competitie fase')
 
         readonly_partly = (deelcomp.competitie.fase >= 'B')
         updated = list()
@@ -220,7 +220,7 @@ class RegioInstellingenGlobaalView(UserPassesTestMixin, TemplateView):
             comp_pk = int(kwargs['comp_pk'][:6])    # afkappen voor de veiligheid
             comp = Competitie.objects.get(pk=comp_pk)
         except (ValueError, Competitie.DoesNotExist):
-            raise Http404()
+            raise Http404('Competitie niet gevonden')
 
         deelcomps = (DeelCompetitie
                      .objects

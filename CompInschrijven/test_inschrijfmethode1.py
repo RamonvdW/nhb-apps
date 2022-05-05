@@ -383,46 +383,38 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
 
         # competitie bestaat niet
         url = self.url_behoefte1 % (999999, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         url = self.url_behoefte1_bestand % (999999, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # regio bestaat niet
         url = self.url_behoefte1 % (comp.pk, 999999)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Regio niet gevonden')
 
         url = self.url_behoefte1_bestand % (comp.pk, 999999)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Regio niet gevonden')
 
         # deelcomp bestaat niet
         url = self.url_behoefte1 % (comp.pk, 100)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         url = self.url_behoefte1_bestand % (comp.pk, 100)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # correct, maar niet inschrijfmethode 3
         url = self.url_behoefte1 % (comp.pk, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde inschrijfmethode')
 
         url = self.url_behoefte1_bestand % (comp.pk, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde inschrijfmethode')
 
 # end of file

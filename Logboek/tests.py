@@ -190,10 +190,11 @@ class TestLogboek(E2EHelpers, TestCase):
         # test illegale pagina nummers
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_logboek + 'crm-import/?page=999999')
-        self.assert404(resp)  # 404 = Not found
+        self.assert404(resp, 'Ongeldige pagina (999999): Die pagina bevat geen resultaten')     # django vertaling
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_logboek + 'crm-import/?page=test')
-        self.assert404(resp)  # 404 = Not found
+        self.assert404(resp, 'Pagina is niet')                                                  # django vertaling
+        self.assert404(resp, 'en kan ook niet naar een geheel getal worden geconverteerd')      # django vertaling
 
         # voeg wat extra regels toe aan het logboek
         # zorg voor 10+ pagina's

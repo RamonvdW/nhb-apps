@@ -351,12 +351,10 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
 
         # niet bestaande functie
         url = self.url_wijzig_email % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
-        self.assert404(resp)
+        resp = self.client.get(url)
+        self.assert404(resp, 'Foutieve functie')
+        resp = self.client.post(url)
+        self.assert404(resp, 'Foutieve functie')
 
         # post met te weinig parameters
         url = self.url_wijzig_email % self.functie_rko1.pk

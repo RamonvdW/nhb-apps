@@ -347,47 +347,39 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
 
         # competitie bestaat niet
         url = self.url_behoefte3 % (999999, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         url = self.url_behoefte3_bestand % (999999, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # regio bestaat niet
         url = self.url_behoefte3 % (comp.pk, 999999)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         url = self.url_behoefte3_bestand % (comp.pk, 999999)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         # deelcomp bestaat niet
         url = self.url_behoefte3 % (comp.pk, 100)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         url = self.url_behoefte3_bestand % (comp.pk, 100)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         # correct, maar niet inschrijfmethode 3
         url = self.url_behoefte3 % (comp.pk, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         url = self.url_behoefte3_bestand % (comp.pk, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde competitie fase')
 
 
 # end of file

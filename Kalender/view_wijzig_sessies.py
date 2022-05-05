@@ -303,7 +303,7 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
 
         if request.POST.get('verwijder_sessie', ''):
             if wedstrijd.status == WEDSTRIJD_STATUS_GEANNULEERD:
-                raise Http404()
+                raise Http404('Wedstrijd is geannuleerd')
             sessie.delete()
         else:
             updated = list()

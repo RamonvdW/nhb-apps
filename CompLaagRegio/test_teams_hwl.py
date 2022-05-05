@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.core import management
 from django.utils import timezone
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
@@ -19,7 +18,6 @@ from Score.operations import score_indiv_ag_opslaan
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
-import io
 
 
 class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
@@ -374,53 +372,42 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_koppelen % 999999)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(self.url_koppelen % 999999)
+        self.assert404(resp, 'Team niet gevonden')
 
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_koppelen % 999999)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.post(self.url_koppelen % 999999)
+        self.assert404(resp, 'Team niet gevonden')
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_maak_team % 999999)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(self.url_maak_team % 999999)
+        self.assert404(resp, 'Competitie niet gevonden')
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_wijzig_team % (999999, 999999))
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(self.url_wijzig_team % (999999, 999999))
+        self.assert404(resp, 'Competitie niet gevonden')
 
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_wijzig_team % (999999, 999999))
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.post(self.url_wijzig_team % (999999, 999999))
+        self.assert404(resp, 'Competitie niet gevonden')
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_regio_teams % 999999)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(self.url_regio_teams % 999999)
+        self.assert404(resp, 'Competitie niet gevonden')
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 999999))
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 999999))
+        self.assert404(resp, 'Team niet gevonden of niet van jouw vereniging')
 
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 999999))
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 999999))
+        self.assert404(resp, 'Team niet gevonden')
 
         # maak een team aan zonder team_type
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0))
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0))
+        self.assert404(resp, 'Team niet gevonden')
 
         # zet de competitie naar > fase E
         zet_competitie_fase(self.comp_18, 'F')
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_regio_teams % self.deelcomp18_regio111.pk)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(self.url_regio_teams % self.deelcomp18_regio111.pk)
+        self.assert404(resp, 'Competitie is niet in de juiste fase')
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 999999))
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 999999))
+        self.assert404(resp, 'Competitie is niet in de juiste fase')
 
     def test_regio_teams(self):
         # login als HWL van de vereniging in regio 111
@@ -475,7 +462,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         # wijzig het team type
         resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk),
                                 {'team_type': 'BAD'})
-        self.assert404(resp)     # 404 = Not found
+        self.assert404(resp, 'Verkeerde parameter')
 
         # team change
         with self.assert_max_queries(20):
@@ -509,7 +496,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         # nu zijn er 10 teams. Maak #11 aan
         resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
                                 {'team_type': 'R2'})
-        self.assert404(resp)     # 404 = Not found
+        self.assert404(resp, 'Team niet gevonden')
 
         # haal het teams overzicht op
         with self.assert_max_queries(20):
@@ -549,7 +536,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, team.pk),
                                     {'verwijderen': '1'})
-        self.assert404(resp)
+        self.assert404(resp, 'Mag niet (meer) wijzigen')
 
         # herstel de datum en verwijder het team
         self.deelcomp18_regio111.einde_teams_aanmaken = self.deelcomp18_regio111.competitie.einde_teamvorming
@@ -561,16 +548,16 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
 
         # bad team pk
         resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 'notanumber'))
-        self.assert404(resp)
+        self.assert404(resp, 'Geen valide parameter')
 
         # nieuw team maken met bad team_type
         resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
                                 {'team_type': 'xxx'})
-        self.assert404(resp)
+        self.assert404(resp, 'Team niet gevonden')
 
         # not-existing team pk
         resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 999999))
-        self.assert404(resp)
+        self.assert404(resp, 'Team niet gevonden')
 
         self.e2e_assert_other_http_commands_not_supported(self.url_regio_teams % self.deelcomp25_regio111.pk)
 
@@ -731,7 +718,7 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('complaagregio/hwl-teams-koppelen.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.post(url)
-        self.assert404(resp)
+        self.assert404(resp, 'Voorbij de einddatum voor wijzigingen')
 
     def test_wijzig_ag(self):
         # login als HWL
@@ -766,33 +753,27 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)
 
         # corner case: geen nieuw ag
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
+        resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
 
         # bad: te laag ag
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'nieuw_ag': '0.999'})
-        self.assert404(resp)
+        resp = self.client.post(url, {'nieuw_ag': '0.999'})
+        self.assert404(resp, 'Geen goed AG')
 
         # bad: te hoog ag
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'nieuw_ag': '10.0'})
-        self.assert404(resp)
+        resp = self.client.post(url, {'nieuw_ag': '10.0'})
+        self.assert404(resp, 'Geen goed AG')
 
         # bad code: geen float
-        with self.assert_max_queries(20):
-            resp = self.client.post(url, {'nieuw_ag': 'what a big mess is this'})
-        self.assert404(resp)
+        resp = self.client.post(url, {'nieuw_ag': 'what a big mess is this'})
+        self.assert404(resp, 'Geen goed AG')
 
         # bad case: onbekende deelnemer
         bad_url = self.url_wijzig_ag % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.get(bad_url)
-        self.assert404(resp)
-        with self.assert_max_queries(20):
-            resp = self.client.post(bad_url)
-        self.assert404(resp)
+        resp = self.client.get(bad_url)
+        self.assert404(resp, 'Sporter niet gevonden')
+        resp = self.client.post(bad_url)
+        self.assert404(resp, 'Sporter niet gevonden')
 
         # bad case: lid van andere vereniging
         self.deelnemer_100002_18.bij_vereniging = self.nhbver2
@@ -1034,14 +1015,14 @@ class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
 
         # niet bestaande deelcomp
         resp = self.client.get(self.url_team_invallers % 999999)
-        self.assert404(resp)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # niet bestaande team-ronde
         url = self.url_team_invallers_koppelen % 999999
         resp = self.client.get(url)
-        self.assert404(resp)
+        self.assert404(resp, 'Team niet gevonden')
         resp = self.client.post(url, {})
-        self.assert404(resp)
+        self.assert404(resp, 'Team ronde niet gevonden of niet van jouw vereniging')
 
         # team zonder initiële sporters
         ronde_team.deelnemers_geselecteerd.clear()

@@ -57,10 +57,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                                         'nhb_regio')
                         .get(pk=deelcomp_pk))
 
-        except (ValueError, KeyError):
-            # vuilnis
-            raise Http404()
-        except (SporterBoog.DoesNotExist, DeelCompetitie.DoesNotExist):
+        except (ValueError, KeyError, SporterBoog.DoesNotExist, DeelCompetitie.DoesNotExist):
             # niet bestaand record
             raise Http404('Sporter of competitie niet gevonden')
 
@@ -258,10 +255,7 @@ class RegiocompetitieAanmeldenView(View):
                         .select_related('competitie',
                                         'nhb_regio')
                         .get(pk=deelcomp_pk))
-        except (ValueError, KeyError):
-            # vuilnis
-            raise Http404()
-        except (SporterBoog.DoesNotExist, DeelCompetitie.DoesNotExist):
+        except (ValueError, KeyError, SporterBoog.DoesNotExist, DeelCompetitie.DoesNotExist):
             # niet bestaand record(s)
             raise Http404('Sporter of competitie niet gevonden')
 
@@ -400,10 +394,7 @@ class RegiocompetitieAfmeldenView(View):
                          .select_related('deelcompetitie__competitie',
                                          'sporterboog__sporter')
                          .get(pk=deelnemer_pk))
-        except (ValueError, KeyError):
-            # vuilnis
-            raise Http404()
-        except RegioCompetitieSchutterBoog.DoesNotExist:
+        except (ValueError, KeyError, RegioCompetitieSchutterBoog.DoesNotExist):
             # niet bestaand record
             raise Http404('Inschrijving niet gevonden')
 

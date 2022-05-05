@@ -78,9 +78,9 @@ class TestKalenderMaand(E2EHelpers, TestCase):
 
         # illegale maand getallen
         resp = self.client.get(self.url_kalender_maand % (2020, 0))
-        self.assert404(resp)
+        self.assert404(resp, 'Geen valide jaar / maand combinatie')
         resp = self.client.get(self.url_kalender_maand % (2020, 0))
-        self.assert404(resp)
+        self.assert404(resp, 'Geen valide jaar / maand combinatie')
 
         # maand als tekst
         with self.assert_max_queries(20):
@@ -178,7 +178,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
         # niet bestaande wedstrijd
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_kalender_info % 999999)
-        self.assert404(resp)
+        self.assert404(resp, 'Wedstrijd niet gevonden')
 
         self.e2e_assert_other_http_commands_not_supported(url)
 

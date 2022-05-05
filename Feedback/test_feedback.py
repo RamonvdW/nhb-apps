@@ -148,9 +148,8 @@ class TestFeedback(E2EHelpers, TestCase):
 
     def test_form_get(self):
         # de formulier-url is bedoeld voor een POST, maar staat ook een GET toe
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_feedback_formulier)
-        self.assert404(resp)
+        resp = self.client.get(self.url_feedback_formulier)
+        self.assert404(resp, 'Pagina bestaat niet')
 
     def test_post_without_get(self):
         # probeer een post van het formulier zonder de get

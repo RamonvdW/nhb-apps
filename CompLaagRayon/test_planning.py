@@ -255,7 +255,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # maak een RK wedstrijd aan in het eigen rayon
         url = self.url_planning_rayon % self.deelcomp_rayon1_18.pk
@@ -378,7 +378,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         url = self.url_verwijder_rk_wedstrijd % wedstrijd.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assert404(resp)     # 404 = Not found/allowed
+        self.assert404(resp, 'Uitslag mag niet meer gewijzigd worden')
 
         # verwijder de bevriezing
         uitslag.is_bevroren = False
@@ -415,7 +415,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         url = self.url_verwijder_rk_wedstrijd % 999999
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assert404(resp)     # 404 = Not found/allowed
+        self.assert404(resp, 'Wedstrijd niet gevonden')
 
         # wedstrijd van niet-RK
         self.deelcomp_rayon1_18.laag = LAAG_REGIO
@@ -424,7 +424,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         url = self.url_verwijder_rk_wedstrijd % wedstrijd.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assert404(resp)     # 404 = Not found/allowed
+        self.assert404(resp, 'Competitie niet gevonden')
 
         self.deelcomp_rayon1_18.laag = LAAG_RK
         self.deelcomp_rayon1_18.save()
@@ -502,7 +502,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         url = self.url_planning_rayon % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # probeer een wedstrijd te wijzigen als BKO
         url = self.url_wijzig_rk_wedstrijd % 999999
@@ -517,26 +517,26 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         url = self.url_wijzig_rk_wedstrijd % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Wedstrijd niet gevonden')
 
         url = self.url_wijzig_rk_wedstrijd % "BAD"
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Wedstrijd niet gevonden')
 
         url = self.url_wijzig_rk_wedstrijd % "##"
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Pagina bestaat niet')
 
         url = self.url_wijzig_rk_wedstrijd % "1(2)"
         with self.assert_max_queries(20):
             resp = self.client.get(url)
+        self.assert404(resp, 'Wedstrijd niet gevonden')
 
-        self.assert404(resp)  # 404 = Not allowed
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Wedstrijd niet gevonden')
 
         # maak een RK wedstrijd aan in het eigen rayon
         url = self.url_planning_rayon % self.deelcomp_rayon1_18.pk
@@ -550,63 +550,63 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         # wijzig de wedstrijd
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Incompleet verzoek')
 
         # slechte weekdag
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'weekdag': "XX",
                                           'aanvang': '12:34',
                                           'nhbver_pk': self.nhbver_112.ver_nr})
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Geen valide verzoek')
 
         # slechte weekdag
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'weekdag': 99,
                                           'aanvang': '12:34',
                                           'nhbver_pk': self.nhbver_112.ver_nr})
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Geen valide verzoek')
 
         # slechte weekdag
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'weekdag': "-1",
                                           'aanvang': '12:34',
                                           'nhbver_pk': self.nhbver_112.ver_nr})
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Geen valide verzoek')
 
         # weekdag buiten RK range (is 1 week lang)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'weekdag': 30,
                                           'aanvang': '12:34',
                                           'nhbver_pk': self.nhbver_112.ver_nr})
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Geen valide datum')
 
         # slecht tijdstip
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'weekdag': 1,
                                           'aanvang': '(*:#)',
                                           'nhbver_pk': self.nhbver_112.ver_nr})
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Geen valide verzoek')
 
         # slecht tijdstip
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'weekdag': 1,
                                           'aanvang': '12:60',
                                           'nhbver_pk': self.nhbver_112.ver_nr})
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Geen valide tijdstip')
 
         # bad vereniging nummer
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'weekdag': 1,
                                           'aanvang': '12:34',
                                           'nhbver_pk': 999999})
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Vereniging niet gevonden')
 
         # niet toegestane vereniging
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'weekdag': 1,
                                           'aanvang': '12:34',
                                           'nhbver_pk': self.nhbver_112.ver_nr})
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Geen valide rayon')
 
         # probeer wedstrijd van ander rayon te wijzigen
         self.e2e_login_and_pass_otp(self.account_rko2_18)
@@ -727,7 +727,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         # regio deelcomp
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_rk % self.deelcomp_regio101_18.pk)
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # verkeerde rayon deelcomp
         with self.assert_max_queries(20):
@@ -737,7 +737,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         # geen deelnemers lijst
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_bestand % self.deelcomp_rayon1_18.pk)
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Geen deelnemerslijst')
 
         # verkeerde rayon deelcomp - download
         self.deelcomp_rayon2_18.heeft_deelnemerslijst = True
@@ -749,7 +749,7 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
         # bad deelcomp pk
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_lijst_bestand % 999999)
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Competitie niet gevonden')
 
     def test_bad_wijzig_status(self):
         self.client.logout()
@@ -764,11 +764,11 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Deelnemer niet gevonden')
 
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Deelnemer niet gevonden')
 
         # verkeerde RKO
         self.e2e_login_and_pass_otp(self.account_rko2_18)
@@ -898,11 +898,11 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Competitie niet gevonden')
 
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Competitie niet gevonden')
 
         url = self.url_wijzig_limiet % self.deelcomp_rayon1_18.pk
         isel = 'isel_%s' % self.klasse_c.pk
@@ -918,11 +918,11 @@ class TestCompRayonPlanning(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {isel: '19'})
-        self.assert404(resp)     # 404 = Not allowed
+        self.assert404(resp, 'Geen valide keuze voor indiv')
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {tsel: '19'})
-        self.assert404(resp)     # 404 = Not allowed
+        self.assert404(resp, 'Geen valide keuze voor team')
 
         # verkeerde RKO
         self.e2e_login_and_pass_otp(self.account_rko2_18)

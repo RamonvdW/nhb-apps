@@ -195,9 +195,8 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
 
         # vereniging die niet bij de locatie hoort
         url = self.url_accommodatie_details % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Geen valide vereniging')
 
         # coverage
         self.assertTrue(str(self.loc1) != "")
@@ -386,51 +385,28 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'baan_type': 'O',
                                           'banen_18m': 40,
-                                          'banen_25m': 6,
-                                          #'max_dt': 3
-                                          })
-        self.assert404(resp)     # 404 = Not found
+                                          'banen_25m': 6})
+        self.assert404(resp, 'Geen valide invoer')
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'baan_type': 'O',
                                           'banen_18m': 4,
-                                          'banen_25m': 40,
-                                          #'max_dt': 3
-                                          })
-        self.assert404(resp)     # 404 = Not found
-
-        #with self.assert_max_queries(20):
-        #    resp = self.client.post(url, {'baan_type': 'O',
-        #                                  'banen_18m': 4,
-        #                                  'banen_25m': 4,
-        #                                  'max_dt': 2})
-        #self.assert404(resp)     # 404 = Not found
-
-        #with self.assert_max_queries(20):
-        #    resp = self.client.post(url, {'baan_type': 'O',
-        #                                  'banen_18m': 4,
-        #                                  'banen_25m': 4,
-        #                                  'max_dt': 5
-        #                                  })
-        #self.assert404(resp)     # 404 = Not found
+                                          'banen_25m': 40})
+        self.assert404(resp, 'Geen valide invoer')
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'baan_type': 'y',
                                           'banen_18m': 4,
-                                          'banen_25m': 4,
-                                          #'max_dt': 4
-                                          })
-        self.assert404(resp)     # 404 = Not found
+                                          'banen_25m': 4})
+        self.assert404(resp, 'Geen valide invoer')
 
         # illegale location_pk
         url = self.url_accommodatie_vereniging % 888888
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'baan_type': 'O',
                                           'banen_18m': 4,
-                                          'banen_25m': 4,
-                                          #'max_dt': 4
-                                          })
-        self.assert404(resp)     # 404 = Not found
+                                          'banen_25m': 4})
+        self.assert404(resp, 'Geen valide vereniging')
 
     def test_wl(self):
         # login als HWL van ver2 op loc2
@@ -705,13 +681,11 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertEqual(urls, [])
 
         # niet bestaande vereniging
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_externe_locaties % 999999)
-        self.assert404(resp)
+        resp = self.client.get(self.url_externe_locaties % 999999)
+        self.assert404(resp, 'Vereniging niet gevonden')
 
         # probeer een locatie toe te voegen
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
+        resp = self.client.post(url)
         self.assert403(resp)
 
         # login als HWL van ver2 op loc2
@@ -801,7 +775,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           # indoor velden die niet meegenomen zullen worden
                                           'banen_18m': 1,
                                           'banen_25m': 1,
-                                          #'max_dt': 3,
                                           # outdoor velden die niet meegenomen zullen worden
                                           'buiten_max_afstand': 99,
                                           'buiten_banen': 42,
@@ -818,7 +791,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertTrue(locatie.discipline_3d)
         self.assertEqual(locatie.banen_18m, 0)
         self.assertEqual(locatie.banen_25m, 0)
-        #self.assertEqual(locatie.max_dt_per_baan, 4)
         self.assertEqual(locatie.buiten_max_afstand, 99)
         self.assertEqual(locatie.buiten_banen, 42)
         self.assertIn('Langeboog 5\nBoogstad', locatie.adres)
@@ -868,9 +840,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'adres': 'Langeboog 5\r\nBoogstad',
                                           'disc_indoor': 'on',
                                           'banen_18m': 17,
-                                          'banen_25m': 24,
-                                          #'max_dt': '4'
-                                          })
+                                          'banen_25m': 24})
         self.assert_is_redirect_not_plein(resp)
 
         locatie = WedstrijdLocatie.objects.get(pk=locatie.pk)
@@ -885,9 +855,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'adres': 'Langeboog 5\r\nBoogstad',
                                           'disc_indoor': 'on',
                                           'banen_18m': 17,
-                                          'banen_25m': 24,
-                                          #'max_dt': '4'
-                                          })
+                                          'banen_25m': 24})
         self.assert_is_redirect_not_plein(resp)
 
         # bad values
@@ -896,32 +864,28 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'adres': 'Langeboog 5\r\nBoogstad',
                                           'disc_indoor': 'on',
                                           'banen_18m': 'xxx',
-                                          'banen_25m': 'xxx',
-                                          #'max_dt': 3
-                                          })
+                                          'banen_25m': 'xxx'})
         self.assert_is_redirect_not_plein(resp)
 
         # niet bestaande locatie
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_externe_locatie_details % (self.nhbver2.pk, 999999))
-        self.assert404(resp)
+        resp = self.client.get(self.url_externe_locatie_details % (self.nhbver2.pk, 999999))
+        self.assert404(resp, 'Locatie bestaat niet')
 
         # niet externe locatie
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_externe_locatie_details % (self.nhbver2.pk, self.loc2.pk))
-        self.assert404(resp)
+        self.assert404(resp, 'Locatie bestaat niet')
 
         # niet bestaande vereniging
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_externe_locatie_details % (999999, locatie.pk))
-        self.assert404(resp)
+        resp = self.client.get(self.url_externe_locatie_details % (999999, locatie.pk))
+        self.assert404(resp, 'Vereniging niet gevonden')
 
         # locatie van een andere vereniging
         self.loc1.baan_type = 'E'
         self.loc1.save()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_externe_locatie_details % (self.nhbver2.pk, self.loc1.pk))
-        self.assert404(resp)
+        self.assert404(resp, 'Locatie hoort niet bij de vereniging')
 
         # login als HWL van nhbver1
         self.e2e_login_and_pass_otp(self.account_hwl1)
@@ -958,7 +922,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         locatie.verenigingen.clear()
         with self.assert_max_queries(20):
             resp = self.client.post(url)
-        self.assert404(resp)
+        self.assert404(resp, 'Locatie hoort niet bij de vereniging')
 
     def test_externe_accommodatie(self):
         # accommodatie bestaat niet of heeft geen banen

@@ -409,7 +409,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
         try:
             team_pk = int(kwargs['team_pk'][:6])    # afkappen voor de veiligheid
         except (ValueError, KeyError):
-            raise Http404()
+            raise Http404('Geen valide parameter')
 
         try:
             team = (RegiocompetitieTeam
@@ -433,7 +433,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
                 try:
                     team_type = TeamType.objects.get(afkorting=afkorting)
                 except TeamType.DoesNotExist:
-                    raise Http404()
+                    raise Http404('Verkeerde parameter')
 
                 team.team_type = team_type
                 team.aanvangsgemiddelde = 0.0
@@ -577,7 +577,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
                                          'bij_vereniging')
                          .get(pk=deelnemer_pk))
         except (ValueError, RegioCompetitieSchutterBoog.DoesNotExist):
-            raise Http404()
+            raise Http404('Sporter niet gevonden')
 
         # controleer dat deze deelnemer bekeken en gewijzigd mag worden
         self._mag_wijzigen_of_404(deelnemer)
@@ -877,7 +877,7 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
                              regio_organiseert_teamcompetitie=True,
                              nhb_regio=self.functie_nu.nhb_ver.regio))
         except (ValueError, DeelCompetitie.DoesNotExist):
-            raise Http404()
+            raise Http404('Competitie niet gevonden')
 
         comp = deelcomp.competitie
         comp.bepaal_fase()

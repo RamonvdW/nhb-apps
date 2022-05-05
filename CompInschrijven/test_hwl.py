@@ -365,7 +365,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_18, 'A')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp)
+        self.assert404(resp, 'Verkeerde competitie fase')
         zet_competitie_fase(self.comp_18, 'B')
 
         # stel 1 schutter in die op randje aspirant/cadet zit
@@ -444,17 +444,17 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         # dubbele inschrijving
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on'})
-        self.assert404(resp)
+        self.assert404(resp, 'Sporter is al ingeschreven')
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
 
         # POST met garbage
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_10xxx2_boogtype_1': 'on'})
-        self.assert404(resp)
+        self.assert404(resp, 'Verkeerde parameters')
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_999999_boogtype_1': 'on'})
-        self.assert404(resp)
+        self.assert404(resp, 'Sporter niet gevonden')
 
         # haal het aanmeld-scherm op zodat er al ingeschreven leden bij staan
         with self.assert_max_queries(26):
@@ -501,7 +501,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'dagdeel': 'ZA'})
-        self.assert404(resp)     # 404 = Not allowed
+        self.assert404(resp, 'Incompleet verzoek')
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
 
         # nu de POST om een paar leden aan te melden met een verkeer dagdeel
@@ -509,7 +509,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'dagdeel': 'xx'})
-        self.assert404(resp)     # 404 = Not allowed
+        self.assert404(resp, 'Incompleet verzoek')
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
 
         # nu de POST om een paar leden aan te melden
@@ -569,7 +569,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'dagdeel': 'AV'})
-        self.assert404(resp)     # 404 = Not allowed
+        self.assert404(resp, 'Sporter heeft geen voorkeur voor wedstrijden opgegeven')
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         sporterboog.voor_wedstrijd = True
         sporterboog.save()
@@ -778,35 +778,35 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_aanmelden % 9999999)
-        self.assert404(resp)         # 404 = Not allowed
+        self.assert404(resp, 'Competitie niet gevonden')
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_aanmelden % 9999999)
-        self.assert404(resp)         # 404 = Not allowed
+        self.assert404(resp, 'Competitie niet gevonden')
 
         url = self.url_aanmelden % self.comp_18.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'garbage': 'oh',
                                           'lid_GEENGETAL_boogtype_3': 'on'})
-        self.assert404(resp)     # 404 = Not allowed
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'garbage': 'oh',
                                           'lid_999999_boogtype_GEENGETAL': 'on'})
-        self.assert404(resp)     # 404 = Not allowed
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_999999_boogtype_3': 'on'})       # 3=BB
-        self.assert404(resp)     # 404 = Not allowed
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100003_boogtype_1': 'on'})       # 1=R = geen wedstrijdboog
-        self.assert404(resp)     # 404 = Not allowed
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         url = self.url_ingeschreven % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not allowed
+        self.assert404(resp, 'Verkeerde parameters')
 
         with self.assert_max_queries(20):
             resp = self.client.post(url)
@@ -814,11 +814,11 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'pk_hallo': 'on'})
-        self.assert404(resp)     # 404 = Not allowed
+        self.assert404(resp, 'Geen valide inschrijving')
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'ignore': 'jaja', 'pk_null': 'on'})
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Geen valide inschrijving')
 
         # extreem: aanmelden zonder passende klasse
         self._zet_sporter_voorkeuren(100002)
@@ -838,7 +838,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on'})
-        self.assert404(resp)
+        self.assert404(resp, 'Geen passende wedstrijdklasse')
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
 
     def test_administratief(self):

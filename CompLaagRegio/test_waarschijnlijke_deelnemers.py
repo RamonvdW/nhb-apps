@@ -473,7 +473,7 @@ class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_waarschijnlijke % 99999)
-        self.assert404(resp)
+        self.assert404(resp, 'Wedstrijd niet gevonden')
 
     def test_corner_cases(self):
         # login als HWL

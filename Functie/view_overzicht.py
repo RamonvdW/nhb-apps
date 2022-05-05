@@ -321,7 +321,6 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
         emails = list()
         if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO):
             context['geo_str'] = ''
-            print('hoi!')
             emails = (Functie
                       .objects
                       .filter(rol__in=('HWL', 'SEC'))

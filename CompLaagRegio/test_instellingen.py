@@ -230,7 +230,7 @@ class TestCompRegioInstellingen(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'teams': 'ja',
                                           'einde_teams_aanmaken': post_datum_bad})
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Datum buiten toegestane reeks')
 
         # late date - not checked when teams=nee
         with self.assert_max_queries(20):
@@ -248,7 +248,7 @@ class TestCompRegioInstellingen(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'teams': 'ja',
                                           'einde_teams_aanmaken': 'xxx'})
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Datum fout formaat')
 
         # fase B en C
 
@@ -308,16 +308,16 @@ class TestCompRegioInstellingen(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_18, 'K')      # fase G is niet te zetten
 
         resp = self.client.get(url)
-        self.assert404(resp)  # 404 = Not found
+        self.assert404(resp, 'Verkeerde competitie fase')
         resp = self.client.post(url)
-        self.assert404(resp)  # 404 = Not found
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         # niet bestaande regio
         url = self.url_regio_instellingen % (self.comp_18.pk, 100)
         resp = self.client.get(url)
-        self.assert404(resp)  # 404 = Not found
+        self.assert404(resp, 'Competitie niet gevonden')
         resp = self.client.post(url)
-        self.assert404(resp)  # 404 = Not found
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # niet de regio van de RCL
         url = self.url_regio_instellingen % (self.comp_18.pk, 110)

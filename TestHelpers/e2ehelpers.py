@@ -769,17 +769,19 @@ class E2EHelpers(TestCase):
             if expected_msg not in pagina:                                          # pragma: no cover
                 # haal de nuttige regel informatie uit de 404 pagina en toon die
                 pos = pagina.find('<code>')
-                pagina = pagina[pos+6:]
-                pos = pagina.find('</code>')
-                pagina = pagina[:pos]
+                if pos >= 0:
+                    pagina = pagina[pos+6:]
+                    pos = pagina.find('</code>')
+                    pagina = pagina[:pos]
                 self.fail(msg='404 pagina bevat %s; verwacht: %s' % (repr(pagina), repr(expected_msg)))
         else:
             pagina = str(resp.content)
             pos = pagina.find('<code>')
-            pagina = pagina[pos + 6:]
-            pos = pagina.find('</code>')
-            pagina = pagina[:pos]
-            print('\nassert404: geen expected msg! Inhoud pagina: %s' % repr(pagina))
+            if pos >= 0:
+                pagina = pagina[pos + 6:]
+                pos = pagina.find('</code>')
+                pagina = pagina[:pos]
+            self.fail(msg='404 pagina, maar geen expected_msg! Inhoud pagina: %s' % repr(pagina))
 
     def assert200_file(self, resp):
         if resp.status_code != 200:                                 # pragma: no cover

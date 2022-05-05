@@ -137,13 +137,10 @@ class TestTakenViews(E2EHelpers, TestCase):
 
         # niet bestaande taak
         url = self.url_details % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)
-
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
-        self.assert404(resp)
+        resp = self.client.get(url)
+        self.assert404(resp, 'Geen valide taak')
+        resp = self.client.post(url)
+        self.assert404(resp, 'Geen valide taak')
 
         # taak van een ander
         url = self.url_details % self.taak2.pk
