@@ -124,7 +124,7 @@ class Command(BaseCommand):
                     # houd de actieve betalingen bij
                     actief = BetaalActief(
                                     payment_id=payment_id,
-                                    ontvanger=instellingen,
+                                    ontvanger=instellingen,     # TODO: dit wordt NHB bij akkoord_via_nhb
                                     payment_status=status)
                     actief.log += "[%s]: created\n" % timezone.localtime(timezone.now())
                     actief.log += json.dumps(payment)

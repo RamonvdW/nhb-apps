@@ -168,11 +168,11 @@ class E2EHelpers(TestCase):
 
         if functie.rol in ('SEC', 'HWL', 'WL'):
             self.assert_is_redirect(resp, '/vereniging/')
-        elif functie.rol in ('BKO', 'RKO', 'RCL') and resp.url.startswith('/bondscompetities/'):
+        elif functie.rol in ('BKO', 'RKO', 'RCL') and resp.url.startswith('/bondscompetities/'):    # pragma: no branch
             # als er geen competitie is, dan verwijst deze alsnog naar wissel-van-rol
             self.assert_is_redirect(resp, '/bondscompetities/##')
         else:
-            self.assert_is_redirect(resp, '/functie/wissel-van-rol/')
+            self.assert_is_redirect(resp, '/functie/wissel-van-rol/')                               # pragma: no cover
 
     def e2e_check_rol(self, rol_verwacht):
         resp = self.client.get('/functie/wissel-van-rol/')
@@ -216,15 +216,16 @@ class E2EHelpers(TestCase):
             # menu is the in the navbar at the top of the page
             # it ends with the nav-content-scrollbar div
             pos = content.find('<div class="nav-content-scrollbar">')
-            if pos >= 0:
+            if pos >= 0:                                                        # pragma: no branch
                 content = content[pos:]
         else:
             # skip the headers
             pos = content.find('<body')
-            if pos > 0:                             # pragma: no branch
-                content = content[pos:]             # strip head section
+            if pos > 0:                                                         # pragma: no branch
+                # strip head section
+                content = content[pos:]
 
-        if skip_broodkruimels:
+        if skip_broodkruimels:                                                  # pragma: no branch
             pos = content.find('class="broodkruimels-')
             if pos >= 0:
                 content = content[pos:]
@@ -300,7 +301,7 @@ class E2EHelpers(TestCase):
             return
 
         resp = self.client.head(link)
-        if resp.status_code != 200:
+        if resp.status_code != 200:                                                 # pragma: no cover
             self.fail(msg='Link not usable (code %s) on page %s (%s)' % (resp.status_code, template_name, link))
 
     def assert_broodkruimels(self, content, template_name):
@@ -464,7 +465,7 @@ class E2EHelpers(TestCase):
             if klass.find("z-depth") < 0:
                 p1 = klass.find("col s10")
                 p2 = klass.find("white")
-                if p1 >= 0 and p2 >= 0:
+                if p1 >= 0 and p2 >= 0:             # pragma: no cover
                     msg = 'Found grid col s10 + white (too much unused space on small) --> use separate div.white + padding:10px) in %s' % dtl
                     self.fail(msg)
 
@@ -727,10 +728,10 @@ class E2EHelpers(TestCase):
         # of een redirect hebben gekregen naar de login pagina
 
         if isinstance(resp, str):
-            self.fail(msg='Verkeerde aanroep: resp parameter vergeten?')          # pragma: no cover
+            self.fail(msg='Verkeerde aanroep: resp parameter vergeten?')            # pragma: no cover
 
         if resp.status_code == 302:
-            if resp.url != '/account/login/':
+            if resp.url != '/account/login/':                                       # pragma: no cover
                 self.e2e_dump_resp(resp)
                 self.fail(msg="Onverwachte redirect naar %s" % resp.url)
         else:
@@ -753,10 +754,10 @@ class E2EHelpers(TestCase):
 
     def assert404(self, resp, expected_msg=''):
         if isinstance(resp, str):
-            self.fail(msg='Verkeerde aanroep: resp parameter vergeten?')          # pragma: no cover
+            self.fail(msg='Verkeerde aanroep: resp parameter vergeten?')            # pragma: no cover
 
         # controleer dat we op de speciale code-404 handler pagina gekomen zijn
-        if resp.status_code != 200:     # pragma: no cover
+        if resp.status_code != 200:                                                 # pragma: no cover
             self.e2e_dump_resp(resp)
             self.fail(msg="Onverwachte status code %s; verwacht: 200" % resp.status_code)
 
@@ -764,7 +765,7 @@ class E2EHelpers(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
 
-        if expected_msg:
+        if expected_msg:                                                            # pragma: no branch
             pagina = str(resp.content)
             if expected_msg not in pagina:                                          # pragma: no cover
                 # haal de nuttige regel informatie uit de 404 pagina en toon die
@@ -774,7 +775,7 @@ class E2EHelpers(TestCase):
                     pos = pagina.find('</code>')
                     pagina = pagina[:pos]
                 self.fail(msg='404 pagina bevat %s; verwacht: %s' % (repr(pagina), repr(expected_msg)))
-        else:
+        else:                                                                       # pragma: no cover
             pagina = str(resp.content)
             pos = pagina.find('<code>')
             if pos >= 0:
@@ -827,7 +828,7 @@ class E2EHelpers(TestCase):
             print(f1.getvalue())
             print(f2.getvalue())
 
-        elif show_warnings:
+        elif show_warnings:                                                     # pragma: no branch
             lines = f1.getvalue() + '\n' + f2.getvalue()
             for line in lines.split('\n'):
                 if line.startswith('[WARNING] '):                               # pragma: no cover

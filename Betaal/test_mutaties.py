@@ -27,14 +27,15 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
     def setUp(self):
         self.account = self.e2e_create_account_admin()
 
+        self.regio_100 = NhbRegio.objects.get(regio_nr=100)
         self.regio_111 = NhbRegio.objects.get(regio_nr=111)
 
         # maak een test vereniging
-        ver = NhbVereniging()
-        ver.naam = "Grote Club"
-        ver.ver_nr = "1000"
-        ver.regio = self.regio_111
-        # secretaris kan nog niet ingevuld worden
+        ver = NhbVereniging(
+                    ver_nr=1000,
+                    naam="Grote Club",
+                    # secretaris kan nog niet ingevuld worden
+                    regio=self.regio_111)
         ver.save()
         self.nhbver = ver
 
@@ -64,7 +65,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         return f1, f2
 
-    def test_betaal(self):
+    def test_start_ontvangst(self):
         bestelling = Bestelling(
                             bestel_nr=1,
                             account=self.account,
@@ -104,6 +105,83 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         actief = BetaalActief.objects.get(pk=actief.pk)
         self.assertEqual(actief.payment_status, 'paid')
+
+    def test_betaal_via_nhb(self):
+        # start ontvangst met betaling via de NHB
+
+        # maak de instellingen van de NHB aan
+        ver = NhbVereniging(
+                        ver_nr=settings.BETAAL_VIA_NHB_VER_NR,
+                        naam="De NHB",
+                        regio=self.regio_100)
+        ver.save()
+        instellingen_nhb = BetaalInstellingenVereniging(
+                                vereniging=ver,
+                                mollie_api_key='test_1234nhb')
+        instellingen_nhb.save()
+
+        self.instellingen.akkoord_via_nhb = True
+        self.instellingen.save(update_fields=['akkoord_via_nhb'])
+
+        bestelling = Bestelling(
+                            bestel_nr=1,
+                            account=self.account,
+                            ontvanger=self.instellingen,
+                            totaal_euro=Decimal('42.42'))
+        bestelling.save()
+
+        url_betaling_gedaan = settings.SITE_URL + '/plein/'
+
+        mutatie = betaal_mutatieverzoek_start_ontvangst(
+                        bestelling,
+                        "Test betaling 42",     # 42 triggered 'paid'
+                        bestelling.totaal_euro,
+                        url_betaling_gedaan,
+                        True)       # snel
+
+        self.assertFalse(mutatie.is_verwerkt)
+        self.assertEqual(BetaalActief.objects.count(), 0)
+
+        self._run_achtergrondtaak(debug=True)
+
+        mutatie = BetaalMutatie.objects.get(pk=mutatie.pk)
+        self.assertTrue(mutatie.is_verwerkt)
+
+        self.assertEqual(BetaalActief.objects.count(), 1)
+        actief = BetaalActief.objects.all()[0]
+        self.assertEqual(actief.ontvanger.pk, instellingen_nhb.pk)
+
+    def test_bad_api_key(self):
+        self.instellingen.mollie_api_key = 'bad_1234'
+        self.instellingen.save(update_fields=['mollie_api_key'])
+
+        bestelling = Bestelling(
+                            bestel_nr=1,
+                            account=self.account,
+                            ontvanger=self.instellingen,
+                            totaal_euro=Decimal('42.42'))
+        bestelling.save()
+
+        url_betaling_gedaan = settings.SITE_URL + '/plein/'
+
+        mutatie = betaal_mutatieverzoek_start_ontvangst(
+                        bestelling,
+                        "Test betaling 42",     # 42 triggered 'paid'
+                        bestelling.totaal_euro,
+                        url_betaling_gedaan,
+                        True)       # snel
+
+        self.assertFalse(mutatie.is_verwerkt)
+        self.assertEqual(BetaalActief.objects.count(), 0)
+
+        f1, f2 = self._run_achtergrondtaak(debug=True)
+        self.assertTrue('Invalid API key' in f1.getvalue())
+
+        mutatie = BetaalMutatie.objects.get(pk=mutatie.pk)
+        self.assertTrue(mutatie.is_verwerkt)
+
+        # er zal nu geen betaling opgestart zijn
+        self.assertEqual(BetaalActief.objects.count(), 0)
 
     def test_betaal_failed(self):
         bestelling = Bestelling(

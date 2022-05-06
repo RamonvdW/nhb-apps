@@ -141,6 +141,12 @@ class MyServer(BaseHTTPRequestHandler):
     def do_POST(self):
         # print("[DEBUG] {websim} POST request,\nPath: %s\nHeaders:\n%s" % (str(self.path), str(self.headers)))
 
+        auth = self.headers.get('authorization')
+        if auth.startswith('Bearer '):
+            api_key = auth[7:]
+        else:
+            api_key = None
+
         if self.path.startswith('/v2/payments'):
             data = self._read_json_body()
             # print('[DEBUG] {websim} POST data: %s' % repr(data))

@@ -62,6 +62,7 @@ class BetaalActief(models.Model):
     when = models.DateTimeField(auto_now_add=True)      # automatisch invullen
 
     # referentie naar de instellingen voor de vereniging waar de betaling bij hoort
+    # TODO: bij akkoord_via_nhb is dit niet de vereniging waar het heen moet!
     ontvanger = models.ForeignKey(BetaalInstellingenVereniging, on_delete=models.PROTECT)
 
     # het nummer dat ooit teruggegeven is toen de transactie aangemaakt werd
