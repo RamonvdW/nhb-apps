@@ -215,7 +215,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
             else:
                 sporter.ver_str = 'Geen'
 
-            if sporter.account:
+            if sporter.account:                     # pragma: no branch
                 account = sporter.account
                 sporter.inlog_naam_str = account.username
 
@@ -258,7 +258,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         # for
 
         # toon sessies
-        if not context:     # aka "never without complains"
+        if not context:     # aka "never without complains"     # pragma: no cover
             accses = (AccountSessions
                       .objects
                       .select_related('account', 'session')
