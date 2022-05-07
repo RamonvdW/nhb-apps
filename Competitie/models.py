@@ -869,11 +869,15 @@ class KampioenschapSchutterBoog(models.Model):
     # "AAABBBCCCDDDEEEFFFGGG" met AAA..GGG=7 scores van 3 cijfers, gesorteerd van beste naar slechtste score
     regio_scores = models.CharField(max_length=24, default='', blank=True)
 
-    # resultaat van het kampioenschap
+    # resultaat van het individuele kampioenschap
     result_rank = models.PositiveSmallIntegerField(default=0)
-    result_score_1 = models.PositiveSmallIntegerField(default=0)                # max = 32767
+    result_score_1 = models.PositiveSmallIntegerField(default=0)           # max = 32767
     result_score_2 = models.PositiveSmallIntegerField(default=0)
     result_counts = models.CharField(max_length=20, default='', blank=True)     # 5x10 3x9
+
+    # resultaat van het team kampioenschap
+    result_teamscore_1 = models.PositiveSmallIntegerField(default=0)           # max = 32767
+    result_teamscore_2 = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         if self.deelcompetitie.nhb_rayon:
@@ -953,7 +957,9 @@ class KampioenschapTeam(models.Model):
     klasse = models.ForeignKey(CompetitieKlasse, on_delete=models.CASCADE,
                                blank=True, null=True)
 
-    # TODO: RK uitslag scores en ranking toevoegen
+    # kampioenschap uitslag: score en ranking
+    result_rank = models.PositiveSmallIntegerField(default=0)
+    result_teamscore = models.PositiveSmallIntegerField(default=0)           # max = 32767
 
     def __str__(self):
         return "%s: %s" % (self.vereniging, self.team_naam)

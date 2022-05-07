@@ -114,6 +114,7 @@
     </div>
 
     {% if regiocomp_nog_actief %}
+
         <div class="row">
             <div style="padding:10px">
                 <p class="center red-text">De regiocompetitie is nog niet afgesloten, dus onderstaande lijst kan nog wijzigingen</p>

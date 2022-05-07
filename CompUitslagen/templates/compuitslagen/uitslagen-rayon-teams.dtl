@@ -29,7 +29,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Uitslagen RK teams</h3>
-            <p>Tussenstand/eindstand van de rayon<wbr>kampioenschappen voor teams</p>
+            <p>{% if comp.fase > 'L' %}Eindstand{% else %}Planning/tussenstand{% endif %} van de rayon<wbr>kampioenschappen voor teams</p>
         </div>
     </div>
 
@@ -111,6 +111,19 @@
         </div>
     </div>
 
+    <!-- uitleg over tijdstippen -->
+    {% if not comp.rk_is_afgelast and comp.fase <= 'L' %}
+
+        <div class="row">
+            <div style="padding:10px">
+                <div class="col s12 center">
+                    <p>Hieronder genoemde tijdstippen zijn "aanvang wedstrijd". De accommodatie is een uur eerder open. Zorg dat je op tijd bent!</p>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+
     <!-- witruimte -->
     <div class="row center" style="margin-bottom:0">
         <div class="col s12">
@@ -151,21 +164,47 @@
                             <span class="hide-on-small-only">Vereniging</span>
                         </th>
                         <th>Team</th>
-                        <th>Team sterkte</th>
-                        <th>RK scores</th>
+                        <th class="center hide-on-small-only">Team sterkte</th>
+                        <th class="right-align" style="padding-right:10px">RK scores</th>
                         <td rowspan="{{ team.aantal_regels }}" class="nhb-table-zijrand"></td>
                     </tr>
                 {% endif %}
 
-                <tr>
+                <tr{% if team.niet_deelgenomen %} class="grey-text"{% endif %}>
                     <td class="center">{% if not team.is_reserve %}{{ team.rank }}{% endif %}</td>
                     <td>
                         <span class="hide-on-med-and-up">{{ team.ver_nr }}</span>
                         <span class="hide-on-small-only">{{ team.ver_str }}</span>
                     </td>
-                    <td>{{ team.team_naam }}</td>
-                    <td>{{ team.ag_str }}</td>
-                    <td><i class="grey-text">komt later</i><!-- RK scores --></td>
+                    <td>
+                        {% if team.heeft_uitslag %}
+                            <b>{{ team.team_naam }}</b><br>
+                            {% for deelnemer in team.deelnemers %}
+                                <span{% if deelnemer.is_uitvaller %} class="grey-text"{% endif %}>{{ deelnemer.naam_str }}{% if deelnemer.is_invaller %}&nbsp;**{% endif %}</span><br>
+                            {% endfor %}
+                        {% else %}
+                            <span>{{ team.team_naam }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="center hide-on-small-only">
+                        <span>{{ team.ag_str }}</span>
+                        {% if team.heeft_uitslag %}
+                            <br>
+                            {% for deelnemer in team.deelnemers %}
+                                <span{% if deelnemer.is_uitvaller %} class="grey-text"{% endif %}>{{ deelnemer.gemiddelde }}</span><br>
+                            {% endfor %}
+                        {% endif %}
+                    </td>
+                    <td class="right-align" style="padding-right:10px">
+                        {% if team.heeft_uitslag %}
+                            <b>{{ team.rk_score_str }}</b><br>
+                            {% for deelnemer in team.deelnemers %}
+                                <span{% if deelnemer.is_uitvaller %} class="grey-text"{% endif %}>{{ deelnemer.result_totaal }}</span><br>
+                            {% endfor %}
+                        {% else %}
+                            <i class="grey-text">{% if team.niet_deelgenomen %}-{% else %}komt later{% endif %}</i>
+                        {% endif %}
+                    </td>
                 </tr>
 
                 {% if team.toon_team_leden %}
@@ -186,6 +225,8 @@
             </tr>
         </table>
     {% endif %}
+
+    <p class="center">Sporter met ** achter de naam is invaller</p>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="competitie-uitslagen-rayon-teams" %}
 

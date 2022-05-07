@@ -446,30 +446,55 @@ class UitslagenRayonTeamsView(TemplateView):
                     .objects
                     .filter(deelcompetitie=deelcomp_rk,
                             team_type=teamtype)
-                    .select_related('klasse__team')
-                    .prefetch_related('gekoppelde_schutters')
+                    .select_related('klasse__team',
+                                    'vereniging')
+                    .prefetch_related('gekoppelde_schutters',
+                                      'feitelijke_schutters')
                     .order_by('klasse__team__volgorde',
+                              'result_rank',
                               '-aanvangsgemiddelde'))       # sterkste team eerst
+
+        context['rk_teams'] = totaal_lijst = list()
 
         prev_klasse = ""
         rank = 0
-        teller = None
+        klasse_teams_done = list()
+        klasse_teams_plan = list()
+        aantal_regels = 0
         for team in rk_teams:
-            if team.klasse != prev_klasse:
-                team.break_klasse = True
-                if team.klasse:
-                    team.klasse_str = team.klasse.team.beschrijving
-                    try:
-                        team.wedstrijd = team2wedstrijd[team.klasse.team.pk]
-                    except KeyError:
-                        pass
-                else:
-                    team.klasse_str = "%s - Nog niet ingedeeld in een wedstrijdklasse" % team.team_type.beschrijving
 
-                teller = team
-                teller.aantal_regels = 2
+            if team.klasse != prev_klasse:
+                if len(klasse_teams_done) > 0:
+                    for plan_team in klasse_teams_plan:
+                        plan_team.niet_deelgenomen = True
+                        plan_team.rank = ''
+                        plan_team.rk_score_str = '-'
+                    # for
+                    teller = klasse_teams_done[0]
+                elif len(klasse_teams_plan) > 0:
+                    teller = klasse_teams_plan[0]
+                else:
+                    teller = None
+
+                if teller:
+                    teller.aantal_regels = aantal_regels
+                    teller.break_klasse = True
+                    if teller.klasse:
+                        teller.klasse_str = teller.klasse.team.beschrijving
+                        try:
+                            teller.wedstrijd = team2wedstrijd[teller.klasse.team.pk]
+                        except KeyError:
+                            pass
+                    else:
+                        teller.klasse_str = "%s - Nog niet ingedeeld in een wedstrijdklasse" % team.team_type.beschrijving
+
+                totaal_lijst.extend(klasse_teams_done)
+                totaal_lijst.extend(klasse_teams_plan)
+                klasse_teams_done = list()
+                klasse_teams_plan = list()
 
                 prev_klasse = team.klasse
+                aantal_regels = 2
                 rank = 0
 
             team.ver_nr = team.vereniging.ver_nr
@@ -487,20 +512,78 @@ class UitslagenRayonTeamsView(TemplateView):
                     team.team_leden.append(deelnemer)
                     deelnemer.sporter_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
                 # for
-                teller.aantal_regels += 2
+                aantal_regels += 2
             else:
                 team.toon_team_leden = False
-                teller.aantal_regels += 1
+                aantal_regels += 1
 
             # TODO: dit scherm is zowel een kandidaat-deelnemerslijst als de uitslag
 
-            # TODO: geen rank invullen na de cut
+            if team.result_rank > 0:
+                team.rank = team.result_rank
+                team.rk_score_str = str(team.result_teamscore)
+                team.heeft_uitslag = True
 
-            rank += 1
-            team.rank = rank
+                originele_lid_nrs = list(team.gekoppelde_schutters.all().values_list('sporterboog__sporter__lid_nr', flat=True))
+                deelnemers = list()
+                lid_nrs = list()
+                for deelnemer in team.feitelijke_schutters.select_related('sporterboog__sporter'):
+                    deelnemer.result_totaal = deelnemer.result_teamscore_1 + deelnemer.result_teamscore_2
+                    deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
+                    lid_nr = deelnemer.sporterboog.sporter.lid_nr
+                    if lid_nr not in originele_lid_nrs:
+                        deelnemer.is_invaller = True
+                    tup = (deelnemer.result_totaal, deelnemer.pk, deelnemer)
+                    deelnemers.append(tup)
+
+                    lid_nrs.append(deelnemer.sporterboog.sporter.lid_nr)
+                # for
+                for deelnemer in team.gekoppelde_schutters.select_related('sporterboog__sporter'):
+                    if deelnemer.sporterboog.sporter.lid_nr not in lid_nrs:
+                        deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
+                        deelnemer.is_uitvaller = True
+                        deelnemer.result_totaal = '-'
+                        tup = (deelnemer.gemiddelde, deelnemer.pk, deelnemer)
+                        deelnemers.append(tup)
+                # for
+
+                deelnemers.sort(reverse=True)       # hoogste eerst
+                team.deelnemers = [deelnemer for _, _, deelnemer in deelnemers]
+
+                klasse_teams_done.append(team)
+            else:
+                # TODO: geen rank invullen na de cut
+                rank += 1
+                team.rank = rank
+                klasse_teams_plan.append(team)
         # for
 
-        context['rk_teams'] = rk_teams
+        if len(klasse_teams_done) > 0:
+            for plan_team in klasse_teams_plan:
+                plan_team.rank = 0
+                plan_team.rk_score_str = '-'
+                plan_team.heeft_uitslag = True
+            # for
+            teller = klasse_teams_done[0]
+        elif len(klasse_teams_plan) > 0:
+            teller = klasse_teams_plan[0]
+        else:
+            teller = None
+
+        if teller:
+            teller.aantal_regels = aantal_regels
+            teller.break_klasse = True
+            if teller.klasse:
+                teller.klasse_str = teller.klasse.team.beschrijving
+                try:
+                    teller.wedstrijd = team2wedstrijd[teller.klasse.team.pk]
+                except KeyError:
+                    pass
+            else:
+                teller.klasse_str = "%s - Nog niet ingedeeld in een wedstrijdklasse" % team.team_type.beschrijving
+
+        totaal_lijst.extend(klasse_teams_done)
+        totaal_lijst.extend(klasse_teams_plan)
 
         if rk_teams.count() == 0:
             context['geen_teams'] = True

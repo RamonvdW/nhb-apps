@@ -4,11 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-# bereken de team sterktes opnieuw
-# door een foutje was deze berekend over de 3 laagste gemiddelden in plaats van de 3 hoogste
-
 from django.core.management.base import BaseCommand
 from Competitie.models import KampioenschapSchutterBoog, DEELNAME_NEE
+from openpyxl.utils.exceptions import InvalidFileException
 import openpyxl
 import zipfile
 
@@ -36,7 +34,9 @@ class Command(BaseCommand):
                           .objects
                           .filter(deelcompetitie__competitie__afstand=afstand)
                           .select_related('deelcompetitie',
+                                          'deelcompetitie__nhb_rayon',
                                           'sporterboog__sporter',
+                                          'sporterboog__boogtype',
                                           'klasse')):
 
             lid_nr = deelnemer.sporterboog.sporter.lid_nr
@@ -52,7 +52,7 @@ class Command(BaseCommand):
 
         afstand = options['afstand']
         if afstand not in ('18', '25'):
-            self.stderr.write('Afstand moet 18 of 25 zijn')
+            self.stderr.write('[ERROR] Afstand moet 18 of 25 zijn')
             return
 
         # open de kopie, zodat we die aan kunnen passen
@@ -61,24 +61,33 @@ class Command(BaseCommand):
         try:
             prg = openpyxl.load_workbook(fname,
                                          data_only=True)        # do not evaluate formulas; use last calculated values
-        except (OSError, zipfile.BadZipFile, KeyError):
-            self.stderr.write('Kan het excel bestand niet openen')
+        except (OSError, zipfile.BadZipFile, KeyError, InvalidFileException) as exc:
+            self.stderr.write('[ERROR] Kan het excel bestand niet openen (%s)' % str(exc))
             return
 
         blad = options['blad']
         try:
             ws = prg[blad]
         except KeyError:
-            self.stderr.write('Kan blad %s niet vinden' % repr(blad))
+            self.stderr.write('[ERROR] Kan blad %s niet vinden' % repr(blad))
             return
 
         cols = options['kolommen']
-        col_lid_nr = cols[0]
-        col_score1 = cols[1]
-        col_score2 = cols[2]
-        col_10s = cols[3]
-        col_9s = cols[4]
-        col_8s = cols[5]
+        if afstand == '25':
+            if len(cols) != 6:
+                self.stderr.write('[ERROR] Vereiste kolommen: lid_nr, score1, score2, tienen, negens, achten')
+                return
+
+            col_lid_nr = cols[0]
+            col_score1 = cols[1]
+            col_score2 = cols[2]
+            col_10s = cols[3]
+            col_9s = cols[4]
+            col_8s = cols[5]
+        else:
+            # indoor nog niet ondersteund
+            self.stderr.write('[ERROR] Indoor nog niet ondersteund')
+            return
 
         self.deelnemers_ophalen(afstand)
 
@@ -113,7 +122,7 @@ class Command(BaseCommand):
                             deelnemer = deelnemers[0]
                         else:
                             deelnemer = None
-                            if klasse_pk:
+                            if klasse_pk:                                               # pragma: no branch
                                 for kandidaat in deelnemers:
                                     if kandidaat.klasse.pk == klasse_pk:
                                         deelnemer = kandidaat
@@ -137,10 +146,10 @@ class Command(BaseCommand):
                             klasse_pk = deelnemer.klasse.pk
                             rank = 0
                             prev_totaal = 999
-                            if klasse_pk not in klasse_pks:
+                            if klasse_pk not in klasse_pks:                             # pragma: no branch
                                 klasse_pks.append(klasse_pk)
                                 deelcomp_pk = deelnemer.deelcompetitie.pk
-                                if deelcomp_pk not in deelcomp_pks:
+                                if deelcomp_pk not in deelcomp_pks:                     # pragma: no branch
                                     deelcomp_pks.append(deelnemer.deelcompetitie.pk)
 
                         score1 = ws[col_score1 + row].value
@@ -182,7 +191,7 @@ class Command(BaseCommand):
                                     # zelfde score, zelf rank
                                     pass
                                 elif totaal > prev_totaal:
-                                    self.stderr.write('[ERROR] Score is niet aflopend!')
+                                    self.stderr.write('[ERROR] Score is niet aflopend op regel %s' % row)
                                 else:
                                     rank += 1
                                 prev_totaal = totaal
