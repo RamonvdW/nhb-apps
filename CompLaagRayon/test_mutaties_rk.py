@@ -87,7 +87,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.cut.save()
 
     @staticmethod
-    def _dump_klasse_deelnemers(klasse):
+    def _dump_klasse_deelnemers(klasse):                                            # pragma: no cover
         print('')
         print('====================================================================')
         print('Klasse: %s' % klasse)

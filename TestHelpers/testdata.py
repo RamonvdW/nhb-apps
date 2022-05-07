@@ -207,7 +207,7 @@ class TestData(object):
             print(f1.getvalue())
             print(f2.getvalue())
 
-        elif show_warnings:
+        elif show_warnings:                                                     # pragma: no branch
             lines = f1.getvalue() + '\n' + f2.getvalue()
             for line in lines.split('\n'):
                 if line.startswith('[WARNING] '):                               # pragma: no cover
@@ -219,7 +219,7 @@ class TestData(object):
             Trigger de site om de team ronde van een specifieke competitie door te zetten naar de volgende ronde
         """
         regio_nr = deelcomp.nhb_regio.regio_nr
-        if deelcomp.competitie.afstand == 18:
+        if deelcomp.competitie.afstand == 18:                                   # pragma: no cover
             account = self.comp18_account_rcl[regio_nr]
             functie = self.comp18_functie_rcl[regio_nr]
         else:
@@ -298,7 +298,7 @@ class TestData(object):
                     bulk = list()
         # for
 
-        if len(bulk) > 0:
+        if len(bulk) > 0:                                                           # pragma: no branch
             VerklaringHanterenPersoonsgegevens.objects.bulk_create(bulk)
 
     def _maak_verenigingen(self):
@@ -662,7 +662,7 @@ class TestData(object):
 
                 bulk.append(func)
 
-                if len(bulk) > 150:                           # pragma: no branch
+                if len(bulk) > 150:                           # pragma: no cover
                     Functie.objects.bulk_create(bulk)
                     bulk = list()
             # for
@@ -708,7 +708,7 @@ class TestData(object):
                             .filter(sporter__bij_vereniging__ver_nr=ver_nr,
                                     voor_wedstrijd=True)):
             # even pk get an AG
-            if sporterboog.pk % 1 == 0:
+            if sporterboog.pk % 1 == 0:                                             # pragma: no branch
                 ag = 6000 if ag > 9800 else ag + 25
                 score = Score(type=SCORE_TYPE_INDIV_AG,
                               sporterboog=sporterboog,
@@ -716,7 +716,7 @@ class TestData(object):
                               afstand_meter=afstand)
                 bulk.append(score)
 
-                if len(bulk) > 500:                 # pragma: no cover
+                if len(bulk) > 500:                                                 # pragma: no cover
                     Score.objects.bulk_create(bulk)
 
                     bulk2 = list()
@@ -735,7 +735,7 @@ class TestData(object):
                     bulk = list()
         # for
 
-        if len(bulk):                           # pragma: no branch
+        if len(bulk):                                                               # pragma: no branch
             Score.objects.bulk_create(bulk)
 
             bulk2 = list()
@@ -1041,7 +1041,7 @@ class TestData(object):
         done = list()
         bulk = list()
         for team in regioteams:
-            if team.deelcompetitie == deelcomp:
+            if team.deelcompetitie == deelcomp:                                     # pragma: no branch
                 afkorting = team.team_type.afkorting
                 if afkorting not in done:
                     poule = RegiocompetitieTeamPoule(
@@ -1062,7 +1062,7 @@ class TestData(object):
 
             pks = list()
             for team in regioteams:
-                if team.deelcompetitie == deelcomp:
+                if team.deelcompetitie == deelcomp:                                 # pragma: no branch
                     if poule.beschrijving.endswith(team.team_type.beschrijving):
                         pks.append(team.pk)
             # for
@@ -1117,7 +1117,7 @@ class TestData(object):
                 afk = sporterboog.boogtype.afkorting
                 if afk in limit_boogtypen:
                     deelnemer_klasse = None
-                    for klasse in reversed(klassen[afk]):
+                    for klasse in reversed(klassen[afk]):                           # pragma: no branch
                         if klasse.is_voor_rk_bk:
                             for lkl in klasse.leeftijdsklassen.all():
                                 if lkl.leeftijd_is_compatible(leeftijd):
@@ -1129,7 +1129,7 @@ class TestData(object):
                     # for
 
                     # print(sporterboog.sporter.bij_vereniging.ver_nr, sporterboog.sporter.lid_nr, sporterboog.boogtype.afkorting, "%.3f" % (ag/1000), deelnemer_klasse)
-                    if deelnemer_klasse:
+                    if deelnemer_klasse:                                            # pragma: no branch
                         deelnemer = KampioenschapSchutterBoog(
                                             deelcompetitie=deelcomp_rk,
                                             sporterboog=sporterboog,
@@ -1210,7 +1210,7 @@ class TestData(object):
         ver = NhbVereniging.objects.select_related('regio__rayon').get(ver_nr=ver_nr)
         rayon_nr = ver.regio.rayon.rayon_nr
 
-        if afstand == 18:
+        if afstand == 18:                                                           # pragma: no cover
             deelcomp_rk = self.deelcomp18_rk[rayon_nr]
             deelnemers = self.comp18_deelnemers
             rk_teams = self.comp18_kampioenschapteams
@@ -1296,7 +1296,7 @@ class TestData(object):
         # for
 
     def geef_rk_team_tijdelijke_sporters_genoeg_scores(self, afstand, ver_nr):
-        if afstand == 18:
+        if afstand == 18:                                                           # pragma: no cover
             rk_teams = self.comp18_kampioenschapteams       # list of KampioenschapTeam
         else:
             rk_teams = self.comp25_kampioenschapteams
@@ -1322,7 +1322,7 @@ class TestData(object):
                 # for
         # for
 
-    def geef_regio_deelnemers_genoeg_scores_voor_rk(self, afstand):
+    def geef_regio_deelnemers_genoeg_scores_voor_rk(self, afstand):         # pragma: no cover
         if afstand == 18:
             deelnemers = self.comp18_deelnemers
         else:
@@ -1373,7 +1373,7 @@ class TestData(object):
 
                 # vertaal boogtype naar teamtype
                 teamtype_afkorting = boogtype_afkorting
-                if teamtype_afkorting in ('R', 'BB'):
+                if teamtype_afkorting in ('R', 'BB'):                               # pragma: no branch
                     teamtype_afkorting += '2'  # R2, BB2
 
                 if teamtype_afkorting in limit_teamtypen:
@@ -1384,10 +1384,10 @@ class TestData(object):
         # for
 
         # zet 1x BB en 1x LB in een recurve team
-        if 'BB' in deelnemers_per_boog and len(deelnemers_per_boog['BB']) > 0:
+        if 'BB' in deelnemers_per_boog and len(deelnemers_per_boog['BB']) > 0:      # pragma: no cover
             deelnemers_per_boog['R'].append(deelnemers_per_boog['BB'].pop(0))
 
-        if 'LB' in deelnemers_per_boog and len(deelnemers_per_boog['LB']) > 0:
+        if 'LB' in deelnemers_per_boog and len(deelnemers_per_boog['LB']) > 0:      # pragma: no cover
             deelnemers_per_boog['R'].append(deelnemers_per_boog['LB'].pop(0))
 
         bulk = list()
@@ -1395,7 +1395,7 @@ class TestData(object):
         for afkorting, deelnemers in deelnemers_per_boog.items():
 
             # vertaal boogtype naar teamtype
-            if afkorting in ('R', 'BB'):
+            if afkorting in ('R', 'BB'):                                            # pragma: no branch
                 afkorting += '2'            # R2, BB2
             teamtype = self.afkorting2teamtype_nhb[afkorting]
 
