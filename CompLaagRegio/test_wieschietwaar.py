@@ -19,7 +19,7 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestCompRegioWieSchietWaar(E2EHelpers, TestCase):
+class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
 
     """ tests voor de Vereniging applicatie, functies voor Wie schiet waar """
 

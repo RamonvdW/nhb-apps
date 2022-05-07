@@ -23,7 +23,7 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestCompRegioPlanning(E2EHelpers, TestCase):
+class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRegio applicatie, Planning functie """
 

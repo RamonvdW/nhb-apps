@@ -20,7 +20,7 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestCompRayonVerenigingTeams(E2EHelpers, TestCase):
+class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
 
     """ Tests voor de CompLaagRayon applicatie, functies voor de HWL """
 

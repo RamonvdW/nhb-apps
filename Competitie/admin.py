@@ -376,11 +376,13 @@ class KampioenschapSchutterBoogAdmin(CreateOnlyAdmin):
                         'volgorde',
                         'rank'),
              }),
-        ('Resultaat',
+        ('Resultaten',
             {'fields': ('result_rank',
                         'result_score_1',
                         'result_score_2',
-                        'result_counts')
+                        'result_counts',
+                        'result_teamscore_1',
+                        'result_teamscore_2')
              }),
     )
 

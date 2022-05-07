@@ -13,7 +13,7 @@ from TestHelpers import testdata
 import io
 
 
-class TestCompRayonImportUitslagKampioenschap(E2EHelpers, TestCase):
+class TestCompLaagRayonImportUitslagKampioenschap(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, import van de RK/BK uitslag """
 
@@ -47,8 +47,8 @@ class TestCompRayonImportUitslagKampioenschap(E2EHelpers, TestCase):
     def setUp(self):
         pass
 
-    def test_25m_indiv(self):
-        real_file = 'CompLaagRayon/management/testfiles/test_rk-programma_individueel-rayon2_compound-klasse-2.xlsm'
+    def test_25m(self):
+        real_file = 'CompLaagRayon/management/testfiles/test_rk-25m1p_indiv.xlsm'
 
         # afstand NOK
         f1 = io.StringIO()
@@ -107,7 +107,7 @@ class TestCompRayonImportUitslagKampioenschap(E2EHelpers, TestCase):
         self.assertTrue(' heeft al andere resultaten!' in f1.getvalue())
         self.assertTrue(' [301966] ' in f1.getvalue())
 
-    def test_18m_indiv(self):
+    def test_18m(self):
         real_file = 'CompLaagRayon/files/template-excel-rk-indoor-indiv.xlsm'
 
         f1 = io.StringIO()

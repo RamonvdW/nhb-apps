@@ -22,7 +22,7 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestCompRegioTeams(E2EHelpers, TestCase):
+class TestCompLaagRegioTeams(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRegio applicatie, Teams functies voor de RCL """
 

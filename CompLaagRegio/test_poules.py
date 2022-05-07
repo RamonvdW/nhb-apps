@@ -22,7 +22,7 @@ import datetime
 import io
 
 
-class TestCompRegioPoules(E2EHelpers, TestCase):
+class TestCompLaagRegioPoules(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRegio applicatie, Poules functie """
 

@@ -20,7 +20,7 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestCompRegioTeamsHWL(E2EHelpers, TestCase):
+class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRegio applicatie, Teams functies voor de HWL """
 

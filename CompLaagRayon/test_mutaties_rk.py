@@ -18,7 +18,7 @@ from TestHelpers import testdata
 import io
 
 
-class TestCompRayonMutatiesRK(E2EHelpers, TestCase):
+class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, mutaties van RK/BK deelnemers lijsten """
 

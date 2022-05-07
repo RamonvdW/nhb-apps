@@ -10,7 +10,7 @@ from NhbStructuur.models import NhbRegio, NhbCluster, NhbVereniging
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
-class TestCompRegioClusters(E2EHelpers, TestCase):
+class TestCompLaagRegioClusters(E2EHelpers, TestCase):
 
     """ Tests voor de CompLaagRegio applicatie, Wijzig Clusters functies """
 

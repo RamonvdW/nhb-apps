@@ -25,7 +25,7 @@ import time
 sleep_oud = time.sleep
 
 
-class TestCompRayonPlanning(E2EHelpers, TestCase):
+class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, Planning functie """
 

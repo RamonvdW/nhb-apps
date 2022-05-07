@@ -16,7 +16,7 @@ import io
 import os
 
 
-class TestCompRayonTeams(E2EHelpers, TestCase):
+class TestCompLaagRayonTeams(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, RK Teams functie """
 
@@ -147,7 +147,7 @@ class TestCompRayonTeams(E2EHelpers, TestCase):
 
     def test_rk_bk_klassengrenzen(self):
         # maak een paar teams aan
-        self.testdata.maak_inschrijvingen_rk_teamcompetitie(25, self.ver_nr, ook_incomplete_teams=False)
+        self.testdata.maak_voorinschrijvingen_rk_teamcompetitie(25, self.ver_nr, ook_incomplete_teams=False)
         self.testdata.geef_rk_team_tijdelijke_sporters_genoeg_scores(25, self.ver_nr)
 
         # als BKO doorzetten naar RK fase (G --> J) en bepaal de klassengrenzen (fase J --> K)

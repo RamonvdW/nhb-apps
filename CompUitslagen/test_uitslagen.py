@@ -314,7 +314,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         self.assert404(resp, 'Competitie niet gevonden')
 
         # maak een paar teams aan
-        self.testdata.maak_inschrijvingen_rk_teamcompetitie(25, self.ver_nr, ook_incomplete_teams=False)
+        self.testdata.maak_voorinschrijvingen_rk_teamcompetitie(25, self.ver_nr, ook_incomplete_teams=False)
         self.testdata.geef_rk_team_tijdelijke_sporters_genoeg_scores(25, self.ver_nr)
 
         url = self.url_uitslagen_rayon_teams_n % (self.testdata.comp25.pk, 'R2', 1)

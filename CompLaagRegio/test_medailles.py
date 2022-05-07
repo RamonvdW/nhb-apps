@@ -10,7 +10,7 @@ from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
 
-class TestCompRegioWieSchietWaar(E2EHelpers, TestCase):
+class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
 
     """ tests voor de Vereniging applicatie, functies voor Wie schiet waar """
 

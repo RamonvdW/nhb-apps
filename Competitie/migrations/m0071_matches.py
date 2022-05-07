@@ -20,9 +20,9 @@ def migreer_matches(apps, _):
     indiv_klas = apps.get_model('Competitie', 'CompetitieIndivKlasse')
     team_klas = apps.get_model('Competitie', 'CompetitieTeamKlasse')
 
-    comp_volgorde2indiv_pk = dict()    # [(comp.pk, volgorde)] = CompetitieIndivKlasse
-    comp_volgorde2team_pk = dict()     # [(comp.pk, volgorde)] = CompetitieTeamKlasse
-    wedstrijd_pk2match_pk = dict()     # [CompetitieWedstrijd.pk] = CompetitieMatch.pk
+    comp_volgorde2indiv_pk = dict()     # [(comp.pk, volgorde)] = CompetitieIndivKlasse
+    comp_volgorde_rk2team_pk = dict()   # [(comp.pk, volgorde, rk=true/false)] = CompetitieTeamKlasse
+    wedstrijd_pk2match_pk = dict()      # [CompetitieWedstrijd.pk] = CompetitieMatch.pk
 
     for indiv in indiv_klas.objects.prefetch_related('competitie'):     # pragma: no cover
         tup = (indiv.competitie.pk, indiv.volgorde)
@@ -30,8 +30,8 @@ def migreer_matches(apps, _):
     # for
 
     for team in team_klas.objects.prefetch_related('competitie'):       # pragma: no cover
-        tup = (team.competitie.pk, team.volgorde)
-        comp_volgorde2team_pk[tup] = team.pk
+        tup = (team.competitie.pk, team.volgorde, team.is_voor_teams_rk_bk)
+        comp_volgorde_rk2team_pk[tup] = team.pk
     # for
 
     # migreer DeelcompetitieRonde wedstrijden
@@ -77,8 +77,8 @@ def migreer_matches(apps, _):
 
             pks = list()
             for team_old in wedstrijd.team_klassen.all():
-                tup = (comp.pk, team_old.volgorde)
-                pks.append(comp_volgorde2team_pk[tup])
+                tup = (comp.pk, team_old.volgorde, False)
+                pks.append(comp_volgorde_rk2team_pk[tup])
             # for
             match.team_klassen.set(pks)
         # for
@@ -123,8 +123,8 @@ def migreer_matches(apps, _):
 
             pks = list()
             for team_old in wedstrijd.team_klassen.all():
-                tup = (comp.pk, team_old.volgorde)
-                pks.append(comp_volgorde2team_pk[tup])
+                tup = (comp.pk, team_old.volgorde + 100, True)
+                pks.append(comp_volgorde_rk2team_pk[tup])
             # for
             match.team_klassen.set(pks)
         # for

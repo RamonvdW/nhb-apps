@@ -13,7 +13,7 @@ import zipfile
 import os
 
 
-class TestCompRayonFormulieren(E2EHelpers, TestCase):
+class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
 
     """ tests voor de CompLaagRayon applicatie, Formulieren functie """
 
@@ -43,7 +43,7 @@ class TestCompRayonFormulieren(E2EHelpers, TestCase):
 
         cls.testdata.maak_inschrijvingen_regiocompetitie(18, cls.ver_nr)
         cls.testdata.maak_rk_deelnemers(18, cls.ver_nr, cls.regio_nr)
-        cls.testdata.maak_inschrijvingen_rk_teamcompetitie(18, cls.ver_nr)
+        cls.testdata.maak_voorinschrijvingen_rk_teamcompetitie(18, cls.ver_nr)
 
         # TODO: competitie doorzetten naar fase K zodat de team.klasse ingevuld is
 

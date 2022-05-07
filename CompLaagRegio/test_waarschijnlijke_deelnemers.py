@@ -19,7 +19,7 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestCompRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
+class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
 
     """ tests voor de CompScores applicatie, functies voor Wedstrijden """
 

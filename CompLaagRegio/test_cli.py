@@ -19,7 +19,7 @@ import datetime
 import io
 
 
-class TestCompRegioCli(E2EHelpers, TestCase):
+class TestCompLaagRegioCli(E2EHelpers, TestCase):
     """ unittests voor de Competitie applicatie, management command check_klasse """
 
     def setUp(self):

@@ -4,9 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-# bereken de team sterktes opnieuw
-# door een foutje was deze berekend over de 3 laagste gemiddelden in plaats van de 3 hoogste
-
 from django.core.management.base import BaseCommand
 from Competitie.models import KampioenschapSchutterBoog, DEELNAME_NEE
 from openpyxl.utils.exceptions import InvalidFileException
