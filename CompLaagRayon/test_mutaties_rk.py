@@ -165,7 +165,7 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         self.assertTrue(KampioenschapSchutterBoog.objects.count() > 0)
         # self._dump_deelnemers()
 
-        self.assertEqual(64, KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).count())
+        self.assertEqual(60, KampioenschapSchutterBoog.objects.filter(indiv_klasse=self.klasse).count())
 
         self._check_volgorde_en_rank()
 

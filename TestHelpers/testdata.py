@@ -1128,7 +1128,7 @@ class TestData(object):
                             break
                     # for
 
-                    # print(sporterboog.sporter.bij_vereniging.ver_nr, sporterboog.sporter.lid_nr, sporterboog.boogtype.afkorting, "%.3f" % (ag/1000))
+                    # print(sporterboog.sporter.bij_vereniging.ver_nr, sporterboog.sporter.lid_nr, sporterboog.boogtype.afkorting, "%.3f" % (ag/1000), deelnemer_klasse)
                     if deelnemer_klasse:
                         deelnemer = KampioenschapSchutterBoog(
                                             deelcompetitie=deelcomp_rk,

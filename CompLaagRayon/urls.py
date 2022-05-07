@@ -23,11 +23,11 @@ urlpatterns = [
          view_planning.RayonPlanningView.as_view(),
          name='rayon-planning'),
 
-    path('planning/wedstrijd/wijzig/<wedstrijd_pk>/',
+    path('planning/wedstrijd/wijzig/<match_pk>/',
          view_planning.WijzigRayonWedstrijdView.as_view(),
          name='rayon-wijzig-wedstrijd'),
 
-    path('planning/wedstrijd/verwijder/<wedstrijd_pk>/',
+    path('planning/wedstrijd/verwijder/<match_pk>/',
          view_planning.VerwijderWedstrijdView.as_view(),
          name='rayon-verwijder-wedstrijd'),
 
@@ -83,15 +83,15 @@ urlpatterns = [
 
 
     # HWL: download lijsten
-    path('download-formulier/<wedstrijd_pk>/',
+    path('download-formulier/<match_pk>/',
          view_formulieren.DownloadRkFormulierView.as_view(),
          name='download-formulier'),
 
-    path('download-formulier-indiv/<wedstrijd_pk>/<klasse_pk>/',
+    path('download-formulier-indiv/<match_pk>/<klasse_pk>/',
          view_formulieren.FormulierIndivAlsBestandView.as_view(),
          name='formulier-indiv-als-bestand'),
 
-    path('download-formulier-teams/<wedstrijd_pk>/<klasse_pk>/',
+    path('download-formulier-teams/<match_pk>/<klasse_pk>/',
          view_formulieren.FormulierTeamsAlsBestandView.as_view(),
          name='formulier-teams-als-bestand'),
 

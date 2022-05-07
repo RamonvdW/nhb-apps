@@ -423,7 +423,12 @@ class CompetitieIndivKlasse(models.Model):
     blazoen_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
 
     def __str__(self):
-        return self.beschrijving + ' [' + self.boogtype.afkorting + '] (%.3f)' % self.min_ag
+        msg = self.beschrijving + ' [' + self.boogtype.afkorting + '] (%.3f)' % self.min_ag
+        if self.is_voor_rk_bk:
+            msg += ' RK'
+        else:
+            msg += ' regio'
+        return msg
 
     class Meta:
         verbose_name = "Competitie indiv klasse"

@@ -194,20 +194,33 @@ class E2EHelpers(TestCase):
     def e2e_dump_resp(self, resp):                        # pragma: no cover
         print("status code:", resp.status_code)
         print(repr(resp))
+        is_attachment = False
         if resp.status_code == 302:
             print("redirect to url:", resp.url)
         else:
-            print('templates used:')
-            for templ in resp.templates:
-                print('   %s' % repr(templ.name))
-            # for
-        content = str(resp.content)
-        content = self._remove_debug_toolbar(content)
-        if len(content) < 50:
-            print("very short content:", content)
+            try:
+                header = resp['Content-Disposition']
+            except KeyError:
+                pass
+            else:
+                is_attachment = header.startswith('attachment; filename')
+
+            if not is_attachment:
+                print('templates used:')
+                for templ in resp.templates:
+                    print('   %s' % repr(templ.name))
+                # for
+
+        if is_attachment:
+            print('content is an attachment: %s...' % str(resp.content)[:20])
         else:
-            soup = BeautifulSoup(content, features="html.parser")
-            print(soup.prettify())
+            content = str(resp.content)
+            content = self._remove_debug_toolbar(content)
+            if len(content) < 50:
+                print("very short content:", content)
+            else:
+                soup = BeautifulSoup(content, features="html.parser")
+                print(soup.prettify())
 
     def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True, skip_broodkruimels=True, data_urls=True):
         content = str(resp.content)
