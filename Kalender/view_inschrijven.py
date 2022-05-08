@@ -10,16 +10,14 @@ from django.db import IntegrityError, transaction
 from django.db.models import ObjectDoesNotExist
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import BoogType
 from Functie.rol import Rollen, rol_get_huidige
 from Bestel.mandje import mandje_tel_inhoud
 from Bestel.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
 from Plein.menu import menu_dynamics
-from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren_wedstrijdbogen
+from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
 from .models import (KalenderWedstrijd, KalenderWedstrijdSessie, KalenderInschrijving,
                      INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_TO_STR)
 from Kalender.view_maand import MAAND2URL
-import time
 
 
 TEMPLATE_KALENDER_INSCHRIJVEN_SPORTER = 'kalender/inschrijven-sporter.dtl'
@@ -27,7 +25,7 @@ TEMPLATE_KALENDER_INSCHRIJVEN_GROEPJE = 'kalender/inschrijven-groepje.dtl'
 TEMPLATE_KALENDER_INSCHRIJVEN_FAMILIE = 'kalender/inschrijven-familie.dtl'
 
 
-def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pks):
+def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
 
     wedstrijdleeftijd = None
     if sporter:
@@ -77,23 +75,28 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pks):
         for klasse in sessie.klassen:
             lkl = klasse.leeftijdsklasse
 
-            if klasse.boogtype.id in wedstrijdboog_pks:
-                compatible_boog = True
+            klasse_compat_boog = klasse_compat_geslacht = klasse_compat_leeftijd = False
+
+            if klasse.boogtype.pk == wedstrijdboog_pk:
+                compatible_boog = klasse_compat_boog = True
                 sessie.boogtype_pk = klasse.boogtype.id
 
             # check geslacht is compatible
             if lkl.geslacht_is_compatible(wedstrijd_geslacht):
-                compatible_geslacht = True
+                compatible_geslacht = klasse_compat_geslacht = True
 
             # check leeftijd is compatible
             if wedstrijdleeftijd:
                 if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
-                    compatible_leeftijd = True
+                    compatible_leeftijd = klasse_compat_leeftijd = True
 
                     # verzamel een lijstje van compatibele wedstrijdklassen om te tonen
                     if lkl.beschrijving not in wedstrijdklassen:
                         if lkl.geslacht_is_compatible(wedstrijd_geslacht):
                             wedstrijdklassen.append(lkl.beschrijving)
+
+            if klasse_compat_boog and klasse_compat_geslacht and klasse_compat_leeftijd:
+                klasse.is_compat = True
         # for
 
         if compatible_boog and compatible_leeftijd and compatible_geslacht:
@@ -150,34 +153,71 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
 
         context['wed'] = wedstrijd
 
+        wedstrijd_boogtype_pks = list(wedstrijd.boogtypen.all().values_list('pk', flat=True))
+
         account = self.request.user
         try:
             lid_nr = int(account.username)
         except ValueError:
             raise Http404('Bondsnummer ontbreekt')
 
-        sporter, voorkeuren, wedstrijdboog_pks = get_sporter_voorkeuren_wedstrijdbogen(lid_nr)
+        try:
+            boog_afk = str(kwargs['boog_afk'])[:3]              # afkappen voor de veiligheid
+            boog_afk = boog_afk.lower()
+        except KeyError:
+            # val terug op "geen keuze"
+            boog_afk = ''
 
-        context['sporter'] = sporter
-        context['bogen'] = BoogType.objects.filter(pk__in=wedstrijdboog_pks).order_by('volgorde')
+        context['sportersboog'] = list(SporterBoog
+                                       .objects
+                                       .filter(sporter__lid_nr=lid_nr,
+                                               voor_wedstrijd=True,
+                                               boogtype__pk__in=wedstrijd_boogtype_pks)  # alleen toegestane bogen
+                                       .select_related('sporter',
+                                                       'sporter__bij_vereniging',
+                                                       'boogtype')
+                                       .order_by('boogtype__volgorde'))
 
-        tups = get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pks)
-        context['sessies'], context['leeftijd'], context['leeftijdsklassen'], geslacht = tups
+        geselecteerd = None
+        for sporterboog in context['sportersboog']:
+            sporterboog.is_geselecteerd = False
 
-        kan_aanmelden = False
-        for sessie in context['sessies']:
-            if sessie.kan_aanmelden:
-                kan_aanmelden = True
-                break
+            sporterboog.url_selecteer = reverse('Kalender:inschrijven-sporter-boog',
+                                                kwargs={'wedstrijd_pk': wedstrijd.pk,
+                                                        'boog_afk': sporterboog.boogtype.afkorting.lower()})
+
+            if boog_afk == sporterboog.boogtype.afkorting.lower():
+                geselecteerd = sporterboog
         # for
-        context['kan_aanmelden'] = kan_aanmelden
 
-        # als de sporter geslacht 'anders' heeft en nog geen keuze gemaakt heeft voor wedstrijden
-        # kijk dan of er een gender-neutrale sessie is waar op ingeschreven kan worden
-        if geslacht == '?':
-            context['uitleg_geslacht'] = True
-            if kan_aanmelden:
-                context['uitleg_geslacht'] = False
+        if not geselecteerd and len(context['sportersboog']) > 0:
+            geselecteerd = context['sportersboog'][0]
+
+        if geselecteerd:
+            context['geselecteerd'] = geselecteerd
+
+            # geen wissel knop meer tonen
+            geselecteerd.is_geselecteerd = True
+            geselecteerd.url_selecteer = None
+
+            voorkeuren = get_sporter_voorkeuren(geselecteerd.sporter)
+            tups = get_sessies(wedstrijd, geselecteerd.sporter, voorkeuren, geselecteerd.boogtype.pk)
+            context['sessies'], context['leeftijd'], context['leeftijdsklassen'], geslacht = tups
+
+            kan_aanmelden = False
+            for sessie in context['sessies']:
+                if sessie.kan_aanmelden:
+                    kan_aanmelden = True
+                    break
+            # for
+            context['kan_aanmelden'] = kan_aanmelden
+
+            # als de sporter geslacht 'anders' heeft en nog geen keuze gemaakt heeft voor wedstrijden
+            # kijk dan of er een gender-neutrale sessie is waar op ingeschreven kan worden
+            if geslacht == '?':
+                context['uitleg_geslacht'] = True
+                if kan_aanmelden:
+                    context['uitleg_geslacht'] = False
 
         context['menu_toon_mandje'] = True
 
@@ -233,34 +273,99 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
 
         context['wed'] = wedstrijd
 
+        wedstrijd_boogtype_pks = list(wedstrijd.boogtypen.all().values_list('pk', flat=True))
+
         try:
-            lid_nr = self.request.GET['bondsnummer']
-            lid_nr = str(lid_nr)[:6]      # afkappen voor de veiligheid
+            lid_nr = str(kwargs['lid_nr'])[:6]                  # afkappen voor de veiligheid
             lid_nr = int(lid_nr)
         except (KeyError, TypeError, ValueError):
-            # geen zoekparameter of slechte zoekterm
+            # val terug op de ingelogde gebruiker
             lid_nr = -1
         else:
             # controleer de range
             if not (100000 <= lid_nr <= 999999):
+                # val terug op de ingelogde gebruiker
                 lid_nr = -1
 
-        sporter, voorkeuren, wedstrijdboog_pks = get_sporter_voorkeuren_wedstrijdbogen(lid_nr)
+        try:
+            boog_afk = str(kwargs['boog_afk'])[:3]              # afkappen voor de veiligheid
+            boog_afk = boog_afk.lower()
+        except KeyError:
+            # val terug op "geen keuze"
+            boog_afk = ''
 
-        context['sporter'] = sporter
-        context['bogen'] = BoogType.objects.filter(pk__in=wedstrijdboog_pks).order_by('volgorde')
+        try:
+            zoek_lid_nr = self.request.GET['bondsnummer']
+            zoek_lid_nr = str(zoek_lid_nr)[:6]      # afkappen voor de veiligheid
+            zoek_lid_nr = int(zoek_lid_nr)
+        except (KeyError, TypeError, ValueError):
+            # geen zoekparameter of slechte zoekterm
+            zoek_lid_nr = -1
+        else:
+            # controleer de range
+            if not (100000 <= zoek_lid_nr <= 999999):
+                zoek_lid_nr = -1
 
-        tups = get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pks)
-        context['sessies'], _, context['leeftijdsklassen'], geslacht = tups
+        if zoek_lid_nr != -1:
+            context['sportersboog'] = list(SporterBoog
+                                           .objects
+                                           .filter(sporter__lid_nr=zoek_lid_nr,
+                                                   voor_wedstrijd=True,
+                                                   boogtype__pk__in=wedstrijd_boogtype_pks)  # alleen toegestane bogen
+                                           .select_related('sporter',
+                                                           'sporter__bij_vereniging',
+                                                           'boogtype')
+                                           .order_by('boogtype__volgorde'))
+        elif lid_nr != -1:
+            context['sportersboog'] = list(SporterBoog
+                                           .objects
+                                           .filter(sporter__lid_nr=lid_nr,
+                                                   voor_wedstrijd=True,
+                                                   boogtype__pk__in=wedstrijd_boogtype_pks)  # alleen toegestane bogen
+                                           .select_related('sporter',
+                                                           'sporter__bij_vereniging',
+                                                           'boogtype')
+                                           .order_by('boogtype__volgorde'))
+        else:
+            # toon alleen het zoekveld
+            context['sportersboog'] = list()
 
-        if context['sporter']:
+        geselecteerd = None
+        for sporterboog in context['sportersboog']:
+            sporterboog.is_geselecteerd = False
+
+            sporterboog.url_selecteer = reverse('Kalender:inschrijven-groepje-lid-boog',
+                                                kwargs={'wedstrijd_pk': wedstrijd.pk,
+                                                        'lid_nr': sporterboog.sporter.lid_nr,
+                                                        'boog_afk': sporterboog.boogtype.afkorting.lower()})
+
+            if boog_afk == sporterboog.boogtype.afkorting.lower():
+                geselecteerd = sporterboog
+        # for
+
+        if not geselecteerd and len(context['sportersboog']) > 0:
+            geselecteerd = context['sportersboog'][0]
+
+        if len(context['sportersboog']) > 1:
+            context['toon_sportersboog'] = True
+
+        if geselecteerd:
+            context['geselecteerd'] = geselecteerd
+
+            # geen wissel knop meer tonen
+            geselecteerd.is_geselecteerd = True
+            geselecteerd.url_selecteer = None
+
+            voorkeuren = get_sporter_voorkeuren(geselecteerd.sporter)
+            tups = get_sessies(wedstrijd, geselecteerd.sporter, voorkeuren, geselecteerd.boogtype.pk)
+            context['sessies'], context['leeftijd'], context['leeftijdsklassen'], geslacht = tups
 
             # kijk of deze sporter al ingeschreven is
             sessie_pk2inschrijving = dict()
             for inschrijving in (KalenderInschrijving
                                  .objects
                                  .filter(wedstrijd=wedstrijd,
-                                         sporterboog__sporter=sporter)
+                                         sporterboog__sporter=geselecteerd.sporter)
                                  .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)
                                  .select_related('sessie',
                                                  'sporterboog',
@@ -281,6 +386,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
                     # sporter is ingeschreven
                     al_ingeschreven = True
                     context['inschrijving'] = inschrijving
+                    inschrijving.status_str = INSCHRIJVING_STATUS_TO_STR[inschrijving.status]
             # for
             context['kan_aanmelden'] = kan_aanmelden
             context['al_ingeschreven'] = al_ingeschreven
@@ -348,6 +454,9 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
 
         context['wed'] = wedstrijd
 
+        wedstrijd_boogtype_pks = list(wedstrijd.boogtypen.all().values_list('pk', flat=True))
+
+        # begrens de mogelijkheden tot leden met dezelfde adres_code als de ingelogde gebruiker
         account = self.request.user
         sporter = Sporter.objects.get(account=account)
         adres_code = sporter.adres_code
@@ -367,40 +476,58 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
                 # val terug op de ingelogde gebruiker
                 lid_nr = sporter.lid_nr
 
+        try:
+            boog_afk = str(kwargs['boog_afk'])[:3]              # afkappen voor de veiligheid
+            boog_afk = boog_afk.lower()
+        except KeyError:
+            # val terug op "geen keuze"
+            boog_afk = ''
+
         context['familie'] = list(SporterBoog
                                   .objects
                                   .filter(sporter__adres_code=adres_code,
-                                          voor_wedstrijd=True)
+                                          voor_wedstrijd=True,
+                                          boogtype__pk__in=wedstrijd_boogtype_pks)  # alleen toegestane bogen
                                   .select_related('sporter',
+                                                  'sporter__bij_vereniging',
                                                   'boogtype')
                                   .order_by('sporter__sinds_datum',
-                                            'sporter__lid_nr')[:10])
+                                            'sporter__lid_nr',
+                                            'boogtype__volgorde')[:50])
 
-        sporter, voorkeuren, wedstrijdboog_pks = None, None, list()
         sporter_pks = list()
+        geselecteerd = None
         for sporterboog in context['familie']:
+            sporterboog.is_geselecteerd = False
+
+            sporterboog.url_selecteer = reverse('Kalender:inschrijven-familie-lid-boog',
+                                                kwargs={'wedstrijd_pk': wedstrijd.pk,
+                                                        'lid_nr': sporterboog.sporter.lid_nr,
+                                                        'boog_afk': sporterboog.boogtype.afkorting.lower()})
+
             if sporterboog.sporter.pk not in sporter_pks:
                 sporter_pks.append(sporterboog.sporter.pk)
 
             if sporterboog.sporter.lid_nr == lid_nr:
-                sporterboog.is_geselecteerd = True
-                sporter, voorkeuren, wedstrijdboog_pks = get_sporter_voorkeuren_wedstrijdbogen(lid_nr)
-            else:
-                sporterboog.is_geselecteerd = False
-                sporterboog.url_selecteer = reverse('Kalender:inschrijven-familie-lid-nr',
-                                                    kwargs={'wedstrijd_pk': wedstrijd.pk,
-                                                            'lid_nr': sporterboog.sporter.lid_nr})
+                if boog_afk == sporterboog.boogtype.afkorting.lower():
+                    geselecteerd = sporterboog
         # for
 
-        if sporter:
-            context['sporter'] = sporter
+        if not geselecteerd and len(context['familie']) > 0:
+            geselecteerd = context['familie'][0]
 
-            context['bogen'] = BoogType.objects.filter(pk__in=wedstrijdboog_pks).order_by('volgorde')
+        if geselecteerd:
+            context['geselecteerd'] = geselecteerd
 
-            tups = get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pks)
+            # geen wissel knop meer tonen
+            geselecteerd.is_geselecteerd = True
+            geselecteerd.url_selecteer = None
+
+            voorkeuren = get_sporter_voorkeuren(geselecteerd.sporter)
+            tups = get_sessies(wedstrijd, geselecteerd.sporter, voorkeuren, geselecteerd.boogtype.pk)
             context['sessies'], _, context['leeftijdsklassen'], geslacht = tups
 
-            # kijk of deze sporter al ingeschreven is
+            # kijk of deze sporter al ingeschreven is, want maximaal aanmelden met 1 boog
             sessie_pk2inschrijving = dict()
             for inschrijving in (KalenderInschrijving
                                  .objects
@@ -453,7 +580,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
             if sporter.pk not in sporter_pks:
                 dummy = SporterBoog(sporter=sporter)
                 dummy.geen_boog = True
-                dummy.is_geselecteerd = (sporter.lid_nr == lid_nr)
+                dummy.is_geselecteerd = False
                 context['familie'].append(dummy)
         # for
 
@@ -477,6 +604,8 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
 
 class ToevoegenAanMandjeView(UserPassesTestMixin, View):
 
+    # TODO: verplaats naar Bestel
+
     """ Met deze view wordt het toevoegen van een wedstrijd aan het mandje van de koper afgehandeld """
 
     # class variables shared by all instances
@@ -493,23 +622,24 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
 
     def post(self, request, *args, **kwargs):
         wedstrijd_str = request.POST.get('wedstrijd', '')[:6]   # afkappen voor de veiligheid
-        sporter_str = request.POST.get('sporter', '')[:6]       # afkappen voor de veiligheid
+        sporterboog_str = request.POST.get('sporterboog', '')[:6]   # afkappen voor de veiligheid
         sessie_str = request.POST.get('sessie', '')[:6]         # afkappen voor de veiligheid
-        boog_str = request.POST.get('boog', '')[:6]             # afkappen voor de veiligheid
         goto_str = request.POST.get('goto', '')[:6]             # afkappen voor de veiligheid
 
         try:
             wedstrijd_pk = int(wedstrijd_str)
-            sporter_pk = int(sporter_str)
+            sporterboog_pk = int(sporterboog_str)
             sessie_pk = int(sessie_str)
-            boog_pk = int(boog_str)
         except (ValueError, TypeError):
             raise Http404('Slecht verzoek')
 
         try:
             wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd_pk)
             sessie = KalenderWedstrijdSessie.objects.get(pk=sessie_pk)
-            sporterboog = SporterBoog.objects.select_related('sporter').get(sporter__pk=sporter_pk, boogtype__pk=boog_pk)
+            sporterboog = (SporterBoog
+                           .objects
+                           .select_related('sporter')
+                           .get(pk=sporterboog_pk))
         except ObjectDoesNotExist:
             raise Http404('Onderdeel van verzoek niet gevonden')
 

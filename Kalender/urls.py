@@ -26,17 +26,25 @@ urlpatterns = [
          name='wedstrijd-info'),
 
     # inschrijven
+    path('inschrijven/<wedstrijd_pk>/sporter/<boog_afk>/',
+         view_inschrijven.WedstrijdInschrijvenSporter.as_view(),
+         name='inschrijven-sporter-boog'),
+
     path('inschrijven/<wedstrijd_pk>/sporter/',
          view_inschrijven.WedstrijdInschrijvenSporter.as_view(),
          name='inschrijven-sporter'),
+
+    path('inschrijven/<wedstrijd_pk>/groep/<lid_nr>/<boog_afk>/',
+         view_inschrijven.WedstrijdInschrijvenGroepje.as_view(),
+         name='inschrijven-groepje-lid-boog'),
 
     path('inschrijven/<wedstrijd_pk>/groep/',
          view_inschrijven.WedstrijdInschrijvenGroepje.as_view(),
          name='inschrijven-groepje'),
 
-    path('inschrijven/<wedstrijd_pk>/familie/<lid_nr>/',
+    path('inschrijven/<wedstrijd_pk>/familie/<lid_nr>/<boog_afk>/',
          view_inschrijven.WedstrijdInschrijvenFamilie.as_view(),
-         name='inschrijven-familie-lid-nr'),
+         name='inschrijven-familie-lid-boog'),
 
     path('inschrijven/<wedstrijd_pk>/familie/',
          view_inschrijven.WedstrijdInschrijvenFamilie.as_view(),
