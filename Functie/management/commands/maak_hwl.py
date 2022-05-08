@@ -24,7 +24,7 @@ class Command(BaseCommand):
         try:
             account = Account.objects.get(username=username)
         except Account.DoesNotExist as exc:
-            self.stderr.write("%s" % str(exc))
+            self.stderr.write("[ERROR] Kan account %s niet vinden" % username)
             account = None
         return account
 
@@ -32,7 +32,7 @@ class Command(BaseCommand):
         try:
             nhb_ver = NhbVereniging.objects.get(ver_nr=ver_nr)
         except NhbVereniging.DoesNotExist as exc:
-            self.stderr.write("%s" % str(exc))
+            self.stderr.write("[ERROR] Kan vereniging %s niet vinden" % ver_nr)
             nhb_ver = None
         return nhb_ver
 
@@ -40,7 +40,7 @@ class Command(BaseCommand):
         try:
             functie = Functie.objects.get(rol='HWL', nhb_ver=nhb_ver)
         except Functie.DoesNotExist as exc:
-            self.stderr.write("%s" % str(exc))
+            self.stderr.write("[ERROR] Kan HWL functie van vereniging %s niet vinden" % nhb_ver.ver_nr)
             functie = None
         return functie
 
@@ -51,6 +51,7 @@ class Command(BaseCommand):
         ver_nr = options['ver_nr'][0]
         nhb_ver = self.get_vereniging(ver_nr)
 
+        activiteit = ""
         if account and nhb_ver:
             functie = self.get_functie_hwl(nhb_ver)
 
@@ -68,5 +69,8 @@ class Command(BaseCommand):
                                        gebruikte_functie='maak_hwl (command line)',
                                        activiteit=activiteit)
                     self.stdout.write(activiteit)
+
+        if not activiteit:
+            self.stderr.write('[ERROR] Kon account %s geen HWL maken van vereniging %s' % (username, ver_nr))
 
 # end of file

@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 # koppel een account aan een Sporter vanaf de commandline
+# wordt gebruikt voor dev testen, na het opzetten van een lege database
 
 from django.core.management.base import BaseCommand
 from Account.models import Account
@@ -16,7 +17,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('username', nargs=1,
-                            help="inlog naam")
+                            help="inlog naam en lid_nr")
 
     def handle(self, *args, **options):
         username = options['username'][0]
