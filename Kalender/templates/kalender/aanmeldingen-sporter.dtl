@@ -46,11 +46,8 @@
                             <td class="right-align">{% if obj.retour_euro %}&euro;&nbsp;{{ obj.retour_euro }}{% else %}-{% endif %}</td>
                             <td class="center">
                                 {% if obj.url_afmelden %}
-                                    <form action="{{ obj.url_afmelden }}" method="post">
-                                        {% csrf_token %}
-                                        <button class="btn-nhb-rood">
-                                            <i class="material-icons-round">delete</i></button>
-                                    </form>
+                                    <a class="btn-nhb-rood modal-trigger" href="#bevestig_afmelden_{{ obj.pk }}">
+                                        <i class="material-icons-round">delete</i></a>
                                 {% endif %}
                             </td>
                         {% else %}
@@ -77,6 +74,32 @@
             </table>
         </div>
     </div>
+
+
+    {% for datum, type, obj in lijst %}
+        {% if obj.url_afmelden %}
+            <div class="modal" id="bevestig_afmelden_{{ obj.pk }}">
+                <div class="modal-content center">
+                    <h5>Verwijder aanmelding?</h5>
+                    <p>Wil je de aanmelding van <b>{{ sporter.volledige_naam }}</b><br>voor de wedstrijd <b>{{ obj.wedstrijd.titel }}</b><br>verwijderen uit het systeem?</p>
+
+                    <form method="post" action="{{ obj.url_afmelden }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="verwijder" value="1">
+
+                        <div class="modal-footer" style="text-align:center; display:block">
+                            <div style="display:inline-block; width:50%">
+                                <button class="btn-nhb-rood" type="submit">Ja</button>
+                            </div>
+                            <div style="display:inline-block; width:50%">
+                                <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="kalender-aanmeldingen" %}
 

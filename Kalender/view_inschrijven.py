@@ -682,8 +682,10 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
 
         if goto_str == 'F':
             # ga terug naar de familie pagina met dezelfde sporter geselecteerd
-            url = reverse('Kalender:inschrijven-familie-lid-nr', kwargs={'wedstrijd_pk': wedstrijd.pk,
-                                                                         'lid_nr': sporterboog.sporter.lid_nr})
+            url = reverse('Kalender:inschrijven-familie-lid-boog',
+                          kwargs={'wedstrijd_pk': wedstrijd.pk,
+                                  'lid_nr': sporterboog.sporter.lid_nr,
+                                  'boog_afk': sporterboog.boogtype.afkorting.lower()})
         else:
             url = reverse('Kalender:wedstrijd-info', kwargs={'wedstrijd_pk': wedstrijd.pk})
 

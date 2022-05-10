@@ -43,7 +43,7 @@
             inp = document.createElement('input');
             inp.type = "hidden";
             inp.name = 'sporterboog';
-            inp.value = el.dataset.sporter;
+            inp.value = el.dataset.sporterboog;
             form.appendChild(inp);
 
             inp = document.createElement('input');
@@ -68,7 +68,7 @@
     <!-- blauwe balk met dialoog venster -->
     <div class="row-nhb-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <table class="white"
+            <table class="white">
                 <tr>
                     <th>Titel</th>
                     <td>{{ wed.titel }}</td>
@@ -141,7 +141,7 @@
     <!-- blauwe balk met informatie -->
     <div class="row-nhb-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <table class="white"
+            <table class="white">
                 <tr>
                     <th>Sporter</th>
                     <td>{{ geselecteerd.sporter.lid_nr_en_volledige_naam }}</td>
@@ -241,7 +241,7 @@
                                 {% else %}
                                     {% if not sessie.compatible_leeftijd %}<span>(leeftijd)</span><br>{% endif %}
                                     {% if not sessie.compatible_boog %}<span>(boog)</span><br>{% endif %}
-                                    {% if not sessie.compatible_geslacht %}<span>(M/V)</span><br{% endif %}
+                                    {% if not sessie.compatible_geslacht %}<span>(M/V)</span><br>{% endif %}
                                 {% endif %}
                             </td>
                         </tr>

@@ -252,7 +252,7 @@
                                     {% else %}
                                         {% if not sessie.compatible_leeftijd %}<span>(leeftijd)</span><br>{% endif %}
                                         {% if not sessie.compatible_boog %}<span>(boog)</span><br>{% endif %}
-                                        {% if not sessie.compatible_geslacht %}<span>(M/V)</span><br{% endif %}
+                                        {% if not sessie.compatible_geslacht %}<span>(M/V)</span><br>{% endif %}
                                     {% endif %}
                                 </td>
                             </tr>

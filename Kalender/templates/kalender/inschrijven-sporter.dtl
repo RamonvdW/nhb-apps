@@ -68,7 +68,7 @@
     <!-- blauwe balk met dialoog venster -->
     <div class="row-nhb-blauw">
         <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <table class="white"
+            <table class="white">
                 <tr>
                     <th>Titel</th>
                     <td>{{ wed.titel }}</td>
@@ -122,115 +122,130 @@
                             {% endif %}
                         </td>
                     </tr>
+                {% empty %}
+                    <tr>
+                        <td class="center"><i>Er zijn geen bogen ingesteld die gebruikt kunnen worden voor deze wedstrijd</i></td>
+                    </tr>
                 {% endfor %}
             </table>
         </div>
     </div>
 
 
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h4>Gekozen sporter en boog</h4>
+    {% if geselecteerd %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Gekozen sporter en boog</h4>
+            </div>
         </div>
-    </div>
 
-    <!-- blauwe balk met informatie -->
-    <div class="row-nhb-blauw">
-        <div class="col s12 l10 offset-l1 xl8 offset-xl2">
-            <table class="white">
-                <tr>
-                    <th>Sporter</th>
-                    <td>{{ geselecteerd.sporter.lid_nr_en_volledige_naam }}</td>
-                </tr>
-
-                <tr>
-                    <th>Lid bij vereniging</th>
-                    <td>{{ geselecteerd.sporter.bij_vereniging }}</td>
-                </tr>
-
-                <tr>
-                    <th>Wedstrijdleeftijd</th>
-                    <td>{{ leeftijd }} jaar</td>
-                </tr>
-
-                {% if uitleg_geslacht %}
+        <!-- blauwe balk met informatie -->
+        <div class="row-nhb-blauw">
+            <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+                <table class="white">
                     <tr>
-                        <th>Keuze voor mannen of vrouwen</th>
-                        <td class="red-text">Om in te kunnen schrijven op deze wedstrijd moet je kiezen<br>of je met de mannen of vrouwen meedoet.<br>Maak deze keuze op Mijn pagina, Voorkeuren.</td>
+                        <th>Sporter</th>
+                        <td>{{ geselecteerd.sporter.lid_nr_en_volledige_naam }}</td>
                     </tr>
-                {% endif %}
 
-                <tr>
-                    <th>Boog</th>
-                    <td>{{ geselecteerd.boogtype.beschrijving }}</td>
-                </tr>
+                    <tr>
+                        <th>Lid bij vereniging</th>
+                        <td>{{ geselecteerd.sporter.bij_vereniging }}</td>
+                    </tr>
 
-                <tr>
-                    <th>Mogelijke klassen voor deze wedstrijd</th>
-                    <td>{% for beschrijving in leeftijdsklassen %}{{ beschrijving }}<br>{% empty %}<span class="red-text">Geen</span>{% endfor %}</td>
-                </tr>
+                    <tr>
+                        <th>Wedstrijdleeftijd</th>
+                        <td>{{ leeftijd }} jaar</td>
+                    </tr>
 
-            </table>
+                    {% if uitleg_geslacht %}
+                        <tr>
+                            <th>Keuze voor mannen of vrouwen</th>
+                            <td class="red-text">Om in te kunnen schrijven op deze wedstrijd moet je kiezen<br>of je met de mannen of vrouwen meedoet.<br>Maak deze keuze op Mijn pagina, Voorkeuren.</td>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <th>Boog</th>
+                        <td>{{ geselecteerd.boogtype.beschrijving }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Mogelijke klassen voor deze wedstrijd</th>
+                        <td>{% for beschrijving in leeftijdsklassen %}{{ beschrijving }}<br>{% empty %}<span class="red-text">Geen</span>{% endfor %}</td>
+                    </tr>
+
+                </table>
+            </div>
         </div>
-    </div>
+
+    {% endif %}
 
 
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
             <h4>Kies een sessie</h4>
-                                 <!-- N = NHB -->
-            {% if wed.organisatie == 'N' %}
-                <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
-            {% endif %}
-
             {% if not kan_aanmelden %}
+
                 <p class="red-text">Je kan niet inschrijven op deze wedstrijd.<br>Dit kan komen door je leeftijd en/of de gekozen bogen onder Mijn pagina, Voorkeuren.</p>
+
+            {% else %}
+                                     <!-- N = NHB -->
+                {% if wed.organisatie == 'N' %}
+                    <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
+                {% endif %}
+
             {% endif %}
         </div>
     </div>
 
-    <div class="row-nhb-blauw">
-        <div class="col s12">
-            <table class="white">
-                <tr>
-                    <th class="center">Wanneer</th>
-                    <th class="center">Wedstrijdklasse</th>
-                    <th class="center">Nog beschikbaar</th>
-                    <th class="center">Prijs</th>
-                    <th><!-- kolom voor de knoppen --></th>
-                </tr>
+    {% if kan_aanmelden %}
 
-                {% for sessie in sessies %}
-                    <tr{% if not sessie.kan_aanmelden and not sessie.al_ingeschreven %} class="grey-text"{% endif %}>
-                        <td class="center">{{ sessie.datum }}<br>{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</td>
-                        <td class="center">
-                            {% for klasse in sessie.klassen %}
-                                {% if klasse.is_compat %}
-                                    <span>{{ klasse.beschrijving }}</span><br>
-                                {% endif %}
-                            {% endfor %}
-                        </td>
-                        <td class="center">{{ sessie.aantal_beschikbaar }} (van de {{ sessie.max_sporters }})</td>
-                        <td class="center">&euro;&nbsp;{{ sessie.prijs_euro }}</td>
-                        <td class="center">
-                            {% if sessie.kan_aanmelden %}
-                                <button class="btn-nhb-rood" id="id_toevoegen_{{ sessie.pk }}" onclick="toevoegen('id_toevoegen_{{ sessie.pk }}')" data-wedstrijd="{{ wed.pk }}" data-sessie="{{ sessie.pk }}" data-sporterboog="{{ geselecteerd.pk }}">
-                                    <i class="material-icons-round">add</i><i class="material-icons-round">shopping_cart</i></button>
-                            {% elif sessie.al_ingeschreven %}
-                                <span class="green-text">Ingeschreven</span>{% if not sessie.inschrijving.betaling_voldaan %}<br><span>(nog niet betaald)</span>{% endif %}
-                            {% else %}
-                                {% if not sessie.compatible_leeftijd %}<span>(leeftijd)</span><br>{% endif %}
-                                {% if not sessie.compatible_boog %}<span>(boog)</span><br>{% endif %}
-                                {% if not sessie.compatible_geslacht %}<span>(M/V)</span><br{% endif %}
-                            {% endif %}
-                        </td>
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+                <table class="white">
+                    <tr>
+                        <th class="center">Wanneer</th>
+                        <th class="center">Wedstrijdklasse</th>
+                        <th class="center">Nog beschikbaar</th>
+                        <th class="center">Prijs</th>
+                        <th><!-- kolom voor de knoppen --></th>
                     </tr>
-                {% endfor %}
-            </table>
+
+                    {% for sessie in sessies %}
+                        <tr{% if not sessie.kan_aanmelden and not sessie.al_ingeschreven %} class="grey-text"{% endif %}>
+                            <td class="center">{{ sessie.datum }}<br>{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</td>
+                            <td class="center">
+                                {% for klasse in sessie.klassen %}
+                                    {% if klasse.is_compat %}
+                                        <span>{{ klasse.beschrijving }}</span><br>
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                            <td class="center">{{ sessie.aantal_beschikbaar }} (van de {{ sessie.max_sporters }})</td>
+                            <td class="center">&euro;&nbsp;{{ sessie.prijs_euro }}</td>
+                            <td class="center">
+                                {% if sessie.kan_aanmelden %}
+                                    <button class="btn-nhb-rood" id="id_toevoegen_{{ sessie.pk }}" onclick="toevoegen('id_toevoegen_{{ sessie.pk }}')" data-wedstrijd="{{ wed.pk }}" data-sessie="{{ sessie.pk }}" data-sporterboog="{{ geselecteerd.pk }}">
+                                        <i class="material-icons-round">add</i><i class="material-icons-round">shopping_cart</i></button>
+                                {% elif sessie.al_ingeschreven %}
+                                    <span class="green-text">Ingeschreven</span>{% if not sessie.inschrijving.betaling_voldaan %}<br><span>(nog niet betaald)</span>{% endif %}
+                                {% else %}
+                                    {% if not sessie.compatible_leeftijd %}<span>(leeftijd)</span><br>{% endif %}
+                                    {% if not sessie.compatible_boog %}<span>(boog)</span><br>{% endif %}
+                                    {% if not sessie.compatible_geslacht %}<span>(M/V)</span><br>{% endif %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
         </div>
-    </div>
+
+    {% endif %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="kalender-inschrijven-sporter" %}
 

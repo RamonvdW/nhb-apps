@@ -10,7 +10,12 @@ sudo cpupower frequency-set --governor performance > /dev/null
 export PYTHONDONTWRITEBYTECODE=1
 
 DEBUG=1
-[ "$1" = "--nodebug" ] && DEBUG=0
+SETTINGS="nhbapps.settings_dev"
+if [ "$1" = "--nodebug" ]
+then
+    DEBUG=0
+    SETTINGS="nhbapps.settings"
+fi
 
 ./manage.py check
 [ $? -eq 0 ] || exit 1
@@ -23,30 +28,30 @@ rm -rf "$STATIC_DIR"/*
 # start the background processes
 echo "[INFO] Starting betaal_mutaties (runtime: 60 minutes)"
 pkill -f betaal_mutaties
-./manage.py betaal_mutaties 60 &
+./manage.py betaal_mutaties --settings=$SETTINGS 60 &
 
 echo "[INFO] Starting bestel_mutaties (runtime: 60 minutes)"
 pkill -f bestel_mutaties
-./manage.py bestel_mutaties 60 &
+./manage.py bestel_mutaties --settings=$SETTINGS 60 &
 
 echo "[INFO] Starting regiocomp_mutaties (runtime: 60 minutes)"
 pkill -f regiocomp_mutaties
-./manage.py regiocomp_mutaties 60 &
+./manage.py regiocomp_mutaties --settings=$SETTINGS 60 &
 
 echo "[INFO] Starting regiocomp_tussenstand (runtime: 60 minutes)"
 pkill -f regiocomp_tussenstand
-./manage.py regiocomp_tussenstand 60 &
+./manage.py regiocomp_tussenstand --settings=$SETTINGS 60 &
 
 # start the development webserver
 if [ $DEBUG -eq 1 ]
 then
     echo "[INFO] Starting runserver with dev config and DEBUG=True"
-    ./manage.py runserver --settings=nhbapps.settings_dev
+    ./manage.py runserver --settings=$SETTINGS
 else
     # run with DEBUG=False stops serving static files..
     # using --insecure fixes that
     echo "[INFO] Starting runserver"
-    ./manage.py runserver --settings=nhbapps.settings --insecure
+    ./manage.py runserver --settings=$SETTINGS --insecure
 fi
 
 # kill the background processes

@@ -55,5 +55,7 @@ if ENABLE_DEBUG_TOOLBAR:                            # pragma: no cover
         }
     )
 
+BETAAL_API = 'http://localhost:8125'
+
 
 # end of file

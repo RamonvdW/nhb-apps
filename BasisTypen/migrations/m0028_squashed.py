@@ -211,7 +211,7 @@ KALENDERWEDSTRIJDENKLASSEN = (
     (542, 'TR', 'CV', 'Traditional Onder 18 meisjes (cadet)'),
 
     (550, 'TR', 'AA2', 'Traditional Onder 14 (aspirant)'),
-    (551, 'TR', 'AH2', 'Traditional Onder 14 14 jongens (aspirant)'),
+    (551, 'TR', 'AH2', 'Traditional Onder 14 jongens (aspirant)'),
     (552, 'TR', 'AV2', 'Traditional Onder 14 meisjes (aspirant)'),
 
 
