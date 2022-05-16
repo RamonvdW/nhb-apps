@@ -466,9 +466,8 @@ class UitslagenRayonTeamsView(TemplateView):
             if team.klasse != prev_klasse:
                 if len(klasse_teams_done) > 0:
                     for plan_team in klasse_teams_plan:
-                        plan_team.niet_deelgenomen = True
                         plan_team.rank = ''
-                        plan_team.rk_score_str = '-'
+                        plan_team.niet_deelgenomen = True
                     # for
                     teller = klasse_teams_done[0]
                 elif len(klasse_teams_plan) > 0:
@@ -552,6 +551,7 @@ class UitslagenRayonTeamsView(TemplateView):
 
                 klasse_teams_done.append(team)
             else:
+                # nog geen uitslag beschikbaar
                 # TODO: geen rank invullen na de cut
                 rank += 1
                 team.rank = rank
@@ -559,10 +559,10 @@ class UitslagenRayonTeamsView(TemplateView):
         # for
 
         if len(klasse_teams_done) > 0:
+            # er is uitslag
             for plan_team in klasse_teams_plan:
-                plan_team.rank = 0
-                plan_team.rk_score_str = '-'
-                plan_team.heeft_uitslag = True
+                plan_team.rank = ''
+                plan_team.niet_deelgenomen = True
             # for
             teller = klasse_teams_done[0]
         elif len(klasse_teams_plan) > 0:

@@ -207,6 +207,7 @@
                     </td>
                 </tr>
 
+                <!--
                 {% if team.toon_team_leden %}
                     <tr>
                         <td></td>
@@ -217,6 +218,7 @@
                         </td>
                     </tr>
                 {% endif %}
+                -->
 
             {% endfor %}
 
