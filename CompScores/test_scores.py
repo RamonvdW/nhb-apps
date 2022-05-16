@@ -24,16 +24,16 @@ class TestCompScoresScores(E2EHelpers, TestCase):
     url_planning_cluster = '/bondscompetities/regio/planning/%s/cluster/%s/'        # deelcomp_pk, cluster_pk
     url_planning_regio_ronde = '/bondscompetities/regio/planning/ronde/%s/'         # ronde_pk
 
-    url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'          # wedstrijd_pk
+    url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'          # match_pk
     url_uitslag_opslaan = '/bondscompetities/scores/dynamic/scores-opslaan/'
     url_deelnemers_ophalen = '/bondscompetities/scores/dynamic/deelnemers-ophalen/'
     url_deelnemer_zoeken = '/bondscompetities/scores/dynamic/check-nhbnr/'
 
-    url_uitslag_controleren = '/bondscompetities/scores/uitslag-controleren/%s/'    # wedstrijd_pk
-    url_uitslag_accorderen = '/bondscompetities/scores/uitslag-accorderen/%s/'      # wedstrijd_pk
+    url_uitslag_controleren = '/bondscompetities/scores/uitslag-controleren/%s/'    # match_pk
+    url_uitslag_accorderen = '/bondscompetities/scores/uitslag-accorderen/%s/'      # match_pk
 
     url_scores_regio = '/bondscompetities/scores/regio/%s/'                         # deelcomp_pk
-    url_bekijk_uitslag = '/bondscompetities/scores/bekijk-uitslag/%s/'              # wedstrijd_pk
+    url_bekijk_uitslag = '/bondscompetities/scores/bekijk-uitslag/%s/'              # match_pk
 
     url_regio_teams = '/bondscompetities/scores/teams/%s/'                          # deelcomp_pk
 

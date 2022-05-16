@@ -423,10 +423,10 @@ class UitslagenRayonTeamsView(TemplateView):
         teamklasse2match = dict()     # [team_klasse.pk] = competitiematch
         match_pks = list(deelcomp_rk.rk_bk_matches.values_list('pk', flat=True))
         for match in (CompetitieMatch
-                          .objects
-                          .prefetch_related('team_klassen')
-                          .select_related('locatie')
-                          .filter(pk__in=match_pks)):
+                      .objects
+                      .prefetch_related('team_klassen')
+                      .select_related('locatie')
+                      .filter(pk__in=match_pks)):
 
             if match.locatie:
                 match.adres_str = ", ".join(match.locatie.adres.split('\n'))
@@ -464,9 +464,8 @@ class UitslagenRayonTeamsView(TemplateView):
             if team.team_klasse != prev_klasse:
                 if len(klasse_teams_done) > 0:
                     for plan_team in klasse_teams_plan:
-                        plan_team.niet_deelgenomen = True
                         plan_team.rank = ''
-                        plan_team.rk_score_str = '-'
+                        plan_team.niet_deelgenomen = True
                     # for
                     teller = klasse_teams_done[0]
                 elif len(klasse_teams_plan) > 0:
@@ -550,6 +549,7 @@ class UitslagenRayonTeamsView(TemplateView):
 
                 klasse_teams_done.append(team)
             else:
+                # nog geen uitslag beschikbaar
                 # TODO: geen rank invullen na de cut
                 rank += 1
                 team.rank = rank
@@ -557,10 +557,10 @@ class UitslagenRayonTeamsView(TemplateView):
         # for
 
         if len(klasse_teams_done) > 0:
+            # er is uitslag
             for plan_team in klasse_teams_plan:
-                plan_team.rank = 0
-                plan_team.rk_score_str = '-'
-                plan_team.heeft_uitslag = True
+                plan_team.rank = ''
+                plan_team.niet_deelgenomen = True
             # for
             teller = klasse_teams_done[0]
         elif len(klasse_teams_plan) > 0:

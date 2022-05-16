@@ -138,7 +138,7 @@ class TestKalenderVereniging(E2EHelpers, TestCase):
         self.assertEqual(2, KalenderWedstrijd.objects.count())
         wedstrijd = KalenderWedstrijd.objects.get(organisatie=ORGANISATIE_NHB)
         self.assertEqual(wedstrijd.boogtypen.count(), 5)
-        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 60)        # gender-neutrale klassen zijn niet gekozen
+        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 70)        # gender-neutrale klassen zijn niet gekozen
 
         # maak nog een wedstrijd aan
         with self.assert_max_queries(20):

@@ -132,7 +132,7 @@ class TestBasisTypen(TestCase):
         self.assertEqual(get_organisatie_teamtypen(ORGANISATIE_IFAA).count(), 0)
 
         self.assertEqual(get_organisatie_klassen(ORGANISATIE_WA).count(), 40)
-        self.assertEqual(get_organisatie_klassen(ORGANISATIE_NHB).count(), 90)
+        self.assertEqual(get_organisatie_klassen(ORGANISATIE_NHB).count(), 105)
         self.assertEqual(get_organisatie_klassen(ORGANISATIE_IFAA).count(), 144)
 
         bogen_pks = [BoogType.objects.get(afkorting='R').pk]
@@ -147,6 +147,6 @@ class TestBasisTypen(TestCase):
         klassen = get_organisatie_klassen(ORGANISATIE_NHB, filter_bogen=bogen_pks)
         # for klasse in klassen:
         #     print(klasse)
-        self.assertEqual(klassen.count(), 36)
+        self.assertEqual(klassen.count(), 42)
 
 # end of file

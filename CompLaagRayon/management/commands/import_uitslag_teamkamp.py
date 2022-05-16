@@ -7,6 +7,7 @@
 from django.core.management.base import BaseCommand
 from Competitie.models import KampioenschapSchutterBoog, KampioenschapTeam, LAAG_RK  # , LAAG_BK
 from openpyxl.utils.exceptions import InvalidFileException
+from decimal import Decimal
 import openpyxl
 import zipfile
 
@@ -97,14 +98,43 @@ class Command(BaseCommand):
         gem.sort(reverse=True)
         return gem
 
-    def _get_deelnemer(self, lid_nr):
+    def _get_deelnemer(self, lid_nr, lid_ag):
         deelnemer_all = self.deelnemers[lid_nr]
-        if len(deelnemer_all) == 1:
-            deelnemer = deelnemer_all[0]
-        else:
-            self.stderr.write('[WARNING] TODO: bepaal juiste deelnemer uit %s' % repr(deelnemer_all))
-            deelnemer = deelnemer_all[0]
+        for deelnemer in deelnemer_all:
+            if abs(deelnemer.gemiddelde - lid_ag) < 0.0001:
+                return deelnemer
+        # for
+
+        self.stderr.write('[WARNING] TODO: bepaal juiste deelnemer met ag=%s uit\n%s' % (
+                            lid_ag,
+                            "\n".join(["%s / %s / %s" % (deelnemer,
+                                                         deelnemer.sporterboog.boogtype.afkorting,
+                                                         deelnemer.gemiddelde) for deelnemer in deelnemer_all])))
+        deelnemer = deelnemer_all[0]
         return deelnemer
+
+    def _get_team(self, team_naam, ver_nr, row_nr, team_klasse):
+        up_naam = team_naam.upper()
+        sel_teams = list()
+        for team in self.teams_cache:
+            if team.vereniging.ver_nr == ver_nr:
+                if team.team_naam.upper() == up_naam:
+                    if team_klasse is None or team.team_klasse == team_klasse:
+                        sel_teams.append(team)
+        # for
+
+        kamp_team = None
+        if len(sel_teams) == 1:
+            kamp_team = sel_teams[0]
+        elif len(sel_teams) > 1:
+            self.stderr.write('[ERROR] Kan team %s van vereniging %s op regel %s niet kiezen uit\n%s' % (
+                repr(team_naam), ver_nr, row_nr, "\n".join([str(team) for team in sel_teams])))
+
+        if kamp_team is None:
+            self.stderr.write('[ERROR] Kan team %s van vereniging %s op regel %s niet vinden' % (
+                repr(team_naam), ver_nr, row_nr))
+
+        return kamp_team
 
     def handle(self, *args, **options):
 
@@ -134,15 +164,16 @@ class Command(BaseCommand):
 
         cols = options['kolommen']
         if afstand == '25':
-            if len(cols) != 5:
-                self.stderr.write('[ERROR] Vereiste kolommen: verenigingsnaam, teamnaam, bondsnummer, score1, score2')
+            if len(cols) != 6:
+                self.stderr.write('[ERROR] Vereiste kolommen: verenigingsnaam, teamnaam, bondsnummer, ag, score1, score2')
                 return
 
             col_ver_naam = cols[0]
             col_team_naam = cols[1]
             col_lid_nr = cols[2]
-            col_score1 = cols[3]
-            col_score2 = cols[4]
+            col_lid_ag = cols[3]
+            col_score1 = cols[4]
+            col_score2 = cols[5]
         else:
             # indoor nog niet ondersteund
             self.stderr.write('[ERROR] Indoor nog niet ondersteund')
@@ -178,23 +209,15 @@ class Command(BaseCommand):
             except ValueError:
                 pass
 
-            self.stdout.write('[DEBUG] ver_nr=%s, ver_naam=%s, team_naam=%s' % (ver_nr, repr(ver_naam), repr(team_naam)))
+            self.stdout.write('[DEBUG] regel %s: ver_nr=%s, ver_naam=%s, team_naam=%s' % (row, ver_nr, repr(ver_naam), repr(team_naam)))
 
             if ver_nr < 0:
                 continue
 
             # zoek het team erbij
-            kamp_team = None
-            for team in self.teams_cache:
-                if team.vereniging.ver_nr == ver_nr:
-                    if team.team_naam.upper() == team_naam.upper():
-                        kamp_team = team
-                        break
-            # for
+            kamp_team = self._get_team(team_naam, ver_nr, row_nr, team_klasse)
             if kamp_team is None:
-                self.stderr.write('[ERROR] Kan team %s van vereniging %s op regel %s niet vinden' % (repr(team_naam), ver_nr, row_nr))
                 continue
-            del team
 
             if team_klasse is None:
                 team_klasse = kamp_team.team_klasse
@@ -226,6 +249,7 @@ class Command(BaseCommand):
                     self.stderr.write('[ERROR] Lid %s is niet van vereniging %s!' % (lid_nr, ver_nr))
                 else:
                     try:
+                        lid_ag = round(Decimal(ws[col_lid_ag + row].value), 3)  # 3 cijfers achter de komma
                         score1 = int(ws[col_score1 + row].value)
                         score2 = int(ws[col_score2 + row].value)
                     except (ValueError, TypeError):
@@ -235,7 +259,7 @@ class Command(BaseCommand):
                             # sporter heeft niet meegedaan
                             self.stdout.write('[WARNING] Geen scores voor sporter %s op regel %s' % (lid_nr, row_nr))
                         else:
-                            deelnemer = self._get_deelnemer(lid_nr)
+                            deelnemer = self._get_deelnemer(lid_nr, lid_ag)
                             deelnemer.result_teamscore_1 = score1
                             deelnemer.result_teamscore_2 = score2
                             feitelijke_deelnemers.append(deelnemer)

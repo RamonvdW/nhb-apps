@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -33,19 +33,19 @@ urlpatterns = [
 
 
     # HWL/RCL: scores invoeren/bekijken/accorderen voor specifieke wedstrijd
-    path('uitslag-invoeren/<wedstrijd_pk>/',
+    path('uitslag-invoeren/<match_pk>/',
          view_scores.WedstrijdUitslagInvoerenView.as_view(),
          name='uitslag-invoeren'),
 
-    path('uitslag-controleren/<wedstrijd_pk>/',
+    path('uitslag-controleren/<match_pk>/',
          view_scores.WedstrijdUitslagControlerenView.as_view(),
          name='uitslag-controleren'),
 
-    path('uitslag-accorderen/<wedstrijd_pk>/',
+    path('uitslag-accorderen/<match_pk>/',
          view_scores.WedstrijdUitslagControlerenView.as_view(),
          name='uitslag-accorderen'),
 
-    path('bekijk-uitslag/<wedstrijd_pk>/',
+    path('bekijk-uitslag/<match_pk>/',
          view_scores.WedstrijdUitslagBekijkenView.as_view(),
          name='uitslag-bekijken'),
 

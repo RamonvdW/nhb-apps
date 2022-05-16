@@ -34,14 +34,14 @@ class TestSporterCli(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('koppel_sporter', 'niet_bestaand_account', stderr=f1, stdout=f2)
+            management.call_command('dev_koppel_sporter', 'niet_bestaand_account', stderr=f1, stdout=f2)
         self.assertTrue("Geen account met username 'niet_bestaand_account' gevonden" in f1.getvalue())
 
         # username is geen nummer (lid_nr is een nummer)
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('koppel_sporter', self.testdata.account_admin.username, stderr=f1, stdout=f2)
+            management.call_command('dev_koppel_sporter', self.testdata.account_admin.username, stderr=f1, stdout=f2)
         self.assertTrue("Geen sporter met lid_nr 'admin' gevonden" in f1.getvalue())
 
         # corrigeer de username
@@ -50,7 +50,7 @@ class TestSporterCli(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('koppel_sporter', self.testdata.account_admin.username, stderr=f1, stdout=f2)
+            management.call_command('dev_koppel_sporter', self.testdata.account_admin.username, stderr=f1, stdout=f2)
         self.assertTrue("Geen sporter met lid_nr '123456' gevonden" in f1.getvalue())
 
         # maak de sporter aan
@@ -76,7 +76,7 @@ class TestSporterCli(E2EHelpers, TestCase):
         f1 = io.StringIO()
         f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('koppel_sporter', self.testdata.account_admin.username, stderr=f1, stdout=f2)
+            management.call_command('dev_koppel_sporter', self.testdata.account_admin.username, stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("Account '123456' gekoppeld aan bijbehorende sporter" in f2.getvalue())
