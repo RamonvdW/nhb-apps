@@ -465,12 +465,19 @@ class UitslagenRayonTeamsView(TemplateView):
 
             if team.klasse != prev_klasse:
                 if len(klasse_teams_done) > 0:
+                    # er is uitslag, dus deze teams hebben niet meegedaan
                     for plan_team in klasse_teams_plan:
                         plan_team.rank = ''
                         plan_team.niet_deelgenomen = True
                     # for
                     teller = klasse_teams_done[0]
                 elif len(klasse_teams_plan) > 0:
+                    # er is geen uitslag, maar misschien hebben teams vrijstelling
+                    if deelcomp_rk.is_afgesloten:
+                        for plan_team in klasse_teams_plan:
+                            plan_team.rank = ''
+                            plan_team.niet_deelgenomen = True
+                        # for
                     teller = klasse_teams_plan[0]
                 else:
                     teller = None
@@ -559,13 +566,19 @@ class UitslagenRayonTeamsView(TemplateView):
         # for
 
         if len(klasse_teams_done) > 0:
-            # er is uitslag
+            # er is uitslag, dus deze teams hebben niet meegedaan
             for plan_team in klasse_teams_plan:
                 plan_team.rank = ''
                 plan_team.niet_deelgenomen = True
             # for
             teller = klasse_teams_done[0]
         elif len(klasse_teams_plan) > 0:
+            # er is geen uitslag, maar misschien hebben teams vrijstelling
+            if deelcomp_rk.is_afgesloten:
+                for plan_team in klasse_teams_plan:
+                    plan_team.rank = ''
+                    plan_team.niet_deelgenomen = True
+                # for
             teller = klasse_teams_plan[0]
         else:
             teller = None
