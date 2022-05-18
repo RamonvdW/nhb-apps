@@ -94,14 +94,14 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
         # dry-run
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_uitslag_teamkamp', '25', real_file, 'Deelnemers en Scores', 'D', 'F', 'E', 'H', 'I', '--dryrun', stderr=f1, stdout=f2)
+        management.call_command('import_uitslag_teamkamp', '25', real_file, 'Deelnemers en Scores', 'D', 'F', 'E', 'G', 'H', 'I', '--dryrun', stderr=f1, stdout=f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
 
         self.assertTrue('[ERROR] Te hoog gemiddelde 8.991 voor invaller 301957 voor team rk-1091-2-R2 van vereniging 1091' in f1.getvalue())
         self.assertTrue('[ERROR] Lid 302220 is niet van vereniging 1121!' in f1.getvalue())
         self.assertTrue('[ERROR] Lid 123456 is niet gekwalificeerd voor dit kampioenschap!' in f1.getvalue())
-        self.assertTrue('[ERROR] Inconsistente team klasse op regel 45: Recurve klasse A [R2] (26.028) (RK/BK) (eerdere teams: Recurve klasse B [R2] (25.128) (RK/BK))' in f1.getvalue())
+        # self.assertTrue('[ERROR] Inconsistente team klasse op regel 45: Recurve klasse A [R2] (26.028) (RK/BK) (eerdere teams: Recurve klasse B [R2] (25.128) (RK/BK))' in f1.getvalue())
         self.assertTrue("[ERROR] Kan team 'Niet bestaand team' van vereniging 1121 op regel 51 niet vinden" in f1.getvalue())
 
         self.assertTrue('[WARNING] Geen scores voor sporter 301946 op regel 13' in f2.getvalue())
@@ -109,10 +109,9 @@ class TestCompLaagRayonImportUitslagTeamKampioenschap(E2EHelpers, TestCase):
         # echte import
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('import_uitslag_teamkamp', '25', real_file, 'Deelnemers en Scores', 'D', 'F', 'E', 'H', 'I', stderr=f1, stdout=f2)
+        management.call_command('import_uitslag_teamkamp', '25', real_file, 'Deelnemers en Scores', 'D', 'F', 'E', 'G', 'H', 'I', stderr=f1, stdout=f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
-        # TODO: check opgeslagen scores/rank
         team1 = KampioenschapTeam.objects.filter(team_naam='rk-1111-1-R2')[0]
         team2 = KampioenschapTeam.objects.filter(team_naam='rk-1101-1-R2')[0]
         self.assertEqual(team1.result_teamscore, 1395)

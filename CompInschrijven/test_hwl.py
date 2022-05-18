@@ -27,14 +27,14 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 
-    url_aanmelden = '/bondscompetities/deelnemen/leden-aanmelden/%s/'      # <comp_pk>
-    url_ingeschreven = '/bondscompetities/deelnemen/leden-ingeschreven/%s/'  # <deelcomp_pk>
-    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'  # <sporter_pk>
+    url_aanmelden = '/bondscompetities/deelnemen/leden-aanmelden/%s/'               # comp_pk
+    url_ingeschreven = '/bondscompetities/deelnemen/leden-ingeschreven/%s/'         # deelcomp_pk
+    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                              # sporter_pk
     url_overzicht = '/vereniging/'
     url_voorkeuren = '/vereniging/leden-voorkeuren/'
-    url_planning_regio = '/bondscompetities/regio/planning/%s/'  # deelcomp_pk
+    url_planning_regio = '/bondscompetities/regio/planning/%s/'                     # deelcomp_pk
     url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'  # ronde_pk
-    url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'  # wedstrijd_pk
+    url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'  # match_pk
 
     testdata = None
 
@@ -606,7 +606,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.deelcomp_regio.toegestane_dagdelen = ''    # alles toegestaan
         self.deelcomp_regio.save()
 
-        wedstrijd_pks = self._maak_wedstrijden()
+        match_pks = self._maak_wedstrijden()
 
         # login als HWL
         self.e2e_login_and_pass_otp(self.account_hwl)
@@ -626,7 +626,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'wedstrijd_%s' % wedstrijd_pks[0]: 'on',
+            resp = self.client.post(url, {'wedstrijd_%s' % match_pks[0]: 'on',
                                           'lid_100003_boogtype_3': 'on'})
         self.assert_is_redirect_not_plein(resp)     # check success
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)    # 1 schutter, 1 competitie

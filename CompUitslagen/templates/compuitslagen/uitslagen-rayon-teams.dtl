@@ -207,6 +207,19 @@
                     </td>
                 </tr>
 
+                <!--
+                {% if team.toon_team_leden %}
+                    <tr>
+                        <td></td>
+                        <td style="padding-left:50px">
+                            {% for team_lid in team.team_leden %}
+                                <span>{{ team_lid.sporter_str }} ({{ team_lid.gemiddelde }})</span><br>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
+                -->
+
             {% endfor %}
 
             <tr>

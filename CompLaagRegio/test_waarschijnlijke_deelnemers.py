@@ -25,8 +25,8 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 
-    url_waarschijnlijke = '/bondscompetities/regio/waarschijnlijke-deelnemers/%s/'  # wedstrijd_pk
-    url_waarschijnlijke_bestand = '/bondscompetities/regio/waarschijnlijke-deelnemers/%s/als-bestand/'  # wedstrijd_pk
+    url_waarschijnlijke = '/bondscompetities/regio/waarschijnlijke-deelnemers/%s/'  # match_pk
+    url_waarschijnlijke_bestand = '/bondscompetities/regio/waarschijnlijke-deelnemers/%s/als-bestand/'  # match_pk
     url_scores = '/bondscompetities/scores/bij-de-vereniging/'
     url_wedstrijden = '/bondscompetities/scores/wedstrijden-bij-de-vereniging/'
 

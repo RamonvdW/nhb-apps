@@ -189,7 +189,7 @@ class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
 
         self.url_planning_regio = '/bondscompetities/regio/planning/%s/'                  # deelcomp_pk
         self.url_planning_regio_ronde = '/bondscompetities/regio/planning/ronde/%s/'      # ronde_pk
-        self.url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'       # wedstrijd_pk
+        self.url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'       # match_pk
         self.url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'          # comp_pk
 
         # deze test is afhankelijk van de standaard regio's

@@ -12,11 +12,11 @@ app_name = 'CompLaagRegio'
 
 urlpatterns = [
 
-    path('waarschijnlijke-deelnemers/<wedstrijd_pk>/',
+    path('waarschijnlijke-deelnemers/<match_pk>/',
          view_waarschijnlijke_deelnemers.WaarschijnlijkeDeelnemersView.as_view(),
          name='waarschijnlijke-deelnemers'),
 
-    path('waarschijnlijke-deelnemers/<wedstrijd_pk>/als-bestand/',
+    path('waarschijnlijke-deelnemers/<match_pk>/als-bestand/',
          view_waarschijnlijke_deelnemers.WaarschijnlijkeDeelnemersAlsBestandView.as_view(),
          name='waarschijnlijke-deelnemers-als-bestand'),
 
@@ -42,11 +42,11 @@ urlpatterns = [
          view_planning.RegioRondePlanningMethode1View.as_view(),
          name='regio-methode1-planning'),
 
-    path('planning/wedstrijd/wijzig/<wedstrijd_pk>/',
+    path('planning/wedstrijd/wijzig/<match_pk>/',
          view_planning.WijzigWedstrijdView.as_view(),
          name='regio-wijzig-wedstrijd'),
 
-    path('planning/wedstrijd/verwijder/<wedstrijd_pk>/',
+    path('planning/wedstrijd/verwijder/<match_pk>/',
          view_planning.VerwijderWedstrijdView.as_view(),
          name='regio-verwijder-wedstrijd'),
 

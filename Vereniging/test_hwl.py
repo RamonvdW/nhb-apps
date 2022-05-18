@@ -29,11 +29,11 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
     url_overzicht = '/vereniging/'
     url_ledenlijst = '/vereniging/leden-lijst/'
     url_voorkeuren = '/vereniging/leden-voorkeuren/'
-    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'  # <sporter_pk>
-    url_planning_regio = '/bondscompetities/regio/planning/%s/'  # deelcomp_pk
-    url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'  # ronde_pk
-    url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'  # wedstrijd_pk
-    url_wieschietwaar = '/bondscompetities/regio/wie-schiet-waar/%s/'                      # deelcomp_pk
+    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                                              # sporter_pk
+    url_planning_regio = '/bondscompetities/regio/planning/%s/'                                     # deelcomp_pk
+    url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'    # ronde_pk
+    url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'                  # match_pk
+    url_wieschietwaar = '/bondscompetities/regio/wie-schiet-waar/%s/'                               # deelcomp_pk
 
     testdata = None
 

@@ -79,6 +79,7 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
         sporterboog = SporterBoog.objects.get(sporter=sporter1, boogtype=self.boog_r)
         sporterboog.voor_wedstrijd = True
         sporterboog.save(update_fields=['voor_wedstrijd'])
+        self.sporterboog1 = sporterboog
 
         sporter2 = Sporter(
                     lid_nr=self.lid_nr + 1,
@@ -97,6 +98,7 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
         sporterboog = SporterBoog.objects.get(sporter=sporter2, boogtype=self.boog_c)
         sporterboog.voor_wedstrijd = True
         sporterboog.save(update_fields=['voor_wedstrijd'])
+        self.sporterboog2 = sporterboog
 
         # voeg een locatie toe
         locatie = WedstrijdLocatie(
@@ -146,7 +148,7 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
 
         resp = self.client.post(self.url_inschrijven_toevoegen, {'snel': 1,
                                                                  'wedstrijd': self.wedstrijd.pk,
-                                                                 'sporter': sporter1.lid_nr,
+                                                                 'sporterboog': self.sporterboog1.pk,
                                                                  'sessie': self.sessie_r.pk,
                                                                  'boog': self.boog_r.pk})
         self.assert_is_redirect(resp, self.url_kalender_wedstrijd_info % self.wedstrijd.pk)
@@ -155,7 +157,7 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
 
         resp = self.client.post(self.url_inschrijven_toevoegen, {'snel': 1,
                                                                  'wedstrijd': self.wedstrijd.pk,
-                                                                 'sporter': sporter2.lid_nr,
+                                                                 'sporterboog': self.sporterboog2.pk,
                                                                  'sessie': self.sessie_r.pk,
                                                                  'boog': self.boog_c.pk})
         self.assert_is_redirect(resp, self.url_kalender_wedstrijd_info % self.wedstrijd.pk)

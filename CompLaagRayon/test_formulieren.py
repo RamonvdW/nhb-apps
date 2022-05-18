@@ -21,9 +21,9 @@ class TestCompLaagRayonFormulieren(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_fase', 'CompLaagRayon.test_teams_rko', 'CompLaagRayon.test_teams_rko')
 
-    url_forms = '/bondscompetities/rk/download-formulier/%s/'                             # wedstrijd_pk
-    url_forms_download_indiv = '/bondscompetities/rk/download-formulier-indiv/%s/%s/'     # wedstrijd_pk, klasse_pk
-    url_forms_download_teams = '/bondscompetities/rk/download-formulier-teams/%s/%s/'     # wedstrijd_pk, klasse_pk
+    url_forms = '/bondscompetities/rk/download-formulier/%s/'                             # match_pk
+    url_forms_download_indiv = '/bondscompetities/rk/download-formulier-indiv/%s/%s/'     # match_pk, klasse_pk
+    url_forms_download_teams = '/bondscompetities/rk/download-formulier-teams/%s/%s/'     # match_pk, klasse_pk
 
     testdata = None
     regio_nr = 113

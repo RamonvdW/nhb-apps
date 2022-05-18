@@ -463,12 +463,19 @@ class UitslagenRayonTeamsView(TemplateView):
 
             if team.team_klasse != prev_klasse:
                 if len(klasse_teams_done) > 0:
+                    # er is uitslag, dus deze teams hebben niet meegedaan
                     for plan_team in klasse_teams_plan:
                         plan_team.rank = ''
                         plan_team.niet_deelgenomen = True
                     # for
                     teller = klasse_teams_done[0]
                 elif len(klasse_teams_plan) > 0:
+                    # er is geen uitslag, maar misschien hebben teams vrijstelling
+                    if deelcomp_rk.is_afgesloten:
+                        for plan_team in klasse_teams_plan:
+                            plan_team.rank = ''
+                            plan_team.niet_deelgenomen = True
+                        # for
                     teller = klasse_teams_plan[0]
                 else:
                     teller = None
@@ -500,6 +507,7 @@ class UitslagenRayonTeamsView(TemplateView):
             team.ag_str = team.ag_str.replace('.', ',')
 
             if team.ver_nr == toon_team_leden_van_ver_nr:
+                # TODO: dit is uitgezet in de template omdat het ook getoond werd in de uitslag. Nodig om te weten wie naar deze wedstrijd moeten!
                 team.toon_team_leden = True
                 team.team_leden = list()
                 for deelnemer in (team
@@ -557,13 +565,19 @@ class UitslagenRayonTeamsView(TemplateView):
         # for
 
         if len(klasse_teams_done) > 0:
-            # er is uitslag
+            # er is uitslag, dus deze teams hebben niet meegedaan
             for plan_team in klasse_teams_plan:
                 plan_team.rank = ''
                 plan_team.niet_deelgenomen = True
             # for
             teller = klasse_teams_done[0]
         elif len(klasse_teams_plan) > 0:
+            # er is geen uitslag, maar misschien hebben teams vrijstelling
+            if deelcomp_rk.is_afgesloten:
+                for plan_team in klasse_teams_plan:
+                    plan_team.rank = ''
+                    plan_team.niet_deelgenomen = True
+                # for
             teller = klasse_teams_plan[0]
         else:
             teller = None

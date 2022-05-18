@@ -450,7 +450,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
             for wedstrijd in context['wedstrijden']:
                 # TODO: vanaf welke datum dit niet meer aan laten passen?
                 wedstrijd.url_wijzig = reverse('CompLaagRegio:regio-wijzig-wedstrijd',
-                                               kwargs={'wedstrijd_pk': wedstrijd.pk})
+                                               kwargs={'match_pk': wedstrijd.pk})
             # for
 
             context['url_verwijderen'] = context['ronde_opslaan_url']
@@ -703,7 +703,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
             # laat de nieuwe wedstrijd meteen wijzigen
             next_url = reverse('CompLaagRegio:regio-wijzig-wedstrijd',
-                               kwargs={'wedstrijd_pk': match.pk})
+                               kwargs={'match_pk': match.pk})
 
         return HttpResponseRedirect(next_url)
 
@@ -761,7 +761,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
             for wedstrijd in wedstrijden:
                 # TODO: vanaf welke datum dit niet meer aan laten passen?
                 wedstrijd.url_wijzig = reverse('CompLaagRegio:regio-wijzig-wedstrijd',
-                                               kwargs={'wedstrijd_pk': wedstrijd.pk})
+                                               kwargs={'match_pk': wedstrijd.pk})
             # for
 
         if self.rol_nu != Rollen.ROL_RCL:
@@ -826,7 +826,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
 
         # laat de nieuwe wedstrijd meteen wijzigen
         next_url = reverse('CompLaagRegio:regio-wijzig-wedstrijd',
-                           kwargs={'wedstrijd_pk': match.pk})
+                           kwargs={'match_pk': match.pk})
 
         return HttpResponseRedirect(next_url)
 
@@ -919,7 +919,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            match_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen voor de veiligheid
+            match_pk = int(kwargs['match_pk'][:6])  # afkappen voor de veiligheid
             match = (CompetitieMatch
                      .objects
                      .select_related('uitslag')
@@ -1053,7 +1053,8 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         if heeft_wkl:
             context['wkl_indiv'], context['wkl_team'] = self._get_wedstrijdklassen(ronde.deelcompetitie, match)
 
-        context['url_opslaan'] = reverse('CompLaagRegio:regio-wijzig-wedstrijd', kwargs={'wedstrijd_pk': match.pk})
+        context['url_opslaan'] = reverse('CompLaagRegio:regio-wijzig-wedstrijd',
+                                         kwargs={'match_pk': match.pk})
 
         if ronde.deelcompetitie.inschrijf_methode == INSCHRIJF_METHODE_1:
             url_planning_week = reverse('CompLaagRegio:regio-methode1-planning',
@@ -1067,7 +1068,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
             context['kan_niet_verwijderen'] = True
         else:
             context['url_verwijderen'] = reverse('CompLaagRegio:regio-verwijder-wedstrijd',
-                                                 kwargs={'wedstrijd_pk': match.pk})
+                                                 kwargs={'match_pk': match.pk})
 
         context['kruimels'] = [
             (reverse('Competitie:kies'), 'Bondscompetities'),
@@ -1091,7 +1092,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         """
 
         try:
-            match_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen voor de veiligheid
+            match_pk = int(kwargs['match_pk'][:6])  # afkappen voor de veiligheid
             match = CompetitieMatch.objects.get(pk=match_pk)
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
@@ -1272,7 +1273,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
         """ Deze functie wordt aangeroepen als de knop 'Verwijder' gebruikt wordt
         """
         try:
-            match_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen voor de veiligheid
+            match_pk = int(kwargs['match_pk'][:6])  # afkappen voor de veiligheid
             match = (CompetitieMatch
                      .objects
                      .select_related('uitslag')

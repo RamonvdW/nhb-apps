@@ -24,10 +24,10 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_beheerders',)
 
-    url_planning_regio = '/bondscompetities/regio/planning/%s/'  # deelcomp_pk
-    url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'  # ronde_pk
-    url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'  # wedstrijd_pk
-    url_behoefte1 = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes/'  # comp_pk, regio_pk
+    url_planning_regio = '/bondscompetities/regio/planning/%s/'                                         # deelcomp_pk
+    url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'        # ronde_pk
+    url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'                      # match_pk
+    url_behoefte1 = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes/'    # comp_pk, regio_pk
     url_behoefte1_bestand = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes-als-bestand/'  # comp_pk, regio_pk
 
     testdata = None
@@ -182,15 +182,15 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         self.assertEqual(CompetitieMatch.objects.count(), 5)
 
         # zet de wedstrijden op de 15 van elke maand
-        self.wedstrijd_pks = list()
+        self.match_pks = list()
         maand = 7
-        for wedstrijd in CompetitieMatch.objects.all():
-            self.wedstrijd_pks.append(wedstrijd.pk)
+        for match in CompetitieMatch.objects.all():
+            self.match_pks.append(match.pk)
 
-            wedstrijd.datum_wanneer = '2019-%s-15' % maand
-            wedstrijd.tijd_begin_wedstrijd = '19:00'
-            wedstrijd.vereniging = self._ver
-            wedstrijd.save(update_fields=['datum_wanneer', 'tijd_begin_wedstrijd', 'vereniging'])
+            match.datum_wanneer = '2019-%s-15' % maand
+            match.tijd_begin_wedstrijd = '19:00'
+            match.vereniging = self._ver
+            match.save(update_fields=['datum_wanneer', 'tijd_begin_wedstrijd', 'vereniging'])
 
             maand += 1
         # for
@@ -271,7 +271,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
             # for
 
             # schrijf deze leden met in 4 van de 5 wedstrijden
-            for pk in self.wedstrijd_pks[1:]:
+            for pk in self.match_pks[1:]:
                 post_params['wedstrijd_%s' % pk] = 'on'
             # for
 

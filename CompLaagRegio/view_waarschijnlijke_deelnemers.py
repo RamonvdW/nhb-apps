@@ -41,7 +41,7 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            match_pk = int(kwargs['wedstrijd_pk'][:6])      # afkappen voor de veiligheid
+            match_pk = int(kwargs['match_pk'][:6])      # afkappen voor de veiligheid
             match = (CompetitieMatch
                      .objects
                      .select_related('vereniging')
@@ -85,7 +85,7 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
         context['blazoenen'] = bepaal_blazoen_behoefte(afstand, sporters, teams)
 
         context['url_download'] = reverse('CompLaagRegio:waarschijnlijke-deelnemers-als-bestand',
-                                          kwargs={'wedstrijd_pk': match.pk})
+                                          kwargs={'match_pk': match.pk})
 
         # prep de view
         nr = 1
@@ -125,7 +125,7 @@ class WaarschijnlijkeDeelnemersAlsBestandView(UserPassesTestMixin, TemplateView)
         """ Afhandelen van de GET request waarmee we een bestand terug geven. """
 
         try:
-            match_pk = int(kwargs['wedstrijd_pk'][:6])      # afkappen voor de veiligheid
+            match_pk = int(kwargs['match_pk'][:6])      # afkappen voor de veiligheid
             match = (CompetitieMatch
                      .objects
                      .select_related('vereniging')

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 #  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
@@ -621,10 +622,10 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         return self.rol_nu != Rollen.ROL_NONE
 
     def post(self, request, *args, **kwargs):
-        wedstrijd_str = request.POST.get('wedstrijd', '')[:6]   # afkappen voor de veiligheid
+        wedstrijd_str = request.POST.get('wedstrijd', '')[:6]       # afkappen voor de veiligheid
         sporterboog_str = request.POST.get('sporterboog', '')[:6]   # afkappen voor de veiligheid
-        sessie_str = request.POST.get('sessie', '')[:6]         # afkappen voor de veiligheid
-        goto_str = request.POST.get('goto', '')[:6]             # afkappen voor de veiligheid
+        sessie_str = request.POST.get('sessie', '')[:6]             # afkappen voor de veiligheid
+        goto_str = request.POST.get('goto', '')[:6]                 # afkappen voor de veiligheid
 
         try:
             wedstrijd_pk = int(wedstrijd_str)

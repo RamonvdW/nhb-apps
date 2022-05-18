@@ -74,56 +74,56 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
         # deelcompetitie bestaat uit rondes
         # elke ronde heeft een plan met wedstrijden
 
-        wedstrijd_pks = list()
-        wedstrijd2beschrijving = dict()
+        match_pks = list()
+        match2beschrijving = dict()
 
         for ronde in (DeelcompetitieRonde
                       .objects
                       .prefetch_related('matches')
                       .filter(deelcompetitie=deelcomp)):
 
-            for wedstrijd in ronde.matches.all():
-                wedstrijd_pks.append(wedstrijd.pk)
+            for match in ronde.matches.all():
+                match_pks.append(match.pk)
                 beschrijving = ronde.beschrijving
                 if not beschrijving and ronde.cluster:
                     beschrijving = ronde.cluster.naam
                 if not beschrijving:
                     beschrijving = "?? (ronde)"
-                wedstrijd2beschrijving[wedstrijd.pk] = beschrijving
+                match2beschrijving[match.pk] = beschrijving
             # for
         # for
 
-        wedstrijden = (CompetitieMatch
-                       .objects
-                       .select_related('uitslag',
-                                       'vereniging')
-                       .filter(pk__in=wedstrijd_pks)
-                       .annotate(scores_count=Count('uitslag__scores'))
-                       .order_by('datum_wanneer', 'tijd_begin_wedstrijd',
-                                 'pk'))     # vaste sortering bij gelijke datum/tijd
+        matches = (CompetitieMatch
+                   .objects
+                   .select_related('uitslag',
+                                   'vereniging')
+                   .filter(pk__in=match_pks)
+                   .annotate(scores_count=Count('uitslag__scores'))
+                   .order_by('datum_wanneer', 'tijd_begin_wedstrijd',
+                             'pk'))     # vaste sortering bij gelijke datum/tijd
 
-        for wedstrijd in wedstrijden:
-            heeft_uitslag = (wedstrijd.uitslag and wedstrijd.scores_count > 0)
+        for match in matches:
+            heeft_uitslag = (match.uitslag and match.scores_count > 0)
 
-            beschrijving = wedstrijd2beschrijving[wedstrijd.pk]
-            if wedstrijd.beschrijving != beschrijving:
-                wedstrijd.beschrijving = beschrijving
-                wedstrijd.save()
+            beschrijving = match2beschrijving[match.pk]
+            if match.beschrijving != beschrijving:
+                match.beschrijving = beschrijving
+                match.save()
 
             # geef RCL de mogelijkheid om te scores aan te passen
             # de HWL/WL krijgen deze link vanuit Vereniging::Wedstrijden
-            if heeft_uitslag and not wedstrijd.uitslag.is_bevroren:
-                wedstrijd.url_uitslag_controleren = reverse('CompScores:uitslag-controleren',
-                                                            kwargs={'wedstrijd_pk': wedstrijd.pk})
+            if heeft_uitslag and not match.uitslag.is_bevroren:
+                match.url_uitslag_controleren = reverse('CompScores:uitslag-controleren',
+                                                        kwargs={'match_pk': match.pk})
             else:
                 # TODO: knop pas beschikbaar maken op wedstrijddatum tot datum+N
-                wedstrijd.url_uitslag_invoeren = reverse('CompScores:uitslag-invoeren',
-                                                         kwargs={'wedstrijd_pk': wedstrijd.pk})
+                match.url_uitslag_invoeren = reverse('CompScores:uitslag-invoeren',
+                                                     kwargs={'match_pk': match.pk})
         # for
 
-        context['wedstrijden'] = wedstrijden
+        context['wedstrijden'] = matches
 
-        context['aantal_regels'] = wedstrijden.count() + 2
+        context['aantal_regels'] = matches.count() + 2
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
@@ -151,7 +151,7 @@ def mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
     return False
 
 
-def bepaal_wedstrijd_en_deelcomp_of_404(match_pk):
+def bepaal_match_en_deelcomp_of_404(match_pk):
     try:
         match_pk = int(match_pk[:6])        # afkappen voor de veiligheid
         match = (CompetitieMatch
@@ -257,23 +257,23 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen voor de veiligheid
-        wedstrijd, deelcomp, ronde = bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk)
+        match_pk = kwargs['match_pk'][:6]     # afkappen voor de veiligheid
+        match, deelcomp, ronde = bepaal_match_en_deelcomp_of_404(match_pk)
 
-        context['wedstrijd'] = wedstrijd
+        context['wedstrijd'] = match
         context['deelcomp'] = deelcomp
 
-        if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, self.functie_nu, deelcomp):
+        if not mag_deelcomp_wedstrijd_wijzigen(match, self.functie_nu, deelcomp):
             raise PermissionDenied()
 
         context['is_controle'] = self.is_controle
-        context['is_akkoord'] = wedstrijd.uitslag.is_bevroren
+        context['is_akkoord'] = match.uitslag.is_bevroren
 
         if self.is_controle:
             context['url_geef_akkoord'] = reverse('CompScores:uitslag-accorderen',
-                                                  kwargs={'wedstrijd_pk': wedstrijd.pk})
+                                                  kwargs={'match_pk': match.pk})
 
-        scores = (wedstrijd
+        scores = (match
                   .uitslag
                   .scores
                   .filter(type=SCORE_TYPE_SCORE)
@@ -341,19 +341,19 @@ class WedstrijdUitslagControlerenView(WedstrijdUitslagInvoerenView):
 
         rol_nu, functie_nu = rol_get_huidige_functie(self.request)
 
-        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen voor de veiligheid
-        wedstrijd, deelcomp, _ = bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk)
+        match_pk = kwargs['match_pk'][:6]     # afkappen voor de veiligheid
+        match, deelcomp, _ = bepaal_match_en_deelcomp_of_404(match_pk)
 
-        if not mag_deelcomp_wedstrijd_wijzigen(wedstrijd, functie_nu, deelcomp):
+        if not mag_deelcomp_wedstrijd_wijzigen(match, functie_nu, deelcomp):
             raise PermissionDenied()
 
-        uitslag = wedstrijd.uitslag
+        uitslag = match.uitslag
         if not uitslag.is_bevroren:
             uitslag.is_bevroren = True
             uitslag.save()
 
         url = reverse('CompScores:uitslag-controleren',
-                      kwargs={'wedstrijd_pk': wedstrijd.pk})
+                      kwargs={'match_pk': match.pk})
 
         return HttpResponseRedirect(url)
 
@@ -536,16 +536,16 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
     @staticmethod
     def laad_match_of_404(data):
         try:
-            wedstrijd_pk = int(str(data['wedstrijd_pk'])[:6])   # afkappen voor de veiligheid
-            wedstrijd = (CompetitieMatch
-                         .objects
-                         .select_related('uitslag')
-                         .prefetch_related('uitslag__scores')
-                         .get(pk=wedstrijd_pk))
+            match_pk = int(str(data['wedstrijd_pk'])[:6])   # afkappen voor de veiligheid
+            match = (CompetitieMatch
+                     .objects
+                     .select_related('uitslag')
+                     .prefetch_related('uitslag__scores')
+                     .get(pk=match_pk))
         except (KeyError, ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        return wedstrijd
+        return match
 
     @staticmethod
     def nieuwe_score(bulk, uitslag, sporterboog_pk, waarde, when, door_account):
@@ -707,10 +707,10 @@ class WedstrijdUitslagBekijkenView(UserPassesTestMixin, TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        wedstrijd_pk = kwargs['wedstrijd_pk'][:6]     # afkappen voor de veiligheid
-        wedstrijd, deelcomp, ronde = bepaal_wedstrijd_en_deelcomp_of_404(wedstrijd_pk)
+        match_pk = kwargs['match_pk'][:6]     # afkappen voor de veiligheid
+        match, deelcomp, ronde = bepaal_match_en_deelcomp_of_404(match_pk)
 
-        scores = (wedstrijd
+        scores = (match
                   .uitslag
                   .scores
                   .filter(type=SCORE_TYPE_SCORE)
@@ -749,7 +749,7 @@ class WedstrijdUitslagBekijkenView(UserPassesTestMixin, TemplateView):
         scores = [score for _, _, _, _, score in te_sorteren]
 
         context['scores'] = scores
-        context['wedstrijd'] = wedstrijd
+        context['wedstrijd'] = match
         context['deelcomp'] = deelcomp
         context['ronde'] = ronde
 
@@ -899,7 +899,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         # via sporterboog_pks kunnen we alle scores vinden
         # bepaal welke relevant kunnen zijn
-        score2wedstrijd = dict()
+        score2match = dict()
 
         match_pks = list()
         for ronde in (DeelcompetitieRonde
@@ -911,18 +911,18 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         # doorloop alle wedstrijden van deze plannen
         # de wedstrijd heeft een datum en uitslag met scores
-        for wedstrijd in (CompetitieMatch
-                          .objects
-                          .exclude(uitslag=None)
-                          .select_related('uitslag',
-                                          'vereniging')
-                          .filter(pk__in=match_pks)
-                          .prefetch_related('uitslag__scores')):
+        for match in (CompetitieMatch
+                      .objects
+                      .exclude(uitslag=None)
+                      .select_related('uitslag',
+                                      'vereniging')
+                      .filter(pk__in=match_pks)
+                      .prefetch_related('uitslag__scores')):
 
             # noteer welke scores interessant zijn
             # en de koppeling naar de wedstrijd, voor de datum
-            for score in wedstrijd.uitslag.scores.all():
-                score2wedstrijd[score.pk] = wedstrijd
+            for score in match.uitslag.scores.all():
+                score2match[score.pk] = match
             # for
         # for
 
@@ -976,7 +976,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
             sporterboog_pk = score.sporterboog.pk
 
             try:
-                wedstrijd = score2wedstrijd[score.pk]
+                match = score2match[score.pk]
             except KeyError:
                 # niet relevante score
                 pass
@@ -988,7 +988,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                 #    tup = (2, wedstrijd.datum_wanneer, wedstrijd.tijd_begin_wedstrijd, wedstrijd.pk, wedstrijd, score)
 
                 # optie B: scores op datum houden
-                tup = (1, wedstrijd.datum_wanneer, wedstrijd.tijd_begin_wedstrijd, wedstrijd.pk, wedstrijd, score)
+                tup = (1, match.datum_wanneer, match.tijd_begin_wedstrijd, match.pk, match, score)
 
                 try:
                     sporterboog2wedstrijdscores[sporterboog_pk].append(tup)
@@ -1023,7 +1023,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
                     deelnemer.kan_kiezen = deelnemer.keuze_nodig = (aantal > 1)
                     if deelnemer.kan_kiezen:
                         deelnemer.id_radio = "id_score_%s" % deelnemer.sporterboog_pk
-                        for wedstrijd, score in deelnemer.gevonden_scores:
+                        for match, score in deelnemer.gevonden_scores:
                             if not score.block_selection:
                                 score.id_radio = "id_score_%s" % score.pk
                                 score.is_selected = (score.pk in regel.score_pks_feitelijk)

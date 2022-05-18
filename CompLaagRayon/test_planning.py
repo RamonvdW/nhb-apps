@@ -31,14 +31,14 @@ class TestCompLaagRayonPlanning(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
-    url_planning_rayon = '/bondscompetities/rk/planning/%s/'  # deelcomp_pk
-    url_wijzig_rk_wedstrijd = '/bondscompetities/rk/planning/wedstrijd/wijzig/%s/'  # wedstrijd_pk
-    url_verwijder_rk_wedstrijd = '/bondscompetities/rk/planning/wedstrijd/verwijder/%s/'  # wedstrijd_pk
-    url_lijst_rk = '/bondscompetities/rk/lijst-rayonkampioenschappen/%s/'  # deelcomp_pk
-    url_lijst_bestand = '/bondscompetities/rk/lijst-rayonkampioenschappen/%s/bestand/'  # deelcomp_pk
+    url_planning_rayon = '/bondscompetities/rk/planning/%s/'                                # deelcomp_pk
+    url_wijzig_rk_wedstrijd = '/bondscompetities/rk/planning/wedstrijd/wijzig/%s/'          # match_pk
+    url_verwijder_rk_wedstrijd = '/bondscompetities/rk/planning/wedstrijd/verwijder/%s/'    # match_pk
+    url_lijst_rk = '/bondscompetities/rk/lijst-rayonkampioenschappen/%s/'                   # deelcomp_pk
+    url_lijst_bestand = '/bondscompetities/rk/lijst-rayonkampioenschappen/%s/bestand/'      # deelcomp_pk
     url_wijzig_status = '/bondscompetities/rk/lijst-rayonkampioenschappen/wijzig-status-rk-deelnemer/%s/'  # deelnemer_pk
-    url_wijzig_limiet = '/bondscompetities/rk/planning/%s/limieten/'  # deelcomp_pk
-    url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'  # comp_pk
+    url_wijzig_limiet = '/bondscompetities/rk/planning/%s/limieten/'                        # deelcomp_pk
+    url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'                               # comp_pk
 
     testdata = None
 

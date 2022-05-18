@@ -524,7 +524,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         self.assertEqual(1, KalenderWedstrijd.objects.count())
         wedstrijd = KalenderWedstrijd.objects.all()[0]
         self.assertEqual(wedstrijd.boogtypen.count(), 5)
-        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 60)
+        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 70)
 
         # wedstrijd wordt aangemaakt met alle bogen en wedstrijdklassen aangevinkt
         wkl_pks = list(wedstrijd.wedstrijdklassen.values_list('pk', flat=True))
@@ -544,7 +544,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
 
         self.assertEqual(wedstrijd.boogtypen.count(), 2)                # alleen R en C
         # wedstrijdklassen waarvoor geen boog aangevinkt is, die verdwijnen
-        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 24)        # alleen R en C klassen
+        self.assertEqual(wedstrijd.wedstrijdklassen.count(), 28)        # alleen R en C klassen
 
         # sessie wordt aangemaakt met alle wedstrijdklassen van de wedstrijd
         url = self.url_kalender_sessies % wedstrijd.pk
