@@ -34,6 +34,8 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('afstand', type=int, help='Competitie afstand (18/25)')
+        parser.add_argument('--teams', action='store_true', help='Teams klassen toevoegen')
+        parser.add_argument('--indiv', action='store_true', help='Individuele klassen toevoegen')
 
     def _write_teams(self, wb):
 
@@ -296,8 +298,11 @@ class Command(BaseCommand):
         wb = openpyxl.Workbook()
         default_sheet = wb.active
 
-        self._write_teams(wb)
-        self._write_indiv(wb)
+        if options['teams']:
+            self._write_teams(wb)
+
+        if options['indiv']:
+            self._write_indiv(wb)
 
         wb.remove_sheet(default_sheet)
 
