@@ -13,6 +13,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse,
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
 from Functie.models import maak_functie
+from HistComp.models import HistCompetitie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
@@ -33,6 +34,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
     url_doorzetten_bk = '/bondscompetities/%s/doorzetten/bk/'                   # comp_pk
     url_doorzetten_voorbij_bk = '/bondscompetities/%s/doorzetten/voorbij-bk/'   # comp_pk
     url_competitie_overzicht = '/bondscompetities/%s/'                          # comp_pk
+    url_seizoen_afsluiten = '/bondscompetities/seizoen-afsluiten/'
 
     testdata = None
 
@@ -403,6 +405,9 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         # niet bestaande comp_pk
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
+        resp = self.client.get(self.url_seizoen_afsluiten)
+        self.assert403(resp)
+
         resp = self.client.get(self.url_doorzetten_rk % 999999)
         self.assert404(resp, 'Competitie niet gevonden')
 
@@ -471,5 +476,58 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_bko_18)
         resp = self.client.post(url)
         self.assert_is_redirect(resp, self.url_competitie_overzicht % self.comp_18.pk)
+
+    def test_seizoen_afsluiten(self):
+        # moet BB zijn
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wisselnaarrol_bb()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_seizoen_afsluiten)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/bb-seizoen-afsluiten.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_seizoen_afsluiten)
+        self.assert404(resp, 'Alle competities nog niet in fase S')
+
+        # maak een competitie van het volgende seizoen aan
+        competities_aanmaken(jaar=2020)
+
+        # maak een HistComp aan die straks doorgezet gaat worden
+        hist = HistCompetitie(
+                        seizoen='2019/2020',
+                        is_openbaar=False,
+                        klasse='Test',
+                        comp_type='18')
+        hist.save()
+
+        # fase S: pagina zonder knop 'doorzetten'
+        zet_competitie_fase(self.comp_18, 'S')
+        zet_competitie_fase(self.comp_25, 'S')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_seizoen_afsluiten)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/bb-seizoen-afsluiten.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_seizoen_afsluiten)
+        self.assert_is_redirect(resp, '/bondscompetities/')
+
+        hist = HistCompetitie.objects.get(pk=hist.pk)
+        self.assertTrue(hist.is_openbaar)
+
+        # corner case: verwijder alle competitie
+        Competitie.objects.all().delete()
+
+        resp = self.client.get(self.url_seizoen_afsluiten)
+        self.assert404(resp, 'Geen competitie gevonden')
+
+        resp = self.client.post(self.url_seizoen_afsluiten)
+        self.assert404(resp, 'Geen competitie gevonden')
+
 
 # end of file

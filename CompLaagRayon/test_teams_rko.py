@@ -197,7 +197,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         # maak de BK lijst aan
         f1 = io.StringIO()
         f2 = io.StringIO()
-        management.call_command('bk_lijst_zonder_rk', '18', stderr=f1, stdout=f2)
+        management.call_command('bk_lijst_zonder_rk', '18', '--indiv', '--teams', stderr=f1, stdout=f2)
         os.remove('bk_lijst.xlsx')
 
 

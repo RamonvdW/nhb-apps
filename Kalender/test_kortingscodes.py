@@ -186,12 +186,21 @@ class TestKalenderKortingscodes(E2EHelpers, TestCase):
         # wijzig scherm ophalen voor elk type korting
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_kalender_wijzig % korting_sporter.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('kalender/wijzig-kortingscode-sporter.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_kalender_wijzig % korting_ver.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('kalender/wijzig-kortingscode-vereniging.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_kalender_wijzig % korting_combi.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('kalender/wijzig-kortingscode-combi.dtl', 'plein/site_layout.dtl'))
 
         # wijzig korting sporter
         resp = self.client.post(self.url_kalender_wijzig % korting_sporter.pk)
