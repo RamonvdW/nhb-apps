@@ -56,7 +56,7 @@ def betaal_mutatieverzoek_start_ontvangst(bestelling, beschrijving, bedrag_euro,
     bestelling.actief_mutatie = mutatie
     bestelling.save(update_fields=['actief_mutatie'])
 
-    if is_created:
+    if is_created:                                      # pragma: no branch
         # wacht kort op de achtergrondtaak
         _betaal_ping_achtergrondtaak(mutatie, snel)
 

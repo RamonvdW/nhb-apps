@@ -49,9 +49,9 @@ class BestellingAdmin(admin.ModelAdmin):
 
 class BestelMutatieAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('when', 'account')
+    readonly_fields = ('when', 'account',)
 
-    auto_complete = ('inschrijving', 'product')
+    auto_complete = ('inschrijving', 'product', 'bestelling')
 
 
 admin.site.register(BestelProduct, BestelProductAdmin)

@@ -5,8 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from Bestel.models import (BestelMutatie, BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_MAAK_BESTELLING,
-                           BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_KORTINGSCODE, BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN)
+from Bestel.models import (BestelMutatie, Bestelling,
+                           BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_MAAK_BESTELLING,
+                           BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_KORTINGSCODE, BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN,
+                           BESTEL_MUTATIE_BETALING_AFGEROND)
 from Overig.background_sync import BackgroundSync
 import time
 
@@ -95,7 +97,7 @@ def bestel_mutatieverzoek_kortingscode_toepassen(account, kortingscode_str, snel
         _bestel_ping_achtergrondtaak(mutatie, snel)
 
 
-def bestel_mutatieverzoek_maak_bestellingen(account, snel):
+def bestel_mutatieverzoek_maak_bestellingen(account, snel=False):
     """
         Zet het mandje om in een bestelling (of meerdere)
 
@@ -116,7 +118,7 @@ def bestel_mutatieverzoek_maak_bestellingen(account, snel):
         _bestel_ping_achtergrondtaak(mutatie, snel)
 
 
-def bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel):
+def bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel=False):
     """
         Verwijder een inschrijving op een wedstrijd.
     """
@@ -132,6 +134,32 @@ def bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel):
     if is_created:
         # wacht kort op de achtergrondtaak
         _bestel_ping_achtergrondtaak(mutatie, snel)
+
+
+def bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt, snel=False):
+    """
+        Een actieve betaling is afgerond.
+    """
+
+    # zoek de bestelling erbij
+    try:
+        bestelling = Bestelling.objects.get(actief_transactie=betaalactief)
+    except Bestelling.DoesNotExist:
+        # bestelling niet kunnen vinden
+        pass
+    else:
+        # zet dit verzoek door naar het mutaties process
+        # voorkom duplicates (niet 100%)
+        mutatie, is_created = BestelMutatie.objects.get_or_create(
+                                        code=BESTEL_MUTATIE_BETALING_AFGEROND,
+                                        bestelling=bestelling,
+                                        betaling_is_gelukt=gelukt,
+                                        is_verwerkt=False)
+        mutatie.save()
+
+        if is_created:
+            # wacht kort op de achtergrondtaak
+            _bestel_ping_achtergrondtaak(mutatie, snel)
 
 
 # end of file

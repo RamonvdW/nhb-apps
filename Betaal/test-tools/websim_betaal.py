@@ -84,14 +84,24 @@ class MyServer(BaseHTTPRequestHandler):
                 self.end_headers()
                 return
 
-            if resp['status'] == 'open':
+            if 'status' in resp and resp['status'] == 'open':
                 # transition to another state
                 test_code = 0
                 description = resp['description']
                 if description.startswith('Test betaling '):
                     test_code = description[14:]
 
-                if test_code == '42':
+                if test_code == '39':
+                    resp['status'] = 'failed'
+
+                elif test_code == '40':
+                    resp['status'] = 'pending'
+
+                elif test_code == '41':
+                    # keep status=open
+                    pass
+
+                elif test_code.startswith('42'):        # 42*
                     # transition to 'paid'
                     resp['status'] = 'paid'
                     resp['paidAt'] = self._get_timestamp()
@@ -104,24 +114,41 @@ class MyServer(BaseHTTPRequestHandler):
                     resp['locale'] = 'en_NL'
                     resp['countryCode'] = 'NL'
                     resp['details'] = details = dict()
-                    details['consumerName'] = 'T. TEST'
-                    details['consumerAccount'] = 'NL72RABO0110438885'
-                    details['consumerBic'] = 'RABONL2U'
+                    if resp['method'] == 'ideal':
+                        details['consumerName'] = 'T. TEST'
+                        details['consumerAccount'] = 'NL72RABO0110438885'
+                        details['consumerBic'] = 'RABONL2U'
+                    elif resp['method'] == 'creditcard':
+                        details['cardHolder'] = 'T. TEST'
+                        details['cardNumber'] = '12345678901234'
+                        details['cardLabel'] = 'Dankort'
+                        details['cardCountryCode'] = 'DK'
+                    elif resp['method'] == 'paypal':
+                        details['consumerName'] = 'T. TEST'
+                        details['consumerAccount'] = 'paypaluser@somewhere.nz'
+                        details['paypalReference'] = '9AL35361CF606152E'
+                        details['paypalPayerId'] = 'WDJJHEBZ4X2LY'
+                        details['paypalFee'] = {'currency': resp['amount']['currency'],
+                                                'value': '2.50'}
+                    value = float(resp['amount']['value']) - 0.26
+                    if test_code != '429':
+                        resp['settlementAmount'] = {'currency': resp['amount']['currency'],
+                                                    'value': '%.2f' % value}
                     del resp['isCancelable']
                     del resp['_links']['checkout']
                     # '_links': {'changePaymentState': {'href': 'https://www.mollie.com/checkout/test-mode?method=ideal&token=3.210mge', 'type': 'text/html'},
 
                 elif test_code == "43":
-                    # transition to 'failed'
-                    resp['status'] = 'failed'
-                    resp['failedAt'] = self._get_timestamp()
+                    # transition to 'canceled'
+                    resp['status'] = 'canceled'
+                    resp['canceledAt'] = self._get_timestamp()
                     resp['locale'] = 'en_NL'
                     resp['countryCode'] = 'NL'
                     del resp['isCancelable']
                     del resp['expiresAt']
                     del resp['_links']['checkout']
 
-                elif test_code == "44":
+                elif test_code in ("44", "45"):
                     # transition to 'expired'
                     resp['status'] = 'expired'
                     del resp['expiresAt']
@@ -130,6 +157,16 @@ class MyServer(BaseHTTPRequestHandler):
                     resp['countryCode'] = 'NL'
                     del resp['_links']['checkout']
                     del resp['_links']['dashboard']
+
+                if test_code in ("425", "426"):
+                    details = resp['details']
+                    details['consumerName'] = details['cardHolder'] = ''
+                    del details['consumerName']
+                    del details['cardHolder']
+                elif test_code == "427":
+                    resp['settlementAmount']['value'] = '1&2'
+                elif test_code == "428":
+                    resp['settlementAmount']['currency'] = 'DKK'
 
             self._write_response(200, resp)
             return
@@ -191,7 +228,37 @@ class MyServer(BaseHTTPRequestHandler):
                 if description.startswith('Test betaling '):
                     test_code = description[14:]
 
-                if test_code in ("42", "43", "44"):
+                if test_code in ('421', '426', '427', '428', '429'):
+                    resp['method'] = 'ideal'
+                elif test_code in ('422', '425'):
+                    resp['method'] = 'creditcard'
+                elif test_code == '423':
+                    resp['method'] = 'paypal'
+
+                if test_code == '45':
+                    # bijna leeg antwoord
+                    payments[payment_id] = resp = dict()
+                    resp['metadata'] = None
+
+                if test_code == '46':
+                    # foute status
+                    resp['status'] = 'bogus'
+
+                if test_code == '47':
+                    # foute payment_id
+                    resp['id_original'] = resp['id']
+                    resp['id'] = 'tr_FoutjeBedankt'
+
+                # 39 = failed
+                # 40 = pending
+                # 41 = open
+                # 42 = paid
+                # 43 = canceled
+                # 44 = expired
+                # 45 = bijna leeg antwoord (+expired?!)
+                # 46 = foute status
+                # 47 = foute  id
+                if test_code in ("39", "40", "41", "42", "421", "422", "423", "425", "426", "427", "428", "429", "43", "44", "45", "46", "47"):
                     self._write_response(200, resp)
 
         # internal server error

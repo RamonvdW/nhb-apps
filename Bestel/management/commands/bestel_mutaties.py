@@ -12,13 +12,13 @@ from django.conf import settings
 from django.db.models import F
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from Betaal.models import BetaalInstellingenVereniging
-from Bestel.models import (BestelProduct, BestelMandje,
-                           Bestelling, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING,
-                           BestelHoogsteBestelNr, BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK,
+from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
+from Bestel.models import (BestelProduct, BestelMandje, Bestelling,
+                           BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING,
+                           BestelHoogsteBestelNr, BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK, BESTELLING_STATUS2STR,
                            BestelMutatie, BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN,
                            BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_KORTINGSCODE, BESTEL_MUTATIE_MAAK_BESTELLING,
-                           BESTEL_MUTATIE_BETALING_ONTVANGEN, BESTEL_MUTATIE_RESTITUTIE_UITBETAALD)
+                           BESTEL_MUTATIE_BETALING_AFGEROND, BESTEL_MUTATIE_RESTITUTIE_UITBETAALD)
 from Bestel.plugins.kalender import (kalender_plugin_automatische_kortingscodes_toepassen, kalender_plugin_inschrijven,
                                      kalender_plugin_verwijder_reservering, kalender_plugin_kortingscode_toepassen,
                                      kalender_plugin_afmelden, kalender_plugin_inschrijving_is_betaald)
@@ -338,6 +338,56 @@ class Command(BaseCommand):
                 # FUTURE: automatisch een restitutie beginnen
                 pass
 
+    def _verwerk_mutatie_betaling_afgerond(self, mutatie):
+        bestelling = mutatie.bestelling
+        is_gelukt = mutatie.betaling_is_gelukt
+
+        status = bestelling.status
+        if status != BESTELLING_STATUS_WACHT_OP_BETALING:
+            self.stdout.write('[DEBUG] Bestelling %s (pk=%s) wacht niet op een betaling (status=%s)' % (
+                                bestelling.bestel_nr, bestelling.pk, BESTELLING_STATUS2STR[bestelling.status]))
+            return
+
+        actief = bestelling.actief_transactie
+        if not actief:
+            self.stdout.write('[DEBUG] Bestelling %s (pk=%s) heeft geen actieve transactie' % (
+                                bestelling.bestel_nr, bestelling.pk))
+            return
+
+        if is_gelukt:
+            self.stdout.write('[DEBUG] Betaling succesvol afgerond voor bestelling %s (pk=%s)' % (
+                                bestelling.bestel_nr, bestelling.pk))
+
+            # koppel alle (nieuwe) transacties aan de bestelling
+            payment_id = actief.payment_id
+            bestaande_pks = list(bestelling.transacties.all().values_list('pk', flat=True))
+            transacties_new = BetaalTransactie.objects.filter(payment_id=payment_id).exclude(pk__in=bestaande_pks)
+            bestelling.transacties.add(*transacties_new)
+
+            # controleer of we voldoende ontvangen hebben
+            ontvangen_euro = Decimal('0')
+            for transactie in bestelling.transacties.all():
+                if transactie.is_restitutie:
+                    ontvangen_euro -= transactie.bedrag_euro_klant
+                else:
+                    ontvangen_euro += transactie.bedrag_euro_klant
+            # for
+
+            self.stdout.write('[DEBUG] Bestelling %s (pk=%s) heeft %s van de %s euro ontvangen' % (
+                                bestelling.bestel_nr, bestelling.pk, ontvangen_euro, bestelling.totaal_euro))
+
+            if ontvangen_euro >= bestelling.totaal_euro:
+                self.stdout.write('[DEBUG] Bestelling %s (pk=%s) is afgerond' % (
+                                    bestelling.bestel_nr, bestelling.pk))
+                bestelling.status = BESTELLING_STATUS_AFGEROND
+        else:
+            self.stdout.write('[DEBUG] Betaling niet gelukt voor bestelling %s (pk=%s)' % (
+                                bestelling.bestel_nr, bestelling.pk))
+            # laat status staan op "wacht op betaling"
+
+        bestelling.actief_transactie = None
+        bestelling.save(update_fields=['actief_transactie', 'status'])
+
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.code
 
@@ -361,9 +411,9 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor wedstrijd' % mutatie.pk)
             self._verwerk_mutatie_wedstrijd_afmelden(mutatie)
 
-        elif code == BESTEL_MUTATIE_BETALING_ONTVANGEN:
-            self.stdout.write('[INFO] Verwerk mutatie %s: betaling ontvangen' % mutatie.pk)
-            self._verwerk_mutatie_betaling_ontvangen(mutatie)
+        elif code == BESTEL_MUTATIE_BETALING_AFGEROND:
+            self.stdout.write('[INFO] Verwerk mutatie %s: betaling afgerond' % mutatie.pk)
+            self._verwerk_mutatie_betaling_afgerond(mutatie)
 
         elif code == BESTEL_MUTATIE_RESTITUTIE_UITBETAALD:
             self.stdout.write('[INFO] Verwerk mutatie %s: restitutie uitbetaald' % mutatie.pk)

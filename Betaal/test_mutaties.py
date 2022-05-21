@@ -14,6 +14,9 @@ from Functie.models import maak_functie
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from TestHelpers.e2ehelpers import E2EHelpers
 from decimal import Decimal
+from mollie.api.client import Client, RequestSetupError, RequestError
+from mollie.api.error import ResponseError, ResponseHandlingError
+from mollie.api.objects.payment import Payment
 import io
 
 
@@ -65,7 +68,36 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         return f1, f2
 
+    def _prep_mollie_websim(self, test_code):
+        beschrijving = 'Test betaling %s' % test_code
+        bedrag_euro_str = '42.99'
+
+        mollie_client = Client(api_endpoint=self.url_websim_api)
+        mollie_client.set_api_key('test_1234prep')
+        mollie_webhook_url = url_betaling_gedaan = settings.SITE_URL + '/plein/'
+
+        data = {
+            'amount': {'currency': 'EUR', 'value': bedrag_euro_str},
+            'description': beschrijving,
+            'webhookUrl': mollie_webhook_url,
+            'redirectUrl': url_betaling_gedaan,
+        }
+
+        payment = mollie_client.payments.create(data)
+        # print('prep_mollie_websim: payment=%s' % repr(payment))
+
+        try:
+            payment_id = payment['id_original']
+        except KeyError:
+            try:
+                payment_id = payment['id']
+            except KeyError:
+                payment_id = '??'
+
+        return payment_id
+
     def test_start_ontvangst(self):
+        # initieer een betaling
         bestelling = Bestelling(
                             bestel_nr=1,
                             account=self.account,
@@ -142,7 +174,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertFalse(mutatie.is_verwerkt)
         self.assertEqual(BetaalActief.objects.count(), 0)
 
-        self._run_achtergrondtaak(debug=True)
+        self._run_achtergrondtaak()
 
         mutatie = BetaalMutatie.objects.get(pk=mutatie.pk)
         self.assertTrue(mutatie.is_verwerkt)
@@ -150,6 +182,34 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertEqual(BetaalActief.objects.count(), 1)
         actief = BetaalActief.objects.all()[0]
         self.assertEqual(actief.ontvanger.pk, instellingen_nhb.pk)
+
+    def test_exceptions(self):
+        bestelling = Bestelling(
+                            bestel_nr=1,
+                            account=self.account,
+                            ontvanger=self.instellingen,
+                            totaal_euro=Decimal('45.45'))
+        bestelling.save()
+
+        url_betaling_gedaan = settings.SITE_URL + '/plein/'
+
+        mutatie = betaal_mutatieverzoek_start_ontvangst(
+                        bestelling,
+                        "Test betaling 45",     # 45 triggert onvolledige response
+                        bestelling.totaal_euro,
+                        url_betaling_gedaan,
+                        True)       # snel
+
+        mutatie = betaal_mutatieverzoek_start_ontvangst(
+                        bestelling,
+                        "Test betaling 46",  # 46 triggert bogus status
+                        bestelling.totaal_euro,
+                        url_betaling_gedaan,
+                        True)  # snel
+
+        f1, f2 = self._run_achtergrondtaak()
+        self.assertTrue('[ERROR] Missing mandatory information in create payment response: None, None, None' in f1.getvalue())
+        self.assertTrue("[ERROR] Onverwachte status 'bogus' in create payment response" in f1.getvalue())
 
     def test_bad_api_key(self):
         self.instellingen.mollie_api_key = 'bad_1234'
@@ -174,7 +234,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertFalse(mutatie.is_verwerkt)
         self.assertEqual(BetaalActief.objects.count(), 0)
 
-        f1, f2 = self._run_achtergrondtaak(debug=True)
+        f1, f2 = self._run_achtergrondtaak()
         self.assertTrue('Invalid API key' in f1.getvalue())
 
         mutatie = BetaalMutatie.objects.get(pk=mutatie.pk)
@@ -188,7 +248,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
                             bestel_nr=1,
                             account=self.account,
                             ontvanger=self.instellingen,
-                            totaal_euro=Decimal('42.42'))
+                            totaal_euro=Decimal('43.43'))
         bestelling.save()
 
         # de bestelde producten met prijs en korting
@@ -198,7 +258,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         mutatie = betaal_mutatieverzoek_start_ontvangst(
                         bestelling,
-                        "Test betaling 43",     # 43 triggert 'failed'
+                        "Test betaling 43",     # 43 triggert 'canceled'
                         bestelling.totaal_euro,
                         url_betaling_gedaan,
                         True)       # snel
@@ -206,7 +266,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertFalse(mutatie.is_verwerkt)
         self.assertEqual(BetaalActief.objects.count(), 0)
 
-        self._run_achtergrondtaak(debug=True)
+        self._run_achtergrondtaak()
 
         mutatie = BetaalMutatie.objects.get(pk=mutatie.pk)
         self.assertTrue(mutatie.is_verwerkt)
@@ -222,14 +282,14 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self._run_achtergrondtaak()
 
         actief = BetaalActief.objects.get(pk=actief.pk)
-        self.assertEqual(actief.payment_status, 'failed')
+        self.assertEqual(actief.payment_status, 'canceled')
 
     def test_betaal_expired(self):
         bestelling = Bestelling(
                             bestel_nr=1,
                             account=self.account,
                             ontvanger=self.instellingen,
-                            totaal_euro=Decimal('42.42'))
+                            totaal_euro=Decimal('44.44'))
         bestelling.save()
 
         # de bestelde producten met prijs en korting
@@ -239,7 +299,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         mutatie = betaal_mutatieverzoek_start_ontvangst(
                         bestelling,
-                        "Test betaling 44",     # 43 triggert 'expired'
+                        "Test betaling 44",     # 44 triggert 'expired'
                         bestelling.totaal_euro,
                         url_betaling_gedaan,
                         True)       # snel
@@ -247,7 +307,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         self.assertFalse(mutatie.is_verwerkt)
         self.assertEqual(BetaalActief.objects.count(), 0)
 
-        self._run_achtergrondtaak(debug=True)
+        self._run_achtergrondtaak()
 
         mutatie = BetaalMutatie.objects.get(pk=mutatie.pk)
         self.assertTrue(mutatie.is_verwerkt)
@@ -338,5 +398,218 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         mutatie.is_verwerkt = True
         mutatie.code = 1
         self.assertTrue(str(mutatie) != '')
+
+    def test_status_changed(self):
+        bestelling = Bestelling(
+                            bestel_nr=1,
+                            account=self.account,
+                            ontvanger=self.instellingen,
+                            totaal_euro=Decimal('99.01'))
+        bestelling.save()
+
+        payment_id = 'test123'
+
+        # ignore, want geen BetaalActief
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        self._run_achtergrondtaak()
+        # lastig / niet te checken
+
+        # maak de BetaalActief aan
+        BetaalActief(
+            payment_id=payment_id,
+            ontvanger=self.instellingen,
+            log='testje').save()
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        f1, f2 = self._run_achtergrondtaak()
+        self.assertTrue('[ERROR] Unexpected exception from Mollie payments.get: Invalid payment ID' in f1.getvalue())
+
+        # maak de payment aan in de websim met een foutieve payment_id
+        payment_id = self._prep_mollie_websim(47)
+        actief = BetaalActief(
+            payment_id=payment_id,
+            ontvanger=self.instellingen,
+            log='testje')
+        actief.save()
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        f1, f2 = self._run_achtergrondtaak()
+        self.assertTrue('[ERROR] Mismatch in payment id:' in f1.getvalue())
+
+        # maak de payment aan in de websim met een bijna leeg antwoord
+        self._prep_mollie_websim(45)        # hergebruik standaard websim payment_id
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        f1, f2 = self._run_achtergrondtaak()
+        self.assertTrue('[ERROR] Missing mandatory information in get payment response: None, None' in f1.getvalue())
+
+        # een status=failed payment
+        self._prep_mollie_websim(39)        # hergebruik standaard websim payment_id
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        f1, f2 = self._run_achtergrondtaak()
+        self.assertTrue('[INFO] Payment tr_1234AbcdEFGH status aangepast:  --> failed' in f2.getvalue())
+
+        # een status=pending payment
+        self._prep_mollie_websim(40)        # hergebruik standaard websim payment_id
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        f1, f2 = self._run_achtergrondtaak()
+        self.assertTrue('[INFO] Payment tr_1234AbcdEFGH status aangepast: failed --> pending' in f2.getvalue())
+
+        # een status=open payment
+        self._prep_mollie_websim(41)        # hergebruik standaard websim payment_id
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        f1, f2 = self._run_achtergrondtaak()
+        self.assertTrue('[INFO] Payment tr_1234AbcdEFGH status aangepast: pending --> open' in f2.getvalue())
+
+        # een status=canceled payment
+        self._prep_mollie_websim(43)        # hergebruik standaard websim payment_id
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        f1, f2 = self._run_achtergrondtaak()
+        self.assertTrue('[INFO] Payment tr_1234AbcdEFGH status aangepast: open --> canceled' in f2.getvalue())
+        actief = BetaalActief.objects.get(pk=actief.pk)
+        self.assertTrue('Betaling is mislukt' in actief.log)
+
+        # een status=paid, with issue
+        self._prep_mollie_websim(425)       # hergebruik standaard websim payment_id
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        f1, f2 = self._run_achtergrondtaak()
+        self.assertTrue('[INFO] Payment tr_1234AbcdEFGH status aangepast: canceled --> paid' in f2.getvalue())
+        self.assertTrue('[ERROR] {maak_transactie} Incomplete details voor card: ' in f1.getvalue())
+
+        # een status=paid, with issue
+        self._prep_mollie_websim(426)       # hergebruik standaard websim payment_id
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        f1, f2 = self._run_achtergrondtaak()
+        self.assertTrue('[INFO] Payment tr_1234AbcdEFGH status aangepast: paid --> paid' in f2.getvalue())
+        self.assertTrue('[ERROR] {maak_transactie} Incomplete details over consumer: ' in f1.getvalue())
+
+        # een status=paid, with issue
+        self._prep_mollie_websim(427)       # hergebruik standaard websim payment_id
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        f1, f2 = self._run_achtergrondtaak()
+        self.assertTrue('[INFO] Payment tr_1234AbcdEFGH status aangepast: paid --> paid' in f2.getvalue())
+        self.assertTrue('[ERROR] {maak_transactie} Probleem met de bedragen' in f1.getvalue())
+
+        # een status=paid, with issue
+        self._prep_mollie_websim(428)       # hergebruik standaard websim payment_id
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        f1, f2 = self._run_achtergrondtaak()
+        self.assertTrue('[INFO] Payment tr_1234AbcdEFGH status aangepast: paid --> paid' in f2.getvalue())
+        self.assertTrue('[ERROR] {maak_transactie} Currency not in EUR' in f1.getvalue())
+
+        # een status=paid, with issue
+        self._prep_mollie_websim(429)       # hergebruik standaard websim payment_id
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        f1, f2 = self._run_achtergrondtaak()
+        self.assertTrue('[INFO] Payment tr_1234AbcdEFGH status aangepast: paid --> paid' in f2.getvalue())
+        self.assertTrue('[ERROR] {maak_transactie} Missing field: ' in f1.getvalue())
+
+    def test_paid_ideal(self):
+        bestelling = Bestelling(
+                            bestel_nr=1,
+                            account=self.account,
+                            ontvanger=self.instellingen,
+                            totaal_euro=Decimal('99.01'))
+        bestelling.save()
+
+        # maak de payment met status=paid en method=ideal
+        payment_id = self._prep_mollie_websim(421)
+        actief = BetaalActief(
+            payment_id=payment_id,
+            ontvanger=self.instellingen,
+            log='testje')
+        actief.save()
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        f1, f2 = self._run_achtergrondtaak()
+        actief = BetaalActief.objects.get(pk=actief.pk)
+        self.assertTrue('Betaling is voldaan' in actief.log)
+
+    def test_paid_creditcard(self):
+        bestelling = Bestelling(
+                            bestel_nr=1,
+                            account=self.account,
+                            ontvanger=self.instellingen,
+                            totaal_euro=Decimal('99.01'))
+        bestelling.save()
+
+        # maak de payment met status=paid en method=creditcard
+        payment_id = self._prep_mollie_websim(422)
+        actief = BetaalActief(
+            payment_id=payment_id,
+            ontvanger=self.instellingen,
+            log='testje')
+        actief.save()
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        f1, f2 = self._run_achtergrondtaak()
+        actief = BetaalActief.objects.get(pk=actief.pk)
+        self.assertTrue('Betaling is voldaan' in actief.log)
+
+    def test_paid_paypal(self):
+        bestelling = Bestelling(
+                            bestel_nr=1,
+                            account=self.account,
+                            ontvanger=self.instellingen,
+                            totaal_euro=Decimal('99.01'))
+        bestelling.save()
+
+        # maak de payment met status=paid en method=paypal
+        payment_id = self._prep_mollie_websim(423)
+        actief = BetaalActief(
+            payment_id=payment_id,
+            ontvanger=self.instellingen,
+            log='testje')
+        actief.save()
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        f1, f2 = self._run_achtergrondtaak()
+        actief = BetaalActief.objects.get(pk=actief.pk)
+        self.assertTrue('Betaling is voldaan' in actief.log)
+
+    def test_status_changed_bad_api_key(self):
+        self.instellingen.mollie_api_key = 'hallo daar'
+        self.instellingen.save()
+
+        payment_id = 'test123'
+
+        # maak de BetaalActief aan
+        BetaalActief(
+            payment_id=payment_id,
+            ontvanger=self.instellingen,
+            log='testje').save()
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+
+        f1, f2 = self._run_achtergrondtaak()
+        self.assertTrue('Unexpected exception from Mollie set API key' in f1.getvalue())
+
+    def test_status_changed_via_nhb(self):
+        # maak de instellingen van de NHB aan
+        ver = NhbVereniging(
+                        ver_nr=settings.BETAAL_VIA_NHB_VER_NR,
+                        naam="De NHB",
+                        regio=self.regio_100)
+        ver.save()
+        instellingen_nhb = BetaalInstellingenVereniging(
+                                vereniging=ver,
+                                mollie_api_key='test_1234nhb')
+        instellingen_nhb.save()
+
+        self.instellingen.akkoord_via_nhb = True
+        self.instellingen.save(update_fields=['akkoord_via_nhb'])
+
+        bestelling = Bestelling(
+                            bestel_nr=1,
+                            account=self.account,
+                            ontvanger=self.instellingen,
+                            totaal_euro=Decimal('99.01'))
+        bestelling.save()
+
+        payment_id = 'test123'
+
+        # maak de BetaalActief aan
+        BetaalActief(
+            payment_id=payment_id,
+            ontvanger=self.instellingen,
+            log='testje').save()
+        betaal_mutatieverzoek_payment_status_changed(payment_id)
+        f1, f2, = self._run_achtergrondtaak()
+
+        self.assertTrue('[ERROR] Unexpected exception from Mollie payments.get: Invalid payment ID' in f1.getvalue())
+
 
 # end of file

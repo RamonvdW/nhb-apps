@@ -13,13 +13,17 @@ from django.urls import reverse
 from django.utils import timezone
 from django.db.models import F
 from django.core.management.base import BaseCommand
-from Betaal.models import (BetaalMutatie, BetaalActief, BetaalInstellingenVereniging,
+from Bestel.mutaties import bestel_mutatieverzoek_betaling_afgerond
+from Betaal.models import (BetaalMutatie, BetaalActief, BetaalInstellingenVereniging, BetaalTransactie,
                            BETAAL_MUTATIE_START_ONTVANGST, BETAAL_MUTATIE_START_RESTITUTIE,
-                           BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED)
-from Mailer.models import mailer_queue_email
+                           BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED, BETAAL_PAYMENT_STATUS_MAXLENGTH,
+                           BETAAL_PAYMENT_ID_MAXLENGTH, BETAAL_BESCHRIJVING_MAXLENGTH,
+                           BETAAL_KLANT_NAAM_MAXLENGTH, BETAAL_KLANT_ACCOUNT_MAXLENGTH)
 from Overig.background_sync import BackgroundSync
 from mollie.api.client import Client, RequestSetupError, RequestError
 from mollie.api.error import ResponseError, ResponseHandlingError
+from mollie.api.objects.payment import Payment
+from decimal import Decimal, DecimalException
 import django.db.utils
 import traceback
 import datetime
@@ -101,13 +105,18 @@ class Command(BaseCommand):
             else:
                 self.stdout.write('[DEBUG] Create payment response: %s' % repr(payment))
 
-                try:
-                    payment_id = payment['id']
-                    url_checkout = payment['_links']['checkout']['href']
-                    status = payment['status']
-                except KeyError as exc:
-                    self.stderr.write('[ERROR] Missing mandatory information in create payment response: %s' % str(exc))
+                obj = Payment(payment)
+                payment_id = obj.id
+                url_checkout = obj.checkout_url
+                status = obj.status
+
+                if payment_id is None or url_checkout is None or status is None:
+                    self.stderr.write('[ERROR] Missing mandatory information in create payment response: %s, %s, %s' % (
+                                        repr(payment_id), repr(url_checkout), repr(status)))
+                elif not obj.is_open():
+                    self.stderr.write('[ERROR] Onverwachte status %s in create payment response' % repr(status))
                 else:
+                    # het is gelukt om de betaling op te starten
                     mutatie.payment_id = payment_id
                     mutatie.url_checkout = url_checkout
                     mutatie.save(update_fields=['payment_id', 'url_checkout'])
@@ -117,6 +126,7 @@ class Command(BaseCommand):
                         del payment['webhookUrl']
                         del payment['redirectUrl']
                         del payment['_links']['dashboard']
+                        # del payment['_links']['self']
                         del payment['_links']['documentation']
                     except KeyError:
                         pass
@@ -124,7 +134,7 @@ class Command(BaseCommand):
                     # houd de actieve betalingen bij
                     actief = BetaalActief(
                                     payment_id=payment_id,
-                                    ontvanger=instellingen,     # TODO: dit wordt NHB bij akkoord_via_nhb
+                                    ontvanger=instellingen,     # TODO: bij akkoord_via_nhb...
                                     payment_status=status)
                     actief.log += "[%s]: created\n" % timezone.localtime(timezone.now())
                     actief.log += json.dumps(payment)
@@ -133,6 +143,73 @@ class Command(BaseCommand):
 
     def _verwerk_mutatie_start_restitutie(self, mutatie):
         pass
+
+    def _maak_transactie(self, obj, payment_id):
+        description = str(obj.description)  # ensure string (just in case)
+        euro_klant = obj.amount
+        euro_boeking = obj.settlement_amount
+        details = obj.details
+        methode = obj.method
+
+        if euro_klant is None or euro_boeking is None or details is None or methode is None:
+            self.stderr.write('[ERROR] {maak_transactie} Missing field: %s, %s, %s, %s' % (
+                                repr(euro_klant), repr(euro_boeking), repr(details), repr(methode)))
+            return False
+
+        try:
+            if euro_klant['currency'] != 'EUR' or euro_boeking['currency'] != 'EUR':
+                self.stderr.write('[ERROR] {maak_transactie} Currency not in EUR: %s, %s' % (
+                                    repr(euro_klant), repr(euro_boeking)))
+                return False
+
+            bedrag_klant = Decimal(euro_klant['value'])
+            bedrag_boeking = Decimal(euro_boeking['value'])
+        except (KeyError, DecimalException) as exc:
+            self.stderr.write('[ERROR] {maak_transactie} Probleem met de bedragen: %s, %s (%s)' % (
+                                repr(euro_klant), repr(euro_boeking), str(exc)))
+            return False
+
+        klant_naam = None
+        klant_account = None
+
+        # haal de gegevens van de betaler op
+        # FUTURE: Paypal
+        if methode in ('ideal', 'bancontact', 'banktransfer', 'belfius', 'kbc', 'sofort', 'directdebit'):
+            # methode 1: "consumer" velden
+            try:
+                klant_naam = details['consumerName'][:BETAAL_KLANT_NAAM_MAXLENGTH]
+                klant_account = '%s (%s)' % (details['consumerAccount'], details['consumerBic'])
+                klant_account = klant_account[:BETAAL_KLANT_ACCOUNT_MAXLENGTH]
+            except KeyError:
+                self.stderr.write('[ERROR] {maak_transactie} Incomplete details over consumer: %s' % repr(details))
+                return False
+
+        elif methode in ('creditcard',):
+            # methode 2: credit cards (inclusief apple pay)
+            try:
+                klant_naam = details['cardHolder']
+                klant_account = '%s %s %s' % (details['cardCountryCode'], details['cardLabel'], details['cardNumber'])
+            except KeyError:
+                self.stderr.write('[ERROR] {maak_transactie} Incomplete details voor card: %s' % repr(details))
+                return False
+
+        if klant_naam is None or klant_account is None:
+            self.stderr.write('[ERROR] {maak_transactie} Incomplete informatie over klant: %s, %s' % (
+                                repr(klant_naam), repr(klant_account)))
+            return False
+
+        # transactie geschiedenis aanmaken
+        BetaalTransactie(
+                payment_id=payment_id[:BETAAL_PAYMENT_ID_MAXLENGTH],
+                when=timezone.now(),
+                beschrijving=description[:BETAAL_BESCHRIJVING_MAXLENGTH],
+                is_restitutie=False,
+                bedrag_euro_klant=bedrag_klant,
+                bedrag_euro_boeking=bedrag_boeking,
+                klant_naam=klant_naam,
+                klant_account=klant_account).save()
+
+        # TODO: betaal transactie koppelen aan de bestelling
 
     def _verwerk_mutatie_payment_status_changed(self, mutatie):
         """ Een voor ons bekende transactie is van status gewijzigd
@@ -170,16 +247,24 @@ class Command(BaseCommand):
                 else:
                     self.stdout.write('[DEBUG] Get payment response: %s' % repr(payment))
 
-                    try:
-                        status = payment['status']
-                    except KeyError as exc:
-                        self.stderr.write('[ERROR] Missing mandatory information in get payment response: %s' % str(exc))
+                    obj = Payment(payment)
+                    status = obj.status
+                    payment_id = obj.id
+
+                    if payment_id is None or status is None:
+                        self.stderr.write('[ERROR] Missing mandatory information in get payment response: %s, %s' % (
+                                            repr(payment_id), repr(status)))
+
+                    elif payment_id != mutatie.payment_id:
+                        self.stderr.write('[ERROR] Mismatch in payment id: %s, %s' % (
+                                            repr(payment_id), repr(mutatie.payment_id)))
                     else:
                         # remove some keys we don't need in the log
                         try:
                             del payment['webhookUrl']
                             del payment['redirectUrl']
                             del payment['_links']['dashboard']
+                            # del payment['_links']['self']
                             del payment['_links']['documentation']
                         except KeyError:
                             pass
@@ -193,8 +278,30 @@ class Command(BaseCommand):
                                                                             status)
                         actief.log += json.dumps(payment)
                         actief.log += '\n'
-                        actief.payment_status = status
+                        actief.payment_status = status[:BETAAL_PAYMENT_STATUS_MAXLENGTH]
                         actief.save(update_fields=['payment_status', 'log'])
+
+                        if obj.is_paid():
+                            actief.log += 'Betaling is voldaan\n\n'
+                            actief.save(update_fields=['log'])
+
+                            if self._maak_transactie(obj, payment_id):
+                                # betaling is afgerond en alle benodigde informatie staat nu in een transactie
+                                bestel_mutatieverzoek_betaling_afgerond(actief, gelukt=True)
+
+                        elif obj.is_canceled() or obj.is_expired():
+                            actief.log += 'Betaling is mislukt\n\n'
+                            actief.save(update_fields=['log'])
+
+                            # geef door dat de betaling mislukt is, zodat deze opnieuw opgestart kan worden
+                            bestel_mutatieverzoek_betaling_afgerond(actief, gelukt=False)
+                        elif obj.is_pending() or obj.is_open():
+                            # do nothing
+                            pass
+                        elif obj.is_failed():
+                            # verwachting: Mollie stuurt gebruiker terug naar kies-betaalmethode
+                            # voor sommige betaalmethodes zijn 'failure reasons' beschikbaar onder details
+                            pass
 
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.code

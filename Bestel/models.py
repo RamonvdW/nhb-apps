@@ -37,7 +37,7 @@ BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN = 1        # inschrijven op wedstrijd
 BESTEL_MUTATIE_VERWIJDER = 2                    # product verwijderen uit mandje
 BESTEL_MUTATIE_KORTINGSCODE = 3                 # kortingcode toepassen op mandje
 BESTEL_MUTATIE_MAAK_BESTELLING = 4              # mandje omzetten in bestelling(en)
-BESTEL_MUTATIE_BETALING_ONTVANGEN = 5           # betaling ontvangen
+BESTEL_MUTATIE_BETALING_AFGEROND = 5            # betaling is afgerond (gelukt of mislukt)
 BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN = 6           # afmelden (na betaling)
 BESTEL_MUTATIE_RESTITUTIE_UITBETAALD = 7        # restitutie uitbetaald
 
@@ -46,7 +46,7 @@ BESTEL_MUTATIE_TO_STR = {
     BESTEL_MUTATIE_VERWIJDER: "Product verwijderen uit mandje",
     BESTEL_MUTATIE_KORTINGSCODE: "Kortingscode toepassen op mandje",
     BESTEL_MUTATIE_MAAK_BESTELLING: "Mandje omzetten in bestelling",
-    BESTEL_MUTATIE_BETALING_ONTVANGEN: "Betaling ontvangen",
+    BESTEL_MUTATIE_BETALING_AFGEROND: "Betaling afgerond",
     BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN: "Afmelden voor wedstrijd",
     BESTEL_MUTATIE_RESTITUTIE_UITBETAALD: "Restitutie uitbetaald",
 }
@@ -207,8 +207,8 @@ class BestelMutatie(models.Model):
     # BESTEL_MUTATIE_VERWIJDER:                 account(=mandje), product
     # BESTEL_MUTATIE_KORTINGSCODE:              account(=mandje), kortingscode
     # BESTEL_MUTATIE_MAAK_BESTELLING:           account(=mandje)
-    # BESTEL_MUTATIE_BETALING_ONTVANGEN:
     # BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN:        inschrijving
+    # BESTEL_MUTATIE_BETALING_ONTVANGEN:        bestelling, betaling_is_gelukt
     # BESTEL_MUTATIE_RESTITUTIE_UITBETAALD:
 
     # wiens mandje moet omgezet worden?
@@ -222,6 +222,12 @@ class BestelMutatie(models.Model):
 
     # gevraagde kortingscode om toe te passen
     kortingscode = models.CharField(max_length=20, default='', blank=True)
+
+    # de bestelling waar deze mutatie betrekking op heeft
+    bestelling = models.ForeignKey(Bestelling, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # status van de betaling: gelukt, of niet?
+    betaling_is_gelukt = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Bestel mutatie"

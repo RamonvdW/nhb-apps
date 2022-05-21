@@ -20,9 +20,11 @@ BETAAL_MUTATIE_TO_STR = {
 }
 
 BETAAL_PAYMENT_ID_MAXLENGTH = 64        # 32 waarschijnlijk genoeg voor Mollie (geen limiet gevonden in docs)
+BETAAL_PAYMENT_STATUS_MAXLENGTH=15
 BETAAL_BESCHRIJVING_MAXLENGTH = 100     # aantal taken voor beschrijving op afschrift
 MOLLIE_API_KEY_MAXLENGTH = 50           # geen limiet gevonden in docs
-
+BETAAL_KLANT_NAAM_MAXLENGTH = 100
+BETAAL_KLANT_ACCOUNT_MAXLENGTH = 100    # standaard: 11 (BIC) + 18 (IBAN), maar flexibel genoeg voor varianten
 
 class BetaalInstellingenVereniging(models.Model):
 
@@ -69,7 +71,7 @@ class BetaalActief(models.Model):
     payment_id = models.CharField(max_length=BETAAL_PAYMENT_ID_MAXLENGTH)
 
     # de laatste ontvangen status
-    payment_status = models.CharField(max_length=15, default='')
+    payment_status = models.CharField(max_length=BETAAL_PAYMENT_STATUS_MAXLENGTH, default='')
 
     # logboek met status veranderingen
     log = models.TextField(default='')
@@ -100,16 +102,19 @@ class BetaalTransactie(models.Model):
     # is dit een restitutie of ontvangst?
     is_restitutie = models.BooleanField(default=False)
 
-    # het bedrag
-    bedrag_euro = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)         # max 99999,99
+    # het bedrag wat de klant ziet (betaling / refund)
+    bedrag_euro_klant = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)        # max 99999,99
+
+    # het bedrag wat wij krijgen/uitgeven
+    # betaling: het bedrag wat ontvangen is (dus transfer kosten al ingehouden door de CPSP)
+    # refund: het bedrag wat uitbetaald is  (dus inclusief transfer kosten van de CPSP)
+    bedrag_euro_boeking = models.DecimalField(max_digits=7, decimal_places=2, default=0.0)      # max 99999,99
 
     # naam wat bij het rekeningnummer van de klant hoort
-    klant_naam = models.CharField(max_length=100)
+    klant_naam = models.CharField(max_length=BETAAL_KLANT_NAAM_MAXLENGTH)
 
-    # IBAN nummer van de rekening waarmee betaal id
-    # zie https://bank.codes/iban/structure/netherlands/
-    klant_iban = models.CharField(max_length=18)
-    klant_bic = models.CharField(max_length=11)
+    # informatie over de rekening waarmee betaald is
+    klant_account = models.CharField(max_length=BETAAL_KLANT_ACCOUNT_MAXLENGTH)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
