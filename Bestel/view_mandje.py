@@ -12,7 +12,9 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.operations import account_controleer_snelheid_verzoeken
 from Bestel.mandje import mandje_tel_inhoud, eval_mandje_inhoud
 from Bestel.models import BestelMandje, BESTEL_KORTINGSCODE_MINLENGTH
-from Bestel.mutaties import bestel_mutatieverzoek_maak_bestellingen, bestel_mutatieverzoek_verwijder_product_uit_mandje, bestel_mutatieverzoek_kortingscode_toepassen
+from Bestel.mutaties import (bestel_mutatieverzoek_maak_bestellingen,
+                             bestel_mutatieverzoek_verwijder_product_uit_mandje,
+                             bestel_mutatieverzoek_kortingscode_toepassen)
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.rol import Rollen, rol_get_huidige
 from Kalender.models import KALENDER_KORTING_COMBI

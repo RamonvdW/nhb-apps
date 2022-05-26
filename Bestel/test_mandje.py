@@ -279,6 +279,13 @@ class TestBestelMandje(E2EHelpers, TestCase):
                                      'snel': 1})
         self.assert_is_redirect(resp, self.url_mandje_toon)
 
+        # nog een keer, dan bestaat de mutatie al (is_created is False)
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_mandje_code_toevoegen,
+                                    {'code': '@@' + self.code + '!',   # troep wordt verwijderd
+                                     'snel': 1})
+        self.assert_is_redirect(resp, self.url_mandje_toon)
+
         self.verwerk_bestel_mutaties()
 
         # controleer dat de code toegepast is
@@ -321,6 +328,11 @@ class TestBestelMandje(E2EHelpers, TestCase):
             resp = self.client.post(self.url_mandje_verwijder % 999999)
         self.assert404(resp, 'Niet gevonden in jouw mandje')
 
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_mandje_verwijder % product.pk, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_mandje_toon)
+
+        # nog een keer, dan is de mutatie al aangemaakt (is_created is False)
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_mandje_verwijder % product.pk, {'snel': 1})
         self.assert_is_redirect(resp, self.url_mandje_toon)
@@ -370,6 +382,12 @@ class TestBestelMandje(E2EHelpers, TestCase):
         mutatie.code = 99999
         mutatie.is_verwerkt = True
         self.assertTrue(str(mutatie) != '')
+
+        # nog een keer, dan bestaat de mutatie al (is_created is False)
+        resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+        self.assertEqual(1, BestelMutatie.objects.count())
+        self.assertEqual(0, Bestelling.objects.count())
 
         self.verwerk_bestel_mutaties()
 

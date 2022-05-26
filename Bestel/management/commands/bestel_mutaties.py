@@ -380,6 +380,7 @@ class Command(BaseCommand):
                 self.stdout.write('[DEBUG] Bestelling %s (pk=%s) is afgerond' % (
                                     bestelling.bestel_nr, bestelling.pk))
                 bestelling.status = BESTELLING_STATUS_AFGEROND
+                # TODO: kalender plugin aanroepen
         else:
             self.stdout.write('[DEBUG] Betaling niet gelukt voor bestelling %s (pk=%s)' % (
                                 bestelling.bestel_nr, bestelling.pk))
