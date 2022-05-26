@@ -27,9 +27,6 @@ export PYTHONDONTWRITEBYTECODE=1
 #OMIT="--omit=data3/wsgi.py,manage.py,/usr/local/lib64/*,/usr/lib/*,/usr/local/lib/python3.6/site-packages/c*,/usr/local/lib/python3.6/site-packages/da*,/usr/local/lib/python3.6/site-packages/de*,/usr/local/lib/python3.6/site-packages/i*,/usr/local/lib/python3.6/site-packages/p*,/usr/local/lib/python3.6/site-packages/q*,/usr/local/lib/python3.6/site-packages/r*,/usr/local/lib/python3.6/site-packages/si*,/usr/local/lib/python3.6/site-packages/u*,/usr/local/lib/python3.6/site-packages/django/*"
 OMIT=""
 
-# set high performance
-sudo cpupower frequency-set --governor performance > /dev/null
-
 # kill the http simulator if still running in the background
 # -f check entire commandline program name is python and does not match
 pgrep -f websim > /dev/null
@@ -45,9 +42,6 @@ echo
 
 STAMP=$(date +"%Y-%m-%d %H:%M:%S")
 echo "[INFO] Now is $STAMP"
-
-echo "[INFO] Checking application is free of fatal errors"
-python3 ./manage.py check || exit $?
 
 FORCE_REPORT=0
 if [[ "$ARGS" =~ "--force" ]]
@@ -91,6 +85,15 @@ then
     #echo "[DEBUG] COV_INCLUDE set to $COV_INCLUDE"
 fi
 
+if [ $KEEP_DB -eq 0 ]
+then
+    echo "[INFO] Checking application is free of fatal errors"
+    python3 ./manage.py check || exit $?
+fi
+
+# set high performance
+sudo cpupower frequency-set --governor performance > /dev/null
+
 ABORTED=0
 
 export COVERAGE_FILE="/tmp/.coverage.$$"
@@ -109,15 +112,13 @@ then
     echo "[INFO] Deleting test database"
     sudo -u postgres dropdb --if-exists test_data3
     echo "[INFO] Creating clean database; running migrations and performing run with nodebug"
-else
-    echo "[INFO] Running potential migrations and performing run with nodebug"
-fi
 
-# add coverage with nodebug
-python3 -u $PYCOV ./manage.py test --keepdb --noinput --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.TestPlein.test_quick &>>"$LOG"
-RES=$?
-#echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
-[ $RES -eq 3 ] && ABORTED=1
+    # add coverage with nodebug
+    python3 -u $PYCOV ./manage.py test --keepdb --noinput --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.TestPlein.test_quick &>>"$LOG"
+    RES=$?
+    #echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
+    [ $RES -eq 3 ] && ABORTED=1
+fi
 
 # start the mail transport service simulator
 python3 ./Mailer/test_tools/websim_mailer.py &

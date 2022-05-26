@@ -47,7 +47,7 @@ def bestel_mutatieverzoek_inschrijven_wedstrijd(account, inschrijving, snel):
                                     is_verwerkt=False)
     mutatie.save()
 
-    if is_created:
+    if is_created:                                          # pragma: no branch
         # wacht kort op de achtergrondtaak
         _bestel_ping_achtergrondtaak(mutatie, snel)
 
@@ -131,7 +131,7 @@ def bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel=False):
                                     is_verwerkt=False)
     mutatie.save()
 
-    if is_created:
+    if is_created:                                          # pragma: no branch
         # wacht kort op de achtergrondtaak
         _bestel_ping_achtergrondtaak(mutatie, snel)
 

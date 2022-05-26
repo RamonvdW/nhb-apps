@@ -8,10 +8,13 @@ from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType
-from Bestel.models import BestelProduct, BestelMandje, BestelMutatie, Bestelling
-from Betaal.models import BetaalInstellingenVereniging
+from Bestel.models import (BestelMandje, BestelMutatie, Bestelling,
+                           BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING)
+from Bestel.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd, bestel_mutatieverzoek_betaling_afgerond,
+                             bestel_mutatieverzoek_kortingscode_toepassen)
+from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie
 from Kalender.models import (KalenderWedstrijd, KalenderWedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD,
-                             KalenderInschrijving, KalenderWedstrijdKortingscode, KALENDER_KORTING_COMBI)
+                             KalenderInschrijving, KalenderWedstrijdKortingscode)
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -102,6 +105,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                     prijs_euro=10.00,
                     max_sporters=50)
         sessie.save()
+        self.sessie = sessie
         # sessie.wedstrijdklassen.add()
 
         # maak een kalenderwedstrijd aan, met sessie
@@ -140,16 +144,16 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         mandje, is_created = BestelMandje.objects.get_or_create(account=account)
         self.mandje = mandje
 
-        # TODO: misschien beter om via de achtergrondtaak te laten lopen
-        # geen koppeling aan een mandje
-        product = BestelProduct(
-                    inschrijving=self.inschrijving,
-                    prijs_euro=Decimal(10.0))
-        product.save()
-        self.product1 = product
-
-        # stop het product in het mandje
-        mandje.producten.add(product)
+        # # TODO: misschien beter om via de achtergrondtaak te laten lopen
+        # # geen koppeling aan een mandje
+        # product = BestelProduct(
+        #             inschrijving=self.inschrijving,
+        #             prijs_euro=Decimal(10.0))
+        # product.save()
+        # self.product1 = product
+        #
+        # # stop het product in het mandje
+        # mandje.producten.add(product)
 
     def test_anon(self):
         self.client.logout()
@@ -168,6 +172,10 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
 
+        # bestel wedstrijddeelname
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        self.verwerk_bestel_mutaties()
+
         # bekijk de bestellingen (lege lijst)
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_bestellingen_overzicht)
@@ -182,7 +190,9 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
 
-        bestelling = Bestelling.objects.all()[0]
+        bestelling = Bestelling.objects.prefetch_related('producten').all()[0]
+        self.assertEqual(1, bestelling.producten.count())
+        product1 = bestelling.producten.all()[0]
 
         # bekijk de bestellingen
         with self.assert_max_queries(20):
@@ -201,9 +211,22 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(url)
 
+        # fout: dikke korting zonder code (te betalen wordt negatief)
+        product1.korting_euro = Decimal('100')
+        product1.save()
+        # fout: sporter niet meer bij vereniging
+        self.sporter.bij_vereniging = None
+        self.sporter.save()
+        url = self.url_bestelling_afrekenen % bestelling.bestel_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/bestelling-afrekenen.dtl', 'plein/site_layout.dtl'))
+
         # mutileer het product (doorzetten vanuit het mandje lukt niet)
-        self.product1.inschrijving = None
-        self.product1.save()
+        product1.inschrijving = None
+        product1.save(update_fields=['inschrijving'])
 
         # bekijk de bestellingen
         with self.assert_max_queries(20):
@@ -225,9 +248,69 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         resp = self.client.get(self.url_bestelling_details % '1=5')
         self.assert404(resp, 'Niet gevonden')
 
+    def test_geen_instellingen(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        # bestel wedstrijddeelname
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        self.verwerk_bestel_mutaties()
+
+        # zet het mandje om in een bestelling
+        self.assertEqual(0, Bestelling.objects.count())
+        resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+
+        # verwijder de instellingen van de vereniging
+        self.instellingen.delete()
+
+        # nu kan de bestelling niet aangemaakt worden
+        self.verwerk_bestel_mutaties()
+        self.assertEqual(0, Bestelling.objects.count())
+
+    def test_geen_instellingen_nhb(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        # bestel wedstrijddeelname
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        self.verwerk_bestel_mutaties()
+
+        # zet het mandje om in een bestelling
+        self.assertEqual(0, Bestelling.objects.count())
+        resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+
+        # verwijder de instellingen van de vereniging
+        self.instellingen_nhb.delete()
+
+        # nu kan de bestelling niet aangemaakt worden
+        self.verwerk_bestel_mutaties()
+        self.assertEqual(0, Bestelling.objects.count())
+
+    def test_geen_mandje(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        # bestel wedstrijddeelname
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+
+        mutatie = BestelMutatie.objects.all()[0]
+        mutatie.account = None
+        mutatie.save(update_fields=['account'])
+
+        f1, f2 = self.verwerk_bestel_mutaties(fail_on_error=False)
+        self.assertTrue('[ERROR] Mutatie' in f1.getvalue())
+        self.assertTrue('heeft geen account' in f1.getvalue())
+
     def test_afrekenen(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
+
+        # bestel wedstrijddeelname met kortingscode
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        bestel_mutatieverzoek_kortingscode_toepassen(self.account_admin, self.korting.code, snel=True)
+        self.verwerk_bestel_mutaties()
 
         # zet het mandje om in een bestelling
         self.assertEqual(0, Bestelling.objects.count())
@@ -244,10 +327,78 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/bestelling-afrekenen.dtl', 'plein/site_layout.dtl'))
 
+        # betaling verwerken
+        betaalactief = BetaalActief(
+                            ontvanger=self.instellingen,
+                            payment_id='testje',
+                            payment_status='open',
+                            log='test')
+        betaalactief.save()
+
+        BetaalTransactie(
+                payment_id='testje',
+                when=betaalactief.when,
+                beschrijving="Test beschrijving",
+                is_restitutie=False,
+                bedrag_euro_klant=Decimal('10'),
+                bedrag_euro_boeking=Decimal('9.75'),
+                klant_naam="Pietje Pijlsnel",
+                klant_account="1234.5678.9012.3456").save()
+
+        # zonder BetaalActief gekoppeld aan de Bestelling werkt het niet (mutatie verzoek wordt niet eens verstuurd)
+        self.assertEqual(3, BestelMutatie.objects.count())
+        bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
+        self.assertEqual(3, BestelMutatie.objects.count())
+
+        # koppel transactie aan de bestelling, zodat deze gevonden kan worden
+        bestelling.actief_transactie = betaalactief
+        bestelling.save(update_fields=['actief_transactie'])
+
+        # betaling mislukt
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_WACHT_OP_BETALING)
+        bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=False, snel=True)
+        self.assertEqual(4, BestelMutatie.objects.count())
+        f1, f2 = self.verwerk_bestel_mutaties()
+        self.assertTrue('Betaling niet gelukt voor bestelling' in f2.getvalue())
+
+        bestelling = Bestelling.objects.get(pk=bestelling.pk)
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_WACHT_OP_BETALING)
+        self.assertIsNone(bestelling.actief_transactie)
+
+        # betaling verwerken
+        betaalactief = BetaalActief(
+                            ontvanger=self.instellingen,
+                            payment_id='testje',
+                            payment_status='paid',
+                            log='test')
+        betaalactief.save()
+        bestelling.actief_transactie = betaalactief
+        bestelling.save(update_fields=['actief_transactie'])
+
+        # dubbel verzoek heeft geen effect
+        bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
+        self.assertEqual(5, BestelMutatie.objects.count())
+        bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
+        self.assertEqual(5, BestelMutatie.objects.count())
+        f1, f2 = self.verwerk_bestel_mutaties()
+        self.assertTrue('[INFO] Betaling is gelukt voor bestelling' in f2.getvalue())
+
+        bestelling = Bestelling.objects.get(pk=bestelling.pk)
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
+
+        # haal de details op nu de betaling gedaan is
+        url = self.url_bestelling_details % bestelling.bestel_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
+
+        # corner cases
         resp = self.client.get(self.url_bestelling_afrekenen % 999999)
         self.assert404(resp, 'Niet gevonden')
 
-        # maak een bestelling aan van een ander account
+        # test met een bestelling aan van een ander account
         account = self.e2e_create_account('user', 'user@nhb.not', 'User')
         andere = Bestelling(bestel_nr=1234, account=account)
         andere.save()
@@ -259,5 +410,175 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, url)
+
+        # transactie met bestelling in verkeerde status
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
+        bestelling.actief_transactie = betaalactief
+        bestelling.save(update_fields=['actief_transactie'])
+
+        bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
+        f1, f2 = self.verwerk_bestel_mutaties(show_warnings=False)
+        self.assertTrue('wacht niet op een betaling (status=' in f2.getvalue())
+
+    def test_afrekenen_te_weinig(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        # bestel wedstrijddeelname
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        self.verwerk_bestel_mutaties()
+
+        # zet het mandje om in een bestelling
+        self.assertEqual(0, Bestelling.objects.count())
+        resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+        self.verwerk_bestel_mutaties()
+        self.assertEqual(1, Bestelling.objects.count())
+        bestelling = Bestelling.objects.all()[0]
+
+        url = self.url_bestelling_afrekenen % bestelling.bestel_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/bestelling-afrekenen.dtl', 'plein/site_layout.dtl'))
+
+        # betaling verwerken
+        betaalactief = BetaalActief(
+                            ontvanger=self.instellingen,
+                            payment_id='testje',
+                            payment_status='paid',
+                            log='test')
+        betaalactief.save()
+
+        # koppel transactie aan de bestelling, zodat deze gevonden kan worden
+        bestelling.actief_transactie = betaalactief
+        bestelling.save(update_fields=['actief_transactie'])
+
+        # deze betaling is 1 cent te weinig
+        BetaalTransactie(
+                payment_id='testje',
+                when=betaalactief.when,
+                beschrijving="Test beschrijving",
+                is_restitutie=False,
+                bedrag_euro_klant=Decimal('9.99'),
+                bedrag_euro_boeking=Decimal('9.75'),
+                klant_naam="Pietje Pijlsnel",
+                klant_account="1234.5678.9012.3456").save()
+
+        bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
+        f1, f2 = self.verwerk_bestel_mutaties()
+        self.assertTrue('[INFO] Betaling is gelukt voor bestelling' in f2.getvalue())
+
+        bestelling = Bestelling.objects.get(pk=bestelling.pk)
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_WACHT_OP_BETALING)
+        self.assertIsNone(bestelling.actief_transactie)
+
+    def test_restitutie(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        # bestel wedstrijddeelname
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        self.verwerk_bestel_mutaties()
+
+        # zet het mandje om in een bestelling
+        self.assertEqual(0, Bestelling.objects.count())
+        resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+        self.verwerk_bestel_mutaties()
+        self.assertEqual(1, Bestelling.objects.count())
+        bestelling = Bestelling.objects.all()[0]
+
+        url = self.url_bestelling_afrekenen % bestelling.bestel_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/bestelling-afrekenen.dtl', 'plein/site_layout.dtl'))
+
+        # betaling verwerken
+        betaalactief = BetaalActief(
+                            ontvanger=self.instellingen,
+                            payment_id='testje',
+                            payment_status='paid',
+                            log='test')
+        betaalactief.save()
+        bestelling.actief_transactie = betaalactief
+        bestelling.save(update_fields=['actief_transactie'])
+
+        # maak een transactie geschiedenis aan met een restitutie, maar toch genoeg betaald
+        BetaalTransactie(
+                payment_id='testje',
+                when=betaalactief.when,
+                beschrijving="Test beschrijving 1",
+                is_restitutie=False,
+                bedrag_euro_klant=Decimal('5'),
+                bedrag_euro_boeking=Decimal('4.75'),
+                klant_naam="Pietje Pijlsnel",
+                klant_account="1234.5678.9012.3456").save()
+
+        BetaalTransactie(
+                payment_id='testje',
+                when=betaalactief.when,
+                beschrijving="Test beschrijving 2",
+                is_restitutie=True,
+                bedrag_euro_klant=Decimal('5'),
+                bedrag_euro_boeking=Decimal('5.25'),
+                klant_naam="Pietje Pijlsnel",
+                klant_account="1234.5678.9012.3456").save()
+
+        BetaalTransactie(
+                payment_id='testje',
+                when=betaalactief.when,
+                beschrijving="Test beschrijving 3",
+                is_restitutie=False,
+                bedrag_euro_klant=Decimal('10'),
+                bedrag_euro_boeking=Decimal('9.75'),
+                klant_naam="Pietje Pijlsnel",
+                klant_account="1234.5678.9012.3456").save()
+
+        bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
+        self.verwerk_bestel_mutaties()
+
+        bestelling = Bestelling.objects.get(pk=bestelling.pk)
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
+
+        # haal de details op nu de betaling gedaan is met restitutie
+        url = self.url_bestelling_details % bestelling.bestel_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
+
+        # opnieuw de bestelling af willen rekenen met een overzicht waarin een restitutie zit
+        url = self.url_bestelling_afrekenen % bestelling.bestel_nr
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, url)
+
+    def test_nul_bedrag(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        # maak de sessie gratis
+        self.sessie.prijs_euro = Decimal('0')
+        self.sessie.save(update_fields=['prijs_euro'])
+
+        # bestel wedstrijddeelname
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        self.verwerk_bestel_mutaties()
+
+        # zet het mandje om in een bestelling
+        self.assertEqual(0, Bestelling.objects.count())
+        resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+        f1, f2 = self.verwerk_bestel_mutaties()
+        # print('f1: %s' % f1.getvalue())
+        # print('f2: %s' % f2.getvalue())
+        self.assertTrue(' wordt meteen afgerond' in f2.getvalue())
+        self.assertEqual(1, Bestelling.objects.count())
+        bestelling = Bestelling.objects.all()[0]
 
 # end of file

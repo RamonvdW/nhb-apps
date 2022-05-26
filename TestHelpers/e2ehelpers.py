@@ -827,15 +827,16 @@ class E2EHelpers(TestCase):
                     print(line)
             # for
 
-    def verwerk_bestel_mutaties(self, show_warnings=True, show_all=False):
+    def verwerk_bestel_mutaties(self, show_warnings=True, show_all=False, fail_on_error=True):
         # vraag de achtergrondtaak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
         management.call_command('bestel_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
-        err_msg = f1.getvalue()
-        if '[ERROR]' in err_msg:                        # pragma: no cover
-            self.fail(msg='Onverwachte fout van bestel_mutaties:\n' + err_msg)
+        if fail_on_error:
+            err_msg = f1.getvalue()
+            if '[ERROR]' in err_msg:                        # pragma: no cover
+                self.fail(msg='Onverwachte fout van bestel_mutaties:\n' + err_msg)
 
         if show_all:                                                            # pragma: no cover
             print(f1.getvalue())
@@ -847,5 +848,7 @@ class E2EHelpers(TestCase):
                 if line.startswith('[WARNING] '):                               # pragma: no cover
                     print(line)
             # for
+
+        return f1, f2
 
 # end of file

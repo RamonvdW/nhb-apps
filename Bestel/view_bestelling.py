@@ -198,10 +198,10 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
 
             if transactie.is_restitutie:
                 regels.append('Restitutie')
-                transacties_euro -= transactie.bedrag_euro
+                transacties_euro -= transactie.bedrag_euro_klant
             else:
                 regels.append('Ontvangen van %s' % transactie.klant_naam)
-                transacties_euro += transactie.bedrag_euro
+                transacties_euro += transactie.bedrag_euro_klant
         # for
 
         return transacties, transacties_euro
@@ -293,9 +293,9 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
             rest_euro = bestelling.totaal_euro
             for transactie in bestelling.transacties.all():
                 if transactie.is_restitutie:
-                    rest_euro += transactie.bedrag_euro
+                    rest_euro += transactie.bedrag_euro_klant
                 else:
-                    rest_euro -= transactie.bedrag_euro
+                    rest_euro -= transactie.bedrag_euro_klant
             # for
 
             url_betaling_gedaan = settings.SITE_URL + reverse('Bestel:bestelling-afrekenen',
