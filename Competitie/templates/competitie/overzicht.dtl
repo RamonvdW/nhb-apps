@@ -38,7 +38,9 @@
                 {% include 'plein/card.dtl' with title="Rayon Teams" text=text_rayon_teams icon="view_compact" url=url_rayon_teams %}
 
                 <!-- bond -->
+                {% comment %}
                 {% include 'plein/card.dtl' with title="Bond" text=text_bond icon="flag" url=url_bond %}
+                {% endcomment %}
             </div>
         </div>
 
