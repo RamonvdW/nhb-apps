@@ -12,7 +12,7 @@ cachetools==5.1.0
     # via
     #   -r requirements.txt
     #   google-auth
-certifi==2021.10.8
+certifi==2022.5.18.1
     # via
     #   -r requirements.txt
     #   requests
@@ -26,11 +26,11 @@ et-xmlfile==1.1.0
     # via
     #   -r requirements.txt
     #   openpyxl
-google-api-core==2.7.3
+google-api-core==2.8.0
     # via
     #   -r requirements.txt
     #   google-api-python-client
-google-api-python-client==2.48.0
+google-api-python-client==2.49.0
     # via -r requirements.txt
 google-auth==2.6.6
     # via
@@ -61,9 +61,9 @@ oauthlib==3.2.0
     # via
     #   -r requirements.txt
     #   requests-oauthlib
-openpyxl==3.0.9
+openpyxl==3.0.10
     # via -r requirements.txt
-protobuf==3.20.1
+protobuf==4.21.0
     # via
     #   -r requirements.txt
     #   google-api-core
