@@ -54,7 +54,8 @@ class Command(BaseCommand):
         parser.add_argument('duration', type=int,
                             choices={1, 2, 5, 7, 10, 15, 20, 30, 45, 60},
                             help="Aantal minuten actief blijven")
-        parser.add_argument('--quick', action='store_true')     # for testing
+        parser.add_argument('--quick', action='store_true')             # for testing
+        parser.add_argument('--fake-hoogste', action='store_true')      # for testing
 
     def _get_mandje(self, mutatie):
         account = mutatie.account
@@ -141,7 +142,7 @@ class Command(BaseCommand):
         mandje = self._get_mandje(mutatie)
         if mandje:                                  # pragma: no branch
             qset = mandje.producten.filter(pk=mutatie.product.pk)
-            if qset.exists():
+            if qset.exists():                       # pragma: no branch
                 # product zit nog in het mandje (anders: ignore want waarschijnlijk een dubbel verzoek)
                 product = qset[0]
 
@@ -260,10 +261,9 @@ class Command(BaseCommand):
             for bestelling in nieuwe_bestellingen:
                 if bestelling.totaal_euro < Decimal('0.001'):
                     self.stdout.write('[INFO] Bestelling pk=%s wordt meteen afgerond' % bestelling.pk)
-                    ontvangen_euro = Decimal('0')
                     for product in bestelling.producten.all():
                         if product.inschrijving:
-                            kalender_plugin_inschrijving_is_betaald(product.inschrijving, ontvangen_euro)
+                            kalender_plugin_inschrijving_is_betaald(product)
                     # for
 
                     bestelling.status = BESTELLING_STATUS_AFGEROND
@@ -281,54 +281,23 @@ class Command(BaseCommand):
         inschrijving = mutatie.inschrijving
         oude_status = inschrijving.status
 
-        self.stdout.write('[DEBUG] Inschrijving pk=%s met status="%s" afmelden voor wedstrijd' % (
-                    inschrijving.pk, INSCHRIJVING_STATUS_TO_STR[oude_status]))
+        # INSCHRIJVING_STATUS_AFGEMELD --> doe niets
+        # INSCHRIJVING_STATUS_RESERVERING_MANDJE gaat via BESTEL_MUTATIE_VERWIJDER
 
-        if oude_status != INSCHRIJVING_STATUS_AFGEMELD:
+        if oude_status == INSCHRIJVING_STATUS_RESERVERING_BESTELD:
+            # in een bestelling; nog niet (volledig) betaald
+            self.stdout.write('[INFO] Inschrijving pk=%s met status="besteld" afmelden voor wedstrijd' % inschrijving.pk)
 
-            # verwijder de inschrijving op de wedstrijd zelf
+            kalender_plugin_verwijder_reservering(self.stdout, inschrijving)
+            # FUTURE: betaling afbreken
+            # FUTURE: automatische restitutie als de betaling binnen is
+
+        elif oude_status == INSCHRIJVING_STATUS_DEFINITIEF:
+            # in een bestelling en betaald
+            self.stdout.write('[INFO] Inschrijving pk=%s met status="definitief" afmelden voor wedstrijd' % inschrijving.pk)
+
             kalender_plugin_afmelden(inschrijving)
-
-            if oude_status == INSCHRIJVING_STATUS_RESERVERING_MANDJE:
-                # haal deze uit het mandje
-                # doorloop de bestellingen (typisch 0 of 1)
-                for product in BestelProduct.objects.filter(inschrijving=inschrijving):
-                    # doorloop het mandje (typisch 0 of 1)
-                    for mandje in product.bestelmandje_set.all():
-                        # product ligt in een mandje
-                        self.stdout.write('[DEBUG] Inschrijving pk=%s in product pk=%s verwijderd uit mandje pk=%s' % (
-                                            inschrijving.pk, product.pk, mandje.pk))
-
-                        # verwijder het product uit het mandje
-                        mandje.producten.remove(product)
-
-                        # niet interessant om te bewaren, dus verwijder het hele bestelproduct
-                        product.delete()
-
-                        # kijk of er automatische kortingscodes zijn die niet meer toegepast mogen worden
-                        kalender_plugin_automatische_kortingscodes_toepassen(self.stdout, mandje)
-
-                        # bereken het totaal opnieuw
-                        mandje.bepaal_totaalprijs_opnieuw()
-                    # for
-                # for
-
-                # niet interessant om te bewaren (eventjes in het mandje, geen bestelling van gemaakt)
-                # verwijder de complete inschrijving
-                mutatie.inschrijving = None
-                inschrijving.delete()
-
-            elif oude_status == INSCHRIJVING_STATUS_RESERVERING_BESTELD:
-                # in een bestelling; moet nog betaald worden
-                # misschien is de betaling onderweg, dus niet aanraken
-                # FUTURE: betaling afbreken
-                # FUTURE: automatische restitutie als de betaling binnen is
-                pass
-
-            elif oude_status == INSCHRIJVING_STATUS_DEFINITIEF:
-                # in een bestelling en betaald
-                # FUTURE: automatisch een restitutie beginnen
-                pass
+            # FUTURE: automatisch een restitutie beginnen
 
     def _verwerk_mutatie_betaling_afgerond(self, mutatie):
         bestelling = mutatie.bestelling
@@ -368,16 +337,24 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Bestelling %s (pk=%s) heeft %s van de %s euro ontvangen' % (
                                 bestelling.bestel_nr, bestelling.pk, ontvangen_euro, bestelling.totaal_euro))
 
+            msg = "\n[%s] Bestelling heeft %s van de %s euro ontvangen" % (
+                mutatie.when, ontvangen_euro, bestelling.totaal_euro)
+            bestelling.log += msg
+            bestelling.save(update_fields=['log'])
+
             if ontvangen_euro >= bestelling.totaal_euro:
                 self.stdout.write('[INFO] Bestelling %s (pk=%s) is afgerond' % (
                                     bestelling.bestel_nr, bestelling.pk))
                 bestelling.status = BESTELLING_STATUS_AFGEROND
 
-                # TODO: ontvangen_euro verdelen over de producten
-                # for product in bestelling.producten.all():
-                #     if product.inschrijving:
-                #         kalender_plugin_inschrijving_is_betaald(product.inschrijving, ontvangen_euro)
-                # # for
+                msg = "\n[%s] Bestelling is afgerond (volledig betaald)" % mutatie.when
+                bestelling.log += msg
+                bestelling.save(update_fields=['log'])
+
+                for product in bestelling.producten.all():
+                    if product.inschrijving:
+                        kalender_plugin_inschrijving_is_betaald(product)
+                # for
         else:
             self.stdout.write('[INFO] Betaling niet gelukt voor bestelling %s (pk=%s)' % (
                                 bestelling.bestel_nr, bestelling.pk))
@@ -423,11 +400,8 @@ class Command(BaseCommand):
     def _verwerk_nieuwe_mutaties(self):
         begin = datetime.datetime.now()
 
-        try:
-            mutatie_latest = BestelMutatie.objects.latest('pk')
-        except BestelMutatie.DoesNotExist:
-            # alle mutatie records zijn verwijderd
-            return
+        mutatie_latest = BestelMutatie.objects.latest('pk')     # foutafhandeling in handle()
+
         # als hierna een extra mutatie aangemaakt wordt dan verwerken we een record
         # misschien dubbel, maar daar kunnen we tegen
 
@@ -509,6 +483,9 @@ class Command(BaseCommand):
                             + datetime.timedelta(seconds=duration))
 
         self.stdout.write('[INFO] Taak loopt tot %s' % str(self.stop_at))
+
+        if options['fake_hoogste']:
+            self._hoogste_mutatie_pk = -1
 
     def handle(self, *args, **options):
 

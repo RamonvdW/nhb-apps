@@ -165,7 +165,6 @@ KALENDER_KORTING_SOORT_TO_STR = {
 }
 
 
-
 class KalenderWedstrijdDeeluitslag(models.Model):
     """ Deel van de uitslag van een wedstrijd """
 
@@ -354,7 +353,8 @@ class KalenderInschrijving(models.Model):
     wanneer = models.DateTimeField()
 
     # status
-    status = models.CharField(max_length=2, default=INSCHRIJVING_STATUS_RESERVERING_MANDJE, choices=INSCHRIJVING_STATUS_CHOICES)
+    status = models.CharField(max_length=2, choices=INSCHRIJVING_STATUS_CHOICES,
+                              default=INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
     # voor welke wedstrijd is dit?
     wedstrijd = models.ForeignKey(KalenderWedstrijd, on_delete=models.PROTECT)

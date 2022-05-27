@@ -88,7 +88,7 @@ fi
 if [ $KEEP_DB -eq 0 ]
 then
     echo "[INFO] Checking application is free of fatal errors"
-    python3 ./manage.py check || exit $?
+    python3 ./manage.py check --tag admin --tag models || exit $?
 fi
 
 # set high performance

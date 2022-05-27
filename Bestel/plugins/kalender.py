@@ -231,11 +231,13 @@ def kalender_plugin_kortingscode_toepassen(stdout, kortingscode_str, producten):
     # for korting
 
 
-def kalender_plugin_inschrijving_is_betaald(inschrijving, ontvangen_euro):
+def kalender_plugin_inschrijving_is_betaald(product):
     """ Deze functie wordt aangeroepen als een bestelling betaald is,
         of als een bestelling niet betaald hoeft te worden (totaal bedrag nul)
     """
-    inschrijving.ontvangen_euro = ontvangen_euro
+    inschrijving = product.inschrijving
+
+    inschrijving.ontvangen_euro = product.prijs_euro - product.korting_euro
     inschrijving.status = INSCHRIJVING_STATUS_DEFINITIEF
     inschrijving.save(update_fields=['ontvangen_euro', 'status'])
 
