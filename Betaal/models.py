@@ -155,7 +155,7 @@ class BetaalMutatie(models.Model):
     url_betaling_gedaan = models.CharField(max_length=100, default='')
 
     # waar naartoe om de betaling te doen (bij de CPSP)
-    url_checkout = models.CharField(max_length=200, default='')
+    url_checkout = models.CharField(max_length=200, default='', blank=True)
 
     # BETAAL_MUTATIE_START_RESTITUTIE:
     # BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED:

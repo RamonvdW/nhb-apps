@@ -30,6 +30,8 @@ class BestellingAdmin(admin.ModelAdmin):
 
     auto_complete = ('account', 'ontvanger', 'actief_mutatie', 'actief_transactie')
 
+    filter_horizontal = ('producten',)
+
     fieldsets = (
         ('Koper',
             {'fields': ('bestel_nr',
@@ -38,12 +40,15 @@ class BestellingAdmin(admin.ModelAdmin):
                         'totaal_euro')
              }),
         ('Transactie',
-            {'fields': ('ontvanger',
+            {'fields': ('status',
+                        'ontvanger',
                         'actief_mutatie',           # BetaalMutatie
                         'actief_transactie',        # BetaalActief
                         'log')
              }),
-        ('Niet wijzigen!', {'fields': ('producten', 'transacties')}),
+        ('Niet wijzigen!',
+            {'fields': ('producten',
+                        'transacties')}),
     )
 
 
