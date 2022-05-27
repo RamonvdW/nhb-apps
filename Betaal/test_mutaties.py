@@ -9,14 +9,12 @@ from django.core import management
 from django.conf import settings
 from Betaal.models import BetaalMutatie, BetaalActief, BetaalTransactie, BetaalInstellingenVereniging
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst, betaal_mutatieverzoek_payment_status_changed
-from Bestel.models import Bestelling
+from Bestel.models import Bestelling, BestelMutatie
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from TestHelpers.e2ehelpers import E2EHelpers
 from decimal import Decimal
-from mollie.api.client import Client, RequestSetupError, RequestError
-from mollie.api.error import ResponseError, ResponseHandlingError
-from mollie.api.objects.payment import Payment
+from mollie.api.client import Client
 import io
 
 

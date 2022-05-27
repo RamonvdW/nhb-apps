@@ -784,4 +784,6 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_AFGEMELD)
 
+# TODO: gesimuleerde betaling doen
+
 # end of file
