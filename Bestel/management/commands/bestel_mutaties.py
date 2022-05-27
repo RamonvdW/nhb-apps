@@ -9,8 +9,8 @@
 """
 
 from django.conf import settings
-from django.db.models import F
 from django.core.management.base import BaseCommand
+from django.db.utils import DataError, OperationalError, IntegrityError
 from django.db import transaction
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Bestel.models import (BestelProduct, BestelMandje, Bestelling,
@@ -27,7 +27,6 @@ from Kalender.models import (INSCHRIJVING_STATUS_RESERVERING_BESTELD, INSCHRIJVI
                              INSCHRIJVING_STATUS_TO_STR)
 from Overig.background_sync import BackgroundSync
 from decimal import Decimal
-import django.db.utils
 import traceback
 import datetime
 import sys
@@ -494,7 +493,7 @@ class Command(BaseCommand):
         # vang generieke fouten af
         try:
             self._monitor_nieuwe_mutaties()
-        except (django.db.utils.DataError, django.db.utils.IntegrityError) as exc:        # pragma: no cover
+        except (DataError, OperationalError, IntegrityError) as exc:  # pragma: no cover
             _, _, tb = sys.exc_info()
             lst = traceback.format_tb(tb)
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))

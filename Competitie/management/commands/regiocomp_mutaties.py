@@ -11,6 +11,7 @@
 from django.conf import settings
 from django.utils import timezone
 from django.db.models import F
+from django.db.utils import DataError, OperationalError, IntegrityError
 from django.core.management.base import BaseCommand
 from BasisTypen.models import ORGANISATIE_NHB
 from BasisTypen.operations import get_organisatie_teamtypen
@@ -29,7 +30,6 @@ from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
 from Taken.taken import maak_taak
-import django.db.utils
 import traceback
 import datetime
 import sys
@@ -1244,7 +1244,7 @@ class Command(BaseCommand):
         # vang generieke fouten af
         try:
             self._monitor_nieuwe_mutaties()
-        except django.db.utils.DataError as exc:        # pragma: no cover
+        except (DataError, OperationalError, IntegrityError) as exc:  # pragma: no cover
             _, _, tb = sys.exc_info()
             lst = traceback.format_tb(tb)
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))

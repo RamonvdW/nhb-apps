@@ -9,7 +9,7 @@
 
 from django.core.management.base import BaseCommand
 from django.db.models import F, Q
-import django.db.utils
+from django.db.utils import DataError, OperationalError, IntegrityError
 from Competitie.models import (CompetitieTaken,
                                LAAG_REGIO, Competitie, CompetitieIndivKlasse, DeelCompetitie, DeelcompetitieRonde,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
@@ -490,7 +490,7 @@ class Command(BaseCommand):
         # vang generieke fouten af
         try:
             self._monitor_nieuwe_scores()
-        except django.db.utils.DataError as exc:        # pragma: no cover
+        except (DataError, OperationalError, IntegrityError) as exc:  # pragma: no cover
             _, _, tb = sys.exc_info()
             lst = traceback.format_tb(tb)
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))

@@ -11,7 +11,7 @@
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
-from django.db.models import F
+from django.db.utils import DataError, OperationalError, IntegrityError
 from django.core.management.base import BaseCommand
 from Bestel.mutaties import bestel_mutatieverzoek_betaling_afgerond
 from Betaal.models import (BetaalMutatie, BetaalActief, BetaalInstellingenVereniging, BetaalTransactie,
@@ -24,7 +24,6 @@ from mollie.api.client import Client, RequestSetupError, RequestError
 from mollie.api.error import ResponseError, ResponseHandlingError
 from mollie.api.objects.payment import Payment
 from decimal import Decimal, DecimalException
-import django.db.utils
 import traceback
 import datetime
 import json
@@ -209,7 +208,9 @@ class Command(BaseCommand):
                 klant_naam=klant_naam,
                 klant_account=klant_account).save()
 
-        # TODO: betaal transactie koppelen aan de bestelling
+        # bestel_mutaties vind de transacties die bij een bestelling horen d.m.v. het payment_id
+        # en legt de koppeling aan Bestelling.transacties
+        return True
 
     def _verwerk_mutatie_payment_status_changed(self, mutatie):
         """ Een voor ons bekende transactie is van status gewijzigd
@@ -418,7 +419,7 @@ class Command(BaseCommand):
         # vang generieke fouten af
         try:
             self._monitor_nieuwe_mutaties()
-        except django.db.utils.DataError as exc:        # pragma: no cover
+        except (DataError, OperationalError, IntegrityError) as exc:  # pragma: no cover
             _, _, tb = sys.exc_info()
             lst = traceback.format_tb(tb)
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
