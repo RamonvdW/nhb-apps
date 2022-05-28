@@ -353,11 +353,11 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
                         snel == '1')
 
         elif bestelling.status == BESTELLING_STATUS_WACHT_OP_BETALING:
-            if bestelling.betaal_actief and bestelling.betaal_actief.checkout_url:
+            if bestelling.betaal_mutatie.url_checkout:
                 # de checkout url is beschikbaar
                 # stuur de bezoeker daar heen
                 out['status'] = 'betaal'
-                out['checkout_url'] = bestelling.betaal_actief.checkout_url
+                out['checkout_url'] = bestelling.betaal_mutatie.url_checkout
             else:
                 out['status'] = 'error'
 
