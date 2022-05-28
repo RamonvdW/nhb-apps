@@ -26,6 +26,7 @@ MOLLIE_API_KEY_MAXLENGTH = 50           # geen limiet gevonden in docs
 BETAAL_KLANT_NAAM_MAXLENGTH = 100
 BETAAL_KLANT_ACCOUNT_MAXLENGTH = 100    # standaard: 11 (BIC) + 18 (IBAN), maar flexibel genoeg voor varianten
 
+
 class BetaalInstellingenVereniging(models.Model):
 
     # bij welke vereniging hoort deze informatie?

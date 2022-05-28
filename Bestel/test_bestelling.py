@@ -148,17 +148,6 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         mandje, is_created = BestelMandje.objects.get_or_create(account=account)
         self.mandje = mandje
 
-        # # TODO: misschien beter om via de achtergrondtaak te laten lopen
-        # # geen koppeling aan een mandje
-        # product = BestelProduct(
-        #             inschrijving=self.inschrijving,
-        #             prijs_euro=Decimal(10.0))
-        # product.save()
-        # self.product1 = product
-        #
-        # # stop het product in het mandje
-        # mandje.producten.add(product)
-
     def test_anon(self):
         self.client.logout()
 
@@ -355,8 +344,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(3, BestelMutatie.objects.count())
 
         # koppel transactie aan de bestelling, zodat deze gevonden kan worden
-        bestelling.actief_transactie = betaalactief
-        bestelling.save(update_fields=['actief_transactie'])
+        bestelling.betaal_actief = betaalactief
+        bestelling.save(update_fields=['betaal_actief'])
 
         # betaling mislukt
         self.assertEqual(bestelling.status, BESTELLING_STATUS_WACHT_OP_BETALING)
@@ -367,7 +356,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_WACHT_OP_BETALING)
-        self.assertIsNone(bestelling.actief_transactie)
+        self.assertIsNone(bestelling.betaal_actief)
 
         # betaling verwerken
         betaalactief = BetaalActief(
@@ -376,8 +365,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                             payment_status='paid',
                             log='test')
         betaalactief.save()
-        bestelling.actief_transactie = betaalactief
-        bestelling.save(update_fields=['actief_transactie'])
+        bestelling.betaal_actief = betaalactief
+        bestelling.save(update_fields=['betaal_actief'])
 
         # dubbel verzoek heeft geen effect
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
@@ -417,8 +406,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         # transactie met bestelling in verkeerde status
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
-        bestelling.actief_transactie = betaalactief
-        bestelling.save(update_fields=['actief_transactie'])
+        bestelling.betaal_actief = betaalactief
+        bestelling.save(update_fields=['betaal_actief'])
 
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
         f1, f2 = self.verwerk_bestel_mutaties(show_warnings=False)
@@ -456,8 +445,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         betaalactief.save()
 
         # koppel transactie aan de bestelling, zodat deze gevonden kan worden
-        bestelling.actief_transactie = betaalactief
-        bestelling.save(update_fields=['actief_transactie'])
+        bestelling.betaal_actief = betaalactief
+        bestelling.save(update_fields=['betaal_actief'])
 
         # deze betaling is 1 cent te weinig
         BetaalTransactie(
@@ -479,7 +468,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_WACHT_OP_BETALING)
-        self.assertIsNone(bestelling.actief_transactie)
+        self.assertIsNone(bestelling.betaal_actief)
 
     def test_restitutie(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -511,8 +500,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                             payment_status='paid',
                             log='test')
         betaalactief.save()
-        bestelling.actief_transactie = betaalactief
-        bestelling.save(update_fields=['actief_transactie'])
+        bestelling.betaal_actief = betaalactief
+        bestelling.save(update_fields=['betaal_actief'])
 
         # maak een transactie geschiedenis aan met een restitutie, maar toch genoeg betaald
         BetaalTransactie(
@@ -688,8 +677,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                             payment_status='paid',
                             log='test')
         betaalactief.save()
-        bestelling.actief_transactie = betaalactief
-        bestelling.save(update_fields=['actief_transactie'])
+        bestelling.betaal_actief = betaalactief
+        bestelling.save(update_fields=['betaal_actief'])
         BetaalTransactie(
                 payment_id='testje',
                 when=betaalactief.when,
@@ -753,8 +742,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                             payment_status='paid',
                             log='test')
         betaalactief.save()
-        bestelling.actief_transactie = betaalactief
-        bestelling.save(update_fields=['actief_transactie'])
+        bestelling.betaal_actief = betaalactief
+        bestelling.save(update_fields=['betaal_actief'])
         BetaalTransactie(
                 payment_id='testje',
                 when=betaalactief.when,
@@ -783,7 +772,5 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
         inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_AFGEMELD)
-
-# TODO: gesimuleerde betaling doen
 
 # end of file

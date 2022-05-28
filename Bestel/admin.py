@@ -28,7 +28,7 @@ class BestellingAdmin(admin.ModelAdmin):
 
     ordering = ('aangemaakt',)
 
-    auto_complete = ('account', 'ontvanger', 'actief_mutatie', 'actief_transactie')
+    auto_complete = ('account', 'ontvanger', 'betaal_mutatie', 'betaal_actief')
 
     filter_horizontal = ('producten',)
 
@@ -42,8 +42,8 @@ class BestellingAdmin(admin.ModelAdmin):
         ('Transactie',
             {'fields': ('status',
                         'ontvanger',
-                        'actief_mutatie',           # BetaalMutatie
-                        'actief_transactie',        # BetaalActief
+                        'betaal_mutatie',       # BetaalMutatie
+                        'betaal_actief',        # BetaalActief
                         'log')
              }),
         ('Niet wijzigen!',

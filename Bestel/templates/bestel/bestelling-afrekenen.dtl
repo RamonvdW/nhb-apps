@@ -43,28 +43,28 @@
                     <td>&euro;&nbsp;{{ bestelling.totaal_euro }}</td>
                 </tr>
 
-                {% if bestelling.actief_transactie %}
+                {% if bestelling.betaal_actief %}
                     <tr>
                         <th>Payment ID</th>
-                        <td>{{ bestelling.actief_transactie.payment_id }}</td>
+                        <td>{{ bestelling.betaal_actief.payment_id }}</td>
                     </tr>
 
                     <tr>
                         <th>Payment status</th>
-                        <td>{{ bestelling.actief_transactie.payment_status }}</td>
+                        <td>{{ bestelling.betaal_actief.payment_status }}</td>
                     </tr>
                 {% endif %}
 
-                {% if bestelling.actief_mutatie %}
+                {% if bestelling.betaal_mutatie %}
                     <tr>
                         <th>Beschrijving</th>
-                        <td>{{ bestelling.actief_mutatie.beschrijving }}</td>
+                        <td>{{ bestelling.betaal_mutatie.beschrijving }}</td>
                     </tr>
                     <tr>
                         <th>Checkout</th>
                         <td>
-                            {% if bestelling.actief_mutatie.url_checkout %}
-                                <a class="btn-nhb-rood" href="{{ bestelling.actief_mutatie.url_checkout }}">Nu betalen</a>
+                            {% if bestelling.betaal_mutatie.url_checkout %}
+                                <a class="btn-nhb-rood" href="{{ bestelling.betaal_mutatie.url_checkout }}">Nu betalen</a>
                             {% else %}
                                 <i>Nog niet beschikbaar</i>
                             {% endif %}

@@ -143,7 +143,7 @@ def bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt, snel=False):
 
     # zoek de bestelling erbij
     try:
-        bestelling = Bestelling.objects.get(actief_transactie=betaalactief)
+        bestelling = Bestelling.objects.get(betaal_actief=betaalactief)
     except Bestelling.DoesNotExist:
         # bestelling niet kunnen vinden
         pass

@@ -276,12 +276,12 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
         snel = str(request.POST.get('snel', ''))[:1]
 
         # zoek de betaling erbij
-        if bestelling.actief_transactie:
+        if bestelling.betaal_actief:
             # betaling is al opgestart; transactie is al actief, dus ga daar mee door
             # TODO: gebruiker naar de betaal-status pagina sturen en van daaruit door naar de checkout URL
             print('POST: doorgaan met actieve transactie nog niet gemaakt')
 
-        elif bestelling.actief_mutatie:
+        elif bestelling.betaal_mutatie:
             # betaling is al opgestart; we wachten op de achtergrond taak
             # TODO: gebruiker naar de betaal-status pagina sturen
             print('POST: doorgaan met actieve mutatie is nog niet gemaakt')

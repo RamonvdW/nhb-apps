@@ -161,9 +161,10 @@ class Bestelling(models.Model):
     status = models.CharField(max_length=1, default=BESTELLING_STATUS_NIEUW, choices=BESTELLING_STATUS_CHOICES)
 
     # de opgestarte betaling/restitutie wordt hier bijgehouden
-    # begint als een mutatie, daarin zet de achtergrond taak een payment_id en daarmee kunnen we de transactie vinden
-    actief_mutatie = models.ForeignKey(BetaalMutatie, on_delete=models.SET_NULL, null=True, blank=True)
-    actief_transactie = models.ForeignKey(BetaalActief, on_delete=models.SET_NULL, null=True, blank=True)
+    # de BetaalMutatie wordt opgeslagen zodat deze is aangemaakt. Daarin zet de achtergrond taak een payment_id.
+    # daarmee kunnen we het BetaalActief record vinden met de status van de betaling en de log
+    betaal_mutatie = models.ForeignKey(BetaalMutatie, on_delete=models.SET_NULL, null=True, blank=True)
+    betaal_actief = models.ForeignKey(BetaalActief, on_delete=models.SET_NULL, null=True, blank=True)
 
     # de afgeronde betalingen: ontvangst en restitutie
     transacties = models.ManyToManyField(BetaalTransactie, blank=True)

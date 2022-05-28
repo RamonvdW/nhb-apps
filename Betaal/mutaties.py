@@ -53,8 +53,8 @@ def betaal_mutatieverzoek_start_ontvangst(bestelling, beschrijving, bedrag_euro,
     mutatie.save()
 
     # voorkom dat we nog een keer hetzelfde pad doorlopen
-    bestelling.actief_mutatie = mutatie
-    bestelling.save(update_fields=['actief_mutatie'])
+    bestelling.betaal_mutatie = mutatie
+    bestelling.save(update_fields=['betaal_mutatie'])
 
     if is_created:                                      # pragma: no branch
         # wacht kort op de achtergrondtaak

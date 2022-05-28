@@ -308,7 +308,7 @@ class Command(BaseCommand):
                                 bestelling.bestel_nr, bestelling.pk, BESTELLING_STATUS2STR[bestelling.status]))
             return
 
-        actief = bestelling.actief_transactie
+        actief = bestelling.betaal_actief
         if not actief:
             self.stdout.write('[WARNING] Bestelling %s (pk=%s) heeft geen actieve transactie' % (
                                 bestelling.bestel_nr, bestelling.pk))
@@ -359,8 +359,8 @@ class Command(BaseCommand):
                                 bestelling.bestel_nr, bestelling.pk))
             # laat status staan op "wacht op betaling"
 
-        bestelling.actief_transactie = None
-        bestelling.save(update_fields=['actief_transactie', 'status'])
+        bestelling.betaal_actief = None
+        bestelling.save(update_fields=['betaal_actief', 'status'])
 
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.code
