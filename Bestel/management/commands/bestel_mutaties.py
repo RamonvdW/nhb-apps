@@ -409,11 +409,12 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] vorige hoogste BestelMutatie pk is %s' % self._hoogste_mutatie_pk)
             qset = (BestelMutatie
                     .objects
+                    .exclude(is_verwerkt=True)
                     .filter(pk__gt=self._hoogste_mutatie_pk))
         else:
             qset = (BestelMutatie
                     .objects
-                    .all())         # deferred
+                    .exclude(is_verwerkt=True))             # deferred
 
         mutatie_pks = qset.values_list('pk', flat=True)     # deferred
 
@@ -421,11 +422,15 @@ class Command(BaseCommand):
 
         did_useful_work = False
         for pk in mutatie_pks:
-            # LET OP: we halen de records hier 1 voor 1 op
-            #         zodat we verse informatie hebben inclusief de vorige mutatie
-            #         en zodat we 1 plek hebben voor select/prefetch
+            # we halen de records hier 1 voor 1 op
+            # zodat we verse informatie hebben inclusief de vorige mutatie
+            # en zodat we 1 plek hebben voor select/prefetch
             mutatie = (BestelMutatie
-                       .objects             # geen select_related nodig
+                       .objects
+                       .select_related('account',
+                                       'inschrijving',
+                                       'product',
+                                       'bestelling')
                        .get(pk=pk))
 
             if not mutatie.is_verwerkt:

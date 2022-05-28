@@ -15,7 +15,10 @@
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import datetime
+import requests     # voor de callback
 import json
+import time
+
 
 MY_PORT = 8125
 
@@ -184,6 +187,10 @@ class MyServer(BaseHTTPRequestHandler):
         else:
             api_key = None
 
+        do_post_payment_change = False
+        payment_id = '1234AbcdEFGH'
+        webhook_url = ''
+
         if self.path.startswith('/v2/payments'):
             data = self._read_json_body()
             # print('[DEBUG] {websim} POST data: %s' % repr(data))
@@ -199,8 +206,6 @@ class MyServer(BaseHTTPRequestHandler):
                 self.send_response(400)     # 400 = bad request
             else:
                 # print('[DEBUG] {websim} POST: description=%s' % description)
-
-                payment_id = '1234AbcdEFGH'
 
                 payments[payment_id] = resp = dict()
                 resp['resource'] = 'payment'
@@ -227,6 +232,10 @@ class MyServer(BaseHTTPRequestHandler):
                 test_code = 0
                 if description.startswith('Test betaling '):
                     test_code = description[14:]
+                    if test_code[-1] == '+':
+                        test_code = test_code[:-1]
+                        if webhook_url:
+                            do_post_payment_change = True
 
                 if test_code in ('421', '426', '427', '428', '429'):
                     resp['method'] = 'ideal'
@@ -264,6 +273,14 @@ class MyServer(BaseHTTPRequestHandler):
         # internal server error
         self.send_response(500)
         self.end_headers()
+
+        # TODO: onderstaande werkt niet tijdens django testrunner omdat er geen http server aan het luisteren is
+        if do_post_payment_change:
+            # wait a little bit, then send the payment change
+            print('[DEBUG] Generating payment callback to %s' % repr(webhook_url))
+            time.sleep(0.5)     # even wachten voordat we er voor gaan
+            r = requests.post(webhook_url, data={'payment_id': payment_id})
+            print('[DEBUG] Callback POST results:', r.status_code, r.reason)
 
 
 def main():

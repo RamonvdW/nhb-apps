@@ -55,11 +55,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         if betaal_api is None:
             betaal_api = self.url_websim_api
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
-        with override_settings(BETAAL_API=betaal_api):
-            management.call_command('betaal_mutaties', '1', '--quick', stderr=f1, stdout=f2)
-
+        f1, f2 = self.verwerk_betaal_mutaties(betaal_api)
         if debug:
             print('f1: %s' % f1.getvalue())
             print('f2: %s' % f2.getvalue())
@@ -507,17 +503,25 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
                             totaal_euro=Decimal('99.01'))
         bestelling.save()
 
+        self.assertEqual(0, BestelMutatie.objects.count())
+
         # maak de payment met status=paid en method=ideal
         payment_id = self._prep_mollie_websim(421)
         actief = BetaalActief(
-            payment_id=payment_id,
-            ontvanger=self.instellingen,
-            log='testje')
+                        payment_id=payment_id,
+                        ontvanger=self.instellingen,
+                        log='testje')
         actief.save()
+        bestelling.betaal_actief = actief
+        bestelling.save(update_fields=['betaal_actief'])
         betaal_mutatieverzoek_payment_status_changed(payment_id)
         f1, f2 = self._run_achtergrondtaak()
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         actief = BetaalActief.objects.get(pk=actief.pk)
         self.assertTrue('Betaling is voldaan' in actief.log)
+
+        # controleer dat een BestelMutatie aangemaakt is
+        self.assertEqual(1, BestelMutatie.objects.count())
 
     def test_paid_creditcard(self):
         bestelling = Bestelling(

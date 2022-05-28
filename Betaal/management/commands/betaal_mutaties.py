@@ -140,6 +140,14 @@ class Command(BaseCommand):
                     actief.log += '\n'
                     actief.save()
 
+                    try:
+                        bestelling = mutatie.bestelling_set.all()[0]
+                    except KeyError:        # TODO: correct exceptie invullen
+                        pass
+                    else:
+                        bestelling.betaal_actief = actief
+                        bestelling.save(update_fields=['betaal_actief'])
+
     def _verwerk_mutatie_start_restitutie(self, mutatie):
         pass
 
@@ -350,11 +358,12 @@ class Command(BaseCommand):
 
         did_useful_work = False
         for pk in mutatie_pks:
-            # LET OP: we halen de records hier 1 voor 1 op
-            #         zodat we verse informatie hebben inclusief de vorige mutatie
-            #         en zodat we 1 plek hebben voor select/prefetch
+            # we halen de records hier 1 voor 1 op
+            # zodat we verse informatie hebben inclusief de vorige mutatie
+            # en zodat we 1 plek hebben voor select/prefetch
             mutatie = (BetaalMutatie
-                       .objects             # geen select_related nodig
+                       .objects
+                       .select_related('ontvanger')
                        .get(pk=pk))
 
             if not mutatie.is_verwerkt:

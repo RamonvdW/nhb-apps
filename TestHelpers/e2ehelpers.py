@@ -7,7 +7,7 @@
 from django.contrib import auth
 from django.core import management
 from django.conf import settings
-from django.test import TestCase, Client
+from django.test import TestCase, Client, override_settings
 from django.db import connection
 from Account.models import Account
 from Account.operations import account_create
@@ -848,6 +848,16 @@ class E2EHelpers(TestCase):
                 if line.startswith('[WARNING] '):                               # pragma: no cover
                     print(line)
             # for
+
+        return f1, f2
+
+    @staticmethod
+    def verwerk_betaal_mutaties(betaal_api):
+        # vraag de achtergrondtaak om de mutaties te verwerken
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with override_settings(BETAAL_API=betaal_api):
+            management.call_command('betaal_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
         return f1, f2
 
