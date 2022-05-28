@@ -17,7 +17,7 @@ from Bestel.models import (BestelProduct, BestelMandje, Bestelling,
                            BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING,
                            BestelHoogsteBestelNr, BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK, BESTELLING_STATUS2STR,
                            BestelMutatie, BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN,
-                           BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_KORTINGSCODE, BESTEL_MUTATIE_MAAK_BESTELLING,
+                           BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_KORTINGSCODE, BESTEL_MUTATIE_MAAK_BESTELLINGEN,
                            BESTEL_MUTATIE_BETALING_AFGEROND, BESTEL_MUTATIE_RESTITUTIE_UITBETAALD)
 from Bestel.plugins.kalender import (kalender_plugin_automatische_kortingscodes_toepassen, kalender_plugin_inschrijven,
                                      kalender_plugin_verwijder_reservering, kalender_plugin_kortingscode_toepassen,
@@ -276,9 +276,8 @@ class Command(BaseCommand):
                     bestelling.status = BESTELLING_STATUS_AFGEROND
                     bestelling.save(update_fields=['status'])
                 else:
-                    # wijzig de status in 'wacht op betaling'
-                    bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
-                    bestelling.save(update_fields=['status'])
+                    # laat de status op BESTELLING_STATUS_NIEUW staan totdat de betaling opgestart is
+                    pass
             # for
 
             # zorg dat het totaal van het mandje ook weer klopt
@@ -385,7 +384,7 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Verwerk mutatie %s: kortingscode toepassen' % mutatie.pk)
             self._verwerk_mutatie_kortingscode(mutatie)
 
-        elif code == BESTEL_MUTATIE_MAAK_BESTELLING:
+        elif code == BESTEL_MUTATIE_MAAK_BESTELLINGEN:
             self.stdout.write('[INFO] Verwerk mutatie %s: mandje omzetten in bestelling(en)' % mutatie.pk)
             self._verwerk_mutatie_maak_bestelling(mutatie)
 

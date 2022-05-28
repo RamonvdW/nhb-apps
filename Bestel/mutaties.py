@@ -6,7 +6,7 @@
 
 from django.conf import settings
 from Bestel.models import (BestelMutatie, Bestelling,
-                           BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_MAAK_BESTELLING,
+                           BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_MAAK_BESTELLINGEN,
                            BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_KORTINGSCODE, BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN,
                            BESTEL_MUTATIE_BETALING_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING)
 from Overig.background_sync import BackgroundSync
@@ -108,7 +108,7 @@ def bestel_mutatieverzoek_maak_bestellingen(account, snel=False):
     # zet dit verzoek door naar het mutaties process
     # voorkom duplicates (niet 100%)
     mutatie, is_created = BestelMutatie.objects.get_or_create(
-                                    code=BESTEL_MUTATIE_MAAK_BESTELLING,
+                                    code=BESTEL_MUTATIE_MAAK_BESTELLINGEN,
                                     account=account,
                                     is_verwerkt=False)
     mutatie.save()

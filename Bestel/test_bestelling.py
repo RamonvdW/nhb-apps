@@ -10,7 +10,7 @@ from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType
 from Bestel.models import (BestelMandje, BestelMutatie, Bestelling,
-                           BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING)
+                           BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING, BESTELLING_STATUS_NIEUW)
 from Bestel.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd, bestel_mutatieverzoek_betaling_afgerond,
                              bestel_mutatieverzoek_kortingscode_toepassen, bestel_mutatieverzoek_afmelden_wedstrijd)
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie
@@ -36,6 +36,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
     url_bestellingen_overzicht = '/bestel/overzicht/'
     url_bestelling_details = '/bestel/details/%s/'          # bestel_nr
     url_bestelling_afrekenen = '/bestel/afrekenen/%s/'      # bestel_nr
+    url_check_status = '/bestel/check-status/%s/'           # bestel_nr
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -312,6 +313,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
         bestelling = Bestelling.objects.all()[0]
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         url = self.url_bestelling_afrekenen % bestelling.bestel_nr
         with self.assert_max_queries(20):
@@ -345,10 +347,10 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         # koppel transactie aan de bestelling, zodat deze gevonden kan worden
         bestelling.betaal_actief = betaalactief
-        bestelling.save(update_fields=['betaal_actief'])
+        bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
+        bestelling.save(update_fields=['betaal_actief', 'status'])
 
         # betaling mislukt
-        self.assertEqual(bestelling.status, BESTELLING_STATUS_WACHT_OP_BETALING)
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=False, snel=True)
         self.assertEqual(4, BestelMutatie.objects.count())
         f1, f2 = self.verwerk_bestel_mutaties()
@@ -396,13 +398,13 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         andere = Bestelling(bestel_nr=1234, account=account)
         andere.save()
 
-        resp = self.client.post(self.url_bestelling_afrekenen % andere.bestel_nr)
+        resp = self.client.post(self.url_check_status % andere.bestel_nr)
         self.assert404(resp, 'Niet gevonden')       # want verkeerd account
 
-        url = self.url_bestelling_afrekenen % bestelling.bestel_nr
+        url = self.url_check_status % bestelling.bestel_nr
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, url)
+        self.assert404(resp, "Onverwachte status")
 
         # transactie met bestelling in verkeerde status
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
@@ -446,7 +448,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
         # koppel transactie aan de bestelling, zodat deze gevonden kan worden
         bestelling.betaal_actief = betaalactief
-        bestelling.save(update_fields=['betaal_actief'])
+        bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
+        bestelling.save(update_fields=['betaal_actief', 'status'])
 
         # deze betaling is 1 cent te weinig
         BetaalTransactie(
@@ -501,7 +504,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                             log='test')
         betaalactief.save()
         bestelling.betaal_actief = betaalactief
-        bestelling.save(update_fields=['betaal_actief'])
+        bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
+        bestelling.save(update_fields=['betaal_actief', 'status'])
 
         # maak een transactie geschiedenis aan met een restitutie, maar toch genoeg betaald
         BetaalTransactie(
@@ -548,11 +552,11 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
 
-        # opnieuw de bestelling af willen rekenen met een overzicht waarin een restitutie zit
-        url = self.url_bestelling_afrekenen % bestelling.bestel_nr
+        # opnieuw de bestelling af willen rekenen met een bestelling waar een restitutie in zit
+        url = self.url_check_status % bestelling.bestel_nr
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, url)
+        self.assert404(resp, 'Onverwachte status')
 
     def test_nul_bedrag(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -622,7 +626,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
         bestelling = Bestelling.objects.all()[0]
-        self.assertEqual(bestelling.status, BESTELLING_STATUS_WACHT_OP_BETALING)
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_BESTELD)
@@ -664,7 +668,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
         bestelling = Bestelling.objects.all()[0]
-        self.assertEqual(bestelling.status, BESTELLING_STATUS_WACHT_OP_BETALING)
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_BESTELD)
@@ -677,8 +681,9 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                             payment_status='paid',
                             log='test')
         betaalactief.save()
+        bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
         bestelling.betaal_actief = betaalactief
-        bestelling.save(update_fields=['betaal_actief'])
+        bestelling.save(update_fields=['betaal_actief', 'status'])
         BetaalTransactie(
                 payment_id='testje',
                 when=betaalactief.when,
@@ -729,7 +734,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
         self.assertEqual(1, Bestelling.objects.count())
         bestelling = Bestelling.objects.all()[0]
-        self.assertEqual(bestelling.status, BESTELLING_STATUS_WACHT_OP_BETALING)
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
         inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_BESTELD)
@@ -743,7 +748,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                             log='test')
         betaalactief.save()
         bestelling.betaal_actief = betaalactief
-        bestelling.save(update_fields=['betaal_actief'])
+        bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
+        bestelling.save(update_fields=['betaal_actief','status'])
         BetaalTransactie(
                 payment_id='testje',
                 when=betaalactief.when,
@@ -772,5 +778,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
         inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_AFGEMELD)
+
+    def test_check_status(self):
+        pass
 
 # end of file

@@ -36,7 +36,7 @@ BESTELLING_STATUS2STR = {
 BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN = 1        # inschrijven op wedstrijd
 BESTEL_MUTATIE_VERWIJDER = 2                    # product verwijderen uit mandje
 BESTEL_MUTATIE_KORTINGSCODE = 3                 # kortingcode toepassen op mandje
-BESTEL_MUTATIE_MAAK_BESTELLING = 4              # mandje omzetten in bestelling(en)
+BESTEL_MUTATIE_MAAK_BESTELLINGEN = 4            # mandje omzetten in bestelling(en)
 BESTEL_MUTATIE_BETALING_AFGEROND = 5            # betaling is afgerond (gelukt of mislukt)
 BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN = 6           # afmelden (na betaling)
 BESTEL_MUTATIE_RESTITUTIE_UITBETAALD = 7        # restitutie uitbetaald
@@ -45,7 +45,7 @@ BESTEL_MUTATIE_TO_STR = {
     BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN: "Inschrijven op wedstrijd",
     BESTEL_MUTATIE_VERWIJDER: "Product verwijderen uit mandje",
     BESTEL_MUTATIE_KORTINGSCODE: "Kortingscode toepassen op mandje",
-    BESTEL_MUTATIE_MAAK_BESTELLING: "Mandje omzetten in bestelling",
+    BESTEL_MUTATIE_MAAK_BESTELLINGEN: "Mandje omzetten in bestelling(en)",
     BESTEL_MUTATIE_BETALING_AFGEROND: "Betaling afgerond",
     BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN: "Afmelden voor wedstrijd",
     BESTEL_MUTATIE_RESTITUTIE_UITBETAALD: "Restitutie uitbetaald",

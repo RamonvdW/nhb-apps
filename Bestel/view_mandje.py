@@ -183,6 +183,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         context['bevat_fout'] = bevat_fout
         context['aantal_betalingen'] = len(ontvanger2product_pks.keys())
         context['url_code_toevoegen'] = reverse('Bestel:mandje-code-toevoegen')
+        context['url_voorwaarden'] = settings.VERKOOP_VOORWAARDEN_URL
 
         if mandje:
             context['toon_kortingscode_invoer'] = (mandje.totaal_euro > 0)
