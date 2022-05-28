@@ -179,7 +179,17 @@ class KalenderDetailsSporterView(UserPassesTestMixin, TemplateView):
             inschrijving.status_str = INSCHRIJVING_STATUS_TO_SHORT_STR[inschrijving.status]
 
             if inschrijving.status != INSCHRIJVING_STATUS_AFGEMELD:
-                inschrijving.url_afmelden = reverse('Kalender:afmelden', kwargs={'inschrijving_pk': inschrijving.pk})
+
+                mag_afmelden = True
+                if self.rol_nu != Rollen.ROL_BB:
+                    # controleer dat dit een inschrijving is op een wedstrijd van de vereniging
+                    ver = self.functie_nu.nhb_ver
+                    if inschrijving.wedstrijd.organiserende_vereniging != ver:
+                        mag_afmelden = False
+
+                if mag_afmelden:
+                    inschrijving.url_afmelden = reverse('Kalender:afmelden',
+                                                        kwargs={'inschrijving_pk': inschrijving.pk})
 
             if inschrijving.gebruikte_code:
                 inschrijving.korting_str = '%s%%' % inschrijving.gebruikte_code.percentage
@@ -230,8 +240,9 @@ class AfmeldenView(UserPassesTestMixin, View):
         snel = str(request.POST.get('snel', ''))[:1]
 
         if inschrijving.status == INSCHRIJVING_STATUS_RESERVERING_MANDJE:
-            product = inschrijving.bestelproduct_set.all()[0]
-            bestel_mutatieverzoek_verwijder_product_uit_mandje(inschrijving.koper, product, snel == '1')
+            if inschrijving.bestelproduct_set.count() > 0:
+                product = inschrijving.bestelproduct_set.all()[0]
+                bestel_mutatieverzoek_verwijder_product_uit_mandje(inschrijving.koper, product, snel == '1')
         else:
             bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel == '1')
 
