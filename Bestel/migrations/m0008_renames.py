@@ -20,12 +20,12 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RenameField(
             model_name='bestelling',
-            old_name='betaal_actief',
+            old_name='actief_transactie',
             new_name='betaal_actief',
         ),
         migrations.RenameField(
             model_name='bestelling',
-            old_name='betaal_mutatie',
+            old_name='actief_mutatie',
             new_name='betaal_mutatie',
         ),
     ]
