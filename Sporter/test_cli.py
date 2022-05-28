@@ -7,6 +7,7 @@
 from django.test import TestCase
 from django.core import management
 from .models import Sporter
+from NhbStructuur.models import NhbVereniging, NhbRegio
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import io
@@ -27,7 +28,7 @@ class TestSporterCli(E2EHelpers, TestCase):
         """ initialisatie van de test case """
         pass
 
-    def test_koppel(self):
+    def test_dev_koppel_sporter(self):
         lid_nr = 123456
 
         # niet bestaand account
@@ -84,5 +85,57 @@ class TestSporterCli(E2EHelpers, TestCase):
         sporter = Sporter.objects.get(lid_nr=lid_nr)
         self.assertIsNotNone(sporter.account)
 
+    def test_dev_koppel_ver(self):
+        # niet bestaande vereniging
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20):
+            management.call_command('dev_koppel_ver', '999999', '999999', stderr=f1, stdout=f2)
+        self.assertTrue("Vereniging '999999' niet gevonden" in f1.getvalue())
+
+        # maak een test vereniging
+        ver_nr = 1000
+        self.regio_111 = NhbRegio.objects.get(regio_nr=111)
+        ver = NhbVereniging(
+                    ver_nr=ver_nr,
+                    naam="Grote Club",
+                    # secretaris kan nog niet ingevuld worden
+                    regio=self.regio_111)
+        ver.save()
+
+        # niet bestaande sporter
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20):
+            management.call_command('dev_koppel_ver', '999999', ver_nr, stderr=f1, stdout=f2)
+        self.assertTrue("Sporter met lid_nr '999999' niet gevonden" in f1.getvalue())
+
+        # maak de sporter aan
+        lid_nr = 345678
+        Sporter(
+            lid_nr=lid_nr,
+            voornaam='Tester',
+            achternaam='de Test',
+            unaccented_naam='Tester de Test',
+            email='test@sporters.not',
+            geboorte_datum='1972-01-01',
+            geslacht='M',
+            is_actief_lid=False,
+            sinds_datum='2000-01-01',
+            bij_vereniging=None,
+            lid_tot_einde_jaar=2019,
+            account=None).save()
+
+        # koppel de twee
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(20):
+            management.call_command('dev_koppel_ver', lid_nr, ver_nr, stderr=f1, stdout=f2)
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        self.assertTrue("Sporter 345678 gekoppeld aan vereniging 1000" in f2.getvalue())
+
+        sporter = Sporter.objects.get(lid_nr=lid_nr)
+        self.assertTrue(sporter.is_actief_lid)
+        self.assertEqual(sporter.bij_vereniging.ver_nr, ver_nr)
 
 # end of file
