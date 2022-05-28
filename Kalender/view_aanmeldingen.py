@@ -9,12 +9,12 @@ from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Bestel.mutaties import bestel_mutatieverzoek_afmelden_wedstrijd
+from Bestel.mutaties import bestel_mutatieverzoek_afmelden_wedstrijd, bestel_mutatieverzoek_verwijder_product_uit_mandje
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
-from .models import (KalenderWedstrijd, KalenderInschrijving,
-                     INSCHRIJVING_STATUS_TO_SHORT_STR, INSCHRIJVING_STATUS_AFGEMELD)
+from .models import (KalenderWedstrijd, KalenderInschrijving, INSCHRIJVING_STATUS_TO_SHORT_STR,
+                     INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 from decimal import Decimal
 
 
@@ -161,7 +161,14 @@ class KalenderDetailsSporterView(UserPassesTestMixin, TemplateView):
         # - restitutie
         context['lijst'] = lijst = list()
 
-        inschrijvingen = KalenderInschrijving.objects.filter(sporterboog__sporter__lid_nr=sporter_lid_nr)
+        inschrijvingen = (KalenderInschrijving
+                          .objects
+                          .filter(sporterboog__sporter__lid_nr=sporter_lid_nr)
+                          .select_related('wedstrijd',
+                                          'sessie',
+                                          'wedstrijd__organiserende_vereniging',
+                                          'sporterboog',
+                                          'gebruikte_code'))
         if self.rol_nu != Rollen.ROL_BB:
             # HWL of SEC --> alleen van de eigen vereniging laten zien
             ver = self.functie_nu.nhb_ver
@@ -221,7 +228,12 @@ class AfmeldenView(UserPassesTestMixin, View):
                 raise Http404('Verkeerde vereniging')
 
         snel = str(request.POST.get('snel', ''))[:1]
-        bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel == '1')
+
+        if inschrijving.status == INSCHRIJVING_STATUS_RESERVERING_MANDJE:
+            product = inschrijving.bestelproduct_set.all()[0]
+            bestel_mutatieverzoek_verwijder_product_uit_mandje(inschrijving.koper, product, snel == '1')
+        else:
+            bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel == '1')
 
         sporter_lid_nr = inschrijving.sporterboog.sporter.lid_nr
         url = reverse('Kalender:details-sporter', kwargs={'sporter_lid_nr': sporter_lid_nr})

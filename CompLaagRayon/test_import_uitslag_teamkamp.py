@@ -6,9 +6,8 @@
 
 from django.test import TestCase
 from django.core import management
-from django.test.client import Client
 from Competitie.test_fase import zet_competitie_fase
-from Competitie.models import KampioenschapSchutterBoog, KampioenschapTeam, DEELNAME_NEE
+from Competitie.models import KampioenschapTeam
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import io

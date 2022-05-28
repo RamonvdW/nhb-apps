@@ -138,6 +138,7 @@ class Command(BaseCommand):
     def _verwerk_mutatie_verwijder(self, mutatie):
         """ een bestelling mag uit het mandje voordat de betaling gestart is """
 
+        handled = False
         mandje = self._get_mandje(mutatie)
         if mandje:                                  # pragma: no branch
             qset = mandje.producten.filter(pk=mutatie.product.pk)
@@ -161,6 +162,8 @@ class Command(BaseCommand):
 
                     # verwijder de hele inschrijving, want bewaren heeft geen waarde op dit punt
                     # inschrijving.delete()     # geeft db integratie error ivm referenties die nog ergens bestaan
+
+                    handled = True
                 else:
                     self.stderr.write('[ERROR] Verwijder product pk=%s uit mandje pk=%s: Type niet ondersteund' % (
                                         product.pk, mandje.pk))
@@ -170,6 +173,11 @@ class Command(BaseCommand):
 
             # bereken het totaal opnieuw
             mandje.bepaal_totaalprijs_opnieuw()
+
+        if not handled:
+            # product ligt niet meer in het mandje?!
+            self.stdout.write('[WARNING] Product pk=%s niet meer in het mandje gevonden' % mutatie.product.pk)
+            kalender_plugin_verwijder_reservering(self.stdout, mutatie.product.inschrijving)
 
     def _verwerk_mutatie_kortingscode(self, mutatie):
         """ Deze functie controleert of een kortingscode toegepast mag worden op de producten die in het mandje

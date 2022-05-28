@@ -24,9 +24,9 @@
             <table class="white">
                 <thead>
                     <tr>
-                        <th>Wanneer</th>
-                        <th>Status</th>
                         <th>Wedstrijd / sessie</th>
+                        <th>Status</th>
+                        <th>Sinds</th>
                         <th class="right-align">Korting</th>
                         <th class="right-align">Ontvangen</th>
                         <th class="right-align">Retour</th>
@@ -36,11 +36,11 @@
 
                 {% for datum, type, obj in lijst %}
                     <tr>
-                        <td>{{ datum }}</td>
                         {% if type == 'I' %}
                             <!-- inschrijving -->
+                            <td>{{ obj.wedstrijd.titel }}<br>{{ obj.sessie.datum }} om {{ obj.sessie.tijd_begin }}<br>bij {{ obj.wedstrijd.organiserende_vereniging }}</td>
                             <td>{{ obj.status_str }}</td>
-                            <td>{{ obj.wedstrijd.titel }}<br>{{ obj.sessie.datum }} om {{ obj.sessie.tijd_begin }}</td>
+                            <td>{{ datum }}</td>
                             <td class="right-align">{{ obj.korting_str }}</td>
                             <td class="right-align">&euro;&nbsp;{{ obj.ontvangen_euro }}</td>
                             <td class="right-align">{% if obj.retour_euro %}&euro;&nbsp;{{ obj.retour_euro }}{% else %}-{% endif %}</td>
