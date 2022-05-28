@@ -26,113 +26,50 @@
             <table class="white">
                 <tr>
                     <th>Bestelnummer</th>
-                    <td>{{ bestelling.bestel_nr }}</td>
+                    <td colspan="2">{{ bestelling.bestel_nr }}</td>
                 </tr>
                 <tr>
                     <th>Aangemaakt op</th>
-                    <td>{{ bestelling.aangemaakt }}</td>
+                    <td colspan="2">{{ bestelling.aangemaakt }}</td>
                 </tr>
                 <tr>
                     <th>Koper</th>
-                    <td>{{ bestelling.account }}</td>
+                    <td colspan="2">{{ bestelling.account }}</td>
                 </tr>
                 <tr>
                     <th>Aan vereniging</th>
-                    <td>{{ bestelling.ontvanger.vereniging }}</td>
+                    <td colspan="2">{{ bestelling.ontvanger.vereniging }}</td>
                 </tr>
                 <tr>
                     <th>Bedrag</th>
-                    <td>&euro;&nbsp;{{ bestelling.totaal_euro }}</td>
+                    <td colspan="2">&euro;&nbsp;{{ bestelling.totaal_euro }}</td>
                 </tr>
                 <tr>
-                    <th class="red-text">TODO</th>
-                    <td><i class="red-text">Rapporteer status</i></td>
+                    <th>Ontvangen</th>
+                    <td colspan="2">&euro;&nbsp;{{ ontvangen }}</td>
+                </tr>
+                <tr>
+                    <th></th>
+                    <td>
+                        {% if is_afgerond %}
+                            <i>De betaling is gelukt</i>
+                        {% elif wacht_op_betaling %}
+                            <i>De betaling is (nog) niet gelukt</i>
+                            <!-- TODO: opnieuw problemen link maken?? -->
+                        {% else %}
+                            <i class="red-text">Er is een probleem opgetreden</i>
+                        {% endif %}
+                    </td>
+                    <td class="center">
+                        {% if is_afgerond %}
+                            <a class="btn-nhb-rood" href="{{ url_afschrift }}">Toon afschrift</a>
+                        {% endif %}
+                    </td>
                 </tr>
             </table>
         </div>
     </div>
 
-    <script type="application/javascript">
-        // TODO: maximum aantal pogingen inbouwen
-        let pogingen = 100;
-
-        function status_ophalen_klaar(xhr)
-        {
-            let retry = true;
-
-            console.log('xhr: ready=',xhr.readyState, 'status=', xhr.status);
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    // verzoek is klaar en we hebben een antwoord
-                    // responseText is leeg bij connection failure
-                    if (xhr.responseText !== "") {
-                        const rsp = JSON.parse(xhr.responseText);
-                        console.log('rsp=', rsp);
-                        if ("status" in rsp) {
-                            const status = rsp["status"];
-
-                            // status kan zijn:
-                            // - nieuw:
-                            // - betaal:
-                            // - afgerond:
-
-                            if (status === "nieuw") {
-                                // checkout_url is nog niet beschikbaar
-                                toon_klaar();
-                                retry = false;
-
-                            }  else if (status === "betaal") {
-                                // redirect naar de checkout_url
-                                const url = rsp["checkout_url"];
-                                window.location.href = url;
-                                // won't get here
-                            }
-                        }
-                    }
-                }
-                // else: fout
-            }
-
-            if (retry) {
-                // over 1 seconde opnieuw proberen
-                setTimeout(check_status_bestelling, 1000)
-            }
-        }
-
-        function status_ophalen_timeout(xhr) {
-            // voorkom reactie bij ontvangst laat antwoord
-            xhr.abort()
-
-            // doe de volgende status check over 1 seconde
-            setTimeout(check_status_bestelling, 1000)
-        }
-
-        function check_status_bestelling() {
-            // haal de status van de bestelling op
-            // als de checkout_url beschikbaar is, redirect dan daar naartoe
-            // wacht anders 1 seconde en herhaal de check
-            if (pogingen > 0) {
-                // POST voorkomt caching
-                const xhr = new XMLHttpRequest()
-                xhr.open("POST", "{{ url_status_check }}", true)         // true = async
-                xhr.timeout = 5000                                       // 5 sec
-                xhr.onloadend = function() { status_ophalen_klaar(xhr) }
-                xhr.ontimeout = function() { status_ophalen_timeout(xhr) }
-                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
-                xhr.send()      // no data
-            } else {
-                toon_fout()
-            }
-        }
-
-        window.addEventListener("load", function()
-        {
-            // doe de eerste status check over 500ms
-            // TODO: dit geeft mensen niet echt een kans om de tekst te lezen
-            setTimeout(check_status_bestelling, 500)
-        })
-    </script>
-
-    {% include 'feedback/sidebar.dtl' with op_pagina="bestel-bestelling-afrekenen" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="bestel-bestelling-afgerond" %}
 
 {% endblock %}

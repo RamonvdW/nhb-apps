@@ -26,7 +26,7 @@ class BestellingAdmin(admin.ModelAdmin):
 
     search_fields = ('bestel_nr', 'account__username', 'account__unaccented_naam')
 
-    ordering = ('aangemaakt',)
+    ordering = ('-aangemaakt',)     # nieuwste bovenaan
 
     auto_complete = ('account', 'ontvanger', 'betaal_mutatie', 'betaal_actief')
 

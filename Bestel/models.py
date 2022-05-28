@@ -174,8 +174,9 @@ class Bestelling(models.Model):
 
     def __str__(self):
         """ beschrijving voor de admin interface """
-        msg = "%s: " % self.bestel_nr
-        msg += "%s " % self.account.username
+        msg = "%s " % self.bestel_nr
+        msg += "[%s] " % self.aangemaakt
+        msg += "koper=%s" % self.account.username
         return msg
 
     class Meta:

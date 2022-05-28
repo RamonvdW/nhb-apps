@@ -402,13 +402,32 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
         except (KeyError, TypeError, ValueError, Bestelling.DoesNotExist):
             raise Http404('Niet gevonden')
 
-        # de details worden via DynamicBestellingCheckStatus opgehaald
         context['bestelling'] = bestelling
+
+        transacties_euro = Decimal(0)
+        for transactie in bestelling.transacties.all():
+            if transactie.is_restitutie:
+                transacties_euro -= transactie.bedrag_euro_klant
+            else:
+                transacties_euro += transactie.bedrag_euro_klant
+        # for
+
+        context['ontvangen'] = transacties_euro
+
+        if bestelling.status == BESTELLING_STATUS_AFGEROND:
+            context['is_afgerond'] = True
+            context['url_afschrift'] = reverse('Bestel:toon-bestelling-details',
+                                               kwargs={'bestel_nr': bestelling.bestel_nr})
+        else:
+            # hier komen we als de betaling niet gelukt is
+            # maar ook als Mollie de redirect naar deze pagina deed voordat de payment-status-changed callback kwam
+            if transacties_euro < bestelling.totaal_euro:
+                context['wacht_op_betaling'] = True
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),
             (reverse('Bestel:toon-bestelling-details', kwargs={'bestel_nr': bestelling.bestel_nr}), 'Bestelling'),
-            (None, 'Afrekenen')
+            (None, 'Status betaling')
         )
 
         menu_dynamics(self.request, context)
