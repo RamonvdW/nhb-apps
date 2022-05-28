@@ -353,10 +353,13 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
                         snel == '1')
 
         elif bestelling.status == BESTELLING_STATUS_WACHT_OP_BETALING:
-            # de checkout url is beschikbaar
-            # stuur de bezoeker daar heen
-            out['status'] = 'betaal'
-            out['checkout_url'] = bestelling.betaal_actief.checkout_url
+            if bestelling.betaal_actief and bestelling.betaal_actief.checkout_url:
+                # de checkout url is beschikbaar
+                # stuur de bezoeker daar heen
+                out['status'] = 'betaal'
+                out['checkout_url'] = bestelling.betaal_actief.checkout_url
+            else:
+                out['status'] = 'error'
 
         elif bestelling.status == BESTELLING_STATUS_AFGEROND:
             # we zouden hier niet moeten komen
@@ -366,7 +369,6 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
         else:
             raise Http404('Onbekende status')
 
-        print('out: %s' % repr(out))
         return JsonResponse(out)
 
 

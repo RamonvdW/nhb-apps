@@ -86,6 +86,14 @@
                                 const url = rsp["checkout_url"];
                                 window.location.href = url;
                                 // won't get here
+
+                            } else if (status === "error") {
+                                // intern probleem
+                                const el = document.getElementById('id_bericht')
+                                el.innerText = "Er is een probleem opgetreden met deze bestelling"
+                                el.classList.add('red-text')
+
+                                retry = false;      // stop trying
                             }
                         }
                     }
@@ -128,7 +136,6 @@
                 const el = document.getElementById('id_bericht')
                 el.innerText = "Het is op dit moment niet mogelijk om te betalen; probeer het later nog eens"
                 el.classList.add('red-text')
-                toon_fout()
             }
         }
 
