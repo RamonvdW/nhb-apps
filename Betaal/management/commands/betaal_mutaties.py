@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.db.utils import DataError, OperationalError, IntegrityError
 from django.core.management.base import BaseCommand
-from Bestel.mutaties import bestel_mutatieverzoek_betaling_afgerond
+from Bestel.mutaties import bestel_mutatieverzoek_betaling_afgerond, bestel_betaling_is_gestart
 from Betaal.models import (BetaalMutatie, BetaalActief, BetaalInstellingenVereniging, BetaalTransactie,
                            BETAAL_MUTATIE_START_ONTVANGST, BETAAL_MUTATIE_START_RESTITUTIE,
                            BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED, BETAAL_PAYMENT_STATUS_MAXLENGTH,
@@ -145,8 +145,7 @@ class Command(BaseCommand):
                     except KeyError:        # TODO: correct exceptie invullen
                         pass
                     else:
-                        bestelling.betaal_actief = actief
-                        bestelling.save(update_fields=['betaal_actief'])
+                        bestel_betaling_is_gestart(bestelling, actief)
 
     def _verwerk_mutatie_start_restitutie(self, mutatie):
         pass

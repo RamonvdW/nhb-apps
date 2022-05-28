@@ -56,7 +56,8 @@
                     <tr>
                         <td class="hide-on-small-only">Transactie</td>
                         <td>{% for regel in transactie.regels %}{{ regel }}<br>{% endfor %}</td>
-                        <td class="right-align">{% if not transactie.is_restitutie %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ transactie.bedrag_euro }}</td>
+                        <!-- let op: we tonen een minteken bij betaling, dus "not restitutie" -->
+                        <td class="right-align">{% if not transactie.is_restitutie %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ transactie.bedrag_euro_klant }}</td>
                     </tr>
                 {% endfor %}
 
@@ -65,6 +66,12 @@
                         <td class="hide-on-small-only"></td>
                         <td class="right-align"><b>Nog te voldoen:</b></td>
                         <td class="right-align"><b>&euro;&nbsp;{{ rest_euro }}</b></td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td class="hide-on-small-only"></td>
+                        <td class="right-align"><b>Openstaand:</b></td>
+                        <td class="right-align"><b>&euro;&nbsp;0,00</b></td>
                     </tr>
                 {% endif %}
 
@@ -75,11 +82,8 @@
                     {% elif url_afrekenen %}
                         <td class="hide-on-small-only"></td>
                         <td class="right-align">
-                            <form action="{{ url_afrekenen }}" method="post">
-                                {% csrf_token %}
-                                <button id="id_afrekenen" class="btn-nhb-rood">
-                                    <i class="material-icons-round right">shopping_cart_checkout</i>Betalen</button>
-                            </form>
+                            <a class="btn-nhb-rood" href="{{ url_afrekenen }}">
+                                <i class="material-icons-round right">shopping_cart_checkout</i>Betalen</a>
                         </td>
                         <td><!-- bedragen --></td>
                     {% endif %}

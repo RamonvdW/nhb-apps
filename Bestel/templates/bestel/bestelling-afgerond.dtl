@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    <!-- bestelling.status is 'nieuw' en gaat na de eerste post over in 'betaal' met een checkout_url van de CPSP -->
+    <!-- de betaling is gelukt of mislukt -->
 
     <!-- banner -->
     <div class="row center">
@@ -45,30 +45,29 @@
                     <td>&euro;&nbsp;{{ bestelling.totaal_euro }}</td>
                 </tr>
                 <tr>
-                    <th></th>
-                    <td>
-                        <i style="padding:50px 0 50px" id="id_bericht">Een klein momentje: je wordt zo doorgestuurd..&nbsp;<span id="id_teller"></span></i>
-                    </td>
+                    <th class="red-text">TODO</th>
+                    <td><i class="red-text">Rapporteer status</i></td>
                 </tr>
             </table>
         </div>
     </div>
 
     <script type="application/javascript">
-        let pogingen = 20;      // 20 seconden
+        // TODO: maximum aantal pogingen inbouwen
+        let pogingen = 100;
 
         function status_ophalen_klaar(xhr)
         {
             let retry = true;
 
-            //console.log('xhr: ready=',xhr.readyState, 'status=', xhr.status);
+            console.log('xhr: ready=',xhr.readyState, 'status=', xhr.status);
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
                     // verzoek is klaar en we hebben een antwoord
                     // responseText is leeg bij connection failure
                     if (xhr.responseText !== "") {
                         const rsp = JSON.parse(xhr.responseText);
-                        //console.log('rsp=', rsp);
+                        console.log('rsp=', rsp);
                         if ("status" in rsp) {
                             const status = rsp["status"];
 
@@ -79,7 +78,8 @@
 
                             if (status === "nieuw") {
                                 // checkout_url is nog niet beschikbaar
-                                retry = true;
+                                toon_klaar();
+                                retry = false;
 
                             }  else if (status === "betaal") {
                                 // redirect naar de checkout_url
@@ -112,22 +112,15 @@
             // als de checkout_url beschikbaar is, redirect dan daar naartoe
             // wacht anders 1 seconde en herhaal de check
             if (pogingen > 0) {
-                const el = document.getElementById('id_teller')
-                el.innerText = pogingen
-                pogingen -= 1;
-
                 // POST voorkomt caching
-                const xhr = new XMLHttpRequest();
-                xhr.open("POST", "{{ url_status_check }}", true);        // true = async
-                xhr.timeout = 5000;                                      // 5 sec
+                const xhr = new XMLHttpRequest()
+                xhr.open("POST", "{{ url_status_check }}", true)         // true = async
+                xhr.timeout = 5000                                       // 5 sec
                 xhr.onloadend = function() { status_ophalen_klaar(xhr) }
                 xhr.ontimeout = function() { status_ophalen_timeout(xhr) }
-                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
-                xhr.send();     // no data
+                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}")
+                xhr.send()      // no data
             } else {
-                const el = document.getElementById('id_bericht')
-                el.innerText = "Het is op dit moment niet mogelijk om te betalen; probeer het later nog eens"
-                el.classList.add('red-text')
                 toon_fout()
             }
         }

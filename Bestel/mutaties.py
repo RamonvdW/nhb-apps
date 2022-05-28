@@ -8,7 +8,7 @@ from django.conf import settings
 from Bestel.models import (BestelMutatie, Bestelling,
                            BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_MAAK_BESTELLING,
                            BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_KORTINGSCODE, BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN,
-                           BESTEL_MUTATIE_BETALING_AFGEROND)
+                           BESTEL_MUTATIE_BETALING_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING)
 from Overig.background_sync import BackgroundSync
 import time
 
@@ -160,6 +160,15 @@ def bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt, snel=False):
         if is_created:
             # wacht kort op de achtergrondtaak
             _bestel_ping_achtergrondtaak(mutatie, snel)
+
+
+def bestel_betaling_is_gestart(bestelling, actief):
+    """ Deze functie wordt aangeroepen vanuit de Betaal daemon om door te geven dat de betaling opgestart
+        is en de checkout_url beschikbaar is in dit betaal_actief record
+    """
+    bestelling.betaal_actief = actief
+    bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
+    bestelling.save(update_fields=['betaal_actief', 'status'])
 
 
 # end of file

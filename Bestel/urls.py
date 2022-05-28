@@ -35,6 +35,14 @@ urlpatterns = [
     path('afrekenen/<bestel_nr>/',
          view_bestelling.BestellingAfrekenenView.as_view(),
          name='bestelling-afrekenen'),
+
+    path('check-status/<bestel_nr>/',
+         view_bestelling.DynamicBestellingCheckStatus.as_view(),
+         name='dynamic-check-status'),
+
+    path('na-de-betaling/<bestel_nr>/',
+         view_bestelling.BestellingAfgerondView.as_view(),
+         name='na-de-betaling')
 ]
 
 # end of file

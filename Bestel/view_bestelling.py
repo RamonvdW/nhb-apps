@@ -5,21 +5,24 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, JsonResponse
 from django.urls import reverse
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 from django.utils.timezone import localtime
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige
-from Bestel.models import Bestelling, BESTELLING_STATUS2STR, BESTELLING_STATUS_WACHT_OP_BETALING
+from Bestel.models import (Bestelling, BESTELLING_STATUS2STR, BESTELLING_STATUS_WACHT_OP_BETALING,
+                           BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND)
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Plein.menu import menu_dynamics
 from decimal import Decimal
+import json
 
 
 TEMPLATE_TOON_BESTELLINGEN = 'bestel/toon-bestellingen.dtl'
 TEMPLATE_BESTELLING_DETAILS = 'bestel/toon-bestelling-details.dtl'
 TEMPLATE_BESTELLING_AFREKENEN = 'bestel/bestelling-afrekenen.dtl'
+TEMPLATE_BESTELLING_AFGEROND = 'bestel/bestelling-afgerond.dtl'
 
 
 class ToonBestellingenView(UserPassesTestMixin, TemplateView):
@@ -118,7 +121,8 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                                      'inschrijving__sessie',
                                      'inschrijving__sporterboog',
                                      'inschrijving__sporterboog__boogtype',
-                                     'inschrijving__sporterboog__sporter'))
+                                     'inschrijving__sporterboog__sporter',
+                                     'inschrijving__sporterboog__sporter__bij_vereniging'))
 
         for product in producten:
             # maak een beschrijving van deze regel
@@ -262,10 +266,52 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
         self.rol_nu = rol_get_huidige(self.request)
         return self.rol_nu != Rollen.ROL_NONE
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        account = self.request.user
+
+        try:
+            bestel_nr = str(kwargs['bestel_nr'])[:7]        # afkappen voor de veiligheid
+            bestel_nr = int(bestel_nr)
+            bestelling = Bestelling.objects.get(bestel_nr=bestel_nr, account=account)
+        except (KeyError, TypeError, ValueError, Bestelling.DoesNotExist):
+            raise Http404('Niet gevonden')
+
+        if bestelling.status == BESTELLING_STATUS_AFGEROND:
+            # betaling is al klaar
+            url = reverse('Bestel:na-de-betaling', kwargs={'bestel_nr': bestelling.bestel_nr})
+            return HttpResponseRedirect(url)
+
+        # de details worden via DynamicBestellingCheckStatus opgehaald
+        context['bestelling'] = bestelling
+
+        context['url_status_check'] = reverse('Bestel:dynamic-check-status', kwargs={'bestel_nr': bestelling.bestel_nr})
+
+        context['kruimels'] = (
+            (reverse('Sporter:profiel'), 'Mijn pagina'),
+            (reverse('Bestel:toon-bestelling-details', kwargs={'bestel_nr': bestelling.bestel_nr}), 'Bestelling'),
+            (None, 'Afrekenen')
+        )
+
+        menu_dynamics(self.request, context)
+        return context
+
+
+class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
+
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu != Rollen.ROL_NONE
+
     @staticmethod
     def post(request, *args, **kwargs):
-        """ Voeg de code toe aan het mandje """
+        """ Deze functie wordt aangeroepen vanuit de template om te kijken wat de status van de bestelling/betaling is.
 
+            Dit is een POST by design, om caching te voorkomen.
+        """
         account = request.user
 
         try:
@@ -275,22 +321,14 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
         except (KeyError, TypeError, ValueError, Bestelling.DoesNotExist):
             raise Http404('Niet gevonden')
 
-        snel = str(request.POST.get('snel', ''))[:1]
+        out = dict()
 
-        # zoek de betaling erbij
-        if bestelling.betaal_actief:
-            # betaling is al opgestart; transactie is al actief, dus ga daar mee door
-            # TODO: gebruiker naar de betaal-status pagina sturen en van daaruit door naar de checkout URL
-            print('POST: doorgaan met actieve transactie nog niet gemaakt')
+        if bestelling.status == BESTELLING_STATUS_NIEUW:
+            # de betaling is nog niet opgestart, dus dit is het moment (want we willen het niet op een GET doen)
+            out['status'] = 'nieuw'
 
-        elif bestelling.betaal_mutatie:
-            # betaling is al opgestart; we wachten op de achtergrond taak
-            # TODO: gebruiker naar de betaal-status pagina sturen
-            print('POST: doorgaan met actieve mutatie is nog niet gemaakt')
-
-        else:
             # start een nieuwe transactie op
-            beschrijving = "MijnHandboogsport bestelling %s" % bestelling.bestel_nr
+            beschrijving = "%s bestelling %s" % (settings.AFSCHRIFT_SITE_NAAM, bestelling.bestel_nr)
 
             rest_euro = bestelling.totaal_euro
             for transactie in bestelling.transacties.all():
@@ -300,8 +338,10 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
                     rest_euro -= transactie.bedrag_euro_klant
             # for
 
-            url_betaling_gedaan = settings.SITE_URL + reverse('Bestel:bestelling-afrekenen',
+            url_betaling_gedaan = settings.SITE_URL + reverse('Bestel:na-de-betaling',
                                                               kwargs={'bestel_nr': bestelling.bestel_nr})
+
+            snel = str(request.POST.get('snel', ''))[:1]
 
             # start de bestelling via de achtergrond taak
             # deze slaat de referentie naar de mutatie op in de bestelling
@@ -312,11 +352,42 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
                         url_betaling_gedaan,
                         snel == '1')
 
-        # go to the "show progress" screen
-        url = reverse('Bestel:bestelling-afrekenen',
-                      kwargs={'bestel_nr': bestelling.bestel_nr})
+        elif bestelling.status == BESTELLING_STATUS_WACHT_OP_BETALING:
+            # de checkout url is beschikbaar
+            # stuur de bezoeker daar heen
+            out['status'] = 'betaal'
+            out['checkout_url'] = bestelling.betaal_actief.checkout_url
 
-        return HttpResponseRedirect(url)
+        elif bestelling.status == BESTELLING_STATUS_AFGEROND:
+            # we zouden hier niet moeten komen
+            # TODO: automatisch doorsturen
+            raise Http404('Onverwachte status')
+
+        else:
+            raise Http404('Onbekende status')
+
+        print('out: %s' % repr(out))
+        return JsonResponse(out)
+
+
+class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
+
+    """ De CPSP stuurt de gebruiker naar deze view als de betaling afgerond is.
+        We checken de status en bedanken de gebruiker of geven instructies voor de vervolgstappen.
+    """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_BESTELLING_AFGEROND
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu != Rollen.ROL_NONE
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -329,10 +400,8 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
         except (KeyError, TypeError, ValueError, Bestelling.DoesNotExist):
             raise Http404('Niet gevonden')
 
+        # de details worden via DynamicBestellingCheckStatus opgehaald
         context['bestelling'] = bestelling
-
-        # analyseer de stand van zaken
-
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),
