@@ -67,7 +67,14 @@
                     // verzoek is klaar en we hebben een antwoord
                     // responseText is leeg bij connection failure
                     if (xhr.responseText !== "") {
-                        const rsp = JSON.parse(xhr.responseText);
+                        let rsp = "";
+                        try {
+                            rsp = JSON.parse(xhr.responseText);
+                        } catch(e) {
+                            // waarschijnlijk geen goede JSON data
+                            // een Http404() geeft een foutmelding pagina met status=200 (OK) en komt hier terecht
+                            rsp = "fout";
+                        }
                         //console.log('rsp=', rsp);
                         if ("status" in rsp) {
                             const status = rsp["status"];

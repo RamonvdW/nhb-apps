@@ -353,23 +353,26 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
                         # snel == '1',
                         snel=True)          # niet wachten op reactie
 
-        elif bestelling.status == BESTELLING_STATUS_WACHT_OP_BETALING and bestelling.betaal_mutatie:
-            url = bestelling.betaal_mutatie.url_checkout
-            if url:
-                # de checkout url is beschikbaar
-                # stuur de bezoeker daar heen
-                out['status'] = 'betaal'
-                out['checkout_url'] = url
-            else:
-                out['status'] = 'error'
+        elif bestelling.status == BESTELLING_STATUS_WACHT_OP_BETALING:
+            out['status'] = 'error'     # fallback
+
+            if bestelling.betaal_mutatie:
+                url = bestelling.betaal_mutatie.url_checkout
+                if url:
+                    # de checkout url is beschikbaar
+                    # stuur de bezoeker daar heen
+                    out['status'] = 'betaal'
+                    out['checkout_url'] = url
 
         elif bestelling.status == BESTELLING_STATUS_AFGEROND:
             # we zouden hier niet moeten komen
             # TODO: automatisch doorsturen
-            raise Http404('Onverwachte status')
+            out['status'] = 'error'
 
         else:
-            raise Http404('Onbekende status')
+            out['status'] = 'error'
+            # een 404 resulteert in een foutmelding pagina (status 200)
+            # raise Http404('Onbekende status')
 
         return JsonResponse(out)
 
