@@ -341,7 +341,7 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
             url_betaling_gedaan = settings.SITE_URL + reverse('Bestel:na-de-betaling',
                                                               kwargs={'bestel_nr': bestelling.bestel_nr})
 
-            snel = str(request.POST.get('snel', ''))[:1]
+            # snel = str(request.POST.get('snel', ''))[:1]
 
             # start de bestelling via de achtergrond taak
             # deze slaat de referentie naar de mutatie op in de bestelling
@@ -350,14 +350,16 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
                         beschrijving,
                         rest_euro,
                         url_betaling_gedaan,
-                        snel == '1')
+                        # snel == '1',
+                        snel=True)          # niet wachten op reactie
 
-        elif bestelling.status == BESTELLING_STATUS_WACHT_OP_BETALING:
-            if bestelling.betaal_mutatie.url_checkout:
+        elif bestelling.status == BESTELLING_STATUS_WACHT_OP_BETALING and bestelling.betaal_mutatie:
+            url = bestelling.betaal_mutatie.url_checkout
+            if url:
                 # de checkout url is beschikbaar
                 # stuur de bezoeker daar heen
                 out['status'] = 'betaal'
-                out['checkout_url'] = bestelling.betaal_mutatie.url_checkout
+                out['checkout_url'] = url
             else:
                 out['status'] = 'error'
 
