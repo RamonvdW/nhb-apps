@@ -119,12 +119,19 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             # wijzigingen opslaan
             voorkeuren.save(update_fields=['voorkeur_eigen_blazoen', 'voorkeur_meedoen_competitie'])
 
-        if sporter.para_classificatie:
-            para_notitie = request.POST.get('para_notitie', '')
-            if para_notitie != voorkeuren.opmerking_para_sporter:
-                # wijziging opslaan
-                voorkeuren.opmerking_para_sporter = para_notitie
-                voorkeuren.save(update_fields=['opmerking_para_sporter'])
+        para_notitie = request.POST.get('para_notitie', '')
+        if para_notitie != voorkeuren.opmerking_para_sporter:
+            # wijziging opslaan
+            voorkeuren.opmerking_para_sporter = para_notitie
+            voorkeuren.save(update_fields=['opmerking_para_sporter'])
+
+        old_voorkeur_para_met_rolstoel = voorkeuren.para_met_rolstoel
+        voorkeuren.para_met_rolstoel = False
+        if request.POST.get('para_rolstoel', None):
+            voorkeuren.para_met_rolstoel = True
+        if old_voorkeur_para_met_rolstoel != voorkeuren.para_met_rolstoel:
+            # wijziging opslaan
+            voorkeuren.save(update_fields=['para_met_rolstoel'])
 
         old_disc_outdoor = voorkeuren.voorkeur_discipline_outdoor
         voorkeuren.voorkeur_discipline_outdoor = False

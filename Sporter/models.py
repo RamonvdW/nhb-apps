@@ -232,8 +232,12 @@ class SporterVoorkeuren(models.Model):
     # (opt-out) wel/niet aanbieden om mee te doen met de competitie
     voorkeur_meedoen_competitie = models.BooleanField(default=True)
 
-    # sporters met para-classificatie mogen een opmerking toevoegen voor de wedstrijdleiding
+    # open notitie aan de wedstrijdleiding
     opmerking_para_sporter = models.CharField(max_length=256, default='', blank=True)
+
+    # notificatie aan de wedstrijdleiding: sporter gebruikt een rolstoel
+    # (hierdoor kunnen er minder sporters op zijn baan)
+    para_met_rolstoel = models.BooleanField(default=False)
 
     # (opt-out) voorkeur voor wedstrijden van specifieke disciplines
     voorkeur_discipline_25m1pijl = models.BooleanField(default=True)

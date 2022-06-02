@@ -230,25 +230,34 @@
                         </tr>
 
 
-                        {% if sporter.para_classificatie %}
-                            <tr>
-                                <td colspan="2">
-                                    <h5>Voorkeur para-sporter</h5>
-                                </td>
-                            </tr>
+                        <tr>
+                            <td colspan="2">
+                                <h5>Voorkeuren voor para-sporters</h5>
+                            </td>
+                        </tr>
 
-                            <tr>
-                                <td colspan="2">Als sporter met para classificatie kan je hieronder een kort bericht (1 regel) invoeren voor de wedstrijdleiding zodat ze, indien mogelijk, hier rekening mee houden.</td>
-                            </tr>
-                            <tr>
-                                <td colspan="2">Voorbeelden:<br>&nbsp;&nbsp;&nbsp;Blijf op schietlijn wachten<br>&nbsp;&nbsp;&nbsp;Gebruik kruk<br>&nbsp;&nbsp;&nbsp;etc.</td>
-                            </tr>
-                            <tr>
-                                <td colspan="2" class="input-field">
+                        <tr>
+                            <td colspan="2">Ingevoerde informatie wordt gedeeld met de wedstrijdleiding zodat ze, indien mogelijk, hier rekening mee houden.</td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="2">
+                                <label>
+                                    <input type="checkbox" class="filled-in" name="para_rolstoel"{% if voorkeuren.para_met_rolstoel %} checked{% endif %} onchange="gewijzigd()">
+                                    <span class="black-text">Ik zit in een rolstoel</span>
+                                </label>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="2" class="input-field">
+                                <p colspan="2">Kort bericht (1 regel) voor de wedstrijdleiding:</p>
+                                <div>
                                     <input type="text" maxlength="256" name="para_notitie" placeholder="Hier invoeren" value="{{ voorkeuren.opmerking_para_sporter }}" oninput="gewijzigd()">
-                                </td>
-                            </tr>
-                        {% endif %}
+                                </div>
+                                <p>Voorbeelden:<br>&nbsp;&nbsp;&nbsp;Blijf op schietlijn wachten<br>&nbsp;&nbsp;&nbsp;Gebruik kruk<br>&nbsp;&nbsp;&nbsp;etc.</p>
+                            </td>
+                        </tr>
 
                     {% endif %}     <!-- bogen -->
 

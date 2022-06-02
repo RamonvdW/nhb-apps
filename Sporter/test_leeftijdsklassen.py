@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from BasisTypen.models import GESLACHT_ANDERS
+from BasisTypen.models import GESLACHT_ANDERS, ORGANISATIE_IFAA, ORGANISATIE_NHB, ORGANISATIE_WA
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from .leeftijdsklassen import bereken_leeftijdsklassen_nhb
 from .models import Sporter, SporterVoorkeuren
@@ -57,6 +57,37 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
         sporter.bij_vereniging = ver
         sporter.save()
+
+    def test_model(self):
+        datum_wedstrijd_voor_verjaardag = datetime.date(2022, month=self.sporter1.geboorte_datum.month,
+                                                        day=self.sporter1.geboorte_datum.day-1)
+        datum_wedstrijd_op_verjaardag = datetime.date(2022, month=self.sporter1.geboorte_datum.month,
+                                                      day=self.sporter1.geboorte_datum.day)
+        datum_wedstrijd_na_verjaardag = datetime.date(2022, month=self.sporter1.geboorte_datum.month,
+                                                      day=self.sporter1.geboorte_datum.day+1)
+
+        # IFAA hanteert echte leeftijd
+        n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_voor_verjaardag, ORGANISATIE_IFAA)
+        self.assertEqual(n, 49)
+        n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_op_verjaardag, ORGANISATIE_IFAA)
+        self.assertEqual(n, 50)
+        n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_na_verjaardag, ORGANISATIE_IFAA)
+        self.assertEqual(n, 50)
+
+        # WA en NHB hanteren kijken het hele jaar naar de leeftijd die je bereikt
+        n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_voor_verjaardag, ORGANISATIE_WA)
+        self.assertEqual(n, 50)
+        n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_op_verjaardag, ORGANISATIE_WA)
+        self.assertEqual(n, 50)
+        n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_na_verjaardag, ORGANISATIE_WA)
+        self.assertEqual(n, 50)
+
+        n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_voor_verjaardag, ORGANISATIE_NHB)
+        self.assertEqual(n, 50)
+        n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_op_verjaardag, ORGANISATIE_NHB)
+        self.assertEqual(n, 50)
+        n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_na_verjaardag, ORGANISATIE_NHB)
+        self.assertEqual(n, 50)
 
     def test_leeftijdsklassen(self):
         now = timezone.now()  # is in UTC

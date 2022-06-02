@@ -188,6 +188,7 @@ then
             python3 -u $PYCOV ./manage.py help $cmd &>>"$LOG"
         fi
     done
+    echo
 fi
 
 if [ $RES -eq 0 -a $# -eq 0 ]

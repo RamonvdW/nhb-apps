@@ -8,7 +8,8 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Functie.models import maak_functie
-from .models import Sporter, SporterBoog, SporterVoorkeuren
+from .models import (Sporter, SporterBoog, SporterVoorkeuren,
+                     get_sporter_voorkeuren, get_sporter_voorkeuren_wedstrijdbogen)
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -195,6 +196,45 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_voorkeuren, post=False)
 
+    def test_getters(self):
+        voorkeuren = get_sporter_voorkeuren(self.sporter1)
+
+        # bestaat niet
+        sporter, voorkeuren, boog_pks = get_sporter_voorkeuren_wedstrijdbogen(lid_nr=999999)
+        self.assertIsNone(sporter)
+        self.assertIsNone(voorkeuren)
+        self.assertEqual(len(boog_pks), 0)
+
+        # initieel zijn er geen bogen
+        sporter, voorkeuren, boog_pks = get_sporter_voorkeuren_wedstrijdbogen(self.sporter1.lid_nr)
+        self.assertIsNotNone(sporter)
+        self.assertIsNotNone(voorkeuren)
+        self.assertEqual(len(boog_pks), 0)
+
+        # login as HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        # haal als HWL de voorkeuren pagina op van een lid van de vereniging
+        # dit maakt ook de SporterBoog records aan
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_voorkeuren + '100001/')
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('sporter/voorkeuren.dtl', 'plein/site_layout.dtl'))
+
+        # post een wijziging
+        with self.assert_max_queries(25):
+            resp = self.client.post(self.url_voorkeuren, {'sporter_pk': self.sporter1.lid_nr,
+                                                          'schiet_R': 'on',
+                                                          'schiet_C': 'on'})
+        self.assert_is_redirect(resp, '/vereniging/leden-voorkeuren/')
+
+        sporter, voorkeuren, boog_pks = get_sporter_voorkeuren_wedstrijdbogen(self.sporter1.lid_nr)
+        self.assertIsNotNone(sporter)
+        self.assertIsNotNone(voorkeuren)
+        self.assertEqual(len(boog_pks), 2)
+
     def test_hwl(self):
         # login as HWL
         self.e2e_login_and_pass_otp(self.account_hwl)
@@ -206,6 +246,7 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_voorkeuren + '100001/')
         self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('sporter/voorkeuren.dtl', 'plein/site_layout.dtl'))
 
         # controleer de stand van zaken voordat de HWL iets wijzigt
         obj_r = SporterBoog.objects.get(sporter__lid_nr=100001, boogtype__afkorting='R')
@@ -370,31 +411,35 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
             resp = self.client.get(self.url_voorkeuren)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
-        # niet-para sporter mag geen opmerking invoeren
+        # niet-para sporter mag ook een opmerking invoeren
         voorkeuren = SporterVoorkeuren.objects.all()[0]
         self.assertEqual(voorkeuren.opmerking_para_sporter, '')
+        self.assertFalse(voorkeuren.para_met_rolstoel)
 
-        with self.assert_max_queries(24):
-            resp = self.client.post(self.url_voorkeuren, {'para_notitie': 'Hallo test'})
+        with self.assert_max_queries(26):
+            resp = self.client.post(self.url_voorkeuren, {'para_notitie': 'Hallo test 1',
+                                                          'para_rolstoel': 'on'})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
         voorkeuren = SporterVoorkeuren.objects.get(pk=voorkeuren.pk)
-        self.assertEqual(voorkeuren.opmerking_para_sporter, '')
+        self.assertEqual(voorkeuren.opmerking_para_sporter, 'Hallo test 1')
+        self.assertTrue(voorkeuren.para_met_rolstoel)
 
         # maak dit een para sporter
         self.sporter1.para_classificatie = 'VI1'
         self.sporter1.save()
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_voorkeuren, {'para_notitie': 'Hallo test'})
+            resp = self.client.post(self.url_voorkeuren, {'para_notitie': 'Hallo test 2'})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
         voorkeuren = SporterVoorkeuren.objects.get(pk=voorkeuren.pk)
-        self.assertEqual(voorkeuren.opmerking_para_sporter, 'Hallo test')
+        self.assertEqual(voorkeuren.opmerking_para_sporter, 'Hallo test 2')
+        self.assertFalse(voorkeuren.para_met_rolstoel)
 
         # coverage: opslaan zonder wijziging
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_voorkeuren, {'para_notitie': 'Hallo test'})
+            resp = self.client.post(self.url_voorkeuren, {'para_notitie': 'Hallo test 2'})
         self.assert_is_redirect(resp, '/sporter/')     # naar profiel
 
     def test_email_optout(self):
@@ -466,7 +511,6 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         voorkeur = self.sporter_100002.sportervoorkeuren_set.all()[0]
         self.assertTrue(voorkeur.wedstrijd_geslacht_gekozen)
         self.assertEqual(self.sporter_100002.geslacht, voorkeur.wedstrijd_geslacht)
-
 
         # wissel naar de sporter met geslacht anders
 
