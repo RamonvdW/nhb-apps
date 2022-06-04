@@ -236,8 +236,6 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
 
         context['sessie'] = sessie
 
-        sessie.prijs_euro_str = str(sessie.prijs_euro).replace('.', ',')
-
         if wedstrijd.sessies.filter(pk=sessie.pk).count() != 1:
             raise Http404('Sessie hoort niet bij wedstrijd')
 
@@ -363,20 +361,6 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
 
                 sessie.max_sporters = sporters
                 updated.append('max_sporters')
-
-            prijs = request.POST.get('prijs', '')
-            if prijs:
-                prijs = prijs.replace(',', '.')   # regionale verschillen afvangen
-                try:
-                    prijs = float(prijs[:6])      # afkappen voor de veiligheid
-                except ValueError:
-                    raise Http404('Geen toegestane prijs')
-
-                if prijs < 0.0 or prijs > 999.99:
-                    raise Http404('Geen toegestane prijs')
-
-                sessie.prijs_euro = prijs
-                updated.append('prijs_euro')
 
             sessie.save(update_fields=updated)
 

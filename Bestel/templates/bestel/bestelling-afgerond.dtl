@@ -54,7 +54,7 @@
                         {% if is_afgerond %}
                             <i>De betaling is gelukt</i>
                         {% elif wacht_op_betaling %}
-                            <i>De betaling is (nog) niet gelukt</i>
+                            <i>De betaling is (nog) niet ontvangen</i>
                             <!-- TODO: opnieuw problemen link maken?? -->
                         {% else %}
                             <i class="red-text">Er is een probleem opgetreden</i>

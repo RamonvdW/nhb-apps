@@ -97,7 +97,6 @@ class TestBestelMandje(E2EHelpers, TestCase):
                     datum=datum,
                     tijd_begin='10:00',
                     tijd_einde='11:00',
-                    prijs_euro=10.00,
                     max_sporters=50)
         sessie.save()
         # sessie.wedstrijdklassen.add()
@@ -110,7 +109,9 @@ class TestBestelMandje(E2EHelpers, TestCase):
                         datum_einde=datum,
                         locatie=locatie,
                         organiserende_vereniging=ver,
-                        voorwaarden_a_status_when=now)
+                        voorwaarden_a_status_when=now,
+                        prijs_euro_normaal=10.00,
+                        prijs_euro_onder18=10.00)
         wedstrijd.save()
         wedstrijd.sessies.add(sessie)
         # wedstrijd.boogtypen.add()

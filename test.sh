@@ -129,7 +129,7 @@ python3 ./Bondspas/test-tools/websim_bondspas.py &
 PID_WEBSIM2=$!
 
 # start the payment service simulator
-python3 ./Betaal/test-tools/websim_betaal.py &
+python3 ./Betaal/test-tools/websim_betaal_test.py &
 PID_WEBSIM3=$!
 
 # check all websim programs have started properly

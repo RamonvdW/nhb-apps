@@ -113,6 +113,9 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
         sessie.compatible_boog = compatible_boog
         sessie.compatible_leeftijd = compatible_leeftijd
         sessie.compatible_geslacht = compatible_geslacht
+
+        if sporter:
+            sessie.prijs_euro_sporter = wedstrijd.bepaal_prijs_voor_sporter(sporter)
     # for
 
     return sessies, wedstrijdleeftijd, wedstrijdklassen, wedstrijd_geslacht
@@ -219,6 +222,8 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
                 context['uitleg_geslacht'] = True
                 if kan_aanmelden:
                     context['uitleg_geslacht'] = False
+
+            context['prijs_euro_sporter'] = wedstrijd.bepaal_prijs_voor_sporter(geselecteerd.sporter)
 
         context['menu_toon_mandje'] = True
 
@@ -399,6 +404,8 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
                 if kan_aanmelden:
                     context['uitleg_geslacht'] = False
 
+            context['prijs_euro_sporter'] = wedstrijd.bepaal_prijs_voor_sporter(geselecteerd.sporter)
+
         context['menu_toon_mandje'] = True
 
         context['url_toevoegen'] = reverse('Kalender:inschrijven-toevoegen')
@@ -567,6 +574,8 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
                 context['uitleg_geslacht'] = True
                 if kan_aanmelden:
                     context['uitleg_geslacht'] = False
+
+            context['prijs_euro_sporter'] = wedstrijd.bepaal_prijs_voor_sporter(geselecteerd.sporter)
         else:
             # sporter heeft geen boog voorkeur, dus mag waarschijnlijk niet schieten
             # context['sporter'] is al ingevuld (nodig in de template)

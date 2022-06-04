@@ -123,7 +123,16 @@ def kalender_plugin_inschrijven(inschrijving):
     sessie.aantal_inschrijvingen += 1
     sessie.save(update_fields=['aantal_inschrijvingen'])
 
-    return sessie.prijs_euro
+    wedstrijd = inschrijving.wedstrijd
+    sporter = inschrijving.sporterboog.sporter
+
+    leeftijd = sporter.bereken_wedstrijdleeftijd(wedstrijd.datum_begin, wedstrijd.organisatie)
+    if leeftijd < 18:
+        prijs = wedstrijd.prijs_euro_onder18
+    else:
+        prijs = wedstrijd.prijs_euro_normaal
+
+    return prijs
 
 
 def kalender_plugin_afmelden(inschrijving):

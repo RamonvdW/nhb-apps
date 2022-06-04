@@ -26,6 +26,10 @@ rm -rf "$STATIC_DIR"/*
 ./manage.py collectstatic -l
 
 # start the background processes
+echo "[INFO] Starting Mollie simulator"
+pkill -f websim_betaal
+python3 ./Betaal/test-tools/websim_betaal.py &
+
 echo "[INFO] Starting betaal_mutaties (runtime: 60 minutes)"
 pkill -f betaal_mutaties
 ./manage.py betaal_mutaties --settings=$SETTINGS 60 &
@@ -54,14 +58,15 @@ else
     ./manage.py runserver --settings=$SETTINGS --insecure
 fi
 
+# set normal performance
+sudo cpupower frequency-set --governor schedutil > /dev/null
+
 # kill the background processes
 echo "[INFO] Stopping background tasks"
 pkill -f regiocomp_tussenstand
 pkill -f regiocomp_mutaties
 pkill -f bestel_mutaties
 pkill -f betaal_mutaties
-
-# set normal performance
-sudo cpupower frequency-set --governor schedutil > /dev/null
+pkill -f websim_betaal
 
 # end of file

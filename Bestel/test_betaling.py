@@ -105,7 +105,6 @@ class TestBestelBetaling(E2EHelpers, TestCase):
                     datum=datum,
                     tijd_begin='10:00',
                     tijd_einde='11:00',
-                    prijs_euro=10.00,
                     max_sporters=50)
         sessie.save()
         self.sessie = sessie
@@ -119,10 +118,13 @@ class TestBestelBetaling(E2EHelpers, TestCase):
                         datum_einde=datum,
                         locatie=locatie,
                         organiserende_vereniging=ver,
-                        voorwaarden_a_status_when=now)
+                        voorwaarden_a_status_when=now,
+                        prijs_euro_normaal=10.00,
+                        prijs_euro_onder18=10.00)
         wedstrijd.save()
         wedstrijd.sessies.add(sessie)
         # wedstrijd.boogtypen.add()
+        self.wedstrijd = wedstrijd
 
         inschrijving = KalenderInschrijving(
                             wanneer=now,
@@ -155,7 +157,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         # betaling opstarten
         url_betaling_gedaan = '/plein/'     # TODO: betere url kiezen
         description = 'Test betaling 421'       # 421 = paid, iDEAL
-        betaal_mutatieverzoek_start_ontvangst(bestelling, description, self.sessie.prijs_euro, url_betaling_gedaan, snel=True)
+        betaal_mutatieverzoek_start_ontvangst(bestelling, description, self.wedstrijd.prijs_euro_normaal, url_betaling_gedaan, snel=True)
         f1, f2 = self.verwerk_betaal_mutaties(self.url_websim_api)
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
 

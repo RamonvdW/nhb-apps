@@ -273,6 +273,9 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
             aanwezig.append(opt)
         # for
 
+        context['prijs_euro_normaal_str'] = str(wedstrijd.prijs_euro_normaal).replace('.', ',')
+        context['prijs_euro_onder18_str'] = str(wedstrijd.prijs_euro_onder18).replace('.', ',')
+
         context['url_voorwaarden'] = settings.VOORWAARDEN_A_STATUS_URL
 
         # aantal banen waar uit gekozen kan worden
@@ -477,6 +480,32 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                 wedstrijd.extern_beheerd = True
             else:
                 wedstrijd.extern_beheerd = False
+
+            prijs = request.POST.get('prijs_normaal', '')
+            if prijs:
+                prijs = prijs.replace(',', '.')   # regionale verschillen afvangen
+                try:
+                    prijs = float(prijs[:6])      # afkappen voor de veiligheid
+                except ValueError:
+                    raise Http404('Geen toegestane prijs')
+
+                if prijs < 0.0 or prijs > 999.99:
+                    raise Http404('Geen toegestane prijs')
+
+                wedstrijd.prijs_euro_normaal = prijs
+
+            prijs = request.POST.get('prijs_onder18', '')
+            if prijs:
+                prijs = prijs.replace(',', '.')   # regionale verschillen afvangen
+                try:
+                    prijs = float(prijs[:6])      # afkappen voor de veiligheid
+                except ValueError:
+                    raise Http404('Geen toegestane prijs')
+
+                if prijs < 0.0 or prijs > 999.99:
+                    raise Http404('Geen toegestane prijs')
+
+                wedstrijd.prijs_euro_onder18 = prijs
 
             wedstrijd.save()
 

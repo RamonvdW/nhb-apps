@@ -47,7 +47,7 @@
                 <tr>
                     <th></th>
                     <td>
-                        <i style="padding:50px 0 50px" id="id_bericht">Een klein momentje: je wordt zo doorgestuurd..&nbsp;<span id="id_teller"></span></i>
+                        <i style="padding:50px 0 50px" id="id_bericht">Een klein momentje, je wordt zo doorgestuurd..&nbsp;<span id="id_teller"></span></i>
                     </td>
                 </tr>
             </table>
@@ -141,7 +141,7 @@
                 xhr.send();     // no data
             } else {
                 const el = document.getElementById('id_bericht')
-                el.innerText = "Het is op dit moment niet mogelijk om te betalen; probeer het later nog eens"
+                el.innerText = "Het is op dit moment niet mogelijk om te betalen. Probeer het later nog eens"
                 el.classList.add('red-text')
             }
         }

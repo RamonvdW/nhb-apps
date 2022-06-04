@@ -128,11 +128,28 @@
                         </td>
                     </tr>
                 {% endif %}
+
+
+                <tr>
+                    <td colspan="2" class="center nhb-blauw-text">
+                        <h6>Inschrijfgeld</h6>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Standaard</th>
+                    <td>&euro;&nbsp;{{ wed.prijs_euro_normaal }}</td>
+                </tr>
+
+                <tr>
+                    <th>Onder 18</th>
+                    <td>&euro;&nbsp;{{ wed.prijs_euro_onder18 }}</td>
+                </tr>
+
             </table>
 
             <table class="white">
                 <tr>
-                    <td colspan="5" class="center">
+                    <td colspan="3" class="center">
                         <h6 class="nhb-blauw-text">Sessies</h6>
                                              <!-- N = NHB -->
                         {% if wed.organisatie == 'N' %}
@@ -145,8 +162,6 @@
                     <th class="center">Wanneer</th>
                     <th class="center">Wedstrijdklassen</th>
                     <th class="center">Nog beschikbaar</th>
-                    <th class="center">Prijs</th>
-                    <th><!-- kolom voor de knoppen --></th>
                 </tr>
 
                 {% for sessie in sessies %}
@@ -158,13 +173,6 @@
                             {% endfor %}
                         </td>
                         <td class="center">{{ sessie.aantal_beschikbaar }} (van de {{ sessie.max_sporters }})</td>
-                        <td class="center">&euro;&nbsp;{{ sessie.prijs_euro }}</td>
-                        <td class="center">
-                            {% if sessie.kan_aanmelden %}
-                                <a class="btn-nhb-rood" href="#">
-                                    <i class="material-icons-round">add_shopping_cart</i></a>
-                            {% endif %}
-                        </td>
                     </tr>
                 {% endfor %}
             </table>

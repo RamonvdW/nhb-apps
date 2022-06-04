@@ -364,13 +364,13 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         # genereer het payment status-changed event met een niet-bestaand payment id
         resp = self.client.post(self.url_betaal_webhook)
-        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.status_code, 200)
 
-        resp = self.client.post(self.url_betaal_webhook, {'id': 'test_nietbestaand'})
-        self.assertEqual(resp.status_code, 400)
+        resp = self.client.post(self.url_betaal_webhook, {'id': 'test_niet_bestaand'})
+        self.assertEqual(resp.status_code, 200)
 
         resp = self.client.post(self.url_betaal_webhook, {'id': 'test&inject=%s!'})
-        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.status_code, 200)
 
         # model str() functies
         betaal = BetaalActief(payment_id="test", ontvanger=self.instellingen)
@@ -560,6 +560,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         actief.save()
         betaal_mutatieverzoek_payment_status_changed(payment_id)
         f1, f2 = self._run_achtergrondtaak()
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         actief = BetaalActief.objects.get(pk=actief.pk)
         self.assertTrue('Betaling is voldaan' in actief.log)
 

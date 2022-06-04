@@ -107,7 +107,6 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                     datum=datum,
                     tijd_begin='10:00',
                     tijd_einde='11:00',
-                    prijs_euro=10.00,
                     max_sporters=50)
         sessie.save()
         self.sessie = sessie
@@ -121,10 +120,13 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                         datum_einde=datum,
                         locatie=locatie,
                         organiserende_vereniging=ver,
-                        voorwaarden_a_status_when=now)
+                        voorwaarden_a_status_when=now,
+                        prijs_euro_normaal=10.00,
+                        prijs_euro_onder18=10.00)
         wedstrijd.save()
         wedstrijd.sessies.add(sessie)
         # wedstrijd.boogtypen.add()
+        self.wedstrijd = wedstrijd
 
         inschrijving = KalenderInschrijving(
                             wanneer=now,
@@ -398,13 +400,18 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         andere = Bestelling(bestel_nr=1234, account=account)
         andere.save()
 
+        # verkeerd account
         resp = self.client.post(self.url_check_status % andere.bestel_nr)
         self.assert404(resp, 'Niet gevonden')       # want verkeerd account
 
         url = self.url_check_status % bestelling.bestel_nr
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert404(resp, "Onverwachte status")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertTrue('status' in data.keys())
+        status = data['status']
+        self.assertEqual(status, 'error')           # want:
 
         # transactie met bestelling in verkeerde status
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
@@ -556,15 +563,20 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         url = self.url_check_status % bestelling.bestel_nr
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert404(resp, 'Onverwachte status')
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertTrue('status' in data.keys())
+        status = data['status']
+        self.assertEqual(status, 'error')
 
     def test_nul_bedrag(self):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
 
-        # maak de sessie gratis
-        self.sessie.prijs_euro = Decimal('0')
-        self.sessie.save(update_fields=['prijs_euro'])
+        # maak de wedstrijd gratis
+        self.wedstrijd.prijs_euro_normaal = Decimal('0')
+        self.wedstrijd.prijs_euro_onder18 = Decimal('0')
+        self.wedstrijd.save(update_fields=['prijs_euro_normaal', 'prijs_euro_onder18'])
 
         # bestel wedstrijddeelname
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)

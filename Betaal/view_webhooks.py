@@ -27,14 +27,19 @@ def simple_view_mollie_webhook(request):
             payment_id += char
     # for
 
+    # print('[DEBUG] webhook: payment_id=%s' % repr(payment_id))
+
     # herkennen we deze betaling?
     if BetaalActief.objects.filter(payment_id=payment_id).count() > 0:
         betaal_mutatieverzoek_payment_status_changed(payment_id)
+
+        # geef een status 200 terug (binnen 15 seconden) dan stoppen de callbacks
         status = 200
     else:
-        # 404 or 403 gives too much content
-        # 400 becomes a plain and empty response
-        status = 400
+        # 404 or 403 geeft een uitgebreide pagina met foutmelding
+        # 400 is een simpele en lege reactie
+        # 200 voorkomt dat er niets geleerd kan worden (ook advies Mollie)
+        status = 200
 
     # geef een status 200 terug (binnen 15 seconden) dan stoppen de callbacks
     return HttpResponse(status=status)

@@ -116,13 +116,6 @@
                             </tr>
 
                             <tr>
-                                <th>Prijs in &euro; (123,45)</th>
-                                <td>
-                                    <input type="text" name="prijs" value="{{ sessie.prijs_euro_str }}" pattern="^\d+(,\d{2})?$" oninput="gewijzigd()">
-                                </td>
-                            </tr>
-
-                            <tr>
                                 <!-- inline-block gives vertical align top -->
                                 <th style="display: inline-block">Wedstrijdklassen in deze sessie</th>
                                 <td>

@@ -131,13 +131,15 @@ class Command(BaseCommand):
                         pass
 
                     # houd de actieve betalingen bij
-                    actief = BetaalActief(
-                                    payment_id=payment_id,
-                                    ontvanger=instellingen,     # TODO: bij akkoord_via_nhb...
-                                    payment_status=status)
+                    actief, is_created = BetaalActief.objects.get_or_create(
+                                                payment_id=payment_id,
+                                                ontvanger=instellingen)     # TODO: bij akkoord_via_nhb...
+                    if not is_created:
+                        actief.log = "Reused\n"
                     actief.log += "[%s]: created\n" % timezone.localtime(timezone.now())
                     actief.log += json.dumps(payment)
                     actief.log += '\n'
+                    actief.payment_status = status
                     actief.save()
 
                     try:
@@ -200,7 +202,7 @@ class Command(BaseCommand):
                 return False
 
         if klant_naam is None or klant_account is None:
-            self.stderr.write('[ERROR] {maak_transactie} Incomplete informatie over klant: %s, %s' % (
+            self.stderr.write('[ERROR] {maak_transactie} Incomplete informatie over betaler: %s, %s' % (
                                 repr(klant_naam), repr(klant_account)))
             return False
 
@@ -295,14 +297,14 @@ class Command(BaseCommand):
 
                             if self._maak_transactie(obj, payment_id):
                                 # betaling is afgerond en alle benodigde informatie staat nu in een transactie
-                                bestel_mutatieverzoek_betaling_afgerond(actief, gelukt=True)
+                                bestel_mutatieverzoek_betaling_afgerond(actief, gelukt=True, snel=True)
 
                         elif obj.is_canceled() or obj.is_expired():
                             actief.log += 'Betaling is mislukt\n\n'
                             actief.save(update_fields=['log'])
 
                             # geef door dat de betaling mislukt is, zodat deze opnieuw opgestart kan worden
-                            bestel_mutatieverzoek_betaling_afgerond(actief, gelukt=False)
+                            bestel_mutatieverzoek_betaling_afgerond(actief, gelukt=False, snel=True)
                         elif obj.is_pending() or obj.is_open():
                             # do nothing
                             pass

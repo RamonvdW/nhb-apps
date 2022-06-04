@@ -289,6 +289,7 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),
+            (reverse('Bestel:toon-bestellingen'), 'Bestellingen'),
             (reverse('Bestel:toon-bestelling-details', kwargs={'bestel_nr': bestelling.bestel_nr}), 'Bestelling'),
             (None, 'Afrekenen')
         )
@@ -340,8 +341,6 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
 
             url_betaling_gedaan = settings.SITE_URL + reverse('Bestel:na-de-betaling',
                                                               kwargs={'bestel_nr': bestelling.bestel_nr})
-
-            # snel = str(request.POST.get('snel', ''))[:1]
 
             # start de bestelling via de achtergrond taak
             # deze slaat de referentie naar de mutatie op in de bestelling
@@ -431,6 +430,7 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),
+            (reverse('Bestel:toon-bestellingen'), 'Bestellingen'),
             (reverse('Bestel:toon-bestelling-details', kwargs={'bestel_nr': bestelling.bestel_nr}), 'Bestelling'),
             (None, 'Status betaling')
         )

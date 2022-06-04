@@ -192,9 +192,6 @@ class KalenderWedstrijdSessie(models.Model):
     tijd_begin = models.TimeField()
     tijd_einde = models.TimeField()
 
-    # prijs
-    prijs_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))     # max 999,99
-
     # toegestane wedstrijdklassen
     wedstrijdklassen = models.ManyToManyField(KalenderWedstrijdklasse, blank=True)
 
@@ -282,6 +279,10 @@ class KalenderWedstrijd(models.Model):
     bijzonderheden = models.TextField(max_length=1000, default='',
                                       blank=True)      # mag leeg zijn
 
+    # kosten (voor alle sessies van de hele wedstrijd)
+    prijs_euro_normaal = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))     # max 999,99
+    prijs_euro_onder18 = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))     # max 999,99
+
     # de sessies van deze wedstrijd
     sessies = models.ManyToManyField(KalenderWedstrijdSessie,
                                      blank=True)        # mag leeg zijn
@@ -290,13 +291,21 @@ class KalenderWedstrijd(models.Model):
     deeluitslagen = models.ManyToManyField(KalenderWedstrijdDeeluitslag,
                                            blank=True)        # mag leeg zijn
 
-    class Meta:
-        verbose_name = "Kalender wedstrijd"
-        verbose_name_plural = "Kalender wedstrijden"
+    def bepaal_prijs_voor_sporter(self, sporter):
+        leeftijd = sporter.bereken_wedstrijdleeftijd(self.datum_begin, self.organisatie)
+        if leeftijd < 18:
+            prijs = self.prijs_euro_onder18
+        else:
+            prijs = self.prijs_euro_normaal
+        return prijs
 
     def __str__(self):
         """ geef een beschrijving terug voor de admin interface """
         return "%s [%s] %s" % (self.datum_begin, WEDSTRIJD_STATUS_TO_STR[self.status], self.titel)
+
+    class Meta:
+        verbose_name = "Kalender wedstrijd"
+        verbose_name_plural = "Kalender wedstrijden"
 
 
 class KalenderWedstrijdKortingscode(models.Model):
