@@ -21,7 +21,7 @@ urlpatterns = [
          name='info-competitie'),
 
     path('info/leeftijden/',
-         views_info.InfoLeeftijdenView.as_view(),
+         views_info.redirect_leeftijden,        # oud; redirects naar nieuw
          name='info-leeftijden'),
 
     path('<comp_pk>/klassengrenzen/tonen/',

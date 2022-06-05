@@ -18,6 +18,9 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
 
     """ tests voor de Sporter applicatie, module Leeftijdsklassen """
 
+    url_leeftijdsklassen = '/sporter/leeftijden/persoonlijk/'
+    url_leeftijdsgroepen = '/sporter/leeftijden/'
+
     def setUp(self):
         """ initialisatie van de test case """
         self.account_admin = self.e2e_create_account_admin()
@@ -146,29 +149,29 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                                ['21+ (senioren)', '21+ (senioren)', '21+ (senioren)', '21+ (senioren)', '21+ (senioren)'],
                                '21+'))
 
-    def test_view(self):
+    def test_persoonlijk(self):
         # zonder login
         with self.assert_max_queries(20):
-            resp = self.client.get('/sporter/leeftijdsklassen/')
+            resp = self.client.get(self.url_leeftijdsklassen)
         self.assert403(resp)
 
         # inlog, geen NHB lid
         self.e2e_login(self.account_admin)
         with self.assert_max_queries(20):
-            resp = self.client.get('/sporter/leeftijdsklassen/')
+            resp = self.client.get(self.url_leeftijdsklassen)
         self.assert403(resp)
 
         # sporter
         self.e2e_login(self.account_normaal)
         with self.assert_max_queries(20):
-            resp = self.client.get('/sporter/leeftijdsklassen/')
+            resp = self.client.get(self.url_leeftijdsklassen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
 
         # met voorkeuren
         with self.assert_max_queries(20):
-            resp = self.client.get('/sporter/leeftijdsklassen/')
+            resp = self.client.get(self.url_leeftijdsklassen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
@@ -181,11 +184,25 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         voorkeur.save(update_fields=['wedstrijd_geslacht_gekozen'])
 
         with self.assert_max_queries(20):
-            resp = self.client.get('/sporter/leeftijdsklassen/')
+            resp = self.client.get(self.url_leeftijdsklassen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
 
-        self.e2e_assert_other_http_commands_not_supported('/sporter/leeftijdsklassen/')
+        self.e2e_assert_other_http_commands_not_supported(self.url_leeftijdsklassen)
+
+        # redirect oud naar nieuw
+        resp = self.client.get('/sporter/leeftijdsklassen/')
+        self.assert_is_redirect(resp, '/sporter/leeftijden/persoonlijk/')
+
+    def test_groepen(self):
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_leeftijdsgroepen)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/leeftijdsgroepen.dtl', 'plein/site_layout.dtl'))
+
+        self.e2e_assert_other_http_commands_not_supported(self.url_leeftijdsgroepen)
+
 
 # end of file

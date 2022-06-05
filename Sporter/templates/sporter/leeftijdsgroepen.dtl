@@ -36,11 +36,12 @@
         </div>
     </div>
 
+
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
             <h4>Leeftijds<wbr>klassen World Archery</h4>
-            <p>Volgens het reglement van World Archery wordt de klasse bepaald door de leeftijd die je <b>bereikt</b> in een jaar.</p>
+            <p>Volgens het reglement van World Archery wordt de klasse bepaald door de leeftijd die je <b>bereikt in een jaar</b>.</p>
         </div>
     </div>
 
@@ -114,6 +115,74 @@
     <!-- witruimte -->
     <div class="row center">
         <div class="col s12">
+            <h4>Leeftijds<wbr>klassen IFAA</h4>
+            <p>Volgens het reglement van de IFAA wordt de klasse bepaald door je leeftijd <b>op de eerste dag van een wedstrijd</b>.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Leeftijds<wbr>klasse</th>
+                        <th>Vanaf deze leeftijd</th>
+                        <th>Tot en met deze leeftijd</th>
+                        <th>Andere klassen waarin je uit mag komen</th>
+                    </tr>
+                </thead>
+
+                <tr>
+                    <td>Welp</td>
+                    <td>-</td>
+                    <td>12</td>
+                    <td>Junior, Jongvolwassen, Volwassen</td>
+                </tr>
+
+                <tr>
+                    <td>Junior</td>
+                    <td>-</td>
+                    <td>16</td>
+                    <td>Jongvolwassen, Volwassen</td>
+                </tr>
+
+                <tr>
+                    <td>Jongvolwassen</td>
+                    <td>-</td>
+                    <td>20</td>
+                    <td>Volwassen</td>
+                </tr>
+
+                <tr>
+                    <td>Volwassen</td>
+                    <td>21</td>
+                    <td>54</td>
+                    <td>-</td>
+                </tr>
+
+                <tr>
+                    <td>Veteraan</td>
+                    <td>55</td>
+                    <td>-</td>
+                    <td>Volwassen</td>
+                </tr>
+
+                <tr>
+                    <td>Senior</td>
+                    <td>65</td>
+                    <td>-</td>
+                    <td>Veteraan, Volwassen</td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
             <h4>Bonds<wbr>competitie</h4>
             <p>De bondscompetities (tijdens het winter-seizoen) lopen over 2 jaren. De finales worden in het tweede jaar gehouden.</p>
             <p>Je moet de bondscompetitie beginnen in de klasse waarin je tijdens de finale hoort uit te komen.</p>
@@ -169,6 +238,6 @@
 
     <p class="center">De klassen 50+ (master) en 60+ (veteraan) zijn niet in gebruik in de bondscompetities.</p>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-info-leeftijden" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="sporter-leeftijdsgroepen" %}
 
 {% endblock %}

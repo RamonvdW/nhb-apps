@@ -208,6 +208,25 @@
 
     {% endif %}
 
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Informatie</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+
+            <!-- informatie over leeftijden -->
+            {% url 'Sporter:leeftijdsgroepen' as card_url %}
+            {% include 'plein/card.dtl' with title="Leeftijden" text="Informatie over de leeftijds-categori&euml;n voor wedstrijden en de competities." icon="star" url=card_url %}
+
+        </div>
+    </div>
+
     {% include 'feedback/sidebar.dtl' with op_pagina="kalender-wedstrijd-details" %}
 
 {% endblock %}
