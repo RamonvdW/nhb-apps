@@ -115,6 +115,8 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
     def post(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de POST request af te handelen """
 
+        account = request.user
+
         ver = self.functie_nu.nhb_ver
         locaties = ver.wedstrijdlocatie_set.exclude(zichtbaar=False)
         aantal = locaties.count()
@@ -138,7 +140,11 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
                             organiserende_vereniging=self.functie_nu.nhb_ver,
                             organisatie=keuze2organisatie[keuze],
                             voorwaarden_a_status_when=now,
-                            locatie=locaties[0])
+                            locatie=locaties[0],
+                            contact_naam=account.volledige_naam(),
+                            contact_email=self.functie_nu.bevestigde_email,
+                            contact_website=ver.website,
+                            contact_telefoon=ver.telefoonnummer)
 
                 if wed.organisatie == ORGANISATIE_IFAA:
                     wed.discipline = WEDSTRIJD_DISCIPLINE_3D

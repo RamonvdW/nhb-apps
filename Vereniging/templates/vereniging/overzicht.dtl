@@ -38,7 +38,6 @@
                     <th>Regio</th>
                     <td>{{ nhb_ver.regio }}</td>
                 </tr>
-
                 {% if clusters.count > 0 %}
                     <tr>
                         <th>Cluster{% if clusters.count > 1 %}s{% endif %}</th>
@@ -49,6 +48,29 @@
                         </td>
                     </tr>
                 {% endif %}
+
+                <tr>
+                    <th>Website</th>
+                    <td>
+                        {% if nhb_ver.website %}
+                            <a class="email" href="{{ nhb_ver.website }}" target="_blank" rel="noopener noreferrer"><code>{{ nhb_ver.website }}</code></a>
+                        {% else %}
+                            <i>Geen</i>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                {% comment %}
+                <tr>
+                    <th>Telefoonnummer</th>
+                    <td>{% if nhb_ver.telefoonnummer %}{{ nhb_ver.telefoonnummer }}{% else %}<i class="red-text">Geen</i>{% endif %}</td>
+                </tr>
+
+                <tr>
+                    <th>KvK nummer</th>
+                    <td>{% if nhb_ver.kvk_nummer %}{{ nhb_ver.kvk_nummer }}{% else %}<i class="red-text">Geen</i>{% endif %}</td>
+                </tr>
+                {% endcomment %}
 
                 {% if nhb_ver.geen_wedstrijden %}
                     <tr>

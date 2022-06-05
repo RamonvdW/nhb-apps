@@ -142,9 +142,16 @@ class NhbVereniging(models.Model):
     # website van deze vereniging
     website = models.CharField(max_length=100, default='', blank=True)
 
+    # algemeen e-mailadres
+    contact_email = models.EmailField(blank=True)
+
     # telefoonnummer van deze vereniging
     # maximum is 15 tekens, maar we staan streepjes/spaties toe
     telefoonnummer = models.CharField(max_length=20, default='', blank=True)
+
+    # adres van "het bedrijf"
+    adres_regel1 = models.CharField(max_length=100, default='', blank=True)
+    adres_regel2 = models.CharField(max_length=100, default='', blank=True)
 
     def ver_nr_en_naam(self):
         return "[%s] %s" % (self.ver_nr, self.naam)

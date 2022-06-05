@@ -423,6 +423,20 @@ class Command(BaseCommand):
                     break
             # for
 
+            ver_adres1 = ''
+            ver_adres2 = ''
+            # address = "Straat 9\n1234 AB  Plaats\n"
+            adres = club['address']
+            if not adres:       # handles None and ''
+                self.stderr.write('[ERROR] Vereniging %s heeft geen adres' % ver_nr)
+            else:
+                adres_spl = adres.strip().split('\n')
+                if len(adres_spl) != 2:
+                    self.stderr.write('[ERROR] Vereniging %s adres bestaat niet uit 2 regels: %s' % (ver_nr, repr(club['address'])))
+                if len(adres_spl) >= 2:
+                    ver_adres1 = adres_spl[0]
+                    ver_adres2 = adres_spl[1]
+
             # FUTURE: verdere velden: has_disabled_facilities, lat/lon,
 
             # zoek de vereniging op
@@ -478,11 +492,29 @@ class Command(BaseCommand):
                     obj.website = ver_website
                     updated.append('website')
 
+                if obj.contact_email != ver_email:
+                    self.stdout.write("[INFO] Wijziging van contact_email van vereniging %s: %s --> %s" % (ver_nr, obj.contact_email, ver_email))
+                    self._count_wijzigingen += 1
+                    obj.contact_email = ver_email
+                    updated.append('contact_email')
+
                 if obj.telefoonnummer != ver_tel_nr:
                     self.stdout.write("[INFO] Wijziging van telefoonnummer van vereniging %s: %s --> %s" % (ver_nr, obj.telefoonnummer, ver_tel_nr))
                     self._count_wijzigingen += 1
                     obj.telefoonnummer = ver_tel_nr
                     updated.append('telefoonnummer')
+
+                if obj.adres_regel1 != ver_adres1:
+                    self.stdout.write("[INFO] Wijziging van adres regel 1 van vereniging %s: %s --> %s" % (ver_nr, obj.adres_regel1, ver_adres1))
+                    self._count_wijzigingen += 1
+                    obj.adres_regel1 = ver_adres1
+                    updated.append('adres_regel1')
+
+                if obj.adres_regel2 != ver_adres2:
+                    self.stdout.write("[INFO] Wijziging van adres regel 2 van vereniging %s: %s --> %s" % (ver_nr, obj.adres_regel2, ver_adres2))
+                    self._count_wijzigingen += 1
+                    obj.adres_regel2 = ver_adres2
+                    updated.append('adres_regel2')
 
                 if not self.dryrun:
                     obj.save(update_fields=updated)
@@ -497,6 +529,9 @@ class Command(BaseCommand):
                 ver.kvk_nummer = ver_kvk
                 ver.website = ver_website
                 ver.telefoonnummer = ver_tel_nr
+                ver.contact_email = ver_email
+                ver.adres_regel1 = ver_adres1
+                ver.adres_regel2 = ver_adres2
                 regio_obj = self._vind_regio(ver_regio)
                 if not regio_obj:
                     self._count_errors += 1

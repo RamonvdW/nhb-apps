@@ -321,13 +321,12 @@
                                 </td>
                             </tr>
 
-
                             <tr>
                                 <td colspan="3" class="center nhb-blauw-text"><h6>Contactgegevens organisatie</h6></td>
                             </tr>
 
                             <tr>
-                                <th style="padding-left:30px">Naam</th>
+                                <th style="padding-left:30px">Naam van contact<wbr>persoon / wedstrijd<wbr>leider</th>
                                 <td colspan="2">
                                     {% if block_edits %}
                                         <span>{{ wed.contact_naam }}</span>
@@ -349,7 +348,7 @@
                             </tr>
 
                             <tr>
-                                <th style="padding-left:30px">E-mailadres</th>
+                                <th style="padding-left:30px">E-mail<wbr>adres</th>
                                 <td colspan="2">
                                     {% if block_edits %}
                                         <span>{{ wed.contact_email }}</span>
