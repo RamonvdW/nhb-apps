@@ -199,9 +199,6 @@ class MyServer(BaseHTTPRequestHandler):
         data = self._read_json_body()
         # print('[DEBUG] {websim_betaal_test} POST data: %s' % repr(data))
 
-        do_post_payment_change = False
-        webhook_url = ''
-
         try:
             webhook_url = data['webhookUrl']
             redirect_url = data['redirectUrl']
@@ -284,20 +281,8 @@ class MyServer(BaseHTTPRequestHandler):
             if test_code in ("39", "40", "41", "42", "421", "422", "423", "425", "426", "427", "428", "429", "43", "44", "45", "46", "47"):
                 self._write_response(200, resp)
         else:
-            # normale simulatie (geen test case)
-            # opstart van een betaling
-            resp['method'] = 'ideal'
+            # geen corner-case
             self._write_response(200, resp)
-            if webhook_url:
-                do_post_payment_change = True
-
-        # TODO: onderstaande werkt niet tijdens django testrunner omdat er geen http server aan het luisteren is
-        if do_post_payment_change:
-            # wait a little bit, then send the payment change
-            print('[DEBUG] {websim_betaal_test} Generating payment callback to %s' % repr(webhook_url))
-            time.sleep(0.5)     # even wachten voordat we er voor gaan
-            r = requests.post(webhook_url, data={'id': 'tr_%s' % payment_id})
-            print('[DEBUG] {websim_betaal_test} Callback POST results:', r.status_code, r.reason)
 
 
 def main():

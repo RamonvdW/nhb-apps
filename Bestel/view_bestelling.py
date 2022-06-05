@@ -260,30 +260,43 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu = None
+        self.bestelling = None  # wordt gezet door dispatch()
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu = rol_get_huidige(self.request)
         return self.rol_nu != Rollen.ROL_NONE
+
+    def dispatch(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen voor get_queryset/get_context_data
+            hier is het mogelijk om een redirect te doen.
+
+            Let op: test_func is nog niet aangeroepen
+        """
+        self.rol_nu = rol_get_huidige(self.request)
+        if self.rol_nu != Rollen.ROL_NONE:
+            account = self.request.user
+
+            try:
+                bestel_nr = str(kwargs['bestel_nr'])[:7]        # afkappen voor de veiligheid
+                bestel_nr = int(bestel_nr)
+                bestelling = Bestelling.objects.get(bestel_nr=bestel_nr, account=account)
+            except (KeyError, TypeError, ValueError, Bestelling.DoesNotExist):
+                raise Http404('Niet gevonden')
+
+            if bestelling.status == BESTELLING_STATUS_AFGEROND:
+                # betaling is al klaar
+                url = reverse('Bestel:na-de-betaling', kwargs={'bestel_nr': bestelling.bestel_nr})
+                return HttpResponseRedirect(url)
+
+            self.bestelling = bestelling
+
+        return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        account = self.request.user
-
-        try:
-            bestel_nr = str(kwargs['bestel_nr'])[:7]        # afkappen voor de veiligheid
-            bestel_nr = int(bestel_nr)
-            bestelling = Bestelling.objects.get(bestel_nr=bestel_nr, account=account)
-        except (KeyError, TypeError, ValueError, Bestelling.DoesNotExist):
-            raise Http404('Niet gevonden')
-
-        if bestelling.status == BESTELLING_STATUS_AFGEROND:
-            # betaling is al klaar
-            url = reverse('Bestel:na-de-betaling', kwargs={'bestel_nr': bestelling.bestel_nr})
-            return HttpResponseRedirect(url)
 
         # de details worden via DynamicBestellingCheckStatus opgehaald
-        context['bestelling'] = bestelling
+        context['bestelling'] = bestelling = self.bestelling
 
         context['url_status_check'] = reverse('Bestel:dynamic-check-status', kwargs={'bestel_nr': bestelling.bestel_nr})
 
@@ -322,7 +335,9 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
         except (KeyError, TypeError, ValueError, Bestelling.DoesNotExist):
             raise Http404('Niet gevonden')
 
+        # print('bestelling.status=%s' % bestelling.status)
         out = dict()
+        out['status'] = 'error'  # fallback
 
         if bestelling.status == BESTELLING_STATUS_NIEUW:
             # de betaling is nog niet opgestart, dus dit is het moment (want we willen het niet op een GET doen)
@@ -331,6 +346,7 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
             # start een nieuwe transactie op
             beschrijving = "%s bestelling %s" % (settings.AFSCHRIFT_SITE_NAAM, bestelling.bestel_nr)
 
+            # TODO: is het realistisch dat status NIEUW al transacties heeft?
             rest_euro = bestelling.totaal_euro
             for transactie in bestelling.transacties.all():
                 if transactie.is_restitutie:
@@ -353,8 +369,6 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
                         snel=True)          # niet wachten op reactie
 
         elif bestelling.status == BESTELLING_STATUS_WACHT_OP_BETALING:
-            out['status'] = 'error'     # fallback
-
             if bestelling.betaal_mutatie:
                 url = bestelling.betaal_mutatie.url_checkout
                 if url:
@@ -366,12 +380,10 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
         elif bestelling.status == BESTELLING_STATUS_AFGEROND:
             # we zouden hier niet moeten komen
             # TODO: automatisch doorsturen
-            out['status'] = 'error'
+            out['status'] = 'afgerond'
 
-        else:
-            out['status'] = 'error'
-            # een 404 resulteert in een foutmelding pagina (status 200)
-            # raise Http404('Onbekende status')
+        # niet gebruiken: raise Http404('Onbekende status')
+        # want een 404 resulteert in een foutmelding pagina (status 200)
 
         return JsonResponse(out)
 
