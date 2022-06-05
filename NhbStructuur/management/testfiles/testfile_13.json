@@ -32,7 +32,8 @@
      "phone_mobile": null,
      "iso_abbr": null,
      "latitude": null,
-     "longitude": null
+     "longitude": null,
+     "coc_number": null
     }
   ],
   "members": [

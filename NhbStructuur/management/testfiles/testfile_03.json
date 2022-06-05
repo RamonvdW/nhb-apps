@@ -21,7 +21,7 @@
      "prefix": null,
      "secretaris": [],
      "email": "test@groteclub.archery",
-     "website": "www.groteclub.archery",
+     "website": "https://www.groteclub.archery",
      "has_disabled_facilities": true,
      "location_name": "Stad",
      "postal_code": null,
@@ -31,7 +31,8 @@
      "phone_mobile": null,
      "iso_abbr": null,
      "latitude": null,
-     "longitude": null
+     "longitude": null,
+     "coc_number": null
     },
     {"club_number": 1001,
      "region_number": 101,
@@ -41,17 +42,18 @@
         {"member_number": 1}
       ],
      "email": "test@nhbtest.net",
-     "website": "www.somewhere.test",
+     "website": "http://www.somewhere.test",
      "has_disabled_facilities": true,
      "location_name": null,
      "postal_code": null,
      "address": null,
-     "phone_business": null,
+     "phone_business": "+316666666",
      "phone_private": null,
      "phone_mobile": null,
      "iso_abbr": null,
      "latitude": null,
-     "longitude": null
+     "longitude": null,
+     "coc_number": "12345678"
     },
     {"club_number": 1042,
      "region_number": 113,
@@ -69,7 +71,8 @@
      "phone_mobile": null,
      "iso_abbr": null,
      "latitude": null,
-     "longitude": null
+     "longitude": null,
+     "coc_number": null
     }
   ],
   "members": [

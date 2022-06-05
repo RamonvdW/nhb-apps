@@ -136,6 +136,16 @@ class NhbVereniging(models.Model):
     # deze leden mogen geen wedstrijden schieten
     geen_wedstrijden = models.BooleanField(default=False)
 
+    # KvK nummer - wordt gebruikt bij verkoop wedstrijd/opleiding
+    kvk_nummer = models.CharField(max_length=15, default='', blank=True)
+
+    # website van deze vereniging
+    website = models.CharField(max_length=100, default='', blank=True)
+
+    # telefoonnummer van deze vereniging
+    # maximum is 15 tekens, maar we staan streepjes/spaties toe
+    telefoonnummer = models.CharField(max_length=20, default='', blank=True)
+
     def ver_nr_en_naam(self):
         return "[%s] %s" % (self.ver_nr, self.naam)
 

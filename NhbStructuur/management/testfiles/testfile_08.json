@@ -21,7 +21,7 @@
      "prefix": null,
      "secretaris": [],
      "email": "andere@groteclub.archery",
-     "website": "www.groteclub.archery",
+     "website": "https://www.groteclub.archery",
      "has_disabled_facilities": true,
      "location_name": "Stadia",
      "postal_code": null,
@@ -31,7 +31,8 @@
      "phone_mobile": null,
      "iso_abbr": null,
      "latitude": null,
-     "longitude": null
+     "longitude": null,
+     "coc_number": null
     },
     {"club_number": 1001,
      "region_number": 199,
@@ -41,7 +42,7 @@
         {"member_number": 100001}
       ],
      "email": "test@nhbtest.net",
-     "website": "www.somewhere.test",
+     "website": "http://www.somewhere.test",
      "has_disabled_facilities": true,
      "location_name": "Locatión",
      "postal_code": null,
@@ -51,7 +52,8 @@
      "phone_mobile": null,
      "iso_abbr": null,
      "latitude": null,
-     "longitude": null
+     "longitude": null,
+     "coc_number": null
     },
     {"club_number": 1002,
      "region_number": 199,
@@ -63,7 +65,7 @@
      "email": "zonderdoel@nhbtest.net",
      "website": "www.zonderdoel.test",
      "has_disabled_facilities": true,
-     "location_name": null,
+     "location_name": " ",
      "postal_code": null,
      "address": null,
      "phone_business": null,
@@ -71,7 +73,8 @@
      "phone_mobile": null,
      "iso_abbr": null,
      "latitude": null,
-     "longitude": null
+     "longitude": null,
+     "coc_number": "X15"
     },
     {"club_number": 1042,
      "region_number": 113,
@@ -79,7 +82,7 @@
      "prefix": null,
      "secretaris": [],
      "email": "test@vasteclub.archery",
-     "website": "www.vasteclub.archery",
+     "website": null,
      "has_disabled_facilities": false,
      "location_name": "Vaste",
      "postal_code": null,
@@ -89,7 +92,8 @@
      "phone_mobile": null,
      "iso_abbr": null,
      "latitude": null,
-     "longitude": null
+     "longitude": null,
+     "coc_number": "1234"
     }
   ],
   "members": [

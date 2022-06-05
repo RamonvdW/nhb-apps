@@ -10,7 +10,7 @@ from django.shortcuts import render, reverse
 from BasisTypen.models import BLAZOEN2STR
 from Functie.rol import rol_get_huidige, Rollen
 from Plein.menu import menu_dynamics
-from .models import (AG_NUL, Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse)
+from .models import AG_NUL, Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 
 
 TEMPLATE_COMPETITIE_KLASSENGRENZEN_TONEN = 'competitie/klassengrenzen-tonen.dtl'

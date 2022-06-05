@@ -83,6 +83,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         with self.assert_max_queries(93):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_03.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1000 (Grote Club) heeft geen secretaris!" in f1.getvalue())
         self.assertTrue("[ERROR] Kan secretaris 1 van vereniging 1001 niet vinden" in f1.getvalue())
         self.assertTrue("[ERROR] Lid 100024 heeft geen valide e-mail (enige@nhb)" in f1.getvalue())
@@ -94,6 +96,14 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[INFO] Lid 100001 geboortedatum: 1972-03-04 --> 2000-02-01" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100001: sinds_datum: 2010-11-12 --> 2000-01-01" in f2.getvalue())
         self.assertTrue("[INFO] Lid 100001: nieuwe speelsterkte 1990-01-01, Recurve, Recurve 1000" in f2.getvalue())
+        self.assertTrue("[WARNING] Vereniging 1000 heeft geen KvK nummer" in f2.getvalue())
+        self.assertTrue("[INFO] Wijziging van website van vereniging 1000:  --> https://www.groteclub.archery" in f2.getvalue())
+        self.assertTrue("[WARNING] Vereniging 1042 website url: 'www.vasteclub.archery' bevat fout (['Voer een geldige URL in.'])" in f2.getvalue())
+
+        ver = NhbVereniging.objects.get(ver_nr=1001)
+        self.assertEqual(ver.website, "http://www.somewhere.test")
+        self.assertEqual(ver.telefoonnummer, "+316666666")
+        self.assertEqual(ver.kvk_nummer, "12345678")
 
     def test_unicode_error(self):
         # UnicodeDecodeError
@@ -162,16 +172,18 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[INFO] Wijziging van regio voor vereniging 1000: 111 --> 112" in f2.getvalue())
-        self.assertTrue('[INFO] Wijziging van naam voor vereniging 1000: "Grote Club" --> "Nieuwe Grote Club"' in f2.getvalue())
+        self.assertTrue("[INFO] Wijziging van regio van vereniging 1000: 111 --> 112" in f2.getvalue())
+        self.assertTrue('[INFO] Wijziging van naam van vereniging 1000: "Grote Club" --> "Nieuwe Grote Club"' in f2.getvalue())
         self.assertTrue("[ERROR] Kan vereniging 1001 niet wijzigen naar onbekende regio 199" in f1.getvalue())
         self.assertTrue("[ERROR] Vereniging 1002 hoort bij onbekende regio 199" in f1.getvalue())
         self.assertTrue("[INFO] Wijziging van secretaris voor vereniging 1001: geen --> 100001" in f2.getvalue())
-        self.assertTrue('[INFO] Wijziging van plaats voor vereniging 1000: "Stad" --> "Stadia"' in f2.getvalue())
+        self.assertTrue('[INFO] Wijziging van plaats van vereniging 1000: "Stad" --> "Stadia"' in f2.getvalue())
         self.assertTrue('[INFO] Wijziging van secretaris email voor vereniging 1000: "test@groteclub.archery" --> "andere@groteclub.archery"' in f2.getvalue())
         self.assertTrue("[INFO] Nieuwe wedstrijdlocatie voor adres 'Nieuwe pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
         self.assertTrue("[INFO] Vereniging [1000] Nieuwe Grote Club ontkoppeld van wedstrijdlocatie met adres 'Oude pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
         self.assertTrue("[INFO] Vereniging [1000] Nieuwe Grote Club gekoppeld aan wedstrijdlocatie 'Nieuwe pijlweg 1, 1234 AB Doelstad'" in f2.getvalue())
+        self.assertTrue("[WARNING] Vereniging 1002 KvK nummer 'X15' moet 8 cijfers bevatten" in f2.getvalue())
+        self.assertTrue("[WARNING] Vereniging 1042 KvK nummer '1234' moet 8 cijfers bevatten" in f2.getvalue())
 
     def test_lid_mutaties(self):
         # lid mutaties
@@ -420,8 +432,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         with self.assert_max_queries(25):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_15.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
-        self.assertTrue("[INFO] Wijziging van 'geen wedstrijden' voor vereniging 1377: False --> True" in f2.getvalue())
-        self.assertTrue("[INFO] Wijziging van 'geen wedstrijden' voor vereniging 1000: True --> False" in f2.getvalue())
+        self.assertTrue("[INFO] Wijziging van 'geen wedstrijden' van vereniging 1377: False --> True" in f2.getvalue())
+        self.assertTrue("[INFO] Wijziging van 'geen wedstrijden' van vereniging 1000: True --> False" in f2.getvalue())
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
 
@@ -465,6 +477,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         with self.assert_max_queries(61):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
 
         # maak een record aan op naam van 100024
         sporter = Sporter.objects.get(lid_nr="100024")
@@ -585,7 +599,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # lid 100001 heeft zich uitgeschreven tijdens het jaar
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(33):
+        with self.assert_max_queries(35):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_18.json',
                                     '--sim_now=2020-07-02', stderr=f1, stdout=f2)
 
@@ -640,7 +654,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[ERROR] Foutief regio nummer: 'a101' (geen getal)" in f1.getvalue())
         self.assertTrue("[ERROR] Onbekende regio {'region_number': 'a101', 'name': 'Regio 99', 'rayon_number': 1}" in f1.getvalue())
         self.assertTrue("[ERROR] Onbekende regio {'region_number': '99', 'name': 'Regio 99', 'rayon_number': 'x'}" in f1.getvalue())
-        self.assertTrue("[ERROR] Geen valide verenigingsnummer: 'y' (geen getal)" in f1.getvalue())
+        self.assertTrue("[ERROR] Foutief verenigingsnummer: 'y' (geen getal)" in f1.getvalue())
         self.assertTrue("[ERROR] Foutief regio nummer: 'z' (geen getal)" in f1.getvalue())
         self.assertTrue("[ERROR] Vereniging 1001 hoort bij onbekende regio z" in f1.getvalue())
         self.assertTrue("[ERROR] Foutief bondsnummer: x (geen getal)" in f1.getvalue())
@@ -662,6 +676,5 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_20.json',
                                 stderr=f1, stdout=f2)
         self.assertTrue("[INFO] Lid 100001: nieuwe speelsterkte 1991-01-01, Recurve, Recurve 1100" in f2.getvalue())
-
 
 # end of file
