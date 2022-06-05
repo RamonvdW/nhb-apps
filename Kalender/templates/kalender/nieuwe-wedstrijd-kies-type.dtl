@@ -70,23 +70,23 @@
         <div class="col s12">
             <div class="white" style="padding:10px">
                 <h5>World Archery</h5>
-                <p>Vijf bogentypen: Recurve, Compound, Barebow, Traditional en Longbow</p>
+                <p>Vijf typen bogen: Recurve, Compound, Barebow, Traditional en Longbow</p>
                 <p>Vier leeftijdsklassen: Onder 18, Onder 21, 21+ en 50+</p>
-                <p>Scheiding in Heren en Vrouwen</p>
-                <p>Disciplines: Outdoor, Indoor</p>
+                <p>Scheiding in Mannen en Vrouwen</p>
+                <p>Disciplines: Outdoor, Indoor, Veld, 3D, Clout, Run Archery</p>
 
                 <br>
                 <h5>IFAA</h5>
-                <p>Boogtypen: Bla bla informatie</p>
-                <p>Leeftijdsklassen: Bla bla informatie</p>
-                <p>Geslacht: Bla bla informatie</p>
-                <p>Disciplines: Bla bla informatie</p>
+                <p>Twaalf schietstijlen: Barebow Recurve/Compound, Freestyle Limited Recurve/Compound/Unlimited, Bowhunter Recurve/Compound/Unlimited/Limited, Traditional Recurve, Longbow, Historical Bow</p>
+                <p>Zes leeftijdsklassen: Welpen, Junioren, Jongvolwassenen, Volwassenen, Veteranen (55+), Senioren (65+)</p>
+                <p>Scheiding in Mannen en Vrouwen</p>
+                <p>Disciplines: 3D</p>
 
                 <br>
                 <h5>NHB</h5>
                 <p>Dezelfde boogtypen als World Archery</p>
                 <p>Zeven leeftijdsklassen: Onder 12, Onder 14, Onder 18, Onder 21, 21+, 50+ en 60+</p>
-                <p>Heren, vrouwen en genderneutrale klassen</p>
+                <p>Scheiding in Mannen en Vrouwen of genderneutrale klassen</p>
                 <p>Disciplines: Outdoor, 3D, Veld, Run Archery, Clout, Indoor, 25m 1pijl</p>
             </div>
         </div>
