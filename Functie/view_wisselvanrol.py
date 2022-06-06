@@ -6,6 +6,7 @@
 
 from django.conf import settings
 from django.urls import reverse
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -44,6 +45,8 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         super().__init__(**kwargs)
         self.rol_nu, self.functie_nu = None, None
         self.account = None
+        self.show_vhpg = False
+        self.vhpg = None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -51,14 +54,23 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         if not self.request.user.is_authenticated:
             return False
 
-        self.account = self.request.user
-
         # evalueer opnieuw welke rechten de gebruiker heeft
         rol_evalueer_opnieuw(self.request)
 
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
 
         return rol_mag_wisselen(self.request)
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            self.account = self.request.user
+            self.show_vhpg, self.vhpg = account_needs_vhpg(self.account)
+            if self.show_vhpg and self.vhpg is not None:
+                # herhaling van VHPG acceptatie: meteen daarheen sturen
+                url = reverse('Functie:vhpg-acceptatie')
+                return HttpResponseRedirect(url)
+
+        return super().dispatch(request, *args, **kwargs)
 
     @staticmethod
     def _functie_volgorde(functie):
@@ -196,7 +208,8 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                     functie = pk2func[functie_pk]
                     volgorde = self._functie_volgorde(functie)
 
-                    if rol == Rollen.ROL_SEC:
+                    if rol == Rollen.ROL_SEC:               # pragma: no cover
+                        # nergens in de hierarchie kan je vandaag wisselen naar de HWL rol
                         kort = 'SEC'
                     elif rol == Rollen.ROL_HWL:
                         kort = 'HWL'
@@ -291,7 +304,8 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
         # als je hier komt dan is OTP nodig
 
-        context['show_vhpg'], context['vhpg'] = account_needs_vhpg(self.account)
+        context['show_vhpg'] = self.show_vhpg
+        context['vhpg'] = self.vhpg
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
         if self.account.is_staff:
@@ -433,8 +447,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
 
         if rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
             url = get_url_voor_competitie(functie_nu)
-            if url:
-                return redirect(url)
+            return redirect(url)
 
         return redirect('Functie:wissel-van-rol')
 

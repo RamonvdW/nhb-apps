@@ -64,6 +64,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         VerklaringHanterenPersoonsgegevens.objects.all().delete()
 
         self.e2e_login(self.testdata.account_admin)
+
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_acceptatie, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK

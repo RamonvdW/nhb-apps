@@ -17,6 +17,8 @@
 
             {% if not kan_aanmelden %}
                 <p>Om aan te melden voor een wedstrijd moet je een account aanmaken en inloggen</p>
+            {% elif not kan_inschrijven %}
+                <p>Het is niet meer mogelijk om te schrijven</p>
             {% endif %}
         </div>
     </div>
@@ -161,7 +163,9 @@
                 <tr>
                     <th class="center">Wanneer</th>
                     <th class="center">Wedstrijdklassen</th>
-                    <th class="center">Nog beschikbaar</th>
+                    {% if kan_inschrijven %}
+                        <th class="center">Nog beschikbaar</th>
+                    {% endif %}
                 </tr>
 
                 {% for sessie in sessies %}
@@ -172,7 +176,9 @@
                                 <span>{{ klasse.beschrijving }}</span><br>
                             {% endfor %}
                         </td>
-                        <td class="center">{{ sessie.aantal_beschikbaar }} (van de {{ sessie.max_sporters }})</td>
+                        {% if kan_inschrijven %}
+                            <td class="center">{{ sessie.aantal_beschikbaar }} (van de {{ sessie.max_sporters }})</td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
             </table>
@@ -181,7 +187,7 @@
     </div>
 
 
-    {% if kan_aanmelden %}
+    {% if kan_aanmelden and kan_inschrijven %}
 
         <!-- witruimte -->
         <div class="row center">
