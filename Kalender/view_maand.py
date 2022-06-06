@@ -235,19 +235,19 @@ class WedstrijdInfoView(TemplateView):
         context['kan_inschrijven'] = wedstrijd.datum_begin > timezone.now().date()
 
         if context['kan_aanmelden']:
-            context['url_inschrijven_sporter'] = reverse('Kalender:inschrijven-sporter',
-                                                         kwargs={'wedstrijd_pk': wedstrijd.pk})
-            context['url_inschrijven_groepje'] = reverse('Kalender:inschrijven-groepje',
-                                                         kwargs={'wedstrijd_pk': wedstrijd.pk})
-            context['url_inschrijven_familie'] = reverse('Kalender:inschrijven-familie',
-                                                         kwargs={'wedstrijd_pk': wedstrijd.pk})
-
             context['menu_toon_mandje'] = True
+
+            if context['kan_inschrijven']:
+                context['url_inschrijven_sporter'] = reverse('Kalender:inschrijven-sporter',
+                                                             kwargs={'wedstrijd_pk': wedstrijd.pk})
+                context['url_inschrijven_groepje'] = reverse('Kalender:inschrijven-groepje',
+                                                             kwargs={'wedstrijd_pk': wedstrijd.pk})
+                context['url_inschrijven_familie'] = reverse('Kalender:inschrijven-familie',
+                                                             kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         url_terug = reverse('Kalender:maand',
                             kwargs={'jaar': wedstrijd.datum_begin.year,
                                     'maand': MAAND2URL[wedstrijd.datum_begin.month]})
-
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
             (None, 'Wedstrijd details'),

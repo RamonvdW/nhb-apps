@@ -9,8 +9,9 @@ from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter
 from Wedstrijden.models import WedstrijdLocatie
-from .models import KalenderWedstrijd
+from .models import KalenderWedstrijd, ORGANISATIE_WA
 from TestHelpers.e2ehelpers import E2EHelpers
+import datetime
 
 
 class TestKalenderMaand(E2EHelpers, TestCase):
@@ -175,7 +176,32 @@ class TestKalenderMaand(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
-        # niet bestaande wedstrijd
+        # zet de begin datum in de toekomst, zodat er inschreven kan worden
+        wedstrijd.datum_begin += datetime.timedelta(days=100)
+        wedstrijd.save(update_fields=['datum_begin'])
+
+        # haal de info pagina van de wedstrijd op
+        url = self.url_kalender_info % wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+        # wijzig naar een WA wedstrijd
+        wedstrijd.organisatie = ORGANISATIE_WA
+        wedstrijd.save(update_fields=['organisatie'])
+
+        # niet ingelogd --> kan niet inschrijven
+        self.client.logout()
+
+        # haal de info pagina van de wedstrijd op
+        url = self.url_kalender_info % wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+        # corner case: niet bestaande wedstrijd
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_kalender_info % 999999)
         self.assert404(resp, 'Wedstrijd niet gevonden')
