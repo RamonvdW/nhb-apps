@@ -32,12 +32,22 @@ class BestellingAdmin(admin.ModelAdmin):
 
     filter_horizontal = ('producten',)
 
+    list_filter = ('status',)
+
     fieldsets = (
         ('Koper',
             {'fields': ('bestel_nr',
                         'account',
                         'aangemaakt',
                         'totaal_euro')
+             }),
+        ('Verkoper',
+            {'fields': ('verkoper_naam',
+                        'verkoper_adres1',
+                        'verkoper_adres2',
+                        'verkoper_kvk',
+                        'verkoper_email',
+                        'verkoper_telefoon')
              }),
         ('Transactie',
             {'fields': ('status',

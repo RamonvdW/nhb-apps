@@ -19,17 +19,20 @@ BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK = 1
 BESTELLING_STATUS_NIEUW = 'N'
 BESTELLING_STATUS_WACHT_OP_BETALING = 'B'
 BESTELLING_STATUS_AFGEROND = 'A'
+BESTELLING_STATUS_MISLUKT = 'F'
 
 BESTELLING_STATUS_CHOICES = (
     (BESTELLING_STATUS_NIEUW, 'Nieuw'),
     (BESTELLING_STATUS_WACHT_OP_BETALING, 'Te betalen'),
     (BESTELLING_STATUS_AFGEROND, 'Afgerond'),
+    (BESTELLING_STATUS_MISLUKT, 'Mislukt')
 )
 
 BESTELLING_STATUS2STR = {
     BESTELLING_STATUS_NIEUW: 'Nieuw',
     BESTELLING_STATUS_WACHT_OP_BETALING: 'Te betalen',
     BESTELLING_STATUS_AFGEROND: 'Afgerond',
+    BESTELLING_STATUS_MISLUKT: 'Mislukt',
 }
 
 
@@ -151,6 +154,15 @@ class Bestelling(models.Model):
     ontvanger = models.ForeignKey(BetaalInstellingenVereniging, on_delete=models.PROTECT,
                                   null=True, blank=True)        # alleen nodig voor migratie
 
+    # verplichte informatie over de verkoper
+    # naam, adres, kvk, email, telefoon
+    verkoper_naam = models.CharField(max_length=100, default='', blank=True)
+    verkoper_adres1 = models.CharField(max_length=100, default='', blank=True)      # straat
+    verkoper_adres2 = models.CharField(max_length=100, default='', blank=True)      # postcode, plaats
+    verkoper_kvk = models.CharField(max_length=15, default='', blank=True)
+    verkoper_email = models.EmailField(default='', blank=True)
+    verkoper_telefoon = models.CharField(max_length=20, default='', blank=True)
+
     # de bestelde producten met prijs en korting
     producten = models.ManyToManyField(BestelProduct)
 
@@ -174,9 +186,14 @@ class Bestelling(models.Model):
 
     def __str__(self):
         """ beschrijving voor de admin interface """
-        msg = "%s " % self.bestel_nr
-        msg += "[%s] " % self.aangemaakt
-        msg += "koper=%s" % self.account.username
+        msg = "%s" % self.bestel_nr
+        msg += " %s" % BESTELLING_STATUS2STR[self.status]
+        msg += " [%s]" % self.aangemaakt.strftime('%Y-%m-%d %H:%M:%S')
+        msg += " koper=%s" % self.account.username
+
+        bedrag = " € %s" % self.totaal_euro
+        msg += bedrag.replace('.', ',')
+
         return msg
 
     class Meta:

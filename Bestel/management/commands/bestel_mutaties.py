@@ -9,22 +9,23 @@
 """
 
 from django.conf import settings
+from django.utils import timezone
 from django.core.management.base import BaseCommand
 from django.db.utils import DataError, OperationalError, IntegrityError
 from django.db import transaction
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
-from Bestel.models import (BestelProduct, BestelMandje, Bestelling,
-                           BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING,
-                           BestelHoogsteBestelNr, BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK, BESTELLING_STATUS2STR,
+from Bestel.models import (BestelProduct, BestelMandje,
+                           Bestelling, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING,
+                           BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS2STR,
+                           BestelHoogsteBestelNr, BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK,
                            BestelMutatie, BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN,
                            BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_KORTINGSCODE, BESTEL_MUTATIE_MAAK_BESTELLINGEN,
                            BESTEL_MUTATIE_BETALING_AFGEROND, BESTEL_MUTATIE_RESTITUTIE_UITBETAALD)
 from Bestel.plugins.kalender import (kalender_plugin_automatische_kortingscodes_toepassen, kalender_plugin_inschrijven,
                                      kalender_plugin_verwijder_reservering, kalender_plugin_kortingscode_toepassen,
                                      kalender_plugin_afmelden, kalender_plugin_inschrijving_is_betaald)
-from Kalender.models import (INSCHRIJVING_STATUS_RESERVERING_BESTELD, INSCHRIJVING_STATUS_RESERVERING_MANDJE,
-                             INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_DEFINITIEF,
-                             INSCHRIJVING_STATUS_TO_STR)
+from Kalender.models import INSCHRIJVING_STATUS_RESERVERING_BESTELD, INSCHRIJVING_STATUS_DEFINITIEF
+from Mailer.models import mailer_queue_email
 from Overig.background_sync import BackgroundSync
 from decimal import Decimal
 import traceback
@@ -204,7 +205,9 @@ class Command(BaseCommand):
             ontvanger2producten = dict()      # [ver_nr] = [MandjeProduct, ...]
             for product in (mandje
                             .producten
-                            .select_related('inschrijving')
+                            .select_related('inschrijving',
+                                            'inschrijving__wedstrijd',
+                                            'inschrijving__wedstrijd__organiserende_vereniging')
                             .order_by('inschrijving__pk')):
 
                 if product.inschrijving:
@@ -228,16 +231,25 @@ class Command(BaseCommand):
                 bestel_nr = self._bestel_get_volgende_bestel_nr()
 
                 totaal_euro = Decimal('0')
+                ver = None
                 for product in producten:
                     totaal_euro += product.prijs_euro
                     totaal_euro -= product.korting_euro
+                    if ver is None:
+                        ver = product.inschrijving.wedstrijd.organiserende_vereniging
                 # for
 
                 bestelling = Bestelling(
                                     bestel_nr=bestel_nr,
                                     account=mutatie.account,
                                     ontvanger=instellingen,
-                                    totaal_euro=totaal_euro)
+                                    totaal_euro=totaal_euro,
+                                    verkoper_naam=ver.naam,
+                                    verkoper_adres1=ver.adres_regel1,
+                                    verkoper_adres2=ver.adres_regel2,
+                                    verkoper_kvk=ver.kvk_nummer,
+                                    verkoper_email=ver.contact_email,
+                                    verkoper_telefoon=ver.telefoonnummer)
                 bestelling.save()
                 bestelling.producten.set(producten)
 
@@ -305,6 +317,111 @@ class Command(BaseCommand):
             kalender_plugin_afmelden(inschrijving)
             # FUTURE: automatisch een restitutie beginnen
 
+    @staticmethod
+    def _stuur_email_naar_koper(bestelling):
+        """ Stuur een e-mail om de betaalde bestelling te bevestigen """
+
+        # TODO: lever ook een html layout van de mail
+
+        account = bestelling.account
+        email = account.accountemail_set.all()[0]
+
+        text_body = ("Hallo %s!\n\n" % account.get_first_name()
+                     + "Deze e-mail is de bevestiging van je aankoop op MijnHandboogsport\n\n"
+                     + "Bestelnummer: %s\n" % bestelling.bestel_nr
+                     + "Betaalstatus: Voldaan\n")
+
+        text_body += ("\nVerkoper:\n"
+                      + "\t%s\n" % bestelling.verkoper_naam
+                      + "\t%s\n" % bestelling.verkoper_adres1
+                      + "\t%s\n" % bestelling.verkoper_adres2
+                      + "\tKvK nummer: %s\n" % bestelling.verkoper_kvk
+                      + "\tE-mail: %s\n" % bestelling.verkoper_email
+                      + "\tTelefoon: %s\n" % bestelling.verkoper_telefoon)
+
+        producten = (bestelling
+                     .producten
+                     .select_related('inschrijving',
+                                     'inschrijving__wedstrijd',
+                                     'inschrijving__sessie',
+                                     'inschrijving__sporterboog',
+                                     'inschrijving__sporterboog__boogtype',
+                                     'inschrijving__sporterboog__sporter',
+                                     'inschrijving__sporterboog__sporter__bij_vereniging'))
+                    # TODO: order_by
+
+        regel_nr = 0
+
+        for product in producten:
+
+            if product.inschrijving:
+                inschrijving = product.inschrijving
+
+                # lege regel gevolgd door een regel nummer
+                regel_nr += 1
+                text_body += "\n[%s]\n" % regel_nr
+
+                reserveringsnummer = settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk
+                text_body += "\tReserveringsnummer: %s\n" % reserveringsnummer
+
+                wedstrijd = inschrijving.wedstrijd
+                text_body += "\tWedstrijd: %s\n" % wedstrijd.titel
+
+                sessie = inschrijving.sessie
+                text_body += "\tSessie: %s om %s\n" % (sessie.datum, sessie.tijd_begin.strftime('%H:%M'))
+
+                sporterboog = inschrijving.sporterboog
+                text_body += "\tSporter: %s\n" % sporterboog.sporter.lid_nr_en_volledige_naam()
+
+                sporter_ver = sporterboog.sporter.bij_vereniging
+                if sporter_ver:
+                    ver_naam = sporter_ver.ver_nr_en_naam()
+                else:
+                    ver_naam = 'Onbekend'
+                text_body += "\tVan vereniging: %s\n" % ver_naam
+
+                text_body += "\tBoog: %s\n" % sporterboog.boogtype.beschrijving
+
+                if inschrijving.gebruikte_code:
+                    korting = inschrijving.gebruikte_code
+                    gebruikte_code_str = "code %s (korting: %d%%)" % (korting.code, korting.percentage)
+                    text_body += "\tGebruikte korting: %s\n" % gebruikte_code_str
+
+                    if korting.combi_basis_wedstrijd:
+                        combi_reden = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
+                        text_body += "\t(combinatie korting voor %s)\n" % " en ".join(combi_reden)
+
+                text_body += "\tPrijs: € %s\n" % product.prijs_euro
+                if product.korting_euro > 0.001:
+                    text_body += "\tKorting: -€ %s\n" % product.korting_euro
+        # for
+
+        transacties = (bestelling
+                       .transacties
+                       .all()
+                       .order_by('when'))       # chronologisch
+
+        for transactie in transacties:
+
+            text_body += "\nBetaling:"
+
+            if transactie.is_restitutie:
+                text_body += "\tRestitutie € %s\n" % transactie.bedrag_euro_klant
+            else:
+                text_body += "\tOntvangen € %s\n" % transactie.bedrag_euro_klant
+                text_body += "\tvan %s\n" % transactie.klant_naam
+
+            text_body += "\top %s\n" % timezone.localtime(transactie.when).strftime('%Y-%m-%d %H:%M')
+
+            text_body += "\tBeschrijving: %s\n" % transactie.beschrijving
+        # for
+
+        text_body += "\n\nDeze e-mail is automatisch gegenereerd op %s\n" % timezone.localtime(timezone.now()).strftime('%Y-%m-%d %H:%M')
+
+        mailer_queue_email(email.bevestigde_email,
+                           'Bevestiging aankoop via MijnHandboogsport (%s)' % bestelling.bestel_nr,
+                           text_body)
+
     def _verwerk_mutatie_betaling_afgerond(self, mutatie):
         bestelling = mutatie.bestelling
         is_gelukt = mutatie.betaling_is_gelukt
@@ -361,10 +478,18 @@ class Command(BaseCommand):
                     if product.inschrijving:
                         kalender_plugin_inschrijving_is_betaald(product)
                 # for
+
+                # stuur een e-mail aan de koper
+                self._stuur_email_naar_koper(bestelling)
         else:
             self.stdout.write('[INFO] Betaling niet gelukt voor bestelling %s (pk=%s)' % (
                                 bestelling.bestel_nr, bestelling.pk))
-            # laat status staan op "wacht op betaling"
+
+            bestelling.status = BESTELLING_STATUS_MISLUKT
+
+            msg = "\n[%s] Betaling is niet gelukt" % mutatie.when
+            bestelling.log += msg
+            bestelling.save(update_fields=['log'])
 
         bestelling.betaal_actief = None
         bestelling.save(update_fields=['betaal_actief', 'status'])

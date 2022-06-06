@@ -12,7 +12,7 @@ from django.utils.timezone import localtime
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige
 from Bestel.models import (Bestelling, BESTELLING_STATUS2STR, BESTELLING_STATUS_WACHT_OP_BETALING,
-                           BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND)
+                           BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT)
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Plein.menu import menu_dynamics
 from decimal import Decimal
@@ -67,8 +67,13 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
                     beschrijving.append("??")
             # for
 
-            bestelling.status_str = BESTELLING_STATUS2STR[bestelling.status]
-            bestelling.status_aandacht = (bestelling.status == BESTELLING_STATUS_WACHT_OP_BETALING)
+            status = bestelling.status
+            if status == BESTELLING_STATUS_NIEUW:
+                # nieuw is een interne state. Na een verlopen/mislukte betalen wordt deze status ook gezet.
+                # toon daarom als "te betalen"
+                status = BESTELLING_STATUS_WACHT_OP_BETALING
+            bestelling.status_str = BESTELLING_STATUS2STR[status]
+            bestelling.status_aandacht = (status == BESTELLING_STATUS_WACHT_OP_BETALING)
 
             bestelling.url_details = reverse('Bestel:toon-bestelling-details',
                                              kwargs={'bestel_nr': bestelling.bestel_nr})
@@ -123,6 +128,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                                      'inschrijving__sporterboog__boogtype',
                                      'inschrijving__sporterboog__sporter',
                                      'inschrijving__sporterboog__sporter__bij_vereniging'))
+                    # TODO: order_by
 
         for product in producten:
             # maak een beschrijving van deze regel
@@ -310,6 +316,29 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
         menu_dynamics(self.request, context)
         return context
 
+    def post(self, request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als de gebruiker op de BETALEN knop drukt in de bestelling
+            de enige taak van deze functie is een bestelling met status MISLUKT terug zetten naar NIEUW.
+        """
+
+        account = request.user
+
+        try:
+            bestel_nr = str(kwargs['bestel_nr'])[:7]        # afkappen voor de veiligheid
+            bestel_nr = int(bestel_nr)
+            bestelling = Bestelling.objects.get(bestel_nr=bestel_nr, account=account)
+        except (KeyError, TypeError, ValueError, Bestelling.DoesNotExist):
+            raise Http404('Niet gevonden')
+
+        if bestelling.status == BESTELLING_STATUS_MISLUKT:
+            bestelling.status = BESTELLING_STATUS_NIEUW
+            bestelling.save(update_fields=['status'])
+
+        # doorsturen naar de GET
+        url = reverse('Bestel:bestelling-afrekenen',
+                      kwargs={'bestel_nr': bestelling.bestel_nr})
+        return HttpResponseRedirect(url)
+
 
 class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
 
@@ -340,7 +369,7 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
         out['status'] = 'error'  # fallback
 
         if bestelling.status == BESTELLING_STATUS_NIEUW:
-            # de betaling is nog niet opgestart, dus dit is het moment (want we willen het niet op een GET doen)
+            # de betaling is nog niet actief
             out['status'] = 'nieuw'
 
             # start een nieuwe transactie op
@@ -381,6 +410,9 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
             # we zouden hier niet moeten komen
             # TODO: automatisch doorsturen
             out['status'] = 'afgerond'
+
+        elif bestelling.status == BESTELLING_STATUS_MISLUKT:
+            out['status'] = 'mislukt'
 
         # niet gebruiken: raise Http404('Onbekende status')
         # want een 404 resulteert in een foutmelding pagina (status 200)
@@ -430,10 +462,14 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
 
         context['ontvangen'] = transacties_euro
 
+        context['url_afschrift'] = reverse('Bestel:toon-bestelling-details',
+                                           kwargs={'bestel_nr': bestelling.bestel_nr})
+
+        context['url_status_check'] = reverse('Bestel:dynamic-check-status',
+                                              kwargs={'bestel_nr': bestelling.bestel_nr})
+
         if bestelling.status == BESTELLING_STATUS_AFGEROND:
             context['is_afgerond'] = True
-            context['url_afschrift'] = reverse('Bestel:toon-bestelling-details',
-                                               kwargs={'bestel_nr': bestelling.bestel_nr})
         else:
             # hier komen we als de betaling niet gelukt is
             # maar ook als Mollie de redirect naar deze pagina deed voordat de payment-status-changed callback kwam

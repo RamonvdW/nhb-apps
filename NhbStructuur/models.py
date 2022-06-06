@@ -122,6 +122,10 @@ class NhbVereniging(models.Model):
     # naam van de vereniging
     naam = models.CharField(max_length=200)
 
+    # adres van "het bedrijf"
+    adres_regel1 = models.CharField(max_length=100, default='', blank=True)
+    adres_regel2 = models.CharField(max_length=100, default='', blank=True)
+
     # locatie van het doel van de vereniging
     plaats = models.CharField(max_length=100, blank=True)
 
@@ -148,10 +152,6 @@ class NhbVereniging(models.Model):
     # telefoonnummer van deze vereniging
     # maximum is 15 tekens, maar we staan streepjes/spaties toe
     telefoonnummer = models.CharField(max_length=20, default='', blank=True)
-
-    # adres van "het bedrijf"
-    adres_regel1 = models.CharField(max_length=100, default='', blank=True)
-    adres_regel2 = models.CharField(max_length=100, default='', blank=True)
 
     def ver_nr_en_naam(self):
         return "[%s] %s" % (self.ver_nr, self.naam)

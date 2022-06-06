@@ -30,16 +30,16 @@
 
                 {% for product in producten %}
                     <tr>
-                        <td class="hide-on-small-only">{% for hdr, lijn in product.beschrijving %}{{ hdr }}<br>{% endfor %}</td>
+                        <th class="hide-on-small-only" style="padding-left:20px">{% for hdr, lijn in product.beschrijving %}{{ hdr }}:<br>{% endfor %}</th>
                         <td>{% for hdr, lijn in product.beschrijving %}{{ lijn }}<br>{% endfor %}</td>
-                        <td class="right-align">&euro;&nbsp;{{ product.prijs_euro }}</td>
+                        <td class="right-align" style="padding-right:20px">&euro;&nbsp;{{ product.prijs_euro }}</td>
                     </tr>
 
                     {% if product.gebruikte_code_str %}
                         <tr>
-                            <td class="hide-on-small-only">{% if product.is_combi_korting %}Automatische combi-korting{% else %}Korting{% endif %}</td>
+                            <td class="hide-on-small-only" style="padding-left:20px">{% if product.is_combi_korting %}Automatische combi-korting{% else %}Korting{% endif %}</td>
                             <td>{{ product.gebruikte_code_str }}{% if product.is_combi_korting %}{% for titel in product.combi_reden %}<br>{{ titel }}{% endfor %}{% endif %}</td>
-                            <td class="right-align">{% if product.korting_euro > 0.0001 %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ product.korting_euro }}</td>
+                            <td class="right-align" style="padding-right:20px">{% if product.korting_euro > 0.0001 %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ product.korting_euro }}</td>
                         </tr>
                     {% endif %}
                 {% endfor %}
@@ -48,30 +48,30 @@
                 <tr>
                     <td class="hide-on-small-only"></td>
                     <td class="right-align"><b>Totale kosten:</b></td>
-                    <td class="right-align"><b>&euro;&nbsp;{{ bestelling.totaal_euro }}</b></td>
+                    <td class="right-align" style="padding-right:20px"><b>&euro;&nbsp;{{ bestelling.totaal_euro }}</b></td>
                 </tr>
 
                 <!-- transacties -->
                 {% for transactie in transacties %}
                     <tr>
-                        <td class="hide-on-small-only">Transactie</td>
+                        <td class="hide-on-small-only" style="padding-left:20px">Transactie</td>
                         <td>{% for regel in transactie.regels %}{{ regel }}<br>{% endfor %}</td>
                         <!-- let op: we tonen een minteken bij betaling, dus "not restitutie" -->
-                        <td class="right-align">{% if not transactie.is_restitutie %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ transactie.bedrag_euro_klant }}</td>
+                        <td class="right-align" style="padding-right:20px">{% if not transactie.is_restitutie %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ transactie.bedrag_euro_klant }}</td>
                     </tr>
                 {% endfor %}
 
                 {% if rest_euro %}
                     <tr>
-                        <td class="hide-on-small-only"></td>
+                        <td class="hide-on-small-only" style="padding-left:20px"></td>
                         <td class="right-align"><b>Nog te voldoen:</b></td>
-                        <td class="right-align"><b>&euro;&nbsp;{{ rest_euro }}</b></td>
+                        <td class="right-align" style="padding-right:20px"><b>&euro;&nbsp;{{ rest_euro }}</b></td>
                     </tr>
                 {% else %}
                     <tr>
-                        <td class="hide-on-small-only"></td>
+                        <td class="hide-on-small-only" style="padding-left:20px"></td>
                         <td class="right-align"><b>Openstaand:</b></td>
-                        <td class="right-align"><b>&euro;&nbsp;0,00</b></td>
+                        <td class="right-align" style="padding-right:20px"><b>&euro;&nbsp;0,00</b></td>
                     </tr>
                 {% endif %}
 
@@ -82,13 +82,35 @@
                     {% elif url_afrekenen %}
                         <td class="hide-on-small-only"></td>
                         <td class="right-align">
-                            <a class="btn-nhb-rood" href="{{ url_afrekenen }}">
-                                <i class="material-icons-round right">shopping_cart_checkout</i>Betalen</a>
+                            <form action="{{ url_afrekenen }}" method="post">
+                                {% csrf_token %}
+                                <button class="btn-nhb-rood">
+                                    <i class="material-icons-round right">shopping_cart_checkout</i>Betalen</button>
+                            </form>
                         </td>
                         <td><!-- bedragen --></td>
                     {% endif %}
                 </tr>
 
+            </table>
+        </div>
+
+        <p>&nbsp;</p>
+
+        <div class="col s12 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <td colspan="4" class="center">
+                        <h6>Verkoper</h6>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td></td>
+                    <th class="nhb-column-small hide-on-small-only">Naam:<br>Adres:<br><br>KvK nummer:<br>E-mail:<br>Telefoon:</th>
+                    <td class="nhb-column-small">{{ bestelling.verkoper_naam }}<br>{{ bestelling.verkoper_adres1 }}<br>{{ bestelling.verkoper_adres2 }}<br>{{ bestelling.verkoper_kvk }}<br>{{ bestelling.verkoper_email }}<br>{{ bestelling.verkoper_telefoon }}</td>
+                    <td></td>
+                </tr>
             </table>
         </div>
     </div>

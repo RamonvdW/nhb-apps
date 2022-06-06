@@ -168,7 +168,11 @@ def bestel_betaling_is_gestart(bestelling, actief):
     """
     bestelling.betaal_actief = actief
     bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
-    bestelling.save(update_fields=['betaal_actief', 'status'])
+
+    msg = "\n[%s] Betaling is opgestart (wacht op betaling)" % actief.when
+    bestelling.log += msg
+
+    bestelling.save(update_fields=['betaal_actief', 'status', 'log'])
 
 
 # end of file

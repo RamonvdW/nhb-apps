@@ -25,11 +25,11 @@
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
-                    <th>Bestelnummer</th>
+                    <th class="nhb-column-small">Bestelnummer</th>
                     <td>{{ bestelling.bestel_nr }}</td>
                 </tr>
                 <tr>
-                    <th>Aangemaakt op</th>
+                    <th>Aangemaakt&nbsp;op</th>
                     <td>{{ bestelling.aangemaakt }}</td>
                 </tr>
                 <tr>
@@ -37,7 +37,7 @@
                     <td>{{ bestelling.account }}</td>
                 </tr>
                 <tr>
-                    <th>Aan vereniging</th>
+                    <th>Aan&nbsp;vereniging</th>
                     <td>{{ bestelling.ontvanger.vereniging }}</td>
                 </tr>
                 <tr>
@@ -80,9 +80,11 @@
                             const status = rsp["status"];
 
                             // status kan zijn:
-                            // - nieuw:
-                            // - betaal:
-                            // - afgerond:
+                            // - nieuw: nog niet opgestart
+                            // - betaal: we wachten op de betaling
+                            // - afgerond: de betaling is afgerond (final)
+                            // - mislukt: de betaling is niet gelukt (final)
+                            // - error: onverwachte fout
 
                             if (status === "nieuw") {
                                 // checkout_url is nog niet beschikbaar
@@ -93,6 +95,13 @@
                                 const url = rsp["checkout_url"];
                                 window.location.href = url;
                                 // won't get here
+
+                            } else if (status === "mislukt") {
+                                // betaling is afgebroken / expired
+                                const el = document.getElementById('id_bericht')
+                                el.innerText = "De betaling is niet gelukt"
+
+                                retry = False;      // stop trying
 
                             } else if (status === "error") {
                                 // intern probleem

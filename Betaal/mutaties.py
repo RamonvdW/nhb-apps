@@ -5,9 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
+from django.utils import timezone
 from Betaal.models import (BetaalMutatie, BETAAL_MUTATIE_START_ONTVANGST, BETAAL_MUTATIE_START_RESTITUTIE,
                            BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED)
 from Overig.background_sync import BackgroundSync
+import datetime
 import time
 
 
@@ -42,9 +44,12 @@ def betaal_mutatieverzoek_start_ontvangst(bestelling, beschrijving, bedrag_euro,
         snel = True: niet wachten op reactie achtergrond taak (voor testen)
     """
 
+    recent = timezone.now() - datetime.timedelta(seconds=30)
+
     # zet dit verzoek door naar het mutaties process
     # voorkom duplicates (niet 100%)
     mutatie, is_created = BetaalMutatie.objects.get_or_create(
+                                    when__gt=recent,
                                     code=BETAAL_MUTATIE_START_ONTVANGST,
                                     ontvanger=bestelling.ontvanger,
                                     beschrijving=beschrijving,

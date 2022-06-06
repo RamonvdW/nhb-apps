@@ -32,30 +32,6 @@ MY_URL_CHECKOUT = MY_URL_BASE + '/checkout/select-issuer/ideal/%s'         # pay
 MY_URL_DASHBOARD = MY_URL_BASE + '/dashboard/org_12345677/payments/%s'     # payment_id
 MY_URL_CHECKOUT_DONE = MY_URL_BASE + '/checkout/done/%s'
 
-template_payment_page = """<!DOCTYPE html>
-<html lang="nl">
-    <head>
-        <title>Betalen</title>
-    </head>
-    <body>
-        <div style="text-align:center; margin-top:100px">
-            <form method="post" action="{{url}}">
-                <input type="hidden" name="status" value="paid">
-                <button style="margin:50px">Paid</button>
-            </form>
-            <form method="post" action="{{url}}">
-                <input type="hidden" name="status" value="cancel">
-                <button style="margin:50px">Cancel</button>
-            </form>
-            <form method="post" action="{{url}}">
-                <input type="hidden" name="status" value="expired">
-                <button style="margin:50px">Expire</button>
-            </form>
-        </div>
-    </body>
-</html>
-"""
-
 
 def out_debug(msg):
     print('[DEBUG] {websim_betaal} ' + msg)
@@ -310,9 +286,36 @@ class MyHandler(BaseHTTPRequestHandler):
             self._write_response(200, resp)
             return
 
+        status = resp['status']
+        out_debug('status is %s' % repr(status))
+
+        if status != 'open':
+            redirect_url = resp['redirectUrl']
+            out_debug('GET checkout: redirect to %s' % repr(redirect_url))
+            self.send_response(302)  # 302 = redirect
+            self.send_header('Location', redirect_url)
+            self.end_headers()
+            return
+
+        page = '<!DOCTYPE html><html lang="nl">'
+        page += '<head><title>Betalen</title></head>'
+        page += '<body><div style="text-align:center; margin-top:100px">'
+
+        page += '<p>%s</p>' % resp['description']
+
+        amount = resp['amount']
+        page += '<p>%s %s</p>' % (amount['value'], amount['currency'])
+
+        if status == 'open':
+            page += '<form method="post" action="{{url}}"><input type="hidden" name="status" value="pay"><button style="margin:50px">Pay</button></form>'
+            page += '<form method="post" action="{{url}}"><input type="hidden" name="status" value="cancel"><button style="margin:50px">Cancel</button></form>'
+            page += '<form method="post" action="{{url}}"><input type="hidden" name="status" value="expire"><button style="margin:50px">Expire</button></form>'
+
+        page += '</div></body></html>'
+
         payment_id_zonder_prefix = payment_id[3:]
         url = MY_URL_CHECKOUT_DONE % payment_id_zonder_prefix
-        data = template_payment_page.replace('{{url}}', url)
+        data = page.replace('{{url}}', url)
 
         enc_data = data.encode('utf-8')  # convert string to bytes
         enc_data_len = len(enc_data)
@@ -398,11 +401,11 @@ class MyHandler(BaseHTTPRequestHandler):
         resp['method'] = 'ideal'
         self._write_response(200, resp)
 
-    def _change_payment_status(self, payment, nieuwe_status):
+    def _change_payment_status(self, payment, gekozen_status):
         payment_id = payment['id']
-        out_debug('Payment %s status %s --> %s' % (repr(payment_id), repr(payment['status']), repr(nieuwe_status)))
+        out_debug('Payment %s status %s --> %s' % (repr(payment_id), repr(payment['status']), repr(gekozen_status)))
 
-        if payment['status'] == 'open' and nieuwe_status == 'paid':
+        if payment['status'] == 'open' and gekozen_status == 'pay':
             payment['status'] = 'paid'
             payment['paidAt'] = self._get_timestamp()
             payment['amountRefunded'] = refund = dict()
@@ -424,10 +427,17 @@ class MyHandler(BaseHTTPRequestHandler):
             del payment['isCancelable']
             del payment['_links']['checkout']
 
-        elif payment['status'] == 'open' and nieuwe_status == 'cancelled':
-            payment['status'] = 'cancelled'
+        elif payment['status'] == 'open' and gekozen_status == 'cancel':
+            payment['status'] = 'canceled'
             payment['cancelledAt'] = self._get_timestamp()
             del payment['isCancelable']
+            del payment['_links']['checkout']
+
+        elif payment['status'] == 'open' and gekozen_status == 'expire':
+            payment['status'] = 'expired'
+            payment['expiredAt'] = self._get_timestamp()
+            del payment['isCancelable']
+            del payment['expiresAt']
             del payment['_links']['checkout']
 
         payments.save()
@@ -445,14 +455,14 @@ class MyHandler(BaseHTTPRequestHandler):
             return
 
         # doe de update
-        if body == b'status=paid':
-            self._change_payment_status(resp, 'paid')
+        if body == b'status=pay':
+            self._change_payment_status(resp, 'pay')
         elif body == b'status=cancel':
-            self._change_payment_status(resp, 'cancelled')
-        elif body == b'status=cancel':
-            self._change_payment_status(resp, 'cancelled')
+            self._change_payment_status(resp, 'cancel')
+        elif body == b'status=expire':
+            self._change_payment_status(resp, 'expire')
         else:
-            out_debug('POST checkout done: Niet behandelbaar voor payment_id %s: %s' % (repr(payment_id), repr(body)))
+            out_debug('POST checkout done: Niet ondersteunde methode voor payment_id %s: %s' % (repr(payment_id), repr(body)))
             self.send_response(404)
             self.end_headers()
             return
