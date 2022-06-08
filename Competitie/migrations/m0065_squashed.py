@@ -187,6 +187,8 @@ class Migration(migrations.Migration):
                 ('result_rank', models.PositiveSmallIntegerField(default=0)),
                 ('result_score_1', models.PositiveSmallIntegerField(default=0)),
                 ('result_score_2', models.PositiveSmallIntegerField(default=0)),
+                ('result_teamscore_1', models.PositiveSmallIntegerField(default=0)),
+                ('result_teamscore_2', models.PositiveSmallIntegerField(default=0)),
             ],
             options={
                 'verbose_name': 'Kampioenschap Schutterboog',
@@ -248,6 +250,8 @@ class Migration(migrations.Migration):
                 ('feitelijke_schutters', models.ManyToManyField(blank=True, related_name='kampioenschapteam_feitelijke_schutters', to='Competitie.KampioenschapSchutterBoog')),
                 ('gekoppelde_schutters', models.ManyToManyField(blank=True, related_name='kampioenschapteam_gekoppelde_schutters', to='Competitie.KampioenschapSchutterBoog')),
                 ('tijdelijke_schutters', models.ManyToManyField(blank=True, related_name='kampioenschapteam_tijdelijke_schutters', to='Competitie.RegioCompetitieSchutterBoog')),
+                ('result_rank', models.PositiveSmallIntegerField(default=0)),
+                ('result_teamscore', models.PositiveSmallIntegerField(default=0)),
             ],
         ),
         migrations.CreateModel(
