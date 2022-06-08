@@ -91,7 +91,7 @@
                                 // een Http404() geeft een foutmelding pagina met status=200 (OK) en komt hier terecht
                                 rsp = "fout";
                             }
-                            console.log('rsp=', rsp);
+                            //console.log('rsp=', rsp);
                             if ("status" in rsp) {
                                 const status = rsp["status"];
 

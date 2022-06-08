@@ -10,7 +10,8 @@ from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType
 from Bestel.models import (BestelMandje, BestelMutatie, Bestelling,
-                           BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING, BESTELLING_STATUS_NIEUW)
+                           BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING, BESTELLING_STATUS_NIEUW,
+                           BESTELLING_STATUS_MISLUKT)
 from Bestel.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd, bestel_mutatieverzoek_betaling_afgerond,
                              bestel_mutatieverzoek_kortingscode_toepassen, bestel_mutatieverzoek_afmelden_wedstrijd)
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie
@@ -363,7 +364,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertTrue('Betaling niet gelukt voor bestelling' in f2.getvalue())
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
-        self.assertEqual(bestelling.status, BESTELLING_STATUS_WACHT_OP_BETALING)
+        self.assertEqual(bestelling.status, BESTELLING_STATUS_MISLUKT)
         self.assertIsNone(bestelling.betaal_actief)
 
         # betaling verwerken
@@ -374,7 +375,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                             log='test')
         betaalactief.save()
         bestelling.betaal_actief = betaalactief
-        bestelling.save(update_fields=['betaal_actief'])
+        bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
+        bestelling.save(update_fields=['betaal_actief', 'status'])
 
         # dubbel verzoek heeft geen effect
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
@@ -382,6 +384,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
         self.assertEqual(5, BestelMutatie.objects.count())
         f1, f2 = self.verwerk_bestel_mutaties()
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue('[INFO] Betaling is gelukt voor bestelling' in f2.getvalue())
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)

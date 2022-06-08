@@ -178,7 +178,9 @@ class Command(BaseCommand):
         if not handled:
             # product ligt niet meer in het mandje?!
             self.stdout.write('[WARNING] Product pk=%s niet meer in het mandje gevonden' % mutatie.product.pk)
-            kalender_plugin_verwijder_reservering(self.stdout, mutatie.product.inschrijving)
+            inschrijving = mandje.product.inschrijving
+            if inschrijving:
+                kalender_plugin_verwijder_reservering(self.stdout, inschrijving)
 
     def _verwerk_mutatie_kortingscode(self, mutatie):
         """ Deze functie controleert of een kortingscode toegepast mag worden op de producten die in het mandje
@@ -301,12 +303,12 @@ class Command(BaseCommand):
 
         # INSCHRIJVING_STATUS_AFGEMELD --> doe niets
         # INSCHRIJVING_STATUS_RESERVERING_MANDJE gaat via BESTEL_MUTATIE_VERWIJDER
-
         if oude_status == INSCHRIJVING_STATUS_RESERVERING_BESTELD:
             # in een bestelling; nog niet (volledig) betaald
             self.stdout.write('[INFO] Inschrijving pk=%s met status="besteld" afmelden voor wedstrijd' % inschrijving.pk)
 
-            kalender_plugin_verwijder_reservering(self.stdout, inschrijving)
+            if inschrijving:
+                kalender_plugin_verwijder_reservering(self.stdout, inschrijving)
             # FUTURE: betaling afbreken
             # FUTURE: automatische restitutie als de betaling binnen is
 
@@ -314,7 +316,8 @@ class Command(BaseCommand):
             # in een bestelling en betaald
             self.stdout.write('[INFO] Inschrijving pk=%s met status="definitief" afmelden voor wedstrijd' % inschrijving.pk)
 
-            kalender_plugin_afmelden(inschrijving)
+            if inschrijving:
+                kalender_plugin_afmelden(inschrijving)
             # FUTURE: automatisch een restitutie beginnen
 
     @staticmethod
