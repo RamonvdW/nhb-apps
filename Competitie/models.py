@@ -804,8 +804,13 @@ class RegioCompetitieSchutterBoog(models.Model):
     # bovenstaande gemiddelde vastgesteld aan het begin van de huidige team ronde
     gemiddelde_begin_team_ronde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 10,000
 
-    # voorkeuren opgegeven bij het inschrijven
+    # voorkeuren opgegeven bij het inschrijven:
+
+    # (opt-in) Deelname aan de teamcompetitie gewenst?
     inschrijf_voorkeur_team = models.BooleanField(default=False)
+
+    # (opt-out) Uitnodiging voor deelname aan het RK en BK gewenst?
+    inschrijf_voorkeur_rk_bk = models.BooleanField(default=True)
 
     # opmerking vrije tekst
     inschrijf_notitie = models.TextField(default="", blank=True)

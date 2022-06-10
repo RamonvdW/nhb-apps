@@ -89,6 +89,15 @@
                             </tr>
                         {% endif %}
 
+                        <tr>
+                            <td>Deelname aan de Rayonkampioenschappen:<br><br>
+                                <label style="margin-left: 20px">
+                                    <input type="checkbox" class="filled-in" name="geen_rk">
+                                    <span class="black-text">Alvast afmelden</span>
+                                </label>
+                            </td>
+                        </tr>
+
                         {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
                             <tr>
                                 <td>Kies wanneer de sporters willen schieten door 7 keuzes te maken in onderstaande lijst. Dit is later nog individueel aan te passen.<br>

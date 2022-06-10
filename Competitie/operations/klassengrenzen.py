@@ -70,7 +70,8 @@ def _get_targets_teams(comp):
     targets = dict()
     for obj in (CompetitieTeamKlasse
                 .objects
-                .filter(competitie=comp)
+                .filter(competitie=comp,
+                        is_voor_teams_rk_bk=False)
                 .order_by('volgorde')):        # hoogste klasse (=laagste volgnummer) eerst
 
         try:

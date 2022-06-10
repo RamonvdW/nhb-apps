@@ -327,6 +327,10 @@ class RegiocompetitieAanmeldenView(View):
         if mag_team_schieten and request.POST.get('wil_in_team', '') != '':
             aanmelding.inschrijf_voorkeur_team = True
 
+        if request.POST.get('geen_rk', '') != '':
+            # sporter wil zich alvast afmelden voor het RK
+            aanmelding.inschrijf_voorkeur_rk_bk = False
+
         # kijk of er velden van een formulier bij zitten
         if methode == INSCHRIJF_METHODE_3:
             aanmelding.inschrijf_voorkeur_dagdeel = ''

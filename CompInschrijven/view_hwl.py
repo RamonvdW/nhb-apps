@@ -372,6 +372,11 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         if mag_team_schieten and request.POST.get('wil_in_team', '') != '':
             bulk_team = True
 
+        bulk_voorkeur_rk_bk = True
+        if request.POST.get('geen_rk', '') != '':
+            # sporters alvast afmelden voor het RK
+            bulk_voorkeur_rk_bk = False
+
         bulk_wedstrijden = list()
         if methode == INSCHRIJF_METHODE_1:
             pks = list()
@@ -481,6 +486,8 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 if age > MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT and dvl < udvl:
                     # is geen aspirant en was op tijd lid
                     aanmelding.inschrijf_voorkeur_team = bulk_team
+
+                aanmelding.inschrijf_voorkeur_rk_bk = bulk_voorkeur_rk_bk
 
                 aanmelding.inschrijf_voorkeur_dagdeel = bulk_dagdeel
                 aanmelding.inschrijf_notitie = bulk_opmerking

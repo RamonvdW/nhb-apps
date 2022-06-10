@@ -95,7 +95,8 @@ class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
              }),
         ('Individueel',
             {'fields': (('ag_voor_indiv',),
-                        'indiv_klasse'),
+                         'indiv_klasse',
+                         'inschrijf_voorkeur_rk_bk'),
              }),
         ('Team',
             {'fields': ('inschrijf_voorkeur_team',
@@ -130,6 +131,7 @@ class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
     list_filter = ('deelcompetitie__competitie',
                    'deelcompetitie__nhb_regio',
                    'sporterboog__boogtype',
+                   'inschrijf_voorkeur_rk_bk',
                    ('sporterboog__sporter__bij_vereniging', admin.EmptyFieldListFilter),
                    'sporterboog__sporter__bij_vereniging')
 
