@@ -187,41 +187,44 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             comp = deelcompetitie.competitie
             comp.bepaal_fase()
 
+            comp_boog_afk = [boogtype.afkorting for boogtype in comp.boogtypen.all()]
+
             # doorloop elk boogtype waar de sporter informatie/wedstrijden voorkeur voor heeft
             for afk in boog_afkorting_wedstrijd:
-                obj = copy.copy(deelcompetitie)
-                objs.append(obj)
+                if afk in comp_boog_afk:
+                    obj = copy.copy(deelcompetitie)
+                    objs.append(obj)
 
-                obj.boog_afkorting = afk
-                obj.boog_beschrijving = boog_dict[afk].beschrijving
-                obj.boog_niet_meer = False
-                obj.is_ingeschreven = False
+                    obj.boog_afkorting = afk
+                    obj.boog_beschrijving = boog_dict[afk].beschrijving
+                    obj.boog_niet_meer = False
+                    obj.is_ingeschreven = False
 
-                # zoek uit of de sporter al ingeschreven is
-                sporterboog = boogafk2sporterboog[afk]
-                for inschrijving in inschrijvingen:
-                    if inschrijving.sporterboog == sporterboog and inschrijving.deelcompetitie == obj:
-                        obj.is_ingeschreven = True
-                        inschrijvingen.remove(inschrijving)
-                        if comp.fase <= 'B':
-                            obj.url_afmelden = reverse('CompInschrijven:afmelden',
-                                                       kwargs={'deelnemer_pk': inschrijving.pk})
+                    # zoek uit of de sporter al ingeschreven is
+                    sporterboog = boogafk2sporterboog[afk]
+                    for inschrijving in inschrijvingen:
+                        if inschrijving.sporterboog == sporterboog and inschrijving.deelcompetitie == obj:
+                            obj.is_ingeschreven = True
+                            inschrijvingen.remove(inschrijving)
+                            if comp.fase <= 'B':
+                                obj.url_afmelden = reverse('CompInschrijven:afmelden',
+                                                           kwargs={'deelnemer_pk': inschrijving.pk})
+                                gebruik_knoppen = True
+
+                            if obj.inschrijf_methode == INSCHRIJF_METHODE_1 and comp.fase <= 'E':
+                                obj.url_schietmomenten = reverse('CompLaagRegio:keuze-zeven-wedstrijden',
+                                                                 kwargs={'deelnemer_pk': inschrijving.pk})
+                                gebruik_knoppen = True
+                            break
+                    # for
+
+                    if not obj.is_ingeschreven:
+                        # niet ingeschreven
+                        if 'B' <= comp.fase < 'F':
+                            obj.url_aanmelden = reverse('CompInschrijven:bevestig-aanmelden',
+                                                        kwargs={'sporterboog_pk': sporterboog.pk,
+                                                                'deelcomp_pk': obj.pk})
                             gebruik_knoppen = True
-
-                        if obj.inschrijf_methode == INSCHRIJF_METHODE_1 and comp.fase <= 'E':
-                            obj.url_schietmomenten = reverse('CompLaagRegio:keuze-zeven-wedstrijden',
-                                                             kwargs={'deelnemer_pk': inschrijving.pk})
-                            gebruik_knoppen = True
-                        break
-                # for
-
-                if not obj.is_ingeschreven:
-                    # niet ingeschreven
-                    if 'B' <= comp.fase < 'F':
-                        obj.url_aanmelden = reverse('CompInschrijven:bevestig-aanmelden',
-                                                    kwargs={'sporterboog_pk': sporterboog.pk,
-                                                            'deelcomp_pk': obj.pk})
-                        gebruik_knoppen = True
             # for
         # for
 

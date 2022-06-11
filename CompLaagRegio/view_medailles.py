@@ -8,7 +8,7 @@ from django.http import Http404
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import DeelCompetitie, RegioCompetitieSchutterBoog
+from Competitie.models import DeelCompetitie, RegioCompetitieSchutterBoog, LAAG_REGIO
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 
@@ -79,7 +79,9 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
                         .objects
                         .select_related('competitie')
                         .get(competitie__afstand=self.functie_nu.comp_type,
-                             nhb_regio__regio_nr=regio_nr))
+                             laag=LAAG_REGIO,
+                             nhb_regio__regio_nr=regio_nr,
+                             huidige_team_ronde__gte=6))        # ivm 2 competitie seizoenen
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 

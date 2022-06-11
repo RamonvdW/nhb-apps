@@ -217,7 +217,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
 
             # schrijf in voor de competitie
             post_params['dagdeel'] = dagdelen.pop(-1)
-            with self.assert_max_queries(22):
+            with self.assert_max_queries(23):
                 resp = self.client.post(url_inschrijven, post_params)
             self.assert_is_redirect_not_plein(resp)         # check for success
         # for

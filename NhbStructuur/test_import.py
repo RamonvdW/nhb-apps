@@ -368,7 +368,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         with self.assert_max_queries(61):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
-        self.assertTrue('[ERROR] Vereniging 1000 heeft geen adres' in f1.getvalue())
+        self.assertTrue('[WARNING] Vereniging 1000 heeft geen adres' in f2.getvalue())
         self.assertTrue("[INFO] Wijziging van secretaris voor vereniging 1000: geen --> 100001 Ramon de Tester" in f2.getvalue())
         self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 heeft nog geen account" in f2.getvalue())
 
@@ -392,7 +392,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         with self.assert_max_queries(27):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
-        self.assertTrue('[ERROR] Vereniging 1000 heeft geen adres' in f1.getvalue())
+        self.assertTrue('[WARNING] Vereniging 1000 heeft geen adres' in f2.getvalue())
         self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan SEC functie" in f2.getvalue())
 
         ver = NhbVereniging.objects.get(ver_nr="2000")
@@ -459,7 +459,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         with self.assert_max_queries(29):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_14.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
-        self.assertTrue('[ERROR] Vereniging 1000 heeft geen adres' in f1.getvalue())
+        self.assertTrue('[WARNING] Vereniging 1000 heeft geen adres' in f2.getvalue())
         self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 is gekoppeld aan SEC functie" in f2.getvalue())
 
         # probeer 100024 te verwijderen

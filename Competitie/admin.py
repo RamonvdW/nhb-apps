@@ -107,7 +107,8 @@ class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
         ('Inschrijving',
             {'fields': ('inschrijf_gekozen_matches',
                         'inschrijf_voorkeur_dagdeel',
-                        'inschrijf_notitie'),
+                        'inschrijf_notitie',
+                        'aangemeld_door'),
              }),
         ('Uitslag',
             {'fields': ('score1', 'score2', 'score3', 'score4', 'score5', 'score6', 'score7',
@@ -123,7 +124,7 @@ class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
 
     autocomplete_fields = ('bij_vereniging',)
 
-    readonly_fields = ('scores', )
+    readonly_fields = ('scores', 'aangemeld_door')
 
     search_fields = ('sporterboog__sporter__unaccented_naam',
                      'sporterboog__sporter__lid_nr')

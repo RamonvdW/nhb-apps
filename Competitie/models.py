@@ -6,6 +6,7 @@
 
 from django.db import models
 from django.utils import timezone
+from Account.models import Account
 from BasisTypen.models import (BoogType, LeeftijdsKlasse, TeamType,
                                TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse,
                                BLAZOEN_CHOICES, BLAZOEN_40CM)
@@ -820,6 +821,9 @@ class RegioCompetitieSchutterBoog(models.Model):
 
     # voorkeur schietmomenten (methode 1)
     inschrijf_gekozen_matches = models.ManyToManyField(CompetitieMatch, blank=True)
+
+    # aangemeld door
+    aangemeld_door = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         # deze naam wordt gebruikt in de admin interface, dus kort houden

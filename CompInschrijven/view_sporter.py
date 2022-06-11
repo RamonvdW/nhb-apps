@@ -294,7 +294,8 @@ class RegiocompetitieAanmeldenView(View):
                             bij_vereniging=sporterboog.sporter.bij_vereniging,
                             ag_voor_indiv=AG_NUL,
                             ag_voor_team=AG_NUL,
-                            ag_voor_team_mag_aangepast_worden=True)
+                            ag_voor_team_mag_aangepast_worden=True,
+                            aangemeld_door=account)
 
         # haal AG op, indien aanwezig
         scores = Score.objects.filter(sporterboog=sporterboog,

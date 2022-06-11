@@ -458,13 +458,14 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(deelcomp.competitie.begin_jaar + 1)
                 dvl = sporterboog.sporter.sinds_datum
 
-                aanmelding = RegioCompetitieSchutterBoog()
-                aanmelding.deelcompetitie = deelcomp
-                aanmelding.sporterboog = sporterboog
-                aanmelding.bij_vereniging = sporterboog.sporter.bij_vereniging
-                aanmelding.ag_voor_indiv = AG_NUL
-                aanmelding.ag_voor_team = AG_NUL
-                aanmelding.ag_voor_team_mag_aangepast_worden = True
+                aanmelding = RegioCompetitieSchutterBoog(
+                                    deelcompetitie=deelcomp,
+                                    sporterboog=sporterboog,
+                                    bij_vereniging=sporterboog.sporter.bij_vereniging,
+                                    ag_voor_indiv=AG_NUL,
+                                    ag_voor_team=AG_NUL,
+                                    ag_voor_team_mag_aangepast_worden=True,
+                                    aangemeld_door=request.user)
 
                 # zoek de aanvangsgemiddelden er bij, indien beschikbaar
                 for score in Score.objects.filter(sporterboog=sporterboog,
@@ -557,11 +558,11 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                                       'sporterboog__sporter',
                                       'bij_vereniging',
                                       'indiv_klasse')
-                     .filter(deelcompetitie=deelcomp,
-                             bij_vereniging=self.functie_nu.nhb_ver)
-                     .order_by('indiv_klasse__volgorde',
-                               'sporterboog__sporter__voornaam',
-                               'sporterboog__sporter__achternaam'))
+                      .filter(deelcompetitie=deelcomp,
+                              bij_vereniging=self.functie_nu.nhb_ver)
+                      .order_by('indiv_klasse__volgorde',
+                                'sporterboog__sporter__voornaam',
+                                'sporterboog__sporter__achternaam'))
 
         for deelnemer in deelnemers:
             deelnemer.eigen_blazoen_ja_nee = '-'

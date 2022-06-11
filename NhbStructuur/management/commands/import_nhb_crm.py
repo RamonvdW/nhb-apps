@@ -428,7 +428,7 @@ class Command(BaseCommand):
             # address = "Straat 9\n1234 AB  Plaats\n"
             adres = club['address']
             if not adres:       # handles None and ''
-                self.stderr.write('[ERROR] Vereniging %s heeft geen adres' % ver_nr)
+                self.stdout.write('[WARNING] Vereniging %s heeft geen adres' % ver_nr)
             else:
                 adres_spl = adres.strip().split('\n')
                 if len(adres_spl) != 2:
@@ -1216,7 +1216,7 @@ class Command(BaseCommand):
                                     .objects
                                     .exclude(baan_type__in=(BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN))
                                     .get(adres=adres))
-            except WedstrijdLocatie.MultipleObjectsReturned:
+            except WedstrijdLocatie.MultipleObjectsReturned:            # pragma: no cover
                 # er is een ongelukje gebeurt
                 self.stderr.write('[ERROR] Onverwacht meer dan 1 wedstrijdlocatie voor vereniging %s' % nhb_ver)
                 continue
