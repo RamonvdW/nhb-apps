@@ -218,7 +218,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self._prep_voorkeuren()
 
         # controleer dat inschrijven mogelijk is
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_profiel)
         self.assertContains(resp, 'De volgende competities worden georganiseerd')
         self.assertContains(resp, 'De inschrijving is open tot ')
@@ -244,7 +244,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         zet_competitie_fase(comp_25, 'C')
 
         # controleer dat inschrijven nog mogelijk is voor 25m en uitschrijven voor 18m
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_profiel)
         self.assertContains(resp, 'De volgende competities worden georganiseerd')
         self.assertContains(resp, 'De inschrijving is open tot ')     # 18m
@@ -398,7 +398,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
 
         # competitie wordt niet getoond in vroege fases
         zet_competitie_fase(self.comp_18, 'A2')
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(23):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
@@ -482,7 +482,7 @@ class TestSporterProfiel(E2EHelpers, TestCase):
             resp = self.client.post(url)
         self.assert_is_redirect(resp, self.url_profiel)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_profiel)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)

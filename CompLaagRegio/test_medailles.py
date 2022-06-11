@@ -35,7 +35,8 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
 
     def test_medailles(self):
 
-        url = self.url_medailles % 111
+        regio_nr = 111
+        url = self.url_medailles % regio_nr
 
         # zonder inlog
         self.client.logout()
@@ -70,6 +71,10 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
             deelnemer.aantal_scores = 6
             deelnemer.save(update_fields=['aantal_scores'])
         # for
+
+        deelcomp = self.testdata.deelcomp18_regio[regio_nr]
+        deelcomp.huidige_team_ronde = 6
+        deelcomp.save(update_fields=['huidige_team_ronde'])
 
         # de echte pagina
         with self.assert_max_queries(20):
