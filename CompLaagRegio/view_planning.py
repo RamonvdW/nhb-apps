@@ -534,7 +534,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
                 for wkl in wedstrijd.team_klassen.order_by('volgorde'):
                     wedstrijd.aantal_sporters += 4
                     wedstrijd.wkl_lijst.append(wkl)
-                    niet_gebruikt[10000 + wkl.pk] = None
+                    niet_gebruikt[100000 + wkl.pk] = None
                 # for
 
                 for wkl in wedstrijd.indiv_klassen.order_by('volgorde'):

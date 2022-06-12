@@ -433,6 +433,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                 wedstrijd.scheidsrechters = request.POST.get('scheidsrechters', wedstrijd.scheidsrechters)[:500]
 
             if not block_edits:
+                # begrenzing is "doelgroep"
                 begrenzing = request.POST.get('begrenzing', '')[:20]     # afkappen voor de veiligheid
                 for code in WEDSTRIJD_BEGRENZING_TO_STR.keys():
                     if begrenzing == 'begrenzing_%s' % code:
@@ -440,6 +441,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                         break
                 # for
 
+            if not limit_edits:
                 boog_pks = list()
                 for boog in BoogType.objects.all():
                     if boog.pk in bogen_pks_gebruikt_in_sessies or request.POST.get('boog_%s' % boog.afkorting, ''):
@@ -448,12 +450,12 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                 # for
                 wedstrijd.boogtypen.set(boog_pks)
 
-                wedstrijd.contact_naam = request.POST.get('contact_naam', wedstrijd.contact_naam)[:50]
-                wedstrijd.contact_email = request.POST.get('contact_email', wedstrijd.contact_email)[:150]
-                wedstrijd.contact_website = request.POST.get('contact_website', wedstrijd.contact_website)[:100]
-                wedstrijd.contact_telefoon = request.POST.get('contact_telefoon', wedstrijd.contact_telefoon)[:50]
+            wedstrijd.contact_naam = request.POST.get('contact_naam', wedstrijd.contact_naam)[:50]
+            wedstrijd.contact_email = request.POST.get('contact_email', wedstrijd.contact_email)[:150]
+            wedstrijd.contact_website = request.POST.get('contact_website', wedstrijd.contact_website)[:100]
+            wedstrijd.contact_telefoon = request.POST.get('contact_telefoon', wedstrijd.contact_telefoon)[:50]
 
-                wedstrijd.bijzonderheden = request.POST.get('bijzonderheden', '')[:1000]
+            wedstrijd.bijzonderheden = request.POST.get('bijzonderheden', '')[:1000]
 
             data = request.POST.get('locatie', '')
             if data:

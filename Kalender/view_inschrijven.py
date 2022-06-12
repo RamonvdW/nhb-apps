@@ -540,7 +540,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
             for inschrijving in (KalenderInschrijving
                                  .objects
                                  .filter(wedstrijd=wedstrijd,
-                                         sporterboog__sporter=sporter)
+                                         sporterboog__sporter=geselecteerd.sporter)
                                  .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)
                                  .select_related('sessie',
                                                  'sporterboog',

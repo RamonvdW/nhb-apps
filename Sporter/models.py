@@ -237,7 +237,7 @@ class SporterVoorkeuren(models.Model):
 
     # notificatie aan de wedstrijdleiding: sporter gebruikt een rolstoel
     # (hierdoor kunnen er minder sporters op zijn baan)
-    para_met_rolstoel = models.BooleanField(default=False)
+    para_met_rolstoel = models.BooleanField(default=False)      # TODO: para_voorwerpen (die blijven staan op de schietlijn)
 
     # (opt-out) voorkeur voor wedstrijden van specifieke disciplines
     voorkeur_discipline_25m1pijl = models.BooleanField(default=True)

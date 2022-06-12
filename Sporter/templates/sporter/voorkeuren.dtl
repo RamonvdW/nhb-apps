@@ -233,19 +233,22 @@
                         <tr>
                             <td colspan="2">
                                 <h5>Voorkeuren voor para-sporters</h5>
+                                <br>
+                                <span>Ingevoerde informatie wordt gedeeld met de wedstrijdleiding zodat ze, indien mogelijk, hier rekening mee houden.</span>
                             </td>
-                        </tr>
-
-                        <tr>
-                            <td colspan="2">Ingevoerde informatie wordt gedeeld met de wedstrijdleiding zodat ze, indien mogelijk, hier rekening mee houden.</td>
                         </tr>
 
                         <tr>
                             <td colspan="2">
                                 <label>
                                     <input type="checkbox" class="filled-in" name="para_rolstoel"{% if voorkeuren.para_met_rolstoel %} checked{% endif %} onchange="gewijzigd()">
-                                    <span class="black-text">Ik zit in een rolstoel</span>
+                                    <span class="black-text">Ik gebruik voorwerpen die blijven staan op de schietlijn</span>
                                 </label>
+
+                                <p>Let op: alleen een officieel geregistreerde classificatie geeft <i>recht</i> op extra ruimte op de schietlijn.</p>
+                                {% if sporter.para_classificatie %}
+                                    <span>Jouw geregistreerde classificatie: {{ sporter.para_classificatie }}</span>
+                                {% endif %}
                             </td>
                         </tr>
 
@@ -255,7 +258,6 @@
                                 <div>
                                     <input type="text" maxlength="256" name="para_notitie" placeholder="Hier invoeren" value="{{ voorkeuren.opmerking_para_sporter }}" oninput="gewijzigd()">
                                 </div>
-                                <p>Voorbeelden:<br>&nbsp;&nbsp;&nbsp;Blijf op schietlijn wachten<br>&nbsp;&nbsp;&nbsp;Gebruik kruk<br>&nbsp;&nbsp;&nbsp;etc.</p>
                             </td>
                         </tr>
 
