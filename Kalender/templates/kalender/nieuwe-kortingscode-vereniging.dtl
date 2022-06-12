@@ -46,7 +46,7 @@
     <!-- blauwe balk met kaartjes -->
     <div class="row-nhb-blauw">
         <div class="col s12">
-            {% include 'plein/card.dtl' with title="Sporter" text="Voor een individuele sporter." icon="account_circle" onclick="keuze('sporter')" %}
+            {% include 'plein/card.dtl' with title="Persoonlijk" text="Voor een individuele sporter." icon="account_circle" onclick="keuze('sporter')" %}
 
             {% include 'plein/card.dtl' with title="Vereniging" text="Voor alle leden van jullie vereniging." icon="home" onclick="keuze('vereniging')" %}
 

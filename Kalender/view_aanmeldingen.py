@@ -202,6 +202,13 @@ class KalenderDetailsSporterView(UserPassesTestMixin, TemplateView):
 
         lijst.sort()
 
+        context['kruimels'] = (
+            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+            (reverse('Kalender:vereniging'), 'Wedstrijdkalender'),
+            (reverse('Kalender:vereniging'), 'Aanmeldingen'),           # TODO: exacte wedstrijd weten we niet!
+            (None, 'Details aanmelding')
+        )
+
         menu_dynamics(self.request, context)
         return context
 
