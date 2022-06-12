@@ -446,7 +446,7 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
         try:
             bestel_nr = str(kwargs['bestel_nr'])[:7]        # afkappen voor de veiligheid
             bestel_nr = int(bestel_nr)
-            bestelling = Bestelling.objects.get(bestel_nr=bestel_nr, account=account)
+            bestelling = Bestelling.objects.prefetch_related('transacties').get(bestel_nr=bestel_nr, account=account)
         except (KeyError, TypeError, ValueError, Bestelling.DoesNotExist):
             raise Http404('Niet gevonden')
 
@@ -470,11 +470,11 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
 
         if bestelling.status == BESTELLING_STATUS_AFGEROND:
             context['is_afgerond'] = True
-        else:
-            # hier komen we als de betaling niet gelukt is
-            # maar ook als Mollie de redirect naar deze pagina deed voordat de payment-status-changed callback kwam
-            if transacties_euro < bestelling.totaal_euro:
-                context['wacht_op_betaling'] = True
+        elif bestelling.status == BESTELLING_STATUS_WACHT_OP_BETALING:
+            # hier komen we als de betaling uitgevoerd is, maar de payment-status-changed nog niet
+            # binnen is of nog niet verwerkt door de achtergrondtaak.
+            # blijf pollen
+            context['wacht_op_betaling'] = True
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),

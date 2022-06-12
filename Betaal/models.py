@@ -42,7 +42,14 @@ class BetaalInstellingenVereniging(models.Model):
         # mollie key heeft een prefix live_ of test_ gevolgd door iets van 20 letters/cijfers
         # verwijder het middelste stuk
         key = self.mollie_api_key
-        key = key[:5+2] + '[...]' + key[-2:]
+
+        # laat aan beide kanten 20% van de sleutel zien
+        sub = len(key) - 5
+        sub = int(sub / 5)
+        sub = max(sub, 1)       # prevent 0
+
+        key = key[:5+sub] + '[...]' + key[-sub:]
+        print('sub=%s, api_key=%s, key=%s' % (sub, repr(self.mollie_api_key), repr(key)))
         return key
 
     def __str__(self):

@@ -87,6 +87,8 @@ class PleinView(View):
         # ga naar live server banner tonen?
         context['ga_naar_live_server'] = settings.IS_TEST_SERVER
 
+        context['toon_kalender'] = settings.TOON_WEDSTRIJDKALENDER
+
         if request.user.is_authenticated:
             rol_nu = rol_get_huidige(request)
 
@@ -111,6 +113,7 @@ class PleinView(View):
 
                 if rol_nu == Rollen.ROL_BB:
                     context['rol_is_bb'] = True
+                    context['toon_kalender'] = True     # override default
                 elif rol_nu == Rollen.ROL_BKO:
                     context['rol_is_bko'] = True
                 elif rol_nu == Rollen.ROL_RKO:

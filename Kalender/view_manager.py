@@ -85,8 +85,8 @@ class KalenderManagerView(UserPassesTestMixin, View):
         except KeyError:
             status = None
 
-        # begin 2 weken terug in tijd (oudere wedstrijden zijn niet interessant)
-        datum_vanaf = timezone.now().date() - datetime.timedelta(days=14)
+        # begin 2 maanden terug in tijd (oudere wedstrijden zijn niet interessant)
+        datum_vanaf = timezone.now().date() - datetime.timedelta(days=61)
 
         # pak de 50 meest recente wedstrijden
         wedstrijden = (KalenderWedstrijd
@@ -97,7 +97,7 @@ class KalenderManagerView(UserPassesTestMixin, View):
         if status:
             wedstrijden = wedstrijden.filter(status=status)
 
-        wedstrijden = wedstrijden[:50]
+        wedstrijden = wedstrijden[:100]
 
         for wed in wedstrijden:
             disc2str = ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS[wed.organisatie]
