@@ -11,19 +11,29 @@
 {% block pagina %}
 
     <script type="application/javascript">
-        function gewijzigd() {
+        function gewijzigd(code_blokkeer) {
             // het formulier is aangepast en moet opgeslagen worden
 
             // disable alle knoppen waarmee de invoer verloren zou gaan
-            const els = document.getElementsByClassName("vertrek_knop")
+            const els = document.getElementsByClassName("vertrek_knop");
             Array.prototype.forEach.call(els, function (el) {
-                el.classList.add('disabled')
+                el.classList.add('disabled');
             })
 
             // enable de 'opslaan' knop
-            const el = document.getElementById("opslaan_knop")
-            el.disabled = false
-            el.parentElement.style.display = "block"
+            const el = document.getElementById("opslaan_knop");
+            el.disabled = false;
+            el.parentElement.style.display = "block";
+
+            // sluit mutually-exclusive klassen uit
+            if ((code_blokkeer !== undefined) && (code_blokkeer > 0)) {
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]')
+                checkboxes.forEach(function(checkbox) {
+                    if (checkbox.dataset.code === code_blokkeer) {
+                        checkbox.checked = false;
+                    }
+                })
+            }
         }
 
         let ignore_datum_changes = true;
@@ -74,7 +84,7 @@
 
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3">
-                <div style="padding:30px">
+                <div style="padding:0 30px 30px 30px">
 
                     <form method="post" action="{{ url_opslaan }}">
                         {% csrf_token %}
@@ -82,23 +92,28 @@
                         <table class="white">
 
                             <tr>
-                                <td>Titel:</td>
-                                <td colspan="2"><input type="text" name="titel" value="{{ wed.titel }}" oninput="gewijzigd()"></td>
+                                <td colspan="3" class="center nhb-blauw-text"><h6>Instellingen</h6></td>
                             </tr>
 
                             <tr>
-                                <td>Organiserende vereniging:</td>
+                                <th>Titel</th>
+                                <td colspan="2">
+                                    <input type="text" name="titel" value="{{ wed.titel }}" oninput="gewijzigd()">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Organiserende vereniging</th>
                                 <td colspan="2">{{ wed.organiserende_vereniging }}</td>
                             </tr>
 
                             <tr>
-                                <td>Status:</td>
-                                <td>
+                                <th>Status</th>
+                                <td colspan="2">
                                     {% for opt in opt_status %}
                                         <span class="{% if opt.selected %}nhb-blauw-text{% else %}grey-text{% endif %}" style="white-space: nowrap">{{ opt.status_str }}</span><br>
                                     {% endfor %}
-                                </td>
-                                <td>
+                                    <br>
                                     {% if url_prev_tekst %}
                                         <button form="form_prev" class="btn-nhb-blauw vertrek_knop">{{ url_prev_tekst }}</button>
                                         <span>&nbsp;&nbsp;</span>
@@ -110,8 +125,8 @@
                             </tr>
 
                             <tr>
-                                <td>Datum begin wedstrijd:</td>
-                                <td>
+                                <th>Datum begin wedstrijd</th>
+                                <td colspan="2">
                                     {% if limit_edits %}
                                         <span>{{ wed.datum_begin }}</span>
                                     {% else %}
@@ -119,12 +134,11 @@
                                         <input type="hidden" name="datum_begin" id="id_datum_begin"> <!-- voor POST, in juiste formaat -->
                                     {% endif %}
                                 </td>
-                                <td></td>
                             </tr>
 
                             <tr>
-                                <td>Duur van de wedstrijd:</td>
-                                <td>
+                                <th>Duur van de wedstrijd</th>
+                                <td colspan="2">
                                     {% if limit_edits %}
                                         <span>{{ duur_dagen }} dagen</span>
                                     {% else %}
@@ -135,11 +149,10 @@
                                         </select>
                                     {% endif %}
                                 </td>
-                                <td></td>
                             </tr>
 
                             <tr>
-                                <td>Bijzonderheden:</td>
+                                <th>Bijzonder<wbr>heden</th>
                                 <td colspan="2">
                                     {% if block_edits %}
                                         <span>{{ wed.bijzonderheden|linebreaksbr }}</span>
@@ -150,11 +163,12 @@
                             </tr>
 
                             <tr>
-                                <td>Discipline:</td>
+                                <th>Discipline</th>
                                 <td colspan="2">
                                     {% if limit_edits %}
                                         <span>{{ wed.disc_str }}</span>
                                     {% else %}
+                                        <span>Beschikbare disciplines van {{ wed.org_str }}:</span>
                                         <ul id="id_discipline">
                                             {% for opt in opt_disc %}
                                                 <li>
@@ -169,64 +183,70 @@
                                 </td>
                             </tr>
 
+                            {% if toon_wa_status %}
+                                <tr>
+                                    <th>WA-status</th>
+                                    <td colspan="2">
+                                        {% if limit_edits %}
+                                            <span>{{ wed.wa_status_str }}</span>
+                                        {% else %}
+                                            <ul id="id_wa_status">
+                                                {% for opt in opt_wa %}
+                                                    <li>
+                                                        <label class="black-text" for="id_{{ opt.sel }}">
+                                                            <input class="with-gap" type="radio" name="wa_status" value="{{ opt.sel }}" required id="id_{{ opt.sel }}"{% if opt.selected %} checked{% endif %}{% if opt.disabled %} disabled{% endif %} onchange="gewijzigd()">
+                                                            <span>{{ opt.keuze_str }}</span>
+                                                        </label>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
+
+                                        {% if wed.voorwaarden_a_status_acceptatie %}
+                                            <p>Akkoord voor A-status voorwaarden is gegeven<br>op {{ wed.voorwaarden_a_status_when }} door {{ wed.voorwaarden_a_status_who }}</p>
+                                            <a class="btn-nhb-blauw btn-small" href="{{ url_voorwaarden }}" target="_blank" rel="noopener noreferrer">
+                                                <i class="material-icons-round left">open_in_new</i>Voorwaarden lezen</a>
+                                        {% else %}
+                                            <p>Voordat A-status gekozen kan worden moet je akkoord gaan met de voorwaarden.</p>
+                                            <a class="btn-nhb-blauw btn-small" href="{{ url_voorwaarden }}" target="_blank" rel="noopener noreferrer">
+                                                <i class="material-icons-round left">open_in_new</i>Voorwaarden lezen</a>
+                                            {% if not limit_edits %}
+                                                <ul id="id_teams">
+                                                    <li>
+                                                        <label>
+                                                            <input type="checkbox" class="filled-in" name="akkoord_a_status" onchange="akkoord_gewijzigd()">
+                                                            <span class="black-text">&nbsp;Ik ga akkoord met de voorwaarden</span>
+                                                        </label>
+                                                    </li>
+                                                </ul>
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endif %}     <!-- toon_wa_status -->
+
                             <tr>
-                                <td>WA-status</td>
-                                <td>
-                                    {% if limit_edits %}
-                                        <span>{{ wed.wa_status_str }}</span>
+                                <th>Wedstrijd locatie</th>
+                                <td colspan="2">
+                                    {% if block_edits %}
+                                        <span>{{ wed.locatie }}</span>
                                     {% else %}
-                                        <ul id="id_wa_status">
-                                            {% for opt in opt_wa %}
-                                                <li>
+                                        <ul id="id_locatie">
+                                            {% for opt in opt_locatie %}
+                                               <li>
                                                     <label class="black-text" for="id_{{ opt.sel }}">
-                                                        <input class="with-gap" type="radio" name="wa_status" value="{{ opt.sel }}" required id="id_{{ opt.sel }}"{% if opt.selected %} checked{% endif %}{% if opt.disabled %} disabled{% endif %} onchange="gewijzigd()">
-                                                        <span>{{ opt.keuze_str }}</span>
+                                                        <input class="with-gap" type="radio" name="locatie" value="{{ opt.sel }}" required id="id_{{ opt.sel }}"{% if opt.selected %} checked{% endif %} onchange="gewijzigd()">
+                                                        <span>{{ opt.keuze_str|linebreaksbr }}{% if not forloop.last %}<br>&nbsp;{% endif %}</span>
                                                     </label>
                                                 </li>
                                             {% endfor %}
                                         </ul>
                                     {% endif %}
                                 </td>
-                                <td>
-                                    {% if wed.voorwaarden_a_status_acceptatie %}
-                                        <p>Akkoord voor A-status voorwaarden is gegeven<br>op {{ wed.voorwaarden_a_status_when }} door {{ wed.voorwaarden_a_status_who }}</p>
-                                        <a class="btn-nhb-blauw btn-small" href="{{ url_voorwaarden }}" target="_blank" rel="noopener noreferrer">
-                                            <i class="material-icons-round left">open_in_new</i>Voorwaarden lezen</a>
-                                    {% else %}
-                                        <p>Voordat A-status gekozen kan worden moet je akkoord gaan met de voorwaarden.</p>
-                                        <a class="btn-nhb-blauw btn-small" href="{{ url_voorwaarden }}" target="_blank" rel="noopener noreferrer">
-                                            <i class="material-icons-round left">open_in_new</i>Voorwaarden lezen</a>
-                                        {% if not limit_edits %}
-                                            <ul id="id_teams">
-                                                <li>
-                                                    <label>
-                                                        <input type="checkbox" class="filled-in" name="akkoord_a_status" onchange="akkoord_gewijzigd()">
-                                                        <span class="black-text">&nbsp;Ik ga akkoord met de voorwaarden</span>
-                                                    </label>
-                                                </li>
-                                            </ul>
-                                        {% endif %}
-                                    {% endif %}
-                                </td>
                             </tr>
 
                             <tr>
-                                <td>Wedstrijd locatie:</td>
-                                <td colspan="2">
-                                    {% if block_edits %}
-                                        <span>{{ wed.locatie }}</span>
-                                    {% else %}
-                                        <select name="locatie" onchange="gewijzigd()">
-                                            {% for opt in opt_locatie %}
-                                                <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    {% endif %}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>Doelgroep:</td>
+                                <th>Doelgroep</th>
                                 <td colspan="2">
                                     {% if block_edits %}
                                         <span>{{ wed.begrenzing_str }}</span>
@@ -245,8 +265,8 @@
                                 </td>
                             </tr>
 
-                            <tr>
-                                <td>Toegestane bogen:</td>
+                            <tr>                         <!-- F = IFAA -->
+                                <th>{% if wed.organisatie == 'F' %}Toegestane schietstijlen{% else %}Toegestane bogen{% endif %}</th>
                                 <td colspan="2">
                                     {% if limit_edits %}
                                         {% for boog in opt_bogen %}
@@ -257,7 +277,7 @@
                                     {% else %}
                                         {% for boog in opt_bogen %}
                                             <label class="black-text">
-                                                <input type="checkbox" name="{{ boog.sel }}" {% if boog.gebruikt %}disabled checked{% else %}class="filled-in" {% if boog.selected %} checked{% endif %}{% endif %} onchange="gewijzigd()">
+                                                <input type="checkbox" name="{{ boog.sel }}"{% if boog.gebruikt %} disabled checked{% else %} class="filled-in"{% if boog.selected %} checked{% endif %}{% endif %} onchange="gewijzigd()">
                                                 <span>{{ boog.beschrijving }}</span>
                                             </label><br>
                                         {% endfor %}
@@ -266,74 +286,8 @@
                             </tr>
 
                             <tr>
-                                <td>Contactgegevens organisatie:</td>
+                                <th>Aanwezig melden</th>
                                 <td colspan="2">
-                                    <table>
-                                        <tr>
-                                            <td{% if block_edits %} style="width:50%"{% endif %}>Naam</td>
-                                            <td>
-                                                {% if block_edits %}
-                                                    <span>{{ wed.contact_naam }}</span>
-                                                {% else %}
-                                                    <input type="text" name="contact_naam" value="{{ wed.contact_naam }}" oninput="gewijzigd()">
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <td>Telefoonnummer</td>
-                                            <td>
-                                                {% if block_edits %}
-                                                    <span>{{ wed.contact_telefoon }}</span>
-                                                {% else %}
-                                                    <input type="tel" name="contact_telefoon" value="{{ wed.contact_telefoon }}" oninput="gewijzigd()">
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <td>E-mailadres</td>
-                                            <td>
-                                                {% if block_edits %}
-                                                    <span>{{ wed.contact_email }}</span>
-                                                {% else %}
-                                                    <input type="email" name="contact_email" value="{{ wed.contact_email }}" oninput="gewijzigd()">
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <td>Website</td>
-                                            <td>
-                                                {% if block_edits %}
-                                                    <span>{{ wed.contact_website }}</span>
-                                                {% else %}
-                                                    <input type="url" name="contact_website" value="{{ wed.contact_website }}" oninput="gewijzigd()">
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <td>Extern beheer:</td>
-                                            <td>
-                                                {% if block_edits %}
-                                                    <span>{% if wed.extern_beheerd %}Ja{% else %}Nee{% endif %}</span>
-                                                {% else %}
-                                                    <label class="black-text">
-                                                        <input type="checkbox" class="filled-in" name="extern"{% if wed.extern_beheerd %} checked{% endif %} onchange="gewijzigd()">
-                                                        <span>Inschrijven via bovenstaande website en/of e-mailadres</span>
-                                                    </label>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-
-                                    </table>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <td>Aanwezig melden:</td>
-                                <td>
                                     {% if block_edits %}
                                         <span>{{ wed.minuten_voor_begin_sessie_aanwezig_zijn }} minuten van te voren</span>
                                     {% else %}
@@ -345,75 +299,152 @@
                                         </select>
                                     {% endif %}
                                 </td>
-                                <td></td>
                             </tr>
 
                             <tr>
-                                <td>Scheidsrechter behoefte:</td>
+                                <td colspan="3" class="center nhb-blauw-text"><h6>Inschrijfgeld</h6></td>
+                            </tr>
+
+                            <tr>
+                                <th>Standaard</th>
+                                <td>
+                                    <span style="font-size:16px">&euro;&nbsp;</span>
+                                    <input style="width:90%" type="text" name="prijs_normaal" value="{{ prijs_euro_normaal_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Onder 18</th>
+                                <td>
+                                    <span style="font-size:16px">&euro;&nbsp;</span>
+                                    <input style="width:90%" type="text" name="prijs_onder18" value="{{ prijs_euro_onder18_str }}" pattern="^\d+(,\d{2})?$" placeholder="123,45" oninput="gewijzigd()">
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="3" class="center nhb-blauw-text"><h6>Contactgegevens organisatie</h6></td>
+                            </tr>
+
+                            <tr>
+                                <th style="padding-left:30px">Naam van contact<wbr>persoon / wedstrijd<wbr>leider</th>
                                 <td colspan="2">
-                                    <table>
-
-                                        <tr>
-                                            <td{% if block_edits %} style="width:50%"{% endif %}>Aantal banen tegelijk actief:</td>
-                                            <td>
-                                                {% if limit_edits %}
-                                                    <span>{{ wed.aantal_banen }} banen</span>
-                                                {% else %}
-                                                    <select name="aantal_banen" onchange="gewijzigd()">
-                                                        <option value="1"{% if wed.aantal_banen == 1 %} selected{% endif %}>1 baan</option>
-                                                        {% for banen in opt_banen %}
-                                                            <option value="{{ banen }}"{%if wed.aantal_banen == banen %} selected{% endif %}>{{ banen }} banen</option>
-                                                        {% endfor %}
-                                                    </select>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-
-                                        <tr>
-                                            <td>Eigen scheidsrechters (namen):</td>
-                                            <td>
-                                                {% if limit_edits %}
-                                                    <span>{{ wed.scheidsrechters|linebreaksbr }}</span>
-                                                {% else %}
-                                                    <textarea name="scheidsrechters" class="materialize-textarea" oninput="gewijzigd()">{{ wed.scheidsrechters }}</textarea>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-
-                                    </table>
+                                    {% if block_edits %}
+                                        <span>{{ wed.contact_naam }}</span>
+                                    {% else %}
+                                        <input type="text" name="contact_naam" value="{{ wed.contact_naam }}" oninput="gewijzigd()">
+                                    {% endif %}
                                 </td>
                             </tr>
 
                             <tr>
-                                <td>Wedstrijdklassen:</td>
-                                <td style="width:40%">
-                                    {% for klasse in opt_klasse_1 %}
-                                        <label class="black-text">
-                                            <input type="checkbox" name="{{ klasse.sel }}" {% if klasse.gebruikt %}disabled checked{% else %}class="filled-in" {% if klasse.selected %} checked{% endif %}{% endif %} onchange="gewijzigd()">
-                                            <span>{{ klasse.beschrijving }}</span>
-                                        </label><br>
-                                    {% endfor %}
+                                <th style="padding-left:30px">Telefoon<wbr>nummer</th>
+                                <td colspan="2">
+                                    {% if block_edits %}
+                                        <span>{{ wed.contact_telefoon }}</span>
+                                    {% else %}
+                                        <input type="tel" name="contact_telefoon" value="{{ wed.contact_telefoon }}" oninput="gewijzigd()">
+                                    {% endif %}
                                 </td>
-                                <td style="width:40%">
-                                    {% for klasse in opt_klasse_2 %}
+                            </tr>
+
+                            <tr>
+                                <th style="padding-left:30px">E-mail<wbr>adres</th>
+                                <td colspan="2">
+                                    {% if block_edits %}
+                                        <span>{{ wed.contact_email }}</span>
+                                    {% else %}
+                                        <input type="email" name="contact_email" value="{{ wed.contact_email }}" oninput="gewijzigd()">
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th style="padding-left:30px">Website</th>
+                                <td colspan="2">
+                                    {% if block_edits %}
+                                        <span>{{ wed.contact_website }}</span>
+                                    {% else %}
+                                        <input type="url" name="contact_website" value="{{ wed.contact_website }}" oninput="gewijzigd()">
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th style="padding-left:30px">Extern beheer</th>
+                                <td colspan="2">
+                                    {% if block_edits %}
+                                        <span>{% if wed.extern_beheerd %}Ja{% else %}Nee{% endif %}</span>
+                                    {% else %}
                                         <label class="black-text">
-                                            <input type="checkbox" name="{{ klasse.sel }}" {% if klasse.gebruikt %}disabled checked{% else %}class="filled-in" {% if klasse.selected %} checked{% endif %}{% endif %} onchange="gewijzigd()">
-                                            <span>{{ klasse.beschrijving }}</span>
+                                            <input type="checkbox" class="filled-in" name="extern"{% if wed.extern_beheerd %} checked{% endif %} onchange="gewijzigd()">
+                                            <span>Inschrijven via bovenstaande website en/of e-mailadres</span>
+                                        </label>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <td colspan="3" class="center nhb-blauw-text"><h6>Scheidsrechter behoefte</h6></td>
+                            </tr>
+
+                            <tr>
+                                <th  style="padding-left:30px">Aantal banen tegelijk actief</th>
+                                <td colspan="2">
+                                    {% if limit_edits %}
+                                        <span>{{ wed.aantal_banen }} banen</span>
+                                    {% else %}
+                                        <select name="aantal_banen" onchange="gewijzigd()">
+                                            <option value="1"{% if wed.aantal_banen == 1 %} selected{% endif %}>1 baan</option>
+                                            {% for banen in opt_banen %}
+                                                <option value="{{ banen }}"{%if wed.aantal_banen == banen %} selected{% endif %}>{{ banen }} banen</option>
+                                            {% endfor %}
+                                        </select>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th style="padding-left:30px">Eigen scheids<wbr>rechters (namen)</th>
+                                <td colspan="2">
+                                    {% if limit_edits %}
+                                        <span>{{ wed.scheidsrechters|linebreaksbr }}</span>
+                                    {% else %}
+                                        <textarea name="scheidsrechters" class="materialize-textarea" oninput="gewijzigd()">{{ wed.scheidsrechters }}</textarea>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="3" class="center">
+                                    <h6 class="nhb-blauw-text">Wedstrijdklassen</h6>
+                                                         <!-- N = NHB -->
+                                    {% if wed.organisatie == 'N' %}
+                                        <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th></th>
+                                <td colspan="2">
+                                    {% for klasse in opt_klasse %}
+                                        <label class="black-text">
+                                            <input type="checkbox" name="{{ klasse.sel }}" {% if klasse.gebruikt %}disabled checked{% else %}class="filled-in" {% if klasse.selected %} checked{% endif %}{% endif %} onchange="gewijzigd('{{ klasse.code_blokkeer }}')" data-code="{{ klasse.code }}">
+                                            <span>{{ klasse.volg_nr }}: {{ klasse.beschrijving }}<!-- ({{ klasse.code }} -> {{ klasse.code_blokkeer }}) --></span>
                                         </label><br>
                                     {% endfor %}
                                 </td>
                             </tr>
-
-                            {% if wedstrijd_is_a_status %}
-                                <tr>
-                                    <td></td>
-                                    <td colspan="2">Let op! Onder 14 en 60+ klassen mogen op A-status wedstrijd, maar kunnen geen records claimen.</td>
-                                </tr>
-                            {% endif %}
-
                         </table>
 
+
                         <div class="center">
+                                                 <!-- N = NHB -->
+                            {% if wed.organisatie == 'N' and wedstrijd_is_a_status %}
+                                <p>Let op! Onder 14 en 60+ klassen mogen op A-status wedstrijd, maar kunnen geen records claimen.</p>
+                            {% endif %}
+
                             <p>De wedstrijdklasse senioren is altijd de 'open' klasse waarin alle andere leeftijdsklassen mee mogen doen.</p>
                             <p>Wedstrijdklassen en bogen die niet aangepast kunnen worden, zijn in gebruik in een sessie.</p>
                         </div>

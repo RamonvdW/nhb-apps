@@ -12,14 +12,13 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import (COMPETITIE_BLAZOENEN, BLAZOEN_DT, BLAZOEN_60CM_4SPOT,
                                BLAZOEN_WENS_4SPOT, BLAZOEN_WENS_DT,
                                BLAZOEN2STR, BLAZOEN2STR_COMPACT)
-from Competitie.models import (LAAG_REGIO, Competitie, DeelCompetitie, DeelcompetitieRonde,
+from Competitie.models import (LAAG_REGIO, Competitie, DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
                                RegioCompetitieSchutterBoog, DAGDEEL2LABEL,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, DAGDELEN, DAGDEEL_AFKORTINGEN)
 from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren
-from Wedstrijden.models import CompetitieWedstrijd
 import csv
 
 
@@ -97,8 +96,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
 
         objs = (RegioCompetitieSchutterBoog
                 .objects
-                .select_related('klasse',
-                                'klasse__indiv',
+                .select_related('indiv_klasse',
                                 'deelcompetitie',
                                 'deelcompetitie__nhb_regio',
                                 'sporterboog',
@@ -106,21 +104,21 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
                                 'bij_vereniging')
                 .filter(deelcompetitie__competitie=comp,
                         deelcompetitie__laag=LAAG_REGIO)
-                .order_by('klasse__indiv__volgorde',
+                .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
 
         obj_aantal = None
         aantal = 0
         volgorde = -1
         for obj in objs:
-            if volgorde != obj.klasse.indiv.volgorde:
+            if volgorde != obj.indiv_klasse.volgorde:
                 obj.nieuwe_klasse = True
                 if obj_aantal:
                     obj_aantal.aantal_in_klasse = aantal
                     obj_aantal.aantal_regels = aantal + 2
                 aantal = 0
                 obj_aantal = obj
-                volgorde = obj.klasse.indiv.volgorde
+                volgorde = obj.indiv_klasse.volgorde
 
             aantal += 1
         # for
@@ -181,8 +179,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
 
         objs = (RegioCompetitieSchutterBoog
                 .objects
-                .select_related('klasse',
-                                'klasse__indiv',
+                .select_related('indiv_klasse',
                                 'deelcompetitie',
                                 'deelcompetitie__nhb_regio__rayon',
                                 'sporterboog',
@@ -191,21 +188,21 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
                 .filter(deelcompetitie__competitie=comp,
                         deelcompetitie__laag=LAAG_REGIO,
                         deelcompetitie__nhb_regio__rayon=rayon)
-                .order_by('klasse__indiv__volgorde',
+                .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
 
         obj_aantal = None
         aantal = 0
         volgorde = -1
         for obj in objs:
-            if volgorde != obj.klasse.indiv.volgorde:
+            if volgorde != obj.indiv_klasse.volgorde:
                 obj.nieuwe_klasse = True
                 if obj_aantal:
                     obj_aantal.aantal_in_klasse = aantal
                     obj_aantal.aantal_regels = aantal + 2
                 aantal = 0
                 obj_aantal = obj
-                volgorde = obj.klasse.indiv.volgorde
+                volgorde = obj.indiv_klasse.volgorde
 
             aantal += 1
         # for
@@ -276,15 +273,14 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
         objs = (RegioCompetitieSchutterBoog
                 .objects
-                .select_related('klasse',
-                                'klasse__indiv',
+                .select_related('indiv_klasse',
                                 'deelcompetitie',
                                 'sporterboog',
                                 'sporterboog__sporter',
                                 'sporterboog__boogtype',
                                 'bij_vereniging')
                 .filter(deelcompetitie=deelcomp)
-                .order_by('klasse__indiv__volgorde',
+                .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
 
         obj_aantal = None
@@ -292,14 +288,14 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
         volgorde = -1
         for obj in objs:
             obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]
-            if volgorde != obj.klasse.indiv.volgorde:
+            if volgorde != obj.indiv_klasse.volgorde:
                 obj.nieuwe_klasse = True
                 if obj_aantal:
                     obj_aantal.aantal_in_klasse = aantal
                     obj_aantal.aantal_regels = aantal + 2
                 aantal = 0
                 obj_aantal = obj
-                volgorde = obj.klasse.indiv.volgorde
+                volgorde = obj.indiv_klasse.volgorde
 
             aantal += 1
         # for
@@ -373,7 +369,7 @@ class LijstAangemeldRegiocompAlsBestandView(LijstAangemeldRegiocompRegioView):
             ver = deelnemer.bij_vereniging
             sporter = deelnemer.sporterboog.sporter
             boog = deelnemer.sporterboog.boogtype
-            klasse = deelnemer.klasse.indiv
+            klasse = deelnemer.indiv_klasse
             team_str = 'Ja' if deelnemer.inschrijf_voorkeur_team else 'Nee'
             eigen_str = 'Ja' if sporter.lid_nr in voorkeur_eigen_blazoen else 'Nee'
 
@@ -435,22 +431,18 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                                   .values_list('sporter__lid_nr', flat=True))
 
         alle_blazoenen = list()
-        afstand = deelcomp.competitie.afstand
 
         for deelnemer in deelnemers:
             # bepaal welk blazoen deze sporter nodig heeft
-            klasse = deelnemer.klasse.indiv
-            if afstand == '18':
-                blazoenen = (klasse.blazoen1_18m_regio, klasse.blazoen2_18m_regio)
-            else:
-                blazoenen = (klasse.blazoen1_25m_regio, klasse.blazoen2_25m_regio)
+            klasse = deelnemer.indiv_klasse
+            blazoenen = (klasse.blazoen1_regio, klasse.blazoen2_regio)
 
-            if blazoenen[0] == blazoenen[1]:
-                blazoen_str = BLAZOEN2STR[blazoenen[0]]
+            if klasse.blazoen1_regio == klasse.blazoen2_regio:
+                blazoen_str = BLAZOEN2STR[klasse.blazoen1_regio]
             else:
                 # meerder mogelijkheden
-                blazoen_str = BLAZOEN2STR[blazoenen[0]]     # ga uit van eerste optie bij geen voorkeur
-                # blazoen_str = "%s of %s" % (BLAZOEN2STR[blazoenen[0]], BLAZOEN2STR[blazoenen[1]])
+                blazoen_str = BLAZOEN2STR[klasse.blazoen1_regio]     # ga uit van eerste optie bij geen voorkeur
+                # blazoen_str = "%s of %s" % (BLAZOEN2STR[klasse.blazoen1_regio], BLAZOEN2STR[klasse.blazoen2_regio])
                 if BLAZOEN_DT in blazoenen:
                     if deelnemer.sporterboog.sporter.lid_nr in voorkeur_eigen_blazoen:
                         blazoen_str = BLAZOEN2STR[BLAZOEN_WENS_DT]
@@ -602,8 +594,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
 
         deelnemers = (RegioCompetitieSchutterBoog
                       .objects
-                      .select_related('klasse',
-                                      'klasse__indiv',
+                      .select_related('indiv_klasse',
                                       'deelcompetitie',
                                       'bij_vereniging',
                                       'sporterboog',
@@ -611,7 +602,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
                                       'sporterboog__sporter',
                                       'sporterboog__sporter__bij_vereniging')
                       .filter(deelcompetitie=deelcomp)
-                      .order_by('klasse__indiv__volgorde',
+                      .order_by('indiv_klasse__volgorde',
                                 'ag_voor_indiv'))
 
         # voeg de tabel met dagdeel-behoefte toe
@@ -680,15 +671,14 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
 
         objs = (RegioCompetitieSchutterBoog
                 .objects
-                .select_related('klasse',
-                                'klasse__indiv',
+                .select_related('indiv_klasse',
                                 'deelcompetitie',
                                 'bij_vereniging',
                                 'sporterboog',
                                 'sporterboog__sporter',
                                 'sporterboog__sporter__bij_vereniging')
                 .filter(deelcompetitie=deelcomp)
-                .order_by('klasse__indiv__volgorde',
+                .order_by('indiv_klasse__volgorde',
                           'ag_voor_indiv'))
 
         context['object_list'] = objs
@@ -790,24 +780,26 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                                   .filter(voorkeur_eigen_blazoen=True)
                                   .values_list('sporter__lid_nr', flat=True))
 
-        # zoek alle wedstrijdplannen in deze deelcompetitie (1 per cluster + 1 voor de regio)
-        plan_pks = list(DeelcompetitieRonde
-                        .objects
-                        .filter(deelcompetitie=deelcomp)
-                        .values_list('plan__pk', flat=True))
+        match_pks = list()
+        for ronde in (DeelcompetitieRonde
+                      .objects
+                      .filter(deelcompetitie=deelcomp)
+                      .prefetch_related('matches')):
+            match_pks.extend(ronde.matches.values_list('pk', flat=True))
+        # for
 
-        wedstrijden = (CompetitieWedstrijd
-                       .objects
-                       .select_related('vereniging')
-                       .prefetch_related('regiocompetitieschutterboog_set')
-                       .filter(competitiewedstrijdenplan__pk__in=plan_pks)
-                       .order_by('datum_wanneer',
-                                 'tijd_begin_wedstrijd',
-                                 'vereniging__ver_nr'))
+        matches = (CompetitieMatch
+                   .objects
+                   .select_related('vereniging')
+                   .prefetch_related('regiocompetitieschutterboog_set')
+                   .filter(pk__in=match_pks)
+                   .order_by('datum_wanneer',
+                             'tijd_begin_wedstrijd',
+                             'vereniging__ver_nr'))
 
-        context['wedstrijden'] = wedstrijden
+        context['wedstrijden'] = matches
 
-        for wedstrijd in wedstrijden:
+        for wedstrijd in matches:
             wedstrijd.beschrijving_str = "%s om %s" % (date_format(wedstrijd.datum_wanneer, "l j E Y"),
                                                        wedstrijd.tijd_begin_wedstrijd.strftime("%H:%M"))
             wedstrijd.locatie_str = str(wedstrijd.vereniging)
@@ -825,18 +817,13 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
                               .select_related('sporterboog',
                                               'sporterboog__boogtype',
                                               'sporterboog__sporter',
-                                              'klasse',
-                                              'klasse__indiv')
+                                              'indiv_klasse')
                               .filter(pk__in=deelnemer_pks)):
 
-                klasse = deelnemer.klasse.indiv
-                if afstand == '18':
-                    blazoenen = (klasse.blazoen1_18m_regio, klasse.blazoen2_18m_regio)
-                else:
-                    blazoenen = (klasse.blazoen1_25m_regio, klasse.blazoen2_25m_regio)
+                klasse = deelnemer.indiv_klasse
 
-                blazoen = blazoenen[0]
-                if blazoenen[0] != blazoenen[1]:
+                blazoen = klasse.blazoen1_regio
+                if klasse.blazoen1_regio != klasse.blazoen2_regio:
                     # meerder mogelijkheden
                     if BLAZOEN_DT in blazoenen_dict:
                         if deelnemer.sporterboog.sporter.lid_nr in voorkeur_eigen_blazoen:
@@ -931,25 +918,27 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
         # wedstrijden header
         writer.writerow(['Nummer', 'Wedstrijd', 'Locatie', 'Blazoenen:'] + blazoen_headers)
 
-        # zoek alle wedstrijdplannen in deze deelcompetitie (1 per cluster + 1 voor de regio)
-        plan_pks = list(DeelcompetitieRonde
-                        .objects
-                        .filter(deelcompetitie=deelcomp)
-                        .values_list('plan__pk', flat=True))
+        match_pks = list()
+        for ronde in (DeelcompetitieRonde
+                      .objects
+                      .filter(deelcompetitie=deelcomp)
+                      .prefetch_related('matches')):
+            match_pks.extend(ronde.matches.values_list('pk', flat=True))
+        # for
 
-        wedstrijden = (CompetitieWedstrijd
-                       .objects
-                       .select_related('vereniging')
-                       .filter(competitiewedstrijdenplan__pk__in=plan_pks)
-                       .order_by('datum_wanneer',
-                                 'tijd_begin_wedstrijd',
-                                 'vereniging__ver_nr'))
+        matches = (CompetitieMatch
+                   .objects
+                   .select_related('vereniging')
+                   .filter(pk__in=match_pks)
+                   .order_by('datum_wanneer',
+                             'tijd_begin_wedstrijd',
+                             'vereniging__ver_nr'))
 
         # maak een blok met genummerde wedstrijden
         # deze nummers komen verderop terug in de kruisjes met de sporters
         nr = 0
         kolom_pks = list()
-        for wedstrijd in wedstrijden:
+        for wedstrijd in matches:
             kolom_pks.append(wedstrijd.pk)
             nr += 1
             beschrijving_str = "%s om %s" % (date_format(wedstrijd.datum_wanneer, "l j E Y"),
@@ -967,18 +956,13 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
                               .select_related('sporterboog',
                                               'sporterboog__boogtype',
                                               'sporterboog__sporter',
-                                              'klasse',
-                                              'klasse__indiv')
+                                              'indiv_klasse')
                               .filter(pk__in=deelnemer_pks)):
 
-                klasse = deelnemer.klasse.indiv
-                if afstand == '18':
-                    blazoenen = (klasse.blazoen1_18m_regio, klasse.blazoen2_18m_regio)
-                else:
-                    blazoenen = (klasse.blazoen1_25m_regio, klasse.blazoen2_25m_regio)
+                klasse = deelnemer.indiv_klasse
 
-                blazoen = blazoenen[0]
-                if blazoenen[0] != blazoenen[1]:
+                blazoen = klasse.blazoen1_regio
+                if klasse.blazoen1_regio != klasse.blazoen2_regio:
                     # meerdere mogelijkheden
                     if BLAZOEN_DT in blazoenen_dict:
                         if deelnemer.sporterboog.sporter.lid_nr in voorkeur_eigen_blazoen:
@@ -1001,9 +985,8 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
 
         for deelnemer in (RegioCompetitieSchutterBoog
                           .objects
-                          .prefetch_related('inschrijf_gekozen_wedstrijden')
-                          .select_related('klasse',
-                                          'klasse__indiv',
+                          .prefetch_related('inschrijf_gekozen_matches')
+                          .select_related('indiv_klasse',
                                           'bij_vereniging',
                                           'sporterboog',
                                           'sporterboog__sporter')
@@ -1011,7 +994,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
                           .order_by('bij_vereniging__ver_nr',
                                     'sporterboog__sporter__lid_nr')):
 
-            pks = list(deelnemer.inschrijf_gekozen_wedstrijden.values_list('pk', flat=True))        # TODO: 1 query per deelnemer
+            pks = list(deelnemer.inschrijf_gekozen_matches.values_list('pk', flat=True))        # TODO: 1 query per deelnemer
 
             kruisjes = list()
             for pk in kolom_pks:
@@ -1022,7 +1005,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
             # for
 
             sporter = deelnemer.sporterboog.sporter
-            klasse = deelnemer.klasse.indiv.beschrijving
+            klasse = deelnemer.indiv_klasse.beschrijving
 
             writer.writerow([sporter.lid_nr, sporter.volledige_naam(), sporter.bij_vereniging, klasse] + kruisjes)
         # for

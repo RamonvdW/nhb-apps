@@ -30,7 +30,7 @@
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@500&display=swap">
-        <link rel="stylesheet" href="{% static 'materialize-new-102.css' %}">
+        <link rel="stylesheet" href="{% static 'materialize-new-103.css' %}">
         {% block extraheader %}{% endblock %}
     </head>
 
@@ -47,15 +47,18 @@
 
                     <!-- login/quick access knop aan de rechter kant -->
                     <ul id="nav-mobile" class="right">
-                        <!--
-                        <li><a class="btn-nhb-rood" href="{% url 'Competitie:kies' %}">Bondscompetities</a></li>
-                        <li><a class="btn-nhb-rood" href="{% url 'Records:overzicht' %}">Records</a></li>
-                        -->
+                        {% if menu_toon_mandje %}
+                            <li>
+                                <a href="{% url 'Bestel:toon-inhoud-mandje' %}" class="btn-nhb-rood">
+                                    <i class="material-icons-round left" style="line-height:36px">shopping_cart</i>{{ menu_mandje_aantal }}</a>
+                            </li>
+                        {% endif %}
+
                         {% if menu_voornaam %}
                             <li>
                                 <a href="#" class="btn-nhb-rood dropdown-trigger" data-target="navbar-dropdown" style="position:relative; z-index:2">
                                     <i class="material-icons-round hide-on-small-only right" style="line-height:36px">expand_more</i>
-                                    <i class="material-icons-round hide-on-med-and-up" style="line-height:36px">expand_more</i>
+                                    <i class="material-icons-round hide-on-med-and-up"       style="line-height:36px">expand_more</i>
                                     <span class="hide-on-small-only">{{ menu_voornaam|escape }}</span></a>
                             </li>
                         {% elif not verberg_login_knop %}
@@ -65,6 +68,7 @@
                 </div>
 
                 <ul id="navbar-dropdown" class="dropdown-content">
+
                     {% if menu_url_wissel_van_rol %}
                         <li class="divider"></li>
                         <li>

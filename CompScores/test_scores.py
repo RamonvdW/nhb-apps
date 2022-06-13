@@ -7,8 +7,8 @@
 from django.test import TestCase
 from django.utils import timezone
 from Score.models import Score
-from Competitie.models import CompetitieKlasse, DeelcompetitieRonde
-from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
+from Competitie.models import CompetitieIndivKlasse, DeelcompetitieRonde, CompetitieMatch
+from Score.models import Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import json
@@ -24,16 +24,16 @@ class TestCompScoresScores(E2EHelpers, TestCase):
     url_planning_cluster = '/bondscompetities/regio/planning/%s/cluster/%s/'        # deelcomp_pk, cluster_pk
     url_planning_regio_ronde = '/bondscompetities/regio/planning/ronde/%s/'         # ronde_pk
 
-    url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'          # wedstrijd_pk
+    url_uitslag_invoeren = '/bondscompetities/scores/uitslag-invoeren/%s/'          # match_pk
     url_uitslag_opslaan = '/bondscompetities/scores/dynamic/scores-opslaan/'
     url_deelnemers_ophalen = '/bondscompetities/scores/dynamic/deelnemers-ophalen/'
     url_deelnemer_zoeken = '/bondscompetities/scores/dynamic/check-nhbnr/'
 
-    url_uitslag_controleren = '/bondscompetities/scores/uitslag-controleren/%s/'    # wedstrijd_pk
-    url_uitslag_accorderen = '/bondscompetities/scores/uitslag-accorderen/%s/'      # wedstrijd_pk
+    url_uitslag_controleren = '/bondscompetities/scores/uitslag-controleren/%s/'    # match_pk
+    url_uitslag_accorderen = '/bondscompetities/scores/uitslag-accorderen/%s/'      # match_pk
 
     url_scores_regio = '/bondscompetities/scores/regio/%s/'                         # deelcomp_pk
-    url_bekijk_uitslag = '/bondscompetities/scores/bekijk-uitslag/%s/'              # wedstrijd_pk
+    url_bekijk_uitslag = '/bondscompetities/scores/bekijk-uitslag/%s/'              # match_pk
 
     url_regio_teams = '/bondscompetities/scores/teams/%s/'                          # deelcomp_pk
 
@@ -88,31 +88,31 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         ronde25 = DeelcompetitieRonde.objects.all()[1]
 
         # maak een cluster planning aan
-        #cluster = self.testdata.regio_cluster[101]
-        #with self.assert_max_queries(20):
-        #    self.client.post(self.url_planning_cluster % (self.testdata.deelcomp18_regio[101].pk, cluster.pk))
+        # cluster = self.testdata.regio_cluster[101]
+        # with self.assert_max_queries(20):
+        #     self.client.post(self.url_planning_cluster % (self.testdata.deelcomp18_regio[101].pk, cluster.pk))
 
         # maak een wedstrijd aan in elke competitie
-        indiv_klassen = CompetitieKlasse.objects.exclude(indiv=None).values_list('indiv__pk', flat=True)
+        indiv_klassen = CompetitieIndivKlasse.objects.values_list('pk', flat=True)
 
         self.client.post(self.url_planning_regio_ronde % ronde18.pk, {})
-        wedstrijd = CompetitieWedstrijd.objects.all()[0]
-        wedstrijd.vereniging = self.testdata.functie_hwl[self.ver_nr].nhb_ver
-        wedstrijd.save()
-        wedstrijd.indiv_klassen.set(indiv_klassen)
-        self.wedstrijd18_pk = wedstrijd.pk
+        match = CompetitieMatch.objects.all()[0]
+        match.vereniging = self.testdata.functie_hwl[self.ver_nr].nhb_ver
+        match.save()
+        match.indiv_klassen.set(indiv_klassen)
+        self.match18_pk = match.pk
 
         self.client.post(self.url_planning_regio_ronde % ronde25.pk, {})
-        wedstrijd = CompetitieWedstrijd.objects.all()[1]
-        wedstrijd.vereniging = self.testdata.functie_hwl[self.ver_nr].nhb_ver
-        wedstrijd.save()
-        wedstrijd.indiv_klassen.set(indiv_klassen)
-        self.wedstrijd25_pk = wedstrijd.pk
+        match = CompetitieMatch.objects.all()[1]
+        match.vereniging = self.testdata.functie_hwl[self.ver_nr].nhb_ver
+        match.save()
+        match.indiv_klassen.set(indiv_klassen)
+        self.wedstrijd25_pk = match.pk
 
     def test_anon(self):
         self.client.logout()
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
+            resp = self.client.get(self.url_uitslag_invoeren % self.match18_pk)
         self.assert403(resp)      # not allowed
 
         # scores
@@ -154,14 +154,14 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_rcl[101])
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
+            resp = self.client.get(self.url_uitslag_invoeren % self.match18_pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('compscores/scores-invoeren.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # nog een keer, dan bestaat de WedstrijdUitslag al
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
+            resp = self.client.get(self.url_uitslag_invoeren % self.match18_pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('compscores/scores-invoeren.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -169,7 +169,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         # niet bestaande wedstrijd
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_uitslag_invoeren % 999999)
-        self.assert404(resp)     # 404 = not found
+        self.assert404(resp, 'Wedstrijd niet gevonden')
 
     def test_rcl_deelnemers_ophalen(self):
         self.e2e_login_and_pass_otp(self.testdata.comp18_account_rcl[101])
@@ -177,7 +177,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
         # haal waarschijnlijke deelnemers op
         json_data = {'deelcomp_pk': self.testdata.deelcomp18_regio[101].pk,
-                     'wedstrijd_pk': self.wedstrijd18_pk}
+                     'wedstrijd_pk': self.match18_pk}
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_deelnemers_ophalen,
                                     json.dumps(json_data),
@@ -196,7 +196,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         # post zonder data
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_deelnemers_ophalen)
-        self.assert404(resp)       # 404 = not found / not allowed
+        self.assert404(resp, 'Geen valide verzoek')
 
         # post met json data maar zonder inhoud
         json_data = {'testje': 1}
@@ -204,7 +204,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_deelnemers_ophalen,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        self.assert404(resp)       # 404 = not found / not allowed
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # post met niet-bestaande deelcomp_pk
         json_data = {'deelcomp_pk': 999999}
@@ -212,7 +212,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_deelnemers_ophalen,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        self.assert404(resp)       # 404 = not found / not allowed
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # post met niet-bestaande wedstrijd_pk
         json_data = {'deelcomp_pk': self.testdata.deelcomp18_regio[101].pk,
@@ -221,13 +221,13 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_deelnemers_ophalen,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        self.assert404(resp)       # 404 = not found / not allowed
+        self.assert404(resp, 'Wedstrijd niet gevonden')
 
     def test_rcl_zoeken(self):
         self.e2e_login_and_pass_otp(self.testdata.comp18_account_rcl[101])
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_rcl[101])
 
-        json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
+        json_data = {'wedstrijd_pk': self.match18_pk,
                      'lid_nr': 1}
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_deelnemer_zoeken,
@@ -242,7 +242,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.assertFalse(deelnemer.inschrijf_voorkeur_team)
         sporterboog_pk = deelnemer.sporterboog.pk
         lid_nr = deelnemer.sporterboog.sporter.lid_nr
-        json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
+        json_data = {'wedstrijd_pk': self.match18_pk,
                      'lid_nr': lid_nr}
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_deelnemer_zoeken,
@@ -270,7 +270,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         deelnemer = self.testdata.comp18_deelnemers_team[0]
         self.assertTrue(deelnemer.inschrijf_voorkeur_team)
         lid_nr = deelnemer.sporterboog.sporter.lid_nr
-        json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
+        json_data = {'wedstrijd_pk': self.match18_pk,
                      'lid_nr': lid_nr}
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_deelnemer_zoeken,
@@ -291,7 +291,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         # post zonder data
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_deelnemer_zoeken)
-        self.assert404(resp)       # 404 = not found / not allowed
+        self.assert404(resp, 'Geen valide verzoek')
 
         # post met alleen een lid_nr
         json_data = {'lid_nr': 0}
@@ -299,7 +299,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_deelnemer_zoeken,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        self.assert404(resp)       # 404 = not found / not allowed
+        self.assert404(resp, 'Geen valide verzoek')
 
         # post met alleen wedstrijd_pk
         json_data = {'wedstrijd_pk': 0}
@@ -307,7 +307,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_deelnemer_zoeken,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        self.assert404(resp)       # 404 = not found / not allowed
+        self.assert404(resp, 'Geen valide verzoek')
 
         # post niet-bestand wedstrijd_pk
         json_data = {'wedstrijd_pk': 999999,
@@ -316,7 +316,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_deelnemer_zoeken,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        self.assert404(resp)       # 404 = not found / not allowed
+        self.assert404(resp, 'Geen valide verzoek')
 
     def test_rcl_opslaan(self):
         self.e2e_login_and_pass_otp(self.testdata.comp18_account_rcl[101])
@@ -324,11 +324,11 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
         # doe eerst een get zodat de wedstrijd.uitslag gegarandeerd is
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
+            resp = self.client.get(self.url_uitslag_invoeren % self.match18_pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         # zonder scores
-        json_data = {'wedstrijd_pk': self.wedstrijd18_pk}
+        json_data = {'wedstrijd_pk': self.match18_pk}
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
@@ -336,7 +336,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
 
         # met sporterboog_pk's en scores
-        json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
+        json_data = {'wedstrijd_pk': self.match18_pk,
                      self.testdata.comp18_deelnemers[0].sporterboog.pk: 123,
                      self.testdata.comp18_deelnemers[1].sporterboog.pk: -1,
                      self.testdata.comp18_deelnemers[2].sporterboog.pk: 999999,
@@ -356,7 +356,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.assertEqual(json_data['done'], 1)
 
         # nog een keer opslaan - met mutaties
-        json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
+        json_data = {'wedstrijd_pk': self.match18_pk,
                      self.testdata.comp18_deelnemers[0].sporterboog.pk: 132,  # aangepaste score
                      self.testdata.comp18_deelnemers[4].sporterboog.pk: 100,  # ongewijzigde score
                      self.testdata.comp18_deelnemers[5].sporterboog.pk: ''}   # verwijderde score
@@ -372,8 +372,8 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.comp18_account_rcl[101])
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_rcl[101])
 
-        url = self.url_uitslag_controleren % self.wedstrijd18_pk
-        ack_url = self.url_uitslag_accorderen % self.wedstrijd18_pk
+        url = self.url_uitslag_controleren % self.match18_pk
+        ack_url = self.url_uitslag_accorderen % self.match18_pk
 
         # doe eerst een get zodat de wedstrijd.uitslag gegarandeerd is
         with self.assert_max_queries(20):
@@ -382,7 +382,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
         # scores aanmaken
         waarde = 123
-        json_data = {'wedstrijd_pk': self.wedstrijd18_pk}
+        json_data = {'wedstrijd_pk': self.match18_pk}
         for deelnemer in self.testdata.comp18_deelnemers[:7]:
             sporterboog = deelnemer.sporterboog
             json_data[sporterboog.pk] = waarde
@@ -397,7 +397,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.assertEqual(json_data['done'], 1)
 
         # controleer dat de uitslag nog niet geaccordeerd is
-        wed = CompetitieWedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd18_pk)
+        wed = CompetitieMatch.objects.select_related('uitslag').get(pk=self.match18_pk)
         self.assertFalse(wed.uitslag.is_bevroren)
 
         # haal de uitslag op en controleer aanwezigheid 'accorderen' knop
@@ -413,7 +413,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(ack_url)
         self.assert_is_redirect(resp, url)
 
-        wed = CompetitieWedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd18_pk)
+        wed = CompetitieMatch.objects.select_related('uitslag').get(pk=self.match18_pk)
         self.assertTrue(wed.uitslag.is_bevroren)
 
         # haal de uitslag op en controleer afwezigheid 'accorderen' knop
@@ -432,7 +432,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.testdata.functie_hwl[self.ver_nr])
         self.e2e_check_rol('HWL')
 
-        json_data = {'wedstrijd_pk': self.wedstrijd18_pk}
+        json_data = {'wedstrijd_pk': self.match18_pk}
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
@@ -465,7 +465,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         # post zonder data
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_uitslag_opslaan)
-        self.assert404(resp)       # 404 = not found / not allowed
+        self.assert404(resp, 'Geen valide verzoek')
 
         # post zonder wedstrijd_pk
         json_data = {'hallo': 'daar'}
@@ -473,8 +473,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        self.assert404(resp)
-        self.assert404(resp)       # 404 = not found / not allowed
+        self.assert404(resp, 'Wedstrijd niet gevonden')
 
         # post met niet bestaande wedstrijd_pk
         json_data = {'wedstrijd_pk': 999999}
@@ -482,15 +481,15 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        self.assert404(resp)       # 404 = not found / not allowed
+        self.assert404(resp, 'Wedstrijd niet gevonden')
 
         # post met wedstrijd_pk die nog geen uitslag heeft
-        json_data = {'wedstrijd_pk': self.wedstrijd18_pk}
+        json_data = {'wedstrijd_pk': self.match18_pk}
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        self.assert404(resp)       # 404 = not found / not allowed
+        self.assert404(resp, 'Geen wedstrijduitslag')
 
         # post met wedstrijd_pk waar deze RCL geen toegang toe heeft
         with self.assert_max_queries(20):
@@ -504,22 +503,22 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
         # wedstrijd die niet bij de competitie hoort
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)
+            resp = self.client.get(self.url_uitslag_invoeren % self.match18_pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        wedstrijd = CompetitieWedstrijd.objects.get(pk=self.wedstrijd18_pk)
-        wedstrijd2 = CompetitieWedstrijd(beschrijving="niet in een plan",
-                                         datum_wanneer=wedstrijd.datum_wanneer,
-                                         tijd_begin_aanmelden=wedstrijd.tijd_begin_aanmelden,
-                                         tijd_begin_wedstrijd=wedstrijd.tijd_begin_wedstrijd,
-                                         tijd_einde_wedstrijd=wedstrijd.tijd_einde_wedstrijd,
-                                         uitslag=wedstrijd.uitslag)
+        wedstrijd = CompetitieMatch.objects.get(pk=self.match18_pk)
+        wedstrijd2 = CompetitieMatch(
+                            competitie=self.testdata.comp18,
+                            beschrijving="niet in een plan",
+                            datum_wanneer=wedstrijd.datum_wanneer,
+                            tijd_begin_wedstrijd=wedstrijd.tijd_begin_wedstrijd,
+                            uitslag=wedstrijd.uitslag)
         wedstrijd2.save()
         json_data = {'wedstrijd_pk': wedstrijd2.pk}
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        self.assert404(resp)       # 404 = not found / not allowed
+        self.assert404(resp, 'Geen competitie wedstrijd')
 
     def test_hwl(self):
         # log in als HWL
@@ -554,7 +553,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.assertEqual(json_data['done'], 1)
 
         # controleer dat de uitslag nog niet geaccordeerd is
-        wed = CompetitieWedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd25_pk)
+        wed = CompetitieMatch.objects.select_related('uitslag').get(pk=self.wedstrijd25_pk)
         self.assertFalse(wed.uitslag.is_bevroren)
 
         # haal de uitslag op en controleer afwezigheid 'accorderen' knop
@@ -571,7 +570,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(ack_url)
         self.assert_is_redirect(resp, self.url_uitslag_controleren % self.wedstrijd25_pk)
-        wed = CompetitieWedstrijd.objects.select_related('uitslag').get(pk=self.wedstrijd25_pk)
+        wed = CompetitieMatch.objects.select_related('uitslag').get(pk=self.wedstrijd25_pk)
         self.assertTrue(wed.uitslag.is_bevroren)
 
         # terug naar HWL rol
@@ -583,27 +582,27 @@ class TestCompScoresScores(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
-        json_data = {'wedstrijd_pk': self.wedstrijd18_pk,
+        json_data = {'wedstrijd_pk': self.match18_pk,
                      self.testdata.comp25_deelnemers[0].sporterboog.pk: 120,
                      self.testdata.comp25_deelnemers[6].sporterboog.pk: 129}
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_uitslag_opslaan,
                                     json.dumps(json_data),
                                     content_type='application/json')
-        self.assert404(resp)
+        self.assert404(resp, 'Geen wedstrijduitslag')
 
-    def _maak_uitslag(self, wedstrijd_pk):
+    def _maak_uitslag(self, match_pk):
         # log in als RCL om de wedstrijduitslag in te voeren
         self.e2e_login_and_pass_otp(self.testdata.comp18_account_rcl[101])
         self.e2e_wissel_naar_functie(self.testdata.comp18_functie_rcl[101])
 
         # voer een wedstrijd.uitslag in
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_uitslag_invoeren % self.wedstrijd18_pk)     # garandeert wedstrijd.uitslag
+            resp = self.client.get(self.url_uitslag_invoeren % self.match18_pk)     # garandeert wedstrijd.uitslag
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
         # maak de data set
-        json_data = {'wedstrijd_pk': wedstrijd_pk}
+        json_data = {'wedstrijd_pk': match_pk}
         waarde = 100
         for deelnemer in self.testdata.comp18_deelnemers:
             sporterboog = deelnemer.sporterboog
@@ -638,15 +637,15 @@ class TestCompScoresScores(E2EHelpers, TestCase):
                       waarde=123)
         score.save()
 
-        uitslag = CompetitieWedstrijdUitslag(max_score=300,
-                                             afstand_meter=18)
+        uitslag = Uitslag(max_score=300,
+                          afstand=18)
         uitslag.save()
         uitslag.scores.add(score)
 
         ronde = DeelcompetitieRonde.objects.filter(deelcompetitie=self.testdata.deelcomp18_regio[101])[0]
-        wedstrijd = ronde.plan.wedstrijden.all()[0]
-        wedstrijd.uitslag = uitslag
-        wedstrijd.save()
+        match = ronde.matches.all()[0]
+        match.uitslag = uitslag
+        match.save()
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -663,7 +662,7 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         url = self.url_scores_regio % 999999
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # verkeerde regio
         url = self.url_scores_regio % self.testdata.deelcomp25_regio[101].pk
@@ -672,14 +671,14 @@ class TestCompScoresScores(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_bekijk_uitslag(self):
-        self._maak_uitslag(self.wedstrijd18_pk)     # logt uit
+        self._maak_uitslag(self.match18_pk)     # logt uit
 
         # log in als HWL
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.testdata.functie_hwl[self.ver_nr])
         self.e2e_check_rol('HWL')
 
-        url = self.url_bekijk_uitslag % self.wedstrijd18_pk
+        url = self.url_bekijk_uitslag % self.match18_pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)       # 200 = OK
@@ -705,16 +704,16 @@ class TestCompScoresScores(E2EHelpers, TestCase):
 
         deelcomp = self.testdata.deelcomp18_regio[101]
 
-        with self.assert_max_queries(47):      # TODO: reduceer
+        with self.assert_max_queries(49):
             resp = self.client.get(self.url_regio_teams % deelcomp.pk)
         self.assertEqual(resp.status_code, 200)       # 200 = OK
         self.assert_template_used(resp, ('compscores/rcl-scores-regio-teams.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
         # do een post
-        with self.assert_max_queries(59):
+        with self.assert_max_queries(64):
             resp = self.client.post(self.url_regio_teams % deelcomp.pk)
-        self.assert_is_redirect(resp, self.url_scores_regio % deelcomp.pk)
+        self.assert_is_redirect_not_plein(resp)
 
         # verkeerde deelcomp
         bad_deelcomp = self.testdata.deelcomp25_regio[101]

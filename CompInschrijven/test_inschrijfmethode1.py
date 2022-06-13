@@ -6,14 +6,13 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
+from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
                                INSCHRIJF_METHODE_1, LAAG_REGIO, LAAG_RK, LAAG_BK)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
-from Wedstrijden.models import CompetitieWedstrijd
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -25,10 +24,10 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_beheerders',)
 
-    url_planning_regio = '/bondscompetities/regio/planning/%s/'  # deelcomp_pk
-    url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'  # ronde_pk
-    url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'  # wedstrijd_pk
-    url_behoefte1 = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes/'  # comp_pk, regio_pk
+    url_planning_regio = '/bondscompetities/regio/planning/%s/'                                         # deelcomp_pk
+    url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'        # ronde_pk
+    url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'                      # match_pk
+    url_behoefte1 = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes/'    # comp_pk, regio_pk
     url_behoefte1_bestand = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/gemaakte-keuzes-als-bestand/'  # comp_pk, regio_pk
 
     testdata = None
@@ -135,10 +134,10 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
 
         # klassengrenzen vaststellen
         url_klassengrenzen = '/bondscompetities/%s/klassengrenzen/vaststellen/'
-        with self.assert_max_queries(91):
+        with self.assert_max_queries(97):
             resp = self.client.post(url_klassengrenzen % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
-        with self.assert_max_queries(91):
+        with self.assert_max_queries(97):
             resp = self.client.post(url_klassengrenzen % self.comp_25.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2
@@ -162,36 +161,36 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
             resp = self.client.get(self.url_planning_regio % self.deelcomp.pk)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('compregio/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('complaagregio/planning-regio-methode1.dtl', 'plein/site_layout.dtl'))
 
         ronde_pk = DeelcompetitieRonde.objects.filter(deelcompetitie=self.deelcomp)[0].pk
         url_ronde = self.url_planning_regio_ronde_methode1 % ronde_pk
 
         # maak 5 wedstrijden aan
-        self.assertEqual(CompetitieWedstrijd.objects.count(), 0)
+        self.assertEqual(CompetitieMatch.objects.count(), 0)
         with self.assert_max_queries(20):
             resp = self.client.post(url_ronde)
         self.assert_is_redirect_not_plein(resp)
         self.assertTrue(self.url_wijzig_wedstrijd[:-3] in resp.url)     # [:-3] cuts off %s/
-        self.assertEqual(CompetitieWedstrijd.objects.count(), 1)
+        self.assertEqual(CompetitieMatch.objects.count(), 1)
 
         self.client.post(url_ronde)
         self.client.post(url_ronde)
         self.client.post(url_ronde)
         self.client.post(url_ronde)
 
-        self.assertEqual(CompetitieWedstrijd.objects.count(), 5)
+        self.assertEqual(CompetitieMatch.objects.count(), 5)
 
         # zet de wedstrijden op de 15 van elke maand
-        self.wedstrijd_pks = list()
+        self.match_pks = list()
         maand = 7
-        for wedstrijd in CompetitieWedstrijd.objects.all():
-            self.wedstrijd_pks.append(wedstrijd.pk)
+        for match in CompetitieMatch.objects.all():
+            self.match_pks.append(match.pk)
 
-            wedstrijd.datum_wanneer = '2019-%s-15' % maand
-            wedstrijd.tijd_begin_wedstrijd = '19:00'
-            wedstrijd.vereniging = self._ver
-            wedstrijd.save(update_fields=['datum_wanneer', 'tijd_begin_wedstrijd', 'vereniging'])
+            match.datum_wanneer = '2019-%s-15' % maand
+            match.tijd_begin_wedstrijd = '19:00'
+            match.vereniging = self._ver
+            match.save(update_fields=['datum_wanneer', 'tijd_begin_wedstrijd', 'vereniging'])
 
             maand += 1
         # for
@@ -243,7 +242,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
                 # zet de recurve boog aan
                 if lp == 1:
                     # zet de DT voorkeur aan voor een paar schutters
-                    with self.assert_max_queries(20):
+                    with self.assert_max_queries(25):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_R': 'on',
                                                                  'voorkeur_eigen_blazoen': 'on'})
@@ -251,18 +250,18 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
                     # 'lid_NNNNNN_boogtype_MM'
                     post_params['lid_%s_boogtype_%s' % (lid_nr, recurve_boog_pk)] = 'on'
                 elif lp == 2:
-                    with self.assert_max_queries(20):
+                    with self.assert_max_queries(25):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_C': 'on'})
                     post_params['lid_%s_boogtype_%s' % (lid_nr, compound_boog_pk)] = 'on'
                 elif barebow_boog_pk:
-                    with self.assert_max_queries(20):
+                    with self.assert_max_queries(25):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_BB': 'on'})
                     post_params['lid_%s_boogtype_%s' % (lid_nr, barebow_boog_pk)] = 'on'
                     barebow_boog_pk = None
                 else:
-                    with self.assert_max_queries(20):
+                    with self.assert_max_queries(25):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_R': 'on'})
                     post_params['lid_%s_boogtype_%s' % (lid_nr, recurve_boog_pk)] = 'on'
@@ -272,7 +271,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
             # for
 
             # schrijf deze leden met in 4 van de 5 wedstrijden
-            for pk in self.wedstrijd_pks[1:]:
+            for pk in self.match_pks[1:]:
                 post_params['wedstrijd_%s' % pk] = 'on'
             # for
 
@@ -294,7 +293,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_geen_keuzes(self):
-        CompetitieWedstrijd.objects.all().delete()
+        CompetitieMatch.objects.all().delete()
 
         # haal het lege overzicht op
         with self.assert_max_queries(20):
@@ -384,46 +383,38 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
 
         # competitie bestaat niet
         url = self.url_behoefte1 % (999999, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         url = self.url_behoefte1_bestand % (999999, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # regio bestaat niet
         url = self.url_behoefte1 % (comp.pk, 999999)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Regio niet gevonden')
 
         url = self.url_behoefte1_bestand % (comp.pk, 999999)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Regio niet gevonden')
 
         # deelcomp bestaat niet
         url = self.url_behoefte1 % (comp.pk, 100)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         url = self.url_behoefte1_bestand % (comp.pk, 100)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # correct, maar niet inschrijfmethode 3
         url = self.url_behoefte1 % (comp.pk, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde inschrijfmethode')
 
         url = self.url_behoefte1_bestand % (comp.pk, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde inschrijfmethode')
 
 # end of file

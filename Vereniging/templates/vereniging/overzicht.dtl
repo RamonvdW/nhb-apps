@@ -38,7 +38,6 @@
                     <th>Regio</th>
                     <td>{{ nhb_ver.regio }}</td>
                 </tr>
-
                 {% if clusters.count > 0 %}
                     <tr>
                         <th>Cluster{% if clusters.count > 1 %}s{% endif %}</th>
@@ -47,6 +46,36 @@
                                 <span>{{ cluster }}</span><br>
                             {% endfor %}
                         </td>
+                    </tr>
+                {% endif %}
+
+                <tr>
+                    <th>Website</th>
+                    <td>
+                        {% if nhb_ver.website %}
+                            <a class="email" href="{{ nhb_ver.website }}" target="_blank" rel="noopener noreferrer"><code>{{ nhb_ver.website }}</code></a>
+                        {% else %}
+                            <i>Geen</i>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                {% comment %}
+                <tr>
+                    <th>Telefoonnummer</th>
+                    <td>{% if nhb_ver.telefoonnummer %}{{ nhb_ver.telefoonnummer }}{% else %}<i class="red-text">Geen</i>{% endif %}</td>
+                </tr>
+
+                <tr>
+                    <th>KvK nummer</th>
+                    <td>{% if nhb_ver.kvk_nummer %}{{ nhb_ver.kvk_nummer }}{% else %}<i class="red-text">Geen</i>{% endif %}</td>
+                </tr>
+                {% endcomment %}
+
+                {% if nhb_ver.geen_wedstrijden %}
+                    <tr>
+                        <th>Speciale status</th>
+                        <td>Geen wedstrijden</td>
                     </tr>
                 {% endif %}
                 <tr>
@@ -151,7 +180,7 @@
 
             <!-- instellingen leden -->
             {% url 'Vereniging:leden-voorkeuren' as card_url %}
-            {% include 'plein/card.dtl' with title="Voorkeuren" text="Voorkeuren van de leden inzien en boog type instellen." icon="tune" url=card_url %}
+            {% include 'plein/card.dtl' with title="Voorkeuren leden" text="Voorkeuren van de leden inzien en boog type instellen." icon="tune" url=card_url %}
 
             <!-- accommodatie details -->
             {% if accommodatie_details_url %}
@@ -161,6 +190,10 @@
             <!-- externe locaties -->
             {% if url_externe_locaties %}
                 {% include 'plein/card.dtl' with title="Wedstrijdlocaties" text="Externe locaties waar jullie vereniging wedstrijden kan organiseren." icon="hiking" url=url_externe_locaties %}
+            {% endif %}
+
+            {% if url_betalingen %}
+                {% include 'plein/card.dtl' with title="Financieel" text="Instellingen om inschrijf-gelden van wedstrijden direct te kunnen ontvangen." icon="euro_symbol" url=url_betalingen %}
             {% endif %}
         </div>
     </div>

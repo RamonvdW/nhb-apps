@@ -46,13 +46,7 @@
 
                     <table class="white">
 
-                    {% if bogen %}
-                        <tr>
-                            <td colspan="2">
-                                <h5>Bogen</h5>
-                            </td>
-                        </tr>
-
+                    {% if bogen_wa %}
                         {% if not is_hwl %}
                             <tr>
                                 <td colspan="2">
@@ -67,13 +61,18 @@
                             </tr>
                         {% endif %}
 
+                        <tr>
+                            <td colspan="2">
+                                <h5>Bogen World Archery</h5>
+                            </td>
+                        </tr>
 
                         <tr>
                             <th>Hier schiet ik mee</th>
                             <th>Alleen informatie</th>
                         </tr>
 
-                        {% for obj in bogen %}
+                        {% for obj in bogen_wa %}
                             <tr>
                                 <td>
                                     <label>
@@ -90,6 +89,37 @@
                                 </td>
                             </tr>
                         {% endfor %}
+
+
+                        <tr>
+                            <td colspan="2">
+                                <h5>Bogen IFAA</h5>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th>Hier schiet ik mee</th>
+                            <th>Alleen informatie</th>
+                        </tr>
+
+                        {% for obj in bogen_ifaa %}
+                            <tr>
+                                <td>
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="{{ obj.check_schiet }}" {% if obj.voor_wedstrijd %}checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
+                                    </label>
+                                </td>
+
+                                <td>
+                                    <label>
+                                        <input type="checkbox" class="filled-in" name="{{ obj.check_info }}" {% if obj.heeft_interesse %}checked{% endif %} onchange="gewijzigd()">
+                                        <span class="black-text">{{ obj.boogtype.beschrijving }}</span>
+                                    </label>
+                                </td>
+                            </tr>
+                        {% endfor %}
+
 
 
                         <tr>
@@ -200,25 +230,36 @@
                         </tr>
 
 
-                        {% if sporter.para_classificatie %}
-                            <tr>
-                                <td colspan="2">
-                                    <h5>Voorkeur para-sporter</h5>
-                                </td>
-                            </tr>
+                        <tr>
+                            <td colspan="2">
+                                <h5>Voorkeuren voor para-sporters</h5>
+                                <br>
+                                <span>Ingevoerde informatie wordt gedeeld met de wedstrijdleiding zodat ze, indien mogelijk, hier rekening mee houden.</span>
+                            </td>
+                        </tr>
 
-                            <tr>
-                                <td colspan="2">Als sporter met para classificatie kan je hieronder een kort bericht (1 regel) invoeren voor de wedstrijdleiding zodat ze, indien mogelijk, hier rekening mee houden.</td>
-                            </tr>
-                            <tr>
-                                <td colspan="2">Voorbeelden:<br>&nbsp;&nbsp;&nbsp;Blijf op schietlijn wachten<br>&nbsp;&nbsp;&nbsp;Gebruik kruk<br>&nbsp;&nbsp;&nbsp;etc.</td>
-                            </tr>
-                            <tr>
-                                <td colspan="2" class="input-field">
+                        <tr>
+                            <td colspan="2">
+                                <label>
+                                    <input type="checkbox" class="filled-in" name="para_rolstoel"{% if voorkeuren.para_met_rolstoel %} checked{% endif %} onchange="gewijzigd()">
+                                    <span class="black-text">Ik gebruik voorwerpen die blijven staan op de schietlijn</span>
+                                </label>
+
+                                <p>Let op: alleen een officieel geregistreerde classificatie geeft <i>recht</i> op extra ruimte op de schietlijn.</p>
+                                {% if sporter.para_classificatie %}
+                                    <span>Jouw geregistreerde classificatie: {{ sporter.para_classificatie }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="2" class="input-field">
+                                <p colspan="2">Kort bericht (1 regel) voor de wedstrijdleiding:</p>
+                                <div>
                                     <input type="text" maxlength="256" name="para_notitie" placeholder="Hier invoeren" value="{{ voorkeuren.opmerking_para_sporter }}" oninput="gewijzigd()">
-                                </td>
-                            </tr>
-                        {% endif %}
+                                </div>
+                            </td>
+                        </tr>
 
                     {% endif %}     <!-- bogen -->
 

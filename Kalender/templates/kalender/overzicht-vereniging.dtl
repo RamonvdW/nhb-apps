@@ -15,6 +15,7 @@
         <div class="col s12">
             <h3 class="page-banner">Wedstrijdkalender</h3>
             <p>Wedstrijden bij de vereniging</p>
+            <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
             {% if geen_locatie %}
                 <p class="red-text">Stel eerst de accommodatie van de vereniging in, of voeg een wedstrijdlocatie toe.</p>
             {% endif %}
@@ -47,8 +48,11 @@
                                 <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
                                     <a class="btn-nhb-rood" href="{{ wed.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">
                                         <i class="material-icons-round">edit</i></a>
-                                    <a class="btn-nhb-rood" href="{{ wed.url_sessies}}" style="padding:0; width:35px">
+                                    <a class="btn-nhb-rood" href="{{ wed.url_sessies}}" style="padding:0; width:35px; margin-right:5px">
                                         <i class="material-icons-round" style="font-size:33px">edit_note</i></a>
+                                    <a class="btn-nhb-rood" href="{{ wed.url_aanmeldingen }}" style="padding:0; width:35px">
+                                        <i class="material-icons-round">people_alt</i>
+                                    </a>
                                 </div>
                             </td>
                         </tr>
@@ -61,12 +65,8 @@
                     {% if url_nieuwe_wedstrijd %}
                         <tr>
                             <td colspan="5" class="center">
-                                <form action="{{ url_nieuwe_wedstrijd }}" method="post">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="nieuwe_wedstrijd" value="1">
-                                    <button class="btn-nhb-rood">
-                                        <i class="material-icons-round">add</i></button>
-                                </form>
+                                <a class="btn-nhb-rood" href="{{ url_nieuwe_wedstrijd }}">
+                                    <i class="material-icons-round">add</i></a>
                             </td>
                         </tr>
                     {% endif %}
@@ -74,6 +74,30 @@
                 </table>
             </div>
         </div>
+
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Korting</h4>
+                <p>Geef korting voor specifieke sporters of alle leden van jouw vereniging</p>
+            </div>
+        </div>
+
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+
+                <!-- vereniging menu -->
+                {% url 'Kalender:vereniging-codes' as card_url %}
+                {% include 'plein/card.dtl' with title="Kortingscodes" text="Kortingscodes aanmaken of aanpassen." icon="sell" url=card_url %}
+
+            </div>
+        </div>
+
+
+
     {% endif %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="kalender-overzicht-vereniging" %}

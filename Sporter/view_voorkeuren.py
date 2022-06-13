@@ -9,10 +9,12 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import BoogType, GESLACHT_ANDERS, GESLACHT_MV_MEERVOUD
+from BasisTypen.models import (BoogType,
+                               GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS,
+                               GESLACHT_MV_MEERVOUD, ORGANISATIE_IFAA)
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_mag_wisselen
 from Plein.menu import menu_dynamics
-from .models import Sporter, SporterVoorkeuren, SporterBoog
+from .models import Sporter, SporterBoog, get_sporter_voorkeuren
 from types import SimpleNamespace
 import logging
 
@@ -20,24 +22,6 @@ import logging
 TEMPLATE_VOORKEUREN = 'sporter/voorkeuren.dtl'
 
 my_logger = logging.getLogger('NHBApps.Sporter')
-
-
-def get_sporter_voorkeuren(sporter):
-    """ zoek het SporterVoorkeuren object erbij, of maak een nieuwe aan
-    """
-
-    voorkeuren, was_created = SporterVoorkeuren.objects.get_or_create(sporter=sporter)
-    if was_created:
-        # default voor wedstrijd_geslacht_gekozen = True
-        if sporter.geslacht != GESLACHT_ANDERS:
-            if sporter.geslacht != voorkeuren.wedstrijd_geslacht:  # default is Man
-                voorkeuren.wedstrijd_geslacht = sporter.geslacht
-                voorkeuren.save(update_fields=['wedstrijd_geslacht'])
-        else:
-            voorkeuren.wedstrijd_geslacht_gekozen = False  # laat de sporter kiezen
-            voorkeuren.save(update_fields=['wedstrijd_geslacht_gekozen'])
-
-    return voorkeuren
 
 
 class VoorkeurenView(UserPassesTestMixin, TemplateView):
@@ -115,7 +99,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             if (old_voor_wedstrijd != obj.voor_wedstrijd or
                     old_heeft_interesse != obj.heeft_interesse):
                 # wijzigingen opslaan
-                obj.save()
+                obj.save(update_fields=['heeft_interesse', 'voor_wedstrijd'])
         # for
 
         voorkeuren = get_sporter_voorkeuren(sporter)
@@ -135,12 +119,19 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             # wijzigingen opslaan
             voorkeuren.save(update_fields=['voorkeur_eigen_blazoen', 'voorkeur_meedoen_competitie'])
 
-        if sporter.para_classificatie:
-            para_notitie = request.POST.get('para_notitie', '')
-            if para_notitie != voorkeuren.opmerking_para_sporter:
-                # wijziging opslaan
-                voorkeuren.opmerking_para_sporter = para_notitie
-                voorkeuren.save(update_fields=['opmerking_para_sporter'])
+        para_notitie = request.POST.get('para_notitie', '')
+        if para_notitie != voorkeuren.opmerking_para_sporter:
+            # wijziging opslaan
+            voorkeuren.opmerking_para_sporter = para_notitie
+            voorkeuren.save(update_fields=['opmerking_para_sporter'])
+
+        old_voorkeur_para_met_rolstoel = voorkeuren.para_met_rolstoel
+        voorkeuren.para_met_rolstoel = False
+        if request.POST.get('para_rolstoel', None):
+            voorkeuren.para_met_rolstoel = True
+        if old_voorkeur_para_met_rolstoel != voorkeuren.para_met_rolstoel:
+            # wijziging opslaan
+            voorkeuren.save(update_fields=['para_met_rolstoel'])
 
         old_disc_outdoor = voorkeuren.voorkeur_discipline_outdoor
         voorkeuren.voorkeur_discipline_outdoor = False
@@ -196,10 +187,11 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
         if sporter.geslacht == GESLACHT_ANDERS:
             keuze = request.POST.get('wedstrijd_mv', None)
 
-            if keuze in ('M', 'V'):
+            if keuze in (GESLACHT_MAN, GESLACHT_VROUW):
                 gekozen = True
             else:
-                keuze = 'M'         # veld accepteert alleen M of V
+                # veld accepteert alleen man of vrouw
+                keuze = GESLACHT_MAN
                 gekozen = False
 
             if gekozen != voorkeuren.wedstrijd_geslacht_gekozen or voorkeuren.wedstrijd_geslacht != keuze:
@@ -250,7 +242,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
             # sporter mag niet aan wedstrijden deelnemen
             # verwijder daarom alle SporterBoog records
             SporterBoog.objects.filter(sporter=sporter).delete()
-            return None
+            return None, None
 
         # haal de SporterBoog records op van deze gebruiker
         objs = (SporterBoog
@@ -260,7 +252,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 .order_by('boogtype__volgorde'))
 
         # maak ontbrekende SporterBoog records aan, indien nodig
-        boogtypen = BoogType.objects.all()
+        boogtypen = BoogType.objects.exclude(buiten_gebruik=True)
         if len(objs) < len(boogtypen):
             aanwezig = objs.values_list('boogtype__pk', flat=True)
             bulk = list()
@@ -279,12 +271,20 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                     .select_related('boogtype')
                     .order_by('boogtype__volgorde'))
 
-        # voeg de checkbox velden toe
+        # voeg de checkbox velden toe en opsplitsen in WA/IFAA
+        objs_wa = list()
+        objs_ifaa = list()
         for obj in objs:
             obj.check_schiet = 'schiet_' + obj.boogtype.afkorting
             obj.check_info = 'info_' + obj.boogtype.afkorting
+
+            if obj.boogtype.organisatie == ORGANISATIE_IFAA:
+                objs_ifaa.append(obj)
+            else:
+                objs_wa.append(obj)
         # for
-        return objs
+
+        return objs_wa, objs_ifaa
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -298,7 +298,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
 
         context['geen_wedstrijden'] = geen_wedstrijden = sporter.bij_vereniging and sporter.bij_vereniging.geen_wedstrijden
 
-        context['bogen'] = self._get_bogen(sporter, geen_wedstrijden)
+        context['bogen_wa'], context['bogen_ifaa'] = self._get_bogen(sporter, geen_wedstrijden)
         context['sporter'] = sporter
         context['voorkeuren'] = voorkeuren = get_sporter_voorkeuren(sporter)
 
@@ -328,10 +328,17 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
 
         context['opslaan_url'] = reverse('Sporter:voorkeuren')
 
-        context['kruimels'] = (
-            (reverse('Sporter:profiel'), 'Mijn pagina'),
-            (None, 'Voorkeuren')
-        )
+        if self.rol_nu == Rollen.ROL_HWL:
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Vereniging:leden-voorkeuren'), 'Voorkeuren leden'),
+                (None, 'Voorkeuren')
+            )
+        else:
+            context['kruimels'] = (
+                (reverse('Sporter:profiel'), 'Mijn pagina'),
+                (None, 'Voorkeuren')
+            )
 
         menu_dynamics(self.request, context)
         return context

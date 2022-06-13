@@ -10,13 +10,16 @@
 from django.conf import settings
 from django.utils import timezone
 from django.db.models import F
+from django.db.utils import DataError, OperationalError, IntegrityError
 from django.core.management.base import BaseCommand
 from Bondspas.models import (Bondspas, BONDSPAS_STATUS_OPHALEN,  BONDSPAS_STATUS_BEZIG,
-                             BONDSPAS_STATUS_FAIL, BONDSPAS_STATUS_AANWEZIG, BONDSPAS_STATUS_VERWIJDERD)
+                             BONDSPAS_STATUS_FAIL, BONDSPAS_STATUS_AANWEZIG)
 from Overig.background_sync import BackgroundSync
 import django.db.utils
 import datetime
 import requests
+import traceback
+import sys
 import os
 
 
@@ -164,8 +167,12 @@ class Command(BaseCommand):
         # vang generieke fouten af
         try:
             self._monitor_ophaal_verzoeken()
-        except django.db.utils.DataError as exc:        # pragma: no cover
+        except (DataError, OperationalError, IntegrityError) as exc:        # pragma: no cover
+            _, _, tb = sys.exc_info()
+            lst = traceback.format_tb(tb)
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
+            self.stderr.write('Traceback:')
+            self.stderr.write(''.join(lst))
         except KeyboardInterrupt:                       # pragma: no cover
             pass
 

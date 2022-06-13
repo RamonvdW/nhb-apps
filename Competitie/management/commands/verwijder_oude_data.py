@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 # verwijder onnodige (oude) data van voorgaande competities
 
 from django.core.management.base import BaseCommand
-from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdenPlan, CompetitieWedstrijdUitslag
+from Competitie.models import CompetitieMatch
 from Score.models import Score, ScoreHist
 from Sporter.models import SporterBoog
 
 """
-    CompetitieWedstrijd + CompetitieWedstrijdUitslag
-    CompetitieWedstrijdenPlan
+    CompetitieMatch + Uitslag
     
     Score (type SCORE) gekoppeld aan SporterBoog zonder Sporter
     ScoreHist "Uitslag competitie seizoen 2019/2020" + Score (type SCORE) 
@@ -81,72 +80,21 @@ class Command(BaseCommand):
             if self._do_save:
                 sporters.delete()
 
-    def _verwijder_orphan_wedstrijd_plan(self):
-        # zoek alle plannen die niet meer aan een deelcompetitie hangen
-        plans = (CompetitieWedstrijdenPlan
-                 .objects
-                 .prefetch_related('wedstrijden')
-                 .filter(deelcompetitie=None,
-                         deelcompetitieronde=None))
-        plans_count = plans.count()
-
-        wedstrijd_pks = list()
-        for plan in plans:
-            pks = plan.wedstrijden.values_list('pk', flat=True)
-            wedstrijd_pks.extend(pks)
-        # for
-
-        weds = (CompetitieWedstrijd
-                .objects
-                .select_related('uitslag')
-                .filter(pk__in=wedstrijd_pks))
-        weds_count = weds.count()
-
-        uitslag_pks = list()
-        for wed in weds:
-            if wed.uitslag:
-                uitslag_pks.append(wed.uitslag.pk)
-        # for
-
-        uitslagen = (CompetitieWedstrijdUitslag
-                     .objects
-                     .filter(pk__in=uitslag_pks))
-        uitslag_count = uitslagen.count()
-
-        if plans_count + weds_count + uitslag_count > 0:
-            self._use_commit()
-
-        # verwijder eerst de plannen, zodat de competitiewedstrijden 'vrij' zijn
-        if plans_count > 0:
-            self.stdout.write('%s oude plannen' % plans_count)
-            if self._do_save:
-                plans.delete()
-
-        # verwijder de wedstrijden zodat de uitslagen 'vrij' komen
-        if weds_count > 0:
-            self.stdout.write('%s oude wedstrijden' % weds_count)
-            if self._do_save:
-                weds.delete()
-
-        if uitslag_count > 0:
-            self.stdout.write('%s oude uitslagen' % uitslag_count)
-            if self._do_save:
-                uitslagen.delete()
-
-    def _verwijder_orphan_wedstrijden(self):
+    def _verwijder_orphan_matches(self):
         orphan_pks = list()
-        for wed in CompetitieWedstrijd.objects.all():
-            in_plans = wed.competitiewedstrijdenplan_set.all()
-            count = in_plans.count()
+        for match in CompetitieMatch.objects.all():
+            in_plans1 = match.deelcompetitie_set.all()
+            in_plans2 = match.deelcompetitieronde_set.all()
+            count = in_plans1.count() + in_plans2.count()
             if count == 0:
-                orphan_pks.append(wed.pk)
+                orphan_pks.append(match.pk)
         # for
 
         if len(orphan_pks):
             self._use_commit()
-            self.stdout.write('%s wedstrijden niet in een plan' % len(orphan_pks))
+            self.stdout.write('%s wedstrijden niet in een deelcompetitie of ronde' % len(orphan_pks))
 
-            orphans = CompetitieWedstrijd.objects.filter(pk__in=orphan_pks)
+            orphans = CompetitieMatch.objects.filter(pk__in=orphan_pks)
             if self._do_save:
                 orphans.delete()
 
@@ -169,9 +117,7 @@ class Command(BaseCommand):
 
         self._verwijder_lege_sporterboog()
 
-        self._verwijder_orphan_wedstrijd_plan()
-
-        self._verwijder_orphan_wedstrijden()
+        self._verwijder_orphan_matches()
 
         if not self._said_use_commit:
             self.stdout.write('Geen verwijderbare data gevonden')

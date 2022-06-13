@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -122,6 +122,10 @@ class NhbVereniging(models.Model):
     # naam van de vereniging
     naam = models.CharField(max_length=200)
 
+    # adres van "het bedrijf"
+    adres_regel1 = models.CharField(max_length=100, default='', blank=True)
+    adres_regel2 = models.CharField(max_length=100, default='', blank=True)
+
     # locatie van het doel van de vereniging
     plaats = models.CharField(max_length=100, blank=True)
 
@@ -136,10 +140,25 @@ class NhbVereniging(models.Model):
     # deze leden mogen geen wedstrijden schieten
     geen_wedstrijden = models.BooleanField(default=False)
 
+    # KvK nummer - wordt gebruikt bij verkoop wedstrijd/opleiding
+    kvk_nummer = models.CharField(max_length=15, default='', blank=True)
+
+    # website van deze vereniging
+    website = models.CharField(max_length=100, default='', blank=True)
+
+    # algemeen e-mailadres
+    contact_email = models.EmailField(blank=True)
+
+    # telefoonnummer van deze vereniging
+    # maximum is 15 tekens, maar we staan streepjes/spaties toe
+    telefoonnummer = models.CharField(max_length=20, default='', blank=True)
+
+    def ver_nr_en_naam(self):
+        return "[%s] %s" % (self.ver_nr, self.naam)
+
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
-        # selectie in de admin interface gaat op deze string, dus ver_nr eerst
-        return "[%s] %s" % (self.ver_nr, self.naam)
+        return self.ver_nr_en_naam()
 
     class Meta:
         """ meta data voor de admin interface """

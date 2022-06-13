@@ -11,14 +11,13 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from Functie.rol import Rollen, rol_get_huidige
-from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog,
+from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog, CompetitieMatch,
                                LAAG_REGIO, AG_NUL,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
                                DAGDELEN, DAGDEEL_AFKORTINGEN)
 from Competitie.operations import KlasseBepaler
 from Plein.menu import menu_dynamics
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
-from Wedstrijden.models import CompetitieWedstrijd
 from Sporter.models import SporterVoorkeuren, SporterBoog
 from decimal import Decimal
 
@@ -58,10 +57,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
                                         'nhb_regio')
                         .get(pk=deelcomp_pk))
 
-        except (ValueError, KeyError):
-            # vuilnis
-            raise Http404()
-        except (SporterBoog.DoesNotExist, DeelCompetitie.DoesNotExist):
+        except (ValueError, KeyError, SporterBoog.DoesNotExist, DeelCompetitie.DoesNotExist):
             # niet bestaand record
             raise Http404('Sporter of competitie niet gevonden')
 
@@ -92,7 +88,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         # urlconf parameters geaccepteerd
 
         # bepaal in welke wedstrijdklasse de sporter komt
-        age = sporterboog.sporter.bereken_wedstrijdleeftijd(comp.begin_jaar + 1)
+        age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(comp.begin_jaar + 1)
 
         # haal AG op, indien aanwezig
         scores = Score.objects.filter(sporterboog=sporterboog,
@@ -118,8 +114,8 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         except LookupError as exc:
             raise Http404(str(exc))
 
-        context['wedstrijdklasse'] = aanmelding.klasse.indiv.beschrijving
-        context['is_klasse_onbekend'] = aanmelding.klasse.indiv.is_onbekend
+        context['wedstrijdklasse'] = aanmelding.indiv_klasse.beschrijving
+        context['is_klasse_onbekend'] = aanmelding.indiv_klasse.is_onbekend
         del aanmelding
 
         udvl = comp.uiterste_datum_lid                      # uiterste datum van lidmaatschap
@@ -147,12 +143,12 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
             pks = list()
             for ronde in (DeelcompetitieRonde
                           .objects
-                          .select_related('plan')
+                          .prefetch_related('matches')
                           .filter(deelcompetitie=deelcomp)):
-                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+                pks.extend(ronde.matches.values_list('pk', flat=True))
             # for
 
-            wedstrijden = (CompetitieWedstrijd
+            wedstrijden = (CompetitieMatch
                            .objects
                            .filter(pk__in=pks)
                            .exclude(vereniging__isnull=True)  # voorkom wedstrijd niet toegekend aan vereniging
@@ -259,10 +255,7 @@ class RegiocompetitieAanmeldenView(View):
                         .select_related('competitie',
                                         'nhb_regio')
                         .get(pk=deelcomp_pk))
-        except (ValueError, KeyError):
-            # vuilnis
-            raise Http404()
-        except (SporterBoog.DoesNotExist, DeelCompetitie.DoesNotExist):
+        except (ValueError, KeyError, SporterBoog.DoesNotExist, DeelCompetitie.DoesNotExist):
             # niet bestaand record(s)
             raise Http404('Sporter of competitie niet gevonden')
 
@@ -293,7 +286,7 @@ class RegiocompetitieAanmeldenView(View):
         methode = deelcomp.inschrijf_methode
 
         # bepaal in welke wedstrijdklasse de sporter komt
-        age = sporterboog.sporter.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar + 1)
+        age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(deelcomp.competitie.begin_jaar + 1)
 
         aanmelding = RegioCompetitieSchutterBoog(
                             deelcompetitie=deelcomp,
@@ -301,7 +294,8 @@ class RegiocompetitieAanmeldenView(View):
                             bij_vereniging=sporterboog.sporter.bij_vereniging,
                             ag_voor_indiv=AG_NUL,
                             ag_voor_team=AG_NUL,
-                            ag_voor_team_mag_aangepast_worden=True)
+                            ag_voor_team_mag_aangepast_worden=True,
+                            aangemeld_door=account)
 
         # haal AG op, indien aanwezig
         scores = Score.objects.filter(sporterboog=sporterboog,
@@ -334,6 +328,10 @@ class RegiocompetitieAanmeldenView(View):
         if mag_team_schieten and request.POST.get('wil_in_team', '') != '':
             aanmelding.inschrijf_voorkeur_team = True
 
+        if request.POST.get('geen_rk', '') != '':
+            # sporter wil zich alvast afmelden voor het RK
+            aanmelding.inschrijf_voorkeur_rk_bk = False
+
         # kijk of er velden van een formulier bij zitten
         if methode == INSCHRIJF_METHODE_3:
             aanmelding.inschrijf_voorkeur_dagdeel = ''
@@ -359,10 +357,10 @@ class RegiocompetitieAanmeldenView(View):
             pks = list()
             for ronde in (DeelcompetitieRonde
                           .objects
-                          .select_related('plan')
+                          .prefetch_related('matches')
                           .filter(deelcompetitie=deelcomp)):
                 # sta alle wedstrijden in de regio toe, dus alle clusters
-                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+                pks.extend(ronde.matches.values_list('pk', flat=True))
             # for
             wedstrijden = list()
             for pk in pks:
@@ -370,7 +368,7 @@ class RegiocompetitieAanmeldenView(View):
                 if request.POST.get(key, '') != '':
                     wedstrijden.append(pk)
             # for
-            aanmelding.inschrijf_gekozen_wedstrijden.set(wedstrijden)
+            aanmelding.inschrijf_gekozen_matches.set(wedstrijden)
 
         return HttpResponseRedirect(reverse('Sporter:profiel'))
 
@@ -401,10 +399,7 @@ class RegiocompetitieAfmeldenView(View):
                          .select_related('deelcompetitie__competitie',
                                          'sporterboog__sporter')
                          .get(pk=deelnemer_pk))
-        except (ValueError, KeyError):
-            # vuilnis
-            raise Http404()
-        except RegioCompetitieSchutterBoog.DoesNotExist:
+        except (ValueError, KeyError, RegioCompetitieSchutterBoog.DoesNotExist):
             # niet bestaand record
             raise Http404('Inschrijving niet gevonden')
 

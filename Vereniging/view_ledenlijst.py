@@ -10,7 +10,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils import timezone
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie
-from BasisTypen.models import LeeftijdsKlasse, MAXIMALE_LEEFTIJD_JEUGD
+from BasisTypen.models import LeeftijdsKlasse, MAXIMALE_LEEFTIJD_JEUGD, ORGANISATIE_NHB
 from Sporter.models import Sporter, SporterBoog
 
 
@@ -25,6 +25,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_LEDENLIJST
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    kruimel = 'Ledenlijst'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -47,11 +48,13 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         jeugdgrens = huidige_jaar - MAXIMALE_LEEFTIJD_JEUGD
         self.huidige_jaar = huidige_jaar
 
+        # deel 1: jeugd
+
         lkls = list()
         for lkl in (LeeftijdsKlasse  # pragma: no branch
                     .objects
-                    .filter(wedstrijd_geslacht='M',
-                            min_wedstrijdleeftijd=0)    # exclude veteraan, master
+                    .filter(organisatie=ORGANISATIE_NHB,
+                            min_wedstrijdleeftijd=0)    # exclude veel van de senioren klassen
                     .order_by('volgorde')):             # aspirant eerst
 
             lkls.append(lkl)
@@ -71,8 +74,8 @@ class LedenLijstView(UserPassesTestMixin, ListView):
                               'achternaam',
                               'voornaam')):
 
-            # de wedstrijdleeftijd voor dit hele jaar
-            wedstrijdleeftijd = huidige_jaar - obj.geboorte_datum.year
+            # de wedstrijdleeftijd voor dit hele jaar, gebruik WA methode
+            wedstrijdleeftijd = obj.bereken_wedstrijdleeftijd_wa(huidige_jaar)
             obj.leeftijd = wedstrijdleeftijd
             obj.is_jeugd = True
 
@@ -80,7 +83,8 @@ class LedenLijstView(UserPassesTestMixin, ListView):
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
-                for lkl in lkls:            # pragma: no branch
+                obj.leeftijdsklasse = None      # fallback
+                for lkl in lkls:                                            # pragma: no branch
                     if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
                         obj.leeftijdsklasse = lkl
                         # stop op de eerste match: aspirant, cadet, junior, senior
@@ -93,9 +97,11 @@ class LedenLijstView(UserPassesTestMixin, ListView):
             objs.append(obj)
         # for
 
+        # deel 2: volwassenen
+
         lkls = list()
         for lkl in (LeeftijdsKlasse  # pragma: no branch
-                    .objects.filter(wedstrijd_geslacht='M',
+                    .objects.filter(organisatie=ORGANISATIE_NHB,
                                     max_wedstrijdleeftijd=0)    # skip jeugd klassen
                     .order_by('-volgorde')):                    # volgorde: veteraan, master, senior
 
@@ -113,15 +119,16 @@ class LedenLijstView(UserPassesTestMixin, ListView):
                     .order_by('achternaam',
                               'voornaam')):
 
-            # de wedstrijdleeftijd voor dit hele jaar
-            wedstrijdleeftijd = huidige_jaar - obj.geboorte_datum.year
+            # de wedstrijdleeftijd voor dit hele jaar, gebruik WA methode
+            wedstrijdleeftijd = obj.bereken_wedstrijdleeftijd_wa(huidige_jaar)
             obj.is_jeugd = False
 
             # de wedstrijdklasse voor dit hele jaar
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
-                for lkl in lkls:
+                obj.leeftijdsklasse = None      # fallback
+                for lkl in lkls:                                            # pragma: no branch
                     if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
                         obj.leeftijdsklasse = lkl
                         # stop op de eerste match: veteraan, master, senior
@@ -182,7 +189,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, 'Ledenlijst')
+            (None, self.kruimel)
         )
 
         menu_dynamics(self.request, context)
@@ -199,6 +206,7 @@ class LedenVoorkeurenView(LedenLijstView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_LEDEN_VOORKEUREN
+    kruimel = 'Voorkeuren leden'
 
     def get_queryset(self):
         objs = super().get_queryset()

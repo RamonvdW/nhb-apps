@@ -5,16 +5,15 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.models import BoogType, IndivWedstrijdklasse
+from BasisTypen.models import BoogType
 from Functie.models import maak_functie
-from NhbStructuur.models import NhbRegio, NhbVereniging, NhbCluster
-from Competitie.models import (CompetitieKlasse, DeelCompetitie, RegioCompetitieSchutterBoog,
-                               LAAG_REGIO, INSCHRIJF_METHODE_1)
+from NhbStructuur.models import NhbRegio, NhbVereniging
+from Competitie.models import (CompetitieIndivKlasse, DeelCompetitie, CompetitieMatch, LAAG_REGIO,
+                               RegioCompetitieSchutterBoog)
 from Competitie.operations import maak_deelcompetitie_ronde
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
-from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
-from Score.models import Score
+from Score.models import Score, Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -180,7 +179,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
         self._maak_inschrijvingen()
 
     def _maak_competitie(self):
-        self.assertEqual(CompetitieKlasse.objects.count(), 0)
+        self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         self.comp_18, self.comp_25 = maak_competities_en_zet_fase_b()
 
         self.deelcomp_regio_18 = DeelCompetitie.objects.get(laag=LAAG_REGIO,
@@ -202,18 +201,17 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
 
         # maak binnen het plan drie wedstrijden voor deze vereniging
         for volgnr in range(3):
-            wedstrijd = CompetitieWedstrijd(
-                            vereniging=self.nhbver1,
-                            datum_wanneer=datetime.date(year=2020, month=1, day=5+volgnr*3),
-                            tijd_begin_aanmelden=de_tijd,
-                            tijd_begin_wedstrijd=de_tijd,
-                            tijd_einde_wedstrijd=de_tijd)
+            match = CompetitieMatch(
+                        competitie=self.comp_18,
+                        vereniging=self.nhbver1,
+                        datum_wanneer=datetime.date(year=2020, month=1, day=5+volgnr*3),
+                        tijd_begin_wedstrijd=de_tijd)
 
             if volgnr <= 1:
-                uitslag = CompetitieWedstrijdUitslag(max_score=300, afstand_meter=12)
+                uitslag = Uitslag(max_score=300, afstand=12)
                 uitslag.save()
-                wedstrijd.uitslag = uitslag
-                wedstrijd.beschrijving = "Test - Dit is een testje %s" % volgnr
+                match.uitslag = uitslag
+                match.beschrijving = "Test - Dit is een testje %s" % volgnr
 
                 if volgnr == 1:
                     score = Score(sporterboog=self.sporterboog_100001,
@@ -222,22 +220,21 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                     score.save()
                     uitslag.scores.add(score)
 
-            wedstrijd.save()
-            ronde.plan.wedstrijden.add(wedstrijd)
+            match.save()
+            ronde.matches.add(match)
 
-            wedstrijd.indiv_klassen.set(IndivWedstrijdklasse.objects.all())
+            match.indiv_klassen.set(CompetitieIndivKlasse.objects.filter(competitie=self.comp_18))
 
-            self.wedstrijden.append(wedstrijd)
+            self.wedstrijden.append(match)
         # for
 
-        # maak voor de vereniging een wedstrijd die niets met de competitie te doen heeft
-        wedstrijd = CompetitieWedstrijd(
-                        vereniging=self.nhbver1,
-                        datum_wanneer=datetime.date(year=2020, month=2, day=1),
-                        tijd_begin_aanmelden=de_tijd,
-                        tijd_begin_wedstrijd=de_tijd,
-                        tijd_einde_wedstrijd=de_tijd)
-        wedstrijd.save()
+        # maak voor de vereniging een wedstrijd die niets met de competitie te doen heeft       TODO: no such thing
+        match = CompetitieMatch(
+                    competitie=self.comp_25,
+                    vereniging=self.nhbver1,
+                    datum_wanneer=datetime.date(year=2020, month=2, day=1),
+                    tijd_begin_wedstrijd=de_tijd)
+        match.save()
 
     def _maak_inschrijvingen(self):
         # schrijf iemand in
@@ -251,37 +248,37 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
 
         SporterVoorkeuren(sporter=sporterboog.sporter, voorkeur_eigen_blazoen=True).save()
 
-        klasse = (CompetitieKlasse
-                  .objects
-                  .filter(competitie=self.comp_18,
-                          indiv__boogtype=boog_r,
-                          indiv__is_onbekend=True))[0]
+        indiv_klasse = (CompetitieIndivKlasse
+                        .objects
+                        .filter(competitie=self.comp_18,
+                                boogtype=boog_r,
+                                is_onbekend=True))[0]
 
         RegioCompetitieSchutterBoog(
                 deelcompetitie=self.deelcomp_regio_18,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
-                klasse=klasse).save()
+                indiv_klasse=indiv_klasse).save()
 
-        klasse = (CompetitieKlasse
-                  .objects
-                  .filter(competitie=self.comp_25,
-                          indiv__boogtype=boog_r,
-                          indiv__is_onbekend=True))[0]
+        indiv_klasse = (CompetitieIndivKlasse
+                        .objects
+                        .filter(competitie=self.comp_25,
+                                boogtype=boog_r,
+                                is_onbekend=True))[0]
 
         RegioCompetitieSchutterBoog(
                 deelcompetitie=self.deelcomp_regio_25,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
-                klasse=klasse).save()
+                indiv_klasse=indiv_klasse).save()
 
         # Schutter 2 aanmelden
 
-        klasse = (CompetitieKlasse
-                  .objects
-                  .filter(competitie=self.comp_18,
-                          indiv__boogtype=boog_c,
-                          indiv__is_onbekend=False))[0]
+        indiv_klasse = (CompetitieIndivKlasse
+                        .objects
+                        .filter(competitie=self.comp_18,
+                                boogtype=boog_c,
+                                is_onbekend=False))[0]
 
         sporterboog = SporterBoog(sporter=self.sporter_100002,
                                   boogtype=boog_c,
@@ -291,19 +288,19 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
         aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_18,
                                                  sporterboog=sporterboog,
                                                  bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                                 klasse=klasse)
+                                                 indiv_klasse=indiv_klasse)
         aanmelding.save()
 
-        klasse = (CompetitieKlasse
-                  .objects
-                  .filter(competitie=self.comp_25,
-                          indiv__boogtype=boog_c,
-                          indiv__is_onbekend=False))[0]
+        indiv_klasse = (CompetitieIndivKlasse
+                        .objects
+                        .filter(competitie=self.comp_25,
+                                boogtype=boog_c,
+                                is_onbekend=False))[0]
 
         aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_25,
                                                  sporterboog=sporterboog,
                                                  bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                                 klasse=klasse)
+                                                 indiv_klasse=indiv_klasse)
         aanmelding.save()
 
         # aspirant schutter aanmelden
@@ -311,11 +308,11 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
         self.sporter_100012.geslacht = 'M'
         self.sporter_100012.save()
 
-        klasse = (CompetitieKlasse
-                  .objects
-                  .filter(competitie=self.comp_18,
-                          indiv__boogtype=boog_tr,
-                          indiv__beschrijving__contains="Onder 12 jongens"))[0]
+        indiv_klasse = (CompetitieIndivKlasse
+                        .objects
+                        .filter(competitie=self.comp_18,
+                                boogtype=boog_tr,
+                                beschrijving__contains="Onder 12 jongens"))[0]
 
         sporterboog = SporterBoog(sporter=self.sporter_100012,
                                   boogtype=boog_tr,
@@ -325,26 +322,26 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
         aanmelding = RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_18,
                                                  sporterboog=sporterboog,
                                                  bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                                 klasse=klasse)
+                                                 indiv_klasse=indiv_klasse)
         aanmelding.save()
 
-        klasse = (CompetitieKlasse
-                  .objects
-                  .filter(competitie=self.comp_25,
-                          indiv__boogtype=boog_tr,
-                          indiv__beschrijving__contains="Onder 12 jongens"))[0]
+        indiv_klasse = (CompetitieIndivKlasse
+                        .objects
+                        .filter(competitie=self.comp_25,
+                                boogtype=boog_tr,
+                                beschrijving__contains="Onder 12 jongens"))[0]
 
         RegioCompetitieSchutterBoog(
                 deelcompetitie=self.deelcomp_regio_25,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
-                klasse=klasse).save()
+                indiv_klasse=indiv_klasse).save()
 
         # Schutter 3 aanmelden
-        klasse = (CompetitieKlasse
-                  .objects
-                  .filter(competitie=self.comp_18,
-                          indiv__boogtype=boog_r))[0]
+        indiv_klasse = (CompetitieIndivKlasse
+                        .objects
+                        .filter(competitie=self.comp_18,
+                                boogtype=boog_r))[0]
 
         sporterboog = SporterBoog(sporter=self.sporter_100003,
                                   boogtype=boog_r,
@@ -355,7 +352,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                 deelcompetitie=self.deelcomp_regio_18,
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
-                klasse=klasse).save()
+                indiv_klasse=indiv_klasse).save()
 
     def test_wedstrijden_hwl(self):
         # login als HWL
@@ -380,11 +377,13 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compscores/wedstrijden.dtl', 'plein/site_layout.dtl'))
 
         urls2 = self.extract_all_urls(resp, skip_menu=True)
+        url = None
         for url in urls2:
             self.assertTrue("/waarschijnlijke-deelnemers/" in url or url.startswith('/bondscompetities/scores/uitslag-invoeren/'))
         # for
 
-        self.e2e_assert_other_http_commands_not_supported(url)
+        if url:     # pragma: no branch
+            self.e2e_assert_other_http_commands_not_supported(url)
 
     def test_wedstrijden_wl(self):
         # login als WL
@@ -392,9 +391,9 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_wl)
         self.e2e_check_rol('WL')
 
-        wedstrijd = CompetitieWedstrijd.objects.all()[0]
-        wedstrijd.beschrijving = 'Hallo'
-        wedstrijd.save(update_fields=['beschrijving'])
+        match = CompetitieMatch.objects.all()[0]
+        match.beschrijving = 'Hallo'
+        match.save(update_fields=['beschrijving'])
 
         # haal de lijst van wedstrijden
         with self.assert_max_queries(20):

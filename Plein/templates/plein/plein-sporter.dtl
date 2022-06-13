@@ -53,7 +53,7 @@
             {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
 
             <!-- Wedstrijdkalender -->
-            {% if toon_kalender %}      <!-- volg menu -->
+            {% if toon_kalender %}
                 {% url 'Kalender:landing-page' as card_url %}
                 {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
             {% endif %}

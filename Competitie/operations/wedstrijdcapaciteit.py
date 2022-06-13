@@ -17,7 +17,7 @@ BLAZOEN_STR_WENS_DT = 'DT (wens)'
 BLAZOEN_STR_WENS_4SPOT = '4-spot (wens)'
 
 
-def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
+def _query_wedstrijd_deelnemers(afstand, deelcomp, match):
 
     """ geef de lijst van deelnemers en teams terug voor deze wedstrijd,
         rekening houdend met de inschrijfmethode
@@ -26,10 +26,9 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
     # TODO: ondersteuning inschrijfmethode 3 toevoegen - maar hoe?
     if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_1:
         # specifiek aangemelde individuele sporters
-        deelnemers_indiv = (wedstrijd
+        deelnemers_indiv = (match
                             .regiocompetitieschutterboog_set
-                            .select_related('klasse',
-                                            'klasse__indiv',
+                            .select_related('indiv_klasse',
                                             'sporterboog',
                                             'sporterboog__boogtype',
                                             'sporterboog__sporter',
@@ -42,11 +41,10 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                 .prefetch_related('team_type__boog_typen')
                                 .select_related('vereniging',
                                                 'team_type',
-                                                'klasse',
-                                                'klasse__team'))
+                                                'team_klasse'))
     else:
         # vereniging zit in 0 of 1 clusters voor deze competitie
-        clusters = wedstrijd.vereniging.clusters.filter(gebruik=afstand)
+        clusters = match.vereniging.clusters.filter(gebruik=afstand)
 
         if clusters.count() > 0:
             # vereniging zit in een cluster, dus toon alleen de deelnemers van dit cluster
@@ -55,8 +53,7 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                 .objects
                                 .filter(deelcompetitie=deelcomp,
                                         bij_vereniging__in=ver_pks)
-                                .select_related('klasse',
-                                                'klasse__indiv',
+                                .select_related('indiv_klasse',
                                                 'bij_vereniging',
                                                 'sporterboog',
                                                 'sporterboog__boogtype',
@@ -71,15 +68,13 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                     .prefetch_related('team_type__boog_typen')
                                     .select_related('vereniging',
                                                     'team_type',
-                                                    'klasse',
-                                                    'klasse__team'))
+                                                    'team_klasse'))
         else:
             # fall-back: alle sporters in de hele regio
             deelnemers_indiv = (RegioCompetitieSchutterBoog
                                 .objects
                                 .filter(deelcompetitie=deelcomp)
-                                .select_related('klasse',
-                                                'klasse__indiv',
+                                .select_related('indiv_klasse',
                                                 'bij_vereniging',
                                                 'sporterboog',
                                                 'sporterboog__boogtype',
@@ -93,25 +88,28 @@ def _query_wedstrijd_deelnemers(afstand, deelcomp, wedstrijd):
                                     .prefetch_related('team_type__boog_typen')
                                     .select_related('vereniging',
                                                     'team_type',
-                                                    'klasse',
-                                                    'klasse__team'))
+                                                    'team_klasse'))
 
         if deelcomp.inschrijf_methode == INSCHRIJF_METHODE_2:
             # verder filteren, op gekoppelde wedstrijdklassen
 
             if deelcomp.regio_organiseert_teamcompetitie:
                 # team klassen
-                team_pks = wedstrijd.team_klassen.values_list('pk', flat=True)
-                gekoppeld_pks = RegiocompetitieTeam.objects.filter(klasse__team__pk__in=team_pks).values_list('gekoppelde_schutters__pk', flat=True)    # TODO: moet dit feitelijke sporters zijn??
+                team_pks = match.team_klassen.values_list('pk', flat=True)
+                # TODO: moet dit feitelijke sporters zijn??
+                gekoppeld_pks = (RegiocompetitieTeam
+                                 .objects
+                                 .filter(team_klasse__pk__in=team_pks)
+                                 .values_list('gekoppelde_schutters__pk', flat=True))
             else:
                 gekoppeld_pks = list()
 
             # individueel
-            indiv_pks = wedstrijd.indiv_klassen.values_list('pk', flat=True)
+            indiv_pks = match.indiv_klassen.values_list('pk', flat=True)
 
             # alleen filteren als er voor deze wedstrijd keuzes zijn gemaakt, anders alle sporters behouden
             if len(indiv_pks) + len(gekoppeld_pks) > 0:
-                deelnemers_indiv = deelnemers_indiv.filter(Q(klasse__indiv__pk__in=indiv_pks) | Q(pk__in=gekoppeld_pks))
+                deelnemers_indiv = deelnemers_indiv.filter(Q(indiv_klasse__pk__in=indiv_pks) | Q(pk__in=gekoppeld_pks))
 
     if not deelcomp.regio_organiseert_teamcompetitie:
         deelnemers_teams = list()
@@ -206,7 +204,7 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
                         schiet_boog_c=(boog.afkorting == 'C'),
                         voorkeur_dt=(sporter.lid_nr in wens_eigen_blazoen),
                         voorkeur_4spot=(sporter.lid_nr in wens_eigen_blazoen),
-                        is_aspirant=deelnemer.klasse.indiv.is_aspirant_klasse,
+                        is_aspirant=deelnemer.indiv_klasse.is_aspirant_klasse,
                         wil_team_schieten=deelnemer.inschrijf_voorkeur_team,
                         team_pk=0,
                         team_gem="",
@@ -249,11 +247,7 @@ def bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, wedstrijd):
 
         sporter.blazoen_lijst = list()
 
-        if afstand == '18':
-            blazoenen = (deelnemer.klasse.indiv.blazoen1_18m_regio, deelnemer.klasse.indiv.blazoen2_18m_regio)
-        else:
-            blazoenen = (deelnemer.klasse.indiv.blazoen1_25m_regio, deelnemer.klasse.indiv.blazoen2_25m_regio)
-        for blazoen in blazoenen:
+        for blazoen in (deelnemer.indiv_klasse.blazoen1_regio, deelnemer.indiv_klasse.blazoen2_regio):
             if blazoen not in sporter.blazoen_lijst:
                 sporter.blazoen_lijst.append(blazoen)
         # for
@@ -350,8 +344,8 @@ def bepaal_blazoen_behoefte(afstand, sporters, deelnemers_teams):
                 ver2teams[ver_nr] = 1
 
             if afstand == '18':
-                if team_klasse.blazoen1_18m_regio == team_klasse.blazoen2_18m_regio:
-                    blazoen = team_klasse.blazoen1_18m_regio
+                if team_klasse.blazoen1_regio == team_klasse.blazoen2_regio:
+                    blazoen = team_klasse.blazoen1_regio
                     if blazoen == BLAZOEN_40CM:
                         blazoenen.teams_40cm += 1
                     elif blazoen == BLAZOEN_DT:
@@ -359,8 +353,8 @@ def bepaal_blazoen_behoefte(afstand, sporters, deelnemers_teams):
                 else:
                     blazoenen.teams_dt_of_40cm += 1
             else:
-                if team_klasse.blazoen1_25m_regio == team_klasse.blazoen2_25m_regio:
-                    if team_klasse.blazoen1_25m_regio == BLAZOEN_60CM:
+                if team_klasse.blazoen1_regio == team_klasse.blazoen2_regio:
+                    if team_klasse.blazoen1_regio == BLAZOEN_60CM:
                         blazoenen.teams_60cm += 1
                     else:
                         blazoenen.teams_60cm_4spot += 1

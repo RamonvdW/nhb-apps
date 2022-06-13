@@ -43,29 +43,20 @@
     <!-- blauwe balk met kaartjes bondscompetities en records -->
     <!--<div class="row nhb-blauw-hoofd white-text center" style="padding-top:50px; padding-bottom:50px">-->
     <div class="row-nhb-blauw">
-        <!--
-        <div class="col s1">01</div>
-        <div class="col s1">02</div>
-        <div class="col s1">03</div>
-        <div class="col s1">04</div>
-        <div class="col s1">05</div>
-        <div class="col s1">06</div>
-        <div class="col s1">07</div>
-        <div class="col s1">08</div>
-        <div class="col s1">09</div>
-        <div class="col s1">10</div>
-        <div class="col s1">11</div>
-        <div class="col s1">12</div>
-        -->
-
-        <div class="col s12 m6">
+        <div class="col s12">
+            <!-- Bondscompetities -->
             {% url 'Competitie:kies' as card_url %}
             {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de<br>bondscompetities,<br> inclusief alle uitslagen." icon="my_location" url=card_url %}
-        </div>
 
-        <div class="col s12 m6">
+            <!-- Records -->
             {% url 'Records:overzicht' as card_url %}
             {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records<br>van nederlandse sporters." icon="insights" url=card_url %}
+
+            <!-- Wedstrijdkalender -->
+            {% if toon_kalender %}
+                {% url 'Kalender:landing-page' as card_url %}
+                {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
+            {% endif %}
         </div>
     </div>
 

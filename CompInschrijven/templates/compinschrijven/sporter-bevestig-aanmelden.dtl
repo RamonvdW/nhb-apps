@@ -104,6 +104,15 @@
                                 </tr>
                             {% endif %}
 
+                            <tr>
+                                <td>Kies of je na de regiocompetitie ook mee wilt doen aan de Rayonkampioenschappen:<br><br>
+                                    <label style="margin-left: 20px">
+                                        <input type="checkbox" class="filled-in" name="geen_rk">
+                                        <span class="black-text">Ik meld me alvast af voor de Rayonkampioenschappen</span>
+                                    </label>
+                                </td>
+                            </tr>
+
                             {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
                                 <tr>
                                     <td>Kies wanneer je wilt schieten:<br>

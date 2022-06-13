@@ -126,7 +126,7 @@
                     {% endif %}
 
                     <tr>
-                        <td colspan="5" class="center"><h5>{{ obj.klasse.indiv.beschrijving }}</h5>Aantal: {{ obj.aantal_in_klasse }}</td>
+                        <td colspan="5" class="center"><h5>{{ obj.indiv_klasse.beschrijving }}</h5>Aantal: {{ obj.aantal_in_klasse }}</td>
                     </tr>
 
                     <tr class="nhb-table-header">

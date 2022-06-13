@@ -5,12 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
-from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
+from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
 from Competitie.models import (AG_NUL, LAAG_REGIO, LAAG_RK, AFSTANDEN,
-                               Competitie, CompetitieKlasse, DeelCompetitie, DeelcompetitieRonde)
+                               Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               DeelCompetitie, DeelcompetitieRonde)
 from Functie.models import Functie
 from NhbStructuur.models import NhbRayon, NhbRegio
-from Wedstrijden.models import CompetitieWedstrijdenPlan
 from datetime import date
 import datetime
 import logging
@@ -93,14 +93,10 @@ def maak_deelcompetitie_ronde(deelcomp, cluster=None):
 
     if nieuwe_week_nr:
         # maak een eigen wedstrijdenplan aan voor deze ronde
-        plan = CompetitieWedstrijdenPlan()
-        plan.save()
-
         ronde = DeelcompetitieRonde()
         ronde.deelcompetitie = deelcomp
         ronde.cluster = cluster
         ronde.week_nr = nieuwe_week_nr
-        ronde.plan = plan
         ronde.save()
     else:
         # maximum aantal rondes is al aangemaakt
@@ -124,14 +120,6 @@ def _maak_deelcompetities(comp, rayons, regios, functies):
                              competitie__afstand=comp.afstand)):
         vorige_deelcomps[deelcomp.nhb_regio.regio_nr] = deelcomp
     # for
-
-    # maak wedstrijdplannen aan: voor de 4x LAAG_RK en 1x voor LAAG_BK
-    plannen = [CompetitieWedstrijdenPlan(),
-               CompetitieWedstrijdenPlan(),
-               CompetitieWedstrijdenPlan(),
-               CompetitieWedstrijdenPlan(),
-               CompetitieWedstrijdenPlan()]
-    CompetitieWedstrijdenPlan.objects.bulk_create(plannen)
 
     # maak de Deelcompetities aan voor Regio, RK, BK
     bulk = list()
@@ -165,8 +153,7 @@ def _maak_deelcompetities(comp, rayons, regios, functies):
                 deel = DeelCompetitie(competitie=comp,
                                       laag=laag,
                                       nhb_rayon=obj,
-                                      functie=functie,
-                                      plan=plannen[obj.rayon_nr])
+                                      functie=functie)
                 bulk.append(deel)
             # for
         else:
@@ -174,8 +161,7 @@ def _maak_deelcompetities(comp, rayons, regios, functies):
             functie = functies[("BKO", comp.afstand, 0)]
             deel = DeelCompetitie(competitie=comp,
                                   laag=laag,
-                                  functie=functie,
-                                  plan=plannen[0])
+                                  functie=functie)
             bulk.append(deel)
     # for
 
@@ -183,56 +169,116 @@ def _maak_deelcompetities(comp, rayons, regios, functies):
 
 
 def _maak_competitieklassen(comp):
-    """ Maak de competitieklassen aan voor een nieuwe competitie
+    """ Maak de competitie klassen aan voor een nieuwe competitie
         het min_ag per klasse wordt later ingevuld
     """
 
-    bulk = list()
+    is_18m = comp.afstand == '18'
 
-    for indiv in (IndivWedstrijdklasse
-                  .objects
-                  .prefetch_related('leeftijdsklassen')
-                  .exclude(buiten_gebruik=True)):
+    if True:
+        volgorde2lkl_pks = dict()     # [volgorde] = [LeeftijdsKlasse.pk, ...]
+        bulk = list()
 
-        klasse = CompetitieKlasse(
-                        competitie=comp,
-                        indiv=indiv,
-                        min_ag=AG_NUL)
+        for indiv in (TemplateCompetitieIndivKlasse
+                      .objects
+                      .prefetch_related('leeftijdsklassen')
+                      .exclude(buiten_gebruik=True)):
 
-        # bepaal of deze klasse voor aspiranten is
-        for lkl in indiv.leeftijdsklassen.all():
-            if lkl.is_aspirant_klasse():
-                klasse.is_aspirant_klasse = True
+            klasse = CompetitieIndivKlasse(
+                            competitie=comp,
+                            volgorde=indiv.volgorde,
+                            beschrijving=indiv.beschrijving,
+                            boogtype=indiv.boogtype,
+                            is_voor_rk_bk=not indiv.niet_voor_rk_bk,
+                            is_onbekend=indiv.is_onbekend,
+                            is_aspirant_klasse=indiv.is_aspirant_klasse,
+                            min_ag=AG_NUL)
+
+            if is_18m:
+                klasse.blazoen1_regio = indiv.blazoen1_18m_regio
+                klasse.blazoen2_regio = indiv.blazoen2_18m_regio
+                klasse.blazoen_rk_bk = indiv.blazoen_18m_rk_bk
+            else:
+                klasse.blazoen1_regio = indiv.blazoen1_25m_regio
+                klasse.blazoen2_regio = indiv.blazoen2_25m_regio
+                klasse.blazoen_rk_bk = indiv.blazoen_25m_rk_bk
+
+            bulk.append(klasse)
+
+            volgorde2lkl_pks[klasse.volgorde] = list(indiv.leeftijdsklassen.values_list('pk', flat=True))
         # for
 
-        bulk.append(klasse)
-    # for
+        CompetitieIndivKlasse.objects.bulk_create(bulk)
 
-    teams = (TeamWedstrijdklasse
-             .objects
-             .exclude(buiten_gebruik=True))
+        # zet de leeftijdsklassen
+        for klasse in CompetitieIndivKlasse.objects.filter(competitie=comp):
+            klasse.leeftijdsklassen.set(volgorde2lkl_pks[klasse.volgorde])
+        # for
 
-    # team klassen voor de regiocompetitie
-    for team in teams:
-        klasse = CompetitieKlasse(
+    if True:
+
+        teamtype_pk2boog_pks = dict()        # [teamtype.pk] = [boogtype.pk, ...]
+
+        bulk = list()
+        for team in (TemplateCompetitieTeamKlasse
+                     .objects
+                     .exclude(buiten_gebruik=True)
+                     .select_related('team_type')
+                     .prefetch_related('team_type__boog_typen')):
+
+            boog_pks = list(team.team_type.boog_typen.all().values_list('pk', flat=True))
+            teamtype_pk2boog_pks[team.team_type.pk] = boog_pks
+
+            # voor de regiocompetitie teams
+            klasse = CompetitieTeamKlasse(
                         competitie=comp,
-                        team=team,
+                        volgorde=team.volgorde,
+                        beschrijving=team.beschrijving,
+                        team_afkorting=team.team_type.afkorting,
+                        team_type=team.team_type,
                         min_ag=AG_NUL,
                         is_voor_teams_rk_bk=False)
-        bulk.append(klasse)
-    # for
 
-    # team klassen voor RK/BK
-    for team in teams:
-        klasse = CompetitieKlasse(
+            if is_18m:
+                klasse.blazoen1_regio = team.blazoen1_18m_regio
+                klasse.blazoen2_regio = team.blazoen2_18m_regio
+                klasse.blazoen_rk_bk = team.blazoen1_18m_rk_bk
+            else:
+                klasse.blazoen1_regio = team.blazoen1_25m_regio
+                klasse.blazoen2_regio = team.blazoen2_25m_regio
+                klasse.blazoen_rk_bk = team.blazoen_25m_rk_bk
+
+            bulk.append(klasse)
+
+            # voor de rayonkampioenschappen teams
+            klasse = CompetitieTeamKlasse(
                         competitie=comp,
-                        team=team,
+                        volgorde=team.volgorde + 100,
+                        beschrijving=team.beschrijving,
+                        team_afkorting=team.team_type.afkorting,
+                        team_type=team.team_type,
                         min_ag=AG_NUL,
                         is_voor_teams_rk_bk=True)
-        bulk.append(klasse)
-    # for
 
-    CompetitieKlasse.objects.bulk_create(bulk)
+            if is_18m:
+                klasse.blazoen1_regio = team.blazoen1_18m_regio
+                klasse.blazoen2_regio = team.blazoen2_18m_regio
+                klasse.blazoen_rk_bk = team.blazoen1_18m_rk_bk
+            else:
+                klasse.blazoen1_regio = team.blazoen1_25m_regio
+                klasse.blazoen2_regio = team.blazoen2_25m_regio
+                klasse.blazoen_rk_bk = team.blazoen_25m_rk_bk
+
+            bulk.append(klasse)
+        # for
+
+        CompetitieTeamKlasse.objects.bulk_create(bulk)
+
+        # zet de boogtypen
+        for team in bulk:
+            boog_pks = teamtype_pk2boog_pks[team.team_type.pk]
+            team.boog_typen.set(boog_pks)
+        # for
 
 
 def bepaal_startjaar_nieuwe_competitie():
@@ -296,6 +342,18 @@ def competities_aanmaken(jaar=None):
             comp.laatst_mogelijke_wedstrijd = yearend
 
         comp.save()
+
+        pks = list(TemplateCompetitieIndivKlasse
+                   .objects
+                   .exclude(buiten_gebruik=True)
+                   .values_list('boogtype__pk', flat=True))
+        comp.boogtypen.set(pks)
+
+        pks = list(TemplateCompetitieTeamKlasse
+                   .objects
+                   .exclude(buiten_gebruik=True)
+                   .values_list('team_type__pk', flat=True))
+        comp.teamtypen.set(pks)
 
         _maak_deelcompetities(comp, rayons, regios, functies)
 

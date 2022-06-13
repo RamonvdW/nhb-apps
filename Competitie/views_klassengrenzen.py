@@ -10,7 +10,7 @@ from django.shortcuts import render, reverse
 from BasisTypen.models import BLAZOEN2STR
 from Functie.rol import rol_get_huidige, Rollen
 from Plein.menu import menu_dynamics
-from .models import (AG_NUL, Competitie, CompetitieKlasse)
+from .models import AG_NUL, Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse
 
 
 TEMPLATE_COMPETITIE_KLASSENGRENZEN_TONEN = 'competitie/klassengrenzen-tonen.dtl'
@@ -28,16 +28,12 @@ class KlassengrenzenTonenView(View):
         """ geef een lijst van individuele competitie wedstrijdklassen terug
             met het AG geformatteerd voor presentatie.
         """
-        klassen = (CompetitieKlasse
+        klassen = (CompetitieIndivKlasse
                    .objects
-                   .select_related('competitie',
-                                   'indiv')
-                   .filter(team=None,
-                           competitie=comp)
+                   .select_related('competitie')
+                   .filter(competitie=comp)
                    .prefetch_related('regiocompetitieschutterboog_set')
-                   .order_by('indiv__volgorde'))
-
-        is_18m = (comp.afstand == '18')
+                   .order_by('volgorde'))
 
         for obj in klassen:
             if obj.min_ag > AG_NUL:
@@ -47,19 +43,11 @@ class KlassengrenzenTonenView(View):
             if toon_aantal:
                 obj.aantal = obj.regiocompetitieschutterboog_set.count()
 
-            if is_18m:
-                blazoenen = (obj.indiv.blazoen1_18m_regio, obj.indiv.blazoen2_18m_regio)
-            else:
-                blazoenen = (obj.indiv.blazoen1_25m_regio, obj.indiv.blazoen2_25m_regio)
+            obj.blazoen_regio_str = BLAZOEN2STR[obj.blazoen1_regio]
+            if obj.blazoen1_regio != obj.blazoen2_regio:
+                obj.blazoen_regio_str += " of " + BLAZOEN2STR[obj.blazoen2_regio]
 
-            obj.blazoen_regio_str = BLAZOEN2STR[blazoenen[0]]
-            if blazoenen[0] != blazoenen[1]:
-                obj.blazoen_regio_str += " of " + BLAZOEN2STR[blazoenen[1]]
-
-            if is_18m:
-                obj.blazoen_rk_bk_str = BLAZOEN2STR[obj.indiv.blazoen_18m_rk_bk]
-            else:
-                obj.blazoen_rk_bk_str = BLAZOEN2STR[obj.indiv.blazoen_25m_rk_bk]
+            obj.blazoen_rk_bk_str = BLAZOEN2STR[obj.blazoen_rk_bk]
         # for
 
         return klassen
@@ -69,35 +57,22 @@ class KlassengrenzenTonenView(View):
         """ geef een lijst van team competitie wedstrijdklassen terug
             met het teamgemiddelde geformatteerd voor presentatie.
         """
-        klassen = (CompetitieKlasse
+        klassen = (CompetitieTeamKlasse
                    .objects
-                   .select_related('competitie',
-                                   'team')
-                   .filter(indiv=None,
-                           competitie=comp)
-                   .order_by('team__volgorde'))
-
-        is_18m = (comp.afstand == '18')
+                   .select_related('competitie')
+                   .filter(competitie=comp)
+                   .order_by('volgorde'))
 
         for obj in klassen:
             if obj.min_ag > AG_NUL:
                 ag_str = "%5.1f" % (obj.min_ag * aantal_pijlen)
                 obj.min_ag_str = ag_str.replace('.', ',')  # nederlands: komma ipv punt
 
-            if is_18m:
-                obj.blazoen_regio_str = BLAZOEN2STR[obj.team.blazoen1_18m_regio]
-                if obj.team.blazoen2_18m_regio != obj.team.blazoen1_18m_regio:
-                    obj.blazoen_regio_str += " of " + BLAZOEN2STR[obj.team.blazoen2_18m_regio]
+            obj.blazoen_regio_str = BLAZOEN2STR[obj.blazoen1_regio]
+            if obj.blazoen2_regio != obj.blazoen1_regio:
+                obj.blazoen_regio_str += " of " + BLAZOEN2STR[obj.blazoen2_regio]
 
-                obj.blazoen_rk_bk_str = BLAZOEN2STR[obj.team.blazoen1_18m_rk_bk]
-                if obj.team.blazoen2_18m_rk_bk != obj.team.blazoen1_18m_rk_bk:
-                    obj.blazoen_rk_bk_str += " of " + BLAZOEN2STR[obj.team.blazoen2_18m_rk_bk]
-            else:
-                obj.blazoen_regio_str = BLAZOEN2STR[obj.team.blazoen1_25m_regio]
-                if obj.team.blazoen1_25m_regio != obj.team.blazoen2_25m_regio:
-                    obj.blazoen_regio_str += " of " + BLAZOEN2STR[obj.team.blazoen2_25m_regio]
-
-                obj.blazoen_rk_bk_str = BLAZOEN2STR[obj.team.blazoen_25m_rk_bk]
+            obj.blazoen_rk_bk_str = BLAZOEN2STR[obj.blazoen_rk_bk]
         # for
 
         return klassen

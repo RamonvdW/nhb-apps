@@ -13,14 +13,13 @@ from BasisTypen.models import (MAXIMALE_LEEFTIJD_JEUGD, MAXIMALE_WEDSTRIJDLEEFTI
                                BLAZOEN_60CM_4SPOT, BLAZOEN_DT)
 from Competitie.models import (AG_NUL, DAGDELEN, DAGDEEL_AFKORTINGEN, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3,
                                Competitie, DeelCompetitie, DeelcompetitieRonde, RegioCompetitieSchutterBoog,
-                               get_competitie_indiv_leeftijdsklassen, get_competitie_team_typen)
+                               CompetitieMatch, get_competitie_indiv_leeftijdsklassen)
 from Competitie.operations import KlasseBepaler
 from Competitie.operations import get_competitie_bogen
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Score.models import Score, SCORE_TYPE_INDIV_AG
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
-from Wedstrijden.models import CompetitieWedstrijd
 from decimal import Decimal
 import copy
 
@@ -94,7 +93,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                               'achternaam', 'voornaam')):
 
             # de wedstrijdleeftijd voor dit hele seizoen
-            wedstrijdleeftijd = obj.bereken_wedstrijdleeftijd(comp.begin_jaar + 1)
+            wedstrijdleeftijd = obj.bereken_wedstrijdleeftijd_wa(comp.begin_jaar + 1)
             obj.leeftijd = wedstrijdleeftijd
 
             # de wedstrijdklasse voor dit hele seizoen
@@ -270,12 +269,12 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 pks = list()
                 for ronde in (DeelcompetitieRonde
                               .objects
-                              .select_related('plan')
+                              .prefetch_related('matches')
                               .filter(deelcompetitie=deelcomp)):
-                    pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+                    pks.extend(ronde.matches.values_list('pk', flat=True))
                 # for
 
-                wedstrijden = (CompetitieWedstrijd
+                wedstrijden = (CompetitieMatch
                                .objects
                                .filter(pk__in=pks)
                                .exclude(vereniging__isnull=True)        # voorkom wedstrijd niet toegekend aan vereniging
@@ -373,15 +372,20 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         if mag_team_schieten and request.POST.get('wil_in_team', '') != '':
             bulk_team = True
 
+        bulk_voorkeur_rk_bk = True
+        if request.POST.get('geen_rk', '') != '':
+            # sporters alvast afmelden voor het RK
+            bulk_voorkeur_rk_bk = False
+
         bulk_wedstrijden = list()
         if methode == INSCHRIJF_METHODE_1:
             pks = list()
             for ronde in (DeelcompetitieRonde
                           .objects
-                          .select_related('plan')
+                          .prefetch_related('matches')
                           .filter(deelcompetitie=deelcomp)):
                 # sta alle wedstrijden in de regio toe, dus alle clusters
-                pks.extend(ronde.plan.wedstrijden.values_list('pk', flat=True))
+                pks.extend(ronde.matches.values_list('pk', flat=True))
             # for
             for pk in pks:
                 key = 'wedstrijd_%s' % pk
@@ -451,16 +455,17 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     raise Http404('Sporter is al ingeschreven')
 
                 # bepaal in welke wedstrijdklasse de schutter komt
-                age = sporterboog.sporter.bereken_wedstrijdleeftijd(deelcomp.competitie.begin_jaar + 1)
+                age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(deelcomp.competitie.begin_jaar + 1)
                 dvl = sporterboog.sporter.sinds_datum
 
-                aanmelding = RegioCompetitieSchutterBoog()
-                aanmelding.deelcompetitie = deelcomp
-                aanmelding.sporterboog = sporterboog
-                aanmelding.bij_vereniging = sporterboog.sporter.bij_vereniging
-                aanmelding.ag_voor_indiv = AG_NUL
-                aanmelding.ag_voor_team = AG_NUL
-                aanmelding.ag_voor_team_mag_aangepast_worden = True
+                aanmelding = RegioCompetitieSchutterBoog(
+                                    deelcompetitie=deelcomp,
+                                    sporterboog=sporterboog,
+                                    bij_vereniging=sporterboog.sporter.bij_vereniging,
+                                    ag_voor_indiv=AG_NUL,
+                                    ag_voor_team=AG_NUL,
+                                    ag_voor_team_mag_aangepast_worden=True,
+                                    aangemeld_door=request.user)
 
                 # zoek de aanvangsgemiddelden er bij, indien beschikbaar
                 for score in Score.objects.filter(sporterboog=sporterboog,
@@ -483,12 +488,14 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     # is geen aspirant en was op tijd lid
                     aanmelding.inschrijf_voorkeur_team = bulk_team
 
+                aanmelding.inschrijf_voorkeur_rk_bk = bulk_voorkeur_rk_bk
+
                 aanmelding.inschrijf_voorkeur_dagdeel = bulk_dagdeel
                 aanmelding.inschrijf_notitie = bulk_opmerking
                 aanmelding.save()
 
                 if methode == INSCHRIJF_METHODE_1:
-                    aanmelding.inschrijf_gekozen_wedstrijden.set(bulk_wedstrijden)
+                    aanmelding.inschrijf_gekozen_matches.set(bulk_wedstrijden)
 
             # else: silently ignore
         # for
@@ -545,52 +552,51 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
                                   .filter(voorkeur_eigen_blazoen=True)
                                   .values_list('sporter__lid_nr', flat=True))
 
-        objs = (RegioCompetitieSchutterBoog
-                .objects
-                .select_related('sporterboog',
-                                'sporterboog__sporter',
-                                'bij_vereniging',
-                                'klasse',
-                                'klasse__indiv')
-                .filter(deelcompetitie=deelcomp,
-                        bij_vereniging=self.functie_nu.nhb_ver)
-                .order_by('klasse__indiv__volgorde',
-                          'sporterboog__sporter__voornaam',
-                          'sporterboog__sporter__achternaam'))
+        deelnemers = (RegioCompetitieSchutterBoog
+                      .objects
+                      .select_related('sporterboog',
+                                      'sporterboog__sporter',
+                                      'bij_vereniging',
+                                      'indiv_klasse')
+                      .filter(deelcompetitie=deelcomp,
+                              bij_vereniging=self.functie_nu.nhb_ver)
+                      .order_by('indiv_klasse__volgorde',
+                                'sporterboog__sporter__voornaam',
+                                'sporterboog__sporter__achternaam'))
 
-        for obj in objs:
-            obj.eigen_blazoen_ja_nee = '-'
-            if obj.sporterboog.sporter.lid_nr in wens_eigen_blazoen:
-                wkl = obj.klasse.indiv
+        for deelnemer in deelnemers:
+            deelnemer.eigen_blazoen_ja_nee = '-'
+            if deelnemer.sporterboog.sporter.lid_nr in wens_eigen_blazoen:
+                wkl = deelnemer.indiv_klasse
                 if comp.afstand == '18':
                     # Indoor
-                    if wkl.blazoen1_18m_regio != wkl.blazoen2_18m_regio:
+                    if wkl.blazoen1_regio != wkl.blazoen2_regio:
                         # er is keuze
-                        if BLAZOEN_DT in (wkl.blazoen1_18m_regio, wkl.blazoen2_18m_regio):
-                            obj.eigen_blazoen_ja_nee = 'DT'
+                        if BLAZOEN_DT in (wkl.blazoen1_regio, wkl.blazoen2_regio):
+                            deelnemer.eigen_blazoen_ja_nee = 'DT'
                 else:
                     # 25m1pijl
-                    if wkl.blazoen1_25m_regio != wkl.blazoen2_25m_regio:
+                    if wkl.blazoen1_regio != wkl.blazoen2_regio:
                         # er is keuze
-                        if BLAZOEN_60CM_4SPOT in (wkl.blazoen1_25m_regio, wkl.blazoen2_25m_regio):
-                            obj.eigen_blazoen_ja_nee = '4spot'
+                        if BLAZOEN_60CM_4SPOT in (wkl.blazoen1_regio, wkl.blazoen2_regio):
+                            deelnemer.eigen_blazoen_ja_nee = '4spot'
 
-            obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]
-            obj.dagdeel_str = dagdeel_str[obj.inschrijf_voorkeur_dagdeel]
-            obj.check = "pk_%s" % obj.pk
-            sporter = obj.sporterboog.sporter
-            obj.lid_nr = sporter.lid_nr
-            obj.naam_str = sporter.volledige_naam()
+            deelnemer.team_ja_nee = JA_NEE[deelnemer.inschrijf_voorkeur_team]
+            deelnemer.dagdeel_str = dagdeel_str[deelnemer.inschrijf_voorkeur_dagdeel]
+            deelnemer.check = "pk_%s" % deelnemer.pk
+            sporter = deelnemer.sporterboog.sporter
+            deelnemer.lid_nr = sporter.lid_nr
+            deelnemer.naam_str = sporter.volledige_naam()
 
-            if obj.inschrijf_voorkeur_team:
+            if deelnemer.inschrijf_voorkeur_team:
                 if mag_toggle:
-                    obj.maak_nee = True
+                    deelnemer.maak_nee = True
             else:
                 if mag_toggle:
-                    obj.maak_ja = True
+                    deelnemer.maak_ja = True
         # for
 
-        return objs
+        return deelnemers
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -16,7 +16,6 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
     """ tests voor de Competitie applicatie, module Informatie over de Competitie """
 
     url_info = '/bondscompetities/info/'
-    url_leeftijden = '/bondscompetities/info/leeftijden/'
 
     def setUp(self):
         """ eenmalige setup voor alle tests
@@ -50,65 +49,45 @@ class TestCompetitieInfo(E2EHelpers, TestCase):
 
         self.account_geenlid = self.e2e_create_account('geenlid', 'geenlid@gmail.com', 'Testertje')
 
-    def test_anon(self):
+    def test_info(self):
+        # anon
+        self.client.logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_info)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'plein/site_layout.dtl'))
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_leeftijden)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/info-leeftijden.dtl', 'plein/site_layout.dtl'))
-
-    def test_geen_lid(self):
+        # geen lid
         self.e2e_login(self.account_geenlid)
-
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_info)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'plein/site_layout.dtl'))
 
+        # sporter
+        self.client.logout()
+        self.e2e_login(self.account_lid)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_leeftijden)
+            resp = self.client.get(self.url_info)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/info-leeftijden.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'plein/site_layout.dtl'))
 
-    def test_inactief(self):
+        # inactief
         self.sporter_100001.bij_vereniging = None
-        self.sporter_100001.save()
-
+        self.sporter_100001.save(update_fields=['bij_vereniging'])
+        self.client.logout()
         self.e2e_login(self.account_lid)
-
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_info)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'plein/site_layout.dtl'))
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_leeftijden)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/info-leeftijden.dtl', 'plein/site_layout.dtl'))
-
-    def test_schutter(self):
-        self.e2e_login(self.account_lid)
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_info)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/info-competitie.dtl', 'plein/site_layout.dtl'))
-
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_leeftijden)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('competitie/info-leeftijden.dtl', 'plein/site_layout.dtl'))
+        # redirect oud naar nieuw
+        resp = self.client.get('/bondscompetities/info/leeftijden/')
+        self.assert_is_redirect(resp, '/sporter/leeftijden/')
 
 # end of file

@@ -27,7 +27,8 @@
      "phone_mobile": null,
      "iso_abbr": null,
      "latitude": null,
-     "longitude": null
+     "longitude": null,
+     "coc_number": null
     }
   ],
   "members": [
@@ -48,7 +49,8 @@
       "iso_abbr": null,
       "latitude": null,
       "longitude": null,
-      "blocked": false
+      "blocked": false,
+      "skill_levels": []
     },
     {"member_number": 100002,
       "club_number": 1000,
@@ -67,7 +69,8 @@
       "iso_abbr": null,
       "latitude": null,
       "longitude": null,
-      "blocked": false
+      "blocked": false,
+      "skill_levels": []
     },
     {"member_number": 100003,
       "club_number": 1000,
@@ -86,7 +89,8 @@
       "iso_abbr": null,
       "latitude": null,
       "longitude": null,
-      "blocked": false
+      "blocked": false,
+      "skill_levels": []
     },
     {"member_number": 100004,
       "club_number": 1000,
@@ -105,7 +109,8 @@
       "iso_abbr": null,
       "latitude": null,
       "longitude": null,
-      "blocked": false
+      "blocked": false,
+      "skill_levels": []
     },
     {"member_number": 100005,
       "club_number": 1000,
@@ -124,7 +129,8 @@
       "iso_abbr": null,
       "latitude": null,
       "longitude": null,
-      "blocked": false
+      "blocked": false,
+      "skill_levels": []
     },
     {"member_number": 100006,
       "club_number": 1000,
@@ -143,7 +149,8 @@
       "iso_abbr": null,
       "latitude": null,
       "longitude": null,
-      "blocked": false
+      "blocked": false,
+      "skill_levels": []
     },
     {"member_number": 100007,
       "club_number": 1000,
@@ -162,7 +169,8 @@
       "iso_abbr": null,
       "latitude": null,
       "longitude": null,
-      "blocked": false
+      "blocked": false,
+      "skill_levels": []
     },
     {"member_number": 100008,
       "club_number": 1000,
@@ -181,7 +189,8 @@
       "iso_abbr": null,
       "latitude": null,
       "longitude": null,
-      "blocked": false
+      "blocked": false,
+      "skill_levels": []
     },
     {"member_number": 100009,
       "club_number": 1000,
@@ -200,7 +209,8 @@
       "iso_abbr": null,
       "latitude": null,
       "longitude": null,
-      "blocked": false
+      "blocked": false,
+      "skill_levels": []
     },
     {"member_number": 100010,
       "club_number": 1000,
@@ -219,7 +229,8 @@
       "iso_abbr": null,
       "latitude": null,
       "longitude": null,
-      "blocked": false
+      "blocked": false,
+      "skill_levels": []
     }
   ]
 }

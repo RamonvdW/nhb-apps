@@ -33,7 +33,7 @@
 
                 <p>De knop moet binnen 60 seconden gebruikt worden.</p>
 
-                <p class="center">
+                <p class="center" style="padding:30px">
                     <a class="btn-nhb-blauw" href="{{ login_as_url }}" target="_blank" rel="noopener noreferrer">
                         <i class="material-icons-round right">open_in_new</i>Inloggen</a>
                 </p>

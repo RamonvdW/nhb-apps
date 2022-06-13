@@ -7,7 +7,7 @@
 from django.test import TestCase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import Competitie, CompetitieKlasse, RegioCompetitieSchutterBoog
+from Competitie.models import Competitie, CompetitieIndivKlasse, RegioCompetitieSchutterBoog
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.operations import competities_aanmaken
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
@@ -193,7 +193,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        self.assertEqual(CompetitieKlasse.objects.count(), 0)
+        self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         competities_aanmaken()
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
@@ -269,7 +269,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_hwl)
         self.e2e_check_rol('HWL')
 
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
 
@@ -310,7 +310,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',        # 1=R
                                           'lid_100003_boogtype_3': 'on'})       # 3=BB
-        self.assert404(resp)     # 404 = Not found
+        self.assert404(resp, 'Geen wedstrijden in deze regio')
 
     def test_ingeschreven(self):
         url = self.url_ingeschreven % 1

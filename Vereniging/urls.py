@@ -38,6 +38,7 @@ urlpatterns = [
          name='vereniging-accommodatie-details'),
 
 
+    # Wedstrijdlocaties
     path('externe-locaties/<vereniging_pk>/',
          view_externe_locaties.ExterneLocatiesView.as_view(),
          name='externe-locaties'),

@@ -5,12 +5,13 @@
 # python sees this as a string and ignores it
 "exec" "python3" "$0" "$@"
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management import execute_from_command_line
 from TestHelpers.e2estatus import validated_templates, included_templates
+from traceback import StackSummary
 from pathlib import Path
 import sys
 import os
@@ -37,7 +38,34 @@ def report_validated_templates():
         # for
 
 
+def my_format(self):            # pragma: no cover
+    """ variant of StackSummary.format that skips all django site-package files in the output
+        so focus is on the application source files. This saves ~75% of the output.
+    """
+    suppress = '  ...\n'
+    result = []
+    for frame in self:
+        if '/site-packages/django/' not in frame.filename:
+            row = list()
+            row.append('  File "{}", line {}, in {}\n'.format(
+                frame.filename, frame.lineno, frame.name))
+            if frame.line:
+                row.append('    {}\n'.format(frame.line.strip()))
+            if frame.locals:
+                for name, value in sorted(frame.locals.items()):
+                    row.append('    {name} = {value}\n'.format(name=name, value=value))
+            result.append(''.join(row))
+        else:
+            if len(result) == 0 or result[-1] != suppress:
+                result.append(suppress)
+    # for
+    return result
+
+
 def main():
+    # eigen formatteer functie voor de stack trace, zodat we alleen nuttige regels kunnen tonen
+    StackSummary.format = my_format
+
     try:
         # print a clear separator on the terminal when using runserver or test
         stars = None

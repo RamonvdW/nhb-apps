@@ -5,13 +5,14 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import KalenderWedstrijd, KalenderWedstrijdSessie, KalenderWedstrijdDeeluitslag
+from .models import (KalenderWedstrijd, KalenderWedstrijdSessie, KalenderWedstrijdDeeluitslag,
+                     KalenderWedstrijdKortingscode, KalenderInschrijving)
 
 
 class KalenderWedstrijdAdmin(admin.ModelAdmin):                 # pragma: no cover
     """ Admin configuratie voor KalenderWedstrijd """
 
-    list_filter = ('discipline', 'status', 'wa_status')
+    list_filter = ('organisatie', 'discipline', 'status', 'wa_status')
 
     readonly_fields = ('sessies', 'deeluitslagen', 'boogtypen', 'wedstrijdklassen')
 
@@ -54,7 +55,7 @@ class KalenderWedstrijdSessieAdmin(admin.ModelAdmin):             # pragma: no c
 
     search_fields = ('pk',)
 
-    readonly_fields = ('wedstrijdklassen', 'sporters')
+    readonly_fields = ('wedstrijdklassen',)
 
     def get_queryset(self, request):
         """ deze functie is voor prestatieverbetering
@@ -63,7 +64,7 @@ class KalenderWedstrijdSessieAdmin(admin.ModelAdmin):             # pragma: no c
         # qs = super().get_queryset(request)
         return (KalenderWedstrijdSessie
                 .objects
-                .prefetch_related('wedstrijdklassen', 'sporters')
+                .prefetch_related('wedstrijdklassen')
                 .all())
 
 
@@ -73,8 +74,28 @@ class KalenderWedstrijdDeeluitslagAdmin(admin.ModelAdmin):          # pragma: no
     search_fields = ('pk',)
 
 
+class KalenderWedstrijdKortingscodeAdmin(admin.ModelAdmin):
+
+    list_filter = (
+                   ('uitgegeven_door', admin.RelatedOnlyFieldListFilter),
+                  )
+
+    autocomplete_fields = ('voor_wedstrijden', 'voor_sporter', 'voor_vereniging', 'uitgegeven_door')
+
+
+class KalenderInschrijvingAdmin(admin.ModelAdmin):
+
+    readonly_fields = ('wanneer', 'wedstrijd', 'sessie', 'sporterboog', 'koper')
+
+    list_filter = ('status',)
+
+    search_fields = ('sporterboog__sporter__lid_nr',)
+
+
 admin.site.register(KalenderWedstrijd, KalenderWedstrijdAdmin)
 admin.site.register(KalenderWedstrijdSessie, KalenderWedstrijdSessieAdmin)
 admin.site.register(KalenderWedstrijdDeeluitslag, KalenderWedstrijdDeeluitslagAdmin)
+admin.site.register(KalenderWedstrijdKortingscode, KalenderWedstrijdKortingscodeAdmin)
+admin.site.register(KalenderInschrijving, KalenderInschrijvingAdmin)
 
 # end of file

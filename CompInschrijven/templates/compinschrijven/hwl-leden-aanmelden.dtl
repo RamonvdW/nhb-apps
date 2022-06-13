@@ -10,7 +10,7 @@
 
 {% block pagina %}
 
-    <script>
+    <script type="application/javascript">
         function tel_wedstrijden() {
             // tel hoeveel checkboxes aangekruist zijn
             const count = document.querySelectorAll('input[name^="wedstrijd_"]:checked').length
@@ -89,6 +89,15 @@
                             </tr>
                         {% endif %}
 
+                        <tr>
+                            <td>Deelname aan de Rayonkampioenschappen:<br><br>
+                                <label style="margin-left: 20px">
+                                    <input type="checkbox" class="filled-in" name="geen_rk">
+                                    <span class="black-text">Alvast afmelden</span>
+                                </label>
+                            </td>
+                        </tr>
+
                         {% if wedstrijden_1 %}    <!-- inschrijfmethode 1 -->
                             <tr>
                                 <td>Kies wanneer de sporters willen schieten door 7 keuzes te maken in onderstaande lijst. Dit is later nog individueel aan te passen.<br>
@@ -153,7 +162,8 @@
 
                     {% if leden_jeugd %}
 
-                        <h5 class="center">Jeugd</h5>
+                        <br>
+                        <h5 class="center nhb-blauw-text">Jeugd</h5>
 
                         <table class="white" id="table1">
                             <thead>
@@ -212,7 +222,8 @@
 
                     {% endif %}
 
-                    <h5 class="center">Senioren</h5>
+                    <br>
+                    <h5 class="center nhb-blauw-text">Senioren</h5>
 
                     <table class="white" id="table2">
                         <thead>
@@ -273,6 +284,8 @@
             </div>
         </div>
     </div>
+
+    <p class="center">Sporters met grijze naam hebben aangegeven niet mee te willen doen met de bondscompetities.</p>
 
     {% if mag_aanmelden %}
             <div class="fixed-action-btn">

@@ -17,8 +17,8 @@ from Plein.menu import menu_dynamics
 from .models import (KalenderWedstrijd, KalenderWedstrijdSessie,
                      WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_DUUR_MAX_UREN,
                      WEDSTRIJD_STATUS_GEANNULEERD)
-import datetime
 from types import SimpleNamespace
+import datetime
 
 TEMPLATE_KALENDER_WIJZIG_SESSIES = 'kalender/wijzig-sessies.dtl'
 TEMPLATE_KALENDER_WIJZIG_SESSIE = 'kalender/wijzig-sessie.dtl'
@@ -60,7 +60,6 @@ class KalenderWedstrijdSessiesView(UserPassesTestMixin, View):
         sessies = (wedstrijd
                    .sessies
                    .prefetch_related('wedstrijdklassen')
-                   .annotate(aanmeldingen_count=Count('sporters'))
                    .order_by('datum',
                              'tijd_begin'))
         for sessie in sessies:
@@ -77,14 +76,16 @@ class KalenderWedstrijdSessiesView(UserPassesTestMixin, View):
                                                    kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         if self.rol_nu == Rollen.ROL_HWL:
-            url_terug = reverse('Kalender:vereniging')
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Kalender:vereniging'), 'Wedstrijdkalender'),
+                (None, 'Wedstrijd sessies'),
+            )
         else:
-            url_terug = reverse('Kalender:manager')
-
-        context['kruimels'] = (
-            (url_terug, 'Wedstrijdkalender'),
-            (None, 'Wedstrijd sessies'),
-        )
+            context['kruimels'] = (
+                (reverse('Kalender:manager'), 'Wedstrijdkalender'),
+                (None, 'Wedstrijd sessies'),
+            )
 
         menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
@@ -111,6 +112,10 @@ class KalenderWedstrijdSessiesView(UserPassesTestMixin, View):
                             max_sporters=50)
             sessie.save()
             wedstrijd.sessies.add(sessie)
+
+            # zet alle klassen default 'aan'
+            wkl_pks = wedstrijd.wedstrijdklassen.all().values_list('pk', flat=True)
+            sessie.wedstrijdklassen.set(wkl_pks)
         else:
             pass
 
@@ -192,21 +197,17 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
 
         pks = list(sessie.wedstrijdklassen.values_list('pk', flat=True))
 
-        klassen_m = list()
-        klassen_v = list()
-        for klasse in (wedstrijd
-                       .wedstrijdklassen
-                       .select_related('leeftijdsklasse')
-                       .order_by('volgorde')):
+        klassen = (wedstrijd
+                   .wedstrijdklassen
+                   .select_related('leeftijdsklasse')
+                   .order_by('volgorde'))
+
+        for klasse in klassen:
             klasse.sel = 'klasse_%s' % klasse.pk
             klasse.selected = (klasse.pk in pks)
-
-            if klasse.leeftijdsklasse.wedstrijd_geslacht == 'M':
-                klassen_m.append(klasse)
-            else:
-                klassen_v.append(klasse)
         # for
-        return klassen_m, klassen_v
+
+        return klassen
 
     def get(self, request, *args, **kwargs):
         """ deze functie wordt aangeroepen om de GET request af te handelen """
@@ -238,12 +239,14 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
         if wedstrijd.sessies.filter(pk=sessie.pk).count() != 1:
             raise Http404('Sessie hoort niet bij wedstrijd')
 
-        context['opt_datums'] = self._maak_opt_datums(wedstrijd, sessie)
+        if wedstrijd.datum_begin != wedstrijd.datum_einde:
+            context['opt_datums'] = self._maak_opt_datums(wedstrijd, sessie)
+
         sessie.tijd_begin_str = sessie.tijd_begin.strftime('%H:%M')
 
         context['opt_duur'] = self._maak_opt_duur(sessie)
 
-        context['opt_klassen_m'], context['opt_klassen_v'] = self._maak_opt_klassen(wedstrijd, sessie)
+        context['opt_klassen'] = self._maak_opt_klassen(wedstrijd, sessie)
 
         context['url_opslaan'] = reverse('Kalender:wijzig-sessie',
                                          kwargs={'wedstrijd_pk': wedstrijd.pk,
@@ -298,7 +301,7 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
 
         if request.POST.get('verwijder_sessie', ''):
             if wedstrijd.status == WEDSTRIJD_STATUS_GEANNULEERD:
-                raise Http404()
+                raise Http404('Wedstrijd is geannuleerd')
             sessie.delete()
         else:
             updated = list()

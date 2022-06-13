@@ -55,7 +55,7 @@ class OTPControleView(TemplateView):
             (None, 'Controle tweede factor')
         )
 
-        menu_dynamics(request, context, actief="wissel-van-rol")
+        menu_dynamics(request, context)
         return render(request, TEMPLATE_OTP_CONTROLE, context)
 
     @staticmethod
@@ -88,7 +88,7 @@ class OTPControleView(TemplateView):
 
         # still here --> re-render with error message
         context = {'form': form}
-        menu_dynamics(request, context, actief="wissel-van-rol")
+        menu_dynamics(request, context)
         return render(request, TEMPLATE_OTP_CONTROLE, context)
 
 
@@ -190,7 +190,7 @@ class OTPKoppelenStap3View(OTPKoppelenStapView):
             if account_otp_koppel(request, account, otp_code):
                 # geef de succes pagina
                 context = dict()
-                menu_dynamics(request, context, actief="wissel-van-rol")
+                menu_dynamics(request, context)
                 return render(request, TEMPLATE_OTP_GEKOPPELD, context)
 
             # controle is mislukt - is al gelogd
@@ -206,7 +206,7 @@ class OTPKoppelenStap3View(OTPKoppelenStapView):
         context['form'] = form
         context['now'] = timezone.now()
 
-        menu_dynamics(request, context, actief="wissel-van-rol")
+        menu_dynamics(request, context)
         return render(request, self.template_name, context)
 
 # end of file

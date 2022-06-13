@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
 from BasisTypen.models import BoogType
-from NhbStructuur.models import NhbRegio, NhbVereniging
+from Competitie.models import Competitie, CompetitieMatch
 from Functie.models import maak_functie
-from Score.models import Score, ScoreHist, SCORE_WAARDE_VERWIJDERD
+from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
-from Wedstrijden.models import CompetitieWedstrijd, CompetitieWedstrijdUitslag
+from .models import Score, ScoreHist, Uitslag, SCORE_WAARDE_VERWIJDERD
 from .operations import score_indiv_ag_opslaan
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
@@ -25,32 +26,46 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
     def _maak_uitslag(self, sporterboog):
         # maak 2x wedstrijd + uitslag + score voor deze schutterboog, met geschiedenis
         uur_00 = datetime.time(hour=0)
-        uur_18 = datetime.time(hour=18)
         uur_19 = datetime.time(hour=19)
-        uur_22 = datetime.time(hour=22)
 
-        uitslag18 = CompetitieWedstrijdUitslag(max_score=300,
-                                               afstand_meter=18)
+        now = timezone.now()
+        einde_jaar = datetime.date(year=now.year, month=12, day=31)
+
+        uitslag18 = Uitslag(max_score=300,
+                            afstand=18)
         uitslag18.save()
 
-        uitslag25 = CompetitieWedstrijdUitslag(max_score=250,
-                                               afstand_meter=25)
+        uitslag25 = Uitslag(max_score=250,
+                            afstand=25)
         uitslag25.save()
 
-        CompetitieWedstrijd(beschrijving='Test wedstrijdje 18m',
-                            datum_wanneer=datetime.date(year=2020, month=10, day=10),
-                            tijd_begin_aanmelden=uur_18,
-                            tijd_begin_wedstrijd=uur_19,
-                            tijd_einde_wedstrijd=uur_22,
-                            uitslag=uitslag18,
-                            vereniging=self.nhbver1).save()
+        comp = Competitie(
+                    begin_jaar=2000,
+                    uiterste_datum_lid=datetime.date(year=2000, month=1, day=1),
+                    begin_aanmeldingen=einde_jaar,
+                    einde_aanmeldingen=einde_jaar,
+                    einde_teamvorming=einde_jaar,
+                    eerste_wedstrijd=einde_jaar,
+                    laatst_mogelijke_wedstrijd=einde_jaar,
+                    datum_klassengrenzen_rk_bk_teams=einde_jaar,
+                    rk_eerste_wedstrijd=einde_jaar,
+                    rk_laatste_wedstrijd=einde_jaar,
+                    bk_eerste_wedstrijd=einde_jaar,
+                    bk_laatste_wedstrijd=einde_jaar)
+        comp.save()
 
-        CompetitieWedstrijd(beschrijving='Test wedstrijdje 25m',
-                            datum_wanneer=datetime.date(year=2020, month=10, day=11),
-                            tijd_begin_aanmelden=uur_00,
-                            tijd_begin_wedstrijd=uur_00,
-                            tijd_einde_wedstrijd=uur_00,
-                            uitslag=uitslag25).save()
+        CompetitieMatch(competitie=comp,
+                        beschrijving='Test wedstrijdje 18m',
+                        datum_wanneer=datetime.date(year=2020, month=10, day=10),
+                        tijd_begin_wedstrijd=uur_19,
+                        uitslag=uitslag18,
+                        vereniging=self.nhbver1).save()
+
+        CompetitieMatch(competitie=comp,
+                        beschrijving='Test wedstrijdje 25m',
+                        datum_wanneer=datetime.date(year=2020, month=10, day=11),
+                        tijd_begin_wedstrijd=uur_00,
+                        uitslag=uitslag25).save()
 
         score = Score(sporterboog=sporterboog,
                       afstand_meter=18,
@@ -154,6 +169,11 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'plein/site_layout.dtl'))
+
+        uitslag = Uitslag.objects.all()[0]
+        self.assertTrue(str(uitslag) != '')
+        uitslag.is_bevroren = True
+        self.assertTrue(str(uitslag) != '')
 
     def test_zoek(self):
         # login als BB

@@ -6,16 +6,15 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Functie.models import maak_functie, Functie
+from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Competitie.models import (Competitie, DeelCompetitie, CompetitieKlasse, DeelcompetitieRonde,
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse,
                                LAAG_REGIO, LAAG_RK,  INSCHRIJF_METHODE_1)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
-from Score.operations import score_indiv_ag_opslaan
-from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
-from Wedstrijden.models import WedstrijdLocatie, CompetitieWedstrijd
+from Sporter.models import Sporter, SporterBoog
+from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -30,11 +29,11 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
     url_overzicht = '/vereniging/'
     url_ledenlijst = '/vereniging/leden-lijst/'
     url_voorkeuren = '/vereniging/leden-voorkeuren/'
-    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'  # <sporter_pk>
-    url_planning_regio = '/bondscompetities/regio/planning/%s/'  # deelcomp_pk
-    url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'  # ronde_pk
-    url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'  # wedstrijd_pk
-    url_wieschietwaar = '/bondscompetities/regio/wie-schiet-waar/%s/'                      # deelcomp_pk
+    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                                              # sporter_pk
+    url_planning_regio = '/bondscompetities/regio/planning/%s/'                                     # deelcomp_pk
+    url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'    # ronde_pk
+    url_wijzig_wedstrijd = '/bondscompetities/regio/planning/wedstrijd/wijzig/%s/'                  # match_pk
+    url_wieschietwaar = '/bondscompetities/regio/wie-schiet-waar/%s/'                               # deelcomp_pk
 
     testdata = None
 
@@ -239,7 +238,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
         self.e2e_check_rol('BB')
 
-        self.assertEqual(CompetitieKlasse.objects.count(), 0)
+        self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
         competities_aanmaken()
         self.comp_18 = Competitie.objects.get(afstand='18')
         self.comp_25 = Competitie.objects.get(afstand='25')
@@ -264,7 +263,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
 
         # post een wijziging
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(23):
             resp = self.client.post(url_sporter_voorkeuren, {'sporter_pk': lid_nr,
                                                              'schiet_R': 'on',
                                                              'info_C': 'on',
@@ -393,7 +392,7 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
                 resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
         # for
-        self.assertEqual(SporterBoog.objects.count(), 18)
+        self.assertEqual(SporterBoog.objects.count(), 51)
 
         # zet een aantal sporterboog records op gebruik voor wedstrijd
         # dit maakt een sporterboog-boog

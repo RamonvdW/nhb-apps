@@ -200,6 +200,12 @@
   height: 3px;
 }
 
+// zo smal mogelijke tabel kolom, zonder wrapping
+.nhb-column-small {
+  width: 1px;
+  white-space: nowrap;
+}
+
 
 
 //-----------------------------------

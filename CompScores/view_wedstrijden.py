@@ -7,10 +7,9 @@
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Competitie.models import DeelcompetitieRonde, DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK
+from Competitie.models import DeelcompetitieRonde, DeelCompetitie, CompetitieMatch, LAAG_REGIO, LAAG_RK, LAAG_BK
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
-from Wedstrijden.models import CompetitieWedstrijd
 
 TEMPLATE_WEDSTRIJDEN = 'compscores/wedstrijden.dtl'
 
@@ -44,97 +43,99 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
         pks1 = list(DeelcompetitieRonde
                     .objects
                     .filter(deelcompetitie__is_afgesloten=False,
-                            plan__wedstrijden__vereniging=self.functie_nu.nhb_ver,
+                            matches__vereniging=self.functie_nu.nhb_ver,
                             deelcompetitie__laag=LAAG_REGIO)
-                    .values_list('plan__wedstrijden', flat=True))
+                    .values_list('matches', flat=True))
 
         pks2 = list(DeelCompetitie
                     .objects
                     .filter(is_afgesloten=False,
-                            plan__wedstrijden__vereniging=self.functie_nu.nhb_ver,
+                            rk_bk_matches__vereniging=self.functie_nu.nhb_ver,
                             laag__in=(LAAG_RK, LAAG_BK))
-                    .exclude(plan__wedstrijden=None)                # excludes when ManyToMany is empty
-                    .values_list('plan__wedstrijden', flat=True))
+                    .exclude(rk_bk_matches=None)                # excludes when ManyToMany is empty
+                    .values_list('rk_bk_matches', flat=True))
 
         pks = list(pks1) + list(pks2)
 
         is_mix = (1 <= len(pks2) < len(pks1))
 
-        wedstrijden = (CompetitieWedstrijd
-                       .objects
-                       .filter(pk__in=pks)
-                       .order_by('datum_wanneer', 'tijd_begin_wedstrijd'))
+        matches = (CompetitieMatch
+                   .objects
+                   .filter(pk__in=pks)
+                   .order_by('datum_wanneer',
+                             'tijd_begin_wedstrijd'))
 
-        for wedstrijd in wedstrijden:
+        for match in matches:
             # voor competitiewedstrijden wordt de beschrijving ingevuld
             # als de instellingen van de ronde opgeslagen worden
             # dit is slechts fall-back
-            if wedstrijd.beschrijving == "":
+            if match.beschrijving == "":
                 # als deze wedstrijd bij een competitieronde hoort,
                 # maak een passende beschrijving voor
 
-                # CompetitieWedstrijd --> CompetitieWedstrijdenPlan --> DeelcompetitieRonde / DeelCompetitie
-                plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
-                if plan.deelcompetitieronde_set.count() > 0:
-                    ronde = plan.deelcompetitieronde_set.select_related('deelcompetitie', 'deelcompetitie__competitie').all()[0]
-                    wedstrijd.beschrijving1 = ronde.deelcompetitie.competitie.beschrijving
-                    wedstrijd.beschrijving2 = ronde.beschrijving
+                rondes = match.deelcompetitieronde_set.all()
+                if len(rondes) > 0:
+                    ronde = rondes[0]
+                    match.beschrijving1 = ronde.deelcompetitie.competitie.beschrijving
+                    match.beschrijving2 = ronde.beschrijving
                 else:
-                    deelcomp = plan.deelcompetitie_set.select_related('competitie').all()[0]
-                    wedstrijd.beschrijving1 = deelcomp.competitie.beschrijving
-                    if deelcomp.laag == LAAG_RK:
-                        wedstrijd.beschrijving2 = "Rayonkampioenschappen"
-                    else:
-                        wedstrijd.beschrijving2 = "Bondskampioenschappen"
+                    deelcomps = match.deelcompetitie_set.all()
+                    if len(deelcomps) > 0:
+                        deelcomp = deelcomps[0]
+                        match.beschrijving1 = deelcomp.competitie.beschrijving
+                        if deelcomp.laag == LAAG_RK:
+                            match.beschrijving2 = "Rayonkampioenschappen"
+                        else:
+                            match.beschrijving2 = "Bondskampioenschappen"
             else:
-                msg = wedstrijd.beschrijving
+                msg = match.beschrijving
                 pos = msg.find(' - ')
                 if pos > 0:
-                    wedstrijd.beschrijving1 = msg[:pos].strip()
-                    wedstrijd.beschrijving2 = msg[pos+3:].strip()
+                    match.beschrijving1 = msg[:pos].strip()
+                    match.beschrijving2 = msg[pos+3:].strip()
                 else:
-                    wedstrijd.beschrijving1 = msg
-                    wedstrijd.beschrijving2 = ''
+                    match.beschrijving1 = msg
+                    match.beschrijving2 = ''
 
-            wedstrijd.is_rk = (wedstrijd.beschrijving2 == 'Rayonkampioenschappen')
-            wedstrijd.is_bk = (wedstrijd.beschrijving2 == 'Bondskampioenschappen')
-            wedstrijd.opvallen = (wedstrijd.is_rk or wedstrijd.is_bk) and is_mix
+            match.is_rk = (match.beschrijving2 == 'Rayonkampioenschappen')
+            match.is_bk = (match.beschrijving2 == 'Bondskampioenschappen')
+            match.opvallen = (match.is_rk or match.is_bk) and is_mix
 
-            wedstrijd.toon_geen_uitslag = True
+            match.toon_geen_uitslag = True
 
-            if not (wedstrijd.is_rk or wedstrijd.is_bk):
-                heeft_uitslag = (wedstrijd.uitslag and wedstrijd.uitslag.scores.count() > 0)
-                mag_wijzigen = self.uitslag_invoeren and not (wedstrijd.uitslag and wedstrijd.uitslag.is_bevroren)
+            if not (match.is_rk or match.is_bk):
+                heeft_uitslag = (match.uitslag and match.uitslag.scores.count() > 0)
+                mag_wijzigen = self.uitslag_invoeren and not (match.uitslag and match.uitslag.is_bevroren)
                 if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and mag_wijzigen:
                     # mag uitslag wijzigen
                     url = reverse('CompScores:uitslag-invoeren',
-                                  kwargs={'wedstrijd_pk': wedstrijd.pk})
+                                  kwargs={'match_pk': match.pk})
                     if heeft_uitslag:
-                        wedstrijd.url_uitslag_aanpassen = url
+                        match.url_uitslag_aanpassen = url
                     else:
-                        wedstrijd.url_score_invoeren = url
-                    wedstrijd.toon_geen_uitslag = False
+                        match.url_score_invoeren = url
+                    match.toon_geen_uitslag = False
                 else:
                     if heeft_uitslag:
-                        wedstrijd.url_uitslag_bekijken = reverse('CompScores:uitslag-bekijken',
-                                                                 kwargs={'wedstrijd_pk': wedstrijd.pk})
-                        wedstrijd.toon_geen_uitslag = False
+                        match.url_uitslag_bekijken = reverse('CompScores:uitslag-bekijken',
+                                                             kwargs={'match_pk': match.pk})
+                        match.toon_geen_uitslag = False
 
             # link naar de waarschijnlijke deelnemerslijst
-            if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and not (wedstrijd.uitslag and wedstrijd.uitslag.is_bevroren):
-                if wedstrijd.is_rk or wedstrijd.is_bk:
-                    wedstrijd.url_waarschijnlijke_deelnemers = reverse('CompRayon:download-formulier',
-                                                                       kwargs={'wedstrijd_pk': wedstrijd.pk})
+            if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL) and not (match.uitslag and match.uitslag.is_bevroren):
+                if match.is_rk or match.is_bk:
+                    match.url_waarschijnlijke_deelnemers = reverse('CompLaagRayon:download-formulier',
+                                                                   kwargs={'match_pk': match.pk})
                 else:
-                    wedstrijd.url_waarschijnlijke_deelnemers = reverse('CompRegio:waarschijnlijke-deelnemers',
-                                                                       kwargs={'wedstrijd_pk': wedstrijd.pk})
+                    match.url_waarschijnlijke_deelnemers = reverse('CompLaagRegio:waarschijnlijke-deelnemers',
+                                                                   kwargs={'match_pk': match.pk})
 
             context['geen_wedstrijden'] = False
         # for
 
         context['vereniging'] = self.functie_nu.nhb_ver
         context['huidige_rol'] = rol_get_beschrijving(self.request)
-        context['wedstrijden'] = wedstrijden
+        context['wedstrijden'] = matches
         context['uitslag_invoeren'] = self.uitslag_invoeren
 
         context['kruimels'] = (

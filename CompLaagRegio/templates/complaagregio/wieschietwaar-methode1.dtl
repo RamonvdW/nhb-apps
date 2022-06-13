@@ -1,0 +1,88 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021-2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Wie schiet waar{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Wie schiet waar?</h3>
+            <p>In jouw regio mogen de sporters aangeven wanneer ze kunnen schieten.</p>
+            <p>Hieronder een overzicht voor leden van jouw vereniging.<br>Je kan ze helpen deze keuzes aan te passen.</p>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+                <p>Betekenis van de nummers:</p>
+                <table>
+                    {% for wedstrijd in wedstrijden %}
+                        <tr>
+                            <td style="padding:0 5px 0 0"><b>{{ wedstrijd.nummer_str }}</b></td>
+                            <td style="padding:0 5px 0 0">{{ wedstrijd.datum_wanneer|date:"l j E Y" }} om {{ wedstrijd.tijd_begin_wedstrijd }}</td>
+                            <td style="padding:0 5px 0 0">bij {{ wedstrijd.waar_str }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+            <!-- blauwe balk met informatie in een tabel -->
+            <div style="margin-top:50px">
+            </div>
+
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Sporter</th>
+                        <th>Boog</th>
+                        {% for nr in kruisjes %}
+                            <th class="kruisje">{{ nr }}</th>
+                        {% endfor %}
+                        <th><!-- kolom voor de wijzig knop --></th>
+                    </tr>
+                </thead>
+
+                {% for deelnemer in object_list %}
+                    {% if deelnemer.herhaal_header %}
+                        <th>Sporter</th>
+                        <th>Boog</th>
+
+                        {% for nr in kruisjes %}
+                            <th class="kruisje">{{ nr }}</th>
+                        {% endfor %}
+
+                        <th><!-- kolom voor de wijzig knop --></th>
+                    {% endif %}
+                    <tr>
+                        <td>{{ deelnemer.naam_str }}</td>
+                        <td>{{ deelnemer.boogtype_str }}</td>
+
+                        {% for kruisje in deelnemer.kruisjes %}
+                            <td class="kruisje">{{ kruisje }}</td>
+                        {% endfor %}
+
+                        <td class="center">
+                            {% if deelnemer.url_wijzig %}
+                                <a class="btn-nhb-rood" href="{{ deelnemer.url_wijzig }}">
+                                    <i class="material-icons-round">edit</i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="complaagregio-wieschietwaar-methode1" %}
+
+{% endblock %}

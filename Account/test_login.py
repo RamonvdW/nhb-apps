@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -134,6 +134,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
     def test_inlog_email_nog_niet_bevestigd(self):
         # verander de status van de bevestiging van het e-mailadres
         self.email_normaal.email_is_bevestigd = False
+        self.email_normaal.nieuwe_email = 'normaal@test.com'
         self.email_normaal.save()
 
         url = maak_tijdelijke_url_account_email(self.email_normaal, test="hallo")
@@ -145,12 +146,54 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/bevestig-email.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'no####l@test.com')
 
         self.e2e_login(self.testdata.account_admin)
         url = reverse('Overig:tijdelijke-url', kwargs={'code': code})
         resp = self.client.post(url)
         self.assertTrue(resp.status_code, 200)
         self.assert_template_used(resp, ('account/bevestigd.dtl', 'plein/site_layout.dtl'))
+
+    def test_inlog_foutieve_email_nog_niet_bevestigd(self):
+        # verander de status van de bevestiging van het e-mailadres
+        self.email_normaal.email_is_bevestigd = False
+        self.email_normaal.nieuwe_email = 'normaal@test.com'
+        self.email_normaal.save()
+
+        url = maak_tijdelijke_url_account_email(self.email_normaal, test="hallo")
+        code = url.split('/')[-2]
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_login, {'login_naam': 'normaal',
+                                                     'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/bevestig-email.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'no####l@test.com')
+
+        # we komen er niet in
+        # simuleer wijziging e-mailadres
+        self.email_normaal.nieuwe_email = 'meer_normaal@test.com'
+        self.email_normaal.save()
+
+        url = maak_tijdelijke_url_account_email(self.email_normaal, test="hallo")
+        code = url.split('/')[-2]
+
+        # probeer opnieuw in te loggen
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_login, {'login_naam': 'normaal',
+                                                     'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('account/nieuwe-email.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'me#########l@test.com')
+
+        self.e2e_login(self.testdata.account_admin)
+        url = reverse('Overig:tijdelijke-url', kwargs={'code': code})
+        resp = self.client.post(url)
+        self.assertTrue(resp.status_code, 200)
+        self.assert_template_used(resp, ('account/bevestigd.dtl', 'plein/site_layout.dtl'))
+
 
     def test_inlog_partial_fields(self):
         # test inlog via het inlog formulier, met verkeerd wachtwoord

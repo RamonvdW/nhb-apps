@@ -65,17 +65,6 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         d = s2 - s1
         print('CompUitslagen: populating testdata took %s seconds' % d.seconds)
 
-    @staticmethod
-    def _verwerk_mutaties(show_all=False):
-        # vraag de achtergrond taak om de mutaties te verwerken
-        f1 = io.StringIO()
-        f2 = io.StringIO()
-        management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
-
-        if show_all:                                    # pragma: no cover
-            print(f1.getvalue())
-            print(f2.getvalue())
-
     def test_top(self):
         now = timezone.now()
         now = datetime.date(year=now.year, month=now.month, day=now.day)
@@ -325,7 +314,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         self.assert404(resp, 'Competitie niet gevonden')
 
         # maak een paar teams aan
-        self.testdata.maak_inschrijvingen_rk_teamcompetitie(25, self.ver_nr, ook_incomplete_teams=False)
+        self.testdata.maak_voorinschrijvingen_rk_teamcompetitie(25, self.ver_nr, ook_incomplete_teams=False)
         self.testdata.geef_rk_team_tijdelijke_sporters_genoeg_scores(25, self.ver_nr)
 
         url = self.url_uitslagen_rayon_teams_n % (self.testdata.comp25.pk, 'R2', 1)
@@ -343,7 +332,7 @@ class TestCompUitslagen(E2EHelpers, TestCase):
         url = self.url_doorzetten_rk % self.testdata.comp25.pk
         resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
-        self._verwerk_mutaties()
+        self.verwerk_regiocomp_mutaties()
 
         comp = Competitie.objects.get(pk=self.testdata.comp25.pk)
         comp.bepaal_fase()

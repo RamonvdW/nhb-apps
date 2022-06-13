@@ -205,7 +205,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         # niet bestaand account
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_wissel, {'selecteer': 999999})
-        self.assert404(resp)     # 404 = not allowed
+        self.assert404(resp, 'Account heeft geen e-mail')
 
     def test_bad_get(self):
         # niet ingelogd

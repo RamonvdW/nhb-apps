@@ -10,12 +10,12 @@ from django.utils.formats import localize
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.templatetags.static import static
-from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde,
+from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, CompetitieMatch,
                                LAAG_REGIO, LAAG_RK, INSCHRIJF_METHODE_1)
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Taken.taken import eval_open_taken
-from Wedstrijden.models import CompetitieWedstrijd, BAAN_TYPE_EXTERN
+from Wedstrijden.models import BAAN_TYPE_EXTERN
 from types import SimpleNamespace
 import datetime
 
@@ -85,8 +85,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             # HWL of WL
             context['toon_competities'] = True
 
-            # if rol_nu == Rollen.ROL_HWL:
-            #     context['toon_wedstrijdkalender'] = True
+            if self.rol_nu == Rollen.ROL_HWL:
+                context['toon_wedstrijdkalender'] = settings.TOON_WEDSTRIJDKALENDER
 
             comps = (Competitie
                      .objects
@@ -108,12 +108,11 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                                     nhb_rayon=ver.regio.rayon)
                             .select_related('competitie'))
 
-            pks = (DeelcompetitieRonde
-                   .objects
-                   .filter(deelcompetitie__is_afgesloten=False,
-                           plan__wedstrijden__vereniging=ver)
-                   .values_list('plan__wedstrijden', flat=True))
-            if CompetitieWedstrijd.objects.filter(pk__in=pks).count() > 0:
+            if (DeelcompetitieRonde
+                .objects
+                .filter(deelcompetitie__is_afgesloten=False,
+                        matches__vereniging=ver)).count() > 0:
+                # er zijn wedstrijden voor deze vereniging
                 context['heeft_wedstrijden'] = True
 
         # bepaal de volgorde waarin de kaartjes getoond worden
@@ -171,7 +170,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje = SimpleNamespace(
                                     titel="Team Invallers",
                                     tekst="Invallers opgeven voor ronde %s van de regiocompetitie." % deelcomp.huidige_team_ronde,
-                                    url=reverse('CompRegio:teams-regio-invallers', kwargs={'deelcomp_pk': deelcomp.pk}),
+                                    url=reverse('CompLaagRegio:teams-regio-invallers', kwargs={'deelcomp_pk': deelcomp.pk}),
                                     icon='how_to_reg')
                         kaartjes.append(kaartje)
                     else:
@@ -180,7 +179,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                             kaartje = SimpleNamespace()
                             kaartje.titel = "Teams Regio"
                             kaartje.tekst = 'Verenigingsteams voor de regiocompetitie samenstellen.'
-                            kaartje.url = reverse('CompRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
+                            kaartje.url = reverse('CompLaagRegio:teams-regio', kwargs={'deelcomp_pk': deelcomp.pk})
                             kaartje.icon = 'gamepad'
                             if comp.fase < 'B':
                                 kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)
@@ -197,7 +196,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                             kaartje = SimpleNamespace()
                             kaartje.titel = "Deelnemers RK"
                             kaartje.tekst = "Sporters van de vereniging aan-/afmelden voor het RK"
-                            kaartje.url = reverse('CompRayon:lijst-rk-ver',
+                            kaartje.url = reverse('CompLaagRayon:lijst-rk-ver',
                                                   kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
                             kaartje.icon = 'rule'
                             kaartjes.append(kaartje)
@@ -206,7 +205,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Teams RK"
                         kaartje.tekst = "Verenigingsteams voor de rayonkampioenschappen samenstellen."
-                        kaartje.url = reverse('CompRayon:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
+                        kaartje.url = reverse('CompLaagRayon:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
                         kaartje.icon = 'api'
                         # niet beschikbaar maken tot een paar weken na de eerste regiowedstrijd
                         vanaf = comp.eerste_wedstrijd + datetime.timedelta(days=settings.COMPETITIES_OPEN_RK_TEAMS_DAYS_AFTER)
@@ -235,7 +234,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje = SimpleNamespace()
                         kaartje.titel = "Wie schiet waar?"
                         kaartje.tekst = 'Overzicht gekozen wedstrijden.'
-                        kaartje.url = reverse('CompRegio:wie-schiet-waar', kwargs={'deelcomp_pk': deelcomp.pk})
+                        kaartje.url = reverse('CompLaagRegio:wie-schiet-waar', kwargs={'deelcomp_pk': deelcomp.pk})
                         kaartje.icon = 'gamepad'
                         if comp.fase < 'B':
                             kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)
@@ -244,6 +243,18 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         # for
 
+        if len(kaartjes) and hasattr(kaartjes[-1], 'heading'):
+            # er waren geen kaartjes voor die competitie - meld dat
+            kaartje = SimpleNamespace()
+            kaartje.geen_kaartjes = True
+            kaartjes.append(kaartje)
+
+        if self.rol_nu != Rollen.ROL_WL:
+            # SEC of HWL
+            if settings.TOON_WEDSTRIJDKALENDER:
+                context['url_betalingen'] = reverse('Betaal:vereniging-instellingen')
+
+        # maak een afsluiter (wordt gebruikt in de template)
         if prev_jaar != 0:
             kaartje = SimpleNamespace()
             kaartje.einde_blok = True

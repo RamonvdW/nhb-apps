@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,8 +9,9 @@ from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter
 from Wedstrijden.models import WedstrijdLocatie
-from .models import KalenderWedstrijd
+from .models import KalenderWedstrijd, ORGANISATIE_WA
 from TestHelpers.e2ehelpers import E2EHelpers
+import datetime
 
 
 class TestKalenderMaand(E2EHelpers, TestCase):
@@ -20,6 +21,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
     url_kalender = '/kalender/'
     url_kalender_maand = '/kalender/pagina-%s-%s/'  # jaar, maand
     url_kalender_vereniging = '/kalender/vereniging/'
+    url_kalender_maak_nieuw = '/kalender/vereniging/kies-type/'
     url_kalender_info = '/kalender/%s/info/'  # wedstrijd_pk
 
     def setUp(self):
@@ -77,9 +79,9 @@ class TestKalenderMaand(E2EHelpers, TestCase):
 
         # illegale maand getallen
         resp = self.client.get(self.url_kalender_maand % (2020, 0))
-        self.assert404(resp)
+        self.assert404(resp, 'Geen valide jaar / maand combinatie')
         resp = self.client.get(self.url_kalender_maand % (2020, 0))
-        self.assert404(resp)
+        self.assert404(resp, 'Geen valide jaar / maand combinatie')
 
         # maand als tekst
         with self.assert_max_queries(20):
@@ -124,7 +126,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
 
         # maak een wedstrijd en sessie aan
         self._maak_externe_locatie(self.nhbver1)
-        resp = self.client.post(self.url_kalender_vereniging, {'nieuwe_wedstrijd': 'ja'})
+        resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'wa'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
         self.assertEqual(1, KalenderWedstrijd.objects.count())
         wedstrijd = KalenderWedstrijd.objects.all()[0]
@@ -162,7 +164,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
 
         # maak een wedstrijd en sessie aan
         self._maak_externe_locatie(self.nhbver1)
-        resp = self.client.post(self.url_kalender_vereniging, {'nieuwe_wedstrijd': 'ja'})
+        resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
         self.assertEqual(1, KalenderWedstrijd.objects.count())
         wedstrijd = KalenderWedstrijd.objects.all()[0]
@@ -174,10 +176,35 @@ class TestKalenderMaand(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
-        # niet bestaande wedstrijd
+        # zet de begin datum in de toekomst, zodat er inschreven kan worden
+        wedstrijd.datum_begin += datetime.timedelta(days=100)
+        wedstrijd.save(update_fields=['datum_begin'])
+
+        # haal de info pagina van de wedstrijd op
+        url = self.url_kalender_info % wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+        # wijzig naar een WA wedstrijd
+        wedstrijd.organisatie = ORGANISATIE_WA
+        wedstrijd.save(update_fields=['organisatie'])
+
+        # niet ingelogd --> kan niet inschrijven
+        self.client.logout()
+
+        # haal de info pagina van de wedstrijd op
+        url = self.url_kalender_info % wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+
+        # corner case: niet bestaande wedstrijd
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_kalender_info % 999999)
-        self.assert404(resp)
+        self.assert404(resp, 'Wedstrijd niet gevonden')
 
         self.e2e_assert_other_http_commands_not_supported(url)
 

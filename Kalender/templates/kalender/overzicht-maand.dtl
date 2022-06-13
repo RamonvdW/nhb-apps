@@ -14,7 +14,9 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Wedstrijdkalender</h3>
-            <p>LET OP: Het is nog niet mogelijk om aan te melden.<br>De wedstrijdkalender is daarom voorlopig alleen in te zien door beheerders.</p>
+            {% if not kan_aanmelden %}
+                <p>Om aan te melden voor een wedstrijd moet je een account aanmaken en inloggen</p>
+            {% endif %}
         </div>
     </div>
 
@@ -60,7 +62,6 @@
                     <td><a class="btn-nhb-rood" href="#">Details</a></td>
                 </tr>
 
-
                 {% for wed in wedstrijden %}
                     <tr>
                         <td>{{ wed.datum_begin }}{% if wed.datum_begin != wed.datum_einde %} - {{ wed.datum_einde }}{% endif %}</td>
@@ -68,7 +69,8 @@
                         <td>{{ wed.locatie.plaats }}</td>
                         <td>
                             {% if wed.url_details %}
-                                <a class="btn-nhb-rood" href="{{ wed.url_details }}">Details</a>
+                                <a class="btn-nhb-rood" href="{{ wed.url_details }}">
+                                    <i class="material-icons-round">play_arrow</i></a>
                             {% endif %}
                         </td>
                     </tr>

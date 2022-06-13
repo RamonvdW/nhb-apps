@@ -38,7 +38,9 @@
                 {% include 'plein/card.dtl' with title="Rayon Teams" text=text_rayon_teams icon="view_compact" url=url_rayon_teams %}
 
                 <!-- bond -->
+                {% comment %}
                 {% include 'plein/card.dtl' with title="Bond" text=text_bond icon="flag" url=url_bond %}
+                {% endcomment %}
             </div>
         </div>
 
@@ -125,6 +127,11 @@
 
             {% endfor %}
 
+            <!-- medailles -->
+            {% if url_medailles %}
+                {% include 'plein/card.dtl' with title="Medailles" text="Toon de toegekende medailles voor elke klasse." icon="military_tech" url=url_medailles %}
+            {% endif %}
+
             {% if comp.url_regio_instellingen and comp.fase >= 'B' %}
                 {% include 'plein/card.dtl' with title="Instelling teams" text="Instellingen voor de teamcompetitie in de regio." icon="flaky" url=comp.url_regio_instellingen %}
             {% endif %}
@@ -180,13 +187,13 @@
             {% endif %}
 
             {% if regio_instellingen_globaal %}
-                {% url 'CompRegio:regio-instellingen-globaal' comp_pk=comp.pk as card_url %}
+                {% url 'CompLaagRegio:regio-instellingen-globaal' comp_pk=comp.pk as card_url %}
                 {% include 'plein/card.dtl' with title="Regio keuzes" text="Overzicht van de keuzes gemaakt per regio" icon="flaky" url=card_url %}
             {% endif %}
 
             <!-- clusters RCL -->
             {% if toon_clusters %}
-                {% url 'CompRegio:clusters' as card_url %}
+                {% url 'CompLaagRegio:clusters' as card_url %}
                 {% include 'plein/card.dtl' with title="Clusters" text="Verenigingen groeperen in geografische clusters." icon="group_work" url=card_url %}
             {% endif %}
 

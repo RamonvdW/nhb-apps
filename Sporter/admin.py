@@ -38,8 +38,31 @@ class SporterVoorkeurenAdmin(admin.ModelAdmin):
 
     list_select_related = True
 
-    autocomplete_fields = ('sporter',)
+    readonly_fields = ('sporter',)
 
+    fieldsets = (
+        ('Wie',
+            {'fields': ('sporter',)
+             }),
+        ('Disciplines',
+            {'fields': ('voorkeur_discipline_25m1pijl',
+                        'voorkeur_discipline_outdoor',
+                        'voorkeur_discipline_indoor',
+                        'voorkeur_discipline_clout',
+                        'voorkeur_discipline_veld',
+                        'voorkeur_discipline_run',
+                        'voorkeur_discipline_3d'),
+             }),
+        ('Wedstrijdgeslacht',
+            {'fields': ('wedstrijd_geslacht_gekozen',
+                        'wedstrijd_geslacht'),
+             }),
+        ('Overig',
+            {'fields': ('voorkeur_eigen_blazoen',
+                        'voorkeur_meedoen_competitie',
+                        'opmerking_para_sporter')
+             }),
+    )
 
 class SecretarisAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Secretaris klasse """

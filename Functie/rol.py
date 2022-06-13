@@ -132,16 +132,22 @@ def rol_zet_sessionvars(account, request):
 
     for obj in (Functie
                 .objects
-                .select_related('nhb_rayon', 'nhb_regio', 'nhb_regio__rayon', 'nhb_ver')
+                .select_related('nhb_rayon',
+                                'nhb_regio',
+                                'nhb_regio__rayon',
+                                'nhb_ver',
+                                'nhb_ver__regio')
                 .only('rol', 'comp_type',
                       'nhb_regio__regio_nr',
                       'nhb_rayon__rayon_nr',
                       'nhb_regio__rayon__rayon_nr',
-                      'nhb_ver__ver_nr')):
+                      'nhb_ver__ver_nr',
+                      'nhb_ver__regio__regio_nr')):
         func = SimpleNamespace()
         func.pk = obj.pk
         func.obj = obj
         func.rol = obj.rol
+        func.koppel_aan_bb = False
         if func.rol == "BKO":
             func.comp_type = obj.comp_type
         elif func.rol == "RKO":
@@ -157,6 +163,8 @@ def rol_zet_sessionvars(account, request):
                 functie_rcl[func.regio_nr] = [func.pk]
         elif func.rol in ("HWL", "WL", "SEC"):
             func.ver_nr = obj.nhb_ver.ver_nr
+            if func.rol == 'HWL' and obj.nhb_ver.regio.regio_nr == 100:
+                func.koppel_aan_bb = True
         functie_cache[obj.pk] = func
     # for
 
@@ -307,7 +315,7 @@ def rol_get_huidige_functie(request) -> Tuple[Rollen, Functie]:
     functie = None
     try:
         functie_pk = request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK]
-    except KeyError:
+    except KeyError:                    # pragma: no cover
         # geen functie opgeslagen
         pass
     else:
@@ -430,7 +438,7 @@ def rol_activeer_functie(request, functie_pk):
                     if account.is_staff or account.is_BB:
                         try:
                             functie = Functie.objects.get(pk=functie_pk)
-                        except Functie.DoesNotExist:                # pragma: no branch
+                        except Functie.DoesNotExist:                # pragma: no cover
                             pass
                         else:
                             # we komen hier alleen voor rollen die niet al in het pallet zitten bij IT/BB
@@ -466,6 +474,12 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
         for pk, obj in functie_cache.items():
             if obj.rol == 'BKO':
                 yield Rollen.ROL_BKO, obj.pk
+        # for
+
+        # deze functie mag de HWL van vereniging in regio 100 aannemen
+        for pk, obj in functie_cache.items():
+            if obj.rol == 'HWL' and obj.koppel_aan_bb:
+                yield Rollen.ROL_HWL, obj.pk
         # for
 
     if functie_in:

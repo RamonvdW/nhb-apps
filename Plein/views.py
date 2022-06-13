@@ -10,6 +10,7 @@ from django.shortcuts import redirect, render, reverse
 from django.views.generic import TemplateView, View
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from Handleiding.views import reverse_handleiding
+from Bestel.mandje import eval_mandje_inhoud
 from Taken.taken import eval_open_taken
 from .menu import menu_dynamics
 
@@ -86,12 +87,17 @@ class PleinView(View):
         # ga naar live server banner tonen?
         context['ga_naar_live_server'] = settings.IS_TEST_SERVER
 
+        context['toon_kalender'] = settings.TOON_WEDSTRIJDKALENDER
+
         if request.user.is_authenticated:
             rol_nu = rol_get_huidige(request)
 
             if rol_nu == Rollen.ROL_SPORTER:
                 template = TEMPLATE_PLEIN_SPORTER
                 context['url_profiel'] = reverse('Sporter:profiel')
+
+                # kijk of we iets in het mandje zit, zodat we het knopje kunnen tonen
+                eval_mandje_inhoud(request)
 
             elif rol_nu == Rollen.ROL_NONE or rol_nu is None:
                 # gebruik de bezoeker pagina
@@ -107,6 +113,7 @@ class PleinView(View):
 
                 if rol_nu == Rollen.ROL_BB:
                     context['rol_is_bb'] = True
+                    context['toon_kalender'] = True     # override default
                 elif rol_nu == Rollen.ROL_BKO:
                     context['rol_is_bko'] = True
                 elif rol_nu == Rollen.ROL_RKO:
@@ -127,6 +134,9 @@ class PleinView(View):
 
                 # kijk hoeveel taken er open staan
                 eval_open_taken(request)
+
+                # kijk of we iets in het mandje zit, zodat we het knopje kunnen tonen
+                eval_mandje_inhoud(request)
 
         context['naam_site'] = settings.NAAM_SITE
         context['email_support'] = settings.EMAIL_SUPPORT

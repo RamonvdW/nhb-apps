@@ -8,18 +8,14 @@ from django.conf import settings
 from django.shortcuts import reverse
 from Account.rechten import account_rechten_is_otp_verified
 from Functie.rol import Rollen, rol_mag_wisselen, rol_get_huidige
+from Bestel.mandje import cached_aantal_in_mandje_get
 from Taken.taken import aantal_open_taken
 
 
-def menu_dynamics(request, context, actief=None):
+def menu_dynamics(request, context):
     """ Deze functie update the template context voor het dynamische gedrag van
         menu zoals de 'Andere rollen' en het menu item dat actief is.
     """
-
-    # # welke regel van het menu op laten lichten?
-    # context['menu_actief'] = actief
-    # if not (actief in ACTIEF_OPTIES or actief.startswith('competitie-')):
-    #     raise AssertionError("menu_dynamics: Onbekende 'actief' waarde: %s" % repr(actief))
 
     # test server banner tonen?
     context['is_test_server'] = settings.IS_TEST_SERVER
@@ -33,7 +29,14 @@ def menu_dynamics(request, context, actief=None):
         # naam voor op de knop
         context['menu_voornaam'] = request.user.get_first_name()
 
-        # wissel van rol toegestaan?
+        # mandje tonen?
+        context['menu_mandje_aantal'] = cached_aantal_in_mandje_get(request)
+        if context['menu_mandje_aantal'] > 0:
+            # we zetten deze niet terug op False,
+            # zodat views deze ook op True kunnen zetten (ook al is het mandje leeg)
+            context['menu_toon_mandje'] = True
+
+            # wissel van rol toegestaan?
         if rol_mag_wisselen(request):
             context['menu_url_wissel_van_rol'] = reverse('Functie:wissel-van-rol')
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -48,7 +48,7 @@ class Command(BaseCommand):
 
         if account and functie:
             if functie.accounts.filter(pk=account.pk).count():
-                self.stderr.write('[WARNING] Account %s is al %s' % (repr(username), functie.beschrijving))
+                self.stdout.write('[WARNING] Account %s is al %s' % (repr(username), functie.beschrijving))
             else:
                 # maak dit account RCL
                 functie.accounts.add(account)

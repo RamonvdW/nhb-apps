@@ -5,10 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from .menu import menu_dynamics
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
-import types
 
 
 class TestPlein(E2EHelpers, TestCase):
@@ -37,15 +35,6 @@ class TestPlein(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('plein/privacy.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
         self.e2e_assert_other_http_commands_not_supported(self.url_privacy)
-
-    # def test_dynamic_menu_assert(self):
-    #     # test the assert in menu_dynamics
-    #     context = dict()
-    #     request = types.SimpleNamespace()      # creates an empty object
-    #     request.user = types.SimpleNamespace()
-    #     request.user.is_authenticated = False
-    #     with self.assertRaises(AssertionError):
-    #         menu_dynamics(request, context, actief='test-bestaat-niet')
 
     def test_quick(self):
         # voor test.sh om met een snelle run in debug mode

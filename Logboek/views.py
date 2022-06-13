@@ -21,6 +21,7 @@ TEMPLATE_LOGBOEK_UITROL = 'logboek/uitrol.dtl'
 TEMPLATE_LOGBOEK_RECORDS = 'logboek/records.dtl'
 TEMPLATE_LOGBOEK_ACCOUNTS = 'logboek/accounts.dtl'
 TEMPLATE_LOGBOEK_CLUSTERS = 'logboek/clusters.dtl'
+TEMPLATE_LOGBOEK_BETALINGEN = 'logboek/betalingen.dtl'
 TEMPLATE_LOGBOEK_COMPETITIE = 'logboek/competitie.dtl'
 TEMPLATE_LOGBOEK_NHBSTRUCTUUR = 'logboek/nhbstructuur.dtl'
 TEMPLATE_LOGBOEK_ACCOMMODATIES = 'logboek/accommodaties.dtl'
@@ -37,6 +38,7 @@ DELEN = (
     ('import', 'CRM import'),
     ('clusters', 'Clusters'),
     ('competitie', 'Bondscompetities'),
+    ('betalingen', 'Betalingen'),
     ('uitrol', 'Uitrol')
 )
 
@@ -323,6 +325,25 @@ class LogboekClustersView(LogboekBasisView):
                 .objects
                 .select_related('actie_door_account')
                 .filter(gebruikte_functie='Clusters')
+                .order_by('-toegevoegd_op'))
+
+
+class LogboekBetalingenView(LogboekBasisView):
+    """ Deze view toont de logboek regels die met betalingen te maken hebben """
+
+    template_name = TEMPLATE_LOGBOEK_BETALINGEN
+    filter = 'betalingen'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.base_url = reverse('Logboek:betalingen')
+
+    def get_focused_queryset(self):
+        """ retourneer de data voor de template view """
+        return (LogboekRegel
+                .objects
+                .select_related('actie_door_account')
+                .filter(gebruikte_functie='Betalingen')
                 .order_by('-toegevoegd_op'))
 
 

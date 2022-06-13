@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import TemplateView
-from Account.models import AccountCreateError, account_create
+from Account.operations import AccountCreateError, account_create
 from Account.views import account_vraag_email_bevestiging
 from Functie.models import Functie
 from Logboek.models import schrijf_in_logboek
@@ -67,16 +67,12 @@ def sporter_create_account_nhb(lid_nr_str, email, nieuw_wachtwoord):
     sporter.save()
 
     # indien dit een secretaris is, ook meteen koppelen aan SEC functie van zijn vereniging
-    try:
-        secs = Secretaris.objects.filter(vereniging=sporter.bij_vereniging)
-    except Secretaris.DoesNotExist:
-        pass
-    else:
-        if secs.count() > 0:
-            sec = secs.all()[0]
-            if sec.sporter == sporter:
-                functie = Functie.objects.get(rol='SEC', nhb_ver=sporter.bij_vereniging)
-                functie.accounts.add(account)
+    secs = Secretaris.objects.filter(vereniging=sporter.bij_vereniging)
+    if secs.count() > 0:
+        sec = secs[0]
+        if sec.sporter == sporter:
+            functie = Functie.objects.get(rol='SEC', nhb_ver=sporter.bij_vereniging)
+            functie.accounts.add(account)
 
     account_vraag_email_bevestiging(accountmail, nhb_nummer=lid_nr_str, email=email)
 

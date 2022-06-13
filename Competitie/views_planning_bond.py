@@ -11,17 +11,16 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from .models import (Competitie,
+from .models import (Competitie, CompetitieMatch,
                      LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie,
                      CompetitieMutatie,
                      MUTATIE_AFSLUITEN_REGIOCOMP)
-from Wedstrijden.models import CompetitieWedstrijd
 
 
 TEMPLATE_COMPETITIE_PLANNING_BOND = 'competitie/planning-landelijk.dtl'
 TEMPLATE_COMPETITIE_DOORZETTEN_NAAR_RK = 'competitie/bko-doorzetten-naar-rk.dtl'
 TEMPLATE_COMPETITIE_DOORZETTEN_NAAR_BK = 'competitie/bko-doorzetten-naar-bk.dtl'
-TEMPLATE_COMPETITIE_AFSLUITEN = 'competitie/bko-afsluiten-competitie.dtl'
+TEMPLATE_COMPETITIE_DOORZETTEN_VOORBIJ_BK = 'competitie/bko-doorzetten-voorbij-bk.dtl'
 
 
 class BondPlanningView(UserPassesTestMixin, TemplateView):
@@ -32,10 +31,14 @@ class BondPlanningView(UserPassesTestMixin, TemplateView):
     template_name = TEMPLATE_COMPETITIE_PLANNING_BOND
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol_nu = rol_get_huidige(self.request)
-        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO)
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -51,7 +54,11 @@ class BondPlanningView(UserPassesTestMixin, TemplateView):
             raise Http404('Competitie niet gevonden')
 
         if deelcomp_bk.laag != LAAG_BK:
-            raise Http404('Verkeerde competitie')
+            raise Http404('Verkeerde competitie (1)')
+
+        if self.rol_nu == Rollen.ROL_BKO:
+            if deelcomp_bk.competitie.afstand != self.functie_nu.comp_type:
+                raise Http404('Verkeerde competitie (2)')
 
         context['deelcomp_bk'] = deelcomp_bk
 
@@ -269,107 +276,73 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
         return HttpResponseRedirect(reverse('Competitie:kies'))
 
 
-class VerwijderWedstrijdView(UserPassesTestMixin, View):
+class DoorzettenVoorbijBKView(UserPassesTestMixin, TemplateView):
 
-    """ Deze view laat een BK wedstrijd verwijderen """
+    """ Met deze view kan de BKO de BK wedstrijden afsluiten """
 
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_DOORZETTEN_VOORBIJ_BK
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.rol_nu, self.functie_nu = None, None
+        self.functie_nu = None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_BKO
+        rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return rol_nu == Rollen.ROL_BKO
 
-    def post(self, request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de knop 'Verwijder' gebruikt wordt
-        """
-        try:
-            wedstrijd_pk = int(kwargs['wedstrijd_pk'][:6])  # afkappen voor de veiligheid
-            wedstrijd = (CompetitieWedstrijd
-                         .objects
-                         .select_related('uitslag')
-                         .prefetch_related('uitslag__scores')
-                         .get(pk=wedstrijd_pk))
-        except (ValueError, CompetitieWedstrijd.DoesNotExist):
-            raise Http404('Wedstrijd niet gevonden')
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
 
-        plan = wedstrijd.competitiewedstrijdenplan_set.all()[0]
         try:
-            deelcomp = DeelCompetitie.objects.get(plan=plan, laag=LAAG_BK)
-        except DeelCompetitie.DoesNotExist:
+            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
+            comp = (Competitie
+                    .objects
+                    .get(pk=comp_pk,
+                         is_afgesloten=False))
+        except (ValueError, Competitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
         # correcte beheerder?
-        if deelcomp.functie != self.functie_nu:
+        if comp.afstand != self.functie_nu.comp_type:
             raise PermissionDenied()
 
-        # voorkom verwijderen van wedstrijden waar een uitslag aan hangt
-        if wedstrijd.uitslag:
-            uitslag = wedstrijd.uitslag
-            if uitslag and (uitslag.is_bevroren or uitslag.scores.count() > 0):
-                raise Http404('Uitslag mag niet meer gewijzigd worden')
+        comp.bepaal_fase()
+        if comp.fase != 'R':
+            raise Http404('Verkeerde competitie fase')
 
-        wedstrijd.delete()
+        context['url_doorzetten'] = reverse('Competitie:bko-doorzetten-voorbij-bk', kwargs={'comp_pk': comp.pk})
 
-        url = reverse('Competitie:bond-planning', kwargs={'deelcomp_pk': deelcomp.pk})
-        return HttpResponseRedirect(url)
+        menu_dynamics(self.request, context)
+        return context
 
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de knop 'BK afsluiten' gebruikt wordt door de BKO.
+        """
+        try:
+            comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
+            comp = (Competitie
+                    .objects
+                    .get(pk=comp_pk,
+                         is_afgesloten=False))
+        except (ValueError, Competitie.DoesNotExist):
+            raise Http404('Competitie niet gevonden')
 
-# class CompetitieAfsluitenView(UserPassesTestMixin, TemplateView):
-#
-#     """ Met deze view kan de BKO de competitie afsluiten """
-#
-#     # class variables shared by all instances
-#     template_name = TEMPLATE_COMPETITIE_AFSLUITEN
-#     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
-#
-#     def test_func(self):
-#         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-#         rol_nu = rol_get_huidige(self.request)
-#         return rol_nu == Rollen.ROL_BKO
-#
-#     def get_context_data(self, **kwargs):
-#         """ called by the template system to get the context data for the template """
-#         context = super().get_context_data(**kwargs)
-#
-#         try:
-#             comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
-#             comp = (Competitie
-#                     .objects
-#                     .get(pk=comp_pk,
-#                          is_afgesloten=False))
-#         except (ValueError, Competitie.DoesNotExist):
-#             raise Http404('Competitie niet gevonden')
-#
-#         comp.zet_fase()
-#         if comp.fase < 'R' or comp.fase >= 'Z':
-#             raise Http404('Verkeerde competitie fase')
-#
-#         menu_dynamics(self.request, context)
-#         return context
-#
-#     def post(self, request, *args, **kwargs):
-#         """ Deze functie wordt aangeroepen als de knop 'Regel toevoegen' gebruikt wordt
-#             in de RK planning, om een nieuwe wedstrijd toe te voegen.
-#         """
-#         try:
-#             comp_pk = int(kwargs['comp_pk'][:6])  # afkappen voor de veiligheid
-#             comp = (Competitie
-#                     .objects
-#                     .get(pk=comp_pk,
-#                          is_afgesloten=False))
-#         except (ValueError, Competitie.DoesNotExist):
-#             raise Http404('Competitie niet gevonden')
-#
-#         comp.zet_fase()
-#         if comp.fase < 'R' or comp.fase >= 'Z':
-#             raise Http404('Verkeerde competitie fase)
-#
-#         return HttpResponseRedirect(reverse('Competitie:kies'))
+        # correcte beheerder?
+        if comp.afstand != self.functie_nu.comp_type:
+            raise PermissionDenied()
+
+        comp.bepaal_fase()
+        if comp.fase != 'R':
+            raise Http404('Verkeerde competitie fase')
+
+        comp.alle_bks_afgesloten = True
+        comp.save(update_fields=['alle_bks_afgesloten'])
+
+        return HttpResponseRedirect(reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}))
 
 
 # end of file

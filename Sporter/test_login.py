@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -115,7 +115,7 @@ class TestSporterLogin(E2EHelpers, TestCase):
         self.assertEqual(obj.nieuwe_email, '')
         self.assertTrue(obj.email_is_bevestigd)
 
-        resp = self.e2e_login_no_check(self.account_normaal)
+        resp = self.e2e_login_no_check(self.account_normaal, follow=True)
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'We hebben een nieuw e-mailadres doorgekregen uit de administratie van de NHB')
         self.assertContains(resp, 'ni###e@test.com')

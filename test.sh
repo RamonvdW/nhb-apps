@@ -12,19 +12,23 @@ LOG="/tmp/test_out.txt"
 [ -e "$LOG" ] && rm "$LOG"
 touch "$LOG"
 
+# include a specific third party package
+COV_INCLUDE_3RD_PARTY=""
+#COV_INCLUDE_3RD_PARTY="mollie"
+
 PYCOV=""
-PYCOV="-m coverage run --append --branch"
+PYCOV="-m coverage run --append --branch"       # --pylib
+[ ! -z "$COV_INCLUDE_3RD_PARTY" ] && PYCOV+=" --include=*${COV_INCLUDE_3RD_PARTY}*"
 
 export PYTHONDONTWRITEBYTECODE=1
 
-OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
+#OMIT="--omit=*/lib/python3*/site-packages/*"    # use , to separate
 # show all saml2 and djangosaml2idp source files
 #OMIT="--omit=data3/wsgi.py,manage.py,/usr/local/lib64/*,/usr/lib/*,/usr/local/lib/python3.6/site-packages/c*,/usr/local/lib/python3.6/site-packages/da*,/usr/local/lib/python3.6/site-packages/de*,/usr/local/lib/python3.6/site-packages/i*,/usr/local/lib/python3.6/site-packages/p*,/usr/local/lib/python3.6/site-packages/q*,/usr/local/lib/python3.6/site-packages/r*,/usr/local/lib/python3.6/site-packages/si*,/usr/local/lib/python3.6/site-packages/u*,/usr/local/lib/python3.6/site-packages/django/*"
-
-# set high performance
-sudo cpupower frequency-set --governor performance > /dev/null
+OMIT=""
 
 # kill the http simulator if still running in the background
+# -f check entire commandline program name is python and does not match
 pgrep -f websim > /dev/null
 if [ $? -eq 0 ]
 then
@@ -39,16 +43,24 @@ echo
 STAMP=$(date +"%Y-%m-%d %H:%M:%S")
 echo "[INFO] Now is $STAMP"
 
-echo "[INFO] Checking application is free of fatal errors"
-python3 ./manage.py check || exit $?
-
 FORCE_REPORT=0
 if [[ "$ARGS" =~ "--force" ]]
 then
+    echo "[INFO] Forcing coverage report"
     FORCE_REPORT=1
     # remove from ARGS used to decide focus
     # will still be given to ./manage.py where --force has no effect
     ARGS=$(echo "$ARGS" | sed 's/--force//')
+fi
+
+KEEP_DB=0
+if [[ "$ARGS" =~ "--keep" ]]
+then
+    echo "[INFO] Keeping database"
+    KEEP_DB=1
+    # remove from ARGS used to decide focus
+    # will still be given to ./manage.py where --force has no effect
+    ARGS=$(echo "$ARGS" | sed 's/--keep//')
 fi
 
 FOCUS=""
@@ -69,55 +81,85 @@ then
     echo "[INFO] Focus set to $FOCUS"
 
     COV_INCLUDE=$(for opt in $FOCUS1; do echo -n "$opt/*,"; done)
+    [ ! -z "$COV_INCLUDE_3RD_PARTY" ] && COV_INCLUDE+="*${COV_INCLUDE_3RD_PARTY}*"
     #echo "[DEBUG] COV_INCLUDE set to $COV_INCLUDE"
 fi
 
+if [ $KEEP_DB -eq 0 ]
+then
+    echo "[INFO] Checking application is free of fatal errors"
+    python3 ./manage.py check --tag admin --tag models || exit $?
+fi
+
+# set high performance
+sudo cpupower frequency-set --governor performance > /dev/null
+
 ABORTED=0
-
-# start the simulator for the mailer
-python3 ./Mailer/test_tools/websim_mailer.py &
-PID_WEBSIM1=$!
-sleep 0.5               # give python some time to load everything
-kill -0 $PID_WEBSIM1    # check the simulator is running
-RES=$?
-#echo "RES=$RES"
-if [ $RES -ne 0 ]
-then
-    echo "[ERROR] Mail server simulator failed to start"
-    exit
-fi
-
-# start the simulator for the bondspas downloader
-python3 ./Bondspas/test-tools/websim_bondspas.py &
-PID_WEBSIM2=$!
-sleep 0.5               # give python some time to load everything
-kill -0 $PID_WEBSIM2    # check the simulator is running
-RES=$?
-#echo "RES=$RES"
-if [ $RES -ne 0 ]
-then
-    echo "[ERROR] Bondspas server simulator failed to start"
-    exit
-fi
 
 export COVERAGE_FILE="/tmp/.coverage.$$"
 
 python3 -m coverage erase
 
 echo "[INFO] Capturing output in $LOG"
-COLOR_DEFAULT=$(tput sgr0)
-COLOR_RED=$(tput setaf 1)
-tail -f "$LOG" | grep --color -E "FAIL$|ERROR$|" &
-PID_TAIL=$!
+# --pid=$$ means: stop when parent stops
+# -u = unbuffered stdin/stdout
+tail -f "$LOG" --pid=$$ | python -u ./number_tests.py | grep --color -E "FAIL$|ERROR$|" &
+PID_TAIL=$(jobs -p | tail -1)
+# echo "PID_TAIL=$PID_TAIL"
 
-echo "[INFO] Deleting test database"
-sudo -u postgres dropdb --if-exists test_data3
+if [ $KEEP_DB -ne 1 ]
+then
+    echo "[INFO] Deleting test database"
+    sudo -u postgres dropdb --if-exists test_data3
+    echo "[INFO] Creating clean database; running migrations and performing run with nodebug"
+
+    # add coverage with nodebug
+    python3 -u $PYCOV ./manage.py test --keepdb --noinput --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.TestPlein.test_quick &>>"$LOG"
+    RES=$?
+    #echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
+    [ $RES -eq 3 ] && ABORTED=1
+fi
+
+# start the mail transport service simulator
+python3 ./Mailer/test_tools/websim_mailer.py &
+PID_WEBSIM1=$!
+
+# start the bondspas service simulator
+python3 ./Bondspas/test-tools/websim_bondspas.py &
+PID_WEBSIM2=$!
+
+# start the payment service simulator
+python3 ./Betaal/test-tools/websim_betaal_test.py &
+PID_WEBSIM3=$!
+
+# check all websim programs have started properly
+sleep 0.5               # give python some time to load everything
+kill -0 $PID_WEBSIM1    # check the simulator is running
+if [ $? -ne 0 ]
+then
+    echo "[ERROR] Mail transport service simulator failed to start"
+    exit
+fi
+
+kill -0 $PID_WEBSIM2    # check the simulator is running
+if [ $? -ne 0 ]
+then
+    echo "[ERROR] Bondspas service simulator failed to start"
+    exit
+fi
+
+kill -0 $PID_WEBSIM3    # check the simulator is running
+if [ $? -ne 0 ]
+then
+    echo "[ERROR] Betaal service simulator failed to start"
+    exit
+fi
 
 # -u = unbuffered stdin/stdout --> also ensures the order of stdout/stderr lines
 # -v = verbose
 # note: double quotes not supported around $*
 echo "[INFO] Starting main test run" >>"$LOG"
-python3 -u $PYCOV ./manage.py test --keepdb --settings=nhbapps.settings_autotest -v 2 --noinput $* &>>"$LOG"
+python3 -u $PYCOV ./manage.py test --keepdb --settings=nhbapps.settings_autotest -v 2 $* &>>"$LOG"
 RES=$?
 #echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
 [ $RES -eq 3 ] && ABORTED=1
@@ -125,21 +167,14 @@ RES=$?
 echo >>"$LOG"
 echo "[INFO] Finished main test run" >>"$LOG"
 
-if [ $RES -eq 0 -a $# -eq 0 ]
-then
-    # add coverage with nodebug
-    echo "[INFO] Performing run with nodebug"
-    python3 -u $PYCOV ./manage.py test --keepdb --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.TestPlein.test_quick &>>"$LOG"
-    RES=$?
-    #echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
-    [ $RES -eq 3 ] && ABORTED=1
-fi
-
 # stop showing the additions to the logfile, because the rest is less interesting
 # use bash construct to prevent the Terminated message on the console
 sleep 0.1
 kill $PID_TAIL
 wait $PID_TAIL 2>/dev/null
+
+# launch log in editor
+[ $RES -eq 0 ] || geany --new-instance "$LOG" &
 
 if [ $RES -eq 0 -a "$FOCUS" != "" ]
 then
@@ -153,6 +188,7 @@ then
             python3 -u $PYCOV ./manage.py help $cmd &>>"$LOG"
         fi
     done
+    echo
 fi
 
 if [ $RES -eq 0 -a $# -eq 0 ]
@@ -173,6 +209,8 @@ kill $PID_WEBSIM1
 wait $PID_WEBSIM1 2>/dev/null
 kill $PID_WEBSIM2
 wait $PID_WEBSIM2 2>/dev/null
+kill $PID_WEBSIM3
+wait $PID_WEBSIM3 2>/dev/null
 
 ASK_LAUNCH=0
 COVERAGE_RED=0
@@ -186,7 +224,7 @@ then
 
     if [ -z "$FOCUS" ]
     then
-        python3 -m coverage report --precision=1 --skip-covered --fail-under=98 $OMIT
+        python3 -m coverage report --precision=1 --skip-covered --fail-under=98 $OMIT 2>&1 | tee -a "$LOG"
         res=$?
 
         python3 -m coverage html -d "$REPORT_DIR" --precision=1 --skip-covered $OMIT &>>"$LOG"

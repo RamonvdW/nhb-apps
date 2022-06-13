@@ -163,11 +163,11 @@
                 <tr>
                     <td colspan="9" class="center">
                         <h5>{{ obj.klasse_str }}</h5>
-                        {% if obj.wedstrijd %}
+                        {% if obj.match %}
                             {% if comp.rk_is_afgelast %}<s>{% endif %}
-                            <span>{{ obj.wedstrijd.datum_wanneer }} om {{ obj.wedstrijd.tijd_begin_wedstrijd }} bij {{ obj.wedstrijd.vereniging }}</span>
-                            {% if obj.wedstrijd.locatie %}
-                                <span> ({{ obj.wedstrijd.adres_str }})</span>
+                            <span>{{ obj.match.datum_wanneer }} om {{ obj.match.tijd_begin_wedstrijd }} bij {{ obj.match.vereniging }}</span>
+                            {% if obj.match.locatie %}
+                                <span> ({{ obj.match.adres_str }})</span>
                             {% endif %}
                             {% if comp.rk_is_afgelast %}</s>{% endif %}
                         {% endif %}

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
-from .models import Account, AccountEmail
+from .models import Account, AccountEmail, AccountVerzoekenTeller
 
 
 class AccountAdmin(UserAdmin):
@@ -53,7 +53,13 @@ class AccountEmailAdmin(admin.ModelAdmin):
     list_select_related = ('account',)
 
 
+class AccountVerzoekenTellerAdmin(admin.ModelAdmin):
+
+    search_fields = ('account__username', 'account__unaccented_naam')
+
+
 admin.site.register(Account, AccountAdmin)
 admin.site.register(AccountEmail, AccountEmailAdmin)
+admin.site.register(AccountVerzoekenTeller, AccountVerzoekenTellerAdmin)
 
 # end of file

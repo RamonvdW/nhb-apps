@@ -57,7 +57,7 @@ class TestBondspas(E2EHelpers, TestCase):
 
         # post zonder data
         resp = self.client.post(self.url_check_status, {})
-        self.assert404(resp)
+        self.assert404(resp, 'Geen valide verzoek')
 
         # get is not implemented
         resp = self.client.get(self.url_check_status)

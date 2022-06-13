@@ -11,6 +11,8 @@ from django.db.models import ProtectedError
 from django.db.utils import DataError
 from django.utils import timezone
 from django.conf import settings
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 from Account.models import Account
 from Functie.models import Functie, maak_functie, maak_account_vereniging_secretaris
 from Logboek.models import schrijf_in_logboek
@@ -44,13 +46,13 @@ EXPECTED_RAYON_KEYS = ('rayon_number', 'name')
 EXPECTED_REGIO_KEYS = ('rayon_number', 'region_number', 'name')
 EXPECTED_CLUB_KEYS = ('region_number', 'club_number', 'name', 'prefix', 'email', 'website',
                       'has_disabled_facilities', 'address', 'postal_code', 'location_name',
-                      'phone_business', 'phone_private', 'phone_mobile',
+                      'phone_business', 'phone_private', 'phone_mobile', 'coc_number',
                       'iso_abbr', 'latitude', 'longitude', 'secretaris')
 EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first_name',
                         'initials', 'birthday', 'email', 'gender', 'member_from',
                         'para_code', 'address', 'postal_code', 'location_name',
                         'iso_abbr', 'latitude', 'longitude', 'blocked')
-
+OPTIONAL_MEMBER_KEYS = ('skill_levels',)
 
 # administratieve entries (met fouten) die overslagen moeten worden
 SKIP_MEMBERS = (101711,)        # CRM developer
@@ -232,7 +234,7 @@ class Command(BaseCommand):
         parser.add_argument('--dryrun', action='store_true')
         parser.add_argument('--sim_now', nargs=1, metavar='YYYY-MM-DD', help="gesimuleerde datum: YYYY-MM-DD")
 
-    def _check_keys(self, keys, expected_keys, level):
+    def _check_keys(self, keys, expected_keys, optional_keys, level):
         has_error = False
         keys = list(keys)
         for key in expected_keys:
@@ -242,6 +244,11 @@ class Command(BaseCommand):
                 self.stderr.write("[ERROR] Verplichte sleutel %s niet aanwezig in de %s data" % (repr(key), repr(level)))
                 has_error = True
         # for
+        for key in optional_keys:
+            try:
+                keys.remove(key)
+            except ValueError:
+                pass
         if len(keys):
             self.stderr.write("[WARNING] Extra sleutel aanwezig in de %s data: %s" % (repr(level), repr(keys)))
         return has_error
@@ -259,7 +266,7 @@ class Command(BaseCommand):
     def _import_rayons(self, data):
         """ Importeert data van alle rayons """
 
-        if self._check_keys(data[0].keys(), EXPECTED_RAYON_KEYS, "rayon"):
+        if self._check_keys(data[0].keys(), EXPECTED_RAYON_KEYS, (), "rayon"):
             return
 
         # rayons zijn statisch gedefinieerd, met een extra beschrijving
@@ -288,7 +295,7 @@ class Command(BaseCommand):
     def _import_regions(self, data):
         """ Importeert data van alle regios """
 
-        if self._check_keys(data[0].keys(), EXPECTED_REGIO_KEYS, "regio"):
+        if self._check_keys(data[0].keys(), EXPECTED_REGIO_KEYS, (), "regio"):
             return
 
         # regios zijn statisch gedefinieerd
@@ -318,7 +325,7 @@ class Command(BaseCommand):
     def _import_clubs(self, data):
         """ Importeert data van alle verenigingen """
 
-        if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, "club"):
+        if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, (), "club"):
             return
 
         # houd bij welke verenigingsnummers in de database zitten
@@ -333,16 +340,20 @@ class Command(BaseCommand):
          'phone_business',
          'phone_private',
          'phone_mobile': None,      ???
-         'email', 'website',
+         'email',                   e-mailadres van de secretaris
+         'website',                 vereniging website
          'has_disabled_facilities': boolean
          'address':                 string with newlines
          'postal_code',
          'location_name',
+         'coc_number',              KvK nummer
          'iso_abbr': 'NL',          ???
          'latitude', 'longitude',
          'secretaris': [{'member_number': int}]
         }
         """
+
+        website_validator = URLValidator(schemes=['http', 'https'])
 
         for club in data:
             self._count_clubs += 1
@@ -369,16 +380,64 @@ class Command(BaseCommand):
             if not ver_plaats:
                 # een vereniging zonder doel heeft een lege location_name - geen waarschuwing geven
                 ver_plaats = ""     # voorkom None
+            else:
+                ver_plaats = ver_plaats.strip()
 
             ver_email = club['email']
             if not ver_email:
-                self.stderr.write('[WARNING] Vereniging %s (%s) heeft geen contact email' % (ver_nr, ver_naam))
+                self.stdout.write('[WARNING] Vereniging %s (%s) heeft geen contact email' % (ver_nr, ver_naam))
                 self._count_warnings += 1
                 ver_email = ""      # voorkom None
 
             ver_geen_wedstrijden = (ver_nr in GEEN_WEDSTRIJDEN)
 
-            # FUTURE: verdere velden: website, has_disabled_facilities, lat/lon
+            ver_kvk = club['coc_number']
+            if ver_kvk is None:
+                ver_kvk = ''
+            ver_kvk = ver_kvk.strip()
+            if not ver_kvk:
+                self.stdout.write('[WARNING] Vereniging %s heeft geen KvK nummer' % ver_nr)
+            elif len(ver_kvk) != 8 or not ver_kvk.isdecimal():
+                self.stdout.write('[WARNING] Vereniging %s KvK nummer %s moet 8 cijfers bevatten' % (ver_nr, repr(ver_kvk)))
+
+            ver_website = club['website']
+            if ver_website is None:
+                ver_website = ''
+            ver_website = ver_website.strip()
+            if ver_website:
+                try:
+                    website_validator(ver_website)
+                except ValidationError as exc:
+                    self.stdout.write('[WARNING] Vereniging %s website url: %s bevat fout (%s)' % (
+                                        ver_nr, repr(ver_website), str(exc)))
+                    ver_website = ''
+
+            ver_tel_nr = ''
+            for field_name in ('phone_business', 'phone_mobile', 'phone_private'):
+                phone = club[field_name]
+                if phone is None:
+                    phone = ''
+                phone = phone.strip()
+                if phone:
+                    ver_tel_nr = phone
+                    break
+            # for
+
+            ver_adres1 = ''
+            ver_adres2 = ''
+            # address = "Straat 9\n1234 AB  Plaats\n"
+            adres = club['address']
+            if not adres:       # handles None and ''
+                self.stdout.write('[WARNING] Vereniging %s heeft geen adres' % ver_nr)
+            else:
+                adres_spl = adres.strip().split('\n')
+                if len(adres_spl) != 2:
+                    self.stderr.write('[ERROR] Vereniging %s adres bestaat niet uit 2 regels: %s' % (ver_nr, repr(club['address'])))
+                if len(adres_spl) >= 2:
+                    ver_adres1 = adres_spl[0]
+                    ver_adres2 = adres_spl[1]
+
+            # FUTURE: verdere velden: has_disabled_facilities, lat/lon,
 
             # zoek de vereniging op
             is_nieuw = False
@@ -398,28 +457,64 @@ class Command(BaseCommand):
                         self.stderr.write('[ERROR] Kan vereniging %s niet wijzigen naar onbekende regio %s' % (ver_nr, ver_regio))
                         self._count_errors += 1
                     else:
-                        self.stdout.write('[INFO] Wijziging van regio voor vereniging %s: %s --> %s' % (ver_nr, obj.regio.regio_nr, ver_regio))
+                        self.stdout.write('[INFO] Wijziging van regio van vereniging %s: %s --> %s' % (ver_nr, obj.regio.regio_nr, ver_regio))
                         self._count_wijzigingen += 1
                         obj.regio = regio_obj
                         updated.append('regio')
 
                 if obj.naam != ver_naam:
-                    self.stdout.write('[INFO] Wijziging van naam voor vereniging %s: "%s" --> "%s"' % (ver_nr, obj.naam, ver_naam))
+                    self.stdout.write('[INFO] Wijziging van naam van vereniging %s: "%s" --> "%s"' % (ver_nr, obj.naam, ver_naam))
                     self._count_wijzigingen += 1
                     obj.naam = ver_naam
                     updated.append('naam')
 
                 if obj.plaats != ver_plaats:
-                    self.stdout.write('[INFO] Wijziging van plaats voor vereniging %s: "%s" --> "%s"' % (ver_nr, obj.plaats, ver_plaats))
+                    self.stdout.write('[INFO] Wijziging van plaats van vereniging %s: "%s" --> "%s"' % (ver_nr, obj.plaats, ver_plaats))
                     self._count_wijzigingen += 1
                     obj.plaats = ver_plaats
                     updated.append('plaats')
 
                 if obj.geen_wedstrijden != ver_geen_wedstrijden:
-                    self.stdout.write("[INFO] Wijziging van 'geen wedstrijden' voor vereniging %s: %s --> %s" % (ver_nr, obj.geen_wedstrijden, ver_geen_wedstrijden))
+                    self.stdout.write("[INFO] Wijziging van 'geen wedstrijden' van vereniging %s: %s --> %s" % (ver_nr, obj.geen_wedstrijden, ver_geen_wedstrijden))
                     self._count_wijzigingen += 1
                     obj.geen_wedstrijden = ver_geen_wedstrijden
                     updated.append('geen_wedstrijden')
+
+                if obj.kvk_nummer != ver_kvk:
+                    self.stdout.write("[INFO] Wijziging van KvK nummer van vereniging %s: %s --> %s" % (ver_nr, obj.kvk_nummer, ver_kvk))
+                    self._count_wijzigingen += 1
+                    obj.kvk_nummer = ver_kvk
+                    updated.append('kvk_nummer')
+
+                if obj.website != ver_website:
+                    self.stdout.write("[INFO] Wijziging van website van vereniging %s: %s --> %s" % (ver_nr, obj.website, ver_website))
+                    self._count_wijzigingen += 1
+                    obj.website = ver_website
+                    updated.append('website')
+
+                if obj.contact_email != ver_email:
+                    self.stdout.write("[INFO] Wijziging van contact_email van vereniging %s: %s --> %s" % (ver_nr, obj.contact_email, ver_email))
+                    self._count_wijzigingen += 1
+                    obj.contact_email = ver_email
+                    updated.append('contact_email')
+
+                if obj.telefoonnummer != ver_tel_nr:
+                    self.stdout.write("[INFO] Wijziging van telefoonnummer van vereniging %s: %s --> %s" % (ver_nr, obj.telefoonnummer, ver_tel_nr))
+                    self._count_wijzigingen += 1
+                    obj.telefoonnummer = ver_tel_nr
+                    updated.append('telefoonnummer')
+
+                if obj.adres_regel1 != ver_adres1:
+                    self.stdout.write("[INFO] Wijziging van adres regel 1 van vereniging %s: %s --> %s" % (ver_nr, obj.adres_regel1, ver_adres1))
+                    self._count_wijzigingen += 1
+                    obj.adres_regel1 = ver_adres1
+                    updated.append('adres_regel1')
+
+                if obj.adres_regel2 != ver_adres2:
+                    self.stdout.write("[INFO] Wijziging van adres regel 2 van vereniging %s: %s --> %s" % (ver_nr, obj.adres_regel2, ver_adres2))
+                    self._count_wijzigingen += 1
+                    obj.adres_regel2 = ver_adres2
+                    updated.append('adres_regel2')
 
                 if not self.dryrun:
                     obj.save(update_fields=updated)
@@ -431,6 +526,12 @@ class Command(BaseCommand):
                 ver.naam = ver_naam
                 ver.plaats = ver_plaats
                 ver.geen_wedstrijden = ver_geen_wedstrijden
+                ver.kvk_nummer = ver_kvk
+                ver.website = ver_website
+                ver.telefoonnummer = ver_tel_nr
+                ver.contact_email = ver_email
+                ver.adres_regel1 = ver_adres1
+                ver.adres_regel2 = ver_adres2
                 regio_obj = self._vind_regio(ver_regio)
                 if not regio_obj:
                     self._count_errors += 1
@@ -500,7 +601,7 @@ class Command(BaseCommand):
     def _import_clubs_secretaris(self, data):
         """ voor elke club, koppel de secretaris aan een Sporter """
 
-        if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, "club"):
+        if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, (), "club"):
             return
 
         for club in data:
@@ -583,7 +684,7 @@ class Command(BaseCommand):
     def _import_members(self, data):
         """ Importeert data van alle leden """
 
-        if self._check_keys(data[0].keys(), EXPECTED_MEMBER_KEYS, "member"):
+        if self._check_keys(data[0].keys(), EXPECTED_MEMBER_KEYS, OPTIONAL_MEMBER_KEYS, "member"):
             return
 
         # houd bij welke leden lid_nrs in de database zitten
@@ -735,6 +836,20 @@ class Command(BaseCommand):
             if not is_valid:
                 continue
 
+            lid_adres_code = ''
+            postcode = member['postal_code']
+            postadres = member['address']
+            if postcode is not None and postadres is not None:
+                postcode = postcode.upper()     # sommige postcodes zijn kleine letters
+                pos = postadres.find(postcode)
+                if pos < 0:
+                    self.stderr.write('[ERROR] Postcode %s niet gevonden in adres %s' % (repr(postcode), repr(postadres)))
+                else:
+                    postadres = postadres[:pos].strip()
+                    spl = postadres.split(' ')
+                    lid_adres_code = postcode.replace(' ', '') + spl[-1]
+            # self.stdout.write('[DEBUG] lid_nr=%s, lid_adres_code=%s' % (lid_nr, repr(lid_adres_code)))
+
             # try:
             #     lid_edu = member['educations']
             #     print('lid: %s, edu: %s' % (lid_nr, repr(lid_edu)))
@@ -871,6 +986,14 @@ class Command(BaseCommand):
                         updated.append('para_classificatie')
                         self._count_wijzigingen += 1
 
+                    if obj.adres_code != lid_adres_code:
+                        if obj.adres_code != '':        # laat toegevoegd veld: voorkom duizenden regels in de log
+                            self.stdout.write('[INFO] Lid %s: adres_code %s --> %s' % (
+                                                lid_nr, repr(obj.adres_code), repr(lid_adres_code)))
+                        obj.adres_code = lid_adres_code
+                        updated.append('adres_code')
+                        self._count_wijzigingen += 1
+
                     if not self.dryrun:
                         obj.save(update_fields=updated)
                         self._cache_sporter[obj.pk] = obj
@@ -921,6 +1044,7 @@ class Command(BaseCommand):
                 obj.sinds_datum = lid_sinds
                 obj.bij_vereniging = lid_ver
                 obj.lid_tot_einde_jaar = self.lidmaatschap_jaar
+                obj.adres_code = lid_adres_code
                 if lid_blocked:
                     obj.is_actief_lid = False
                 if not self.dryrun:
@@ -1037,7 +1161,7 @@ class Command(BaseCommand):
     def _import_wedstrijdlocaties(self, data):
         """ Importeert data van verenigingen als basis voor wedstrijdlocaties """
 
-        if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, "club"):
+        if self._check_keys(data[0].keys(), EXPECTED_CLUB_KEYS, (), "club"):
             return
 
         # voor overige velden, zie _import_clubs
@@ -1070,8 +1194,7 @@ class Command(BaseCommand):
             plaats = ""
             if club['location_name']:
                 plaats = club['location_name']
-                if not plaats:
-                    plaats = ""
+                plaats = plaats.strip()
                 adres = club['address']
                 if not adres:
                     adres = ""
@@ -1093,7 +1216,7 @@ class Command(BaseCommand):
                                     .objects
                                     .exclude(baan_type__in=(BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN))
                                     .get(adres=adres))
-            except WedstrijdLocatie.MultipleObjectsReturned:
+            except WedstrijdLocatie.MultipleObjectsReturned:            # pragma: no cover
                 # er is een ongelukje gebeurt
                 self.stderr.write('[ERROR] Onverwacht meer dan 1 wedstrijdlocatie voor vereniging %s' % nhb_ver)
                 continue
@@ -1183,7 +1306,7 @@ class Command(BaseCommand):
             self.stderr.write("[ERROR] Bestand heeft unicode problemen (%s)" % str(exc))
             return
 
-        if self._check_keys(data.keys(), EXPECTED_DATA_KEYS, "top-level"):
+        if self._check_keys(data.keys(), EXPECTED_DATA_KEYS, (), "top-level"):
             return
 
         for key in EXPECTED_DATA_KEYS:

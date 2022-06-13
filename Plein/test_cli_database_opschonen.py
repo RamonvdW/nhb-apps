@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.core import management
-from Account.models import account_create
+from Account.operations import account_create
 from Feedback.models import Feedback
 from Feedback.feedback_opslaan import store_feedback
 from Logboek.models import LogboekRegel, schrijf_in_logboek
@@ -68,7 +68,7 @@ class TestPleinCliDatabaseOpschonen(E2EHelpers, TestCase):
     def test_alles(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(26):
+        with self.assert_max_queries(32):
             management.call_command('database_opschonen', stderr=f1, stdout=f2)
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())

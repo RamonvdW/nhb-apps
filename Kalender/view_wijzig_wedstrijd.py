@@ -13,13 +13,15 @@ from django.views.generic import View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
-from BasisTypen.models import BoogType, KalenderWedstrijdklasse
+from BasisTypen.models import (BoogType, KalenderWedstrijdklasse, GESLACHT_ALLE,
+                               ORGANISATIES2LONG_STR, ORGANISATIE_WA, ORGANISATIE_IFAA)
+from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Taken.taken import maak_taak
 from Wedstrijden.models import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, WedstrijdLocatie
 from .models import (KalenderWedstrijd,
-                     WEDSTRIJD_DISCIPLINE_TO_STR, WEDSTRIJD_STATUS_TO_STR, WEDSTRIJD_WA_STATUS_TO_STR,
+                     ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR, WEDSTRIJD_WA_STATUS_TO_STR,
                      WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING, WEDSTRIJD_STATUS_GEACCEPTEERD,
                      WEDSTRIJD_STATUS_GEANNULEERD, WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
                      WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_BEGRENZING_TO_STR)
@@ -163,15 +165,21 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
 
             locatie.sel = "loc_%s" % locatie.pk
             locatie.selected = (wedstrijd.locatie == locatie)
-            locatie.keuze_str += ': ' + locatie.adres.replace('\n', ', ') + ' [disciplines: %s]' % locatie.disciplines_str()
+            locatie.keuze_str += ' [disciplines: %s]\n' % locatie.disciplines_str()
+            locatie.keuze_str += locatie.adres.replace('\n', ', ')
             opt_locatie.append(locatie)
 
             max_banen = max(locatie.banen_18m, locatie.banen_25m, locatie.buiten_banen, max_banen)
         # for
 
-        wedstrijd.disc_str = WEDSTRIJD_DISCIPLINE_TO_STR[wedstrijd.discipline]
+        wedstrijd.org_str = ORGANISATIES2LONG_STR[wedstrijd.organisatie]
+
+        disc2str = ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS[wedstrijd.organisatie]
+
+        wedstrijd.disc_str = (ORGANISATIES2LONG_STR[wedstrijd.organisatie] + ' / ' + disc2str[wedstrijd.discipline])
+
         context['opt_disc'] = opt_disc = list()
-        for afk, disc in WEDSTRIJD_DISCIPLINE_TO_STR.items():
+        for afk, disc in disc2str.items():
             opt = SimpleNamespace()
             opt.sel = 'disc_%s' % afk
             opt.keuze_str = disc
@@ -192,44 +200,69 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
         # for
 
         context['opt_bogen'] = opt_bogen = list()
-        pks = list(wedstrijd.boogtypen.values_list('pk', flat=True))
-        for obj in BoogType.objects.order_by('volgorde'):
+        gekozen_boog_pks = list(wedstrijd.boogtypen.values_list('pk', flat=True))
+        for obj in get_organisatie_boogtypen(wedstrijd.organisatie):
             obj.sel = 'boog_%s' % obj.afkorting
             obj.gebruikt = (obj.pk in bogen_gebruikt)
-            obj.selected = (obj.pk in pks)
+            obj.selected = (obj.pk in gekozen_boog_pks)
             opt_bogen.append(obj)
         # for
 
-        context['opt_klasse_1'] = opt_klasse_1 = list()
-        context['opt_klasse_2'] = opt_klasse_2 = list()
+        context['opt_klasse'] = opt_klasse = list()
         context['wedstrijd_is_a_status'] = (wedstrijd.wa_status == WEDSTRIJD_WA_STATUS_A)
-        pks = list(wedstrijd.wedstrijdklassen.values_list('pk', flat=True))
-        for klasse in (KalenderWedstrijdklasse
-                       .objects
-                       .exclude(buiten_gebruik=True)
-                       .select_related('leeftijdsklasse')
-                       .order_by('volgorde')):
-
+        gekozen_pks = list(wedstrijd.wedstrijdklassen.values_list('pk', flat=True))
+        volg_nr = 0
+        code = 0
+        blokkeer2klasse = dict()
+        for klasse in get_organisatie_klassen(wedstrijd.organisatie, gekozen_boog_pks):
             klasse.sel = 'klasse_%s' % klasse.pk
             klasse.gebruikt = (klasse.pk in klassen_gebruikt)
-            klasse.selected = (klasse.pk in pks)
+            klasse.selected = (klasse.pk in gekozen_pks)
 
-            if klasse.leeftijdsklasse.wedstrijd_geslacht == 'M':
-                opt_klasse_1.append(klasse)
+            if klasse.leeftijdsklasse.wedstrijd_geslacht == GESLACHT_ALLE:
+                code += 1
+                klasse.code = code
+                code += 1
+                klasse.code_blokkeer = code
+                blokkeer2klasse[code] = klasse
             else:
-                opt_klasse_2.append(klasse)
+                klasse.code = code
+                klasse.code_blokkeer = 0
+
+            if wedstrijd.organisatie == ORGANISATIE_IFAA:
+                # zet de internationale klasse afkorting erachter
+                klasse.beschrijving += ' [%s]' % klasse.afkorting
+
+            volg_nr += 1
+            klasse.volg_nr = volg_nr
+
+            opt_klasse.append(klasse)
         # for
 
-        wedstrijd.wa_status_str = WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
-        context['opt_wa'] = opt_wa = list()
-        for afk, descr in WEDSTRIJD_WA_STATUS_TO_STR.items():
-            opt = SimpleNamespace()
-            opt.sel = 'wa_%s' % afk
-            opt.keuze_str = descr
-            opt.selected = (wedstrijd.wa_status == afk)
-            opt.disabled = (afk == WEDSTRIJD_WA_STATUS_A and not wedstrijd.voorwaarden_a_status_acceptatie)
-            opt_wa.append(opt)
+        for klasse in opt_klasse:
+            if klasse.code_blokkeer == 0:
+                # verwijs terug naar de klasse die deze blokkeert
+                try:
+                    klasse2 = blokkeer2klasse[klasse.code]
+                except KeyError:
+                    # niet nodig
+                    pass
+                else:
+                    klasse.code_blokkeer = klasse2.code
         # for
+
+        if wedstrijd.organisatie == ORGANISATIE_WA:
+            context['toon_wa_status'] = True
+            wedstrijd.wa_status_str = WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
+            context['opt_wa'] = opt_wa = list()
+            for afk, descr in WEDSTRIJD_WA_STATUS_TO_STR.items():
+                opt = SimpleNamespace()
+                opt.sel = 'wa_%s' % afk
+                opt.keuze_str = descr
+                opt.selected = (wedstrijd.wa_status == afk)
+                opt.disabled = (afk == WEDSTRIJD_WA_STATUS_A and not wedstrijd.voorwaarden_a_status_acceptatie)
+                opt_wa.append(opt)
+            # for
 
         context['opt_aanwezig'] = aanwezig = list()
         for mins in (10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60):
@@ -239,6 +272,9 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
             opt.selected = (wedstrijd.minuten_voor_begin_sessie_aanwezig_zijn == mins)
             aanwezig.append(opt)
         # for
+
+        context['prijs_euro_normaal_str'] = str(wedstrijd.prijs_euro_normaal).replace('.', ',')
+        context['prijs_euro_onder18_str'] = str(wedstrijd.prijs_euro_onder18).replace('.', ',')
 
         context['url_voorwaarden'] = settings.VOORWAARDEN_A_STATUS_URL
 
@@ -253,14 +289,16 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
             context['url_verwijder'] = context['url_opslaan']
 
         if self.rol_nu == Rollen.ROL_HWL:
-            url_terug = reverse('Kalender:vereniging')
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Kalender:vereniging'), 'Wedstrijdkalender'),
+                (None, 'Wijzig wedstrijd')
+            )
         else:
-            url_terug = reverse('Kalender:manager')
-
-        context['kruimels'] = (
-            (url_terug, 'Wedstrijdkalender'),
-            (None, 'Wijzig wedstrijd')
-        )
+            context['kruimels'] = (
+                (reverse('Kalender:manager'), 'Wedstrijdkalender'),
+                (None, 'Wijzig wedstrijd')
+            )
 
         menu_dynamics(self.request, context)
         return render(request, self.template_name, context)
@@ -326,6 +364,8 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                 # for
             # for
 
+            disc2str = ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS[wedstrijd.organisatie]
+
             wedstrijd.titel = request.POST.get('titel', wedstrijd.titel)[:50]
 
             if not limit_edits:
@@ -358,7 +398,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
 
             if not limit_edits:
                 disc = request.POST.get('discipline', '')
-                for afk in WEDSTRIJD_DISCIPLINE_TO_STR.keys():
+                for afk in disc2str.keys():
                     if disc == 'disc_' + afk:
                         wedstrijd.discipline = afk
                 # for
@@ -393,6 +433,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                 wedstrijd.scheidsrechters = request.POST.get('scheidsrechters', wedstrijd.scheidsrechters)[:500]
 
             if not block_edits:
+                # begrenzing is "doelgroep"
                 begrenzing = request.POST.get('begrenzing', '')[:20]     # afkappen voor de veiligheid
                 for code in WEDSTRIJD_BEGRENZING_TO_STR.keys():
                     if begrenzing == 'begrenzing_%s' % code:
@@ -400,6 +441,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                         break
                 # for
 
+            if not limit_edits:
                 boog_pks = list()
                 for boog in BoogType.objects.all():
                     if boog.pk in bogen_pks_gebruikt_in_sessies or request.POST.get('boog_%s' % boog.afkorting, ''):
@@ -408,12 +450,12 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                 # for
                 wedstrijd.boogtypen.set(boog_pks)
 
-                wedstrijd.contact_naam = request.POST.get('contact_naam', wedstrijd.contact_naam)[:50]
-                wedstrijd.contact_email = request.POST.get('contact_email', wedstrijd.contact_email)[:150]
-                wedstrijd.contact_website = request.POST.get('contact_website', wedstrijd.contact_website)[:100]
-                wedstrijd.contact_telefoon = request.POST.get('contact_telefoon', wedstrijd.contact_telefoon)[:50]
+            wedstrijd.contact_naam = request.POST.get('contact_naam', wedstrijd.contact_naam)[:50]
+            wedstrijd.contact_email = request.POST.get('contact_email', wedstrijd.contact_email)[:150]
+            wedstrijd.contact_website = request.POST.get('contact_website', wedstrijd.contact_website)[:100]
+            wedstrijd.contact_telefoon = request.POST.get('contact_telefoon', wedstrijd.contact_telefoon)[:50]
 
-                wedstrijd.bijzonderheden = request.POST.get('bijzonderheden', '')[:1000]
+            wedstrijd.bijzonderheden = request.POST.get('bijzonderheden', '')[:1000]
 
             data = request.POST.get('locatie', '')
             if data:
@@ -440,6 +482,32 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                 wedstrijd.extern_beheerd = True
             else:
                 wedstrijd.extern_beheerd = False
+
+            prijs = request.POST.get('prijs_normaal', '')
+            if prijs:
+                prijs = prijs.replace(',', '.')   # regionale verschillen afvangen
+                try:
+                    prijs = float(prijs[:6])      # afkappen voor de veiligheid
+                except ValueError:
+                    raise Http404('Geen toegestane prijs')
+
+                if prijs < 0.0 or prijs > 999.99:
+                    raise Http404('Geen toegestane prijs')
+
+                wedstrijd.prijs_euro_normaal = prijs
+
+            prijs = request.POST.get('prijs_onder18', '')
+            if prijs:
+                prijs = prijs.replace(',', '.')   # regionale verschillen afvangen
+                try:
+                    prijs = float(prijs[:6])      # afkappen voor de veiligheid
+                except ValueError:
+                    raise Http404('Geen toegestane prijs')
+
+                if prijs < 0.0 or prijs > 999.99:
+                    raise Http404('Geen toegestane prijs')
+
+                wedstrijd.prijs_euro_onder18 = prijs
 
             wedstrijd.save()
 

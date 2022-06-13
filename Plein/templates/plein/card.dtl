@@ -8,10 +8,11 @@
 
     Deze file formateert een kaartje aan de hand van de vier parameters:
 
-        title = "Account activiteit"
-        icon  = "recent_actors"
-        text  = "Toon overzicht van de recent gebruikte en aangemaakte accounts."
-        url   = de url waar je heen gaat na klikken op het kaartje
+        title   = "Account activiteit"
+        icon    = "recent_actors"
+        text    = "Toon overzicht van de recent gebruikte en aangemaakte accounts."
+        url     = de url waar je heen gaat na klikken op het kaartje
+        onclick = alternatief voor de url - roept een javascript functie aan
 
     Hierdoor is mogelijk om centraal de code van een kaartje aan te passen.
 
@@ -23,7 +24,11 @@
 <div class="nhb-card">
 
     <!-- de hele kaart is klikbaar -->
-    <a href="{{ url }}"{% if extern_open %} target="_blank" rel="noopener noreferrer"{% endif %}>
+    {% if onclick %}
+        <a href="#" onclick="{{ onclick }}">
+    {% else %}
+        <a href="{{ url }}"{% if extern_open %} target="_blank" rel="noopener noreferrer"{% endif %}>
+    {% endif %}
 
         {% if extern_open %}
             <div style="position:absolute; right:6px; top:6px">
@@ -35,7 +40,9 @@
         <div class="nhb-card-content center-align">
 
             <!-- titel -->
-            <div class="card-title">{{ title }}</div>
+            {% if title %}
+                <div class="card-title">{{ title }}</div>
+            {% endif %}
 
             <!-- icoon -->
             <div style="margin-bottom:8px">

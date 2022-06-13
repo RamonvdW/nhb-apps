@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -47,6 +47,7 @@ class TestLogboek(E2EHelpers, TestCase):
         schrijf_in_logboek(None, 'Records', 'import gelukt')
         schrijf_in_logboek(None, 'Rollen', 'Jantje is de baas')
         schrijf_in_logboek(None, 'NhbStructuur', 'weer een nieuw lid')
+        schrijf_in_logboek(None, 'Betalingen', 'Betalen maar')
         schrijf_in_logboek(None, 'Uitrol', 'Rollen met die hap')
         schrijf_in_logboek(self.account_normaal, 'OTP controle', 'alweer verkeerd')
         schrijf_in_logboek(self.account_same, 'Testafdeling', 'Afdeling gesloten')
@@ -154,6 +155,14 @@ class TestLogboek(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assertContains(resp, 'Groepeer ze maar')
 
+        # betalingen
+        with self.assert_max_queries(4):
+            resp = self.client.get(self.url_logboek + 'betalingen/')
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('logboek/betalingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Betalen maar')
+
         # uitrol
         with self.assert_max_queries(4):
             resp = self.client.get(self.url_logboek + 'uitrol/')
@@ -181,10 +190,11 @@ class TestLogboek(E2EHelpers, TestCase):
         # test illegale pagina nummers
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_logboek + 'crm-import/?page=999999')
-        self.assert404(resp)  # 404 = Not found
+        self.assert404(resp, 'Ongeldige pagina (999999): Die pagina bevat geen resultaten')     # django vertaling
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_logboek + 'crm-import/?page=test')
-        self.assert404(resp)  # 404 = Not found
+        self.assert404(resp, 'Pagina is niet')                                                  # django vertaling
+        self.assert404(resp, 'en kan ook niet naar een geheel getal worden geconverteerd')      # django vertaling
 
         # voeg wat extra regels toe aan het logboek
         # zorg voor 10+ pagina's

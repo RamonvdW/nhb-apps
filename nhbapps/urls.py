@@ -10,6 +10,7 @@ from django.urls import path
 from django.conf import settings
 from django.contrib import admin
 from django.conf.urls import include
+#from django.shortcuts import redirect
 from Plein.views import site_root_view
 from Plein.views_fout import (site_handler403_permission_denied,
                               site_handler404_page_not_found,
@@ -23,9 +24,11 @@ urlpatterns = [
     path('',                                site_root_view),
     path('account/',                        include('Account.urls')),
     path('beheer/',                         admin.site.urls),
+    path('bestel/',                         include('Bestel.urls')),
+    path('bestel/betaal/',                  include('Betaal.urls')),
     path('bondscompetities/deelnemen/',     include('CompInschrijven.urls')),
-    path('bondscompetities/regio/',         include('CompRegio.urls')),
-    path('bondscompetities/rk/',            include('CompRayon.urls')),
+    path('bondscompetities/regio/',         include('CompLaagRegio.urls')),
+    path('bondscompetities/rk/',            include('CompLaagRayon.urls')),
     path('bondscompetities/scores/',        include('CompScores.urls')),
     path('bondscompetities/uitslagen/',     include('CompUitslagen.urls')),
     path('bondscompetities/hist/',          include('HistComp.urls')),
@@ -42,7 +45,10 @@ urlpatterns = [
     path('sporter/bondspas/',               include('Bondspas.urls')),
     path('score/',                          include('Score.urls')),
     path('taken/',                          include('Taken.urls')),
-    path('vereniging/',                     include('Vereniging.urls'))
+    path('vereniging/',                     include('Vereniging.urls')),
+
+    # direct van oude urls naar nieuwe urls
+    #path('sporter/bondspas/', lambda request: redirect('ledenpas/', permanent=True)),
 ]
 
 if settings.DEBUG:          # pragma: no cover

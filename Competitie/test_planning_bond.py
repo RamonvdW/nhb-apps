@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
-from Competitie.models import (Competitie, CompetitieKlasse,
+from Competitie.models import (Competitie, CompetitieIndivKlasse,
                                DeelCompetitie, LAAG_REGIO, LAAG_RK, LAAG_BK,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
 from Functie.models import maak_functie
+from HistComp.models import HistCompetitie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
@@ -28,8 +29,12 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
-    url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'  # comp_pk
-    url_doorzetten_bk = '/bondscompetities/%s/doorzetten/bk/'  # comp_pk
+    url_planning_bk = '/bondscompetities/planning/bk/%s/'                       # deelcomp_pk
+    url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'                   # comp_pk
+    url_doorzetten_bk = '/bondscompetities/%s/doorzetten/bk/'                   # comp_pk
+    url_doorzetten_voorbij_bk = '/bondscompetities/%s/doorzetten/voorbij-bk/'   # comp_pk
+    url_competitie_overzicht = '/bondscompetities/%s/'                          # comp_pk
+    url_seizoen_afsluiten = '/bondscompetities/seizoen-afsluiten/'
 
     testdata = None
 
@@ -99,6 +104,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         # maak test leden aan die we kunnen koppelen aan beheerders functies
         self.account_bko_18 = self._prep_beheerder_lid('BKO')
+        self.account_bko_25 = self._prep_beheerder_lid('BKO')
         self.account_rko1_18 = self._prep_beheerder_lid('RKO1')
         self.account_rko2_18 = self._prep_beheerder_lid('RKO2')
         self.account_rcl101_18 = self._prep_beheerder_lid('RCL101')
@@ -138,9 +144,17 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         self.deelcomp_regio_101 = DeelCompetitie.objects.filter(competitie=self.comp_18,
                                                                 laag=LAAG_REGIO,
                                                                 nhb_regio=self.regio_101)[0]
+        self.deelcomp_regio_105 = DeelCompetitie.objects.filter(competitie=self.comp_18,
+                                                                laag=LAAG_REGIO,
+                                                                nhb_regio=self.regio_105)[0]
 
         self.functie_bko_18 = self.deelcomp_bond_18.functie
         self.functie_bko_18.accounts.add(self.account_bko_18)
+
+        self.deelcomp_bond_25 = DeelCompetitie.objects.filter(competitie=self.comp_25,
+                                                              laag=LAAG_BK)[0]
+        self.functie_bko_25 = self.deelcomp_bond_25.functie
+        self.functie_bko_25.accounts.add(self.account_bko_25)
 
         self.functie_rko1_18 = self.deelcomp_rayon1_18.functie
         self.functie_rko1_18.accounts.add(self.account_rko1_18)
@@ -157,19 +171,19 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         boog_c = BoogType.objects.get(afkorting='C')
 
-        klasse_r = CompetitieKlasse.objects.filter(indiv__boogtype__afkorting='R',
-                                                   indiv__is_onbekend=False,
-                                                   indiv__niet_voor_rk_bk=False)[0]
+        klasse_r = CompetitieIndivKlasse.objects.filter(boogtype__afkorting='R',
+                                                        is_onbekend=False,
+                                                        is_voor_rk_bk=True)[0]
 
-        klasse_c = CompetitieKlasse.objects.filter(indiv__boogtype__afkorting='C',
-                                                   indiv__is_onbekend=False,
-                                                   indiv__niet_voor_rk_bk=False)[0]
+        klasse_c = CompetitieIndivKlasse.objects.filter(boogtype__afkorting='C',
+                                                        is_onbekend=False,
+                                                        is_voor_rk_bk=True)[0]
 
         # recurve, lid 1
         RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_101,
                                     sporterboog=self.sporterboog,
                                     bij_vereniging=self.sporterboog.sporter.bij_vereniging,
-                                    klasse=klasse_r,
+                                    indiv_klasse=klasse_r,
                                     aantal_scores=7).save()
 
         # compound, lid 1
@@ -181,7 +195,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_101,
                                     sporterboog=sporterboog,
                                     bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                    klasse=klasse_c,
+                                    indiv_klasse=klasse_c,
                                     aantal_scores=6).save()
 
         # compound, lid2
@@ -193,10 +207,35 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         RegioCompetitieSchutterBoog(deelcompetitie=self.deelcomp_regio_101,
                                     sporterboog=sporterboog,
                                     bij_vereniging=sporterboog.sporter.bij_vereniging,
-                                    klasse=klasse_c,
+                                    indiv_klasse=klasse_c,
                                     aantal_scores=6).save()
 
-    def test_doorzetten_rk(self):
+    def test_planning_bk(self):
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
+
+        # verkeerde BKO
+        url = self.url_planning_bk % self.deelcomp_bond_25.pk
+        resp = self.client.get(url)
+
+        url = self.url_planning_bk % self.deelcomp_bond_18.pk
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/planning-landelijk.dtl', 'plein/site_layout.dtl'))
+
+        # probeer als BB
+        self.e2e_wisselnaarrol_bb()
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/planning-landelijk.dtl', 'plein/site_layout.dtl'))
+
+        # verkeerde deelcomp
+        resp = self.client.get(self.url_planning_bk % self.deelcomp_rayon1_18.pk)
+        self.assert404(resp, 'Verkeerde competitie (1)')
+
+    def test_doorzetten_naar_rk(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
@@ -206,6 +245,16 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_18, 'F')
         self.comp_18.bepaal_fase()
         self.assertEqual(self.comp_18.fase, 'F')
+
+        # zet een deelcompetitie die geen team competitie organiseert
+        self.deelcomp_regio_101.regio_organiseert_teamcompetitie = False
+        self.deelcomp_regio_101.save(update_fields=['regio_organiseert_teamcompetitie'])
+
+        # zet een deelcompetitie team ronde > 7
+        self.deelcomp_regio_105.huidige_team_ronde = 8
+        self.deelcomp_regio_105.save(update_fields=['huidige_team_ronde'])
+
+        # status ophalen
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -244,6 +293,10 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         management.call_command('regiocomp_mutaties', '1', '--quick', stderr=io.StringIO(), stdout=io.StringIO())
 
         self.assertEqual(3, KampioenschapSchutterBoog.objects.count())
+
+        # verkeerde competitie/BKO
+        resp = self.client.get(self.url_doorzetten_rk % self.comp_25.pk)
+        self.assert404(resp, 'Verkeerde competitie')
 
     def test_doorzetten_rk_geen_lid(self):
         # variant van doorzetten_rk met een lid dat niet meer bij een vereniging aangesloten is
@@ -286,7 +339,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
 
         # verdere tests in test_planning_rayon.test_geen_vereniging check
 
-    def test_doorzetten_bk(self):
+    def test_doorzetten_naar_bk(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
@@ -296,6 +349,11 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_18, 'M')
         self.comp_18.bepaal_fase()
         self.assertEqual(self.comp_18.fase, 'M')
+
+        # zet een rayon met status 'afgesloten'
+        self.deelcomp_rayon1_18.is_afgesloten = True
+        self.deelcomp_rayon1_18.save(update_fields=['is_afgesloten'])
+
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -314,6 +372,7 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         zet_competitie_fase(self.comp_18, 'N')
         self.comp_18.bepaal_fase()
         self.assertEqual(self.comp_18.fase, 'N')
+
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -332,61 +391,143 @@ class TestCompetitiePlanningBond(E2EHelpers, TestCase):
         objs = KampioenschapSchutterBoog.objects.filter(deelcompetitie=deelcomp_bk_18)
         self.assertEqual(objs.count(), 0)       # worden nog niet gemaakt, dus 0
 
-        team_klasse = CompetitieKlasse.objects.filter(indiv=None)[0]
-        deeln_bk = KampioenschapSchutterBoog(deelcompetitie=deelcomp_bk_18,
-                                             sporterboog=self.sporterboog,
-                                             klasse=team_klasse)
-        self.assertTrue(str(deeln_bk) != '')
-
-    def test_doorzetten_bad(self):
+    def test_bad(self):
         # moet BKO zijn
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_doorzetten_rk % 999999)
+        resp = self.client.get(self.url_doorzetten_rk % 999999)
         self.assert403(resp)
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_doorzetten_bk % 999999)
+        resp = self.client.get(self.url_doorzetten_bk % 999999)
         self.assert403(resp)
 
         # niet bestaande comp_pk
         self.e2e_wissel_naar_functie(self.functie_bko_18)
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_doorzetten_rk % 999999)
-        self.assert404(resp)     # 404 = Not found/allowed
+        resp = self.client.get(self.url_seizoen_afsluiten)
+        self.assert403(resp)
 
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_doorzetten_rk % 999999)
-        self.assert404(resp)     # 404 = Not found/allowed
+        resp = self.client.get(self.url_doorzetten_rk % 999999)
+        self.assert404(resp, 'Competitie niet gevonden')
 
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_doorzetten_bk % 999999)
-        self.assert404(resp)     # 404 = Not found/allowed
+        resp = self.client.post(self.url_doorzetten_rk % 999999)
+        self.assert404(resp, 'Competitie niet gevonden')
 
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_doorzetten_bk % 999999)
-        self.assert404(resp)     # 404 = Not found/allowed
+        resp = self.client.get(self.url_doorzetten_bk % 999999)
+        self.assert404(resp, 'Competitie niet gevonden')
+
+        resp = self.client.post(self.url_doorzetten_bk % 999999)
+        self.assert404(resp, 'Competitie niet gevonden')
+
+        resp = self.client.get(self.url_doorzetten_voorbij_bk % 999999)
+        self.assert404(resp, 'Competitie niet gevonden')
+
+        resp = self.client.post(self.url_doorzetten_voorbij_bk % 999999)
+        self.assert404(resp, 'Competitie niet gevonden')
+
+        resp = self.client.get(self.url_planning_bk % 999999)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # juiste comp_pk maar verkeerde fase
         zet_competitie_fase(self.comp_18, 'C')
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_doorzetten_rk % self.comp_18.pk)
-        self.assert404(resp)     # 404 = Not found/allowed
+        resp = self.client.get(self.url_doorzetten_rk % self.comp_18.pk)
+        self.assert404(resp, 'Verkeerde competitie fase')
+
+        resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
+        self.assert404(resp, 'Verkeerde competitie fase')
+
+        resp = self.client.get(self.url_doorzetten_bk % self.comp_18.pk)
+        self.assert404(resp, 'Verkeerde competitie fase')
+
+        resp = self.client.post(self.url_doorzetten_bk % self.comp_18.pk)
+        self.assert404(resp, 'Verkeerde competitie fase')
+
+        resp = self.client.get(self.url_doorzetten_voorbij_bk % self.comp_18.pk)
+        self.assert404(resp, 'Verkeerde competitie fase')
+
+        resp = self.client.post(self.url_doorzetten_voorbij_bk % self.comp_18.pk)
+        self.assert404(resp, 'Verkeerde competitie fase')
+
+    def test_doorzetten_voorbij_bk(self):
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
+
+        zet_competitie_fase(self.comp_18, 'R')
+        self.comp_18.bepaal_fase()
+        self.assertEqual(self.comp_18.fase, 'R')
+
+        url = self.url_doorzetten_voorbij_bk % self.comp_18.pk
+
+        # pagina ophalen
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/bko-doorzetten-voorbij-bk.dtl', 'plein/site_layout.dtl'))
+
+        # verkeerde BKO
+        self.e2e_wissel_naar_functie(self.functie_bko_25)
+        resp = self.client.get(url)
+        self.assert403(resp)
+        resp = self.client.post(url)
+        self.assert403(resp)
+
+        # echt doorzetten
+        self.e2e_wissel_naar_functie(self.functie_bko_18)
+        resp = self.client.post(url)
+        self.assert_is_redirect(resp, self.url_competitie_overzicht % self.comp_18.pk)
+
+    def test_seizoen_afsluiten(self):
+        # moet BB zijn
+        self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wisselnaarrol_bb()
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_doorzetten_rk % self.comp_18.pk)
-        self.assert404(resp)     # 404 = Not found/allowed
+            resp = self.client.get(self.url_seizoen_afsluiten)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/bb-seizoen-afsluiten.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_doorzetten_bk % self.comp_18.pk)
-        self.assert404(resp)     # 404 = Not found/allowed
+            resp = self.client.post(self.url_seizoen_afsluiten)
+        self.assert404(resp, 'Alle competities nog niet in fase S')
+
+        # maak een competitie van het volgende seizoen aan
+        competities_aanmaken(jaar=2020)
+
+        # maak een HistComp aan die straks doorgezet gaat worden
+        hist = HistCompetitie(
+                        seizoen='2019/2020',
+                        is_openbaar=False,
+                        klasse='Test',
+                        comp_type='18')
+        hist.save()
+
+        # fase S: pagina zonder knop 'doorzetten'
+        zet_competitie_fase(self.comp_18, 'S')
+        zet_competitie_fase(self.comp_25, 'S')
 
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_doorzetten_bk % self.comp_18.pk)
-        self.assert404(resp)     # 404 = Not found/allowed
+            resp = self.client.get(self.url_seizoen_afsluiten)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/bb-seizoen-afsluiten.dtl', 'plein/site_layout.dtl'))
+
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_seizoen_afsluiten)
+        self.assert_is_redirect(resp, '/bondscompetities/')
+
+        hist = HistCompetitie.objects.get(pk=hist.pk)
+        self.assertTrue(hist.is_openbaar)
+
+        # corner case: verwijder alle competitie
+        Competitie.objects.all().delete()
+
+        resp = self.client.get(self.url_seizoen_afsluiten)
+        self.assert404(resp, 'Geen competitie gevonden')
+
+        resp = self.client.post(self.url_seizoen_afsluiten)
+        self.assert404(resp, 'Geen competitie gevonden')
 
 
 # end of file

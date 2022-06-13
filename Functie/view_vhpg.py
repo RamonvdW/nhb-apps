@@ -98,7 +98,7 @@ class VhpgAcceptatieView(TemplateView):
             (None, 'Persoonsgegevens')
         )
 
-        menu_dynamics(request, context, actief="wissel-van-rol")
+        menu_dynamics(request, context)
         return render(request, TEMPLATE_VHPG_ACCEPTATIE, context)
 
     @staticmethod
@@ -121,7 +121,7 @@ class VhpgAcceptatieView(TemplateView):
 
         # checkbox is verplicht --> nog een keer
         context = {'form': form}
-        menu_dynamics(request, context, actief="hetplein")
+        menu_dynamics(request, context)
         return render(request, TEMPLATE_VHPG_ACCEPTATIE, context)
 
 

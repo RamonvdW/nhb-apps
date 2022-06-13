@@ -1,0 +1,106 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Planning{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Planning</h3>
+            <p>De RCL kan deze planning aanpassen.</p>
+            <p>
+                <a class="btn-nhb-rood" href="{{ handleiding_planning_regio_url }}" target="_blank" rel="noopener noreferrer">
+                    <i class="material-icons-round white-text left">help_outline</i>Handleiding</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Competitie</th>
+                    <td>{{ deelcomp.competitie.beschrijving }}</td>
+                </tr>
+                <tr>
+                    <th>Rayon</th>
+                    <td>{{ regio.rayon }}</td>
+                </tr>
+                <tr>
+                    <th>Regio</th>
+                    <td>{{ regio }}</td>
+                </tr>
+                <tr>
+                    <th>Inschrijfmethode</th>
+                    <td>{{ inschrijfmethode }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Planning {% if clusters %}per cluster{% else %}regio{% endif %}</h4>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        {% if clusters %}
+                            <th class="center">Cluster</th>
+                        {% endif %}
+                        <th>Beschrijving</th>
+                        <th class="center">Wedstrijden</th>
+                        <th class="center"><!-- kolom voor knoppen --></th>
+                    </tr>
+                </thead>
+
+                <tr>
+                    {% if clusters %}
+                        <td class="center">{{ regio.regio_nr }}</td>
+                    {% endif %}
+                    <td>{{ regio_ronde.beschrijving }}</td>
+                    <td class="center">{{ regio_ronde.wedstrijden_count }}</td>
+
+                    <td class="center">
+                        <a class="btn-nhb-rood" href="{{ regio_ronde.url }}">
+                            <img src="{% static 'plein/zoom_in.svg' %}" height="36px">
+                        </a>
+                    </td>
+                </tr>
+
+                {% for cluster in clusters %}
+                    <tr>
+                        <td class="center">{{ cluster.cluster_code }}</td>
+                        <td>{{ cluster.naam }}</td>
+                        <td class="center">{{ cluster.wedstrijden_count }}</td>
+
+                        <td class="center">
+                            <a class="btn-nhb-rood" href="{{ cluster.ronde_url }}">
+                                <img src="{% static 'plein/zoom_in.svg' %}" height="36px">
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="complaagregio-planning-regio-methode1" %}
+
+{% endblock %}

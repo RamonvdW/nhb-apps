@@ -16,7 +16,7 @@ MAXIMALE_LEEFTIJD_JEUGD = 20
 GESLACHT_MAN = 'M'          # geregistreerd geslacht / voor wedstrijdklassen
 GESLACHT_VROUW = 'V'        # geregistreerd geslacht / voor wedstrijdklassen
 GESLACHT_ANDERS = 'X'       # geregistreerd geslacht
-GESLACHT_ALLE = 'A'         # gender-neutraal voor wedstrijdklassen
+GESLACHT_ALLE = 'A'         # genderneutraal voor wedstrijdklassen
 
 # geregistreerde geslacht van sporters: M/V/X
 GESLACHT_MVX = [(GESLACHT_MAN, 'Man'),
@@ -34,7 +34,7 @@ GESLACHT_MV_MEERVOUD = [(GESLACHT_MAN, 'Mannen'),
 # mogelijk geslacht van sporters in wedstrijden: M/V/A
 WEDSTRIJDGESLACHT_MVA = [(GESLACHT_MAN, 'Man'),
                          (GESLACHT_VROUW, 'Vrouw'),
-                         (GESLACHT_ALLE, 'Alle')]       # gender-neutraal
+                         (GESLACHT_ALLE, 'Genderneutraal')]
 
 BLAZOEN_40CM = '40'
 BLAZOEN_60CM = '60'
@@ -73,18 +73,49 @@ BLAZOEN_CHOICES = [
     (BLAZOEN_DT, 'Dutch Target')
 ]
 
+# organisatie, om boogtype, leeftijdsklassen etc. uit elkaar te kunnen houden binnen 1 tabel
+ORGANISATIE_WA = 'W'      # World Archery
+ORGANISATIE_NHB = 'N'     # NHB
+ORGANISATIE_IFAA = 'F'    # International Field Archery Association
+
+ORGANISATIES = [
+    (ORGANISATIE_WA, 'World Archery'),
+    (ORGANISATIE_NHB, 'NHB'),
+    (ORGANISATIE_IFAA, 'IFAA'),
+]
+
+ORGANISATIES2SHORT_STR = {
+    ORGANISATIE_WA: 'WA',
+    ORGANISATIE_NHB: 'NHB',
+    ORGANISATIE_IFAA: 'IFAA',
+}
+
+ORGANISATIES2LONG_STR = {
+    ORGANISATIE_WA: 'World Archery',
+    ORGANISATIE_NHB: 'NHB',
+    ORGANISATIE_IFAA: 'IFAA',
+}
+
 
 class BoogType(models.Model):
     """ boog typen: volledige naam en unique afkorting """
 
-    # Recurve, etc.
-    beschrijving = models.CharField(max_length=50)
+    # WA, IFAA of nationaal
+    organisatie = models.CharField(max_length=1, choices=ORGANISATIES, default=ORGANISATIE_WA)
 
     # R, C, etc.
     afkorting = models.CharField(max_length=5)
 
+    # Recurve, etc.
+    beschrijving = models.CharField(max_length=50)
+
     # sorteervolgorde zodat order_by('volgorde') de juiste sortering oplevert
     volgorde = models.CharField(max_length=1, default='?')
+
+    # is dit boog type nog actueel?
+    # zolang in gebruik blijft een boogtype bestaan
+    # True = niet meer gebruiken voor nieuwe wedstrijden
+    buiten_gebruik = models.BooleanField(default=False)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
@@ -102,6 +133,8 @@ class BoogType(models.Model):
 
             # help sorteren op volgorde
             models.Index(fields=['volgorde']),
+
+            # TODO: extra index voor organisatie, in combinatie met afkorting/volgorde??
         ]
 
     objects = models.Manager()      # for the editor only
@@ -110,17 +143,25 @@ class BoogType(models.Model):
 class TeamType(models.Model):
     """ team type: voor gebruik in de team competities """
 
-    # Recurve team, etc.
-    beschrijving = models.CharField(max_length=50)
+    # WA, IFAA of nationaal
+    organisatie = models.CharField(max_length=1, choices=ORGANISATIES, default=ORGANISATIE_WA)
 
     # R/R2/C/BB/BB2/IB/TR/LB
     afkorting = models.CharField(max_length=3)
+
+    # Recurve team, etc.
+    beschrijving = models.CharField(max_length=50)
 
     # sorteervolgorde zodat order_by('volgorde') de juiste sortering oplevert
     volgorde = models.PositiveSmallIntegerField(default=0)
 
     # toegestane boogtypen
     boog_typen = models.ManyToManyField(BoogType)
+
+    # is dit team type nog actueel?
+    # zolang in gebruik blijft een teamtype bestaan
+    # True = niet meer gebruiken voor nieuwe wedstrijden
+    buiten_gebruik = models.BooleanField(default=False)
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
@@ -138,6 +179,8 @@ class TeamType(models.Model):
 
             # help sorteren op volgorde
             models.Index(fields=['volgorde']),
+
+            # TODO: extra index voor organisatie, in combinatie met afkorting/volgorde??
         ]
 
     objects = models.Manager()      # for the editor only
@@ -146,16 +189,19 @@ class TeamType(models.Model):
 class LeeftijdsKlasse(models.Model):
     """ definitie van een leeftijdsklasse """
 
+    # WA, IFAA of nationaal
+    organisatie = models.CharField(max_length=1, choices=ORGANISATIES, default=ORGANISATIE_WA)
+
     # SH = Senioren mannen, etc.
     afkorting = models.CharField(max_length=5)
-
-    # korte beschrijving: 'Onder 18', etc.
-    klasse_kort = models.CharField(max_length=30)
 
     # complete beschrijving: 'Onder 18, meisjes'
     beschrijving = models.CharField(max_length=80)      # CH Cadetten, mannen
 
-    # man, vrouw of gender-neutraal
+    # korte beschrijving: 'Onder 18', etc.
+    klasse_kort = models.CharField(max_length=30)
+
+    # man, vrouw of genderneutraal
     wedstrijd_geslacht = models.CharField(max_length=1, choices=WEDSTRIJDGESLACHT_MVA)
 
     # leeftijds grenzen voor de klassen: of ondergrens, of bovengrens
@@ -164,10 +210,6 @@ class LeeftijdsKlasse(models.Model):
     #   de senioren klasse heeft helemaal geen grens
     min_wedstrijdleeftijd = models.IntegerField()
     max_wedstrijdleeftijd = models.IntegerField()
-
-    # is dit een definitie volgens World Archery?
-    # kan gebruikt om te filteren bij A-status wedstrijden
-    volgens_wa = models.BooleanField(default=True)
 
     # presentatie volgorde: aspirant als laagste, veteraan als hoogste
     #  gender sub-volgorde: neutraal, man, vrouw
@@ -211,11 +253,13 @@ class LeeftijdsKlasse(models.Model):
         verbose_name = "Leeftijdsklasse"
         verbose_name_plural = "Leeftijdsklassen"
 
+        # TODO: index voor organisatie, in combinatie met afkorting/volgorde??
+
     objects = models.Manager()      # for the editor only
 
 
-class IndivWedstrijdklasse(models.Model):
-    """ definitie van een wedstrijdklasse voor de bondscompetities """
+class TemplateCompetitieIndivKlasse(models.Model):
+    """ definitie van een individuele klasse voor de volgende bondscompetities """
 
     # klassen die verouderd zijn krijgen worden op deze manier eruit gehaald
     # zonder dat referenties die nog in gebruik zijn kapot gaan
@@ -265,8 +309,8 @@ class IndivWedstrijdklasse(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Indiv Wedstrijdklasse"
-        verbose_name_plural = "Indiv Wedstrijdklassen"
+        verbose_name = "Template Competitie Indiv Klasse"
+        verbose_name_plural = "Template Competitie Indiv Klassen"
 
         indexes = [
             # help sorteren op volgorde
@@ -276,8 +320,8 @@ class IndivWedstrijdklasse(models.Model):
     objects = models.Manager()      # for the editor only
 
 
-class TeamWedstrijdklasse(models.Model):
-    """ definitie van een team wedstrijdklasse voor de bondscompetitie """
+class TemplateCompetitieTeamKlasse(models.Model):
+    """ definitie van een team klasse voor de volgende bondscompetities """
 
     # niet meer gebruiken?
     buiten_gebruik = models.BooleanField(default=False)
@@ -303,7 +347,7 @@ class TeamWedstrijdklasse(models.Model):
 
     # op welk soort blazoen schiet deze klasse in de kampioenschappen
     blazoen1_18m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
-    blazoen2_18m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)
+    blazoen2_18m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_40CM)       # TODO: kan weg
 
     blazoen_25m_rk_bk = models.CharField(max_length=2, choices=BLAZOEN_CHOICES, default=BLAZOEN_60CM)
 
@@ -316,8 +360,8 @@ class TeamWedstrijdklasse(models.Model):
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "Team Wedstrijdklasse"
-        verbose_name_plural = "Team Wedstrijdklassen"
+        verbose_name = "Template Competitie Team Klasse"
+        verbose_name_plural = "Template Competitie Team Klassen"
 
         indexes = [
             # help sorteren op volgorde
@@ -329,6 +373,9 @@ class TeamWedstrijdklasse(models.Model):
 
 class KalenderWedstrijdklasse(models.Model):
     """ definitie van de wedstrijdklassen voor de wedstrijdkalender """
+
+    # WA, IFAA of nationaal
+    organisatie = models.CharField(max_length=1, choices=ORGANISATIES, default=ORGANISATIE_WA)
 
     # klassen die verouderd zijn krijgen worden op deze manier eruit gehaald
     # zonder dat referenties die nog in gebruik zijn kapot gaan
@@ -346,14 +393,17 @@ class KalenderWedstrijdklasse(models.Model):
     # volgende voor gebruik bij het presenteren van een lijst van klassen
     volgorde = models.PositiveIntegerField()
 
+    # officiële (internationale) afkorting voor deze wedstrijdklasse
+    afkorting = models.CharField(max_length=10, default='?')
+
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
         return self.beschrijving
 
     class Meta:
         """ meta data voor de admin interface """
-        verbose_name = "KalenderWedstrijdklasse"
-        verbose_name_plural = "KalenderWedstrijdklassen"
+        verbose_name = "Kalender Wedstrijdklasse"
+        verbose_name_plural = "Kalender Wedstrijdklassen"
 
         indexes = [
             # help sorteren op volgorde

@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from Functie.models import Functie, maak_functie
+from Functie.models import Functie, maak_functie, account_needs_vhpg
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -24,6 +24,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
     url_activeer_functie = '/functie/activeer-functie/%s/'
     url_accountwissel = '/account/account-wissel/'
     url_bondscompetities = '/bondscompetities/'
+    url_vhpg_acceptatie = '/functie/vhpg-acceptatie/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -534,6 +535,42 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_sec)
         self.e2e_check_rol('SEC')
 
+    def test_bb_to_hwl_regio_100(self):
+        # maak een test vereniging
+        ver = NhbVereniging(
+            naam="Bondsbureau; veel te lange naam die afgekort wordt",
+            ver_nr="1001",
+            regio=NhbRegio.objects.get(pk=100))
+        ver.save()
+
+        functie_hwl = maak_functie('HWL ver 1001', 'HWL')
+        functie_hwl.nhb_ver = ver
+        functie_hwl.save()
+
+        self.e2e_account_accepteert_vhpg(self.account_admin)
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wissel_van_rol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        urls = self._get_wissel_urls(resp)
+        self.assertIn(self.url_activeer_functie % functie_hwl.pk, urls)
+
+    def test_vhpg(self):
+        # controleer doorsturen naar de VHPG acceptatie pagina
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_account_accepteert_vhpg(self.account_admin)
+
+        # forceer verlopen VHPG
+        _, vhpg = account_needs_vhpg(self.account_admin)
+        vhpg.acceptatie_datum -= datetime.timedelta(days=400)
+        vhpg.save(update_fields=['acceptatie_datum'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wissel_van_rol)
+        self.assert_is_redirect(resp, self.url_vhpg_acceptatie)
 
     # TODO: test maken waarbij gebruiker aan 2x rol zit met dezelfde 'volgorde' (gaf sorteerprobleem), zowel 2xBKO als 2xHWL
 

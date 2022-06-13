@@ -125,10 +125,10 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
 
         # klassengrenzen vaststellen
         url_klassengrenzen = '/bondscompetities/%s/klassengrenzen/vaststellen/'
-        with self.assert_max_queries(91):
+        with self.assert_max_queries(97):
             resp = self.client.post(url_klassengrenzen % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
-        with self.assert_max_queries(91):
+        with self.assert_max_queries(97):
             resp = self.client.post(url_klassengrenzen % self.comp_25.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2
@@ -177,7 +177,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
                 sporter.save()
 
                 if barebow_boog_pk:
-                    self.assertTrue(sporter.bereken_wedstrijdleeftijd(self.begin_jaar + 1) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
+                    self.assertTrue(sporter.bereken_wedstrijdleeftijd_wa(self.begin_jaar + 1) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT)
 
                 # haal de schutter voorkeuren op, zodat de schutterboog records aangemaakt worden
                 url_voorkeuren = '/sporter/voorkeuren/%s/' % lid_nr
@@ -188,7 +188,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
                 # zet de recurve boog aan
                 if lp == 1:
                     # zet de DT voorkeur aan voor een paar schutters
-                    with self.assert_max_queries(20):
+                    with self.assert_max_queries(25):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_R': 'on',
                                                                  'voorkeur_eigen_blazoen': 'on'})
@@ -196,18 +196,18 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
                     # 'lid_NNNNNN_boogtype_MM'
                     post_params['lid_%s_boogtype_%s' % (lid_nr, recurve_boog_pk)] = 'on'
                 elif lp == 2:
-                    with self.assert_max_queries(20):
+                    with self.assert_max_queries(25):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_C': 'on'})
                     post_params['lid_%s_boogtype_%s' % (lid_nr, compound_boog_pk)] = 'on'
                 elif barebow_boog_pk:
-                    with self.assert_max_queries(20):
+                    with self.assert_max_queries(25):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_BB': 'on'})
                     post_params['lid_%s_boogtype_%s' % (lid_nr, barebow_boog_pk)] = 'on'
                     barebow_boog_pk = None
                 else:
-                    with self.assert_max_queries(20):
+                    with self.assert_max_queries(25):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_R': 'on'})
                     post_params['lid_%s_boogtype_%s' % (lid_nr, recurve_boog_pk)] = 'on'
@@ -217,7 +217,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
 
             # schrijf in voor de competitie
             post_params['dagdeel'] = dagdelen.pop(-1)
-            with self.assert_max_queries(22):
+            with self.assert_max_queries(23):
                 resp = self.client.post(url_inschrijven, post_params)
             self.assert_is_redirect_not_plein(resp)         # check for success
         # for
@@ -347,47 +347,39 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
 
         # competitie bestaat niet
         url = self.url_behoefte3 % (999999, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         url = self.url_behoefte3_bestand % (999999, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # regio bestaat niet
         url = self.url_behoefte3 % (comp.pk, 999999)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         url = self.url_behoefte3_bestand % (comp.pk, 999999)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         # deelcomp bestaat niet
         url = self.url_behoefte3 % (comp.pk, 100)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         url = self.url_behoefte3_bestand % (comp.pk, 100)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         # correct, maar niet inschrijfmethode 3
         url = self.url_behoefte3 % (comp.pk, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde competitie fase')
 
         url = self.url_behoefte3_bestand % (comp.pk, 101)
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Verkeerde competitie fase')
 
 
 # end of file

@@ -32,7 +32,8 @@
      "phone_mobile": null,
      "iso_abbr": null,
      "latitude": null,
-     "longitude": null
+     "longitude": null,
+     "coc_number": null
     },
     {"club_number": 1001,
      "region_number": "z",
@@ -52,7 +53,8 @@
      "phone_mobile": null,
      "iso_abbr": null,
      "latitude": null,
-     "longitude": null
+     "longitude": null,
+     "coc_number": null
     },
     {"club_number": 1042,
      "region_number": 113,
@@ -70,7 +72,8 @@
      "phone_mobile": null,
      "iso_abbr": null,
      "latitude": null,
-     "longitude": null
+     "longitude": null,
+     "coc_number": null
     }
   ],
   "members": [

@@ -723,9 +723,8 @@
         <!-- blauwe balk met kaartjes -->
         <div class="col s12" style="margin-top:50px">
 
-            <!-- vereniging menu -->
-            {% include 'plein/card_button.dtl' with title="Lijst ophalen" text="Waarschijnlijke deelnemers toevoegen aan de uitslag." icon="add" onclick="deelnemers_ophalen(this)" %}
-            <!-- button class="btn-nhb-blauw" onclick="deelnemers_ophalen(this)">Waarschijnlijke deelnemers toevoegen</button -->
+            <!-- waarschijnlijke deelnemers -->
+            {% include 'plein/card.dtl' with title="Lijst ophalen" text="Waarschijnlijke deelnemers toevoegen aan de uitslag." icon="add" onclick="deelnemers_ophalen(this)" %}
 
         </div>
 

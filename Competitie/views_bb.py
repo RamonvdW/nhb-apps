@@ -5,24 +5,23 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.http import HttpResponseRedirect, Http404
-from django.shortcuts import render
-from django.urls import reverse
-from django.views.generic import TemplateView
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.shortcuts import redirect
 from django.conf import settings
-from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
+from django.urls import reverse
+from django.shortcuts import render, redirect
+from django.views.generic import TemplateView
+from django.utils.formats import localize
+from django.contrib.auth.mixins import UserPassesTestMixin
+from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
 from Functie.rol import Rollen, rol_get_huidige
 from HistComp.models import HistCompetitie
 from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from Score.operations import wanneer_ag_vastgesteld
-from django.utils.formats import localize
 from .models import (Competitie, DeelCompetitie, CompetitieMutatie, LAAG_REGIO,
                      MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
-from .operations import (bepaal_startjaar_nieuwe_competitie, get_mappings_wedstrijdklasse_to_competitieklasse,
-                         bepaal_klassengrenzen_indiv, bepaal_klassengrenzen_teams, competitie_klassengrenzen_vaststellen)
+from .operations import (bepaal_startjaar_nieuwe_competitie, bepaal_klassengrenzen_indiv, bepaal_klassengrenzen_teams,
+                         competitie_klassengrenzen_vaststellen)
 import datetime
 import time
 
@@ -33,6 +32,7 @@ TEMPLATE_COMPETITIE_KLASSENGRENZEN_VASTSTELLEN = 'competitie/bb-klassengrenzen-v
 TEMPLATE_COMPETITIE_AANGEMELD_REGIO = 'competitie/lijst-aangemeld-regio.dtl'
 TEMPLATE_COMPETITIE_AG_VASTSTELLEN = 'competitie/bb-ag-vaststellen.dtl'
 TEMPLATE_COMPETITIE_WIJZIG_DATUMS = 'competitie/bb-wijzig-datums.dtl'
+TEMPLATE_COMPETITIE_SEIZOEN_AFSLUITEN = 'competitie/bb-seizoen-afsluiten.dtl'
 
 mutatie_ping = BackgroundSync(settings.BACKGROUND_SYNC__REGIOCOMP_MUTATIES)
 
@@ -52,7 +52,7 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _get_queryset_indivklassen():
-        objs = (IndivWedstrijdklasse
+        objs = (TemplateCompetitieIndivKlasse
                 .objects
                 .filter(buiten_gebruik=False)
                 .select_related('boogtype')
@@ -69,7 +69,7 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _get_queryset_teamklassen():
-        objs = (TeamWedstrijdklasse
+        objs = (TemplateCompetitieTeamKlasse
                 .objects
                 .filter(buiten_gebruik=False)
                 .select_related('team_type')
@@ -298,13 +298,11 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
 
         context['comp'] = comp
 
-        trans_indiv, trans_team = get_mappings_wedstrijdklasse_to_competitieklasse(comp)
-
         if comp.klassengrenzen_vastgesteld:
             context['al_vastgesteld'] = True
         else:
-            context['klassengrenzen_indiv'] = bepaal_klassengrenzen_indiv(comp, trans_indiv)
-            context['klassengrenzen_teams'] = bepaal_klassengrenzen_teams(comp, trans_team)
+            context['klassengrenzen_indiv'] = bepaal_klassengrenzen_indiv(comp)
+            context['klassengrenzen_teams'] = bepaal_klassengrenzen_teams(comp)
             context['wedstrijdjaar'] = comp.begin_jaar + 1
 
         datum = wanneer_ag_vastgesteld(comp.afstand)
@@ -450,5 +448,98 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
 
         return HttpResponseRedirect(reverse('Competitie:overzicht',
                                             kwargs={'comp_pk': comp.pk}))
+
+
+class SeizoenAfsluitenView(UserPassesTestMixin, TemplateView):
+
+    """ Met deze view kan de BKO de competitie afsluiten """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_COMPETITIE_SEIZOEN_AFSLUITEN
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu == Rollen.ROL_BB
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        begin_jaar = None
+        comps = list()      # af te sluiten competities
+        for comp in (Competitie
+                     .objects
+                     .exclude(is_afgesloten=True)
+                     .order_by('afstand',
+                               'begin_jaar')):      # laagste jaar eerst --> oudste competitie eerst
+
+            if begin_jaar is None or comp.begin_jaar == begin_jaar:
+                begin_jaar = comp.begin_jaar
+                comp.bepaal_fase()
+                comps.append(comp)
+        # for
+
+        if len(comps) == 0:
+            raise Http404('Geen competitie gevonden')
+
+        context['seizoen'] = '%s/%s' % (begin_jaar, begin_jaar + 1)
+        context['comps'] = comps
+
+        context['url_afsluiten'] = reverse('Competitie:bb-seizoen-afsluiten')
+        for comp in comps:
+            if comp.fase != 'S':
+                context['url_afsluiten'] = None
+        # for
+
+        context['kruimels'] = (
+            (reverse('Competitie:kies'), 'Bondscompetities'),
+            (None, 'Seizoen afsluiten'),
+        )
+
+        menu_dynamics(self.request, context)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """ Deze functie wordt aangeroepen als de knop 'Seizoen afsluiten' gebruikt wordt door de BKO.
+        """
+
+        begin_jaar = None
+        comps = list()      # af te sluiten competities
+        for comp in (Competitie
+                     .objects
+                     .exclude(is_afgesloten=True)
+                     .order_by('afstand',
+                               'begin_jaar')):      # laagste jaar eerst --> oudste competitie eerst
+
+            if begin_jaar is None or comp.begin_jaar == begin_jaar:
+                begin_jaar = comp.begin_jaar
+                comp.bepaal_fase()
+                comps.append(comp)
+        # for
+
+        if len(comps) == 0:
+            raise Http404('Geen competitie gevonden')
+
+        for comp in comps:
+            if comp.fase != 'S':
+                raise Http404('Alle competities nog niet in fase S')
+        # for
+
+        for comp in comps:
+            comp.is_afgesloten = True
+            comp.save(update_fields=['is_afgesloten'])
+        # for
+
+        # maak de HistComp uitslagen openbaar voor dit seizoen
+        seizoen = '%s/%s' % (comps[0].begin_jaar, comps[0].begin_jaar + 1)
+        for histcomp in HistCompetitie.objects.filter(seizoen=seizoen, is_openbaar=False):
+            histcomp.is_openbaar = True
+            histcomp.save(update_fields=['is_openbaar'])
+        # for
+
+        return HttpResponseRedirect(reverse('Competitie:kies'))
+
 
 # end of file

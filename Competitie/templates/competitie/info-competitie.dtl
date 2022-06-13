@@ -179,14 +179,14 @@ Je schiet <b>7 rondes</b>, waarvan de beste 6 tellend zijn.</p>
 
                 <p>We hebben een aparte pagina waarop de leeftijdsgroepen uitgelegd staan:</p>
                 <p>
-                    <a class="btn-nhb-rood" href="{% url 'Competitie:info-leeftijden' %}">Leeftijden</a>
+                    <a class="btn-nhb-rood" href="{% url 'Sporter:leeftijdsgroepen' %}">Leeftijden</a>
                 </p>
 
                 <p>Sporters die vorige seizoen 6 scores neergezet hebben krijgen aan de hand van dat gemiddelde een <i>aanvangsgemiddelde</i> waarmee de indeling op speelsterkte gedaan wordt.
 Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
 
                 <p>In elke van de {{ klassen_count }} wedstrijdklassen wordt de sporter met de hoogste score gekroond tot <b>regiokampioen</b>.</p>
-                <p>De wedstrijdklassen van de bondscompetitie zijn gender-neutraal, behalve in de jongste leeftijdsklassen (Onder 12 en Onder 14, voorheen aspiranten) waarin aparte medailles uitgedeeld worden aan jongens en meisjes.</p>
+                <p>De wedstrijdklassen van de bondscompetitie zijn genderneutraal, behalve in de jongste leeftijdsklassen (Onder 12 en Onder 14, voorheen aspiranten) waarin aparte medailles uitgedeeld worden aan jongens en meisjes.</p>
             </div>
         </div>
     </div>
@@ -269,10 +269,10 @@ Nieuwe sporters krijgen na 3 scores hun speelsterkte vastgesteld.</p>
                 <table>
                     <tr>
                         <td class="center">
-                            <img src="{% static 'plein/blazoen_dt.png' %}" style="max-height:300px; height:auto" loading="lazy" alt="Dutch Target blazoen">
+                            <img src="{% static 'plein/blazoen_dt_134x394.png' %}" style="max-height:300px; height:auto" loading="lazy" alt="Dutch Target blazoen">
                         </td>
                         <td class="center">
-                            <img src="{% static 'plein/blazoen_40cm.png' %}" style="max-height:220px; height:auto; border:1px solid gray" loading="lazy" alt="40cm / 60cm blazoen" >
+                            <img src="{% static 'plein/blazoen_40cm_330x328.png' %}" style="max-height:220px; height:auto; border:1px solid gray" loading="lazy" alt="40cm / 60cm blazoen" >
                         </td>
                     </tr>
                     <tr>

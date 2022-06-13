@@ -27,7 +27,8 @@
      "phone_mobile": null,
      "iso_abbr": null,
      "latitude": null,
-     "longitude": null
+     "longitude": null,
+     "coc_number": null
     },
     {"club_number": 1377,
      "region_number": 111,
@@ -45,7 +46,8 @@
      "phone_mobile": null,
      "iso_abbr": null,
      "latitude": null,
-     "longitude": null
+     "longitude": null,
+     "coc_number": null
     }
   ],
   "members": [
@@ -66,7 +68,8 @@
       "iso_abbr": null,
       "latitude": null,
       "longitude": null,
-      "blocked": false
+      "blocked": false,
+      "skill_levels": []
     },
     {"member_number": 100024,
       "club_number": 1000,
@@ -85,7 +88,8 @@
       "iso_abbr": null,
       "latitude": null,
       "longitude": null,
-      "blocked": true
+      "blocked": true,
+      "skill_levels": []
     },
     {"member_number": 100025,
       "club_number": 1000,
@@ -104,7 +108,8 @@
       "iso_abbr": null,
       "latitude": null,
       "longitude": null,
-      "blocked": false
+      "blocked": false,
+      "skill_levels": []
     }
   ]
 }

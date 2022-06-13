@@ -122,10 +122,10 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
         # klassengrenzen vaststellen
         url_klassengrenzen = '/bondscompetities/%s/klassengrenzen/vaststellen/'
-        with self.assert_max_queries(91):
+        with self.assert_max_queries(97):
             resp = self.client.post(url_klassengrenzen % self.comp_18.pk)
             self.assert_is_redirect_not_plein(resp)  # check for success
-        with self.assert_max_queries(91):
+        with self.assert_max_queries(97):
             resp = self.client.post(url_klassengrenzen % self.comp_25.pk)
             self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2
@@ -174,7 +174,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
                 # zet de recurve boog aan
                 if lp == 1:
                     # zet de DT voorkeur aan voor een paar sporters
-                    with self.assert_max_queries(20):
+                    with self.assert_max_queries(25):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_R': 'on',
                                                                  'voorkeur_eigen_blazoen': 'on'})
@@ -182,18 +182,18 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
                     # 'lid_NNNNNN_boogtype_MM'
                     post_params['lid_%s_boogtype_%s' % (lid_nr, recurve_boog_pk)] = 'on'
                 elif lp == 2:
-                    with self.assert_max_queries(20):
+                    with self.assert_max_queries(25):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_C': 'on'})
                     post_params['lid_%s_boogtype_%s' % (lid_nr, compound_boog_pk)] = 'on'
                 elif barebow_boog_pk:
-                    with self.assert_max_queries(20):
+                    with self.assert_max_queries(25):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_BB': 'on'})
                     post_params['lid_%s_boogtype_%s' % (lid_nr, barebow_boog_pk)] = 'on'
                     barebow_boog_pk = None
                 else:
-                    with self.assert_max_queries(20):
+                    with self.assert_max_queries(25):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_R': 'on'})
                     post_params['lid_%s_boogtype_%s' % (lid_nr, recurve_boog_pk)] = 'on'
@@ -202,7 +202,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
             # for
 
             # schrijf in voor de competitie
-            with self.assert_max_queries(22):
+            with self.assert_max_queries(23):
                 resp = self.client.post(url_inschrijven, post_params)
             self.assert_is_redirect_not_plein(resp)         # check for success
         # for
@@ -358,24 +358,22 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         # alle datums verplicht
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'datum1': '2019-08-09'})
-        self.assert404(resp)     # 404 = Not found
+        self.assert404(resp, 'Verplichte parameter ontbreekt')
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'datum1': 'null',
                                           'datum2': 'hallo',
                                           'datum3': '0',
                                           'datum4': '2019-13-42'})
-        self.assert404(resp)     # 404 = Not found
+        self.assert404(resp, 'Geen valide datum')
 
         # foute comp_pk bij get
         url = self.url_wijzigdatums % 999999
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.get(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
         # foute comp_pk bij post
-        with self.assert_max_queries(20):
-            resp = self.client.post(url)
-        self.assert404(resp)     # 404 = Not found
+        resp = self.client.post(url)
+        self.assert404(resp, 'Competitie niet gevonden')
 
 # end of file

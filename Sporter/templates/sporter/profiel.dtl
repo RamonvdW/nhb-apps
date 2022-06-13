@@ -19,7 +19,7 @@
             form.setAttribute('method', 'post');
             form.setAttribute('action', id.getAttribute("data-url"));
 
-            inp = document.createElement('input');
+            const inp = document.createElement('input');
             inp.type = "hidden";
             inp.name = "csrfmiddlewaretoken";
             inp.value = getCookie('csrftoken');
@@ -221,6 +221,27 @@
             {% include 'plein/card.dtl' with title="Bondspas" text="Bekijk je digitale bondspas." icon="card_membership" url=url_bondspas %}
         </div>
     </div>
+
+
+    {% if toon_bestellingen %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Bestellingen</h4>
+                <p>Bekijk alle details van eerder gemaakte bestellingen en regel betaling.</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+                {% url 'Bestel:toon-bestellingen' as card_url %}
+                {% include 'plein/card.dtl' with title="Bestellingen" text="Alle details van je bestellingen." icon="receipt_long" url=card_url %}
+            </div>
+        </div>
+
+    {% endif %}
 
 
     <!-- witruimte -->

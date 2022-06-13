@@ -5,10 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import auth
+from django.core import management
 from django.conf import settings
-from django.test import TestCase, Client
+from django.test import TestCase, Client, override_settings
 from django.db import connection
-from Account.models import Account, account_create
+from Account.models import Account
+from Account.operations import account_create
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
 from TestHelpers.e2estatus import validated_templates, included_templates
 from contextlib import contextmanager
@@ -20,6 +22,7 @@ import tempfile
 import vnujar
 import pyotp
 import time
+import io
 
 
 # debug optie: toon waar in de code de queries vandaan komen
@@ -124,12 +127,13 @@ class E2EHelpers(TestCase):
         account.save()
         return account
 
-    def e2e_login_no_check(self, account, wachtwoord=None):
+    def e2e_login_no_check(self, account, wachtwoord=None, follow=False):
         """ log in op de website via de voordeur, zodat alle rechten geëvalueerd worden """
         if not wachtwoord:
             wachtwoord = self.WACHTWOORD
         resp = self.client.post('/account/login/', {'login_naam': account.username,
-                                                    'wachtwoord': wachtwoord})
+                                                    'wachtwoord': wachtwoord},
+                                follow=follow)
         return resp
 
     def e2e_login(self, account, wachtwoord=None):
@@ -164,11 +168,11 @@ class E2EHelpers(TestCase):
 
         if functie.rol in ('SEC', 'HWL', 'WL'):
             self.assert_is_redirect(resp, '/vereniging/')
-        elif functie.rol in ('BKO', 'RKO', 'RCL') and resp.url.startswith('/bondscompetities/'):
+        elif functie.rol in ('BKO', 'RKO', 'RCL') and resp.url.startswith('/bondscompetities/'):    # pragma: no branch
             # als er geen competitie is, dan verwijst deze alsnog naar wissel-van-rol
             self.assert_is_redirect(resp, '/bondscompetities/##')
         else:
-            self.assert_is_redirect(resp, '/functie/wissel-van-rol/')
+            self.assert_is_redirect(resp, '/functie/wissel-van-rol/')                               # pragma: no cover
 
     def e2e_check_rol(self, rol_verwacht):
         resp = self.client.get('/functie/wissel-van-rol/')
@@ -190,20 +194,33 @@ class E2EHelpers(TestCase):
     def e2e_dump_resp(self, resp):                        # pragma: no cover
         print("status code:", resp.status_code)
         print(repr(resp))
+        is_attachment = False
         if resp.status_code == 302:
             print("redirect to url:", resp.url)
         else:
-            print('templates used:')
-            for templ in resp.templates:
-                print('   %s' % repr(templ.name))
-            # for
-        content = str(resp.content)
-        content = self._remove_debug_toolbar(content)
-        if len(content) < 50:
-            print("very short content:", content)
+            try:
+                header = resp['Content-Disposition']
+            except KeyError:
+                pass
+            else:
+                is_attachment = header.startswith('attachment; filename')
+
+            if not is_attachment:
+                print('templates used:')
+                for templ in resp.templates:
+                    print('   %s' % repr(templ.name))
+                # for
+
+        if is_attachment:
+            print('content is an attachment: %s...' % str(resp.content)[:20])
         else:
-            soup = BeautifulSoup(content, features="html.parser")
-            print(soup.prettify())
+            content = str(resp.content)
+            content = self._remove_debug_toolbar(content)
+            if len(content) < 50:
+                print("very short content:", content)
+            else:
+                soup = BeautifulSoup(content, features="html.parser")
+                print(soup.prettify())
 
     def extract_all_urls(self, resp, skip_menu=False, skip_smileys=True, skip_broodkruimels=True, data_urls=True):
         content = str(resp.content)
@@ -212,15 +229,16 @@ class E2EHelpers(TestCase):
             # menu is the in the navbar at the top of the page
             # it ends with the nav-content-scrollbar div
             pos = content.find('<div class="nav-content-scrollbar">')
-            if pos >= 0:
+            if pos >= 0:                                                        # pragma: no branch
                 content = content[pos:]
         else:
             # skip the headers
             pos = content.find('<body')
-            if pos > 0:                             # pragma: no branch
-                content = content[pos:]             # strip head section
+            if pos > 0:                                                         # pragma: no branch
+                # strip head section
+                content = content[pos:]
 
-        if skip_broodkruimels:
+        if skip_broodkruimels:                                                  # pragma: no branch
             pos = content.find('class="broodkruimels-')
             if pos >= 0:
                 content = content[pos:]
@@ -296,7 +314,7 @@ class E2EHelpers(TestCase):
             return
 
         resp = self.client.head(link)
-        if resp.status_code != 200:
+        if resp.status_code != 200:                                                 # pragma: no cover
             self.fail(msg='Link not usable (code %s) on page %s (%s)' % (resp.status_code, template_name, link))
 
     def assert_broodkruimels(self, content, template_name):
@@ -460,7 +478,7 @@ class E2EHelpers(TestCase):
             if klass.find("z-depth") < 0:
                 p1 = klass.find("col s10")
                 p2 = klass.find("white")
-                if p1 >= 0 and p2 >= 0:
+                if p1 >= 0 and p2 >= 0:             # pragma: no cover
                     msg = 'Found grid col s10 + white (too much unused space on small) --> use separate div.white + padding:10px) in %s' % dtl
                     self.fail(msg)
 
@@ -488,6 +506,7 @@ class E2EHelpers(TestCase):
         self.assertNotIn('<th/>', html, msg='Illegal <th/> must be replaced with <th></th> in %s' % dtl)
         self.assertNotIn('<td/>', html, msg='Illegal <td/> must be replaced with <td></td> in %s' % dtl)
         self.assertNotIn('<thead><th>', html, msg='Missing <tr> between <thead> and <th> in %s' % dtl)
+        self.assertNotIn('<script>', html, msg='Missing type="application/javascript" in <script> in %s' % dtl)
 
         self.assert_link_quality(html, dtl)
         self.assert_broodkruimels(html, dtl)
@@ -597,14 +616,13 @@ class E2EHelpers(TestCase):
                 self.fail(msg='Onverwachte status code %s bij PATCH command' % resp.status_code)
 
     def assert_is_redirect(self, resp, expected_url):
-        if resp.status_code != 302:
-            if resp.status_code != 302:  # pragma: no cover
-                # geef een iets uitgebreider antwoord
-                msg = "status_code: %s != 302" % resp.status_code
-                if resp.status_code == 200:
-                    self.e2e_dump_resp(resp)
-                    msg += "; templates used: %s" % repr([tmpl.name for tmpl in resp.templates])
-                self.fail(msg=msg)
+        if resp.status_code != 302:  # pragma: no cover
+            # geef een iets uitgebreider antwoord
+            msg = "status_code: %s != 302" % resp.status_code
+            if resp.status_code == 200:
+                self.e2e_dump_resp(resp)
+                msg += "; templates used: %s" % repr([tmpl.name for tmpl in resp.templates])
+            self.fail(msg=msg)
         pos = expected_url.find('##')
         if pos > 0:
             self.assertTrue(resp.url.startswith(expected_url[:pos]))
@@ -723,16 +741,16 @@ class E2EHelpers(TestCase):
         # of een redirect hebben gekregen naar de login pagina
 
         if isinstance(resp, str):
-            self.fail(msg='Incorrect invocation: missing resp parameter?')          # pragma: no cover
+            self.fail(msg='Verkeerde aanroep: resp parameter vergeten?')            # pragma: no cover
 
         if resp.status_code == 302:
-            if resp.url != '/account/login/':
+            if resp.url != '/account/login/':                                       # pragma: no cover
                 self.e2e_dump_resp(resp)
-                self.fail(msg="Unexpected redirect to %s" % resp.url)
+                self.fail(msg="Onverwachte redirect naar %s" % resp.url)
         else:
             if resp.status_code != 200:     # pragma: no cover
                 self.e2e_dump_resp(resp)
-                self.fail(msg="Unexpected status code %s instead of 200" % resp.status_code)
+                self.fail(msg="Onverwachte status code %s; verwacht: 200" % resp.status_code)
 
             self.assertEqual(resp.status_code, 200)
             self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
@@ -745,39 +763,102 @@ class E2EHelpers(TestCase):
                     pagina = pagina[pos+6:]
                     pos = pagina.find('</code>')
                     pagina = pagina[:pos]
-                    self.fail(msg='403 pagina contained %s instead of %s' % (repr(pagina), repr(expected_msg)))
+                    self.fail(msg='403 pagina bevat %s in plaats van %s' % (repr(pagina), repr(expected_msg)))
 
     def assert404(self, resp, expected_msg=''):
         if isinstance(resp, str):
-            self.fail(msg='Incorrect invocation: missing resp parameter?')          # pragma: no cover
+            self.fail(msg='Verkeerde aanroep: resp parameter vergeten?')            # pragma: no cover
 
         # controleer dat we op de speciale code-404 handler pagina gekomen zijn
-        if resp.status_code != 200:     # pragma: no cover
+        if resp.status_code != 200:                                                 # pragma: no cover
             self.e2e_dump_resp(resp)
-            self.fail(msg="Unexpected status code %s instead of 200" % resp.status_code)
+            self.fail(msg="Onverwachte status code %s; verwacht: 200" % resp.status_code)
 
         # controleer dat we op de speciale code-404 handler pagina gekomen zijn
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('plein/fout_404.dtl', 'plein/site_layout_minimaal.dtl'))
 
-        if expected_msg:
+        if expected_msg:                                                            # pragma: no branch
             pagina = str(resp.content)
             if expected_msg not in pagina:                                          # pragma: no cover
                 # haal de nuttige regel informatie uit de 404 pagina en toon die
                 pos = pagina.find('<code>')
-                pagina = pagina[pos+6:]
+                if pos >= 0:
+                    pagina = pagina[pos+6:]
+                    pos = pagina.find('</code>')
+                    pagina = pagina[:pos]
+                self.fail(msg='404 pagina bevat %s; verwacht: %s' % (repr(pagina), repr(expected_msg)))
+        else:                                                                       # pragma: no cover
+            pagina = str(resp.content)
+            pos = pagina.find('<code>')
+            if pos >= 0:
+                pagina = pagina[pos + 6:]
                 pos = pagina.find('</code>')
                 pagina = pagina[:pos]
-                self.fail(msg='404 pagina contained %s instead of %s' % (repr(pagina), repr(expected_msg)))
+            self.fail(msg='404 pagina, maar geen expected_msg! Inhoud pagina: %s' % repr(pagina))
 
     def assert200_file(self, resp):
         if resp.status_code != 200:                                 # pragma: no cover
             self.e2e_dump_resp(resp)
-            self.fail(msg="Unexpected status code %s instead of 200" % resp.status_code)
+            self.fail(msg="Onverwachte foutcode %s in plaats van 200" % resp.status_code)
 
         header = resp['Content-Disposition']
         if not header.startswith('attachment; filename'):           # pragma: no cover
-            self.fail(msg="Response is not a file attachment")
+            self.fail(msg="Response is geen file attachment")
 
+    def verwerk_regiocomp_mutaties(self, show_warnings=True, show_all=False):
+        # vraag de achtergrondtaak om de mutaties te verwerken
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('regiocomp_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+
+        err_msg = f1.getvalue()
+        if '[ERROR]' in err_msg:                        # pragma: no cover
+            self.fail(msg='Onverwachte fout van regiocomp_mutaties:\n' + err_msg)
+
+        if show_all:                                                            # pragma: no cover
+            print(f1.getvalue())
+            print(f2.getvalue())
+
+        elif show_warnings:
+            lines = f1.getvalue() + '\n' + f2.getvalue()
+            for line in lines.split('\n'):
+                if line.startswith('[WARNING] '):                               # pragma: no cover
+                    print(line)
+            # for
+
+    def verwerk_bestel_mutaties(self, show_warnings=True, show_all=False, fail_on_error=True):
+        # vraag de achtergrondtaak om de mutaties te verwerken
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('bestel_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+
+        if fail_on_error:
+            err_msg = f1.getvalue()
+            if '[ERROR]' in err_msg:                        # pragma: no cover
+                self.fail(msg='Onverwachte fout van bestel_mutaties:\n' + err_msg)
+
+        if show_all:                                                            # pragma: no cover
+            print(f1.getvalue())
+            print(f2.getvalue())
+
+        elif show_warnings:                                                     # pragma: no branch
+            lines = f1.getvalue() + '\n' + f2.getvalue()
+            for line in lines.split('\n'):
+                if line.startswith('[WARNING] '):                               # pragma: no cover
+                    print(line)
+            # for
+
+        return f1, f2
+
+    @staticmethod
+    def verwerk_betaal_mutaties(betaal_api):
+        # vraag de achtergrondtaak om de mutaties te verwerken
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with override_settings(BETAAL_API=betaal_api):
+            management.call_command('betaal_mutaties', '1', '--quick', stderr=f1, stdout=f2)
+
+        return f1, f2
 
 # end of file

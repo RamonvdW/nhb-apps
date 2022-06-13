@@ -11,6 +11,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils.formats import localize
 from django.db.models import Q
 from BasisTypen.models import BoogType
+from Bestel.models import Bestelling
 from Competitie.models import (Competitie, DeelCompetitie,
                                RegioCompetitieSchutterBoog,
                                LAAG_REGIO, INSCHRIJF_METHODE_1)
@@ -20,8 +21,7 @@ from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Plein.menu import menu_dynamics
 from Records.models import IndivRecord, MATERIAALKLASSE
 from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
-from .view_voorkeuren import get_sporter_voorkeuren
-from .models import SporterBoog, Speelsterkte
+from .models import SporterBoog, Speelsterkte, get_sporter_voorkeuren
 from decimal import Decimal
 import logging
 import copy
@@ -179,7 +179,6 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         for deelcompetitie in (DeelCompetitie
                                .objects
                                .select_related('competitie')
-                               .prefetch_related('competitie__competitieklasse_set')
                                .exclude(competitie__is_afgesloten=True)
                                .filter(competitie__pk__in=comp_pks,
                                        laag=LAAG_REGIO,
@@ -188,41 +187,44 @@ class ProfielView(UserPassesTestMixin, TemplateView):
             comp = deelcompetitie.competitie
             comp.bepaal_fase()
 
+            comp_boog_afk = [boogtype.afkorting for boogtype in comp.boogtypen.all()]
+
             # doorloop elk boogtype waar de sporter informatie/wedstrijden voorkeur voor heeft
             for afk in boog_afkorting_wedstrijd:
-                obj = copy.copy(deelcompetitie)
-                objs.append(obj)
+                if afk in comp_boog_afk:
+                    obj = copy.copy(deelcompetitie)
+                    objs.append(obj)
 
-                obj.boog_afkorting = afk
-                obj.boog_beschrijving = boog_dict[afk].beschrijving
-                obj.boog_niet_meer = False
-                obj.is_ingeschreven = False
+                    obj.boog_afkorting = afk
+                    obj.boog_beschrijving = boog_dict[afk].beschrijving
+                    obj.boog_niet_meer = False
+                    obj.is_ingeschreven = False
 
-                # zoek uit of de sporter al ingeschreven is
-                sporterboog = boogafk2sporterboog[afk]
-                for inschrijving in inschrijvingen:
-                    if inschrijving.sporterboog == sporterboog and inschrijving.deelcompetitie == obj:
-                        obj.is_ingeschreven = True
-                        inschrijvingen.remove(inschrijving)
-                        if comp.fase <= 'B':
-                            obj.url_afmelden = reverse('CompInschrijven:afmelden',
-                                                       kwargs={'deelnemer_pk': inschrijving.pk})
+                    # zoek uit of de sporter al ingeschreven is
+                    sporterboog = boogafk2sporterboog[afk]
+                    for inschrijving in inschrijvingen:
+                        if inschrijving.sporterboog == sporterboog and inschrijving.deelcompetitie == obj:
+                            obj.is_ingeschreven = True
+                            inschrijvingen.remove(inschrijving)
+                            if comp.fase <= 'B':
+                                obj.url_afmelden = reverse('CompInschrijven:afmelden',
+                                                           kwargs={'deelnemer_pk': inschrijving.pk})
+                                gebruik_knoppen = True
+
+                            if obj.inschrijf_methode == INSCHRIJF_METHODE_1 and comp.fase <= 'E':
+                                obj.url_schietmomenten = reverse('CompLaagRegio:keuze-zeven-wedstrijden',
+                                                                 kwargs={'deelnemer_pk': inschrijving.pk})
+                                gebruik_knoppen = True
+                            break
+                    # for
+
+                    if not obj.is_ingeschreven:
+                        # niet ingeschreven
+                        if 'B' <= comp.fase < 'F':
+                            obj.url_aanmelden = reverse('CompInschrijven:bevestig-aanmelden',
+                                                        kwargs={'sporterboog_pk': sporterboog.pk,
+                                                                'deelcomp_pk': obj.pk})
                             gebruik_knoppen = True
-
-                        if obj.inschrijf_methode == INSCHRIJF_METHODE_1 and comp.fase <= 'E':
-                            obj.url_schietmomenten = reverse('CompRegio:keuze-zeven-wedstrijden',
-                                                             kwargs={'deelnemer_pk': inschrijving.pk})
-                            gebruik_knoppen = True
-                        break
-                # for
-
-                if not obj.is_ingeschreven:
-                    # niet ingeschreven
-                    if 'B' <= comp.fase < 'F':
-                        obj.url_aanmelden = reverse('CompInschrijven:bevestig-aanmelden',
-                                                    kwargs={'sporterboog_pk': sporterboog.pk,
-                                                            'deelcomp_pk': obj.pk})
-                        gebruik_knoppen = True
             # for
         # for
 
@@ -440,6 +442,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                     context['toon_bondscompetities'] = False
 
             context['speelsterktes'] = self._find_speelsterktes(sporter)
+
+        if Bestelling.objects.filter(account=account).count() > 0:
+            context['toon_bestellingen'] = True
 
         self._get_contact_gegevens(sporter, context)
 

@@ -1,0 +1,108 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2020-2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Planning Cluster{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Planning Cluster</h3>
+            <p>De RCL kan deze planning aanpassen.</p>
+            <p>
+                <a class="btn-nhb-rood" href="{{ handleiding_planning_regio_url }}" target="_blank" rel="noopener noreferrer">
+                    <i class="material-icons-round white-text left">help_outline</i>Handleiding</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Competitie</th>
+                    <td>{{ deelcomp.competitie.beschrijving }}</td>
+                </tr>
+                <tr>
+                    <th>Rayon</th>
+                    <td>{{ cluster.regio.rayon }}</td>
+                </tr>
+                <tr>
+                    <th>Regio</th>
+                    <td>{{ cluster.regio }}</td>
+                </tr>
+                <tr>
+                    <th>Cluster</th>
+                    <td>{{ cluster }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Wedstrijd blokken</h4>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+
+                <thead>
+                    <tr>
+                        <th class="center">Week</th>
+                        <th>Beschrijving</th>
+                        <th class="center">Wedstrijden</th>
+                        <th><!-- kolom voor knoppen --></th>
+                    </tr>
+                </thead>
+
+                {% for ronde in rondes %}
+                    <tr>
+                        <td class="center">{{ ronde.week_nr }}</td>
+                        <td>{{ ronde.beschrijving }}</td>
+                        <td class="center">{{ ronde.wedstrijd_count }}</td>
+
+                        <!-- knop naar de ronde van de regioplanning -->
+                        <td class="center">
+                            <a class="btn-nhb-rood" href="{% url 'CompLaagRegio:regio-ronde-planning' ronde.pk %}">
+                                <img src="{% static 'plein/zoom_in.svg' %}" height="36px">
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="center"><i>Geen blokken aanwezig</i></td>
+                    </tr>
+                {% endfor %}
+
+                <!-- knop om een regel toe te voegen -->
+                {% if url_nieuwe_week %}
+                    <tr>
+                        <td colspan="4" class="center">
+                            <form action="{{ url_nieuwe_week }}" method="post">
+                                {% csrf_token %}
+                                <button class="btn-nhb-rood" type="submit">
+                                    <i class="material-icons-round">add</i></button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endif %}
+
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="complaagregio-planning-cluster" %}
+
+{% endblock %}

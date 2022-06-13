@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -54,8 +54,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(20):
             management.call_command('maak_hwl', 'normaal', '1001', stderr=f1, stdout=f2)
-        self.assertTrue("[WARNING] Account 'normaal' is al HWL van vereniging [1001] Grote Club" in f1.getvalue())
-        self.assertTrue(f2.getvalue() == '')
+        self.assertTrue("[WARNING] Account 'normaal' is al HWL van vereniging [1001] Grote Club" in f2.getvalue())
 
     def test_bad_account(self):
         # niet bestaand account
@@ -63,7 +62,9 @@ class TestFunctieCli(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(20):
             management.call_command('maak_hwl', 'abnormaal', '1001', stderr=f1, stdout=f2)
-        self.assertTrue("Account matching query does not exist" in f1.getvalue())
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+        self.assertTrue("[ERROR] Kan account abnormaal niet vinden" in f1.getvalue())
         self.assertTrue(f2.getvalue() == '')
 
     def test_bad_vereniging(self):
@@ -72,7 +73,9 @@ class TestFunctieCli(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(20):
             management.call_command('maak_hwl', 'normaal', '9999', stderr=f1, stdout=f2)
-        self.assertTrue("NhbVereniging matching query does not exist" in f1.getvalue())
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+        self.assertTrue("[ERROR] Kan vereniging 9999 niet vinden" in f1.getvalue())
         self.assertTrue(f2.getvalue() == '')
 
     def test_bad_functie(self):
@@ -82,7 +85,9 @@ class TestFunctieCli(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(20):
             management.call_command('maak_hwl', 'normaal', '1001', stderr=f1, stdout=f2)
-        self.assertTrue("Functie matching query does not exist" in f1.getvalue())
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
+        self.assertTrue("[ERROR] Kan HWL functie van vereniging 1001 niet vinden" in f1.getvalue())
         self.assertTrue(f2.getvalue() == '')
 
     def test_maak_rcl(self):
@@ -98,8 +103,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(20):
             management.call_command('maak_rcl', 'normaal', '18', '101', stderr=f1, stdout=f2)
-        self.assertTrue("[WARNING] Account 'normaal' is al RCL Regio 101 Indoor" in f1.getvalue())
-        self.assertTrue(f2.getvalue() == '')
+        self.assertTrue("[WARNING] Account 'normaal' is al RCL Regio 101 Indoor" in f2.getvalue())
 
     def test_maak_rcl_bad(self):
         f1 = io.StringIO()
@@ -123,8 +127,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(20):
             management.call_command('maak_sec', 'normaal', '1001', stderr=f1, stdout=f2)
-        self.assertTrue("[WARNING] Account 'normaal' is al SEC van vereniging [1001] Grote Club" in f1.getvalue())
-        self.assertTrue(f2.getvalue() == '')
+        self.assertTrue("[WARNING] Account 'normaal' is al SEC van vereniging [1001] Grote Club" in f2.getvalue())
 
         # account bestaat niet
         f1 = io.StringIO()
@@ -153,7 +156,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
     def test_check_beheerders(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(47):
             management.call_command('check_beheerders', stderr=f1, stdout=f2)
         self.assertTrue(f1.getvalue() == '')        # geen foutmeldingen
 
@@ -162,7 +165,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(49):
             management.call_command('check_beheerders', stderr=f1, stdout=f2)
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("LET OP: geen koppeling met NHB lid" in f2.getvalue())
@@ -185,7 +188,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(49):
             management.call_command('check_beheerders', stderr=f1, stdout=f2)
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("LET OP: geen lid meer bij een vereniging" in f2.getvalue())
@@ -203,7 +206,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(50):
             management.call_command('check_beheerders', stderr=f1, stdout=f2)
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("LET OP: geen lid bij deze vereniging" in f2.getvalue())
@@ -214,7 +217,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(50):
             management.call_command('check_beheerders', stderr=f1, stdout=f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())

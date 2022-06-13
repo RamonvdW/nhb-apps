@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -64,6 +64,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         VerklaringHanterenPersoonsgegevens.objects.all().delete()
 
         self.e2e_login(self.testdata.account_admin)
+
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_acceptatie, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -71,7 +72,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
         self.assertNotContains(resp, 'verplicht')
 
         self.assertEqual(VerklaringHanterenPersoonsgegevens.objects.count(), 0)
-        needs_vhpg, _ = account_needs_vhpg(self.testdata.account_admin)
+        needs_vhpg, _ = account_needs_vhpg(self.testdata.account_admin, show_only=True)
         self.assertTrue(needs_vhpg)
 
         # voer de post uit zonder checkbox (dit gebeurt ook als de checkbox niet gezet wordt)

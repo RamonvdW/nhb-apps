@@ -1,0 +1,46 @@
+# -*- coding: utf-8 -*-
+
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
+#  All rights reserved.
+#  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+
+from django.db import migrations, models
+import django.db.models.deletion
+
+
+class Migration(migrations.Migration):
+
+    """ Migratie class voor dit deel van de applicatie """
+
+    replaces = [('Overig', 'm0009_squashed'),
+                ('Overig', 'm0010_delete_sitefeedback')]
+
+    # dit is de eerste
+    initial = True
+
+    # volgorde afdwingen
+    dependencies = [
+        ('Account', 'm0019_squashed'),
+        ('Competitie', 'm0065_squashed'),
+        ('Feedback', 'm0003_squashed'),
+        ('Functie', 'm0012_squashed'),
+    ]
+
+    # migratie functies
+    operations = [
+        migrations.CreateModel(
+            name='SiteTijdelijkeUrl',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('url_code', models.CharField(max_length=32)),
+                ('aangemaakt_op', models.DateTimeField()),
+                ('geldig_tot', models.DateTimeField()),
+                ('hoortbij_accountemail', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='Account.accountemail')),
+                ('dispatch_to', models.CharField(default='', max_length=20)),
+                ('hoortbij_functie', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='Functie.functie')),
+                ('hoortbij_kampioenschap', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='Competitie.kampioenschapschutterboog')),
+            ],
+        ),
+    ]
+
+# end of file

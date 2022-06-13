@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2022-05-18'
+SITE_VERSIE = '2022-06-13'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -34,11 +34,13 @@ INSTALLED_APPS = [
     'Beheer.apps.BeheerConfig',         # uitbreiding op admin interface
     'Account.apps.AccountConfig',
     'BasisTypen.apps.BasisTypenConfig',
+    'Bestel.apps.BestelConfig',
+    'Betaal.apps.BetaalConfig',
     'Bondspas.apps.BondspasConfig',
     'Competitie.apps.CompetitieConfig',
     'CompInschrijven.apps.CompInschrijvenConfig',
-    'CompRegio.apps.CompRegioConfig',
-    'CompRayon.apps.CompRayonConfig',
+    'CompLaagRegio.apps.CompRegioConfig',
+    'CompLaagRayon.apps.CompRayonConfig',
     'CompScores.apps.CompScoresConfig',
     'CompUitslagen.apps.CompUitslagenConfig',
     'Feedback.apps.FeedbackConfig',
@@ -194,7 +196,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 BACKGROUND_SYNC_POORT = 3000
 BACKGROUND_SYNC__REGIOCOMP_MUTATIES = BACKGROUND_SYNC_POORT + 1
 BACKGROUND_SYNC__BONDSPAS_DOWNLOADER = BACKGROUND_SYNC_POORT + 2
-
+BACKGROUND_SYNC__BESTEL_MUTATIES = BACKGROUND_SYNC_POORT + 3
+BACKGROUND_SYNC__BETAAL_MUTATIES = BACKGROUND_SYNC_POORT + 4
 
 # our own test runner that executes the tests ordered by application hierarchy indicators to ensure that
 # low-level errors are reported before applications depending that (broken) functionality report failures
@@ -470,6 +473,20 @@ LOGGING = {
         }
     }
 }
+
+
+# begin waarden voor unieke ticket nummers
+# boekingsnummers: vanaf 1000000
+TICKET_NUMMER_START__OPLEIDING = 3000000
+TICKET_NUMMER_START__WEDSTRIJD = 7000000
+
+
+# het verenigingsnummer van de NHB
+# wordt gebruikt als verenigingen via de NHB betalingen mogen ontvangen
+BETAAL_VIA_NHB_VER_NR = 1368
+
+# implementation uses this instead of built-in default, to allow override during testing
+BETAAL_API = 'https://api.mollie.com'
 
 # defaults for 'dev' and 'test' options
 

@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
 from Account.models import Account
 from Functie.models import maak_functie
+from NhbStructuur.models import NhbVereniging, NhbRegio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -32,20 +34,38 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         """ initialisatie van de test case """
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_100001 = self.e2e_create_account('100001', 'nhb100001@test.com', 'Norma de Schutter')
+        self.account_100002 = self.e2e_create_account('100002', 'nhb100002@test.com', 'Pilla de Schutter')
+
+        self.account_100001.last_login = timezone.now() - datetime.timedelta(days=1)
+        self.account_100001.save(update_fields=['last_login'])
+
+        email = self.account_100002.accountemail_set.all()[0]
+        email.email_is_bevestigd = True
+        email.save(update_fields=['email_is_bevestigd'])
+
+        # maak een test vereniging
+        self.nhbver1 = NhbVereniging(
+                            ver_nr=1000,
+                            naam="Grote Club",
+                            regio=NhbRegio.objects.get(regio_nr=112))
+        self.nhbver1.save()
 
         self.sporter_100001 = Sporter(lid_nr=100001,
                                       voornaam='Norma',
                                       achternaam='de Schutter',
+                                      unaccented_naam='Norma de Schutter',      # hier wordt op gezocht
                                       account=self.account_100001,
                                       geboorte_datum='1980-01-08',
-                                      sinds_datum='2008-01-08')
+                                      sinds_datum='2008-01-08',
+                                      bij_vereniging=self.nhbver1)
         self.sporter_100001.save()
 
         # maak nog een sporter aan die niet gekoppeld is aan een account
         self.sporter_100002 = Sporter(lid_nr=100002,
                                       voornaam='Andere',
                                       achternaam='Schutter',
-                                      account=None,
+                                      unaccented_naam='Andere Schutter',
+                                      account=self.account_100002,
                                       geboorte_datum='1980-01-09',
                                       sinds_datum='2008-01-09')
         self.sporter_100002.save()
@@ -121,6 +141,13 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
 
+        # zoek op naam --> 2 hits
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_activiteit, {'zoekterm': 'schutter'})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+
         # maak wat wijzigingen
         email = self.account_100001.accountemail_set.all()[0]
         email.email_is_bevestigd = False
@@ -144,7 +171,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         functie.accounts.add(self.account_100001)
 
         # zoek op nhb nummer --> wel functie, dus wel 2FA nodig
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(23):
             resp = self.client.get(self.url_activiteit, {'zoekterm': '100001'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -155,7 +182,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         vhpg.save()
 
         # zoek op naam, 2 hits --> VHPG verlopen
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(25):
             resp = self.client.get(self.url_activiteit, {'zoekterm': 'schutter'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -165,7 +192,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         vhpg.delete()
 
         # zoek op nhb nummer --> geen VHPG record
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(23):
             resp = self.client.get(self.url_activiteit, {'zoekterm': '100001'})
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
@@ -202,6 +229,33 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.account_100001.save()
 
         self.e2e_account_accepteert_vhpg(self.account_100001)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_activiteit)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+
+    def test_no_age_groups(self):
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        # zet alle logins minstens een maand in het verleden
+        lang_geleden = timezone.now() - datetime.timedelta(days=40)
+        for account in Account.objects.all():
+            account.last_login = lang_geleden
+            account.save(update_fields=['last_login'])
+        # for
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_activiteit)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+
+        # nu helemaal zonder sporters
+        Sporter.objects.all().delete()
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_activiteit)

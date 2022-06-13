@@ -48,6 +48,7 @@
     <div class="row center">
         <div class="col s12">
             <h4>Sessies</h4>
+            <p>Met sessies kan je een grote wedstrijd over de dag verspreiden<br>of het aantal inschrijvingen beheersen (per boogtype of leeftijd)</p>
         </div>
     </div>
 
@@ -58,9 +59,9 @@
 
                 <thead>
                     <tr>
-                        <th>Wanneer</th>
-                        <th>Aanm<span class="hide-on-small-only">eldingen</span></th>
-                        <th>Max<span class="hide-on-small-only">imum</span></th>
+                        <th class="center">Wanneer</th>
+                        <th class="center">Aanm<span class="hide-on-small-only">eldingen</span></th>
+                        <th class="center">Max<span class="hide-on-small-only">imum</span></th>
                         <th>Wedstrijdklassen</th>
                         <th><!-- kolom voor de knoppen --></th>
                     </tr>
@@ -68,9 +69,9 @@
 
                 {% for sessie in sessies %}
                     <tr>
-                        <td>{% if wed.datum_begin != wed.datum_einde %}{{ sessie.datum }} {% endif %}[{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}]</td>
-                        <td>{{ sessie.aanmeldingen_count }}</td>
-                        <td>{{ sessie.max_sporters }}</td>
+                        <td class="center">{% if wed.datum_begin != wed.datum_einde %}{{ sessie.datum }} {% endif %}[{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}]</td>
+                        <td class="center">{{ sessie.aantal_inschrijvingen }}</td>
+                        <td class="center">{{ sessie.max_sporters }}</td>
                         <td>
                             {% for klasse in sessie.klassen_ordered %}
                                 <span>{{ klasse.beschrijving }}</span><br>
@@ -78,7 +79,7 @@
                                 <span><i>Nog geen klassen</i></span>
                             {% endfor %}
                         </td>
-                        <td>
+                        <td class="center">
                             <a class="btn-nhb-rood" href="{{ sessie.url_wijzig }}">
                                 <i class="material-icons-round">edit</i></a>
                         </td>

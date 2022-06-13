@@ -6,11 +6,11 @@
 
 from django.test import TestCase
 from django.core import management
-from BasisTypen.models import IndivWedstrijdklasse, TeamWedstrijdklasse
-from Competitie.models import Competitie, DeelCompetitie
+from Competitie.models import Competitie, DeelCompetitie, CompetitieMatch, CompetitieIndivKlasse, CompetitieTeamKlasse
+from Competitie.operations import competities_aanmaken
 from NhbStructuur.models import NhbRegio, NhbRayon, NhbVereniging
 from TestHelpers.e2ehelpers import E2EHelpers
-from Wedstrijden.models import CompetitieWedstrijdenPlan, CompetitieWedstrijd, WedstrijdLocatie
+from Wedstrijden.models import WedstrijdLocatie
 import io
 
 
@@ -20,15 +20,23 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
 
+        competities_aanmaken(2019)
+
+        comp = Competitie.objects.get(afstand='25')
+        comp.delete()
+
+        comp = Competitie.objects.get(afstand='18')
+        comp.beschrijving = 'comp1'
+        comp.save(update_fields=['beschrijving'])
+
         dummy_datum = '2019-07-01'
         dummy_tijd = '10:00'
 
-        indiv1, indiv2 = IndivWedstrijdklasse.objects.all()[:2]
-        team1, team2 = TeamWedstrijdklasse.objects.all()[:2]
+        indiv1, indiv2 = CompetitieIndivKlasse.objects.filter(competitie=comp)[:2]
+        team1, team2 = CompetitieTeamKlasse.objects.filter(competitie=comp)[:2]
 
         regio_114 = NhbRegio.objects.get(regio_nr=114)
         rayon_1 = NhbRayon.objects.get(rayon_nr=1)
-        rayon_2 = NhbRayon.objects.get(rayon_nr=2)
         rayon_3 = NhbRayon.objects.get(rayon_nr=3)
 
         ver = NhbVereniging(
@@ -50,22 +58,17 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         loc.save()
         loc.verenigingen.add(ver)
 
-        # een paar wedstrijden
-        wed = CompetitieWedstrijd(
+        # wed1: indiv, team, loc, ver
+        wed1 = CompetitieMatch(
+                    competitie=comp,
                     beschrijving='wed1',
                     vereniging=ver,
                     locatie=loc,
                     datum_wanneer=dummy_datum,
-                    tijd_begin_aanmelden=dummy_tijd,
-                    tijd_begin_wedstrijd=dummy_tijd,
-                    tijd_einde_wedstrijd=dummy_tijd)
-        wed.save()
-        wed.indiv_klassen.add(indiv1)
-        wed.team_klassen.add(team1)
-
-        plan_bk = CompetitieWedstrijdenPlan()
-        plan_bk.save()
-        plan_bk.wedstrijden.add(wed)
+                    tijd_begin_wedstrijd=dummy_tijd)
+        wed1.save()
+        wed1.indiv_klassen.add(indiv1)
+        wed1.team_klassen.add(team1)
 
         loc = WedstrijdLocatie(
                 naam='loc2',
@@ -82,31 +85,26 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         loc.verenigingen.add(ver)
         self.loc2 = loc
 
-        wed = CompetitieWedstrijd(
+        # wed2: loc, ver; geen indiv/teams
+        wed2 = CompetitieMatch(
+                    competitie=comp,
                     beschrijving='wed2',
                     vereniging=ver,
                     locatie=loc,
                     datum_wanneer=dummy_datum,
-                    tijd_begin_aanmelden=dummy_tijd,
-                    tijd_begin_wedstrijd=dummy_tijd,
-                    tijd_einde_wedstrijd=dummy_tijd)
-        wed.save()
+                    tijd_begin_wedstrijd=dummy_tijd)
+        wed2.save()
         # geen klassen
-        plan_rk = CompetitieWedstrijdenPlan()
-        plan_rk.save()
-        plan_rk.wedstrijden.add(wed)
 
-        # locatie, geen vereniging
-        wed = CompetitieWedstrijd(
+        # wed2: loc; geen indiv/teams, ver
+        wed3 = CompetitieMatch(
+                    competitie=comp,
                     beschrijving='wed3',
                     vereniging=None,
                     locatie=loc,
                     datum_wanneer=dummy_datum,
-                    tijd_begin_aanmelden=dummy_tijd,
-                    tijd_begin_wedstrijd=dummy_tijd,
-                    tijd_einde_wedstrijd=dummy_tijd)
-        wed.save()
-        plan_rk.wedstrijden.add(wed)
+                    tijd_begin_wedstrijd=dummy_tijd)
+        wed3.save()
 
         # wedstrijd met vereniging maar zonder locatie
         ver = NhbVereniging(
@@ -116,66 +114,36 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
                 regio=regio_114)
         ver.save()
 
-        wed = CompetitieWedstrijd(
-                    beschrijving='wed2',
+        # wed4: indiv, teams, ver; geen loc
+        wed4 = CompetitieMatch(
+                    competitie=comp,
+                    beschrijving='wed4',
                     vereniging=ver,
                     # locatie=None,
                     datum_wanneer=dummy_datum,
-                    tijd_begin_aanmelden=dummy_tijd,
-                    tijd_begin_wedstrijd=dummy_tijd,
-                    tijd_einde_wedstrijd=dummy_tijd)
-        wed.save()
-        wed.indiv_klassen.add(indiv2)
-        wed.team_klassen.add(team2)
+                    tijd_begin_wedstrijd=dummy_tijd)
+        wed4.save()
+        wed4.indiv_klassen.add(indiv2)
+        wed4.team_klassen.add(team2)
 
-        plan_rk.wedstrijden.add(wed)
-
-        comp = Competitie(
-            beschrijving='comp1',
-            afstand='18',
-            begin_jaar=2019,
-            uiterste_datum_lid=dummy_datum,
-            begin_aanmeldingen=dummy_datum,
-            einde_aanmeldingen=dummy_datum,
-            einde_teamvorming=dummy_datum,
-            eerste_wedstrijd=dummy_datum,
-            laatst_mogelijke_wedstrijd=dummy_datum,
-            datum_klassengrenzen_rk_bk_teams=dummy_datum,
-            rk_eerste_wedstrijd=dummy_datum,
-            rk_laatste_wedstrijd=dummy_datum,
-            bk_eerste_wedstrijd=dummy_datum,
-            bk_laatste_wedstrijd=dummy_datum)
-        comp.save()
-
-        deelcomp_bk = DeelCompetitie(
+        deelcomp_bk = DeelCompetitie.objects.get(
                         competitie=comp,
-                        laag='BK',
-                        plan=plan_bk)
-        deelcomp_bk.save()
+                        laag='BK')
+        deelcomp_bk.rk_bk_matches.add(wed1)
 
-        deelcomp_rk = DeelCompetitie(
+        deelcomp_rk = DeelCompetitie.objects.get(
                         competitie=comp,
                         nhb_rayon=rayon_3,
-                        laag='RK',
-                        plan=plan_rk)
-        deelcomp_rk.save()
-
-        # deelcomp zonder plan
-        deelcomp_rk = DeelCompetitie(
-                        competitie=comp,
-                        nhb_rayon=rayon_2,
                         laag='RK')
-        deelcomp_rk.save()
+        deelcomp_rk.rk_bk_matches.set([wed2, wed3, wed4])
 
-        # deelcomp met plan, zonder wedstrijden
-        plan_rk_leeg = CompetitieWedstrijdenPlan()
-        plan_rk_leeg.save()
-        deelcomp_rk = DeelCompetitie(
+        # deelcomp zonder wedstrijden
+        # geen wijzigingen nodig
+        deelcomp_rk = DeelCompetitie.objects.get(
                         competitie=comp,
-                        laag='RK',
                         nhb_rayon=rayon_1,
-                        plan=plan_rk_leeg)
-        deelcomp_rk.save()
+                        laag='RK')
+        self.assertIsNotNone(deelcomp_rk)
 
     def test_basis(self):
         # no args
@@ -186,11 +154,11 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             management.call_command('check_wedstrijdlocaties', '--rk', stderr=f1, stdout=f2)
         # print("f2: %s" % f2.getvalue())
-        self.assertTrue("[WARNING] Geen plan of wedstrijden voor deelcompetitie comp1 - Rayon 2" in f2.getvalue())
-        self.assertTrue("[WARNING] Geen wedstrijden voor deelcompetitie comp1 - Rayon 1" in f2.getvalue())
+        self.assertTrue("[WARNING] Geen rk_bk_matches voor deelcompetitie comp1 - Rayon 2" in f2.getvalue())
+        self.assertTrue("[WARNING] Geen rk_bk_matches voor deelcompetitie comp1 - Rayon 1" in f2.getvalue())
         self.assertTrue("zonder banen 18m/25m opgaaf en zonder discipline_indoor en geen vereniging" in f2.getvalue())
 
         # bk (geen fouten)
@@ -208,7 +176,7 @@ class TestCompetitieCliCheckWedstrijdlocaties(E2EHelpers, TestCase):
         self.loc2.save(update_fields=['zichtbaar'])
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             management.call_command('check_wedstrijdlocaties', '--rk', stderr=f1, stdout=f2)
         self.assertTrue('met zichtbaar=False' in f2.getvalue())
 

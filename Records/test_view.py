@@ -194,7 +194,7 @@ class TestRecordsView(E2EHelpers, TestCase):
         url = self.url_specifiek % ('OD', 0)            # niet bestaand record nummer
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assert404(resp)  # 404 = Not found
+        self.assert404(resp, 'Record niet gevonden')
 
     def test_view_zoek(self):
         with self.assert_max_queries(20):

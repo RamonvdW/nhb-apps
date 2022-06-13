@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Voorkeuren leden</h3>
-            <p>Van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }}.</p>
+            <p>van vereniging [{{ nhb_ver.ver_nr }}] {{ nhb_ver.naam }} te {{ nhb_ver.plaats }}</p>
         </div>
     </div>
 
@@ -129,7 +129,10 @@
                             <td class="right-align">
                                 {% if obj.wijzig_url %}
                                     <a class="btn-nhb-rood" href="{{ obj.wijzig_url }}">
-                                        <i class="material-icons-round left">tune</i>Wijzig</a>
+                                        <i class="material-icons-round left hide-on-med-and-down">tune</i>
+                                        <i class="material-icons-round hide-on-large-and-up">tune</i>
+                                        <span class="hide-on-med-and-down">Wijzig</span>
+                                    </a>
                                 {% endif %}
                             </td>
                         {% endif %}

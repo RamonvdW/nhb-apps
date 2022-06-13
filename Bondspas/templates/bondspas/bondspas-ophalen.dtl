@@ -41,7 +41,8 @@
                     </div>
 
                     <div id="id_toon_klaar" class="hide">
-                        <p>Je bondspas is beschikbaar als bestand</p>
+                        <p>Je bondspas is beschikbaar als PDF bestand</p>
+                        <p>Als deze niet automatisch opent, kijk dan even in het mapje Downloads</p>
                     </div>
 
                 {% endif %}

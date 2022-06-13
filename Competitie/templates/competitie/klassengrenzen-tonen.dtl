@@ -41,7 +41,7 @@
                 <th>Materiaalklasse</th>
                 <th class="center">Minimaal aanvangs<wbr>gemiddelde</th>
                 {% if toon_aantal %}
-                    <th>Aantal deelnemers</th>
+                    <th class="center">Aantal deelnemers</th>
                 {% endif %}
                 <th class="hide-on-small-only">Blazoen regio</th>
                 <th class="hide-on-small-only">Blazoen RK/BK</th>
@@ -50,16 +50,16 @@
 
             {% for klasse in indiv_klassen %}
                 <tr>
-                    <td>{{ klasse.indiv.beschrijving }}</td>
+                    <td>{{ klasse.beschrijving }}</td>
 
                     <td class="center">{% if klasse.min_ag_str %}{{ klasse.min_ag_str }}{% else %}<i class="grey-text">n.v.t.</i>{% endif %}</td>
 
                     {% if toon_aantal %}
-                        <td>{{ klasse.aantal }}</td>
+                        <td class="center">{{ klasse.aantal }}</td>
                     {% endif %}
 
                     <td class="hide-on-small-only">{{ klasse.blazoen_regio_str }}</td>
-                    <td class="hide-on-small-only">{{ klasse.blazoen_rk_bk_str }}</td>
+                    <td class="hide-on-small-only">{% if klasse.is_voor_rk_bk %}{{ klasse.blazoen_rk_bk_str }}{% else %}<i class="grey-text">n.v.t.</i>{% endif %}</td>
                 </tr>
             {% endfor %}
 
@@ -74,7 +74,7 @@
         </table>
 
 
-        <!-- Team wedstrijdklassen regio -->
+        <!-- Team wedstrijdklassen regio teams -->
 
         <!-- witruimte -->
         <div class="row center" style="margin-top:50px">
@@ -99,7 +99,7 @@
             {% for klasse in team_klassen %}
                 {% if not klasse.is_voor_teams_rk_bk %}
                     <tr>
-                        <td>{{ klasse.team.beschrijving }}</td>
+                        <td>{{ klasse.beschrijving }}</td>
 
                         <td class="center">{% if klasse.min_ag_str %}{{ klasse.min_ag_str }}{% else %}<i class="grey-text">n.v.t.</i>{% endif %}</td>
 
@@ -152,7 +152,7 @@
             {% for klasse in team_klassen %}
                 {% if klasse.is_voor_teams_rk_bk %}
                     <tr>
-                        <td>{{ klasse.team.beschrijving }}</td>
+                        <td>{{ klasse.beschrijving }}</td>
 
 
                         <td class="center">{% if klasse.min_ag_str %}{{ klasse.min_ag_str }}{% else %}

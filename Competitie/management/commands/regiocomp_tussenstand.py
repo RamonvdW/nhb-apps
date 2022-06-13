@@ -9,13 +9,15 @@
 
 from django.core.management.base import BaseCommand
 from django.db.models import F, Q
-import django.db.utils
-from Competitie.models import (CompetitieTaken, CompetitieKlasse,
-                               LAAG_REGIO, Competitie, DeelCompetitie, DeelcompetitieRonde,
+from django.db.utils import DataError, OperationalError, IntegrityError
+from Competitie.models import (CompetitieTaken,
+                               LAAG_REGIO, Competitie, CompetitieIndivKlasse, DeelCompetitie, DeelcompetitieRonde,
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Score.models import ScoreHist, SCORE_WAARDE_VERWIJDERD
+import traceback
 import datetime
 import time
+import sys
 
 
 class Command(BaseCommand):
@@ -29,7 +31,7 @@ class Command(BaseCommand):
 
         self.index2scores = dict()      # [(DeelCompetitie.pk, RegioCompetitieSchutterBoog.pk)] = [(afstand, score), ..]
 
-        self._onbekend2beter = dict()   # [competitieklasse.pk] = [klasse, ..] met oplopend AG
+        self._onbekend2beter = dict()   # [CompetitieIndivKlasse.pk] = [klasse, ..] met oplopend AG
 
     def add_arguments(self, parser):
         parser.add_argument('duration', type=int,
@@ -92,18 +94,18 @@ class Command(BaseCommand):
         self._verwerk_overstappers_regio(regio_comp_pks)
 
     def _prep_caches(self):
-        # maak een structuur om gerelateerde IndivWedstrijdklassen te vinden
+        # maak een structuur om gerelateerde klassen te vinden
         indiv_alike = dict()     # [(boogtype.pk, leeftijdsklasse.pk, ...)] = [indiv, ..]
-        klassen_qset = (CompetitieKlasse
+        klassen_qset = (CompetitieIndivKlasse
                         .objects
-                        .select_related('competitie', 'indiv', 'indiv__boogtype')
-                        .prefetch_related('indiv__leeftijdsklassen')
-                        .filter(team=None))
-        for obj in klassen_qset:
-            indiv = obj.indiv
+                        .select_related('competitie',
+                                        'boogtype')
+                        .prefetch_related('leeftijdsklassen'))
+
+        for indiv in klassen_qset:
             if not indiv.is_onbekend:
                 tup = (indiv.boogtype.pk,)
-                tup += tuple(indiv.leeftijdsklassen.values_list('pk', flat=True))       # TODO: avoid database hit
+                tup += tuple(indiv.leeftijdsklassen.values_list('pk', flat=True))
                 try:
                     if indiv not in indiv_alike[tup]:
                         indiv_alike[tup].append(indiv)
@@ -113,19 +115,17 @@ class Command(BaseCommand):
 
         # maak een datastructuur waarmee we snel kunnen bepalen naar welke nieuwe
         # wedstrijdklasse een schutter verplaatst kan worden vanuit klasse onbekend
-        for klasse in klassen_qset:
-            if klasse.indiv.is_onbekend:
-                tup = (klasse.indiv.boogtype.pk,)
-                tup += tuple(klasse.indiv.leeftijdsklassen.values_list('pk', flat=True))    # TODO: avoid database hit
+        for indiv in klassen_qset:
+            if indiv.is_onbekend:
+                tup = (indiv.boogtype.pk,)
+                tup += tuple(indiv.leeftijdsklassen.values_list('pk', flat=True))
 
-                for indiv in indiv_alike[tup]:
-                    # zoek klassen met deze indiv
-                    for klasse2 in klassen_qset:
-                        if klasse2.indiv == indiv and klasse2.competitie == klasse.competitie:
-                            try:
-                                self._onbekend2beter[klasse.pk].append(klasse2)
-                            except KeyError:
-                                self._onbekend2beter[klasse.pk] = [klasse2]
+                for alike in indiv_alike[tup]:
+                    if alike.competitie == indiv.competitie:
+                        try:
+                            self._onbekend2beter[indiv.pk].append(alike)
+                        except KeyError:
+                            self._onbekend2beter[indiv.pk] = [alike]
                 # for
         # for
 
@@ -174,7 +174,7 @@ class Command(BaseCommand):
         rondes = list()
         for ronde in (DeelcompetitieRonde
                       .objects
-                      .select_related('deelcompetitie', 'plan')
+                      .select_related('deelcompetitie')
                       .filter(deelcompetitie__is_afgesloten=False,
                               deelcompetitie__laag=LAAG_REGIO)
                       .all()):
@@ -194,8 +194,7 @@ class Command(BaseCommand):
         for _, _, ronde in rondes:
             # sorteer de beschikbare scores op het moment van de wedstrijd
             for wedstrijd in (ronde
-                              .plan
-                              .wedstrijden
+                              .matches
                               .select_related('uitslag')
                               .order_by('datum_wanneer',
                                         'tijd_begin_wedstrijd',
@@ -209,7 +208,7 @@ class Command(BaseCommand):
                                   .select_related('sporterboog')
                                   .exclude(waarde=0)                # 0 scores zijn voor team competitie only
                                   .all()):
-                        tup = (uitslag.afstand_meter, score)
+                        tup = (uitslag.afstand, score)
                         pk = score.sporterboog.pk
                         index = (ronde.deelcompetitie.pk, score.sporterboog.pk)
                         if pk in allowed_sporterboog_pks:   # presumed better than huge __in
@@ -329,7 +328,7 @@ class Command(BaseCommand):
                     # kijk of verplaatsing uit klasse onbekend van toepassing is
                     if deelnemer.ag_voor_indiv < 0.001:
                         try:
-                            betere_klassen = self._onbekend2beter[deelnemer.klasse.pk]
+                            betere_klassen = self._onbekend2beter[deelnemer.indiv_klasse.pk]
                         except KeyError:
                             # overslaan, want niet meer in een klasse onbekend
                             pass
@@ -349,7 +348,7 @@ class Command(BaseCommand):
                                         self.stdout.write(
                                             '[INFO] Verplaats %s (%sm) met nieuw AG %.3f naar klasse %s' % (
                                                 deelnemer.sporterboog.sporter.lid_nr, klasse.competitie.afstand, new_ag, klasse))
-                                        deelnemer.klasse = klasse
+                                        deelnemer.indiv_klasse = klasse
                                         break
                                 # for
 
@@ -491,8 +490,12 @@ class Command(BaseCommand):
         # vang generieke fouten af
         try:
             self._monitor_nieuwe_scores()
-        except django.db.utils.DataError as exc:        # pragma: no cover
+        except (DataError, OperationalError, IntegrityError) as exc:  # pragma: no cover
+            _, _, tb = sys.exc_info()
+            lst = traceback.format_tb(tb)
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
+            self.stderr.write('Traceback:')
+            self.stderr.write(''.join(lst))
         except KeyboardInterrupt:                       # pragma: no cover
             pass
 

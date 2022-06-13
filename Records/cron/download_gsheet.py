@@ -10,6 +10,7 @@ from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 import google.auth.exceptions
 import settings_local
+import socket
 import json
 
 OUTFILE = '/tmp/downloader/records.json'
@@ -26,15 +27,18 @@ try:
     gsheets_api = build('sheets', 'v4', credentials=creds).spreadsheets()
 
     # door de naam van een sheet te gebruiken as 'Range' krijg je alle cellen uit de sheet
-    request = gsheets_api.values().batchGet(
-                    spreadsheetId=settings_local.RECORDS_GSHEET_FILE_ID,
-                    ranges=settings_local.RECORDS_GSHEET_SHEET_NAMES)
-    result = request.execute()
+    try:
+        request = gsheets_api.values().batchGet(
+                        spreadsheetId=settings_local.RECORDS_GSHEET_FILE_ID,
+                        ranges=settings_local.RECORDS_GSHEET_SHEET_NAMES)
+        result = request.execute()
+    except socket.timeout as exc:
+        print('[ERROR] Socket timeout: %s' % exc)
+    else:
+        with open(OUTFILE, "w", encoding='utf-8') as jsonfile:
+            json.dump(result, jsonfile, ensure_ascii=False)
 
-    with open(OUTFILE, "w", encoding='utf-8') as jsonfile:
-        json.dump(result, jsonfile, ensure_ascii=False)
-
-    print('[INFO] Written ' + OUTFILE)
+        print('[INFO] Written ' + OUTFILE)
 
 except google.auth.exceptions.TransportError as exc:
     print('[ERROR] Error downloading gsheet: %s' % str(exc))

@@ -153,7 +153,7 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         # probeer een niet-bestaande functie
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wijzig % '999999')
-        self.assert404(resp)     # 404 = Not allowed
+        self.assert404(resp, 'Verkeerde functie')
 
         # haal het wijzig scherm op voor de BKO
         url = self.url_wijzig % self.functie_bko.pk
@@ -266,18 +266,18 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         # probeer een niet-bestaande functie
         with self.assert_max_queries(20):
             resp = self.client.post('/functie/wijzig/123/ontvang/')
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Verkeerde functie')
 
         # foute form parameter
         url = self.url_wijzig_ontvang % self.functie_bko.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'what': 1})
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Verkeerd gebruik')
 
         # fout account nummer
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'add': '999999'})
-        self.assert404(resp)  # 404 = Not allowed
+        self.assert404(resp, 'Account niet gevonden')
 
     def test_koppel_bko(self):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
@@ -646,9 +646,8 @@ class TestFunctieKoppelen(E2EHelpers, TestCase):
         self.assertContains(resp, 'LET OP: geen lid bij deze vereniging')
 
     def test_menu(self):
-        """ Controleer het het Wissel van Rol menu getoond wordt nadat een
-            gebruiker aan een eerste rol gekoppeld is.
-        """
+        # Controleer het het Wissel van Rol menu getoond wordt nadat een
+        # gebruiker aan een eerste rol gekoppeld is.
 
         # log in met aparte een aparte test client instantie, zodat de sessie behouden blijft
         client2 = Client()
