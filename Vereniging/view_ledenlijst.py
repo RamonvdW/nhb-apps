@@ -10,7 +10,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils import timezone
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige_functie
-from BasisTypen.models import LeeftijdsKlasse, MAXIMALE_LEEFTIJD_JEUGD
+from BasisTypen.models import LeeftijdsKlasse, MAXIMALE_LEEFTIJD_JEUGD, ORGANISATIE_NHB
 from Sporter.models import Sporter, SporterBoog
 
 
@@ -48,11 +48,13 @@ class LedenLijstView(UserPassesTestMixin, ListView):
         jeugdgrens = huidige_jaar - MAXIMALE_LEEFTIJD_JEUGD
         self.huidige_jaar = huidige_jaar
 
+        # deel 1: jeugd
+
         lkls = list()
         for lkl in (LeeftijdsKlasse  # pragma: no branch
                     .objects
-                    .filter(wedstrijd_geslacht='M',
-                            min_wedstrijdleeftijd=0)    # exclude veteraan, master
+                    .filter(organisatie=ORGANISATIE_NHB,
+                            min_wedstrijdleeftijd=0)    # exclude veel van de senioren klassen
                     .order_by('volgorde')):             # aspirant eerst
 
             lkls.append(lkl)
@@ -72,8 +74,8 @@ class LedenLijstView(UserPassesTestMixin, ListView):
                               'achternaam',
                               'voornaam')):
 
-            # de wedstrijdleeftijd voor dit hele jaar
-            wedstrijdleeftijd = huidige_jaar - obj.geboorte_datum.year
+            # de wedstrijdleeftijd voor dit hele jaar, gebruik WA methode
+            wedstrijdleeftijd = obj.bereken_wedstrijdleeftijd_wa(huidige_jaar)
             obj.leeftijd = wedstrijdleeftijd
             obj.is_jeugd = True
 
@@ -81,6 +83,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
+                obj.leeftijdsklasse = None      # fallback
                 for lkl in lkls:                                            # pragma: no branch
                     if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
                         obj.leeftijdsklasse = lkl
@@ -94,9 +97,11 @@ class LedenLijstView(UserPassesTestMixin, ListView):
             objs.append(obj)
         # for
 
+        # deel 2: volwassenen
+
         lkls = list()
         for lkl in (LeeftijdsKlasse  # pragma: no branch
-                    .objects.filter(wedstrijd_geslacht='M',
+                    .objects.filter(organisatie=ORGANISATIE_NHB,
                                     max_wedstrijdleeftijd=0)    # skip jeugd klassen
                     .order_by('-volgorde')):                    # volgorde: veteraan, master, senior
 
@@ -114,14 +119,15 @@ class LedenLijstView(UserPassesTestMixin, ListView):
                     .order_by('achternaam',
                               'voornaam')):
 
-            # de wedstrijdleeftijd voor dit hele jaar
-            wedstrijdleeftijd = huidige_jaar - obj.geboorte_datum.year
+            # de wedstrijdleeftijd voor dit hele jaar, gebruik WA methode
+            wedstrijdleeftijd = obj.bereken_wedstrijdleeftijd_wa(huidige_jaar)
             obj.is_jeugd = False
 
             # de wedstrijdklasse voor dit hele jaar
             if wedstrijdleeftijd == prev_wedstrijdleeftijd:
                 obj.leeftijdsklasse = prev_lkl
             else:
+                obj.leeftijdsklasse = None      # fallback
                 for lkl in lkls:                                            # pragma: no branch
                     if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
                         obj.leeftijdsklasse = lkl

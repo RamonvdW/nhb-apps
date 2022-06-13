@@ -406,7 +406,7 @@ class Command(BaseCommand):
 
         for transactie in transacties:
 
-            text_body += "\nBetaling:"
+            text_body += "\nBetaling:\n"
 
             if transactie.is_restitutie:
                 text_body += "\tRestitutie € %s\n" % transactie.bedrag_euro_klant
