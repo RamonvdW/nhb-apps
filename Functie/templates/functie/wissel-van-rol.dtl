@@ -207,7 +207,7 @@
             <div class="row-nhb-blauw">
 
                 <!-- witte rechthoek voor radiobuttons -->
-                <div class="col s12 m8 offset-m2 l4" style="margin-bottom:50px">
+                <div class="col s12 m8 offset-m2 l6" style="margin-bottom:50px">
                     <div class="white left-align" style="padding:10px">
                         <ul>
                         {% for obj in eigen_rollen %}
@@ -227,12 +227,12 @@
 
                 <!-- kaartjes -->
                 {% if url_login_as %}
-                    <div class="col s12 l8 xl6 offset-xl2">
-                        {% include 'plein/card.dtl' with title="Uitleg Rollen" text="De site bekijken als een andere gebruiker." icon="help" url=wiki_rollen extern_open=True %}
+                    <div class="col s12 l6 xl6">
                         {% include 'plein/card.dtl' with title="Account wissel" text="De site bekijken als een andere gebruiker." icon="switch_access_shortcut" url=url_login_as %}
+                        {% include 'plein/card.dtl' with title="Uitleg Rollen" text="De site bekijken als een andere gebruiker." icon="help" url=wiki_rollen extern_open=True %}
                     </div>
                 {% else %}
-                    <div class="col s12 l4 offset-l3">
+                    <div class="col s12 l4 offset-l1">
                         {% include 'plein/card.dtl' with title="Uitleg Rollen" text="De site bekijken als een andere gebruiker." icon="help" url=wiki_rollen extern_open=True %}
                     </div>
                 {% endif %}
