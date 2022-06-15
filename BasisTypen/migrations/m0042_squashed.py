@@ -507,7 +507,7 @@ def init_leeftijdsklassen(apps, _):
         # Senioren / 65+
         leeftijdsklasse_klas(
             organisatie=ifaa,
-            afkorting='SM',
+            afkorting='SEM',
             wedstrijd_geslacht=GESLACHT_MAN,
             klasse_kort='Sen M',
             beschrijving='Senioren mannen (65+)',
@@ -516,7 +516,7 @@ def init_leeftijdsklassen(apps, _):
             max_wedstrijdleeftijd=0),
         leeftijdsklasse_klas(
             organisatie=ifaa,
-            afkorting='SF',
+            afkorting='SEV',
             wedstrijd_geslacht=GESLACHT_VROUW,
             klasse_kort='Sen V',
             beschrijving='Senioren vrouwen (65+)',
@@ -527,7 +527,7 @@ def init_leeftijdsklassen(apps, _):
         # Veteranen / 55-64
         leeftijdsklasse_klas(
             organisatie=ifaa,
-            afkorting='VM',
+            afkorting='VEM',
             wedstrijd_geslacht=GESLACHT_MAN,
             klasse_kort='Vet',
             beschrijving='Veteranen mannen (55+)',
@@ -536,7 +536,7 @@ def init_leeftijdsklassen(apps, _):
             max_wedstrijdleeftijd=0),
         leeftijdsklasse_klas(
             organisatie=ifaa,
-            afkorting='VF',
+            afkorting='VEV',
             wedstrijd_geslacht=GESLACHT_VROUW,
             klasse_kort='Vet V',
             beschrijving='Veteranen vrouwen (55+)',
@@ -547,7 +547,7 @@ def init_leeftijdsklassen(apps, _):
         # Volwassenen (21-54)
         leeftijdsklasse_klas(
             organisatie=ifaa,
-            afkorting='AM',
+            afkorting='VWH',
             wedstrijd_geslacht=GESLACHT_MAN,
             klasse_kort='Volw M',
             beschrijving='Volwassen mannen',
@@ -557,7 +557,7 @@ def init_leeftijdsklassen(apps, _):
 
         leeftijdsklasse_klas(
             organisatie=ifaa,
-            afkorting='AF',
+            afkorting='VWV',
             wedstrijd_geslacht=GESLACHT_VROUW,
             klasse_kort='Volw V',
             beschrijving='Volwassen vrouwen',
@@ -568,7 +568,7 @@ def init_leeftijdsklassen(apps, _):
         # Jong volwassenen (17-20)
         leeftijdsklasse_klas(
             organisatie=ifaa,
-            afkorting='YAM',
+            afkorting='JVH',
             wedstrijd_geslacht=GESLACHT_MAN,
             klasse_kort='Jong M',
             beschrijving='Jongvolwassen mannen',
@@ -578,7 +578,7 @@ def init_leeftijdsklassen(apps, _):
 
         leeftijdsklasse_klas(
             organisatie=ifaa,
-            afkorting='YAF',
+            afkorting='JVV',
             wedstrijd_geslacht=GESLACHT_VROUW,
             klasse_kort='Jong V',
             beschrijving='Jongvolwassen vrouwen',
@@ -589,7 +589,7 @@ def init_leeftijdsklassen(apps, _):
         # Junioren (13-16)
         leeftijdsklasse_klas(
             organisatie=ifaa,
-            afkorting='JM',
+            afkorting='JUH',
             wedstrijd_geslacht=GESLACHT_MAN,
             klasse_kort='Jun M',
             beschrijving='Junioren jongens',
@@ -599,7 +599,7 @@ def init_leeftijdsklassen(apps, _):
 
         leeftijdsklasse_klas(
             organisatie=ifaa,
-            afkorting='JF',
+            afkorting='JUV',
             wedstrijd_geslacht=GESLACHT_VROUW,
             klasse_kort='Jun V',
             beschrijving='Junioren meisjes',
@@ -610,7 +610,7 @@ def init_leeftijdsklassen(apps, _):
         # Welpen (<13)
         leeftijdsklasse_klas(
             organisatie=ifaa,
-            afkorting='CM',
+            afkorting='WEH',
             wedstrijd_geslacht=GESLACHT_MAN,
             klasse_kort='Welp M',
             beschrijving='Welpen jongens',
@@ -620,7 +620,7 @@ def init_leeftijdsklassen(apps, _):
 
         leeftijdsklasse_klas(
             organisatie=ifaa,
-            afkorting='CF',
+            afkorting='WEV',
             wedstrijd_geslacht=GESLACHT_VROUW,
             klasse_kort='Welp V',
             beschrijving='Welpen meisjes',
@@ -844,6 +844,23 @@ def init_kalenderwedstrijdklassen(apps, _):
 def init_kalenderwedstrijdklassen_ifaa(apps, _):
     """ Maak de IFAA kalender wedstrijdklassen aan """
 
+    # vertaling eigen afkorting naar code in internationale wedstrijdklasse
+    ifaa_afkorting_leeftijd = {
+        'SEM': 'SM',
+        'SEV': 'SF',
+        'VEM': 'VM',
+        'VEV': 'VF',
+        'VWH': 'AM',
+        'VWV': 'AF',
+        'JVH': 'YAM',
+        'JVV': 'YAF',
+        'JUH': 'JM',
+        'JUV': 'JF',
+        'WEH': 'CM',
+        'WEV': 'CF',
+    }
+
+    # vertaling eigen afkorting naar code in internationale wedstrijdklasse
     ifaa_afkorting_boog = {
         'BBR': 'BB-R',
         'BBC': 'BB-C',
@@ -876,7 +893,7 @@ def init_kalenderwedstrijdklassen_ifaa(apps, _):
         volgorde = groep_volgorde
         for leeftijd in leeftijden:
             beschrijving = '%s %s' % (boog.beschrijving, leeftijd.beschrijving)
-            afkorting = leeftijd.afkorting + ifaa_afkorting_boog[boog.afkorting]
+            afkorting = ifaa_afkorting_leeftijd[leeftijd.afkorting] + ifaa_afkorting_boog[boog.afkorting]
 
             bulk.append(
                 kalenderwedstrijdklasse_klas(
