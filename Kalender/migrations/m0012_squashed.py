@@ -5,21 +5,25 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
+from decimal import Decimal
 
 
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('Kalender', 'm0006_squashed'), ('Kalender', 'm0007_organisatie'), ('Kalender', 'm0008_inschrijving'), ('Kalender', 'm0009_combi_korting'), ('Kalender', 'm0010_delete_kalendermutatie'), ('Kalender', 'm0011_kosten')]
+
     # dit is de eerste
     initial = True
 
     # volgorde afdwingen
     dependencies = [
-        ('BasisTypen', 'm0028_squashed'),
-        ('NhbStructuur', 'm0024_squashed'),
-        ('Sporter', 'm0006_squashed'),
-        ('Wedstrijden', 'm0020_squashed'),
+        ('Account', 'm0021_squashed'),
+        ('BasisTypen', 'm0042_squashed'),
+        ('NhbStructuur', 'm0027_squashed'),
+        ('Sporter', 'm0010_squashed'),
+        ('Wedstrijden', 'm0023_squashed'),
     ]
 
     # migratie functies
@@ -46,7 +50,7 @@ class Migration(migrations.Migration):
                 ('tijd_einde', models.TimeField()),
                 ('max_sporters', models.PositiveSmallIntegerField(default=1)),
                 ('wedstrijdklassen', models.ManyToManyField(blank=True, to='BasisTypen.KalenderWedstrijdklasse')),
-                ('sporters', models.ManyToManyField(blank=True, to='Sporter.SporterBoog')),
+                ('aantal_inschrijvingen', models.PositiveSmallIntegerField(default=0)),
             ],
             options={
                 'verbose_name': 'Kalender wedstrijd sessie',
@@ -82,11 +86,55 @@ class Migration(migrations.Migration):
                 ('wedstrijdklassen', models.ManyToManyField(blank=True, to='BasisTypen.KalenderWedstrijdklasse')),
                 ('begrenzing', models.CharField(choices=[('L', 'Landelijk'), ('Y', 'Rayon'), ('G', 'Regio'), ('V', 'Vereniging')], default='L', max_length=1)),
                 ('bijzonderheden', models.TextField(blank=True, default='', max_length=1000)),
+                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'NHB'), ('F', 'IFAA')], default='W', max_length=1)),
+                ('prijs_euro_normaal', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
+                ('prijs_euro_onder18', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
             ],
             options={
                 'verbose_name': 'Kalender wedstrijd',
                 'verbose_name_plural': 'Kalender wedstrijden',
             },
+        ),
+        migrations.CreateModel(
+            name='KalenderWedstrijdKortingscode',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('code', models.CharField(default='', max_length=20)),
+                ('geldig_tot_en_met', models.DateField()),
+                ('percentage', models.PositiveSmallIntegerField(default=100)),
+                ('voor_sporter', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Sporter.sporter')),
+                ('voor_vereniging', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='NhbStructuur.nhbvereniging')),
+                ('voor_wedstrijden', models.ManyToManyField(to='Kalender.KalenderWedstrijd')),
+                ('uitgegeven_door', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT, related_name='korting_uitgever', to='NhbStructuur.nhbvereniging')),
+                ('combi_basis_wedstrijd', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, related_name='combi_korting', to='Kalender.kalenderwedstrijd')),
+                ('soort', models.CharField(choices=[('s', 'Sporter'), ('v', 'Vereniging'), ('c', 'Combi')], default='v', max_length=1)),
+            ],
+            options={
+                'verbose_name': 'Kalender kortingscode',
+            },
+        ),
+        migrations.CreateModel(
+            name='KalenderInschrijving',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('wanneer', models.DateTimeField()),
+                ('gebruikte_code', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Kalender.kalenderwedstrijdkortingscode')),
+                ('koper', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Account.account')),
+                ('sessie', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Kalender.kalenderwedstrijdsessie')),
+                ('sporterboog', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Sporter.sporterboog')),
+                ('wedstrijd', models.ForeignKey(on_delete=models.deletion.PROTECT, to='Kalender.kalenderwedstrijd')),
+                ('status', models.CharField(choices=[('R', 'Reservering'), ('B', 'Besteld'), ('D', 'Definitief'), ('A', 'Afgemeld')], default='R', max_length=2)),
+                ('ontvangen_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
+                ('retour_euro', models.DecimalField(decimal_places=2, default=Decimal('0'), max_digits=5)),
+            ],
+            options={
+                'verbose_name': 'Kalender inschrijving',
+                'verbose_name_plural': 'Kalender inschrijvingen',
+            },
+        ),
+        migrations.AddConstraint(
+            model_name='kalenderinschrijving',
+            constraint=models.UniqueConstraint(fields=('sessie', 'sporterboog'), name='Geen dubbele inschrijving'),
         ),
     ]
 

@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -20,8 +19,8 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0019_squashed'),
-        ('Competitie', 'm0065_squashed'),
+        ('Account', 'm0021_squashed'),
+        ('Competitie', 'm0075_squashed'),
         ('Feedback', 'm0003_squashed'),
         ('Functie', 'm0012_squashed'),
     ]
@@ -35,10 +34,10 @@ class Migration(migrations.Migration):
                 ('url_code', models.CharField(max_length=32)),
                 ('aangemaakt_op', models.DateTimeField()),
                 ('geldig_tot', models.DateTimeField()),
-                ('hoortbij_accountemail', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='Account.accountemail')),
+                ('hoortbij_accountemail', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Account.accountemail')),
                 ('dispatch_to', models.CharField(default='', max_length=20)),
-                ('hoortbij_functie', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='Functie.functie')),
-                ('hoortbij_kampioenschap', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='Competitie.kampioenschapschutterboog')),
+                ('hoortbij_functie', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Functie.functie')),
+                ('hoortbij_kampioenschap', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Competitie.kampioenschapschutterboog')),
             ],
         ),
     ]

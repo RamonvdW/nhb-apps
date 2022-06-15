@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-import django.db.models.deletion
 
 
 ADMINISTRATIEVE_REGIO = 100
@@ -71,8 +70,8 @@ class Migration(migrations.Migration):
 
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0019_squashed'),
-        ('NhbStructuur', 'm0024_squashed'),
+        ('Account', 'm0021_squashed'),
+        ('NhbStructuur', 'm0027_squashed'),
     ]
 
     # migratie functies
@@ -84,10 +83,10 @@ class Migration(migrations.Migration):
                 ('beschrijving', models.CharField(max_length=50)),
                 ('rol', models.CharField(max_length=5)),
                 ('comp_type', models.CharField(blank=True, default='', max_length=2)),
-                ('nhb_rayon', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='NhbStructuur.nhbrayon')),
-                ('nhb_regio', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='NhbStructuur.nhbregio')),
-                ('nhb_ver', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='NhbStructuur.nhbvereniging')),
-                ('accounts', models.ManyToManyField(blank=True, to='Account.Account')),
+                ('nhb_rayon', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT, to='NhbStructuur.nhbrayon')),
+                ('nhb_regio', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT, to='NhbStructuur.nhbregio')),
+                ('nhb_ver', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='NhbStructuur.nhbvereniging')),
+                ('accounts', models.ManyToManyField(blank=True, to='Account.account')),
                 ('bevestigde_email', models.EmailField(blank=True, max_length=254)),
                 ('nieuwe_email', models.EmailField(blank=True, max_length=254)),
             ],
@@ -97,7 +96,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('acceptatie_datum', models.DateTimeField()),
-                ('account', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='vhpg', to='Account.Account')),
+                ('account', models.OneToOneField(on_delete=models.deletion.CASCADE, related_name='vhpg', to='Account.account')),
             ],
             options={
                 'verbose_name': 'Verklaring Hanteren Persoonsgegevens',

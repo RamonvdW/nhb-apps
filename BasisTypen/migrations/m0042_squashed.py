@@ -5,13 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-import django.db.models.deletion
-from BasisTypen.models import (BLAZOEN_40CM, BLAZOEN_DT,
-                               BLAZOEN_60CM, BLAZOEN_60CM_4SPOT)
+from BasisTypen.models import (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_60CM, BLAZOEN_60CM_4SPOT,
+                               ORGANISATIE_NHB, GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE)
 
 
-# team wedstrijdklassen volgens spec v2.2, deel 3, tabel 3.5
-WKL_TEAM = (                             # 18m                                       25m
+# team competitie klassen volgens spec v2.2, deel 3, tabel 3.5
+TEAM_COMP_KLASSEN = (                    # 18m                                       25m
                                          # regio1,       regio2,     rk-bk           regio1,       regio2,             rk/bk
     (15, 'Recurve klasse ERE',     'R2',  (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_DT),   (BLAZOEN_60CM,)),
     (16, 'Recurve klasse A',       'R2',  (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
@@ -22,15 +21,15 @@ WKL_TEAM = (                             # 18m                                  
     (20, 'Compound klasse ERE',    'C',   (BLAZOEN_DT,),                            (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
     (21, 'Compound klasse A',      'C',   (BLAZOEN_DT,),                            (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
 
-    (31, 'Barebow klasse ERE',     'BB2', (BLAZOEN_40CM,),                         (BLAZOEN_60CM,)),
+    (31, 'Barebow klasse ERE',     'BB2', (BLAZOEN_40CM,),                          (BLAZOEN_60CM,)),
 
-    (41, 'Traditional klasse ERE', 'TR',  (BLAZOEN_40CM,),                         (BLAZOEN_60CM,)),
+    (41, 'Traditional klasse ERE', 'TR',  (BLAZOEN_40CM,),                          (BLAZOEN_60CM,)),
 
-    (50, 'Longbow klasse ERE',     'LB',  (BLAZOEN_40CM,),                         (BLAZOEN_60CM,)),
+    (50, 'Longbow klasse ERE',     'LB',  (BLAZOEN_40CM,),                          (BLAZOEN_60CM,)),
 )
 
-# individuele wedstrijdklassen volgens spec v2.2, deel 3, tabel 3.4
-WKL_INDIV = (                                                                   # regio 1       regio 2     rk/bk
+# individuele competitie klassen volgens spec v2.2, deel 3, tabel 3.4
+INDIV_COMP_KLASSEN = (                                                          # regio 1       regio 2     rk/bk
     (1100, 'Recurve klasse 1',                              'R',  ('SA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_DT),   (BLAZOEN_60CM,)),
     (1101, 'Recurve klasse 2',                              'R',  ('SA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_DT),   (BLAZOEN_60CM,)),
     (1102, 'Recurve klasse 3',                              'R',  ('SA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
@@ -139,6 +138,10 @@ KALENDERWEDSTRIJDENKLASSEN = (
     (151, 'R', 'AH2', 'Recurve Onder 14 jongens (aspirant)'),
     (152, 'R', 'AV2', 'Recurve Onder 14 meisjes (aspirant)'),
 
+    (160, 'R', 'AA1', 'Recurve Onder 12 (aspirant)'),
+    (161, 'R', 'AH1', 'Recurve Onder 12 jongens (aspirant)'),
+    (162, 'R', 'AV1', 'Recurve Onder 12 meisjes (aspirant)'),
+
 
     (200, 'C', 'VA', 'Compound 60+ (veteraan)'),
     (201, 'C', 'VH', 'Compound 60+ mannen (veteraan)'),
@@ -163,6 +166,10 @@ KALENDERWEDSTRIJDENKLASSEN = (
     (250, 'C', 'AA2', 'Compound Onder 14 (aspirant)'),
     (251, 'C', 'AH2', 'Compound Onder 14 jongens (aspirant)'),
     (252, 'C', 'AV2', 'Compound Onder 14 meisjes (aspirant)'),
+
+    (260, 'C', 'AA1', 'Compound Onder 12 (aspirant)'),
+    (261, 'C', 'AH1', 'Compound Onder 12 jongens (aspirant)'),
+    (262, 'C', 'AV1', 'Compound Onder 12 meisjes (aspirant)'),
 
 
     (300, 'BB', 'VA', 'Barebow 60+ (veteraan)'),
@@ -189,6 +196,10 @@ KALENDERWEDSTRIJDENKLASSEN = (
     (351, 'BB', 'AH2', 'Barebow Onder 14 jongens (aspirant)'),
     (352, 'BB', 'AV2', 'Barebow Onder 14 meisjes (aspirant)'),
 
+    (360, 'BB', 'AA1', 'Barebow Onder 12 (aspirant)'),
+    (361, 'BB', 'AH1', 'Barebow Onder 12 jongens (aspirant)'),
+    (362, 'BB', 'AV1', 'Barebow Onder 12 meisjes (aspirant)'),
+
 
     (500, 'TR', 'VA', 'Traditional 60+ (veteraan)'),
     (501, 'TR', 'VH', 'Traditional 60+ mannen (veteraan)'),
@@ -214,6 +225,10 @@ KALENDERWEDSTRIJDENKLASSEN = (
     (551, 'TR', 'AH2', 'Traditional Onder 14 jongens (aspirant)'),
     (552, 'TR', 'AV2', 'Traditional Onder 14 meisjes (aspirant)'),
 
+    (560, 'TR', 'AA1', 'Traditional Onder 12 (aspirant)'),
+    (561, 'TR', 'AH1', 'Traditional Onder 12 jongens (aspirant)'),
+    (562, 'TR', 'AV1', 'Traditional Onder 12 meisjes (aspirant)'),
+
 
     (600, 'LB', 'VA', 'Longbow 60+ (veteraan)'),
     (601, 'LB', 'VH', 'Longbow 60+ mannen (veteraan)'),
@@ -238,10 +253,14 @@ KALENDERWEDSTRIJDENKLASSEN = (
     (650, 'LB', 'AA2', 'Longbow Onder 14 (aspirant)'),
     (651, 'LB', 'AH2', 'Longbow Onder 14 jongens (aspirant)'),
     (652, 'LB', 'AV2', 'Longbow Onder 14 meisjes (aspirant)'),
+
+    (660, 'LB', 'AA1', 'Longbow Onder 12 (aspirant)'),
+    (661, 'LB', 'AH1', 'Longbow Onder 12 jongens (aspirant)'),
+    (662, 'LB', 'AV1', 'Longbow Onder 12 meisjes (aspirant)'),
 )
 
 
-def init_boogtype(apps, _):
+def init_boogtypen(apps, _):
     """ Maak de boog typen aan """
 
     # boog typen volgens spec v2.2, tabel 3.2
@@ -249,17 +268,32 @@ def init_boogtype(apps, _):
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
 
+    ifaa = 'F'  # International Field Archery Association
+
     # maak de standaard boogtypen aan
     bulk = [boogtype_klas(pk=1, afkorting='R',  volgorde='A', beschrijving='Recurve'),
             boogtype_klas(pk=2, afkorting='C',  volgorde='D', beschrijving='Compound'),
             boogtype_klas(pk=3, afkorting='BB', volgorde='I', beschrijving='Barebow'),
             # oud: boogtype IB met pk=4
             boogtype_klas(pk=5, afkorting='LB', volgorde='S', beschrijving='Longbow'),
-            boogtype_klas(pk=6, afkorting='TR', volgorde='K', beschrijving='Traditional')]
+            boogtype_klas(pk=6, afkorting='TR', volgorde='K', beschrijving='Traditional'),
+            boogtype_klas(pk=7, organisatie=ifaa, afkorting='BBR', volgorde='A', beschrijving='Barebow Recurve'),
+            boogtype_klas(pk=8, organisatie=ifaa, afkorting='BBC', volgorde='B', beschrijving='Barebow Compound'),
+            boogtype_klas(pk=9, organisatie=ifaa, afkorting='FSR', volgorde='F', beschrijving='Freestyle Limited Recurve'),
+            boogtype_klas(pk=10, organisatie=ifaa, afkorting='FSC', volgorde='G', beschrijving='Freestyle Limited Compound'),
+            boogtype_klas(pk=11, organisatie=ifaa, afkorting='FU',  volgorde='H', beschrijving='Freestyle Unlimited'),
+            boogtype_klas(pk=12, organisatie=ifaa, afkorting='BHR', volgorde='K', beschrijving='Bowhunter Recurve'),
+            boogtype_klas(pk=13, organisatie=ifaa, afkorting='BHC', volgorde='L', beschrijving='Bowhunter Compound'),
+            boogtype_klas(pk=14, organisatie=ifaa, afkorting='BHU', volgorde='M', beschrijving='Bowhunter Unlimited'),
+            boogtype_klas(pk=15, organisatie=ifaa, afkorting='BHL', volgorde='N', beschrijving='Bowhunter Limited'),
+            boogtype_klas(pk=16, organisatie=ifaa, afkorting='ITR', volgorde='P', beschrijving='Traditional Recurve Bow'),
+            boogtype_klas(pk=17, organisatie=ifaa, afkorting='ILB', volgorde='R', beschrijving='Longbow'),
+            boogtype_klas(pk=18, organisatie=ifaa, afkorting='IHB', volgorde='T', beschrijving='Historical Bow')]
+
     boogtype_klas.objects.bulk_create(bulk)
 
 
-def init_leeftijdsklasse(apps, _):
+def init_leeftijdsklassen(apps, _):
     """ Maak de leeftijdsklassen aan """
 
     # leeftijdsklassen volgens spec v2.1, deel 3, tabel 3.1
@@ -270,183 +304,331 @@ def init_leeftijdsklasse(apps, _):
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
 
+    ifaa = 'F'  # International Field Archery Association
+
     bulk = [
         # 60+
         leeftijdsklasse_klas(
-            afkorting='VV', wedstrijd_geslacht='V',
+            afkorting='VV',
+            wedstrijd_geslacht=GESLACHT_VROUW,
             klasse_kort='60+',
             beschrijving='60+ vrouwen (veteranen)',
             volgorde=61,
             min_wedstrijdleeftijd=60,
             max_wedstrijdleeftijd=0,
-            volgens_wa=False),
+            organisatie=ORGANISATIE_NHB),
         leeftijdsklasse_klas(
-            afkorting='VH', wedstrijd_geslacht='M',
+            afkorting='VH',
+            wedstrijd_geslacht=GESLACHT_MAN,
             klasse_kort='60+',
             beschrijving='60+ mannen (veteranen)',
             volgorde=62,
             min_wedstrijdleeftijd=60,
             max_wedstrijdleeftijd=0,
-            volgens_wa=False),
+            organisatie=ORGANISATIE_NHB),
         leeftijdsklasse_klas(
-            afkorting='VA', wedstrijd_geslacht='A',
+            afkorting='VA',
+            wedstrijd_geslacht=GESLACHT_ALLE,
             klasse_kort='60+',
             beschrijving='60+ (veteranen)',
             volgorde=63,
             min_wedstrijdleeftijd=60,
             max_wedstrijdleeftijd=0,
-            volgens_wa=False),
+            organisatie=ORGANISATIE_NHB),
 
         # 50+
         leeftijdsklasse_klas(
-            afkorting='MV', wedstrijd_geslacht='V',
+            afkorting='MV',
+            wedstrijd_geslacht=GESLACHT_VROUW,
             klasse_kort='50+',
             beschrijving='50+ vrouwen (masters)',
             volgorde=51,
             min_wedstrijdleeftijd=50,
-            max_wedstrijdleeftijd=0,
-            volgens_wa=True),
+            max_wedstrijdleeftijd=0),
         leeftijdsklasse_klas(
-            afkorting='MH', wedstrijd_geslacht='M',
+            afkorting='MH',
+            wedstrijd_geslacht=GESLACHT_MAN,
             klasse_kort='50+',
             beschrijving='50+ mannen (masters)',
             volgorde=52,
             min_wedstrijdleeftijd=50,
-            max_wedstrijdleeftijd=0,
-            volgens_wa=True),
+            max_wedstrijdleeftijd=0),
         leeftijdsklasse_klas(
-            afkorting='MA', wedstrijd_geslacht='A',
+            afkorting='MA',
+            wedstrijd_geslacht=GESLACHT_ALLE,
             klasse_kort='50+',
             beschrijving='50+ (masters)',
             volgorde=53,
             min_wedstrijdleeftijd=50,
             max_wedstrijdleeftijd=0,
-            volgens_wa=False),
+            organisatie=ORGANISATIE_NHB),
 
         # open klasse
         leeftijdsklasse_klas(
-            afkorting='SV', wedstrijd_geslacht='V',
+            afkorting='SV',
+            wedstrijd_geslacht=GESLACHT_VROUW,
             klasse_kort='21+',
             beschrijving='21+ vrouwen (senioren)',
             volgorde=41,
             min_wedstrijdleeftijd=0,
             max_wedstrijdleeftijd=0),
         leeftijdsklasse_klas(
-            afkorting='SH', wedstrijd_geslacht='M',
+            afkorting='SH',
+            wedstrijd_geslacht=GESLACHT_MAN,
             klasse_kort='21+',
             beschrijving='21+ mannen (senioren)',
             volgorde=42,
             min_wedstrijdleeftijd=0,
             max_wedstrijdleeftijd=0),
         leeftijdsklasse_klas(
-            afkorting='SA', wedstrijd_geslacht='A',
+            afkorting='SA',
+            wedstrijd_geslacht=GESLACHT_ALLE,
             klasse_kort='21+',
             beschrijving='21+ (senioren)',
             volgorde=43,
             min_wedstrijdleeftijd=0,
             max_wedstrijdleeftijd=0,
-            volgens_wa=False),
+            organisatie=ORGANISATIE_NHB),
 
         # Onder 21
         leeftijdsklasse_klas(
-            afkorting='JV', wedstrijd_geslacht='V',
+            afkorting='JV',
+            wedstrijd_geslacht=GESLACHT_VROUW,
             klasse_kort='Onder 21',
             beschrijving='Onder 21 vrouwen (junioren)',
             volgorde=31,
             min_wedstrijdleeftijd=0,
             max_wedstrijdleeftijd=20),
         leeftijdsklasse_klas(
-            afkorting='JH', wedstrijd_geslacht='M',
+            afkorting='JH',
+            wedstrijd_geslacht=GESLACHT_MAN,
             klasse_kort='Onder 21',
             beschrijving='Onder 21 mannen (junioren)',
             volgorde=32,
             min_wedstrijdleeftijd=0,
             max_wedstrijdleeftijd=20),
         leeftijdsklasse_klas(
-            afkorting='JA', wedstrijd_geslacht='A',
+            afkorting='JA',
+            wedstrijd_geslacht=GESLACHT_ALLE,
             klasse_kort='Onder 21',
             beschrijving='Onder 21 (junioren)',
             volgorde=33,
             min_wedstrijdleeftijd=0,
             max_wedstrijdleeftijd=20,
-            volgens_wa=False),
+            organisatie=ORGANISATIE_NHB),
 
         # Onder 18
         leeftijdsklasse_klas(
-            afkorting='CV', wedstrijd_geslacht='V',
+            afkorting='CV',
+            wedstrijd_geslacht=GESLACHT_VROUW,
             klasse_kort='Onder 18',
             beschrijving='Onder 18 meisjes (cadetten)',
             volgorde=21,
             min_wedstrijdleeftijd=0,
             max_wedstrijdleeftijd=17),
         leeftijdsklasse_klas(
-            afkorting='CH', wedstrijd_geslacht='M',
+            afkorting='CH',
+            wedstrijd_geslacht=GESLACHT_MAN,
             klasse_kort='Onder 18',
             beschrijving='Onder 18 jongens (cadetten)',
             volgorde=22,
             min_wedstrijdleeftijd=0,
             max_wedstrijdleeftijd=17),
         leeftijdsklasse_klas(
-            afkorting='CA', wedstrijd_geslacht='A',
+            afkorting='CA',
+            wedstrijd_geslacht=GESLACHT_ALLE,
             klasse_kort='Onder 18',
             beschrijving='Onder 18 (cadetten)',
             volgorde=23,
             min_wedstrijdleeftijd=0,
             max_wedstrijdleeftijd=17,
-            volgens_wa=False),
+            organisatie=ORGANISATIE_NHB),
 
         # Onder 14
         leeftijdsklasse_klas(
-            afkorting='AV2', wedstrijd_geslacht='V',
+            afkorting='AV2',
+            wedstrijd_geslacht=GESLACHT_VROUW,
             klasse_kort='Onder 14',
             beschrijving='Onder 14 meisjes (aspiranten)',
             volgorde=15,
             min_wedstrijdleeftijd=0,
             max_wedstrijdleeftijd=13,
-            volgens_wa=False),
+            organisatie=ORGANISATIE_NHB),
         leeftijdsklasse_klas(
-            afkorting='AH2', wedstrijd_geslacht='M',
+            afkorting='AH2',
+            wedstrijd_geslacht=GESLACHT_MAN,
             klasse_kort='Onder 14',
             beschrijving='Onder 14 jongens (aspiranten)',
             volgorde=16,
             min_wedstrijdleeftijd=0,
             max_wedstrijdleeftijd=13,
-            volgens_wa=False),
+            organisatie=ORGANISATIE_NHB),
         leeftijdsklasse_klas(
-            afkorting='AA2', wedstrijd_geslacht='A',
+            afkorting='AA2',
+            wedstrijd_geslacht=GESLACHT_ALLE,
             klasse_kort='Onder 14',
             beschrijving='Onder 14 (aspiranten)',
             volgorde=17,
             min_wedstrijdleeftijd=0,
             max_wedstrijdleeftijd=13,
-            volgens_wa=False),
+            organisatie=ORGANISATIE_NHB),
 
         # Onder 12
         leeftijdsklasse_klas(
-            afkorting='AV1', wedstrijd_geslacht='V',
+            afkorting='AV1',
+            wedstrijd_geslacht=GESLACHT_VROUW,
             klasse_kort='Onder 12',
             beschrijving='Onder 12 meisjes (aspiranten)',
             volgorde=11,
             min_wedstrijdleeftijd=0,
             max_wedstrijdleeftijd=11,
-            volgens_wa=False),
+            organisatie=ORGANISATIE_NHB),
         leeftijdsklasse_klas(
-            afkorting='AH1', wedstrijd_geslacht='M',
+            afkorting='AH1',
+            wedstrijd_geslacht=GESLACHT_MAN,
             klasse_kort='Onder 12',
             beschrijving='Onder 12 jongens (aspiranten)',
             volgorde=12,
             min_wedstrijdleeftijd=0,
             max_wedstrijdleeftijd=11,
-            volgens_wa=False),
+            organisatie=ORGANISATIE_NHB),
         leeftijdsklasse_klas(
-            afkorting='AA1', wedstrijd_geslacht='A',
+            afkorting='AA1',
+            wedstrijd_geslacht=GESLACHT_ALLE,
             klasse_kort='Onder 12',
             beschrijving='Onder 12 (aspiranten)',
             volgorde=13,
             min_wedstrijdleeftijd=0,
             max_wedstrijdleeftijd=11,
-            volgens_wa=False),
+            organisatie=ORGANISATIE_NHB),
+
+        # IFAA
+
+        # Senioren / 65+
+        leeftijdsklasse_klas(
+            organisatie=ifaa,
+            afkorting='SM',
+            wedstrijd_geslacht=GESLACHT_MAN,
+            klasse_kort='Sen M',
+            beschrijving='Senioren mannen (65+)',
+            volgorde=62,
+            min_wedstrijdleeftijd=65,
+            max_wedstrijdleeftijd=0),
+        leeftijdsklasse_klas(
+            organisatie=ifaa,
+            afkorting='SF',
+            wedstrijd_geslacht=GESLACHT_VROUW,
+            klasse_kort='Sen V',
+            beschrijving='Senioren vrouwen (65+)',
+            volgorde=61,
+            min_wedstrijdleeftijd=65,
+            max_wedstrijdleeftijd=0),
+
+        # Veteranen / 55-64
+        leeftijdsklasse_klas(
+            organisatie=ifaa,
+            afkorting='VM',
+            wedstrijd_geslacht=GESLACHT_MAN,
+            klasse_kort='Vet',
+            beschrijving='Veteranen mannen (55+)',
+            volgorde=52,
+            min_wedstrijdleeftijd=55,
+            max_wedstrijdleeftijd=0),
+        leeftijdsklasse_klas(
+            organisatie=ifaa,
+            afkorting='VF',
+            wedstrijd_geslacht=GESLACHT_VROUW,
+            klasse_kort='Vet V',
+            beschrijving='Veteranen vrouwen (55+)',
+            volgorde=51,
+            min_wedstrijdleeftijd=55,
+            max_wedstrijdleeftijd=0),
+
+        # Volwassenen (21-54)
+        leeftijdsklasse_klas(
+            organisatie=ifaa,
+            afkorting='AM',
+            wedstrijd_geslacht=GESLACHT_MAN,
+            klasse_kort='Volw M',
+            beschrijving='Volwassen mannen',
+            volgorde=42,
+            min_wedstrijdleeftijd=21,
+            max_wedstrijdleeftijd=54),
+
+        leeftijdsklasse_klas(
+            organisatie=ifaa,
+            afkorting='AF',
+            wedstrijd_geslacht=GESLACHT_VROUW,
+            klasse_kort='Volw V',
+            beschrijving='Volwassen vrouwen',
+            volgorde=41,
+            min_wedstrijdleeftijd=21,
+            max_wedstrijdleeftijd=54),
+
+        # Jong volwassenen (17-20)
+        leeftijdsklasse_klas(
+            organisatie=ifaa,
+            afkorting='YAM',
+            wedstrijd_geslacht=GESLACHT_MAN,
+            klasse_kort='Jong M',
+            beschrijving='Jongvolwassen mannen',
+            volgorde=32,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=20),
+
+        leeftijdsklasse_klas(
+            organisatie=ifaa,
+            afkorting='YAF',
+            wedstrijd_geslacht=GESLACHT_VROUW,
+            klasse_kort='Jong V',
+            beschrijving='Jongvolwassen vrouwen',
+            volgorde=31,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=20),
+
+        # Junioren (13-16)
+        leeftijdsklasse_klas(
+            organisatie=ifaa,
+            afkorting='JM',
+            wedstrijd_geslacht=GESLACHT_MAN,
+            klasse_kort='Jun M',
+            beschrijving='Junioren jongens',
+            volgorde=22,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=16),
+
+        leeftijdsklasse_klas(
+            organisatie=ifaa,
+            afkorting='JF',
+            wedstrijd_geslacht=GESLACHT_VROUW,
+            klasse_kort='Jun V',
+            beschrijving='Junioren meisjes',
+            volgorde=21,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=16),
+
+        # Welpen (<13)
+        leeftijdsklasse_klas(
+            organisatie=ifaa,
+            afkorting='CM',
+            wedstrijd_geslacht=GESLACHT_MAN,
+            klasse_kort='Welp M',
+            beschrijving='Welpen jongens',
+            volgorde=12,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=12),
+
+        leeftijdsklasse_klas(
+            organisatie=ifaa,
+            afkorting='CF',
+            wedstrijd_geslacht=GESLACHT_VROUW,
+            klasse_kort='Welp V',
+            beschrijving='Welpen meisjes',
+            volgorde=11,
+            min_wedstrijdleeftijd=0,
+            max_wedstrijdleeftijd=12),
     ]
+
     leeftijdsklasse_klas.objects.bulk_create(bulk)
 
 
@@ -459,7 +641,7 @@ def init_team_typen(apps, _):
     team_type_klas = apps.get_model('BasisTypen', 'TeamType')
     boog_type_klas = apps.get_model('BasisTypen', 'BoogType')
 
-    boog_r = boog_c = boog_bb = boog_ib = boog_tr = boog_lb = None
+    boog_r = boog_c = boog_bb = boog_tr = boog_lb = None
     for boog in boog_type_klas.objects.all():
         if boog.afkorting == 'R':
             boog_r = boog
@@ -481,8 +663,9 @@ def init_team_typen(apps, _):
     team_r2 = team_type_klas(afkorting='R2', volgorde=1, beschrijving='Recurve team')
     team_c = team_type_klas(afkorting='C',  volgorde=2, beschrijving='Compound team')
     team_bb2 = team_type_klas(afkorting='BB2', volgorde=3, beschrijving='Barebow team')
-    team_tr = team_type_klas(afkorting='TR', volgorde=4, beschrijving='Traditional team')
-    team_lb = team_type_klas(afkorting='LB', volgorde=5, beschrijving='Longbow team')
+    # R, C en BB zijn officiële WA team typen, de rest is nationaal - deze zijn default al op WA gezet
+    team_tr = team_type_klas(afkorting='TR', volgorde=4, beschrijving='Traditional team', organisatie=ORGANISATIE_NHB)
+    team_lb = team_type_klas(afkorting='LB', volgorde=5, beschrijving='Longbow team', organisatie=ORGANISATIE_NHB)
 
     team_type_klas.objects.bulk_create([team_r2, team_c, team_bb2, team_tr, team_lb])
 
@@ -497,7 +680,7 @@ def init_wedstrijdklassen_individueel(apps, _):
     """ Maak de wedstrijdklassen aan"""
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie
-    indiv_wedstrijdklasse_klas = apps.get_model('BasisTypen', 'IndivWedstrijdklasse')
+    indiv_comp_klasse_klas = apps.get_model('BasisTypen', 'TemplateCompetitieIndivKlasse')
     leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
     boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
 
@@ -515,7 +698,7 @@ def init_wedstrijdklassen_individueel(apps, _):
     volgorde2lkl = dict()
 
     bulk = list()
-    for tup in WKL_INDIV:
+    for tup in INDIV_COMP_KLASSEN:
         if len(tup) == 6:
             volgorde, beschrijving, boog_afkorting, leeftijdsklassen_afkortingen, blazoenen_18m, blazoenen_25m = tup
             niet_voor_rk_bk = False
@@ -539,7 +722,7 @@ def init_wedstrijdklassen_individueel(apps, _):
             blazoenen_25m.append(blazoenen_25m[0])
         # while
 
-        wkl = indiv_wedstrijdklasse_klas(
+        wkl = indiv_comp_klasse_klas(
                     beschrijving=beschrijving,
                     volgorde=volgorde,
                     boogtype=boogtype_obj,
@@ -568,10 +751,10 @@ def init_wedstrijdklassen_individueel(apps, _):
         bulk.append(wkl)
     # for
 
-    indiv_wedstrijdklasse_klas.objects.bulk_create(bulk)
+    indiv_comp_klasse_klas.objects.bulk_create(bulk)
 
     # koppel nu de leeftijdsklassen aan elke wedstrijdklasse
-    for wkl in indiv_wedstrijdklasse_klas.objects.all():
+    for wkl in indiv_comp_klasse_klas.objects.all():
         lkl_lijst = volgorde2lkl[wkl.volgorde]
         wkl.leeftijdsklassen.set(lkl_lijst)
     # for
@@ -582,7 +765,7 @@ def init_wedstrijdklassen_team(apps, _):
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     team_type_klas = apps.get_model('BasisTypen', 'TeamType')
-    team_wedstrijdklasse_klas = apps.get_model('BasisTypen', 'TeamWedstrijdklasse')
+    team_comp_klasse_klas = apps.get_model('BasisTypen', 'TemplateCompetitieTeamKlasse')
 
     # maak een look-up table voor de team type afkortingen
     boog_afkorting2teamtype = dict()
@@ -591,7 +774,7 @@ def init_wedstrijdklassen_team(apps, _):
     # for
 
     bulk = list()
-    for volgorde, beschrijving, teamtype_afkorting, blazoenen_18m, blazoenen_25m in WKL_TEAM:
+    for volgorde, beschrijving, teamtype_afkorting, blazoenen_18m, blazoenen_25m in TEAM_COMP_KLASSEN:
 
         teamtype = boog_afkorting2teamtype[teamtype_afkorting]
 
@@ -606,7 +789,7 @@ def init_wedstrijdklassen_team(apps, _):
             blazoenen_25m.append(blazoenen_25m[0])
         # while
 
-        obj = team_wedstrijdklasse_klas(
+        obj = team_comp_klasse_klas(
                     beschrijving=beschrijving,
                     volgorde=volgorde,
                     team_type=teamtype,
@@ -621,7 +804,7 @@ def init_wedstrijdklassen_team(apps, _):
         bulk.append(obj)
     # for
 
-    team_wedstrijdklasse_klas.objects.bulk_create(bulk)
+    team_comp_klasse_klas.objects.bulk_create(bulk)
 
 
 def init_kalenderwedstrijdklassen(apps, _):
@@ -646,13 +829,70 @@ def init_kalenderwedstrijdklassen(apps, _):
     for volgorde, boog_afk, lkl_afk, beschrijving in KALENDERWEDSTRIJDENKLASSEN:
         boog = afk2boog[boog_afk]
         lkl = afk2lkl[lkl_afk]
+
         obj = kalenderwedstrijdklasse_klas(
                         beschrijving=beschrijving,
                         boogtype=boog,
                         leeftijdsklasse=lkl,
-                        volgorde=volgorde)
+                        volgorde=volgorde,
+                        organisatie=lkl.organisatie)
         bulk.append(obj)
     # for
+    kalenderwedstrijdklasse_klas.objects.bulk_create(bulk)
+
+
+def init_kalenderwedstrijdklassen_ifaa(apps, _):
+    """ Maak de IFAA kalender wedstrijdklassen aan """
+
+    ifaa_afkorting_boog = {
+        'BBR': 'BB-R',
+        'BBC': 'BB-C',
+        'FSR': 'FS-R',
+        'FSC': 'FS-C',
+        'FU': 'FU',
+        'BHR': 'BH-R',
+        'BHC': 'BH-C',
+        'BHU': 'BU',
+        'BHL': 'BL',
+        'ITR': 'TR',
+        'ILB': 'LB',
+        'IHB': 'HB',
+    }
+
+    # haal de klassen op die van toepassing zijn tijdens deze migratie
+    kalenderwedstrijdklasse_klas = apps.get_model('BasisTypen', 'KalenderWedstrijdklasse')
+    leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
+    boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
+    ifaa = 'F'  # International Field Archery Association
+
+    # haal de bogen en leeftijden op en sorteer meteen op de gewenste volgorde
+    bogen = boogtype_klas.objects.filter(organisatie=ifaa).order_by('volgorde')
+    leeftijden = leeftijdsklasse_klas.objects.filter(organisatie=ifaa).order_by('-volgorde')
+
+    # maak elke combinatie van leeftijdsklassen en boogtype aan
+    bulk = list()
+    groep_volgorde = 1000
+    for boog in bogen:
+        volgorde = groep_volgorde
+        for leeftijd in leeftijden:
+            beschrijving = '%s %s' % (boog.beschrijving, leeftijd.beschrijving)
+            afkorting = leeftijd.afkorting + ifaa_afkorting_boog[boog.afkorting]
+
+            bulk.append(
+                kalenderwedstrijdklasse_klas(
+                    organisatie=ifaa,
+                    beschrijving=beschrijving,
+                    boogtype=boog,
+                    leeftijdsklasse=leeftijd,
+                    afkorting=afkorting,
+                    volgorde=volgorde)
+            )
+            volgorde += 1
+        # for
+
+        groep_volgorde += 100
+    # for
+
     kalenderwedstrijdklasse_klas.objects.bulk_create(bulk)
 
 
@@ -660,10 +900,20 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('BasisTypen', 'm0024_squashed'),
-                ('BasisTypen', 'm0025_indexes'),
-                ('BasisTypen', 'm0026_wa_rename'),
-                ('BasisTypen', 'm0027_renames')]
+    replaces = [('BasisTypen', 'm0028_squashed'),
+                ('BasisTypen', 'm0029_template'),
+                ('BasisTypen', 'm0030_organisatie'),
+                ('BasisTypen', 'm0031_repair_tr'),
+                ('BasisTypen', 'm0032_organisatie_nhb'),
+                ('BasisTypen', 'm0033_buiten_gebruik'),
+                ('BasisTypen', 'm0034_ifaa_bogen'),
+                ('BasisTypen', 'm0035_team_buiten_gebruik'),
+                ('BasisTypen', 'm0036_corrigeer_kalender_140'),
+                ('BasisTypen', 'm0037_ifaa_leeftijdsklassen'),
+                ('BasisTypen', 'm0038_ifaa_wedstrijdklassen'),
+                ('BasisTypen', 'm0039_ifaa_afkortingen'),
+                ('BasisTypen', 'm0040_nhb_onder12'),
+                ('BasisTypen', 'm0041_ifaa_volwassenen')]
 
     # dit is de eerste
     initial = True
@@ -680,6 +930,8 @@ class Migration(migrations.Migration):
                 ('beschrijving', models.CharField(max_length=50)),
                 ('afkorting', models.CharField(max_length=5)),
                 ('volgorde', models.CharField(default='?', max_length=1)),
+                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'NHB'), ('F', 'IFAA')], default='W', max_length=1)),
+                ('buiten_gebruik', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'Boog type',
@@ -693,11 +945,11 @@ class Migration(migrations.Migration):
                 ('afkorting', models.CharField(max_length=5)),
                 ('beschrijving', models.CharField(max_length=80)),
                 ('klasse_kort', models.CharField(max_length=30)),
-                ('wedstrijd_geslacht', models.CharField(choices=[('M', 'Man'), ('V', 'Vrouw'), ('A', 'Alle')], max_length=1)),
+                ('wedstrijd_geslacht', models.CharField(choices=[('M', 'Man'), ('V', 'Vrouw'), ('A', 'Genderneutraal')], max_length=1)),
                 ('min_wedstrijdleeftijd', models.IntegerField()),
                 ('max_wedstrijdleeftijd', models.IntegerField()),
-                ('volgens_wa', models.BooleanField(default=True)),
                 ('volgorde', models.PositiveSmallIntegerField(default=0)),
+                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'NHB'), ('F', 'IFAA')], default='W', max_length=1)),
             ],
             options={
                 'verbose_name': 'Leeftijdsklasse',
@@ -712,6 +964,8 @@ class Migration(migrations.Migration):
                 ('afkorting', models.CharField(max_length=3)),
                 ('volgorde', models.PositiveSmallIntegerField(default=0)),
                 ('boog_typen', models.ManyToManyField(to='BasisTypen.BoogType')),
+                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'NHB'), ('F', 'IFAA')], default='W', max_length=1)),
+                ('buiten_gebruik', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'Team type',
@@ -719,7 +973,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='IndivWedstrijdklasse',
+            name='TemplateCompetitieIndivKlasse',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('buiten_gebruik', models.BooleanField(default=False)),
@@ -727,7 +981,7 @@ class Migration(migrations.Migration):
                 ('volgorde', models.PositiveIntegerField()),
                 ('niet_voor_rk_bk', models.BooleanField()),
                 ('is_onbekend', models.BooleanField(default=False)),
-                ('boogtype', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='BasisTypen.boogtype')),
+                ('boogtype', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.boogtype')),
                 ('leeftijdsklassen', models.ManyToManyField(to='BasisTypen.LeeftijdsKlasse')),
                 ('blazoen1_18m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2)),
                 ('blazoen1_25m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='60', max_length=2)),
@@ -738,18 +992,18 @@ class Migration(migrations.Migration):
                 ('is_aspirant_klasse', models.BooleanField(default=False)),
             ],
             options={
-                'verbose_name': 'Indiv Wedstrijdklasse',
-                'verbose_name_plural': 'Indiv Wedstrijdklassen',
+                'verbose_name': 'Template Competitie Indiv Klasse',
+                'verbose_name_plural': 'Template Competitie Indiv Klassen'
             },
         ),
         migrations.CreateModel(
-            name='TeamWedstrijdklasse',
+            name='TemplateCompetitieTeamKlasse',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('buiten_gebruik', models.BooleanField(default=False)),
                 ('beschrijving', models.CharField(max_length=80)),
                 ('volgorde', models.PositiveIntegerField()),
-                ('team_type', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='BasisTypen.teamtype')),
+                ('team_type', models.ForeignKey(null=True, on_delete=models.deletion.PROTECT, to='BasisTypen.teamtype')),
                 ('blazoen1_25m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='60', max_length=2)),
                 ('blazoen2_25m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='60', max_length=2)),
                 ('blazoen1_18m_regio', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='40', max_length=2)),
@@ -759,8 +1013,8 @@ class Migration(migrations.Migration):
                 ('blazoen_25m_rk_bk', models.CharField(choices=[('40', '40cm'), ('60', '60cm'), ('4S', '60cm 4-spot'), ('DT', 'Dutch Target')], default='60', max_length=2)),
             ],
             options={
-                'verbose_name': 'Team Wedstrijdklasse',
-                'verbose_name_plural': 'Team Wedstrijdklassen',
+                'verbose_name': 'Template Competitie Team Klasse',
+                'verbose_name_plural': 'Template Competitie Team Klassen'
             },
         ),
         migrations.CreateModel(
@@ -770,20 +1024,23 @@ class Migration(migrations.Migration):
                 ('buiten_gebruik', models.BooleanField(default=False)),
                 ('beschrijving', models.CharField(max_length=80)),
                 ('volgorde', models.PositiveIntegerField()),
-                ('boogtype', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='BasisTypen.boogtype')),
-                ('leeftijdsklasse', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='BasisTypen.leeftijdsklasse')),
+                ('boogtype', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.boogtype')),
+                ('leeftijdsklasse', models.ForeignKey(on_delete=models.deletion.PROTECT, to='BasisTypen.leeftijdsklasse')),
+                ('organisatie', models.CharField(choices=[('W', 'World Archery'), ('N', 'NHB'), ('F', 'IFAA')], default='W', max_length=1)),
+                ('afkorting', models.CharField(default='?', max_length=10)),
             ],
             options={
-                'verbose_name': 'KalenderWedstrijdklasse',
-                'verbose_name_plural': 'KalenderWedstrijdklassen',
+                'verbose_name': 'Kalender Wedstrijdklasse',
+                'verbose_name_plural': 'Kalender Wedstrijdklassen'
             },
         ),
-        migrations.RunPython(init_boogtype),
-        migrations.RunPython(init_leeftijdsklasse),
+        migrations.RunPython(init_boogtypen),
+        migrations.RunPython(init_leeftijdsklassen),
         migrations.RunPython(init_team_typen),
         migrations.RunPython(init_wedstrijdklassen_individueel),
         migrations.RunPython(init_wedstrijdklassen_team),
         migrations.RunPython(init_kalenderwedstrijdklassen),
+        migrations.RunPython(init_kalenderwedstrijdklassen_ifaa),
         migrations.AddIndex(
             model_name='boogtype',
             index=models.Index(fields=['afkorting'], name='BasisTypen__afkorti_0bf4b9_idx'),
@@ -793,7 +1050,7 @@ class Migration(migrations.Migration):
             index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_81dcc1_idx'),
         ),
         migrations.AddIndex(
-            model_name='teamtype',
+           model_name='teamtype',
             index=models.Index(fields=['afkorting'], name='BasisTypen__afkorti_6ad4da_idx'),
         ),
         migrations.AddIndex(
@@ -801,16 +1058,16 @@ class Migration(migrations.Migration):
             index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_4984e4_idx'),
         ),
         migrations.AddIndex(
-            model_name='indivwedstrijdklasse',
-            index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_8e5550_idx'),
-        ),
-        migrations.AddIndex(
             model_name='kalenderwedstrijdklasse',
             index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_246cec_idx'),
         ),
         migrations.AddIndex(
-            model_name='teamwedstrijdklasse',
-            index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_46891c_idx'),
+            model_name='templatecompetitieindivklasse',
+            index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_48eb00_idx'),
+        ),
+        migrations.AddIndex(
+            model_name='templatecompetitieteamklasse',
+            index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_4d62f0_idx'),
         ),
     ]
 
