@@ -7,7 +7,7 @@
 from django.db import models
 from Account.models import Account
 from Betaal.models import BetaalActief, BetaalTransactie, BetaalMutatie, BetaalInstellingenVereniging
-from Kalender.models import KalenderInschrijving
+from Wedstrijden.models import WedstrijdInschrijving
 from decimal import Decimal
 
 
@@ -62,7 +62,7 @@ class BestelProduct(models.Model):
     """
 
     # inschrijving voor een wedstrijd
-    inschrijving = models.ForeignKey(KalenderInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
+    wedstrijd_inschrijving = models.ForeignKey(WedstrijdInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
 
     # FUTURE: andere mogelijke regels in dit mandje
 
@@ -76,8 +76,8 @@ class BestelProduct(models.Model):
 
     def __str__(self):
         """ beschrijving voor de admin interface """
-        if self.inschrijving:
-            msg = str(self.inschrijving)
+        if self.wedstrijd_inschrijving:
+            msg = str(self.wedstrijd_inschrijving)
         else:
             # TODO: andere producten
             msg = '?'
@@ -89,8 +89,8 @@ class BestelProduct(models.Model):
         return msg
 
     def korte_beschrijving(self):
-        if self.inschrijving:
-            return self.inschrijving.korte_beschrijving()
+        if self.wedstrijd_inschrijving:
+            return self.wedstrijd_inschrijving.korte_beschrijving()
         return "?"
 
     class Meta:
@@ -234,7 +234,7 @@ class BestelMutatie(models.Model):
     account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
 
     # de kalender inschrijving
-    inschrijving = models.ForeignKey(KalenderInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
+    wedstrijd_inschrijving = models.ForeignKey(WedstrijdInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
 
     # het product waar deze mutatie betrekking op heeft
     product = models.ForeignKey(BestelProduct, on_delete=models.SET_NULL, null=True, blank=True)

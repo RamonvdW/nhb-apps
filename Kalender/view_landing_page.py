@@ -20,10 +20,10 @@ class KalenderLandingPageView(View):
         rol_nu = rol_get_huidige(request)
 
         if rol_nu == Rollen.ROL_BB:
-            url = reverse('Kalender:manager')
+            url = reverse('Wedstrijden:manager')
 
         elif rol_nu == Rollen.ROL_HWL:
-            url = reverse('Kalender:vereniging')
+            url = reverse('Wedstrijden:vereniging')
 
         else:
             url = get_url_eerstvolgende_maand_met_wedstrijd()

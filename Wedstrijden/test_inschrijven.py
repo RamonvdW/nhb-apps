@@ -10,7 +10,7 @@ from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
 from Wedstrijden.models import WedstrijdLocatie
-from .models import KalenderWedstrijd, KalenderWedstrijdSessie, KalenderInschrijving
+from .models import Wedstrijd, WedstrijdSessie, WedstrijdInschrijving
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
@@ -20,20 +20,20 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
 
     test_after = ('Kalender.test_wedstrijd',)
 
-    url_kalender_sessies = '/kalender/%s/sessies/'                              # wedstrijd_pk
-    url_kalender_wijzig_sessie = '/kalender/%s/sessies/%s/wijzig/'              # wedstrijd_pk, sessie_pk
-    url_kalender_wedstrijd_info = '/kalender/%s/info/'                          # wedstrijd_pk
+    url_kalender_sessies = '/wedstrijden/%s/sessies/'                              # wedstrijd_pk
+    url_kalender_wijzig_sessie = '/wedstrijden/%s/sessies/%s/wijzig/'              # wedstrijd_pk, sessie_pk
+    url_kalender_wedstrijd_info = '/wedstrijden/%s/info/'                          # wedstrijd_pk
 
-    url_kalender_maak_nieuw = '/kalender/vereniging/kies-type/'
-    url_kalender_vereniging = '/kalender/vereniging/'
-    url_inschrijven_sporter = '/kalender/inschrijven/%s/sporter/'                   # wedstrijd_pk
-    url_inschrijven_sporter_boog = '/kalender/inschrijven/%s/sporter/%s/'           # wedstrijd_pk, boog_afk
-    url_inschrijven_groepje = '/kalender/inschrijven/%s/groep/'                     # wedstrijd_pk
-    url_inschrijven_groepje_lid_boog = '/kalender/inschrijven/%s/groep/%s/%s/'      # wedstrijd_pk, lid_nr, boog_afk
-    url_inschrijven_familie = '/kalender/inschrijven/%s/familie/'                   # wedstrijd_pk
-    url_inschrijven_familie_lid_boog = '/kalender/inschrijven/%s/familie/%s/%s/'    # wedstrijd_pk, lid_nr, boog_afk
-    url_inschrijven_familie = '/kalender/inschrijven/%s/familie/'                   # wedstrijd_pk
-    url_inschrijven_toevoegen = '/kalender/inschrijven/toevoegen/'
+    url_kalender_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
+    url_kalender_vereniging = '/wedstrijden/vereniging/'
+    url_inschrijven_sporter = '/wedstrijden/inschrijven/%s/sporter/'                   # wedstrijd_pk
+    url_inschrijven_sporter_boog = '/wedstrijden/inschrijven/%s/sporter/%s/'           # wedstrijd_pk, boog_afk
+    url_inschrijven_groepje = '/wedstrijden/inschrijven/%s/groep/'                     # wedstrijd_pk
+    url_inschrijven_groepje_lid_boog = '/wedstrijden/inschrijven/%s/groep/%s/%s/'      # wedstrijd_pk, lid_nr, boog_afk
+    url_inschrijven_familie = '/wedstrijden/inschrijven/%s/familie/'                   # wedstrijd_pk
+    url_inschrijven_familie_lid_boog = '/wedstrijden/inschrijven/%s/familie/%s/%s/'    # wedstrijd_pk, lid_nr, boog_afk
+    url_inschrijven_familie = '/wedstrijden/inschrijven/%s/familie/'                   # wedstrijd_pk
+    url_inschrijven_toevoegen = '/wedstrijden/inschrijven/toevoegen/'
 
     url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                              # sporter_pk
 
@@ -116,11 +116,11 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
         resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
 
-        self.assertEqual(1, KalenderWedstrijd.objects.count())
-        self.wedstrijd = KalenderWedstrijd.objects.all()[0]
+        self.assertEqual(1, Wedstrijd.objects.count())
+        self.wedstrijd = Wedstrijd.objects.all()[0]
 
         # maak een R sessie aan
-        sessie = KalenderWedstrijdSessie(
+        sessie = WedstrijdSessie(
                         datum=self.wedstrijd.datum_begin,
                         tijd_begin='10:00',
                         tijd_einde='15:00',
@@ -132,7 +132,7 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
         self.sessie_r = sessie
 
         # maak een C sessie aan
-        sessie = KalenderWedstrijdSessie(
+        sessie = WedstrijdSessie(
                         datum=self.wedstrijd.datum_begin,
                         tijd_begin='10:00',
                         tijd_einde='15:00',
@@ -167,18 +167,18 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
             resp = self.client.get(self.url_inschrijven_sporter % self.wedstrijd.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
 
         # schrijf in
-        self.assertEqual(0, KalenderInschrijving.objects.count())
+        self.assertEqual(0, WedstrijdInschrijving.objects.count())
         resp = self.client.post(self.url_inschrijven_toevoegen, {'snel': 1,
                                                                  'wedstrijd': self.wedstrijd.pk,
                                                                  'sporterboog': self.sporterboog.pk,
                                                                  'sessie': self.sessie_r.pk})
         self.assert_is_redirect(resp, self.url_kalender_wedstrijd_info % self.wedstrijd.pk)
-        self.assertEqual(1, KalenderInschrijving.objects.count())
+        self.assertEqual(1, WedstrijdInschrijving.objects.count())
 
-        inschrijving = (KalenderInschrijving
+        inschrijving = (WedstrijdInschrijving
                         .objects
                         .select_related('wedstrijd',
                                         'sporterboog',
@@ -194,7 +194,7 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
             resp = self.client.get(self.url_inschrijven_sporter % self.wedstrijd.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
 
         # bad stuff
         resp = self.client.get(self.url_inschrijven_sporter % 999999)
@@ -226,22 +226,22 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/inschrijven-groepje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-groepje.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.get(url + '?bondsnummer=bla')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('kalender/inschrijven-groepje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-groepje.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.get(url + '?bondsnummer=0')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('kalender/inschrijven-groepje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-groepje.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.get(self.url_inschrijven_groepje % 999999)
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
         resp = self.client.get(url + '?bondsnummer=%s' % self.lid_nr)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('kalender/inschrijven-groepje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-groepje.dtl', 'plein/site_layout.dtl'))
 
         # schrijf in
         resp = self.client.post(self.url_inschrijven_toevoegen, {'snel': 1,
@@ -255,7 +255,7 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
             resp = self.client.get(url + '?bondsnummer=%s' % self.lid_nr)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/inschrijven-groepje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-groepje.dtl', 'plein/site_layout.dtl'))
 
     def test_familie(self):
         self.e2e_login_and_pass_otp(self.account)
@@ -266,19 +266,19 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
             resp = self.client.get(self.url_inschrijven_familie % self.wedstrijd.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/inschrijven-familie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-familie.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.get(self.url_inschrijven_familie_lid_boog % (self.wedstrijd.pk, 'bla', 'x'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('kalender/inschrijven-familie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-familie.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.get(self.url_inschrijven_familie_lid_boog % (self.wedstrijd.pk, '0', 'x'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('kalender/inschrijven-familie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-familie.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.get(self.url_inschrijven_familie_lid_boog % (self.wedstrijd.pk, '999999', 'R'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('kalender/inschrijven-familie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-familie.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.get(self.url_inschrijven_familie % 999999)
         self.assert404(resp, 'Wedstrijd niet gevonden')
@@ -287,7 +287,7 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
         with self.assert_max_queries(21):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('kalender/inschrijven-familie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-familie.dtl', 'plein/site_layout.dtl'))
 
         # schrijf in
         resp = self.client.post(self.url_inschrijven_toevoegen, {'snel': 1,
@@ -301,7 +301,7 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
         with self.assert_max_queries(21):
             resp = self.client.get(self.url_inschrijven_familie_lid_boog % (self.wedstrijd.pk, self.lid_nr, 'R'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('kalender/inschrijven-familie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-familie.dtl', 'plein/site_layout.dtl'))
 
     def test_sporter_anders(self):
         self.e2e_login_and_pass_otp(self.account)
@@ -316,16 +316,16 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
             resp = self.client.get(self.url_inschrijven_sporter % self.wedstrijd.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_inschrijven_groepje % self.wedstrijd.pk
         resp = self.client.get(url + '?bondsnummer=%s' % self.lid_nr)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('kalender/inschrijven-groepje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-groepje.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.get(self.url_inschrijven_familie_lid_boog % (self.wedstrijd.pk, self.lid_nr, 'R'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('kalender/inschrijven-familie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-familie.dtl', 'plein/site_layout.dtl'))
 
         # geslacht anders, voorkeur nog niet ingesteld --> kan niet inschrijven
         self.sporter_voorkeuren.wedstrijd_geslacht_gekozen = False
@@ -336,15 +336,15 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
             resp = self.client.get(self.url_inschrijven_sporter % self.wedstrijd.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-sporter.dtl', 'plein/site_layout.dtl'))
 
         url = self.url_inschrijven_groepje % self.wedstrijd.pk
         resp = self.client.get(url + '?bondsnummer=%s' % self.lid_nr)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('kalender/inschrijven-groepje.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-groepje.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.get(self.url_inschrijven_familie_lid_boog % (self.wedstrijd.pk, self.lid_nr, 'r'))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('kalender/inschrijven-familie.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-familie.dtl', 'plein/site_layout.dtl'))
 
 # end of file

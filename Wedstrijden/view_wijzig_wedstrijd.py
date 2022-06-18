@@ -20,7 +20,7 @@ from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Taken.taken import maak_taak
 from Wedstrijden.models import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, WedstrijdLocatie
-from .models import (KalenderWedstrijd,
+from .models import (Wedstrijd,
                      ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR, WEDSTRIJD_WA_STATUS_TO_STR,
                      WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING, WEDSTRIJD_STATUS_GEACCEPTEERD,
                      WEDSTRIJD_STATUS_GEANNULEERD, WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
@@ -28,10 +28,10 @@ from .models import (KalenderWedstrijd,
 import datetime
 from types import SimpleNamespace
 
-TEMPLATE_KALENDER_WIJZIG_WEDSTRIJD = 'kalender/wijzig-wedstrijd.dtl'
+TEMPLATE_KALENDER_WIJZIG_WEDSTRIJD = 'wedstrijden/wijzig-wedstrijd.dtl'
 
 
-class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
+class WijzigWedstrijdView(UserPassesTestMixin, View):
 
     """ Via deze view kunnen de HWL of BB een wedstrijd wijzigen """
 
@@ -54,7 +54,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
 
         try:
             wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])     # afkappen voor de veiligheid
-            wedstrijd = (KalenderWedstrijd
+            wedstrijd = (Wedstrijd
                          .objects
                          .select_related('organiserende_vereniging',
                                          'locatie')
@@ -62,7 +62,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                                            'sessies__wedstrijdklassen',
                                            'wedstrijdklassen')
                          .get(pk=wedstrijd_pk))
-        except KalenderWedstrijd.DoesNotExist:
+        except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
         if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
@@ -87,7 +87,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
         if self.rol_nu == Rollen.ROL_HWL:
             if wedstrijd.status == WEDSTRIJD_STATUS_ONTWERP:
                 context['url_next_tekst'] = 'Vraag om goedkeuring'
-                context['url_next_status'] = reverse('Kalender:zet-status',
+                context['url_next_status'] = reverse('Wedstrijden:zet-status',
                                                      kwargs={'wedstrijd_pk': wedstrijd.pk})
             else:
                 context['limit_edits'] = True
@@ -96,11 +96,11 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
             if wedstrijd.status == WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING:
                 context['url_prev_tekst'] = 'Afkeuren'
                 context['url_next_tekst'] = 'Accepteren'
-                context['url_next_status'] = reverse('Kalender:zet-status',
+                context['url_next_status'] = reverse('Wedstrijden:zet-status',
                                                      kwargs={'wedstrijd_pk': wedstrijd.pk})
 
             elif wedstrijd.status == WEDSTRIJD_STATUS_GEACCEPTEERD:
-                context['url_annuleer'] = reverse('Kalender:zet-status',
+                context['url_annuleer'] = reverse('Wedstrijden:zet-status',
                                                   kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         if wedstrijd.status == WEDSTRIJD_STATUS_GEANNULEERD:
@@ -282,7 +282,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
         max_banen = min(80, max_banen)
         context['opt_banen'] = [nr for nr in range(2, max_banen + 1)]  # 1 baan = handmatig in .dtl
 
-        context['url_opslaan'] = reverse('Kalender:wijzig-wedstrijd',
+        context['url_opslaan'] = reverse('Wedstrijden:wijzig-wedstrijd',
                                          kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         if wedstrijd.status == WEDSTRIJD_STATUS_ONTWERP:
@@ -291,12 +291,12 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
         if self.rol_nu == Rollen.ROL_HWL:
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-                (reverse('Kalender:vereniging'), 'Wedstrijdkalender'),
+                (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
                 (None, 'Wijzig wedstrijd')
             )
         else:
             context['kruimels'] = (
-                (reverse('Kalender:manager'), 'Wedstrijdkalender'),
+                (reverse('Wedstrijden:manager'), 'Wedstrijdkalender'),
                 (None, 'Wijzig wedstrijd')
             )
 
@@ -322,7 +322,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
 
         try:
             wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])     # afkappen voor de veiligheid
-            wedstrijd = (KalenderWedstrijd
+            wedstrijd = (Wedstrijd
                          .objects
                          .select_related('organiserende_vereniging',
                                          'locatie')
@@ -331,7 +331,7 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
                                            'sessies',
                                            'sessies__wedstrijdklassen')
                          .get(pk=wedstrijd_pk))
-        except KalenderWedstrijd.DoesNotExist:
+        except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
         if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
@@ -532,14 +532,14 @@ class WijzigKalenderWedstrijdView(UserPassesTestMixin, View):
             self._verplaats_sessies(wedstrijd, oude_datum_begin)
 
         if self.rol_nu == Rollen.ROL_HWL:
-            url = reverse('Kalender:vereniging')
+            url = reverse('Wedstrijden:vereniging')
         else:
-            url = reverse('Kalender:manager')
+            url = reverse('Wedstrijden:manager')
 
         return HttpResponseRedirect(url)
 
 
-class ZetStatusKalenderWedstrijdView(UserPassesTestMixin, View):
+class ZetStatusWedstrijdView(UserPassesTestMixin, View):
 
     """ Via deze view kan de BB of HWL de wedstrijd status aanpassen """
 
@@ -599,10 +599,10 @@ class ZetStatusKalenderWedstrijdView(UserPassesTestMixin, View):
 
         try:
             wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])     # afkappen voor de veiligheid
-            wedstrijd = (KalenderWedstrijd
+            wedstrijd = (Wedstrijd
                          .objects
                          .get(pk=wedstrijd_pk))
-        except KalenderWedstrijd.DoesNotExist:
+        except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
         terug = request.POST.get('terug', '')
@@ -615,7 +615,7 @@ class ZetStatusKalenderWedstrijdView(UserPassesTestMixin, View):
             if wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
                 raise PermissionDenied('Wedstrijd niet van jouw vereniging')
 
-            next_url = reverse('Kalender:vereniging')
+            next_url = reverse('Wedstrijden:vereniging')
 
             if wedstrijd.status == WEDSTRIJD_STATUS_ONTWERP and verder:
                 # verzoek tot goedkeuring
@@ -625,7 +625,7 @@ class ZetStatusKalenderWedstrijdView(UserPassesTestMixin, View):
                 self._maak_taak_voor_bb(wedstrijd, 'Wedstrijd %s is ingediend voor goedkeuring')
 
         else:
-            next_url = reverse('Kalender:manager')
+            next_url = reverse('Wedstrijden:manager')
 
             if annuleer:
                 # annuleer deze wedstrijd

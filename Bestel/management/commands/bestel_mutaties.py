@@ -21,12 +21,13 @@ from Bestel.models import (BestelProduct, BestelMandje,
                            BestelMutatie, BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN,
                            BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_KORTINGSCODE, BESTEL_MUTATIE_MAAK_BESTELLINGEN,
                            BESTEL_MUTATIE_BETALING_AFGEROND, BESTEL_MUTATIE_RESTITUTIE_UITBETAALD)
-from Bestel.plugins.kalender import (kalender_plugin_automatische_kortingscodes_toepassen, kalender_plugin_inschrijven,
-                                     kalender_plugin_verwijder_reservering, kalender_plugin_kortingscode_toepassen,
-                                     kalender_plugin_afmelden, kalender_plugin_inschrijving_is_betaald)
-from Kalender.models import INSCHRIJVING_STATUS_RESERVERING_BESTELD, INSCHRIJVING_STATUS_DEFINITIEF
+from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingscodes_toepassen,
+                                        wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
+                                        wedstrijden_plugin_kortingscode_toepassen, wedstrijden_plugin_afmelden,
+                                        wedstrijden_plugin_inschrijving_is_betaald)
 from Mailer.models import mailer_queue_email
 from Overig.background_sync import BackgroundSync
+from Wedstrijden.models import INSCHRIJVING_STATUS_RESERVERING_BESTELD, INSCHRIJVING_STATUS_DEFINITIEF
 from decimal import Decimal
 import traceback
 import datetime
@@ -119,11 +120,11 @@ class Command(BaseCommand):
     def _verwerk_mutatie_wedstrijd_inschrijven(self, mutatie):
         mandje = self._get_mandje(mutatie)
         if mandje:                                  # pragma: no branch
-            prijs_euro = kalender_plugin_inschrijven(mutatie.inschrijving)
+            prijs_euro = wedstrijden_plugin_inschrijven(mutatie.wedstrijd_inschrijving)
 
             # maak een product regel aan voor de bestelling
             product = BestelProduct(
-                            inschrijving=mutatie.inschrijving,
+                            wedstrijd_inschrijving=mutatie.wedstrijd_inschrijving,
                             prijs_euro=prijs_euro)
             product.save()
 
@@ -131,7 +132,7 @@ class Command(BaseCommand):
             mandje.producten.add(product)
 
             # kijk of er automatische kortingscodes zijn die toegepast kunnen worden
-            kalender_plugin_automatische_kortingscodes_toepassen(self.stdout, mandje)
+            wedstrijden_plugin_automatische_kortingscodes_toepassen(self.stdout, mandje)
 
             # bereken het totaal opnieuw
             mandje.bepaal_totaalprijs_opnieuw()
@@ -147,14 +148,14 @@ class Command(BaseCommand):
                 # product zit nog in het mandje (anders: ignore want waarschijnlijk een dubbel verzoek)
                 product = qset[0]
 
-                if product.inschrijving:
+                if product.wedstrijd_inschrijving:
                     mandje.producten.remove(product)
 
-                    inschrijving = product.inschrijving
+                    inschrijving = product.wedstrijd_inschrijving
 
-                    kalender_plugin_verwijder_reservering(self.stdout, inschrijving)
+                    wedstrijden_plugin_verwijder_reservering(self.stdout, inschrijving)
 
-                    mutatie.inschrijving = None
+                    mutatie.wedstrijd_inschrijving = None
                     mutatie.product = None
                     mutatie.save()
 
@@ -170,7 +171,7 @@ class Command(BaseCommand):
                                         product.pk, mandje.pk))
 
             # kijk of er automatische kortingscodes zijn die niet meer toegepast mogen worden
-            kalender_plugin_automatische_kortingscodes_toepassen(self.stdout, mandje)
+            wedstrijden_plugin_automatische_kortingscodes_toepassen(self.stdout, mandje)
 
             # bereken het totaal opnieuw
             mandje.bepaal_totaalprijs_opnieuw()
@@ -178,9 +179,9 @@ class Command(BaseCommand):
         if not handled:
             # product ligt niet meer in het mandje?!
             self.stdout.write('[WARNING] Product pk=%s niet meer in het mandje gevonden' % mutatie.product.pk)
-            inschrijving = mandje.product.inschrijving
+            inschrijving = mandje.product.wedstrijd_inschrijving
             if inschrijving:
-                kalender_plugin_verwijder_reservering(self.stdout, inschrijving)
+                wedstrijden_plugin_verwijder_reservering(self.stdout, inschrijving)
 
     def _verwerk_mutatie_kortingscode(self, mutatie):
         """ Deze functie controleert of een kortingscode toegepast mag worden op de producten die in het mandje
@@ -189,9 +190,9 @@ class Command(BaseCommand):
         mandje = self._get_mandje(mutatie)
         if mandje:                                  # pragma: no branch
             kortingscode_str = mutatie.kortingscode
-            producten = mandje.producten.exclude(inschrijving=None)
+            producten = mandje.producten.exclude(wedstrijd_inschrijving=None)
 
-            kalender_plugin_kortingscode_toepassen(self.stdout, kortingscode_str, producten)
+            wedstrijden_plugin_kortingscode_toepassen(self.stdout, kortingscode_str, producten)
             # FUTURE: opleiding_plugin_kortingscode_toepassen()
 
             # bereken het totaal opnieuw
@@ -207,14 +208,14 @@ class Command(BaseCommand):
             ontvanger2producten = dict()      # [ver_nr] = [MandjeProduct, ...]
             for product in (mandje
                             .producten
-                            .select_related('inschrijving',
-                                            'inschrijving__wedstrijd',
-                                            'inschrijving__wedstrijd__organiserende_vereniging')
-                            .order_by('inschrijving__pk')):
+                            .select_related('wedstrijd_inschrijving',
+                                            'wedstrijd_inschrijving__wedstrijd',
+                                            'wedstrijd_inschrijving__wedstrijd__organiserende_vereniging')
+                            .order_by('wedstrijd_inschrijving__pk')):
 
-                if product.inschrijving:
+                if product.wedstrijd_inschrijving:
                     # wedstrijd van de kalender
-                    ver_nr = product.inschrijving.wedstrijd.organiserende_vereniging.ver_nr
+                    ver_nr = product.wedstrijd_inschrijving.wedstrijd.organiserende_vereniging.ver_nr
                     instellingen = self._get_instellingen(ver_nr)
                     if instellingen:
                         ontvanger_ver_nr = instellingen.vereniging.ver_nr
@@ -238,7 +239,7 @@ class Command(BaseCommand):
                     totaal_euro += product.prijs_euro
                     totaal_euro -= product.korting_euro
                     if ver is None:
-                        ver = product.inschrijving.wedstrijd.organiserende_vereniging
+                        ver = product.wedstrijd_inschrijving.wedstrijd.organiserende_vereniging
                 # for
 
                 bestelling = Bestelling(
@@ -267,8 +268,8 @@ class Command(BaseCommand):
 
                 # pas de status aan van wedstrijd inschrijvingen
                 for product in producten:
-                    if product.inschrijving:
-                        inschrijving = product.inschrijving
+                    if product.wedstrijd_inschrijving:
+                        inschrijving = product.wedstrijd_inschrijving
                         inschrijving.status = INSCHRIJVING_STATUS_RESERVERING_BESTELD
                         inschrijving.save(update_fields=['status'])
                 # for
@@ -283,8 +284,8 @@ class Command(BaseCommand):
                 if bestelling.totaal_euro < Decimal('0.001'):
                     self.stdout.write('[INFO] Bestelling pk=%s wordt meteen afgerond' % bestelling.pk)
                     for product in bestelling.producten.all():
-                        if product.inschrijving:
-                            kalender_plugin_inschrijving_is_betaald(product)
+                        if product.wedstrijd_inschrijving:
+                            wedstrijden_plugin_inschrijving_is_betaald(product)
                     # for
 
                     bestelling.status = BESTELLING_STATUS_AFGEROND
@@ -298,7 +299,7 @@ class Command(BaseCommand):
             mandje.bepaal_totaalprijs_opnieuw()
 
     def _verwerk_mutatie_wedstrijd_afmelden(self, mutatie):
-        inschrijving = mutatie.inschrijving
+        inschrijving = mutatie.wedstrijd_inschrijving
         oude_status = inschrijving.status
 
         # INSCHRIJVING_STATUS_AFGEMELD --> doe niets
@@ -308,7 +309,7 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Inschrijving pk=%s met status="besteld" afmelden voor wedstrijd' % inschrijving.pk)
 
             if inschrijving:
-                kalender_plugin_verwijder_reservering(self.stdout, inschrijving)
+                wedstrijden_plugin_verwijder_reservering(self.stdout, inschrijving)
             # FUTURE: betaling afbreken
             # FUTURE: automatische restitutie als de betaling binnen is
 
@@ -317,7 +318,7 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Inschrijving pk=%s met status="definitief" afmelden voor wedstrijd' % inschrijving.pk)
 
             if inschrijving:
-                kalender_plugin_afmelden(inschrijving)
+                wedstrijden_plugin_afmelden(inschrijving)
             # FUTURE: automatisch een restitutie beginnen
 
     @staticmethod
@@ -344,21 +345,21 @@ class Command(BaseCommand):
 
         producten = (bestelling
                      .producten
-                     .select_related('inschrijving',
-                                     'inschrijving__wedstrijd',
-                                     'inschrijving__sessie',
-                                     'inschrijving__sporterboog',
-                                     'inschrijving__sporterboog__boogtype',
-                                     'inschrijving__sporterboog__sporter',
-                                     'inschrijving__sporterboog__sporter__bij_vereniging'))
+                     .select_related('wedstrijd_inschrijving',
+                                     'wedstrijd_inschrijving__wedstrijd',
+                                     'wedstrijd_inschrijving__sessie',
+                                     'wedstrijd_inschrijving__sporterboog',
+                                     'wedstrijd_inschrijving__sporterboog__boogtype',
+                                     'wedstrijd_inschrijving__sporterboog__sporter',
+                                     'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging'))
                     # TODO: order_by
 
         regel_nr = 0
 
         for product in producten:
 
-            if product.inschrijving:
-                inschrijving = product.inschrijving
+            if product.wedstrijd_inschrijving:
+                inschrijving = product.wedstrijd_inschrijving
 
                 # lege regel gevolgd door een regel nummer
                 regel_nr += 1
@@ -478,8 +479,8 @@ class Command(BaseCommand):
                 bestelling.save(update_fields=['log'])
 
                 for product in bestelling.producten.all():
-                    if product.inschrijving:
-                        kalender_plugin_inschrijving_is_betaald(product)
+                    if product.wedstrijd_inschrijving:
+                        wedstrijden_plugin_inschrijving_is_betaald(product)
                 # for
 
                 # stuur een e-mail aan de koper
@@ -563,7 +564,7 @@ class Command(BaseCommand):
             mutatie = (BestelMutatie
                        .objects
                        .select_related('account',
-                                       'inschrijving',
+                                       'wedstrijd_inschrijving',
                                        'product',
                                        'bestelling')
                        .get(pk=pk))

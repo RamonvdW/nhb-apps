@@ -15,10 +15,10 @@ from Bestel.models import (BestelMandje, BestelMutatie, Bestelling,
 from Bestel.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd, bestel_mutatieverzoek_betaling_afgerond,
                              bestel_mutatieverzoek_kortingscode_toepassen, bestel_mutatieverzoek_afmelden_wedstrijd)
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie
-from Kalender.models import (KalenderWedstrijd, KalenderWedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD,
-                             KalenderInschrijving, KalenderWedstrijdKortingscode,
-                             INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_RESERVERING_BESTELD,
-                             INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD)
+from Wedstrijden.models import (Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD,
+                                WedstrijdInschrijving, WedstrijdKortingscode,
+                                INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                                INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD)
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -105,7 +105,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         locatie.save()
         locatie.verenigingen.add(ver)
 
-        sessie = KalenderWedstrijdSessie(
+        sessie = WedstrijdSessie(
                     datum=datum,
                     tijd_begin='10:00',
                     tijd_einde='11:00',
@@ -115,7 +115,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         # sessie.wedstrijdklassen.add()
 
         # maak een kalenderwedstrijd aan, met sessie
-        wedstrijd = KalenderWedstrijd(
+        wedstrijd = Wedstrijd(
                         titel='Test',
                         status=WEDSTRIJD_STATUS_GEACCEPTEERD,
                         datum_begin=datum,
@@ -130,7 +130,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         # wedstrijd.boogtypen.add()
         self.wedstrijd = wedstrijd
 
-        inschrijving = KalenderInschrijving(
+        inschrijving = WedstrijdInschrijving(
                             wanneer=now,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
@@ -140,7 +140,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.inschrijving = inschrijving
 
         self.code = 'TESTJE1234'
-        korting = KalenderWedstrijdKortingscode(
+        korting = WedstrijdKortingscode(
                     code=self.code,
                     geldig_tot_en_met=datum,
                     uitgegeven_door=ver,
@@ -226,8 +226,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('bestel/bestelling-afrekenen.dtl', 'plein/site_layout.dtl'))
 
         # mutileer het product (doorzetten vanuit het mandje lukt niet)
-        product1.inschrijving = None
-        product1.save(update_fields=['inschrijving'])
+        product1.wedstrijd_inschrijving = None
+        product1.save(update_fields=['wedstrijd_inschrijving'])
 
         # bekijk de bestellingen
         with self.assert_max_queries(20):
@@ -634,7 +634,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
-        inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEquals(inschrijving.koper, self.account_admin)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
         self.assertEqual(inschrijving.ontvangen_euro, Decimal('0'))
@@ -648,7 +648,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         bestelling = Bestelling.objects.all()[0]
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
-        inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_BESTELD)
         self.assertEqual(inschrijving.ontvangen_euro, inschrijving.retour_euro)     # nog steeds 0
 
@@ -658,7 +658,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue(' met status="besteld" afmelden voor wedstrijd' in f2.getvalue())
         self.assertTrue('status Gereserveerd, wacht op betaling --> Afgemeld' in f2.getvalue())
-        inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_AFGEMELD)
 
         # nog een keer afmelden
@@ -676,7 +676,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
-        inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEquals(inschrijving.koper, self.account_admin)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
@@ -688,7 +688,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         bestelling = Bestelling.objects.all()[0]
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
-        inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_BESTELD)
         self.assertEqual(inschrijving.ontvangen_euro, inschrijving.retour_euro)     # nog steeds 0
 
@@ -719,7 +719,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_WACHT_OP_BETALING)
 
-        inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.koper, self.account_admin)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_BESTELD)
         self.assertEqual(inschrijving.ontvangen_euro, Decimal('0'))     # TODO: verwachting = 5
@@ -728,7 +728,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         # afmelden voor de wedstrijd
         bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
-        inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_AFGEMELD)
 
     def test_afmelden_na_betalen(self):
@@ -740,7 +740,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
-        inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEquals(inschrijving.koper, self.account_admin)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 
@@ -752,7 +752,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         bestelling = Bestelling.objects.all()[0]
         self.assertEqual(bestelling.status, BESTELLING_STATUS_NIEUW)
 
-        inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_BESTELD)
         self.assertEqual(inschrijving.ontvangen_euro, inschrijving.retour_euro)     # nog steeds 0
 
@@ -783,7 +783,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
 
-        inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.koper, self.account_admin)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_DEFINITIEF)
         self.assertEqual(inschrijving.ontvangen_euro, Decimal('10'))
@@ -792,7 +792,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         # afmelden voor de wedstrijd
         bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
-        inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_AFGEMELD)
 
     def test_afgerond(self):
@@ -804,7 +804,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
-        inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEquals(inschrijving.koper, self.account_admin)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 

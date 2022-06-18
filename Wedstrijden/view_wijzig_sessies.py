@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.db.models import Count
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.shortcuts import render
@@ -14,17 +13,17 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from .models import (KalenderWedstrijd, KalenderWedstrijdSessie,
-                     WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_DUUR_MAX_UREN,
-                     WEDSTRIJD_STATUS_GEANNULEERD)
+from Wedstrijden.models import (Wedstrijd, WedstrijdSessie,
+                                WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_DUUR_MAX_UREN,
+                                WEDSTRIJD_STATUS_GEANNULEERD)
 from types import SimpleNamespace
 import datetime
 
-TEMPLATE_KALENDER_WIJZIG_SESSIES = 'kalender/wijzig-sessies.dtl'
-TEMPLATE_KALENDER_WIJZIG_SESSIE = 'kalender/wijzig-sessie.dtl'
+TEMPLATE_KALENDER_WIJZIG_SESSIES = 'wedstrijden/wijzig-sessies.dtl'
+TEMPLATE_KALENDER_WIJZIG_SESSIE = 'wedstrijden/wijzig-sessie.dtl'
 
 
-class KalenderWedstrijdSessiesView(UserPassesTestMixin, View):
+class WedstrijdSessiesView(UserPassesTestMixin, View):
 
     """ Via deze view kunnen de HWL en BB de sessies van een wedstrijd wijzigen """
 
@@ -47,10 +46,10 @@ class KalenderWedstrijdSessiesView(UserPassesTestMixin, View):
 
         try:
             wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])     # afkappen voor de veiligheid
-            wedstrijd = (KalenderWedstrijd
+            wedstrijd = (Wedstrijd
                          .objects
                          .get(pk=wedstrijd_pk))
-        except KalenderWedstrijd.DoesNotExist:
+        except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
         if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
@@ -65,25 +64,25 @@ class KalenderWedstrijdSessiesView(UserPassesTestMixin, View):
         for sessie in sessies:
             sessie.klassen_ordered = sessie.wedstrijdklassen.order_by('volgorde')
 
-            sessie.url_wijzig = reverse('Kalender:wijzig-sessie',
+            sessie.url_wijzig = reverse('Wedstrijden:wijzig-sessie',
                                         kwargs={'wedstrijd_pk': wedstrijd.pk,
                                                 'sessie_pk': sessie.pk})
         # for
         context['sessies'] = sessies
 
         if wedstrijd.status != WEDSTRIJD_STATUS_GEANNULEERD:
-            context['url_nieuwe_sessie'] = reverse('Kalender:wijzig-sessies',
+            context['url_nieuwe_sessie'] = reverse('Wedstrijden:wijzig-sessies',
                                                    kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         if self.rol_nu == Rollen.ROL_HWL:
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-                (reverse('Kalender:vereniging'), 'Wedstrijdkalender'),
+                (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
                 (None, 'Wedstrijd sessies'),
             )
         else:
             context['kruimels'] = (
-                (reverse('Kalender:manager'), 'Wedstrijdkalender'),
+                (reverse('Wedstrijden:manager'), 'Wedstrijdkalender'),
                 (None, 'Wedstrijd sessies'),
             )
 
@@ -94,10 +93,10 @@ class KalenderWedstrijdSessiesView(UserPassesTestMixin, View):
         """ deze functie wordt aangeroepen om de POST request af te handelen """
 
         try:
-            wedstrijd = (KalenderWedstrijd
+            wedstrijd = (Wedstrijd
                          .objects
                          .get(pk=kwargs['wedstrijd_pk']))
-        except KalenderWedstrijd.DoesNotExist:
+        except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
         if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
@@ -105,7 +104,7 @@ class KalenderWedstrijdSessiesView(UserPassesTestMixin, View):
 
         if wedstrijd.status != WEDSTRIJD_STATUS_GEANNULEERD and request.POST.get('nieuwe_sessie', ''):
             # voeg een nieuwe sessie toe aan deze wedstrijd
-            sessie = KalenderWedstrijdSessie(
+            sessie = WedstrijdSessie(
                             datum=wedstrijd.datum_begin,
                             tijd_begin='10:00',
                             tijd_einde='15:00',
@@ -119,13 +118,13 @@ class KalenderWedstrijdSessiesView(UserPassesTestMixin, View):
         else:
             pass
 
-        url = reverse('Kalender:wijzig-sessies',
+        url = reverse('Wedstrijden:wijzig-sessies',
                       kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         return HttpResponseRedirect(url)
 
 
-class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
+class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
 
     """ Via deze view kunnen de HWL en BB een sessie wijzigen """
 
@@ -215,10 +214,10 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
 
         try:
             wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])     # afkappen voor de veiligheid
-            wedstrijd = (KalenderWedstrijd
+            wedstrijd = (Wedstrijd
                          .objects
                          .get(pk=wedstrijd_pk))
-        except KalenderWedstrijd.DoesNotExist:
+        except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
         if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
@@ -228,10 +227,10 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
 
         try:
             sessie_pk = int(str(kwargs['sessie_pk'])[:6])     # afkappen voor de veiligheid
-            sessie = (KalenderWedstrijdSessie
+            sessie = (WedstrijdSessie
                       .objects
                       .get(pk=sessie_pk))
-        except KalenderWedstrijdSessie.DoesNotExist:
+        except WedstrijdSessie.DoesNotExist:
             raise Http404('Sessie niet gevonden')
 
         context['sessie'] = sessie
@@ -248,7 +247,7 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
 
         context['opt_klassen'] = self._maak_opt_klassen(wedstrijd, sessie)
 
-        context['url_opslaan'] = reverse('Kalender:wijzig-sessie',
+        context['url_opslaan'] = reverse('Wedstrijden:wijzig-sessie',
                                          kwargs={'wedstrijd_pk': wedstrijd.pk,
                                                  'sessie_pk': sessie.pk})
 
@@ -258,11 +257,11 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
             context['url_verwijder'] = context['url_opslaan']
 
         if self.rol_nu == Rollen.ROL_HWL:
-            url_top = reverse('Kalender:vereniging')
+            url_top = reverse('Wedstrijden:vereniging')
         else:
-            url_top = reverse('Kalender:manager')
+            url_top = reverse('Wedstrijden:manager')
 
-        url_terug = reverse('Kalender:wijzig-sessies',
+        url_terug = reverse('Wedstrijden:wijzig-sessies',
                             kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         context['kruimels'] = (
@@ -279,10 +278,10 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
 
         try:
             wedstrijd_pk = int(str(kwargs['wedstrijd_pk'])[:6])     # afkappen voor de veiligheid
-            wedstrijd = (KalenderWedstrijd
+            wedstrijd = (Wedstrijd
                          .objects
                          .get(pk=wedstrijd_pk))
-        except KalenderWedstrijd.DoesNotExist:
+        except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
         if self.rol_nu == Rollen.ROL_HWL and wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
@@ -290,10 +289,10 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
 
         try:
             sessie_pk = int(str(kwargs['sessie_pk'])[:6])     # afkappen voor de veiligheid
-            sessie = (KalenderWedstrijdSessie
+            sessie = (WedstrijdSessie
                       .objects
                       .get(pk=sessie_pk))
-        except KalenderWedstrijdSessie.DoesNotExist:
+        except WedstrijdSessie.DoesNotExist:
             raise Http404('Sessie niet gevonden')
 
         if wedstrijd.sessies.filter(pk=sessie.pk).count() != 1:
@@ -371,7 +370,7 @@ class WijzigKalenderWedstrijdSessieView(UserPassesTestMixin, View):
             # for
             sessie.wedstrijdklassen.set(gekozen)
 
-        url = reverse('Kalender:wijzig-sessies',
+        url = reverse('Wedstrijden:wijzig-sessies',
                       kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         return HttpResponseRedirect(url)

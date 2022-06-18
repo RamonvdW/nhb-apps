@@ -17,7 +17,7 @@ from Bestel.mutaties import (bestel_mutatieverzoek_maak_bestellingen,
                              bestel_mutatieverzoek_kortingscode_toepassen)
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.rol import Rollen, rol_get_huidige
-from Kalender.models import KALENDER_KORTING_COMBI
+from Wedstrijden.models import WEDSTRIJD_KORTING_COMBI
 from Plein.menu import menu_dynamics
 from decimal import Decimal
 
@@ -74,21 +74,21 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
             producten = (mandje
                          .producten
-                         .select_related('inschrijving',
-                                         'inschrijving__wedstrijd',
-                                         'inschrijving__sessie',
-                                         'inschrijving__sporterboog',
-                                         'inschrijving__sporterboog__boogtype',
-                                         'inschrijving__sporterboog__sporter')
-                         .order_by('inschrijving__pk'))
+                         .select_related('wedstrijd_inschrijving',
+                                         'wedstrijd_inschrijving__wedstrijd',
+                                         'wedstrijd_inschrijving__sessie',
+                                         'wedstrijd_inschrijving__sporterboog',
+                                         'wedstrijd_inschrijving__sporterboog__boogtype',
+                                         'wedstrijd_inschrijving__sporterboog__sporter')
+                         .order_by('wedstrijd_inschrijving__pk'))
 
             for product in producten:
                 # maak een beschrijving van deze regel
                 product.beschrijving = beschrijving = list()
                 product.kan_afrekenen = True
 
-                if product.inschrijving:
-                    inschrijving = product.inschrijving
+                if product.wedstrijd_inschrijving:
+                    inschrijving = product.wedstrijd_inschrijving
 
                     tup = ('Reserveringsnummer', settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk)
                     beschrijving.append(tup)
@@ -121,7 +121,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                     if inschrijving.gebruikte_code:
                         korting = inschrijving.gebruikte_code
                         product.gebruikte_code_str = "code %s (korting: %d%%)" % (korting.code, korting.percentage)
-                        if korting.soort == KALENDER_KORTING_COMBI:
+                        if korting.soort == WEDSTRIJD_KORTING_COMBI:
                             product.is_combi_korting = True
                             product.combi_reden = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
                     elif product.korting_euro:
@@ -131,7 +131,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                     controleer_euro += product.prijs_euro
                     controleer_euro -= product.korting_euro
 
-                    ver_nr = product.inschrijving.wedstrijd.organiserende_vereniging.ver_nr
+                    ver_nr = product.wedstrijd_inschrijving.wedstrijd.organiserende_vereniging.ver_nr
                     try:
                         instellingen = ver_nr2instellingen[ver_nr]
                     except KeyError:

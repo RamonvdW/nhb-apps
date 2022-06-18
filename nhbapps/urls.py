@@ -46,6 +46,7 @@ urlpatterns = [
     path('score/',                          include('Score.urls')),
     path('taken/',                          include('Taken.urls')),
     path('vereniging/',                     include('Vereniging.urls')),
+    path('wedstrijden/',                    include('Wedstrijden.urls')),
 
     # direct van oude urls naar nieuwe urls
     #path('sporter/bondspas/', lambda request: redirect('ledenpas/', permanent=True)),

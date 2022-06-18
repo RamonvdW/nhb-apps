@@ -10,7 +10,7 @@ from .models import BestelProduct, BestelMandje, Bestelling, BestelMutatie, BEST
 
 class BestelProductAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('inschrijving',)
+    readonly_fields = ('wedstrijd_inschrijving',)
 
 
 class BestelMandjeAdmin(admin.ModelAdmin):
@@ -66,7 +66,7 @@ class BestelMutatieAdmin(admin.ModelAdmin):
 
     readonly_fields = ('when', 'account',)
 
-    auto_complete = ('inschrijving', 'product', 'bestelling')
+    auto_complete = ('wedstrijd_inschrijving', 'product', 'bestelling')
 
 
 admin.site.register(BestelProduct, BestelProductAdmin)

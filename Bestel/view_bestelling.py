@@ -57,12 +57,12 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
 
             for product in (bestelling
                             .producten
-                            .select_related('inschrijving',
-                                            'inschrijving__wedstrijd',
-                                            'inschrijving__sporterboog__sporter')):
+                            .select_related('wedstrijd_inschrijving',
+                                            'wedstrijd_inschrijving__wedstrijd',
+                                            'wedstrijd_inschrijving__sporterboog__sporter')):
 
-                if product.inschrijving:
-                    beschrijving.append(product.inschrijving.korte_beschrijving())
+                if product.wedstrijd_inschrijving:
+                    beschrijving.append(product.wedstrijd_inschrijving.korte_beschrijving())
                 else:
                     beschrijving.append("??")
             # for
@@ -121,21 +121,21 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
 
         producten = (bestelling
                      .producten
-                     .select_related('inschrijving',
-                                     'inschrijving__wedstrijd',
-                                     'inschrijving__sessie',
-                                     'inschrijving__sporterboog',
-                                     'inschrijving__sporterboog__boogtype',
-                                     'inschrijving__sporterboog__sporter',
-                                     'inschrijving__sporterboog__sporter__bij_vereniging'))
+                     .select_related('wedstrijd_inschrijving',
+                                     'wedstrijd_inschrijving__wedstrijd',
+                                     'wedstrijd_inschrijving__sessie',
+                                     'wedstrijd_inschrijving__sporterboog',
+                                     'wedstrijd_inschrijving__sporterboog__boogtype',
+                                     'wedstrijd_inschrijving__sporterboog__sporter',
+                                     'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging'))
                     # TODO: order_by
 
         for product in producten:
             # maak een beschrijving van deze regel
             product.beschrijving = beschrijving = list()
 
-            if product.inschrijving:
-                inschrijving = product.inschrijving
+            if product.wedstrijd_inschrijving:
+                inschrijving = product.wedstrijd_inschrijving
 
                 tup = ('Reserveringsnummer', settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk)
                 beschrijving.append(tup)

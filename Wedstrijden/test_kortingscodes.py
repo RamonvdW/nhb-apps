@@ -11,8 +11,8 @@ from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie
-from .models import (KalenderWedstrijd, KalenderWedstrijdSessie, KalenderInschrijving, KalenderWedstrijdKortingscode,
-                     KALENDER_KORTING_SPORTER, KALENDER_KORTING_VERENIGING, KALENDER_KORTING_COMBI)
+from .models import (Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKortingscode,
+                     WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING, WEDSTRIJD_KORTING_COMBI)
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
@@ -21,9 +21,9 @@ class TestKalenderKortingscodes(E2EHelpers, TestCase):
 
     """ tests voor de Kalender applicatie, module kortingscodes """
 
-    url_kalender_kortingscodes = '/kalender/vereniging/kortingscodes/'
-    url_kalender_nieuwe_code = '/kalender/vereniging/kortingscodes/nieuw/'
-    url_kalender_wijzig = '/kalender/vereniging/kortingscodes/wijzig/%s/'    # korting_pk
+    url_kalender_kortingscodes = '/wedstrijden/vereniging/kortingscodes/'
+    url_kalender_nieuwe_code = '/wedstrijden/vereniging/kortingscodes/nieuw/'
+    url_kalender_wijzig = '/wedstrijden/vereniging/kortingscodes/wijzig/%s/'    # korting_pk
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -78,21 +78,21 @@ class TestKalenderKortingscodes(E2EHelpers, TestCase):
         now = timezone.now()
         now_date = now.date()
 
-        self.wedstrijd1 = KalenderWedstrijd(
+        self.wedstrijd1 = Wedstrijd(
                                 titel='test wedstrijd 1',
                                 datum_begin=now_date,
                                 datum_einde=now_date,
                                 organiserende_vereniging=self.nhbver1,
                                 voorwaarden_a_status_when=now,
                                 locatie=self.locatie)
-        self.wedstrijd2 = KalenderWedstrijd(
+        self.wedstrijd2 = Wedstrijd(
                                 titel='test wedstrijd 2',
                                 datum_begin=now_date,
                                 datum_einde=now_date,
                                 organiserende_vereniging=self.nhbver1,
                                 voorwaarden_a_status_when=now,
                                 locatie=self.locatie)
-        self.wedstrijd3 = KalenderWedstrijd(
+        self.wedstrijd3 = Wedstrijd(
                                 titel='test wedstrijd 3',
                                 datum_begin=now_date,
                                 datum_einde=now_date,
@@ -126,50 +126,50 @@ class TestKalenderKortingscodes(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kalender_nieuwe_code)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/nieuwe-kortingscode-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/nieuwe-kortingscode-vereniging.dtl', 'plein/site_layout.dtl'))
 
         resp = self.client.post(self.url_kalender_nieuwe_code)
         self.assert404(resp, 'Niet ondersteund')
 
-        self.assertEqual(0, KalenderWedstrijdKortingscode.objects.count())
+        self.assertEqual(0, WedstrijdKortingscode.objects.count())
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_kalender_nieuwe_code, {'keuze': 'sporter'})
         self.assert_is_redirect_not_plein(resp)
-        self.assertEqual(1, KalenderWedstrijdKortingscode.objects.count())
+        self.assertEqual(1, WedstrijdKortingscode.objects.count())
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_kalender_nieuwe_code, {'keuze': 'vereniging'})
         self.assert_is_redirect_not_plein(resp)
-        self.assertEqual(2, KalenderWedstrijdKortingscode.objects.count())
+        self.assertEqual(2, WedstrijdKortingscode.objects.count())
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_kalender_nieuwe_code, {'keuze': 'combi'})
         self.assert_is_redirect_not_plein(resp)
-        self.assertEqual(3, KalenderWedstrijdKortingscode.objects.count())
+        self.assertEqual(3, WedstrijdKortingscode.objects.count())
 
         # haal het overzicht op met de gedeeltelijk ingevulde kortingscodes
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_kalender_kortingscodes)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/overzicht-kortingscodes-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/overzicht-kortingscodes-vereniging.dtl', 'plein/site_layout.dtl'))
 
         # vul wat meer details in
-        korting_sporter = KalenderWedstrijdKortingscode.objects.get(soort=KALENDER_KORTING_SPORTER)
+        korting_sporter = WedstrijdKortingscode.objects.get(soort=WEDSTRIJD_KORTING_SPORTER)
         self.assertEqual(korting_sporter.uitgegeven_door, self.nhbver1)
         korting_sporter.voor_sporter = self.sporter
         korting_sporter.save(update_fields=['voor_sporter'])
         korting_sporter.voor_wedstrijden.add(self.wedstrijd2)
         self.assertTrue(str(korting_sporter) != '')
 
-        korting_ver = KalenderWedstrijdKortingscode.objects.get(soort=KALENDER_KORTING_VERENIGING)
+        korting_ver = WedstrijdKortingscode.objects.get(soort=WEDSTRIJD_KORTING_VERENIGING)
         self.assertEqual(korting_ver.uitgegeven_door, self.nhbver1)
         korting_ver.voor_vereniging = self.nhbver1
         korting_ver.save(update_fields=['voor_vereniging'])
         korting_ver.voor_wedstrijden.add(self.wedstrijd2)
 
-        korting_combi = KalenderWedstrijdKortingscode.objects.get(soort=KALENDER_KORTING_COMBI)
+        korting_combi = WedstrijdKortingscode.objects.get(soort=WEDSTRIJD_KORTING_COMBI)
         self.assertEqual(korting_combi.uitgegeven_door, self.nhbver1)
         korting_combi.combi_basis_wedstrijd = self.wedstrijd1
         korting_combi.save(update_fields=['combi_basis_wedstrijd'])
@@ -181,26 +181,26 @@ class TestKalenderKortingscodes(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kalender_kortingscodes)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/overzicht-kortingscodes-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/overzicht-kortingscodes-vereniging.dtl', 'plein/site_layout.dtl'))
 
         # wijzig scherm ophalen voor elk type korting
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_kalender_wijzig % korting_sporter.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/wijzig-kortingscode-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-kortingscode-sporter.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_kalender_wijzig % korting_ver.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/wijzig-kortingscode-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-kortingscode-vereniging.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_kalender_wijzig % korting_combi.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/wijzig-kortingscode-combi.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-kortingscode-combi.dtl', 'plein/site_layout.dtl'))
 
         # wijzig korting sporter
         resp = self.client.post(self.url_kalender_wijzig % korting_sporter.pk)
@@ -292,18 +292,18 @@ class TestKalenderKortingscodes(E2EHelpers, TestCase):
                                                                               'wedstrijd_' + str(self.wedstrijd3.pk): 'ja'})
 
         # verwijder een kortingscode
-        self.assertEqual(3, KalenderWedstrijdKortingscode.objects.count())
+        self.assertEqual(3, WedstrijdKortingscode.objects.count())
         resp = self.client.post(self.url_kalender_wijzig % korting_sporter.pk, {'verwijder': 'yes'})
         self.assert_is_redirect_not_plein(resp)
-        self.assertEqual(2, KalenderWedstrijdKortingscode.objects.count())
+        self.assertEqual(2, WedstrijdKortingscode.objects.count())
 
         # verwijder korting die al in gebruik is
-        sessie = KalenderWedstrijdSessie(
+        sessie = WedstrijdSessie(
                     datum=self.wedstrijd1.datum_begin,
                     tijd_begin='10:00',
                     tijd_einde='15:00')
         sessie.save()
-        inschrijving = KalenderInschrijving(
+        inschrijving = WedstrijdInschrijving(
                             wanneer=timezone.now(),
                             wedstrijd=self.wedstrijd1,
                             sessie=sessie,
@@ -317,10 +317,10 @@ class TestKalenderKortingscodes(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
 
         # verwijderen lukt niet
-        self.assertEqual(2, KalenderWedstrijdKortingscode.objects.count())
+        self.assertEqual(2, WedstrijdKortingscode.objects.count())
         resp = self.client.post(self.url_kalender_wijzig % korting_ver.pk, {'verwijder': 'yes'})
         self.assert404(resp, 'Korting is in gebruik')
-        self.assertEqual(2, KalenderWedstrijdKortingscode.objects.count())
+        self.assertEqual(2, WedstrijdKortingscode.objects.count())
 
         # bad
         resp = self.client.get(self.url_kalender_wijzig % "999999")

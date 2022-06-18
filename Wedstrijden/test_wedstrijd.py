@@ -9,21 +9,21 @@ from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter
 from Wedstrijden.models import WedstrijdLocatie
-from .models import KalenderWedstrijd, KalenderWedstrijdSessie, WEDSTRIJD_STATUS_GEANNULEERD
+from .models import Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEANNULEERD
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 
-class TestKalenderWedstrijd(E2EHelpers, TestCase):
+class TestWedstrijd(E2EHelpers, TestCase):
 
     """ tests voor de Kalender applicatie """
 
-    url_kalender_manager = '/kalender/manager/'
-    url_kalender_vereniging = '/kalender/vereniging/'
-    url_kalender_maak_nieuw = '/kalender/vereniging/kies-type/'
-    url_kalender_wijzig_wedstrijd = '/kalender/%s/wijzig/'  # wedstrijd_pk
-    url_kalender_zet_status = '/kalender/%s/zet-status/'    # wedstrijd_pk
-    url_kalender_sessies = '/kalender/%s/sessies/'          # wedstrijd_pk
+    url_kalender_manager = '/wedstrijden/manager/'
+    url_kalender_vereniging = '/wedstrijden/vereniging/'
+    url_kalender_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
+    url_kalender_wijzig_wedstrijd = '/wedstrijden/%s/wijzig/'  # wedstrijd_pk
+    url_kalender_zet_status = '/wedstrijden/%s/zet-status/'    # wedstrijd_pk
+    url_kalender_sessies = '/wedstrijden/%s/sessies/'          # wedstrijd_pk
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -102,8 +102,8 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
 
-        self.assertEqual(1, KalenderWedstrijd.objects.count())
-        wedstrijd = KalenderWedstrijd.objects.all()[0]
+        self.assertEqual(1, Wedstrijd.objects.count())
+        wedstrijd = Wedstrijd.objects.all()[0]
         self.assertTrue(str(wedstrijd) != '')
         url = self.url_kalender_wijzig_wedstrijd % wedstrijd.pk
 
@@ -112,7 +112,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         # buiten locatie zonder binnen locatie
         locatie_buiten = self._maak_accommodatie_buiten(self.nhbver1)
@@ -147,7 +147,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
                                           'extern': 'ja'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
 
-        wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd.pk)
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.titel, 'Test Titel')
         self.assertEqual(wedstrijd.datum_begin, wedstrijd.datum_einde)
         self.assertEqual(wedstrijd.contact_naam, 'Test Naam')
@@ -169,7 +169,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
                                           'wa_status': 'wa_A',
                                           'aantal_banen': '0'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
-        wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd.pk)
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.wa_status, 'B')
         self.assertFalse(wedstrijd.extern_beheerd)
 
@@ -178,7 +178,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
             resp = self.client.post(url, {'wa_status': 'wa_A',
                                           'akkoord_a_status': 'ja'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
-        wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd.pk)
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.wa_status, 'A')
 
         # zet de wedstrijd door 'Wacht op goedkeuring' en haal de pagina opnieuw op
@@ -208,7 +208,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
                                           'begrenzing': 'begrenzing_V',         # mag wel
                                           'extern': 'nee'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
-        wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd.pk)
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.titel, 'Test Titel 3')
         self.assertEqual(wedstrijd.datum_begin, oude_datum_begin)
         self.assertEqual(wedstrijd.datum_einde, oude_datum_einde)
@@ -257,7 +257,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
                                           'begrenzing': 'begrenzing_Y',
                                           'extern': 'nee'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
-        wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd.pk)
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.titel, 'Test Titel 2')
         self.assertEqual(wedstrijd.datum_begin, oude_datum_begin)
         self.assertEqual(wedstrijd.datum_einde, oude_datum_einde)
@@ -284,7 +284,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
 
         wedstrijd.status = 'W'      # wacht op goedkeuring
         wedstrijd.save()
@@ -311,11 +311,11 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         # echt verwijderen van de wedstrijd
         wedstrijd.status = 'O'      # ontwerp
         wedstrijd.save()
-        self.assertEqual(1, KalenderWedstrijd.objects.count())
+        self.assertEqual(1, Wedstrijd.objects.count())
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'verwijder_wedstrijd': 'ja'})
         self.assert_is_redirect(resp, self.url_kalender_manager)
-        self.assertEqual(0, KalenderWedstrijd.objects.count())
+        self.assertEqual(0, Wedstrijd.objects.count())
 
         self.e2e_assert_other_http_commands_not_supported(url, post=False)
 
@@ -328,8 +328,8 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
 
-        self.assertEqual(1, KalenderWedstrijd.objects.count())
-        wedstrijd = KalenderWedstrijd.objects.all()[0]
+        self.assertEqual(1, Wedstrijd.objects.count())
+        wedstrijd = Wedstrijd.objects.all()[0]
         url = self.url_kalender_wijzig_wedstrijd % wedstrijd.pk
 
         # wijzig velden via de 'post' interface
@@ -370,7 +370,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
             with self.assert_max_queries(20):
                 resp = self.client.post(url, {'verwijder_wedstrijd': 'ja'})
             self.assert_is_redirect(resp, self.url_kalender_vereniging)
-            wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd.pk)      # nog steeds aanwezig?
+            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)      # nog steeds aanwezig?
         # for
 
         # verkeerder vereniging
@@ -394,8 +394,8 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
 
-        self.assertEqual(1, KalenderWedstrijd.objects.count())
-        wedstrijd = KalenderWedstrijd.objects.all()[0]
+        self.assertEqual(1, Wedstrijd.objects.count())
+        wedstrijd = Wedstrijd.objects.all()[0]
         url = self.url_kalender_zet_status % wedstrijd.pk
 
         with self.assert_max_queries(20):
@@ -406,7 +406,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'verder': 'ja'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
-        wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd.pk)
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.status, 'W')
 
         # verkeerde vereniging
@@ -430,7 +430,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'terug': 'ja'})
         self.assert_is_redirect(resp, self.url_kalender_manager)
-        wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd.pk)
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.status, 'O')
 
         # vanuit ontwerp blijf je in Ontwerp
@@ -442,27 +442,27 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'verder': 'ja'})
         self.assert_is_redirect(resp, self.url_kalender_manager)
-        wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd.pk)
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.status, 'W')
 
         # van Wacht-op-goedkeuring door naar Geaccepteerd
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'verder': 'ja'})
         self.assert_is_redirect(resp, self.url_kalender_manager)
-        wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd.pk)
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.status, 'A')
 
         # van Geaccepteerd kan je niet verder of terug
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'verder': 'ja'})
         self.assert_is_redirect(resp, self.url_kalender_manager)
-        wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd.pk)
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.status, 'A')
 
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'terug': 'ja'})
         self.assert_is_redirect(resp, self.url_kalender_manager)
-        wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd.pk)
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.status, 'A')
 
         # Annuleer
@@ -472,7 +472,7 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
             with self.assert_max_queries(20):
                 resp = self.client.post(url, {'annuleer': 'ja'})
             self.assert_is_redirect(resp, self.url_kalender_manager)
-            wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd.pk)
+            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
             self.assertEqual(wedstrijd.status, 'X')
         # for
 
@@ -490,13 +490,13 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         self._maak_externe_locatie(self.nhbver1)
         resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
-        self.assertEqual(1, KalenderWedstrijd.objects.count())
-        wedstrijd = KalenderWedstrijd.objects.all()[0]
+        self.assertEqual(1, Wedstrijd.objects.count())
+        wedstrijd = Wedstrijd.objects.all()[0]
         url = self.url_kalender_sessies % wedstrijd.pk
         resp = self.client.post(url, {'nieuwe_sessie': 'graag'})
         self.assert_is_redirect(resp, url)
-        self.assertEqual(1, KalenderWedstrijdSessie.objects.count())
-        sessie = KalenderWedstrijdSessie.objects.all()[0]
+        self.assertEqual(1, WedstrijdSessie.objects.count())
+        sessie = WedstrijdSessie.objects.all()[0]
         self.assertTrue(str(sessie) != '')
 
         # wijzig de wedstrijd datum en controleer dat de sessie mee gaat
@@ -506,8 +506,8 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         resp = self.client.post(url, {'datum_begin': str(datum)})
         self.assert_is_redirect_not_plein(resp)
 
-        wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd.pk)
-        sessie = KalenderWedstrijdSessie.objects.get(pk=sessie.pk)
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+        sessie = WedstrijdSessie.objects.get(pk=sessie.pk)
         self.assertEqual(wedstrijd.datum_begin, datum)
         self.assertEqual(sessie.datum, datum)
 
@@ -521,8 +521,8 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         self._maak_externe_locatie(self.nhbver1)
         resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
-        self.assertEqual(1, KalenderWedstrijd.objects.count())
-        wedstrijd = KalenderWedstrijd.objects.all()[0]
+        self.assertEqual(1, Wedstrijd.objects.count())
+        wedstrijd = Wedstrijd.objects.all()[0]
         self.assertEqual(wedstrijd.boogtypen.count(), 5)
         self.assertEqual(wedstrijd.wedstrijdklassen.count(), 70)
 
@@ -552,9 +552,9 @@ class TestKalenderWedstrijd(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, url)
         resp = self.client.post(url, {'nieuwe_sessie': 'graag'})
         self.assert_is_redirect(resp, url)
-        self.assertEqual(2, KalenderWedstrijdSessie.objects.count())
-        sessie = KalenderWedstrijdSessie.objects.all()[0]
-        sessie2 = KalenderWedstrijdSessie.objects.all()[1]
+        self.assertEqual(2, WedstrijdSessie.objects.count())
+        sessie = WedstrijdSessie.objects.all()[0]
+        sessie2 = WedstrijdSessie.objects.all()[1]
 
         wkl = wedstrijd.wedstrijdklassen.get(beschrijving='Recurve 50+ mannen (master)')
         sessie.wedstrijdklassen.set([wkl])        # alle uit, behalve deze

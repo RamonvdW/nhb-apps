@@ -90,7 +90,7 @@
             <div class="col s12">
 
                 <!-- vereniging menu -->
-                {% url 'Kalender:vereniging-codes' as card_url %}
+                {% url 'Wedstrijden:vereniging-codes' as card_url %}
                 {% include 'plein/card.dtl' with title="Kortingscodes" text="Kortingscodes aanmaken of aanpassen." icon="sell" url=card_url %}
 
             </div>

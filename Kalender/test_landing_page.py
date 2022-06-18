@@ -7,9 +7,6 @@
 from django.test import TestCase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Sporter.models import Sporter
-from Wedstrijden.models import WedstrijdLocatie
-from .models import KalenderWedstrijd
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
@@ -18,8 +15,8 @@ class TestKalender(E2EHelpers, TestCase):
     """ tests voor de Kalender applicatie. module Manager """
 
     url_kalender = '/kalender/'
-    url_kalender_manager = '/kalender/manager/'
-    url_kalender_vereniging = '/kalender/vereniging/'
+    url_kalender_manager = '/wedstrijden/manager/'
+    url_kalender_vereniging = '/wedstrijden/vereniging/'
     url_kalender_maand = '/kalender/pagina-##'          # startswith
 
     def setUp(self):

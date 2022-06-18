@@ -12,8 +12,8 @@ from Bestel.models import BestelMandje, Bestelling, BESTELLING_STATUS_AFGEROND, 
 from Bestel.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd, bestel_mutatieverzoek_betaling_afgerond
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalMutatie, BetaalTransactie
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
-from Kalender.models import (KalenderWedstrijd, KalenderWedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD,
-                             KalenderInschrijving, INSCHRIJVING_STATUS_DEFINITIEF)
+from Wedstrijden.models import (Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD,
+                                WedstrijdInschrijving, INSCHRIJVING_STATUS_DEFINITIEF)
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -103,7 +103,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         locatie.save()
         locatie.verenigingen.add(ver)
 
-        sessie = KalenderWedstrijdSessie(
+        sessie = WedstrijdSessie(
                     datum=datum,
                     tijd_begin='10:00',
                     tijd_einde='11:00',
@@ -113,7 +113,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         # sessie.wedstrijdklassen.add()
 
         # maak een kalenderwedstrijd aan, met sessie
-        wedstrijd = KalenderWedstrijd(
+        wedstrijd = Wedstrijd(
                         titel='Test',
                         status=WEDSTRIJD_STATUS_GEACCEPTEERD,
                         datum_begin=datum,
@@ -128,7 +128,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         # wedstrijd.boogtypen.add()
         self.wedstrijd = wedstrijd
 
-        inschrijving = KalenderInschrijving(
+        inschrijving = WedstrijdInschrijving(
                             wanneer=now,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
@@ -219,7 +219,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         self.assertEqual(1, bestelling.transacties.count())
 
         # controleer dat de inschrijving nu op 'definitief' staat
-        inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertEqual(inschrijving.status, INSCHRIJVING_STATUS_DEFINITIEF)
         self.assertEqual(inschrijving.ontvangen_euro, Decimal('10'))
         self.assertEqual(inschrijving.retour_euro, Decimal('0'))

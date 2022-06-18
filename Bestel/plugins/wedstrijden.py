@@ -7,13 +7,13 @@
 """ Deze module levert functionaliteit voor de Bestel applicatie met kennis van de Kalender, zoals kortingen. """
 
 from django.utils import timezone
-from Kalender.models import (KalenderWedstrijdKortingscode, KalenderInschrijving,
-                             INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_DEFINITIEF,
-                             INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_TO_STR, KALENDER_KORTING_COMBI)
+from Wedstrijden.models import (WedstrijdKortingscode, WedstrijdInschrijving,
+                                INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_DEFINITIEF,
+                                INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_TO_STR, WEDSTRIJD_KORTING_COMBI)
 from decimal import Decimal
 
 
-def kalender_plugin_automatische_kortingscodes_toepassen(stdout, mandje):
+def wedstrijden_plugin_automatische_kortingscodes_toepassen(stdout, mandje):
 
     # analyseer de inhoud van het mandje
     inschrijvingen = dict()                 # [lid_nr] = [wedstrijd.pk, ...]
@@ -21,8 +21,8 @@ def kalender_plugin_automatische_kortingscodes_toepassen(stdout, mandje):
     ver_nrs = list()                        # verenigingen die voorkomen in het mandje
     inschrijving2product = dict()           # [inschrijving.pk] = BestelProduct
     if True:
-        for product in mandje.producten.exclude(inschrijving=None).all():
-            inschrijving = product.inschrijving
+        for product in mandje.producten.exclude(wedstrijd_inschrijving=None).all():
+            inschrijving = product.wedstrijd_inschrijving
             inschrijving2product[inschrijving.pk] = product
 
             # verwijder automatische kortingen
@@ -52,7 +52,7 @@ def kalender_plugin_automatische_kortingscodes_toepassen(stdout, mandje):
 
         # naast wat er in het mandje ligt ook kijken waar al op ingeschreven is
         for lid_nr, nieuwe_pks in inschrijvingen.items():
-            pks = list(KalenderInschrijving
+            pks = list(WedstrijdInschrijving
                        .objects
                        .filter(sporterboog__sporter__lid_nr=lid_nr)
                        .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)
@@ -62,7 +62,7 @@ def kalender_plugin_automatische_kortingscodes_toepassen(stdout, mandje):
         # for
 
     # doorloop alle combi-kortingen van de organiserende verenigingen die voorkomen in het mandje
-    for korting in (KalenderWedstrijdKortingscode
+    for korting in (WedstrijdKortingscode
                     .objects
                     .exclude(combi_basis_wedstrijd=None)
                     .filter(uitgegeven_door__ver_nr__in=ver_nrs)):
@@ -114,7 +114,7 @@ def kalender_plugin_automatische_kortingscodes_toepassen(stdout, mandje):
     # for
 
 
-def kalender_plugin_inschrijven(inschrijving):
+def wedstrijden_plugin_inschrijven(inschrijving):
     """ verwerk een nieuwe inschrijving op een wedstrijdsessie """
     # verhoog het aantal inschrijvingen op deze sessie
     # hiermee geven we een garantie op een plekje
@@ -135,7 +135,7 @@ def kalender_plugin_inschrijven(inschrijving):
     return prijs
 
 
-def kalender_plugin_afmelden(inschrijving):
+def wedstrijden_plugin_afmelden(inschrijving):
     """ verwerk een afmelding voor een wedstrijdsessie """
     # verlaag het aantal inschrijvingen op deze sessie
     # Noteer: geen concurrency risico want serialisatie via deze achtergrondtaak
@@ -148,7 +148,7 @@ def kalender_plugin_afmelden(inschrijving):
     inschrijving.save(update_fields=['status'])
 
 
-def kalender_plugin_verwijder_reservering(stdout, inschrijving):
+def wedstrijden_plugin_verwijder_reservering(stdout, inschrijving):
 
     # zet de inschrijving om in status=afgemeld
     # dit heeft de voorkeur over het verwijderen van inschrijvingen,
@@ -168,11 +168,11 @@ def kalender_plugin_verwijder_reservering(stdout, inschrijving):
                                                                        INSCHRIJVING_STATUS_TO_STR[oude_status]))
 
 
-def kalender_plugin_kortingscode_toepassen(stdout, kortingscode_str, producten):
+def wedstrijden_plugin_kortingscode_toepassen(stdout, kortingscode_str, producten):
 
-    for korting in (KalenderWedstrijdKortingscode
+    for korting in (WedstrijdKortingscode
                     .objects
-                    .exclude(soort=KALENDER_KORTING_COMBI)      # wordt apart bekeken
+                    .exclude(soort=WEDSTRIJD_KORTING_COMBI)      # wordt apart bekeken
                     .filter(code__iexact=kortingscode_str,
                             geldig_tot_en_met__gte=timezone.now().date())):
 
@@ -181,7 +181,7 @@ def kalender_plugin_kortingscode_toepassen(stdout, kortingscode_str, producten):
 
         for product in producten:
 
-            inschrijving = product.inschrijving
+            inschrijving = product.wedstrijd_inschrijving
 
             # kijk of deze korting van toepassing is op deze inschrijving
             toepassen = False
@@ -240,11 +240,11 @@ def kalender_plugin_kortingscode_toepassen(stdout, kortingscode_str, producten):
     # for korting
 
 
-def kalender_plugin_inschrijving_is_betaald(product):
+def wedstrijden_plugin_inschrijving_is_betaald(product):
     """ Deze functie wordt aangeroepen als een bestelling betaald is,
         of als een bestelling niet betaald hoeft te worden (totaal bedrag nul)
     """
-    inschrijving = product.inschrijving
+    inschrijving = product.wedstrijd_inschrijving
 
     inschrijving.ontvangen_euro = product.prijs_euro - product.korting_euro
     inschrijving.status = INSCHRIJVING_STATUS_DEFINITIEF

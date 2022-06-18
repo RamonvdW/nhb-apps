@@ -43,7 +43,7 @@ def bestel_mutatieverzoek_inschrijven_wedstrijd(account, inschrijving, snel):
     mutatie, is_created = BestelMutatie.objects.get_or_create(
                                     code=BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN,
                                     account=account,
-                                    inschrijving=inschrijving,
+                                    wedstrijd_inschrijving=inschrijving,
                                     is_verwerkt=False)
     mutatie.save()
 
@@ -127,7 +127,7 @@ def bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel=False):
     # voorkom duplicates (niet 100%)
     mutatie, is_created = BestelMutatie.objects.get_or_create(
                                     code=BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN,
-                                    inschrijving=inschrijving,
+                                    wedstrijd_inschrijving=inschrijving,
                                     is_verwerkt=False)
     mutatie.save()
 

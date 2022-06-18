@@ -15,9 +15,9 @@ class TestKalender(E2EHelpers, TestCase):
 
     """ tests voor de Kalender applicatie. module Manager """
 
-    url_kalender_manager = '/kalender/manager/'
-    url_kalender_vereniging = '/kalender/vereniging/'
-    url_kalender_maak_nieuw = '/kalender/vereniging/kies-type/'
+    url_kalender_manager = '/wedstrijden/manager/'
+    url_kalender_vereniging = '/wedstrijden/vereniging/'
+    url_kalender_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -58,7 +58,7 @@ class TestKalender(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kalender_manager)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/overzicht-manager.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/overzicht-manager.dtl', 'plein/site_layout.dtl'))
 
         # wissel naar HWL en maak een wedstrijd aan
         self.e2e_wissel_naar_functie(self.functie_hwl)
@@ -71,7 +71,7 @@ class TestKalender(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kalender_manager)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/overzicht-manager.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/overzicht-manager.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_kalender_manager, post=False)
 

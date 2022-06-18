@@ -14,15 +14,15 @@ from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Bestel.models import BESTEL_KORTINGSCODE_MINLENGTH
 from Sporter.models import Sporter
 from Plein.menu import menu_dynamics
-from Kalender.models import (KalenderWedstrijd, KalenderWedstrijdKortingscode,
-                             KALENDER_KORTING_SPORTER, KALENDER_KORTING_VERENIGING, KALENDER_KORTING_COMBI)
+from Wedstrijden.models import (Wedstrijd, WedstrijdKortingscode,
+                                WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING, WEDSTRIJD_KORTING_COMBI)
 import datetime
 
-TEMPLATE_KALENDER_KORTINGSCODES_OVERZICHT = 'kalender/overzicht-kortingscodes-vereniging.dtl'
-TEMPLATE_KALENDER_NIEUWE_KORTINGSCODE = 'kalender/nieuwe-kortingscode-vereniging.dtl'
-TEMPLATE_KALENDER_WIJZIG_KORTINGSCODE_SPORTER = 'kalender/wijzig-kortingscode-sporter.dtl'
-TEMPLATE_KALENDER_WIJZIG_KORTINGSCODE_VERENIGING = 'kalender/wijzig-kortingscode-vereniging.dtl'
-TEMPLATE_KALENDER_WIJZIG_KORTINGSCODE_COMBI = 'kalender/wijzig-kortingscode-combi.dtl'
+TEMPLATE_KALENDER_KORTINGSCODES_OVERZICHT = 'wedstrijden/overzicht-kortingscodes-vereniging.dtl'
+TEMPLATE_KALENDER_NIEUWE_KORTINGSCODE = 'wedstrijden/nieuwe-kortingscode-vereniging.dtl'
+TEMPLATE_KALENDER_WIJZIG_KORTINGSCODE_SPORTER = 'wedstrijden/wijzig-kortingscode-sporter.dtl'
+TEMPLATE_KALENDER_WIJZIG_KORTINGSCODE_VERENIGING = 'wedstrijden/wijzig-kortingscode-vereniging.dtl'
+TEMPLATE_KALENDER_WIJZIG_KORTINGSCODE_COMBI = 'wedstrijden/wijzig-kortingscode-combi.dtl'
 
 
 class VerenigingKortingcodesView(UserPassesTestMixin, TemplateView):
@@ -50,7 +50,7 @@ class VerenigingKortingcodesView(UserPassesTestMixin, TemplateView):
 
         context['huidige_rol'] = rol_get_beschrijving(self.request)
 
-        codes = (KalenderWedstrijdKortingscode
+        codes = (WedstrijdKortingscode
                  .objects
                  .filter(uitgegeven_door=ver)
                  .select_related('voor_sporter')
@@ -60,17 +60,17 @@ class VerenigingKortingcodesView(UserPassesTestMixin, TemplateView):
             korting.voor_wie_str = '-'
             korting.voor_wedstrijden_str = '\n'.join(korting.voor_wedstrijden.order_by('datum_begin', 'pk').values_list('titel', flat=True))
 
-            if korting.soort == KALENDER_KORTING_SPORTER:
+            if korting.soort == WEDSTRIJD_KORTING_SPORTER:
                 korting.icon_name = 'account_circle'
                 if korting.voor_sporter:
                     korting.voor_wie_str = korting.voor_sporter.volledige_naam()
 
-            elif korting.soort == KALENDER_KORTING_VERENIGING:
+            elif korting.soort == WEDSTRIJD_KORTING_VERENIGING:
                 korting.icon_name = 'home'
                 korting.voor_wie_str = 'Leden van vereniging %s' % ver.ver_nr
                 korting.voor_vereniging = ver
 
-            elif korting.soort == KALENDER_KORTING_COMBI:       # pragma: no branch
+            elif korting.soort == WEDSTRIJD_KORTING_COMBI:       # pragma: no branch
                 korting.icon_name = 'join_full'
                 if korting.combi_basis_wedstrijd:
                     korting.voor_wedstrijden_str = korting.combi_basis_wedstrijd.titel
@@ -78,16 +78,16 @@ class VerenigingKortingcodesView(UserPassesTestMixin, TemplateView):
             else:       # pragma: no cover
                 korting.voor_wie_str = "?"
 
-            korting.url_wijzig = reverse('Kalender:vereniging-wijzig-code', kwargs={'korting_pk': korting.pk})
+            korting.url_wijzig = reverse('Wedstrijden:vereniging-wijzig-code', kwargs={'korting_pk': korting.pk})
         # for
 
         context['codes'] = codes
 
-        context['url_nieuwe_code'] = reverse('Kalender:vereniging-codes-nieuw-kies')
+        context['url_nieuwe_code'] = reverse('Wedstrijden:vereniging-codes-nieuw-kies')
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (reverse('Kalender:vereniging'), 'Wedstrijdkalender'),
+            (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
             (None, 'Kortingscodes'),
         )
 
@@ -116,12 +116,12 @@ class NieuweKortingcodesView(UserPassesTestMixin, View):
         """ deze functie wordt aangeroepen om de GET request af te handelen """
         context = dict()
 
-        context['url_nieuwe_korting'] = reverse('Kalender:vereniging-codes-nieuw-kies')
+        context['url_nieuwe_korting'] = reverse('Wedstrijden:vereniging-codes-nieuw-kies')
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (reverse('Kalender:vereniging'), 'Wedstrijdkalender'),
-            (reverse('Kalender:vereniging-codes'), 'Kortingscodes'),
+            (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
+            (reverse('Wedstrijden:vereniging-codes'), 'Kortingscodes'),
             (None, 'Nieuwe aanmaken')
         )
 
@@ -134,25 +134,25 @@ class NieuweKortingcodesView(UserPassesTestMixin, View):
         ver = self.functie_nu.nhb_ver
         toekomst = timezone.now().date() + datetime.timedelta(days=30)
 
-        korting = KalenderWedstrijdKortingscode(
+        korting = WedstrijdKortingscode(
                         geldig_tot_en_met=toekomst,
                         uitgegeven_door=ver)
 
         keuze = request.POST.get('keuze', '')
 
         if keuze == 'sporter':
-            korting.soort = KALENDER_KORTING_SPORTER
+            korting.soort = WEDSTRIJD_KORTING_SPORTER
         elif keuze == 'vereniging':
-            korting.soort = KALENDER_KORTING_VERENIGING
+            korting.soort = WEDSTRIJD_KORTING_VERENIGING
             korting.voor_vereniging = ver
         elif keuze == 'combi':
-            korting.soort = KALENDER_KORTING_COMBI
+            korting.soort = WEDSTRIJD_KORTING_COMBI
         else:
             raise Http404('Niet ondersteund')
 
         korting.save()
 
-        url = reverse('Kalender:vereniging-wijzig-code', kwargs={'korting_pk': korting.pk})
+        url = reverse('Wedstrijden:vereniging-wijzig-code', kwargs={'korting_pk': korting.pk})
 
         return HttpResponseRedirect(url)
 
@@ -182,22 +182,22 @@ class VerenigingWijzigKortingcodesView(UserPassesTestMixin, View):
         try:
             korting_pk = kwargs['korting_pk'][:6]       # afkappen voor de veiligheid
             korting_pk = int(korting_pk)
-            korting = (KalenderWedstrijdKortingscode
+            korting = (WedstrijdKortingscode
                        .objects
                        .select_related('voor_vereniging',
                                        'voor_sporter')
                        .get(pk=korting_pk,
                             uitgegeven_door=ver))
-        except (ValueError, TypeError, KalenderWedstrijdKortingscode.DoesNotExist):
+        except (ValueError, TypeError, WedstrijdKortingscode.DoesNotExist):
             raise Http404('Niet gevonden')
 
         context['korting'] = korting
 
-        if korting.soort == KALENDER_KORTING_SPORTER:
+        if korting.soort == WEDSTRIJD_KORTING_SPORTER:
             template_name = TEMPLATE_KALENDER_WIJZIG_KORTINGSCODE_SPORTER
-        elif korting.soort == KALENDER_KORTING_VERENIGING:
+        elif korting.soort == WEDSTRIJD_KORTING_VERENIGING:
             template_name = TEMPLATE_KALENDER_WIJZIG_KORTINGSCODE_VERENIGING
-        elif korting.soort == KALENDER_KORTING_COMBI:                           # pragma: no branch
+        elif korting.soort == WEDSTRIJD_KORTING_COMBI:                           # pragma: no branch
             template_name = TEMPLATE_KALENDER_WIJZIG_KORTINGSCODE_COMBI
         else:                                                                   # pragma: no cover
             raise Http404('Niet ondersteund')
@@ -219,7 +219,7 @@ class VerenigingWijzigKortingcodesView(UserPassesTestMixin, View):
 
             wedstrijden.append(wedstrijd)
         else:
-            for wedstrijd in (KalenderWedstrijd
+            for wedstrijd in (Wedstrijd
                               .objects
                               .filter(organiserende_vereniging=ver)
                               .order_by('datum_begin', 'pk')):
@@ -232,7 +232,7 @@ class VerenigingWijzigKortingcodesView(UserPassesTestMixin, View):
             # for
 
         context['combi_wedstrijden'] = combi_wedstrijden = list()
-        for wedstrijd in (KalenderWedstrijd
+        for wedstrijd in (Wedstrijd
                           .objects
                           .filter(organiserende_vereniging=ver)
                           .order_by('datum_begin', 'pk')):
@@ -252,16 +252,16 @@ class VerenigingWijzigKortingcodesView(UserPassesTestMixin, View):
         context['min_date'] = min(now.date(), korting.geldig_tot_en_met)
         context['max_date'] = datetime.date(now.year + 1, 12, 31)
 
-        context['url_opslaan'] = reverse('Kalender:vereniging-wijzig-code', kwargs={'korting_pk': korting.pk})
+        context['url_opslaan'] = reverse('Wedstrijden:vereniging-wijzig-code', kwargs={'korting_pk': korting.pk})
 
         # verwijderen kan alleen als deze nog niet gebruikt is
-        if korting.kalenderinschrijving_set.count() == 0:
+        if korting.wedstrijdinschrijving_set.count() == 0:
             context['url_verwijder'] = context['url_opslaan']
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (reverse('Kalender:vereniging'), 'Wedstrijdkalender'),
-            (reverse('Kalender:vereniging-codes'), 'Kortingscodes'),
+            (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
+            (reverse('Wedstrijden:vereniging-codes'), 'Kortingscodes'),
             (None, 'Wijzig'),
         )
 
@@ -276,14 +276,14 @@ class VerenigingWijzigKortingcodesView(UserPassesTestMixin, View):
         try:
             korting_pk = kwargs['korting_pk'][:6]       # afkappen voor de veiligheid
             korting_pk = int(korting_pk)
-            korting = KalenderWedstrijdKortingscode.objects.get(pk=korting_pk,
+            korting = WedstrijdKortingscode.objects.get(pk=korting_pk,
                                                                 uitgegeven_door=ver)
-        except (ValueError, TypeError, KalenderWedstrijdKortingscode.DoesNotExist):
+        except (ValueError, TypeError, WedstrijdKortingscode.DoesNotExist):
             raise Http404('Niet gevonden')
 
         if request.POST.get('verwijder', ''):
             # verwijderen deze kortingscode
-            if korting.kalenderinschrijving_set.count() > 0:
+            if korting.wedstrijdinschrijving_set.count() > 0:
                 raise Http404('Korting is in gebruik')
             korting.delete()
         else:
@@ -344,7 +344,7 @@ class VerenigingWijzigKortingcodesView(UserPassesTestMixin, View):
             eerste_wedstrijd = None
             combi_pks = list()
             keep_pks = list()
-            for wedstrijd in (KalenderWedstrijd
+            for wedstrijd in (Wedstrijd
                               .objects
                               .filter(organiserende_vereniging=ver)):
 
@@ -372,7 +372,7 @@ class VerenigingWijzigKortingcodesView(UserPassesTestMixin, View):
                 korting.save()
                 korting.voor_wedstrijden.set(keep_pks)
 
-        url = reverse('Kalender:vereniging-codes')
+        url = reverse('Wedstrijden:vereniging-codes')
         return HttpResponseRedirect(url)
 
 

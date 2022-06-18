@@ -10,12 +10,11 @@ from django.utils import timezone
 from BasisTypen.models import BoogType
 from Bestel.models import BestelProduct, BestelMandje, BestelMutatie, Bestelling
 from Betaal.models import BetaalInstellingenVereniging
-from Kalender.models import (KalenderWedstrijd, KalenderWedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD,
-                             KalenderInschrijving, KalenderWedstrijdKortingscode, KALENDER_KORTING_COMBI)
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
-from Wedstrijden.models import WedstrijdLocatie
+from Wedstrijden.models import (WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD,
+                                WedstrijdInschrijving, WedstrijdKortingscode, WEDSTRIJD_KORTING_COMBI)
 from decimal import Decimal
 
 
@@ -93,7 +92,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         locatie.save()
         locatie.verenigingen.add(ver)
 
-        sessie = KalenderWedstrijdSessie(
+        sessie = WedstrijdSessie(
                     datum=datum,
                     tijd_begin='10:00',
                     tijd_einde='11:00',
@@ -102,7 +101,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         # sessie.wedstrijdklassen.add()
 
         # maak een kalenderwedstrijd aan, met sessie
-        wedstrijd = KalenderWedstrijd(
+        wedstrijd = Wedstrijd(
                         titel='Test',
                         status=WEDSTRIJD_STATUS_GEACCEPTEERD,
                         datum_begin=datum,
@@ -116,7 +115,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         wedstrijd.sessies.add(sessie)
         # wedstrijd.boogtypen.add()
 
-        inschrijving = KalenderInschrijving(
+        inschrijving = WedstrijdInschrijving(
                             wanneer=now,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
@@ -126,7 +125,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.inschrijving = inschrijving
 
         self.code = 'TESTJE1234'
-        korting = KalenderWedstrijdKortingscode(
+        korting = WedstrijdKortingscode(
                     code=self.code,
                     geldig_tot_en_met=datum,
                     uitgegeven_door=ver,
@@ -142,7 +141,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
 
         # geen koppeling aan een mandje
         product = BestelProduct(
-                    inschrijving=self.inschrijving,
+                    wedstrijd_inschrijving=self.inschrijving,
                     prijs_euro=Decimal(10.0))
         product.save()
 
@@ -216,7 +215,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
 
         # verander de korting in een combi-korting
-        self.korting.soort = KALENDER_KORTING_COMBI
+        self.korting.soort = WEDSTRIJD_KORTING_COMBI
         self.korting.save()
 
         # leg een product in het mandje wat geen wedstrijd inschrijving is
@@ -270,7 +269,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.assert_is_redirect(resp, self.url_mandje_toon)
 
         # controleer dat de code nog niet toegepast is
-        inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertIsNone(inschrijving.gebruikte_code)
 
         # pas de code toe, inclusief garbage
@@ -290,7 +289,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.verwerk_bestel_mutaties()
 
         # controleer dat de code toegepast is
-        inschrijving = KalenderInschrijving.objects.get(pk=self.inschrijving.pk)
+        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
         self.assertIsNotNone(inschrijving.gebruikte_code)
         self.assertEqual(inschrijving.gebruikte_code.code, self.code)
 

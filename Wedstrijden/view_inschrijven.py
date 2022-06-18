@@ -11,19 +11,99 @@ from django.db import IntegrityError, transaction
 from django.db.models import ObjectDoesNotExist
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.rol import Rollen, rol_get_huidige
+from BasisTypen.models import ORGANISATIE_WA
 from Bestel.mandje import mandje_tel_inhoud
 from Bestel.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
+from Functie.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
-from .models import (KalenderWedstrijd, KalenderWedstrijdSessie, KalenderInschrijving,
-                     INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_TO_STR)
+from Wedstrijden.models import (Wedstrijd, WedstrijdSessie, WedstrijdInschrijving,
+                                INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_TO_STR,
+                                WEDSTRIJD_ORGANISATIE_TO_STR, WEDSTRIJD_BEGRENZING_TO_STR, WEDSTRIJD_WA_STATUS_TO_STR)
 from Kalender.view_maand import MAAND2URL
 
 
-TEMPLATE_KALENDER_INSCHRIJVEN_SPORTER = 'kalender/inschrijven-sporter.dtl'
-TEMPLATE_KALENDER_INSCHRIJVEN_GROEPJE = 'kalender/inschrijven-groepje.dtl'
-TEMPLATE_KALENDER_INSCHRIJVEN_FAMILIE = 'kalender/inschrijven-familie.dtl'
+TEMPLATE_KALENDER_WEDSTRIJD_DETAILS = 'wedstrijden/wedstrijd-details.dtl'
+TEMPLATE_KALENDER_INSCHRIJVEN_SPORTER = 'wedstrijden/inschrijven-sporter.dtl'
+TEMPLATE_KALENDER_INSCHRIJVEN_GROEPJE = 'wedstrijden/inschrijven-groepje.dtl'
+TEMPLATE_KALENDER_INSCHRIJVEN_FAMILIE = 'wedstrijden/inschrijven-familie.dtl'
+
+
+class WedstrijdInfoView(TemplateView):
+
+    """ Via deze view krijgen gebruikers en sporters de wedstrijdkalender te zien """
+
+    # class variables shared by all instances
+    template_name = TEMPLATE_KALENDER_WEDSTRIJD_DETAILS
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+
+        context = super().get_context_data(**kwargs)
+
+        try:
+            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
+            wedstrijd = (Wedstrijd
+                         .objects
+                         .select_related('organiserende_vereniging',
+                                         'locatie')
+                         .prefetch_related('boogtypen',
+                                           'sessies')
+                         .get(pk=wedstrijd_pk))
+        except Wedstrijd.DoesNotExist:
+            raise Http404('Wedstrijd niet gevonden')
+
+        context['wed'] = wedstrijd
+
+        wedstrijd.organisatie_str = WEDSTRIJD_ORGANISATIE_TO_STR[wedstrijd.organisatie]
+
+        wedstrijd.begrenzing_str = WEDSTRIJD_BEGRENZING_TO_STR[wedstrijd.begrenzing]
+
+        if wedstrijd.organisatie == ORGANISATIE_WA:
+            context['toon_wa_status'] = True
+            wedstrijd.wa_status_str = WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
+
+        sessie_pks = list(wedstrijd.sessies.values_list('pk', flat=True))
+        context['sessies'] = sessies = (WedstrijdSessie
+                                        .objects
+                                        .filter(pk__in=sessie_pks)
+                                        .prefetch_related('wedstrijdklassen')
+                                        .order_by('datum',
+                                                  'tijd_begin',
+                                                  'pk'))
+
+        for sessie in sessies:
+            sessie.aantal_beschikbaar = sessie.max_sporters - sessie.aantal_inschrijvingen
+            sessie.klassen = sessie.wedstrijdklassen.all()
+        # for
+
+        # om aan te melden is een account nodig
+        context['kan_aanmelden'] = self.request.user.is_authenticated
+
+        # inschrijven kan alleen op een wedstrijd in de toekomst
+        context['kan_inschrijven'] = wedstrijd.datum_begin > timezone.now().date()
+
+        if context['kan_aanmelden']:
+            context['menu_toon_mandje'] = True
+
+            if context['kan_inschrijven']:
+                context['url_inschrijven_sporter'] = reverse('Wedstrijden:inschrijven-sporter',
+                                                             kwargs={'wedstrijd_pk': wedstrijd.pk})
+                context['url_inschrijven_groepje'] = reverse('Wedstrijden:inschrijven-groepje',
+                                                             kwargs={'wedstrijd_pk': wedstrijd.pk})
+                context['url_inschrijven_familie'] = reverse('Wedstrijden:inschrijven-familie',
+                                                             kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+        url_terug = reverse('Kalender:maand',
+                            kwargs={'jaar': wedstrijd.datum_begin.year,
+                                    'maand': MAAND2URL[wedstrijd.datum_begin.month]})
+        context['kruimels'] = (
+            (url_terug, 'Wedstrijdkalender'),
+            (None, 'Wedstrijd details'),
+        )
+
+        menu_dynamics(self.request, context)
+        return context
 
 
 def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
@@ -38,7 +118,7 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
             wedstrijd_geslacht = voorkeuren.wedstrijd_geslacht
 
     sessie_pks = list(wedstrijd.sessies.values_list('pk', flat=True))
-    sessies = (KalenderWedstrijdSessie
+    sessies = (WedstrijdSessie
                .objects
                .filter(pk__in=sessie_pks)
                .prefetch_related('wedstrijdklassen')
@@ -49,7 +129,7 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
     # kijk of de sporter al ingeschreven is
     sessie_pk2inschrijving = dict()       # [sessie.pk] = inschrijving
     if sporter:
-        for inschrijving in (KalenderInschrijving
+        for inschrijving in (WedstrijdInschrijving
                              .objects
                              .select_related('sessie',
                                              'sporterboog',
@@ -145,14 +225,14 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
 
         try:
             wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
-            wedstrijd = (KalenderWedstrijd
+            wedstrijd = (Wedstrijd
                          .objects
                          .select_related('organiserende_vereniging',
                                          'locatie')
                          .prefetch_related('boogtypen',
                                            'sessies')
                          .get(pk=wedstrijd_pk))
-        except KalenderWedstrijd.DoesNotExist:
+        except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
         context['wed'] = wedstrijd
@@ -186,7 +266,7 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
         for sporterboog in context['sportersboog']:
             sporterboog.is_geselecteerd = False
 
-            sporterboog.url_selecteer = reverse('Kalender:inschrijven-sporter-boog',
+            sporterboog.url_selecteer = reverse('Wedstrijden:inschrijven-sporter-boog',
                                                 kwargs={'wedstrijd_pk': wedstrijd.pk,
                                                         'boog_afk': sporterboog.boogtype.afkorting.lower()})
 
@@ -227,7 +307,7 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
 
         context['menu_toon_mandje'] = True
 
-        context['url_toevoegen'] = reverse('Kalender:inschrijven-toevoegen')
+        context['url_toevoegen'] = reverse('Wedstrijden:inschrijven-toevoegen')
 
         url_terug = reverse('Kalender:maand',
                             kwargs={'jaar': wedstrijd.datum_begin.year,
@@ -235,7 +315,7 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
-            (reverse('Kalender:wedstrijd-info', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
+            (reverse('Wedstrijden:wedstrijd-info', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
             (None, 'Inschrijven sporter')
         )
 
@@ -267,14 +347,14 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
 
         try:
             wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
-            wedstrijd = (KalenderWedstrijd
+            wedstrijd = (Wedstrijd
                          .objects
                          .select_related('organiserende_vereniging',
                                          'locatie')
                          .prefetch_related('boogtypen',
                                            'sessies')
                          .get(pk=wedstrijd_pk))
-        except KalenderWedstrijd.DoesNotExist:
+        except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
         context['wed'] = wedstrijd
@@ -340,7 +420,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
         for sporterboog in context['sportersboog']:
             sporterboog.is_geselecteerd = False
 
-            sporterboog.url_selecteer = reverse('Kalender:inschrijven-groepje-lid-boog',
+            sporterboog.url_selecteer = reverse('Wedstrijden:inschrijven-groepje-lid-boog',
                                                 kwargs={'wedstrijd_pk': wedstrijd.pk,
                                                         'lid_nr': sporterboog.sporter.lid_nr,
                                                         'boog_afk': sporterboog.boogtype.afkorting.lower()})
@@ -368,7 +448,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
 
             # kijk of deze sporter al ingeschreven is
             sessie_pk2inschrijving = dict()
-            for inschrijving in (KalenderInschrijving
+            for inschrijving in (WedstrijdInschrijving
                                  .objects
                                  .filter(wedstrijd=wedstrijd,
                                          sporterboog__sporter=geselecteerd.sporter)
@@ -408,9 +488,9 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
 
         context['menu_toon_mandje'] = True
 
-        context['url_toevoegen'] = reverse('Kalender:inschrijven-toevoegen')
+        context['url_toevoegen'] = reverse('Wedstrijden:inschrijven-toevoegen')
 
-        context['url_zoek'] = reverse('Kalender:inschrijven-groepje', kwargs={'wedstrijd_pk': wedstrijd.pk})
+        context['url_zoek'] = reverse('Wedstrijden:inschrijven-groepje', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         url_terug = reverse('Kalender:maand',
                             kwargs={'jaar': wedstrijd.datum_begin.year,
@@ -418,7 +498,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
-            (reverse('Kalender:wedstrijd-info', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
+            (reverse('Wedstrijden:wedstrijd-info', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
             (None, 'Inschrijven groepje')
         )
 
@@ -450,14 +530,14 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
 
         try:
             wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
-            wedstrijd = (KalenderWedstrijd
+            wedstrijd = (Wedstrijd
                          .objects
                          .select_related('organiserende_vereniging',
                                          'locatie')
                          .prefetch_related('boogtypen',
                                            'sessies')
                          .get(pk=wedstrijd_pk))
-        except KalenderWedstrijd.DoesNotExist:
+        except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
 
         context['wed'] = wedstrijd
@@ -508,7 +588,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
         for sporterboog in context['familie']:
             sporterboog.is_geselecteerd = False
 
-            sporterboog.url_selecteer = reverse('Kalender:inschrijven-familie-lid-boog',
+            sporterboog.url_selecteer = reverse('Wedstrijden:inschrijven-familie-lid-boog',
                                                 kwargs={'wedstrijd_pk': wedstrijd.pk,
                                                         'lid_nr': sporterboog.sporter.lid_nr,
                                                         'boog_afk': sporterboog.boogtype.afkorting.lower()})
@@ -537,7 +617,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
 
             # kijk of deze sporter al ingeschreven is, want maximaal aanmelden met 1 boog
             sessie_pk2inschrijving = dict()
-            for inschrijving in (KalenderInschrijving
+            for inschrijving in (WedstrijdInschrijving
                                  .objects
                                  .filter(wedstrijd=wedstrijd,
                                          sporterboog__sporter=geselecteerd.sporter)
@@ -596,7 +676,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
 
         context['menu_toon_mandje'] = True
 
-        context['url_toevoegen'] = reverse('Kalender:inschrijven-toevoegen')
+        context['url_toevoegen'] = reverse('Wedstrijden:inschrijven-toevoegen')
 
         url_terug = reverse('Kalender:maand',
                             kwargs={'jaar': wedstrijd.datum_begin.year,
@@ -604,7 +684,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
-            (reverse('Kalender:wedstrijd-info', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
+            (reverse('Wedstrijden:wedstrijd-info', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
             (None, 'Wedstrijd details'),
         )
 
@@ -644,8 +724,8 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
             raise Http404('Slecht verzoek')
 
         try:
-            wedstrijd = KalenderWedstrijd.objects.get(pk=wedstrijd_pk)
-            sessie = KalenderWedstrijdSessie.objects.get(pk=sessie_pk)
+            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
+            sessie = WedstrijdSessie.objects.get(pk=sessie_pk)
             sporterboog = (SporterBoog
                            .objects
                            .select_related('sporter')
@@ -660,7 +740,7 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         # misschien dat de sporter al ingeschreven staat, maar afgemeld is
         # verwijder deze inschrijving omdat het nu een andere koper kan zijn
         # TODO: afmeldingen verplaatsen naar een andere tabel
-        qset = (KalenderInschrijving
+        qset = (WedstrijdInschrijving
                 .objects
                 .filter(wedstrijd=wedstrijd,
                         sporterboog=sporterboog,
@@ -669,7 +749,7 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
             qset.delete()
 
         # maak de inschrijving aan en voorkom dubbelen
-        inschrijving = KalenderInschrijving(
+        inschrijving = WedstrijdInschrijving(
                             wanneer=now,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
@@ -692,12 +772,12 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
 
         if goto_str == 'F':
             # ga terug naar de familie pagina met dezelfde sporter geselecteerd
-            url = reverse('Kalender:inschrijven-familie-lid-boog',
+            url = reverse('Wedstrijden:inschrijven-familie-lid-boog',
                           kwargs={'wedstrijd_pk': wedstrijd.pk,
                                   'lid_nr': sporterboog.sporter.lid_nr,
                                   'boog_afk': sporterboog.boogtype.afkorting.lower()})
         else:
-            url = reverse('Kalender:wedstrijd-info', kwargs={'wedstrijd_pk': wedstrijd.pk})
+            url = reverse('Wedstrijden:wedstrijd-info', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         return HttpResponseRedirect(url)
 

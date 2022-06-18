@@ -8,8 +8,7 @@ from django.test import TestCase
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter
-from Wedstrijden.models import WedstrijdLocatie
-from .models import KalenderWedstrijd, ORGANISATIE_WA
+from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, ORGANISATIE_WA
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
@@ -20,9 +19,9 @@ class TestKalenderMaand(E2EHelpers, TestCase):
 
     url_kalender = '/kalender/'
     url_kalender_maand = '/kalender/pagina-%s-%s/'  # jaar, maand
-    url_kalender_vereniging = '/kalender/vereniging/'
-    url_kalender_maak_nieuw = '/kalender/vereniging/kies-type/'
-    url_kalender_info = '/kalender/%s/info/'  # wedstrijd_pk
+    url_kalender_vereniging = '/wedstrijden/vereniging/'
+    url_kalender_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
+    url_kalender_info = '/wedstrijden/%s/info/'  # wedstrijd_pk
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -128,8 +127,8 @@ class TestKalenderMaand(E2EHelpers, TestCase):
         self._maak_externe_locatie(self.nhbver1)
         resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'wa'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
-        self.assertEqual(1, KalenderWedstrijd.objects.count())
-        wedstrijd = KalenderWedstrijd.objects.all()[0]
+        self.assertEqual(1, Wedstrijd.objects.count())
+        wedstrijd = Wedstrijd.objects.all()[0]
 
         # accepteer de wedstrijd zodat deze getoond wordt
         wedstrijd.status = 'A'
@@ -166,8 +165,8 @@ class TestKalenderMaand(E2EHelpers, TestCase):
         self._maak_externe_locatie(self.nhbver1)
         resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
-        self.assertEqual(1, KalenderWedstrijd.objects.count())
-        wedstrijd = KalenderWedstrijd.objects.all()[0]
+        self.assertEqual(1, Wedstrijd.objects.count())
+        wedstrijd = Wedstrijd.objects.all()[0]
 
         # haal de info pagina van de wedstrijd op
         url = self.url_kalender_info % wedstrijd.pk

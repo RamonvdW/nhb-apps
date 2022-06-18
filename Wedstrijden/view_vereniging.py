@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
 from django.shortcuts import render
@@ -15,15 +15,15 @@ from BasisTypen.models import (GESLACHT_ALLE,
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
-from .models import (KalenderWedstrijd,
-                     WEDSTRIJD_DISCIPLINE_3D, ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR)
+from Wedstrijden.models import (Wedstrijd,
+                                WEDSTRIJD_DISCIPLINE_3D, ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR)
 from datetime import date
 
-TEMPLATE_KALENDER_KIES_TYPE = 'kalender/nieuwe-wedstrijd-kies-type.dtl'
-TEMPLATE_KALENDER_OVERZICHT_VERENIGING = 'kalender/overzicht-vereniging.dtl'
+TEMPLATE_KALENDER_KIES_TYPE = 'wedstrijden/nieuwe-wedstrijd-kies-type.dtl'
+TEMPLATE_KALENDER_OVERZICHT_VERENIGING = 'wedstrijden/overzicht-vereniging.dtl'
 
 
-class VerenigingKalenderWedstrijdenView(UserPassesTestMixin, View):
+class VerenigingWedstrijdenView(UserPassesTestMixin, View):
 
     """ Via deze view kan de HWL de wedstrijden van de vereniging beheren """
 
@@ -45,7 +45,7 @@ class VerenigingKalenderWedstrijdenView(UserPassesTestMixin, View):
         context = dict()
         ver = self.functie_nu.nhb_ver
 
-        wedstrijden = (KalenderWedstrijd
+        wedstrijden = (Wedstrijd
                        .objects
                        .filter(organiserende_vereniging=ver)
                        .order_by('datum_begin',
@@ -56,16 +56,16 @@ class VerenigingKalenderWedstrijdenView(UserPassesTestMixin, View):
             wed.disc_str = ORGANISATIES2SHORT_STR[wed.organisatie] + ' / '
             wed.disc_str += disc2str[wed.discipline]
             wed.status_str = WEDSTRIJD_STATUS_TO_STR[wed.status]
-            wed.url_wijzig = reverse('Kalender:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wed.pk})
-            wed.url_sessies = reverse('Kalender:wijzig-sessies', kwargs={'wedstrijd_pk': wed.pk})
-            wed.url_aanmeldingen = reverse('Kalender:aanmeldingen', kwargs={'wedstrijd_pk': wed.pk})
+            wed.url_wijzig = reverse('Wedstrijden:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wed.pk})
+            wed.url_sessies = reverse('Wedstrijden:wijzig-sessies', kwargs={'wedstrijd_pk': wed.pk})
+            wed.url_aanmeldingen = reverse('Wedstrijden:aanmeldingen', kwargs={'wedstrijd_pk': wed.pk})
         # for
 
         context['wedstrijden'] = wedstrijden
 
         # vereniging kan alleen een wedstrijd beginnen als er een locatie is
         if ver.wedstrijdlocatie_set.exclude(zichtbaar=False).count() > 0:
-            context['url_nieuwe_wedstrijd'] = reverse('Kalender:nieuwe-wedstrijd-kies-type')
+            context['url_nieuwe_wedstrijd'] = reverse('Wedstrijden:nieuwe-wedstrijd-kies-type')
         else:
             context['geen_locatie'] = True
 
@@ -101,11 +101,11 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
         """ deze functie wordt aangeroepen om de GET request af te handelen """
         context = dict()
 
-        context['url_nieuwe_wedstrijd'] = reverse('Kalender:nieuwe-wedstrijd-kies-type')
+        context['url_nieuwe_wedstrijd'] = reverse('Wedstrijden:nieuwe-wedstrijd-kies-type')
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (reverse('Kalender:vereniging'), 'Wedstrijdkalender'),
+            (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
             (None, 'Nieuwe wedstrijd')
         )
 
@@ -134,7 +134,7 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
                     'ifaa': ORGANISATIE_IFAA,
                 }
 
-                wed = KalenderWedstrijd(
+                wed = Wedstrijd(
                             datum_begin=begin,
                             datum_einde=begin,
                             organiserende_vereniging=self.functie_nu.nhb_ver,
@@ -162,7 +162,7 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
 
                 wed.wedstrijdklassen.set(klassen)
 
-        url = reverse('Kalender:vereniging')
+        url = reverse('Wedstrijden:vereniging')
         return HttpResponseRedirect(url)
 
 

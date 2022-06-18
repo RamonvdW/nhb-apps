@@ -12,13 +12,13 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import ORGANISATIES2SHORT_STR
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
-from .models import (KalenderWedstrijd,
-                     ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR, WEDSTRIJD_STATUS,
-                     WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING)
+from Wedstrijden.models import (Wedstrijd,
+                                ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR, WEDSTRIJD_STATUS,
+                                WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING)
 from types import SimpleNamespace
 import datetime
 
-TEMPLATE_KALENDER_OVERZICHT_MANAGER = 'kalender/overzicht-manager.dtl'
+TEMPLATE_KALENDER_OVERZICHT_MANAGER = 'wedstrijden/overzicht-manager.dtl'
 
 
 # vertaling van wedstrijd status in een url parameter en terug
@@ -54,13 +54,13 @@ class KalenderManagerView(UserPassesTestMixin, View):
                             sel='status_alle',
                             beschrijving='Alle',
                             selected=True,              # fallback, kan verderop op False gezet worden
-                            zoom_url=reverse('Kalender:manager'))
+                            zoom_url=reverse('Wedstrijden:manager'))
         status_filters.append(optie_alle)
 
         for status, beschrijving in WEDSTRIJD_STATUS:       # gegarandeerde volgorde
 
             url_param = WEDSTRIJD_STATUS2URL[status]
-            url = reverse('Kalender:manager-status', kwargs={'status': url_param})
+            url = reverse('Wedstrijden:manager-status', kwargs={'status': url_param})
             selected = (status == gekozen_status)
 
             if selected:
@@ -89,7 +89,7 @@ class KalenderManagerView(UserPassesTestMixin, View):
         datum_vanaf = timezone.now().date() - datetime.timedelta(days=61)
 
         # pak de 50 meest recente wedstrijden
-        wedstrijden = (KalenderWedstrijd
+        wedstrijden = (Wedstrijd
                        .objects
                        .filter(datum_begin__gte=datum_vanaf)
                        .order_by('datum_begin'))
@@ -104,8 +104,8 @@ class KalenderManagerView(UserPassesTestMixin, View):
             wed.disc_str = ORGANISATIES2SHORT_STR[wed.organisatie] + ' / ' + disc2str[wed.discipline]
             wed.status_str = WEDSTRIJD_STATUS_TO_STR[wed.status]
             wed.status_val_op = (wed.status == WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING)
-            wed.url_wijzig = reverse('Kalender:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wed.pk})
-            wed.url_sessies = reverse('Kalender:wijzig-sessies', kwargs={'wedstrijd_pk': wed.pk})
+            wed.url_wijzig = reverse('Wedstrijden:wijzig-wedstrijd', kwargs={'wedstrijd_pk': wed.pk})
+            wed.url_sessies = reverse('Wedstrijden:wijzig-sessies', kwargs={'wedstrijd_pk': wed.pk})
         # for
 
         context['wedstrijden'] = wedstrijden

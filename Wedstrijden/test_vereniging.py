@@ -9,8 +9,7 @@ from BasisTypen.models import ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter
-from Wedstrijden.models import WedstrijdLocatie
-from .models import KalenderWedstrijd, WEDSTRIJD_DISCIPLINE_3D
+from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WEDSTRIJD_DISCIPLINE_3D
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
@@ -18,8 +17,8 @@ class TestKalenderVereniging(E2EHelpers, TestCase):
 
     """ tests voor de Kalender applicatie, module vereniging """
 
-    url_kalender_vereniging = '/kalender/vereniging/'
-    url_kalender_maak_nieuw = '/kalender/vereniging/kies-type/'
+    url_kalender_vereniging = '/wedstrijden/vereniging/'
+    url_kalender_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -80,14 +79,14 @@ class TestKalenderVereniging(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        self.assertEqual(0, KalenderWedstrijd.objects.count())
+        self.assertEqual(0, Wedstrijd.objects.count())
 
         # haal het overzicht op, zonder externe locatie
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_kalender_vereniging)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_kalender_vereniging)
 
@@ -95,7 +94,7 @@ class TestKalenderVereniging(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'wa'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
-        self.assertEqual(0, KalenderWedstrijd.objects.count())
+        self.assertEqual(0, Wedstrijd.objects.count())
 
         self.e2e_assert_other_http_commands_not_supported(self.url_kalender_maak_nieuw, post=True)
 
@@ -107,21 +106,21 @@ class TestKalenderVereniging(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kalender_vereniging)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
 
         # haal de keuze pagina op
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_kalender_maak_nieuw)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/nieuwe-wedstrijd-kies-type.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/nieuwe-wedstrijd-kies-type.dtl', 'plein/site_layout.dtl'))
 
         # maak een nieuwe wedstrijd aan
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'wa'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
-        self.assertEqual(1, KalenderWedstrijd.objects.count())
-        wedstrijd = KalenderWedstrijd.objects.get(organisatie=ORGANISATIE_WA)
+        self.assertEqual(1, Wedstrijd.objects.count())
+        wedstrijd = Wedstrijd.objects.get(organisatie=ORGANISATIE_WA)
         self.assertEqual(wedstrijd.boogtypen.count(), 5)
         self.assertEqual(wedstrijd.wedstrijdklassen.count(), 40)
 
@@ -129,14 +128,14 @@ class TestKalenderVereniging(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'huh'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
-        self.assertEqual(1, KalenderWedstrijd.objects.count())
+        self.assertEqual(1, Wedstrijd.objects.count())
 
         # maak nog een wedstrijd aan
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
-        self.assertEqual(2, KalenderWedstrijd.objects.count())
-        wedstrijd = KalenderWedstrijd.objects.get(organisatie=ORGANISATIE_NHB)
+        self.assertEqual(2, Wedstrijd.objects.count())
+        wedstrijd = Wedstrijd.objects.get(organisatie=ORGANISATIE_NHB)
         self.assertEqual(wedstrijd.boogtypen.count(), 5)
         self.assertEqual(wedstrijd.wedstrijdklassen.count(), 70)        # gender-neutrale klassen zijn niet gekozen
 
@@ -144,8 +143,8 @@ class TestKalenderVereniging(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'ifaa'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
-        self.assertEqual(3, KalenderWedstrijd.objects.count())
-        wedstrijd = KalenderWedstrijd.objects.get(organisatie=ORGANISATIE_IFAA)
+        self.assertEqual(3, Wedstrijd.objects.count())
+        wedstrijd = Wedstrijd.objects.get(organisatie=ORGANISATIE_IFAA)
         self.assertEqual(wedstrijd.boogtypen.count(), 12)
         self.assertEqual(wedstrijd.discipline, WEDSTRIJD_DISCIPLINE_3D)
         self.assertEqual(wedstrijd.wedstrijdklassen.count(), 144)
@@ -155,6 +154,6 @@ class TestKalenderVereniging(E2EHelpers, TestCase):
             resp = self.client.get(self.url_kalender_vereniging)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('kalender/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
 
 # end of file

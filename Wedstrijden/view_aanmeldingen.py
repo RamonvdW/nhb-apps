@@ -13,13 +13,13 @@ from Bestel.mutaties import bestel_mutatieverzoek_afmelden_wedstrijd, bestel_mut
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
-from .models import (KalenderWedstrijd, KalenderInschrijving, INSCHRIJVING_STATUS_TO_SHORT_STR,
-                     INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
+from Wedstrijden.models import (Wedstrijd, WedstrijdInschrijving, INSCHRIJVING_STATUS_TO_SHORT_STR,
+                                INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 from decimal import Decimal
 
 
-TEMPLATE_KALENDER_AANMELDINGEN = 'kalender/aanmeldingen.dtl'
-TEMPLATE_KALENDER_AANMELDINGEN_SPORTER = 'kalender/aanmeldingen-sporter.dtl'
+TEMPLATE_KALENDER_AANMELDINGEN = 'wedstrijden/aanmeldingen.dtl'
+TEMPLATE_KALENDER_AANMELDINGEN_SPORTER = 'wedstrijden/aanmeldingen-sporter.dtl'
 
 
 class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
@@ -45,16 +45,16 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
 
         try:
             wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
-            wedstrijd = (KalenderWedstrijd
+            wedstrijd = (Wedstrijd
                          .objects
                          .select_related('organiserende_vereniging')
                          .get(pk=wedstrijd_pk))
-        except (ValueError, TypeError, KalenderWedstrijd.DoesNotExist):
+        except (ValueError, TypeError, Wedstrijd.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
         context['wed'] = wedstrijd
 
-        aanmeldingen = (KalenderInschrijving
+        aanmeldingen = (WedstrijdInschrijving
                         .objects
                         .filter(wedstrijd=wedstrijd)
                         .select_related('sessie',
@@ -93,7 +93,7 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
             if aanmelding.gebruikte_code:
                 aanmelding.korting_str = '%s%%' % aanmelding.gebruikte_code.percentage
 
-            aanmelding.url_sporter = reverse('Kalender:details-sporter',
+            aanmelding.url_sporter = reverse('Wedstrijden:details-sporter',
                                              kwargs={'sporter_lid_nr': sporter.lid_nr})
 
             totaal_ontvangen_euro += aanmelding.ontvangen_euro
@@ -109,12 +109,12 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rollen.ROL_HWL:
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-                (reverse('Kalender:vereniging'), 'Wedstrijdkalender'),
+                (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
                 (None, 'Aanmeldingen'),
             )
         else:
             context['kruimels'] = (
-                (reverse('Kalender:manager'), 'Wedstrijdkalender'),
+                (reverse('Wedstrijden:manager'), 'Wedstrijdkalender'),
                 (None, 'Aanmeldingen'),
             )
 
@@ -161,7 +161,7 @@ class KalenderDetailsSporterView(UserPassesTestMixin, TemplateView):
         # - restitutie
         context['lijst'] = lijst = list()
 
-        inschrijvingen = (KalenderInschrijving
+        inschrijvingen = (WedstrijdInschrijving
                           .objects
                           .filter(sporterboog__sporter__lid_nr=sporter_lid_nr)
                           .select_related('wedstrijd',
@@ -188,7 +188,7 @@ class KalenderDetailsSporterView(UserPassesTestMixin, TemplateView):
                         mag_afmelden = False
 
                 if mag_afmelden:
-                    inschrijving.url_afmelden = reverse('Kalender:afmelden',
+                    inschrijving.url_afmelden = reverse('Wedstrijden:afmelden',
                                                         kwargs={'inschrijving_pk': inschrijving.pk})
 
             if inschrijving.gebruikte_code:
@@ -204,8 +204,8 @@ class KalenderDetailsSporterView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (reverse('Kalender:vereniging'), 'Wedstrijdkalender'),
-            (reverse('Kalender:vereniging'), 'Aanmeldingen'),           # TODO: exacte wedstrijd weten we niet!
+            (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
+            (reverse('Wedstrijden:vereniging'), 'Aanmeldingen'),           # TODO: exacte wedstrijd weten we niet!
             (None, 'Details aanmelding')
         )
 
@@ -234,8 +234,8 @@ class AfmeldenView(UserPassesTestMixin, View):
         try:
             inschrijving_pk = str(kwargs['inschrijving_pk'])[:6]     # afkappen voor de veiligheid
             inschrijving_pk = int(inschrijving_pk)
-            inschrijving = KalenderInschrijving.objects.get(pk=inschrijving_pk)
-        except (TypeError, ValueError, KalenderInschrijving.DoesNotExist):
+            inschrijving = WedstrijdInschrijving.objects.get(pk=inschrijving_pk)
+        except (TypeError, ValueError, WedstrijdInschrijving.DoesNotExist):
             raise Http404('Inschrijving niet gevonden')
 
         if self.rol_nu != Rollen.ROL_BB:
@@ -254,7 +254,7 @@ class AfmeldenView(UserPassesTestMixin, View):
             bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel == '1')
 
         sporter_lid_nr = inschrijving.sporterboog.sporter.lid_nr
-        url = reverse('Kalender:details-sporter', kwargs={'sporter_lid_nr': sporter_lid_nr})
+        url = reverse('Wedstrijden:details-sporter', kwargs={'sporter_lid_nr': sporter_lid_nr})
 
         return HttpResponseRedirect(url)
 
