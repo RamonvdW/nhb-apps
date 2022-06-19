@@ -413,8 +413,8 @@ class Wedstrijd(models.Model):
                                      blank=True)        # mag leeg zijn
 
     # de losse uitslagen van deze wedstrijd
-    #deeluitslagen = models.ManyToManyField(WedstrijdDeeluitslag,
-    #                                       blank=True)        # mag leeg zijn
+    # deeluitslagen = models.ManyToManyField(WedstrijdDeeluitslag,
+    #                                        blank=True)        # mag leeg zijn
 
     def bepaal_prijs_voor_sporter(self, sporter):
         leeftijd = sporter.bereken_wedstrijdleeftijd(self.datum_begin, self.organisatie)

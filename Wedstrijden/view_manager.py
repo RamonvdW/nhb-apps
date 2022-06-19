@@ -22,9 +22,9 @@ TEMPLATE_KALENDER_OVERZICHT_MANAGER = 'wedstrijden/overzicht-manager.dtl'
 
 
 # vertaling van wedstrijd status in een url parameter en terug
-WEDSTRIJD_STATUS2URL = { key: beschrijving.split()[0].lower() for key, beschrijving in WEDSTRIJD_STATUS }
+WEDSTRIJD_STATUS2URL = {key: beschrijving.split()[0].lower() for key, beschrijving in WEDSTRIJD_STATUS}
 
-WEDSTRIJD_URL2STATUS = { value: key for key, value in WEDSTRIJD_STATUS2URL.items() }
+WEDSTRIJD_URL2STATUS = {value: key for key, value in WEDSTRIJD_STATUS2URL.items()}
 WEDSTRIJD_URL2STATUS['alle'] = None
 
 

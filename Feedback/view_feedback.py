@@ -64,9 +64,9 @@ class KrijgFeedbackView(UserPassesTestMixin, View):
                    'check_2': (bev == 'min')}
 
         # bewust geen broodkruimels (behalve de "vorige" knop)
-        #context['kruimels'] = (
-        #    (None, 'Geef feedback'),
-        #)
+        # context['kruimels'] = (
+        #     (None, 'Geef feedback'),
+        # )
 
         menu_dynamics(request, context)
         return render(request, self.template_name, context)

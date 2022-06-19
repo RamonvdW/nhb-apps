@@ -194,7 +194,6 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assertTrue(resp.status_code, 200)
         self.assert_template_used(resp, ('account/bevestigd.dtl', 'plein/site_layout.dtl'))
 
-
     def test_inlog_partial_fields(self):
         # test inlog via het inlog formulier, met verkeerd wachtwoord
         with self.assert_max_queries(20):

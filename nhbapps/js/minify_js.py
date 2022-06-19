@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -68,7 +68,7 @@ def minify_part(script):
 
 
 def zoek_eind_quote(script, stop_char):
-    start = 0
+    start = pos = 0
     while start < len(script):
         pos = script.find(stop_char, start)
         if pos > 0 and script[pos-1] == '\\':

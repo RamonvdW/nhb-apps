@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -61,9 +61,9 @@ class TestAccountOTP(E2EHelpers, TestCase):
 
         # correcte code kan niet getest worden
         # te veel code met dependency op echt Account
-        #code = self._get_otp_code(account)
-        #res = account_otp_controleer(request, account, code)
-        #self.assertFalse(res)
+        # code = self._get_otp_code(account)
+        # res = account_otp_controleer(request, account, code)
+        # self.assertFalse(res)
 
     def test_koppelen(self):
         account = self.account_otp

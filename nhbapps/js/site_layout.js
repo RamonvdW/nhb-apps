@@ -21,7 +21,7 @@ function getCookie(name) {
             }
         }
     }
-    return cookieValue
+    return cookieValue;
 }
 
 // haalt het getal uit een cookie
@@ -127,7 +127,7 @@ function myTableFilter(zoekveld, tableId)
             filter_kolommen.forEach(kolom_nr => {
                 const cell = row.cells[kolom_nr];
                 if (cell === undefined) {
-                    window.console.log('missing cell in kolom_nr=', kolom_nr, "in row", i, "of row", row)
+                    window.console.log('missing cell in kolom_nr=', kolom_nr, "in row", i, "of row", row);
                 }
                 let clean_text = cell.dataset.clean_text;    // cached resultaat ophalen
                 //window.console.log("clean_text:", clean_text);

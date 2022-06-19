@@ -271,14 +271,12 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.post(url, {'baan_type': 'X',
                                           'banen_18m': 1,
                                           'banen_25m': 0,
-                                          #'max_dt': 3,     # FUTURE: clean out all max_dt
                                           'notities': 'hoi'})
         self.assert_is_redirect(resp, self.url_lijst)
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
         self.assertEqual(loc2.baan_type, 'X')
         self.assertEqual(loc2.banen_18m, 1)
         self.assertEqual(loc2.banen_25m, 0)
-        #self.assertEqual(loc2.max_dt_per_baan, 3)
         self.assertEqual(loc2.notities, 'hoi')
 
         # doe een niet-wijziging voor de coverage
@@ -288,14 +286,12 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'banen_25m': 0,
                                           'max_sporters_18m': 4,
                                           'max_sporters_25m': 0,
-                                          #'max_dt': 3,
                                           'notities': 'hoi'})
         self.assert_is_redirect(resp, self.url_lijst)
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
         self.assertEqual(loc2.baan_type, 'X')
         self.assertEqual(loc2.banen_18m, 1)
         self.assertEqual(loc2.banen_25m, 0)
-        #self.assertEqual(loc2.max_dt_per_baan, 3)
         self.assertEqual(loc2.max_sporters_18m, 4)
         self.assertEqual(loc2.max_sporters_25m, 0)
         self.assertEqual(loc2.notities, 'hoi')
@@ -343,7 +339,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
                                           'banen_25m': 6,
                                           'max_sporters_18m': 18,
                                           'max_sporters_25m': 25,
-                                          'max_dt': 3,
                                           'notities': 'dit is een test'})
         self.assert_is_redirect(resp, '/vereniging/')       # stuur HWL terug naar vereniging pagina
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
@@ -352,7 +347,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.assertEqual(loc2.banen_25m, 6)
         self.assertEqual(loc2.max_sporters_18m, 18)
         self.assertEqual(loc2.max_sporters_25m, 25)
-        #self.assertEqual(loc2.max_dt_per_baan, 3)
         self.assertEqual(loc2.notities, 'dit is een test')
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -362,7 +356,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.post(url, {'baan_type': 'H',
                                           'banen_18m': 0,
                                           'banen_25m': 0,
-                                          #'max_dt': 3,
                                           'notities': 'dit is een test'})
         self.assert_is_redirect(resp, '/vereniging/')       # stuur HWL terug naar vereniging pagina
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
@@ -375,7 +368,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.post(url, {'baan_type': 'X',
                                           'banen_18m': 5,
                                           'banen_25m': 6,
-                                          #'max_dt': 3,
                                           'notities': 'dit is een test'})
         self.assertEqual(resp.status_code, 302)     # 302 = redirect = success
         loc2 = WedstrijdLocatie.objects.get(pk=self.loc2.pk)
@@ -448,7 +440,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.post(url, {'baan_type': 'O',
                                           'banen_18m': 5,
                                           'banen_25m': 6,
-                                          #'max_dt': 3,
                                           'notities': 'dit is een test'})
         self.assert403(resp)
 
@@ -458,7 +449,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.post(url, {'baan_type': 'H',
                                           'banen_18m': 1,
                                           'banen_25m': 0,
-                                          #'max_dt': 3,
                                           'notities': 'dit is een test'})
         # haal op als WL, dan krijg je read-only zonder DT
         self.e2e_wissel_naar_functie(self.functie_wl)
@@ -503,7 +493,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.post(url, {'baan_type': 'H',
                                           'banen_18m': 5,
                                           'banen_25m': 6,
-                                          #'max_dt': 3,
                                           'notities': 'dit is een test'})
         self.assert403(resp)
 
@@ -607,7 +596,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.post(url, {'baan_type': 'H',
                                           'banen_18m': 5,
                                           'banen_25m': 6,
-                                          #'max_dt': 3,
                                           'notities': 'dit is een test',
                                           'buiten_banen': 50,
                                           'buiten_max_afstand': 90,
@@ -625,7 +613,6 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
             resp = self.client.post(url, {'baan_type': 'H',
                                           'banen_18m': 5,
                                           'banen_25m': 6,
-                                          #'max_dt': 3,
                                           'notities': 'dit is een test',
                                           'buiten_banen': 50,
                                           'buiten_max_afstand': 90,

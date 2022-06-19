@@ -1067,7 +1067,7 @@ class Migration(migrations.Migration):
             index=models.Index(fields=['volgorde'], name='BasisTypen__volgord_81dcc1_idx'),
         ),
         migrations.AddIndex(
-           model_name='teamtype',
+            model_name='teamtype',
             index=models.Index(fields=['afkorting'], name='BasisTypen__afkorti_6ad4da_idx'),
         ),
         migrations.AddIndex(

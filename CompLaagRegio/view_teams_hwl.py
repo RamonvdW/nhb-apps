@@ -553,10 +553,13 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         else:
             context['kruimels'] = (
                 (reverse('Competitie:kies'), 'Bondscompetities'),
-                (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}), comp.beschrijving.replace(' competitie', '')),
-                (reverse('CompLaagRegio:regio-ag-controle', kwargs={'comp_pk': comp.pk,
-                                                                'regio_nr': deelnemer.deelcompetitie.nhb_regio.regio_nr}),
-                    'AG controle'),
+                (reverse('Competitie:overzicht',
+                         kwargs={'comp_pk': comp.pk}),
+                 comp.beschrijving.replace(' competitie', '')),
+                (reverse('CompLaagRegio:regio-ag-controle',
+                         kwargs={'comp_pk': comp.pk,
+                                 'regio_nr': deelnemer.deelcompetitie.nhb_regio.regio_nr}),
+                 'AG controle'),
                 (None, 'Wijzig AG')
             )
 

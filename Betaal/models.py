@@ -20,7 +20,7 @@ BETAAL_MUTATIE_TO_STR = {
 }
 
 BETAAL_PAYMENT_ID_MAXLENGTH = 64        # 32 waarschijnlijk genoeg voor Mollie (geen limiet gevonden in docs)
-BETAAL_PAYMENT_STATUS_MAXLENGTH=15
+BETAAL_PAYMENT_STATUS_MAXLENGTH = 15
 BETAAL_BESCHRIJVING_MAXLENGTH = 100     # aantal taken voor beschrijving op afschrift
 MOLLIE_API_KEY_MAXLENGTH = 50           # geen limiet gevonden in docs
 BETAAL_KLANT_NAAM_MAXLENGTH = 100

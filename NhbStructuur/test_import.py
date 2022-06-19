@@ -203,7 +203,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        if True: #with self.assert_max_queries(49):
+        if True:  # with self.assert_max_queries(49):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_09.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
         # print('f1:', f1.getvalue())

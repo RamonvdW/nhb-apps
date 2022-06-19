@@ -582,7 +582,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
 
         if ronde.cluster:
             tup = (reverse('CompLaagRegio:regio-cluster-planning', kwargs={'cluster_pk': ronde.cluster.pk,
-                                                                       'deelcomp_pk': ronde.deelcompetitie.pk}),
+                                                                           'deelcomp_pk': ronde.deelcompetitie.pk}),
                    'Cluster')
             context['kruimels'].insert(-1, tup)
 
@@ -1080,7 +1080,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
 
         if ronde.cluster:
             tup = (reverse('CompLaagRegio:regio-cluster-planning', kwargs={'cluster_pk': ronde.cluster.pk,
-                                                                       'deelcomp_pk': ronde.deelcompetitie.pk}),
+                                                                           'deelcomp_pk': ronde.deelcompetitie.pk}),
                    'Cluster')
             context['kruimels'].insert(-2, tup)
 

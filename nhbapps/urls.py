@@ -10,7 +10,7 @@ from django.urls import path
 from django.conf import settings
 from django.contrib import admin
 from django.conf.urls import include
-#from django.shortcuts import redirect
+# from django.shortcuts import redirect
 from Plein.views import site_root_view
 from Plein.views_fout import (site_handler403_permission_denied,
                               site_handler404_page_not_found,
@@ -49,7 +49,7 @@ urlpatterns = [
     path('wedstrijden/',                    include('Wedstrijden.urls')),
 
     # direct van oude urls naar nieuwe urls
-    #path('sporter/bondspas/', lambda request: redirect('ledenpas/', permanent=True)),
+    # path('sporter/bondspas/', lambda request: redirect('ledenpas/', permanent=True)),
 ]
 
 if settings.DEBUG:          # pragma: no cover

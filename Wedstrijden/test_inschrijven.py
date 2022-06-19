@@ -32,7 +32,6 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
     url_inschrijven_groepje_lid_boog = '/wedstrijden/inschrijven/%s/groep/%s/%s/'      # wedstrijd_pk, lid_nr, boog_afk
     url_inschrijven_familie = '/wedstrijden/inschrijven/%s/familie/'                   # wedstrijd_pk
     url_inschrijven_familie_lid_boog = '/wedstrijden/inschrijven/%s/familie/%s/%s/'    # wedstrijd_pk, lid_nr, boog_afk
-    url_inschrijven_familie = '/wedstrijden/inschrijven/%s/familie/'                   # wedstrijd_pk
     url_inschrijven_toevoegen = '/wedstrijden/inschrijven/toevoegen/'
 
     url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                              # sporter_pk

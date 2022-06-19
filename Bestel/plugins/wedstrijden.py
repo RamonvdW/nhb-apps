@@ -7,9 +7,9 @@
 """ Deze module levert functionaliteit voor de Bestel applicatie met kennis van de Kalender, zoals kortingen. """
 
 from django.utils import timezone
-from Wedstrijden.models import (WedstrijdKortingscode, WedstrijdInschrijving,
-                                INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_DEFINITIEF,
-                                INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_TO_STR, WEDSTRIJD_KORTING_COMBI)
+from Wedstrijden.models import (WedstrijdKortingscode, WedstrijdInschrijving, WEDSTRIJD_KORTING_COMBI,
+                                INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD,
+                                INSCHRIJVING_STATUS_TO_STR)
 from decimal import Decimal
 
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -25,7 +25,7 @@ class TestRecordsRest(TestCase):
         sporter.geboorte_datum = parse_date('1970-01-30')
         sporter.woon_straatnaam = 'Arnhem'
         sporter.geslacht = 'V'
-        sporter.sinds_datum = parse_date("1991-02-05") # Y-M-D
+        sporter.sinds_datum = parse_date("1991-02-05")  # Y-M-D
         sporter.save()
 
         # Record 42

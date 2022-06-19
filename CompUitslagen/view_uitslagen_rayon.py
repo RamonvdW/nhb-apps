@@ -157,10 +157,10 @@ class UitslagenRayonIndivView(TemplateView):
         indiv2match = dict()    # [indiv_pk] = CompetitieMatch
         match_pks = list(deelcomp_rk.rk_bk_matches.values_list('pk', flat=True))
         for match in (CompetitieMatch
-                          .objects
-                          .prefetch_related('indiv_klassen')
-                          .select_related('locatie')
-                          .filter(pk__in=match_pks)):
+                      .objects
+                      .prefetch_related('indiv_klassen')
+                      .select_related('locatie')
+                      .filter(pk__in=match_pks)):
 
             if match.locatie:
                 match.adres_str = ", ".join(match.locatie.adres.split('\n'))

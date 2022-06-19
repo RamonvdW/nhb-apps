@@ -77,7 +77,7 @@ class Command(BaseCommand):
             ws['G3'] = 'Gemiddelde'
             ws['H3'] = 'Team sterkte'
 
-            #ws['G3'].alignment = left_align
+            # ws['G3'].alignment = left_align
             ws['H3'].alignment = left_align
 
             ws['A3'].font = font_header
@@ -158,7 +158,7 @@ class Command(BaseCommand):
             ws['G' + row_str] = 'Gemiddelde'
             ws['H' + row_str] = 'Boog type'
 
-            #ws['G' + row_str].alignment = left_align
+            # ws['G' + row_str].alignment = left_align
 
             ws['B' + row_str].font = font_header
             ws['C' + row_str].font = font_header
@@ -234,7 +234,7 @@ class Command(BaseCommand):
             ws['F3'] = 'Gemiddelde'
             ws['G3'] = 'Notitie'
 
-            #ws['F3'].alignment = right_align
+            # ws['F3'].alignment = right_align
 
             ws['A3'].font = font_header
             ws['B3'].font = font_header

@@ -330,7 +330,7 @@ class CompetitieOverzichtView(View):
                 wed_boog = all_bogen[0].boogtype.afkorting.lower()
 
             # TODO: zoek ook het team type van het team waarin hij geplaatst is
-            #team_type = wed_boog
+            # team_type = wed_boog
 
         team_type = list(comp.teamtypen.order_by('volgorde').values_list('afkorting', flat=True))[0].lower()    # r/r2
 

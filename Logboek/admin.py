@@ -13,7 +13,7 @@ class LogboekRegelForm(ModelForm):
 
     class Meta:
         model = LogboekRegel
-        fields = ('__all__')
+        fields = '__all__'
         widgets = {
             'activiteit': Textarea(attrs={'cols': 100, 'rows': 8}),
         }

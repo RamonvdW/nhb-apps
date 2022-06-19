@@ -352,7 +352,7 @@ class Command(BaseCommand):
                                      'wedstrijd_inschrijving__sporterboog__boogtype',
                                      'wedstrijd_inschrijving__sporterboog__sporter',
                                      'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging'))
-                    # TODO: order_by
+                     # TODO: order_by
 
         regel_nr = 0
 

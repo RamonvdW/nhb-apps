@@ -15,9 +15,7 @@
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import datetime
-import requests     # voor de callback
 import json
-import time
 
 
 MY_PORT = 8125

@@ -223,7 +223,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         comp25 = Competitie.objects.get(afstand='25')
 
         self._doe_inschrijven(comp18)         # wisselt naar HWL rol
-        #self._doe_inschrijven(comp25)         # wisselt naar HWL rol
+        # self._doe_inschrijven(comp25)         # wisselt naar HWL rol
 
         # BB
         self.e2e_wisselnaarrol_bb()

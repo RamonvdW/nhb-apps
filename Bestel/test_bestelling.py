@@ -765,7 +765,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         betaalactief.save()
         bestelling.betaal_actief = betaalactief
         bestelling.status = BESTELLING_STATUS_WACHT_OP_BETALING
-        bestelling.save(update_fields=['betaal_actief','status'])
+        bestelling.save(update_fields=['betaal_actief', 'status'])
         BetaalTransactie(
                 payment_id='testje',
                 when=betaalactief.when,

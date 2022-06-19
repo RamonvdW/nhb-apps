@@ -79,6 +79,7 @@ class WachtwoordVergetenView(TemplateView):
     def post(self, request, *args, **kwargs):
 
         from_ip = get_safe_from_ip(request)
+        account_email = None
         context = super().get_context_data(**kwargs)
         context['foutmelding'] = ''
 
@@ -105,13 +106,15 @@ class WachtwoordVergetenView(TemplateView):
 
         menu_dynamics(self.request, context)
 
-        if not context['foutmelding']:
+        if not context['foutmelding'] and account_email is not None:
             # we hebben nu het account waar we een de e-mail voor moeten sturen
 
             schrijf_in_logboek(account=None,
                                gebruikte_functie="Wachtwoord",
                                activiteit="Stuur e-mail naar adres %s voor account %s, verzocht vanaf IP %s." % (
-                                   repr(account_email.bevestigde_email), repr(account_email.account.get_account_full_name()), from_ip))
+                                           repr(account_email.bevestigde_email),
+                                           repr(account_email.account.get_account_full_name()),
+                                           from_ip))
 
             account_stuur_email_wachtwoord_vergeten(account_email,
                                                     wachtwoord='vergeten',
@@ -240,8 +243,6 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
                 context['moet_oude_ww_weten'] = self.request.session['moet_oude_ww_weten']
             except KeyError:
                 context['moet_oude_ww_weten'] = True
-
-            #if account.sporter_set.count() > 0:  # FUTURE: ongewenste kennis over Sporter.account
 
             menu_dynamics(self.request, context)
             return render(request, self.template_name, context)

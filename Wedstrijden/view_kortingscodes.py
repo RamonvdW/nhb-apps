@@ -277,7 +277,7 @@ class VerenigingWijzigKortingcodesView(UserPassesTestMixin, View):
             korting_pk = kwargs['korting_pk'][:6]       # afkappen voor de veiligheid
             korting_pk = int(korting_pk)
             korting = WedstrijdKortingscode.objects.get(pk=korting_pk,
-                                                                uitgegeven_door=ver)
+                                                        uitgegeven_door=ver)
         except (ValueError, TypeError, WedstrijdKortingscode.DoesNotExist):
             raise Http404('Niet gevonden')
 

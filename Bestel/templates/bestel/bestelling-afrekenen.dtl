@@ -67,7 +67,7 @@
                     // verzoek is klaar en we hebben een antwoord
                     // responseText is leeg bij connection failure
                     if (xhr.responseText !== "") {
-                        let rsp = "";
+                        let rsp;
                         try {
                             rsp = JSON.parse(xhr.responseText);
                         } catch(e) {
@@ -101,7 +101,7 @@
                                 const el = document.getElementById('id_bericht')
                                 el.innerText = "De betaling is niet gelukt"
 
-                                retry = False;      // stop trying
+                                retry = false;      // stop trying
 
                             } else if (status === "error") {
                                 // intern probleem

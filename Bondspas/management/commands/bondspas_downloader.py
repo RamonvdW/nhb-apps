@@ -9,13 +9,11 @@
 
 from django.conf import settings
 from django.utils import timezone
-from django.db.models import F
 from django.db.utils import DataError, OperationalError, IntegrityError
 from django.core.management.base import BaseCommand
 from Bondspas.models import (Bondspas, BONDSPAS_STATUS_OPHALEN,  BONDSPAS_STATUS_BEZIG,
                              BONDSPAS_STATUS_FAIL, BONDSPAS_STATUS_AANWEZIG)
 from Overig.background_sync import BackgroundSync
-import django.db.utils
 import datetime
 import requests
 import traceback
