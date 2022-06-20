@@ -211,9 +211,9 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         beschrijving2team_klasse = dict()
 
         for team_klasse in (CompetitieTeamKlasse
-                       .objects
-                       .filter(is_voor_teams_rk_bk=True,
-                               competitie=comp)):
+                            .objects
+                            .filter(is_voor_teams_rk_bk=True,
+                                    competitie=comp)):
             beschrijving2team_klasse[team_klasse.beschrijving] = team_klasse
         # for
 

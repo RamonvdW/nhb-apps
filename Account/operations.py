@@ -15,6 +15,7 @@ class AccountCreateError(Exception):
     """ Generic exception raised by account_create """
     pass
 
+
 # alles in kleine letter
 VERBODEN_WOORDEN_IN_WACHTWOORD = (
     'password',

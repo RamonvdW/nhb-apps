@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -31,7 +31,7 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
         sporter.geboorte_datum = parse_date('1970-03-03')
         sporter.woon_straatnaam = 'Papendal'
         sporter.geslacht = 'V'
-        sporter.sinds_datum = parse_date("1991-02-03") # Y-M-D
+        sporter.sinds_datum = parse_date("1991-02-03")  # Y-M-D
         sporter.save()
         self.sporter_123456 = sporter
 
@@ -43,7 +43,7 @@ class TestRecordsVerbeterbaar(E2EHelpers, TestCase):
         sporter.geboorte_datum = parse_date('1970-01-30')
         sporter.woon_straatnaam = 'Arnhem'
         sporter.geslacht = 'V'
-        sporter.sinds_datum = parse_date("1991-02-05") # Y-M-D
+        sporter.sinds_datum = parse_date("1991-02-05")  # Y-M-D
         sporter.save()
         self.sporter_123457 = sporter
 

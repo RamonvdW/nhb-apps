@@ -254,7 +254,7 @@
 
                         <tr>
                             <td colspan="2" class="input-field">
-                                <p colspan="2">Kort bericht (1 regel) voor de wedstrijdleiding:</p>
+                                <p>Kort bericht (1 regel) voor de wedstrijdleiding:</p>
                                 <div>
                                     <input type="text" maxlength="256" name="para_notitie" placeholder="Hier invoeren" value="{{ voorkeuren.opmerking_para_sporter }}" oninput="gewijzigd()">
                                 </div>

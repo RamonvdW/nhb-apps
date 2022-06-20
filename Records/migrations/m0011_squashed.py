@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -44,7 +43,7 @@ class Migration(migrations.Migration):
                 ('max_score', models.PositiveIntegerField(default=0)),
                 ('x_count', models.PositiveIntegerField(default=0)),
                 ('verbeterbaar', models.BooleanField(default=True)),
-                ('sporter', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='Sporter.sporter')),
+                ('sporter', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT, to='Sporter.sporter')),
             ],
             options={
                 'verbose_name': 'Individueel record',
@@ -67,8 +66,7 @@ class Migration(migrations.Migration):
                     choices=[('R', 'Recurve'), ('C', 'Compound'), ('BB', 'Barebow'), ('LB', 'Longbow'),
                              ('IB', 'Instinctive bow')], max_length=2)),
                 ('para_klasse', models.CharField(blank=True, max_length=20)),
-                ('beste', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
-                                            to='Records.indivrecord')),
+                ('beste', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Records.indivrecord')),
             ],
             options={
                 'verbose_name': 'Beste individuele records',

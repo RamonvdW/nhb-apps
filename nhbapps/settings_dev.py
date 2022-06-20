@@ -25,11 +25,6 @@ DEBUG = True
 #ENABLE_DJANGO_EXTENSIONS = True
 
 
-# enable html validation using v.Nu (warning: triples test duration)
-# warning: increases test run duration significantly
-#TEST_VALIDATE_HTML = True
-
-
 if ENABLE_DJANGO_EXTENSIONS:                        # pragma: no cover
     INSTALLED_APPS.append('django_extensions')
 

@@ -108,7 +108,7 @@ class Loader(AppDirectoriesLoader):
                 deel = re.sub(r'\n{', '{', deel)
                 deel = re.sub(r'{\n', '{', deel)
                 deel = re.sub(r'\n}', '}', deel)
-                #deel = re.sub(r'}\n', '}', deel)       # breakt javascript als er een ; ontbreekt!
+                # deel = re.sub(r'}\n', '}', deel)       # breakt javascript als er een ; ontbreekt!
                 deel = re.sub(r';\n', ';', deel)
                 deel = re.sub(r',\n', ',', deel)
                 deel = re.sub(r'}\nelse', '}else', deel)
@@ -188,8 +188,8 @@ class Loader(AppDirectoriesLoader):
         contents = re.sub(r'>\s+{%', '>{%', contents)
 
         # remove whitespace between template context variables and html tags
-        #contents = re.sub(r'>\s+{{', '>{{', contents)      # behouden want layout!
-        #contents = re.sub(r'}}\s+<', '}}<', contents)
+        # contents = re.sub(r'>\s+{{', '>{{', contents)      # behouden want layout!
+        # contents = re.sub(r'}}\s+<', '}}<', contents)
 
         # remove whitespace between html tags
         contents = re.sub(r'>\s+<', '><', contents)

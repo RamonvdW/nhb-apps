@@ -241,8 +241,6 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
             except KeyError:
                 context['moet_oude_ww_weten'] = True
 
-            #if account.sporter_set.count() > 0:  # FUTURE: ongewenste kennis over Sporter.account
-
             menu_dynamics(self.request, context)
             return render(request, self.template_name, context)
 

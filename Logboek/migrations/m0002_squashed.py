@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -29,7 +28,7 @@ class Migration(migrations.Migration):
                 ('toegevoegd_op', models.DateTimeField()),
                 ('gebruikte_functie', models.CharField(max_length=100)),
                 ('activiteit', models.CharField(max_length=500)),
-                ('actie_door_account', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='Account.Account')),
+                ('actie_door_account', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.CASCADE, to='Account.account')),
             ],
             options={
                 'verbose_name': 'Logboek regel',

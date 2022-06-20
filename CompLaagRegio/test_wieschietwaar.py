@@ -236,12 +236,12 @@ class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
                 match.uitslag = uitslag
                 match.beschrijving = "Dit is een testje %s" % volgnr
 
-            if volgnr == 1:
-                score = Score(sporterboog=self.sporterboog_100001,
-                              waarde=123,
-                              afstand_meter=12)
-                score.save()
-                uitslag.scores.add(score)
+                if volgnr == 1:
+                    score = Score(sporterboog=self.sporterboog_100001,
+                                  waarde=123,
+                                  afstand_meter=12)
+                    score.save()
+                    uitslag.scores.add(score)
 
             match.save()
             self.ronde_wedstrijd = match

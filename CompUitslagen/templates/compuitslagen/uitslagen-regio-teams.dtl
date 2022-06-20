@@ -194,7 +194,7 @@
                                         </tr>
                                     {% endfor %}
                                     <tr>
-                                        <td colspan="18" class="nhb-table-onderrand"></td>
+                                        <td colspan="3" class="nhb-table-onderrand"></td>
                                     </tr>
                                 </table>
                             </td>

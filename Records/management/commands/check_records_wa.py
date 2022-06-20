@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -119,6 +119,7 @@ class Command(BaseCommand):         # pragma: no cover      # FUTURE: commando i
 
     def _vergelijk_records(self, wa_rec, nhb_rec):
         # para_klasse = models.CharField(max_length=20, blank=True)
+        cat = wa_rec['Cat']       # [0]=R/C/etc, [1]=C/J/S, [2]=M/W/O
         if wa_rec['ParaAr'] == 'True':
             # is een para record
             if nhb_rec.para_klasse == '':
@@ -131,7 +132,6 @@ class Command(BaseCommand):         # pragma: no cover      # FUTURE: commando i
                 self._warning_count += 1
 
         # nhb_rec.geslacht
-        cat = wa_rec['Cat']       # [0]=R/C/etc, [1]=C/J/S, [2]=M/W/O
         if nhb_rec.geslacht == 'M' and 'M' not in cat:
             self.stdout.write('[WARNING] Record %s-%s is onverwacht geslacht=M (WA: cat=%s)' % (nhb_rec.discipline, nhb_rec.volg_nr, cat))
             self._warning_count += 1

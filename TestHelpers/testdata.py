@@ -1073,7 +1073,7 @@ class TestData(object):
             poules.append(poule)
         # for
 
-    def maak_rk_deelnemers(self, afstand, ver_nr, regio_nr, limit_boogtypen=['R', 'C', 'BB', 'LB', 'TR']):
+    def maak_rk_deelnemers(self, afstand, ver_nr, regio_nr, limit_boogtypen=('R', 'C', 'BB', 'LB', 'TR')):
         """ Maak de RK deelnemers aan, alsof ze doorgestroomd zijn vanuit de regiocompetitie
             rank en volgorde wordt ingevuld door maak_label_regiokampioenen
 
@@ -1346,7 +1346,7 @@ class TestData(object):
             gem = round(gem, 3)
         # for
 
-    def maak_inschrijvingen_rk_teamcompetitie(self, afstand, ver_nr, per_team=4, limit_teamtypen=['R2', 'C']):
+    def maak_inschrijvingen_rk_teamcompetitie(self, afstand, ver_nr, per_team=4, limit_teamtypen=('R2', 'C')):
         """ maak voor deze vereniging een paar teams aan voor de RK teams inschrijving
             en koppel er meteen een aantal RK deelnemers van de vereniging aan.
         """

@@ -559,5 +559,4 @@ class TestSporterVoorkeuren(E2EHelpers, TestCase):
         self.assertFalse(voorkeur.wedstrijd_geslacht_gekozen)
 
 
-
 # end of file

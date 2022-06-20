@@ -63,6 +63,7 @@
                         <span>&nbsp;&nbsp;</span><a class="btn-nhb-rood" href="{{ unfiltered_url }}"><i class="material-icons-round left">backspace</i>Toon alles</a>
                     {% endif %}
                 </p>
+            </form>
         </div>
     </div>
 </div>

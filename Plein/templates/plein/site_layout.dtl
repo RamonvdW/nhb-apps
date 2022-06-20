@@ -168,7 +168,7 @@
                     const el = document.getElementById("id_kruimels_back");
                     // element bestaat niet als broodkruimels uitgezet zijn, zoals op het Plein zelf
                     if (el) el.style.display = "none";
-                };
+                }
 
                 elems = document.querySelectorAll(".collapsible");
                 M.Collapsible.init(elems, options);

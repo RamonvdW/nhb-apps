@@ -78,7 +78,6 @@
                         <td>Geen wedstrijden</td>
                     </tr>
                 {% endif %}
-                <tr>
             </table>
         </div>
     </div>

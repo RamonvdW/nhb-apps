@@ -113,7 +113,7 @@
                                 {% if readonly %}
                                     <p>{{ ronde.beschrijving }}</p>
                                 {% else %}
-                                <td class="input-field">
+                                    <td class="input-field">
                                         <input type="text" name="ronde_naam" placeholder="Beschrijving" value="{{ ronde.beschrijving }}" oninput="gewijzigd()">
                                     </td>
                                 {% endif %}

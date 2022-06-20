@@ -64,6 +64,7 @@ class SporterVoorkeurenAdmin(admin.ModelAdmin):
              }),
     )
 
+
 class SecretarisAdmin(admin.ModelAdmin):
     """ Admin configuratie voor Secretaris klasse """
 
