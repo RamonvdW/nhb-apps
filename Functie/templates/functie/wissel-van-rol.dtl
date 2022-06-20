@@ -160,7 +160,7 @@
                                     {% for obj in alle_18 %}
                                         <form method="post" action="{{ obj.url }}" style="display:inline">
                                             {% csrf_token %}
-                                            <button class="btn-nhb-rood"{% if obj.ruimte %}style="margin-right:5px"{% endif %}>{{ obj.tekst_kort }}</button>
+                                            <button class="btn-nhb-rood"{% if obj.ruimte %} style="margin-right:5px"{% endif %}>{{ obj.tekst_kort }}</button>
                                         </form>
                                         {% if obj.do_break %}<br>{% endif %}
                                     {% endfor %}
@@ -178,7 +178,7 @@
                                     {% for obj in alle_25 %}
                                         <form method="post" action="{{ obj.url }}" style="display:inline">
                                             {% csrf_token %}
-                                            <button class="btn-nhb-blauw"{% if obj.ruimte %}style="margin-right:5px"{% endif %}>{{ obj.tekst_kort }}</button>
+                                            <button class="btn-nhb-blauw"{% if obj.ruimte %} style="margin-right:5px"{% endif %}>{{ obj.tekst_kort }}</button>
                                         </form>
                                         {% if obj.do_break %}<br>{% endif %}
                                     {% endfor %}

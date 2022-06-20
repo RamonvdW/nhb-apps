@@ -79,7 +79,7 @@
 
                     <td class="center">
                         <a class="btn-nhb-rood" href="{{ regio_ronde.url }}">
-                            <img src="{% static 'plein/zoom_in.svg' %}" height="36px">
+                            <img src="{% static 'plein/zoom_in.svg' %}" height="36">
                         </a>
                     </td>
                 </tr>
@@ -92,7 +92,7 @@
 
                         <td class="center">
                             <a class="btn-nhb-rood" href="{{ cluster.ronde_url }}">
-                                <img src="{% static 'plein/zoom_in.svg' %}" height="36px">
+                                <img src="{% static 'plein/zoom_in.svg' %}" height="36">
                             </a>
                         </td>
                     </tr>
