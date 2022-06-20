@@ -133,7 +133,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
 
             if cluster.nhbvereniging_set.count() > 0:
                 # maak de enige ronde automatisch aan
-                if cluster.deelcompetitieronde_set.count() == 0:
+                if cluster.deelcompetitieronde_set.filter(deelcompetitie=deelcomp).count() == 0:
                     maak_deelcompetitie_ronde(deelcomp, cluster)
         # for
 
@@ -149,7 +149,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
                         .order_by('letter')):
 
             if cluster.nhbvereniging_set.count() > 0:
-                ronde = cluster.deelcompetitieronde_set.all()[0]
+                ronde = cluster.deelcompetitieronde_set.filter(deelcompetitie=deelcomp)[0]
                 cluster.wedstrijden_count = ronde.matches.count()
                 cluster.ronde_url = reverse('CompLaagRegio:regio-methode1-planning',
                                             kwargs={'ronde_pk': ronde.pk})
