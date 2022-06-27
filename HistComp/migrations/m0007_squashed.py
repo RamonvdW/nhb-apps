@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -53,7 +52,7 @@ class Migration(migrations.Migration):
                 ('totaal_ronde7', models.PositiveIntegerField()),
                 ('totaal', models.PositiveIntegerField()),
                 ('gemiddelde', models.DecimalField(decimal_places=1, max_digits=5)),
-                ('histcompetitie', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='HistComp.HistCompetitie')),
+                ('histcompetitie', models.ForeignKey(on_delete=models.deletion.CASCADE, to='HistComp.HistCompetitie')),
             ],
             options={
                 'verbose_name': 'Historische team competitie',
@@ -79,7 +78,7 @@ class Migration(migrations.Migration):
                 ('score7', models.PositiveIntegerField()),
                 ('totaal', models.PositiveIntegerField()),
                 ('gemiddelde', models.DecimalField(decimal_places=3, max_digits=5)),
-                ('histcompetitie', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='HistComp.HistCompetitie')),
+                ('histcompetitie', models.ForeignKey(on_delete=models.deletion.CASCADE, to='HistComp.HistCompetitie')),
                 ('laagste_score_nr', models.PositiveIntegerField(default=0)),
             ],
             options={

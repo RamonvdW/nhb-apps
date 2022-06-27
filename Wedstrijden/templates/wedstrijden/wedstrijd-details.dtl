@@ -151,7 +151,7 @@
 
             <table class="white">
                 <tr>
-                    <td colspan="3" class="center">
+                    <td colspan="{% if kan_inschrijven %}3{% else %}2{% endif %}" class="center">
                         <h6 class="nhb-blauw-text">Sessies</h6>
                                              <!-- N = NHB -->
                         {% if wed.organisatie == 'N' %}

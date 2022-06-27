@@ -48,6 +48,8 @@ class BetalingenInstellenView(UserPassesTestMixin, TemplateView):
         if instellingen.akkoord_via_nhb:
             context['akkoord_via_nhb'] = True
 
+        context['url_opslaan'] = reverse('Betaal:vereniging-instellingen')
+
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
             (None, 'Financieel'),

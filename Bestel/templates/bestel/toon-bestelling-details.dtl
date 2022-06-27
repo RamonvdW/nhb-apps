@@ -76,10 +76,12 @@
                 {% endif %}
 
                 <!-- afrekenen -->
-                <tr>
-                    {% if bevat_fout %}
+                {% if bevat_fout %}
+                    <tr>
                         <td colspan="3" class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
-                    {% elif url_afrekenen %}
+                    </tr>
+                {% elif url_afrekenen %}
+                    <tr>
                         <td class="hide-on-small-only"></td>
                         <td class="right-align">
                             <form action="{{ url_afrekenen }}" method="post">
@@ -89,8 +91,8 @@
                             </form>
                         </td>
                         <td><!-- bedragen --></td>
-                    {% endif %}
-                </tr>
+                    </tr>
+                {% endif %}
 
             </table>
         </div>

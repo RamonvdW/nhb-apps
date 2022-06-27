@@ -81,7 +81,7 @@
 
                         <td class="center">
                             <a class="btn-nhb-rood" href="{% url 'CompLaagRayon:rayon-planning' deelcomp.pk %}">
-                                <img src="{% static 'plein/zoom_in.svg' %}" height="36">
+                                <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Details">
                             </a>
                         </td>
                     </tr>

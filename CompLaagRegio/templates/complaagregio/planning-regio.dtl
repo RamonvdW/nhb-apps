@@ -78,7 +78,7 @@
                             <!-- knop naar de ronde van de regioplanning -->
                             <td class="center">
                                 <a class="btn-nhb-rood" href="{{ cluster.url_bekijk }}">
-                                    <img src="{% static 'plein/zoom_in.svg' %}" height="36px">
+                                    <img src="{% static 'plein/zoom_in.svg' %}" height="36" alt="Details">
                                 </a>
                             </td>
                         </tr>
