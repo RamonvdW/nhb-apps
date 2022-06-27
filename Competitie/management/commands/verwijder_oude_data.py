@@ -8,16 +8,18 @@
 
 from django.core.management.base import BaseCommand
 from Competitie.models import CompetitieMatch
-from Score.models import Score, ScoreHist
+from Score.models import Score, ScoreHist, SCORE_TYPE_GEEN
 from Sporter.models import SporterBoog
 
 """
     CompetitieMatch + Uitslag
-    
+
+    Surrogaat scores (type "geen score") die ingezet zijn voor de team competitie    
     Score (type SCORE) gekoppeld aan SporterBoog zonder Sporter
-    ScoreHist "Uitslag competitie seizoen 2019/2020" + Score (type SCORE) 
-    ScoreHist "Uitslag competitie seizoen 2020/2021" + Score (type SCORE) 
-    ScoreHist "Importeer scores van uitslagen.handboogsport.nl voor ronde".. + Score (type SCORE) 
+    # ScoreHist "Uitslag competitie seizoen 2021/2022" + Score (type SCORE)     --> pas op, dit is AG!
+    ScoreHist "Nieuw handmatig AG voor teams"
+    ScoreHist "Invoer uitslag wedstrijd"
+    Wedstrijden die niet in een plan zitten
 """
 
 DELETE_BLOCK_SIZE = 500
@@ -40,6 +42,16 @@ class Command(BaseCommand):
                 self.stderr.write('Let op: gebruik --commit om de voorstellen echt te verwijderen')
             self._said_use_commit = True
 
+    def _verwijder_geen_score(self):
+        scores = Score.objects.filter(type=SCORE_TYPE_GEEN)
+        count = scores.count()
+        if count > 0:
+            self._use_commit()
+            self.stdout.write('%s Score type "geen score"' % count)
+
+            if self._do_save:
+                scores.delete()
+
     def _verwijder_score_scorehist_met_notitie(self, notitie_moet_bevatten):
         score_pks = list(ScoreHist
                          .objects
@@ -48,7 +60,7 @@ class Command(BaseCommand):
         count = len(score_pks)
         if count > 0:
             self._use_commit()
-            self.stdout.write('%s records met %s' % (count, repr(notitie_moet_bevatten)))
+            self.stdout.write('%s ScoreHist met %s' % (count, repr(notitie_moet_bevatten)))
 
             # verwijder in blokken om geen overflow te veroorzaken
             while len(score_pks):
@@ -80,6 +92,17 @@ class Command(BaseCommand):
             if self._do_save:
                 sporters.delete()
 
+    def _verwijder_lege_score(self):
+        # verwijder score zonder SporterBoog
+        scores = Score.objects.filter(sporterboog=None)
+        count = scores.count()
+        if count > 0:
+            self._use_commit()
+            self.stdout.write('%s Score zonder SporterBoog' % count)
+
+            if self._do_save:
+                scores.delete()
+
     def _verwijder_orphan_matches(self):
         orphan_pks = list()
         for match in CompetitieMatch.objects.all():
@@ -92,7 +115,7 @@ class Command(BaseCommand):
 
         if len(orphan_pks):
             self._use_commit()
-            self.stdout.write('%s wedstrijden niet in een deelcompetitie of ronde' % len(orphan_pks))
+            self.stdout.write('%s wedstrijden (CompetitieMatch) niet in een deelcompetitie of ronde' % len(orphan_pks))
 
             orphans = CompetitieMatch.objects.filter(pk__in=orphan_pks)
             if self._do_save:
@@ -107,15 +130,22 @@ class Command(BaseCommand):
             door ScoreHist.score te verwijderen, wordt ScoreHist ook verwijderd
         """
 
-        # al overal verwijderd
-        self._verwijder_score_scorehist_met_notitie(
-                    "Uitslag competitie seizoen 2019/2020")
+        self._verwijder_geen_score()
+
+        # behouden, want dit zijn de AG's voor seizoen 2022/2023!
+        # self._verwijder_score_scorehist_met_notitie("Uitslag competitie seizoen 2021/2022")
+
+        self._verwijder_score_scorehist_met_notitie("Invoer uitslag wedstrijd")
+
+        self._verwijder_score_scorehist_met_notitie("Nieuw handmatig AG voor teams")
 
         # behouden, want dit zijn de AG's voor seizoen 2021/2022!
         # self._verwijder_score_scorehist_met_notitie(
-        #             "Uitslag competitie seizoen 2020/2021")
+        #             "Uitslag competitie seizoen 2021/2022")
 
         self._verwijder_lege_sporterboog()
+
+        self._verwijder_lege_score()
 
         self._verwijder_orphan_matches()
 
