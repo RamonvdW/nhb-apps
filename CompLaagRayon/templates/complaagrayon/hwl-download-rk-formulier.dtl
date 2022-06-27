@@ -78,7 +78,7 @@
                                 </tr>
                             {% endif %}
                             <tr>
-                                <td colspan="7" class="center">
+                                <td colspan="6" class="center">
                                     <h5>{{ deelnemer.indiv_klasse.beschrijving }}</h5>
                                     <br>
                                     <a class="btn-nhb-rood" href="{{ deelnemer.url_download_indiv }}">
@@ -112,7 +112,7 @@
 
                     {% empty %}
                         <tr>
-                            <td colspan="7" class="center"><i>Geen sporters gevonden</i></td>
+                            <td colspan="6" class="center"><i>Geen sporters gevonden</i></td>
                         </tr>
                     {% endfor %}
 
@@ -139,7 +139,7 @@
 
                     {% if geen_klassengrenzen %}
                         <tr class="white">
-                            <td colspan="6">
+                            <td colspan="5">
                                 <i class="red-text">De BKO heeft de teams klassengrenzen nog niet vastgesteld</i>
                             </td>
                         </tr>

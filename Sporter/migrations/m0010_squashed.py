@@ -5,26 +5,26 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-import django.db.models.deletion
-from Sporter.models import validate_geboorte_datum, validate_sinds_datum
+import Sporter.models
 
 
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
-    replaces = [('Sporter', 'm0003_squashed'),
-                ('Sporter', 'm0004_indexes'),
-                ('Sporter', 'm0005_geslacht_anders')]
+    replaces = [('Sporter', 'm0006_squashed'),
+                ('Sporter', 'm0007_voorkeuren'),
+                ('Sporter', 'm0008_adres_code'),
+                ('Sporter', 'm0009_para_met_rolstoel')]
 
     # dit is de eerste
     initial = True
 
     # volgorde afdwingen
     dependencies = [
-        ('Account', 'm0019_squashed'),
-        ('BasisTypen', 'm0028_squashed'),
-        ('NhbStructuur', 'm0024_squashed'),
+        ('Account', 'm0021_squashed'),
+        ('BasisTypen', 'm0042_squashed'),
+        ('NhbStructuur', 'm0027_squashed'),
     ]
 
     # migratie functies
@@ -37,14 +37,15 @@ class Migration(migrations.Migration):
                 ('achternaam', models.CharField(max_length=100)),
                 ('unaccented_naam', models.CharField(blank=True, default='', max_length=200)),
                 ('email', models.CharField(max_length=150)),
-                ('geboorte_datum', models.DateField(validators=[validate_geboorte_datum])),
+                ('geboorte_datum', models.DateField(validators=[Sporter.models.validate_geboorte_datum])),
                 ('geslacht', models.CharField(choices=[('M', 'Man'), ('V', 'Vrouw'), ('X', 'Anders')], max_length=1)),
                 ('para_classificatie', models.CharField(blank=True, max_length=30)),
                 ('is_actief_lid', models.BooleanField(default=True)),
-                ('sinds_datum', models.DateField(validators=[validate_sinds_datum])),
+                ('sinds_datum', models.DateField(validators=[Sporter.models.validate_sinds_datum])),
                 ('lid_tot_einde_jaar', models.PositiveSmallIntegerField(default=0)),
-                ('account', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='Account.Account')),
-                ('bij_vereniging', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='NhbStructuur.nhbvereniging')),
+                ('account', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.SET_NULL, to='Account.account')),
+                ('bij_vereniging', models.ForeignKey(blank=True, null=True, on_delete=models.deletion.PROTECT, to='NhbStructuur.nhbvereniging')),
+                ('adres_code', models.CharField(blank=True, default='', max_length=30)),
             ],
             options={
                 'verbose_name': 'Sporter',
@@ -56,7 +57,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('voorkeur_eigen_blazoen', models.BooleanField(default=False)),
                 ('voorkeur_meedoen_competitie', models.BooleanField(default=True)),
-                ('opmerking_para_sporter', models.CharField(default='', max_length=256)),
+                ('opmerking_para_sporter', models.CharField(blank=True, default='', max_length=256)),
                 ('voorkeur_discipline_25m1pijl', models.BooleanField(default=True)),
                 ('voorkeur_discipline_outdoor', models.BooleanField(default=True)),
                 ('voorkeur_discipline_indoor', models.BooleanField(default=True)),
@@ -66,7 +67,8 @@ class Migration(migrations.Migration):
                 ('voorkeur_discipline_3d', models.BooleanField(default=True)),
                 ('wedstrijd_geslacht', models.CharField(choices=[('M', 'Man'), ('V', 'Vrouw')], default='M', max_length=1)),
                 ('wedstrijd_geslacht_gekozen', models.BooleanField(default=True)),
-                ('sporter', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Sporter.sporter')),
+                ('sporter', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Sporter.sporter')),
+                ('para_met_rolstoel', models.BooleanField(default=False)),
             ],
             options={
                 'verbose_name': 'Sporter voorkeuren',
@@ -79,8 +81,8 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('heeft_interesse', models.BooleanField(default=True)),
                 ('voor_wedstrijd', models.BooleanField(default=False)),
-                ('boogtype', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='BasisTypen.boogtype')),
-                ('sporter', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='Sporter.sporter')),
+                ('boogtype', models.ForeignKey(on_delete=models.deletion.CASCADE, to='BasisTypen.boogtype')),
+                ('sporter', models.ForeignKey(null=True, on_delete=models.deletion.CASCADE, to='Sporter.sporter')),
             ],
             options={
                 'verbose_name': 'SporterBoog',
@@ -91,8 +93,8 @@ class Migration(migrations.Migration):
             name='Secretaris',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('sporter', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='Sporter.sporter')),
-                ('vereniging', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='NhbStructuur.nhbvereniging')),
+                ('sporter', models.ForeignKey(null=True, on_delete=models.deletion.SET_NULL, to='Sporter.sporter')),
+                ('vereniging', models.ForeignKey(on_delete=models.deletion.CASCADE, to='NhbStructuur.nhbvereniging')),
             ],
             options={
                 'verbose_name': 'Secretaris Vereniging',
@@ -108,7 +110,7 @@ class Migration(migrations.Migration):
                 ('discipline', models.CharField(max_length=50)),
                 ('category', models.CharField(max_length=50)),
                 ('volgorde', models.PositiveSmallIntegerField()),
-                ('sporter', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='Sporter.sporter')),
+                ('sporter', models.ForeignKey(on_delete=models.deletion.CASCADE, to='Sporter.sporter')),
             ],
             options={
                 'verbose_name': 'Speelsterkte',

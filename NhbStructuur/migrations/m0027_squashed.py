@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -112,6 +112,10 @@ class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
 
+    replaces = [('NhbStructuur', 'm0024_squashed'),
+                ('NhbStructuur', 'm0025_kvk_website_phone'),
+                ('NhbStructuur', 'm0026_adres_email')]
+
     # dit is de eerste
     initial = True
 
@@ -168,21 +172,21 @@ class Migration(migrations.Migration):
                 ('plaats', models.CharField(blank=True, max_length=100)),
                 ('clusters', models.ManyToManyField(blank=True, to='NhbStructuur.NhbCluster')),
                 ('geen_wedstrijden', models.BooleanField(default=False)),
+                ('kvk_nummer', models.CharField(blank=True, default='', max_length=15)),
+                ('telefoonnummer', models.CharField(blank=True, default='', max_length=20)),
+                ('website', models.CharField(blank=True, default='', max_length=100)),
+                ('adres_regel1', models.CharField(blank=True, default='', max_length=100)),
+                ('adres_regel2', models.CharField(blank=True, default='', max_length=100)),
+                ('contact_email', models.EmailField(blank=True, max_length=254)),
             ],
             options={
                 'verbose_name': 'Nhb vereniging',
                 'verbose_name_plural': 'Nhb verenigingen',
             },
         ),
-        migrations.RunPython(
-            code=init_rayons,
-        ),
-        migrations.RunPython(
-            code=init_regios,
-        ),
-        migrations.RunPython(
-            code=init_clusters,
-        ),
+        migrations.RunPython(init_rayons),
+        migrations.RunPython(init_regios),
+        migrations.RunPython(init_clusters),
     ]
 
 # end of file

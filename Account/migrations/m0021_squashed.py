@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-import django.contrib.auth.models
 from django.db import migrations, models
+import django.contrib.auth.models
 import django.utils.timezone
 
 
 class Migration(migrations.Migration):
 
     """ Migratie class voor dit deel van de applicatie """
+
+    replaces = [('Account', 'm0019_squashed'),
+                ('Account', 'm0020_rate_limiter')]
 
     # dit is de eerste
     initial = True
@@ -71,7 +74,7 @@ class Migration(migrations.Migration):
                 ('laatste_email_over_taken', models.DateTimeField(blank=True, null=True)),
                 ('optout_functie_koppeling', models.BooleanField(default=False)),
                 ('optout_reactie_klacht', models.BooleanField(default=False)),
-                ('account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('account', models.ForeignKey(on_delete=models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'verbose_name': 'AccountEmail',
@@ -82,8 +85,17 @@ class Migration(migrations.Migration):
             name='AccountSessions',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('session', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sessions.session')),
+                ('account', models.ForeignKey(on_delete=models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('session', models.ForeignKey(on_delete=models.deletion.CASCADE, to='sessions.session')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='AccountVerzoekenTeller',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('uur_nummer', models.PositiveBigIntegerField(default=0)),
+                ('teller', models.PositiveIntegerField(default=0)),
+                ('account', models.ForeignKey(on_delete=models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
     ]

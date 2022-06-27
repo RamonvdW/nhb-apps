@@ -288,9 +288,6 @@
     <p class="center">Sporters met grijze naam hebben aangegeven niet mee te willen doen met de bondscompetities.</p>
 
     {% if mag_aanmelden %}
-            <div class="fixed-action-btn">
-                <input class="btn-nhb-rood" type="submit" value="Geselecteerde sporters aanmelden" id="submit">
-            </div>
         </form>
     {% endif %}     <!-- mag aanmelden -->
 

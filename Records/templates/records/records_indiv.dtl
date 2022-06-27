@@ -129,8 +129,8 @@
                 <ul id="id_makl2">
                     {% for obj in makl_filters %}
                         <li>
-                            <label class="black-text" for="id_{{ obj.sel }}">
-                                <input class="with-gap" type="radio" name="makl2" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.zoom_url }}">
+                            <label class="black-text" for="id_{{ obj.sel }}_2">
+                                <input class="with-gap" type="radio" name="makl2" value="{{ obj.sel }}" required id="id_{{ obj.sel }}_2" {% if obj.selected %}checked{% endif %} data-url="{{ obj.zoom_url }}">
                                 <span>{{ obj.beschrijving }}</span>
                             </label>
                         </li>

@@ -39,7 +39,7 @@
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3">
                 <div style="padding:30px">
-                    <form action="{{ url }}" method="post">
+                    <form action="{{ url_opslaan }}" method="post">
                         {% csrf_token %}
 
                         <div class="center" style="margin-bottom:50px">

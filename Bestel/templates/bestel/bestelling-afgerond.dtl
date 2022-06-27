@@ -83,7 +83,7 @@
                         // verzoek is klaar en we hebben een antwoord
                         // responseText is leeg bij connection failure
                         if (xhr.responseText !== "") {
-                            let rsp = "";
+                            let rsp;
                             try {
                                 rsp = JSON.parse(xhr.responseText);
                             } catch(e) {
