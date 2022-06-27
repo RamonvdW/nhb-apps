@@ -5,8 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import migrations, models
-import django.db.models.deletion
-
 
 RAYONS = (
     (1, "Rayon 1"),     # Noord Nederland
@@ -141,7 +139,7 @@ class Migration(migrations.Migration):
                 ('regio_nr', models.PositiveIntegerField(primary_key=True, serialize=False)),
                 ('naam', models.CharField(max_length=50)),
                 ('is_administratief', models.BooleanField(default=False)),
-                ('rayon', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='NhbStructuur.nhbrayon')),
+                ('rayon', models.ForeignKey(on_delete=models.deletion.PROTECT, to='NhbStructuur.nhbrayon')),
             ],
             options={
                 'verbose_name': 'Nhb regio',
@@ -153,7 +151,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('naam', models.CharField(blank=True, default='', max_length=50)),
-                ('regio', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='NhbStructuur.nhbregio')),
+                ('regio', models.ForeignKey(on_delete=models.deletion.PROTECT, to='NhbStructuur.nhbregio')),
                 ('letter', models.CharField(default='x', max_length=1)),
                 ('gebruik', models.CharField(choices=[('18', 'Indoor'), ('25', '25m 1pijl')], max_length=2)),
             ],
@@ -168,7 +166,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('ver_nr', models.PositiveIntegerField(primary_key=True, serialize=False)),
                 ('naam', models.CharField(max_length=200)),
-                ('regio', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='NhbStructuur.nhbregio')),
+                ('regio', models.ForeignKey(on_delete=models.deletion.PROTECT, to='NhbStructuur.nhbregio')),
                 ('plaats', models.CharField(blank=True, max_length=100)),
                 ('clusters', models.ManyToManyField(blank=True, to='NhbStructuur.NhbCluster')),
                 ('geen_wedstrijden', models.BooleanField(default=False)),

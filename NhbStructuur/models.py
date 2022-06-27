@@ -153,6 +153,10 @@ class NhbVereniging(models.Model):
     # maximum is 15 tekens, maar we staan streepjes/spaties toe
     telefoonnummer = models.CharField(max_length=20, default='', blank=True)
 
+    # bankrekening details
+    bank_iban = models.CharField(max_length=18, default='', blank=True)
+    bank_bic = models.CharField(max_length=11, default='', blank=True)      # 8 of 11 tekens
+
     def ver_nr_en_naam(self):
         return "[%s] %s" % (self.ver_nr, self.naam)
 

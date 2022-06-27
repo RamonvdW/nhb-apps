@@ -47,7 +47,7 @@ EXPECTED_REGIO_KEYS = ('rayon_number', 'region_number', 'name')
 EXPECTED_CLUB_KEYS = ('region_number', 'club_number', 'name', 'prefix', 'email', 'website',
                       'has_disabled_facilities', 'address', 'postal_code', 'location_name',
                       'phone_business', 'phone_private', 'phone_mobile', 'coc_number',
-                      'iso_abbr', 'latitude', 'longitude', 'secretaris')
+                      'iso_abbr', 'latitude', 'longitude', 'secretaris', 'iban', 'bic')
 EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first_name',
                         'initials', 'birthday', 'email', 'gender', 'member_from',
                         'para_code', 'address', 'postal_code', 'location_name',
@@ -253,6 +253,28 @@ class Command(BaseCommand):
             self.stderr.write("[WARNING] Extra sleutel aanwezig in de %s data: %s" % (repr(level), repr(keys)))
         return has_error
 
+    @staticmethod
+    def _check_iban(iban):
+        """ Voer de mod97 test uit op de IBAN """
+        if len(iban) != 18:
+            return False
+
+        getal = ''
+        for teken in iban[4:] + iban[:4]:
+            if teken.isdigit():
+                getal += teken
+            elif teken.isupper():
+                # vertaal in A=10, B=11 .. Z=36
+                getal += str(ord(teken) - ord('A') + 10)
+            else:
+                # niet ondersteund teken
+                return False
+        # for
+
+        nr = int(getal)
+        rest = nr % 97
+        return rest == 1
+
     def _vind_recordhouders(self):
         """ Sporters met een NL record op hun naam worden niet verwijderd.
             Zoek deze op zodat we niet eens een poging gaan doen om ze te verwijderen.
@@ -349,6 +371,7 @@ class Command(BaseCommand):
          'coc_number',              KvK nummer
          'iso_abbr': 'NL',          ???
          'latitude', 'longitude',
+         'iban', 'bic',
          'secretaris': [{'member_number': int}]
         }
         """
@@ -437,6 +460,45 @@ class Command(BaseCommand):
                     ver_adres1 = adres_spl[0]
                     ver_adres2 = adres_spl[1]
 
+            ver_iban = club['iban']
+            ver_bic = club['bic']
+            if ver_bic and ver_iban:
+                # correcte situatie
+                if len(ver_bic) not in (8, 11):
+                    self.stderr.write('[ERROR] Vereniging %s heeft BIC %s met foute length %s (verwacht: 8 of 11) horende bij IBAN %s' % (
+                                        ver_nr, repr(ver_bic), len(ver_bic), repr(ver_iban)))
+                    ver_bic = None
+
+                if len(ver_iban) != 18:
+                    self.stderr.write('[ERROR] Vereniging %s heeft IBAN %s met foute length %s (verwacht: 18)' % (
+                                        ver_nr, repr(ver_iban), len(ver_iban)))
+                    ver_bic = None
+            else:
+                # een van de twee is afwezig
+                if ver_bic and not ver_iban:
+                    self.stdout.write('[WARNING] Vereniging %s heeft een BIC zonder IBAN: %s, %s' % (
+                                            ver_nr, repr(ver_bic), repr(ver_iban)))
+                elif ver_iban and not ver_bic:
+                    self.stdout.write('[WARNING] Vereniging %s heeft een IBAN zonder BIC: %s, %s' % (
+                                            ver_nr, repr(ver_bic), repr(ver_iban)))
+                ver_bic = None
+
+            if ver_bic:
+                if ver_bic not in settings.BEKENDE_BIC_CODES:
+                    self.stdout.write('[WARNING] Vereniging %s heeft een onbekende BIC code %s horende bij IBAN %s' % (
+                                        ver_nr, repr(ver_bic), repr(ver_iban)))
+
+            if ver_bic:
+                # controleer de IBAN
+                if not self._check_iban(ver_iban):
+                    self.stderr.write('[ERROR] Vereniging %s heeft een foutieve IBAN: %s' % (ver_nr, repr(ver_iban)))
+                    ver_bic = None
+
+            # zet None om naar lege string
+            if not ver_bic:
+                ver_bic = ''
+                ver_iban = ''
+
             # FUTURE: verdere velden: has_disabled_facilities, lat/lon,
 
             # zoek de vereniging op
@@ -515,6 +577,18 @@ class Command(BaseCommand):
                     self._count_wijzigingen += 1
                     obj.adres_regel2 = ver_adres2
                     updated.append('adres_regel2')
+
+                if obj.bank_iban != ver_iban:
+                    self.stdout.write("[INFO] Wijziging van IBAN van vereniging %s: %s --> %s" % (ver_nr, obj.bank_iban, ver_iban))
+                    self._count_wijzigingen += 1
+                    obj.bank_iban = ver_iban
+                    updated.append('bank_iban')
+
+                if obj.bank_bic != ver_bic:
+                    self.stdout.write("[INFO] Wijziging van BIC van vereniging %s: %s --> %s" % (ver_nr, obj.bank_bic, ver_bic))
+                    self._count_wijzigingen += 1
+                    obj.bank_bic = ver_bic
+                    updated.append('bank_bic')
 
                 if not self.dryrun:
                     obj.save(update_fields=updated)
