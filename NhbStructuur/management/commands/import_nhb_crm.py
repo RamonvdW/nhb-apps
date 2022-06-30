@@ -256,7 +256,7 @@ class Command(BaseCommand):
     @staticmethod
     def _check_iban(iban):
         """ Voer de mod97 test uit op de IBAN """
-        if len(iban) != 18:
+        if len(iban) < 18:      # pragma: no cover
             return False
 
         getal = ''
@@ -463,6 +463,8 @@ class Command(BaseCommand):
             ver_iban = club['iban']
             ver_bic = club['bic']
             if ver_bic and ver_iban:
+                ver_bic = str(ver_bic)
+                ver_iban = str(ver_iban)
                 # correcte situatie
                 if len(ver_bic) not in (8, 11):
                     self.stderr.write('[ERROR] Vereniging %s heeft BIC %s met foute length %s (verwacht: 8 of 11) horende bij IBAN %s' % (

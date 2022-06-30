@@ -32,7 +32,9 @@
      "iso_abbr": null,
      "latitude": null,
      "longitude": null,
-     "coc_number": null
+     "coc_number": null,
+     "iban": "NL91ABNA0417164300",
+     "bic": "ABNANL2A"
     },
     {"club_number": 1001,
      "region_number": 101,
@@ -53,7 +55,9 @@
      "iso_abbr": null,
      "latitude": null,
      "longitude": null,
-     "coc_number": null
+     "coc_number": null,
+     "iban": null,
+     "bic": null
     }
   ],
   "members": [

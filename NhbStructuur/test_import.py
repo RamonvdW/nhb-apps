@@ -287,6 +287,8 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         with self.assert_max_queries(46):
             management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_12.json',
                                     '--sim_now=2020-07-01', stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
         self.assertTrue("[INFO] Vereniging [1999] Wegisweg Club wordt nu verwijderd" in f2.getvalue())
 
     def test_weer_actief(self):
@@ -662,6 +664,10 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue("[ERROR] Kan vereniging 'y' voor lid 100024 niet vinden" in f1.getvalue())
         self.assertTrue("[ERROR] Foutief bondsnummer: ggg (geen getal)" in f1.getvalue())
         self.assertTrue("[WARNING] Kan speelsterkte volgorde niet vaststellen voor" in f1.getvalue())
+        self.assertTrue("[ERROR] Vereniging 1001 heeft BIC '1234' met foute length 4 (verwacht: 8 of 11) horende bij IBAN '1234'" in f1.getvalue())
+        self.assertTrue("[ERROR] Vereniging 1001 heeft IBAN '1234' met foute length 4 (verwacht: 18)" in f1.getvalue())
+        # self.assertTrue("[ERROR] Vereniging 1042 heeft BIC 'fout lengte' met foute length 12 (verwacht: 8 of 11) horende bij IBAN 'Wat een grap'" in f1.getvalue())
+        self.assertTrue("[ERROR] Vereniging 1042 heeft IBAN 'Wat een grap' met foute length 12 (verwacht: 18)" in f1.getvalue())
 
     def test_speelsterkte(self):
         # controleer dat de import tegen niet-nummers kan
@@ -676,5 +682,18 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_20.json',
                                 stderr=f1, stdout=f2)
         self.assertTrue("[INFO] Lid 100001: nieuwe speelsterkte 1991-01-01, Recurve, Recurve 1100" in f2.getvalue())
+
+    def test_iban_bic(self):
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_21.json',
+                                stderr=f1, stdout=f2)
+        print("f1: %s" % f1.getvalue())
+        print("f2: %s" % f2.getvalue())
+        self.assertTrue("[WARNING] Vereniging 1001 heeft een IBAN zonder BIC: None, 'NL91ABNA0417164300'" in f2.getvalue())
+        self.assertTrue("[WARNING] Vereniging 1042 heeft een BIC zonder IBAN: 'ABNANL2A', None" in f2.getvalue())
+        self.assertTrue("[WARNING] Vereniging 1000 heeft een onbekende BIC code 'HUH2HUH2' horende bij IBAN 'NL91ABNA0417164300'" in f2.getvalue())
+        self.assertTrue("ERROR] Vereniging 1043 heeft een foutieve IBAN: 'NL91ABNA0417164309'" in f1.getvalue())
+        self.assertTrue("[ERROR] Vereniging 1044 heeft IBAN 'NL91ABNA0TEKORT' met foute length 15 (verwacht: 18)" in f1.getvalue())
 
 # end of file
