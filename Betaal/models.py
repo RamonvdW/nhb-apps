@@ -49,7 +49,6 @@ class BetaalInstellingenVereniging(models.Model):
         sub = max(sub, 1)       # prevent 0
 
         key = key[:5+sub] + '[...]' + key[-sub:]
-        print('sub=%s, api_key=%s, key=%s' % (sub, repr(self.mollie_api_key), repr(key)))
         return key
 
     def __str__(self):
