@@ -28,6 +28,10 @@
                 <p>Met een eigen (gratis) account bij Mollie kunnen jullie inschrijfgelden van een wedstrijd innen, zonder tussenkomst van verdere partijen. Ook terugbetalingen bij afmelding worden via Mollie afgehandeld.</p>
                 <p>Het bondsbureau heeft meer informatie beschikbaar.</p>
             </div>
+            <div class="white" style="padding:10px; margin-top:50px">
+                <p>Zonder Mollie koppeling krijgen sporters een e-mail met het verzoek het geld handmatig over te maken naar jullie rekening.</p>
+                <p>De betaling moet dan handmatig bevestigd worden in MijnHandboogsport.</p>
+            </div>
         </div>
     </div>
 
@@ -102,8 +106,8 @@
             <div class="white" style="padding:10px">
                 <table>
                     <tr style="border-bottom:0px">      <!-- verwijder de streep -->
-                        <th class="right-align">KvK nummer:<br>Naam:<br>Adres:<br><br>E-mailadres:<br>Telefoonnummer:<br>
-                        <td>{{ ver.kvk_nummer }}<br>{{ ver.naam }}<br>{{ ver.adres_regel1 }}<br>{{ ver.adres_regel2 }}<br>{{ ver.contact_email }}<br>{{ ver.telefoonnummer }}</td>
+                        <th class="right-align">KvK nummer:<br>Naam:<br>Adres:<br><br>IBAN:<br>BIC:<br>E-mailadres:<br>Telefoonnummer:</th>
+                        <td>{{ ver.kvk_nummer }}<br>{{ ver.naam }}<br>{{ ver.adres_regel1 }}<br>{{ ver.adres_regel2 }}<br>{{ ver.bank_iban }}<br>{{ ver.bank_bic }}<br>{{ ver.contact_email }}<br>{{ ver.telefoonnummer }}</td>
                     </tr>
                 </table>
             </div>
