@@ -23,6 +23,34 @@
         </div>
     </div>
 
+    {% if toon_inschrijven %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>De inschrijving is open!</h4>
+                <p>Kies het kaartje <b>Mijn pagina</b> om je aan te melden.</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+                {% url 'Sporter:profiel' as card_url %}
+                {% include 'plein/card.dtl' with title="Mijn pagina" text="Inschrijven voor de bondscompetities, voorkeuren en informatie toegespitst op jou." icon="portrait" url=card_url %}
+            </div>
+        </div>
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <p>&nbsp;</p>
+                <h4>Bondscompetities</h4>
+            </div>
+        </div>
+
+    {% endif %}
+
     <!-- blauwe balk met kaartjes -->
     <div class="row-nhb-blauw">
         <div class="col s12">
@@ -40,26 +68,6 @@
         </div>
     </div>
 
-    {% if toon_inschrijven %}
-
-        <!-- witruimte -->
-        <div class="row center">
-            <div class="col s12">
-                <p>&nbsp;</p>
-                <h4>Inschrijven</h4>
-                <p>De inschrijving is open! Ga naar Mijn pagina om je aan te melden.</p>
-            </div>
-        </div>
-
-        <!-- blauwe balk met kaartjes -->
-        <div class="row-nhb-blauw">
-            <div class="col s12">
-                {% url 'Sporter:profiel' as card_url %}
-                {% include 'plein/card.dtl' with title="Mijn pagina" text="Voorkeuren en informatie toegespitst op jou." icon="portrait" url=card_url %}
-            </div>
-        </div>
-
-    {% endif %}
 
     {% if toon_management_competitie %}
 

@@ -299,10 +299,8 @@ class CompetitieOverzichtView(View):
             context['toon_uitslagen'] = True
 
         if self.rol_nu == Rollen.ROL_SPORTER:
-            if comp.fase == 'B':
-                context['toon_inschrijven'] = True
-
             # TODO: wedstrijdkalender toevoegen
+            pass
 
         return TEMPLATE_COMPETITIE_OVERZICHT
 
