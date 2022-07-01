@@ -64,6 +64,9 @@ class CompetitieKiesView(TemplateView):
                 else:
                     comp.text = "Alle informatie en uitslagen van de actuele bondscompetitie."
 
+                if comp.fase == 'B' and rol_nu == Rollen.ROL_SPORTER:
+                    context['toon_inschrijven'] = True
+
             try:
                 if comp.afstand in eerdere_comp:
                     comp.is_volgend_seizoen = True
