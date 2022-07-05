@@ -102,19 +102,9 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                                           'accounts__accountemail_set')
                         .annotate(aantal=Count('accounts'))
                         .filter(aantal__gt=0)):
-            for account in functie.accounts.all():
-                try:
-                    vhpg = account.vhpg
-                except VerklaringHanterenPersoonsgegevens.DoesNotExist:
-                    add = True
-                else:
-                    # elke 11 maanden moet de verklaring afgelegd worden
-                    # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
-                    opnieuw = vhpg.acceptatie_datum + datetime.timedelta(days=334)
-                    add = (opnieuw < now)
 
-                if not account.otp_is_actief:
-                    add = True
+            for account in functie.accounts.all():
+                add = not account.otp_is_actief
 
                 if add:
                     if account.pk not in account_pks:
@@ -125,29 +115,10 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
         hulp = list()
         for account in (Account
                         .objects
-                        .prefetch_related('vhpg',
-                                          'functie_set')
+                        .prefetch_related('functie_set')
                         .filter(pk__in=account_pks)
                         .order_by('last_login',
                                   'unaccented_naam')):
-
-            try:
-                vhpg = account.vhpg
-            except VerklaringHanterenPersoonsgegevens.DoesNotExist:
-                account.vhpg_str = 'Nee'
-            else:
-                # elke 11 maanden moet de verklaring afgelegd worden
-                # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
-                opnieuw = vhpg.acceptatie_datum + datetime.timedelta(days=334)
-                if opnieuw < now:
-                    account.vhpg_str = 'Verlopen'
-                else:
-                    account.vhpg_str = 'Ja'
-
-            if account.otp_is_actief:
-                account.tweede_factor_str = 'Ja'
-            else:
-                account.tweede_factor_str = 'Nee'
 
             totaal_level = 0
             functies = list()
@@ -166,7 +137,6 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
 
         hulp.sort(reverse=True)
         context['hulp'] = [tup[2] for tup in hulp]
-        context['hulp_testserver'] = settings.IS_TEST_SERVER
 
         # zoekformulier
         context['zoek_url'] = reverse('Overig:activiteit')
