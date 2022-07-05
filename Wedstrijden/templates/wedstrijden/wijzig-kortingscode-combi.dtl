@@ -176,6 +176,6 @@
             })
     </script>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-wijzig-kortingscode" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-wijzig-kortingscode-combi" %}
 
 {% endblock %}

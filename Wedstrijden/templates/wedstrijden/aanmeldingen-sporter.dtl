@@ -101,6 +101,6 @@
         {% endif %}
     {% endfor %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-aanmeldingen" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-aanmeldingen-sporter" %}
 
 {% endblock %}

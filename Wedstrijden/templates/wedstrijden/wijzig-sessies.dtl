@@ -109,6 +109,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-wijzig-sessies" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-wijzig-sessies" %}
 
 {% endblock %}

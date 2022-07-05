@@ -92,6 +92,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-nieuwe-wedstrijd-kies-type" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-nieuwe-wedstrijd-kies-type" %}
 
 {% endblock %}

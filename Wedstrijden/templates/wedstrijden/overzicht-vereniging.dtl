@@ -100,6 +100,6 @@
 
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-overzicht-vereniging" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-overzicht-vereniging" %}
 
 {% endblock %}

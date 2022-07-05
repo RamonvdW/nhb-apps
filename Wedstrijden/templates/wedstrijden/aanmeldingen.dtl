@@ -102,10 +102,10 @@
                     </tr>
                 {% endfor %}
 
-                {% if url_nieuwe_wedstrijd %}
+                {% if url_toevoegen %}
                     <tr>
-                        <td colspan="5" class="center">
-                            <a class="btn-nhb-rood" href="{{ url_nieuwe_wedstrijd }}">
+                        <td colspan="8" class="center">
+                            <a class="btn-nhb-rood" href="{{ url_toevoegen }}">
                                 <i class="material-icons-round">add</i></a>
                         </td>
                     </tr>

@@ -233,6 +233,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-wedstrijd-details" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-wedstrijd-details" %}
 
 {% endblock %}

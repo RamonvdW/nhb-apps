@@ -105,6 +105,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-overzicht-manager" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-overzicht-manager" %}
 
 {% endblock %}
