@@ -14,7 +14,12 @@ DTL_FILES=$(find . -name \*.dtl | grep -vE "$DTL_BEWUST_NIET" | grep -vE "$DTL_I
 COUNT=$(ls -1 $DTL_FILES | wc -l)
 echo "[DEBUG] $COUNT templates met op_pagina:"
 
-grep "with op_pagina" $DTL_FILES | cut -d':' -f2 | tr ' ' '\n' | grep op_pagina | sort | uniq -c | sort -n
+ALL=' 1 op_pagina'
+[ $# -gt 0 ] && ALL='@@@@@'
+
+grep "with op_pagina" $DTL_FILES | cut -d':' -f2 | tr ' ' '\n' | grep op_pagina | sort | uniq -c | sort -n | grep -v "$ALL"
+
+[ $# -gt 0 ] || echo "Gebruik -v om alles te krijgen"
 
 echo "[DEBUG] Geen 'op_pagina':"
 grep -L "with op_pagina" $DTL_FILES
