@@ -276,4 +276,20 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/overzicht-emails-sec-hwl.dtl', 'plein/site_layout.dtl'))
 
+        self.e2e_wissel_naar_functie(self.functie_rko3)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht_lid_nrs)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/overzicht-emails-sec-hwl.dtl', 'plein/site_layout.dtl'))
+
+        self.e2e_wissel_naar_functie(self.functie_rcl111)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht_lid_nrs)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('functie/overzicht-emails-sec-hwl.dtl', 'plein/site_layout.dtl'))
+
 # end of file

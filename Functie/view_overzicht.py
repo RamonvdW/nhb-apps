@@ -337,7 +337,7 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
                       .exclude(bevestigde_email='')
                       .values_list('bevestigde_email', flat=True))
 
-        elif self.rol_nu == Rollen.ROL_RCL:
+        else:  # elif self.rol_nu == Rollen.ROL_RCL:
             regio_nr = self.functie_nu.nhb_regio.regio_nr
             context['geo_str'] = ' in regio %s' % regio_nr
             emails = (Functie

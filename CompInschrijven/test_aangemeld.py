@@ -438,9 +438,10 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
                 content = content[pos:]
                 pos = content.find('</tr>')
                 regel = content[:pos]
-                if zoekterm in regel:
+                if zoekterm in regel:           # pragma: no branch
                     pos = -1        # exits while loop
-                else:
+                else:                           # pragma: no cover
+                    # zoek in de volgende table row
                     content = content[pos:]
                     pos = content.find('<tr>')
             # while
