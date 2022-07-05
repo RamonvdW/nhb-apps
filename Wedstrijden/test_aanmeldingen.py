@@ -29,7 +29,7 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
     url_kalender_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
     url_kalender_vereniging = '/wedstrijden/vereniging/'
     url_inschrijven_groepje = '/wedstrijden/inschrijven/%s/groep/'                 # wedstrijd_pk
-    url_inschrijven_toevoegen = '/wedstrijden/inschrijven/toevoegen/'
+    url_inschrijven_toevoegen_mandje = '/wedstrijden/inschrijven/toevoegen-mandje/'
     url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                          # sporter_pk
 
     def setUp(self):
@@ -146,20 +146,20 @@ class TestKalenderInschrijven(E2EHelpers, TestCase):
         # self.e2e_wisselnaarrol_sporter()
         url = self.url_inschrijven_groepje % self.wedstrijd.pk
 
-        resp = self.client.post(self.url_inschrijven_toevoegen, {'snel': 1,
-                                                                 'wedstrijd': self.wedstrijd.pk,
-                                                                 'sporterboog': self.sporterboog1.pk,
-                                                                 'sessie': self.sessie_r.pk,
-                                                                 'boog': self.boog_r.pk})
+        resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
+                                                                        'wedstrijd': self.wedstrijd.pk,
+                                                                        'sporterboog': self.sporterboog1.pk,
+                                                                        'sessie': self.sessie_r.pk,
+                                                                        'boog': self.boog_r.pk})
         self.assert_is_redirect(resp, self.url_kalender_wedstrijd_info % self.wedstrijd.pk)
         self.assertEqual(1, WedstrijdInschrijving.objects.count())
         self.inschrijving1 = WedstrijdInschrijving.objects.all()[0]
 
-        resp = self.client.post(self.url_inschrijven_toevoegen, {'snel': 1,
-                                                                 'wedstrijd': self.wedstrijd.pk,
-                                                                 'sporterboog': self.sporterboog2.pk,
-                                                                 'sessie': self.sessie_r.pk,
-                                                                 'boog': self.boog_c.pk})
+        resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
+                                                                        'wedstrijd': self.wedstrijd.pk,
+                                                                        'sporterboog': self.sporterboog2.pk,
+                                                                        'sessie': self.sessie_r.pk,
+                                                                        'boog': self.boog_c.pk})
         self.assert_is_redirect(resp, self.url_kalender_wedstrijd_info % self.wedstrijd.pk)
         self.assertEqual(2, WedstrijdInschrijving.objects.count())
         self.inschrijving2 = WedstrijdInschrijving.objects.exclude(pk=self.inschrijving1.pk)[0]

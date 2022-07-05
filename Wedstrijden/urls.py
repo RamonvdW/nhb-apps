@@ -41,10 +41,19 @@ urlpatterns = [
          view_inschrijven.WedstrijdInschrijvenFamilie.as_view(),
          name='inschrijven-familie'),
 
+    path('inschrijven/<wedstrijd_pk>/handmatig/<lid_nr>/<boog_afk>/',
+         view_inschrijven.WedstrijdInschrijvenHandmatig.as_view(),
+         name='inschrijven-handmatig-lid-boog'),
+
+    path('inschrijven/<wedstrijd_pk>/handmatig/',
+         view_inschrijven.WedstrijdInschrijvenHandmatig.as_view(),
+         name='inschrijven-handmatig'),
+
     # toevoegen aan winkelwagentje
-    path('inschrijven/toevoegen/',
+    path('inschrijven/toevoegen-mandje/',
          view_inschrijven.ToevoegenAanMandjeView.as_view(),
-         name='inschrijven-toevoegen'),
+         name='inschrijven-toevoegen-aan-mandje'),
+
 
     # afmelden
     path('afmelden/<inschrijving_pk>/',

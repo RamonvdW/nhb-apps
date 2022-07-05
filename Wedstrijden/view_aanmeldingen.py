@@ -107,6 +107,10 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
         context['aantal_afmeldingen'] = aantal_afmeldingen
 
         if self.rol_nu == Rollen.ROL_HWL:
+            context['url_toevoegen'] = reverse('Wedstrijden:inschrijven-handmatig',
+                                               kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+        if self.rol_nu == Rollen.ROL_HWL:
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
                 (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
@@ -174,6 +178,8 @@ class KalenderDetailsSporterView(UserPassesTestMixin, TemplateView):
             ver = self.functie_nu.nhb_ver
             inschrijvingen.filter(wedstrijd__organiserende_vereniging=ver)
 
+        url_aanmeldingen = None
+
         for inschrijving in inschrijvingen:
 
             inschrijving.status_str = INSCHRIJVING_STATUS_TO_SHORT_STR[inschrijving.status]
@@ -198,14 +204,22 @@ class KalenderDetailsSporterView(UserPassesTestMixin, TemplateView):
 
             tup = (inschrijving.wanneer, 'I', inschrijving)
             lijst.append(tup)
+
+            if not url_aanmeldingen:
+                url_aanmeldingen = reverse('Wedstrijden:aanmeldingen',
+                                           kwargs={'wedstrijd_pk': inschrijving.wedstrijd.pk})
         # for
 
         lijst.sort()
 
+        if not url_aanmeldingen:
+            # exacte wedstrijd weten we niet!
+            url_aanmeldingen = reverse('Wedstrijden:vereniging')
+
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
             (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
-            (reverse('Wedstrijden:vereniging'), 'Aanmeldingen'),           # TODO: exacte wedstrijd weten we niet!
+            (url_aanmeldingen, 'Aanmeldingen'),
             (None, 'Details aanmelding')
         )
 
