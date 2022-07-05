@@ -19,6 +19,7 @@ from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren
+import textwrap
 import csv
 
 
@@ -66,6 +67,52 @@ def maak_regiocomp_zoom_knoppen(context, comp_pk, rayon=None, regio=None):
     # for
 
 
+def formatteer_objs(objs):
+
+    lid2voorkeuren = dict()  # [lid_nr] = SporterVoorkeuren
+    for voorkeuren in SporterVoorkeuren.objects.select_related('sporter').all():
+        lid2voorkeuren[voorkeuren.sporter.lid_nr] = voorkeuren
+    # for
+
+    obj_aantal = None
+    aantal = 0
+    volgorde = -1
+    for obj in objs:
+        if volgorde != obj.indiv_klasse.volgorde:
+            obj.nieuwe_klasse = True
+            if obj_aantal:
+                obj_aantal.aantal_in_klasse = aantal
+                obj_aantal.aantal_regels = aantal + 2
+            aantal = 0
+            obj_aantal = obj
+            volgorde = obj.indiv_klasse.volgorde
+
+        obj.notities = obj.inschrijf_notitie
+
+        try:
+            voorkeuren = lid2voorkeuren[obj.sporterboog.sporter.lid_nr]
+        except KeyError:
+            obj.voorkeuren = SporterVoorkeuren()        # defaults
+        else:
+            obj.voorkeuren = voorkeuren
+
+            if voorkeuren.para_met_rolstoel:
+                obj.notities += '\nSporter laat voorwerpen op de schietlijn staan\n'
+
+            if voorkeuren.opmerking_para_sporter:
+                obj.notities = obj.notities + '\n' + voorkeuren.opmerking_para_sporter
+
+        obj.notities = obj.notities.replace('\n\n', '\n')
+        obj.notities = textwrap.fill(obj.notities, 30)
+
+        aantal += 1
+    # for
+
+    if obj_aantal:
+        obj_aantal.aantal_in_klasse = aantal
+        obj_aantal.aantal_regels = aantal + 2
+
+
 class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
 
     """ Toon een lijst van SporterBoog die aangemeld zijn voor de regiocompetitie """
@@ -107,24 +154,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
                 .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
 
-        obj_aantal = None
-        aantal = 0
-        volgorde = -1
-        for obj in objs:
-            if volgorde != obj.indiv_klasse.volgorde:
-                obj.nieuwe_klasse = True
-                if obj_aantal:
-                    obj_aantal.aantal_in_klasse = aantal
-                    obj_aantal.aantal_regels = aantal + 2
-                aantal = 0
-                obj_aantal = obj
-                volgorde = obj.indiv_klasse.volgorde
-
-            aantal += 1
-        # for
-        if obj_aantal:
-            obj_aantal.aantal_in_klasse = aantal
-            obj_aantal.aantal_regels = aantal + 2
+        formatteer_objs(objs)
 
         context['object_list'] = objs
 
@@ -191,24 +221,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
                 .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
 
-        obj_aantal = None
-        aantal = 0
-        volgorde = -1
-        for obj in objs:
-            if volgorde != obj.indiv_klasse.volgorde:
-                obj.nieuwe_klasse = True
-                if obj_aantal:
-                    obj_aantal.aantal_in_klasse = aantal
-                    obj_aantal.aantal_regels = aantal + 2
-                aantal = 0
-                obj_aantal = obj
-                volgorde = obj.indiv_klasse.volgorde
-
-            aantal += 1
-        # for
-        if obj_aantal:
-            obj_aantal.aantal_in_klasse = aantal
-            obj_aantal.aantal_regels = aantal + 2
+        formatteer_objs(objs)
 
         context['object_list'] = objs
 
@@ -283,25 +296,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
                 .order_by('indiv_klasse__volgorde',
                           '-ag_voor_indiv'))
 
-        obj_aantal = None
-        aantal = 0
-        volgorde = -1
-        for obj in objs:
-            obj.team_ja_nee = JA_NEE[obj.inschrijf_voorkeur_team]
-            if volgorde != obj.indiv_klasse.volgorde:
-                obj.nieuwe_klasse = True
-                if obj_aantal:
-                    obj_aantal.aantal_in_klasse = aantal
-                    obj_aantal.aantal_regels = aantal + 2
-                aantal = 0
-                obj_aantal = obj
-                volgorde = obj.indiv_klasse.volgorde
-
-            aantal += 1
-        # for
-        if obj_aantal:
-            obj_aantal.aantal_in_klasse = aantal
-            obj_aantal.aantal_regels = aantal + 2
+        formatteer_objs(objs)
 
         context['object_list'] = objs
 
@@ -317,11 +312,9 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
                                               kwargs={'comp_pk': comp.pk,
                                                       'regio_pk': regio.pk})
 
-        else:
-            # inschrijfmethode 2
-            context['url_download'] = reverse('CompInschrijven:lijst-regiocomp-regio-als-bestand',
-                                              kwargs={'comp_pk': comp.pk,
-                                                      'regio_pk': regio.pk})
+        context['url_download'] = reverse('CompInschrijven:lijst-regiocomp-regio-als-bestand',
+                                          kwargs={'comp_pk': comp.pk,
+                                                  'regio_pk': regio.pk})
 
         maak_regiocomp_zoom_knoppen(context, comp.pk, regio=regio)
 
@@ -347,33 +340,36 @@ class LijstAangemeldRegiocompAlsBestandView(LijstAangemeldRegiocompRegioView):
 
         regio = context['regio']
 
-        # schutters met voorkeur voor eigen blazoen (DT of 60cm 4spot)
-        voorkeur_eigen_blazoen = (SporterVoorkeuren
-                                  .objects
-                                  .select_related('sporter')
-                                  .filter(voorkeur_eigen_blazoen=True)
-                                  .values_list('sporter__lid_nr', flat=True))
-
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="aanmeldingen-regio-%s.csv"' % regio.regio_nr
 
         writer = csv.writer(response, delimiter=";")  # ; is good for import with dutch regional settings
 
         # voorkeur dagdelen per vereniging
-        writer.writerow(['ver_nr', 'Vereniging',
-                         'lid_nr', 'Naam',
+        writer.writerow(['Ver nr', 'Vereniging',
+                         'Lid nr', 'Naam',
                          'Boog', 'Voorkeur team', 'Voorkeur eigen blazoen',
+                         'Inschrijf notitie', 'Voorwerpen op lijn', 'Para notitie',
                          'Wedstrijdklasse'])
 
         for deelnemer in context['object_list']:
+
+            sporterboog = deelnemer.sporterboog
+            voorkeuren = deelnemer.voorkeuren
+
             ver = deelnemer.bij_vereniging
-            sporter = deelnemer.sporterboog.sporter
-            boog = deelnemer.sporterboog.boogtype
+            sporter = sporterboog.sporter
+            boog = sporterboog.boogtype
             klasse = deelnemer.indiv_klasse
             team_str = 'Ja' if deelnemer.inschrijf_voorkeur_team else 'Nee'
-            eigen_str = 'Ja' if sporter.lid_nr in voorkeur_eigen_blazoen else 'Nee'
+            eigen_str = 'Ja' if voorkeuren.voorkeur_eigen_blazoen else 'Nee'
+            para_voorwerpen = 'Ja' if voorkeuren.para_met_rolstoel else 'Nee'
 
-            tup = (ver.ver_nr, ver.naam, sporter.lid_nr, sporter.volledige_naam(), boog.beschrijving, team_str, eigen_str, klasse.beschrijving)
+            tup = (ver.ver_nr, ver.naam,
+                   sporter.lid_nr, sporter.volledige_naam(),
+                   boog.beschrijving, team_str, eigen_str,
+                   deelnemer.inschrijf_notitie, para_voorwerpen, voorkeuren.opmerking_para_sporter,
+                   klasse.beschrijving)
             writer.writerow(tup)
         # for
 

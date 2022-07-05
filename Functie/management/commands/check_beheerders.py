@@ -8,6 +8,7 @@
 
 from django.core.management.base import BaseCommand
 from Functie.models import Functie
+from Sporter.models import Sporter
 
 
 class Command(BaseCommand):
@@ -50,6 +51,19 @@ class Command(BaseCommand):
 
                     self.stdout.write('  %s (%s) %s' % (account.username, account.volledige_naam(), let_op))
             # for
+        # for
+
+        # zoek accounts zonder functie koppelen maar (nog) wel tweede factor actief
+        self.stdout.write('Actieve leden met 2FA maar niet meer gekoppeld aan een functie:')
+        for sporter in (Sporter
+                        .objects
+                        .filter(account__otp_is_actief=True)
+                        .exclude(account__is_BB=True)       # BB moet 2FA hebben (maar hoeven geen functie te hebben)
+                        .select_related('account')
+                        .prefetch_related('account__functie_set')):
+            account = sporter.account
+            if account.functie_set.count() == 0:
+                self.stdout.write('  %s' % sporter.lid_nr_en_volledige_naam())
         # for
 
 # end of file

@@ -156,7 +156,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
     def test_check_beheerders(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(47):
+        with self.assert_max_queries(48):
             management.call_command('check_beheerders', stderr=f1, stdout=f2)
         self.assertTrue(f1.getvalue() == '')        # geen foutmeldingen
 
@@ -165,7 +165,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(49):
+        with self.assert_max_queries(50):
             management.call_command('check_beheerders', stderr=f1, stdout=f2)
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("LET OP: geen koppeling met NHB lid" in f2.getvalue())
@@ -188,7 +188,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(49):
+        with self.assert_max_queries(51):
             management.call_command('check_beheerders', stderr=f1, stdout=f2)
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("LET OP: geen lid meer bij een vereniging" in f2.getvalue())
@@ -206,7 +206,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(50):
+        with self.assert_max_queries(52):
             management.call_command('check_beheerders', stderr=f1, stdout=f2)
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue("LET OP: geen lid bij deze vereniging" in f2.getvalue())
@@ -217,7 +217,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
 
         f1 = io.StringIO()
         f2 = io.StringIO()
-        with self.assert_max_queries(50):
+        with self.assert_max_queries(52):
             management.call_command('check_beheerders', stderr=f1, stdout=f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())

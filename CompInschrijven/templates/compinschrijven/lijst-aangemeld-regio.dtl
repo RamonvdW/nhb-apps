@@ -121,19 +121,20 @@
                 {% if obj.nieuwe_klasse %}
                     {% if not forloop.first %}
                         <tr>
-                            <td colspan="3" class="nhb-table-onderrand"></td>
+                            <td colspan="4" class="nhb-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
                     <tr>
-                        <td colspan="5" class="center"><h5>{{ obj.indiv_klasse.beschrijving }}</h5>Aantal: {{ obj.aantal_in_klasse }}</td>
+                        <td colspan="6" class="center"><h5>{{ obj.indiv_klasse.beschrijving }}</h5>Aantal: {{ obj.aantal_in_klasse }}</td>
                     </tr>
 
                     <tr class="nhb-table-header">
                         <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
                         <th>Vereniging</th>
-                        <th class="center">Aanvangsgemiddelde</th>
-                        <th>Naam schutter</th>
+                        <th class="center"><span class="hide-on-small-only">Aanvangsgemiddelde</span><span class="hide-on-med-and-up">AG</span></th>
+                        <th>Sporter</th>
+                        <th>Notities</th>
                         <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
                     </tr>
 
@@ -143,12 +144,13 @@
                     <td>[{{ obj.bij_vereniging.ver_nr }}] {{ obj.bij_vereniging.naam }}</td>
                     <td class="center">{{ obj.ag_voor_indiv }}</td>
                     <td>[{{ obj.sporterboog.sporter.lid_nr }}] {{ obj.sporterboog.sporter.volledige_naam }}</td>
+                    <td>{{ obj.notities|linebreaksbr }}</td>
                 </tr>
 
             {% endfor %}
 
             <tr>
-                <td colspan="3" class="nhb-table-onderrand"></td>
+                <td colspan="4" class="nhb-table-onderrand"></td>
             </tr>
         </table>
 

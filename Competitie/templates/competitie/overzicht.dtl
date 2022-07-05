@@ -17,15 +17,11 @@
         </div>
     </div>
 
-
     {% if toon_uitslagen %}
 
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                {% if toon_inschrijven %}
-                    <p>&nbsp;</p>
-                {% endif %}
                 <h4>Uitslagen</h4>
             </div>
         </div>
@@ -49,7 +45,6 @@
         </div>
 
     {% endif %}
-
 
     <!-- witruimte -->
     <div class="row center">
