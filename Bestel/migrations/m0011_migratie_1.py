@@ -16,17 +16,17 @@ def migreer_inschrijving(apps, _):
     mutatie_klas = apps.get_model('Bestel', 'BestelMutatie')
 
     inschrijving_oud2new = dict()   # [oud.pk] = new
-    for obj in inschrijving_new_klas.objects.select_related('oud').all():
+    for obj in inschrijving_new_klas.objects.select_related('oud').all():       # pragma: no cover
         oud = obj.oud
         inschrijving_oud2new[oud.pk] = obj
     # for
 
-    for obj in product_klas.objects.select_related('inschrijving').exclude(inschrijving=None).all():
+    for obj in product_klas.objects.select_related('inschrijving').exclude(inschrijving=None).all():    # pragma: no cover
         obj.wedstrijd_inschrijving = inschrijving_oud2new[obj.inschrijving.pk]
         obj.save(update_fields=['wedstrijd_inschrijving'])
     # for
 
-    for obj in mutatie_klas.objects.select_related('inschrijving').exclude(inschrijving=None).all():
+    for obj in mutatie_klas.objects.select_related('inschrijving').exclude(inschrijving=None).all():    # pragma: no cover
         obj.wedstrijd_inschrijving = inschrijving_oud2new[obj.inschrijving.pk]
         obj.save(update_fields=['wedstrijd_inschrijving'])
     # for

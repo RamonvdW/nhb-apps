@@ -31,7 +31,7 @@ def verwijder_buiten_gebruik_en_ib(apps, _):
                  boogtype_klas):
 
         objs = klas.objects.filter(buiten_gebruik=True)
-        if objs.count() > 0:
+        if objs.count() > 0:            # pragma: no cover
             objs.delete()
     # for
 

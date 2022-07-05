@@ -17,7 +17,7 @@ def migreer_locatie(apps, _):
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     wedstrijd_oud_klas = apps.get_model('Kalender', 'KalenderWedstrijd')
 
-    for obj in wedstrijd_oud_klas.objects.select_related('locatie').all():
+    for obj in wedstrijd_oud_klas.objects.select_related('locatie').all():      # pragma: no cover
         obj.locatie_pk = obj.locatie.pk
         obj.save(update_fields=['locatie_pk'])
     # for

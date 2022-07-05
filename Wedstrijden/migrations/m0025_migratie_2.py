@@ -15,19 +15,19 @@ def migreer_kalender(apps, _):
     """
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie
-    if apps:
+    if apps:                # pragma: no branch
         deeluitslag_oud_klas = apps.get_model('Kalender', 'KalenderWedstrijdDeeluitslag')
-        if deeluitslag_oud_klas.objects.count() > 0:
+        if deeluitslag_oud_klas.objects.count() > 0:            # pragma: no cover
             raise ValueError('Onverwachte aanwezigheid van KalenderWedstrijdDeeluitslag')
 
     # sessies
     sessie_oud2new = dict()  # [oud.pk] = new
-    if apps:
+    if apps:                # pragma: no branch
         sessie_oud_klas = apps.get_model('Kalender', 'KalenderWedstrijdSessie')
         sessie_new_klas = apps.get_model('Wedstrijden', 'WedstrijdSessie')
 
         bulk = list()
-        for obj in sessie_oud_klas.objects.all():
+        for obj in sessie_oud_klas.objects.all():           # pragma: no cover
             sessie = sessie_new_klas(
                         datum=obj.datum,
                         tijd_begin=obj.tijd_begin,
@@ -40,7 +40,7 @@ def migreer_kalender(apps, _):
         # for
         sessie_new_klas.objects.bulk_create(bulk)
 
-        for obj in (sessie_new_klas
+        for obj in (sessie_new_klas                         # pragma: no cover
                     .objects
                     .select_related('oud')
                     .prefetch_related('oud__wedstrijdklassen')
@@ -53,7 +53,7 @@ def migreer_kalender(apps, _):
 
     # wedstrijden
     wedstrijd_oud2new = dict()  # [oud.pk] = new
-    if apps:
+    if apps:                # pragma: no branch
         pk2locatie = dict()     # [pk] = WedstrijdLocatie
         locatie_klas = apps.get_model('Wedstrijden', 'WedstrijdLocatie')
         for obj in locatie_klas.objects.all():
@@ -64,7 +64,7 @@ def migreer_kalender(apps, _):
         wedstrijd_new_klas = apps.get_model('Wedstrijden', 'Wedstrijd')
 
         bulk = list()
-        for obj in wedstrijd_oud_klas.objects.all():
+        for obj in wedstrijd_oud_klas.objects.all():           # pragma: no cover
             wedstrijd = wedstrijd_new_klas(
                             titel=obj.titel,
                             status=obj.status,
@@ -98,7 +98,7 @@ def migreer_kalender(apps, _):
         # for
         wedstrijd_new_klas.objects.bulk_create(bulk)
 
-        for obj in (wedstrijd_new_klas
+        for obj in (wedstrijd_new_klas                         # pragma: no cover
                     .objects
                     .select_related('oud')
                     .prefetch_related('oud__boogtypen',
@@ -119,12 +119,12 @@ def migreer_kalender(apps, _):
 
     # kortingen
     korting_oud2new = dict()        # [oud.pk] = new
-    if apps:
+    if apps:                # pragma: no branch
         korting_oud_klas = apps.get_model('Kalender', 'KalenderWedstrijdKortingscode')
         korting_new_klas = apps.get_model('Wedstrijden', 'WedstrijdKortingscode')
 
         bulk = list()
-        for obj in korting_oud_klas.objects.all():
+        for obj in korting_oud_klas.objects.all():           # pragma: no cover
             korting = korting_new_klas(
                             code=obj.code,
                             geldig_tot_en_met=obj.geldig_tot_en_met,
@@ -145,12 +145,12 @@ def migreer_kalender(apps, _):
             korting_oud2new[oud.pk] = obj
         # for
 
-    if apps:
+    if apps:                # pragma: no branch
         inschrijving_oud_klas = apps.get_model('Kalender', 'KalenderInschrijving')
         inschrijving_new_klas = apps.get_model('Wedstrijden', 'WedstrijdInschrijving')
 
         bulk = list()
-        for obj in (inschrijving_oud_klas
+        for obj in (inschrijving_oud_klas                         # pragma: no cover
                     .objects
                     .select_related('sessie',
                                     'wedstrijd',

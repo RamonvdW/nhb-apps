@@ -56,7 +56,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
             betaal_api = self.url_websim_api
 
         f1, f2 = self.verwerk_betaal_mutaties(betaal_api)
-        if debug:
+        if debug:           # pragma: no cover
             print('f1: %s' % f1.getvalue())
             print('f2: %s' % f2.getvalue())
 
