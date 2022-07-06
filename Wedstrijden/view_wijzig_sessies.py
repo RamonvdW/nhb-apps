@@ -305,6 +305,11 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
         else:
             updated = list()
 
+            beschr = request.POST.get('beschrijving', '')[:50]
+            if beschr != sessie.beschrijving:
+                sessie.beschrijving = beschr
+                updated.append('beschrijving')
+
             datum = request.POST.get('datum', '')       # bevat 'datum_N'
             if datum.startswith('datum_'):
                 datum_offset = wedstrijd.datum_begin

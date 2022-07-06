@@ -212,7 +212,8 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                     try:
                         vhpg = account.vhpg
                     except VerklaringHanterenPersoonsgegevens.DoesNotExist:
-                        sporter.vhpg_str = 'n.v.t.'
+                        # geen registratie
+                        pass
                     else:
                         # elke 11 maanden moet de verklaring afgelegd worden
                         # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen

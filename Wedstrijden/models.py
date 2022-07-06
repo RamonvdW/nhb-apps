@@ -317,6 +317,9 @@ class WedstrijdSessie(models.Model):
     tijd_begin = models.TimeField()
     tijd_einde = models.TimeField()
 
+    # beschrijving
+    beschrijving = models.CharField(max_length=50, default='')
+
     # toegestane wedstrijdklassen
     wedstrijdklassen = models.ManyToManyField(KalenderWedstrijdklasse, blank=True)
 

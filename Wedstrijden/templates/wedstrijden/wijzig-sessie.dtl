@@ -69,6 +69,13 @@
 
                         <table class="white">
                             <tr>
+                                <th>Beschrijving</th>
+                                <td>
+                                    <input id="beschr" name="beschrijving" type="text" value="{{ sessie.beschrijving }}" maxlength="50" onchange="gewijzigd()">
+                                </td>
+                            </tr>
+
+                            <tr>
                                 <th>Datum</th>
                                 <td>
                                     {% if wedstrijd.datum_begin != wedstrijd.datum_einde %}
@@ -178,16 +185,19 @@
     <!-- initialisatie van de datum/tijd kiezers -->
     <script type="application/javascript">
         document.addEventListener('DOMContentLoaded', function() {
-                let el1 = document.querySelector('#tijd')
+                let el1 = document.querySelector('#tijd');
                 let options = {
                         twelveHour: false,
                         defaultTime: "{{ sessie.tijd_begin_str }}",
                       }
-                let inst = M.Timepicker.init(el1, options)
-                inst._updateTimeFromInput()
-                inst.done()
+                let inst = M.Timepicker.init(el1, options);
+                inst._updateTimeFromInput();
+                inst.done();
 
-                initialized = true
+                let focus = document.getElementById('beschr');
+                focus.focus();
+
+                initialized = true;
             })
     </script>
 

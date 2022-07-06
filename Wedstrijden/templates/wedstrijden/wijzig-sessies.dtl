@@ -59,9 +59,9 @@
 
                 <thead>
                     <tr>
+                        <th>Beschrijving</th>
                         <th class="center">Wanneer</th>
                         <th class="center">Aanm<span class="hide-on-small-only">eldingen</span></th>
-                        <th class="center">Max<span class="hide-on-small-only">imum</span></th>
                         <th>Wedstrijdklassen</th>
                         <th><!-- kolom voor de knoppen --></th>
                     </tr>
@@ -69,9 +69,9 @@
 
                 {% for sessie in sessies %}
                     <tr>
-                        <td class="center">{% if wed.datum_begin != wed.datum_einde %}{{ sessie.datum }} {% endif %}[{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}]</td>
-                        <td class="center">{{ sessie.aantal_inschrijvingen }}</td>
-                        <td class="center">{{ sessie.max_sporters }}</td>
+                        <td>{{ sessie.beschrijving }}</td>
+                        <td class="center">{% if wed.datum_begin != wed.datum_einde %}{{ sessie.datum }} {% endif %}{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</td>
+                        <td class="center">{{ sessie.aantal_inschrijvingen }} / {{ sessie.max_sporters }}</td>
                         <td>
                             {% for klasse in sessie.klassen_ordered %}
                                 <span>{{ klasse.beschrijving }}</span><br>

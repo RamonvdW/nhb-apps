@@ -116,6 +116,14 @@ urlpatterns = [
          view_aanmeldingen.KalenderAanmeldingenView.as_view(),
          name='aanmeldingen'),
 
+    path('<wedstrijd_pk>/aanmeldingen/download/tsv/',
+         view_aanmeldingen.DownloadAanmeldingenBestandTSV.as_view(),
+         name='download-aanmeldingen-tsv'),
+
+    path('<wedstrijd_pk>/aanmeldingen/download/csv/',
+         view_aanmeldingen.DownloadAanmeldingenBestandCSV.as_view(),
+         name='download-aanmeldingen-csv'),
+
     path('sporter/<sporter_lid_nr>/',
          view_aanmeldingen.KalenderDetailsSporterView.as_view(),
          name='details-sporter'),

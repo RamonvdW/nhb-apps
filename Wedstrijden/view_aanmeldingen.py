@@ -5,17 +5,19 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from BasisTypen.models import GESLACHT2STR, GESLACHT_VROUW
 from Bestel.mutaties import bestel_mutatieverzoek_afmelden_wedstrijd, bestel_mutatieverzoek_verwijder_product_uit_mandje
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Sporter.models import Sporter
+from Sporter.models import Sporter, SporterVoorkeuren
 from Wedstrijden.models import (Wedstrijd, WedstrijdInschrijving, INSCHRIJVING_STATUS_TO_SHORT_STR,
                                 INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 from decimal import Decimal
+import csv
 
 
 TEMPLATE_KALENDER_AANMELDINGEN = 'wedstrijden/aanmeldingen.dtl'
@@ -80,9 +82,10 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
                 aantal_aanmeldingen += 1
                 aanmelding.volg_nr = aantal_aanmeldingen
 
-                aanmelding.bib = aanmelding.pk + settings.TICKET_NUMMER_START__WEDSTRIJD
+                aanmelding.reserveringsnummer = aanmelding.pk + settings.TICKET_NUMMER_START__WEDSTRIJD
             else:
                 aantal_afmeldingen += 1
+                aanmelding.is_afgemeld = True
 
             aanmelding.status_str = INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status]
 
@@ -106,6 +109,12 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
         context['aantal_aanmeldingen'] = aantal_aanmeldingen
         context['aantal_afmeldingen'] = aantal_afmeldingen
 
+        if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_BB):
+            context['url_download_tsv'] = reverse('Wedstrijden:download-aanmeldingen-tsv',
+                                                  kwargs={'wedstrijd_pk': wedstrijd.pk})
+            context['url_download_csv'] = reverse('Wedstrijden:download-aanmeldingen-csv',
+                                                  kwargs={'wedstrijd_pk': wedstrijd.pk})
+
         if self.rol_nu == Rollen.ROL_HWL:
             context['url_toevoegen'] = reverse('Wedstrijden:inschrijven-handmatig',
                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
@@ -124,6 +133,197 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
 
         menu_dynamics(self.request, context)
         return context
+
+
+class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
+
+    """ Maak een simpel bestand met alle aanmeldingen met tab-gescheiden velden (TSV = tab separated values).
+        geschikt voor importeren in een scoreverwerkingsprogramma
+    """
+
+    # class variables shared by all instances
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_BB)
+
+    def get(self, request, *args, **kwargs):
+        try:
+            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
+            wedstrijd = (Wedstrijd
+                         .objects
+                         .select_related('organiserende_vereniging')
+                         .prefetch_related('sessies')
+                         .get(pk=wedstrijd_pk))
+        except (ValueError, TypeError, Wedstrijd.DoesNotExist):
+            raise Http404('Wedstrijd niet gevonden')
+
+        if self.rol_nu == Rollen.ROL_HWL:
+            if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.nhb_ver.ver_nr:
+                raise Http404('Wedstrijd is niet bij jullie vereniging')
+
+        lid_nr2geslacht = dict()     # [lid_nr] = wedstrijd geslacht (M/V/X)
+        for voorkeuren in SporterVoorkeuren.objects.select_related('sporter').all():
+            sporter = voorkeuren.sporter
+
+            if voorkeuren.wedstrijd_geslacht_gekozen:
+                lid_nr2geslacht[sporter.lid_nr] = voorkeuren.wedstrijd_geslacht
+        # for
+
+        aanmeldingen = (WedstrijdInschrijving
+                        .objects
+                        .filter(wedstrijd=wedstrijd)
+                        .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)
+                        .select_related('sessie',
+                                        'sporterboog',
+                                        'sporterboog__sporter',
+                                        'sporterboog__boogtype',
+                                        'gebruikte_code')
+                        .order_by('sessie',
+                                  'wanneer',
+                                  'status'))
+
+        response = HttpResponse(content_type='text/tab-separated-values; charset=UTF-8')
+        response['Content-Disposition'] = 'attachment; filename="aanmeldingen.txt"'
+
+        # Ianseo supports a tab-separate file with specific column order, without headers
+        writer = csv.writer(response, delimiter="\t")       # tab separated fields
+
+        # maak een mapping van sessie naar nummers 1..n
+        sessie_pk2nr = dict()       # [pk] = nr
+        nr = 0
+        for sessie in wedstrijd.sessies.order_by('pk'):
+            nr += 1
+            sessie_pk2nr[sessie.pk] = nr
+        # for
+
+        for aanmelding in aanmeldingen:
+            sporterboog = aanmelding.sporterboog
+            sporter = sporterboog.sporter
+            sessie_nr = sessie_pk2nr[aanmelding.sessie.pk]
+            ver = sporter.bij_vereniging
+            if ver:
+                ver_nr = ver.ver_nr
+                ver_naam = ver.naam
+            else:
+                ver_nr = 0
+                ver_naam = '?'
+
+            try:
+                wedstrijd_geslacht = lid_nr2geslacht[sporter.lid_nr]
+            except KeyError:
+                # wedstrijdgeslacht is niet bekend
+                # neem het geslacht van de sporter zelf
+                wedstrijd_geslacht = sporter.geslacht
+
+            writer.writerow([sporter.lid_nr,        # TODO: sporter met meerdere bogen niet ondersteund
+                             sessie_nr,
+                             sporterboog.boogtype.afkorting,
+                             '',                    # wedstrijdklasse zoals gedefinieerd voor de wedstrijd
+                             '',                    # baan
+                             1,                     # indiv qualification
+                             0,                     # team qualification
+                             0,                     # indiv finals
+                             0,                     # team finals
+                             0,                     # mixed finals
+                             '',                    # achternaam (wordt omgezet in hoofdletters)
+                             sporter.volledige_naam(),      # voornaam: volledige naam
+                             wedstrijd_geslacht,    # M/0 is man, de rest vrouw
+                             ver_nr,
+                             ver_naam,
+                             sporter.geboorte_datum.strftime('%Y-%m-%d')])
+        # for
+
+        return response
+
+
+class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
+
+    """ Maak een bestand met alle inschrijvingen, geschikt voor import in een spreadsheet programma """
+
+    # class variables shared by all instances
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu, self.functie_nu = None, None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_BB)
+
+    def get(self, request, *args, **kwargs):
+        try:
+            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
+            wedstrijd = (Wedstrijd
+                         .objects
+                         .select_related('organiserende_vereniging')
+                         .get(pk=wedstrijd_pk))
+        except (ValueError, TypeError, Wedstrijd.DoesNotExist):
+            raise Http404('Wedstrijd niet gevonden')
+
+        if self.rol_nu == Rollen.ROL_HWL:
+            if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.nhb_ver.ver_nr:
+                raise Http404('Wedstrijd is niet bij jullie vereniging')
+
+        lid_nr2geslacht = dict()     # [lid_nr] = wedstrijd geslacht (M/V/X)
+        for voorkeuren in SporterVoorkeuren.objects.select_related('sporter').all():
+            sporter = voorkeuren.sporter
+
+            if voorkeuren.wedstrijd_geslacht_gekozen:
+                lid_nr2geslacht[sporter.lid_nr] = voorkeuren.wedstrijd_geslacht
+        # for
+
+        aanmeldingen = (WedstrijdInschrijving
+                        .objects
+                        .filter(wedstrijd=wedstrijd)
+                        .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)
+                        .select_related('sessie',
+                                        'sporterboog',
+                                        'sporterboog__sporter',
+                                        'sporterboog__boogtype')
+                        .order_by('sessie',
+                                  'wanneer',
+                                  'status'))
+
+        response = HttpResponse(content_type='text/csv; charset=UTF-8')
+        response['Content-Disposition'] = 'attachment; filename="aanmeldingen.csv"'
+
+        writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
+        writer.writerow(['Lid nr', 'Sporter', 'Geslacht', 'Boog', 'Vereniging', 'Reserveringsnummer', 'Status', 'Sessie', 'Aangemeld op'])
+        # TODO: wedstrijdklasse toevoegen
+
+        for aanmelding in aanmeldingen:
+            sporterboog = aanmelding.sporterboog
+            sporter = sporterboog.sporter
+            reserveringsnummer = aanmelding.pk + settings.TICKET_NUMMER_START__WEDSTRIJD
+
+            try:
+                wedstrijd_geslacht = lid_nr2geslacht[sporter.lid_nr]
+            except KeyError:
+                # wedstrijdgeslacht is niet bekend
+                # neem het geslacht van de sporter zelf
+                wedstrijd_geslacht = sporter.geslacht
+
+            writer.writerow([sporter.lid_nr,
+                             sporter.volledige_naam(),
+                             GESLACHT2STR[wedstrijd_geslacht],
+                             sporterboog.boogtype.beschrijving,
+                             INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
+                             reserveringsnummer,
+                             sporter.bij_vereniging.ver_nr_en_naam(),
+                             aanmelding.sessie.beschrijving,
+                             aanmelding.wanneer.strftime('%Y-%m-%d %H:%M')])
+        # for
+
+        return response
 
 
 class KalenderDetailsSporterView(UserPassesTestMixin, TemplateView):

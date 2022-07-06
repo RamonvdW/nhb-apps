@@ -122,20 +122,22 @@ class Command(BaseCommand):
         if mandje:                                  # pragma: no branch
             prijs_euro = wedstrijden_plugin_inschrijven(mutatie.wedstrijd_inschrijving)
 
-            # maak een product regel aan voor de bestelling
-            product = BestelProduct(
-                            wedstrijd_inschrijving=mutatie.wedstrijd_inschrijving,
-                            prijs_euro=prijs_euro)
-            product.save()
+            # handmatige inschrijviging heeft meteen status definitief en hoeft dus niet betaald te worden
+            if mutatie.wedstrijd_inschrijving.status != INSCHRIJVING_STATUS_DEFINITIEF:
+                # maak een product regel aan voor de bestelling
+                product = BestelProduct(
+                                wedstrijd_inschrijving=mutatie.wedstrijd_inschrijving,
+                                prijs_euro=prijs_euro)
+                product.save()
 
-            # leg het product in het mandje
-            mandje.producten.add(product)
+                # leg het product in het mandje
+                mandje.producten.add(product)
 
-            # kijk of er automatische kortingscodes zijn die toegepast kunnen worden
-            wedstrijden_plugin_automatische_kortingscodes_toepassen(self.stdout, mandje)
+                # kijk of er automatische kortingscodes zijn die toegepast kunnen worden
+                wedstrijden_plugin_automatische_kortingscodes_toepassen(self.stdout, mandje)
 
-            # bereken het totaal opnieuw
-            mandje.bepaal_totaalprijs_opnieuw()
+                # bereken het totaal opnieuw
+                mandje.bepaal_totaalprijs_opnieuw()
 
     def _verwerk_mutatie_verwijder(self, mutatie):
         """ een bestelling mag uit het mandje voordat de betaling gestart is """
@@ -465,7 +467,7 @@ class Command(BaseCommand):
                                 bestelling.bestel_nr, bestelling.pk, ontvangen_euro, bestelling.totaal_euro))
 
             msg = "\n[%s] Bestelling heeft %s van de %s euro ontvangen" % (
-                mutatie.when, ontvangen_euro, bestelling.totaal_euro)
+                        mutatie.when, ontvangen_euro, bestelling.totaal_euro)
             bestelling.log += msg
             bestelling.save(update_fields=['log'])
 

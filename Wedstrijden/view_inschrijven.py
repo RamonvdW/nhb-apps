@@ -932,8 +932,6 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
             snel = str(request.POST.get('snel', ''))[:1]
             bestel_mutatieverzoek_inschrijven_wedstrijd(account_koper, inschrijving, snel == '1')
 
-            mandje_tel_inhoud(self.request)
-
         url = reverse('Wedstrijden:aanmeldingen', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         return HttpResponseRedirect(url)

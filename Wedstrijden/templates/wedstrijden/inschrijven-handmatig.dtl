@@ -87,40 +87,46 @@
     </div>
 
 
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h4>Zoeken</h4>
+    {% if not geselecteerd %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Zoeken</h4>
+            </div>
         </div>
-    </div>
 
-    <!-- blauwe balk met dialoog venster -->
-    <div class="row-nhb-blauw">
-        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
+        <!-- blauwe balk met dialoog venster -->
+        <div class="row-nhb-blauw">
+            <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
 
-            <!-- dialoog venster -->
-            <div class="white left-align z-depth-3">
-                <div style="padding:30px">
-                    <form action="{{ url_zoek }}" method="get">
+                <!-- dialoog venster -->
+                <div class="white left-align z-depth-3">
+                    <div style="padding:30px">
+                        <form action="{{ url_zoek }}" method="get">
 
-                        <div class="input-field">
-                            <label for="id_bondsnr">Bondsnummer</label>
-                            <input type="number" min="100000" max="999999" name="bondsnummer" id="id_bondsnr"{% if not geselecteerd %} autofocus{% endif %}>
-                        </div>
+                            <div class="input-field">
+                                <label for="id_bondsnr">Bondsnummer</label>
+                                <input type="number" min="100000" max="999999" name="bondsnummer" id="id_bondsnr"{% if not geselecteerd %} autofocus{% endif %}>
+                            </div>
 
-                        <p class="center">
-                            <button class="btn-nhb-rood" type="submit">
-                                <i class="material-icons-round left">search</i>Zoek</button>
-                        </p>
+                            <p class="center">
+                                <button class="btn-nhb-rood" type="submit">
+                                    <i class="material-icons-round left">search</i>Zoek</button>
+                            </p>
 
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+
+    {% endif %}
 
 
     {% if toon_sportersboog %}
+
+        <!-- sporter heeft meerdere bogen - geeft keuzemenu -->
 
         <!-- witruimte -->
         <div class="row center">
@@ -162,6 +168,8 @@
 
 
     {% if geselecteerd %}
+
+        <!-- geselecteerde sporterboog -->
 
         <!-- witruimte -->
         <div class="row center">
@@ -277,6 +285,44 @@
         {% endif %}     <!-- al ingeschreven -->
 
     {% endif %}
+
+
+    {% if geselecteerd %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Zoek een andere sporter</h4>
+            </div>
+        </div>
+
+        <!-- blauwe balk met dialoog venster -->
+        <div class="row-nhb-blauw">
+            <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 xl4 offset-xl4">
+
+                <!-- dialoog venster -->
+                <div class="white left-align z-depth-3">
+                    <div style="padding:30px">
+                        <form action="{{ url_zoek }}" method="get">
+
+                            <div class="input-field">
+                                <label for="id_bondsnr">Bondsnummer</label>
+                                <input type="number" min="100000" max="999999" name="bondsnummer" id="id_bondsnr"{% if not geselecteerd %} autofocus{% endif %}>
+                            </div>
+
+                            <p class="center">
+                                <button class="btn-nhb-rood" type="submit">
+                                    <i class="material-icons-round left">search</i>Zoek</button>
+                            </p>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+
 
     {% include 'feedback/sidebar.dtl' with op_pagina="kalender-inschrijven-handmatig" %}
 
