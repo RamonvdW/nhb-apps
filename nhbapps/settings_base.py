@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2022-07-05'
+SITE_VERSIE = '2022-07-06'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -487,6 +487,7 @@ BETAAL_VIA_NHB_VER_NR = 1368
 
 # implementation uses this instead of built-in default, to allow override during testing
 BETAAL_API = 'https://api.mollie.com'
+
 
 # defaults for 'dev' and 'test' options
 

@@ -212,8 +212,8 @@
                         <ul>
                         {% for obj in eigen_rollen %}
                             <li>
-                                <label class="black-text" for="id_{{ obj.pk }}">
-                                    <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
+                                <label class="black-text" for="id_eigen_{{ obj.pk }}">
+                                    <input class="with-gap" type="radio" name="rol" value="{{ obj.sel }}" required id="id_eigen_{{ obj.pk }}" data-url="{{ obj.url }}" {% if obj.selected %}checked{% endif %}>
                                     <span>{{ obj.beschrijving }}{% if obj.ver_naam %}&nbsp;&nbsp;{{ obj.ver_naam }}{% endif %}</span>
                                 </label>
                             </li>
