@@ -1,0 +1,68 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Opleidingen{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Opleidingen</h3>
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Periode</th>
+                        <th>Beschrijving</th>
+                        <th>?</th>
+                        <th><!-- kolom voor de knoppen --></th>
+                    </tr>
+                </thead>
+
+                <!-- forceer de breedte van de kolommen in alle maanden met een niet getoonde regel -->
+                <tr style="visibility:collapse">
+                    <td>Q1 2021</td>
+                    <td>Dit is de titel van een best wel lange opleiding</td>
+                    <td>??</td>
+                    <td><a class="btn-nhb-rood" href="#">Details</a></td>
+                </tr>
+
+                {% for opleiding in opleidingen %}
+                    <tr>
+                        <td>{{ wed.datum_begin }}</td>
+                        <td>{{ wed.titel }}</td>
+                        <td>{{ wed.locatie.plaats }}</td>
+                        <td>
+                            {% if wed.url_details %}
+                                <a class="btn-nhb-rood" href="{{ wed.url_details }}">
+                                    <i class="material-icons-round">play_arrow</i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="center">
+                            <i>Geen opleidingen gevonden</i>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="opleidingen-overzicht" %}
+
+{% endblock %}

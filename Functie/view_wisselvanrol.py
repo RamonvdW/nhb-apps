@@ -74,7 +74,10 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _functie_volgorde(functie):
-        if functie.rol == "BKO":
+        # BB heeft volgorde 2
+        if functie.rol == "MO":
+            volgorde = 3
+        elif functie.rol == "BKO":
             volgorde = 10  # 10
         elif functie.rol == "RKO":
             volgorde = 20 + functie.nhb_rayon.rayon_nr  # 21-24
@@ -436,10 +439,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
         # de rest blijft in Wissel van Rol
         rol_nu, functie_nu = rol_get_huidige_functie(request)
 
-        if rol_nu == Rollen.ROL_BB:
-            return redirect('Plein:plein')
-
-        if rol_nu == Rollen.ROL_SPORTER:
+        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_MO, Rollen.ROL_SPORTER):
             return redirect('Plein:plein')
 
         if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):

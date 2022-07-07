@@ -26,7 +26,7 @@ BASE_DIR = os.path.dirname(PROJ_DIR)
 
 # version of the site
 # this is used to keep site feedback separated by version
-SITE_VERSIE = '2022-07-06'
+SITE_VERSIE = '2022-07-07'
 
 # modules van de site
 INSTALLED_APPS = [
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'Logboek.apps.LogboekConfig',
     'Mailer.apps.MailerConfig',
     'NhbStructuur.apps.NhbStructuurConfig',
+    'Opleidingen.apps.OpleidingenConfig',
     'Overig.apps.OverigConfig',
     'Records.apps.RecordsConfig',
     'Score.apps.ScoreConfig',
@@ -384,6 +385,7 @@ HANDLEIDING_PLANNING_REGIO = 'Planning_Regio'
 HANDLEIDING_RKO = 'Handleiding_RKO'
 HANDLEIDING_BKO = 'Handleiding_BKO'
 HANDLEIDING_BB = 'Handleiding_BB'
+HANDLEIDING_MO = 'Handleiding_MO'
 HANDLEIDING_2FA = 'Twee-factor_authenticatie'
 HANDLEIDING_ROLLEN = 'Rollen'
 HANDLEIDING_INTRO_NIEUWE_BEHEERDERS = 'Intro_nieuwe_beheerders'
@@ -404,6 +406,7 @@ HANDLEIDING_PAGINAS = [
     HANDLEIDING_RKO,
     HANDLEIDING_BKO,
     HANDLEIDING_BB,
+    HANDLEIDING_MO,
     HANDLEIDING_2FA,
     HANDLEIDING_ROLLEN,
     HANDLEIDING_INTRO_NIEUWE_BEHEERDERS,

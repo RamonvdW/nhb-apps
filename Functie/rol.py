@@ -44,6 +44,7 @@ class Rollen(enum.IntEnum):
     ROL_WL = 7          # Wedstrijdleider van een vereniging, alle competities
     ROL_SEC = 10        # Secretaris van een vereniging
     ROL_SPORTER = 20    # Individuele sporter en NHB lid
+    ROL_MO = 30         # Manager Opleidingen
     ROL_NONE = 99       # geen rol
 
     """ LET OP!
@@ -63,6 +64,7 @@ url2rol = {
     'WL': Rollen.ROL_WL,
     'SEC': Rollen.ROL_SEC,
     'sporter': Rollen.ROL_SPORTER,
+    'MO': Rollen.ROL_MO,
     'geen': Rollen.ROL_NONE
 }
 
@@ -75,6 +77,7 @@ rol2url = {
     Rollen.ROL_WL: 'WL',
     Rollen.ROL_SEC: 'SEC',
     Rollen.ROL_SPORTER: 'sporter',
+    Rollen.ROL_MO: 'MO',
     Rollen.ROL_NONE: 'geen',
 }
 
@@ -200,6 +203,9 @@ def rol_zet_sessionvars(account, request):
                     rol = Rollen.ROL_WL
                 elif functie.rol == "SEC":
                     rol = Rollen.ROL_SEC
+                elif functie.rol == "MO":
+                    rol = Rollen.ROL_MO
+
                 if rol:
                     child_tup = (rol, functie.pk)
                     tup = (child_tup, parent_tup)
@@ -350,6 +356,8 @@ def rol_bepaal_beschrijving(rol, functie_pk=None):
 
     if rol == Rollen.ROL_BB:
         beschr = 'Manager competitiezaken'
+    elif rol == Rollen.ROL_MO:
+        beschr = 'Manager opleidingen'
     elif rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC):
         beschr = functie_naam
     elif rol == Rollen.ROL_SPORTER:
@@ -431,7 +439,7 @@ def rol_activeer_functie(request, functie_pk):
                     return
             # for
 
-            # IT en BB mogen wisselen naar SEC
+            # IT en BB mogen wisselen naar elke SEC (dit is niet aan de hierarchie toegevoegd)
             account = request.user
             if account.is_authenticated:                            # pragma: no branch
                 if account_rechten_is_otp_verified(request):        # pragma: no branch
@@ -474,6 +482,8 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
         for pk, obj in functie_cache.items():
             if obj.rol == 'BKO':
                 yield Rollen.ROL_BKO, obj.pk
+            elif obj.rol == 'MO':
+                yield Rollen.ROL_MO, obj.pk
         # for
 
         # deze functie mag de HWL van vereniging in regio 100 aannemen

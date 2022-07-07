@@ -222,10 +222,14 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
                 # neem het geslacht van de sporter zelf
                 wedstrijd_geslacht = sporter.geslacht
 
+            # TODO: wedstrijdklasse bepalen
+            # TODO: wedstrijdklasse afkorting invullen (nu allemaal ?)
+            # TODO: wedstrijdklasse laten kiezen door de sporter
+
             writer.writerow([sporter.lid_nr,        # TODO: sporter met meerdere bogen niet ondersteund
                              sessie_nr,
                              sporterboog.boogtype.afkorting,
-                             '',                    # wedstrijdklasse zoals gedefinieerd voor de wedstrijd
+                             'X',                   # wedstrijdklasse zoals gedefinieerd voor de wedstrijd
                              '',                    # baan
                              1,                     # indiv qualification
                              0,                     # team qualification

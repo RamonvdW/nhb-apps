@@ -23,6 +23,7 @@ TEMPLATE_PRIVACY = 'plein/privacy.dtl'
 
 ROL2HANDLEIDING_PAGINA = {
     Rollen.ROL_BB: settings.HANDLEIDING_BB,
+    Rollen.ROL_MO: settings.HANDLEIDING_MO,
     Rollen.ROL_BKO: settings.HANDLEIDING_BKO,
     Rollen.ROL_RKO: settings.HANDLEIDING_RKO,
     Rollen.ROL_RCL: settings.HANDLEIDING_RCL,
@@ -87,7 +88,9 @@ class PleinView(View):
         # ga naar live server banner tonen?
         context['ga_naar_live_server'] = settings.IS_TEST_SERVER
 
+        # site-specifieke default voor deze kaartjes
         context['toon_kalender'] = settings.TOON_WEDSTRIJDKALENDER
+        context['toon_opleidingen'] = settings.TOON_OPLEIDINGEN
 
         if request.user.is_authenticated:
             rol_nu = rol_get_huidige(request)
@@ -113,7 +116,8 @@ class PleinView(View):
 
                 if rol_nu == Rollen.ROL_BB:
                     context['rol_is_bb'] = True
-                    context['toon_kalender'] = True     # override default
+                elif rol_nu == Rollen.ROL_MO:
+                    context['rol_is_mo'] = True
                 elif rol_nu == Rollen.ROL_BKO:
                     context['rol_is_bko'] = True
                 elif rol_nu == Rollen.ROL_RKO:
