@@ -53,8 +53,8 @@ class TestAccountLogin(E2EHelpers, TestCase):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
         self.account_normaal = Account.objects.get(username='normaal')
         self.assertEqual(self.account_normaal.verkeerd_wachtwoord_teller, 0)
 
@@ -115,7 +115,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         # redirect is naar het plein
-        self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
     def test_inlog_wordt_geblokkeerd(self):
         # te vaak een verkeerd wachtwoord
@@ -220,8 +220,8 @@ class TestAccountLogin(E2EHelpers, TestCase):
                                                      'wachtwoord':  E2EHelpers.WACHTWOORD,
                                                      'next': '/bla/bla/'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
@@ -229,7 +229,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
                                                      'next': 'www.handboogsport.nl'}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
     def test_logout(self):
         # controleer wat er gebeurd indien niet ingelogd
@@ -242,7 +242,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
             resp = self.client.post(self.url_login, {'login_naam': 'normaal',
                                                      'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
 
         with self.assert_max_queries(20):
             resp = self.client.get('/account/logout/')
@@ -268,7 +268,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         with self.assert_max_queries(26):
             resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com',
                                                      'wachtwoord': E2EHelpers.WACHTWOORD})
-        self.assert_is_redirect(resp, '/functie/otp-controle/')
+        self.assert_is_redirect(resp, '/plein/')
 
         # check aanwezigheid van Uitloggen optie in menu als teken van inlog succes
         with self.assert_max_queries(20):
@@ -283,7 +283,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
         with self.assert_max_queries(26):
             resp = self.client.post(self.url_login, {'login_naam': 'MetMail@test.com',
                                                      'wachtwoord': E2EHelpers.WACHTWOORD})
-        self.assert_is_redirect(resp, '/functie/otp-controle/')
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_login_aangemeld_blijven(self):
         # test inlog via het inlog formulier, met het 'aangemeld blijven' vinkje gezet
@@ -291,7 +291,7 @@ class TestAccountLogin(E2EHelpers, TestCase):
             resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com',
                                                      'wachtwoord': E2EHelpers.WACHTWOORD,
                                                      'aangemeld_blijven': True})
-        self.assert_is_redirect(resp, '/functie/otp-controle/')
+        self.assert_is_redirect(resp, '/plein/')
 
         # als het vinkje gezet is, dan verloopt deze sessie niet als de browser afgesloten wordt
         self.assertFalse(self.client.session.get_expire_at_browser_close())
@@ -338,9 +338,9 @@ class TestAccountLogin(E2EHelpers, TestCase):
             resp = self.client.post(self.url_login, {'login_naam': 'metmail@test.com',
                                                      'wachtwoord': E2EHelpers.WACHTWOORD}, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        # redirect is naar het wissel-van-rol, want er is geen nieuw email adres
+        self.assert_template_used(resp, ('plein/plein-bezoeker.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
-        # redirect is naar het plein, want er is geen nieuw email adres
-        self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
 
     def test_login_next(self):
         # test een login met een 'next' parameter die na de login gevolgd wordt

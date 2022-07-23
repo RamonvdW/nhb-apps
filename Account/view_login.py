@@ -277,8 +277,16 @@ class LoginView(TemplateView):
                 # is valide url
                 return HttpResponseRedirect(next_url)
 
+        # TODO: ongewenste kennis over OTP en Functies --> dit door een plug-in laten doen
         if account.otp_is_actief:
-            return HttpResponseRedirect(reverse('Functie:otp-controle'))
+            # 2FA check altijd aanbieden aan IT en BB rollen
+            if account.is_staff or account.is_superuser or account.is_BB:
+                return HttpResponseRedirect(reverse('Functie:otp-controle'))
+
+            # alleen 2FA check aanbieden als er ook functies aan gekoppeld zijn
+            # dit voorkomt 2FA check voor ex-managers
+            if account.functie_set.count() > 0:
+                return HttpResponseRedirect(reverse('Functie:otp-controle'))
 
         return HttpResponseRedirect(reverse('Plein:plein'))
 

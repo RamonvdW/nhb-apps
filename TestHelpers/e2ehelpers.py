@@ -315,7 +315,8 @@ class E2EHelpers(TestCase):
 
         resp = self.client.head(link)
         if resp.status_code != 200:                                                 # pragma: no cover
-            self.fail(msg='Link not usable (code %s) on page %s (%s)' % (resp.status_code, template_name, link))
+            self.fail(msg='Found NOK href (gives code %s) on page %s (href=%s)' % (
+                resp.status_code, template_name, repr(link)))
 
     def assert_broodkruimels(self, content, template_name):
         # find the start
