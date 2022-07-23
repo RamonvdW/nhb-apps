@@ -236,6 +236,43 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
 
+    def test_alle_rollen(self):
+        # controleer dat de rollen van alle mogelijke functies weergegeven kunnen worden
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        functie = maak_functie('Test functie 1', 'MO')
+        functie.accounts.add(self.account_100001)
+
+        functie = maak_functie('Test functie 2', 'BKO')
+        functie.accounts.add(self.account_100001)
+
+        functie = maak_functie('Test functie 3', 'RKO')
+        functie.accounts.add(self.account_100001)
+
+        functie = maak_functie('Test functie 4', 'RCL')
+        functie.accounts.add(self.account_100001)
+
+        functie = maak_functie('Test functie 5', 'SEC')
+        functie.accounts.add(self.account_100001)
+
+        functie = maak_functie('Test functie 6', 'HWL')
+        functie.accounts.add(self.account_100001)
+
+        functie = maak_functie('Test functie 7', 'WL')
+        functie.accounts.add(self.account_100001)
+
+        # maak dat het account hulp nodig heeft en dus in de lijst komt te staan
+        self.account_100001.otp_is_actief = False
+        self.account_100001.save()
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_activiteit)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('overig/activiteit.dtl', 'plein/site_layout.dtl'))
+
     def test_no_age_groups(self):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()

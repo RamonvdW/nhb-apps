@@ -36,7 +36,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu = Rollen.ROL_NONE
-        self.sort_level = {'BKO': 10000, 'RKO': 500, 'RCL': 40, 'SEC': 3, 'HWL': 2, 'WL': 1}
+        self.sort_level = {'MO': 20000, 'BKO': 10000, 'RKO': 500, 'RCL': 40, 'SEC': 3, 'HWL': 2, 'WL': 1}
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """

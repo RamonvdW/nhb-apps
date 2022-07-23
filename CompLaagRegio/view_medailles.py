@@ -78,10 +78,10 @@ class ToonMedailles(UserPassesTestMixin, TemplateView):
             deelcomp = (DeelCompetitie
                         .objects
                         .select_related('competitie')
-                        .get(competitie__afstand=self.functie_nu.comp_type,
-                             laag=LAAG_REGIO,
-                             nhb_regio__regio_nr=regio_nr,
-                             huidige_team_ronde__gte=6))        # ivm 2 competitie seizoenen
+                        .filter(competitie__afstand=self.functie_nu.comp_type,
+                                laag=LAAG_REGIO,
+                                nhb_regio__regio_nr=regio_nr)
+                        .order_by('competitie__begin_jaar'))[0]     # neem de oudste
         except (ValueError, DeelCompetitie.DoesNotExist):
             raise Http404('Competitie niet gevonden')
 
