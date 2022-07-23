@@ -334,8 +334,8 @@ def bepaal_blazoen_behoefte(afstand, sporters, deelnemers_teams):
     for team in deelnemers_teams:
 
         # team wat nog niet in een klasse staat slaan we over
-        if team.klasse:
-            team_klasse = team.klasse.team
+        if team.team_klasse:
+            team_klasse = team.team_klasse
 
             ver_nr = team.vereniging.ver_nr
             try:
