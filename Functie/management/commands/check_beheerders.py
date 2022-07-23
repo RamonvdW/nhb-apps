@@ -54,7 +54,7 @@ class Command(BaseCommand):
         # for
 
         # zoek accounts zonder functie koppelen maar (nog) wel tweede factor actief
-        self.stdout.write('Actieve leden met 2FA maar niet meer gekoppeld aan een functie:')
+        self.stdout.write('\nActieve leden met 2FA maar niet meer gekoppeld aan een functie:')
         for sporter in (Sporter
                         .objects
                         .filter(account__otp_is_actief=True)
@@ -62,8 +62,9 @@ class Command(BaseCommand):
                         .select_related('account')
                         .prefetch_related('account__functie_set')):
             account = sporter.account
-            if account.functie_set.count() == 0:
-                self.stdout.write('  %s' % sporter.lid_nr_en_volledige_naam())
+            if not (account.is_BB or account.is_staff or account.is_superuser):
+                if account.functie_set.count() == 0:
+                    self.stdout.write('  %s' % sporter.lid_nr_en_volledige_naam())
         # for
 
 # end of file
