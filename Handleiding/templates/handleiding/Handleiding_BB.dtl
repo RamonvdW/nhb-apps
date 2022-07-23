@@ -22,7 +22,7 @@
         <div class="col s12">
             <div class="white left-align" style="padding:10px">
 
-                <p>Deze pagina beschrijft de mogelijkheden voor de Manager Competitiezaken.</p>
+                <p>Deze pagina beschrijft de mogelijkheden voor de Manager competitiezaken.</p>
 
                 <h5>Opstarten nieuwe competitie</h5>
 
@@ -33,7 +33,7 @@
                     <li style="list-style-type: disc; padding-left:0">Aanmaken van de nieuwe competities (Indoor + 25m1pijl)</li>
                     <li style="list-style-type: disc; padding-left:0">Vaststellen van de wedstrijdklassen</li>
                     <li style="list-style-type: disc; padding-left:0">Vaststellen van de klassengrenzen per competitie, aan de hand van de aanvangsgemiddelden</li>
-                    <li style="list-style-type: disc; padding-left:0">Aanpassen van de kalenderdatums</li>
+                    <li style="list-style-type: disc; padding-left:0">Aanpassen van de fase datums</li>
                 </ul>
 
                 <p>&nbsp;</p>
