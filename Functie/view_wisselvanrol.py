@@ -63,12 +63,20 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            self.account = self.request.user
-            self.show_vhpg, self.vhpg = account_needs_vhpg(self.account)
+            self.account = account = self.request.user
+            self.show_vhpg, self.vhpg = account_needs_vhpg(account)
             if self.show_vhpg and self.vhpg is not None:
                 # herhaling van VHPG acceptatie: meteen daarheen sturen
                 url = reverse('Functie:vhpg-acceptatie')
                 return HttpResponseRedirect(url)
+
+            if account.otp_is_actief:
+                # gebruiker heeft 2FA actief en is na inlog en 2FA check hierheen gestuurd
+                # als er geen rollen meer gekoppeld zijn, dan geeft test_func een foutcode 403
+                if not account.is_BB and not account.is_staff and account.functie_set.count() == 0:
+                    # voorkom de foutcode 403 (na inlog en 2FA controle): stuur ze door naar het plein
+                    url = reverse('Plein:plein')
+                    return HttpResponseRedirect(url)
 
         return super().dispatch(request, *args, **kwargs)
 

@@ -136,7 +136,10 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_assert_other_http_commands_not_supported(self.url_wissel_van_rol)
 
     def test_normaal(self):
+        self.account_normaal.otp_is_actief = False
+        self.account_normaal.save(update_fields=['otp_is_actief'])
         self.e2e_login(self.account_normaal)
+
         # controleer dat de wissel-van-rol pagina niet aanwezig is voor deze normale gebruiker
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
@@ -412,7 +415,8 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # wat is de huidige functie?
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
-        self.assert403(resp)
+        # self.assert403(resp)
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_dubbele_rol_rko(self):
         # voorkom dat dit probleem terug komt:
@@ -571,6 +575,42 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assert_is_redirect(resp, self.url_vhpg_acceptatie)
+
+    def test_post_functie(self):
+        # test de situatie nadat een gebruiker (met 2FA) nu geen functie meer heeft
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+
+        # gaan naar de wissel-van-rol pagina
+        resp = self.client.get(self.url_wissel_van_rol)
+        self.assert_is_redirect(resp, '/plein/')
+
+        # herhaal met 'staff' vlag, zonder functies
+        self.e2e_account_accepteert_vhpg(self.account_admin)
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.assertEqual(0, self.account_admin.functie_set.count())
+        self.assertTrue(self.account_admin.is_staff)
+        self.assertFalse(self.account_admin.is_BB)
+
+        # gaan naar de wissel-van-rol pagina
+        resp = self.client.get(self.url_wissel_van_rol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
+
+        # herhaal met 'BB' vlag, zonder functies
+        self.account_admin.is_BB = True
+        self.account_admin.is_staff = False
+        self.account_admin.save(update_fields=['is_BB', 'is_staff'])
+
+        self.e2e_account_accepteert_vhpg(self.account_admin)
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.assertFalse(self.account_admin.is_staff)
+        self.assertTrue(self.account_admin.is_BB)
+
+        # gaan naar de wissel-van-rol pagina
+        resp = self.client.get(self.url_wissel_van_rol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
 
     # TODO: test maken waarbij gebruiker aan 2x rol zit met dezelfde 'volgorde' (gaf sorteerprobleem), zowel 2xBKO als 2xHWL
 
