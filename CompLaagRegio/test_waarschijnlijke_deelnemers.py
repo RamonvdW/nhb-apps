@@ -5,10 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from BasisTypen.models import BoogType
+from BasisTypen.models import BoogType, TeamType
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbCluster
-from Competitie.models import (CompetitieIndivKlasse, DeelCompetitie, RegioCompetitieSchutterBoog, CompetitieMatch,
+from Competitie.models import (DeelCompetitie, CompetitieMatch,
+                               CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               RegioCompetitieSchutterBoog, RegiocompetitieTeam,
                                LAAG_REGIO, INSCHRIJF_METHODE_1)
 from Competitie.operations import maak_deelcompetitie_ronde
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
@@ -16,6 +18,7 @@ from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from Score.models import Score, Uitslag
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from decimal import Decimal
 import datetime
 
 
@@ -179,6 +182,8 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
         self._maak_competitie()
         self._maak_wedstrijden()
         self._maak_inschrijvingen()
+        self._maak_teams_18()
+        self._maak_teams_25()
 
     def _maak_competitie(self):
         self.assertEqual(CompetitieIndivKlasse.objects.count(), 0)
@@ -248,7 +253,8 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
 
         sporterboog = self.sporterboog_100001
 
-        SporterVoorkeuren(sporter=sporterboog.sporter, voorkeur_eigen_blazoen=True).save()
+        SporterVoorkeuren(sporter=sporterboog.sporter,
+                          voorkeur_eigen_blazoen=True).save()
 
         klasse = (CompetitieIndivKlasse
                   .objects
@@ -354,6 +360,101 @@ class TestCompLaagRegioWaarschijnlijkeDeelnemers(E2EHelpers, TestCase):
                 sporterboog=sporterboog,
                 bij_vereniging=sporterboog.sporter.bij_vereniging,
                 indiv_klasse=klasse).save()
+
+    def _maak_teams_18(self):
+
+        teamtype_r = TeamType.objects.get(afkorting='R2')       # zowel DT als 40cm blazoen
+        teamtype_c = TeamType.objects.get(afkorting='C')        # alleen DT blazoen
+        teamtype_bb = TeamType.objects.get(afkorting='BB2')     # alleen 40cm blazoen
+
+        klasse_r = CompetitieTeamKlasse.objects.get(competitie=self.comp_18,
+                                                    volgorde=15,        # Recurve ERE
+                                                    is_voor_teams_rk_bk=False)
+
+        klasse_c = CompetitieTeamKlasse.objects.get(competitie=self.comp_18,
+                                                    volgorde=20,        # Compound ERE
+                                                    is_voor_teams_rk_bk=False)
+
+        klasse_bb = CompetitieTeamKlasse.objects.get(competitie=self.comp_18,
+                                                     volgorde=31,       # Barebow ERE
+                                                     is_voor_teams_rk_bk=False)
+
+        # een 18m recurve team, dus met 2 verschillende blazoenen
+        team = RegiocompetitieTeam(
+                    deelcompetitie=self.deelcomp_regio_18,
+                    vereniging=self.nhbver1,
+                    volg_nr=1,
+                    team_type=teamtype_r,
+                    team_naam='Test team R 18',
+                    aanvangsgemiddelde=Decimal('30'),
+                    team_klasse=klasse_r)
+        team.save()
+
+        # een 18m compound team, dus met maar 1 soort blazoen
+        team = RegiocompetitieTeam(
+                    deelcompetitie=self.deelcomp_regio_18,
+                    vereniging=self.nhbver1,
+                    volg_nr=2,
+                    team_type=teamtype_c,
+                    team_naam='Test team C 18',
+                    aanvangsgemiddelde=Decimal('30'),
+                    team_klasse=klasse_c)
+        team.save()
+
+        # een 18m barebow team, dus met maar 1 soort blazoen
+        team = RegiocompetitieTeam(
+                    deelcompetitie=self.deelcomp_regio_18,
+                    vereniging=self.nhbver1,
+                    volg_nr=3,
+                    team_type=teamtype_bb,
+                    team_naam='Test team BB 18',
+                    aanvangsgemiddelde=Decimal('30'),
+                    team_klasse=klasse_bb)
+        team.save()
+
+    def _maak_teams_25(self):
+
+        teamtype_r = TeamType.objects.get(afkorting='R2')       # alleen 60cm blazoen
+        teamtype_c = TeamType.objects.get(afkorting='C')        # 60cm en DT blazoen
+
+        klasse_r = CompetitieTeamKlasse.objects.get(competitie=self.comp_25,
+                                                    volgorde=15,        # Recurve ERE
+                                                    is_voor_teams_rk_bk=False)
+
+        klasse_c = CompetitieTeamKlasse.objects.get(competitie=self.comp_25,
+                                                    volgorde=20,        # Compound ERE
+                                                    is_voor_teams_rk_bk=False)
+
+        # 1 team zonder team klasse
+        RegiocompetitieTeam(
+                deelcompetitie=self.deelcomp_regio_25,
+                vereniging=self.nhbver1,
+                volg_nr=1,
+                team_type=teamtype_r,
+                team_naam='Test team R geen klasse 25',
+                team_klasse=None).save()
+
+        # recurve team
+        RegiocompetitieTeam(
+                deelcompetitie=self.deelcomp_regio_25,
+                vereniging=self.nhbver1,
+                volg_nr=2,
+                team_type=teamtype_r,
+                team_naam='Test team R 25',
+                team_klasse=klasse_r).save()
+
+        # compound team
+        RegiocompetitieTeam(
+                deelcompetitie=self.deelcomp_regio_25,
+                vereniging=self.nhbver1,
+                volg_nr=3,
+                team_type=teamtype_c,
+                team_naam='Test team C 25',
+                team_klasse=klasse_c).save()
+
+        # # initiële schutters in het team
+        # gekoppelde_schutters = models.ManyToManyField(RegioCompetitieSchutterBoog,
+        #                                               blank=True)    # mag leeg zijn
 
     def test_wedstrijden_hwl(self):
         # login als HWL
