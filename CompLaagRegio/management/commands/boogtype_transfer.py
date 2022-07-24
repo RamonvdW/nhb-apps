@@ -18,7 +18,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--commit', action='store_true', help='Voorgestelde wijzigingen opslaan')
         parser.add_argument('lid_nr', type=int, help='Bondsnummer')
-        parser.add_argument('boog', type=str, help='Boogtype afkorting (R/C/BB/IB/LB)')
+        parser.add_argument('boog', type=str, help='Boogtype afkorting (R/C/BB/TR/LB)')
         parser.add_argument('afstand', type=int, help='Competitie afstand (18/25)')
 
     def handle(self, *args, **options):

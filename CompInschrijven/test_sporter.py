@@ -174,7 +174,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assert404(resp, 'Sporter is al aangemeld')
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
 
-        # 18m IB voor extra coverage
+        # 18m TR voor extra coverage
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='TR')
         url = self.url_bevestig_aanmelden % (deelcomp.pk, sporterboog.pk)
         with self.assert_max_queries(20):

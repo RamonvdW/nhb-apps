@@ -113,7 +113,7 @@ INDIV_COMP_KLASSEN = (                                                          
 
 
 KALENDERWEDSTRIJDENKLASSEN = (
-    # old new  boog afk
+    # nr  boog afk
     (100, 'R', 'VA', 'Recurve 60+ (veteraan)'),
     (101, 'R', 'VH', 'Recurve 60+ mannen (veteraan)'),
     (102, 'R', 'VV', 'Recurve 60+ vrouwen (veteraan)'),

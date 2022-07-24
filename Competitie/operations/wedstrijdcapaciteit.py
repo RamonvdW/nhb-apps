@@ -348,7 +348,7 @@ def bepaal_blazoen_behoefte(afstand, sporters, deelnemers_teams):
                     blazoen = team_klasse.blazoen1_regio
                     if blazoen == BLAZOEN_40CM:
                         blazoenen.teams_40cm += 1
-                    elif blazoen == BLAZOEN_DT:
+                    else:
                         blazoenen.teams_dt += 1
                 else:
                     blazoenen.teams_dt_of_40cm += 1
@@ -356,7 +356,7 @@ def bepaal_blazoen_behoefte(afstand, sporters, deelnemers_teams):
                 if team_klasse.blazoen1_regio == team_klasse.blazoen2_regio:
                     if team_klasse.blazoen1_regio == BLAZOEN_60CM:
                         blazoenen.teams_60cm += 1
-                    else:
+                    else:   # pragma: no cover (er is op dit moment geen klasse met alleen 4spot)
                         blazoenen.teams_60cm_4spot += 1
                 else:
                     blazoenen.teams_60cm_4spot_of_60cm += 1

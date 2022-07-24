@@ -73,7 +73,7 @@ class Sporter(models.Model):
     # voor zoekfunctie: de namen aan elkaar; speciale tekens vervangen
     unaccented_naam = models.CharField(max_length=200, default='', blank=True)
 
-    # het e-mailadres van dit lid
+    # het e-mailadres waarop dit lid te bereiken is
     email = models.CharField(max_length=150)
 
     # geboortedatum van de sporter

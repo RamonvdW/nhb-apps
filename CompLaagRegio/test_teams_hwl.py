@@ -454,7 +454,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         klasse = CompetitieTeamKlasse.objects.get(competitie=self.comp_18,
                                                   volgorde=15,           # Rec ERE
                                                   is_voor_teams_rk_bk=False)
-        team.klasse = klasse
+        team.team_klasse = klasse
         team.aanvangsgemiddelde = 8.8
         team.save()
         team.gekoppelde_schutters.add(self.deelnemer_100004_18)

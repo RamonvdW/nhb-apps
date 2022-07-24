@@ -37,7 +37,7 @@ def bepaal_team_sterkte_en_klasse(team):
     ags = team.gekoppelde_schutters.values_list('ag_voor_team', flat=True)
     ags = list(ags)
 
-    team.klasse = None
+    team.team_klasse = None
 
     if len(ags) >= 3:
         # bereken de team sterkte: de som van de 3 sterkste sporters
@@ -53,6 +53,7 @@ def bepaal_team_sterkte_en_klasse(team):
                                is_voor_teams_rk_bk=False)
                        .order_by('min_ag',
                                  '-volgorde')):  # oplopend AG (=hogere klasse later)
+
             if ag >= klasse.min_ag:
                 team.team_klasse = klasse
         # for
@@ -351,7 +352,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
         context['team'] = team
 
-        context['opt_team_type'] = teamtypes = (deelcomp.competitie.teamtypen.all())
+        context['opt_team_type'] = teamtypes = (deelcomp.competitie.teamtypen.order_by('volgorde'))
         for obj in teamtypes:
             obj.choice_name = obj.afkorting
             obj.actief = (team.team_type == obj)
@@ -437,7 +438,7 @@ class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
                 team.team_type = team_type
                 team.aanvangsgemiddelde = 0.0
-                team.klasse = None
+                team.team_klasse = None
                 team.save()
 
                 # verwijder eventueel gekoppelde sporters bij wijziging team type,

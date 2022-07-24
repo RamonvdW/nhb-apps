@@ -18,6 +18,11 @@ GESLACHT_VROUW = 'V'        # geregistreerd geslacht / voor wedstrijdklassen
 GESLACHT_ANDERS = 'X'       # geregistreerd geslacht
 GESLACHT_ALLE = 'A'         # genderneutraal voor wedstrijdklassen
 
+GESLACHT2STR = {GESLACHT_MAN: 'Man',
+                GESLACHT_VROUW: 'Vrouw',
+                GESLACHT_ANDERS: 'Anders',
+                GESLACHT_ALLE: 'Alle'}
+
 # geregistreerde geslacht van sporters: M/V/X
 GESLACHT_MVX = [(GESLACHT_MAN, 'Man'),
                 (GESLACHT_VROUW, 'Vrouw'),
