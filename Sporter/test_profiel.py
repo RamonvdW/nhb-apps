@@ -8,6 +8,7 @@ from django.utils.dateparse import parse_date
 from django.utils import timezone
 from django.test import TestCase
 from BasisTypen.models import BoogType
+from Bestel.models import Bestelling
 from Competitie.models import Competitie, DeelCompetitie, INSCHRIJF_METHODE_1
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.test_competitie import maak_competities_en_zet_fase_b, competities_aanmaken
@@ -270,6 +271,11 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         sporterboog_bb.voor_wedstrijd = True
         sporterboog_bb.save()
 
+        # zet een IFAA boog aan
+        sporterboog_ifaa = SporterBoog.objects.get(boogtype__afkorting='FSR')
+        sporterboog_ifaa.voor_wedstrijd = True
+        sporterboog_ifaa.save()
+
         # zet de barebow boog 'aan' en schrijf in voor 25m BB
         sporterboog_bb = SporterBoog.objects.get(boogtype__afkorting='BB')
         sporterboog_bb.voor_wedstrijd = True
@@ -503,5 +509,22 @@ class TestSporterProfiel(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
 
+    def test_bestelling(self):
+        # log in as schutter
+        self.e2e_login(self.account_normaal)
+
+        Bestelling(
+            bestel_nr=1,
+            account=self.account_normaal,
+            log='testje').save()
+
+        with self.assert_max_queries(39):
+            resp = self.client.get(self.url_profiel)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/profiel.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Bestellingen')                           # titel kaartje
+        self.assertContains(resp, 'Alle details van je bestellingen.')      # tekst op kaartje
+        self.assertContains(resp, '/bestel/overzicht/')                     # href van het kaartje
 
 # end of file
