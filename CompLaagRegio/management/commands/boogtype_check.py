@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -46,7 +46,13 @@ class Command(BaseCommand):
                 self.stdout.write('\n%s:' % prev_comp)
 
             sporter = deelnemer.sporterboog.sporter
-            voorkeuren = SporterBoog.objects.filter(sporter=sporter, voor_wedstrijd=True).select_related('boogtype').values_list('boogtype__afkorting', flat=True)
+            voorkeuren = (SporterBoog
+                          .objects
+                          .filter(sporter=sporter,
+                                  voor_wedstrijd=True)
+                          .select_related('boogtype')
+                          .values_list('boogtype__afkorting',
+                                       flat=True))
             wil_str = ", ".join(list(voorkeuren))
             if not wil_str:
                 wil_str = '?'

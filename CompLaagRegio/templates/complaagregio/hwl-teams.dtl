@@ -60,7 +60,7 @@
                         <td>{{ team.team_naam }}</td>
                         <td class="hide-on-small-only center{% if team.aantal < 3 or team.aantal > 4 %} red-text{% endif %}">{{ team.aantal }}</td>
 
-                        {% if team.klasse %}
+                        {% if team.team_klasse %}
                             <td class="hide-on-small-only">{{ team.ag_str }}</td>
                             <td>{{ team.team_klasse.beschrijving }}</td>
                         {% else %}

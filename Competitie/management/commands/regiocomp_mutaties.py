@@ -68,7 +68,7 @@ class Command(BaseCommand):
         """ bepaalde boog typen mogen meedoen in bepaalde team types
             straks als we de team schutters gaan verdelen over de teams moeten dat in een slimme volgorde
             zodat de sporters in toegestane teams en alle team typen gevuld worden.
-            Voorbeeld: LB mag meedoen in LB, IB, BB en R teams terwijl C alleen in C team mag.
+            Voorbeeld: LB mag meedoen in LB, TR, BB en R teams terwijl C alleen in C team mag.
                        we moeten dus niet beginnen met de LB schutter in een R team te stoppen en daarna
                        geen sporters meer over hebben voor het LB team.
         """
