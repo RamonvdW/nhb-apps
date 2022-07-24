@@ -36,7 +36,7 @@
      "region_number": 111,
      "name": "Club 2K",
      "prefix": null,
-     "secretaris": [{"member_number": 100024}],
+     "secretaris": [{"member_number": 100024}, {"member_number": 100001}],
      "email": "test@club2k.archery",
      "website": "www.club2k.archery",
      "has_disabled_facilities": false,

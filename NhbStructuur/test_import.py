@@ -374,6 +374,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertTrue('[WARNING] Vereniging 1000 heeft geen adres' in f2.getvalue())
         self.assertTrue("[INFO] Wijziging van secretaris voor vereniging 1000: geen --> 100001 Ramon de Tester" in f2.getvalue())
         self.assertTrue("[INFO] Secretaris 100024 van vereniging 2000 heeft nog geen account" in f2.getvalue())
+        self.assertTrue("[WARNING] Meerdere secretarissen voor vereniging 2000 is niet ondersteund: 100024, 100001" in f2.getvalue())
 
         # lid = Sporter.objects.get(lid_nr="100001")
         ver = NhbVereniging.objects.get(ver_nr="1000")

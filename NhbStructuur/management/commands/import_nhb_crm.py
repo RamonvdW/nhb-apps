@@ -699,9 +699,18 @@ class Command(BaseCommand):
 
             ver_naam = club['name']
 
-            if len(club['secretaris']) < 1:
+            club_secs = club['secretaris']
+            if len(club_secs) < 1:
                 ver_secretaris = None
             else:
+                if len(club_secs) > 1:
+                    # onverwacht meer dan 1 secretaris
+                    lid_nrs = [str(sec['member_number']) for sec in club_secs]
+                    lid_nrs_str = ", ".join(lid_nrs)
+                    self.stdout.write(
+                        '[WARNING] Meerdere secretarissen voor vereniging %s is niet ondersteund: %s' % (
+                            ver_nr, lid_nrs_str))
+
                 ver_secretaris_nr = club['secretaris'][0]['member_number']
                 ver_secretaris = self._vind_sporter(ver_secretaris_nr)
                 if ver_secretaris is None:
