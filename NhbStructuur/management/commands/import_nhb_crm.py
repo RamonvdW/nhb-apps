@@ -16,7 +16,7 @@ from django.core.exceptions import ValidationError
 from Account.models import Account
 from Functie.models import Functie, maak_functie, maak_account_vereniging_secretaris
 from Logboek.models import schrijf_in_logboek
-from Mailer.models import mailer_email_is_valide
+from Mailer.models import mailer_email_is_valide, mailer_notify_internal_error
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord
@@ -24,8 +24,11 @@ from Sporter.models import Sporter, Secretaris, Speelsterkte
 from Wedstrijden.models import WedstrijdLocatie, BAAN_TYPE_EXTERN, BAAN_TYPE_BUITEN
 import traceback
 import datetime
+import logging
 import json
 import sys
+
+my_logger = logging.getLogger('NHBApps.NhbStructuur')
 
 
 def get_secretaris_str(sporter):
@@ -72,6 +75,9 @@ class Command(BaseCommand):
 
     def __init__(self):
         super().__init__()
+
+        self._exit_code = 0
+
         self._count_errors = 0
         self._count_warnings = 0
         self._count_rayons = 0
@@ -385,6 +391,9 @@ class Command(BaseCommand):
             try:
                 ver_nr = int(ver_nr)
             except ValueError:
+                if self.dryrun and ver_nr == 'crash':
+                    raise Exception('crash test')
+                
                 self.stderr.write('[ERROR] Geen valide verenigingsnummer: %s (geen getal)' % repr(ver_nr))
                 self._count_errors += 1
                 continue
@@ -1354,21 +1363,7 @@ class Command(BaseCommand):
         # FUTURE: zichtbaar=False zetten voor wedstrijdlocatie zonder vereniging
         # FUTURE: zichtbaar=True zetten voor (revived) wedstrijdlocatie met vereniging
 
-    def handle(self, *args, **options):
-        self.dryrun = options['dryrun']
-        fname = options['filename'][0]
-
-        if options['sim_now']:
-            try:
-                sim_now = datetime.datetime.strptime(options['sim_now'][0], '%Y-%m-%d')
-            except ValueError as exc:
-                self.stderr.write('[ERROR] geen valide sim_now (%s)' % str(exc))
-                return
-            else:
-                self.zet_lidmaatschap_jaar(sim_now)
-
-        self.stdout.write('[INFO] lidmaatschap jaar = %s' % self.lidmaatschap_jaar)
-
+    def _import_bestand(self, fname):
         try:
             with open(fname, encoding='raw_unicode_escape') as f_handle:
                 data = json.load(f_handle)
@@ -1408,6 +1403,7 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
+            self._exit_code = 1
 
         self.stdout.write('Import van CRM data is klaar')
         # self.stdout.write("Read %s lines; skipped %s dupes; skipped %s errors; added %s records" % (line_nr, dupe_count, error_count, added_count))
@@ -1444,6 +1440,56 @@ class Command(BaseCommand):
         self.stdout.write(samenvatting)
 
         self.stdout.write('Done')
-        return
+
+    def handle(self, *args, **options):
+        self.dryrun = options['dryrun']
+        if self.dryrun:
+            self.stdout.write("DRY RUN")
+
+        fname = options['filename'][0]
+
+        if options['sim_now']:
+            try:
+                sim_now = datetime.datetime.strptime(options['sim_now'][0], '%Y-%m-%d')
+            except ValueError as exc:
+                self.stderr.write('[ERROR] geen valide sim_now (%s)' % str(exc))
+                return
+            else:
+                self.zet_lidmaatschap_jaar(sim_now)
+
+        self.stdout.write('[INFO] lidmaatschap jaar = %s' % self.lidmaatschap_jaar)
+
+        try:
+            self._import_bestand(fname)
+        except Exception as exc:
+            # schrijf in de output
+            tups = sys.exc_info()
+            lst = traceback.format_tb(tups[2])
+            tb = traceback.format_exception(*tups)
+
+            tb_msg_start = 'Unexpected error during import_nhb_crm\n'
+            tb_msg_start += '\n'
+            tb_msg = tb_msg_start + '\n'.join(tb)
+
+            # full traceback to syslog
+            my_logger.error(tb_msg)
+
+            self.stderr.write('[ERROR] Onverwachte fout tijdens import_nhb_crm: ' + str(exc))
+            self.stderr.write('Traceback:')
+            self.stderr.write(''.join(lst))
+
+            # stuur een mail naar de ontwikkelaars
+            # reduceer tot de nuttige regels
+            tb = [line for line in tb if '/site-packages/' not in line]
+            tb_msg = tb_msg_start + '\n'.join(tb)
+
+            # deze functie stuurt maximaal 1 mail per dag over hetzelfde probleem
+            mailer_notify_internal_error(tb_msg)
+
+            self._exit_code = 1
+
+        if self._exit_code > 0:
+            sys.exit(self._exit_code)
+
 
 # end of file

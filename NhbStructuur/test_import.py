@@ -8,6 +8,7 @@ from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
 from Functie.models import Functie
+from Mailer.models import MailQueue
 from Records.models import IndivRecord
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
@@ -688,12 +689,25 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         f2 = io.StringIO()
         management.call_command('import_nhb_crm', './NhbStructuur/management/testfiles/testfile_21.json',
                                 stderr=f1, stdout=f2)
-        # print("f1: %s" % f1.getvalue())
-        # print("f2: %s" % f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1001 heeft een IBAN zonder BIC: None, 'NL91ABNA0417164300'" in f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1042 heeft een BIC zonder IBAN: 'ABNANL2A', None" in f2.getvalue())
         self.assertTrue("[WARNING] Vereniging 1000 heeft een onbekende BIC code 'HUH2HUH2' horende bij IBAN 'NL91ABNA0417164300'" in f2.getvalue())
         self.assertTrue("ERROR] Vereniging 1043 heeft een foutieve IBAN: 'NL91ABNA0417164309'" in f1.getvalue())
         self.assertTrue("[ERROR] Vereniging 1044 heeft IBAN 'NL91ABNA0TEKORT' met foute length 15 (verwacht: 18)" in f1.getvalue())
+
+    def test_crash(self):
+        self.assertEqual(0, MailQueue.objects.count())
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assertRaises(SystemExit):
+            management.call_command('import_nhb_crm', '--dryrun', './NhbStructuur/management/testfiles/testfile_22.json',
+                                    stderr=f1, stdout=f2)
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue("[ERROR] Onverwachte fout tijdens import_nhb_crm: crash test" in f1.getvalue())
+
+        self.assertEqual(1, MailQueue.objects.count())
+
 
 # end of file
