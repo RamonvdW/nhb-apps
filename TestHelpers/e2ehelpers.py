@@ -807,6 +807,22 @@ class E2EHelpers(TestCase):
         if not header.startswith('attachment; filename'):           # pragma: no cover
             self.fail(msg="Response is geen file attachment")
 
+    def run_management_command(self, *args, report_exit_code=True):
+        """ Helper om code duplicate te verminderen en bij een SystemExit toch de traceback (in stderr) te tonen """
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        try:
+            management.call_command(*args, stderr=f1, stdout=f2)
+        except SystemExit as exc:
+            if report_exit_code:
+                msg = '\nmanagement commando genereerde een SystemExit\n'
+                msg += 'commando: %s\n' % repr(args)
+                msg += 'stderr:\n'
+                msg += f1.getvalue()
+                msg = msg.replace('\n', '\n  ')
+                raise self.failureException(msg) from exc
+        return f1, f2
+
     def verwerk_regiocomp_mutaties(self, show_warnings=True, show_all=False):
         # vraag de achtergrondtaak om de mutaties te verwerken
         f1 = io.StringIO()

@@ -73,11 +73,19 @@ class Sporter(models.Model):
     # voor zoekfunctie: de namen aan elkaar; speciale tekens vervangen
     unaccented_naam = models.CharField(max_length=200, default='', blank=True)
 
-    # het e-mailadres van dit lid
+    # het e-mailadres waarop dit lid te bereiken is
     email = models.CharField(max_length=150)
+
+    # het telefoonnummer waarop dit lid te bereiken is
+    # komt uit CRM: mobiel (indien aanwezig), anders vaste nummer (indien aanwezig)
+    telefoon = models.CharField(max_length=25, default='', blank=True)
 
     # geboortedatum van de sporter
     geboorte_datum = models.DateField(validators=[validate_geboorte_datum])
+
+    # geboorteplaats van de sporter
+    # alleen nodig voor op het certificaat van een genoten opleiding
+    geboorteplaats = models.CharField(max_length=100, default='', blank=True)
 
     # geslacht (M/V/X)
     geslacht = models.CharField(max_length=1, choices=GESLACHT_MVX)
