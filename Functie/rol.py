@@ -306,10 +306,12 @@ def rol_get_huidige(request):
         een rol uit de groep Rollen.ROL_xxx
     """
     try:
-        return request.session[SESSIONVAR_ROL_HUIDIGE]
+        rol = request.session[SESSIONVAR_ROL_HUIDIGE]
+        if not request.user.is_authenticated and rol != Rollen.ROL_NONE:
+            my_logger.warning('{rol_get_huidige} sessie zegt rol=%s voor anon user' % rol)
     except KeyError:
-        pass
-    return Rollen.ROL_NONE
+        rol = Rollen.ROL_NONE
+    return rol
 
 
 def rol_get_huidige_functie(request) -> Tuple[Rollen, Functie]:
@@ -321,6 +323,8 @@ def rol_get_huidige_functie(request) -> Tuple[Rollen, Functie]:
     functie = None
     try:
         functie_pk = request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK]
+        if not request.user.is_authenticated:
+            my_logger.warning('{rol_get_huidige_functie} sessie zegt functie_pk=%s voor anon user' % functie_pk)
     except KeyError:                    # pragma: no cover
         # geen functie opgeslagen
         pass
