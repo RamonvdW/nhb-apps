@@ -1097,7 +1097,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        rondes = match.deelcompetitieronde_set.all()
+        rondes = (match
+                  .deelcompetitieronde_set
+                  .select_related('deelcompetitie',
+                                  'deelcompetitie__competitie')
+                  .all())
         if len(rondes) == 0:
             raise Http404('Geen regio wedstrijd')
         ronde = rondes[0]

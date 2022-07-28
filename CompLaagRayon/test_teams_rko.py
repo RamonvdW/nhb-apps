@@ -184,7 +184,7 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
 
         url = self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk
-        with self.assert_max_queries(28):
+        with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)
 

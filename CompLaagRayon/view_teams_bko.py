@@ -213,7 +213,8 @@ class KlassengrenzenTeamsVaststellenView(UserPassesTestMixin, TemplateView):
         for team_klasse in (CompetitieTeamKlasse
                             .objects
                             .filter(is_voor_teams_rk_bk=True,
-                                    competitie=comp)):
+                                    competitie=comp)
+                            .select_related('team_type')):
             beschrijving2team_klasse[team_klasse.beschrijving] = team_klasse
         # for
 

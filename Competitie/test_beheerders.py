@@ -332,7 +332,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('competitie/bb-wijzig-datums.dtl', 'plein/site_layout.dtl'))
 
         # post
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.post(url, {'datum1': '2019-08-09',
                                           'datum2': '2019-09-10',
                                           'datum3': '2019-10-11',

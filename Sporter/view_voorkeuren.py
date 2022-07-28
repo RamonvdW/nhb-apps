@@ -56,7 +56,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 raise Http404('Sporter niet gevonden')
 
             try:
-                sporter = Sporter.objects.get(pk=sporter_pk)
+                sporter = Sporter.objects.select_related('bij_vereniging').get(pk=sporter_pk)
             except Sporter.DoesNotExist:
                 raise Http404('Sporter niet gevonden')
 
