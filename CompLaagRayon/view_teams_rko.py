@@ -195,8 +195,8 @@ class RayonTeamsView(TemplateView):
             except KeyError:
                 # dit is geen acceptabele klasse (waarschijnlijk een regio klasse)
                 # pas dit meteen even aan
-                team.klasse = None
-                team.save(update_fields=['klasse'])
+                team.team_klasse = None
+                team.save(update_fields=['team_klasse'])
         # for
 
         context['rk_teams'] = klasse2teams

@@ -11,7 +11,7 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.models import (AG_NUL, DeelCompetitie, LAAG_RK, CompetitieTeamKlasse,
+from Competitie.models import (AG_NUL, DeelCompetitie, LAAG_RK,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -54,7 +54,7 @@ def bepaal_rk_team_tijdelijke_sterkte_en_klasse(rk_team, open_inschrijving):
             ags.append(deelnemer.gemiddelde)
         # for
 
-    rk_team.klasse = None       # wordt later bepaald, als de teams al bevroren zijn
+    rk_team.team_klasse = None       # wordt later bepaald, als de teams al bevroren zijn
 
     if len(ags) >= 3:
         # bereken de team sterkte: de som van de 3 sterkste sporters
@@ -367,7 +367,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
 
                     rk_team.team_type = team_type
                     rk_team.aanvangsgemiddelde = 0.0
-                    rk_team.klasse = None
+                    rk_team.team_klasse = None
                     rk_team.save()
 
                     # verwijder eventueel gekoppelde sporters bij wijziging rk_team type,

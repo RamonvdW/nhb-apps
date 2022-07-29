@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.core import management
 from django.utils import timezone
-from Competitie.models import Competitie, DeelCompetitie, LAAG_RK
+from Competitie.models import Competitie, DeelCompetitie, LAAG_RK, KampioenschapTeam
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -27,7 +27,8 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
     url_doorzetten_rk = '/bondscompetities/%s/doorzetten/rk/'                                       # comp_pk
     url_teams_klassengrenzen_vaststellen = '/bondscompetities/rk/%s/rk-bk-teams-klassengrenzen/vaststellen/'     # comp_pk
 
-    ver_nr = 1012  # regio 101, vereniging 2
+    regio_nr = 101
+    ver_nr = 1012  # rayon 1, regio 101, vereniging 2
 
     testdata = None
 
@@ -114,17 +115,49 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         self.assert403(resp)        # RKO heeft andere ingang
 
     def test_rko_teams(self):
-        # alleen de RKO mag deze pagina ophalen
-        url = self.url_rko_teams % self.testdata.deelcomp25_rk[1].pk
+        self.testdata.maak_rk_deelnemers(25, self.ver_nr, self.regio_nr)
+        self.testdata.maak_inschrijvingen_rk_teamcompetitie(25, self.ver_nr)
+
+        url = self.url_rko_teams % self.testdata.deelcomp25_rk[1].pk        # rayon 1
 
         # anon
         resp = self.client.get(url)
-        self.assert403(resp)
+        self.assert403(resp)            # alleen de RKO mag deze pagina ophalen
 
-        # wordt RKO
+        # wordt RKO van rayon 1
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wissel_naar_functie(self.testdata.comp25_functie_rko[1])
 
+        # pagina ophalen zonder vastgestelde team klassen
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('complaagrayon/rko-teams.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+
+        self.e2e_assert_other_http_commands_not_supported(url)
+
+        # wordt BKO
+        self.e2e_wissel_naar_functie(self.testdata.comp25_functie_bko)
+
+        # stel de RK/BK klassegrenzen vast
+        zet_competitie_fase(self.testdata.comp25, 'J')
+        resp = self.client.post(self.url_teams_klassengrenzen_vaststellen % self.testdata.comp25.pk)
+        self.assert_is_redirect_not_plein(resp)
+
+        # verpruts de klasse van 1 team
+        team = KampioenschapTeam.objects.get(pk=self.testdata.comp25_kampioenschapteams[0].pk)
+        for klasse in self.testdata.comp25_klassen_team['R2']:
+            if not klasse.is_voor_teams_rk_bk:
+                team.team_klasse = klasse
+                team.save(update_fields=['team_klasse'])
+                break   # from the for
+        # for
+
+        # wordt RKO van rayon 1
+        self.e2e_wissel_naar_functie(self.testdata.comp25_functie_rko[1])
+
+        # pagina ophalen met vastgestelde team klassen
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
