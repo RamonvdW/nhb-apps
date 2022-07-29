@@ -53,6 +53,8 @@ class BasisTypenTemplateCompetitieIndivKlasseAdmin(BasisTypenReadonlyMetVolgorde
 
     list_select_related = ('boogtype',)
 
+    ordering = ('volgorde',)
+
     # record weergave
     fieldsets = (
         (None, {'fields': ('volgorde', 'beschrijving', 'boogtype', 'buiten_gebruik')}),
@@ -79,6 +81,8 @@ class BasisTypenTemplateCompetitieTeamKlasseAdmin(BasisTypenReadonlyMetVolgordeA
     list_filter = ('buiten_gebruik',)
 
     list_select_related = ('team_type',)
+
+    ordering = ('volgorde',)
 
     # record weergave
     fieldsets = (
