@@ -155,11 +155,11 @@
                 {% if al_ingeschreven %}
 
                     <tr>
-                        <th>Inschreven op sessie</th>
+                        <th>Ingeschreven op sessie</th>
                         <td>{{ inschrijving.sessie.datum }} om {{ inschrijving.sessie.tijd_begin }}</td>
                     </tr>
                     <tr>
-                        <th>Inschreven met boog</th>
+                        <th>Ingeschreven met boog</th>
                         <td>{{ inschrijving.sporterboog.boogtype.beschrijving }}</td>
                     </tr>
                     <tr>
