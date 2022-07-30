@@ -175,7 +175,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
 
-        # zet de begin datum in de toekomst, zodat er inschreven kan worden
+        # zet de begin datum in de toekomst, zodat er ingeschreven kan worden
         wedstrijd.datum_begin += datetime.timedelta(days=100)
         wedstrijd.save(update_fields=['datum_begin'])
 

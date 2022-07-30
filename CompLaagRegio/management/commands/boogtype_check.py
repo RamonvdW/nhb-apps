@@ -24,7 +24,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        self.stdout.write('Deelnemers met inschreven boogtype niet meer actief als wedstrijdboog')
+        self.stdout.write('Deelnemers met ingeschreven boogtype niet meer actief als wedstrijdboog')
         # zoek alle leden met een andere voorkeur dan ingeschreven
         prev_comp = None
         for deelnemer in (RegioCompetitieSchutterBoog
