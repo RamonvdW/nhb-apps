@@ -289,7 +289,16 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         afstand = options['afstand']
 
-        self.comp = Competitie.objects.filter(is_afgesloten=False, afstand=afstand).order_by('begin_jaar')[0]
+        if not (options['teams'] or options['indiv']):
+            self.stderr.write('[ERROR] Verplicht: --indiv en/of --teams')
+            return
+
+        qset = Competitie.objects.filter(is_afgesloten=False, afstand=afstand).order_by('begin_jaar')
+        if qset.count() == 0:
+            self.stderr.write('[ERROR] Geen competitie beschikbaar')
+            return
+
+        self.comp = qset[0]
         self.stdout.write('[INFO] Geselecteerde competitie: %s' % self.comp)
 
         DEFAULT_FONT.name = FONT_NAME

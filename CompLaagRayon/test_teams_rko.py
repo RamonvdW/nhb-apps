@@ -226,12 +226,5 @@ class TestCompLaagRayonTeams(E2EHelpers, TestCase):
         resp = self.client.post(url)
         self.assert404(resp, 'De klassengrenzen zijn al vastgesteld')
 
-    def test_bk_lijst(self):
-        # maak de BK lijst aan
-        f1 = io.StringIO()
-        f2 = io.StringIO()
-        management.call_command('bk_lijst_zonder_rk', '18', '--indiv', '--teams', stderr=f1, stdout=f2)
-        os.remove('bk_lijst.xlsx')
-
 
 # end of file

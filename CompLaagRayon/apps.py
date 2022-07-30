@@ -7,7 +7,7 @@
 from django.apps import AppConfig
 
 
-class CompRayonConfig(AppConfig):
+class CompLaagRayonConfig(AppConfig):
     name = 'CompLaagRayon'
 
 # end of file
