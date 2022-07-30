@@ -13,9 +13,9 @@ from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WEDSTRIJD_DISCIPLINE
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
-class TestKalenderVereniging(E2EHelpers, TestCase):
+class TestWedstrijdenVereniging(E2EHelpers, TestCase):
 
-    """ tests voor de Kalender applicatie, module vereniging """
+    """ tests voor de Wedstrijden applicatie, module vereniging """
 
     url_kalender_vereniging = '/wedstrijden/vereniging/'
     url_kalender_maak_nieuw = '/wedstrijden/vereniging/kies-type/'

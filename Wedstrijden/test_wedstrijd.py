@@ -16,7 +16,7 @@ import datetime
 
 class TestWedstrijd(E2EHelpers, TestCase):
 
-    """ tests voor de Kalender applicatie """
+    """ tests voor de Wedstrijden applicatie, module wedstrijd wijzigen """
 
     url_kalender_manager = '/wedstrijden/manager/'
     url_kalender_vereniging = '/wedstrijden/vereniging/'

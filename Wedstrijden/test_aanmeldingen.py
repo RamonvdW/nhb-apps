@@ -15,11 +15,11 @@ from .models import (Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, Wedstrij
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
-class TestKalenderInschrijven(E2EHelpers, TestCase):
+class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
 
-    """ tests voor de Kalender applicatie, module Inschrijven """
+    """ tests voor de Wedstrijden applicatie, module Aanmeldingen """
 
-    test_after = ('Kalender.test_wedstrijd',)
+    test_after = ('Wedstrijden.test_wedstrijd',)
 
     url_aanmeldingen_wedstrijd = '/wedstrijden/%s/aanmeldingen/'       # wedstrijd_pk
     url_aanmeldingen_sporter = '/wedstrijden/sporter/%s/'              # sporter_lid_nr

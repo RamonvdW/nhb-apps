@@ -18,11 +18,11 @@ from Wedstrijden.models import (Wedstrijd, WedstrijdKortingscode,
                                 WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING, WEDSTRIJD_KORTING_COMBI)
 import datetime
 
-TEMPLATE_KALENDER_KORTINGSCODES_OVERZICHT = 'wedstrijden/overzicht-kortingscodes-vereniging.dtl'
-TEMPLATE_KALENDER_NIEUWE_KORTINGSCODE = 'wedstrijden/nieuwe-kortingscode-vereniging.dtl'
-TEMPLATE_KALENDER_WIJZIG_KORTINGSCODE_SPORTER = 'wedstrijden/wijzig-kortingscode-sporter.dtl'
-TEMPLATE_KALENDER_WIJZIG_KORTINGSCODE_VERENIGING = 'wedstrijden/wijzig-kortingscode-vereniging.dtl'
-TEMPLATE_KALENDER_WIJZIG_KORTINGSCODE_COMBI = 'wedstrijden/wijzig-kortingscode-combi.dtl'
+TEMPLATE_WEDSTRIJDEN_KORTINGSCODES_OVERZICHT = 'wedstrijden/overzicht-kortingscodes-vereniging.dtl'
+TEMPLATE_WEDSTRIJDEN_NIEUWE_KORTINGSCODE = 'wedstrijden/nieuwe-kortingscode-vereniging.dtl'
+TEMPLATE_WEDSTRIJDEN_WIJZIG_KORTINGSCODE_SPORTER = 'wedstrijden/wijzig-kortingscode-sporter.dtl'
+TEMPLATE_WEDSTRIJDEN_WIJZIG_KORTINGSCODE_VERENIGING = 'wedstrijden/wijzig-kortingscode-vereniging.dtl'
+TEMPLATE_WEDSTRIJDEN_WIJZIG_KORTINGSCODE_COMBI = 'wedstrijden/wijzig-kortingscode-combi.dtl'
 
 
 class VerenigingKortingcodesView(UserPassesTestMixin, TemplateView):
@@ -30,7 +30,7 @@ class VerenigingKortingcodesView(UserPassesTestMixin, TemplateView):
     """ Via deze view kan de HWL de kortingscodes van de vereniging beheren """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_KALENDER_KORTINGSCODES_OVERZICHT
+    template_name = TEMPLATE_WEDSTRIJDEN_KORTINGSCODES_OVERZICHT
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -100,7 +100,7 @@ class NieuweKortingcodesView(UserPassesTestMixin, View):
     """ Via deze view kan de HWL een nieuwe kortingscode van de vereniging aanmaken """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_KALENDER_NIEUWE_KORTINGSCODE
+    template_name = TEMPLATE_WEDSTRIJDEN_NIEUWE_KORTINGSCODE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -194,11 +194,11 @@ class VerenigingWijzigKortingcodesView(UserPassesTestMixin, View):
         context['korting'] = korting
 
         if korting.soort == WEDSTRIJD_KORTING_SPORTER:
-            template_name = TEMPLATE_KALENDER_WIJZIG_KORTINGSCODE_SPORTER
+            template_name = TEMPLATE_WEDSTRIJDEN_WIJZIG_KORTINGSCODE_SPORTER
         elif korting.soort == WEDSTRIJD_KORTING_VERENIGING:
-            template_name = TEMPLATE_KALENDER_WIJZIG_KORTINGSCODE_VERENIGING
+            template_name = TEMPLATE_WEDSTRIJDEN_WIJZIG_KORTINGSCODE_VERENIGING
         elif korting.soort == WEDSTRIJD_KORTING_COMBI:                           # pragma: no branch
-            template_name = TEMPLATE_KALENDER_WIJZIG_KORTINGSCODE_COMBI
+            template_name = TEMPLATE_WEDSTRIJDEN_WIJZIG_KORTINGSCODE_COMBI
         else:                                                                   # pragma: no cover
             raise Http404('Niet ondersteund')
 

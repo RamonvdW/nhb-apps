@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.db import IntegrityError, transaction
 from django.db.models import ObjectDoesNotExist
+from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import ORGANISATIE_WA
@@ -24,11 +25,11 @@ from Wedstrijden.models import (Wedstrijd, WedstrijdSessie, WedstrijdInschrijvin
 from Kalender.view_maand import MAAND2URL
 
 
-TEMPLATE_KALENDER_WEDSTRIJD_DETAILS = 'wedstrijden/wedstrijd-details.dtl'
-TEMPLATE_KALENDER_INSCHRIJVEN_SPORTER = 'wedstrijden/inschrijven-sporter.dtl'
-TEMPLATE_KALENDER_INSCHRIJVEN_GROEPJE = 'wedstrijden/inschrijven-groepje.dtl'
-TEMPLATE_KALENDER_INSCHRIJVEN_FAMILIE = 'wedstrijden/inschrijven-familie.dtl'
-TEMPLATE_KALENDER_INSCHRIJVEN_HANDMATIG = 'wedstrijden/inschrijven-handmatig.dtl'
+TEMPLATE_WEDSTRIJDEN_WEDSTRIJD_DETAILS = 'wedstrijden/wedstrijd-details.dtl'
+TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_SPORTER = 'wedstrijden/inschrijven-sporter.dtl'
+TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_GROEPJE = 'wedstrijden/inschrijven-groepje.dtl'
+TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_FAMILIE = 'wedstrijden/inschrijven-familie.dtl'
+TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_HANDMATIG = 'wedstrijden/inschrijven-handmatig.dtl'
 
 
 class WedstrijdInfoView(TemplateView):
@@ -36,7 +37,7 @@ class WedstrijdInfoView(TemplateView):
     """ Via deze view krijgen gebruikers en sporters de wedstrijdkalender te zien """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_KALENDER_WEDSTRIJD_DETAILS
+    template_name = TEMPLATE_WEDSTRIJDEN_WEDSTRIJD_DETAILS
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -109,15 +110,24 @@ class WedstrijdInfoView(TemplateView):
 
 
 def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
+    """ geef de mogelijke sessies terug waarop de sporter zich in kan schrijven
 
-    wedstrijdleeftijd = None
-    if sporter:
-        wedstrijdleeftijd = sporter.bereken_wedstrijdleeftijd(wedstrijd.datum_begin, wedstrijd.organisatie)
+        Input: wedstrijd:        de wedstrijd waar het om gaat (verplicht)
+               sporter:          de sporter waar het om gaat (optioneel; mag None zijn)
+               voorkeuren:       de voorkeuren van de sporter (optioneel; mag None zijn)
+               wedstrijdboog_pk  het boogtype waar het om gaat (optioneel; mag -1 zijn)
+
+        Output: sessies (qset), wedstrijdleeftijd, wedstrijdklassen (list), wedstrijd_geslacht
+
+                wedstrijdleeftijd is None als deze niet bepaald kon worden
+                wedstrijd_geslacht is '?' als deze niet bepaald kon worden
+    """
+
+    wedstrijdleeftijd = sporter.bereken_wedstrijdleeftijd(wedstrijd.datum_begin, wedstrijd.organisatie)
 
     wedstrijd_geslacht = '?'
-    if voorkeuren:
-        if voorkeuren.wedstrijd_geslacht_gekozen:
-            wedstrijd_geslacht = voorkeuren.wedstrijd_geslacht
+    if voorkeuren.wedstrijd_geslacht_gekozen:
+        wedstrijd_geslacht = voorkeuren.wedstrijd_geslacht
 
     sessie_pks = list(wedstrijd.sessies.values_list('pk', flat=True))
     sessies = (WedstrijdSessie
@@ -130,19 +140,18 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
 
     # kijk of de sporter al ingeschreven is
     sessie_pk2inschrijving = dict()       # [sessie.pk] = inschrijving
-    if sporter:
-        for inschrijving in (WedstrijdInschrijving
-                             .objects
-                             .select_related('sessie',
-                                             'sporterboog',
-                                             'sporterboog__sporter')
-                             .filter(sessie__pk__in=sessie_pks,
-                                     sporterboog__sporter=sporter)
-                             .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)):
+    for inschrijving in (WedstrijdInschrijving
+                         .objects
+                         .select_related('sessie',
+                                         'sporterboog',
+                                         'sporterboog__sporter')
+                         .filter(sessie__pk__in=sessie_pks,
+                                 sporterboog__sporter=sporter)
+                         .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)):
 
-            sessie_pk = inschrijving.sessie.pk
-            sessie_pk2inschrijving[sessie_pk] = inschrijving
-        # for
+        sessie_pk = inschrijving.sessie.pk
+        sessie_pk2inschrijving[sessie_pk] = inschrijving
+    # for
 
     wedstrijdklassen = list()
     for sessie in sessies:
@@ -169,14 +178,13 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
                 compatible_geslacht = klasse_compat_geslacht = True
 
             # check leeftijd is compatible
-            if wedstrijdleeftijd:
-                if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
-                    compatible_leeftijd = klasse_compat_leeftijd = True
+            if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
+                compatible_leeftijd = klasse_compat_leeftijd = True
 
-                    # verzamel een lijstje van compatibele wedstrijdklassen om te tonen
-                    if lkl.beschrijving not in wedstrijdklassen:
-                        if lkl.geslacht_is_compatible(wedstrijd_geslacht):
-                            wedstrijdklassen.append(lkl.beschrijving)
+                # verzamel een lijstje van compatibele wedstrijdklassen om te tonen
+                if lkl.beschrijving not in wedstrijdklassen:
+                    if lkl.geslacht_is_compatible(wedstrijd_geslacht):
+                        wedstrijdklassen.append(lkl.beschrijving)
 
             if klasse_compat_boog and klasse_compat_geslacht and klasse_compat_leeftijd:
                 klasse.is_compat = True
@@ -196,8 +204,7 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
         sessie.compatible_leeftijd = compatible_leeftijd
         sessie.compatible_geslacht = compatible_geslacht
 
-        if sporter:
-            sessie.prijs_euro_sporter = wedstrijd.bepaal_prijs_voor_sporter(sporter)
+        sessie.prijs_euro_sporter = wedstrijd.bepaal_prijs_voor_sporter(sporter)
     # for
 
     return sessies, wedstrijdleeftijd, wedstrijdklassen, wedstrijd_geslacht
@@ -208,7 +215,7 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
     """ Via deze view kan een sporter zichzelf inschrijven voor een wedstrijd """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_KALENDER_INSCHRIJVEN_SPORTER
+    template_name = TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_SPORTER
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -330,7 +337,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
     """ Via deze view kan een sporter een groepje inschrijven """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_KALENDER_INSCHRIJVEN_GROEPJE
+    template_name = TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_GROEPJE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -513,7 +520,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
     """ Via deze view kan een sporter zichzelf en familie inschrijven """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_KALENDER_INSCHRIJVEN_FAMILIE
+    template_name = TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_FAMILIE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -696,10 +703,10 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
 
 class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
 
-    """ Via deze view kan een sporter zichzelf en familie inschrijven """
+    """ Via deze view kan de HWL een sporter inschrijven """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_KALENDER_INSCHRIJVEN_HANDMATIG
+    template_name = TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_HANDMATIG
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -731,7 +738,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
         context['wed'] = wedstrijd
 
         if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.nhb_ver.ver_nr:
-            raise PermissionError('Wedstrijd van andere vereniging')
+            raise PermissionDenied('Wedstrijd van andere vereniging')
 
         wedstrijd_boogtype_pks = list(wedstrijd.boogtypen.all().values_list('pk', flat=True))
 
@@ -756,7 +763,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
 
         try:
             zoek_lid_nr = self.request.GET['bondsnummer']
-            zoek_lid_nr = str(zoek_lid_nr)[:6]      # afkappen voor de veiligheid
+            zoek_lid_nr = str(zoek_lid_nr)[:6]                  # afkappen voor de veiligheid
             zoek_lid_nr = int(zoek_lid_nr)
         except (KeyError, TypeError, ValueError):
             # geen zoekparameter of slechte zoekterm
@@ -875,26 +882,42 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        wedstrijd_str = request.POST.get('wedstrijd', '')[:6]       # afkappen voor de veiligheid
+
+        try:
+
+            wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
+            wedstrijd = (Wedstrijd
+                         .objects
+                         .select_related('organiserende_vereniging',
+                                         'locatie')
+                         .prefetch_related('boogtypen',
+                                           'sessies')
+                         .get(pk=wedstrijd_pk))
+        except Wedstrijd.DoesNotExist:
+            raise Http404('Wedstrijd niet gevonden')
+
+        if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.nhb_ver.ver_nr:
+            raise PermissionDenied('Wedstrijd van andere vereniging')
+
         sporterboog_str = request.POST.get('sporterboog', '')[:6]   # afkappen voor de veiligheid
         sessie_str = request.POST.get('sessie', '')[:6]             # afkappen voor de veiligheid
 
         try:
-            wedstrijd_pk = int(wedstrijd_str)
             sporterboog_pk = int(sporterboog_str)
             sessie_pk = int(sessie_str)
         except (ValueError, TypeError):
             raise Http404('Slecht verzoek')
 
         try:
-            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
-            sessie = WedstrijdSessie.objects.get(pk=sessie_pk)
+            sessie = wedstrijd.sessies.get(pk=sessie_pk)
             sporterboog = (SporterBoog
                            .objects
                            .select_related('sporter')
                            .get(pk=sporterboog_pk))
         except ObjectDoesNotExist:
             raise Http404('Onderdeel van verzoek niet gevonden')
+
+        # TODO: check wedstrijd geslacht gekozen
 
         account_koper = request.user
 

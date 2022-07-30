@@ -13,9 +13,9 @@ from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 
-class TestKalenderSessies(E2EHelpers, TestCase):
+class TestWedstrijdenSessies(E2EHelpers, TestCase):
 
-    """ tests voor de Kalender applicatie """
+    """ tests voor de Wedstrijden applicatie, module sessie wijzigen """
 
     url_kalender_vereniging = '/wedstrijden/vereniging/'
     url_kalender_sessies = '/wedstrijden/%s/sessies/'  # wedstrijd_pk

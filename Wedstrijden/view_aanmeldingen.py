@@ -20,8 +20,8 @@ from decimal import Decimal
 import csv
 
 
-TEMPLATE_KALENDER_AANMELDINGEN = 'wedstrijden/aanmeldingen.dtl'
-TEMPLATE_KALENDER_AANMELDINGEN_SPORTER = 'wedstrijden/aanmeldingen-sporter.dtl'
+TEMPLATE_WEDSTRIJDEN_AANMELDINGEN = 'wedstrijden/aanmeldingen.dtl'
+TEMPLATE_WEDSTRIJDEN_AANMELDINGEN_SPORTER = 'wedstrijden/aanmeldingen-sporter.dtl'
 
 
 class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
@@ -29,7 +29,7 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
     """ Via deze view kunnen beheerders de inschrijvingen voor een wedstrijd inzien """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_KALENDER_AANMELDINGEN
+    template_name = TEMPLATE_WEDSTRIJDEN_AANMELDINGEN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -335,7 +335,7 @@ class KalenderDetailsSporterView(UserPassesTestMixin, TemplateView):
     """ Via deze view kunnen beheerders de details van een inschrijving voor een wedstrijd inzien """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_KALENDER_AANMELDINGEN_SPORTER
+    template_name = TEMPLATE_WEDSTRIJDEN_AANMELDINGEN_SPORTER
     raise_exception = True          # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):

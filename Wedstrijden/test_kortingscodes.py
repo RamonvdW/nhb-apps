@@ -17,9 +17,9 @@ from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
 
-class TestKalenderKortingscodes(E2EHelpers, TestCase):
+class TestWedstrijdenKortingscodes(E2EHelpers, TestCase):
 
-    """ tests voor de Kalender applicatie, module kortingscodes """
+    """ tests voor de Wedstrijden applicatie, module kortingscodes """
 
     url_kalender_kortingscodes = '/wedstrijden/vereniging/kortingscodes/'
     url_kalender_nieuwe_code = '/wedstrijden/vereniging/kortingscodes/nieuw/'

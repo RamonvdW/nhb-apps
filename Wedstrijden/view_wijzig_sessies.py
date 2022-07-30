@@ -19,8 +19,8 @@ from Wedstrijden.models import (Wedstrijd, WedstrijdSessie,
 from types import SimpleNamespace
 import datetime
 
-TEMPLATE_KALENDER_WIJZIG_SESSIES = 'wedstrijden/wijzig-sessies.dtl'
-TEMPLATE_KALENDER_WIJZIG_SESSIE = 'wedstrijden/wijzig-sessie.dtl'
+TEMPLATE_WEDSTRIJDEN_WIJZIG_SESSIES = 'wedstrijden/wijzig-sessies.dtl'
+TEMPLATE_WEDSTRIJDEN_WIJZIG_SESSIE = 'wedstrijden/wijzig-sessie.dtl'
 
 
 class WedstrijdSessiesView(UserPassesTestMixin, View):
@@ -28,7 +28,7 @@ class WedstrijdSessiesView(UserPassesTestMixin, View):
     """ Via deze view kunnen de HWL en BB de sessies van een wedstrijd wijzigen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_KALENDER_WIJZIG_SESSIES
+    template_name = TEMPLATE_WEDSTRIJDEN_WIJZIG_SESSIES
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -129,7 +129,7 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
     """ Via deze view kunnen de HWL en BB een sessie wijzigen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_KALENDER_WIJZIG_SESSIE
+    template_name = TEMPLATE_WEDSTRIJDEN_WIJZIG_SESSIE
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):

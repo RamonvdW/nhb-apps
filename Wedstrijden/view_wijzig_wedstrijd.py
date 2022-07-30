@@ -28,7 +28,7 @@ from .models import (Wedstrijd,
 import datetime
 from types import SimpleNamespace
 
-TEMPLATE_KALENDER_WIJZIG_WEDSTRIJD = 'wedstrijden/wijzig-wedstrijd.dtl'
+TEMPLATE_WEDSTRIJDEN_WIJZIG_WEDSTRIJD = 'wedstrijden/wijzig-wedstrijd.dtl'
 
 
 class WijzigWedstrijdView(UserPassesTestMixin, View):
@@ -36,7 +36,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
     """ Via deze view kunnen de HWL of BB een wedstrijd wijzigen """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_KALENDER_WIJZIG_WEDSTRIJD
+    template_name = TEMPLATE_WEDSTRIJDEN_WIJZIG_WEDSTRIJD
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):

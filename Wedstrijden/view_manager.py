@@ -18,7 +18,7 @@ from Wedstrijden.models import (Wedstrijd,
 from types import SimpleNamespace
 import datetime
 
-TEMPLATE_KALENDER_OVERZICHT_MANAGER = 'wedstrijden/overzicht-manager.dtl'
+TEMPLATE_WEDSTRIJDEN_OVERZICHT_MANAGER = 'wedstrijden/overzicht-manager.dtl'
 
 
 # vertaling van wedstrijd status in een url parameter en terug
@@ -32,7 +32,7 @@ class KalenderManagerView(UserPassesTestMixin, View):
     """ Via deze view kan de Manager Competitiezaken de wedstrijdkalender beheren """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_KALENDER_OVERZICHT_MANAGER
+    template_name = TEMPLATE_WEDSTRIJDEN_OVERZICHT_MANAGER
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):

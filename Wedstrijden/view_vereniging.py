@@ -19,8 +19,8 @@ from Wedstrijden.models import (Wedstrijd,
                                 WEDSTRIJD_DISCIPLINE_3D, ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR)
 from datetime import date
 
-TEMPLATE_KALENDER_KIES_TYPE = 'wedstrijden/nieuwe-wedstrijd-kies-type.dtl'
-TEMPLATE_KALENDER_OVERZICHT_VERENIGING = 'wedstrijden/overzicht-vereniging.dtl'
+TEMPLATE_WEDSTRIJDEN_KIES_TYPE = 'wedstrijden/nieuwe-wedstrijd-kies-type.dtl'
+TEMPLATE_WEDSTRIJDEN_OVERZICHT_VERENIGING = 'wedstrijden/overzicht-vereniging.dtl'
 
 
 class VerenigingWedstrijdenView(UserPassesTestMixin, View):
@@ -28,7 +28,7 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
     """ Via deze view kan de HWL de wedstrijden van de vereniging beheren """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_KALENDER_OVERZICHT_VERENIGING
+    template_name = TEMPLATE_WEDSTRIJDEN_OVERZICHT_VERENIGING
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -85,7 +85,7 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
     """ Via deze view geeft informatie over de verschillende typen wedstrijden """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_KALENDER_KIES_TYPE
+    template_name = TEMPLATE_WEDSTRIJDEN_KIES_TYPE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
 
     def __init__(self, **kwargs):
@@ -113,7 +113,9 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen om de POST request af te handelen """
+        """ deze functie wordt aangeroepen om de POST request af te handelen
+            met deze POST wordt een nieuwe wedstrijd aangemaakt
+        """
 
         account = request.user
 
@@ -126,7 +128,7 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
             keuze = request.POST.get('keuze', '')
             if keuze in ('wa', 'ifaa', 'nhb'):
                 now = timezone.now()
-                begin = date(now.year, now.month, now.day)
+                begin = date(now.year, now.month, now.day)      # inschrijven kan alleen indien in toekomst
 
                 keuze2organisatie = {
                     'wa': ORGANISATIE_WA,

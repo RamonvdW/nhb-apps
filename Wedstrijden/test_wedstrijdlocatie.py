@@ -10,9 +10,9 @@ from .models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
-class TestWedstrijden(E2EHelpers, TestCase):
+class TestWedstrijdenLocatie(E2EHelpers, TestCase):
 
-    """ Tests voor de Wedstrijden applicatie """
+    """ Tests voor de Wedstrijden applicatie, module wedstrijdlocatie """
 
     def setUp(self):
         """ eenmalige setup voor alle tests

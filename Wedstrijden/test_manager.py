@@ -11,9 +11,9 @@ from Wedstrijden.models import WedstrijdLocatie
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
-class TestKalender(E2EHelpers, TestCase):
+class TestWedstrijdenManager(E2EHelpers, TestCase):
 
-    """ tests voor de Kalender applicatie. module Manager """
+    """ tests voor de Wedstrijden applicatie, module Manager """
 
     url_kalender_manager = '/wedstrijden/manager/'
     url_kalender_vereniging = '/wedstrijden/vereniging/'
