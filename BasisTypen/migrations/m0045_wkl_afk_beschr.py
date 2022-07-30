@@ -22,7 +22,7 @@ def update_kalender_klassen(apps, _):
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     kalenderwedstrijdklasse_klas = apps.get_model('BasisTypen', 'KalenderWedstrijdklasse')
 
-    for obj in kalenderwedstrijdklasse_klas.objects.filter(afkorting='?'):
+    for obj in kalenderwedstrijdklasse_klas.objects.filter(afkorting='?'):      # pragma: no cover
         obj.afkorting, obj.beschrijving = volgorde2new[obj.volgorde]
         obj.save(update_fields=['afkorting', 'beschrijving'])
     # for
