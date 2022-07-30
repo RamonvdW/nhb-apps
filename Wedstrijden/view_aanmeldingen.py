@@ -309,6 +309,11 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
             sporter = sporterboog.sporter
             reserveringsnummer = aanmelding.pk + settings.TICKET_NUMMER_START__WEDSTRIJD
 
+            if sporter.bij_vereniging:
+                ver_str = sporter.bij_vereniging.ver_nr_en_naam()
+            else:
+                ver_str = '[0000] Geen vereniging'
+
             try:
                 wedstrijd_geslacht = lid_nr2geslacht[sporter.lid_nr]
             except KeyError:
@@ -322,7 +327,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                              sporterboog.boogtype.beschrijving,
                              INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
                              reserveringsnummer,
-                             sporter.bij_vereniging.ver_nr_en_naam(),
+                             ver_str,
                              aanmelding.sessie.beschrijving,
                              aanmelding.wanneer.strftime('%Y-%m-%d %H:%M')])
         # for

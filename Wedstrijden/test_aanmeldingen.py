@@ -6,6 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
+from Bestel.models import BestelProduct
 from Functie.models import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
@@ -21,16 +22,18 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
 
     test_after = ('Wedstrijden.test_wedstrijd',)
 
-    url_aanmeldingen_wedstrijd = '/wedstrijden/%s/aanmeldingen/'       # wedstrijd_pk
-    url_aanmeldingen_sporter = '/wedstrijden/sporter/%s/'              # sporter_lid_nr
-    url_aanmeldingen_afmelden = '/wedstrijden/afmelden/%s/'            # inschrijving_pk
+    url_aanmeldingen_wedstrijd = '/wedstrijden/%s/aanmeldingen/'                    # wedstrijd_pk
+    url_aanmeldingen_sporter = '/wedstrijden/sporter/%s/'                           # sporter_lid_nr
+    url_aanmeldingen_afmelden = '/wedstrijden/afmelden/%s/'                         # inschrijving_pk
+    url_aanmeldingen_download_tsv = '/wedstrijden/%s/aanmeldingen/download/tsv/'    # wedstrijd_pk
+    url_aanmeldingen_download_csv = '/wedstrijden/%s/aanmeldingen/download/csv/'    # wedstrijd_pk
 
-    url_kalender_wedstrijd_info = '/wedstrijden/%s/info/'                          # wedstrijd_pk
+    url_kalender_wedstrijd_info = '/wedstrijden/%s/info/'                           # wedstrijd_pk
     url_kalender_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
     url_kalender_vereniging = '/wedstrijden/vereniging/'
-    url_inschrijven_groepje = '/wedstrijden/inschrijven/%s/groep/'                 # wedstrijd_pk
+    url_inschrijven_groepje = '/wedstrijden/inschrijven/%s/groep/'                  # wedstrijd_pk
     url_inschrijven_toevoegen_mandje = '/wedstrijden/inschrijven/toevoegen-mandje/'
-    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                          # sporter_pk
+    url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                              # sporter_pk
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -79,7 +82,12 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         sporterboog = SporterBoog.objects.get(sporter=sporter1, boogtype=self.boog_r)
         sporterboog.voor_wedstrijd = True
         sporterboog.save(update_fields=['voor_wedstrijd'])
-        self.sporterboog1 = sporterboog
+        self.sporterboog1r = sporterboog
+
+        sporterboog = SporterBoog.objects.get(sporter=sporter1, boogtype=self.boog_c)
+        sporterboog.voor_wedstrijd = True
+        sporterboog.save(update_fields=['voor_wedstrijd'])
+        self.sporterboog1c = sporterboog
 
         sporter2 = Sporter(
                     lid_nr=self.lid_nr + 1,
@@ -98,7 +106,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         sporterboog = SporterBoog.objects.get(sporter=sporter2, boogtype=self.boog_c)
         sporterboog.voor_wedstrijd = True
         sporterboog.save(update_fields=['voor_wedstrijd'])
-        self.sporterboog2 = sporterboog
+        self.sporterboog2c = sporterboog
 
         # voeg een locatie toe
         locatie = WedstrijdLocatie(
@@ -148,21 +156,31 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
 
         resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
                                                                         'wedstrijd': self.wedstrijd.pk,
-                                                                        'sporterboog': self.sporterboog1.pk,
+                                                                        'sporterboog': self.sporterboog1r.pk,
                                                                         'sessie': self.sessie_r.pk,
                                                                         'boog': self.boog_r.pk})
         self.assert_is_redirect(resp, self.url_kalender_wedstrijd_info % self.wedstrijd.pk)
         self.assertEqual(1, WedstrijdInschrijving.objects.count())
-        self.inschrijving1 = WedstrijdInschrijving.objects.all()[0]
+        self.inschrijving1r = WedstrijdInschrijving.objects.all()[0]
 
         resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
                                                                         'wedstrijd': self.wedstrijd.pk,
-                                                                        'sporterboog': self.sporterboog2.pk,
+                                                                        'sporterboog': self.sporterboog1c.pk,
                                                                         'sessie': self.sessie_r.pk,
                                                                         'boog': self.boog_c.pk})
         self.assert_is_redirect(resp, self.url_kalender_wedstrijd_info % self.wedstrijd.pk)
         self.assertEqual(2, WedstrijdInschrijving.objects.count())
-        self.inschrijving2 = WedstrijdInschrijving.objects.exclude(pk=self.inschrijving1.pk)[0]
+        self.inschrijving1c = WedstrijdInschrijving.objects.exclude(pk=self.inschrijving1r.pk)[0]
+
+        resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
+                                                                        'wedstrijd': self.wedstrijd.pk,
+                                                                        'sporterboog': self.sporterboog2c.pk,
+                                                                        'sessie': self.sessie_r.pk,
+                                                                        'boog': self.boog_c.pk})
+        self.assert_is_redirect(resp, self.url_kalender_wedstrijd_info % self.wedstrijd.pk)
+        self.assertEqual(3, WedstrijdInschrijving.objects.count())
+        self.inschrijving2 = WedstrijdInschrijving.objects.exclude(pk__in=(self.inschrijving1r.pk,
+                                                                           self.inschrijving1c.pk))[0]
 
         korting = WedstrijdKortingscode(
                         code='TESTING1234',
@@ -172,6 +190,9 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                         soort=WEDSTRIJD_KORTING_VERENIGING,
                         voor_vereniging=self.nhbver1)
         korting.save()
+
+        self.inschrijving1r.gebruikte_code = korting
+        self.inschrijving1r.save(update_fields=['gebruikte_code'])
 
         self.inschrijving2.status = INSCHRIJVING_STATUS_AFGEMELD
         self.inschrijving2.gebruikte_code = korting
@@ -186,7 +207,13 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         resp = self.client.get(self.url_aanmeldingen_sporter % self.sporter1.lid_nr)
         self.assert403(resp)
 
-        resp = self.client.get(self.url_aanmeldingen_afmelden % self.inschrijving1.pk)
+        resp = self.client.get(self.url_aanmeldingen_afmelden % self.inschrijving1r.pk)
+        self.assert403(resp)
+
+        resp = self.client.get(self.url_aanmeldingen_download_tsv % self.wedstrijd.pk)
+        self.assert403(resp)
+
+        resp = self.client.get(self.url_aanmeldingen_download_csv % self.wedstrijd.pk)
         self.assert403(resp)
 
     def test_aanmeldingen(self):
@@ -216,6 +243,22 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         resp = self.client.get(self.url_aanmeldingen_wedstrijd % 'X=1')
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
+        # wordt SEC
+        functie_sec = maak_functie('SEC Ver 1000', 'SEC')
+        functie_sec.nhb_ver = self.nhbver1
+        functie_sec.save()
+        functie_sec.accounts.add(self.account_admin)
+
+        # opnieuw inloggen om de SEC functie te kunnen zien
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(functie_sec)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/aanmeldingen.dtl', 'plein/site_layout.dtl'))
+
     def test_details_sporter(self):
         # wordt HWL
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -234,6 +277,16 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         # als BB
         self.e2e_wisselnaarrol_bb()
 
+        url = self.url_aanmeldingen_sporter % self.sporter1.lid_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/aanmeldingen-sporter.dtl', 'plein/site_layout.dtl'))
+
+        # maak de sporter niet ingeschreven
+        self.inschrijving2.delete()
+
         url = self.url_aanmeldingen_sporter % self.sporter2.lid_nr      # is afgemeld
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -248,12 +301,34 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         resp = self.client.get(self.url_aanmeldingen_sporter % 999999)
         self.assert404(resp, 'Sporter niet gevonden')
 
+        # maak 1 inschrijving afgemeld
+        self.inschrijving1c.status = INSCHRIJVING_STATUS_AFGEMELD
+        self.inschrijving1c.save(update_fields=['status'])
+
+        # verkeerde vereniging
+        nhbver2 = NhbVereniging(
+                        ver_nr=2000,
+                        naam="Andere Club",
+                        regio=NhbRegio.objects.get(regio_nr=116))
+        nhbver2.save()
+        self.wedstrijd.organiserende_vereniging = nhbver2
+        self.wedstrijd.save(update_fields=['organiserende_vereniging'])
+
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        url = self.url_aanmeldingen_sporter % self.sporter1.lid_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/aanmeldingen-sporter.dtl', 'plein/site_layout.dtl'))
+
     def test_afmelden(self):
         # wordt HWL
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        url = self.url_aanmeldingen_afmelden % self.inschrijving1.pk
+        url = self.url_aanmeldingen_afmelden % self.inschrijving1r.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
         self.assert_is_redirect(resp, self.url_aanmeldingen_sporter % self.sporter1.lid_nr)
@@ -267,7 +342,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.wedstrijd.organiserende_vereniging = ver2
         self.wedstrijd.save()
 
-        url = self.url_aanmeldingen_afmelden % self.inschrijving1.pk
+        url = self.url_aanmeldingen_afmelden % self.inschrijving1r.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
         self.assert404(resp, 'Verkeerde vereniging')
@@ -288,5 +363,75 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
 
         resp = self.client.post(self.url_aanmeldingen_afmelden % 'X=1')
         self.assert404(resp, 'Inschrijving niet gevonden')
+
+    def test_afmelden_bestelproduct(self):
+        # wordt HWL
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        BestelProduct(wedstrijd_inschrijving=self.inschrijving1r).save()
+
+        url = self.url_aanmeldingen_afmelden % self.inschrijving1r.pk
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_aanmeldingen_sporter % self.sporter1.lid_nr)
+
+    def test_download(self):
+        # wordt HWL
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+
+        # echte download
+        url = self.url_aanmeldingen_download_tsv % self.wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert200_file(resp)
+
+        url = self.url_aanmeldingen_download_csv % self.wedstrijd.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert200_file(resp)
+
+        # als verkeerde HWL
+        nhbver2 = NhbVereniging(
+                            ver_nr=2000,
+                            naam="Extra Club",
+                            regio=NhbRegio.objects.get(regio_nr=116))
+        nhbver2.save()
+
+        self.wedstrijd.organiserende_vereniging = nhbver2
+        self.wedstrijd.save(update_fields=['organiserende_vereniging'])
+
+        resp = self.client.get(self.url_aanmeldingen_download_tsv % self.wedstrijd.pk)
+        self.assert404(resp, 'Wedstrijd is niet bij jullie vereniging')
+
+        resp = self.client.get(self.url_aanmeldingen_download_csv % self.wedstrijd.pk)
+        self.assert404(resp, 'Wedstrijd is niet bij jullie vereniging')
+
+        # nu als BB
+        self.e2e_wisselnaarrol_bb()
+
+        # koppel een sporter los van een vereniging
+        self.sporter1.bij_vereniging = None
+        self.sporter1.save(update_fields=['bij_vereniging'])
+
+        # sporter zonder gekozen geslacht
+        self.sporter_voorkeuren.wedstrijd_geslacht_gekozen = False
+        self.sporter_voorkeuren.save(update_fields=['wedstrijd_geslacht_gekozen'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_aanmeldingen_download_tsv % self.wedstrijd.pk)
+        self.assert200_file(resp)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_aanmeldingen_download_csv % self.wedstrijd.pk)
+        self.assert200_file(resp)
+
+        # wedstrijd niet gevonden
+        resp = self.client.get(self.url_aanmeldingen_download_tsv % 999999)
+        self.assert404(resp, 'Wedstrijd niet gevonden')
+
+        resp = self.client.get(self.url_aanmeldingen_download_csv % 999999)
+        self.assert404(resp, 'Wedstrijd niet gevonden')
 
 # end of file
