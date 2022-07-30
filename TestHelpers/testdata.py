@@ -1305,7 +1305,7 @@ class TestData(object):
         step = 0.12
 
         for team in rk_teams:
-            if team.vereniging.ver_nr == ver_nr:
+            if team.vereniging.ver_nr == ver_nr:            # pragma: no branch
                 for deelnemer in team.tijdelijke_schutters.all():
                     deelnemer.aantal_scores = 6
                     deelnemer.gemiddelde = gem

@@ -220,12 +220,14 @@ class TestFunctie2FA(E2EHelpers, TestCase):
             resp = self.client.get(self.url_controle)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
         # geen code
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_controle, {'jaja': 'nee'})
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('functie/otp-controle.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
         self.assertContains(resp, "De gegevens worden niet geaccepteerd")
 
         # lege code
