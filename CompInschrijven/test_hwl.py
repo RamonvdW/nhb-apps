@@ -377,8 +377,8 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
 
         self.assertContains(resp, '>Cadet de Jeugd</')
-        self.assertContains(resp, '>14</')                   # leeftijd 2021
-        self.assertContains(resp, '>Onder 18 (cadetten)</')  # leeftijdsklasse competitie
+        self.assertContains(resp, '>14</')                  # leeftijd 2021
+        self.assertContains(resp, '>Onder 18</')            # leeftijdsklasse competitie
 
         # schrijf het jonge lid in en controleer de wedstrijdklasse
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)

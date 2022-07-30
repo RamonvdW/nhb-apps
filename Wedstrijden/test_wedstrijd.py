@@ -556,11 +556,11 @@ class TestWedstrijd(E2EHelpers, TestCase):
         sessie = WedstrijdSessie.objects.all()[0]
         sessie2 = WedstrijdSessie.objects.all()[1]
 
-        wkl = wedstrijd.wedstrijdklassen.get(beschrijving='Recurve 50+ mannen (master)')
+        wkl = wedstrijd.wedstrijdklassen.get(volgorde=111)  # Recurve 50+ heren
         sessie.wedstrijdklassen.set([wkl])        # alle uit, behalve deze
         sessie2.wedstrijdklassen.set([wkl])       # alle uit, behalve deze
 
-        wkl = wedstrijd.wedstrijdklassen.get(beschrijving='Recurve 50+ vrouwen (master)')
+        wkl = wedstrijd.wedstrijdklassen.get(volgorde=112)  # Recurve 50+ dames
         sessie2.wedstrijdklassen.add(wkl)         # nu 2 klassen
 
         # probeer nu de recurve boog uit te zetten

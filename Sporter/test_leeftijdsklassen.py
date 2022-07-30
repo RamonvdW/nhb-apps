@@ -106,7 +106,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                                # wedstrijden
                                ['Onder 12', 'Onder 12', 'Onder 12', 'Onder 12', 'Onder 14'],
                                # competitie (1 jaar opgeschoven)
-                               ['Onder 12 (aspiranten)', 'Onder 12 (aspiranten)', 'Onder 12 (aspiranten)', 'Onder 14 (aspiranten)', 'Onder 14 (aspiranten)'],
+                               ['Onder 12', 'Onder 12', 'Onder 12', 'Onder 14', 'Onder 14'],
                                'Onder 12'))
 
         # onder 18 / cadet (14..17)
@@ -114,7 +114,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         self.assertEqual(tup, (huidige_jaar,
                                13,
                                ['Onder 14', 'Onder 14', 'Onder 18', 'Onder 18', 'Onder 18'],
-                               ['Onder 14 (aspiranten)', 'Onder 18 (cadetten)', 'Onder 18 (cadetten)', 'Onder 18 (cadetten)', 'Onder 18 (cadetten)'],
+                               ['Onder 14', 'Onder 18', 'Onder 18', 'Onder 18', 'Onder 18'],
                                'Onder 18'))
 
         # junior (18..20)
@@ -122,7 +122,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         self.assertEqual(tup, (huidige_jaar,
                                18,
                                ['Onder 18', 'Onder 21', 'Onder 21', 'Onder 21', '21+'],
-                               ['Onder 21 (junioren)', 'Onder 21 (junioren)', 'Onder 21 (junioren)', '21+ (senioren)', '21+ (senioren)'],
+                               ['Onder 21', 'Onder 21', 'Onder 21', '21+', '21+'],
                                'Onder 21'))
 
         # senior
@@ -130,7 +130,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         self.assertEqual(tup, (huidige_jaar,
                                21,
                                ['Onder 21', '21+', '21+', '21+', '21+'],
-                               ['21+ (senioren)', '21+ (senioren)', '21+ (senioren)', '21+ (senioren)', '21+ (senioren)'],
+                               ['21+', '21+', '21+', '21+', '21+'],
                                '21+'))
 
         # master
@@ -138,7 +138,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         self.assertEqual(tup, (huidige_jaar,
                                50,
                                ['21+', '50+', '50+', '50+', '50+'],
-                               ['21+ (senioren)', '21+ (senioren)', '21+ (senioren)', '21+ (senioren)', '21+ (senioren)'],
+                               ['21+', '21+', '21+', '21+', '21+'],
                                '21+'))
 
         # veteraan
@@ -146,7 +146,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         self.assertEqual(tup, (huidige_jaar,
                                60,
                                ['50+', '60+', '60+', '60+', '60+'],
-                               ['21+ (senioren)', '21+ (senioren)', '21+ (senioren)', '21+ (senioren)', '21+ (senioren)'],
+                               ['21+', '21+', '21+', '21+', '21+'],
                                '21+'))
 
     def test_persoonlijk(self):
