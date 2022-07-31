@@ -157,7 +157,8 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
 
         self.account_100001 = Account.objects.get(pk=self.account_100001.pk)
         self.account_100001.otp_is_actief = False
-        self.account_100001.save()
+        self.account_100001.last_login -= datetime.timedelta(days=720)
+        self.account_100001.save(update_fields=['otp_is_actief', 'last_login'])
 
         # zoek op nhb nummer  --> geen functies, dus geen 2FA nodig
         with self.assert_max_queries(20):

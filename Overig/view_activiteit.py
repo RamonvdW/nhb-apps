@@ -196,7 +196,10 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                     sporter.email_is_bevestigd_str = 'Nee'
 
                 if account.last_login:
-                    sporter.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz), 'j F H:i')
+                    if account.last_login.year == now.year:
+                        sporter.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz), 'j F H:i')
+                    else:
+                        sporter.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz), 'j F Y H:i')
 
                 do_vhpg = True
                 if account.otp_is_actief:
