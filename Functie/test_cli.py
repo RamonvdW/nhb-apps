@@ -168,7 +168,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
         with self.assert_max_queries(51):
             management.call_command('check_beheerders', stderr=f1, stdout=f2)
         self.assertTrue(f1.getvalue() == '')
-        self.assertTrue("LET OP: geen koppeling met NHB lid" in f2.getvalue())
+        self.assertTrue("LET OP: account heeft geen koppeling met NHB lid" in f2.getvalue())
 
         # maak account ook nhblid
         sporter = Sporter(
@@ -236,7 +236,7 @@ class TestFunctieCli(E2EHelpers, TestCase):
             management.call_command('check_beheerders', stderr=f1, stdout=f2)
         # print('f1:', f1.getvalue())
         # print('f2:', f2.getvalue())
-        self.assertTrue('maar niet meer gekoppeld aan een functie:\n  [100042] Kees Pijlpunt\n' in f2.getvalue())
+        self.assertTrue('maar niet meer gekoppeld aan een functie:\n  [100042] Kees Pijlpunt' in f2.getvalue())
 
 
 # end of file

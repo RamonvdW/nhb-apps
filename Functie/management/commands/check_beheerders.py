@@ -34,7 +34,7 @@ class Command(BaseCommand):
                     sporter = account.sporter_set.prefetch_related('bij_vereniging').all()[0]
                 except IndexError:
                     sporter = None
-                    let_op = 'LET OP: geen koppeling met NHB lid'
+                    let_op = 'LET OP: account heeft geen koppeling met NHB lid'
                 else:
                     if not sporter.bij_vereniging or not sporter.is_actief_lid:
                         # deze melding komt na 15 januari
@@ -49,7 +49,7 @@ class Command(BaseCommand):
                         self.stdout.write('Functie: %s' % functie.beschrijving)
                         functie_getoond = True
 
-                    self.stdout.write('  %s (%s) %s' % (account.username, account.volledige_naam(), let_op))
+                    self.stdout.write('  [%s] %s  %s' % (account.username, account.volledige_naam(), let_op))
             # for
         # for
 
@@ -57,14 +57,19 @@ class Command(BaseCommand):
         self.stdout.write('\nActieve leden met 2FA maar niet meer gekoppeld aan een functie:')
         for sporter in (Sporter
                         .objects
-                        .filter(account__otp_is_actief=True)
-                        .exclude(account__is_BB=True)       # BB moet 2FA hebben (maar hoeven geen functie te hebben)
                         .select_related('account')
-                        .prefetch_related('account__functie_set')):
+                        .filter(account__otp_is_actief=True,
+                                account__is_BB=False)       # BB moet 2FA hebben (maar hoeven geen functie te hebben)
+                        .prefetch_related('account__functie_set')
+                        .order_by('lid_nr')):
+
             account = sporter.account
             if not (account.is_BB or account.is_staff or account.is_superuser):
                 if account.functie_set.count() == 0:
-                    self.stdout.write('  %s' % sporter.lid_nr_en_volledige_naam())
+                    let_op = ''
+                    if not sporter.is_actief_lid:
+                        let_op = 'LET OP: geen actief lid'
+                    self.stdout.write('  %s  %s' % (sporter.lid_nr_en_volledige_naam(), let_op))
         # for
 
 # end of file
