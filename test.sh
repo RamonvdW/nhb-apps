@@ -92,7 +92,7 @@ then
 fi
 
 # set high performance
-sudo cpupower frequency-set --governor performance > /dev/null
+#sudo cpupower frequency-set --governor performance > /dev/null
 
 ABORTED=0
 
@@ -244,7 +244,7 @@ then
 fi
 
 # set normal performance
-sudo cpupower frequency-set --governor schedutil > /dev/null
+#sudo cpupower frequency-set --governor schedutil > /dev/null
 
 if [ $COVERAGE_RED -ne 0 ]
 then

@@ -32,14 +32,14 @@ class TestWedstrijd(E2EHelpers, TestCase):
         self.account_admin.is_BB = True
         self.account_admin.save()
 
-        sporter = Sporter(
-                    lid_nr=100000,
-                    voornaam='Ad',
-                    achternaam='de Admin',
-                    geboorte_datum='1966-06-06',
-                    sinds_datum='2020-02-02',
-                    account=self.account_admin)
-        sporter.save()
+        Sporter(
+                lid_nr=100000,
+                voornaam='Ad',
+                achternaam='de Admin',
+                geboorte_datum='1966-06-06',
+                sinds_datum='2020-02-02',
+                account=self.account_admin).save()
+        self.sporter = Sporter.objects.get(lid_nr=100000)     # geeft bruikbare geboorte_datum
 
         # maak een test vereniging
         self.nhbver1 = NhbVereniging(
@@ -58,6 +58,15 @@ class TestWedstrijd(E2EHelpers, TestCase):
                             naam="Kleine Club",
                             regio=NhbRegio.objects.get(regio_nr=112))
         self.nhbver2.save()
+
+        # onder 18 in 2022
+        Sporter(
+                lid_nr=100001,
+                voornaam='Onder',
+                achternaam='Achttien',
+                geboorte_datum='2012-06-06',
+                sinds_datum='2020-02-02').save()
+        self.sporter_jong = Sporter.objects.get(lid_nr=100001)     # geeft bruikbare geboorte_datum
 
     @staticmethod
     def _maak_externe_locatie(ver):
@@ -105,6 +114,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         self.assertEqual(1, Wedstrijd.objects.count())
         wedstrijd = Wedstrijd.objects.all()[0]
         self.assertTrue(str(wedstrijd) != '')
+
         url = self.url_kalender_wijzig_wedstrijd % wedstrijd.pk
 
         # haal de wedstrijd op met status 'ontwerp'
@@ -316,6 +326,16 @@ class TestWedstrijd(E2EHelpers, TestCase):
             resp = self.client.post(url, {'verwijder_wedstrijd': 'ja'})
         self.assert_is_redirect(resp, self.url_kalender_manager)
         self.assertEqual(0, Wedstrijd.objects.count())
+
+        wedstrijd.datum_begin = datetime.date(2022, 1, 1)
+        wedstrijd.prijs_euro_onder18 = 42.0
+        wedstrijd.prijs_euro_normaal = 99.0
+
+        prijs = wedstrijd.bepaal_prijs_voor_sporter(self.sporter)
+        self.assertEqual(prijs, 99.0)
+
+        prijs = wedstrijd.bepaal_prijs_voor_sporter(self.sporter_jong)
+        self.assertEqual(prijs, 42.0)
 
         self.e2e_assert_other_http_commands_not_supported(url, post=False)
 
@@ -584,5 +604,6 @@ class TestWedstrijd(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
+
 
 # end of file

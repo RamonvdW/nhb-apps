@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 # set high performance
-sudo cpupower frequency-set --governor performance > /dev/null
+#sudo cpupower frequency-set --governor performance > /dev/null
 
 export PYTHONDONTWRITEBYTECODE=1
 
@@ -59,7 +59,7 @@ else
 fi
 
 # set normal performance
-sudo cpupower frequency-set --governor schedutil > /dev/null
+#sudo cpupower frequency-set --governor schedutil > /dev/null
 
 # kill the background processes
 echo "[INFO] Stopping background tasks"

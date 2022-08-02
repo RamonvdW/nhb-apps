@@ -8,6 +8,7 @@ from django.test import TestCase
 from django.core import management
 from .models import Sporter
 from NhbStructuur.models import NhbVereniging, NhbRegio
+from Sporter.models import SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import io
@@ -22,7 +23,7 @@ class TestSporterCli(E2EHelpers, TestCase):
     def setUpTestData(cls):
         cls.testdata = testdata.TestData()
         cls.testdata.maak_accounts()
-        cls.testdata.maak_clubs_en_sporters()
+        cls.testdata.maak_clubs_en_sporters(ook_ifaa_bogen=True)
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -137,5 +138,10 @@ class TestSporterCli(E2EHelpers, TestCase):
         sporter = Sporter.objects.get(lid_nr=lid_nr)
         self.assertTrue(sporter.is_actief_lid)
         self.assertEqual(sporter.bij_vereniging.ver_nr, ver_nr)
+
+    def test_keuzes_bogen(self):
+        f1, f2 = self.run_management_command('keuzes_bogen')
+        # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
+        self.assertTrue('met boog voorkeuren' in f2.getvalue())
 
 # end of file

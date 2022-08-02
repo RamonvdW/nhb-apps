@@ -11,7 +11,7 @@ from django.core import management
 from django.utils import timezone
 from Account.models import Account, AccountEmail
 from Account.operations import account_create
-from BasisTypen.models import ORGANISATIE_NHB, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
+from BasisTypen.models import ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA, MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_teamtypen
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                DeelCompetitie, LAAG_BK, LAAG_RK,
@@ -148,7 +148,9 @@ class TestData(object):
         self._accounts_beheerders = list()      # 1 per vereniging, voor BKO, RKO, RCL
 
         self.afkorting2teamtype_nhb = dict()    # [team afkorting] = TeamType()
+
         self.afkorting2boogtype_nhb = dict()    # [boog afkorting] = BoogType()
+        self.afkorting2boogtype_ifaa = dict()   # [boog afkorting] = BoogType()
 
         for teamtype in get_organisatie_teamtypen(ORGANISATIE_NHB):
             self.afkorting2teamtype_nhb[teamtype.afkorting] = teamtype
@@ -156,6 +158,9 @@ class TestData(object):
         del teamtype
         for boogtype in get_organisatie_boogtypen(ORGANISATIE_NHB):
             self.afkorting2boogtype_nhb[boogtype.afkorting] = boogtype
+        # for
+        for boogtype in get_organisatie_boogtypen(ORGANISATIE_IFAA):
+            self.afkorting2boogtype_ifaa[boogtype.afkorting] = boogtype
         # for
         del boogtype
 
@@ -358,7 +363,7 @@ class TestData(object):
             # for
         # for
 
-    def _maak_leden(self):
+    def _maak_leden(self, ook_ifaa_bogen):
         """
             Maak voor elke vereniging een aantal leden aan: een mix van alle wedstrijdklassen en boogtypen.
 
@@ -412,12 +417,12 @@ class TestData(object):
             (37, 'V', 'Sen37',  'R',  False),
             (38, 'M', 'Sen38',  'LB', False),
             (39, 'V', 'Sen39',  'R',  True),            # Sen39 = BKO/RKO/RCL
-            (40, 'M', 'Sen40',  'C',  False),
+            (40, 'M', 'Sen40',  'C+FSC',  False),
             (41, 'V', 'Sen41',  'R',  False),
             (42, 'M', 'Sen42',  'R',  False),
             (42, 'M', 'Sen42b', 'C',  False),
             (49, 'V', 'Sen49',  'R',  False),
-            (49, 'V', 'Sen49b', 'BB', False),
+            (49, 'V', 'Sen49b', 'BB+BBR', False),
             (50, 'M', 'Mas50',  'R',  True),            # Mas50 = SEC
             (51, 'V', 'Mas51',  'R',  True),            # account
             (51, 'V', 'Mas51b', 'C',  False),
@@ -553,7 +558,9 @@ class TestData(object):
         del lid_nr2account
 
         # maak voor elke Sporter nu de SporterBoog records aan
-        boogtypen = self.afkorting2boogtype_nhb.values()
+        boogtypen = list(self.afkorting2boogtype_nhb.values())
+        if ook_ifaa_bogen:
+            boogtypen += list(self.afkorting2boogtype_ifaa.values())
 
         bulk_voorkeuren = list()
         bulk_sporter = list()
@@ -686,11 +693,11 @@ class TestData(object):
                 functie.accounts.add(self.account_hwl[ver_nr])
         # for
 
-    def maak_clubs_en_sporters(self):
+    def maak_clubs_en_sporters(self, ook_ifaa_bogen=False):
         # print('TestData: maak_clubs_en_leden. Counters: NhbVereniging=%s, Sporter=%s' % (
         #                     NhbVereniging.objects.count(), Sporter.objects.count()))
         self._maak_verenigingen()
-        self._maak_leden()
+        self._maak_leden(ook_ifaa_bogen)
         self._maak_accounts_en_functies()
         self._accepteer_vhpg_voor_alle_accounts()
 
@@ -902,7 +909,8 @@ class TestData(object):
                             .select_related('sporter',
                                             'boogtype')
                             .filter(sporter__bij_vereniging__ver_nr=ver_nr,
-                                    voor_wedstrijd=True)):
+                                    voor_wedstrijd=True,
+                                    boogtype__organisatie=ORGANISATIE_WA)):
 
             # lid_100004_boogtype_1
             pk1 = sporterboog.sporter.pk
