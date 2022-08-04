@@ -588,7 +588,7 @@
 
                     <!-- RCL Indoor -->
                     <tr>
-                        <td rowspan="2">RCL Indoor</td>
+                        <td rowspan="2">Regiocompetitieleider Indoor</td>
 
                         <td>{% if rcl18_namen|length > 1 %}Namen:{% else %}Naam:{% endif %}</td>
 
@@ -623,7 +623,7 @@
 
                     <!-- RCL 25m1pijl -->
                     <tr>
-                        <td rowspan="2">RCL 25m1pijl</td>
+                        <td rowspan="2">Regiocompetitieleider 25m1pijl</td>
 
                         <td>{% if rcl25_namen|length > 1 %}Namen:{% else %}Naam:{% endif %}</td>
 
