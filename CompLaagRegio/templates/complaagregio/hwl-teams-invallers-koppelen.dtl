@@ -174,8 +174,8 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-nhb-blauw">
         <div class="col s12">
-            <div class="white left-align" style="padding:10px">
-                <span>{{ logboek|linebreaks }}</span>
+            <div class="white left-align" style="padding:30px">
+                <span>{{ logboek|linebreaksbr }}</span>
             </div>
         </div>
     </div>

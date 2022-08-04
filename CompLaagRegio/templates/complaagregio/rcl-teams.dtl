@@ -134,9 +134,10 @@
                 {% endif %}
                 <td>{{ team.vereniging }}</td>
                 <td>{{ team.team_naam }}</td>
-                <td class="center">{{ team.ag_str }}</td>
-                <td>{{ team.team_type.beschrijving }}</td>
+                <td class="center">{{ team.ag_str }}</td>       <!-- sterkte -->
+                <td>{{ team.team_type.beschrijving }}</td>      <!-- soort team -->
                 <td class="center">
+                    <!-- knoppen -->
                     {% if team.url_aanpassen %}
                         <a class="btn-nhb-rood" href="{{ team.url_aanpassen }}">
                             <i class="material-icons-round">edit</i></a>
@@ -179,7 +180,7 @@
         {% for klasse, teams in regioteams.items %}
             <tr>
                 <td colspan="{{ cols }}" class="center">
-                    <h5>{{ klasse.team.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
+                    <h5>{{ klasse.beschrijving }}</h5>{{ klasse.sterkte_str }}</td>
             </tr>
             <tr class="nhb-table-header">
                 <td rowspan="{{ klasse.aantal_regels }}" class="nhb-table-zijrand"></td>
@@ -189,7 +190,7 @@
                 <th>Vereniging</th>
                 <th>Naam</th>
                 <th class="center">Team sterkte</th>
-                <th></th>
+                <th><!-- beschrijving --></th>
                 <th><!-- kolom voor knoppen --></th>
                 <td rowspan="{{ klasse.aantal_regels }}" class="nhb-table-zijrand"></td>
             </tr>
@@ -202,8 +203,9 @@
                     <td>{{ team.vereniging }}</td>
                     <td>{{ team.team_naam }}</td>
                     <td class="center">{{ team.ag_str }}</td>
-                    <td></td>
+                    <td><!-- beschrijving --></td>
                     <td class="center">
+                        <!-- knoppen -->
                         {% if team.url_aanpassen %}
                             <a class="btn-nhb-rood" href="{{ team.url_aanpassen }}">
                                 <i class="material-icons-round">edit</i></a>
