@@ -63,8 +63,11 @@ then
 fi
 
 FOCUS=""
-if [ ! -z "$ARGS" ]
+if [ -z "$ARGS" ]
 then
+    # no args = test all = remove database
+    KEEP_DB=0
+else
     # convert Function.testfile.TestCase.test_functie into "Function"
     # also works for just "Function"
     FOCUS1=""
