@@ -138,18 +138,18 @@
                 {% if team.break_klasse %}
                     {% if not forloop.first %}
                         <tr>
-                            <td colspan="7" class="nhb-table-onderrand"></td>
+                            <td colspan="5" class="nhb-table-onderrand"></td>
                         </tr>
                     {% endif %}
 
                     <tr>
                         <td colspan="7" class="center">
                             <h5>{{ team.klasse_str }}</h5>
-                            {% if team.wedstrijd %}
+                            {% if team.match %}
                                 {% if comp.rk_is_afgelast %}<s>{% endif %}
-                                <span>{{ team.wedstrijd.datum_wanneer }} om {{ team.wedstrijd.tijd_begin_wedstrijd }} bij {{ team.wedstrijd.vereniging }}</span>
-                                {% if team.wedstrijd.locatie %}
-                                    <span> ({{ team.wedstrijd.adres_str }})</span>
+                                <span>{{ team.match.datum_wanneer }} om {{ team.match.tijd_begin_wedstrijd }} bij {{ team.match.vereniging }}</span>
+                                {% if team.match.locatie %}
+                                    <span> ({{ team.match.adres_str }})</span>
                                 {% endif %}
                                 {% if comp.rk_is_afgelast %}</s>{% endif %}
                             {% endif %}
@@ -207,7 +207,6 @@
                     </td>
                 </tr>
 
-                <!--
                 {% if team.toon_team_leden %}
                     <tr>
                         <td></td>
@@ -218,12 +217,11 @@
                         </td>
                     </tr>
                 {% endif %}
-                -->
 
             {% endfor %}
 
             <tr>
-                <td colspan="7" class="nhb-table-onderrand"></td>
+                <td colspan="5" class="nhb-table-onderrand"></td>
             </tr>
         </table>
     {% endif %}

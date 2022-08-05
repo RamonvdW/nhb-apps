@@ -262,6 +262,7 @@ class UitslagenRegioIndivView(TemplateView):
         # for
 
         context['deelnemers'] = objs
+        context['heeft_deelnemers'] = (len(objs) > 0)
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),

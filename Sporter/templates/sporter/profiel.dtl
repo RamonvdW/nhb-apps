@@ -96,7 +96,7 @@
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td colspan="3" class="center">Er worden op dit moment geen competities georganiseerd.</td>
+                            <td class="center">Er worden op dit moment geen competities georganiseerd.</td>
                         </tr>
                     {% endif %}
                 </table>
