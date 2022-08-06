@@ -12,14 +12,22 @@
         extrastyle    uitbreiding op de inline styles
         extraheader   uitbreiding in de head sectie
         inhoud_text   de inhoud van de e-mail in platte tekst
-        inhoud_html   de inhoud van de e-mail in html format
+        inhoud_html   de inhoud van de e-mail in html formaat
+        footer_text   vervang de e-mail ondertekening/afsluiting, text formaat
+        footer_html   vervang de e-mail ondertekening/afsluiting, html formaat
 
 {% endcomment %}
 
 {% block inhoud_text %}
 <!-- email inhoud komt hier, vanuit de template -->
 {% endblock %}
+{% block footer_text %}
 
+Veel plezier met de site!
+
+Het bondsbureau
+
+{% endblock %}
 <!DOCTYPE html>
 
 {% autoescape on %}
@@ -39,6 +47,15 @@
             <!-- email inhoud komt hier, vanuit de template -->
         {% endblock %}
 
+        {% block footer_html %}
+            <br>
+            <div>Veel plezier met de site!</div>
+            <br>
+            <div>Het bondsbureau</div>
+            <br>
+            <img src="{% static 'plein/logo_with_text_nhb_jubileum.png' %}" height="50" width="213" alt="NHB logo">
+            <br>
+        {% endblock %}
     </body>
 </html>
 
