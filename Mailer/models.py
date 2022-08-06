@@ -13,14 +13,27 @@ class MailQueue(models.Model):
     """ Database tabel waarin de te versturen emails staan """
 
     toegevoegd_op = models.DateTimeField()
+
+    # admin
     is_blocked = models.BooleanField(default=False)     # blocked door whitelist
     is_verstuurd = models.BooleanField(default=False)
+
+    # verzenden naar service provider
     laatste_poging = models.DateTimeField()
     aantal_pogingen = models.PositiveSmallIntegerField(default=0)
+
+    # mail headers
     mail_to = models.CharField(max_length=150)
     mail_subj = models.CharField(max_length=100)
     mail_date = models.CharField(max_length=60)
+
+    # mail body, text
     mail_text = models.TextField()
+
+    # mail body, html
+    mail_html = models.TextField(default='')
+
+    # logboekje
     log = models.TextField()
 
     def __str__(self):

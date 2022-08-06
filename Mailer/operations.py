@@ -7,18 +7,23 @@
 from django.conf import settings
 from django.utils import timezone
 from django.template.loader import render_to_string
-from email.charset import Charset, QP
-from email.mime.multipart import MIMEMultipart
-from email.mime.nonmultipart import MIMENonMultipart
 from Mailer.models import MailQueue
 import datetime
-import email
 
 
 def mailer_queue_email(to_address, onderwerp, mail_body, enforce_whitelist=True):
     """ Deze functie accepteert het verzoek om een mail te versturen en slaat deze op in de database
-        Het feitelijk versturen van de email wordt door een achtergrondtaak gedaan
+        Het feitelijk versturen van de e-mail wordt door een achtergrondtaak gedaan
+
+        mail_body kan een string zijn, of een tuple van (text body, html body)
     """
+
+    if isinstance(mail_body, tuple):
+        mail_text, mail_html = mail_body
+    else:
+        mail_text = mail_body
+        mail_html = ''
+    del mail_body
 
     # e-mailadres is verplicht
     if to_address:
@@ -33,7 +38,8 @@ def mailer_queue_email(to_address, onderwerp, mail_body, enforce_whitelist=True)
                         mail_to=to_address,
                         mail_subj=onderwerp,
                         mail_date=mail_date,
-                        mail_text=mail_body)
+                        mail_text=mail_text,
+                        mail_html=mail_html)
 
         # als er een whitelist is, dan moet het e-mailadres er in voorkomen
         if enforce_whitelist and len(settings.EMAIL_ADDRESS_WHITELIST) > 0:
@@ -73,7 +79,7 @@ def mailer_email_is_valide(adres):
         - niet leeg
         - bevat @
         - bevat geen spatie
-        - domein bevat een .
+        - domein bevat minimaal 1 punt
         Uiteindelijk weet je pas of het een valide adres is als je er een e-mail naartoe kon sturen
         We proberen lege velden en velden met opmerkingen als "geen" of "niet bekend" te ontdekken.
     """
@@ -115,9 +121,19 @@ def mailer_notify_internal_error(tb):
 
 
 def render_email_template(context, email_template_name):
+    """
+        Verwerk een django email template tot een mail body.
+        De inhoud van context is beschikbaar voor het renderen van de template.
 
-    cs_utf8_qp = Charset('utf-8')
-    cs_utf8_qp.body_encoding = QP
+        Returns: email body in text, html
+    """
+
+    # from email.charset import Charset, QP
+    # from email.mime.multipart import MIMEMultipart
+    # from email.mime.nonmultipart import MIMENonMultipart
+
+    # cs_utf8_qp = Charset('utf-8')
+    # cs_utf8_qp.body_encoding = QP
 
     rendered_content = render_to_string(email_template_name, context)
 
@@ -127,18 +143,24 @@ def render_email_template(context, email_template_name):
 
     html_content = rendered_content[pos:]
 
-    text_msg = MIMENonMultipart('plain', 'utf-8')
-    text_msg.set_payload(text_content, cs_utf8_qp)
+    # print('email body:')
+    # print('text: %s' % text_content)
+    # print('html: %s' % html_content)
 
-    html_msg = MIMENonMultipart('html',  'utf-8')
-    html_msg.set_payload(html_content, cs_utf8_qp)
-
-    msg = MIMEMultipart(_subtype='alternative', encoding='utf-8')
-    msg.attach(text_msg)
-    msg.attach(html_msg)
-
-    out = msg.as_string()
+    # maak een multi-part email body (niet meer nodig, want Postmark doet dat voor ons)
+    # text_msg = MIMENonMultipart('plain', 'utf-8')
+    # text_msg.set_payload(text_content, cs_utf8_qp)
+    #
+    # html_msg = MIMENonMultipart('html',  'utf-8')
+    # html_msg.set_payload(html_content, cs_utf8_qp)
+    #
+    # msg = MIMEMultipart(_subtype='alternative', encoding='utf-8')
+    # msg.attach(text_msg)
+    # msg.attach(html_msg)
+    #
+    # out = msg.as_string()
     # print('out:\n---\n%s\n---' % out)
-    return out
+
+    return text_content, html_content
 
 # end of file

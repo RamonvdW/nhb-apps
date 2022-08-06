@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from Mailer.models import MailQueue
-from Mailer.operations import mailer_queue_email, mailer_obfuscate_email, mailer_email_is_valide
+from Mailer.operations import mailer_queue_email, mailer_obfuscate_email, mailer_email_is_valide, render_email_template
 
 
 class TestMailerOperations(TestCase):
@@ -73,6 +73,19 @@ class TestMailerOperations(TestCase):
             mail = MailQueue.objects.all()[0]
             self.assertFalse(mail.is_blocked)
         # with
+
+    def test_render(self):
+        context = {
+            'url': 'dit_is_geen_url',
+            'naam_site': 'TestSite',
+            'contact_email': 'ergens@nerge.ns',
+        }
+        test_email_template = 'email_account/wachtwoord-vergeten.dtl'
+
+        out_text, out_html = render_email_template(context, test_email_template)
+
+        self.assertTrue(out_text != '')
+        self.assertTrue(out_html != '')
 
 
 # end of file
