@@ -30,6 +30,7 @@ Het bondsbureau
 {% endblock %}
 <!DOCTYPE html>
 
+{% load static %}
 {% autoescape on %}
 
     <html lang="nl">
