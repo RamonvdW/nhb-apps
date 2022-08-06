@@ -1,0 +1,45 @@
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% comment %}
+
+    Dit document is de blauwdruk voor alle e-mails van de site.
+    E-mail template's van de applicaties beginnen met een 'extends' op deze template
+    en kunnen de volgende block tags gebruiken om delen te vervangen:
+        extrastyle    uitbreiding op de inline styles
+        extraheader   uitbreiding in de head sectie
+        inhoud_text   de inhoud van de e-mail in platte tekst
+        inhoud_html   de inhoud van de e-mail in html format
+
+{% endcomment %}
+
+{% block inhoud_text %}
+<!-- email inhoud komt hier, vanuit de template -->
+{% endblock %}
+
+<!DOCTYPE html>
+
+{% autoescape on %}
+
+    <html lang="nl">
+    <head>
+        <style>
+            @import url("https://fonts.googleapis.com/css2?family=Open+Sans&display=swap");
+            {% block extrastyle %}{% endblock %}
+        </style>
+        {% block extraheader %}{% endblock %}
+    </head>
+
+    <body class="white">
+
+        {% block inhoud_html %}
+            <!-- email inhoud komt hier, vanuit de template -->
+        {% endblock %}
+
+    </body>
+</html>
+
+{% endautoescape %}
