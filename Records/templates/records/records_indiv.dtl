@@ -104,8 +104,8 @@
                     <ul id="id_soort1">
                         {% for obj in soorten %}
                             <li>
-                                <label class="black-text" for="id_{{ obj.sel }}">
-                                    <input class="with-gap" type="radio" name="soort1" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.is_gekozen %}checked{% endif %} data-url="{{ obj.url }}">
+                                <label class="black-text" for="id_soort1_{{ obj.sel }}">
+                                    <input class="with-gap" type="radio" name="soort1" value="{{ obj.sel }}" required id="id_soort1_{{ obj.sel }}" {% if obj.is_gekozen %}checked{% endif %} data-url="{{ obj.url }}">
                                     <span>{{ obj.soort_record }}</span>
                                 </label>
                             </li>
@@ -150,8 +150,8 @@
                     <ul id="id_soort2">
                         {% for obj in soorten %}
                             <li>
-                                <label class="black-text" for="id_{{ obj.sel }}">
-                                    <input class="with-gap" type="radio" name="soort2" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.is_gekozen %}checked{% endif %} data-url="{{ obj.url }}">
+                                <label class="black-text" for="id_soort2_{{ obj.sel }}">
+                                    <input class="with-gap" type="radio" name="soort2" value="{{ obj.sel }}" required id="id_soort2_{{ obj.sel }}" {% if obj.is_gekozen %}checked{% endif %} data-url="{{ obj.url }}">
                                     <span>{{ obj.soort_record }}</span>
                                 </label>
                             </li>
