@@ -1,0 +1,40 @@
+{% extends 'email_mailer/email_basis.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% block inhoud_text %}
+Hallo!
+
+Je hebt aangegeven je wachtwoord vergeten te zijn voor {{ naam_site }}.
+
+Klik op onderstaande link om een nieuw wachtwoord in te stellen.
+
+{{ url }}
+
+Als je dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}
+
+Veel plezier met de site!
+
+Het bondsbureau
+{% endblock %}
+
+{% block inhoud_html %}
+
+    <p>Hallo!</p>
+
+    <p>Je hebt aangegeven je wachtwoord vergeten te zijn voor {{ naam_site }}.</p>
+
+    <p>Klik op onderstaande link om een nieuw wachtwoord in te stellen.</p>
+
+    <p>{{ url }}</p>
+
+    <p>Als jij dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}</p>
+
+    <p>Veel plezier met de site!</p>
+
+    <p>Het bondsbureau</p>
+
+{% endblock %}
