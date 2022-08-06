@@ -54,7 +54,7 @@ Het bondsbureau
             <br>
             <div>Het bondsbureau</div>
             <br>
-            <img src="{% static 'plein/logo_with_text_nhb_jubileum.png' %}" height="50" width="213" alt="NHB logo">
+            <img src="{{ logo_url }}" height="{{ logo_height }}" width="{{ logo_width }}" alt="NHB logo">
             <br>
         {% endblock %}
     </body>

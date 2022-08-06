@@ -7,6 +7,7 @@
 from django.conf import settings
 from django.utils import timezone
 from django.template.loader import render_to_string
+from django.templatetags.static import static
 from Mailer.models import MailQueue
 import datetime
 
@@ -128,38 +129,15 @@ def render_email_template(context, email_template_name):
         Returns: email body in text, html
     """
 
-    # from email.charset import Charset, QP
-    # from email.mime.multipart import MIMEMultipart
-    # from email.mime.nonmultipart import MIMENonMultipart
-
-    # cs_utf8_qp = Charset('utf-8')
-    # cs_utf8_qp.body_encoding = QP
+    context['logo_url'] = settings.SITE_URL + static('plein/logo_with_text_nhb_jubileum.png')
+    context['logo_width'] = 213
+    context['logo_height'] = 50
 
     rendered_content = render_to_string(email_template_name, context)
 
     pos = rendered_content.find('<!DOCTYPE')
-
     text_content = rendered_content[:pos].strip()   # remove leading & trailing newlines
-
     html_content = rendered_content[pos:]
-
-    # print('email body:')
-    # print('text: %s' % text_content)
-    # print('html: %s' % html_content)
-
-    # maak een multi-part email body (niet meer nodig, want Postmark doet dat voor ons)
-    # text_msg = MIMENonMultipart('plain', 'utf-8')
-    # text_msg.set_payload(text_content, cs_utf8_qp)
-    #
-    # html_msg = MIMENonMultipart('html',  'utf-8')
-    # html_msg.set_payload(html_content, cs_utf8_qp)
-    #
-    # msg = MIMEMultipart(_subtype='alternative', encoding='utf-8')
-    # msg.attach(text_msg)
-    # msg.attach(html_msg)
-    #
-    # out = msg.as_string()
-    # print('out:\n---\n%s\n---' % out)
 
     return text_content, html_content
 
