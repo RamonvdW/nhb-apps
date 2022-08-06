@@ -69,7 +69,15 @@ class Payments(object):
         try:
             data = open(self._fname, 'r').read()
         except (OSError, IOError) as exc:
-            out_error('Could not load payments admin: %s' % str(exc))
+            normaal = False
+            try:
+                if exc.errno == 2:
+                    out_info('Starting with a clean payments memory')
+                    normaal = True
+            except KeyError:
+                pass
+            if not normaal:
+                out_error('Could not load payments admin: %s' % str(exc))
         else:
             self.payments = json.loads(data)
 
