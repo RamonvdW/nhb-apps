@@ -26,16 +26,15 @@ Het bondsbureau
     <div>Hallo!</div>
     <br>
     <div>Je hebt aangegeven je wachtwoord vergeten te zijn voor {{ naam_site }}.</div>
-    <br>
     <div>Klik op onderstaande link om een nieuw wachtwoord in te stellen.</div>
     <br>
-    <div>Link: <a href="{{ url }}" target="_blank">{{ url }}</a></div>
+    <div style="padding-left:30px"><code><a href="{{ url }}" target="_blank">{{ url }}</a></code></div>
     <br>
-    <div>Als jij dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}</div>
+    <div>Als je dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}</div>
     <br>
     <div>Veel plezier met de site!</div>
     <br>
     <div>Het bondsbureau</div>
     <br>
-    
+
 {% endblock %}
