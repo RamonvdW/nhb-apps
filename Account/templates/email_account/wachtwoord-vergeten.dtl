@@ -23,18 +23,19 @@ Het bondsbureau
 
 {% block inhoud_html %}
 
-    <p>Hallo!</p>
-
-    <p>Je hebt aangegeven je wachtwoord vergeten te zijn voor {{ naam_site }}.</p>
-
-    <p>Klik op onderstaande link om een nieuw wachtwoord in te stellen.</p>
-
-    <p>{{ url }}</p>
-
-    <p>Als jij dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}</p>
-
-    <p>Veel plezier met de site!</p>
-
-    <p>Het bondsbureau</p>
-
+    <div>Hallo!</div>
+    <br>
+    <div>Je hebt aangegeven je wachtwoord vergeten te zijn voor {{ naam_site }}.</div>
+    <br>
+    <div>Klik op onderstaande link om een nieuw wachtwoord in te stellen.</div>
+    <br>
+    <div>Link: <a href="{{ url }}" target="_blank">{{ url }}</a></div>
+    <br>
+    <div>Als jij dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}</div>
+    <br>
+    <div>Veel plezier met de site!</div>
+    <br>
+    <div>Het bondsbureau</div>
+    <br>
+    
 {% endblock %}
