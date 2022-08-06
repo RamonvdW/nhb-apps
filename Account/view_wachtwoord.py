@@ -16,7 +16,7 @@ from Account.operations import account_test_wachtwoord_sterkte
 from Account.rechten import account_rechten_login_gelukt
 from Account.view_login import account_plugins_login
 from Logboek.models import schrijf_in_logboek
-from Mailer.models import mailer_queue_email, mailer_email_is_valide
+from Mailer.operations import mailer_queue_email, mailer_email_is_valide
 from Overig.helpers import get_safe_from_ip
 from Overig.tijdelijke_url import (set_tijdelijke_url_receiver,
                                    RECEIVER_WACHTWOORD_VERGETEN,

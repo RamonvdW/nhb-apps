@@ -1,41 +1,20 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase, override_settings
-from .models import MailQueue, mailer_queue_email, mailer_obfuscate_email, mailer_email_is_valide
-from .mailer import send_mail
+from Mailer.models import MailQueue
+from Mailer.operations import mailer_queue_email
+from Mailer.mailer import send_mail
 
 
-class TestMailerBase(TestCase):
+class TestMailerGoodBase(TestCase):
 
     """ tests voor de Mailer applicatie """
 
-    def test_queue_mail(self):
-        objs = MailQueue.objects.all()
-        self.assertEqual(len(objs), 0)
-
-        mailer_queue_email('schutter@nhb.test', 'onderwerp', 'body\ndoei!\n')
-
-        # valideer dat de mail nu in de queue staat
-        objs = MailQueue.objects.all()
-        self.assertEqual(len(objs), 1)
-        obj = objs[0]
-
-        # validate de velden van de mail
-        self.assertFalse(obj.is_verstuurd)
-        self.assertEqual(obj.aantal_pogingen, 0)
-        self.assertEqual(obj.mail_to, 'schutter@nhb.test')
-        self.assertEqual(obj.mail_subj, 'onderwerp')
-        self.assertEqual(obj.mail_text, 'body\ndoei!\n')
-        self.assertTrue("onderwerp" in str(obj))
-
-        # controleer dat een leeg to-adres niet in de queue beland
-        self.assertEqual(1, MailQueue.objects.count())
-        mailer_queue_email('', 'onderwerp', 'body\ndoei!\n')
-        self.assertEqual(1, MailQueue.objects.count())
+    test_after = ('Mailer.test_operations', )
 
     def test_send_mail_deliver(self):
         # requires websim_mailer.py running in the background
@@ -74,26 +53,6 @@ class TestMailerBase(TestCase):
         self.assertEqual(obj.aantal_pogingen, 1)
         self.assertFalse(obj.is_verstuurd)
 
-    def test_obfuscate_email(self):
-        self.assertEqual(mailer_obfuscate_email(''), '')
-        self.assertEqual(mailer_obfuscate_email('x'), 'x')
-        self.assertEqual(mailer_obfuscate_email('x@test.nhb'), 'x@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('do@test.nhb'), 'd#@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('tre@test.nhb'), 't#e@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('vier@test.nhb'), 'v##r@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('zeven@test.nhb'), 'ze##n@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('hele.lange@maaktnietuit.nl'), 'he#######e@maaktnietuit.nl')
-
-    def test_email_is_valide(self):
-        self.assertTrue(mailer_email_is_valide('test@nhb.nl'))
-        self.assertTrue(mailer_email_is_valide('jan.de.tester@nhb.nl'))
-        self.assertTrue(mailer_email_is_valide('jan.de.tester@hb.nl'))
-        self.assertTrue(mailer_email_is_valide('r@hb.nl'))
-        self.assertFalse(mailer_email_is_valide('tester@nhb'))
-        self.assertFalse(mailer_email_is_valide('test er@nhb.nl'))
-        self.assertFalse(mailer_email_is_valide('test\ter@nhb.nl'))
-        self.assertFalse(mailer_email_is_valide('test\ner@nhb.nl'))
-
     def test_whitelist(self):
         # controleer dat de whitelist zijn werk doet
         self.assertEqual(0, MailQueue.objects.count())
@@ -115,6 +74,8 @@ class TestMailerBase(TestCase):
 class TestMailerBadBase(TestCase):
 
     """ tests voor de Mailer applicatie """
+
+    test_after = ('Mailer.test_operations', )
 
     def test_send_mail_no_connect(self):
         # deze test eist dat de URL wijst naar een poort waar niet op gereageerd wordt
@@ -160,32 +121,12 @@ class TestMailerBadBase(TestCase):
         self.assertEqual(obj.aantal_pogingen, 25)
         self.assertEqual(obj.log, old_log)
 
-    def test_obfuscate_email(self):
-        self.assertEqual(mailer_obfuscate_email(''), '')
-        self.assertEqual(mailer_obfuscate_email('x'), 'x')
-        self.assertEqual(mailer_obfuscate_email('x@test.nhb'), 'x@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('do@test.nhb'), 'd#@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('tre@test.nhb'), 't#e@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('vier@test.nhb'), 'v##r@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('zeven@test.nhb'), 'ze##n@test.nhb')
-        self.assertEqual(mailer_obfuscate_email('hele.lange@maaktnietuit.nl'), 'he#######e@maaktnietuit.nl')
-
-    def test_email_is_valide(self):
-        self.assertTrue(mailer_email_is_valide('test@nhb.nl'))
-        self.assertTrue(mailer_email_is_valide('jan.de.tester@nhb.nl'))
-        self.assertTrue(mailer_email_is_valide('jan.de.tester@hb.nl'))
-        self.assertTrue(mailer_email_is_valide('r@hb.nl'))
-        self.assertFalse(mailer_email_is_valide('tester@nhb'))
-        self.assertFalse(mailer_email_is_valide('test er@nhb.nl'))
-        self.assertFalse(mailer_email_is_valide('test\ter@nhb.nl'))
-        self.assertFalse(mailer_email_is_valide('test\ner@nhb.nl'))
-
 
 @override_settings(POSTMARK_URL='http://localhost:8123/postmark',
                    POSTMARK_API_KEY='the-api-key',
                    EMAIL_FROM_ADDRESS='noreply@nhb.test',
                    EMAIL_ADDRESS_WHITELIST=())
-class TestMailerPostmark(TestMailerBase):
+class TestMailerPostmark(TestMailerGoodBase):
     pass
 
 
@@ -199,7 +140,7 @@ class TestMailerBadPostmark(TestMailerBadBase):
 
 
 # voorkom uitvoeren van tests in de base class
-del TestMailerBase
+del TestMailerGoodBase
 del TestMailerBadBase
 
 

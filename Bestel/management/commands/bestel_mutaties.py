@@ -25,7 +25,7 @@ from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortings
                                         wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
                                         wedstrijden_plugin_kortingscode_toepassen, wedstrijden_plugin_afmelden,
                                         wedstrijden_plugin_inschrijving_is_betaald)
-from Mailer.models import mailer_queue_email
+from Mailer.operations import mailer_queue_email
 from Overig.background_sync import BackgroundSync
 from Wedstrijden.models import INSCHRIJVING_STATUS_RESERVERING_BESTELD, INSCHRIJVING_STATUS_DEFINITIEF
 from decimal import Decimal

@@ -14,12 +14,12 @@ from django.views.generic import ListView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
-from Plein.menu import menu_dynamics
+from Mailer.operations import mailer_queue_email
 from Logboek.models import schrijf_in_logboek
 from Overig.tijdelijke_url import maak_tijdelijke_url_functie_email
-from Mailer.models import mailer_queue_email
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_FUNCTIE_EMAIL
 from Overig.helpers import get_safe_from_ip
+from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
 from .rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving, rol_activeer_wissel_van_rol_menu_voor_account
 from .models import Functie

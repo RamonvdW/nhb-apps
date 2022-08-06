@@ -6,7 +6,7 @@
 
 from django.utils import timezone
 from django.conf import settings
-from Mailer.models import mailer_queue_email
+from Mailer.operations import mailer_queue_email
 from .models import Taak
 from datetime import timedelta
 

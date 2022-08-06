@@ -6,7 +6,8 @@
 
 from django.test import TestCase, override_settings
 from django.core import management
-from .models import MailQueue, mailer_queue_email, mailer_notify_internal_error, mailer_opschonen
+from Mailer.models import MailQueue, mailer_opschonen
+from Mailer.operations import mailer_queue_email, mailer_notify_internal_error
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 import io
@@ -15,9 +16,11 @@ import io
 TEST_EMAIL_ADRES = 'schutter@nhb.test'
 
 
-class TestMailerCliBase(E2EHelpers, TestCase):
+class TestMailerCliGoedBase(E2EHelpers, TestCase):
 
     """ tests voor de Mailer applicatie """
+
+    test_after = ('Mailer.test_operations', )
 
     def test_leeg(self):
         f1 = io.StringIO()
@@ -176,6 +179,8 @@ class TestMailerCliBadBase(E2EHelpers, TestCase):
 
     """ tests voor de Mailer applicatie """
 
+    test_after = ('Mailer.test_operations',)
+
     def test_stuur_mails_bad_duration(self):
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -211,7 +216,7 @@ class TestMailerCliBadBase(E2EHelpers, TestCase):
                    POSTMARK_API_KEY='the-api-key',
                    EMAIL_FROM_ADDRESS='noreply@nhb.test',
                    EMAIL_ADDRESS_WHITELIST=())
-class TestMailerCliPostmark(TestMailerCliBase):
+class TestMailerCliPostmark(TestMailerCliGoedBase):
     pass
 
 
@@ -225,7 +230,7 @@ class TestMailerCliBadPostmark(TestMailerCliBadBase):
 
 
 # voorkomt uitvoeren van de tests in deze base classes
-del TestMailerCliBase
+del TestMailerCliGoedBase
 del TestMailerCliBadBase
 
 

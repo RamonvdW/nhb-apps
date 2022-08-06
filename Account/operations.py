@@ -6,7 +6,7 @@
 
 from Account.models import Account, AccountEmail, AccountVerzoekenTeller
 from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
-from Mailer.models import mailer_email_is_valide
+from Mailer.operations import mailer_email_is_valide
 import psycopg2
 import time
 

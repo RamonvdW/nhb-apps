@@ -20,7 +20,7 @@ from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG
 from Plein.menu import menu_dynamics
 from Logboek.models import schrijf_in_logboek
 from Overig.helpers import get_safe_from_ip
-from Mailer.models import mailer_queue_email, mailer_obfuscate_email
+from Mailer.operations import mailer_queue_email, mailer_obfuscate_email
 from datetime import timedelta
 import logging
 

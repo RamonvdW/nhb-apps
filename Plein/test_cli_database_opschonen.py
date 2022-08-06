@@ -10,7 +10,8 @@ from Account.operations import account_create
 from Feedback.models import Feedback
 from Feedback.feedback_opslaan import store_feedback
 from Logboek.models import LogboekRegel, schrijf_in_logboek
-from Mailer.models import MailQueue, mailer_queue_email
+from Mailer.models import MailQueue
+from Mailer.operations import mailer_queue_email
 from Overig.models import save_tijdelijke_url
 from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers

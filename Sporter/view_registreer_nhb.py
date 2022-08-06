@@ -13,8 +13,7 @@ from Account.operations import AccountCreateError, account_create
 from Account.views import account_vraag_email_bevestiging
 from Functie.models import Functie
 from Logboek.models import schrijf_in_logboek
-from Mailer.models import mailer_email_is_valide
-from Mailer.models import mailer_obfuscate_email
+from Mailer.operations import mailer_email_is_valide, mailer_obfuscate_email
 from Overig.helpers import get_safe_from_ip
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, Secretaris, SporterGeenEmail, SporterInactief
