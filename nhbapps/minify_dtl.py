@@ -194,7 +194,16 @@ class Loader(AppDirectoriesLoader):
         # remove whitespace between html tags
         contents = re.sub(r'>\s+<', '><', contents)
 
-        # optimize inside style=""
+        # whitespace voor een @import statement in een <style> block
+        contents = re.sub('>\s+@import', '>@import', contents)
+
+        # whitespace tussen een css-syntax puntkomma en een block
+        contents = re.sub(';\s+{%', ';{%', contents)
+
+        # whitespace tussen een endblock en </style>
+        contents = re.sub('%}\s+</style>', '%}</style>', contents)
+
+        # optimize in inline style=""
         new_contents = ''
         pos = contents.find('style="')      # let op: neemt ook img_style="padding:10px" mee
         while pos > 0:
