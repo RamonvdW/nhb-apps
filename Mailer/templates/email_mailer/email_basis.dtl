@@ -9,7 +9,6 @@
     Dit document is de blauwdruk voor alle e-mails van de site.
     E-mail template's van de applicaties beginnen met een 'extends' op deze template
     en kunnen de volgende block tags gebruiken om delen te vervangen:
-        extrastyle    uitbreiding op de inline styles
         extraheader   uitbreiding in de head sectie
         inhoud_text   de inhoud van de e-mail in platte tekst
         inhoud_html   de inhoud van de e-mail in html formaat
@@ -35,21 +34,10 @@ Het bondsbureau
 
 <html lang="nl">
     <head>
-        <style>
-            @import url("https://fonts.googleapis.com/css2?family=Open+Sans&display=swap");
-            html {
-                font-family: 'Open Sans', sans-serif;
-                font-weight: normal;
-                font-size: 14px;
-                color: rgba(0, 0, 0, 0.87);
-                background: white;
-            }
-            {% block extrastyle %}{% endblock %}
-        </style>
         {% block extraheader %}{% endblock %}
     </head>
 
-    <body class="white">
+    <body style="background:white; color:rgba(0, 0, 0, 0.87)">
 
         {% block inhoud_html %}
             <!-- email inhoud komt hier, vanuit de template -->

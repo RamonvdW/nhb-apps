@@ -20,7 +20,7 @@
     <!-- blauw balk met wit informatie vlak -->
     <div class="row-nhb-blauw">
         <div class="col s12">
-            <div class="white" style="padding:10px">
+            <div class="white center" style="padding:10px">
                 <p>Het account voor bondsnummer <b>{{ login_naam }}</b> is aangemaakt. Dit nummer is je inlog naam.</p>
 
                 <p>We hebben een e-mail gestuurd naar <b>{{ partial_email }}</b> om zeker te zijn dat we je kunnen bereiken.</p>
