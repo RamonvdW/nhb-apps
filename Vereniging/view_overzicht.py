@@ -14,7 +14,7 @@ from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, 
                                LAAG_REGIO, LAAG_RK, INSCHRIJF_METHODE_1)
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
-from Taken.taken import eval_open_taken
+from Taken.operations import eval_open_taken
 from Wedstrijden.models import BAAN_TYPE_EXTERN
 from types import SimpleNamespace
 import datetime

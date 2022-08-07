@@ -544,7 +544,7 @@ class E2EHelpers(TestCase):
         self.assert_link_quality(html, dtl, is_email=True)
         self._assert_no_div_in_p(html, dtl)
 
-        if True or settings.TEST_VALIDATE_HTML:             # pragma: no cover
+        if settings.TEST_VALIDATE_HTML:             # pragma: no cover
             issues = self._validate_html(html)
             if len(issues):
                 msg = 'Invalid HTML (template: %s):\n' % dtl

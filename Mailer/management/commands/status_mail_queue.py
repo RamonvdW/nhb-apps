@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" dit commando geeft een status overzichtje van de mail queue """
+""" dit commando geeft een status overzichtje van de mail queue voor de server monitoring """
 
 from Mailer.models import MailQueue
 from django.core.management.base import BaseCommand

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,8 +8,9 @@ from django.test import TestCase
 from django.utils import timezone
 from Mailer.models import MailQueue
 from Sporter.models import Sporter
-from Taken import taken
-from .models import Taak
+from Taken.operations import (aantal_open_taken, stuur_taak_email_herinnering, stuur_nieuwe_taak_email,
+                              check_taak_bestaat, maak_taak, herinner_aan_taken)
+from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -17,7 +18,7 @@ import datetime
 
 class TestTakenTaken(E2EHelpers, TestCase):
 
-    """ tests voor de Taken applicatie """
+    """ tests voor de applicatie Taken """
 
     test_after = ('Functie',)
 
@@ -46,19 +47,19 @@ class TestTakenTaken(E2EHelpers, TestCase):
     def test_aantal_open_taken(self):
         # standaard sessie heeft nog geen opgeslagen aantal taken
         request = self.client
-        aantal = taken.aantal_open_taken(request)
+        aantal = aantal_open_taken(request)
         self.assertIsNone(aantal)
 
     def test_stuur_taak_email_herinnering(self):
         self.assertEqual(0, MailQueue.objects.count())
         email = self.account_normaal.accountemail_set.all()[0]
-        taken.stuur_taak_email_herinnering(email, 5)
+        stuur_taak_email_herinnering(email, 5)
         self.assertEqual(1, MailQueue.objects.count())
 
     def test_stuur_nieuwe_taak_email(self):
         self.assertEqual(0, MailQueue.objects.count())
         email = self.account_normaal.accountemail_set.all()[0]
-        taken.stuur_nieuwe_taak_email(email, 5)
+        stuur_nieuwe_taak_email(email, 5)
         self.assertEqual(1, MailQueue.objects.count())
 
     def test_maak_taak(self):
@@ -67,20 +68,21 @@ class TestTakenTaken(E2EHelpers, TestCase):
 
         deadline = datetime.date(2020, 12, 13)
 
-        bestaat = taken.check_taak_bestaat(deadline=deadline)
+        bestaat = check_taak_bestaat(deadline=deadline)
         self.assertFalse(bestaat)
 
-        taken.maak_taak(toegekend_aan=self.account_normaal,
-                        deadline=deadline,
-                        aangemaakt_door=None,
-                        beschrijving="Tekst",
-                        handleiding_pagina="Pagina",
-                        log="Log")
+        maak_taak(
+            toegekend_aan=self.account_normaal,
+            deadline=deadline,
+            aangemaakt_door=None,
+            beschrijving="Tekst",
+            handleiding_pagina="Pagina",
+            log="Log")
 
         self.assertEqual(1, Taak.objects.count())
         self.assertEqual(1, MailQueue.objects.count())
 
-        bestaat = taken.check_taak_bestaat(deadline=deadline)
+        bestaat = check_taak_bestaat(deadline=deadline)
         self.assertTrue(bestaat)
 
         taak = Taak.objects.all()[0]
@@ -104,12 +106,13 @@ class TestTakenTaken(E2EHelpers, TestCase):
         self.assertTrue(str(taak) != "")
 
         # maak nog een taak en controleer dat er weer meteen een email uit gaat
-        taken.maak_taak(toegekend_aan=self.account_normaal,
-                        deadline=deadline,
-                        aangemaakt_door=None,
-                        beschrijving="Tekst 2",
-                        handleiding_pagina="Pagina 2",
-                        log="Log 2")
+        maak_taak(
+            toegekend_aan=self.account_normaal,
+            deadline=deadline,
+            aangemaakt_door=None,
+            beschrijving="Tekst 2",
+            handleiding_pagina="Pagina 2",
+            log="Log 2")
 
         self.assertEqual(2, Taak.objects.count())
         self.assertEqual(2, MailQueue.objects.count())
@@ -124,12 +127,13 @@ class TestTakenTaken(E2EHelpers, TestCase):
         email = self.account_normaal.accountemail_set.all()[0]
         email.optout_nieuwe_taak = True
         email.save()
-        taken.maak_taak(toegekend_aan=self.account_normaal,
-                        deadline=deadline,
-                        aangemaakt_door=None,
-                        beschrijving="Tekst",
-                        handleiding_pagina="Pagina",
-                        log="Log")
+        maak_taak(
+            toegekend_aan=self.account_normaal,
+            deadline=deadline,
+            aangemaakt_door=None,
+            beschrijving="Tekst",
+            handleiding_pagina="Pagina",
+            log="Log")
 
         self.assertEqual(1, Taak.objects.count())
         self.assertEqual(0, MailQueue.objects.count())
@@ -149,7 +153,7 @@ class TestTakenTaken(E2EHelpers, TestCase):
         email.optout_nieuwe_taak = False
         email.optout_herinnering_taken = True
         email.save()
-        taken.herinner_aan_taken()
+        herinner_aan_taken()
         self.assertEqual(0, MailQueue.objects.count())
 
     def test_herinner_aan_taken(self):
@@ -160,17 +164,20 @@ class TestTakenTaken(E2EHelpers, TestCase):
         self.assertEqual(0, MailQueue.objects.count())
 
         # maak 3 taken aan voor 2 accounts
-        taken.maak_taak(toegekend_aan=self.account_normaal,
-                        deadline=deadline,
-                        beschrijving="Tekst 1")
+        maak_taak(
+            toegekend_aan=self.account_normaal,
+            deadline=deadline,
+            beschrijving="Tekst 1")
 
-        taken.maak_taak(toegekend_aan=self.account_normaal,
-                        deadline=deadline,
-                        beschrijving="Tekst 2")
+        maak_taak(
+            toegekend_aan=self.account_normaal,
+            deadline=deadline,
+            beschrijving="Tekst 2")
 
-        taken.maak_taak(toegekend_aan=self.testdata.account_admin,
-                        deadline=deadline,
-                        beschrijving="Tekst 3")
+        maak_taak(
+            toegekend_aan=self.testdata.account_admin,
+            deadline=deadline,
+            beschrijving="Tekst 3")
 
         self.assertEqual(3, Taak.objects.count())
         self.assertEqual(3, MailQueue.objects.count())
@@ -180,20 +187,20 @@ class TestTakenTaken(E2EHelpers, TestCase):
         email.laatste_email_over_taken = None
         email.save()
 
-        taken.herinner_aan_taken()
+        herinner_aan_taken()
         self.assertEqual(4, MailQueue.objects.count())
 
         # controleer dat de herinnering pas gestuurd worden na 7 dagen
         email.laatste_email_over_taken = timezone.now() - datetime.timedelta(days=7) + datetime.timedelta(hours=1)
         email.save()
 
-        taken.herinner_aan_taken()
+        herinner_aan_taken()
         self.assertEqual(4, MailQueue.objects.count())
 
         email.laatste_email_over_taken = timezone.now() - datetime.timedelta(days=7) - datetime.timedelta(hours=1)
         email.save()
 
-        taken.herinner_aan_taken()
+        herinner_aan_taken()
         self.assertEqual(5, MailQueue.objects.count())
 
 # end of file

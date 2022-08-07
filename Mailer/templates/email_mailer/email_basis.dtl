@@ -15,17 +15,20 @@
         footer_text   vervang de e-mail ondertekening/afsluiting, text formaat
         footer_html   vervang de e-mail ondertekening/afsluiting, html formaat
 
+    Elke nieuwe regel moet beginnen met een pipeline teken.
+
 {% endcomment %}
 
 {% block inhoud_text %}
 <!-- email inhoud komt hier, vanuit de template -->
 {% endblock %}
 {% block footer_text %}
-
-Het bondsbureau
-
-
-(deze e-mail is automatisch gegenereerd op {{ when }})
+    |
+    |Het bondsbureau
+    |
+    |
+    |(deze e-mail is automatisch gegenereerd op {{ basis_when }})
+    |
 {% endblock %}
 <!DOCTYPE html>
 
@@ -34,7 +37,24 @@ Het bondsbureau
 
 <html lang="nl">
     <head>
-        <title>Bericht van {{ naam_site }}</title>
+        <title>Bericht van {{ basis_naam_site }}</title>
+        <style>
+            table {
+                text-align: left;
+                border: 1px solid lightgrey;
+                border-collapse: collapse;
+                padding: 10px 0 10px 0;
+            }
+            th,td {
+                border: 1px solid lightgrey;
+                padding: 10px;
+            }
+            h1 {
+                margin: 30px 0 10px 0;
+                color: #0aa0e1;
+                font-size: large;
+            }
+        </style>
         {% block extraheader %}{% endblock %}
     </head>
 
@@ -46,12 +66,12 @@ Het bondsbureau
 
         {% block footer_html %}
             <br>
-            <div><b>Het bondsbureau</b></div>
+            <div>Het bondsbureau</div>
             <br>
             <img src="{{ logo_url }}" height="{{ logo_height }}" width="{{ logo_width }}" alt="NHB logo">
             <br>
             <br>
-            <div style="font-size:small">(deze e-mail is automatisch gegenereerd op {{ when }})</div>
+            <div style="font-size:smaller">(deze e-mail is automatisch gegenereerd op {{ basis_when }})</div>
             <br>
         {% endblock %}
     </body>

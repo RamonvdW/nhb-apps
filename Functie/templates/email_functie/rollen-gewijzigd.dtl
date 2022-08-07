@@ -1,0 +1,24 @@
+{% extends 'email_mailer/email_basis.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% block inhoud_text %}
+|Hallo {{ voornaam }}!
+|
+|Je rollen zijn aangepast op {{ naam_site }}.
+|{{ actie }}: "{{ functie_beschrijving }}".
+|
+|Als je dit niet herkent, neem dan contact met ons op via {{ contact_email }}
+{% endblock %}
+
+{% block inhoud_html %}
+    <div>Hallo {{ voornaam }}!</div>
+    <br>
+    <div>Je rollen zijn aangepast op {{ naam_site }}.</div>
+    <div>{{ actie }}: &quot;{{ functie_beschrijving }}&quot;.</div>
+    <br>
+    <div>Als je dit niet herkent, neem dan contact met ons op via {{ contact_email }}</div>
+{% endblock %}

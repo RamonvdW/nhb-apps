@@ -21,7 +21,7 @@ from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbCluster, NhbVereniging
 from Plein.menu import menu_dynamics
-from Taken.taken import maak_taak
+from Taken.operations import maak_taak
 from Wedstrijden.models import WedstrijdLocatie
 from types import SimpleNamespace
 import datetime

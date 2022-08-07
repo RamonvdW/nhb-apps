@@ -6,8 +6,8 @@
 
 from django.utils import timezone
 from django.conf import settings
-from Mailer.operations import mailer_queue_email
-from .models import Taak
+from Mailer.operations import mailer_queue_email, render_email_template
+from Taken.models import Taak
 from datetime import timedelta
 
 
@@ -15,6 +15,9 @@ SESSIONVAR_TAAK_AANTAL_OPEN = "taak_aantal_open"
 SESSIONVAR_TAAK_EVAL_AFTER = "taak_eval_after"
 
 TAAK_EVAL_INTERVAL_MINUTES = 1
+
+EMAIL_TEMPLATE_NIEUWE_TAAK = 'email_taken/nieuwe_taak.dtl'
+EMAIL_TEMPLATE_HERINNERING = 'email_taken/herinnering.dtl'
 
 
 def aantal_open_taken(request):
@@ -69,15 +72,18 @@ def stuur_taak_email_herinnering(email, aantal_open):
         aantal_str = "stonden er %s taken open" % aantal_open
         taken_str = "zijn taken die jouw aandacht nodig hebben"
 
-    text_body = ("Hallo %s!\n\n" % email.account.get_first_name()
-                 + "Er %s op %s\n" % (taken_str, settings.SITE_URL)
-                 + "Op het moment van sturen %s.\n\n" % aantal_str
-                 + "Bedankt voor je aandacht!\n"
-                 + "Het bondsbureau\n")
+    context = {
+        'voornaam': email.account.get_first_name(),
+        'site_url': settings.SITE_URL,
+        'aantal_str': aantal_str,
+        'taken_str': taken_str,
+    }
+
+    mail_body = render_email_template(context, EMAIL_TEMPLATE_HERINNERING)
 
     mailer_queue_email(email.bevestigde_email,
                        'Er zijn taken voor jou',
-                       text_body)
+                       mail_body)
 
 
 def stuur_nieuwe_taak_email(email, aantal_open):
@@ -89,15 +95,17 @@ def stuur_nieuwe_taak_email(email, aantal_open):
     else:
         aantal_str = "stonden er %s taken open" % aantal_open
 
-    text_body = ("Hallo %s!\n\n" % email.account.get_first_name()
-                 + "Er is zojuist een nieuwe taak voor jou aangemaakt op %s\n" % settings.SITE_URL
-                 + "Op het moment van sturen %s.\n\n" % aantal_str
-                 + "Bedankt voor je aandacht!\n"
-                 + "Het bondsbureau\n")
+    context = {
+        'voornaam': email.account.get_first_name(),
+        'site_url': settings.SITE_URL,
+        'aantal_str': aantal_str,
+    }
+
+    mail_body = render_email_template(context, EMAIL_TEMPLATE_NIEUWE_TAAK)
 
     mailer_queue_email(email.bevestigde_email,
                        'Er is een nieuwe taak voor jou',
-                       text_body)
+                       mail_body)
 
 
 def check_taak_bestaat(**kwargs):

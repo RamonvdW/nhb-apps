@@ -1,0 +1,169 @@
+{% extends 'email_mailer/email_basis.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% block inhoud_text %}
+    |Hallo {{ voornaam }}!
+    |
+    |Deze e-mail is de bevestiging van je aankoop op {{ naam_site }}.
+    |
+    |Bestelnummer: {{ bestelling.bestel_nr }}
+    |Betaalstatus: Voldaan
+    |
+    |Verkoper:
+    |    {{ bestelling.verkoper_naam }}
+    |    {{ bestelling.verkoper_adres1 }}
+    |    {{ bestelling.verkoper_adres2 }}
+    |    KvK nummer: {{ bestelling.verkoper_kvk }}
+    |    E-mail: {{ bestelling.verkoper_email }}
+    |    Telefoon: {{ bestelling.verkoper_telefoon }}
+
+    {% for product in producten %}
+        |
+        |[{{ product.regel_nr }}]
+
+        {% if product.wedstrijd_inschrijving %}
+            |    Reserveringsnummer: {{ product.reserveringsnummer }}
+            |    Wedstrijd: {{ product.wedstrijd_titel }}
+            |    Sessie: {{ product.sessie_datum|date:"l j F Y" }} om {{ product.sessie_tijd|date:"H:i" }}
+            |    Sporter: {{ product.sporter_lid_nr_naam }}
+            |    Van vereniging: {{ product.ver_nr_naam }}
+            |    Boog: {{ product.boog }}
+
+            {% if product.korting %}
+                |    Gebruikte korting: {{ product.korting }}
+            {% endif %}
+            {% if product.combi_reden %}
+                |    (combinatie korting voor {{ product.combi_reden }}
+            {% endif %}
+
+            |    Prijs: € {{ product.prijs_euro }}
+            {% if product.korting_euro > 0.001 %}
+                |    Korting: -€ {{ product.korting_euro }}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+    {% for transactie in transacties %}
+        |
+        |Betaling:
+
+        {% if transactie.is_restitutie %}
+            |    Restitutie € {{ transactie.bedrag_euro_klant }}
+        {% else %}
+            |    Ontvangen € {{ transactie.bedrag_euro_klant }}
+            |    van {{ transactie.klant_naam }}
+        {% endif %}
+
+        |    op {{ transactie.when_str }}
+        |    Beschrijving: {{ transactie.beschrijving }}
+    {% endfor %}
+
+{% endblock %}
+
+{% block inhoud_html %}
+    <div>Hallo {{ voornaam }}!</div>
+    <br>
+    <div>Deze e-mail is de bevestiging van je aankoop op {{ naam_site }}.</div>
+
+    <br>
+
+    <table>
+        <tr><th>Bestelnummer:</th><td>{{ bestelling.bestel_nr }}</td></tr>
+        <tr><th>Betaalstatus:</th><td>Voldaan</td></tr>
+    </table>
+
+    <h1>Verkoper</h1>
+
+    <table>
+        <tr><th>Naam:</th><td>{{ bestelling.verkoper_naam }}</td></tr>
+        <tr><th style="vertical-align:top">Adres:<br></th><td>{{ bestelling.verkoper_adres1 }}<br>{{ bestelling.verkoper_adres2 }}</td></tr>
+        <tr><th>KvK nummer:</th><td>{{ bestelling.verkoper_kvk }}</td></tr>
+        <tr><th>E-mail:</th><td>{{ bestelling.verkoper_email }}</td></tr>
+        <tr><th>Telefoon:</th><td>{{ bestelling.verkoper_telefoon }}</td></tr>
+    </table>
+
+    <h1>Producten</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Product</th>
+                <th>Prijs</th>
+            </tr>
+        </thead>
+
+        {% for product in producten %}
+            {% if product.wedstrijd_inschrijving %}
+                <tr>
+                    <td style="vertical-align:top">[{{ product.regel_nr }}]</td>
+                    <td>
+                        <span>Reserveringsnummer: {{ product.reserveringsnummer }}</span><br>
+                        <span>Wedstrijd: {{ product.wedstrijd_titel }}</span><br>
+                        <span>Sessie: {{ product.sessie_datum|date:"l j F Y" }} om {{ product.sessie_tijd|date:"H:i" }}</span><br>
+                        <span>Sporter: {{ product.sporter_lid_nr_naam }}</span><br>
+                        <span>Van vereniging: {{ product.ver_nr_naam }}</span><br>
+                        <span>Boog: {{ product.boog }}</span><br>
+                    </td>
+
+                    <td style="text-align:right;vertical-align:top">&euro;&nbsp;{{ product.prijs_euro }}</td>
+                </tr>
+
+                {% if product.korting_euro > 0.001 %}
+                    <tr>
+                        <td></td>
+                        <td>Korting<br>
+                            {% if product.korting %}
+                                <span>Gebruikte korting: {{ product.korting }}</span><br>
+                            {% endif %}
+                            {% if product.combi_reden %}
+                                <span>(combinatie korting voor {{ product.combi_reden }}</span><br>
+                            {% endif %}
+                        </td>
+
+                        <td style="text-align:right; vertical-align:top">-&euro;&nbsp;{{ product.korting_euro }}</td>
+                    </tr>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        <tr>
+            <td></td>
+            <td style="text-align:right">Totaal:</td>
+            <td style="text-align:right">&euro;&nbsp;{{ bestelling.totaal_euro }}</td>
+        </tr>
+        <!-- Totaal regel toevoegen -->
+    </table>
+
+    <!-- TODO: als er nog geen betalingen zijn, dan instructie toevoegen hoe te betalen -->
+    <h1>Betaling</h1>
+
+    <table>
+        {% for transactie in transacties %}
+            <tr>
+                {% if transactie.is_restitutie %}
+                    <td style="vertical-align:top">Restitutie</td>
+                    <td>
+                        <span>op {{ transactie.when_str }}</span><br>
+                        <span>{{ transactie.beschrijving }}</span>
+                    </td>
+                {% else %}
+                    <td style="vertical-align:top">Ontvangen</td>
+                    <td>
+                        <span>op {{ transactie.when_str }}</span><br>
+                        <span>van {{ transactie.klant_naam }}</span><br>
+                        <span>{{ transactie.beschrijving }}</span>
+                    </td>
+                {% endif %}
+                <td style="text-align:right; vertical-align:top">&euro;&nbsp;{{ transactie.bedrag_euro_klant }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <br>
+    <div>Bedankt voor je bestelling!</div>
+{% endblock %}

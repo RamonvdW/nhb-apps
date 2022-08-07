@@ -6,24 +6,23 @@
 {% endcomment %}
 
 {% block inhoud_text %}
-Hallo!
-
-Je hebt aangegeven je wachtwoord vergeten te zijn voor {{ naam_site }}.
-
-Klik op onderstaande link om een nieuw wachtwoord in te stellen.
-
-{{ url }}
-
-Als je dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}
-
-Veel plezier met de site!
+    |Hallo!
+    |
+    |Je hebt aangegeven je wachtwoord vergeten te zijn voor {{ naam_site }}.
+    |Gebruik onderstaande link om een nieuw wachtwoord in te stellen.
+    |
+    |{{ url }}
+    |
+    |Als je dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}
+    |
+    |Veel plezier met de site!
 {% endblock %}
 
 {% block inhoud_html %}
     <div>Hallo!</div>
     <br>
     <div>Je hebt aangegeven je wachtwoord vergeten te zijn voor {{ naam_site }}.</div>
-    <div>Klik op onderstaande link om een nieuw wachtwoord in te stellen:</div>
+    <div>Gebruik onderstaande link om een nieuw wachtwoord in te stellen:</div>
     <br>
     <div style="padding-left:30px"><code><a href="{{ url }}" target="_blank">{{ url }}</a></code></div>
     <br>

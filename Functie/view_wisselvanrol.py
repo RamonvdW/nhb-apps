@@ -17,7 +17,7 @@ from Handleiding.views import reverse_handleiding
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
 from Overig.helpers import get_safe_from_ip
-from Taken.taken import eval_open_taken
+from Taken.operations import eval_open_taken
 from .rol import (Rollen, rol_mag_wisselen, rol_enum_pallet, rol2url,
                   rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
                   rol_activeer_rol, rol_activeer_functie, rol_evalueer_opnieuw)

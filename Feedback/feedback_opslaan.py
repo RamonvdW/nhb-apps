@@ -7,7 +7,7 @@
 from django.conf import settings
 from django.utils import timezone
 from Account.models import Account
-from Taken.taken import maak_taak, check_taak_bestaat
+from Taken.operations import maak_taak, check_taak_bestaat
 from .models import Feedback
 import datetime
 

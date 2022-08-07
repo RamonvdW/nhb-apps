@@ -18,7 +18,7 @@ from BasisTypen.models import (BoogType, KalenderWedstrijdklasse, GESLACHT_ALLE,
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Taken.taken import maak_taak
+from Taken.operations import maak_taak
 from Wedstrijden.models import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, WedstrijdLocatie
 from .models import (Wedstrijd,
                      ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR, WEDSTRIJD_WA_STATUS_TO_STR,

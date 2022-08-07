@@ -11,7 +11,7 @@ from django.views.generic import TemplateView, View
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from Handleiding.views import reverse_handleiding
 from Bestel.mandje import eval_mandje_inhoud
-from Taken.taken import eval_open_taken
+from Taken.operations import eval_open_taken
 from .menu import menu_dynamics
 
 

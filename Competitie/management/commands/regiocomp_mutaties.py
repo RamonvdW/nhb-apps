@@ -29,7 +29,7 @@ from Competitie.operations import (competities_aanmaken, bepaal_startjaar_nieuwe
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
-from Taken.taken import maak_taak
+from Taken.operations import maak_taak
 import traceback
 import datetime
 import sys

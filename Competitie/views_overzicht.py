@@ -14,7 +14,7 @@ from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from Score.operations import wanneer_ag_vastgesteld
 from Sporter.models import SporterBoog
-from Taken.taken import eval_open_taken
+from Taken.operations import eval_open_taken
 from .models import LAAG_REGIO, LAAG_BK, Competitie, DeelCompetitie
 import datetime
 

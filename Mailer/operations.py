@@ -10,6 +10,7 @@ from django.template.loader import render_to_string
 from django.templatetags.static import static
 from Mailer.models import MailQueue
 import datetime
+import re
 
 
 def mailer_queue_email(to_address, onderwerp, mail_body, enforce_whitelist=True):
@@ -133,14 +134,19 @@ def render_email_template(context, email_template_name):
     context['logo_width'] = 213
     context['logo_height'] = 50
 
-    context['when'] = timezone.localtime(timezone.now()).strftime('%Y-%m-%d %H:%M')
-    context['naam_site'] = settings.NAAM_SITE
+    context['basis_when'] = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+    context['basis_naam_site'] = settings.NAAM_SITE
 
     rendered_content = render_to_string(email_template_name, context)
-
     pos = rendered_content.find('<!DOCTYPE')
-    text_content = rendered_content[:pos].strip()   # remove leading & trailing newlines
+    text_content = rendered_content[:pos]
     html_content = rendered_content[pos:]
+
+    # control where the newlines are: pipeline character indicates start of new line
+    text_content = re.sub('\s+\|', '|', text_content)          # verwijder whitespace voor elke pipeline
+    text_content = text_content.replace('\n', '')
+    text_content = text_content[text_content.find('|')+1:]      # strip all before first pipeline, including pipeline
+    text_content = text_content.replace('|', '\n')
 
     return text_content, html_content
 

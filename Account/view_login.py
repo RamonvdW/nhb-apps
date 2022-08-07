@@ -36,6 +36,23 @@ EMAIL_TEMPLATE_BEVESTIG_TOEGANG_EMAIL = 'email_account/bevestig-toegang-email.dt
 my_logger = logging.getLogger('NHBApps.Account')
 
 
+def account_stuur_email_bevestig_nieuwe_email(mailadres, ack_url):
+    """ Stuur een mail om toegang tot het (gewijzigde) e-mailadres te bevestigen """
+
+    context = {
+        'naam_site': settings.NAAM_SITE,
+        'url': ack_url,
+        'contact_email': settings.EMAIL_BONDSBUREAU
+    }
+
+    mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_TOEGANG_EMAIL)
+
+    mailer_queue_email(mailadres,
+                       'Email adres bevestigen',
+                       mail_body,
+                       enforce_whitelist=False)
+
+
 def account_check_nieuwe_email(request, from_ip, account):
     """ detecteer wissel van e-mail in CRM; stuur bevestig verzoek mail """
 
@@ -48,18 +65,7 @@ def account_check_nieuwe_email(request, from_ip, account):
                            activiteit="Bevestiging van nieuwe email gevraagd voor account %s" % repr(
                                account.username))
 
-        context = {
-            'naam_site': settings.NAAM_SITE,
-            'url': ack_url,
-            'contact_email': settings.EMAIL_BONDSBUREAU
-        }
-
-        mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_TOEGANG_EMAIL)
-
-        mailer_queue_email(mailadres,
-                           'Email adres bevestigen',
-                           mail_body,
-                           enforce_whitelist=False)
+        account_stuur_email_bevestig_nieuwe_email(mailadres, ack_url)
 
         context = {'partial_email': mailer_obfuscate_email(mailadres)}
         menu_dynamics(request, context)

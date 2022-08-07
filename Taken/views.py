@@ -13,7 +13,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige
 from .models import Taak
-from Taken.taken import eval_open_taken
+from Taken.operations import eval_open_taken
 
 
 TEMPLATE_OVERZICHT = 'taken/overzicht.dtl'

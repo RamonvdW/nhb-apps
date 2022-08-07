@@ -14,22 +14,52 @@ from django.views.generic import ListView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
-from Mailer.operations import mailer_queue_email
+from Functie.rol import (Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
+                         rol_activeer_wissel_van_rol_menu_voor_account)
+from Functie.models import Functie
+from Functie.forms import ZoekBeheerdersForm, WijzigBeheerdersForm, WijzigEmailForm
+from Mailer.operations import mailer_queue_email, render_email_template
 from Logboek.models import schrijf_in_logboek
 from Overig.tijdelijke_url import maak_tijdelijke_url_functie_email
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_FUNCTIE_EMAIL
 from Overig.helpers import get_safe_from_ip
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
-from .rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving, rol_activeer_wissel_van_rol_menu_voor_account
-from .models import Functie
-from .forms import ZoekBeheerdersForm, WijzigBeheerdersForm, WijzigEmailForm
 
 
 TEMPLATE_KOPPEL_BEHEERDERS = 'functie/koppel-beheerders.dtl'
 TEMPLATE_WIJZIG_EMAIL = 'functie/wijzig-email.dtl'
 TEMPLATE_BEVESTIG_EMAIL = 'functie/bevestig.dtl'
 TEMPLATE_EMAIL_BEVESTIGD = 'functie/bevestigd.dtl'
+EMAIL_TEMPLATE_ROLLEN_GEWIJZIGD = 'email_functie/rollen-gewijzigd.dtl'
+EMAIL_TEMPLATE_BEVESTIG_TOEGANG_EMAIL = 'email_functie/bevestig-toegang-email.dtl'
+
+
+def functie_wijziging_stuur_email_notificatie(account, door_naam, functie_beschrijving, add=False, remove=False):
+
+    """ Stuur een e-mail naar 'account' om te melden dat de rollen gewijzigd zijn """
+
+    if add:
+        actie = "Toegevoegde rol"
+    elif remove:
+        actie = 'Verwijderde rol'
+    else:
+        return
+
+    context = {
+        'voornaam': account.get_first_name(),
+        'actie': actie,
+        'naam_site': settings.NAAM_SITE,
+        'functie_beschrijving': functie_beschrijving,
+        'contact_email': settings.EMAIL_BONDSBUREAU
+    }
+
+    mail_body = render_email_template(context, EMAIL_TEMPLATE_ROLLEN_GEWIJZIGD)
+
+    email = account.accountemail_set.all()[0]
+    mailer_queue_email(email.bevestigde_email,
+                       'Wijziging rollen op ' + settings.NAAM_SITE,
+                       mail_body)
 
 
 def mag_beheerder_wijzigen_of_403(request, functie):
@@ -227,16 +257,17 @@ def functie_vraag_email_bevestiging(functie):
     # maak de url aan om het e-mailadres te bevestigen
     url = maak_tijdelijke_url_functie_email(functie)
 
-    text_body = ("Hallo!\n\n"
-                 + "Een beheerder heeft dit e-mailadres gekoppeld op " + settings.NAAM_SITE + ".\n"
-                 + "Klik op onderstaande link om dit te bevestigen.\n\n"
-                 + url + "\n\n"
-                 + "Als je dit niet herkent, neem dan contact met ons op via " + settings.EMAIL_BONDSBUREAU + "\n\n"
-                 + "Het bondsbureau\n")
+    context = {
+        'url': url,
+        'naam_site': settings.NAAM_SITE,
+        'contact_email': settings.EMAIL_BONDSBUREAU,
+    }
+
+    mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_TOEGANG_EMAIL)
 
     mailer_queue_email(functie.nieuwe_email,
                        'Bevestig gebruik e-mail voor rol',
-                       text_body,
+                       mail_body,
                        enforce_whitelist=False)
 
 
@@ -391,7 +422,7 @@ class OntvangBeheerderWijzigingenView(View):
             schrijf_in_logboek(request.user, 'Rollen',
                                "%s is beheerder gemaakt voor functie %s" % (wie, functie.beschrijving))
 
-            self._stuur_notificatie_email(account, wie, functie.beschrijving, add=True)
+            functie_wijziging_stuur_email_notificatie(account, wie, functie.beschrijving, add=True)
 
             if account.functie_set.count() == 1:
                 rol_activeer_wissel_van_rol_menu_voor_account(account)
@@ -400,29 +431,9 @@ class OntvangBeheerderWijzigingenView(View):
             schrijf_in_logboek(request.user, 'Rollen',
                                "%s losgekoppeld van functie %s" % (wie, functie.beschrijving))
 
-            self._stuur_notificatie_email(account, wie, functie.beschrijving, remove=True)
+            functie_wijziging_stuur_email_notificatie(account, wie, functie.beschrijving, remove=True)
 
         return HttpResponseRedirect(reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': functie.pk}))
-
-    @staticmethod
-    def _stuur_notificatie_email(account, door_naam, functie_beschrijving, add=False, remove=False):
-        functie_beschrijving = '"' + functie_beschrijving + '"'
-
-        if add:
-            actie = "Toegevoegde"
-        else:
-            actie = 'Verwijderde'
-
-        text_body = ("Hallo!\n\n"
-                     + "Je rollen zijn aangepast op " + settings.NAAM_SITE + ".\n\n"
-                     + actie + " rol: " + functie_beschrijving + ".\n\n"
-                     + "Als je dit niet herkent, neem dan contact met ons op via " + settings.EMAIL_BONDSBUREAU + "\n\n"
-                     + "Het bondsbureau\n")
-
-        email = account.accountemail_set.all()[0]
-        mailer_queue_email(email.bevestigde_email,
-                           'Wijziging rollen op ' + settings.NAAM_SITE,
-                           text_body)
 
 
 class WijzigBeheerdersView(UserPassesTestMixin, ListView):
