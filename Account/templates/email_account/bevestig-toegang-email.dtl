@@ -1,0 +1,29 @@
+{% extends 'email_mailer/email_basis.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% block inhoud_text %}
+Hallo!
+
+Dit is een verzoek vanuit {{ naam_site }} om toegang tot je email te bevestigen.
+
+Klik op onderstaande link om dit te bevestigen.
+
+{{ url }}
+
+Als je dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}
+{% endblock %}
+
+{% block inhoud_html %}
+    <div>Hallo!</div>
+    <br>
+    <div>Dit is een verzoek vanuit {{ naam_site }} om toegang tot je email te bevestigen.</div>
+    <div>Klik op onderstaande link om dit te bevestigen.</div>
+    <br>
+    <div style="padding-left:30px"><code><a href="{{ url }}" target="_blank">{{ url }}</a></code></div>
+    <br>
+    <div>Als je dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}</div>
+{% endblock %}

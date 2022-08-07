@@ -89,26 +89,18 @@ def account_create(username, voornaam, achternaam, wachtwoord, email, email_is_b
     if not mailer_email_is_valide(email):
         raise AccountCreateError('Dat is geen valide e-mail')
 
-    if Account.objects.filter(username=username).count() != 0:
+    # maak het account aan
+    account, is_created = Account.objects.get_or_create(username=username)
+    if not is_created:
         raise AccountCreateError('Account bestaat al')
 
-    # maak het account aan
-    account = Account()
-    account.username = username
     account.set_password(wachtwoord)
     account.first_name = voornaam
     account.last_name = achternaam
+    account.save()
 
-    try:
-        account.save()
-    except psycopg2.errors.UniqueViolation:     # pragma: no cover
-        # FUTURE: vervang dit door veilige database operatie (get_or_create?)
-        # dus ondanks de check hierboven lukt het sommige mensen toch om een dubbel account aan te maken
-        raise AccountCreateError('Account bestaat al')
-
-    # maak het email record aan
-    mail = AccountEmail()
-    mail.account = account
+    # geeft dit account een e-mail
+    mail = AccountEmail(account=account)
     if email_is_bevestigd:
         mail.email_is_bevestigd = True
         mail.bevestigde_email = email
@@ -137,7 +129,7 @@ def account_check_gewijzigde_email(account):
         if email.nieuwe_email:
             if email.nieuwe_email != email.bevestigde_email:
                 # vraag om bevestiging van deze gewijzigde email
-                # email kan eerder overgenomen zijn uit de NHB administratie
+                # e-mail kan eerder overgenomen zijn uit de NHB-administratie
                 # of handmatig ingevoerd zijn
 
                 # blokkeer inlog totdat dit nieuwe e-mailadres bevestigd is

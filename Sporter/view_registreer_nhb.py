@@ -126,7 +126,7 @@ class RegistreerNhbNummerView(TemplateView):
                                    activiteit="Mislukt voor nhb nummer %s vanaf IP %s: %s" % (repr(nhb_nummer), from_ip, str(exc)))
                 my_logger.info('%s REGISTREER Mislukt voor NHB nummer %s met email %s (reden: %s)' % (from_ip, repr(nhb_nummer), repr(email), str(exc)))
             except SporterInactief:
-                # NHB lid is mag niet gebruik maken van de diensten van de NHB, inclusief deze website
+                # lid is mag niet gebruik maken van de diensten van de NHB, inclusief deze website
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met NHB nummer",
                                    activiteit='NHB lid %s is inactief (geblokkeerd van gebruik NHB diensten).' % nhb_nummer)
@@ -146,6 +146,7 @@ class RegistreerNhbNummerView(TemplateView):
 
         # still here --> re-render with error message
         context = {'form': form, 'verberg_login_knop': True}
+
         context['kruimels'] = (
             (None, 'Account aanmaken'),
         )

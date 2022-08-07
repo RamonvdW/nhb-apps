@@ -424,7 +424,7 @@ class TestSporterRegistreer(E2EHelpers, TestCase):
         functie = Functie.objects.get(rol='SEC', nhb_ver=self.nhbver)
         self.assertEqual(functie.accounts.count(), 0)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(22):
             resp = self.client.post('/sporter/registreer/',
                                     {'nhb_nummer': '100001',
                                      'email': 'rdetester@gmail.not',
