@@ -203,8 +203,37 @@ class Loader(AppDirectoriesLoader):
         # whitespace tussen een endblock en </style>
         contents = re.sub('%}\s+</style>', '%}</style>', contents)
 
-        # optimize in inline style=""
         new_contents = ''
+
+        # optimize inside <style>
+        pos = contents.find('<style>')
+        if pos > 0:
+            pos2 = contents.find('</style>')
+            style = contents[pos+7:pos2]
+            new_contents += contents[:pos+7]        # <style>
+            contents = contents[pos2:]              # </style> and onwards
+
+            # remove whitespace at the start of the style
+            style = re.sub('{\s+\B', '{', style)
+
+            # remove whitespace between elements
+            style = re.sub(';\s+\B', ';', style)
+
+            # remove space before {
+            style = re.sub(' {', '{', style)
+
+            # remove space after ;
+            style = re.sub('; ', ';', style)
+
+            # remove space after comma
+            style = re.sub(', ', ',', style)
+
+            # remove space after :
+            style = re.sub(': ', ':', style)
+
+            new_contents += style
+
+        # optimize in inline style=""
         pos = contents.find('style="')      # let op: neemt ook img_style="padding:10px" mee
         while pos > 0:
             new_contents += contents[:pos+7]

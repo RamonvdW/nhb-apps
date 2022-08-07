@@ -40,9 +40,9 @@ Het bondsbureau
             html {
                 font-family: 'Open Sans', sans-serif;
                 font-weight: normal;
-                font-size: 15px;
+                font-size: 14px;
                 color: rgba(0, 0, 0, 0.87);
-                background: red;
+                background: white;
             }
             {% block extrastyle %}{% endblock %}
         </style>
