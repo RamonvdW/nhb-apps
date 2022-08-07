@@ -133,6 +133,9 @@ def render_email_template(context, email_template_name):
     context['logo_width'] = 213
     context['logo_height'] = 50
 
+    context['when'] = timezone.localtime(timezone.now()).strftime('%Y-%m-%d %H:%M')
+    context['naam_site'] = settings.NAAM_SITE
+
     rendered_content = render_to_string(email_template_name, context)
 
     pos = rendered_content.find('<!DOCTYPE')

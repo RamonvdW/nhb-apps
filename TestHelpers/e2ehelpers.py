@@ -328,7 +328,7 @@ class E2EHelpers(TestCase):
             pos = content.find('class="broodkruimels-link" href="')
         # while
 
-    def assert_link_quality(self, content, template_name):
+    def assert_link_quality(self, content, template_name, is_email=False):
         """ assert the quality of links
             - links to external sites must have target="_blank" and rel="noopener noreferrer"
             - links should not be empty
@@ -356,7 +356,7 @@ class E2EHelpers(TestCase):
                             # these must target a blank window
                             if 'target="_blank"' not in link:            # pragma: no cover
                                 self.fail(msg='Missing target="_blank" in link %s on page %s' % (link, template_name))
-                            if 'rel="noopener noreferrer"' not in link:  # pragma: no cover
+                            if not is_email and 'rel="noopener noreferrer"' not in link:  # pragma: no cover
                                 self.fail(msg='Missing rel="noopener noreferrer" in link %s on page %s' % (link, template_name))
             else:
                 content = ''
@@ -445,7 +445,7 @@ class E2EHelpers(TestCase):
         'main', 'nav', 'noscript', 'ol', 'p', 'pre', 'pre', 'section', 'table', 'tfoot', 'ul', 'video'
     )
 
-    def _assert_no_div_in_p(self, response, html):
+    def _assert_no_div_in_p(self, html, dtl):
         pos = html.find('<p')
         while pos >= 0:
             html = html[pos+2:]
@@ -458,7 +458,7 @@ class E2EHelpers(TestCase):
                     elem_pos -= 20
                     if elem_pos < 0:
                         elem_pos = 0
-                    msg = "Bad HTML (template: %s):" % self._get_useful_template_name(response)
+                    msg = "Bad HTML (template: %s):" % dtl
                     msg += "\n   Found block-level element '%s' inside 'p'" % elem
                     msg = msg + "\n   ==> " + sub[elem_pos:elem_pos+40]
                     self.fail(msg)
@@ -486,16 +486,7 @@ class E2EHelpers(TestCase):
             pos = text.find("class=")
         # while
 
-    def assert_html_ok(self, response):
-        """ Doe een aantal basic checks op een html response """
-        html = response.content.decode('utf-8')
-        html = self._remove_debug_toolbar(html)
-
-        dtl = self._get_useful_template_name(response)
-        # print('useful template names:', dtl)
-        if dtl not in validated_templates:
-            validated_templates.append(dtl)
-
+    def _assert_html_basics(self, html, dtl):
         self.assertIn("<!DOCTYPE html>", html, msg='Missing DOCTYPE at start of %s' % dtl)
         self.assertIn("<html", html, msg='Missing <html in %s' % dtl)
         self.assertIn("<head", html, msg='Missing <head in %s' % dtl)
@@ -507,12 +498,25 @@ class E2EHelpers(TestCase):
         self.assertNotIn('<th/>', html, msg='Illegal <th/> must be replaced with <th></th> in %s' % dtl)
         self.assertNotIn('<td/>', html, msg='Illegal <td/> must be replaced with <td></td> in %s' % dtl)
         self.assertNotIn('<thead><th>', html, msg='Missing <tr> between <thead> and <th> in %s' % dtl)
+
+    def assert_html_ok(self, response):
+        """ Doe een aantal basic checks op een html response """
+        html = response.content.decode('utf-8')
+        html = self._remove_debug_toolbar(html)
+
+        dtl = self._get_useful_template_name(response)
+        # print('useful template names:', dtl)
+        if dtl not in validated_templates:
+            validated_templates.append(dtl)
+
+        self._assert_html_basics(html, dtl)
+
         self.assertNotIn('<script>', html, msg='Missing type="application/javascript" in <script> in %s' % dtl)
 
         self.assert_link_quality(html, dtl)
         self.assert_broodkruimels(html, dtl)
         self.assert_scripts_clean(html, dtl)
-        self._assert_no_div_in_p(response, html)
+        self._assert_no_div_in_p(html, dtl)
         self._assert_no_col_white(html, dtl)
 
         urls = self.extract_all_urls(response)
@@ -522,6 +526,25 @@ class E2EHelpers(TestCase):
         # for
 
         if settings.TEST_VALIDATE_HTML:             # pragma: no cover
+            issues = self._validate_html(html)
+            if len(issues):
+                msg = 'Invalid HTML (template: %s):\n' % dtl
+                for issue in issues:
+                    msg += "    %s\n" % issue
+                # for
+                self.fail(msg=msg)
+
+    def assert_email_html_ok(self, html, dtl):
+        if dtl not in validated_templates:          # pragma: no branch
+            validated_templates.append(dtl)
+
+        self._assert_html_basics(html, dtl)
+
+        self.assertNotIn('<script>', html, msg='Unexpected script in e-mail HTML (template: %s)' % dtl)
+        self.assert_link_quality(html, dtl, is_email=True)
+        self._assert_no_div_in_p(html, dtl)
+
+        if True or settings.TEST_VALIDATE_HTML:             # pragma: no cover
             issues = self._validate_html(html)
             if len(issues):
                 msg = 'Invalid HTML (template: %s):\n' % dtl
@@ -814,7 +837,7 @@ class E2EHelpers(TestCase):
         try:
             management.call_command(*args, stderr=f1, stdout=f2)
         except SystemExit as exc:
-            if report_exit_code:
+            if report_exit_code:                # pragma: no cover
                 msg = '\nmanagement commando genereerde een SystemExit\n'
                 msg += 'commando: %s\n' % repr(args)
                 msg += 'stderr:\n'

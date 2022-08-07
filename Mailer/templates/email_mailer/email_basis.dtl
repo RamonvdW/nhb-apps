@@ -22,10 +22,10 @@
 {% endblock %}
 {% block footer_text %}
 
-Veel plezier met de site!
-
 Het bondsbureau
 
+
+(deze e-mail is automatisch gegenereerd op {{ when }})
 {% endblock %}
 <!DOCTYPE html>
 
@@ -34,6 +34,7 @@ Het bondsbureau
 
 <html lang="nl">
     <head>
+        <title>Bericht van {{ naam_site }}</title>
         {% block extraheader %}{% endblock %}
     </head>
 
@@ -45,11 +46,12 @@ Het bondsbureau
 
         {% block footer_html %}
             <br>
-            <div>Veel plezier met de site!</div>
-            <br>
-            <div>Het bondsbureau</div>
+            <div><b>Het bondsbureau</b></div>
             <br>
             <img src="{{ logo_url }}" height="{{ logo_height }}" width="{{ logo_width }}" alt="NHB logo">
+            <br>
+            <br>
+            <div style="font-size:small">(deze e-mail is automatisch gegenereerd op {{ when }})</div>
             <br>
         {% endblock %}
     </body>

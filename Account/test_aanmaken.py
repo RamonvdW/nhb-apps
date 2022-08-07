@@ -146,6 +146,6 @@ class TestAccountAanmaken(E2EHelpers, TestCase):
         self.assertTrue(email.email_is_bevestigd)
 
     # er is geen view om een account direct aan te maken
-    # dit wordt via Schutter gedaan
+    # dit wordt via Sporter gedaan
 
 # end of file

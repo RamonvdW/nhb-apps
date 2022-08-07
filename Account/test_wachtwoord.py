@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -104,6 +104,9 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
 
         # er moet nu een mail in de MailQueue staan met een single-use url
         self.assertEqual(MailQueue.objects.count(), 1)
+        mail = MailQueue.objects.all()[0]
+        self.assert_email_html_ok(mail.mail_html, 'email_account/wachtwoord-vergeten.dtl')
+
         self.assertEqual(SiteTijdelijkeUrl.objects.count(), 1)
         obj = SiteTijdelijkeUrl.objects.all()[0]
 

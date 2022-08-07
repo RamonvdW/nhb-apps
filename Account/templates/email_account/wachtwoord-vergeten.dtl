@@ -15,6 +15,8 @@ Klik op onderstaande link om een nieuw wachtwoord in te stellen.
 {{ url }}
 
 Als je dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}
+
+Veel plezier met de site!
 {% endblock %}
 
 {% block inhoud_html %}
@@ -26,4 +28,6 @@ Als je dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_ema
     <div style="padding-left:30px"><code><a href="{{ url }}" target="_blank">{{ url }}</a></code></div>
     <br>
     <div>Als je dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}</div>
+    <br>
+    <div>Veel plezier met de site!</div>
 {% endblock %}
