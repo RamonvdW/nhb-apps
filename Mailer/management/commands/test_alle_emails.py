@@ -231,13 +231,13 @@ class Command(BaseCommand):
     def _database_opschonen(self):
         try:
             ver = NhbVereniging.objects.get(ver_nr=self.test_ver_nr)
-        except NhbVereniging.DoesNotExist:
+        except NhbVereniging.DoesNotExist:      # pragma: no cover
             pass
         else:
             self.bestelling = None
             try:
                 bestelling = Bestelling.objects.get(bestel_nr=self.test_bestel_nr)
-            except Bestelling.DoesNotExist:
+            except Bestelling.DoesNotExist:      # pragma: no cover
                 pass
             else:
                 bestelling.producten.all().delete()
@@ -245,7 +245,7 @@ class Command(BaseCommand):
 
             try:
                 instellingen = BetaalInstellingenVereniging.objects.get(vereniging=ver)
-            except BetaalInstellingenVereniging.DoesNotExist:
+            except BetaalInstellingenVereniging.DoesNotExist:      # pragma: no cover
                 pass
             else:
                 instellingen.delete()
@@ -253,21 +253,19 @@ class Command(BaseCommand):
             try:
                 sporter1 = Sporter.objects.get(lid_nr=self.test_lid_nr)
                 sporter2 = Sporter.objects.get(lid_nr=self.test_lid_nr - 1)
-            except Sporter.DoesNotExist:
-                print('Sporter.DoesNotExist')
+            except Sporter.DoesNotExist:      # pragma: no cover
                 pass
             else:
                 try:
                     sporterboog1 = SporterBoog.objects.get(sporter=sporter1)
                     sporterboog2 = SporterBoog.objects.get(sporter=sporter2)
-                except SporterBoog.DoesNotExist:
-                    print('SporterBoog.DoesNotExist')
+                except SporterBoog.DoesNotExist:      # pragma: no cover
                     pass
                 else:
                     try:
                         inschrijving1 = WedstrijdInschrijving.objects.get(sporterboog=sporterboog1)
                         inschrijving2 = WedstrijdInschrijving.objects.get(sporterboog=sporterboog2)
-                    except WedstrijdInschrijving.DoesNotExist:
+                    except WedstrijdInschrijving.DoesNotExist:      # pragma: no cover
                         pass
                     else:
                         inschrijving1.delete()
@@ -281,14 +279,14 @@ class Command(BaseCommand):
 
             try:
                 wedstrijd = Wedstrijd.objects.get(organiserende_vereniging=ver)
-            except Wedstrijd.DoesNotExist:
+            except Wedstrijd.DoesNotExist:      # pragma: no cover
                 pass
             else:
                 wedstrijd.delete()
 
             try:
                 locatie = WedstrijdLocatie.objects.get(naam=self.test_wedstrijdlocatie_naam)
-            except WedstrijdLocatie.DoesNotExist:
+            except WedstrijdLocatie.DoesNotExist:      # pragma: no cover
                 pass
             else:
                 locatie.delete()
@@ -298,7 +296,7 @@ class Command(BaseCommand):
         self.functie = None
         try:
             functie = Functie.objects.get(beschrijving=self.test_functie_beschrijving)
-        except Functie.DoesNotExist:
+        except Functie.DoesNotExist:      # pragma: no cover
             pass
         else:
             functie.delete()
@@ -306,7 +304,7 @@ class Command(BaseCommand):
     def _check_mail_gemaakt(self):
         # controleer dat er 1 mail bijgemaakt is
         mailqueue_count = MailQueue.objects.count()
-        if mailqueue_count != self.mailqueue_last + 1:
+        if mailqueue_count != self.mailqueue_last + 1:      # pragma: no cover
             self.stderr.write('[ERROR] Geen nieuwe mail kunnen vinden in de MailQueue')
         self.mailqueue_last = mailqueue_count
 
