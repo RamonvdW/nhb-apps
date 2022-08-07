@@ -33,10 +33,17 @@ Het bondsbureau
 {% load static %}
 {% autoescape on %}
 
-    <html lang="nl">
+<html lang="nl">
     <head>
         <style>
             @import url("https://fonts.googleapis.com/css2?family=Open+Sans&display=swap");
+            html {
+                font-family: 'Open Sans', sans-serif;
+                font-weight: normal;
+                font-size: 15px;
+                color: rgba(0, 0, 0, 0.87);
+                background: red;
+            }
             {% block extrastyle %}{% endblock %}
         </style>
         {% block extraheader %}{% endblock %}
