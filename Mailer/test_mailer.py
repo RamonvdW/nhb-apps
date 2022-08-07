@@ -40,7 +40,7 @@ class TestMailerGoodBase(TestCase):
         # stop een mail in de queue
         objs = MailQueue.objects.all()
         self.assertEqual(len(objs), 0)
-        mailer_queue_email('schutter@nhb.test', 'onderwerp faal', 'body\ndoei!\n')
+        mailer_queue_email('schutter@nhb.test', 'onderwerp faal', ('body\ndoei!\n', '<html>body</html>'))
 
         # probeer te versturen
         obj = MailQueue.objects.all()[0]
