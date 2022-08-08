@@ -5,8 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import reverse
+from django.db.models import F
 from django.views.generic import TemplateView
 from django.templatetags.static import static
+from Competitie.models import RegioCompetitieSchutterBoog, RegiocompetitieTeam
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from Plein.menu import menu_dynamics
@@ -22,6 +24,46 @@ class CompetitieKiesView(TemplateView):
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_KIES_SEIZOEN
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.actuele_regio_comps = list()
+
+    def _tel_aantallen(self, context):
+        context['toon_aantal_inschrijvingen'] = True
+
+        pks = list()
+        for comp in self.actuele_regio_comps:
+            pks.append(comp.pk)
+            aantal_indiv = (RegioCompetitieSchutterBoog
+                            .objects
+                            .filter(deelcompetitie__competitie=comp)
+                            .count())
+
+            qset = RegiocompetitieTeam.objects.filter(deelcompetitie__competitie=comp)
+            aantal_teams = qset.count()
+            aantal_teams_ag_nul = qset.filter(aanvangsgemiddelde__lt=0.001).count()
+
+            if comp.afstand == '18':
+                context['aantal_18m_indiv'] = aantal_indiv
+                context['aantal_18m_teams'] = aantal_teams
+                context['aantal_18m_teams_niet_af'] = aantal_teams_ag_nul
+            else:
+                context['aantal_25m_indiv'] = aantal_indiv
+                context['aantal_25m_teams'] = aantal_teams
+                context['aantal_25m_teams_niet_af'] = aantal_teams_ag_nul
+        # for
+
+        qset = (RegioCompetitieSchutterBoog
+                .objects
+                .filter(deelcompetitie__competitie__pk__in=pks)
+                .select_related('sporterboog__sporter',
+                                'sporterboog__sporter__account')
+                .distinct('sporterboog__sporter__lid_nr'))
+
+        context['aantal_lid_nrs'] = qset.count()
+        context['aantal_zelfstandig'] = qset.filter(aangemeld_door=F('sporterboog__sporter__account')).count()
+        context['procent_zelfstandig'] = '%.1f' % ((context['aantal_zelfstandig'] / context['aantal_lid_nrs']) * 100.0)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -67,6 +109,9 @@ class CompetitieKiesView(TemplateView):
                 if comp.fase == 'B' and rol_nu == Rollen.ROL_SPORTER:
                     context['toon_inschrijven'] = True
 
+                if 'B' <= comp.fase <= 'G':
+                    self.actuele_regio_comps.append(comp)
+
             try:
                 if comp.afstand in eerdere_comp:
                     comp.is_volgend_seizoen = True
@@ -85,6 +130,8 @@ class CompetitieKiesView(TemplateView):
             if seizoen_afsluiten > 0:
                 context['url_seizoen_afsluiten'] = reverse('Competitie:bb-seizoen-afsluiten')
                 context['toon_management_competitie'] = True
+
+            self._tel_aantallen(context)
 
         if rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL):
             context['toon_beheerders'] = True
