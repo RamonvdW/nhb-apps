@@ -40,7 +40,7 @@
                     {% if comp.fase > 'A' %}
                         <span class="green-text">Afgerond</span>
                     {% else %}
-                        <span>{{ comp.begin_aanmeldingen }}</span>
+                        <span>tot {{ comp.begin_aanmeldingen }}</span>
                     {% endif %}
                 </td>
             </tr>
