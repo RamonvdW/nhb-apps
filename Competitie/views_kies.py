@@ -57,13 +57,15 @@ class CompetitieKiesView(TemplateView):
         qset = (RegioCompetitieSchutterBoog
                 .objects
                 .filter(deelcompetitie__competitie__pk__in=pks)
-                .select_related('sporterboog__sporter',
+                .select_related('sporterboog',
                                 'sporterboog__sporter__account')
-                .distinct('sporterboog__sporter__lid_nr'))
+                .distinct('sporterboog'))
 
-        context['aantal_lid_nrs'] = qset.count()
+        aantal_sportersboog = qset.count()
+        context['aantal_sporters'] = qset.distinct('sporterboog__sporter').count()
+        context['aantal_multiboog'] = aantal_sportersboog - context['aantal_sporters']
         context['aantal_zelfstandig'] = qset.filter(aangemeld_door=F('sporterboog__sporter__account')).count()
-        context['procent_zelfstandig'] = '%.1f' % ((context['aantal_zelfstandig'] / context['aantal_lid_nrs']) * 100.0)
+        context['procent_zelfstandig'] = '%.1f' % ((context['aantal_zelfstandig'] / aantal_sportersboog) * 100.0)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
