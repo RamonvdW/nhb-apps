@@ -121,7 +121,7 @@
                     <tr>
                         <th>Aantal unieke sporters</th>
                         <td></td>
-                        <td>{{ aantal_lid_nrs }}</td>
+                        <td>{{ aantal_sporters }} ({{ aantal_multiboog }} met meerdere bogen)</td>
                     </tr>
                     <tr>
                         <th>Aantal zelfstandig aangemeld</th>
