@@ -9,8 +9,7 @@
 from django.conf import settings
 from django.utils import timezone
 from django.core.management.base import BaseCommand
-from Account.models import Account, AccountEmail
-from Account.operations import account_create
+from Account.models import AccountEmail
 from Account.view_wachtwoord import account_stuur_email_wachtwoord_vergeten
 from Account.view_login import account_stuur_email_bevestig_nieuwe_email
 from BasisTypen.models import BoogType
@@ -54,7 +53,6 @@ class Command(BaseCommand):
         self.account_email = None
         self.bestelling = None
         self.functie = None
-        self.account = None
         self.mailqueue_last = MailQueue.objects.count()
         self._database_opschonen()
 
@@ -63,12 +61,6 @@ class Command(BaseCommand):
                             help="E-mailadres waar de mails heen moeten")
 
     def _database_vullen(self):
-        self.account, _ = account_create(self.test_lid_nr, 'Testertje', 'van der Test',
-                                         self.test_wachtwoord, self.test_email, True)
-        self.account.otp_code = "whatever"
-        self.account.otp_is_actief = True
-        self.account.save(update_fields=['otp_code', 'otp_is_actief'])
-
         functie = Functie(
                         beschrijving=self.test_functie_beschrijving,
                         rol='MO',
@@ -312,13 +304,6 @@ class Command(BaseCommand):
         else:
             functie.delete()
 
-        try:
-            account = Account.objects.get(username=self.test_lid_nr)
-        except Account.DoesNotExist:
-            pass
-        else:
-            account.delete()
-
     def _check_mail_gemaakt(self):
         # controleer dat er 1 mail bijgemaakt is
         mailqueue_count = MailQueue.objects.count()
@@ -353,8 +338,8 @@ class Command(BaseCommand):
         functie_wijziging_stuur_email_notificatie(self.account_email.account, 'not used', 'Test functie', remove=True)
         self._check_mail_gemaakt()
 
-        self.stdout.write('OTP losgekoppeld')
-        functie_stuur_email_otp_losgekoppeld(self.account)
+        self.stdout.write('Maak mail voor Functie - OTP losgekoppeld')
+        functie_stuur_email_otp_losgekoppeld(self.account_email.account)
         self._check_mail_gemaakt()
 
     def _test_taken(self):

@@ -106,8 +106,7 @@
                                             <span>Volledige naam:<br>Inlog naam:<br>E-mail is bevestigd:<br>Laatste inlog:<br>Tweede factor:<br>VHPG:<br>Lid bij vereniging:<br>Gekoppelde functies:{% for functie in obj.functies %}<br>{% endfor %}</span>
                                             {% if obj.kan_loskoppelen %}
                                                 <br><br>
-                                                <a class="btn-nhb-blauw modal-trigger" href="#bevestig_reset_tweede_factor_{{ obj.inlog_naam_str }}">
-                                                    <i class="material-icons-round left">qr_code_2</i>Tweede factor loskoppelen</a><br>
+                                                <a class="btn-nhb-blauw modal-trigger" href="#bevestig_reset_tweede_factor_{{ obj.inlog_naam_str }}">Tweede factor loskoppelen</a><br>
                                             {% endif %}
                                         </div>
                                         <div>
