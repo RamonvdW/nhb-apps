@@ -32,6 +32,14 @@ class CompetitieKiesView(TemplateView):
     def _tel_aantallen(self, context):
         context['toon_aantal_inschrijvingen'] = True
 
+        context['aantal_18m_indiv'] = 0
+        context['aantal_18m_teams'] = 0
+        context['aantal_18m_teams_niet_af'] = 0
+
+        context['aantal_25m_indiv'] = 0
+        context['aantal_25m_teams'] = 0
+        context['aantal_25m_teams_niet_af'] = 0
+
         pks = list()
         for comp in self.actuele_regio_comps:
             pks.append(comp.pk)
@@ -65,7 +73,9 @@ class CompetitieKiesView(TemplateView):
         context['aantal_sporters'] = qset.distinct('sporterboog__sporter').count()
         context['aantal_multiboog'] = aantal_sportersboog - context['aantal_sporters']
         context['aantal_zelfstandig'] = qset.filter(aangemeld_door=F('sporterboog__sporter__account')).count()
-        context['procent_zelfstandig'] = '%.1f' % ((context['aantal_zelfstandig'] / aantal_sportersboog) * 100.0)
+
+        if aantal_sportersboog > 0:
+            context['procent_zelfstandig'] = '%.1f' % ((context['aantal_zelfstandig'] / aantal_sportersboog) * 100.0)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
