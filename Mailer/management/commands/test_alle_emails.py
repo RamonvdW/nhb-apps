@@ -36,7 +36,7 @@ class Command(BaseCommand):
 
     help = "Stuur alle mogelijke e-mails"
 
-    aantal_verwacht = 8
+    aantal_verwacht = 9
 
     test_regio_nr = 100
     test_ver_nr = 9999
