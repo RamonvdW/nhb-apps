@@ -17,7 +17,7 @@ from TestHelpers import testdata
 import datetime
 
 
-class TestFunctieKoppelen(E2EHelpers, TestCase):
+class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
     """ tests voor de Functie applicatie, functionaliteit Koppel bestuurders """
 

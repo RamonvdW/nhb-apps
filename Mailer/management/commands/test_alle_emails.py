@@ -17,7 +17,7 @@ from Bestel.management.commands.bestel_mutaties import stuur_email_naar_koper
 from Bestel.models import Bestelling, BestelProduct, BESTELLING_STATUS_WACHT_OP_BETALING
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Functie.models import Functie
-from Functie.view_koppelen import functie_wijziging_stuur_email_notificatie, functie_vraag_email_bevestiging
+from Functie.view_koppel_beheerder import functie_wijziging_stuur_email_notificatie, functie_vraag_email_bevestiging
 from Mailer.models import MailQueue
 from Mailer.operations import mailer_email_is_valide
 from NhbStructuur.models import NhbVereniging, NhbRegio

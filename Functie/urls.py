@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_overzicht, view_otp, view_vhpg, view_wisselvanrol, view_koppelen
+from . import view_overzicht, view_otp_controle, view_otp_koppelen, view_vhpg, view_wisselvanrol, view_koppel_beheerder
 
 app_name = 'Functie'
 
@@ -13,15 +13,15 @@ urlpatterns = [
 
     # post-only, alle data gaat via parameters in de body ipv de url
     path('wijzig/<functie_pk>/ontvang/',
-         view_koppelen.OntvangBeheerderWijzigingenView.as_view(),
+         view_koppel_beheerder.OntvangBeheerderWijzigingenView.as_view(),
          name='ontvang-wijzigingen'),
 
     path('wijzig/<functie_pk>/',
-         view_koppelen.WijzigBeheerdersView.as_view(),
+         view_koppel_beheerder.WijzigBeheerdersView.as_view(),
          name='wijzig-beheerders'),
 
     path('wijzig-email/<functie_pk>/',
-         view_koppelen.WijzigEmailView.as_view(),
+         view_koppel_beheerder.WijzigEmailView.as_view(),
          name='wijzig-email'),
 
     path('overzicht/vereniging/',
@@ -38,20 +38,20 @@ urlpatterns = [
 
 
     path('otp-koppelen-stap1/',
-         view_otp.OTPKoppelenStap1View.as_view(),
+         view_otp_koppelen.OTPKoppelenStap1View.as_view(),
          name="otp-koppelen-stap1"),
 
     path('otp-koppelen-stap2/',
-         view_otp.OTPKoppelenStap2View.as_view(),
+         view_otp_koppelen.OTPKoppelenStap2View.as_view(),
          name="otp-koppelen-stap2"),
 
     path('otp-koppelen-stap3/',
-         view_otp.OTPKoppelenStap3View.as_view(),
+         view_otp_koppelen.OTPKoppelenStap3View.as_view(),
          name="otp-koppelen-stap3"),
 
 
     path('otp-controle/',
-         view_otp.OTPControleView.as_view(),
+         view_otp_controle.OTPControleView.as_view(),
          name="otp-controle"),
 
 
