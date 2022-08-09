@@ -181,6 +181,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
             sporter.tweede_factor_str = '-'
             sporter.vhpg_str = '-'
             sporter.laatste_inlog_str = '-'
+            sporter.kan_loskoppelen = False
 
             if sporter.bij_vereniging:
                 sporter.ver_str = str(sporter.bij_vereniging)
@@ -206,6 +207,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                     sporter.tweede_factor_str = 'Ja'
                     if account.otp_controle_gelukt_op:
                         sporter.tweede_factor_str += ' (check gelukt op %s)' % date_format(account.otp_controle_gelukt_op.astimezone(to_tz), 'j F Y H:i').replace(current_year_str, '')
+                    sporter.kan_loskoppelen = True
                 elif account.functie_set.count() == 0:
                     sporter.tweede_factor_str = 'n.v.t.'
                     do_vhpg = False
