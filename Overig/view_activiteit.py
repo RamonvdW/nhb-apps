@@ -171,6 +171,8 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                             .order_by('unaccented_naam'))[:50]
 
         to_tz = get_default_timezone()
+        current_year_str = ' %s' % now.year
+
         context['zoek_leden'] = list(sporters)
         for sporter in sporters:
             sporter.lid_nr_str = str(sporter.lid_nr)
@@ -197,13 +199,13 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
 
                 if account.last_login:
                     if account.last_login.year == now.year:
-                        sporter.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz), 'j F H:i')
-                    else:
-                        sporter.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz), 'j F Y H:i')
+                        sporter.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz), 'j F Y H:i').replace(current_year_str, '')
 
                 do_vhpg = True
                 if account.otp_is_actief:
                     sporter.tweede_factor_str = 'Ja'
+                    if account.otp_controle_gelukt_op:
+                        sporter.tweede_factor_str += ' (check gelukt op %s)' % date_format(account.otp_controle_gelukt_op.astimezone(to_tz), 'j F Y H:i').replace(current_year_str, '')
                 elif account.functie_set.count() == 0:
                     sporter.tweede_factor_str = 'n.v.t.'
                     do_vhpg = False
@@ -230,6 +232,8 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
 
                 sporter.functies = account.functie_set.order_by('beschrijving')
         # for
+
+        context['url_reset_tweede_factor'] = reverse('Functie:otp-loskoppelen')
 
         # toon sessies
         if not context:     # aka "never without complains"     # pragma: no cover

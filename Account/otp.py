@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -95,6 +95,31 @@ def account_otp_koppel(request, account, code):
                             repr(account.username), from_ip))
     my_logger.info('%s 2FA koppeling mislukte controle voor account %s' % (from_ip, account.username))
     return False
+
+
+def account_otp_loskoppelen(request, account):
+    """ Koppelde de tweede factor los voor het gevraagde account
+
+        Geeft True terug als OTP actief was en echt losgekoppeld is.
+    """
+
+    if not request.user.is_authenticated:
+        return False
+
+    if not account.otp_is_actief:
+        return False
+
+    from_ip = get_safe_from_ip(request)
+
+    account.otp_is_actief = False
+    account.save(update_fields=['otp_is_actief'])
+    my_logger.info('%s 2FA losgekoppeld voor account %s' % (from_ip, account.username))
+
+    # schrijf in het logboek
+    schrijf_in_logboek(account=None,
+                       gebruikte_functie="OTP loskoppelen",
+                       activiteit='OTP is losgekoppeld voor gebruiker %s' % account.username)
+    return True
 
 
 # end of file

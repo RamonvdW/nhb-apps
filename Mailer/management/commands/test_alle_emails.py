@@ -9,7 +9,8 @@
 from django.conf import settings
 from django.utils import timezone
 from django.core.management.base import BaseCommand
-from Account.models import AccountEmail
+from Account.models import Account, AccountEmail
+from Account.operations import account_create
 from Account.view_wachtwoord import account_stuur_email_wachtwoord_vergeten
 from Account.view_login import account_stuur_email_bevestig_nieuwe_email
 from BasisTypen.models import BoogType
@@ -18,6 +19,7 @@ from Bestel.models import Bestelling, BestelProduct, BESTELLING_STATUS_WACHT_OP_
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Functie.models import Functie
 from Functie.view_koppel_beheerder import functie_wijziging_stuur_email_notificatie, functie_vraag_email_bevestiging
+from Functie.view_otp_controle import functie_stuur_email_otp_losgekoppeld
 from Mailer.models import MailQueue
 from Mailer.operations import mailer_email_is_valide
 from NhbStructuur.models import NhbVereniging, NhbRegio
@@ -43,6 +45,8 @@ class Command(BaseCommand):
     test_functie_beschrijving = 'Test functie 9999'
     test_wedstrijdlocatie_naam = 'Test wedstrijdlocatie 999999'
     test_sessie_beschrijving = 'Test sessie 99999'
+    test_wachtwoord = "qewretrytuyi"     # sterk genoeg default wachtwoord
+    test_email = 'testertje@vander.test'
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
@@ -50,6 +54,7 @@ class Command(BaseCommand):
         self.account_email = None
         self.bestelling = None
         self.functie = None
+        self.account = None
         self.mailqueue_last = MailQueue.objects.count()
         self._database_opschonen()
 
@@ -58,6 +63,12 @@ class Command(BaseCommand):
                             help="E-mailadres waar de mails heen moeten")
 
     def _database_vullen(self):
+        self.account, _ = account_create(self.test_lid_nr, 'Testertje', 'van der Test',
+                                         self.test_wachtwoord, self.test_email, True)
+        self.account.otp_code = "whatever"
+        self.account.otp_is_actief = True
+        self.account.save(update_fields=['otp_code', 'otp_is_actief'])
+
         functie = Functie(
                         beschrijving=self.test_functie_beschrijving,
                         rol='MO',
@@ -301,6 +312,13 @@ class Command(BaseCommand):
         else:
             functie.delete()
 
+        try:
+            account = Account.objects.get(username=self.test_lid_nr)
+        except Account.DoesNotExist:
+            pass
+        else:
+            account.delete()
+
     def _check_mail_gemaakt(self):
         # controleer dat er 1 mail bijgemaakt is
         mailqueue_count = MailQueue.objects.count()
@@ -333,6 +351,10 @@ class Command(BaseCommand):
 
         self.stdout.write('Maak mail voor Functie - Gewijzigde beheerder (verwijderd)')
         functie_wijziging_stuur_email_notificatie(self.account_email.account, 'not used', 'Test functie', remove=True)
+        self._check_mail_gemaakt()
+
+        self.stdout.write('OTP losgekoppeld')
+        functie_stuur_email_otp_losgekoppeld(self.account)
         self._check_mail_gemaakt()
 
     def _test_taken(self):

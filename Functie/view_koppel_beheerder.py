@@ -41,9 +41,9 @@ def functie_wijziging_stuur_email_notificatie(account, door_naam, functie_beschr
 
     if add:
         actie = "Toegevoegde rol"
-    elif remove:
+    elif remove:                    # pragma: no branch
         actie = 'Verwijderde rol'
-    else:
+    else:                           # pragma: no cover
         return
 
     context = {

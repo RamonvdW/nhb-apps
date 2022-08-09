@@ -54,6 +54,10 @@ urlpatterns = [
          view_otp_controle.OTPControleView.as_view(),
          name="otp-controle"),
 
+    path('otp-loskoppelen/',
+         view_otp_controle.OTPLoskoppelenView.as_view(),
+         name='otp-loskoppelen'),
+
 
     path('activeer-functie/<str:functie_pk>/',
          view_wisselvanrol.ActiveerRolView.as_view(),
