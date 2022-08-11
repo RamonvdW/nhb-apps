@@ -139,7 +139,7 @@ class BoogType(models.Model):
             # help sorteren op volgorde
             models.Index(fields=['volgorde']),
 
-            # TODO: extra index voor organisatie, in combinatie met afkorting/volgorde??
+            # FUTURE: extra index voor organisatie, in combinatie met afkorting/volgorde??
         ]
 
     objects = models.Manager()      # for the editor only
@@ -185,7 +185,7 @@ class TeamType(models.Model):
             # help sorteren op volgorde
             models.Index(fields=['volgorde']),
 
-            # TODO: extra index voor organisatie, in combinatie met afkorting/volgorde??
+            # FUTURE: extra index voor organisatie, in combinatie met afkorting/volgorde??
         ]
 
     objects = models.Manager()      # for the editor only
@@ -258,7 +258,7 @@ class LeeftijdsKlasse(models.Model):
         verbose_name = "Leeftijdsklasse"
         verbose_name_plural = "Leeftijdsklassen"
 
-        # TODO: index voor organisatie, in combinatie met afkorting/volgorde??
+        # FUTURE: index voor organisatie, in combinatie met afkorting/volgorde??
 
     objects = models.Manager()      # for the editor only
 

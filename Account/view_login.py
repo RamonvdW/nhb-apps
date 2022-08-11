@@ -283,7 +283,7 @@ class LoginView(TemplateView):
                 # is valide url
                 return HttpResponseRedirect(next_url)
 
-        # TODO: ongewenste kennis over OTP en Functies --> dit door een plug-in laten doen
+        # FUTURE: ongewenste kennis over OTP en Functies --> dit door een plug-in laten doen
         if account.otp_is_actief:
             # 2FA check altijd aanbieden aan IT en BB rollen
             if account.is_staff or account.is_superuser or account.is_BB:

@@ -15,14 +15,14 @@ from Bestel.models import (BestelMandje, BestelMutatie, Bestelling,
 from Bestel.mutaties import (bestel_mutatieverzoek_inschrijven_wedstrijd, bestel_mutatieverzoek_betaling_afgerond,
                              bestel_mutatieverzoek_kortingscode_toepassen, bestel_mutatieverzoek_afmelden_wedstrijd)
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie
-from Wedstrijden.models import (Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD,
-                                WedstrijdInschrijving, WedstrijdKortingscode,
-                                INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_RESERVERING_BESTELD,
-                                INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD)
+from Mailer.models import MailQueue
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
-from Wedstrijden.models import WedstrijdLocatie
+from Wedstrijden.models import (Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD, WedstrijdLocatie,
+                                WedstrijdInschrijving, WedstrijdKortingscode,
+                                INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_RESERVERING_BESTELD,
+                                INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD)
 from decimal import Decimal
 import io
 
@@ -351,6 +351,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(3, BestelMutatie.objects.count())
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
         self.assertEqual(3, BestelMutatie.objects.count())
+        self.assertEqual(MailQueue.objects.count(), 0)
 
         # koppel transactie aan de bestelling, zodat deze gevonden kan worden
         bestelling.betaal_actief = betaalactief
@@ -362,6 +363,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(4, BestelMutatie.objects.count())
         f1, f2 = self.verwerk_bestel_mutaties()
         self.assertTrue('Betaling niet gelukt voor bestelling' in f2.getvalue())
+        self.assertEqual(MailQueue.objects.count(), 0)
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_MISLUKT)
@@ -386,6 +388,11 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         f1, f2 = self.verwerk_bestel_mutaties()
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         self.assertTrue('[INFO] Betaling is gelukt voor bestelling' in f2.getvalue())
+
+        # er moet nu een mail in de MailQueue staan
+        self.assertEqual(MailQueue.objects.count(), 1)
+        mail = MailQueue.objects.all()[0]
+        self.assert_email_html_ok(mail.mail_html, 'email_bestel/bevestig-bestelling.dtl')
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)

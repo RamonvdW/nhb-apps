@@ -54,13 +54,22 @@ class TestTakenTaken(E2EHelpers, TestCase):
         self.assertEqual(0, MailQueue.objects.count())
         email = self.account_normaal.accountemail_set.all()[0]
         stuur_taak_email_herinnering(email, 5)
-        self.assertEqual(1, MailQueue.objects.count())
+
+        # er moet nu een mail in de MailQueue staan
+        self.assertEqual(MailQueue.objects.count(), 1)
+        mail = MailQueue.objects.all()[0]
+        self.assert_email_html_ok(mail.mail_html, 'email_taken/herinnering.dtl')
 
     def test_stuur_nieuwe_taak_email(self):
         self.assertEqual(0, MailQueue.objects.count())
         email = self.account_normaal.accountemail_set.all()[0]
         stuur_nieuwe_taak_email(email, 5)
         self.assertEqual(1, MailQueue.objects.count())
+
+        # er moet nu een mail in de MailQueue staan
+        self.assertEqual(MailQueue.objects.count(), 1)
+        mail = MailQueue.objects.all()[0]
+        self.assert_email_html_ok(mail.mail_html, 'email_taken/nieuwe_taak.dtl')
 
     def test_maak_taak(self):
         self.assertEqual(0, Taak.objects.count())

@@ -102,8 +102,10 @@ class E2EHelpers(TestCase):
 
     @staticmethod
     def _get_useful_template_name(response):
-        lst = [tmpl.name for tmpl in response.templates if tmpl.name not in included_templates and not tmpl.name.startswith('django/forms')]
-        return ", ".join(lst)
+        lst = [tmpl.name for tmpl in response.templates if tmpl.name not in included_templates and not tmpl.name.startswith('django/forms') and not tmpl.name.startswith('email_')]
+        if len(lst) > 1:
+            print('[WARNING] e2ehelpers._get_useful_template_name: too many choices!!! %s' % repr(lst))
+        return lst[0]
 
     def e2e_create_account(self, username, email, voornaam, accepteer_vhpg=False):
         """ Maak een Account met AccountEmail aan in de database van de website """
@@ -505,7 +507,7 @@ class E2EHelpers(TestCase):
         html = self._remove_debug_toolbar(html)
 
         dtl = self._get_useful_template_name(response)
-        # print('useful template names:', dtl)
+        # print('useful template name:', dtl)
         if dtl not in validated_templates:
             validated_templates.append(dtl)
 
