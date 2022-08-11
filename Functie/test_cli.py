@@ -234,9 +234,32 @@ class TestFunctieCli(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(53):
             management.call_command('check_beheerders', stderr=f1, stdout=f2)
-        # print('f1:', f1.getvalue())
-        # print('f2:', f2.getvalue())
         self.assertTrue('maar niet meer gekoppeld aan een functie:\n  [100042] Kees Pijlpunt' in f2.getvalue())
+        self.assertFalse('LET OP: geen actief lid' in f2.getvalue())
 
+        # maak het lid niet-actief
+        sporter.is_actief_lid = False
+        sporter.save(update_fields=['is_actief_lid'])
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(53):
+            management.call_command('check_beheerders', stderr=f1, stdout=f2)
+        self.assertTrue('[100042] Kees Pijlpunt' in f2.getvalue())
+        self.assertTrue('LET OP: geen actief lid' in f2.getvalue())
+
+        # maak een account BB, dan wordt de functie-check niet gedaan
+        self.account_normaal.is_staff = True
+        self.account_normaal.save(update_fields=['is_staff'])
+        sporter.is_actief_lid = True
+        sporter.save(update_fields=['is_actief_lid'])
+
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        with self.assert_max_queries(53):
+            management.call_command('check_beheerders', stderr=f1, stdout=f2)
+        print('f1:', f1.getvalue())
+        print('f2:', f2.getvalue())
+        self.assertFalse('[100042] Kees Pijlpunt' in f2.getvalue())
 
 # end of file

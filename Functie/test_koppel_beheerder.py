@@ -8,10 +8,11 @@ from django.test import TestCase, Client
 from django.contrib.sessions.backends.db import SessionStore
 from Account.models import AccountSessions
 from Functie.rol import SESSIONVAR_ROL_MAG_WISSELEN
-from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
+from Functie.models import maak_functie, Functie
 from Logboek.models import LogboekRegel
+from Mailer.models import MailQueue
+from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
-from .models import maak_functie, Functie
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -179,7 +180,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.functie_bko.accounts.add(self.account_beh1)
         self.functie_bko.accounts.add(self.account_beh2)
 
-        # haal het wijzig scherm op voor de BKO weer op
+        # haal het wijzigscherm op voor de BKO weer op
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
@@ -237,6 +238,11 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'plein/site_layout.dtl'))
         self.assertEqual(self.functie_bko.accounts.count(), 1)
+
+        # er moet nu een mail in de MailQueue staan met een single-use url
+        self.assertEqual(MailQueue.objects.count(), 1)
+        mail = MailQueue.objects.all()[0]
+        self.assert_email_html_ok(mail.mail_html, 'email_functie/rollen-gewijzigd.dtl')
 
         # koppel beheerder2
         with self.assert_max_queries(22):

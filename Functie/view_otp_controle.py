@@ -41,7 +41,7 @@ def functie_stuur_email_otp_losgekoppeld(account):
 
 class OTPLoskoppelenView(UserPassesTestMixin, View):
 
-    """ Deze view levert een POST functie om de tweede factor los te kunnen koppelen
+    """ Deze view levert een POST-functie om de tweede factor los te kunnen koppelen
         voor een gekozen gebruiken. Dit kan alleen de BB.
     """
 

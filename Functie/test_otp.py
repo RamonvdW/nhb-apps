@@ -6,6 +6,7 @@
 
 from django.test import TestCase
 from Account.models import Account
+from Mailer.models import MailQueue
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import pyotp
@@ -26,6 +27,7 @@ class TestFunctie2FA(E2EHelpers, TestCase):
     url_koppel_stap2 = '/functie/otp-koppelen-stap2/'
     url_koppel_stap3 = '/functie/otp-koppelen-stap3/'
     url_controle = '/functie/otp-controle/'
+    url_loskoppelen = '/functie/otp-loskoppelen/'
 
     @classmethod
     def setUpTestData(cls):
@@ -63,6 +65,9 @@ class TestFunctie2FA(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_koppel_stap3, {'otp_code': '123456'})
         self.assert_is_redirect(resp, '/plein/')
+
+        resp = self.client.post(self.url_loskoppelen)
+        self.assert403(resp)
 
     def test_2fa_koppelen_niet_nodig(self):
         self.e2e_login(self.account_normaal)
@@ -286,5 +291,57 @@ class TestFunctie2FA(E2EHelpers, TestCase):
             self.assertEqual(resp.status_code, 200)     # 200 = OK
             self.assert_template_used(resp, ('functie/otp-koppelen-stap3-code-invoeren.dtl', 'plein/site_layout.dtl'))
             self.assert_html_ok(resp)
+
+    def test_loskoppelen(self):
+        self.testdata.account_admin.otp_is_actief = True
+        self.testdata.account_admin.otp_code = "ABCDEFGHIJKLMNOP"
+        self.testdata.account_admin.save()
+
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
+        self.e2e_wisselnaarrol_bb()
+
+        # loskoppelen via POST
+
+        # bad input: geen parameters
+        resp = self.client.post(self.url_loskoppelen, {})
+        self.assert_is_redirect(resp, '/overig/activiteit/')
+
+        # bad input: geen login parameter
+        resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1})
+        self.assert404(resp, 'Niet gevonden')
+
+        # bad input: niet bestaande login naam
+        resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,
+                                                       'inlog_naam': 'Jantje'})
+        self.assert404(resp, 'Niet gevonden')
+
+        # bad input: rare tekens in login naam
+        resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,
+                                                       'inlog_naam': '###'})
+        self.assert404(resp, 'Niet gevonden')
+
+        # bad input: geen login naam
+        resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,
+                                                       'inlog_naam': ''})
+        self.assert404(resp, 'Niet gevonden')
+
+        # echt loskoppelen
+        resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,
+                                                       'inlog_naam': self.testdata.account_admin.username})
+        self.assert_is_redirect(resp, '/overig/activiteit/?zoekterm=%s' % self.testdata.account_admin.username)
+
+        # controleer losgekoppeld
+        account = Account.objects.get(username=self.testdata.account_admin.username)
+        self.assertFalse(account.otp_is_actief)
+
+        # er moet nu een mail in de MailQueue staan met een single-use url
+        self.assertEqual(MailQueue.objects.count(), 1)
+        mail = MailQueue.objects.all()[0]
+        self.assert_email_html_ok(mail.mail_html, 'email_functie/otp-is-losgekoppeld.dtl')
+
+        # al losgekoppeld
+        resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,
+                                                       'inlog_naam': self.testdata.account_admin.username})
+        self.assert_is_redirect(resp, '/overig/activiteit/?zoekterm=%s' % self.testdata.account_admin.username)
 
 # end of file

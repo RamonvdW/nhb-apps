@@ -8,9 +8,10 @@ from django.utils import timezone
 from django.urls import reverse
 from django.test import TestCase
 from django.conf import settings
+from Account.models import Account
+from Account.forms import LoginForm
+from Mailer.models import MailQueue
 from Overig.tijdelijke_url import maak_tijdelijke_url_account_email
-from .models import Account
-from .forms import LoginForm
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 import datetime
@@ -187,6 +188,11 @@ class TestAccountLogin(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('account/nieuwe-email.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'me#########l@test.com')
+
+        # er moet nu een mail in de MailQueue staan met een single-use url
+        self.assertEqual(MailQueue.objects.count(), 1)
+        mail = MailQueue.objects.all()[0]
+        self.assert_email_html_ok(mail.mail_html, 'email_account/bevestig-toegang-email.dtl')
 
         self.e2e_login(self.testdata.account_admin)
         url = reverse('Overig:tijdelijke-url', kwargs={'code': code})

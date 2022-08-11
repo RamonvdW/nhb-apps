@@ -69,7 +69,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         ver.save()
         self._ver = ver
 
-        # maak HWL functie aan voor deze vereniging
+        # maak functie HWL aan voor deze vereniging
         self.functie_hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
         self.functie_hwl.nhb_ver = ver
         self.functie_hwl.save()
@@ -108,7 +108,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         ver.save()
         self._ver2 = ver
 
-        # maak HWL functie aan voor deze vereniging
+        # maak functie HWL aan voor deze vereniging
         hwl = maak_functie("HWL Vereniging %s" % ver.ver_nr, "HWL")
         hwl.nhb_ver = ver
         hwl.save()
@@ -173,7 +173,7 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
                 # zet de recurve boog aan
                 if lp == 1:
-                    # zet de DT voorkeur aan voor een paar sporters
+                    # zet de voorkeur voor eigen blazoen aan voor een paar sporters
                     with self.assert_max_queries(25):
                         resp = self.client.post(url_voorkeuren, {'sporter_pk': lid_nr,
                                                                  'schiet_R': 'on',
@@ -218,9 +218,17 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
 
     def test_overzicht(self):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
+        self.e2e_wisselnaarrol_bb()
 
         comp18 = Competitie.objects.get(afstand='18')
         comp25 = Competitie.objects.get(afstand='25')
+
+        # statistiek voor de BB met 0 deelnemers
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_kies)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
 
         self._doe_inschrijven(comp18)         # wisselt naar HWL rol
         # self._doe_inschrijven(comp25)         # wisselt naar HWL rol
@@ -232,6 +240,13 @@ class TestCompetitieBeheerders(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('competitie/overzicht-beheerder.dtl', 'plein/site_layout.dtl'))
+
+        # statistiek voor de BB
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_kies)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('competitie/kies.dtl', 'plein/site_layout.dtl'))
 
         # BKO 18m
         functie_bko = DeelCompetitie.objects.get(competitie=comp18, laag=LAAG_BK).functie

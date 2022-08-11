@@ -21,7 +21,8 @@ included_templates = (
     'feedback/sidebar.dtl',
     'logboek/common.dtl',
     'competitie/tijdlijn.dtl',
-    'snippets.dtl'
+    'snippets.dtl',
+    'email_mailer/email_basis.dtl'
 )
 
 

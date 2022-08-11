@@ -103,7 +103,7 @@ def account_otp_loskoppelen(request, account):
         Geeft True terug als OTP actief was en echt losgekoppeld is.
     """
 
-    if not request.user.is_authenticated:
+    if not request.user.is_authenticated:           # pragma: no cover
         return False
 
     if not account.otp_is_actief:
