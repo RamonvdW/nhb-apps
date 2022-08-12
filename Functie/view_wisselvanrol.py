@@ -13,15 +13,16 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.otp import account_otp_is_gekoppeld
 from Account.rechten import account_rechten_is_otp_verified
 from Competitie.menu import get_url_voor_competitie
+from Functie.models import Functie
+from Functie.operations import account_needs_vhpg
+from Functie.rol import (Rollen, rol_mag_wisselen, rol_enum_pallet, rol2url,
+                         rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
+                         rol_activeer_rol, rol_activeer_functie, rol_evalueer_opnieuw)
 from Handleiding.views import reverse_handleiding
 from NhbStructuur.models import NhbVereniging
-from Plein.menu import menu_dynamics
 from Overig.helpers import get_safe_from_ip
+from Plein.menu import menu_dynamics
 from Taken.operations import eval_open_taken
-from .rol import (Rollen, rol_mag_wisselen, rol_enum_pallet, rol2url,
-                  rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
-                  rol_activeer_rol, rol_activeer_functie, rol_evalueer_opnieuw)
-from .models import Functie, account_needs_vhpg
 import logging
 
 

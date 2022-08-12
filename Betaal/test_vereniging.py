@@ -4,22 +4,16 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.test import TestCase, override_settings
-from django.core import management
-from django.conf import settings
-from Betaal.models import BetaalMutatie, BetaalActief, BetaalTransactie, BetaalInstellingenVereniging
-from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst, betaal_mutatieverzoek_payment_status_changed
-from Bestel.models import Bestelling
-from Functie.models import maak_functie
+from django.test import TestCase
+from Betaal.models import BetaalInstellingenVereniging
+from Functie.operations import maak_functie
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from TestHelpers.e2ehelpers import E2EHelpers
-from decimal import Decimal
-import io
 
 
 class TestBetaalMutaties(E2EHelpers, TestCase):
 
-    """ tests voor de Betaal applicatie, interactie achtergrond taak met CPSP """
+    """ tests voor de Betaal-applicatie, interactie achtergrond taak met CPSP """
 
     url_betaal_vereniging = '/bestel/betaal/vereniging/instellingen/'
 

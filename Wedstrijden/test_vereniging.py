@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.models import ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA
-from Functie.models import maak_functie
+from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter
 from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WEDSTRIJD_DISCIPLINE_3D

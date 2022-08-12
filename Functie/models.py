@@ -7,8 +7,8 @@
 from django.db import models
 from django.utils import timezone
 from django.utils.formats import date_format
-from NhbStructuur.models import NhbRegio, NhbRayon, NhbVereniging
 from Account.models import Account
+from NhbStructuur.models import NhbRegio, NhbRayon, NhbVereniging
 import datetime
 
 """ Deze module houdt bij wie beheerders zijn
@@ -105,73 +105,5 @@ class VerklaringHanterenPersoonsgegevens(models.Model):
 
     objects = models.Manager()      # for the editor only
 
-
-def maak_functie(beschrijving, rol):
-    """ Deze helper geeft het Functie object terug met de gevraagde parameters
-        De eerste keer wordt deze aangemaakt.
-    """
-    functie, _ = Functie.objects.get_or_create(beschrijving=beschrijving, rol=rol)
-    return functie      # caller kan zelf andere velden invullen
-
-
-def maak_account_vereniging_secretaris(nhb_ver, account):
-    """ Geeft het account rechten om als secretaris van de vereniging de site te gebruiken
-        Retourneert True als het account aan de SEC functie toegevoegd is
-    """
-
-    # zoek de SEC functie van de vereniging erbij
-    functie = Functie.objects.get(rol='SEC', nhb_ver=nhb_ver)
-
-    # kijk of dit lid al in de groep zit
-    if functie.accounts.filter(pk=account.pk).count() == 0:
-        # nog niet gekoppeld aan de functie --> koppel dit account nu
-        functie.accounts.add(account)
-        return True
-
-    return False
-
-
-def account_needs_vhpg(account, show_only=False):
-    """ Controleer of het Account een VHPG af moet leggen """
-
-    if not account_needs_otp(account):
-        # niet nodig
-        return False, None
-
-    if show_only:
-        return True, None
-
-    # kijk of de acceptatie recent al afgelegd is
-    try:
-        vhpg = VerklaringHanterenPersoonsgegevens.objects.only('acceptatie_datum').get(account=account)
-    except VerklaringHanterenPersoonsgegevens.DoesNotExist:
-        # niet uitgevoerd, wel nodig
-        return True, None
-
-    # elke 11 maanden moet de verklaring afgelegd worden
-    # dit is ongeveer (11/12)*365 == 365-31 = 334 dagen
-    opnieuw = vhpg.acceptatie_datum + datetime.timedelta(days=334)
-    now = timezone.now()
-    return opnieuw < now, vhpg
-
-
-def account_needs_otp(account):
-    """ Controleer of het Account OTP verificatie nodig heeft
-
-        Returns: True or False
-        Bepaalde rechten vereisen OTP:
-            is_BB
-            is_staff
-            bepaalde functies
-    """
-    if account.is_authenticated:                    # pragma: no branch
-        if account.is_BB or account.is_staff:
-            return True
-
-        # alle functies hebben OTP nodig
-        if account.functie_set.count() > 0:
-            return True
-
-    return False
 
 # end of file

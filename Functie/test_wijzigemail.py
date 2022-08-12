@@ -8,7 +8,7 @@ from django.test import TestCase
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Competitie.models import DeelCompetitie, LAAG_BK, LAAG_RK, LAAG_REGIO
 from Competitie.operations import competities_aanmaken
-from Functie.models import maak_functie, Functie
+from Functie.operations import maak_functie, Functie
 from Mailer.models import MailQueue
 from Overig.models import SiteTijdelijkeUrl
 from TestHelpers.e2ehelpers import E2EHelpers

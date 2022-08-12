@@ -13,7 +13,7 @@ from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse
                                RegioCompetitieSchutterBoog, INSCHRIJF_METHODE_1)
 from Competitie.operations import competities_aanmaken
 from CompLaagRegio.view_planning import competitie_week_nr_to_date
-from Functie.models import maak_functie
+from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from Taken.models import Taak

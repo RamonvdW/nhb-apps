@@ -384,7 +384,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_maak_secretaris(self):
         # een lid secretaris maken
-        with self.assert_max_queries(61):
+        with self.assert_max_queries(63):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_14_WIJZIG_GESLACHT_2,
                                                  OPTION_SIM)
@@ -408,7 +408,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         sporter.account = self.e2e_create_account(sporter.lid_nr, 'maakt.niet.uit@gratis.net', sporter.voornaam)
         sporter.save()
 
-        with self.assert_max_queries(27):
+        with self.assert_max_queries(29):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_14_WIJZIG_GESLACHT_2,
                                                  OPTION_SIM)
@@ -459,7 +459,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         # verwijderen van de secretaris geeft een fout
 
         # maak 100024 aan
-        with self.assert_max_queries(61):
+        with self.assert_max_queries(63):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_14_WIJZIG_GESLACHT_2,
                                         OPTION_SIM)
@@ -487,7 +487,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_verwijder_recordhouder_fail(self):
         # maak 100024 aan
-        with self.assert_max_queries(61):
+        with self.assert_max_queries(63):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_14_WIJZIG_GESLACHT_2,
                                         OPTION_SIM)
@@ -510,7 +510,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_verwijder_score_fail(self):
         # maak 100024 aan
-        with self.assert_max_queries(61):
+        with self.assert_max_queries(63):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_14_WIJZIG_GESLACHT_2,
                                         OPTION_SIM)
@@ -551,7 +551,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         ver.geen_wedstrijden = True
         ver.save()
 
-        with self.assert_max_queries(30):
+        with self.assert_max_queries(31):
             self.run_management_command(IMPORT_COMMAND,
                                         TESTFILE_08_VER_MUTATIES,
                                         OPTION_SIM,
@@ -581,7 +581,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
 
     def test_incomplete_data(self):
         # test import met een incomplete entry van een nieuw lid
-        with self.assert_max_queries(46):
+        with self.assert_max_queries(48):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_17_MEMBER_INCOMPLETE_2,
                                                  OPTION_SIM)

@@ -7,7 +7,7 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Bestel.models import BestelProduct
-from Functie.models import maak_functie
+from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
 from Wedstrijden.models import WedstrijdLocatie

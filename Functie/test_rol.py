@@ -10,7 +10,8 @@ from Functie.rol import (SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN,
                          SESSIONVAR_ROL_BESCHRIJVING, SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK,
                          rol_mag_wisselen, rol_enum_pallet, rol_get_beschrijving,
                          rol_activeer_rol, rol_activeer_functie)
-from Functie.models import maak_functie, maak_account_vereniging_secretaris
+from Functie.operations import maak_functie, maak_account_vereniging_secretaris
+from Mailer.models import MailQueue
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from TestHelpers.e2ehelpers import E2EHelpers
 
@@ -49,6 +50,10 @@ class TestFunctieRol(E2EHelpers, TestCase):
         added = maak_account_vereniging_secretaris(self.nhbver1, self.account_normaal)
         self.assertTrue(added)
         self.assertEqual(self.functie_sec.accounts.count(), 1)
+
+        self.assertEqual(MailQueue.objects.count(), 1)
+        mail = MailQueue.objects.all()[0]
+        self.assert_email_html_ok(mail.mail_html, 'email_functie/rollen-gewijzigd.dtl')
 
         # opnieuw toevoegen heeft geen effect
         added = maak_account_vereniging_secretaris(self.nhbver1, self.account_normaal)

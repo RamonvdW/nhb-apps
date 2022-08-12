@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.shortcuts import render
@@ -14,13 +13,12 @@ from django.views.generic import ListView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
+from Functie.models import Functie
+from Functie.operations import functie_vraag_email_bevestiging, functie_wijziging_stuur_email_notificatie
 from Functie.rol import (Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
                          rol_activeer_wissel_van_rol_menu_voor_account)
-from Functie.models import Functie
 from Functie.forms import ZoekBeheerdersForm, WijzigBeheerdersForm, WijzigEmailForm
-from Mailer.operations import mailer_queue_email, render_email_template
 from Logboek.models import schrijf_in_logboek
-from Overig.tijdelijke_url import maak_tijdelijke_url_functie_email
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_FUNCTIE_EMAIL
 from Overig.helpers import get_safe_from_ip
 from Plein.menu import menu_dynamics
@@ -31,39 +29,6 @@ TEMPLATE_KOPPEL_BEHEERDERS = 'functie/koppel-beheerders.dtl'
 TEMPLATE_WIJZIG_EMAIL = 'functie/wijzig-email.dtl'
 TEMPLATE_BEVESTIG_EMAIL = 'functie/bevestig.dtl'
 TEMPLATE_EMAIL_BEVESTIGD = 'functie/bevestigd.dtl'
-EMAIL_TEMPLATE_ROLLEN_GEWIJZIGD = 'email_functie/rollen-gewijzigd.dtl'
-EMAIL_TEMPLATE_BEVESTIG_TOEGANG_EMAIL = 'email_functie/bevestig-toegang-email.dtl'
-
-
-def functie_wijziging_stuur_email_notificatie(account, door_naam, functie_beschrijving, add=False, remove=False):
-
-    """ Stuur een e-mail naar 'account' om te melden dat de rollen gewijzigd zijn """
-
-    if add:
-        actie = "Toegevoegde rol"
-    elif remove:                    # pragma: no branch
-        actie = 'Verwijderde rol'
-    else:                           # pragma: no cover
-        return
-
-    context = {
-        'voornaam': account.get_first_name(),
-        'actie': actie,
-        'naam_site': settings.NAAM_SITE,
-        'functie_beschrijving': functie_beschrijving,
-        'contact_email': settings.EMAIL_BONDSBUREAU
-    }
-
-    if add and not account.otp_is_actief:
-        context['uitleg_2fa'] = True
-        context['url_handleiding_beheerders'] = settings.URL_PDF_HANDLEIDING_BEHEERDERS
-
-    mail_body = render_email_template(context, EMAIL_TEMPLATE_ROLLEN_GEWIJZIGD)
-
-    email = account.accountemail_set.all()[0]
-    mailer_queue_email(email.bevestigde_email,
-                       'Wijziging rollen op ' + settings.NAAM_SITE,
-                       mail_body)
 
 
 def mag_beheerder_wijzigen_of_403(request, functie):
@@ -251,28 +216,6 @@ def receive_bevestiging_functie_email(request, functie):
 
 
 set_tijdelijke_url_receiver(RECEIVER_BEVESTIG_FUNCTIE_EMAIL, receive_bevestiging_functie_email)
-
-
-def functie_vraag_email_bevestiging(functie):
-    """ Stuur een mail naar het adres om te vragen om een bevestiging.
-        Gebruik een tijdelijke URL die, na het volgen, weer in deze module uit komt.
-    """
-
-    # maak de url aan om het e-mailadres te bevestigen
-    url = maak_tijdelijke_url_functie_email(functie)
-
-    context = {
-        'url': url,
-        'naam_site': settings.NAAM_SITE,
-        'contact_email': settings.EMAIL_BONDSBUREAU,
-    }
-
-    mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_TOEGANG_EMAIL)
-
-    mailer_queue_email(functie.nieuwe_email,
-                       'Bevestig gebruik e-mail voor rol',
-                       mail_body,
-                       enforce_whitelist=False)
 
 
 class WijzigEmailView(UserPassesTestMixin, View):

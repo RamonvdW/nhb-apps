@@ -11,7 +11,7 @@ from Competitie.models import (Competitie, DeelCompetitie,
                                LAAG_BK, LAAG_RK, LAAG_REGIO)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
-from Functie.models import maak_functie
+from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbCluster, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from Wedstrijden.models import WedstrijdLocatie

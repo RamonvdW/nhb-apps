@@ -7,7 +7,7 @@
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Functie.models import maak_functie
+from Functie.operations import maak_functie
 from .models import (Sporter, SporterBoog, SporterVoorkeuren,
                      get_sporter_voorkeuren, get_sporter_voorkeuren_wedstrijdbogen)
 from TestHelpers.e2ehelpers import E2EHelpers

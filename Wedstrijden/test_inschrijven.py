@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse, GESLACHT_ANDERS, GESLACHT_ALLE
-from Functie.models import maak_functie
+from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
 from Wedstrijden.models import (WedstrijdLocatie, INSCHRIJVING_STATUS_AFGEMELD, ORGANISATIE_WA,

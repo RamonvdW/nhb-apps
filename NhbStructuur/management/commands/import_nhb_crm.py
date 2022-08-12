@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" importeer een JSON file met data uit het CRM systeem van de NHB """
+""" importeer een JSON-file met data uit het CRM-systeem van de NHB """
 
 from django.core.management.base import BaseCommand
 from django.db.models import ProtectedError
@@ -14,7 +14,8 @@ from django.conf import settings
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from Account.models import Account
-from Functie.models import Functie, maak_functie, maak_account_vereniging_secretaris
+from Functie.models import Functie
+from Functie.operations import maak_functie, maak_account_vereniging_secretaris
 from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_notify_internal_error
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging

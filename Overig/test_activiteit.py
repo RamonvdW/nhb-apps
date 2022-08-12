@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from Account.models import Account
-from Functie.models import maak_functie
+from Functie.operations import maak_functie
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers

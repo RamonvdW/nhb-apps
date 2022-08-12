@@ -9,7 +9,7 @@ from django.test import TestCase, Client
 from django.contrib.sessions.backends.db import SessionStore
 from Account.models import AccountSessions
 from Functie.rol import SESSIONVAR_ROL_MAG_WISSELEN
-from Functie.models import maak_functie, Functie
+from Functie.operations import maak_functie, Functie
 from Logboek.models import LogboekRegel
 from Mailer.models import MailQueue
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging

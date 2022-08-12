@@ -12,7 +12,7 @@ from Bestel.models import Bestelling
 from Competitie.models import Competitie, DeelCompetitie, INSCHRIJF_METHODE_1
 from Competitie.test_fase import zet_competitie_fase
 from Competitie.test_competitie import maak_competities_en_zet_fase_b, competities_aanmaken
-from Functie.models import maak_functie
+from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Records.models import IndivRecord

@@ -11,11 +11,12 @@ from django.shortcuts import render
 from django.views.generic import ListView, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.rechten import account_rechten_eval_now
-from Plein.menu import menu_dynamics
+from Functie.models import VerklaringHanterenPersoonsgegevens
+from Functie.operations import account_needs_vhpg
+from Functie.rol import Rollen, rol_get_huidige
+from Functie.forms import AccepteerVHPGForm
 from Logboek.models import schrijf_in_logboek
-from .rol import Rollen, rol_get_huidige
-from .models import VerklaringHanterenPersoonsgegevens, account_needs_vhpg
-from .forms import AccepteerVHPGForm
+from Plein.menu import menu_dynamics
 
 
 TEMPLATE_VHPG_ACCEPTATIE = 'functie/vhpg-acceptatie.dtl'

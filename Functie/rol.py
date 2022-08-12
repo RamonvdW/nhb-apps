@@ -11,7 +11,8 @@ from Account.rechten import account_add_plugin_rechten, account_rechten_is_otp_v
 from Account.models import AccountSessions
 from NhbStructuur.models import NhbVereniging
 from Overig.helpers import get_safe_from_ip
-from .models import Functie, account_needs_vhpg, account_needs_otp
+from Functie.models import Functie
+from Functie.operations import account_needs_vhpg, account_needs_otp
 from types import SimpleNamespace
 from typing import Tuple
 import logging

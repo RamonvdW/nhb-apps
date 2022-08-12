@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from Functie.models import maak_functie, Functie
+from Functie.operations import maak_functie, Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, RegioCompetitieSchutterBoog,
                                INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3, LAAG_REGIO, LAAG_RK,

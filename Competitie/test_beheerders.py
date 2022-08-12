@@ -9,7 +9,7 @@ from BasisTypen.models import BoogType
 from Competitie.models import Competitie, DeelCompetitie, RegioCompetitieSchutterBoog, LAAG_REGIO, LAAG_RK, LAAG_BK
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
-from Functie.models import maak_functie
+from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers

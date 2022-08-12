@@ -6,7 +6,7 @@
 
 from django.test import TestCase
 from BasisTypen.models import BoogType, TeamType
-from Functie.models import maak_functie
+from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging, NhbCluster
 from Competitie.models import (DeelCompetitie, CompetitieMatch,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,

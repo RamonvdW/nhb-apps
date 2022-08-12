@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.utils import timezone
 from BasisTypen.models import BoogType
 from Competitie.models import Competitie, CompetitieMatch
-from Functie.models import maak_functie
+from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from .models import Score, ScoreHist, Uitslag, SCORE_WAARDE_VERWIJDERD
