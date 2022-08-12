@@ -54,6 +54,10 @@ def functie_wijziging_stuur_email_notificatie(account, door_naam, functie_beschr
         'contact_email': settings.EMAIL_BONDSBUREAU
     }
 
+    if add and not account.otp_is_actief:
+        context['uitleg_2fa'] = True
+        context['url_handleiding_beheerders'] = settings.URL_PDF_HANDLEIDING_BEHEERDERS
+
     mail_body = render_email_template(context, EMAIL_TEMPLATE_ROLLEN_GEWIJZIGD)
 
     email = account.accountemail_set.all()[0]

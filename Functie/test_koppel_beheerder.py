@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.test import TestCase, Client
 from django.contrib.sessions.backends.db import SessionStore
 from Account.models import AccountSessions
@@ -164,16 +165,16 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'plein/site_layout.dtl'))
 
-        # probeer de zoek functie
+        # probeer de zoekfunctie
         with self.assert_max_queries(20):
             resp = self.client.get(url + '?zoekterm=beheerder')
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'plein/site_layout.dtl'))
 
-        # controleer aanwezigheid van toevoeg knoppen
+        # controleer aanwezigheid van toevoeg-knoppen
         self.assertContains(resp, '</i>Koppel</button>', count=2)
-        # controleer afwezigheid van verwijder knoppen
+        # controleer afwezigheid van verwijder-knoppen
         self.assertNotContains(resp, 'Verwijder beheerder')
 
         # koppel de twee beheerders
@@ -187,7 +188,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'plein/site_layout.dtl'))
 
-        # controleer aanwezigheid van verwijder knoppen
+        # controleer aanwezigheid van verwijder-knoppen
         self.assertContains(resp, '</i>Verwijder</a>', count=2)
 
         self.e2e_assert_other_http_commands_not_supported(url)
@@ -213,9 +214,9 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/koppel-beheerders.dtl', 'plein/site_layout.dtl'))
 
-        # controleer aanwezigheid van toevoeg knoppen
+        # controleer aanwezigheid van toevoeg-knoppen
         self.assertContains(resp, '</i>Koppel</button>', count=2)         # 2 leden van de vereniging
-        # controleer afwezigheid van verwijder knoppen
+        # controleer afwezigheid van verwijder-knoppen
         self.assertContains(resp, '</i>Verwijder</a>', count=1)      # kan zichzelf verwijderen
 
     def test_koppel_ontkoppel_bb(self):
@@ -230,6 +231,10 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         # juiste URL om BKO te koppelen
         url = self.url_wijzig_ontvang % self.functie_bko.pk
 
+        # zet OTP uit voor beheerder 1 zodat de handleiding meegestuurd wordt
+        self.account_beh1.otp_is_actief = False
+        self.account_beh1.save(update_fields=['otp_is_actief'])
+
         # koppel beheerder1
         self.assertEqual(self.functie_bko.accounts.count(), 0)
         with self.assert_max_queries(20):
@@ -243,6 +248,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.all()[0]
         self.assert_email_html_ok(mail.mail_html, 'email_functie/rollen-gewijzigd.dtl')
+        self.assertTrue(settings.URL_PDF_HANDLEIDING_BEHEERDERS in mail.mail_html)
 
         # koppel beheerder2
         with self.assert_max_queries(22):
