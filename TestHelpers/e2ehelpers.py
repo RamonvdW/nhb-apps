@@ -103,7 +103,7 @@ class E2EHelpers(TestCase):
     @staticmethod
     def _get_useful_template_name(response):
         lst = [tmpl.name for tmpl in response.templates if tmpl.name not in included_templates and not tmpl.name.startswith('django/forms') and not tmpl.name.startswith('email_')]
-        if len(lst) > 1:
+        if len(lst) > 1:        # pragma: no cover
             print('[WARNING] e2ehelpers._get_useful_template_name: too many choices!!! %s' % repr(lst))
         return lst[0]
 

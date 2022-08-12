@@ -15,7 +15,7 @@ import datetime
 
 class TestPlein(E2EHelpers, TestCase):
 
-    """ tests voor de Plein applicatie """
+    """ tests voor de Plein-applicatie """
 
     test_after = ('Functie',)
 
@@ -91,6 +91,8 @@ class TestPlein(E2EHelpers, TestCase):
         sporter.email = sporter.account.email
         sporter.save()
 
+        self.functie_mo = maak_functie('Test MO', 'MO')
+
     def test_plein_anon(self):
         self.e2e_logout()
         with self.assert_max_queries(20):
@@ -122,6 +124,8 @@ class TestPlein(E2EHelpers, TestCase):
         self.e2e_logout()
 
     def test_plein_admin(self):
+        self.functie_mo.accounts.add(self.testdata.account_admin)
+
         # voordat de 2FA control gedaan is, geen admin scherm link in het dropdown menu
         self.e2e_login(self.testdata.account_admin)
         with self.assert_max_queries(20):
@@ -149,6 +153,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Manager competitiezaken')
 
         # bko
@@ -157,6 +162,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'BKO')
 
         # rko
@@ -165,6 +171,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'RKO')
 
         # rcl
@@ -173,6 +180,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'RCL')
 
         # sec
@@ -181,6 +189,7 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Hoofdwedstrijdleider 1000')
 
         # wl
@@ -189,7 +198,17 @@ class TestPlein(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Wedstrijdleider 1000')
+
+        # mo
+        self.e2e_wissel_naar_functie(self.functie_mo)
+        self.e2e_check_rol('MO')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Manager opleidingen')
 
         # geen
         self.e2e_wisselnaarrol_gebruiker()
