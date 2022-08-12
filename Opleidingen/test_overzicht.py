@@ -21,6 +21,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         """ initialisatie van de test case """
 
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.nhb', 'Normaal')
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
 
         self.functie_mo = Functie.objects.get(rol='MO')
         self.functie_mo.accounts.add(self.account_normaal)

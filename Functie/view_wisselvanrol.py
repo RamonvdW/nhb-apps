@@ -447,7 +447,7 @@ class ActiveerRolView(UserPassesTestMixin, View):
         # de rest blijft in Wissel van Rol
         rol_nu, functie_nu = rol_get_huidige_functie(request)
 
-        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_MO, Rollen.ROL_SPORTER):
+        if rol_nu in (Rollen.ROL_BB, Rollen.ROL_SPORTER):
             return redirect('Plein:plein')
 
         if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
@@ -456,6 +456,9 @@ class ActiveerRolView(UserPassesTestMixin, View):
         if rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
             url = get_url_voor_competitie(functie_nu)
             return redirect(url)
+
+        if rol_nu == Rollen.ROL_MO:
+            return redirect('Opleidingen:manager')
 
         return redirect('Functie:wissel-van-rol')
 

@@ -11,10 +11,15 @@ app_name = 'Opleidingen'
 
 urlpatterns = [
 
-    # wedstrijden
+    # opleidingen
     path('',
          view_overzicht.OpleidingenOverzichtView.as_view(),
          name='overzicht'),
+
+    path('manager/',
+         view_overzicht.OpleidingenOverzichtView.as_view(),
+         name='manager'),
+
 ]
 
 # end of file

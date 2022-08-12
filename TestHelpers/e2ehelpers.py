@@ -174,7 +174,7 @@ class E2EHelpers(TestCase):
             # als er geen competitie is, dan verwijst deze alsnog naar wissel-van-rol
             self.assert_is_redirect(resp, '/bondscompetities/##')
         elif functie.rol == "MO":
-            self.assert_is_redirect(resp, '/plein/')
+            self.assert_is_redirect(resp, '/opleidingen/manager/')
         else:
             self.assert_is_redirect(resp, '/functie/wissel-van-rol/')                               # pragma: no cover
 
