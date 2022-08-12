@@ -4,7 +4,8 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from .models import AccountSessions
+from django.utils import timezone
+from Account.models import AccountSessions
 
 
 SESSIONVAR_ACCOUNT_IS_OTP_VERIFIED = "account_otp_verified"
@@ -55,8 +56,13 @@ def account_rechten_login_gelukt(request):
 
 def account_rechten_otp_controle_gelukt(request):
     """ Deze functie wordt aangeroepen vanuit de OTPControleView om een sessie variabele
-        te zetten die onthoudt dat de OTP controle voor de gebruiker gelukt is
+        te zetten die onthoudt dat de OTP-controle voor de gebruiker gelukt is
     """
+
+    account = request.user
+    account.otp_controle_gelukt_op = timezone.now()
+    account.save(update_fields=['otp_controle_gelukt_op'])
+
     _account_rechten_change_otp_status(request, True)
 
 

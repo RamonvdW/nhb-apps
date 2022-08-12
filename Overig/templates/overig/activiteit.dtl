@@ -102,10 +102,19 @@
                                 </div>
                                 <div class="collapsible-body white" style="column-count: 2">
                                     <div>
-                                        <span>Volledige naam:<br>Inlog naam:<br>E-mail is bevestigd:<br>Tweede factor:<br>VHPG:<br>Laatste inlog:<br>Lid bij vereniging:<br>Gekoppelde functies:{% for functie in obj.functies %}<br>{% endfor %}</span>
-                                    </div>
-                                    <div>
-                                        <span>{{ obj.volledige_naam }}<br>{{ obj.inlog_naam_str }}<br>{{ obj.email_is_bevestigd_str }}<br>{{ obj.tweede_factor_str }}<br>{{ obj.vhpg_str }}<br>{{ obj.laatste_inlog_str }}<br>{{ obj.ver_str }}{% for functie in obj.functies %}<br>{{ functie.beschrijving }}{% empty %}<br>-{% endfor %}</span>
+                                        <div>
+                                            <span>Volledige naam:<br>Inlog naam:<br>E-mail is bevestigd:<br>Laatste inlog:<br>Tweede factor:<br>VHPG:<br>Lid bij vereniging:<br>Gekoppelde functies:{% for functie in obj.functies %}<br>{% endfor %}</span>
+                                            {% if obj.kan_loskoppelen %}
+                                                <br><br>
+                                                <a class="btn-nhb-blauw modal-trigger" href="#bevestig_reset_tweede_factor_{{ obj.inlog_naam_str }}">Tweede factor loskoppelen</a><br>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <span>{{ obj.volledige_naam }}<br>{{ obj.inlog_naam_str }}<br>{{ obj.email_is_bevestigd_str }}<br>{{ obj.laatste_inlog_str }}<br>{{ obj.tweede_factor_str }}<br>{{ obj.vhpg_str }}<br>{{ obj.ver_str }}{% for functie in obj.functies %}<br>{{ functie.beschrijving }}{% empty %}<br>-{% endfor %}</span>
+                                            {% if obj.kan_loskoppelen %}
+                                                <br><br><br>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </div>
                             </li>
@@ -401,8 +410,42 @@
             </div>
         </div>
 
-
     {% endif %}
+
+    <!-- modal dialogs -->
+    {% if zoekterm %}
+        {% if zoek_leden %}
+            {% for obj in zoek_leden %}
+                <!-- obj is Account -->
+                {% if obj.kan_loskoppelen %}
+                    <div class="modal" id="bevestig_reset_tweede_factor_{{ obj.inlog_naam_str }}">
+                        <div class="modal-content center">
+                            <h5>Tweede factor loskoppelen?</h5>
+                            <p>Gebruik dit alleen als de gebruiker aangegeven heeft de controle niet meer uit te kunnen voeren, bijvoorbeeld na overstappen op een andere mobiele telefoon.</p>
+                            <p>Wil je de tweede factor voor <b>[{{ obj.inlog_naam_str }}] {{ obj.volledige_naam }}</b> resetten?</p>
+                            <p>We sturen de gebruiker een e-mail met instructies hoe de tweede factor weer gekoppeld kan worden.</p>
+
+                            <form method="post" action="{{ url_reset_tweede_factor }}">
+                                {% csrf_token %}
+                                <input type="hidden" name="reset_tweede_factor" value="1">
+                                <input type="hidden" name="inlog_naam" value="{{ obj.inlog_naam_str }}">
+
+                                <div class="modal-footer" style="text-align:center; display:block">
+                                    <div style="display:inline-block; width:50%">
+                                        <button class="btn-nhb-rood" type="submit">Ja</button>
+                                    </div>
+                                    <div style="display:inline-block; width:50%">
+                                        <a href="#" class="btn-nhb-blauw modal-close">Nee</a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+
 
     {% include 'feedback/sidebar.dtl' with op_pagina="account-activiteit" %}
 

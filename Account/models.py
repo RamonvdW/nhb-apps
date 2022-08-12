@@ -71,6 +71,8 @@ class Account(AbstractUser):
                         default=False,
                         help_text="Is OTP verificatie gelukt")
 
+    otp_controle_gelukt_op = models.DateTimeField(blank=True, null=True)
+
     REQUIRED_FIELDS = ['password']
 
     class Meta:

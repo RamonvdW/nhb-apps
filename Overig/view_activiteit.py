@@ -171,6 +171,8 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                             .order_by('unaccented_naam'))[:50]
 
         to_tz = get_default_timezone()
+        current_year_str = ' %s' % now.year
+
         context['zoek_leden'] = list(sporters)
         for sporter in sporters:
             sporter.lid_nr_str = str(sporter.lid_nr)
@@ -179,6 +181,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
             sporter.tweede_factor_str = '-'
             sporter.vhpg_str = '-'
             sporter.laatste_inlog_str = '-'
+            sporter.kan_loskoppelen = False
 
             if sporter.bij_vereniging:
                 sporter.ver_str = str(sporter.bij_vereniging)
@@ -196,11 +199,15 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                     sporter.email_is_bevestigd_str = 'Nee'
 
                 if account.last_login:
-                    sporter.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz), 'j F H:i')
+                    if account.last_login.year == now.year:
+                        sporter.laatste_inlog_str = date_format(account.last_login.astimezone(to_tz), 'j F Y H:i').replace(current_year_str, '')
 
                 do_vhpg = True
                 if account.otp_is_actief:
                     sporter.tweede_factor_str = 'Ja'
+                    if account.otp_controle_gelukt_op:
+                        sporter.tweede_factor_str += ' (check gelukt op %s)' % date_format(account.otp_controle_gelukt_op.astimezone(to_tz), 'j F Y H:i').replace(current_year_str, '')
+                    # sporter.kan_loskoppelen = True
                 elif account.functie_set.count() == 0:
                     sporter.tweede_factor_str = 'n.v.t.'
                     do_vhpg = False
