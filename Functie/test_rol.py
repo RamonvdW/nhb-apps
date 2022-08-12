@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from Functie.rol import (SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN,
                          SESSIONVAR_ROL_PALLET_FUNCTIES, SESSIONVAR_ROL_PALLET_VAST,
-                         SESSIONVAR_ROL_BESCHRIJVING,
+                         SESSIONVAR_ROL_BESCHRIJVING, SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK,
                          rol_mag_wisselen, rol_enum_pallet, rol_get_beschrijving,
                          rol_activeer_rol, rol_activeer_functie)
 from Functie.models import maak_functie, maak_account_vereniging_secretaris
@@ -18,6 +18,10 @@ from TestHelpers.e2ehelpers import E2EHelpers
 class TestFunctieRol(E2EHelpers, TestCase):
 
     """ tests voor de Functie applicatie, diverse corner-cases """
+
+    url_wissel_naar_sec = '/functie/wissel-van-rol/secretaris/'
+    url_overzicht_sec_hwl = '/functie/overzicht/alle-lid-nrs/sec-hwl/'
+    url_activeer_functie = '/functie/activeer-functie/%s/'          # functie_pk
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -76,6 +80,46 @@ class TestFunctieRol(E2EHelpers, TestCase):
 
         self.assertTrue(SESSIONVAR_ROL_BESCHRIJVING not in request.session.keys())
         self.assertEqual(rol_get_beschrijving(request), "?")
+
+    def test_anon(self):
+        # zorg dan request.user.is_authenticated op False staat
+        self.client.logout()
+
+        # reproduceer probleem uit de praktijk: AnonymousUser had toch opgeslagen sessie data
+        # geef deze anonymous user toch sessie data
+        session = self.client.session
+        session[SESSIONVAR_ROL_HUIDIGE] = 'Test1!'
+        session.save()
+
+        # roep een view aan die rol_get_huidige aanroept
+        # (als onderdeel van de test_func van UserPassesTestMixin)
+        resp = self.client.get(self.url_wissel_naar_sec)
+        self.assert_is_redirect(resp, '/account/login/')
+
+        # roep een view aan die rol_get_huidige_functie aanroept
+        # (als onderdeel van de test_func van UserPassesTestMixin)
+        resp = self.client.get(self.url_overzicht_sec_hwl)
+        self.assert_is_redirect(resp, '/account/login/')
+
+        # geen PK maar iets wat niet eens een getal is
+        session = self.client.session
+        session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = 'Test2!'
+        session.save()
+
+        # roep een view aan die rol_get_huidige_functie aanroept
+        # (als onderdeel van de test_func van UserPassesTestMixin)
+        resp = self.client.get(self.url_overzicht_sec_hwl)
+        self.assert_is_redirect(resp, '/account/login/')
+
+        # niet bestaande PK
+        session = self.client.session
+        session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = 999999
+        session.save()
+
+        # roep een view aan die rol_get_huidige_functie aanroept
+        # (als onderdeel van de test_func van UserPassesTestMixin)
+        resp = self.client.get(self.url_overzicht_sec_hwl)
+        self.assert_is_redirect(resp, '/account/login/')
 
     def test_plugin(self):
         # controleer het toekennen van rollen

@@ -258,8 +258,8 @@ class TestFunctieCli(E2EHelpers, TestCase):
         f2 = io.StringIO()
         with self.assert_max_queries(53):
             management.call_command('check_beheerders', stderr=f1, stdout=f2)
-        print('f1:', f1.getvalue())
-        print('f2:', f2.getvalue())
+        # print('f1:', f1.getvalue())
+        # print('f2:', f2.getvalue())
         self.assertFalse('[100042] Kees Pijlpunt' in f2.getvalue())
 
 # end of file

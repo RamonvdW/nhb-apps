@@ -86,6 +86,9 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.functie_rko.nhb_rayon = NhbRayon.objects.get(rayon_nr=1)
         self.functie_rko.save()
 
+        self.functie_mo = maak_functie("MO test", "MO")
+        self.functie_mo.save()
+
     def _get_wissel_urls(self, resp):
         urls = self.extract_all_urls(resp)
         return [url for url in urls if url.startswith('/functie/activeer') or url == self.url_accountwissel]
@@ -106,7 +109,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.account_admin.otp_is_actief = True
         self.account_admin.save()
 
-        # controleer dat de link naar de OTP controle en VHPG op de pagina staan
+        # controleer dat de link naar de OTP-controle en VHPG op de pagina staan
         self.e2e_logout()
         self.e2e_login(self.account_admin)          # zonder OTP control
         with self.assert_max_queries(20):
@@ -165,7 +168,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertContains(resp, "HWL test")
         self.assertContains(resp, "Grote Club")
 
-        # niet een niet- bestaande functie vanuit de RCL functie
+        # niet een niet- bestaande functie vanuit de RCL-functie
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_activeer_functie % self.functie_rcl.pk)
         self.assert_is_redirect(resp, self.url_bondscompetities)
@@ -371,6 +374,20 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wissel_naar_sec)
         self.assert403(resp)
 
+    def test_mo(self):
+        self.functie_mo.accounts.add(self.account_normaal)
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wissel_naar_functie(self.functie_mo)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wissel_van_rol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assertContains(resp, "Sporter")
+        urls = self._get_wissel_urls(resp)
+        self.assertIn(self.url_activeer_functie % self.functie_mo.pk, urls)
+        self.assertIn(self.url_activeer_rol % 'sporter', urls)
+
     def test_functie_geen_rol(self):
         # test van een functie die niet resulteert in een rol
         functie = maak_functie('Haha', 'HAHA')
@@ -561,6 +578,27 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         urls = self._get_wissel_urls(resp)
         self.assertIn(self.url_activeer_functie % functie_hwl.pk, urls)
+
+    def test_bb_to_mo(self):
+        self.e2e_account_accepteert_vhpg(self.account_admin)
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_wissel_van_rol)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        urls = self._get_wissel_urls(resp)
+        self.assertIn(self.url_activeer_functie % self.functie_mo.pk, urls)
+
+    def test_bb_naar_bad(self):
+        # corner case: BB naar niet-bestaande functie
+        self.e2e_account_accepteert_vhpg(self.account_admin)
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_wisselnaarrol_bb()
+
+        resp = self.client.post(self.url_activeer_functie % 999999)
+        self.assert_is_redirect(resp, '/plein/')
 
     def test_vhpg(self):
         # controleer doorsturen naar de VHPG acceptatie pagina

@@ -325,21 +325,28 @@ def rol_get_huidige_functie(request) -> Tuple[Rollen, Functie]:
         functie_pk = request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK]
         if not request.user.is_authenticated:
             my_logger.warning('{rol_get_huidige_functie} sessie zegt functie_pk=%s voor anon user' % functie_pk)
-    except KeyError:                    # pragma: no cover
+    except KeyError:
         # geen functie opgeslagen
+        # of geen pk-like nummer
         pass
     else:
-        if functie_pk:
+        if functie_pk:      # filter None
             try:
-                functie = (Functie
-                           .objects
-                           .select_related('nhb_rayon',
-                                           'nhb_regio', 'nhb_regio__rayon',
-                                           'nhb_ver', 'nhb_ver__regio')
-                           .get(pk=functie_pk))
-            except Functie.DoesNotExist:
-                # onverwacht!
+                functie_pk = int(functie_pk)
+            except ValueError:
+                # slecht getal
                 pass
+            else:
+                try:
+                    functie = (Functie
+                               .objects
+                               .select_related('nhb_rayon',
+                                               'nhb_regio', 'nhb_regio__rayon',
+                                               'nhb_ver', 'nhb_ver__regio')
+                               .get(pk=functie_pk))
+                except Functie.DoesNotExist:
+                    # niet bestaande pk
+                    pass
 
     return rol, functie
 
@@ -450,7 +457,7 @@ def rol_activeer_functie(request, functie_pk):
                     if account.is_staff or account.is_BB:
                         try:
                             functie = Functie.objects.get(pk=functie_pk)
-                        except Functie.DoesNotExist:                # pragma: no cover
+                        except Functie.DoesNotExist:
                             pass
                         else:
                             # we komen hier alleen voor rollen die niet al in het pallet zitten bij IT/BB
