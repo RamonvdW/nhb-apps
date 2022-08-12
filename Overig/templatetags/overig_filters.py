@@ -55,12 +55,15 @@ def filter_wbr_email(text):
         pos2 = text.find('@')
 
         if pos1 >= 0:
-            if pos1 < pos2:
+            # adres bevat nog een punt
+            if pos2 < 0 or pos1 < pos2:
+                # punt staat voor het apenstaartje, dus neem die eerst
                 new_text += escape(text[:pos1]) + '<wbr>' + escape(text[pos1])
                 text = text[pos1+1:]
                 continue        # with the while
 
         if pos2 >= 0:
+            # adres bevat nog een apenstaartje
             new_text += escape(text[:pos2]) + '<wbr>' + escape(text[pos2])
             text = text[pos2+1:]
             continue            # with the while
@@ -75,8 +78,15 @@ def filter_wbr_email(text):
 
 
 def filter_wbr_dagdeel(text):
-    """  wbr_dagdeel filter voegt de <wbr> html tag in zodat dagdeel beschrijvingen kunnen wrappen,
-         zoals "woensdagavond" en "zaterdagochtend"
+    """  wbr_dagdeel filter geeft een korte en lange beschrijving van de dagdeel-afkorting
+         voorbeeld:
+            WO:
+                <span class="hide-on-med-and-up">W</span>
+                <span class="hide-on-small-only">Woensdag</span>
+
+            ZAo:
+                <span class="hide-on-med-and-up">Za-Och</span>
+                <span class="hide-on-small-only">Zaterdag<wbr>ochtend</span>
     """
 
     try:
