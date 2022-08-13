@@ -21,17 +21,25 @@ class Command(BaseCommand):
         if not do_save:
             self.stdout.write('Let op: gebruik --commit om voorgestelde wijzigingen op te slaan')
 
-        volgorde2klasse = dict()             # [(competitie.pk, volgorde)] = CompetitieIndivKlasse
-        volgorde2hogere_klasse = dict()      # [(competitie.pk, volgorde)] = CompetitieIndivKlasse
+        volgorde2leeftijdsklassen = dict()  # [(competitie.pk, volgorde)] = "<afkorting>/<afkorting>"
+
+        volgorde2klasse = dict()            # [(competitie.pk, volgorde)] = CompetitieIndivKlasse
+        volgorde2hogere_klasse = dict()     # [(competitie.pk, volgorde)] = CompetitieIndivKlasse
 
         for klasse in (CompetitieIndivKlasse
                        .objects
                        .select_related('competitie')
+                       .prefetch_related('leeftijdsklassen')
                        .filter(is_onbekend=False)
                        .order_by('volgorde')):
 
             comp_pk = klasse.competitie.pk
             volgorde = klasse.volgorde
+
+            lkl_lst = list(klasse.leeftijdsklassen.values_list('afkorting', flat=True))
+            lkl_lst.sort()
+            lkl_str = "/".join(lkl_lst)
+            volgorde2leeftijdsklassen[(comp_pk, volgorde)] = lkl_str
 
             volgorde2klasse[(comp_pk, volgorde)] = klasse
 
@@ -41,10 +49,13 @@ class Command(BaseCommand):
                 # geen hogere klasse
                 pass
             else:
-                if not hogere_klasse.is_onbekend:         # pragma: no branch
-                    volgorde2hogere_klasse[(comp_pk, volgorde)] = hogere_klasse
+                # some lopen de nummers door, maar is het een andere leeftijdsklasse
+                if lkl_str == volgorde2leeftijdsklassen[(comp_pk, hogere_klasse.volgorde)]:
+                    if not hogere_klasse.is_onbekend:         # pragma: no branch
+                        volgorde2hogere_klasse[(comp_pk, volgorde)] = hogere_klasse
         # for
 
+        # debug dump
         # for volgorde, klasse in volgorde2klasse.items():
         #     try:
         #         hogere_klasse = volgorde2hogere_klasse[volgorde]

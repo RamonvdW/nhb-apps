@@ -209,7 +209,7 @@ class LeeftijdsKlasse(models.Model):
     # man, vrouw of genderneutraal
     wedstrijd_geslacht = models.CharField(max_length=1, choices=WEDSTRIJDGESLACHT_MVA)
 
-    # leeftijds grenzen voor de klassen: of ondergrens, of bovengrens
+    # leeftijdsgrenzen voor de klassen: of ondergrens, of bovengrens
     #   de jeugdklassen hebben een leeftijd bovengrens
     #   de masters en veteranen klassen hebben een leeftijd ondergrens
     #   de senioren klasse heeft helemaal geen grens
