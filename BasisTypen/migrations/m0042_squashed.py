@@ -6,7 +6,76 @@
 
 from django.db import migrations, models
 from BasisTypen.models import (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_60CM, BLAZOEN_60CM_4SPOT,
-                               ORGANISATIE_NHB, ORGANISATIE_IFAA, GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE)
+                               ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA,
+                               GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE)
+
+
+LEEFTIJDSKLASSEN = (
+    # WA + NHB
+    # volgorde afk    geslacht        min max  kort        beschrijving               organisatie
+
+    # 60+ (was: Veteranen)
+    (61,       'VV',  GESLACHT_VROUW, 60, 0,   '60+',      '60+ vrouwen',             ORGANISATIE_NHB),
+    (62,       'VH',  GESLACHT_MAN,   60, 0,   '60+',      '60+ mannen',              ORGANISATIE_NHB),
+    (63,       'VA',  GESLACHT_ALLE,  60, 0,   '60+',      '60+',                     ORGANISATIE_NHB),
+
+    # 50+ (was: Master)
+    (51,       'MV',  GESLACHT_VROUW, 50, 0,   '50+',      '50+ vrouwen',             ORGANISATIE_WA),
+    (52,       'MH',  GESLACHT_MAN,   50, 0,   '50+',      '50+ mannen',              ORGANISATIE_WA),
+    (53,       'MA',  GESLACHT_ALLE,  50, 0,   '50+',      '50+',                     ORGANISATIE_NHB),
+
+    # open klasse
+    (41,       'SV',  GESLACHT_VROUW, 0, 0,    '21+',      '21+ vrouwen',             ORGANISATIE_WA),
+    (42,       'SH',  GESLACHT_MAN,   0, 0,    '21+',      '21+ mannen',              ORGANISATIE_WA),
+    (43,       'SA',  GESLACHT_ALLE,  0, 0,    '21+',      '21+',                     ORGANISATIE_NHB),
+
+    # Onder 21 (was: Junioren)
+    (31,       'JV',  GESLACHT_VROUW, 0, 20,   'Onder 21', 'Onder 21 vrouwen',        ORGANISATIE_WA),
+    (32,       'JH',  GESLACHT_MAN,   0, 20,   'Onder 21', 'Onder 21 mannen',         ORGANISATIE_WA),
+    (33,       'JA',  GESLACHT_ALLE,  0, 20,   'Onder 21', 'Onder 21',                ORGANISATIE_NHB),
+
+    # Onder 18 (was: Cadetten)
+    (21,       'CV',  GESLACHT_VROUW, 0, 17,   'Onder 18', 'Onder 18 meisjes',        ORGANISATIE_WA),
+    (22,       'CH',  GESLACHT_MAN,   0, 17,   'Onder 18', 'Onder 18 jongens',        ORGANISATIE_WA),
+    (23,       'CA',  GESLACHT_ALLE,  0, 17,   'Onder 18', 'Onder 18',                ORGANISATIE_NHB),
+
+    # Onder 14 (was: Aspiranten)
+    (15,       'AV2', GESLACHT_VROUW, 0, 13,   'Onder 14', 'Onder 14 meisjes',        ORGANISATIE_NHB),
+    (16,       'AH2', GESLACHT_MAN,   0, 13,   'Onder 14', 'Onder 14 jongens',        ORGANISATIE_NHB),
+    (17,       'AA2', GESLACHT_ALLE,  0, 13,   'Onder 14', 'Onder 14',                ORGANISATIE_NHB),
+
+    # Onder 12 (was: Aspiranten)
+    (11,       'AV1', GESLACHT_VROUW, 0, 11,   'Onder 12', 'Onder 12 meisjes',        ORGANISATIE_NHB),
+    (12,       'AH1', GESLACHT_MAN,   0, 11,   'Onder 12', 'Onder 12 jongens',        ORGANISATIE_NHB),
+    (13,       'AA1', GESLACHT_ALLE,  0, 11,   'Onder 12', 'Onder 12',                ORGANISATIE_NHB),
+
+    # IFAA
+    # volgorde afk    geslacht        min max  kort        beschrijving               organisatie
+
+    # Senioren / 65+
+    (61,       'SEV', GESLACHT_VROUW, 65, 0,   'Sen V',    'Senioren vrouwen (65+)',  ORGANISATIE_IFAA),
+    (62,       'SEM', GESLACHT_MAN,   65, 0,   'Sen M',    'Senioren mannen (65+)',   ORGANISATIE_IFAA),
+
+    # Veteranen / 55-64
+    (51,       'VEV', GESLACHT_VROUW, 55, 0,   'Vet V',    'Veteranen vrouwen (55+)', ORGANISATIE_IFAA),
+    (52,       'VEM', GESLACHT_MAN,   55, 0,   'Vet M',    'Veteranen mannen (55+)',  ORGANISATIE_IFAA),
+
+    # Volwassenen (21-54)
+    (41,       'VWV', GESLACHT_VROUW, 21, 54,  'Volw V',   'Volwassen vrouwen',       ORGANISATIE_IFAA),
+    (42,       'VWH', GESLACHT_MAN,   21, 54,  'Volw M',   'Volwassen mannen',        ORGANISATIE_IFAA),
+
+    # Jong volwassenen (17-20)
+    (31,       'JVV', GESLACHT_VROUW, 0, 20,   'Jong V',   'Jongvolwassen vrouwen',   ORGANISATIE_IFAA),
+    (32,       'JVH', GESLACHT_MAN,   0, 20,   'Jong M',   'Jongvolwassen mannen',    ORGANISATIE_IFAA),
+
+    # Junioren (13-16)
+    (21,       'JUV', GESLACHT_VROUW, 0, 16,   'Jun V',    'Junioren meisjes',        ORGANISATIE_IFAA),
+    (22,       'JUH', GESLACHT_MAN,   0, 16,   'Jun M',    'Junioren jongens',        ORGANISATIE_IFAA),
+
+    # Welpen (<13)
+    (11,       'WEV', GESLACHT_VROUW, 0, 12,   'Welp V',   'Welpen meisjes',          ORGANISATIE_IFAA),
+    (12,       'WEH', GESLACHT_MAN,   0, 12,   'Welp M',   'Welpen jongens',          ORGANISATIE_IFAA),
+)
 
 
 # team competitie klassen volgens spec v2.2, deel 3, tabel 3.5
@@ -302,324 +371,20 @@ def init_leeftijdsklassen(apps, _):
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
 
-    bulk = [
-        # 60+
-        leeftijdsklasse_klas(
-            afkorting='VV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='60+',
-            beschrijving='60+ vrouwen',
-            volgorde=61,
-            min_wedstrijdleeftijd=60,
-            max_wedstrijdleeftijd=0,
-            organisatie=ORGANISATIE_NHB),
-        leeftijdsklasse_klas(
-            afkorting='VH',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='60+',
-            beschrijving='60+ mannen',
-            volgorde=62,
-            min_wedstrijdleeftijd=60,
-            max_wedstrijdleeftijd=0,
-            organisatie=ORGANISATIE_NHB),
-        leeftijdsklasse_klas(
-            afkorting='VA',
-            wedstrijd_geslacht=GESLACHT_ALLE,
-            klasse_kort='60+',
-            beschrijving='60+',
-            volgorde=63,
-            min_wedstrijdleeftijd=60,
-            max_wedstrijdleeftijd=0,
-            organisatie=ORGANISATIE_NHB),
+    bulk = list()
+    for volgorde, afkorting, geslacht, leeftijd_min, leeftijd_max, kort, beschrijving, organisatie in LEEFTIJDSKLASSEN:
+        lkl = leeftijdsklasse_klas(
+                    afkorting=afkorting,
+                    wedstrijd_geslacht=geslacht,
+                    klasse_kort=kort,
+                    beschrijving=beschrijving,
+                    volgorde=volgorde,
+                    min_wedstrijdleeftijd=leeftijd_min,
+                    max_wedstrijdleeftijd=leeftijd_max,
+                    organisatie=organisatie)
 
-        # 50+
-        leeftijdsklasse_klas(
-            afkorting='MV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='50+',
-            beschrijving='50+ vrouwen',
-            volgorde=51,
-            min_wedstrijdleeftijd=50,
-            max_wedstrijdleeftijd=0),
-        leeftijdsklasse_klas(
-            afkorting='MH',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='50+',
-            beschrijving='50+ mannen',
-            volgorde=52,
-            min_wedstrijdleeftijd=50,
-            max_wedstrijdleeftijd=0),
-        leeftijdsklasse_klas(
-            afkorting='MA',
-            wedstrijd_geslacht=GESLACHT_ALLE,
-            klasse_kort='50+',
-            beschrijving='50+ (masters)',
-            volgorde=53,
-            min_wedstrijdleeftijd=50,
-            max_wedstrijdleeftijd=0,
-            organisatie=ORGANISATIE_NHB),
-
-        # open klasse
-        leeftijdsklasse_klas(
-            afkorting='SV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='21+',
-            beschrijving='21+ vrouwen',
-            volgorde=41,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=0),
-        leeftijdsklasse_klas(
-            afkorting='SH',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='21+',
-            beschrijving='21+ mannen',
-            volgorde=42,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=0),
-        leeftijdsklasse_klas(
-            afkorting='SA',
-            wedstrijd_geslacht=GESLACHT_ALLE,
-            klasse_kort='21+',
-            beschrijving='21+',
-            volgorde=43,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=0,
-            organisatie=ORGANISATIE_NHB),
-
-        # Onder 21
-        leeftijdsklasse_klas(
-            afkorting='JV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Onder 21',
-            beschrijving='Onder 21 vrouwen',
-            volgorde=31,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=20),
-        leeftijdsklasse_klas(
-            afkorting='JH',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Onder 21',
-            beschrijving='Onder 21 mannen',
-            volgorde=32,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=20),
-        leeftijdsklasse_klas(
-            afkorting='JA',
-            wedstrijd_geslacht=GESLACHT_ALLE,
-            klasse_kort='Onder 21',
-            beschrijving='Onder 21',
-            volgorde=33,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=20,
-            organisatie=ORGANISATIE_NHB),
-
-        # Onder 18
-        leeftijdsklasse_klas(
-            afkorting='CV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Onder 18',
-            beschrijving='Onder 18 meisjes',
-            volgorde=21,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=17),
-        leeftijdsklasse_klas(
-            afkorting='CH',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Onder 18',
-            beschrijving='Onder 18 jongens',
-            volgorde=22,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=17),
-        leeftijdsklasse_klas(
-            afkorting='CA',
-            wedstrijd_geslacht=GESLACHT_ALLE,
-            klasse_kort='Onder 18',
-            beschrijving='Onder 18',
-            volgorde=23,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=17,
-            organisatie=ORGANISATIE_NHB),
-
-        # Onder 14
-        leeftijdsklasse_klas(
-            afkorting='AV2',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Onder 14',
-            beschrijving='Onder 14 meisjes',
-            volgorde=15,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=13,
-            organisatie=ORGANISATIE_NHB),
-        leeftijdsklasse_klas(
-            afkorting='AH2',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Onder 14',
-            beschrijving='Onder 14 jongens',
-            volgorde=16,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=13,
-            organisatie=ORGANISATIE_NHB),
-        leeftijdsklasse_klas(
-            afkorting='AA2',
-            wedstrijd_geslacht=GESLACHT_ALLE,
-            klasse_kort='Onder 14',
-            beschrijving='Onder 14',
-            volgorde=17,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=13,
-            organisatie=ORGANISATIE_NHB),
-
-        # Onder 12
-        leeftijdsklasse_klas(
-            afkorting='AV1',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Onder 12',
-            beschrijving='Onder 12 meisjes',
-            volgorde=11,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=11,
-            organisatie=ORGANISATIE_NHB),
-        leeftijdsklasse_klas(
-            afkorting='AH1',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Onder 12',
-            beschrijving='Onder 12 jongens',
-            volgorde=12,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=11,
-            organisatie=ORGANISATIE_NHB),
-        leeftijdsklasse_klas(
-            afkorting='AA1',
-            wedstrijd_geslacht=GESLACHT_ALLE,
-            klasse_kort='Onder 12',
-            beschrijving='Onder 12',
-            volgorde=13,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=11,
-            organisatie=ORGANISATIE_NHB),
-
-        # IFAA
-
-        # Senioren / 65+
-        leeftijdsklasse_klas(
-            afkorting='SEM',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Sen M',
-            beschrijving='Senioren mannen (65+)',
-            volgorde=62,
-            min_wedstrijdleeftijd=65,
-            max_wedstrijdleeftijd=0,
-            organisatie=ORGANISATIE_IFAA),
-        leeftijdsklasse_klas(
-            afkorting='SEV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Sen V',
-            beschrijving='Senioren vrouwen (65+)',
-            volgorde=61,
-            min_wedstrijdleeftijd=65,
-            max_wedstrijdleeftijd=0,
-            organisatie=ORGANISATIE_IFAA),
-
-        # Veteranen / 55-64
-        leeftijdsklasse_klas(
-            afkorting='VEM',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Vet',
-            beschrijving='Veteranen mannen (55+)',
-            volgorde=52,
-            min_wedstrijdleeftijd=55,
-            max_wedstrijdleeftijd=0,
-            organisatie=ORGANISATIE_IFAA),
-        leeftijdsklasse_klas(
-            afkorting='VEV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Vet V',
-            beschrijving='Veteranen vrouwen (55+)',
-            volgorde=51,
-            min_wedstrijdleeftijd=55,
-            max_wedstrijdleeftijd=0,
-            organisatie=ORGANISATIE_IFAA),
-
-        # Volwassenen (21-54)
-        leeftijdsklasse_klas(
-            afkorting='VWH',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Volw M',
-            beschrijving='Volwassen mannen',
-            volgorde=42,
-            min_wedstrijdleeftijd=21,
-            max_wedstrijdleeftijd=54,
-            organisatie=ORGANISATIE_IFAA),
-        leeftijdsklasse_klas(
-            afkorting='VWV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Volw V',
-            beschrijving='Volwassen vrouwen',
-            volgorde=41,
-            min_wedstrijdleeftijd=21,
-            max_wedstrijdleeftijd=54,
-            organisatie=ORGANISATIE_IFAA),
-
-        # Jong volwassenen (17-20)
-        leeftijdsklasse_klas(
-            afkorting='JVH',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Jong M',
-            beschrijving='Jongvolwassen mannen',
-            volgorde=32,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=20,
-            organisatie=ORGANISATIE_IFAA),
-        leeftijdsklasse_klas(
-            afkorting='JVV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Jong V',
-            beschrijving='Jongvolwassen vrouwen',
-            volgorde=31,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=20,
-            organisatie=ORGANISATIE_IFAA),
-
-        # Junioren (13-16)
-        leeftijdsklasse_klas(
-            afkorting='JUH',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Jun M',
-            beschrijving='Junioren jongens',
-            volgorde=22,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=16,
-            organisatie=ORGANISATIE_IFAA),
-        leeftijdsklasse_klas(
-            afkorting='JUV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Jun V',
-            beschrijving='Junioren meisjes',
-            volgorde=21,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=16,
-            organisatie=ORGANISATIE_IFAA),
-
-        # Welpen (<13)
-        leeftijdsklasse_klas(
-            afkorting='WEH',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Welp M',
-            beschrijving='Welpen jongens',
-            volgorde=12,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=12,
-            organisatie=ORGANISATIE_IFAA),
-        leeftijdsklasse_klas(
-            afkorting='WEV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Welp V',
-            beschrijving='Welpen meisjes',
-            volgorde=11,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=12,
-            organisatie=ORGANISATIE_IFAA),
-    ]
+        bulk.append(lkl)
+    # for
 
     leeftijdsklasse_klas.objects.bulk_create(bulk)
 
