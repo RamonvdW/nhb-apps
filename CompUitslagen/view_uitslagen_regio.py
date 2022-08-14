@@ -253,6 +253,10 @@ class UitslagenRegioIndivView(TemplateView):
             deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
 
+            # in plaats van allemaal 0,000 willen we het AG tonen tijdens de inschrijffase
+            if comp.fase < 'E':
+                deelnemer.gemiddelde = deelnemer.ag_voor_indiv
+
             deelnemer_count.aantal_in_groep += 1
 
             if is_asp:
