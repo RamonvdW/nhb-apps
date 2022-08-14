@@ -232,6 +232,11 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         context['nhb_ver'] = hwl_ver = self.functie_nu.nhb_ver
         # rol is HWL (zie test_func)
 
+        deelcomp = (DeelCompetitie
+                    .objects
+                    .get(competitie=self.comp,
+                         nhb_regio=hwl_ver.regio))
+
         # splits the ledenlijst op in jeugd, senior en inactief
         jeugd = list()
         senior = list()
@@ -249,7 +254,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         context['tweede_jaar'] = self.comp.begin_jaar + 1
         context['url_aanmelden'] = reverse('CompInschrijven:leden-aanmelden', kwargs={'comp_pk': self.comp.pk})
         context['mag_aanmelden'] = True
-        context['mag_team_schieten'] = (self.comp.fase == 'B')
+        context['mag_team_schieten'] = self.comp.fase == 'B' and deelcomp.regio_organiseert_teamcompetitie
 
         # bepaal de inschrijfmethode voor deze regio
         mijn_regio = self.functie_nu.nhb_ver.regio
