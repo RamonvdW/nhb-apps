@@ -153,39 +153,6 @@ class UitslagenRegioIndivView(TemplateView):
     def filter_zes_scores(deelnemers):
         return deelnemers.filter(aantal_scores__gte=6)
 
-    @staticmethod
-    def _split_aspiranten(asps, objs):
-        klasse_str = asps[0].klasse_str
-        rank_m = 0
-        rank_v = 0
-        asps_v = list()
-        count_v = None
-        count_m = None
-        for deelnemer in asps:
-            if deelnemer.sporterboog.sporter.geslacht == 'V':
-                if rank_v == 0:
-                    deelnemer.klasse_str = klasse_str + ', meisjes'
-                    deelnemer.break_klasse = True
-                    deelnemer.aantal_in_groep = 2
-                    count_v = deelnemer
-                rank_v += 1
-                deelnemer.rank = rank_v
-                asps_v.append(deelnemer)
-                count_v.aantal_in_groep += 1
-            else:
-                if rank_m == 0:
-                    deelnemer.klasse_str = klasse_str + ', jongens'
-                    deelnemer.break_klasse = True
-                    deelnemer.aantal_in_groep = 2
-                    count_m = deelnemer
-                rank_m += 1
-                deelnemer.rank = rank_m
-                objs.append(deelnemer)
-                count_m.aantal_in_groep += 1
-        # for
-        if len(asps_v):
-            objs.extend(asps_v)
-
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -267,10 +234,6 @@ class UitslagenRegioIndivView(TemplateView):
                 deelnemer.aantal_in_groep = 2   # 1 extra zodat balk doorloopt tot horizontale afsluiter
                 deelnemer.is_eerste_groep = (klasse == -1)
 
-                if len(asps):
-                    self._split_aspiranten(asps, objs)      # TODO: niet meer nodig in seizoen 2022/2023
-                    asps = list()
-
                 deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
                 is_asp = False
                 if not deelnemer.indiv_klasse.is_voor_rk_bk:
@@ -290,32 +253,17 @@ class UitslagenRegioIndivView(TemplateView):
             deelnemer.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
 
-            deelnemer_count.aantal_in_groep += 1
+            # in plaats van allemaal 0,000 willen we het AG tonen tijdens de inschrijffase
+            if deelnemer.aantal_scores == 0:
+                deelnemer.gemiddelde = deelnemer.ag_voor_indiv
 
-            # if deelnemer.score1 == 0:
-            #     deelnemer.score1 = '-'
-            # if deelnemer.score2 == 0:
-            #     deelnemer.score2 = '-'
-            # if deelnemer.score3 == 0:
-            #     deelnemer.score3 = '-'
-            # if deelnemer.score4 == 0:
-            #     deelnemer.score4 = '-'
-            # if deelnemer.score5 == 0:
-            #     deelnemer.score5 = '-'
-            # if deelnemer.score6 == 0:
-            #     deelnemer.score6 = '-'
-            # if deelnemer.score7 == 0:
-            #     deelnemer.score7 = '-'
+            deelnemer_count.aantal_in_groep += 1
 
             if is_asp:
                 asps.append(deelnemer)
             else:
                 objs.append(deelnemer)
         # for
-
-        if len(asps):
-            # aspiranten opsplitsen in jongens en meisjes klasse
-            self._split_aspiranten(asps, objs)
 
         context['deelnemers'] = objs
 
