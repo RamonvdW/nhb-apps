@@ -254,7 +254,7 @@ class UitslagenRegioIndivView(TemplateView):
             deelnemer.ver_str = str(deelnemer.bij_vereniging)
 
             # in plaats van allemaal 0,000 willen we het AG tonen tijdens de inschrijffase
-            if deelnemer.aantal_scores == 0:
+            if comp.fase < 'E':
                 deelnemer.gemiddelde = deelnemer.ag_voor_indiv
 
             deelnemer_count.aantal_in_groep += 1
