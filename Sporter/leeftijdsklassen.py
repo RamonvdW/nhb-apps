@@ -7,7 +7,7 @@
 """ ondersteuning voor de leeftijdsklassen binnen de NHB applicaties """
 
 from django.utils import timezone
-from BasisTypen.models import LeeftijdsKlasse, GESLACHT_ALLE, ORGANISATIE_IFAA
+from BasisTypen.models import LeeftijdsKlasse, GESLACHT_ALLE, ORGANISATIE_IFAA, ORGANISATIE_NHB, ORGANISATIE_WA
 
 
 def alle_wedstrijdleeftijden_groepen_nhb():
@@ -160,5 +160,155 @@ def bereken_leeftijdsklassen_ifaa(geboorte_jaar, wedstrijdgeslacht):
     # for
 
     return lst
+
+
+def bereken_leeftijdsklasse_wa(wedstrijdleeftijd, wedstrijdgeslacht):
+    """
+        bepaal de meest exacte WA leeftijdsklasse voor een sporter
+        afhankelijk van zijn geboortejaar en wedstrijdgeslacht.
+
+        Voorbeeld: Onder 12 meisjes
+                   Onder 18 jongens
+    """
+
+    fallback_lkl = None
+    gevonden_lkl = None
+
+    # selecteer een geslacht-specifieke wedstrijdklasse
+    for lkl in (LeeftijdsKlasse
+                .objects
+                .filter(organisatie=ORGANISATIE_WA,
+                        wedstrijd_geslacht=wedstrijdgeslacht)
+                .order_by('volgorde')):
+
+        klasse_compat_geslacht = klasse_compat_leeftijd = False
+
+        # check geslacht is compatible
+        if lkl.geslacht_is_compatible(wedstrijdgeslacht):
+            klasse_compat_geslacht = True
+
+        # check leeftijd is compatible
+        if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
+            if lkl.min_wedstrijdleeftijd == lkl.max_wedstrijdleeftijd == 0:
+                fallback_lkl = lkl
+            else:
+                klasse_compat_leeftijd = True
+
+        if klasse_compat_geslacht and klasse_compat_leeftijd:
+            gevonden_lkl = lkl
+            break
+    # for
+
+    if not gevonden_lkl:
+        gevonden_lkl = fallback_lkl
+
+    return gevonden_lkl.beschrijving
+
+
+def bereken_leeftijdsklasse_ifaa(wedstrijdleeftijd, wedstrijdgeslacht):
+    """
+        bepaal de meest exacte IFAA leeftijdsklasse voor een sporter
+        afhankelijk van zijn wedstrijdleeftijd en wedstrijdgeslacht.
+
+        Voorbeeld: Senioren vrouwen
+    """
+
+    gevonden_lkl = None
+
+    print('bereken_leeftijdsklasse_ifaa: wedstrijdleeftijd=%s, wedstrijdgeslacht=%s' % (wedstrijdleeftijd, wedstrijdgeslacht))
+
+    # selecteer een geslacht-specifieke wedstrijdklasse
+    for lkl in (LeeftijdsKlasse
+                .objects
+                .filter(organisatie=ORGANISATIE_IFAA,
+                        wedstrijd_geslacht=wedstrijdgeslacht)
+                .order_by('volgorde')):
+
+        klasse_compat_geslacht = klasse_compat_leeftijd = False
+
+        # check geslacht is compatible
+        if lkl.geslacht_is_compatible(wedstrijdgeslacht):
+            klasse_compat_geslacht = True
+
+        # check leeftijd is compatible
+        if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
+            klasse_compat_leeftijd = True
+
+        if klasse_compat_geslacht and klasse_compat_leeftijd:
+            gevonden_lkl = lkl
+            break
+    # for
+
+    return gevonden_lkl.beschrijving
+
+
+def bereken_leeftijdsklasse_nhb(wedstrijdleeftijd, wedstrijdgeslacht):
+    """
+        bepaal de meest exacte NHB leeftijdsklasse voor een sporter
+        afhankelijk van zijn geboortejaar en wedstrijdgeslacht.
+
+        Voorbeeld: Onder 12 meisjes
+                   Onder 18 jongens
+    """
+
+    gevonden_lkl = None
+
+    # eerste poging: selecteer een geslacht-specifieke wedstrijdklasse
+    for lkl in (LeeftijdsKlasse
+                .objects
+                .filter(organisatie__in=(ORGANISATIE_WA, ORGANISATIE_NHB),
+                        wedstrijd_geslacht=wedstrijdgeslacht)
+                .order_by('volgorde')):
+
+        klasse_compat_geslacht = klasse_compat_leeftijd = False
+
+        # check geslacht is compatible
+        if lkl.geslacht_is_compatible(wedstrijdgeslacht):
+            klasse_compat_geslacht = True
+
+        # check leeftijd is compatible
+        if lkl.min_wedstrijdleeftijd != lkl.max_wedstrijdleeftijd:      # skip fall-back klassen
+            if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
+                klasse_compat_leeftijd = True
+
+        if klasse_compat_geslacht and klasse_compat_leeftijd:
+            # print('bereken_leeftijdsklasse_nhb (1): kandidaat = %s' % lkl.beschrijving)
+            gevonden_lkl = lkl
+            break
+    # for
+
+    if not gevonden_lkl:
+        fallback_lkl = None
+
+        # tweede poging: selecteer een gender-neutrale wedstrijdklasse
+        for lkl in (LeeftijdsKlasse
+                    .objects
+                    .filter(organisatie__in=(ORGANISATIE_WA, ORGANISATIE_NHB),
+                            wedstrijd_geslacht=GESLACHT_ALLE)
+                    .order_by('volgorde')):
+
+            klasse_compat_geslacht = klasse_compat_leeftijd = False
+
+            # check geslacht is compatible
+            if lkl.geslacht_is_compatible(wedstrijdgeslacht):
+                klasse_compat_geslacht = True
+
+            # check leeftijd is compatible
+            if lkl.leeftijd_is_compatible(wedstrijdleeftijd):
+                if lkl.min_wedstrijdleeftijd == lkl.max_wedstrijdleeftijd == 0:
+                    fallback_lkl = lkl
+                else:
+                    klasse_compat_leeftijd = True
+
+            if klasse_compat_geslacht and klasse_compat_leeftijd:
+                gevonden_lkl = lkl
+                break
+        # for
+
+        if not gevonden_lkl:
+            gevonden_lkl = fallback_lkl
+
+    return gevonden_lkl.beschrijving
+
 
 # end of file
