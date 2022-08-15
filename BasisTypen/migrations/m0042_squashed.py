@@ -624,7 +624,7 @@ def init_kalenderwedstrijdklassen_ifaa(apps, _):
         'BBC': 'BB-C',
         'FSR': 'FS-R',
         'FSC': 'FS-C',
-        'FU': 'FU',
+        'FU':  'FU',
         'BHR': 'BH-R',
         'BHC': 'BH-C',
         'BHU': 'BU',

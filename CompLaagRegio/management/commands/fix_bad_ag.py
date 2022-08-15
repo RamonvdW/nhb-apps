@@ -7,7 +7,7 @@
 from django.core.management.base import BaseCommand
 from Competitie.models import Competitie, RegioCompetitieSchutterBoog, AG_NUL
 from Competitie.operations.klassengrenzen import KlasseBepaler
-from Score.models import Score, SCORE_TYPE_INDIV_AG
+from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV
 from decimal import Decimal
 
 
@@ -42,12 +42,12 @@ class Command(BaseCommand):
         vertel_commit = False
 
         sporterboog_pk2ag = dict()
-        for score in (Score
-                      .objects
-                      .select_related('sporterboog')
-                      .filter(type=SCORE_TYPE_INDIV_AG,
-                              afstand_meter=afstand)):
-            sporterboog_pk2ag[score.sporterboog.pk] = Decimal(score.waarde) / 1000
+        for ag in (Aanvangsgemiddelde
+                   .objects
+                   .select_related('sporterboog')
+                   .filter(doel=AG_DOEL_INDIV,
+                           afstand_meter=afstand)):
+            sporterboog_pk2ag[ag.sporterboog.pk] = ag.waarde
         # for
 
         for deelnemer in (RegioCompetitieSchutterBoog

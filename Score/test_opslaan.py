@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
 from BasisTypen.models import BoogType
 from Sporter.models import Sporter, SporterBoog
-from .models import (Score, ScoreHist,
-                     SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN)
-from .operations import score_indiv_ag_opslaan, score_teams_ag_opslaan, wanneer_ag_vastgesteld
+from Score.models import Score, ScoreHist, Aanvangsgemiddelde, AanvangsgemiddeldeHist
+from Score.operations import score_indiv_ag_opslaan, score_teams_ag_opslaan, wanneer_ag_vastgesteld
 from TestHelpers.e2ehelpers import E2EHelpers
+from decimal import Decimal
 import datetime
 
 
@@ -44,8 +44,7 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         self.assertEqual(ScoreHist.objects.count(), 0)
 
         afstand = 18
-        gemiddelde = 9.876
-        waarde = int(gemiddelde * 1000)
+        gemiddelde = Decimal('9.876')
         account = self.account_normaal
         notitie = "Dit is een notities"
 
@@ -53,69 +52,53 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         res = score_indiv_ag_opslaan(self.sporterboog, afstand, gemiddelde, account, notitie)
         self.assertEqual(res, True)
 
-        self.assertEqual(Score.objects.count(), 1)
-        score = Score.objects.all()[0]
-        self.assertEqual(score.afstand_meter, afstand)
-        self.assertEqual(score.waarde, waarde)
-        self.assertEqual(score.sporterboog, self.sporterboog)
-        self.assertTrue(str(score) != "")
+        self.assertEqual(Aanvangsgemiddelde.objects.count(), 1)
+        ag = Aanvangsgemiddelde.objects.all()[0]
+        self.assertEqual(ag.afstand_meter, afstand)
+        self.assertEqual(ag.waarde, gemiddelde)
+        self.assertEqual(ag.sporterboog, self.sporterboog)
+        self.assertTrue(str(ag) != "")
 
-        score.type = SCORE_TYPE_GEEN
-        self.assertTrue("(geen score)" in str(score))
+        self.assertEqual(AanvangsgemiddeldeHist.objects.count(), 1)
+        ag_hist = AanvangsgemiddeldeHist.objects.all()[0]
+        self.assertEqual(ag_hist.oude_waarde, 0)
+        self.assertEqual(ag_hist.nieuwe_waarde, gemiddelde)
+        self.assertEqual(ag_hist.door_account, account)
+        self.assertEqual(ag_hist.notitie, notitie)
+        self.assertTrue(str(ag_hist) != "")
 
-        score.type = SCORE_TYPE_INDIV_AG
-        self.assertTrue("(indiv AG)" in str(score))
-
-        score.type = SCORE_TYPE_TEAM_AG
-        self.assertTrue("(team AG)" in str(score))
-
-        score.type = SCORE_TYPE_SCORE
-        self.assertTrue(str(score) != "")
-
-        self.assertEqual(ScoreHist.objects.count(), 1)
-        scorehist = ScoreHist.objects.all()[0]
-        self.assertEqual(scorehist.oude_waarde, 0)
-        self.assertEqual(scorehist.nieuwe_waarde, waarde)
-        self.assertEqual(scorehist.door_account, account)
-        self.assertEqual(scorehist.notitie, notitie)
-        self.assertTrue(str(scorehist) != "")
-
-        # dezelfde score nog een keer opslaan resulteert in een reject
+        # dezelfde score nog een keer opslaan leidt tot een reject
         res = score_indiv_ag_opslaan(self.sporterboog, afstand, gemiddelde, account, notitie)
         self.assertEqual(res, False)
 
         # tweede keer wordt er alleen een ScoreHist object aangemaakt
-        gemiddelde2 = 8.765
-        waarde2 = int(gemiddelde2 * 1000)
+        gemiddelde2 = Decimal('8.765')
         notitie2 = "Dit is de tweede notitie"
 
         res = score_indiv_ag_opslaan(self.sporterboog, afstand, gemiddelde2, account, notitie2)
         self.assertEqual(res, True)
 
-        self.assertEqual(Score.objects.count(), 1)
-        score = Score.objects.all()[0]
-        self.assertEqual(score.afstand_meter, afstand)
-        self.assertEqual(score.waarde, waarde2)
-        self.assertEqual(score.sporterboog, self.sporterboog)
+        self.assertEqual(Aanvangsgemiddelde.objects.count(), 1)
+        ag = Aanvangsgemiddelde.objects.all()[0]
+        self.assertEqual(ag.afstand_meter, afstand)
+        self.assertEqual(ag.waarde, gemiddelde2)
+        self.assertEqual(ag.sporterboog, self.sporterboog)
 
-        self.assertEqual(ScoreHist.objects.count(), 2)
-        scorehist = ScoreHist.objects.exclude(pk=scorehist.pk).all()[0]
-        self.assertEqual(scorehist.oude_waarde, waarde)
-        self.assertEqual(scorehist.nieuwe_waarde, waarde2)
-        self.assertEqual(scorehist.door_account, account)
-        self.assertEqual(scorehist.notitie, notitie2)
+        self.assertEqual(AanvangsgemiddeldeHist.objects.count(), 2)
+        ag_hist = AanvangsgemiddeldeHist.objects.exclude(pk=ag_hist.pk).all()[0]
+        self.assertEqual(ag_hist.oude_waarde, gemiddelde)
+        self.assertEqual(ag_hist.nieuwe_waarde, gemiddelde2)
+        self.assertEqual(ag_hist.door_account, account)
+        self.assertEqual(ag_hist.notitie, notitie2)
 
-        gemiddelde = 8.345
+        gemiddelde = Decimal('8.345')
         res = score_teams_ag_opslaan(self.sporterboog, afstand, gemiddelde, account, notitie)
         self.assertEqual(res, True)
 
-        self.assertEqual(ScoreHist.objects.count(), 3)
-        scorehist = ScoreHist.objects.get(score__waarde=8345)
-        score = scorehist.score
-        self.assertTrue('(team AG)' in str(score))
-
-        score.sporterboog = None
-        self.assertTrue(str(score) != '')
+        self.assertEqual(AanvangsgemiddeldeHist.objects.count(), 3)
+        ag_hist = AanvangsgemiddeldeHist.objects.get(ag__waarde=gemiddelde)
+        ag = ag_hist.ag
+        self.assertTrue('(team)' in str(ag))
 
     def test_wanneer(self):
         res = wanneer_ag_vastgesteld(18)

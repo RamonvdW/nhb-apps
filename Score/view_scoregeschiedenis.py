@@ -10,7 +10,7 @@ from django.views.generic import View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige
 from Sporter.models import SporterBoog
-from Score.models import ScoreHist, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
+from Score.models import AanvangsgemiddeldeHist, AG_DOEL_TEAM, ScoreHist, SCORE_WAARDE_VERWIJDERD
 from .forms import ScoreGeschiedenisForm
 from Plein.menu import menu_dynamics
 
@@ -60,6 +60,7 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                 context['niet_gevonden'] = True
             else:
                 context['sporter'] = sportersboog[0].sporter
+                context['afstanden'] = afstanden = list()
 
                 hists = (ScoreHist
                          .objects
@@ -76,24 +77,16 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                     if hist.door_account:
                         hist.door_account_str = str(hist.door_account)
 
-                    hist.is_edit = hist.oude_waarde > 0 or hist.score.type == 'T'
-
-                    if hist.score.type in (SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG):
-                        hist.oude_waarde = "%.3f" % (hist.oude_waarde / 1000)
-                        hist.nieuwe_waarde = "%.3f" % (hist.nieuwe_waarde / 1000)
-                    else:
-                        if hist.oude_waarde == SCORE_WAARDE_VERWIJDERD:
-                            hist.oude_waarde = "verwijderd"
-                        if hist.nieuwe_waarde == SCORE_WAARDE_VERWIJDERD:
-                            hist.nieuwe_waarde = "verwijderd"
+                    if hist.oude_waarde == SCORE_WAARDE_VERWIJDERD:
+                        hist.oude_waarde = "verwijderd"
+                    if hist.nieuwe_waarde == SCORE_WAARDE_VERWIJDERD:
+                        hist.nieuwe_waarde = "verwijderd"
 
                     try:
                         score2hists[hist.score.pk].append(hist)
                     except KeyError:
                         score2hists[hist.score.pk] = [hist]
                 # for
-
-                context['afstanden'] = afstanden = list()
 
                 for obj in sportersboog:
                     obj.scores = list()
@@ -107,8 +100,6 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                                 pass
                             else:
                                 del score2hists[score.pk]
-                                if score.type in (SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG):
-                                    score.waarde = "%.3f" % (hist.score.waarde / 1000)
 
                                 if score.afstand_meter not in afstanden:
                                     afstanden.append(score.afstand_meter)
@@ -127,9 +118,51 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
 
                                 obj.scores.append(score)
                     # for
-
-                    afstanden.sort()
                 # for
+
+                hists = (AanvangsgemiddeldeHist
+                         .objects
+                         .select_related('ag',
+                                         'ag__sporterboog',
+                                         'ag__sporterboog__boogtype')
+                         .filter(ag__sporterboog__in=pks)
+                         .order_by('-when'))
+
+                # splits de hists op per score
+                ag2hists = dict()    # [ag.pk] = [hist, ...]
+                for hist in hists:
+                    if hist.door_account:
+                        hist.door_account_str = str(hist.door_account)
+
+                    try:
+                        ag2hists[hist.ag.pk].append(hist)
+                    except KeyError:
+                        ag2hists[hist.ag.pk] = [hist]
+                # for
+
+                context['afstanden'] = afstanden = list()
+
+                for obj in sportersboog:
+                    obj.ags = list()
+                    for hist in hists:      # deze volgorde aanhouden
+                        if hist.ag.sporterboog == obj:
+                            ag = hist.ag
+                            try:
+                                ag.hists = ag2hists[ag.pk]
+                            except KeyError:
+                                # al gedaan
+                                pass
+                            else:
+                                del ag2hists[ag.pk]
+
+                                if ag.afstand_meter not in afstanden:
+                                    afstanden.append(ag.afstand_meter)
+
+                                obj.ags.append(ag)
+                    # for
+                # for
+
+                afstanden.sort()
         else:
             context['niet_gevonden'] = True
 

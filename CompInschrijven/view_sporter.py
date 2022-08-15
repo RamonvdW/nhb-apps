@@ -17,7 +17,7 @@ from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompeti
                                DAGDELEN, DAGDEEL_AFKORTINGEN)
 from Competitie.operations import KlasseBepaler
 from Plein.menu import menu_dynamics
-from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
+from Score.models import AanvangsgemiddeldeHist, Aanvangsgemiddelde, AG_DOEL_INDIV
 from Sporter.models import SporterVoorkeuren, SporterBoog
 from decimal import Decimal
 
@@ -67,7 +67,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         if comp.fase < 'B' or comp.fase >= 'F':
             raise Http404('Verkeerde competitie fase')
 
-        # controleer dat sporterboog bij de ingelogde gebruiker hoort
+        # controleer dat sporterboog bij de ingelogde gebruiker hoort;
         # controleer dat deelcompetitie bij de juist regio hoort
         account = self.request.user
         sporter = account.sporter_set.all()[0]      # ROL_SPORTER geeft bescherming tegen geen nhblid
@@ -91,14 +91,13 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(comp.begin_jaar + 1)
 
         # haal AG op, indien aanwezig
-        scores = Score.objects.filter(sporterboog=sporterboog,
-                                      type=SCORE_TYPE_INDIV_AG,
-                                      afstand_meter=comp.afstand)
+        ags = Aanvangsgemiddelde.objects.filter(sporterboog=sporterboog,
+                                                doel=AG_DOEL_INDIV,
+                                                afstand_meter=comp.afstand)
         ag = Decimal(AG_NUL)
-        if len(scores):
-            score = scores[0]
-            ag = Decimal(score.waarde) / 1000
-            hist = ScoreHist.objects.filter(score=score).order_by('-when')
+        if len(ags):
+            ag = ags[0].waarde
+            hist = AanvangsgemiddeldeHist.objects.filter(ag=ags[0]).order_by('-when')
             if len(hist):
                 context['ag_hist'] = hist[0]
         context['ag'] = ag
@@ -220,7 +219,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
 class RegiocompetitieAanmeldenView(View):
 
     """ Deze class wordt gebruikt om een sporterboog in te schrijven voor een regiocompetitie
-        methode 1 / 2 : direct geaccepteerd
+        methode 1 of 2: direct geaccepteerd
 
         methode 3: nhblid heeft voorkeuren opgegeven: dagdeel, team schieten, opmerking
     """
@@ -264,7 +263,7 @@ class RegiocompetitieAanmeldenView(View):
         if deelcomp.competitie.fase < 'B' or deelcomp.competitie.fase >= 'F':
             raise Http404('Verkeerde competitie fase')
 
-        # controleer dat sporterboog bij de ingelogde gebruiker hoort
+        # controleer dat sporterboog bij de ingelogde gebruiker hoort;
         # controleer dat deelcompetitie bij de juist regio hoort
         if (sporterboog.sporter != sporter
                 or deelcomp.laag != LAAG_REGIO
@@ -298,15 +297,14 @@ class RegiocompetitieAanmeldenView(View):
                             aangemeld_door=account)
 
         # haal AG op, indien aanwezig
-        scores = Score.objects.filter(sporterboog=sporterboog,
-                                      type=SCORE_TYPE_INDIV_AG,
-                                      afstand_meter=deelcomp.competitie.afstand)
-        if len(scores):
-            score = scores[0]
-            ag = Decimal(score.waarde) / 1000
-            aanmelding.ag_voor_indiv = ag
-            aanmelding.ag_voor_team = ag
-            if ag > 0.000:
+        ags = Aanvangsgemiddelde.objects.filter(sporterboog=sporterboog,
+                                                doel=AG_DOEL_INDIV,
+                                                afstand_meter=deelcomp.competitie.afstand)
+        if len(ags):
+            ag = ags[0]
+            aanmelding.ag_voor_indiv = ag.waarde
+            aanmelding.ag_voor_team = ag.waarde
+            if ag.waarde > 0.000:
                 aanmelding.ag_voor_team_mag_aangepast_worden = False
 
         bepaler = KlasseBepaler(deelcomp.competitie)

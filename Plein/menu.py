@@ -14,7 +14,7 @@ from Taken.operations import aantal_open_taken
 
 def menu_dynamics(request, context):
     """ Deze functie update the template context voor het dynamische gedrag van
-        menu zoals de 'Andere rollen' en het menu item dat actief is.
+        menu zoals de 'Andere rollen' en het menu-item dat actief is.
     """
 
     # test server banner tonen?
@@ -61,7 +61,7 @@ def menu_dynamics(request, context):
     else:
         context['menu_url_inloggen'] = reverse('Account:login')
 
-    # het label met de scherm grootte boven aan het scherm
+    # het label met de schermgrootte boven aan het scherm
     context['menu_toon_schermgrootte'] = settings.DEBUG
 
 

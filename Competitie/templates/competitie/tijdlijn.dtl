@@ -58,7 +58,7 @@
                     {% if comp.fase > 'B' %}
                         <span class="green-text">Afgerond</span>
                     {% else %}
-                        <span>{{ comp.begin_aanmeldingen }}{% if comp.einde_aanmeldingen > comp.begin_aanmeldingen %} tot en met<br>{{ comp.einde_aanmeldingen }}{% endif %}</span>
+                        <span>{{ comp.begin_aanmeldingen }}{% if comp.einde_aanmeldingen > comp.begin_aanmeldingen %}<br>tot en met{{ comp.einde_aanmeldingen }}{% endif %}</span>
                     {% endif %}
                 </td>
             </tr>
@@ -167,7 +167,7 @@
                     {% elif comp.fase == 'L' %}
                         <span>tot en met {{ comp.rk_laatste_wedstrijd }}</span>
                     {% else %}
-                        <span>{{ comp.rk_eerste_wedstrijd }}{% if comp.rk_laatste_wedstrijd > comp.rk_eerste_wedstrijd %} tot en met {{ comp.rk_laatste_wedstrijd }}{% endif %}</span>
+                        <span>{{ comp.rk_eerste_wedstrijd }}{% if comp.rk_laatste_wedstrijd > comp.rk_eerste_wedstrijd %}<br>tot en met {{ comp.rk_laatste_wedstrijd }}{% endif %}</span>
                     {% endif %}
                 </td>
             </tr>
@@ -218,7 +218,7 @@
                     {% elif comp.fase == 'Q' %}
                         <span>tot en met {{ comp.bk_laatste_wedstrijd }}</span>
                     {% else %}
-                        <span>{{ comp.bk_eerste_wedstrijd }}{% if comp.bk_laatste_wedstrijd > comp.bk_eerste_wedstrijd %} tot en met {{ comp.bk_laatste_wedstrijd }}{% endif %}</span>
+                        <span>{{ comp.bk_eerste_wedstrijd }}{% if comp.bk_laatste_wedstrijd > comp.bk_eerste_wedstrijd %}<br>tot en met {{ comp.bk_laatste_wedstrijd }}{% endif %}</span>
                     {% endif %}
                 </td>
             </tr>

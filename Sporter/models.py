@@ -285,7 +285,7 @@ class SporterBoog(models.Model):
     heeft_interesse = models.BooleanField(default=True)
     voor_wedstrijd = models.BooleanField(default=False)
 
-    # aanvangsgemiddelde is opgeslagen in een Score en ScoreHist record
+    # aanvangsgemiddelde is opgeslagen in een Aanvangsgemiddelde en AanvangsgemiddeldeHist record
 
     class Meta:
         """ meta data voor de admin interface """

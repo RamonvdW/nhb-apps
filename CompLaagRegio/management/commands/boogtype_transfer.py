@@ -8,7 +8,8 @@ from django.core.management.base import BaseCommand
 from Competitie.models import Competitie, RegioCompetitieSchutterBoog, AG_NUL
 from Competitie.operations.klassengrenzen import KlasseBepaler
 from Sporter.models import Sporter, SporterBoog
-from Score.models import ScoreHist, Score, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG, SCORE_TYPE_GEEN
+from Score.models import (Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV,
+                          Score, ScoreHist, SCORE_TYPE_GEEN)
 from decimal import Decimal
 
 
@@ -79,7 +80,8 @@ class Command(BaseCommand):
             return
 
         if not juiste_sporterboog:
-            self.stderr.write('[ERROR] Sporter heeft boog %s niet als voorkeur. Wel: %s' % (boog_afk, ", ".join(wedstrijd_bogen)))
+            self.stderr.write('[ERROR] Sporter heeft boog %s niet als voorkeur. Wel: %s' % (
+                            boog_afk, ", ".join(wedstrijd_bogen)))
             return
 
         # controleer dat de sporter niet al geschreven
@@ -108,7 +110,8 @@ class Command(BaseCommand):
 
         huidige_boog_afk = deelnemer.sporterboog.boogtype.afkorting
         self.stdout.write('[INFO] Huidige deelnemer pk = %s' % deelnemer.pk)
-        self.stdout.write('[INFO] Huidige sporterboog pk = %s, boogtype = %s' % (deelnemer.sporterboog.pk, huidige_boog_afk))
+        self.stdout.write('[INFO] Huidige sporterboog pk = %s, boogtype = %s' % (
+                            deelnemer.sporterboog.pk, huidige_boog_afk))
         self.stdout.write('[INFO] Huidige indiv_klasse: %s' % deelnemer.indiv_klasse)
 
         # controleer of de sporter in een team mee doet
@@ -118,20 +121,18 @@ class Command(BaseCommand):
 
         score_pks = list()
         score_waardes = list()
-        for scorehist in (ScoreHist
-                          .objects
-                          .select_related('score')
-                          .filter(score__sporterboog=deelnemer.sporterboog)
-                          .order_by('when')):      # oudste eerst
-            score = scorehist.score
-            ag = Decimal(score.waarde) / Decimal(1000)
-            if score.type == SCORE_TYPE_INDIV_AG:
-                self.stdout.write("[INFO] Boog %s: Individueel AG: %1.3f" % (huidige_boog_afk, float(ag)))
-            elif score.type in (SCORE_TYPE_TEAM_AG, SCORE_TYPE_GEEN):
+        for score_hist in (ScoreHist
+                           .objects
+                           .select_related('score')
+                           .filter(score__sporterboog=deelnemer.sporterboog)
+                           .order_by('when')):      # oudste eerst
+            score = score_hist.score
+            if score.type == SCORE_TYPE_GEEN:
                 pass
             else:
                 # echte score
-                self.stdout.write('[INFO] Boog %s: Score (pk=%s) %s neergezet op %s' % (huidige_boog_afk, score.pk, score.waarde, scorehist.when))
+                self.stdout.write('[INFO] Boog %s: Score (pk=%s) %s neergezet op %s' % (
+                                    huidige_boog_afk, score.pk, score.waarde, score_hist.when))
                 score_pks.append(score.pk)
                 if score.waarde > 0:
                     score_waardes.append(score.waarde)
@@ -140,24 +141,15 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Juiste sporterboog pk = %s' % juiste_sporterboog.pk)
 
         juiste_ag = AG_NUL
-        score_gevonden = False
-        for scorehist in (ScoreHist.objects.select_related('score').filter(score__sporterboog=juiste_sporterboog)):
-            score = scorehist.score
-            ag = Decimal(score.waarde) / Decimal(1000)
-            if score.type == SCORE_TYPE_INDIV_AG:
-                self.stdout.write("[INFO] Boog %s: Individueel AG: %1.3f" % (boog_afk, float(ag)))
-                juiste_ag = ag
-            elif score.type in (SCORE_TYPE_TEAM_AG, SCORE_TYPE_GEEN):
-                pass
-            else:
-                # echte score
-                score_gevonden = True
-                self.stdout.write('[INFO] Boog %s: Score (pk=%s) %s neergezet op %s' % (boog_afk, score.pk, score.waarde, scorehist.when))
+        for ag in (Aanvangsgemiddelde
+                   .objects
+                   .select_related('boogtype')
+                   .filter(doel=AG_DOEL_INDIV,
+                           sporterboog=juiste_sporterboog)):
+            juiste_ag = ag.waarde
+            boog_afk = ag.boogtype.afkorting
+            self.stdout.write("[INFO] Boog %s: Individueel AG: %1.3f" % (boog_afk, float(juiste_ag)))
         # for
-
-        if score_gevonden:
-            self.stderr.write('[ERROR] Onverwacht een score gevonden')
-            return
 
         self.stdout.write('[INFO] Juiste individuele AG: %1.3f' % float(juiste_ag))
 
@@ -183,6 +175,7 @@ class Command(BaseCommand):
             score.save(update_fields=['sporterboog'])
         # for
 
-        self.stdout.write('[INFO] Deelnemer pk=%s is aangepast; scores zijn omgezet naar sporterboog pk=%s' % (deelnemer.pk, juiste_sporterboog.pk))
+        self.stdout.write('[INFO] Deelnemer pk=%s is aangepast; scores zijn omgezet naar sporterboog pk=%s' % (
+                            deelnemer.pk, juiste_sporterboog.pk))
 
 # end of file

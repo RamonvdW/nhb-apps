@@ -12,7 +12,7 @@ from Competitie.test_fase import zet_competitie_fase
 from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from Functie.models import Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV
 from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -50,7 +50,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.account_geenlid = self.e2e_create_account('geenlid', 'geenlid@test.com', 'Geen')
         self.account_twee = self.e2e_create_account('twee', 'twee@test.com', 'Twee')
 
-        # afhankelijk van de rayon/regio's aangemaakt door NhbStructuur migratie
+        # afhankelijk van het rayon / de regios aangemaakt door NhbStructuur migratie
 
         # maak een test vereniging
         ver = NhbVereniging()
@@ -187,10 +187,10 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         # uitzondering: AG score zonder hist
         res = score_indiv_ag_opslaan(sporterboog, 18, 7.18, None, 'Test 2')
         self.assertTrue(res)
-        scores = Score.objects.filter(sporterboog=sporterboog,
-                                      type=SCORE_TYPE_INDIV_AG,
-                                      afstand_meter=deelcomp.competitie.afstand)
-        ScoreHist.objects.filter(score=scores[0]).delete()
+        ags = Aanvangsgemiddelde.objects.filter(doel=AG_DOEL_INDIV,
+                                                sporterboog=sporterboog,
+                                                afstand_meter=deelcomp.competitie.afstand)
+        AanvangsgemiddeldeHist.objects.filter(ag=ags[0]).delete()
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)

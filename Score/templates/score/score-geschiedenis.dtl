@@ -68,7 +68,63 @@
             <!-- witruimte -->
             <div class="row center">
                 <div class="col s12">
-                    <h5 class="red-text">Afstand: {{ afstand }}m</h5>
+                    <h5 class="red-text">Aanvangsgemiddelden voor afstand: {{ afstand }}m</h5>
+                </div>
+            </div>
+
+            <!-- blauwe balk met informatie in een tabel -->
+            <div class="row-nhb-blauw">
+                <div class="col s12">
+                    <table class="white">
+                        <thead>
+                            <tr>
+                                <th>Boog</th>
+                                <th>Waarde</th>
+                                <th>Geschiedenis</th>
+                            </tr>
+                        </thead>
+
+                        {% for sporterboog in sportersboog %}
+                            {% if sporterboog.ags %}
+                                <tr>
+                                    <td>{{ sporterboog.boogtype.beschrijving }}</td>
+                                    <td colspan="2"></td>
+                                </tr>
+
+                                {% for ag in sporterboog.ags %}
+                                    {% if ag.afstand_meter == afstand %}
+                                        <tr>
+                                            <td></td>   <!-- boog -->
+                                            <td>{{ ag.waarde }}</td>
+                                            <td></td>
+                                        </tr>
+
+                                        {% for hist in ag.hists %}
+                                            <tr>
+                                                <td></td>
+                                                <td>{{ hist.oude_waarde }}<span style="position: relative; bottom: .15em;"> &rarr; </span>{{ hist.nieuwe_waarde }}</td>
+                                                <td>{{ hist.when }}{% if hist.door_account_str %} door {{ hist.door_account_str }}{% endif %}<br>{{ hist.notitie }}</td>
+                                            </tr>
+                                        {% endfor %}
+
+                                    {% endif %} <!-- score.afstand_meter == afstand -->
+
+                                {% endfor %} <!-- score -->
+
+                            {% endif %} <!-- sporterboog heeft scores -->
+
+                        {% endfor %}    <!-- for sporterboog -->
+                    </table>
+
+
+                </div>
+            </div>
+
+
+            <!-- witruimte -->
+            <div class="row center">
+                <div class="col s12">
+                    <h5 class="red-text">Scores voor afstand: {{ afstand }}m</h5>
                 </div>
             </div>
 
@@ -112,7 +168,7 @@
                                         {% for hist in score.hists %}
                                             <tr>
                                                 <td colspan="2"></td>
-                                                <td{% if hist.is_edit %} class="nhb-blauw-text"{% endif %}>{{ hist.oude_waarde }}<span style="position: relative; bottom: .15em;"> &rarr; </span>{{ hist.nieuwe_waarde }}</td>
+                                                <td>{{ hist.oude_waarde }}<span style="position: relative; bottom: .15em;"> &rarr; </span>{{ hist.nieuwe_waarde }}</td>
                                                 <td>{{ hist.when }}{% if hist.door_account_str %} door {{ hist.door_account_str }}{% endif %}<br>{{ hist.notitie }}</td>
                                             </tr>
                                         {% endfor %}
@@ -124,6 +180,7 @@
                             {% endif %} <!-- sporterboog heeft scores -->
 
                         {% endfor %}    <!-- for sporterboog -->
+
                     </table>
 
 

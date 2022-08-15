@@ -1,82 +1,88 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV, AG_DOEL_TEAM
 
 
-def _score_ag_opslaan(score_type, sporterboog, afstand, gemiddelde, door_account, notitie):
+def _score_ag_opslaan(ag_doel, sporterboog, afstand, gemiddelde, door_account, notitie):
     """ slaan het aanvangsgemiddelde op voor sporterboog
 
         Return value:
             True  = opslagen
             False = niet opgeslagen / dupe
     """
-    waarde = int(gemiddelde * 1000)
+    waarde = gemiddelde
 
     try:
-        score = Score.objects.get(sporterboog=sporterboog,
-                                  type=score_type,
-                                  afstand_meter=afstand)
-    except Score.DoesNotExist:
+        ag = Aanvangsgemiddelde.objects.get(sporterboog=sporterboog,
+                                            doel=ag_doel,
+                                            afstand_meter=afstand)
+    except Aanvangsgemiddelde.DoesNotExist:
         # eerste aanvangsgemiddelde voor deze afstand
-        score = Score(sporterboog=sporterboog,
-                      type=score_type,
-                      waarde=waarde,
-                      afstand_meter=afstand)
-        score.save()
+        ag = Aanvangsgemiddelde(
+                        sporterboog=sporterboog,
+                        boogtype=sporterboog.boogtype,
+                        doel=ag_doel,
+                        waarde=waarde,
+                        afstand_meter=afstand)
+        ag.save()
 
-        hist = ScoreHist(score=score,
-                         oude_waarde=0,
-                         nieuwe_waarde=waarde,
-                         door_account=door_account,
-                         notitie=notitie)
+        hist = AanvangsgemiddeldeHist(
+                        ag=ag,
+                        oude_waarde=0,
+                        nieuwe_waarde=waarde,
+                        door_account=door_account,
+                        notitie=notitie)
         hist.save()
         return True
 
-    if score.waarde != waarde:
-        # nieuwe score voor deze afstand
-        hist = ScoreHist(score=score,
-                         oude_waarde=score.waarde,
-                         nieuwe_waarde=waarde,
-                         door_account=door_account,
-                         notitie=notitie)
+    if ag.waarde != waarde:
+        # nieuwe AG voor deze afstand
+        hist = AanvangsgemiddeldeHist(
+                    ag=ag,
+                    oude_waarde=ag.waarde,
+                    nieuwe_waarde=waarde,
+                    door_account=door_account,
+                    notitie=notitie)
         hist.save()
 
-        score.waarde = waarde
-        score.save()
+        ag.waarde = waarde
+        ag.save(update_fields=['waarde'])
         return True
 
-    # dezelfde score als voorheen --> voorlopig niet opslaan
+    # AG is niet gewijzigd, dus maak geen hist record aan
     # (ook al is de datum en/of notitie anders)
     return False
 
 
 def score_indiv_ag_opslaan(sporterboog, afstand, gemiddelde, door_account, notitie):
     """ sla een individueel AG op voor een specifieke sporterboog en afstand """
-    return _score_ag_opslaan(SCORE_TYPE_INDIV_AG, sporterboog, afstand, gemiddelde, door_account, notitie)
+    return _score_ag_opslaan(AG_DOEL_INDIV, sporterboog, afstand, gemiddelde, door_account, notitie)
 
 
 def score_teams_ag_opslaan(sporterboog, afstand, gemiddelde, door_account, notitie):
     """ sla een team-AG op voor een specifieke sporterboog en afstand """
-    return _score_ag_opslaan(SCORE_TYPE_TEAM_AG, sporterboog, afstand, gemiddelde, door_account, notitie)
+    return _score_ag_opslaan(AG_DOEL_TEAM, sporterboog, afstand, gemiddelde, door_account, notitie)
 
 
 def wanneer_ag_vastgesteld(afstand_meter):
     """ Zoek de datum waarop de aanvangsgemiddelden voor het laatste vastgesteld zijn """
-    scorehist = (ScoreHist
-                 .objects
-                 .select_related('score')
-                 .filter(door_account=None,
-                         score__afstand_meter=afstand_meter,
-                         score__type=SCORE_TYPE_INDIV_AG)
-                 .order_by('-when'))[:1]
-    if len(scorehist) > 0:
-        return scorehist[0].when
+    qset = (AanvangsgemiddeldeHist
+            .objects
+            .select_related('ag')
+            .filter(door_account=None,
+                    ag__afstand_meter=afstand_meter,
+                    ag__doel=AG_DOEL_INDIV)
+            .order_by('-when'))[:1]
+
+    if len(qset) > 0:
+        return qset[0].when
 
     # nog nooit vastgesteld
     return None
+
 
 # end of file

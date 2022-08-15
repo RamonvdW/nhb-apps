@@ -506,9 +506,9 @@
                             <tr>
                                 <td>{{ sporterboog.boogtype.beschrijving }}</td>
                                 <td>{{ ag.afstand_meter }} meter</td>
-                                <td class="center">{{ ag.ag|floatformat:3 }}</td>
-                                <td>{{ ag.scorehist.when|date:"j F Y" }}</td>
-                                <td>{{ ag.scorehist.notitie }}</td>
+                                <td class="center">{{ ag.waarde }}</td>
+                                <td>{{ ag.hist.when|date:"j F Y" }}</td>
+                                <td>{{ ag.hist.notitie }}</td>
                             </tr>
                         {% endfor %}
                     {% endfor %}

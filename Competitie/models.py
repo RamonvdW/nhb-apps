@@ -203,7 +203,7 @@ class Competitie(models.Model):
     #         RK deelnemers bevestigen deelname
     #         HWL's kunnen invallers koppelen voor RK teams
     #         RKO's moeten planning wedstrijden afronden
-    rk_eerste_wedstrijd = models.DateField()        # einde fast K moet 2 weken voor de eerste wedstrijd zijn
+    rk_eerste_wedstrijd = models.DateField()        # einde fase K moet 2 weken voor de eerste wedstrijd zijn
     # fase L: wedstrijden
     #         stuur emails uitnodiging deelname + locatie details
     rk_laatste_wedstrijd = models.DateField()
@@ -351,7 +351,7 @@ class Competitie(models.Model):
         self.fase = 'G'
 
     def bepaal_openbaar(self, rol_nu):
-        """ deze functie bepaalt of de competitie openbaar is voor de gegeven rol
+        """ deze functie bepaalt of de competitie openbaar is voor de huidige rol
             en zet de is_openbaar variabele op het object.
 
             let op: self.fase moet gezet zijn
@@ -447,7 +447,7 @@ class CompetitieTeamKlasse(models.Model):
     """ Deze database tabel bevat de klassen voor de teamcompetitie,
         met de vastgestelde aanvangsgemiddelden.
 
-        Deze tabel wordt aangemaakt aan de hand van de templates: BasisTypen::TemplateCompetitieTeamKlasse
+        Deze tabel wordt aangemaakt aan de hand van de templates: BasisTypen.TemplateCompetitieTeamKlasse
         en de gerefereerde TeamType wordt hierin ook plat geslagen om het aantal database accesses te begrenzen.
     """
 
@@ -670,7 +670,7 @@ class DeelcompetitieIndivKlasseLimiet(models.Model):
         wedstrijdklasse. De RKO kan dit bijstellen specifiek voor zijn RK.
     """
 
-    # voor welke deelcompetitie (ivm scheiding RKs)
+    # voor welke deelcompetitie (i.v.m. scheiding RKs)
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
     # voor welke klasse is deze limiet
@@ -694,7 +694,7 @@ class DeelcompetitieTeamKlasseLimiet(models.Model):
         wedstrijdklasse. De RKO kan dit bijstellen specifiek voor zijn RK.
     """
 
-    # voor welke deelcompetitie (ivm scheiding RKs)
+    # voor welke deelcompetitie (i.v.m. scheiding RKs)
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
     # voor welke klasse is deze limiet
@@ -802,7 +802,7 @@ class RegioCompetitieSchutterBoog(models.Model):
     # gemiddelde over de 6 beste scores, dus exclusief laatste_score_nr
     gemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 10,000
 
-    # bovenstaande gemiddelde vastgesteld aan het begin van de huidige team ronde
+    # bovenstaand gemiddelde vastgesteld aan het begin van de huidige team ronde
     gemiddelde_begin_team_ronde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 10,000
 
     # voorkeuren opgegeven bij het inschrijven:
@@ -873,7 +873,7 @@ class RegiocompetitieTeam(models.Model):
                                                   blank=True)    # mag leeg zijn
 
     # de berekende team sterkte / team gemiddelde
-    # LET OP: dit is zonder de vermenigvuldiging met aantal pijlen, dus 30,000 voor Indoor ipv 900,0
+    # LET OP: dit is zonder de vermenigvuldiging met aantal pijlen, dus 30,000 voor Indoor i.p.v. 900,0
     aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)  # 30,000
 
     # de klasse waarin dit team ingedeeld is
@@ -942,7 +942,7 @@ class RegiocompetitieRondeTeam(models.Model):
                                                   blank=True)
 
     # gekozen scores van de feitelijke schutters
-    # ingeval van keuze zijn deze specifiek gekozen door de RCL
+    # in geval van keuze zijn deze specifiek gekozen door de RCL
     scores_feitelijk = models.ManyToManyField(Score,
                                               related_name='teamronde_feitelijk',
                                               blank=True)
@@ -994,7 +994,7 @@ class KampioenschapSchutterBoog(models.Model):
     # bij aanpassing van de cut kan de volgorde aangepast worden zodat kampioenen boven de cut staan
     volgorde = models.PositiveSmallIntegerField(default=0)  # inclusief afmeldingen
 
-    # deelname positie van de sporter in de meest up to date lijst
+    # deelname positie van de sporter in de meest up-to-date lijst
     # de eerste N (tot de limiet/cut, standaard 24) zijn deelnemers; daarna reserveschutters
     # afmeldingen hebben rank 0
     rank = models.PositiveSmallIntegerField(default=0)
@@ -1094,7 +1094,7 @@ class KampioenschapTeam(models.Model):
                                                   blank=True)   # mag leeg zijn
 
     # de berekende team sterkte
-    # LET OP: dit is zonder de vermenigvuldiging met aantal pijlen, dus 30,000 voor Indoor ipv 900,0
+    # LET OP: dit is zonder de vermenigvuldiging met aantal pijlen, dus 30,000 voor Indoor i.p.v. 900,0
     aanvangsgemiddelde = models.DecimalField(max_digits=5, decimal_places=3, default=0.0)    # 10,000
 
     # de klasse waarin dit team ingedeeld is

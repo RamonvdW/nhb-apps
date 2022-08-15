@@ -524,7 +524,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         score_indiv_ag_opslaan(sporterboog, 18, 5.678, None, "")
 
         # probeer 100024 te verwijderen
-        with self.assert_max_queries(40):
+        with self.assert_max_queries(41):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_16_VERWIJDER_LID,
                                                  OPTION_SIM)

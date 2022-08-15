@@ -65,6 +65,22 @@ class CompetitieKiesView(TemplateView):
         qset = (RegioCompetitieSchutterBoog
                 .objects
                 .filter(deelcompetitie__competitie__pk__in=pks)
+                .select_related('sporterboog__sporter__bij_vereniging__regio__rayon'))
+
+        context['aantal_r1'] = qset.filter(sporterboog__sporter__bij_vereniging__regio__rayon=1).count()
+        context['aantal_r2'] = qset.filter(sporterboog__sporter__bij_vereniging__regio__rayon=2).count()
+        context['aantal_r3'] = qset.filter(sporterboog__sporter__bij_vereniging__regio__rayon=3).count()
+        context['aantal_r4'] = qset.filter(sporterboog__sporter__bij_vereniging__regio__rayon=4).count()
+
+        qset_geen_rk = qset.filter(inschrijf_voorkeur_rk_bk=False)
+        context['aantal_geen_rk1'] = qset_geen_rk.filter(sporterboog__sporter__bij_vereniging__regio__rayon=1).count()
+        context['aantal_geen_rk2'] = qset_geen_rk.filter(sporterboog__sporter__bij_vereniging__regio__rayon=2).count()
+        context['aantal_geen_rk3'] = qset_geen_rk.filter(sporterboog__sporter__bij_vereniging__regio__rayon=3).count()
+        context['aantal_geen_rk4'] = qset_geen_rk.filter(sporterboog__sporter__bij_vereniging__regio__rayon=4).count()
+
+        qset = (RegioCompetitieSchutterBoog
+                .objects
+                .filter(deelcompetitie__competitie__pk__in=pks)
                 .select_related('sporterboog',
                                 'sporterboog__sporter__account')
                 .distinct('sporterboog'))

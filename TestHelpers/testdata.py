@@ -22,7 +22,7 @@ from Competitie.operations import competities_aanmaken
 from Competitie.test_competitie import zet_competitie_fase
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from NhbStructuur.models import NhbRegio, NhbCluster, NhbVereniging
-from Score.models import Score, SCORE_TYPE_INDIV_AG, ScoreHist
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from bs4 import BeautifulSoup
 from decimal import Decimal
@@ -198,7 +198,8 @@ class TestData(object):
             self._dump_resp(resp)
             raise ValueError('Wissel naar functie HWL failed')
 
-    def _verwerk_regiocomp_mutaties(self, show_warnings=True, show_all=False):
+    @staticmethod
+    def _verwerk_regiocomp_mutaties(show_warnings=True, show_all=False):
         # vraag de achtergrond taak om de mutaties te verwerken
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -221,7 +222,7 @@ class TestData(object):
 
     def regio_teamcompetitie_ronde_doorzetten(self, deelcomp):
         """
-            Trigger de site om de team ronde van een specifieke competitie door te zetten naar de volgende ronde
+            Trigger de site om de teamronde van een specifieke competitie door te zetten naar de volgende ronde
         """
         regio_nr = deelcomp.nhb_regio.regio_nr
         if deelcomp.competitie.afstand == 18:                                   # pragma: no cover
@@ -318,7 +319,6 @@ class TestData(object):
             de eerste 3 verenigingen in regio's 101 en 108 gaan in het eerste cluster van die regio
         """
         cluster_regios = list()
-        curr_rayon = 0
 
         bulk = list()
         for regio in NhbRegio.objects.select_related('rayon').order_by('regio_nr'):
@@ -706,8 +706,8 @@ class TestData(object):
         """ Maak voor de helft van de SporterBoog een AG aan in voorgaand seizoen
             deze kunnen gebruikt worden voor de klassengrenzen en inschrijven.
         """
-        ag = 6000       # 6.0
-        ag += ver_nr
+        volgende_ag = 6000       # 6.0
+        volgende_ag += ver_nr
 
         bulk = list()
         for sporterboog in (SporterBoog
@@ -716,46 +716,50 @@ class TestData(object):
                                     voor_wedstrijd=True)):
             # even pk get an AG
             if sporterboog.pk % 1 == 0:                                             # pragma: no branch
-                ag = 6000 if ag > 9800 else ag + 25
-                score = Score(type=SCORE_TYPE_INDIV_AG,
-                              sporterboog=sporterboog,
-                              waarde=ag,
-                              afstand_meter=afstand)
-                bulk.append(score)
+                volgende_ag = 6000 if volgende_ag > 9800 else volgende_ag + 25
+                ag = Aanvangsgemiddelde(
+                            doel=AG_DOEL_INDIV,
+                            sporterboog=sporterboog,
+                            boogtype=sporterboog.boogtype,
+                            waarde=Decimal(volgende_ag / 1000),
+                            afstand_meter=afstand)
+                bulk.append(ag)
 
                 if len(bulk) > 500:                                                 # pragma: no cover
-                    Score.objects.bulk_create(bulk)
+                    Aanvangsgemiddelde.objects.bulk_create(bulk)
 
                     bulk2 = list()
-                    for score in bulk:
-                        hist = ScoreHist(score=score,
-                                         oude_waarde=0,
-                                         nieuwe_waarde=score.waarde,
-                                         # when = auto-set
-                                         # door_account=None,
-                                         notitie='Testdata')
+                    for ag in bulk:
+                        hist = AanvangsgemiddeldeHist(
+                                        ag=ag,
+                                        oude_waarde=0,
+                                        nieuwe_waarde=ag.waarde,
+                                        # when = auto-set
+                                        # door_account=None,
+                                        notitie='Testdata')
                         bulk2.append(hist)
                     # for
-                    ScoreHist.objects.bulk_create(bulk2)
+                    AanvangsgemiddeldeHist.objects.bulk_create(bulk2)
                     del bulk2
 
                     bulk = list()
         # for
 
         if len(bulk):                                                               # pragma: no branch
-            Score.objects.bulk_create(bulk)
+            Aanvangsgemiddelde.objects.bulk_create(bulk)
 
             bulk2 = list()
-            for score in bulk:
-                hist = ScoreHist(score=score,
-                                 oude_waarde=0,
-                                 nieuwe_waarde=score.waarde,
-                                 # when = auto-set
-                                 # door_account=None,
-                                 notitie='Testdata')
+            for ag in bulk:
+                hist = AanvangsgemiddeldeHist(
+                            ag=ag,
+                            oude_waarde=0,
+                            nieuwe_waarde=ag.waarde,
+                            # when = auto-set
+                            # door_account=None,
+                            notitie='Testdata')
                 bulk2.append(hist)
             # for
-            ScoreHist.objects.bulk_create(bulk2)
+            AanvangsgemiddeldeHist.objects.bulk_create(bulk2)
             del bulk2
 
     def maak_bondscompetities(self, begin_jaar=None):
@@ -938,7 +942,7 @@ class TestData(object):
         deelnemers.extend(new_deelnemers)
 
     def maak_inschrijvingen_regio_teamcompetitie(self, afstand, ver_nr):
-        """ Schrijf teams in voor de teamcompetitie, voor een specifiek vereniging
+        """ Schrijf teams in voor de teamcompetitie, voor een specifieke vereniging
 
             afstand = 18 / 25
             ver_nr = regio_nr * 10 + volgnummer
@@ -1026,7 +1030,7 @@ class TestData(object):
             deelnemers = deelnemers_per_boog[afkorting][:4]
             deelnemers_per_boog[afkorting] = deelnemers_per_boog[afkorting][len(deelnemers):]
 
-            # bereken de team sterkte
+            # bereken de teamsterkte
             team.aanvangsgemiddelde = sum([deelnemer.ag_voor_team for deelnemer in deelnemers])     # TODO: top 3
             team.save(update_fields=['aanvangsgemiddelde'])
 

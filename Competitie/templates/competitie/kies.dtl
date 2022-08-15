@@ -118,15 +118,28 @@
                         <td>25m1pijl</td>
                         <td>{{ aantal_25m_indiv }}</td>
                     </tr>
+
                     <tr>
                         <th>Aantal unieke sporters</th>
                         <td></td>
                         <td>{{ aantal_sporters }}{% if aantal_multiboog > 0 %} ({{ aantal_multiboog }} met meerdere bogen){% endif %}</td>
                     </tr>
+
                     <tr>
                         <th>Aantal zelfstandig aangemeld</th>
                         <td></td>
                         <td>{{ aantal_zelfstandig }}{% if procent_zelfstandig %} ({{ procent_zelfstandig }}%){% endif %}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Aantal alvast afgemeld voor RK:</th>
+                        <td>Rayon 1<br>Rayon 2<br>Rayon 3<br>Rayon 4</td>
+                        <td>
+                            <span>{{ aantal_geen_rk1 }} van de {{ aantal_r1 }}</span><br>
+                            <span>{{ aantal_geen_rk2 }} van de {{ aantal_r2 }}</span><br>
+                            <span>{{ aantal_geen_rk3 }} van de {{ aantal_r3 }}</span><br>
+                            <span>{{ aantal_geen_rk4 }} van de {{ aantal_r4 }}</span>
+                        </td>
                     </tr>
 
                     <tr>

@@ -17,7 +17,7 @@ from Competitie.models import (CompetitieTeamKlasse, AG_NUL, DeelCompetitie, LAA
                                update_uitslag_teamcompetitie)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Score.models import ScoreHist, SCORE_TYPE_TEAM_AG
+from Score.models import AanvangsgemiddeldeHist, AG_DOEL_TEAM
 from Score.operations import score_teams_ag_opslaan
 import datetime
 
@@ -32,7 +32,7 @@ TEMPLATE_TEAMS_INVALLERS_KOPPELEN = 'complaagregio/hwl-teams-invallers-koppelen.
 
 def bepaal_team_sterkte_en_klasse(team):
     """ gebruik AG van gekoppelde schutters om team aanvangsgemiddelde te berekenen
-        en bepaal aan de hand daarvan de team wedstrijdklasse
+        en bepaal aan de hand daarvan de team-wedstrijdklasse
     """
     ags = team.gekoppelde_schutters.values_list('ag_voor_team', flat=True)
     ags = list(ags)
@@ -210,7 +210,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         """ maak een nieuw team aan """
-        deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
+        _ = self._get_deelcomp(kwargs['deelcomp_pk'])
 
         if self.rol_nu != Rollen.ROL_HWL:
             raise PermissionDenied('Geen toegang met deze rol')
@@ -523,15 +523,13 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         ag_str = '%.3f' % deelnemer.ag_voor_team
         deelnemer.ag_str = ag_str.replace('.', ',')
 
-        ag_hist = (ScoreHist
+        ag_hist = (AanvangsgemiddeldeHist
                    .objects
-                   .filter(score__sporterboog=deelnemer.sporterboog,
-                           score__afstand_meter=deelnemer.deelcompetitie.competitie.afstand,
-                           score__type=SCORE_TYPE_TEAM_AG)
+                   .filter(ag__sporterboog=deelnemer.sporterboog,
+                           ag__afstand_meter=deelnemer.deelcompetitie.competitie.afstand,
+                           ag__doel=AG_DOEL_TEAM)
                    .order_by('-when'))
         for obj in ag_hist:
-            obj.oude_waarde /= 1000
-            obj.nieuwe_waarde /= 1000
             obj.oude_waarde_str = "%.3f" % obj.oude_waarde
             obj.nieuwe_waarde_str = "%.3f" % obj.nieuwe_waarde
         # for
@@ -686,7 +684,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             mag_wijzigen = (now <= einde) and not readonly
         else:
             # RCL
-            context['readonly'] = readonly = (comp.fase > 'D')
+            context['readonly'] = (comp.fase > 'D')
             mag_wijzigen = True
 
         context['mag_wijzigen'] = mag_wijzigen
@@ -1081,7 +1079,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
             if deelnemer.sporterboog.boogtype.afkorting != ronde_team_nu_afkorting:
                 # vreemde vogel: BB in R team, LB in BB team, etc.
-                # toon expliciet het type boog voor deze sporters
+                # toon uitdrukkelijk het type boog voor deze sporters;
                 # sporters ingeschreven met meerdere bogen worden zo duidelijk onderscheiden
                 deelnemer.naam_str += ' (%s)' % deelnemer.sporterboog.boogtype.beschrijving
 
@@ -1192,7 +1190,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
         boog_typen = team.team_type.boog_typen.all()
         boog_pks = boog_typen.values_list('pk', flat=True)
 
-        pk2gem = dict()     # kandidaat deelnemer pk's en gemiddelde
+        pk2gem = dict()     # kandidaat-deelnemer pk's en gemiddelde
 
         max_gem = list()
         for deelnemer in ronde_team.deelnemers_geselecteerd.all():
@@ -1267,7 +1265,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         ronde_team.deelnemers_feitelijk.set(sel_pks)
 
-        # trigger een update van de team scores
+        # trigger een update van de team-scores
         update_uitslag_teamcompetitie()
 
         url = reverse('CompLaagRegio:teams-regio-invallers',

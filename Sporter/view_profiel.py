@@ -20,9 +20,8 @@ from Functie.models import Functie
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Plein.menu import menu_dynamics
 from Records.models import IndivRecord, MATERIAALKLASSE
-from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_TEAM, AG_DOEL_INDIV
 from .models import SporterBoog, Speelsterkte, get_sporter_voorkeuren
-from decimal import Decimal
 import logging
 import copy
 
@@ -34,7 +33,7 @@ my_logger = logging.getLogger('NHBApps.Sporter')
 
 class ProfielView(UserPassesTestMixin, TemplateView):
 
-    """ Dit is de profiel pagina van een sporter """
+    """ Dit is de profielpagina van een sporter """
 
     template_name = TEMPLATE_PROFIEL
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
@@ -277,25 +276,24 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         # zoek de AG informatie erbij
         pks = [obj.pk for obj in objs]
         # haal AG's voor dit boogtype op, van 18m en 25m op, indien aanwezig
-        scores = (Score
-                  .objects
-                  .filter(sporterboog__in=pks,
-                          type__in=(SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG))
-                  .select_related('sporterboog')
-                  .order_by('afstand_meter'))
+        ags = (Aanvangsgemiddelde
+               .objects
+               .filter(sporterboog__in=pks,
+                       doel__in=(AG_DOEL_INDIV, AG_DOEL_TEAM))
+               .select_related('sporterboog')
+               .order_by('afstand_meter'))
 
-        # haal alle benodigde ScoreHist objects met 1 query op
-        score_pks = scores.values_list('pk', flat=True)
-        hists = (ScoreHist
+        # haal alle benodigde hist objects met 1 query op
+        ag_pks = ags.values_list('pk', flat=True)
+        hists = (AanvangsgemiddeldeHist
                  .objects
-                 .select_related('score')
-                 .filter(score__in=score_pks)
+                 .select_related('ag')
+                 .filter(ag__in=ag_pks)
                  .order_by('-when'))
-        for score in scores:
-            score.ag = Decimal(score.waarde) / 1000
+        for ag in ags:
             for hist in hists:
-                if hist.score.pk == score.pk:
-                    score.scorehist = hist       # nieuwste
+                if hist.ag.pk == ag.pk:
+                    ag.hist = hist       # nieuwste
                     break   # from the for
             # for
         # for
@@ -304,9 +302,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
         heeft_ags = False
         for obj in objs:
             obj.ags = list()
-            for score in scores:
-                if score.sporterboog == obj:
-                    obj.ags.append(score)
+            for ag in ags:
+                if ag.sporterboog == obj:
+                    obj.ags.append(ag)
             # for
             if len(obj.ags) > 0:
                 heeft_ags = True

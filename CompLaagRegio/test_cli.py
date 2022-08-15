@@ -12,7 +12,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam)
 from Competitie.test_fase import zet_competitie_fase
 from NhbStructuur.models import NhbVereniging, NhbRegio
-from Score.models import Score, SCORE_TYPE_INDIV_AG
+from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
@@ -390,11 +390,12 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             management.call_command('fix_bad_ag', '18', stderr=f1, stdout=f2)
 
-        Score(
-            sporterboog=self.sporterboog_r,
-            type=SCORE_TYPE_INDIV_AG,
-            afstand_meter=18,
-            waarde=8000).save()
+        Aanvangsgemiddelde(
+                sporterboog=self.sporterboog_r,
+                boogtype=self.sporterboog_r.boogtype,
+                doel=AG_DOEL_INDIV,
+                afstand_meter=18,
+                waarde=8.000).save()
 
         f1 = io.StringIO()
         f2 = io.StringIO()

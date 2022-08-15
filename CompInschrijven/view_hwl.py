@@ -18,9 +18,8 @@ from Competitie.operations import KlasseBepaler
 from Competitie.operations import get_competitie_bogen
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Score.models import Score, SCORE_TYPE_INDIV_AG
+from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
-from decimal import Decimal
 import copy
 
 
@@ -131,13 +130,12 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         # for
 
         ag_dict = dict()        # [sporterboog_pk] = Score
-        for score in (Score
-                      .objects
-                      .select_related('sporterboog')
-                      .filter(type=SCORE_TYPE_INDIV_AG,
-                              afstand_meter=comp.afstand)):
-            ag = Decimal(score.waarde) / 1000
-            ag_dict[score.sporterboog.pk] = ag
+        for ag in (Aanvangsgemiddelde
+                   .objects
+                   .select_related('sporterboog')
+                   .filter(doel=AG_DOEL_INDIV,
+                           afstand_meter=comp.afstand)):
+            ag_dict[ag.sporterboog.pk] = ag.waarde
         # for
 
         wil_competitie = dict()     # [lid_nr] = True/False
@@ -232,10 +230,15 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         context['nhb_ver'] = hwl_ver = self.functie_nu.nhb_ver
         # rol is HWL (zie test_func)
 
-        deelcomp = (DeelCompetitie
-                    .objects
-                    .get(competitie=self.comp,
-                         nhb_regio=hwl_ver.regio))
+        try:
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .get(competitie=self.comp,
+                             nhb_regio=hwl_ver.regio))
+        except DeelCompetitie.DoesNotExist:
+            regio_organiseert_teamcomp = False
+        else:
+            regio_organiseert_teamcomp = deelcomp.regio_organiseert_teamcompetitie
 
         # splits the ledenlijst op in jeugd, senior en inactief
         jeugd = list()
@@ -254,7 +257,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         context['tweede_jaar'] = self.comp.begin_jaar + 1
         context['url_aanmelden'] = reverse('CompInschrijven:leden-aanmelden', kwargs={'comp_pk': self.comp.pk})
         context['mag_aanmelden'] = True
-        context['mag_team_schieten'] = self.comp.fase == 'B' and deelcomp.regio_organiseert_teamcompetitie
+        context['mag_team_schieten'] = self.comp.fase == 'B' and regio_organiseert_teamcomp
 
         # bepaal de inschrijfmethode voor deze regio
         mijn_regio = self.functie_nu.nhb_ver.regio
@@ -473,12 +476,11 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                                     aangemeld_door=request.user)
 
                 # zoek de aanvangsgemiddelden er bij, indien beschikbaar
-                for score in Score.objects.filter(sporterboog=sporterboog,
-                                                  afstand_meter=comp.afstand,
-                                                  type=SCORE_TYPE_INDIV_AG):
-                    ag = Decimal(score.waarde) / 1000
-                    aanmelding.ag_voor_indiv = ag
-                    aanmelding.ag_voor_team = ag
+                for ag in Aanvangsgemiddelde.objects.filter(sporterboog=sporterboog,
+                                                            afstand_meter=comp.afstand,
+                                                            doel=AG_DOEL_INDIV):
+                    aanmelding.ag_voor_indiv = ag.waarde
+                    aanmelding.ag_voor_team = ag.waarde
                     aanmelding.ag_voor_team_mag_aangepast_worden = False
                 # for
 
