@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import GESLACHT_MAN, GESLACHT_ALLE
+from BasisTypen.models import GESLACHT_MAN, GESLACHT_ANDERS
 from Functie.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
 from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,
@@ -58,7 +58,7 @@ class WedstrijdLeeftijdenPersoonlijkView(UserPassesTestMixin, TemplateView):
         else:
             # geslacht X, geen keuze gemaakt --> neem mannen
             wedstrijdgeslacht = GESLACHT_MAN
-            wedstrijdgeslacht_nhb = GESLACHT_ALLE
+            wedstrijdgeslacht_nhb = GESLACHT_ANDERS
 
         geboorte_jaar = sporter.geboorte_datum.year
 

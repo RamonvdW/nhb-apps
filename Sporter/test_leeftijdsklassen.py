@@ -6,9 +6,16 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from BasisTypen.models import GESLACHT_ANDERS, ORGANISATIE_IFAA, ORGANISATIE_NHB, ORGANISATIE_WA
+from BasisTypen.models import (GESLACHT_ANDERS, GESLACHT_MAN, GESLACHT_VROUW,
+                               ORGANISATIE_IFAA, ORGANISATIE_NHB, ORGANISATIE_WA)
 from NhbStructuur.models import NhbRegio, NhbVereniging
-from .leeftijdsklassen import bereken_leeftijdsklassen_nhb
+from .leeftijdsklassen import (bereken_leeftijdsklassen_wa,
+                               bereken_leeftijdsklassen_nhb,
+                               bereken_leeftijdsklassen_ifaa,
+                               bereken_leeftijdsklassen_bondscompetitie,
+                               bereken_leeftijdsklasse_wa,
+                               bereken_leeftijdsklasse_nhb,
+                               bereken_leeftijdsklassen_ifaa)
 from .models import Sporter, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
@@ -26,6 +33,10 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         self.account_admin = self.e2e_create_account_admin()
         self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
         self.account_geenlid = self.e2e_create_account('geenlid', 'geenlid@test.com', 'Geen')
+
+        now = timezone.now()  # is in UTC
+        now = timezone.localtime(now)  # convert to active timezone (say Europe/Amsterdam)
+        self.huidige_jaar = now.year
 
         # maak een test vereniging
         ver = NhbVereniging()
@@ -92,62 +103,292 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         n = self.sporter1.bereken_wedstrijdleeftijd(datum_wedstrijd_na_verjaardag, ORGANISATIE_NHB)
         self.assertEqual(n, 50)
 
-    def test_leeftijdsklassen(self):
-        now = timezone.now()  # is in UTC
-        now = timezone.localtime(now)  # convert to active timezone (say Europe/Amsterdam)
-        huidige_jaar = now.year
+    def test_leeftijdsklassen_wa(self):
+        # Onder 12
+        tup = bereken_leeftijdsklassen_wa(self.huidige_jaar - 9, GESLACHT_MAN)
+        self.assertEqual(tup,
+                         (2022, 9,
+                          'Onder 18 Heren',
+                          ['Onder 18 Heren', 'Onder 18 Heren', 'Onder 18 Heren', 'Onder 18 Heren', 'Onder 18 Heren']))
 
-        # check de 5 persoonlijke indicaties: -1 t/m +3 jaar ronde de huidige leeftijd
+        # Onder 18
+        tup = bereken_leeftijdsklassen_wa(self.huidige_jaar - 17, GESLACHT_MAN)
+        self.assertEqual(tup,
+                         (2022, 17,
+                          'Onder 18 Heren',
+                          ['Onder 18 Heren', 'Onder 18 Heren', 'Onder 21 Heren', 'Onder 21 Heren', 'Onder 21 Heren']))
 
-        # onder 12 / aspirant
-        tup = bereken_leeftijdsklassen_nhb(huidige_jaar - 9)
-        self.assertEqual(tup, (huidige_jaar,
-                               9,
-                               # wedstrijden
-                               ['Onder 12', 'Onder 12', 'Onder 12', 'Onder 12', 'Onder 14'],
-                               # competitie (1 jaar opgeschoven)
-                               ['Onder 12', 'Onder 12', 'Onder 12', 'Onder 14', 'Onder 14'],
-                               'Onder 12'))
+        # Onder 21
+        tup = bereken_leeftijdsklassen_wa(self.huidige_jaar - 20, GESLACHT_MAN)
+        self.assertEqual(tup,
+                         (2022, 20,
+                          'Onder 21 Heren',
+                          ['Onder 21 Heren', 'Onder 21 Heren', '21+ Heren', '21+ Heren', '21+ Heren']))
 
-        # onder 18 / cadet (14..17)
-        tup = bereken_leeftijdsklassen_nhb(huidige_jaar - 13)
-        self.assertEqual(tup, (huidige_jaar,
-                               13,
-                               ['Onder 14', 'Onder 14', 'Onder 18', 'Onder 18', 'Onder 18'],
-                               ['Onder 14', 'Onder 18', 'Onder 18', 'Onder 18', 'Onder 18'],
-                               'Onder 18'))
+        # 21+
+        tup = bereken_leeftijdsklassen_wa(self.huidige_jaar - 21, GESLACHT_MAN)
+        self.assertEqual(tup,
+                         (2022, 21,
+                          '21+ Heren',
+                          ['Onder 21 Heren', '21+ Heren', '21+ Heren', '21+ Heren', '21+ Heren']))
 
-        # junior (18..20)
-        tup = bereken_leeftijdsklassen_nhb(huidige_jaar - 18)
-        self.assertEqual(tup, (huidige_jaar,
-                               18,
-                               ['Onder 18', 'Onder 21', 'Onder 21', 'Onder 21', '21+'],
-                               ['Onder 21', 'Onder 21', 'Onder 21', '21+', '21+'],
-                               'Onder 21'))
+        tup = bereken_leeftijdsklassen_wa(self.huidige_jaar - 49, GESLACHT_MAN)
+        self.assertEqual(tup,
+                         (2022, 49,
+                          '21+ Heren',
+                          ['21+ Heren', '21+ Heren', '50+ Heren', '50+ Heren', '50+ Heren']))
 
-        # senior
-        tup = bereken_leeftijdsklassen_nhb(huidige_jaar - 21)
-        self.assertEqual(tup, (huidige_jaar,
-                               21,
-                               ['Onder 21', '21+', '21+', '21+', '21+'],
-                               ['21+', '21+', '21+', '21+', '21+'],
-                               '21+'))
+        # 50+
+        tup = bereken_leeftijdsklassen_wa(self.huidige_jaar - 50, GESLACHT_MAN)
+        self.assertEqual(tup,
+                         (2022, 50,
+                          '50+ Heren',
+                          ['21+ Heren', '50+ Heren', '50+ Heren', '50+ Heren', '50+ Heren']))
 
-        # master
-        tup = bereken_leeftijdsklassen_nhb(huidige_jaar - 50)
-        self.assertEqual(tup, (huidige_jaar,
-                               50,
-                               ['21+', '50+', '50+', '50+', '50+'],
-                               ['21+', '21+', '21+', '21+', '21+'],
-                               '21+'))
+        # 50+
+        tup = bereken_leeftijdsklassen_wa(self.huidige_jaar - 100, GESLACHT_MAN)
+        self.assertEqual(tup,
+                         (2022, 100,
+                          '50+ Heren',
+                          ['50+ Heren', '50+ Heren', '50+ Heren', '50+ Heren', '50+ Heren']))
 
-        # veteraan
-        tup = bereken_leeftijdsklassen_nhb(huidige_jaar - 60)
-        self.assertEqual(tup, (huidige_jaar,
-                               60,
-                               ['50+', '60+', '60+', '60+', '60+'],
-                               ['21+', '21+', '21+', '21+', '21+'],
-                               '21+'))
+    def test_leeftijdsklassen_nhb(self):
+        # Onder 12
+        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 9, GESLACHT_MAN)
+        self.assertEqual(tup,
+                         (2022, 9,
+                          'Onder 12 Unisex of Onder 12 Jongens',
+                          ['Onder 12 Unisex of Onder 12 Jongens', 'Onder 12 Unisex of Onder 12 Jongens',
+                           'Onder 12 Unisex of Onder 12 Jongens', 'Onder 12 Unisex of Onder 12 Jongens',
+                           'Onder 14 Unisex of Onder 14 Jongens']))
+
+        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 9, GESLACHT_VROUW)
+        self.assertEqual(tup,
+                         (2022, 9,
+                          'Onder 12 Unisex of Onder 12 Meisjes',
+                          ['Onder 12 Unisex of Onder 12 Meisjes', 'Onder 12 Unisex of Onder 12 Meisjes',
+                           'Onder 12 Unisex of Onder 12 Meisjes', 'Onder 12 Unisex of Onder 12 Meisjes',
+                           'Onder 14 Unisex of Onder 14 Meisjes']))
+
+        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 9, GESLACHT_ANDERS)
+        self.assertEqual(tup,
+                         (2022, 9,
+                          'Onder 12 Unisex',
+                          ['Onder 12 Unisex', 'Onder 12 Unisex', 'Onder 12 Unisex',
+                           'Onder 12 Unisex', 'Onder 14 Unisex']))
+
+        # Onder 14
+        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 13, GESLACHT_MAN)
+        self.assertEqual(tup,
+                         (2022, 13,
+                          'Onder 14 Unisex of Onder 14 Jongens',
+                          ['Onder 14 Unisex of Onder 14 Jongens', 'Onder 14 Unisex of Onder 14 Jongens',
+                           'Onder 18 Unisex of Onder 18 Heren', 'Onder 18 Unisex of Onder 18 Heren',
+                           'Onder 18 Unisex of Onder 18 Heren']))
+
+        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 13, GESLACHT_VROUW)
+        self.assertEqual(tup,
+                         (2022, 13,
+                          'Onder 14 Unisex of Onder 14 Meisjes',
+                          ['Onder 14 Unisex of Onder 14 Meisjes', 'Onder 14 Unisex of Onder 14 Meisjes',
+                           'Onder 18 Unisex of Onder 18 Dames', 'Onder 18 Unisex of Onder 18 Dames',
+                           'Onder 18 Unisex of Onder 18 Dames']))
+
+        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 13, GESLACHT_ANDERS)
+        self.assertEqual(tup,
+                         (2022, 13,
+                          'Onder 14 Unisex',
+                          ['Onder 14 Unisex', 'Onder 14 Unisex', 'Onder 18 Unisex',
+                           'Onder 18 Unisex', 'Onder 18 Unisex']))
+
+        # 21+
+        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 21, GESLACHT_MAN)
+        self.assertEqual(tup,
+                         (2022, 21,
+                          '21+ Unisex of 21+ Heren',
+                          ['Onder 21 Unisex of Onder 21 Heren', '21+ Unisex of 21+ Heren', '21+ Unisex of 21+ Heren',
+                           '21+ Unisex of 21+ Heren', '21+ Unisex of 21+ Heren']))
+
+        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 21, GESLACHT_VROUW)
+        self.assertEqual(tup,
+                         (2022, 21,
+                          '21+ Unisex of 21+ Dames',
+                          ['Onder 21 Unisex of Onder 21 Dames', '21+ Unisex of 21+ Dames', '21+ Unisex of 21+ Dames',
+                           '21+ Unisex of 21+ Dames', '21+ Unisex of 21+ Dames']))
+
+        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 21, GESLACHT_ANDERS)
+        self.assertEqual(tup,
+                         (2022, 21,
+                          '21+ Unisex',
+                          ['Onder 21 Unisex', '21+ Unisex', '21+ Unisex', '21+ Unisex', '21+ Unisex']))
+
+        # 50+
+        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 50, GESLACHT_MAN)
+        self.assertEqual(tup,
+                         (2022, 50,
+                          '50+ Unisex of 50+ Heren',
+                          ['21+ Unisex of 21+ Heren', '50+ Unisex of 50+ Heren', '50+ Unisex of 50+ Heren',
+                           '50+ Unisex of 50+ Heren', '50+ Unisex of 50+ Heren']))
+
+        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 50, GESLACHT_VROUW)
+        self.assertEqual(tup,
+                         (2022, 50,
+                          '50+ Unisex of 50+ Dames',
+                          ['21+ Unisex of 21+ Dames', '50+ Unisex of 50+ Dames', '50+ Unisex of 50+ Dames',
+                           '50+ Unisex of 50+ Dames', '50+ Unisex of 50+ Dames']))
+
+        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 50, GESLACHT_ANDERS)
+        self.assertEqual(tup,
+                         (2022, 50,
+                          '50+ Unisex',
+                          ['21+ Unisex', '50+ Unisex', '50+ Unisex', '50+ Unisex', '50+ Unisex']))
+
+        # 60+
+        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 60, GESLACHT_MAN)
+        self.assertEqual(tup,
+                         (2022, 60,
+                          '60+ Unisex of 60+ Heren',
+                          ['50+ Unisex of 50+ Heren', '60+ Unisex of 60+ Heren', '60+ Unisex of 60+ Heren',
+                           '60+ Unisex of 60+ Heren', '60+ Unisex of 60+ Heren']))
+
+        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 60, GESLACHT_VROUW)
+        self.assertEqual(tup,
+                         (2022, 60,
+                          '60+ Unisex of 60+ Dames',
+                          ['50+ Unisex of 50+ Dames', '60+ Unisex of 60+ Dames', '60+ Unisex of 60+ Dames',
+                           '60+ Unisex of 60+ Dames', '60+ Unisex of 60+ Dames']))
+
+        tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 60, GESLACHT_ANDERS)
+        self.assertEqual(tup,
+                         (2022, 60,
+                          '60+ Unisex',
+                          ['50+ Unisex', '60+ Unisex', '60+ Unisex', '60+ Unisex', '60+ Unisex']))
+
+    def test_leeftijdsklassen_ifaa(self):
+        print()
+        tup = bereken_leeftijdsklassen_ifaa(self.huidige_jaar - 9, GESLACHT_MAN)
+        self.assertEqual(tup, [(2021, 'Welpen Jongens', 'Welpen Jongens'),
+                               (2022, 'Welpen Jongens', 'Welpen Jongens'),
+                               (2023, 'Welpen Jongens', 'Welpen Jongens'),
+                               (2024, 'Welpen Jongens', 'Welpen Jongens'),
+                               (2025, 'Welpen Jongens', 'Welpen Jongens')])
+
+        tup = bereken_leeftijdsklassen_ifaa(self.huidige_jaar - 13, GESLACHT_MAN)
+        self.assertEqual(tup, [(2021, 'Welpen Jongens', 'Welpen Jongens'),
+                               (2022, 'Welpen Jongens', 'Junioren Jongens'),
+                               (2023, 'Junioren Jongens', 'Junioren Jongens'),
+                               (2024, 'Junioren Jongens', 'Junioren Jongens'),
+                               (2025, 'Junioren Jongens', 'Junioren Jongens')])
+
+        tup = bereken_leeftijdsklassen_ifaa(self.huidige_jaar - 16, GESLACHT_MAN)
+        self.assertEqual(tup, [(2021, 'Junioren Jongens', 'Junioren Jongens'),
+                               (2022, 'Junioren Jongens', 'Junioren Jongens'),
+                               (2023, 'Junioren Jongens', 'Jongvolwassen Heren'),
+                               (2024, 'Jongvolwassen Heren', 'Jongvolwassen Heren'),
+                               (2025, 'Jongvolwassen Heren', 'Jongvolwassen Heren')])
+
+        tup = bereken_leeftijdsklassen_ifaa(self.huidige_jaar - 20, GESLACHT_MAN)
+        self.assertEqual(tup, [(2021, 'Jongvolwassen Heren', 'Jongvolwassen Heren'),
+                               (2022, 'Jongvolwassen Heren', 'Jongvolwassen Heren'),
+                               (2023, 'Jongvolwassen Heren', 'Volwassen Heren'),
+                               (2024, 'Volwassen Heren', 'Volwassen Heren'),
+                               (2025, 'Volwassen Heren', 'Volwassen Heren')])
+
+        tup = bereken_leeftijdsklassen_ifaa(self.huidige_jaar - 30, GESLACHT_MAN)
+        self.assertEqual(tup, [(2021, 'Volwassen Heren', 'Volwassen Heren'),
+                               (2022, 'Volwassen Heren', 'Volwassen Heren'),
+                               (2023, 'Volwassen Heren', 'Volwassen Heren'),
+                               (2024, 'Volwassen Heren', 'Volwassen Heren'),
+                               (2025, 'Volwassen Heren', 'Volwassen Heren')])
+
+        tup = bereken_leeftijdsklassen_ifaa(self.huidige_jaar - 50, GESLACHT_MAN)
+        self.assertEqual(tup, [(2021, 'Volwassen Heren', 'Volwassen Heren'),
+                               (2022, 'Volwassen Heren', 'Volwassen Heren'),
+                               (2023, 'Volwassen Heren', 'Volwassen Heren'),
+                               (2024, 'Volwassen Heren', 'Volwassen Heren'),
+                               (2025, 'Volwassen Heren', 'Volwassen Heren')])
+
+        tup = bereken_leeftijdsklassen_ifaa(self.huidige_jaar - 55, GESLACHT_MAN)
+        self.assertEqual(tup, [(2021, 'Volwassen Heren', 'Volwassen Heren'),
+                               (2022, 'Volwassen Heren', 'Veteranen Heren (55+)'),
+                               (2023, 'Veteranen Heren (55+)', 'Veteranen Heren (55+)'),
+                               (2024, 'Veteranen Heren (55+)', 'Veteranen Heren (55+)'),
+                               (2025, 'Veteranen Heren (55+)', 'Veteranen Heren (55+)')])
+
+        tup = bereken_leeftijdsklassen_ifaa(self.huidige_jaar - 60, GESLACHT_MAN)
+        self.assertEqual(tup, [(2021, 'Veteranen Heren (55+)', 'Veteranen Heren (55+)'),
+                               (2022, 'Veteranen Heren (55+)', 'Veteranen Heren (55+)'),
+                               (2023, 'Veteranen Heren (55+)', 'Veteranen Heren (55+)'),
+                               (2024, 'Veteranen Heren (55+)', 'Veteranen Heren (55+)'),
+                               (2025, 'Veteranen Heren (55+)', 'Veteranen Heren (55+)')])
+
+        tup = bereken_leeftijdsklassen_ifaa(self.huidige_jaar - 65, GESLACHT_MAN)
+        self.assertEqual(tup, [(2021, 'Veteranen Heren (55+)', 'Veteranen Heren (55+)'),
+                               (2022, 'Veteranen Heren (55+)', 'Senioren Heren (65+)'),
+                               (2023, 'Senioren Heren (65+)', 'Senioren Heren (65+)'),
+                               (2024, 'Senioren Heren (65+)', 'Senioren Heren (65+)'),
+                               (2025, 'Senioren Heren (65+)', 'Senioren Heren (65+)')])
+
+    def test_leeftijdsklassen_bondscompetities(self):
+        # Onder 12
+        tup = bereken_leeftijdsklassen_bondscompetitie(self.huidige_jaar - 9, GESLACHT_MAN)
+        self.assertEqual(tup,
+                         (2022, 9,
+                          'Onder 12 Jongens',
+                          ['Onder 12 Jongens', 'Onder 12 Jongens', 'Onder 12 Jongens', 'Onder 12 Jongens',
+                           'Onder 14 Jongens']))
+
+        tup = bereken_leeftijdsklassen_bondscompetitie(self.huidige_jaar - 9, GESLACHT_VROUW)
+        self.assertEqual(tup,
+                         (2022, 9,
+                          'Onder 12 Meisjes',
+                          ['Onder 12 Meisjes', 'Onder 12 Meisjes', 'Onder 12 Meisjes', 'Onder 12 Meisjes',
+                           'Onder 14 Meisjes']))
+
+        tup = bereken_leeftijdsklassen_bondscompetitie(self.huidige_jaar - 9, GESLACHT_ANDERS)
+        self.assertEqual(tup,
+                         (2022, 9,
+                          'Onder 12 Jongens',
+                          ['Onder 12 Jongens', 'Onder 12 Jongens', 'Onder 12 Jongens', 'Onder 12 Jongens',
+                           'Onder 14 Jongens']))
+
+        # Onder 14
+        tup = bereken_leeftijdsklassen_bondscompetitie(self.huidige_jaar - 12, GESLACHT_MAN)
+        self.assertEqual(tup,
+                         (2022, 12,
+                          'Onder 14 Jongens',
+                          ['Onder 12 Jongens', 'Onder 14 Jongens', 'Onder 14 Jongens', 'Onder 18', 'Onder 18']))
+
+        tup = bereken_leeftijdsklassen_bondscompetitie(self.huidige_jaar - 12, GESLACHT_VROUW)
+        self.assertEqual(tup,
+                         (2022, 12,
+                          'Onder 14 Meisjes',
+                          ['Onder 12 Meisjes', 'Onder 14 Meisjes', 'Onder 14 Meisjes', 'Onder 18', 'Onder 18']))
+
+        tup = bereken_leeftijdsklassen_bondscompetitie(self.huidige_jaar - 12, GESLACHT_ANDERS)
+        self.assertEqual(tup,
+                         (2022, 12,
+                          'Onder 14 Jongens',
+                          ['Onder 12 Jongens', 'Onder 14 Jongens', 'Onder 14 Jongens', 'Onder 18', 'Onder 18']))
+
+        # 21+
+        tup = bereken_leeftijdsklassen_bondscompetitie(self.huidige_jaar - 21, GESLACHT_MAN)
+        self.assertEqual(tup,
+                         (2022, 21,
+                          '21+',
+                          ['Onder 21', '21+', '21+', '21+', '21+']))
+
+        tup = bereken_leeftijdsklassen_bondscompetitie(self.huidige_jaar - 50, GESLACHT_VROUW)
+        self.assertEqual(tup,
+                         (2022, 50,
+                          '21+',
+                          ['21+', '21+', '21+', '21+', '21+']))
+
+        tup = bereken_leeftijdsklassen_bondscompetitie(self.huidige_jaar - 100, GESLACHT_VROUW)
+        self.assertEqual(tup,
+                         (2022, 100,
+                          '21+',
+                          ['21+', '21+', '21+', '21+', '21+']))
 
     def test_persoonlijk(self):
         # zonder login

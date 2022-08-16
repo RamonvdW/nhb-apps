@@ -8,7 +8,7 @@
 
 from django.utils import timezone
 from BasisTypen.models import (LeeftijdsKlasse, TemplateCompetitieIndivKlasse,
-                               GESLACHT_ALLE, GESLACHT_MAN,
+                               GESLACHT_ALLE, GESLACHT_ANDERS, GESLACHT_MAN,
                                ORGANISATIE_IFAA, ORGANISATIE_NHB, ORGANISATIE_WA,
                                BOOGTYPE_AFKORTING_RECURVE)
 
@@ -62,7 +62,7 @@ def alle_wedstrijdleeftijden_groepen_nhb():
 
 def bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb):
     """ retourneert de wedstrijdklassen voor een sporter vanaf 1 jaar terug tot 4 jaar vooruit.
-        wedstrijdgeslacht_nhb kan zijn GESLACHT_MAN, GESLACHT_VROUW of GESLACHT_ALLE
+        wedstrijdgeslacht_nhb kan zijn GESLACHT_MAN, GESLACHT_VROUW of GESLACHT_ANDERS
 
         Retourneert:
             Huidige jaar, Leeftijd, False, None, None als het geen jonge schutter betreft
@@ -113,7 +113,7 @@ def bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb):
         # for
 
     # nu uitbreiden met een specifiek geslacht, indien gekozen
-    if wedstrijdgeslacht_nhb != GESLACHT_ALLE:
+    if wedstrijdgeslacht_nhb != GESLACHT_ANDERS:
         # haal alle leeftijdsklassen op en vul de min/max leeftijden aan
         alle_lkl = list()
         prev_lkl = None
@@ -154,6 +154,7 @@ def bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb):
 
     # bereken de wedstrijdklassen en competitieklassen
     lkl_lst = list()
+    lkl_dit_jaar = '?'
     for n in (-1, 0, 1, 2, 3):
         tekst = leeftijd2tekst[wedstrijdleeftijd + n]
         lkl_lst.append(tekst)
@@ -161,13 +162,13 @@ def bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb):
             lkl_dit_jaar = tekst
     # for
 
-    return huidige_jaar, leeftijd, lkl_dit_jaar, lkl_lst
+    return huidige_jaar, wedstrijdleeftijd, lkl_dit_jaar, lkl_lst
 
 
 def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nhb):
     """ retourneert de wedstrijdklassen voor een sporter vanaf 1 jaar terug tot 4 jaar vooruit
         voor de bondscompetities van de NHB.
-        wedstrijdgeslacht_nhb kan zijn GESLACHT_MAN, GESLACHT_VROUW of GESLACHT_ALLE
+        wedstrijdgeslacht_nhb kan zijn GESLACHT_MAN, GESLACHT_VROUW of GESLACHT_ANDERS
 
         Retourneert:
                 huidige_jaar, leeftijd, lkl_dit_jaar, lkl_lst
@@ -186,7 +187,7 @@ def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nh
     # de meeste sporters met geslacht 'anders' zullen dus in een gender-neutrale klasse komen
     # een jonge sporter met geslacht 'anders' die nog geen wedstrijdgeslacht gekozen heeft,
     # die moeten we dus forceren in een van de klasse.
-    if wedstrijdgeslacht_nhb == GESLACHT_ALLE:
+    if wedstrijdgeslacht_nhb == GESLACHT_ANDERS:
         wedstrijdgeslacht_nhb = GESLACHT_MAN
 
     leeftijd2tekst_w = dict()  # [leeftijd] = beschrijving voor wedstrijdgeslacht
@@ -195,9 +196,11 @@ def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nh
     lkl_pks = list()
     for ckl in (TemplateCompetitieIndivKlasse
                 .objects
+                .prefetch_related('leeftijdsklassen')
                 .filter(buiten_gebruik=False,
                         boogtype__afkorting=BOOGTYPE_AFKORTING_RECURVE)):
-        for pk in list(ckl.leeftijdsklassen.all().values_list('pk', flat=True)):
+        for lkl in ckl.leeftijdsklassen.all():
+            pk = lkl.pk
             if pk not in lkl_pks:
                 lkl_pks.append(pk)
         # for
@@ -247,6 +250,7 @@ def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nh
 
     # bereken de wedstrijdklassen en competitieklassen
     lkl_lst = list()
+    lkl_volgende_competitie = '?'
     for n in (-1, 0, 1, 2, 3):
         try:
             tekst = leeftijd2tekst_w[wedstrijdleeftijd + n]
@@ -260,7 +264,7 @@ def bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nh
 
     # print(lkl_lst)
 
-    return huidige_jaar, leeftijd, lkl_volgende_competitie, lkl_lst
+    return huidige_jaar, wedstrijdleeftijd, lkl_volgende_competitie, lkl_lst
 
 
 def bereken_leeftijdsklassen_wa(geboorte_jaar, wedstrijdgeslacht):
