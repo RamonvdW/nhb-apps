@@ -9,14 +9,18 @@ from django.http import HttpResponseRedirect
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Plein.menu import menu_dynamics
+from BasisTypen.models import GESLACHT_MAN, GESLACHT_ALLE
 from Functie.rol import Rollen, rol_get_huidige
-from Sporter.leeftijdsklassen import bereken_leeftijdsklassen_nhb, bereken_leeftijdsklassen_ifaa
+from Plein.menu import menu_dynamics
+from Sporter.leeftijdsklassen import (bereken_leeftijdsklassen_wa,
+                                      bereken_leeftijdsklassen_nhb,
+                                      bereken_leeftijdsklassen_ifaa,
+                                      bereken_leeftijdsklassen_bondscompetitie)
 from Sporter.models import get_sporter_voorkeuren
 from types import SimpleNamespace
 
 
-TEMPLATE_LEEFTIJDSKLASSEN = 'sporter/leeftijdsklassen.dtl'
+TEMPLATE_LEEFTIJDSKLASSEN = 'sporter/jouw_leeftijdsklassen.dtl'
 TEMPLATE_LEEFTIJDSGROEPEN = 'sporter/leeftijdsgroepen.dtl'
 
 
@@ -49,21 +53,33 @@ class WedstrijdLeeftijdenPersoonlijkView(UserPassesTestMixin, TemplateView):
         if voorkeur.wedstrijd_geslacht_gekozen:
             # geslacht M/V of
             # geslacht X + keuze voor M/V gemaakt
-            geslacht = voorkeur.wedstrijd_geslacht
+            wedstrijdgeslacht = voorkeur.wedstrijd_geslacht
+            wedstrijdgeslacht_nhb = voorkeur.wedstrijd_geslacht
         else:
             # geslacht X, geen keuze gemaakt --> neem mannen
-            geslacht = 'M'
+            wedstrijdgeslacht = GESLACHT_MAN
+            wedstrijdgeslacht_nhb = GESLACHT_ALLE
 
         geboorte_jaar = sporter.geboorte_datum.year
 
-        huidige_jaar, leeftijd, wlst, clst, lkl_volgende_competitie = bereken_leeftijdsklassen_nhb(geboorte_jaar)
+        huidige_jaar, leeftijd, lkl_dit_jaar, lkl_list = bereken_leeftijdsklassen_wa(geboorte_jaar, wedstrijdgeslacht)
         context['huidige_jaar'] = huidige_jaar
         context['leeftijd'] = leeftijd
-        context['wlst'] = wlst
-        context['clst'] = clst
-        context['lkl_volgende_competitie'] = lkl_volgende_competitie
+        context['lkl_wa'] = lkl_list
+        context['lkl_wa_dit_jaar'] = lkl_dit_jaar
 
-        context['wlst_ifaa'] = bereken_leeftijdsklassen_ifaa(geboorte_jaar, geslacht)
+        huidige_jaar, leeftijd, lkl_dit_jaar, lkl_lst = bereken_leeftijdsklassen_nhb(geboorte_jaar, wedstrijdgeslacht_nhb)
+        context['lkl_nhb'] = lkl_lst
+        spl = lkl_dit_jaar.split(' of ')
+        context['lkl_nhb_dit_jaar_1'] = spl[0]
+        if len(spl) > 1:
+            context['lkl_nhb_dit_jaar_2'] = spl[1]
+
+        huidige_jaar, leeftijd, lkl_volgende_competitie, lkl_lst = bereken_leeftijdsklassen_bondscompetitie(geboorte_jaar, wedstrijdgeslacht_nhb)
+        context['lkl_volgende_competitie'] = lkl_volgende_competitie
+        context['lkl_comp'] = lkl_lst
+
+        context['wlst_ifaa'] = bereken_leeftijdsklassen_ifaa(geboorte_jaar, wedstrijdgeslacht)
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),

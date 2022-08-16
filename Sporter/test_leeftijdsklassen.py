@@ -167,14 +167,14 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
             resp = self.client.get(self.url_leeftijdsklassen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/jouw_leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
 
         # met voorkeuren
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_leeftijdsklassen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/jouw_leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
 
         # met geslacht X, geen keuze gemaakt
         self.sporter1.geslacht = GESLACHT_ANDERS
@@ -187,7 +187,7 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
             resp = self.client.get(self.url_leeftijdsklassen)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('sporter/leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('sporter/jouw_leeftijdsklassen.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(self.url_leeftijdsklassen)
 

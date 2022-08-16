@@ -101,6 +101,8 @@ ORGANISATIES2LONG_STR = {
     ORGANISATIE_IFAA: 'IFAA',
 }
 
+BOOGTYPE_AFKORTING_RECURVE = 'R'
+
 
 class BoogType(models.Model):
     """ boog typen: volledige naam en unique afkorting """
@@ -280,8 +282,7 @@ class TemplateCompetitieIndivKlasse(models.Model):
     # lager nummer = betere / oudere deelnemers
     volgorde = models.PositiveIntegerField()
 
-    # de leeftijdsklassen: aspirant, cadet, junior, senior en mannen/vrouwen
-    # typisch zijn twee klassen: mannen en vrouwen
+    # de leeftijdsklassen: Onder 12 Jongens/Meisjes, Onder 14 Jongens/Meisjes, Onder 18, Onder 21, 21+
     leeftijdsklassen = models.ManyToManyField(LeeftijdsKlasse)
 
     # wedstrijdklasse wel/niet meenemen naar de RK/BK
