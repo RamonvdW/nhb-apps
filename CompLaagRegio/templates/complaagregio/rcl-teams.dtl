@@ -160,7 +160,7 @@
 
                                 <form method="post" action="{{ team.url_verwijder }}">
                                     {% csrf_token %}
-                                    <input type="hidden" name="verwijder" value="1">
+                                    <input type="hidden" name="verwijderen" value="1">
 
                                     <div class="modal-footer" style="text-align:center; display:block">
                                         <div style="display:inline-block; width:50%">
