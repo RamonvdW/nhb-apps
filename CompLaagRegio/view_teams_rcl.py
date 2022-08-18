@@ -5,10 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.conf import settings
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.urls import reverse
 from django.db.models import Count
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Competitie.models import (LAAG_REGIO, AG_NUL,
@@ -24,6 +24,7 @@ from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from types import SimpleNamespace
 import time
+import csv
 
 
 TEMPLATE_COMPREGIO_RCL_TEAMS = 'complaagregio/rcl-teams.dtl'
@@ -49,9 +50,10 @@ class RegioTeamsView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         if self.subset_filter:
+            # BB/BKO/RKO mode
+
             context['subset_filter'] = True
 
-            # BB/BKO/RKO mode
             try:
                 comp_pk = int(str(kwargs['comp_pk'][:6]))       # afkappen voor de veiligheid
                 comp = Competitie.objects.get(pk=comp_pk)
@@ -123,6 +125,9 @@ class RegioTeamsView(TemplateView):
             if deelcomp.functie != self.functie_nu:
                 # niet de beheerder
                 raise PermissionDenied()
+
+            context['url_download'] = reverse('CompLaagRegio:regio-teams-als-bestand',
+                                              kwargs={'deelcomp_pk': deelcomp.pk})
 
             deelcomp_pks = [deelcomp.pk]
 
@@ -243,8 +248,8 @@ class RegioTeamsView(TemplateView):
         context['totaal_teams'] = totaal_teams
 
         context['cols'] = 5
-        if self.subset_filter:
-            context['cols'] += 1     # regio kolom
+        if self.subset_filter:       # rayon selectie
+            context['cols'] += 1     # toon kolom met regio nummer
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
@@ -272,16 +277,130 @@ class RegioTeamsRCLView(UserPassesTestMixin, RegioTeamsView):
 
 class RegioTeamsAlleView(UserPassesTestMixin, RegioTeamsView):
 
-    """ Met deze view kan de RCL de aangemaakte teams inzien """
+    """ Met deze view kan de BKO / RKO de aangemaakte teams inzien, per rayon """
 
     # class variables shared by all instances
-    subset_filter = True
+    subset_filter = True    # Rayon selectie
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
         return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
+
+
+class RegioTeamsAlsBestand(UserPassesTestMixin, View):
+
+    """ Deze klasse wordt gebruikt om de lijst van aangemelde teams in een regio te downloaden als csv bestand
+    """
+
+    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.functie_nu = None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return rol_nu == Rollen.ROL_RCL
+
+    def get(self, request, *args, **kwargs):
+
+        try:
+            deelcomp_pk = int(kwargs['deelcomp_pk'][:6])    # afkappen voor de veiligheid
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .select_related('competitie')
+                        .get(pk=deelcomp_pk,
+                             laag=LAAG_REGIO))
+        except (ValueError, DeelCompetitie.DoesNotExist):
+            raise Http404('Competitie niet gevonden')
+
+        if deelcomp.functie != self.functie_nu:
+            # niet de beheerder
+            raise PermissionDenied()
+
+        regio_nr = deelcomp.nhb_regio.regio_nr
+
+        comp = deelcomp.competitie
+        comp.bepaal_fase()
+
+        if comp.afstand == '18':
+            aantal_pijlen = 30
+        else:
+            aantal_pijlen = 25
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="aanmeldingen-teams-regio-%s.csv"' % regio_nr
+
+        writer = csv.writer(response,
+                            delimiter=";")  # ; is good for import with dutch regional settings
+
+        writer.writerow(['Ver nr', 'Vereniging',
+                         'Team type', 'Naam', 'Aantal sporters', 'Team sterkte',
+                         'Wedstrijdklasse'])
+
+        # zoek de teams die niet 'af' zijn
+        regioteams_niet_af = (RegiocompetitieTeam
+                              .objects
+                              .select_related('vereniging',
+                                              'vereniging__regio',
+                                              'team_type',
+                                              'deelcompetitie')
+                              .filter(deelcompetitie=deelcomp,
+                                      team_klasse=None)
+                              .prefetch_related('gekoppelde_schutters')
+                              .order_by('team_type__volgorde',
+                                        '-aanvangsgemiddelde',
+                                        'vereniging__ver_nr'))
+
+        klasse_str = '"NIET COMPLEET"'
+
+        for team in regioteams_niet_af:
+            # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
+            ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            ag_str = ag_str.replace('.', ',')
+
+            ver = team.vereniging
+            aantal_sporters = team.gekoppelde_schutters.count()
+
+            tup = (ver.ver_nr, ver.naam,
+                   team.team_type.beschrijving, team.team_naam, aantal_sporters, ag_str,
+                   klasse_str)
+
+            writer.writerow(tup)
+        # for
+
+        regioteams = (RegiocompetitieTeam
+                      .objects
+                      .select_related('vereniging',
+                                      'vereniging__regio',
+                                      'team_type',
+                                      'team_klasse')
+                      .exclude(team_klasse=None)
+                      .filter(deelcompetitie=deelcomp)
+                      .order_by('team_klasse__volgorde',
+                                '-aanvangsgemiddelde',
+                                'vereniging__ver_nr'))
+
+        for team in regioteams:
+            # team AG is 0.0 - 30.0 --> toon als score: 000.0 .. 900.0
+            ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
+            ag_str = ag_str.replace('.', ',')
+
+            ver = team.vereniging
+            aantal_sporters = team.gekoppelde_schutters.count()
+            klasse_str = team.team_klasse.beschrijving
+
+            tup = (ver.ver_nr, ver.naam,
+                   team.team_type.beschrijving, team.team_naam, aantal_sporters, ag_str,
+                   klasse_str)
+
+            writer.writerow(tup)
+        # for
+
+        return response
 
 
 class AGControleView(UserPassesTestMixin, TemplateView):

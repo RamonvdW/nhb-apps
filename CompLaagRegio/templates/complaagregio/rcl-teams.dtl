@@ -101,6 +101,12 @@
             {% else %}
                 <p>Totaal aantal teams: {{ totaal_teams }}</p>
             {% endif %}
+            {% if url_download %}
+                <p>
+                    <a class="btn-nhb-rood" href="{{ url_download }}">
+                        <i class="material-icons-round left">download</i>Download lijst</a>
+                </p>
+            {% endif %}
         </div>
     </div>
 
