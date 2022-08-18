@@ -312,7 +312,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                         .objects
                         .filter(competitie=self.comp_18,
                                 boogtype=boog_tr,
-                                beschrijving__contains="Onder 12 jongens"))[0]
+                                beschrijving__contains="Onder 12 Jongens"))[0]
 
         sporterboog = SporterBoog(sporter=self.sporter_100012,
                                   boogtype=boog_tr,
@@ -329,7 +329,7 @@ class TestCompScoresWedstrijden(E2EHelpers, TestCase):
                         .objects
                         .filter(competitie=self.comp_25,
                                 boogtype=boog_tr,
-                                beschrijving__contains="Onder 12 jongens"))[0]
+                                beschrijving__contains="Onder 12 Jongens"))[0]
 
         RegioCompetitieSchutterBoog(
                 deelcompetitie=self.deelcomp_regio_25,

@@ -515,6 +515,8 @@ def get_competitie_indiv_leeftijdsklassen(comp):
                    .prefetch_related('leeftijdsklassen')):
         for lkl in klasse.leeftijdsklassen.all():
             if lkl.pk not in pks:
+                # verwijder Unisex uit de klasse bescrijving omdat dit niet relevant is voor de bondscompetitie
+                lkl.beschrijving = lkl.beschrijving.replace(' Unisex', '')
                 pks.append(lkl.pk)
                 tup = (lkl.volgorde, lkl.pk, lkl)
                 lijst.append(tup)
