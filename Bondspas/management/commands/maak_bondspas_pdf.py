@@ -29,8 +29,8 @@ class Command(BaseCommand):
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
 
-    # def add_arguments(self, parser):
-    #     parser.add_argument('lid_nr', type=int)
+    def add_arguments(self, parser):
+        parser.add_argument('lid_nr', type=int)
 
     def maak_pdf(self, jaar, lid_nr, pdf_naam):
 
@@ -138,11 +138,16 @@ class Command(BaseCommand):
         if now.month == 1 and now.day < 15:
             jaar -= 1
 
-        for lid_nr in (176696,
-                       135553, 141988, 155666, 177392, 177394, 177395, 162651, 173086, 176324, 100773, 176341,
-                       176342, 176284, 177410, 177419, 176316, 177411):
-            pdf_naam = 'bondspas_%s.pdf' % lid_nr
-            self.maak_pdf(jaar, lid_nr, pdf_naam)
-        # for
+        lid_nr = options['lid_nr']
+        if lid_nr == 0:
+            for lid_nr in (176696,
+                           135553, 141988, 155666, 177392, 177394, 177395, 162651, 173086, 176324, 100773, 176341,
+                           176342, 176284, 177410, 177419, 176316, 177411):
+                pdf_naam = 'bondspas_%s.pdf' % lid_nr
+                self.maak_pdf(jaar, lid_nr, pdf_naam)
+            # for
+
+        pdf_naam = 'bondspas_%s.pdf' % lid_nr
+        self.maak_pdf(jaar, lid_nr, pdf_naam)
 
 # end of file
