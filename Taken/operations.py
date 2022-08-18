@@ -37,10 +37,6 @@ def eval_open_taken(request, forceer=False):
         eval_after = request.session[SESSIONVAR_TAAK_EVAL_AFTER]
     except KeyError:
         eval_after = None
-    else:
-        if eval_after.find('.') < 0:
-            # oud formaat - weggooien
-            eval_after = None
 
     if not forceer:
         now_str = str(timezone.now().timestamp())

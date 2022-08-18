@@ -372,6 +372,10 @@ class TestBondspas(E2EHelpers, TestCase):
     def test_cli_pdf(self):
         # maak een bondspas pdf aan
         f1, f2 = self.run_management_command('maak_bondspas_pdf', self.lid_nr)
-        print('f1=%s\nf2=%s' % (f1.getvalue(), f2.getvalue()))
+        # print('f1=%s\nf2=%s' % (f1.getvalue(), f2.getvalue()))
+        fname = 'bondspas_123456.pdf'
+        self.assertTrue('[ERROR]' not in f1.getvalue())
+        self.assertTrue('[INFO] Gemaakt: %s' % fname in f2.getvalue())
+        os.remove(fname)
 
 # end of file

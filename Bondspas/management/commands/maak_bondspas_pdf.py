@@ -61,14 +61,11 @@ class Command(BaseCommand):
         geboren_str = date_format(sporter.geboorte_datum, "j F Y")
 
         lkl_wa = bereken_leeftijdsklasse_wa(wedstrijdleeftijd_wa, wedstrijdgeslacht)
-        print('lkl_wa=%s' % lkl_wa)
 
         lkl_nhb = bereken_leeftijdsklasse_nhb(wedstrijdleeftijd_wa, wedstrijdgeslacht_nhb)
-        print('lkl_nhb=%s' % lkl_nhb)
 
         lkl_ifaa_1 = bereken_leeftijdsklasse_ifaa(wedstrijdleeftijd_ifaa_voor_verjaardag, wedstrijdgeslacht)
         lkl_ifaa_2 = bereken_leeftijdsklasse_ifaa(wedstrijdleeftijd_ifaa_vanaf_verjaardag, wedstrijdgeslacht)
-        print('lkl_ifaa:%s, %s' % (lkl_ifaa_1, lkl_ifaa_2))
 
         c = canvas.Canvas(pdf_naam, pagesize=pagesizes.A6)
         c.setAuthor("de Nederlandse Handboog Bonds (NHB) - www.handboogsport.nl")

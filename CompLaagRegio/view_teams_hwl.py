@@ -271,7 +271,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
 
 class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
-    """ laat de HWL een nieuw team aanmaken of een bestaand team wijzigen
+    """ laat de HWL een nieuw team aanmaken of een bestaand team wijzigen (of zelfs verwijderen)
         voor de regiocompetitie
     """
 
