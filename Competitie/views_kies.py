@@ -32,6 +32,14 @@ class CompetitieKiesView(TemplateView):
     def _tel_aantallen(self, context):
         context['toon_aantal_inschrijvingen'] = True
 
+        context['aantal_18m_indiv'] = 0
+        context['aantal_18m_teams'] = 0
+        context['aantal_18m_teams_niet_af'] = 0
+
+        context['aantal_25m_indiv'] = 0
+        context['aantal_25m_teams'] = 0
+        context['aantal_25m_teams_niet_af'] = 0
+
         pks = list()
         for comp in self.actuele_regio_comps:
             pks.append(comp.pk)
@@ -57,6 +65,22 @@ class CompetitieKiesView(TemplateView):
         qset = (RegioCompetitieSchutterBoog
                 .objects
                 .filter(deelcompetitie__competitie__pk__in=pks)
+                .select_related('sporterboog__sporter__bij_vereniging__regio__rayon'))
+
+        context['aantal_r1'] = qset.filter(sporterboog__sporter__bij_vereniging__regio__rayon=1).count()
+        context['aantal_r2'] = qset.filter(sporterboog__sporter__bij_vereniging__regio__rayon=2).count()
+        context['aantal_r3'] = qset.filter(sporterboog__sporter__bij_vereniging__regio__rayon=3).count()
+        context['aantal_r4'] = qset.filter(sporterboog__sporter__bij_vereniging__regio__rayon=4).count()
+
+        qset_geen_rk = qset.filter(inschrijf_voorkeur_rk_bk=False)
+        context['aantal_geen_rk1'] = qset_geen_rk.filter(sporterboog__sporter__bij_vereniging__regio__rayon=1).count()
+        context['aantal_geen_rk2'] = qset_geen_rk.filter(sporterboog__sporter__bij_vereniging__regio__rayon=2).count()
+        context['aantal_geen_rk3'] = qset_geen_rk.filter(sporterboog__sporter__bij_vereniging__regio__rayon=3).count()
+        context['aantal_geen_rk4'] = qset_geen_rk.filter(sporterboog__sporter__bij_vereniging__regio__rayon=4).count()
+
+        qset = (RegioCompetitieSchutterBoog
+                .objects
+                .filter(deelcompetitie__competitie__pk__in=pks)
                 .select_related('sporterboog',
                                 'sporterboog__sporter__account')
                 .distinct('sporterboog'))
@@ -65,7 +89,9 @@ class CompetitieKiesView(TemplateView):
         context['aantal_sporters'] = qset.distinct('sporterboog__sporter').count()
         context['aantal_multiboog'] = aantal_sportersboog - context['aantal_sporters']
         context['aantal_zelfstandig'] = qset.filter(aangemeld_door=F('sporterboog__sporter__account')).count()
-        context['procent_zelfstandig'] = '%.1f' % ((context['aantal_zelfstandig'] / aantal_sportersboog) * 100.0)
+
+        if aantal_sportersboog > 0:
+            context['procent_zelfstandig'] = '%.1f' % ((context['aantal_zelfstandig'] / aantal_sportersboog) * 100.0)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """

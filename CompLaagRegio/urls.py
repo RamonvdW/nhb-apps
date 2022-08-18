@@ -21,7 +21,7 @@ urlpatterns = [
          name='waarschijnlijke-deelnemers-als-bestand'),
 
 
-    # RCL:planning regio
+    # RCL: planning regio
     path('planning/<deelcomp_pk>/',
          view_planning.RegioPlanningView.as_view(),
          name='regio-planning'),
@@ -71,6 +71,10 @@ urlpatterns = [
     path('<comp_pk>/ag-controle/regio-<regio_nr>/',
          view_teams_rcl.AGControleView.as_view(),
          name='regio-ag-controle'),
+
+    path('<deelcomp_pk>/teams/als-bestand/',
+         view_teams_rcl.RegioTeamsAlsBestand.as_view(),
+         name='regio-teams-als-bestand'),
 
     path('<comp_pk>/teams/<subset>/',
          view_teams_rcl.RegioTeamsAlleView.as_view(),
