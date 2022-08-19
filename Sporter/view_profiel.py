@@ -291,9 +291,9 @@ class ProfielView(UserPassesTestMixin, TemplateView):
                  .filter(ag__in=ag_pks)
                  .order_by('-when'))
         for ag in ags:
-            for hist in hists:
+            for hist in hists:              # pragma: no branch
                 if hist.ag.pk == ag.pk:
-                    ag.hist = hist       # nieuwste
+                    ag.hist = hist          # nieuwste
                     break   # from the for
             # for
         # for

@@ -37,7 +37,8 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
         self.account_100002 = self.e2e_create_account('100002', 'nhb100002@test.com', 'Pilla de Schutter')
 
         self.account_100001.last_login = timezone.now() - datetime.timedelta(days=1)
-        self.account_100001.save(update_fields=['last_login'])
+        self.account_100001.otp_controle_gelukt_op = self.account_100001.last_login + datetime.timedelta(seconds=30)
+        self.account_100001.save(update_fields=['last_login', 'otp_controle_gelukt_op'])
 
         email = self.account_100002.accountemail_set.all()[0]
         email.email_is_bevestigd = True
