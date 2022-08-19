@@ -117,7 +117,7 @@
 
         {% if kaartje.heading %}
             <!-- witruimte -->
-            <div class="row center">
+            <div class="row center" id="{{ kaartje.anker }}">
                 <div class="col s12">
                     <h4>{{ kaartje.heading }}</h4>
                     <p>Competitie fase {{ kaartje.comp_fase }}</p>

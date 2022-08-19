@@ -336,9 +336,11 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                             context['dagdelen'].append(dagdeel)
                     # for
 
+        url_overzicht = reverse('Vereniging:overzicht')
+        anker = '#competitie_%s' % self.comp.pk
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
-            (None, self.comp.beschrijving.replace(' competitie', '')),
+            (url_overzicht, 'Beheer vereniging'),
+            (url_overzicht + anker, self.comp.beschrijving.replace(' competitie', '')),
             (None, 'Aanmelden')
         )
 
@@ -627,9 +629,11 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         if methode == INSCHRIJF_METHODE_3:
             context['toon_dagdeel'] = DAGDELEN
 
+        url_overzicht = reverse('Vereniging:overzicht')
+        anker = '#competitie_%s' % self.deelcomp.competitie.pk
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, self.deelcomp.competitie.beschrijving.replace(' competitie', '')),
+            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht + anker, self.deelcomp.competitie.beschrijving.replace(' competitie', '')),
             (None, 'Ingeschreven')
         )
 

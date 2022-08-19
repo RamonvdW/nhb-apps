@@ -363,11 +363,11 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
             self.assert_template_used(resp, ('complaagrayon/hwl-teams.dtl', 'plein/site_layout.dtl'))
 
             # team aanmaken pagina
-            with self.assert_max_queries(22):
+            with self.assert_max_queries(20):
                 resp = self.client.get(self.url_rk_teams_nieuw % deelcomp_rk3.pk)
-                self.assertEqual(resp.status_code, 200)
-                self.assert_html_ok(resp)
-                self.assert_template_used(resp, ('complaagrayon/hwl-teams-wijzig.dtl', 'plein/site_layout.dtl'))
+            self.assertEqual(resp.status_code, 200)
+            self.assert_html_ok(resp)
+            self.assert_template_used(resp, ('complaagrayon/hwl-teams-wijzig.dtl', 'plein/site_layout.dtl'))
 
             # maak een team aan zonder team nummer
             with self.assert_max_queries(20):

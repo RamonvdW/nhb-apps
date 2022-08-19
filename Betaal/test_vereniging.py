@@ -49,9 +49,9 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         # nu mag de pagina wel gebruikt worden
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_betaal_vereniging)
-            self.assertEqual(resp.status_code, 200)
-            self.assert_template_used(resp, ('betaal/vereniging-instellingen.dtl', 'plein/site_layout.dtl'))
-            self.assert_html_ok(resp)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('betaal/vereniging-instellingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
         # probeer te wijzigen
         resp = self.client.post(self.url_betaal_vereniging)
@@ -66,9 +66,9 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         # ophalen met instellingen opgeslagen
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_betaal_vereniging)
-            self.assertEqual(resp.status_code, 200)
-            self.assert_template_used(resp, ('betaal/vereniging-instellingen.dtl', 'plein/site_layout.dtl'))
-            self.assert_html_ok(resp)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('betaal/vereniging-instellingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
 
         # zet de "akkoord via NHB" optie
         instellingen = BetaalInstellingenVereniging.objects.all()[0]
@@ -79,9 +79,9 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
         # ophalen met instellingen opgeslagen
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_betaal_vereniging)
-            self.assertEqual(resp.status_code, 200)
-            self.assert_template_used(resp, ('betaal/vereniging-instellingen.dtl', 'plein/site_layout.dtl'))
-            self.assert_html_ok(resp)
-            self.assertContains(resp, 'Ja, betalingen aan jullie lopen via de NHB rekening')
+        self.assertEqual(resp.status_code, 200)
+        self.assert_template_used(resp, ('betaal/vereniging-instellingen.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Ja, betalingen aan jullie lopen via de NHB rekening')
 
 # end of file

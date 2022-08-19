@@ -135,9 +135,11 @@ class WieSchietWaarView(UserPassesTestMixin, TemplateView):
                                               kwargs={'deelcomp_pk': deelcomp.pk})
 
         comp = deelcomp.competitie
+        url_overzicht = reverse('Vereniging:overzicht')
+        anker = '#competitie_%s' % comp.pk
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, comp.beschrijving.replace(' competitie', '')),
+            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
             (None, 'Wie schiet waar?')
         )
 

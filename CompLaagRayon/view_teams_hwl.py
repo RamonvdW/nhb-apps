@@ -181,9 +181,11 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
                                                 kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
         comp = deelcomp_rk.competitie
+        url_overzicht = reverse('Vereniging:overzicht')
+        anker = '#competitie_%s' % comp.pk
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, comp.beschrijving.replace(' competitie', '')),
+            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
             (None, 'Teams RK'),
         )
 
@@ -284,9 +286,11 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
             context['url_verwijderen'] = context['url_opslaan']
 
         comp = deelcomp_rk.competitie
+        url_overzicht = reverse('Vereniging:overzicht')
+        anker = '#competitie_%s' % comp.pk
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, comp.beschrijving.replace(' competitie', '')),
+            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagRayon:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk}), 'Teams RK'),
             (None, 'Wijzig team')
         )
@@ -541,9 +545,11 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
                                              kwargs={'rk_team_pk': rk_team.pk})
 
         comp = deelcomp_rk.competitie
+        url_overzicht = reverse('Vereniging:overzicht')
+        anker = '#competitie_%s' % comp.pk
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, comp.beschrijving.replace(' competitie', '')),
+            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagRayon:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk}), 'Teams RK'),
             (None, 'Koppel teamleden')
         )

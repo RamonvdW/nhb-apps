@@ -200,9 +200,12 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         # for
         context['deelnemers'] = deelnemers
 
+        url_overzicht = reverse('Vereniging:overzicht')
+        anker = '#competitie_%s' % deelcomp.competitie.pk
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, 'Teams Regio %s' % deelcomp.competitie.beschrijving.replace(' competitie', ''))
+            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht + anker, deelcomp.competitie.beschrijving.replace(' competitie', '')),
+            (None, 'Teams Regio')
         )
 
         menu_dynamics(self.request, context)
@@ -975,10 +978,11 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
         context['deelnemers'] = [tup[-1] for tup in unsorted_deelnemers]
 
         comp = deelcomp.competitie
-
+        url_overzicht = reverse('Vereniging:overzicht')
+        anker = '#competitie_%s' % comp.pk
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, comp.beschrijving.replace(' competitie', '')),
+            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
             (None, 'Team Invallers')
         )
 
@@ -1141,9 +1145,11 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                                          kwargs={'ronde_team_pk': ronde_team_nu.pk})
 
         comp = deelcomp.competitie
+        url_overzicht = reverse('Vereniging:overzicht')
+        anker = '#competitie_%s' % comp.pk
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, comp.beschrijving.replace(' competitie', '')),
+            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagRegio:teams-regio-invallers', kwargs={'deelcomp_pk': deelcomp.pk}), 'Team Invallers'),
             (None, 'Invallers Koppelen')
         )

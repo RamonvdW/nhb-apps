@@ -208,8 +208,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),
-            (None, comp.beschrijving.replace(' competitie', '')),
-            (None, 'Aanmelden')
+            (None, 'Aanmelden ' + comp.beschrijving.replace(' competitie', ''))
         )
 
         menu_dynamics(self.request, context)

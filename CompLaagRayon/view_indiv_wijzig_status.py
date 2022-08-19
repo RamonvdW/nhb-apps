@@ -93,9 +93,11 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
             )
         else:
             # HWL
+            url_overzicht = reverse('Vereniging:overzicht')
+            anker = '#competitie_%s' % comp.pk
             context['kruimels'] = (
-                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-                (None, comp.beschrijving.replace(' competitie', '')),
+                (url_overzicht, 'Beheer Vereniging'),
+                (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
                 (reverse('CompLaagRayon:lijst-rk-ver', kwargs={'rk_deelcomp_pk': deelnemer.deelcompetitie.pk}), 'Deelnemers RK'),
                 (None, 'Wijzig sporter status')
             )

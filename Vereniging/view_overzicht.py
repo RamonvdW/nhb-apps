@@ -143,6 +143,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 # nieuwe heading aanmaken
                 kaartje = SimpleNamespace()
                 kaartje.heading = comp.beschrijving
+                kaartje.anker = 'competitie_%s' % comp.pk
                 kaartje.comp_fase = "%s (%s)" % (comp.fase, comp_fase_kort[comp.fase])
                 kaartjes.append(kaartje)
 
