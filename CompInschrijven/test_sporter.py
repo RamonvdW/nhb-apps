@@ -13,7 +13,7 @@ from Competitie.test_competitie import maak_competities_en_zet_fase_b
 from Functie.models import Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV
-from Score.operations import score_indiv_ag_opslaan
+from Score.operations import score_indiv_ag_opslaan, score_teams_ag_opslaan
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
@@ -750,7 +750,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
 
         # doe de inschrijving
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.post(url, {'wedstrijd_%s' % match_pk: 'on',
                                           'wedstrijd_99999': 'on'})     # is ignored
         self.assert_is_redirect(resp, self.url_profiel)
@@ -768,7 +768,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
 
         # doe de inschrijving
         url = self.url_aanmelden % (deelcomp.pk, sporterboog2.pk)
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.post(url, {'wedstrijd_%s' % match_pk: 'on'})
         self.assert_is_redirect(resp, self.url_profiel)
 
@@ -874,5 +874,42 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert404(resp, 'Geen passende wedstrijdklasse')
+
+    def test_met_ag_teams(self):
+        # sporter aanmelden zonder AG indiv maar met handmatig AG teams
+
+        # log in as BB en maak de competitie aan
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
+        self.e2e_wisselnaarrol_bb()
+        self._competitie_aanmaken()
+
+        # log in as sporter
+        self.client.logout()
+        self.e2e_login(self.account_normaal)
+        self._prep_voorkeuren(100001)
+
+        # schrijf in voor de 18m Recurve, met AG
+        # geef ook team schieten en opmerking door
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
+        deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
+        res = score_teams_ag_opslaan(sporterboog, 18, 8.18, self.account_twee, 'Test')
+        self.assertTrue(res)
+
+        url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'wil_in_team': 'yes', 'opmerking': 'Hallo daar!'})
+        self.assert_is_redirect(resp, self.url_profiel)
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 1)
+
+        inschrijving = RegioCompetitieSchutterBoog.objects.all()[0]
+        self.assertEqual(str(inschrijving.ag_voor_indiv), "0.000")
+        self.assertEqual(str(inschrijving.ag_voor_team), "8.180")
+        self.assertTrue(inschrijving.ag_voor_team_mag_aangepast_worden)
+        self.assertEqual(inschrijving.deelcompetitie, deelcomp)
+        self.assertEqual(inschrijving.sporterboog, sporterboog)
+        self.assertEqual(inschrijving.bij_vereniging, sporterboog.sporter.bij_vereniging)
+        self.assertTrue(inschrijving.inschrijf_voorkeur_team)
+
 
 # end of file

@@ -63,7 +63,7 @@ def migreer_ag(apps, _):
         ag = score2ag[score_hist.score.pk]
 
         ag_hist = ag_hist_klas(
-                        when=score_hist.when,
+                        when=score_hist.when,       # werkt omdat we auto_now uitgezet hebben
                         ag=ag,
                         oude_waarde=score_hist.oude_waarde / 1000.0,        # AG was opgeslagen x 1000
                         nieuwe_waarde=score_hist.nieuwe_waarde / 1000.0,    # AG was opgeslagen x 1000
@@ -71,6 +71,7 @@ def migreer_ag(apps, _):
                         notitie=score_hist.notitie)
 
         bulk.append(ag_hist)
+
         if len(bulk) == 500:
             ag_hist_klas.objects.bulk_create(bulk)
             bulk = list()
@@ -114,7 +115,7 @@ class Migration(migrations.Migration):
             name='AanvangsgemiddeldeHist',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('when', models.DateTimeField(auto_now_add=True)),
+                ('when', models.DateTimeField()),
                 ('oude_waarde', models.DecimalField(decimal_places=3, max_digits=6)),
                 ('nieuwe_waarde', models.DecimalField(decimal_places=3, max_digits=6)),
                 ('notitie', models.CharField(max_length=100)),
@@ -131,6 +132,11 @@ class Migration(migrations.Migration):
             model_name='score',
             name='type',
             field=models.CharField(choices=[('S', 'Score'), ('G', 'Geen score')], default='S', max_length=1),
+        ),
+        migrations.AlterField(
+            model_name='aanvangsgemiddeldehist',
+            name='when',
+            field=models.DateTimeField(auto_now_add=True),
         ),
     ]
 

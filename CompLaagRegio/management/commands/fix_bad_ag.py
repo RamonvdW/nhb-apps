@@ -7,7 +7,7 @@
 from django.core.management.base import BaseCommand
 from Competitie.models import Competitie, RegioCompetitieSchutterBoog, AG_NUL
 from Competitie.operations.klassengrenzen import KlasseBepaler
-from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV
+from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV, AG_DOEL_TEAM
 from decimal import Decimal
 
 
@@ -41,13 +41,22 @@ class Command(BaseCommand):
         bepaler = KlasseBepaler(comp)
         vertel_commit = False
 
-        sporterboog_pk2ag = dict()
+        sporterboog_pk2ag_indiv = dict()
         for ag in (Aanvangsgemiddelde
                    .objects
                    .select_related('sporterboog')
                    .filter(doel=AG_DOEL_INDIV,
                            afstand_meter=afstand)):
-            sporterboog_pk2ag[ag.sporterboog.pk] = ag.waarde
+            sporterboog_pk2ag_indiv[ag.sporterboog.pk] = ag.waarde
+        # for
+
+        sporterboog_pk2ag_teams = dict()
+        for ag in (Aanvangsgemiddelde
+                   .objects
+                   .select_related('sporterboog')
+                   .filter(doel=AG_DOEL_TEAM,
+                           afstand_meter=afstand)):
+            sporterboog_pk2ag_teams[ag.sporterboog.pk] = ag.waarde
         # for
 
         for deelnemer in (RegioCompetitieSchutterBoog
@@ -58,22 +67,28 @@ class Command(BaseCommand):
                           .filter(deelcompetitie__competitie=comp)):
 
             try:
-                ag = sporterboog_pk2ag[deelnemer.sporterboog.pk]
+                ag_indiv = sporterboog_pk2ag_indiv[deelnemer.sporterboog.pk]
             except KeyError:
-                ag = AG_NUL
+                ag_indiv = AG_NUL
 
-            ag_str = "%.3f" % ag
+            try:
+                ag_teams = sporterboog_pk2ag_teams[deelnemer.sporterboog.pk]
+            except KeyError:
+                ag_teams = ag_indiv
+
+            ag_indiv_str = "%.3f" % ag_indiv
+            ag_teams_str = "%.3f" % ag_teams
 
             do_save = False
 
-            if ag_str != str(deelnemer.ag_voor_team):
-                self.stdout.write('deelnemer %s : AG team %s --> %s' % (deelnemer, deelnemer.ag_voor_team, ag_str))
-                deelnemer.ag_voor_team = ag
+            if ag_teams_str != str(deelnemer.ag_voor_team):
+                self.stdout.write('deelnemer %s : AG team %s --> %s' % (deelnemer, deelnemer.ag_voor_team, ag_teams_str))
+                deelnemer.ag_voor_team = ag_teams
                 do_save = True
 
-            if ag_str != str(deelnemer.ag_voor_indiv):
-                self.stdout.write('deelnemer %s : AG indiv %s --> %s' % (deelnemer, deelnemer.ag_voor_indiv, ag_str))
-                deelnemer.ag_voor_indiv = ag
+            if ag_indiv_str != str(deelnemer.ag_voor_indiv):
+                self.stdout.write('deelnemer %s : AG indiv %s --> %s' % (deelnemer, deelnemer.ag_voor_indiv, ag_indiv_str))
+                deelnemer.ag_voor_indiv = ag_indiv
                 do_save = True
 
                 # klasse opnieuw bepalen

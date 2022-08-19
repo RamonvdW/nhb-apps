@@ -17,7 +17,7 @@ from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompeti
                                DAGDELEN, DAGDEEL_AFKORTINGEN)
 from Competitie.operations import KlasseBepaler
 from Plein.menu import menu_dynamics
-from Score.models import AanvangsgemiddeldeHist, Aanvangsgemiddelde, AG_DOEL_INDIV
+from Score.models import AanvangsgemiddeldeHist, Aanvangsgemiddelde, AG_DOEL_INDIV, AG_DOEL_TEAM
 from Sporter.models import SporterVoorkeuren, SporterBoog
 from decimal import Decimal
 
@@ -305,6 +305,19 @@ class RegiocompetitieAanmeldenView(View):
             aanmelding.ag_voor_team = ag.waarde
             if ag.waarde > 0.000:
                 aanmelding.ag_voor_team_mag_aangepast_worden = False
+
+        ags = (AanvangsgemiddeldeHist
+               .objects
+               .filter(ag__sporterboog=sporterboog,
+                       ag__doel=AG_DOEL_TEAM,
+                       ag__afstand_meter=deelcomp.competitie.afstand)
+               .order_by('-when'))      # nieuwste eerst
+
+        if len(ags):
+            # iemand heeft een AG ingevoerd voor de teamcompetitie
+            ag = ags[0].ag
+            aanmelding.ag_voor_team = ag.waarde
+            aanmelding.ag_voor_team_mag_aangepast_worden = True
 
         bepaler = KlasseBepaler(deelcomp.competitie)
         try:
