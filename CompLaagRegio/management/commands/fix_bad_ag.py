@@ -7,7 +7,7 @@
 from django.core.management.base import BaseCommand
 from Competitie.models import Competitie, RegioCompetitieSchutterBoog, AG_NUL
 from Competitie.operations.klassengrenzen import KlasseBepaler
-from Score.models import Score, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAMS_AG
+from Score.models import Score, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
 from decimal import Decimal
 
 
@@ -54,7 +54,7 @@ class Command(BaseCommand):
         for score in (Score
                       .objects
                       .select_related('sporterboog')
-                      .filter(type=SCORE_TYPE_TEAMS_AG,
+                      .filter(type=SCORE_TYPE_TEAM_AG,
                               afstand_meter=afstand)):
             sporterboog_pk2ag_teams[score.sporterboog.pk] = Decimal(score.waarde) / 1000
         # for
