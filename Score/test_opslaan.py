@@ -100,6 +100,9 @@ class TestScoreOpslaan(E2EHelpers, TestCase):
         ag = ag_hist.ag
         self.assertTrue('(team)' in str(ag))
 
+        ag_hist.door_account = None
+        self.assertTrue('systeem' in str(ag_hist))
+
     def test_wanneer(self):
         res = wanneer_ag_vastgesteld(18)
         self.assertIsNone(res)

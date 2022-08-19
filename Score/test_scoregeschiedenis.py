@@ -10,9 +10,9 @@ from BasisTypen.models import BoogType
 from Competitie.models import Competitie, CompetitieMatch
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
+from Score.models import Score, ScoreHist, Uitslag, SCORE_WAARDE_VERWIJDERD, SCORE_TYPE_GEEN
+from Score.operations import score_indiv_ag_opslaan
 from Sporter.models import Sporter, SporterBoog
-from .models import Score, ScoreHist, Uitslag, SCORE_WAARDE_VERWIJDERD
-from .operations import score_indiv_ag_opslaan
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
@@ -78,6 +78,17 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         ScoreHist(score=score,
                   oude_waarde=290,
                   nieuwe_waarde=260,
+                  door_account=self.account_hwl).save()
+        # niet in een uitslag stoppen
+        # uitslag18.scores.add(score)
+
+        score = Score(sporterboog=sporterboog,
+                      afstand_meter=18,
+                      waarde=289)
+        score.save()
+        ScoreHist(score=score,
+                  oude_waarde=260,
+                  nieuwe_waarde=289,
                   door_account=self.account_hwl).save()
         uitslag18.scores.add(score)
 
@@ -146,9 +157,11 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.sporterboog_100001r = sporterboog
 
         # maak een AG aan
+        score_indiv_ag_opslaan(sporterboog, 30, 8.123, None, 'raar')        # geeft extra coverage
         score_indiv_ag_opslaan(sporterboog, 18, 9.123, None, 'test melding')
 
         score_indiv_ag_opslaan(sporterboog, 25, 9.251, self.account_hwl, 'test melding')
+        score_indiv_ag_opslaan(sporterboog, 25, 9.152, self.account_hwl, 'correctie')
 
         self._maak_uitslag(sporterboog)
 
@@ -191,6 +204,26 @@ class TestScoreGeschiedenis(E2EHelpers, TestCase):
         self.assertContains(resp, 'Recurve')
         self.assertContains(resp, 'Aanvangsgemiddelde')
         self.assertContains(resp, 'test melding')
+
+        score = Score.objects.all()[0]
+        self.assertTrue(str(score) != '')
+
+        score.type = SCORE_TYPE_GEEN
+        score.sporterboog = None
+        self.assertTrue('(geen score)' in str(score))
+
+        hist = ScoreHist.objects.all()[0]
+        self.assertTrue(str(hist) != '')
+
+        hist = ScoreHist.objects.filter(score__sporterboog__sporter=self.sporter_100001)[0]
+        hist.door_account = None
+        hist.save(update_fields=['door_account'])
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('score/score-geschiedenis.dtl', 'plein/site_layout.dtl'))
 
     def test_zoek_bad(self):
         # login als BB

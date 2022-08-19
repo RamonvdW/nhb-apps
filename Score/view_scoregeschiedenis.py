@@ -66,7 +66,8 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                          .objects
                          .select_related('score',
                                          'score__sporterboog',
-                                         'score__sporterboog__boogtype')
+                                         'score__sporterboog__boogtype',
+                                         'door_account')
                          .prefetch_related('score__uitslag_set')
                          .filter(score__sporterboog__in=pks)
                          .order_by('-when'))
@@ -139,8 +140,6 @@ class ScoreGeschiedenisView(UserPassesTestMixin, View):
                     except KeyError:
                         ag2hists[hist.ag.pk] = [hist]
                 # for
-
-                context['afstanden'] = afstanden = list()
 
                 for obj in sportersboog:
                     obj.ags = list()

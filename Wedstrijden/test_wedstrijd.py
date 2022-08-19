@@ -605,5 +605,71 @@ class TestWedstrijd(E2EHelpers, TestCase):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
 
+    def test_wijzig_ifaa(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+
+        # wissel naar HWL en maak een wedstrijd aan
+        self._maak_externe_locatie(self.nhbver1)  # locatie is noodzakelijk
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'ifaa'})
+        self.assert_is_redirect(resp, self.url_kalender_vereniging)
+
+        self.assertEqual(1, Wedstrijd.objects.count())
+        wedstrijd = Wedstrijd.objects.all()[0]
+        self.assertTrue(str(wedstrijd) != '')
+
+        url = self.url_kalender_wijzig_wedstrijd % wedstrijd.pk
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+
+    def test_wijzig_wa(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+
+        # wissel naar HWL en maak een wedstrijd aan
+        self._maak_externe_locatie(self.nhbver1)  # locatie is noodzakelijk
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'wa'})
+        self.assert_is_redirect(resp, self.url_kalender_vereniging)
+
+        self.assertEqual(1, Wedstrijd.objects.count())
+        wedstrijd = Wedstrijd.objects.all()[0]
+        self.assertTrue(str(wedstrijd) != '')
+
+        url = self.url_kalender_wijzig_wedstrijd % wedstrijd.pk
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/wijzig-wedstrijd.dtl', 'plein/site_layout.dtl'))
+
+        # zet wat parameters, inclusief de prijzen
+        datum = '%s-1-1' % (wedstrijd.datum_begin.year + 1)
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'datum_begin': datum,
+                                          'wedstrijd_duur': 'duur_5',
+                                          'aantal_banen': '0',
+                                          'prijs_normaal': '10,23',
+                                          'prijs_onder18': '5.56789'})
+        self.assert_is_redirect(resp, self.url_kalender_vereniging)
+        wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
+        self.assertEqual(str(wedstrijd.prijs_euro_onder18), '5.57')
+        self.assertEqual(str(wedstrijd.prijs_euro_normaal), '10.23')
+
+        resp = self.client.post(url, {'prijs_normaal': 'crap'})
+        self.assert404(resp, 'Geen toegestane prijs')
+
+        resp = self.client.post(url, {'prijs_onder18': 'crap'})
+        self.assert404(resp, 'Geen toegestane prijs')
+
+        resp = self.client.post(url, {'prijs_normaal': '-50'})
+        self.assert404(resp, 'Geen toegestane prijs')
+
+        resp = self.client.post(url, {'prijs_onder18': '1000'})
+        self.assert404(resp, 'Geen toegestane prijs')
 
 # end of file
