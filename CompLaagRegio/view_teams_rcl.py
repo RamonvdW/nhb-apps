@@ -339,7 +339,7 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
 
         writer.writerow(['Ver nr', 'Vereniging',
                          'Team type', 'Naam', 'Aantal sporters', 'Team sterkte',
-                         'Wedstrijdklasse'])
+                         'Wedstrijdklasse', 'Sporters'])
 
         # zoek de teams die niet 'af' zijn
         regioteams_niet_af = (RegiocompetitieTeam
@@ -364,10 +364,11 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
 
             ver = team.vereniging
             aantal_sporters = team.gekoppelde_schutters.count()
+            sporters_str = ", ".join([str(deelnemer.sporterboog.sporter.lid_nr) for deelnemer in team.gekoppelde_schutters.select_related('sporterboog__sporter').all()])
 
             tup = (ver.ver_nr, ver.naam,
                    team.team_type.beschrijving, team.team_naam, aantal_sporters, ag_str,
-                   klasse_str)
+                   klasse_str, sporters_str)
 
             writer.writerow(tup)
         # for
@@ -392,10 +393,11 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
             ver = team.vereniging
             aantal_sporters = team.gekoppelde_schutters.count()
             klasse_str = team.team_klasse.beschrijving
+            sporters_str = ", ".join([str(deelnemer.sporterboog.sporter.lid_nr) for deelnemer in team.gekoppelde_schutters.select_related('sporterboog__sporter').all()])
 
             tup = (ver.ver_nr, ver.naam,
                    team.team_type.beschrijving, team.team_naam, aantal_sporters, ag_str,
-                   klasse_str)
+                   klasse_str, sporters_str)
 
             writer.writerow(tup)
         # for
