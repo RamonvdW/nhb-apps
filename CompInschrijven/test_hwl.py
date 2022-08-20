@@ -6,6 +6,7 @@
 
 from django.test import TestCase
 from django.utils import timezone
+from BasisTypen.models import BOOGTYPE_AFKORTING_RECURVE
 from Functie.operations import maak_functie, Functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, RegioCompetitieSchutterBoog,
@@ -14,10 +15,11 @@ from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
-from Score.operations import score_indiv_ag_opslaan
+from Score.operations import score_indiv_ag_opslaan, score_teams_ag_opslaan
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from time import sleep
 import datetime
 
 
@@ -620,7 +622,7 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         url = self.url_aanmelden % self.comp_18.pk
         zet_competitie_fase(self.comp_18, 'B')
 
-        with self.assert_max_queries(24):
+        with self.assert_max_queries(25):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
@@ -863,5 +865,58 @@ class TestCompInschrijvenHWL(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert404(resp, 'Geen wedstrijden in deze regio')
+
+    def test_met_ag_teams(self):
+        url = self.url_aanmelden % self.comp_18.pk
+        zet_competitie_fase(self.comp_18, 'B')
+
+        # anon
+        self.e2e_logout()
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert403(resp)
+
+        # login als HWL
+        self.e2e_login_and_pass_otp(self.account_hwl)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
+
+        # stel een paar bogen in
+        self._zet_sporter_voorkeuren(100004)
+        self._zet_sporter_voorkeuren(100003)
+
+        self._zet_ag(100004, 18)
+        self._zet_ag(100003, 25)
+
+        sporterboog = SporterBoog.objects.get(sporter__lid_nr=100004,
+                                              boogtype__afkorting=BOOGTYPE_AFKORTING_RECURVE)
+
+        res = score_teams_ag_opslaan(sporterboog, 18, 8.25, self.account_hwl, 'Test')
+        self.assertTrue(res)
+        sleep(0.050)        # zorg iets van spreiding in de 'when'
+        res = score_teams_ag_opslaan(sporterboog, 18, 8.18, self.account_hwl, 'Test')
+        self.assertTrue(res)
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('compinschrijven/hwl-leden-aanmelden.dtl', 'plein/site_layout.dtl'))
+
+        # nu de POST om een paar leden aan te melden
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
+        with self.assert_max_queries(21):
+            resp = self.client.post(url, {'lid_100004_boogtype_1': 'on',        # 1=R
+                                          'lid_100003_boogtype_3': 'on',        # 3=BB
+                                          'wil_in_team': 'ja',
+                                          'opmerking': 'door de hwl'})
+        self.assert_is_redirect_not_plein(resp)     # check success
+        self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 2)    # 2 schutters, 1 competitie
+
+        for obj in RegioCompetitieSchutterBoog.objects.all():
+            self.assertEqual(obj.inschrijf_notitie, 'door de hwl')
+            self.assertTrue(obj.inschrijf_voorkeur_team)
+            if obj.sporterboog.sporter.lid_nr == 100004:
+                self.assertEqual(str(obj.ag_voor_team), '8.180')
+        # for
 
 # end of file

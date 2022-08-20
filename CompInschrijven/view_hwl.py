@@ -18,7 +18,7 @@ from Competitie.operations import KlasseBepaler
 from Competitie.operations import get_competitie_bogen
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV, AG_DOEL_TEAM
 from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 import copy
 
@@ -129,13 +129,22 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             sporter_dict[sporter.lid_nr] = sporter
         # for
 
-        ag_dict = dict()        # [sporterboog_pk] = Score
+        ag_indiv_dict = dict()        # [sporterboog_pk] = Score
         for ag in (Aanvangsgemiddelde
                    .objects
                    .select_related('sporterboog')
                    .filter(doel=AG_DOEL_INDIV,
                            afstand_meter=comp.afstand)):
-            ag_dict[ag.sporterboog.pk] = ag.waarde
+            ag_indiv_dict[ag.sporterboog.pk] = ag.waarde
+        # for
+
+        ag_teams_dict = dict()        # [sporterboog_pk] = Score
+        for ag in (Aanvangsgemiddelde
+                   .objects
+                   .select_related('sporterboog')
+                   .filter(doel=AG_DOEL_TEAM,
+                           afstand_meter=comp.afstand)):
+            ag_teams_dict[ag.sporterboog.pk] = ag.waarde
         # for
 
         wil_competitie = dict()     # [lid_nr] = True/False
@@ -192,9 +201,14 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     obj.mag_teamschieten = False
 
                 try:
-                    obj.ag = ag_dict[sporterboog.pk]
+                    obj.ag = ag_indiv_dict[sporterboog.pk]
                 except KeyError:
                     obj.ag = AG_NUL
+
+                try:
+                    obj.ag_team = ag_indiv_dict[sporterboog.pk]
+                except KeyError:
+                    obj.ag_team = obj.ag
 
                 # kijk of de schutter al aangemeld is
                 try:
@@ -481,9 +495,25 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                 for ag in Aanvangsgemiddelde.objects.filter(sporterboog=sporterboog,
                                                             afstand_meter=comp.afstand,
                                                             doel=AG_DOEL_INDIV):
+                    # AG, dus > 0.000
                     aanmelding.ag_voor_indiv = ag.waarde
                     aanmelding.ag_voor_team = ag.waarde
                     aanmelding.ag_voor_team_mag_aangepast_worden = False
+                # for
+
+                # zoek de aanvangsgemiddelden er bij, indien beschikbaar
+                ag_hist = (AanvangsgemiddeldeHist
+                           .objects
+                           .filter(ag__sporterboog=sporterboog,
+                                   ag__afstand_meter=comp.afstand,
+                                   ag__doel=AG_DOEL_TEAM)
+                           .order_by('-when'))
+
+                if len(ag_hist):
+                    # gebruik het nieuwste handmatige team AG
+                    ag = ag_hist[0].ag
+                    aanmelding.ag_voor_team = ag.waarde
+                    aanmelding.ag_voor_team_mag_aangepast_worden = True
                 # for
 
                 # zoek een toepasselijke klasse aan de hand van de leeftijd

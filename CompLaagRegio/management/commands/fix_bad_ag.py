@@ -7,7 +7,7 @@
 from django.core.management.base import BaseCommand
 from Competitie.models import Competitie, RegioCompetitieSchutterBoog, AG_NUL
 from Competitie.operations.klassengrenzen import KlasseBepaler
-from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV, AG_DOEL_TEAM
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV, AG_DOEL_TEAM
 from decimal import Decimal
 
 
@@ -51,12 +51,17 @@ class Command(BaseCommand):
         # for
 
         sporterboog_pk2ag_teams = dict()
-        for ag in (Aanvangsgemiddelde
-                   .objects
-                   .select_related('sporterboog')
-                   .filter(doel=AG_DOEL_TEAM,
-                           afstand_meter=afstand)):
-            sporterboog_pk2ag_teams[ag.sporterboog.pk] = ag.waarde
+        for ag_hist in (AanvangsgemiddeldeHist
+                        .objects
+                        .select_related('ag',
+                                        'ag__sporterboog')
+                        .filter(ag__doel=AG_DOEL_TEAM,
+                                ag__afstand_meter=afstand)
+                        .order_by('-when')):
+            ag = ag_hist.ag
+            # alleen het eerste (nieuwste) AG gebruiken
+            if ag.sporterboog.pk not in sporterboog_pk2ag_teams:
+                sporterboog_pk2ag_teams[ag.sporterboog.pk] = ag.waarde
         # for
 
         for deelnemer in (RegioCompetitieSchutterBoog

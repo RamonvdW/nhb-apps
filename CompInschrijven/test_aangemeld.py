@@ -23,10 +23,12 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
     test_after = ('Functie',)
 
-    url_wijzigdatums = '/bondscompetities/%s/wijzig-datums/'  # comp_pk
-    url_aangemeld_alles = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/alles/'  # comp_pk
+    url_wijzigdatums = '/bondscompetities/%s/wijzig-datums/'                                # comp_pk
+    url_aangemeld_alles = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/alles/'     # comp_pk
     url_aangemeld_rayon = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/rayon-%s/'  # comp_pk, rayon_pk
     url_aangemeld_regio = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/'  # comp_pk, regio_pk
+    url_klassengrenzen = '/bondscompetities/%s/klassengrenzen/vaststellen/'                 # comp_pk
+    url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/'                     # comp.pk
 
     @classmethod
     def setUpTestData(cls):
@@ -115,18 +117,17 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
 
     def _doe_inschrijven(self, comp):
 
-        url_inschrijven = '/bondscompetities/deelnemen/leden-aanmelden/%s/' % comp.pk
+        url_inschrijven = self.url_inschrijven % comp.pk
 
         # meld een bak leden aan voor de competitie
         self.e2e_wisselnaarrol_bb()
 
         # klassengrenzen vaststellen
-        url_klassengrenzen = '/bondscompetities/%s/klassengrenzen/vaststellen/'
         with self.assert_max_queries(97):
-            resp = self.client.post(url_klassengrenzen % self.comp_18.pk)
+            resp = self.client.post(self.url_klassengrenzen % self.comp_18.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         with self.assert_max_queries(97):
-            resp = self.client.post(url_klassengrenzen % self.comp_25.pk)
+            resp = self.client.post(self.url_klassengrenzen % self.comp_25.pk)
         self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2
 
@@ -202,7 +203,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
             # for
 
             # schrijf in voor de competitie
-            with self.assert_max_queries(23):
+            with self.assert_max_queries(26):
                 resp = self.client.post(url_inschrijven, post_params)
             self.assert_is_redirect_not_plein(resp)         # check for success
         # for

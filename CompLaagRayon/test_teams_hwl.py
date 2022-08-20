@@ -295,7 +295,7 @@ class TestCompLaagRayonVerenigingTeams(E2EHelpers, TestCase):
         self._zet_ag(100013, 18)
 
         url = url_inschrijven % self.comp_18.pk
-        with self.assert_max_queries(33):
+        with self.assert_max_queries(38):
             resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R       # TODO: vervangen boogtype pk met afkorting!
                                           'lid_100003_boogtype_3': 'on',    # 3=BB
                                           'lid_100004_boogtype_1': 'on',    # 1=R

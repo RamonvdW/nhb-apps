@@ -300,7 +300,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             self._zet_ag(100013, 18)
 
             url = url_inschrijven % self.comp_18.pk
-            with self.assert_max_queries(33):
+            with self.assert_max_queries(38):
                 resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R       # TODO: vervang boogtype pk met afkorting!
                                               'lid_100003_boogtype_3': 'on',    # 3=BB
                                               'lid_100004_boogtype_1': 'on',    # 1=R
@@ -331,7 +331,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
 
         if do_25:
             url = url_inschrijven % self.comp_25.pk
-            with self.assert_max_queries(23):
+            with self.assert_max_queries(26):
                 self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
                                        'lid_100004_boogtype_1': 'on',    # 1=R
                                        'lid_100012_boogtype_1': 'on',    # 1=R
@@ -487,16 +487,21 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
                                     {'team_type': 'C', 'team_naam': 'test test test'})
         self.assert_is_redirect(resp, self.url_regio_teams % self.deelcomp18_regio111.pk)
 
+        resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk, {'team_type': 'RX'})
+        self.assert404(resp, 'Verkeerd team type')
+
+        resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk, {'team_type': '-#'})
+        self.assert404(resp, 'Verkeerd team type')
+
         # maak het maximum aantal teams aan
         for lp in range(9):
             resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
             self.assert_is_redirect_not_plein(resp)
         # for
 
-        # nu zijn er 10 teams. Maak #11 aan
-        resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 0),
-                                {'team_type': 'R2'})
-        self.assert404(resp, 'Team niet gevonden')
+        # er zijn al 10 teams. Maak #11 aan
+        resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
+        self.assert404(resp, 'Maximum van 10 teams is bereikt')
 
         # haal het teams overzicht op
         with self.assert_max_queries(20):
@@ -516,6 +521,9 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         # voorbij einddatum aanmaken / wijzigen teams
         self.deelcomp18_regio111.einde_teams_aanmaken -= datetime.timedelta(days=5)
         self.deelcomp18_regio111.save()
+
+        resp = self.client.post(self.url_maak_team % self.deelcomp18_regio111.pk)
+        self.assert404(resp, 'De deadline is gepasseerd')
 
         # ophalen mag, maar heeft geen wijzig / koppelen knoppen meer
         with self.assert_max_queries(20):
@@ -558,6 +566,13 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         # not-existing team pk
         resp = self.client.post(self.url_wijzig_team % (self.deelcomp18_regio111.pk, 999999))
         self.assert404(resp, 'Team niet gevonden')
+
+        self.e2e_wissel_naar_functie(self.functie_wl)
+        self.e2e_check_rol('WL')
+
+        # WL mag geen wijzigingen maken
+        resp = self.client.post(self.url_regio_teams % self.deelcomp18_regio111.pk)
+        self.assert403(resp, 'Geen toegang met deze rol')
 
         self.e2e_assert_other_http_commands_not_supported(self.url_regio_teams % self.deelcomp25_regio111.pk)
 

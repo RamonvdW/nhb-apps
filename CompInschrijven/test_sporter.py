@@ -17,6 +17,7 @@ from Score.operations import score_indiv_ag_opslaan, score_teams_ag_opslaan
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
+from time import sleep
 import datetime
 
 
@@ -893,6 +894,9 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
         self.assertEqual(RegioCompetitieSchutterBoog.objects.count(), 0)
         sporterboog = SporterBoog.objects.get(boogtype__afkorting='R')
         deelcomp = DeelCompetitie.objects.get(competitie__afstand='18', nhb_regio=self.nhbver.regio)
+        res = score_teams_ag_opslaan(sporterboog, 18, 8.25, self.account_twee, 'Test')
+        self.assertTrue(res)
+        sleep(0.050)        # zorg iets van spreiding in de 'when'
         res = score_teams_ag_opslaan(sporterboog, 18, 8.18, self.account_twee, 'Test')
         self.assertTrue(res)
 
