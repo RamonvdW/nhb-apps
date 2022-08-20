@@ -95,10 +95,12 @@ ORGANISATIES2SHORT_STR = {
     ORGANISATIE_IFAA: 'IFAA',
 }
 
+# wordt gebruikt in de zin:
+# Beschikbare disciplines van ...
 ORGANISATIES2LONG_STR = {
     ORGANISATIE_WA: 'World Archery',
-    ORGANISATIE_NHB: 'NHB',
-    ORGANISATIE_IFAA: 'IFAA',
+    ORGANISATIE_NHB: 'de NHB',
+    ORGANISATIE_IFAA: 'de IFAA',
 }
 
 BOOGTYPE_AFKORTING_RECURVE = 'R'

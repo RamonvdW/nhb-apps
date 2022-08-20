@@ -72,7 +72,7 @@
 
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3">
-                <div style="padding:30px">
+                <div class="form-padding">
                     <table class="white">
                         <tr>
                             <td><b>Voorkeuren voor aanmelden in bulk</b></td>

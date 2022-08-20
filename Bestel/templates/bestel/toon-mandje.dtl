@@ -91,7 +91,7 @@
 
                 <!-- dialoog venster -->
                 <div class="white left-align z-depth-3">
-                    <div style="padding:0 30px 30px 30px">
+                    <div class="form-padding" style="padding-top:0px">
 
                         <table class="white">
 

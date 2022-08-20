@@ -23,7 +23,7 @@
 
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3">
-                <div style="padding:30px">
+                <div class="form-padding">
 
                     {% if not readonly %}
                         <form action="{{ url_opslaan }}" method="post">
