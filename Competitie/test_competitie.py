@@ -614,10 +614,13 @@ class TestCompetitie(E2EHelpers, TestCase):
         self.assertEqual(count1, count2)
 
         # coverage
-        obj = CompetitieIndivKlasse.objects.all()[0]
+        obj = CompetitieIndivKlasse.objects.filter(is_voor_rk_bk=False)[0]
         self.assertTrue(str(obj) != "")
-        obj.indiv = None
-        obj.team = CompetitieTeamKlasse.objects.all()[0]
+        obj = CompetitieIndivKlasse.objects.filter(is_voor_rk_bk=True)[0]
+        self.assertTrue(str(obj) != "")
+        obj = CompetitieTeamKlasse.objects.filter(is_voor_teams_rk_bk=False)[0]
+        self.assertTrue(str(obj) != "")
+        obj = CompetitieTeamKlasse.objects.filter(is_voor_teams_rk_bk=True)[0]
         self.assertTrue(str(obj) != "")
 
     def test_klassengrenzen_vaststellen_cornercases(self):
