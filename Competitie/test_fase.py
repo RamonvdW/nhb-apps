@@ -9,6 +9,7 @@ from django.test import TestCase
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TeamType
 from Competitie.models import (Competitie, DeelCompetitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                LAAG_REGIO, LAAG_RK, LAAG_BK)
+from Functie.rol import Rollen
 import datetime
 
 
@@ -328,5 +329,55 @@ class TestCompetitieFase(TestCase):
             comp.bepaal_fase()
             self.assertEqual(comp.fase, fase)
         # for
+
+    def test_openbaar(self):
+        einde_jaar = datetime.date(year=2000, month=12, day=31)
+        comp = Competitie()
+        comp.begin_jaar = 2000
+        comp.uiterste_datum_lid = datetime.date(year=2000, month=1, day=1)
+        comp.begin_aanmeldingen = comp.einde_aanmeldingen = comp.einde_teamvorming = einde_jaar
+        comp.eerste_wedstrijd = comp.laatst_mogelijke_wedstrijd = einde_jaar
+        comp.datum_klassengrenzen_rk_bk_teams = einde_jaar
+        comp.rk_eerste_wedstrijd = comp.rk_laatste_wedstrijd = einde_jaar
+        comp.bk_eerste_wedstrijd = comp.bk_laatste_wedstrijd = einde_jaar
+        comp.save()
+
+        zet_competitie_fase(comp, 'A')
+
+        # altijd openbaar voor BB en BKO
+        comp.bepaal_openbaar(Rollen.ROL_BB)
+        self.assertTrue(comp.is_openbaar)
+
+        comp.bepaal_openbaar(Rollen.ROL_BKO)
+        self.assertTrue(comp.is_openbaar)
+
+        # altijd openbaar voor RKO/RCL/HWL
+        comp.bepaal_openbaar(Rollen.ROL_RKO)
+        self.assertTrue(comp.is_openbaar)
+
+        comp.bepaal_openbaar(Rollen.ROL_RCL)
+        self.assertTrue(comp.is_openbaar)
+
+        comp.bepaal_openbaar(Rollen.ROL_HWL)
+        self.assertTrue(comp.is_openbaar)
+
+        comp.bepaal_openbaar(Rollen.ROL_WL)
+        self.assertFalse(comp.is_openbaar)
+
+        comp.bepaal_openbaar(Rollen.ROL_SEC)
+        self.assertFalse(comp.is_openbaar)
+
+        comp.bepaal_openbaar(Rollen.ROL_MO)
+        self.assertFalse(comp.is_openbaar)
+
+        comp.bepaal_openbaar(Rollen.ROL_SPORTER)
+        self.assertFalse(comp.is_openbaar)
+
+        # vanaf fase B altijd openbaar
+        comp.fase = 'B'
+
+        comp.bepaal_openbaar(Rollen.ROL_SPORTER)
+        self.assertTrue(comp.is_openbaar)
+
 
 # end of file

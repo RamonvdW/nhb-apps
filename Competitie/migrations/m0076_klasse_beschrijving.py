@@ -21,7 +21,7 @@ def update_competitie_klassen(apps, _):
         volgorde2new[klasse.volgorde] = klasse.beschrijving
     # for
 
-    for obj in competitie_indiv_klas.objects.all():
+    for obj in competitie_indiv_klas.objects.all():     # pragma: no cover
         obj.beschrijving = volgorde2new[obj.volgorde]
         obj.save(update_fields=['beschrijving'])
     # for
