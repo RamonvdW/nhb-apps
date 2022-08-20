@@ -84,7 +84,7 @@
 
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3">
-                <div style="padding:0 30px 30px 30px">
+                <div class="form-padding" style="padding-top:0px">
 
                     <form method="post" action="{{ url_opslaan }}">
                         {% csrf_token %}
@@ -105,23 +105,6 @@
                             <tr>
                                 <th>Organiserende vereniging</th>
                                 <td>{{ wed.organiserende_vereniging }}</td>
-                            </tr>
-
-                            <tr>
-                                <th>Status</th>
-                                <td>
-                                    {% for opt in opt_status %}
-                                        <span class="{% if opt.selected %}nhb-blauw-text{% else %}grey-text{% endif %}" style="white-space: nowrap">{{ opt.status_str }}</span><br>
-                                    {% endfor %}
-                                    <br>
-                                    {% if url_prev_tekst %}
-                                        <button form="form_prev" class="btn-nhb-blauw vertrek_knop">{{ url_prev_tekst }}</button>
-                                        <span>&nbsp;&nbsp;</span>
-                                    {% endif %}
-                                    {% if url_next_tekst %}
-                                        <button form="form_next" class="btn-nhb-rood vertrek_knop">{{ url_next_tekst }}</button>
-                                    {% endif %}
-                                </td>
                             </tr>
 
                             <tr>
@@ -147,6 +130,34 @@
                                                 <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }}</option>
                                             {% endfor %}
                                         </select>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Wanneer moet de inschrijving sluiten?</th>
+                                <td>
+                                    <select name="sluit" onchange="gewijzigd()">
+                                        {% for opt in opt_sluit %}
+                                            <option value="{{ opt.sel }}"{% if opt.selected %} selected{% endif %}>{{ opt.keuze_str }} (op {{ opt.datum }} om 00:00)</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Status</th>
+                                <td>
+                                    {% for opt in opt_status %}
+                                        <span class="{% if opt.selected %}nhb-blauw-text{% else %}grey-text{% endif %}" style="white-space: nowrap">{{ opt.status_str }}</span><br>
+                                    {% endfor %}
+                                    <br>
+                                    {% if url_prev_tekst %}
+                                        <button form="form_prev" class="btn-nhb-blauw vertrek_knop">{{ url_prev_tekst }}</button>
+                                        <span>&nbsp;&nbsp;</span>
+                                    {% endif %}
+                                    {% if url_next_tekst %}
+                                        <button form="form_next" class="btn-nhb-rood vertrek_knop">{{ url_next_tekst }}</button>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -326,7 +337,7 @@
                             </tr>
 
                             <tr>
-                                <th style="padding-left:30px">Naam van contact<wbr>persoon / wedstrijd<wbr>leider</th>
+                                <th>Naam van contact<wbr>persoon / wedstrijd<wbr>leider</th>
                                 <td>
                                     {% if block_edits %}
                                         <span>{{ wed.contact_naam }}</span>
@@ -337,7 +348,7 @@
                             </tr>
 
                             <tr>
-                                <th style="padding-left:30px">Telefoon<wbr>nummer</th>
+                                <th>Telefoon<wbr>nummer</th>
                                 <td>
                                     {% if block_edits %}
                                         <span>{{ wed.contact_telefoon }}</span>
@@ -348,7 +359,7 @@
                             </tr>
 
                             <tr>
-                                <th style="padding-left:30px">E-mail<wbr>adres</th>
+                                <th>E-mail<wbr>adres</th>
                                 <td>
                                     {% if block_edits %}
                                         <span>{{ wed.contact_email }}</span>
@@ -359,7 +370,7 @@
                             </tr>
 
                             <tr>
-                                <th style="padding-left:30px">Website</th>
+                                <th>Website</th>
                                 <td>
                                     {% if block_edits %}
                                         <span>{{ wed.contact_website }}</span>
@@ -370,7 +381,7 @@
                             </tr>
 
                             <tr>
-                                <th style="padding-left:30px">Extern beheer</th>
+                                <th>Extern beheer</th>
                                 <td>
                                     {% if block_edits %}
                                         <span>{% if wed.extern_beheerd %}Ja{% else %}Nee{% endif %}</span>
@@ -389,7 +400,7 @@
                             </tr>
 
                             <tr>
-                                <th  style="padding-left:30px">Aantal banen tegelijk actief</th>
+                                <th>Aantal banen tegelijk actief</th>
                                 <td>
                                     {% if limit_edits %}
                                         <span>{{ wed.aantal_banen }} banen</span>
@@ -405,7 +416,7 @@
                             </tr>
 
                             <tr>
-                                <th style="padding-left:30px">Eigen scheids<wbr>rechters (namen)</th>
+                                <th>Eigen scheids<wbr>rechters (namen)</th>
                                 <td>
                                     {% if limit_edits %}
                                         <span>{{ wed.scheidsrechters|linebreaksbr }}</span>
@@ -430,7 +441,7 @@
                                 <td>
                                     {% for klasse in opt_klasse %}
                                         <label class="black-text">
-                                            <input type="checkbox" name="{{ klasse.sel }}" {% if klasse.gebruikt %}disabled checked{% else %}class="filled-in" {% if klasse.selected %} checked{% endif %}{% endif %} onchange="gewijzigd('{{ klasse.code_blokkeer }}')" data-code="{{ klasse.code }}">
+                                            <input type="checkbox" name="{{ klasse.sel }}" {% if klasse.gebruikt %}disabled checked{% else %}class="filled-in" {% if klasse.selected %} checked{% endif %}{% if klasse.disabled %} disabled{% endif %}{% endif %} onchange="gewijzigd('{{ klasse.code_blokkeer }}')" data-code="{{ klasse.code }}">
                                             <span>{{ klasse.volg_nr }}: {{ klasse.beschrijving }}<!-- ({{ klasse.code }} -> {{ klasse.code_blokkeer }}) --></span>
                                         </label><br>
                                     {% endfor %}
@@ -445,7 +456,7 @@
                                 <p>Let op! Onder 14 en 60+ klassen mogen op A-status wedstrijd, maar kunnen geen records claimen.</p>
                             {% endif %}
 
-                            <p>De wedstrijdklasse senioren is altijd de 'open' klasse waarin alle andere leeftijdsklassen mee mogen doen.</p>
+                            <p>De wedstrijdklasse van de volwassenen is altijd de 'open' klasse waarin alle andere leeftijdsklassen mee mogen doen.</p>
                             <p>Wedstrijdklassen en bogen die niet aangepast kunnen worden, zijn in gebruik in een sessie.</p>
                         </div>
 

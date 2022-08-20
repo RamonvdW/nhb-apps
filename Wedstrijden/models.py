@@ -354,6 +354,9 @@ class Wedstrijd(models.Model):
     datum_begin = models.DateField()
     datum_einde = models.DateField()
 
+    # hoeveel dagen van tevoren de online-inschrijving dicht doen?
+    inschrijven_tot = models.PositiveSmallIntegerField(default=7)
+
     # waar wordt de wedstrijd gehouden
     locatie = models.ForeignKey(WedstrijdLocatie, on_delete=models.PROTECT)
 

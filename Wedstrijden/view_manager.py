@@ -80,7 +80,7 @@ class KalenderManagerView(UserPassesTestMixin, View):
         context = dict()
 
         try:
-            status_str = kwargs['status'][:10]          # afkappen voor de veiligheid
+            status_str = kwargs['status'][:15]          # afkappen voor de veiligheid
             status = WEDSTRIJD_URL2STATUS[status_str]
         except KeyError:
             status = None

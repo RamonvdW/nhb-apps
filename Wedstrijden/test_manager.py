@@ -16,6 +16,7 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
     """ tests voor de Wedstrijden applicatie, module Manager """
 
     url_kalender_manager = '/wedstrijden/manager/'
+    url_kalender_manager_geannuleerd = '/wedstrijden/manager/geannuleerd/'
     url_kalender_vereniging = '/wedstrijden/vereniging/'
     url_kalender_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
 
@@ -55,7 +56,7 @@ class TestWedstrijdenManager(E2EHelpers, TestCase):
         self.e2e_wisselnaarrol_bb()
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_manager)
+            resp = self.client.get(self.url_kalender_manager_geannuleerd)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijden/overzicht-manager.dtl', 'plein/site_layout.dtl'))

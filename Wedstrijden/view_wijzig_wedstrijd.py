@@ -127,6 +127,20 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             opt_duur.append(opt)
         # for
 
+        context['opt_sluit'] = opt_sluit = list()
+        for lp in range(1, 14+1):
+            opt = SimpleNamespace()
+            opt.sel = 'sluit_%s' % lp
+            opt.selected = (wedstrijd.inschrijven_tot == lp)
+            opt.datum = wedstrijd.datum_begin - datetime.timedelta(days=lp)
+            if lp == 1:
+                opt.keuze_str = '1 dag voor aanvang'
+            else:
+                opt.keuze_str = '%s dagen voor aanvang' % lp
+
+            opt_sluit.append(opt)
+        # for
+
         context['opt_begrenzing'] = opt_begrenzing = list()
         for code, begrenzing_str in WEDSTRIJD_BEGRENZING_TO_STR.items():
             opt = SimpleNamespace()
@@ -213,6 +227,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
         gekozen_pks = list(wedstrijd.wedstrijdklassen.values_list('pk', flat=True))
         volg_nr = 0
         code = 0
+        code2klasse = dict()
         blokkeer2klasse = dict()
         for klasse in get_organisatie_klassen(wedstrijd.organisatie, gekozen_boog_pks):
             klasse.sel = 'klasse_%s' % klasse.pk
@@ -222,10 +237,12 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
             if klasse.leeftijdsklasse.wedstrijd_geslacht == GESLACHT_ALLE:
                 code += 1
                 klasse.code = code
+                code2klasse[code] = klasse
                 code += 1
                 klasse.code_blokkeer = code
                 blokkeer2klasse[code] = klasse
             else:
+                code2klasse[code] = klasse
                 klasse.code = code
                 klasse.code_blokkeer = 0
 
@@ -249,6 +266,15 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                     pass
                 else:
                     klasse.code_blokkeer = klasse2.code
+        # for
+        del blokkeer2klasse
+
+        # blokkeer checkbox als de te blokkeren klassen niet uit te zetten zijn
+        for klasse in opt_klasse:
+            if klasse.gebruikt:
+                klasse2 = code2klasse[klasse.code_blokkeer]
+                if not klasse2.selected:
+                    klasse2.disabled = True
         # for
 
         if wedstrijd.organisatie == ORGANISATIE_WA:
@@ -395,6 +421,17 @@ class WijzigWedstrijdView(UserPassesTestMixin, View):
                     duur -= 1
                     if 1 <= duur < 5:
                         wedstrijd.datum_einde += datetime.timedelta(days=duur)
+
+            if not block_edits:
+                sluit = request.POST.get('sluit', '')
+                if sluit.startswith('sluit_'):
+                    try:
+                        sluit = int(sluit[6:10])        # afkappen voor de veiligheid
+                    except ValueError:
+                        raise Http404('Fout in sluiting wedstrijd')
+
+                    if 1 <= sluit <= 14:
+                        wedstrijd.inschrijven_tot = sluit
 
             if not limit_edits:
                 disc = request.POST.get('discipline', '')

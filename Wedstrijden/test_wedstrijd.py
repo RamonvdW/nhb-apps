@@ -5,12 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from BasisTypen.models import KalenderWedstrijdklasse
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter
-from Wedstrijden.models import WedstrijdLocatie
-from .models import Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEANNULEERD
 from TestHelpers.e2ehelpers import E2EHelpers
+from Wedstrijden.models import WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEANNULEERD
 import datetime
 
 
@@ -154,7 +154,8 @@ class TestWedstrijd(E2EHelpers, TestCase):
                                           'aanwezig': 'aanwezig_35',
                                           'scheidsrechters': 'Scheids1\nScheids2',
                                           'begrenzing': 'begrenzing_L',
-                                          'extern': 'ja'})
+                                          'extern': 'ja',
+                                          'sluit': 'sluit_5'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
 
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
@@ -170,6 +171,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.minuten_voor_begin_sessie_aanwezig_zijn, 35)
         self.assertEqual(wedstrijd.locatie, locatie_buiten)
         self.assertEqual(wedstrijd.begrenzing, 'L')
+        self.assertEqual(wedstrijd.inschrijven_tot, 5)
         self.assertTrue(wedstrijd.extern_beheerd)
 
         datum = '%s-1-1' % (wedstrijd.datum_begin.year + 1)
@@ -216,7 +218,8 @@ class TestWedstrijd(E2EHelpers, TestCase):
                                           'wa_status': 'wa_B',
                                           'scheidsrechters': 'Scheids4',
                                           'begrenzing': 'begrenzing_V',         # mag wel
-                                          'extern': 'nee'})
+                                          'extern': 'nee',
+                                          'sluit': 'sluit_9999'})
         self.assert_is_redirect(resp, self.url_kalender_vereniging)
         wedstrijd = Wedstrijd.objects.get(pk=wedstrijd.pk)
         self.assertEqual(wedstrijd.titel, 'Test Titel 3')
@@ -230,6 +233,7 @@ class TestWedstrijd(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.discipline, 'OD')
         self.assertEqual(wedstrijd.scheidsrechters, 'Scheids1\nScheids2')
         self.assertEqual(wedstrijd.begrenzing, 'V')
+        self.assertEqual(wedstrijd.inschrijven_tot, 5)
         self.assertTrue(wedstrijd.extern_beheerd)
 
         # zet de wedstrijd door 'Geaccepteerd' en haal de pagina opnieuw op
@@ -375,6 +379,9 @@ class TestWedstrijd(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'aantal_banen': 'x'})
         self.assert404(resp, 'Fout in aantal banen')
+
+        resp = self.client.post(url, {'sluit': 'sluit_bla'})
+        self.assert404(resp, 'Fout in sluiting wedstrijd')
 
         # niet bestaande locatie
         # en niet bekende aanwezigheid
@@ -576,11 +583,11 @@ class TestWedstrijd(E2EHelpers, TestCase):
         sessie = WedstrijdSessie.objects.all()[0]
         sessie2 = WedstrijdSessie.objects.all()[1]
 
-        wkl = wedstrijd.wedstrijdklassen.get(volgorde=111)  # Recurve 50+ heren
+        wkl = wedstrijd.wedstrijdklassen.get(volgorde=111)  # Recurve 50+ Heren
         sessie.wedstrijdklassen.set([wkl])        # alle uit, behalve deze
         sessie2.wedstrijdklassen.set([wkl])       # alle uit, behalve deze
 
-        wkl = wedstrijd.wedstrijdklassen.get(volgorde=112)  # Recurve 50+ dames
+        wkl = wedstrijd.wedstrijdklassen.get(volgorde=112)  # Recurve 50+ Dames
         sessie2.wedstrijdklassen.add(wkl)         # nu 2 klassen
 
         # probeer nu de recurve boog uit te zetten
@@ -592,6 +599,10 @@ class TestWedstrijd(E2EHelpers, TestCase):
 
         self.assertEqual(wedstrijd.boogtypen.count(), 2)                # alleen R en C
 
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+
         # probeer nu alle wedstrijdklassen uit te zetten
         with self.assert_max_queries(20):
             resp = self.client.post(url, {})
@@ -600,7 +611,11 @@ class TestWedstrijd(E2EHelpers, TestCase):
         self.assertEqual(wedstrijd.boogtypen.count(), 1)                # alleen R
         self.assertEqual(wedstrijd.wedstrijdklassen.count(), 2)         # alleen de in de sessies gebruikte klassen
 
-        # doe een GET, voor de coverage
+        # corner-case: uniseks + gender-specifieke klasse actief
+        wkl = KalenderWedstrijdklasse.objects.get(volgorde=110)
+        wedstrijd.wedstrijdklassen.add(wkl)
+        sessie2.wedstrijdklassen.add(wkl)         # nu 3 klassen
+
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
