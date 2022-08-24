@@ -445,5 +445,19 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_leeftijdsgroepen)
 
+        # manager
+        self.account_normaal.is_BB = True
+        self.account_normaal.save(update_fields=['is_BB'])
+        self.e2e_account_accepteert_vhpg(self.account_normaal)
+        self.e2e_login_and_pass_otp(self.account_normaal)
+        self.e2e_wisselnaarrol_bb()
+        self.e2e_check_rol('BB')
+
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_leeftijdsgroepen)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('sporter/leeftijdsgroepen.dtl', 'plein/site_layout.dtl'))
+
 
 # end of file

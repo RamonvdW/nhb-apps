@@ -310,7 +310,7 @@ class E2EHelpers(TestCase):
         # while
         return checked, unchecked
 
-    SAFE_LINKS = ('/plein/', '/sporter/', '/bondscompetities/', '/records/', '/account/login/', '/account/logout/')
+    SAFE_LINKS = ('/plein/', '/bondscompetities/', '/records/', '/account/login/', '/account/logout/')
 
     def _test_link(self, link, template_name):
         """ make sure the link works """
@@ -318,9 +318,26 @@ class E2EHelpers(TestCase):
             return
 
         resp = self.client.head(link)
+
+        if resp.status_code == 302:                                                 # pragma: no cover
+            self.fail(msg='Found NOK href %s that gives code 302 (redirect to %s) on page %s' % (
+                        repr(link), resp.url, template_name))
+
         if resp.status_code != 200:                                                 # pragma: no cover
-            self.fail(msg='Found NOK href (gives code %s) on page %s (href=%s)' % (
-                resp.status_code, template_name, repr(link)))
+            self.e2e_dump_resp(resp)
+            self.fail(msg='Found NOK href %s that gives code %s on page %s' % (
+                        repr(link), resp.status_code, template_name))
+
+        # 403 and 404 also have status_code 200 but use a special template
+        for templ in resp.templates:
+            if templ.name == 'plein/fout_403.dtl':
+                self.fail(msg='Found NOK href %s that gives code 403 on page %s' % (
+                            repr(link), template_name))
+
+            if templ.name == 'plein/fout_404.dtl':
+                self.fail(msg='Found NOK href %s that gives code 404 on page %s' % (
+                            repr(link), template_name))
+        # for
 
     def assert_broodkruimels(self, content, template_name):
         # find the start
