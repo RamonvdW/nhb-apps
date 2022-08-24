@@ -7,10 +7,9 @@
 from django.core.management.base import BaseCommand
 from Competitie.models import Competitie, RegioCompetitieSchutterBoog, AG_NUL
 from Competitie.operations.klassengrenzen import KlasseBepaler
-from Sporter.models import Sporter, SporterBoog
-from Score.models import (Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV,
+from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
+from Score.models import (Aanvangsgemiddelde, AG_DOEL_INDIV,
                           Score, ScoreHist, SCORE_TYPE_GEEN)
-from decimal import Decimal
 
 
 class Command(BaseCommand):
@@ -55,6 +54,15 @@ class Command(BaseCommand):
         except Sporter.DoesNotExist:
             self.stderr.write('[ERROR] Sporter %s niet gevonden' % lid_nr)
             return
+
+        try:
+            voorkeuren = SporterVoorkeuren.objects.get(sporter=sporter)
+            if voorkeuren.wedstrijd_geslacht_gekozen:
+                wedstrijdgeslacht = voorkeuren.wedstrijd_geslacht   # M/V
+            else:
+                wedstrijdgeslacht = voorkeuren.sporter.geslacht     # M/V/X
+        except SporterVoorkeuren.DoesNotExist:
+            wedstrijdgeslacht = sporter.geslacht
 
         self.stdout.write('[INFO] Sporter %s is van vereniging %s in regio %s' % (
                         sporter.lid_nr_en_volledige_naam(),
@@ -160,7 +168,7 @@ class Command(BaseCommand):
 
         # bepaal de nieuwe klasse
         bepaler = KlasseBepaler(comp)
-        bepaler.bepaal_klasse_deelnemer(deelnemer)
+        bepaler.bepaal_klasse_deelnemer(deelnemer, wedstrijdgeslacht)
         self.stdout.write('[INFO] Nieuwe indiv_klasse: %s' % deelnemer.indiv_klasse)
 
         if not do_save:

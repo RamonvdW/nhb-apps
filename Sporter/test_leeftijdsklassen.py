@@ -123,27 +123,27 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         self.assertEqual(tup,
                          (2022, 20,
                           'Onder 21 Heren',
-                          ['Onder 21 Heren', 'Onder 21 Heren', '21+ Heren', '21+ Heren', '21+ Heren']))
+                          ['Onder 21 Heren', 'Onder 21 Heren', 'Heren', 'Heren', 'Heren']))
 
         # 21+
         tup = bereken_leeftijdsklassen_wa(self.huidige_jaar - 21, GESLACHT_MAN)
         self.assertEqual(tup,
                          (2022, 21,
-                          '21+ Heren',
-                          ['Onder 21 Heren', '21+ Heren', '21+ Heren', '21+ Heren', '21+ Heren']))
+                          'Heren',
+                          ['Onder 21 Heren', 'Heren', 'Heren', 'Heren', 'Heren']))
 
         tup = bereken_leeftijdsklassen_wa(self.huidige_jaar - 49, GESLACHT_MAN)
         self.assertEqual(tup,
                          (2022, 49,
-                          '21+ Heren',
-                          ['21+ Heren', '21+ Heren', '50+ Heren', '50+ Heren', '50+ Heren']))
+                          'Heren',
+                          ['Heren', 'Heren', '50+ Heren', '50+ Heren', '50+ Heren']))
 
         # 50+
         tup = bereken_leeftijdsklassen_wa(self.huidige_jaar - 50, GESLACHT_MAN)
         self.assertEqual(tup,
                          (2022, 50,
                           '50+ Heren',
-                          ['21+ Heren', '50+ Heren', '50+ Heren', '50+ Heren', '50+ Heren']))
+                          ['Heren', '50+ Heren', '50+ Heren', '50+ Heren', '50+ Heren']))
 
         # 50+
         tup = bereken_leeftijdsklassen_wa(self.huidige_jaar - 100, GESLACHT_MAN)
@@ -205,43 +205,43 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 21, GESLACHT_MAN)
         self.assertEqual(tup,
                          (2022, 21,
-                          '21+ Uniseks of 21+ Heren',
-                          ['Onder 21 Uniseks of Onder 21 Heren', '21+ Uniseks of 21+ Heren', '21+ Uniseks of 21+ Heren',
-                           '21+ Uniseks of 21+ Heren', '21+ Uniseks of 21+ Heren']))
+                          'Uniseks of Heren',
+                          ['Onder 21 Uniseks of Onder 21 Heren', 'Uniseks of Heren', 'Uniseks of Heren',
+                           'Uniseks of Heren', 'Uniseks of Heren']))
 
         tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 21, GESLACHT_VROUW)
         self.assertEqual(tup,
                          (2022, 21,
-                          '21+ Uniseks of 21+ Dames',
-                          ['Onder 21 Uniseks of Onder 21 Dames', '21+ Uniseks of 21+ Dames', '21+ Uniseks of 21+ Dames',
-                           '21+ Uniseks of 21+ Dames', '21+ Uniseks of 21+ Dames']))
+                          'Uniseks of Dames',
+                          ['Onder 21 Uniseks of Onder 21 Dames', 'Uniseks of Dames', 'Uniseks of Dames',
+                           'Uniseks of Dames', 'Uniseks of Dames']))
 
         tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 21, GESLACHT_ANDERS)
         self.assertEqual(tup,
                          (2022, 21,
-                          '21+ Uniseks',
-                          ['Onder 21 Uniseks', '21+ Uniseks', '21+ Uniseks', '21+ Uniseks', '21+ Uniseks']))
+                          'Uniseks',
+                          ['Onder 21 Uniseks', 'Uniseks', 'Uniseks', 'Uniseks', 'Uniseks']))
 
         # 50+
         tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 50, GESLACHT_MAN)
         self.assertEqual(tup,
                          (2022, 50,
                           '50+ Uniseks of 50+ Heren',
-                          ['21+ Uniseks of 21+ Heren', '50+ Uniseks of 50+ Heren', '50+ Uniseks of 50+ Heren',
+                          ['Uniseks of Heren', '50+ Uniseks of 50+ Heren', '50+ Uniseks of 50+ Heren',
                            '50+ Uniseks of 50+ Heren', '50+ Uniseks of 50+ Heren']))
 
         tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 50, GESLACHT_VROUW)
         self.assertEqual(tup,
                          (2022, 50,
                           '50+ Uniseks of 50+ Dames',
-                          ['21+ Uniseks of 21+ Dames', '50+ Uniseks of 50+ Dames', '50+ Uniseks of 50+ Dames',
+                          ['Uniseks of Dames', '50+ Uniseks of 50+ Dames', '50+ Uniseks of 50+ Dames',
                            '50+ Uniseks of 50+ Dames', '50+ Uniseks of 50+ Dames']))
 
         tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 50, GESLACHT_ANDERS)
         self.assertEqual(tup,
                          (2022, 50,
                           '50+ Uniseks',
-                          ['21+ Uniseks', '50+ Uniseks', '50+ Uniseks', '50+ Uniseks', '50+ Uniseks']))
+                          ['Uniseks', '50+ Uniseks', '50+ Uniseks', '50+ Uniseks', '50+ Uniseks']))
 
         # 60+
         tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 60, GESLACHT_MAN)
@@ -375,20 +375,20 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
         tup = bereken_leeftijdsklassen_bondscompetitie(self.huidige_jaar - 21, GESLACHT_MAN)
         self.assertEqual(tup,
                          (2022, 21,
-                          '21+',
-                          ['Onder 21', '21+', '21+', '21+', '21+']))
+                          'Uniseks',
+                          ['Onder 21', 'Uniseks', 'Uniseks', 'Uniseks', 'Uniseks']))
 
         tup = bereken_leeftijdsklassen_bondscompetitie(self.huidige_jaar - 50, GESLACHT_VROUW)
         self.assertEqual(tup,
                          (2022, 50,
-                          '21+',
-                          ['21+', '21+', '21+', '21+', '21+']))
+                          'Uniseks',
+                          ['Uniseks', 'Uniseks', 'Uniseks', 'Uniseks', 'Uniseks']))
 
         tup = bereken_leeftijdsklassen_bondscompetitie(self.huidige_jaar - 100, GESLACHT_VROUW)
         self.assertEqual(tup,
                          (2022, 100,
-                          '21+',
-                          ['21+', '21+', '21+', '21+', '21+']))
+                          'Uniseks',
+                          ['Uniseks', 'Uniseks', 'Uniseks', 'Uniseks', 'Uniseks']))
 
     def test_persoonlijk(self):
         # zonder login

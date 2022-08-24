@@ -113,7 +113,7 @@ class RecordsOverzichtView(ListView):
 
 class RecordsIndivSpecifiekView(TemplateView):
     """ Deze view laat een specifiek record zijn aan de hand van het nummer
-        Onder het record worden de relateerde records getoond.
+        Onder het record worden de gerelateerde records getoond.
     """
     # class variables shared by all instances
     template_name = TEMPLATE_RECORDS_SPECIFIEK

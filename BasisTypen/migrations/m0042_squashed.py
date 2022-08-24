@@ -25,9 +25,9 @@ LEEFTIJDSKLASSEN = (
     (53,       'MA',  GESLACHT_ALLE,  50, 0,   '50+',      '50+ Uniseks',             ORGANISATIE_NHB),
 
     # open klasse
-    (41,       'SV',  GESLACHT_VROUW, 0, 0,    '21+',      '21+ Dames',               ORGANISATIE_WA),
-    (42,       'SH',  GESLACHT_MAN,   0, 0,    '21+',      '21+ Heren',               ORGANISATIE_WA),
-    (43,       'SA',  GESLACHT_ALLE,  0, 0,    '21+',      '21+ Uniseks',             ORGANISATIE_NHB),
+    (41,       'SV',  GESLACHT_VROUW, 0, 0,    'Dames',    'Dames',                   ORGANISATIE_WA),   # 21+
+    (42,       'SH',  GESLACHT_MAN,   0, 0,    'Heren',    'Heren',                   ORGANISATIE_WA),   # 21+
+    (43,       'SA',  GESLACHT_ALLE,  0, 0,    'Uniseks',  'Uniseks',                 ORGANISATIE_NHB),  # 21+
 
     # Onder 21 (was: Junioren)
     (31,       'JV',  GESLACHT_VROUW, 0, 20,   'Onder 21', 'Onder 21 Dames',          ORGANISATIE_WA),

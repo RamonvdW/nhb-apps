@@ -19,7 +19,7 @@ from Competitie.operations import get_competitie_bogen
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV, AG_DOEL_TEAM
-from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
+from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren, get_sporter_voorkeuren
 import copy
 
 
@@ -464,8 +464,10 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     # iemand loopt te klooien
                     raise Http404('Sporter heeft geen voorkeur voor wedstrijden opgegeven')
 
+                sporter = sporterboog.sporter
+
                 # controleer lid bij vereniging HWL
-                if sporterboog.sporter.bij_vereniging != self.functie_nu.nhb_ver:
+                if sporter.bij_vereniging != self.functie_nu.nhb_ver:
                     # iemand loopt te klooien
                     raise PermissionDenied('Geen lid bij jouw vereniging')
 
@@ -477,6 +479,12 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                         .count() > 0):
                     # al aangemeld - zou niet hier moeten zijn gekomen
                     raise Http404('Sporter is al ingeschreven')
+
+                voorkeuren = get_sporter_voorkeuren(sporter)
+                if voorkeuren.wedstrijd_geslacht_gekozen:
+                    wedstrijdgeslacht = voorkeuren.wedstrijd_geslacht   # M/V
+                else:
+                    wedstrijdgeslacht = sporter.geslacht                # M/V/X
 
                 # bepaal in welke wedstrijdklasse de schutter komt
                 age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(deelcomp.competitie.begin_jaar + 1)
@@ -518,7 +526,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
 
                 # zoek een toepasselijke klasse aan de hand van de leeftijd
                 try:
-                    bepaler.bepaal_klasse_deelnemer(aanmelding)
+                    bepaler.bepaal_klasse_deelnemer(aanmelding, wedstrijdgeslacht)
                 except LookupError as exc:
                     raise Http404(str(exc))
 

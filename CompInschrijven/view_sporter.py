@@ -18,7 +18,7 @@ from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompeti
 from Competitie.operations import KlasseBepaler
 from Plein.menu import menu_dynamics
 from Score.models import AanvangsgemiddeldeHist, Aanvangsgemiddelde, AG_DOEL_INDIV, AG_DOEL_TEAM
-from Sporter.models import SporterVoorkeuren, SporterBoog
+from Sporter.models import SporterVoorkeuren, SporterBoog, get_sporter_voorkeuren
 from decimal import Decimal
 
 
@@ -87,6 +87,12 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
 
         # urlconf parameters geaccepteerd
 
+        voorkeuren = get_sporter_voorkeuren(sporter)
+        if voorkeuren.wedstrijd_geslacht_gekozen:
+            wedstrijdgeslacht = voorkeuren.wedstrijd_geslacht   # M/V
+        else:
+            wedstrijdgeslacht = sporter.geslacht                # M/V/X
+
         # bepaal in welke wedstrijdklasse de sporter komt
         age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(comp.begin_jaar + 1)
 
@@ -109,7 +115,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
 
         bepaler = KlasseBepaler(comp)
         try:
-            bepaler.bepaal_klasse_deelnemer(aanmelding)
+            bepaler.bepaal_klasse_deelnemer(aanmelding, wedstrijdgeslacht)
         except LookupError as exc:
             raise Http404(str(exc))
 
@@ -280,6 +286,12 @@ class RegiocompetitieAanmeldenView(View):
 
         # urlconf parameters geaccepteerd
 
+        voorkeuren = get_sporter_voorkeuren(sporter)
+        if voorkeuren.wedstrijd_geslacht_gekozen:
+            wedstrijdgeslacht = voorkeuren.wedstrijd_geslacht   # M/V
+        else:
+            wedstrijdgeslacht = sporter.geslacht                # M/V/X
+
         # bepaal de inschrijfmethode voor deze regio
         methode = deelcomp.inschrijf_methode
 
@@ -321,7 +333,7 @@ class RegiocompetitieAanmeldenView(View):
 
         bepaler = KlasseBepaler(deelcomp.competitie)
         try:
-            bepaler.bepaal_klasse_deelnemer(aanmelding)
+            bepaler.bepaal_klasse_deelnemer(aanmelding, wedstrijdgeslacht)
         except LookupError as exc:
             raise Http404(str(exc))
 

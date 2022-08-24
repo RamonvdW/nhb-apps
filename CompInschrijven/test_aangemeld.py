@@ -203,7 +203,7 @@ class TestCompInschrijvenAangemeld(E2EHelpers, TestCase):
             # for
 
             # schrijf in voor de competitie
-            with self.assert_max_queries(26):
+            with self.assert_max_queries(29):
                 resp = self.client.post(url_inschrijven, post_params)
             self.assert_is_redirect_not_plein(resp)         # check for success
         # for

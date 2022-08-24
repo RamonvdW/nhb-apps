@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand
 from Competitie.models import Competitie, RegioCompetitieSchutterBoog, AG_NUL
 from Competitie.operations.klassengrenzen import KlasseBepaler
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV, AG_DOEL_TEAM
-from decimal import Decimal
+from Sporter.models import SporterVoorkeuren
 
 
 class Command(BaseCommand):
@@ -64,6 +64,15 @@ class Command(BaseCommand):
                 sporterboog_pk2ag_teams[ag.sporterboog.pk] = ag.waarde
         # for
 
+        sporter_pk2wedstrijdgeslacht = dict()
+        for voorkeuren in SporterVoorkeuren.objects.select_related('sporter').all():
+            if voorkeuren.wedstrijd_geslacht_gekozen:
+                wedstrijdgeslacht = voorkeuren.wedstrijd_geslacht   # M/V
+            else:
+                wedstrijdgeslacht = voorkeuren.sporter.geslacht     # M/V/X
+            sporter_pk2wedstrijdgeslacht[voorkeuren.sporter.pk] = wedstrijdgeslacht
+        # for
+
         for deelnemer in (RegioCompetitieSchutterBoog
                           .objects
                           .select_related('sporterboog__sporter',
@@ -96,9 +105,14 @@ class Command(BaseCommand):
                 deelnemer.ag_voor_indiv = ag_indiv
                 do_save = True
 
+                try:
+                    wedstrijdgeslacht = sporter_pk2wedstrijdgeslacht[deelnemer.sporterboog.sporter.pk]
+                except KeyError:
+                    wedstrijdgeslacht = deelnemer.sporterboog.sporter.geslacht
+
                 # klasse opnieuw bepalen
                 indiv_klasse = deelnemer.indiv_klasse
-                bepaler.bepaal_klasse_deelnemer(deelnemer)
+                bepaler.bepaal_klasse_deelnemer(deelnemer, wedstrijdgeslacht)
 
                 if indiv_klasse != deelnemer.indiv_klasse:
                     self.stdout.write('deelnemer %s : indiv_klasse=%s --> %s' % (

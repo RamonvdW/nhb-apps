@@ -5,8 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
+from BasisTypen.models import GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS
 from Competitie.models import CompetitieIndivKlasse, RegioCompetitieSchutterBoog
 from Competitie.operations.klassengrenzen import KlasseBepaler
+from Sporter.models import SporterVoorkeuren
 
 
 class Command(BaseCommand):
@@ -56,28 +58,75 @@ class Command(BaseCommand):
         # for
 
         # debug dump
+        # comp_pk2afstand = dict()
+        # for comp in Competitie.objects.all():
+        #     comp_pk2afstand[comp.pk] = comp.afstand
+        # # for
         # for volgorde, klasse in volgorde2klasse.items():
+        #     comp_pk = volgorde[0]
+        #     afstand = comp_pk2afstand[comp_pk]
         #     try:
         #         hogere_klasse = volgorde2hogere_klasse[volgorde]
-        #         print('klasse %s --> hoger: %s' % (klasse, hogere_klasse))
+        #         print('klasse %s %sm --> hoger: %s' % (klasse, afstand, hogere_klasse))
         #     except KeyError:
-        #         print('klasse %s --> hoger: geen' % klasse)
+        #         print('klasse %s %sm --> hoger: geen' % (klasse, afstand))
         #         pass
         # # for
 
+        sporter_pk2wedstrijdgeslacht = dict()
+        for voorkeuren in SporterVoorkeuren.objects.select_related('sporter').all():
+            if voorkeuren.wedstrijd_geslacht_gekozen:
+                wedstrijdgeslacht = voorkeuren.wedstrijd_geslacht   # M/V
+            else:
+                wedstrijdgeslacht = voorkeuren.sporter.geslacht     # M/V/X
+            sporter_pk2wedstrijdgeslacht[voorkeuren.sporter.pk] = wedstrijdgeslacht
+        # for
+
+        prev_comp_pk = jaartal = -1
         for deelnemer in (RegioCompetitieSchutterBoog
                           .objects
                           .select_related('indiv_klasse',
+                                          'sporterboog',
+                                          'sporterboog__sporter',
                                           'deelcompetitie__competitie')
-                          .all()):                                          # pragma: no cover
+                          .order_by('deelcompetitie__competitie__pk')):     # pragma: no cover
 
             comp_pk = deelnemer.deelcompetitie.competitie.pk
             volgorde = deelnemer.indiv_klasse.volgorde
 
+            if comp_pk != prev_comp_pk:
+                bepaler = KlasseBepaler(deelnemer.deelcompetitie.competitie)
+                prev_comp_pk = comp_pk
+                jaartal = deelnemer.deelcompetitie.competitie.begin_jaar + 1
+
+            try:
+                wedstrijdgeslacht = sporter_pk2wedstrijdgeslacht[deelnemer.sporterboog.sporter.pk]
+            except KeyError:
+                wedstrijdgeslacht = deelnemer.sporterboog.sporter.geslacht
+
             try:
                 hogere_klasse = volgorde2hogere_klasse[(comp_pk, volgorde)]
             except KeyError:
-                pass
+                # controleer dat aspiranten met geslacht anders niet in Onder 18 terecht gekomen zijn
+                wedstrijdleeftijd = deelnemer.sporterboog.sporter.bereken_wedstrijdleeftijd_wa(jaartal)
+
+                if wedstrijdgeslacht == GESLACHT_ANDERS and wedstrijdleeftijd < 18:
+                    print('Aspirant met geslacht anders mogelijk in te hogen gender-neutrale klasse ingedeeld')
+                    # omdat wedstrijdgeslacht niet ingesteld is
+                    oude_klasse = deelnemer.indiv_klasse
+                    oude_max_leeftijd = max([lkl.max_wedstrijdleeftijd for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all()])
+                    print(deelnemer, wedstrijdleeftijd, '\n          ', oude_klasse, '<=', oude_max_leeftijd, 'jaar')
+                    bepaler.bepaal_klasse_deelnemer(deelnemer, GESLACHT_MAN)
+                    alt_h = deelnemer.indiv_klasse
+                    alt_h_leeftijd = max([lkl.max_wedstrijdleeftijd for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all()])
+                    bepaler.bepaal_klasse_deelnemer(deelnemer, GESLACHT_VROUW)
+                    alt_d = deelnemer.indiv_klasse
+                    alt_d_leeftijd = max([lkl.max_wedstrijdleeftijd for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all()])
+
+                    if alt_d_leeftijd != oude_max_leeftijd or alt_d_leeftijd != oude_max_leeftijd:
+                        print('    alt_h: %s <= %s jaar' % (alt_h, alt_h_leeftijd))
+                        print('    alt_d: %s <= %s jaar' % (alt_d, alt_d_leeftijd))
+
             else:
                 indiv_ag = deelnemer.ag_voor_indiv
                 klasse_min_ag = hogere_klasse.min_ag
@@ -86,12 +135,13 @@ class Command(BaseCommand):
                     self.stdout.write('[WARNING] %s: klasse %s, indiv_ag %s < hogere klasse min_ag %s (%s)' % (
                                         deelnemer, deelnemer.indiv_klasse, indiv_ag, klasse_min_ag, hogere_klasse))
 
-                    bepaler = KlasseBepaler(deelnemer.deelcompetitie.competitie)
-                    bepaler.bepaal_klasse_deelnemer(deelnemer)
+                    bepaler.bepaal_klasse_deelnemer(deelnemer, wedstrijdgeslacht)
                     self.stdout.write('          nieuwe indiv_klasse: %s' % deelnemer.indiv_klasse)
 
                     if do_save:
                         deelnemer.save(update_fields=['indiv_klasse'])
+
+
         # for
 
 # end of file

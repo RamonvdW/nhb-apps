@@ -751,7 +751,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
 
         # doe de inschrijving
         url = self.url_aanmelden % (deelcomp.pk, sporterboog.pk)
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.post(url, {'wedstrijd_%s' % match_pk: 'on',
                                           'wedstrijd_99999': 'on'})     # is ignored
         self.assert_is_redirect(resp, self.url_profiel)
@@ -769,7 +769,7 @@ class TestCompInschrijvenSporter(E2EHelpers, TestCase):
 
         # doe de inschrijving
         url = self.url_aanmelden % (deelcomp.pk, sporterboog2.pk)
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.post(url, {'wedstrijd_%s' % match_pk: 'on'})
         self.assert_is_redirect(resp, self.url_profiel)
 

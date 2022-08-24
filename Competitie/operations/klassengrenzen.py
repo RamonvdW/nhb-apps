@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.utils import timezone
-from BasisTypen.models import MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT, GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE
+from BasisTypen.models import (MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT,
+                               GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ANDERS, GESLACHT_ALLE)
 from Competitie.models import AG_NUL, AG_LAAGSTE_NIET_NUL, CompetitieIndivKlasse, CompetitieTeamKlasse
 from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV
 from Sporter.models import Sporter
@@ -414,7 +415,8 @@ class KlasseBepaler(object):
         self.lkl_cache = {
             GESLACHT_MAN: self.lkl_cache_mannen,
             GESLACHT_ALLE: self.lkl_cache_neutraal,
-            GESLACHT_VROUW: self.lkl_cache_vrouwen
+            GESLACHT_VROUW: self.lkl_cache_vrouwen,
+            GESLACHT_ANDERS: self.lkl_cache_neutraal
         }
 
         # vul de caches met individuele wedstrijdklassen
@@ -440,8 +442,14 @@ class KlasseBepaler(object):
             # for
         # for
 
-    def bepaal_klasse_deelnemer(self, deelnemer):
-        """ deze functie zet deelnemer klasse aan de hand van de sporterboog """
+    def bepaal_klasse_deelnemer(self, deelnemer, wedstrijdgeslacht):
+        """ deze functie zet deelnemer klasse aan de hand van de sporterboog
+
+            wedstrijdgeslacht:
+                GESLACHT_MAN:    past op leeftijdsklasse GESLACHT_MAN
+                GESLACHT_VROUW:  past op leeftijdsklasse GESLACHT_VROUW
+                GESLACHT_ANDERS: past op leeftijdsklasse GESLACHT_ALLE
+        """
 
         ag = deelnemer.ag_voor_indiv
         sporterboog = deelnemer.sporterboog
@@ -464,7 +472,7 @@ class KlasseBepaler(object):
         else:
             for klasse in klassen:
                 if ag >= klasse.min_ag or klasse.is_onbekend:
-                    for geslacht in (sporter.geslacht, GESLACHT_ALLE):
+                    for geslacht in (wedstrijdgeslacht, GESLACHT_ALLE):
                         try:
                             lkls = self.lkl_cache[geslacht][klasse.pk]
                         except KeyError:

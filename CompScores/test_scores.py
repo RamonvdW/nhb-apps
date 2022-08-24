@@ -520,6 +520,10 @@ class TestCompScoresScores(E2EHelpers, TestCase):
                                     content_type='application/json')
         self.assert404(resp, 'Geen competitie wedstrijd')
 
+        self.assertTrue(str(wedstrijd2) != '')
+        wedstrijd2.vereniging = self.testdata.vereniging[1053]
+        self.assertTrue(str(wedstrijd2) != '')
+
     def test_hwl(self):
         # log in als HWL
         self.e2e_login_and_pass_otp(self.testdata.account_bb)

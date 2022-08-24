@@ -300,7 +300,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
             self._zet_ag(100013, 18)
 
             url = url_inschrijven % self.comp_18.pk
-            with self.assert_max_queries(38):
+            with self.assert_max_queries(43):
                 resp = self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R       # TODO: vervang boogtype pk met afkorting!
                                               'lid_100003_boogtype_3': 'on',    # 3=BB
                                               'lid_100004_boogtype_1': 'on',    # 1=R
@@ -331,7 +331,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
 
         if do_25:
             url = url_inschrijven % self.comp_25.pk
-            with self.assert_max_queries(26):
+            with self.assert_max_queries(29):
                 self.client.post(url, {'lid_100002_boogtype_1': 'on',    # 1=R
                                        'lid_100004_boogtype_1': 'on',    # 1=R
                                        'lid_100012_boogtype_1': 'on',    # 1=R

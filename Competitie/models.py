@@ -157,7 +157,7 @@ class Competitie(models.Model):
     begin_jaar = models.PositiveSmallIntegerField()     # 2019
 
     # wanneer moet een schutter lid zijn bij de bond om mee te mogen doen aan de teamcompetitie?
-    uiterste_datum_lid = models.DateField()
+    uiterste_datum_lid = models.DateField()     # TODO: niet meer gebruiken; mag weg
 
     # alle ondersteunde typen bogen en teams
     teamtypen = models.ManyToManyField(TeamType)
@@ -708,7 +708,11 @@ class DeelcompetitieTeamKlasseLimiet(models.Model):
     limiet = models.PositiveSmallIntegerField(default=24)
 
     def __str__(self):
-        return "%s : %s - %s" % (self.limiet, self.team_klasse.beschrijving, self.deelcompetitie)
+        msg = "%s : " % self.limiet
+        if self.team_klasse:
+            msg += "%s - " % self.team_klasse.beschrijving
+        msg += "%s" % self.deelcompetitie
+        return msg
 
     class Meta:
         verbose_name = "Deelcompetitie TeamKlasse Limiet"

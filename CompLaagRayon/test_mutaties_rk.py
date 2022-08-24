@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.core import management
 from BasisTypen.models import BoogType
 from Competitie.test_fase import zet_competitie_fase
-from Competitie.models import (Competitie, CompetitieIndivKlasse,
+from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                DeelcompetitieIndivKlasseLimiet, DeelcompetitieTeamKlasseLimiet,
                                CompetitieMutatie, MUTATIE_INITIEEL, MUTATIE_CUT, MUTATIE_AFMELDEN,
                                MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M,
@@ -677,6 +677,13 @@ class TestCompLaagRayonMutatiesRK(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'afmelden': 1, 'snel': 1})
         self.assert_is_redirect(resp, self.url_lijst_rko)  # 302 = redirect = success
+
+        self.assertTrue(str(self.cut) != '')
+
+        temp = DeelcompetitieTeamKlasseLimiet(deelcompetitie=self.deelcomp_rk)
+        self.assertTrue(str(temp) != '')
+        temp.team_klasse = CompetitieTeamKlasse.objects.all()[0]
+        self.assertTrue(str(temp) != '')
 
         # verplaats de cut naar 8
         url = self.url_wijzig_cut_rk % self.deelcomp_rk.pk
