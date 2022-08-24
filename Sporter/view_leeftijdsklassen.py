@@ -132,10 +132,17 @@ class InfoLeeftijdenView(TemplateView):
 
         context['persoonlijke_leeftijdsklassen'] = self.request.user.is_authenticated
 
-        context['kruimels'] = (
-            (reverse('Sporter:profiel'), 'Mijn pagina'),
-            (None, 'Leeftijdsgroepen')
-        )
+        rol = rol_get_huidige(self.request)
+        if rol == Rollen.ROL_SPORTER:
+            context['kruimels'] = (
+                (reverse('Sporter:profiel'), 'Mijn pagina'),
+                (None, 'Leeftijdsgroepen')
+            )
+        else:
+            context['kruimels'] = (
+                (reverse('Competitie:kies'), 'Bondscompetities'),
+                (None, 'Leeftijdsgroepen')
+            )
 
         menu_dynamics(self.request, context)
         return context
