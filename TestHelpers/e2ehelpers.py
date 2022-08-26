@@ -310,6 +310,20 @@ class E2EHelpers(TestCase):
         # while
         return checked, unchecked
 
+    @staticmethod
+    def _get_error_msg_from_403_page(resp):
+        error_msg = '??403??'
+        pagina = str(resp.content)
+        pos = pagina.find('<code>')
+        pos2 = pagina.find('</code>')
+        if pos > 0 and pos2 > 0:
+            error_msg = pagina[pos+6:pos2]
+        elif 'We hebben geen extra informatie over deze situatie' in pagina:
+            error_msg = '<not provided>'
+        else:
+            print('_get_error_msg_from_403_page: pagina=%s' % repr(pagina))
+        return error_msg
+
     SAFE_LINKS = ('/plein/', '/bondscompetities/', '/records/', '/account/login/', '/account/logout/')
 
     def _test_link(self, link, template_name):
@@ -331,8 +345,11 @@ class E2EHelpers(TestCase):
         # 403 and 404 also have status_code 200 but use a special template
         for templ in resp.templates:
             if templ.name == 'plein/fout_403.dtl':
-                self.fail(msg='Found NOK href %s that gives code 403 on page %s' % (
-                            repr(link), template_name))
+                # haal de hele pagina op, inclusief de foutmelding
+                resp = self.client.get(link)
+                error_msg = self._get_error_msg_from_403_page(resp)
+                self.fail(msg='Found NOK href %s that gives code 403 with message "%s" on page %s' % (
+                            repr(link), error_msg, template_name))
 
             if templ.name == 'plein/fout_404.dtl':
                 self.fail(msg='Found NOK href %s that gives code 404 on page %s' % (
