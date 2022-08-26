@@ -129,7 +129,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             begin_jaar = comp.begin_jaar
             comp.bepaal_fase()
 
-            if prev_jaar != begin_jaar or prev_afstand != comp.afstand:
+            if prev_jaar != begin_jaar or prev_afstand != comp.afstand:     # pragma: no branch
                 if len(kaartjes) and hasattr(kaartjes[-1], 'heading'):
                     # er waren geen kaartjes voor die competitie - meld dat
                     kaartje = SimpleNamespace()
@@ -238,8 +238,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje.tekst = 'Overzicht gekozen wedstrijden.'
                         kaartje.url = reverse('CompLaagRegio:wie-schiet-waar', kwargs={'deelcomp_pk': deelcomp.pk})
                         kaartje.icon = 'gamepad'
-                        if comp.fase < 'B':
-                            kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)
+                        # if comp.fase < 'B':
+                        #     kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)
                         kaartjes.append(kaartje)
             # for
 

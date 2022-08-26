@@ -974,6 +974,10 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         for rol in ('SEC', 'HWL', 'WL'):
             tmp_func = maak_functie(rol + " nhbver 1099", rol)
             tmp_func.nhb_ver = ver
+
+            if rol == 'SEC':
+                tmp_func.bevestigde_email = 'sec@1099.not'
+
             tmp_func.save()
         # for
 
