@@ -191,16 +191,9 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
         except KeyError:
             context['moet_oude_ww_weten'] = True
 
-        account = self.request.user
-        if account.sporter_set.count() > 0:      # FUTURE: ongewenste kennis over op Sporter.account
-            context['kruimels'] = (
-                (reverse('Sporter:profiel'), 'Mijn pagina'),
-                (None, 'Wachtwoord wijzigen')
-            )
-        else:
-            context['kruimels'] = (
-                (None, 'Wachtwoord wijzigen'),
-            )
+        context['kruimels'] = (
+            (None, 'Wachtwoord wijzigen'),
+        )
 
         menu_dynamics(self.request, context)
         return context
