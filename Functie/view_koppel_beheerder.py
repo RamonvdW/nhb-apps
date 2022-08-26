@@ -393,6 +393,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.rol_nu = None
         self._form = None
         self._functie = None
         self._zoekterm = None
@@ -400,8 +401,10 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        rol = rol_get_huidige(self.request)
-        return rol in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_SEC, Rollen.ROL_HWL)
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu in (Rollen.ROL_BB,
+                               Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
+                               Rollen.ROL_SEC, Rollen.ROL_HWL)
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
@@ -496,7 +499,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
         context['zoekterm'] = self._zoekterm
         context['form'] = self._form
 
-        if self._functie.rol in ('SEC', 'HWL', 'WL'):
+        if self.rol_nu in ('SEC', 'HWL'):
             context['is_vereniging_rol'] = True
 
             # Je kan hier op twee manieren komen:
@@ -509,6 +512,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
                 (None, 'Wijzig beheerder')
             )
         else:
+            # beheerder competitie
             context['kruimels'] = (
                 (reverse('Competitie:kies'), 'Bondscompetities'),
                 (reverse('Functie:overzicht'), 'Beheerders'),
