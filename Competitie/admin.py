@@ -91,7 +91,8 @@ class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
         ('Wie',
             {'fields': ('deelcompetitie',
                         'bij_vereniging',
-                        'sporterboog')
+                        'sporterboog',
+                        'competitieleeftijd')
              }),
         ('Individueel',
             {'fields': (('ag_voor_indiv',),
@@ -124,7 +125,7 @@ class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
 
     autocomplete_fields = ('bij_vereniging',)
 
-    readonly_fields = ('scores', 'aangemeld_door')
+    readonly_fields = ('scores', 'aangemeld_door', 'competitieleeftijd')
 
     search_fields = ('sporterboog__sporter__unaccented_naam',
                      'sporterboog__sporter__lid_nr')
@@ -147,6 +148,15 @@ class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
     def __init__(self, model, admin_site):
         super().__init__(model, admin_site)
         self.obj = None
+
+    @staticmethod
+    def competitieleeftijd(obj):     # pragma: no cover
+        comp = obj.deelcompetitie.competitie
+        msg = "%s jaar (seizoen %s/%s)" % (
+                obj.sporterboog.sporter.bereken_wedstrijdleeftijd_wa(comp.begin_jaar) + 1,
+                comp.begin_jaar,
+                comp.begin_jaar + 1)
+        return msg
 
     def get_form(self, request, obj=None, **kwargs):                    # pragma: no cover
         if obj:
