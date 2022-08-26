@@ -24,7 +24,7 @@ urlpatterns = [
          name='leden-voorkeuren'),
 
 
-    # Accommodatie
+    # Accommodatie (voor gebruik van buiten Beheer vereniging)
     path('accommodaties/lijst/',
          view_lijst_verenigingen.LijstVerenigingenView.as_view(),
          name='lijst-verenigingen'),
@@ -33,6 +33,7 @@ urlpatterns = [
          view_accommodatie.AccommodatieDetailsView.as_view(),
          name='accommodatie-details'),
 
+    # eigen accommodatie
     path('accommodatie-details/<vereniging_pk>/',
          view_accommodatie.VerenigingAccommodatieDetailsView.as_view(),
          name='vereniging-accommodatie-details'),

@@ -417,7 +417,7 @@ class TestVerenigingAccommodatie(E2EHelpers, TestCase):
         self.functie_sec.accounts.clear()
 
         # check accommodatie detail pagina
-        url = self.url_accommodatie_details % self.nhbver2.pk
+        url = self.url_accommodatie_vereniging % self.nhbver2.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK

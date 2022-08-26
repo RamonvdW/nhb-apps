@@ -119,13 +119,14 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
             context['url_toevoegen'] = reverse('Wedstrijden:inschrijven-handmatig',
                                                kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-        if self.rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_SEC):
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
                 (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
                 (None, 'Aanmeldingen'),
             )
         else:
+            # BB
             context['kruimels'] = (
                 (reverse('Wedstrijden:manager'), 'Wedstrijdkalender'),
                 (None, 'Aanmeldingen'),
@@ -421,16 +422,23 @@ class KalenderDetailsSporterView(UserPassesTestMixin, TemplateView):
 
         lijst.sort()
 
-        if not url_aanmeldingen:
-            # exacte wedstrijd weten we niet!
-            url_aanmeldingen = reverse('Wedstrijden:vereniging')
+        if self.rol_nu == Rollen.ROL_BB:
+            context['kruimels'] = (
+                (reverse('Wedstrijden:manager'), 'Wedstrijdkalender'),
+                (reverse('Wedstrijden:manager'), 'Aanmeldingen'),       # TODO: exacte wedstrijd weten we niet!
+                (None, 'Details aanmelding')
+            )
+        else:
+            if not url_aanmeldingen:
+                # exacte wedstrijd weten we niet!
+                url_aanmeldingen = reverse('Wedstrijden:vereniging')
 
-        context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
-            (url_aanmeldingen, 'Aanmeldingen'),
-            (None, 'Details aanmelding')
-        )
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
+                (url_aanmeldingen, 'Aanmeldingen'),
+                (None, 'Details aanmelding')
+            )
 
         menu_dynamics(self.request, context)
         return context

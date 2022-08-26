@@ -20,8 +20,10 @@ TEMPLATE_CONTACT_GEEN_BEHEERDERS = 'vereniging/contact-geen-beheerders.dtl'
 
 class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
 
-    """ Via deze view worden kan een BKO, RKO of RCL
-          de lijst van verenigingen zien, in zijn werkgebied
+    """ Via deze view worden kan
+            de BB een lijst van alle verenigingen zien
+            een BKO, RKO of RCL de lijst van verenigingen zien, in zijn werkgebied
+            de SEC, HWL of WL een lijst van verenigingen in hun regio zien
     """
 
     template_name = TEMPLATE_LIJST_VERENIGINGEN
@@ -39,7 +41,9 @@ class LijstVerenigingenView(UserPassesTestMixin, TemplateView):
         if self.rol_nu == Rollen.ROL_BB:
             self.is_staff = self.request.user.is_staff
 
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_SEC)
+        return self.rol_nu in (Rollen.ROL_BB,
+                               Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
+                               Rollen.ROL_HWL, Rollen.ROL_SEC)
 
     def _get_verenigingen(self):
 

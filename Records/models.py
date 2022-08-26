@@ -26,12 +26,17 @@ MATERIAALKLASSE = [('R', 'Recurve'),
                    ('C', 'Compound'),
                    ('BB', 'Barebow'),
                    ('LB', 'Longbow'),
-                   ('IB', 'Instinctive bow')]
+                   # ('TR', 'Traditional'),
+                   ('IB', 'Instinctive bow')]   # IB = legacy
 
 LEEFTIJDSCATEGORIE = [('M', 'Master'),
+                      # ('m', '50+'),
                       ('S', 'Senior'),
+                      # ('s', '21+'),
                       ('J', 'Junior'),
+                      # ('j', 'Onder 21'),
                       ('C', 'Cadet'),
+                      # ('c', 'Onder 18'),
                       ('U', 'Uniform (para)')]
 
 # FUTURE: support voor team records toevoegen
@@ -88,7 +93,7 @@ class IndivRecord(models.Model):
     # eventuele notities
     score_notitie = models.CharField(max_length=30, blank=True)
 
-    # was het toen een europeesch of wereld record?
+    # was het toen een Europees of wereld record?
     is_european_record = models.BooleanField(default=False)
     is_world_record = models.BooleanField(default=False)
 
