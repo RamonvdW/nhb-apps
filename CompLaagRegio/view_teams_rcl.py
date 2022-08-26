@@ -268,6 +268,7 @@ class RegioTeamsRCLView(UserPassesTestMixin, RegioTeamsView):
     # class variables shared by all instances
     subset_filter = False
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -282,6 +283,7 @@ class RegioTeamsAlleView(UserPassesTestMixin, RegioTeamsView):
     # class variables shared by all instances
     subset_filter = True    # Rayon selectie
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -295,6 +297,7 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
     """
 
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -412,6 +415,7 @@ class AGControleView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPREGIO_RCL_AG_CONTROLE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -500,6 +504,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPREGIO_RCL_TEAM_RONDE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

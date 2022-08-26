@@ -37,6 +37,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPSCORES_REGIO
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -192,6 +193,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPSCORES_INVOEREN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
     is_controle = False
     kruimel = 'Invoeren'
 
@@ -361,6 +363,7 @@ class WedstrijdUitslagControlerenView(WedstrijdUitslagInvoerenView):
 class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
 
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -421,6 +424,7 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
 class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
 
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -527,6 +531,7 @@ class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
 class DynamicScoresOpslaanView(UserPassesTestMixin, View):
 
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -696,6 +701,7 @@ class WedstrijdUitslagBekijkenView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPSCORES_BEKIJKEN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -774,6 +780,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPSCORES_TEAMS
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """

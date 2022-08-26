@@ -30,6 +30,7 @@ class WedstrijdSessiesView(UserPassesTestMixin, View):
     # class variables shared by all instances
     template_name = TEMPLATE_WEDSTRIJDEN_WIJZIG_SESSIES
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -131,6 +132,7 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
     # class variables shared by all instances
     template_name = TEMPLATE_WEDSTRIJDEN_WIJZIG_SESSIE
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

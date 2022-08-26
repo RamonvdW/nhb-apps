@@ -26,6 +26,7 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_WAARSCHIJNLIJKE_DEELNEMERS
     raise_exception = True  # genereer PermissionDefined als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -118,6 +119,7 @@ class WaarschijnlijkeDeelnemersAlsBestandView(UserPassesTestMixin, TemplateView)
 
     # class variables shared by all instances
     raise_exception = True  # genereer PermissionDefined als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

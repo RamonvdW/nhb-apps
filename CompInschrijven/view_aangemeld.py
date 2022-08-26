@@ -119,6 +119,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -177,6 +178,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -243,6 +245,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -382,6 +385,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_COMPETITIE_INSCHRIJFMETHODE3_BEHOEFTE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -719,6 +723,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_COMPETITIE_INSCHRIJFMETHODE1_BEHOEFTE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """

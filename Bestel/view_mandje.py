@@ -32,6 +32,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_MANDJE_TOON_INHOUD
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -222,6 +223,7 @@ class CodeToevoegenView(UserPassesTestMixin, View):
 
     # class variables shared by all instances
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -261,6 +263,7 @@ class VerwijderProductUitMandje(UserPassesTestMixin, View):
 
     # class variables shared by all instances
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

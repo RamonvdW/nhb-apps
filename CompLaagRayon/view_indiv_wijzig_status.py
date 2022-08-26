@@ -30,6 +30,7 @@ class WijzigStatusRkDeelnemerView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPRAYON_WIJZIG_STATUS_RK_DEELNEMER
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

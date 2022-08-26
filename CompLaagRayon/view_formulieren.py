@@ -34,6 +34,7 @@ class DownloadRkFormulierView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_DOWNLOAD_RK_FORMULIER
     raise_exception = True  # genereer PermissionDefined als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -205,6 +206,7 @@ class FormulierIndivAlsBestandView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     raise_exception = True  # genereer PermissionDefined als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -394,6 +396,7 @@ class FormulierTeamsAlsBestandView(UserPassesTestMixin, TemplateView):
 
     # class variables shared by all instances
     raise_exception = True  # genereer PermissionDefined als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

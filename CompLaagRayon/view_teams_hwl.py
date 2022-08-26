@@ -75,6 +75,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPRAYON_VERTEAMS
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -201,6 +202,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPRAYON_VERTEAMS_WIJZIG
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -401,6 +403,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_COMPRAYON_VERTEAMS_KOPPELEN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

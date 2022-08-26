@@ -224,6 +224,7 @@ class WijzigEmailView(UserPassesTestMixin, View):
 
     # class variables shared by all instances
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -390,6 +391,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_KOPPEL_BEHEERDERS
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

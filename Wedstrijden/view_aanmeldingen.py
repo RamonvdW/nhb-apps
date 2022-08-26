@@ -31,6 +31,7 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_WEDSTRIJDEN_AANMELDINGEN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -144,6 +145,7 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
 
     # class variables shared by all instances
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -254,6 +256,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
 
     # class variables shared by all instances
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -343,6 +346,7 @@ class KalenderDetailsSporterView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_WEDSTRIJDEN_AANMELDINGEN_SPORTER
     raise_exception = True          # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -449,6 +453,7 @@ class AfmeldenView(UserPassesTestMixin, View):
     """ Via deze view kunnen beheerders een sporter afmelden voor een wedstrijd """
 
     raise_exception = True          # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

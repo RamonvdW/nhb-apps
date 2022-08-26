@@ -220,6 +220,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         # wordt HWL
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
 
         url = self.url_aanmeldingen_wedstrijd % self.wedstrijd.pk
         with self.assert_max_queries(20):
@@ -252,6 +253,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         # opnieuw inloggen om de SEC functie te kunnen zien
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(functie_sec)
+        self.e2e_check_rol('SEC')
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)

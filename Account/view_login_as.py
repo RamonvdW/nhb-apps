@@ -90,6 +90,7 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_LOGIN_AS_ZOEK
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

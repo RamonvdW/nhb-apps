@@ -32,6 +32,7 @@ class VerenigingKortingcodesView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_WEDSTRIJDEN_KORTINGSCODES_OVERZICHT
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -102,6 +103,7 @@ class NieuweKortingcodesView(UserPassesTestMixin, View):
     # class variables shared by all instances
     template_name = TEMPLATE_WEDSTRIJDEN_NIEUWE_KORTINGSCODE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -163,6 +165,7 @@ class VerenigingWijzigKortingcodesView(UserPassesTestMixin, View):
 
     # class variables shared by all instances
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

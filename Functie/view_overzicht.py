@@ -27,6 +27,7 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_OVERZICHT_VERENIGING
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -128,6 +129,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_OVERZICHT
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -303,6 +305,7 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_OVERZICHT_EMAILS_SEC_HWL
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

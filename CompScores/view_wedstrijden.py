@@ -23,6 +23,7 @@ class WedstrijdenView(UserPassesTestMixin, TemplateView):
     template_name = TEMPLATE_WEDSTRIJDEN
     uitslag_invoeren = False
     raise_exception = True      # genereer PermissionDefined als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
     kruimel = 'Competitie wedstrijden'
 
     def __init__(self, **kwargs):

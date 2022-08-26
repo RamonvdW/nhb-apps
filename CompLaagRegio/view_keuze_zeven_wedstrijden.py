@@ -23,6 +23,7 @@ class KeuzeZevenWedstrijdenView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_SPORTER_KEUZE7WEDSTRIJDEN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """

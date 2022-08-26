@@ -217,6 +217,7 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_SPORTER
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -339,6 +340,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_GROEPJE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -522,6 +524,7 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_FAMILIE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -708,6 +711,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_HANDMATIG
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -968,6 +972,7 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
 
     # class variables shared by all instances
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

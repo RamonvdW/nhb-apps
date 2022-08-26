@@ -26,6 +26,7 @@ TEMPLATE_OTP_KOPPELEN_STAP3 = 'functie/otp-koppelen-stap3-code-invoeren.dtl'
 class OTPKoppelenStapView(UserPassesTestMixin, TemplateView):
 
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

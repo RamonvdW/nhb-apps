@@ -252,6 +252,7 @@ class RayonTeamsRKOView(UserPassesTestMixin, RayonTeamsView):
     # class variables shared by all instances
     subset_filter = False
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -266,6 +267,7 @@ class RayonTeamsAlleView(UserPassesTestMixin, RayonTeamsView):
     # class variables shared by all instances
     subset_filter = True
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
