@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.core import management
 from django.utils.dateparse import parse_date
 from .models import IndivRecord, LEEFTIJDSCATEGORIE, GESLACHT, MATERIAALKLASSE, DISCIPLINE
 from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
-import io
 
 
 class TestRecordsCliImport(E2EHelpers, TestCase):
@@ -114,29 +112,23 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
 
     def test_file_missing(self):
         # afhandelen niet bestaand bestand
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('import_records', './notexisting.json', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('import_records', './notexisting.json')
         self.assertTrue(f1.getvalue().startswith('[ERROR] Kan bestand ./notexisting.json niet lezen ('))
         self.assertEqual(f2.getvalue(), '')
 
     def test_broken_file(self):
         # kapot bestand
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('import_records', './Records/management/testfiles/testfile_01.json', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_01.json')
         self.assertTrue(f1.getvalue().startswith("[ERROR] Probleem met het JSON formaat in bestand './Records/management/testfiles/testfile_01.json'"))
         self.assertEqual(f2.getvalue(), '')
 
     def test_extra_sheet(self):
         # onverwacht tabblad
         # verkeerde headers
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('import_records', './Records/management/testfiles/testfile_02.json', '--dryrun', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_02.json', '--dryrun')
         self.assertTrue('[ERROR] Niet ondersteunde tabblad naam: Onbekende blad naam' in f1.getvalue())
         self.assertTrue('[ERROR] Kolom headers kloppen niet voor range Data team' in f1.getvalue())
         self.assertTrue('Samenvatting: ' in f2.getvalue())
@@ -145,19 +137,15 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
 
     def test_no_data(self):
         # bestand met alleen headers, geen data
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('import_records', './Records/management/testfiles/testfile_03.json', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_03.json')
         self.assertFalse('[ERROR]' in f1.getvalue())
         self.assertTrue('\nDone\n' in f2.getvalue())
 
     def test_incomplete(self):
         # incompleet bestand
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(50):
-            management.call_command('import_records', './Records/management/testfiles/testfile_04.json', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_04.json')
         # print("f2: %s" % f2.getvalue())
         self.assertFalse('[ERROR]' in f1.getvalue())
         self.assertTrue('[INFO] Record OD-1 toegevoegd' in f2.getvalue())
@@ -170,10 +158,8 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
 
     def test_data_errors(self):
         # all kinds of errors
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(37):
-            management.call_command('import_records', './Records/management/testfiles/testfile_05.json', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_05.json')
         self.assertTrue("[ERROR] Foute index (geen nummer): 'XA' in" in f1.getvalue())
         self.assertTrue("Fout geslacht: 'XB' + Foute leeftijdscategorie': 'XC' + Foute materiaalklasse: 'XD' + Foute discipline: 'XE' op blad 'OD' + Fout in soort_record: 'XF' is niet bekend + Fout in para klasse: 'XG' is niet bekend + Fout in pijlen: 'XI' is geen nummer + Fout NHB nummer: 'XJ' + Fout in score 'XK' + Fout in X-count 'XL' is geen getal + Foute tekst in Ook ER: 'XM' + Foute tekst in Ook WR: 'XN' in " in f1.getvalue())
         obj = IndivRecord.objects.get(discipline='18', volg_nr=2)
@@ -181,10 +167,8 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
 
     def test_data_changes(self):
         # all kinds of changes
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(37):
-            management.call_command('import_records', './Records/management/testfiles/testfile_06.json', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_06.json')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("Wijzigingen voor record OD-42:" in f2.getvalue())
@@ -210,26 +194,20 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         self.assertTrue("score_notitie: '' --> 'gedeeld'" in f2.getvalue())
 
     def test_foutvrij_dryrun(self):
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(25):
-            management.call_command('import_records', './Records/management/testfiles/testfile_06.json', '--dryrun', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_06.json', '--dryrun')
         self.assertTrue("DRY RUN\nSamenvatting: 5 records;" in f2.getvalue())
 
     def test_onbekend_nhbnr(self):
         # onbekend NHB nummer
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('import_records', './Records/management/testfiles/testfile_07.json', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_07.json')
         self.assertTrue("NHB nummer niet bekend: '999999' " in f1.getvalue())
 
     def test_foute_datums(self):
         # foute datums
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(33):
-            management.call_command('import_records', './Records/management/testfiles/testfile_08.json', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_08.json')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[ERROR] Fout in datum: '6-30-2017' in ['2'," in f1.getvalue())
@@ -241,18 +219,14 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
 
     def test_dubbele_nrs(self):
         # dubbele nummers
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(35):
-            management.call_command('import_records', './Records/management/testfiles/testfile_09.json', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_09.json')
         self.assertTrue("[ERROR] Volgnummer 22 komt meerdere keren voor in" in f1.getvalue())
 
     def test_niet_consecutief(self):
         # test met records die niet consecutief zijn
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(46):
-            management.call_command('import_records', './Records/management/testfiles/testfile_10.json', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_10.json')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[WARNING] Score niet consecutief voor records OD-101 en OD-100 (1200(57X) >= 1200(56X))" in f1.getvalue())
@@ -260,13 +234,18 @@ class TestRecordsCliImport(E2EHelpers, TestCase):
         self.assertTrue("[WARNING] Score niet consecutief voor records OD-401 en OD-400 (400 >= 300)" in f1.getvalue())
 
     def test_verkeerde_soort_record(self):
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(30):
-            management.call_command('import_records', './Records/management/testfiles/testfile_11.json', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_11.json')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue("[ERROR] Max score (afgeleide van aantal pijlen) is niet consistent in soort" in f1.getvalue())
 
+    def test_wa_renames(self):
+        # IB is hernoemd naar TR, maar in de administratie ondersteunen we beide
+        # Master/Senior/Junior/Cadet zijn hernoemd naar 50+/21+/Onder 21/Onder 18
+        f1, f2 = self.run_management_command('import_records', './Records/management/testfiles/testfile_12.json')
+        # print("f1: %s" % f1.getvalue())
+        # print("f2: %s" % f2.getvalue())
+        self.assertTrue('5 toegevoegd; 0 waarschuwingen, 0 fouten' in f2.getvalue())
 
 # end of file

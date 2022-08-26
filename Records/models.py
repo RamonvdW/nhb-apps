@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,8 +12,15 @@ DISCIPLINE = [('OD', 'Outdoor'),
               ('18', 'Indoor'),
               ('25', '25m 1pijl')]
 
-GESLACHT = [('M', 'Man'),
-            ('V', 'Vrouw')]
+GESLACHT_MAN = 'M'
+GESLACHT_VROUW = 'V'
+
+GESLACHT = [(GESLACHT_MAN, 'Man'),
+            (GESLACHT_VROUW, 'Vrouw')]
+
+# IB is in 2022 hernoemd naar TR. Records lopen dus door.
+
+MATERIAALKLASSEN = ('R', 'C', 'BB', 'LB', 'TR', 'IB')
 
 MATERIAALKLASSE = [('R', 'Recurve'),
                    ('C', 'Compound'),

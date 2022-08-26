@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,7 +8,7 @@
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from Records.models import IndivRecord
+from Records.models import IndivRecord, GESLACHT_MAN, GESLACHT_VROUW, MATERIAALKLASSEN
 from Sporter.models import Sporter
 from Logboek.models import schrijf_in_logboek
 import datetime
@@ -95,9 +95,9 @@ class Command(BaseCommand):
                 # H(eer) / D(ame)
                 val = row[1]
                 if val == 'H':
-                    record.geslacht = 'M'
+                    record.geslacht = GESLACHT_MAN
                 elif val == 'D':
-                    record.geslacht = 'V'
+                    record.geslacht = GESLACHT_VROUW
                 else:
                     errors.append("Fout geslacht: %s" % repr(val))
                     val = None
@@ -108,13 +108,22 @@ class Command(BaseCommand):
 
                 # 2 = Leeftijdscategorie
                 # M(aster) / S(enior) / J(unior) / C(adet) / nvt = U(niform)
+                # 50+ / 21+ / Onder 21 / Onder 18 / nvt
                 val = row[2]
                 if val == 'nvt':
                     val = 'U'
-                if val in ('M', 'S', 'J', 'C', 'U'):
+                elif val == '50+':
+                    val = 'm'
+                elif val == '21+':
+                    val = 's'
+                elif val == 'Onder 21':
+                    val = 'j'
+                elif val == 'Onder 18':
+                    val = 'c'
+                if val in ('M', 'S', 'J', 'C', 'U', 'm', 's', 'j', 'c'):
                     record.leeftijdscategorie = val
                 else:
-                    errors.append("Foute leeftijdscategorie': %s" % repr(val))
+                    errors.append("Foute leeftijdscategorie': %s" % repr(row[2]))
                     val = None
                 if val and curr_record:
                     if record.leeftijdscategorie != curr_record.leeftijdscategorie:
@@ -123,7 +132,7 @@ class Command(BaseCommand):
 
                 # 3 = Materiaalklasse
                 val = row[3]
-                if val in ('R', 'C', 'BB', 'IB', 'LB'):
+                if val in MATERIAALKLASSEN:
                     record.materiaalklasse = val
                 else:
                     errors.append("Foute materiaalklasse: %s" % repr(val))

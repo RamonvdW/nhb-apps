@@ -145,6 +145,25 @@ class TestRecordsView(E2EHelpers, TestCase):
         rec.is_world_record = True
         rec.save()
 
+        # Record 60
+        rec = IndivRecord()
+        rec.volg_nr = 60
+        rec.discipline = 'OD'
+        rec.soort_record = '50m (72p)'
+        rec.geslacht = 'V'
+        rec.leeftijdscategorie = 'U'    # para
+        rec.para_klasse = 'Open'
+        rec.materiaalklasse = 'R'       # Recurve
+        rec.sporter = sporter
+        rec.naam = 'Para Schutter'
+        rec.datum = parse_date('2020-03-03')
+        rec.plaats = 'Bullseye'
+        rec.land = 'Nederland'
+        rec.score = 350
+        # rec.score_notitie =
+        rec.is_european_record = False
+        rec.is_world_record = False
+        rec.save()
         self.rec = rec
 
     def test_create(self):
@@ -262,5 +281,14 @@ class TestRecordsView(E2EHelpers, TestCase):
 
         self.e2e_assert_other_http_commands_not_supported(self.url_lijst_er)
         self.e2e_assert_other_http_commands_not_supported(self.url_lijst_wr)
+
+    def test_zoek_para(self):
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_zoek, {'zoekterm': 'Para Schutter'})
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_template_used(resp, ('records/records_zoek.dtl', 'plein/site_layout.dtl'))
+        self.assert_html_ok(resp)
+        self.assertContains(resp, 'Para Schutter')
+        self.assertContains(resp, 'Open')
 
 # end of file

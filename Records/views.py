@@ -245,9 +245,7 @@ class RecordsZoekView(ListView):
         for obj in context['object_list']:
             obj.para_str = ''
             if obj.para_klasse:
-                obj.para_str = ' - para'
-                if obj.para_klasse != 'Ja':
-                    obj.para_str += ': ' + obj.para_klasse
+                obj.para_str = ' - para: ' + obj.para_klasse
         # for
 
         context['kruimels'] = (
