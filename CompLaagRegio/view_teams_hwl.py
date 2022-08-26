@@ -553,6 +553,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
                 (None, 'Wijzig AG')
             )
         else:
+            # RCL
             context['kruimels'] = (
                 (reverse('Competitie:kies'), 'Bondscompetities'),
                 (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),

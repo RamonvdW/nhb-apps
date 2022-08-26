@@ -164,7 +164,7 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.nhbver2 = ver2
 
         self.account_rcl = self.e2e_create_account('rcl111', 'ercel@nhb.not', 'Ercel', accepteer_vhpg=True)
-        self.functie_rcl = maak_functie('RCL Regio 111', 'RCL')
+        self.functie_rcl = maak_functie('RCL Regio 111 Indoor', 'RCL')
         self.functie_rcl.nhb_regio = self.nhbver1.regio
         self.functie_rcl.save()
         self.functie_rcl.accounts.add(self.account_rcl)

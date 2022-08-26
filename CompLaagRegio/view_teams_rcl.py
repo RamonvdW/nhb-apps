@@ -440,7 +440,7 @@ class AGControleView(UserPassesTestMixin, TemplateView):
 
         if deelcomp.functie != self.functie_nu:
             # niet de beheerder
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         deelcomp.competitie.bepaal_fase()
         if deelcomp.competitie.fase > 'F':
