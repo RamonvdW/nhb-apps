@@ -11,8 +11,8 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Competitie.test_fase import zet_competitie_fase
 from NhbStructuur.models import NhbVereniging, NhbRegio
-from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV
-from Sporter.models import Sporter, SporterBoog
+from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV, ScoreHist, Score, SCORE_TYPE_SCORE, SCORE_TYPE_GEEN
+from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
 
@@ -230,61 +230,105 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
     def test_boogtype_transfer(self):
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'X', '18')
-
         self.assertTrue('[ERROR] Onbekend boog type:' in f1.getvalue())
 
+        # competitie is nog in fase A en heeft geen vastgestelde klassegrenzen
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'R', '18')
-
-        # competitie is nog in fase A en heeft geen vastgestelde klassegrenzen
         self.assertTrue('[ERROR] Kan de competitie niet vinden' in f1.getvalue())
 
         zet_competitie_fase(self.comp, 'C')
-
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('boogtype_transfer', '999999', 'R', '18')
-
         self.assertTrue('[ERROR] Sporter 999999 niet gevonden' in f1.getvalue())
 
         self.sporterboog_r.voor_wedstrijd = False
         self.sporterboog_r.save()
-
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'BB', '18')
-
         self.assertTrue('[ERROR] Sporter heeft geen wedstrijd boog als voorkeur' in f1.getvalue())
+
+        voorkeuren = SporterVoorkeuren(sporter=self.sporter)
+        voorkeuren.wedstrijd_geslacht_gekozen = False
+        voorkeuren.save()
 
         self.sporterboog_tr.voor_wedstrijd = True
         self.sporterboog_tr.save()
-
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'TR', '18')
-
         self.assertTrue('[ERROR] Sporter is al ingeschreven met dat boog type' in f1.getvalue())
 
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'BB', '18')
-
         self.assertTrue('[ERROR] Sporter heeft boog BB niet als voorkeur. Wel: TR' in f1.getvalue())
 
-        self.sporterboog_bb.voor_wedstrijd = True
-        self.sporterboog_bb.save()
-
-        with self.assert_max_queries(20):
-            f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'BB', '18')
+        voorkeuren.wedstrijd_geslacht_gekozen = True
+        voorkeuren.wedstrijd_geslacht = 'M'
+        voorkeuren.save()
 
         # sporter is met R en TR ingeschreven
+        self.sporterboog_bb.voor_wedstrijd = True
+        self.sporterboog_bb.save()
+        with self.assert_max_queries(20):
+            f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'BB', '18')
         self.assertTrue('[ERROR] Sporter met meerdere inschrijvingen wordt niet ondersteund' in f1.getvalue())
 
         self.deelnemer_r.delete()
-
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'BB', '18')
-
         self.assertTrue('[ERROR] Sporter is onderdeel van een team' in f1.getvalue())
 
-        self.team1.gekoppelde_schutters.clear()
+        score = Score(
+                    type=SCORE_TYPE_SCORE,
+                    sporterboog=self.sporterboog_tr,        # TR = huidige inschrijving
+                    waarde=42,
+                    afstand_meter=42)
+        score.save()
+        hist = ScoreHist(
+                    score=score,
+                    oude_waarde=0,
+                    nieuwe_waarde=42,
+                    door_account=None,
+                    notitie='Test')
+        hist.save()
 
+        score = Score(
+                    type=SCORE_TYPE_GEEN,
+                    sporterboog=self.sporterboog_tr,
+                    waarde=0,
+                    afstand_meter=42)
+        score.save()
+        hist = ScoreHist(
+                    score=score,
+                    oude_waarde=0,
+                    nieuwe_waarde=0,
+                    door_account=None,
+                    notitie='Test geen')
+        hist.save()
+
+        score = Score(
+                    type=SCORE_TYPE_SCORE,
+                    sporterboog=self.sporterboog_tr,
+                    waarde=0,
+                    afstand_meter=42)
+        score.save()
+        hist = ScoreHist(
+                    score=score,
+                    oude_waarde=0,
+                    nieuwe_waarde=0,
+                    door_account=None,
+                    notitie='Test dummy')
+        hist.save()
+
+        ag = Aanvangsgemiddelde(
+                        doel=AG_DOEL_INDIV,
+                        sporterboog=self.sporterboog_bb,
+                        boogtype=self.sporterboog_bb.boogtype,
+                        waarde="42.0",
+                        afstand_meter=42)
+        ag.save()
+
+        self.team1.gekoppelde_schutters.clear()
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'BB', '18')
         self.assertTrue(f1.getvalue() == '')
@@ -292,7 +336,6 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
 
         with self.assert_max_queries(20):
             f1, f2 = self.run_management_command('boogtype_transfer', '--commit', '123456', 'BB', '18')
-
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
         self.assertTrue(f1.getvalue() == '')

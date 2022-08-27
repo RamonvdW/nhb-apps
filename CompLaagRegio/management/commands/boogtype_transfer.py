@@ -91,6 +91,7 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Sporter heeft boog %s niet als voorkeur. Wel: %s' % (
                             boog_afk, ", ".join(wedstrijd_bogen)))
             return
+        del sporterboog
 
         # controleer dat de sporter niet al geschreven
         count = (RegioCompetitieSchutterBoog
