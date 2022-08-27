@@ -9,7 +9,7 @@ from django.core import management
 from BasisTypen.models import TemplateCompetitieIndivKlasse, BoogType, TeamType, LeeftijdsKlasse
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                DeelCompetitie, LAAG_REGIO,
-                               RegioCompetitieSchutterBoog, RegiocompetitieTeam)
+                               RegioCompetitieSchutterBoog, RegiocompetitieTeam, RegiocompetitieRondeTeam)
 from Competitie.test_fase import zet_competitie_fase
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV
@@ -174,7 +174,17 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
                             team_klasse=team_klasse_r,
                             team_naam='Test')
         team.save()
-        self.team = team
+        self.team1 = team
+
+        team = RegiocompetitieTeam(
+                            deelcompetitie=deelcomp,
+                            vereniging=ver,
+                            volg_nr=1,
+                            team_type=teamtype_r,
+                            team_klasse=team_klasse_r,
+                            team_naam='Test 2')
+        team.save()
+        self.team2 = team
 
         team.gekoppelde_schutters.add(deelnemer_tr)
 
@@ -300,7 +310,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
 
         self.assertTrue('[ERROR] Sporter is onderdeel van een team' in f1.getvalue())
 
-        self.team.gekoppelde_schutters.clear()
+        self.team1.gekoppelde_schutters.clear()
 
         f1 = io.StringIO()
         f2 = io.StringIO()
@@ -439,13 +449,21 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         # zie test_poules voor nog een test van dit commando
 
     def test_ronde_teams_check(self):
-        f1 = io.StringIO()
-        f2 = io.StringIO()
-        with self.assert_max_queries(20):
-            management.call_command('ronde_teams_check', stderr=f1, stdout=f2)
 
-        # print("f1: %s" % f1.getvalue())
-        # print("f2: %s" % f2.getvalue())
+        # maak de benodigde records aan
+        RegiocompetitieRondeTeam(team=self.team1, ronde_nr=1).save()
+        RegiocompetitieRondeTeam(team=self.team1, ronde_nr=2).save()
+
+        with self.assert_max_queries(20):
+            f1, f2 = self.run_management_command('ronde_teams_check')
+        self.assertEqual(f1.getvalue(), '')
+        self.assertEqual(f2.getvalue().count('\n'), 2)
+
+        RegiocompetitieRondeTeam(team=self.team2, ronde_nr=1).save()
+        with self.assert_max_queries(20):
+            f1, f2 = self.run_management_command('ronde_teams_check')
+        self.assertEqual(f1.getvalue(), '')
+        self.assertTrue('regio 111 ronde counts' in f2.getvalue())
 
         self.assertTrue(f1.getvalue() == '')
 

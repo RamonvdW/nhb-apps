@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2021 Ramon van der Winkel.
+#  Copyright (c) 2021-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,16 +10,6 @@ from Competitie.models import RegiocompetitieRondeTeam
 
 class Command(BaseCommand):
     help = "Zoek dubbele ronde teams"
-
-    @staticmethod
-    def afkappen(msg, limiet):
-        lengte = len(msg)
-        if lengte > limiet:
-            msg = msg[:limiet-2]
-            if msg[-1] == ' ':
-                msg = msg[:-1]
-            msg += '..'
-        return msg
 
     def handle(self, *args, **options):
 
@@ -76,15 +66,16 @@ class Command(BaseCommand):
             del tup2
         # for
 
-        # toon het aantal teams per ronde
+        # check dat elk team evenveel rondes heeft (in elke regio en competitie)
         self.stdout.write('Inconsistentie aantal teams per ronde:')
-        for tup, counts in count.items():
+        for tup, counts in count.items():       # per competitie en regio
             comp_pk, regio_nr = tup
 
-            aantal = counts[1]
+            aantal = counts[1]      # baseline
             bad = False
             for check in counts.values():
                 if check != aantal:
+                    # dit team heeft een afwijkend aantal ronde records
                     bad = True
                     break
             # for
