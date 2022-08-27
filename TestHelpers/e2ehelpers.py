@@ -311,7 +311,7 @@ class E2EHelpers(TestCase):
         return checked, unchecked
 
     @staticmethod
-    def _get_error_msg_from_403_page(resp):
+    def _get_error_msg_from_403_page(resp):                                         # pragma: no cover
         error_msg = '??403??'
         pagina = str(resp.content)
         pos = pagina.find('<code>')
@@ -344,14 +344,14 @@ class E2EHelpers(TestCase):
 
         # 403 and 404 also have status_code 200 but use a special template
         for templ in resp.templates:
-            if templ.name == 'plein/fout_403.dtl':
+            if templ.name == 'plein/fout_403.dtl':                                  # pragma: no cover
                 # haal de hele pagina op, inclusief de foutmelding
                 resp = self.client.get(link)
                 error_msg = self._get_error_msg_from_403_page(resp)
                 self.fail(msg='Found NOK href %s that gives code 403 with message "%s" on page %s' % (
                             repr(link), error_msg, template_name))
 
-            if templ.name == 'plein/fout_404.dtl':
+            if templ.name == 'plein/fout_404.dtl':                                  # pragma: no cover
                 self.fail(msg='Found NOK href %s that gives code 404 on page %s' % (
                             repr(link), template_name))
         # for
@@ -817,9 +817,9 @@ class E2EHelpers(TestCase):
             self.assertEqual(resp.status_code, 200)
             self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
 
-            if expected_msg:
+            if expected_msg:                                                        # pragma: no branch
                 pagina = str(resp.content)
-                if expected_msg not in pagina:                                          # pragma: no cover
+                if expected_msg not in pagina:                                      # pragma: no cover
                     # haal de nuttige regel informatie uit de 403 pagina en toon die
                     pos = pagina.find('<code>')
                     pagina = pagina[pos+6:]
