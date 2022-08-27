@@ -28,13 +28,14 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
 
     test_after = ('Competitie.test_fase', 'Competitie.test_beheerders', 'Competitie.test_competitie')
 
-    url_afsluiten_regio = '/bondscompetities/regio/planning/%s/afsluiten/'  # deelcomp_pk
+    url_afsluiten_regio = '/bondscompetities/regio/planning/%s/afsluiten/'        # deelcomp_pk
     url_regio_instellingen = '/bondscompetities/regio/instellingen/%s/regio-%s/'  # comp_pk, regio-nr
-    url_regio_globaal = '/bondscompetities/regio/instellingen/%s/globaal/'  # comp_pk
-    url_ag_controle = '/bondscompetities/regio/%s/ag-controle/regio-%s/'  # comp_pk, regio-nr
-    url_regio_teams = '/bondscompetities/regio/%s/teams/'  # deelcomp_pk
-    url_regio_teams_alle = '/bondscompetities/regio/%s/teams/%s/'  # comp_pk, subset = auto/alle/rayon_nr
-    url_team_ronde = '/bondscompetities/regio/%s/team-ronde/'  # deelcomp_pk
+    url_regio_globaal = '/bondscompetities/regio/instellingen/%s/globaal/'        # comp_pk
+    url_ag_controle = '/bondscompetities/regio/%s/ag-controle/regio-%s/'          # comp_pk, regio-nr
+    url_regio_teams = '/bondscompetities/regio/%s/teams/'                         # deelcomp_pk
+    url_regio_teams_alle = '/bondscompetities/regio/%s/teams/%s/'                 # comp_pk, subset=auto/alle/rayon_nr
+    url_regio_teams_bestand = '/bondscompetities/regio/%s/teams/als-bestand/'     # deelcomp_pk
+    url_team_ronde = '/bondscompetities/regio/%s/team-ronde/'                     # deelcomp_pk
 
     testdata = None
 
@@ -373,6 +374,87 @@ class TestCompLaagRegioTeams(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assert404(resp, 'Selectie wordt niet ondersteund')
+
+    def test_teams_bestand(self):
+        # BB
+        self.e2e_login_and_pass_otp(self.testdata.account_admin)
+        self.e2e_wisselnaarrol_bb()
+
+        # verkeerde rol
+        url = self.url_regio_teams_bestand % self.deelcomp_regio101_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert403(resp, 'Geen toegang')
+
+        # RCL 18
+        self.e2e_wissel_naar_functie(self.functie_rcl112_18)
+
+        team_r = TeamType.objects.get(afkorting='R2')
+        klasse_r_ere = CompetitieTeamKlasse.objects.get(
+                                    competitie=self.comp_18,
+                                    volgorde=15,      # Rec ERE
+                                    is_voor_teams_rk_bk=False)
+        # create two complete teams
+        RegiocompetitieTeam(
+                deelcompetitie=self.deelcomp_regio112_18,
+                vereniging=self.nhbver_112,
+                volg_nr=1,
+                team_type=team_r,
+                team_naam='Test team 1',
+                aanvangsgemiddelde=25.0,
+                team_klasse=klasse_r_ere).save()
+
+        RegiocompetitieTeam(
+                deelcompetitie=self.deelcomp_regio112_18,
+                vereniging=self.nhbver_112,
+                volg_nr=2,
+                team_type=team_r,
+                team_naam='Test team 2',
+                aanvangsgemiddelde=24.5,
+                team_klasse=klasse_r_ere).save()
+
+        # create a partial team
+        RegiocompetitieTeam(
+                deelcompetitie=self.deelcomp_regio112_18,
+                vereniging=self.nhbver_112,
+                volg_nr=3,
+                team_type=team_r,
+                team_naam='Test team 2',
+                aanvangsgemiddelde=0.0).save()
+
+        temp_team = RegiocompetitieTeam(
+                deelcompetitie=self.deelcomp_regio112_18,
+                vereniging=self.nhbver_112,
+                volg_nr=3,
+                team_type=team_r,
+                team_naam='',
+                aanvangsgemiddelde=0.0)
+        self.assertTrue(temp_team.maak_team_naam_kort() != '')
+
+        # als bestand
+        url = self.url_regio_teams_bestand % self.deelcomp_regio112_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_is_bestand(resp)
+
+        # RCL 25
+        self.e2e_wissel_naar_functie(self.functie_rcl101_25)
+        url = self.url_regio_teams_bestand % self.deelcomp_regio101_25.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assert_is_bestand(resp)
+
+        # niet bestaande deelcomp
+        resp = self.client.get(self.url_regio_teams_bestand % 999999)
+        self.assert404(resp, 'Competitie niet gevonden')
+
+        # foute deelcomp
+        url = self.url_regio_teams_bestand % self.deelcomp_regio112_18.pk
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assert403(resp, 'Verkeerde beheerder')
 
     def test_ag_controle(self):
         self.e2e_login_and_pass_otp(self.account_rcl112_18)

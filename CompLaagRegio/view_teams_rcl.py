@@ -322,7 +322,7 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
 
         if deelcomp.functie != self.functie_nu:
             # niet de beheerder
-            raise PermissionDenied()
+            raise PermissionDenied('Verkeerde beheerder')
 
         regio_nr = deelcomp.nhb_regio.regio_nr
 
