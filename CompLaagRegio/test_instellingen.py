@@ -8,7 +8,7 @@ from django.test import TestCase
 from BasisTypen.models import BoogType
 from Competitie.models import (Competitie, DeelCompetitie,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
-                               LAAG_BK, LAAG_RK, LAAG_REGIO)
+                               LAAG_BK, LAAG_RK, LAAG_REGIO, INSCHRIJF_METHODE_1, INSCHRIJF_METHODE_3)
 from Competitie.operations import competities_aanmaken
 from Competitie.test_fase import zet_competitie_fase
 from Functie.operations import maak_functie
@@ -289,7 +289,7 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
 
         # fase D
 
-        zet_competitie_fase(self.comp_18, 'D')
+        zet_competitie_fase(self.comp_18, 'E')
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -337,11 +337,36 @@ class TestCompLaagRegioInstellingen(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.testdata.account_bb)
         self.e2e_wisselnaarrol_bb()
 
+        self.deelcomp_regio101_18.inschrijf_methode = INSCHRIJF_METHODE_1
+        self.deelcomp_regio101_18.regio_organiseert_teamcompetitie = False
+        self.deelcomp_regio101_18.save(update_fields=['inschrijf_methode', 'regio_organiseert_teamcompetitie'])
+
+        self.deelcomp_regio101_25.inschrijf_methode = INSCHRIJF_METHODE_1
+        self.deelcomp_regio101_25.save(update_fields=['inschrijf_methode'])
+
+        self.deelcomp_regio112_18.inschrijf_methode = INSCHRIJF_METHODE_3
+        self.deelcomp_regio112_18.regio_heeft_vaste_teams = False
+        self.deelcomp_regio112_18.save(update_fields=['inschrijf_methode', 'regio_heeft_vaste_teams'])
+
         url = self.url_regio_globaal % self.comp_18.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)  # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('complaagregio/rcl-instellingen-globaal.dtl', 'plein/site_layout.dtl'))
+
+        # als RKO
+        self.e2e_wissel_naar_functie(self.functie_rko1_18)
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)  # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('complaagregio/rcl-instellingen-globaal.dtl', 'plein/site_layout.dtl'))
+
+        # niet bestaande competitie
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_regio_globaal % 99999)
+        self.assert404(resp, 'Competitie niet gevonden')
+
 
 # end of file
