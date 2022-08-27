@@ -798,7 +798,7 @@ class E2EHelpers(TestCase):
                         print('-----')
                     print('%5s %s' % (count, msg[7:]))
 
-    def assert403(self, resp, expected_msg=''):
+    def assert403(self, resp, expected_msg='Geen toegang'):
         # controleer dat we op de speciale code-403 handler pagina gekomen zijn
         # of een redirect hebben gekregen naar de login pagina
 

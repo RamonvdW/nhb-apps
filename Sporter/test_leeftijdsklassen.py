@@ -15,7 +15,7 @@ from .leeftijdsklassen import (bereken_leeftijdsklassen_wa,
                                bereken_leeftijdsklassen_bondscompetitie,
                                bereken_leeftijdsklasse_wa,
                                bereken_leeftijdsklasse_nhb,
-                               bereken_leeftijdsklassen_ifaa)
+                               bereken_leeftijdsklasse_ifaa)
 from .models import Sporter, SporterVoorkeuren
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
@@ -152,6 +152,42 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                           '50+ Heren',
                           ['50+ Heren', '50+ Heren', '50+ Heren', '50+ Heren', '50+ Heren']))
 
+        # niet compatibel
+        tup = bereken_leeftijdsklassen_wa(self.huidige_jaar - 50, GESLACHT_ANDERS)
+        self.assertIsNone(tup[2])
+
+    def test_leeftijdsklasse_wa(self):
+        # Onder 12
+        beschrijving = bereken_leeftijdsklasse_wa(9, GESLACHT_MAN)
+        self.assertEqual(beschrijving, 'Onder 18 Heren')
+
+        # Onder 18
+        beschrijving = bereken_leeftijdsklasse_wa(17, GESLACHT_MAN)
+        self.assertEqual(beschrijving, 'Onder 18 Heren')
+
+        # Onder 21
+        beschrijving = bereken_leeftijdsklasse_wa(20, GESLACHT_MAN)
+        self.assertEqual(beschrijving, 'Onder 21 Heren')
+
+        # 21+
+        beschrijving = bereken_leeftijdsklasse_wa(21, GESLACHT_MAN)
+        self.assertEqual(beschrijving, 'Heren')
+
+        beschrijving = bereken_leeftijdsklasse_wa(49, GESLACHT_MAN)
+        self.assertEqual(beschrijving, 'Heren')
+
+        # 50+
+        beschrijving = bereken_leeftijdsklasse_wa(50, GESLACHT_MAN)
+        self.assertEqual(beschrijving, '50+ Heren')
+
+        # 50+
+        beschrijving = bereken_leeftijdsklasse_wa(100, GESLACHT_VROUW)
+        self.assertEqual(beschrijving, '50+ Dames')
+
+        # niet compatibel
+        beschrijving = bereken_leeftijdsklasse_wa(50, GESLACHT_ANDERS)
+        self.assertEqual(beschrijving, '?')
+
     def test_leeftijdsklassen_nhb(self):
         # Onder 12
         tup = bereken_leeftijdsklassen_nhb(self.huidige_jaar - 9, GESLACHT_MAN)
@@ -264,8 +300,78 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                           '60+ Uniseks',
                           ['50+ Uniseks', '60+ Uniseks', '60+ Uniseks', '60+ Uniseks', '60+ Uniseks']))
 
+    def test_leeftijdsklasse_nhb(self):
+        # Onder 12
+        tup = bereken_leeftijdsklasse_nhb(9, GESLACHT_MAN)
+        self.assertEqual(tup, 'Onder 12 Jongens')
+
+        tup = bereken_leeftijdsklasse_nhb(10, GESLACHT_VROUW)
+        self.assertEqual(tup, 'Onder 12 Meisjes')
+
+        tup = bereken_leeftijdsklasse_nhb(11, GESLACHT_ANDERS)
+        self.assertEqual(tup, 'Onder 12 Uniseks')
+
+        # Onder 14
+        tup = bereken_leeftijdsklasse_nhb(12, GESLACHT_MAN)
+        self.assertEqual(tup, 'Onder 14 Jongens')
+
+        tup = bereken_leeftijdsklasse_nhb(13, GESLACHT_VROUW)
+        self.assertEqual(tup, 'Onder 14 Meisjes')
+
+        tup = bereken_leeftijdsklasse_nhb(13, GESLACHT_ANDERS)
+        self.assertEqual(tup, 'Onder 14 Uniseks')
+
+        # Onder 18
+        tup = bereken_leeftijdsklasse_nhb(14, GESLACHT_MAN)
+        self.assertEqual(tup, 'Onder 18 Heren')
+
+        tup = bereken_leeftijdsklasse_nhb(15, GESLACHT_VROUW)
+        self.assertEqual(tup, 'Onder 18 Dames')
+
+        tup = bereken_leeftijdsklasse_nhb(17, GESLACHT_ANDERS)
+        self.assertEqual(tup, 'Onder 18 Uniseks')
+
+        # Onder 21
+        tup = bereken_leeftijdsklasse_nhb(18, GESLACHT_MAN)
+        self.assertEqual(tup, 'Onder 21 Heren')
+
+        tup = bereken_leeftijdsklasse_nhb(19, GESLACHT_VROUW)
+        self.assertEqual(tup, 'Onder 21 Dames')
+
+        tup = bereken_leeftijdsklasse_nhb(20, GESLACHT_ANDERS)
+        self.assertEqual(tup, 'Onder 21 Uniseks')
+
+        # 21+
+        tup = bereken_leeftijdsklasse_nhb(21, GESLACHT_MAN)
+        self.assertEqual(tup, 'Heren')
+
+        tup = bereken_leeftijdsklasse_nhb(30, GESLACHT_VROUW)
+        self.assertEqual(tup, 'Dames')
+
+        tup = bereken_leeftijdsklasse_nhb(40, GESLACHT_ANDERS)
+        self.assertEqual(tup, 'Uniseks')
+
+        # 50+
+        tup = bereken_leeftijdsklasse_nhb(50, GESLACHT_MAN)
+        self.assertEqual(tup, '50+ Heren')
+
+        tup = bereken_leeftijdsklasse_nhb(50, GESLACHT_VROUW)
+        self.assertEqual(tup, '50+ Dames')
+
+        tup = bereken_leeftijdsklasse_nhb(50, GESLACHT_ANDERS)
+        self.assertEqual(tup, '50+ Uniseks')
+
+        # 60+
+        tup = bereken_leeftijdsklasse_nhb(60, GESLACHT_MAN)
+        self.assertEqual(tup, '60+ Heren')
+
+        tup = bereken_leeftijdsklasse_nhb(60, GESLACHT_VROUW)
+        self.assertEqual(tup, '60+ Dames')
+
+        tup = bereken_leeftijdsklasse_nhb(60, GESLACHT_ANDERS)
+        self.assertEqual(tup, '60+ Uniseks')
+
     def test_leeftijdsklassen_ifaa(self):
-        print()
         tup = bereken_leeftijdsklassen_ifaa(self.huidige_jaar - 9, GESLACHT_MAN)
         self.assertEqual(tup, [(2021, 'Welpen Jongens', 'Welpen Jongens'),
                                (2022, 'Welpen Jongens', 'Welpen Jongens'),
@@ -328,6 +434,44 @@ class TestSporterLeeftijdsklassen(E2EHelpers, TestCase):
                                (2023, 'Senioren Heren (65+)', 'Senioren Heren (65+)'),
                                (2024, 'Senioren Heren (65+)', 'Senioren Heren (65+)'),
                                (2025, 'Senioren Heren (65+)', 'Senioren Heren (65+)')])
+
+    def test_leeftijdsklasse_ifaa(self):
+        # <13 = Welp
+        beschrijving = bereken_leeftijdsklasse_ifaa(9, GESLACHT_MAN)
+        self.assertEqual(beschrijving, 'Welpen Jongens')
+
+        # 13-16 = Junior
+        beschrijving = bereken_leeftijdsklasse_ifaa(13, GESLACHT_MAN)
+        self.assertEqual(beschrijving, 'Junioren Jongens')
+
+        beschrijving = bereken_leeftijdsklasse_ifaa(16, GESLACHT_VROUW)
+        self.assertEqual(beschrijving, 'Junioren Meisjes')
+
+        # 17-20 = Jongvolwassen
+        beschrijving = bereken_leeftijdsklasse_ifaa(20, GESLACHT_MAN)
+        self.assertEqual(beschrijving, 'Jongvolwassen Heren')
+
+        # 21-54 = Volwassen
+        beschrijving = bereken_leeftijdsklasse_ifaa(30, GESLACHT_MAN)
+        self.assertEqual(beschrijving, 'Volwassen Heren')
+
+        beschrijving = bereken_leeftijdsklasse_ifaa(50, GESLACHT_VROUW)
+        self.assertEqual(beschrijving, 'Volwassen Dames')
+
+        # 55-64 = Veteranen
+        beschrijving = bereken_leeftijdsklasse_ifaa(55, GESLACHT_MAN)
+        self.assertEqual(beschrijving, 'Veteranen Heren (55+)')
+
+        beschrijving = bereken_leeftijdsklasse_ifaa(60, GESLACHT_VROUW)
+        self.assertEqual(beschrijving, 'Veteranen Dames (55+)')
+
+        # 65+ = Senioren
+        beschrijving = bereken_leeftijdsklasse_ifaa(65, GESLACHT_MAN)
+        self.assertEqual(beschrijving, 'Senioren Heren (65+)')
+
+        # niet compatibel
+        beschrijving = bereken_leeftijdsklasse_ifaa(50, GESLACHT_ANDERS)
+        self.assertEqual(beschrijving, '?')
 
     def test_leeftijdsklassen_bondscompetities(self):
         # Onder 12
