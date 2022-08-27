@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.core import management
 from BasisTypen.models import TemplateCompetitieIndivKlasse, BoogType, TeamType, LeeftijdsKlasse
 from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeamKlasse,
                                DeelCompetitie, LAAG_REGIO,
@@ -16,7 +15,6 @@ from Score.models import Aanvangsgemiddelde, AG_DOEL_INDIV
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 import datetime
-import io
 
 
 class TestCompLaagRegioCli(E2EHelpers, TestCase):
@@ -174,6 +172,7 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
                             team_klasse=team_klasse_r,
                             team_naam='Test')
         team.save()
+        team.gekoppelde_schutters.add(deelnemer_tr)
         self.team1 = team
 
         team = RegiocompetitieTeam(
@@ -186,21 +185,15 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         team.save()
         self.team2 = team
 
-        team.gekoppelde_schutters.add(deelnemer_tr)
-
     def test_check_klasse(self):
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('check_klasse', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('check_klasse')
 
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue('Let op: gebruik --commit' in f2.getvalue())
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('check_klasse', '--commit', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('check_klasse', '--commit')
 
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
@@ -209,10 +202,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         self.assertTrue(f2.getvalue() == '')
 
     def test_boogtype_check(self):
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('boogtype_check', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('boogtype_check')
 
         # print("f1: %s" % f1.getvalue())
         self.assertTrue(f1.getvalue() == '')
@@ -229,101 +220,78 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         self.sporterboog_r.voor_wedstrijd = False
         self.sporterboog_r.save()
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('boogtype_check', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('boogtype_check')
 
         # print("f2: %s" % f2.getvalue())
         self.assertTrue('met speciale..' in f2.getvalue())
         self.assertTrue('TR -> ?' in f2.getvalue())
 
     def test_boogtype_transfer(self):
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('boogtype_transfer', '123456', 'X', '18', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'X', '18')
 
         self.assertTrue('[ERROR] Onbekend boog type:' in f1.getvalue())
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('boogtype_transfer', '123456', 'R', '18', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'R', '18')
 
         # competitie is nog in fase A en heeft geen vastgestelde klassegrenzen
         self.assertTrue('[ERROR] Kan de competitie niet vinden' in f1.getvalue())
 
         zet_competitie_fase(self.comp, 'C')
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('boogtype_transfer', '999999', 'R', '18', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('boogtype_transfer', '999999', 'R', '18')
 
         self.assertTrue('[ERROR] Sporter 999999 niet gevonden' in f1.getvalue())
 
         self.sporterboog_r.voor_wedstrijd = False
         self.sporterboog_r.save()
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('boogtype_transfer', '123456', 'BB', '18', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'BB', '18')
 
         self.assertTrue('[ERROR] Sporter heeft geen wedstrijd boog als voorkeur' in f1.getvalue())
 
         self.sporterboog_tr.voor_wedstrijd = True
         self.sporterboog_tr.save()
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('boogtype_transfer', '123456', 'TR', '18', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'TR', '18')
 
         self.assertTrue('[ERROR] Sporter is al ingeschreven met dat boog type' in f1.getvalue())
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('boogtype_transfer', '123456', 'BB', '18', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'BB', '18')
 
         self.assertTrue('[ERROR] Sporter heeft boog BB niet als voorkeur. Wel: TR' in f1.getvalue())
 
         self.sporterboog_bb.voor_wedstrijd = True
         self.sporterboog_bb.save()
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('boogtype_transfer', '123456', 'BB', '18', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'BB', '18')
 
         # sporter is met R en TR ingeschreven
         self.assertTrue('[ERROR] Sporter met meerdere inschrijvingen wordt niet ondersteund' in f1.getvalue())
 
         self.deelnemer_r.delete()
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('boogtype_transfer', '123456', 'BB', '18', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'BB', '18')
 
         self.assertTrue('[ERROR] Sporter is onderdeel van een team' in f1.getvalue())
 
         self.team1.gekoppelde_schutters.clear()
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('boogtype_transfer', '123456', 'BB', '18', stderr=f1, stdout=f2)
-
+            f1, f2 = self.run_management_command('boogtype_transfer', '123456', 'BB', '18')
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue('Gebruik --commit om' in f2.getvalue())
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('boogtype_transfer', '--commit', '123456', 'BB', '18', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('boogtype_transfer', '--commit', '123456', 'BB', '18')
 
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
@@ -331,74 +299,55 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         self.assertTrue(' is aangepast; scores zijn omgezet naar sporterboog ' in f2.getvalue())
 
     def test_regios_afsluiten(self):
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('regios_afsluiten', '18', '101', '10x', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regios_afsluiten', '18', '101', '10x')
 
         self.assertTrue('[ERROR] Valide regio nummers: 101 tot 116' in f1.getvalue())
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('regios_afsluiten', '18', '116', '115', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regios_afsluiten', '18', '116', '115')
 
         self.assertTrue('[ERROR] Valide regio nummers: 101 tot 116, oplopend' in f1.getvalue())
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('regios_afsluiten', '99', '115', '116', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regios_afsluiten', '99', '115', '116')
 
         self.assertTrue('[ERROR] Kan competitie met afstand 99 niet vinden' in f1.getvalue())
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('regios_afsluiten', '18', '101', '102', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regios_afsluiten', '18', '101', '102')
 
         self.assertTrue('[ERROR] Competitie in fase A is niet ondersteund' in f1.getvalue())
 
         zet_competitie_fase(self.comp, 'F')
 
         # geen aangemaakte regios
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('regios_afsluiten', '18', '101', '102', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regios_afsluiten', '18', '101', '102')
 
         self.assertTrue('' == f1.getvalue())
         self.assertTrue('' == f2.getvalue())
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('regios_afsluiten', '18', '111', '111', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regios_afsluiten', '18', '111', '111')
 
         self.assertTrue('[INFO] Deelcompetitie Test - Regio 111 wordt afgesloten' in f2.getvalue())
 
         # nog een keer (terwijl al afgesloten)
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('regios_afsluiten', '18', '111', '111', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('regios_afsluiten', '18', '111', '111')
 
         self.assertTrue(f1.getvalue() == '')
 
     def test_fix_bad_ag(self):
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('fix_bad_ag', '18', stderr=f1, stdout=f2)
-
+            f1, f2 = self.run_management_command('fix_bad_ag', '18')
         self.assertTrue('[ERROR] Competitie is in de verkeerde fase' in f1.getvalue())
 
         zet_competitie_fase(self.comp, 'B')
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('fix_bad_ag', '18', stderr=f1, stdout=f2)
+            self.run_management_command('fix_bad_ag', '18')
 
         Aanvangsgemiddelde(
                 sporterboog=self.sporterboog_r,
@@ -407,18 +356,13 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
                 afstand_meter=18,
                 waarde=8.000).save()
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('fix_bad_ag', '18', stderr=f1, stdout=f2)
-
+            f1, f2 = self.run_management_command('fix_bad_ag', '18')
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue('Gebruik --commit om wijzigingen door te voeren' in f2.getvalue())
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('fix_bad_ag', '18', '--commit', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('fix_bad_ag', '18', '--commit')
 
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
@@ -429,18 +373,14 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
             comp.is_afgesloten = True
             comp.save(update_fields=['is_afgesloten'])
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('fix_bad_ag', '18', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('fix_bad_ag', '18')
 
         self.assertTrue('[ERROR] Geen actieve competitie gevonden' in f1.getvalue())
 
     def test_check_wp_f1(self):
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('check_wp_f1', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('check_wp_f1')
 
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
@@ -468,10 +408,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
         self.assertTrue(f1.getvalue() == '')
 
     def test_verwijder_dupe_data(self):
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('verwijder_dupe_data', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('verwijder_dupe_data')
 
         self.assertTrue(f1.getvalue() == '')
         self.assertTrue(f2.getvalue() == '')
@@ -484,10 +422,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
                     indiv_klasse=self.deelnemer_r.indiv_klasse)
         dupe.save()
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('verwijder_dupe_data', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('verwijder_dupe_data')
 
         self.assertTrue('Gebruik --commit om' in f1.getvalue())
 
@@ -499,10 +435,8 @@ class TestCompLaagRegioCli(E2EHelpers, TestCase):
                     indiv_klasse=self.deelnemer_r.indiv_klasse)
         dupe.save()
 
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('verwijder_dupe_data', '--commit', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('verwijder_dupe_data', '--commit')
 
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
