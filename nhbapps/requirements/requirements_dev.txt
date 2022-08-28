@@ -18,18 +18,18 @@ certifi==2022.6.15
     # via
     #   -r requirements_test.txt
     #   requests
-charset-normalizer==2.1.0
+charset-normalizer==2.1.1
     # via
     #   -r requirements_test.txt
     #   requests
-coverage==6.4.3
+coverage==6.4.4
     # via -r requirements_dev.in
 django==3.2.15
     # via
     #   -r requirements_test.txt
     #   django-debug-toolbar
     #   django-extensions
-django-debug-toolbar==3.5.0
+django-debug-toolbar==3.6.0
     # via -r requirements_dev.in
 django-extensions==3.2.0
     # via -r requirements_dev.in
@@ -41,9 +41,9 @@ google-api-core==2.8.2
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-google-api-python-client==2.56.0
+google-api-python-client==2.58.0
     # via -r requirements_test.txt
-google-auth==2.10.0
+google-auth==2.11.0
     # via
     #   -r requirements_test.txt
     #   google-api-core
@@ -78,9 +78,13 @@ openpyxl==3.0.10
     # via -r requirements_test.txt
 packaging==21.3
     # via pip-review
+pillow==9.2.0
+    # via
+    #   -r requirements_test.txt
+    #   reportlab
 pip-licenses==3.5.4
     # via -r requirements_dev.in
-pip-review==1.1.1
+pip-review==1.2.0
     # via -r requirements_dev.in
 protobuf==4.21.5
     # via
@@ -107,13 +111,15 @@ pyparsing==3.0.9
     #   -r requirements_test.txt
     #   httplib2
     #   packaging
-pytz==2022.1
+pytz==2022.2.1
     # via
     #   -r requirements_test.txt
     #   django
 pyyaml==6.0
     # via html5validator
 qrcode==7.3.1
+    # via -r requirements_test.txt
+reportlab==3.6.11
     # via -r requirements_test.txt
 requests==2.28.1
     # via
@@ -145,7 +151,7 @@ uritemplate==4.1.1
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-urllib3==1.26.11
+urllib3==1.26.12
     # via
     #   -r requirements_test.txt
     #   mollie-api-python
