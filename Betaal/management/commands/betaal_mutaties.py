@@ -51,7 +51,7 @@ class Command(BaseCommand):
         except BetaalInstellingenVereniging.DoesNotExist:
             self._instellingen_nhb = None
 
-        # maak de Mollie client instantie aan
+        # maak de Mollie-client instantie aan
         # de API key zetten we later, afhankelijk van de vereniging waar we deze transactie voor doen
         self._mollie_client = Client(api_endpoint=settings.BETAAL_API)
 

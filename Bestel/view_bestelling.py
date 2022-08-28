@@ -16,7 +16,6 @@ from Bestel.models import (Bestelling, BESTELLING_STATUS2STR, BESTELLING_STATUS_
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Plein.menu import menu_dynamics
 from decimal import Decimal
-import json
 
 
 TEMPLATE_TOON_BESTELLINGEN = 'bestel/toon-bestellingen.dtl'
@@ -319,8 +318,9 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
         menu_dynamics(self.request, context)
         return context
 
-    def post(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als de gebruiker op de BETALEN knop drukt in de bestelling
+    @staticmethod
+    def post(request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als de gebruiker op de knop BETALEN drukt in de bestelling
             de enige taak van deze functie is een bestelling met status MISLUKT terug zetten naar NIEUW.
         """
 
@@ -357,7 +357,7 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
     def post(request, *args, **kwargs):
         """ Deze functie wordt aangeroepen vanuit de template om te kijken wat de status van de bestelling/betaling is.
 
-            Dit is een POST by design, om caching te voorkomen.
+            Dit is een POST by-design, om caching te voorkomen.
         """
         account = request.user
 
@@ -419,7 +419,7 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
             out['status'] = 'mislukt'
 
         # niet gebruiken: raise Http404('Onbekende status')
-        # want een 404 resulteert in een foutmelding pagina (status 200)
+        # want een 404 leidt tot een foutmelding pagina met status 200 ("OK")
 
         return JsonResponse(out)
 
@@ -475,6 +475,7 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
 
         if bestelling.status == BESTELLING_STATUS_AFGEROND:
             context['is_afgerond'] = True
+
         elif bestelling.status == BESTELLING_STATUS_WACHT_OP_BETALING:
             # hier komen we als de betaling uitgevoerd is, maar de payment-status-changed nog niet
             # binnen is of nog niet verwerkt door de achtergrondtaak.

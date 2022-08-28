@@ -13,7 +13,7 @@ from Account.models import AccountEmail
 from Account.view_wachtwoord import account_stuur_email_wachtwoord_vergeten
 from Account.view_login import account_stuur_email_bevestig_nieuwe_email
 from BasisTypen.models import BoogType
-from Bestel.management.commands.bestel_mutaties import stuur_email_naar_koper
+from Bestel.management.commands.bestel_mutaties import stuur_email_naar_koper_betaalbevestiging
 from Bestel.models import Bestelling, BestelProduct, BESTELLING_STATUS_WACHT_OP_BETALING
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Functie.models import Functie
@@ -322,7 +322,7 @@ class Command(BaseCommand):
 
     def _test_bestel(self):
         self.stdout.write('Maak mail voor Bestel - Bevestiging aankoop')
-        stuur_email_naar_koper(self.bestelling)
+        stuur_email_naar_koper_betaalbevestiging(self.bestelling)
         self._check_mail_gemaakt()
 
     def _test_functie(self):

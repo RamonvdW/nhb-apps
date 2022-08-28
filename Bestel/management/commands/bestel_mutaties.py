@@ -276,7 +276,7 @@ class Command(BaseCommand):
             # bereken het totaal opnieuw
             mandje.bepaal_totaalprijs_opnieuw()
 
-    def _verwerk_mutatie_maak_bestelling(self, mutatie):
+    def _verwerk_mutatie_maak_bestellingen(self, mutatie):
         mandje = self._get_mandje(mutatie)
         if mandje:                                  # pragma: no branch
             # zorg dat we verse informatie ophalen (anders 1 uur geblokkeerd)
@@ -488,7 +488,7 @@ class Command(BaseCommand):
 
         elif code == BESTEL_MUTATIE_MAAK_BESTELLINGEN:
             self.stdout.write('[INFO] Verwerk mutatie %s: mandje omzetten in bestelling(en)' % mutatie.pk)
-            self._verwerk_mutatie_maak_bestelling(mutatie)
+            self._verwerk_mutatie_maak_bestellingen(mutatie)
 
         elif code == BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN:
             self.stdout.write('[INFO] Verwerk mutatie %s: afmelden voor wedstrijd' % mutatie.pk)

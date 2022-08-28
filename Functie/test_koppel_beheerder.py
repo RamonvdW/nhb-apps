@@ -157,7 +157,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
             resp = self.client.get(self.url_wijzig % '999999')
         self.assert404(resp, 'Verkeerde functie')
 
-        # haal het wijzig scherm op voor de BKO
+        # haal het wijzigscherm op voor de BKO
         url = self.url_wijzig % self.functie_bko.pk
         with self.assert_max_queries(4):
             resp = self.client.get(url)
@@ -200,8 +200,10 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
         self.functie_hwl.accounts.add(self.account_beh1)
         self.e2e_login_and_pass_otp(self.account_beh1)
+        self.e2e_wissel_naar_functie(self.functie_hwl)
+        self.e2e_check_rol('HWL')
 
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(20):
             resp = self.client.post(self.url_activeer_functie % self.functie_hwl.pk, follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))

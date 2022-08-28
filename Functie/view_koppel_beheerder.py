@@ -501,7 +501,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
         context['zoekterm'] = self._zoekterm
         context['form'] = self._form
 
-        if self.rol_nu in ('SEC', 'HWL'):
+        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
             context['is_vereniging_rol'] = True
 
             # Je kan hier op twee manieren komen:

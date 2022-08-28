@@ -77,7 +77,7 @@ def bestel_mutatieverzoek_verwijder_product_uit_mandje(account, product, snel):
 
 def bestel_mutatieverzoek_kortingscode_toepassen(account, kortingscode_str, snel):
     """
-        Voeg een kortingcode toe aan een mandje.
+        Voeg een kortingscode toe aan een mandje.
 
         account: In het mandje van welk account ligt het product nu?
         code:    De kortingscode tekst

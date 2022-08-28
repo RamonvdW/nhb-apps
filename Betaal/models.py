@@ -67,7 +67,7 @@ class BetaalActief(models.Model):
     """
 
     # datum/tijdstip van aanmaak (wordt gebruikt voor opschonen)
-    # de online betaal methoden verlopen na 3 uur, iDEAL al na 15 minuten
+    # de online-betaalmethoden verlopen na 3 uur, iDEAL al na 15 minuten
     when = models.DateTimeField(auto_now_add=True)      # automatisch invullen
 
     # referentie naar de instellingen voor de vereniging waar de betaling bij hoort
@@ -167,7 +167,7 @@ class BetaalMutatie(models.Model):
     # BETAAL_MUTATIE_START_RESTITUTIE:
     # BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED:
 
-    # Mollie id ontvangen met de payment status changed webhook aanroep
+    # Mollie-id ontvangen met de payment status changed webhook aanroep
     payment_id = models.CharField(max_length=BETAAL_PAYMENT_ID_MAXLENGTH, blank=True)
 
     class Meta:

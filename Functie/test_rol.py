@@ -126,19 +126,5 @@ class TestFunctieRol(E2EHelpers, TestCase):
         resp = self.client.get(self.url_overzicht_sec_hwl)
         self.assert_is_redirect(resp, '/account/login/')
 
-    def test_plugin(self):
-        # controleer het toekennen van rollen
-
-        # TODO: finish
-        # is_staff -->
-        # is_BB -->
-        # BKO functie -->
-        # RKO functie -->
-        # RCL functie -->
-        # HWL functie -->
-        # WL functie -->
-        # SEC functie -->
-        pass
-
 
 # end of file
