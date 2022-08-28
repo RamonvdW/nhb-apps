@@ -1245,6 +1245,7 @@ class Command(BaseCommand):
         try:
             self._monitor_nieuwe_mutaties()
         except (DataError, OperationalError, IntegrityError) as exc:  # pragma: no cover
+            # OperationalError treed op bij system shutdown, als database gesloten wordt
             _, _, tb = sys.exc_info()
             lst = traceback.format_tb(tb)
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
