@@ -229,9 +229,9 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                         opnieuw = opnieuw.astimezone(to_tz)
                         now = timezone.now()
                         if opnieuw < now:
-                            sporter.vhpg_str = 'Verlopen (geaccepteerd op %s)' % date_format(vhpg.acceptatie_datum, 'j F H:i')
+                            sporter.vhpg_str = 'Verlopen (geaccepteerd op %s)' % date_format(vhpg.acceptatie_datum, 'j F Y H:i').replace(current_year_str, '')
                         else:
-                            sporter.vhpg_str = 'Ja (op %s)' % date_format(vhpg.acceptatie_datum.astimezone(to_tz), 'j F H:i')
+                            sporter.vhpg_str = 'Ja (op %s)' % date_format(vhpg.acceptatie_datum.astimezone(to_tz), 'j F Y H:i').replace(current_year_str, '')
 
                 sporter.functies = account.functie_set.order_by('beschrijving')
         # for
