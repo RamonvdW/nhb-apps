@@ -54,6 +54,7 @@ class TestFunctieRol(E2EHelpers, TestCase):
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.all()[0]
         self.assert_email_html_ok(mail.mail_html, 'email_functie/rollen-gewijzigd.dtl')
+        self.assert_consistent_email_html_text(mail)
 
         # opnieuw toevoegen heeft geen effect
         added = maak_account_vereniging_secretaris(self.nhbver1, self.account_normaal)

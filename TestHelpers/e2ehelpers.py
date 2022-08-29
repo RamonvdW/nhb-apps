@@ -12,6 +12,7 @@ from django.db import connection
 from Account.models import Account
 from Account.operations import account_create
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
+from Mailer.models import MailQueue
 from TestHelpers.e2estatus import validated_templates, included_templates
 from contextlib import contextmanager
 from bs4 import BeautifulSoup
@@ -938,5 +939,152 @@ class E2EHelpers(TestCase):
             management.call_command('betaal_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
         return f1, f2
+
+    def assert_consistent_email_html_text(self, email: MailQueue):
+        """ Check that the text version and html version of the e-mail are consistent in wording and contents """
+
+        issues = list()
+
+        html = email.mail_html[:]
+
+        html = html[html.find('<body'):]
+        html = html[:html.find('</body>')]
+
+        # verwijder alle style=".."
+        pos = html.find(' style="')
+        while pos > 0:
+            pos2 = html.find('"', pos+8)
+            if pos2 > pos:
+                html = html[:pos] + html[pos2 + 1:]
+
+            pos = html.find(' style="')
+        # while
+
+        # euro teken vindbaar maken
+        html = html.replace('&nbsp;', ' ')
+        html = html.replace('&euro;', '€')
+        html = html.replace('&quot;', '"')
+
+        th_matched = list()
+
+        for line in email.mail_text.split('\n'):
+            line = line.strip()     # remove spaces used for layout
+            if not line:
+                # skip empty lines
+                continue
+
+            # print('check line: %s' % repr(line))
+
+            zoek = '>' + line + '<'
+            pos = html.find(zoek)
+            if pos > 0:
+                # verwijder de tekst maar behoud de > en <
+                html = html[:pos + 1] + html[pos + len(zoek) - 1:]
+                continue
+
+            # misschien lukt het wel als we de zin opsplitsen in twee stukken
+            pos = zoek.find(': ')
+            if pos > 0:
+                zoek1 = zoek[:pos+1]            # begint met > en eindigt met :
+                zoek2 = zoek[pos+1:].strip()    # eindigt met <
+
+                pos = html.find(zoek1)
+                if pos > 0:
+                    # verwijder de tekst maar behoud de >
+                    html = html[:pos+1] + html[pos + len(zoek1):]
+                else:
+                    # misschien is het een table header zonder dubbele punt
+                    zoek1b = zoek1[:-1]     # verwijder :
+                    zoek_th = '<th' + zoek1b + '</th>'
+                    pos = html.find(zoek_th)
+                    if pos > 0:
+                        # verwijder de header en de tag
+                        html = html[:pos] + html[pos + len(zoek_th):]
+                        th_matched.append(zoek_th)
+                    elif zoek1b not in th_matched:
+                        issues.append('Kan tekst %s niet vinden in html e-mail' % repr(zoek1))
+
+                pos = html.find(zoek2)
+                if pos > 0:
+                    # verwijder de tekst maar behoud de <
+                    html = html[:pos] + html[pos + len(zoek2) - 1:]
+                else:
+                    issues.append('Kan tekst %s niet vinden in html e-mail' % repr(zoek2))
+
+                continue
+
+            if line[-1] == ':':
+                # probeer een zonder de dubbele punt
+                zoek = '>' + line[:-1] + '<'
+                pos = html.find(zoek)
+                if pos > 0:
+                    # verwijder de tekst maar behoud de > en <
+                    html = html[:pos + 1] + html[pos + len(zoek) - 1:]
+                    continue
+
+            if line[0] == '[' and line[-1] == ']':
+                # [nr] staat in de html als nr.
+                zoek = '>' + line[1:-1] + '.<'
+                pos = html.find(zoek)
+                if pos > 0:
+                    # verwijder de tekst maar behoud de > en <
+                    html = html[:pos + 1] + html[pos + len(zoek) - 1:]
+                    continue
+
+            # probeer als href
+            if line.startswith('http://') or line.startswith('https://'):
+                zoek = ' href="%s"' % line
+                pos = html.find(zoek)
+                if pos > 0:
+                    html = html[:pos] + html[pos + len(zoek):]
+                    continue
+
+            issues.append('Kan regel %s niet vinden in html e-mail' % repr(line))
+        # for
+
+        # verwijder referenties naar plaatjes
+        pos = html.find('<img ')
+        while pos > 0:
+            pos2 = html.find('>', pos + 4)
+            html = html[:pos] + html[pos2 + 1:]
+            pos = html.find('<img ')
+        # while
+
+        # verwijder "href" en "target" parameters van een "a" tag
+        pos = html.find('<a ')
+        while pos > 0:
+            pos2 = html.find('>', pos + 4)
+            html = html[:pos + 2] + html[pos2:]     # behoud <a en >
+            pos = html.find('<a ')
+        # while
+
+        html = html[html.find('<body>')+6:]
+
+        # haal tag met inhoud weg
+        for tag in ('th', 'h1', 'h2', 'a'):
+            open_tag = '<' + tag + '>'
+            sluit_tag = '</' + tag + '>'
+            pos = html.find(open_tag)
+            while pos > 0:
+                pos2 = html.find(sluit_tag, pos + len(open_tag))
+                html = html[:pos] + html[pos2 + len(sluit_tag):]
+                pos = html.find(open_tag)
+        # for
+
+        html = html.replace('<br>', '')
+        html = html.replace('<div>.</div>', '')     # was punt aan einde regel achter "a" tag
+
+        for tag in ('p', 'span', 'a', 'code', 'div', 'td', 'tr', 'thead', 'table', 'body'):
+            part = '<' + tag + '></' + tag + '>'
+            html = html.replace(part, '')
+        # for
+
+        if html != '':
+            issues.append('HTML e-mail bevat meer tekst: %s' % repr(html))
+            issues.append('Volledige tekst email: %s' % repr(email.mail_text))
+
+        if len(issues):
+            issues.insert(0, 'E-mail bericht verschillen tussen html en tekst:')
+            self.fail(msg="\n    ".join(issues))
 
 # end of file

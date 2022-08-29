@@ -47,14 +47,17 @@
         {% endif %}
     {% endfor %}
 
+    |
+    |Totaal: € {{ bestelling.totaal_euro }}
+
     {% for transactie in transacties %}
         |
         |Betaling:
 
         {% if transactie.is_restitutie %}
-            |    Restitutie € {{ transactie.bedrag_euro_klant }}
+            |    Restitutie: € {{ transactie.bedrag_euro_klant }}
         {% else %}
-            |    Ontvangen € {{ transactie.bedrag_euro_klant }}
+            |    Ontvangen: € {{ transactie.bedrag_euro_klant }}
             |    van {{ transactie.klant_naam }}
         {% endif %}
 
@@ -62,6 +65,8 @@
         |    Beschrijving: {{ transactie.beschrijving }}
     {% endfor %}
 
+    |
+    |Bedankt voor je bestelling!
 {% endblock %}
 
 {% block inhoud_html %}
@@ -116,7 +121,7 @@
                 {% if product.korting_euro > 0.001 %}
                     <tr>
                         <td></td>
-                        <td>Korting<br>
+                        <td>Korting:<br>
                             {% if product.korting %}
                                 <span>Gebruikte korting: {{ product.korting }}</span><br>
                             {% endif %}
@@ -146,17 +151,17 @@
         {% for transactie in transacties %}
             <tr>
                 {% if transactie.is_restitutie %}
-                    <td style="vertical-align:top">Restitutie</td>
+                    <td style="vertical-align:top">Restitutie:</td>
                     <td>
                         <span>op {{ transactie.when_str }}</span><br>
                         <span>{{ transactie.beschrijving }}</span>
                     </td>
                 {% else %}
-                    <td style="vertical-align:top">Ontvangen</td>
+                    <td style="vertical-align:top">Ontvangen:</td>
                     <td>
                         <span>op {{ transactie.when_str }}</span><br>
                         <span>van {{ transactie.klant_naam }}</span><br>
-                        <span>{{ transactie.beschrijving }}</span>
+                        <span>Beschrijving: {{ transactie.beschrijving }}</span>
                     </td>
                 {% endif %}
                 <td style="text-align:right; vertical-align:top">&euro;&nbsp;{{ transactie.bedrag_euro_klant }}</td>

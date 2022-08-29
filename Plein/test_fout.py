@@ -77,7 +77,7 @@ class TestPleinFout(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assertEqual(1, MailQueue.objects.count())
 
-        # nog een keer, zodat de email naar de ontwikkelaar er al is
+        # nog een keer, zodat de email naar de ontwikkelaar er al is.
         # controleer dat er maar 1 mail geschreven wordt (per dag)
         resp = self.client.get(self.url_speciale_pagina % '500')
         self.assertTrue(resp.status_code, 200)

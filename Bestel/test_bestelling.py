@@ -64,7 +64,13 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         ver = NhbVereniging(
                     ver_nr=1000,
                     naam="Grote Club",
-                    regio=NhbRegio.objects.get(regio_nr=112))
+                    regio=NhbRegio.objects.get(regio_nr=112),
+                    bank_iban='IBAN123456789',
+                    bank_bic='BIC2BIC',
+                    kvk_nummer='KvK1234',
+                    website='www.bb.not',
+                    contact_email='info@bb.not',
+                    telefoonnummer = '12345678')
         ver.save()
 
         instellingen = BetaalInstellingenVereniging(
@@ -195,6 +201,11 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(1, bestelling.producten.count())
         product1 = bestelling.producten.all()[0]
 
+        self.assertEqual(1, MailQueue.objects.count())
+        email = MailQueue.objects.all()[0]
+        self.assert_email_html_ok(email.mail_html, 'email_bestel/bevestig-bestelling.dtl')
+        self.assert_consistent_email_html_text(email)
+
         # bekijk de bestellingen
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_bestellingen_overzicht)
@@ -300,7 +311,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         mutatie.account = None
         mutatie.save(update_fields=['account'])
 
-        f1, f2 = self.verwerk_bestel_mutaties(fail_on_error=False)
+        f1, f2 = self.verwerk_bestel_mutaties(fail_on_error=False, show_warnings=False)
         self.assertTrue('[ERROR] Mutatie' in f1.getvalue())
         self.assertTrue('heeft geen account' in f1.getvalue())
 
@@ -351,7 +362,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(3, BestelMutatie.objects.count())
         bestel_mutatieverzoek_betaling_afgerond(betaalactief, gelukt=True, snel=True)
         self.assertEqual(3, BestelMutatie.objects.count())
-        self.assertEqual(MailQueue.objects.count(), 0)
+        self.assertEqual(MailQueue.objects.count(), 1)      # bevestiging van de bestelling
+        MailQueue.objects.all().delete()
 
         # koppel transactie aan de bestelling, zodat deze gevonden kan worden
         bestelling.betaal_actief = betaalactief
@@ -393,6 +405,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.all()[0]
         self.assert_email_html_ok(mail.mail_html, 'email_bestel/bevestig-bestelling.dtl')
+        self.assert_consistent_email_html_text(mail)
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)

@@ -251,6 +251,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         mail = MailQueue.objects.all()[0]
         self.assert_email_html_ok(mail.mail_html, 'email_functie/rollen-gewijzigd.dtl')
         self.assertTrue(settings.URL_PDF_HANDLEIDING_BEHEERDERS in mail.mail_html)
+        self.assert_consistent_email_html_text(mail)
 
         # koppel beheerder2
         with self.assert_max_queries(22):

@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.template.loader import render_to_string
 from django.templatetags.static import static
 from Mailer.models import MailQueue
+from html import unescape
 import datetime
 import re
 
@@ -147,6 +148,7 @@ def render_email_template(context, email_template_name):
     text_content = text_content.replace('\n', '')
     text_content = text_content[text_content.find('|')+1:]      # strip all before first pipeline, including pipeline
     text_content = text_content.replace('|', '\n')
+    text_content = unescape(text_content)
 
     return text_content, html_content
 
