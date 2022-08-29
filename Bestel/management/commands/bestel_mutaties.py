@@ -28,15 +28,81 @@ from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortings
 from Mailer.operations import mailer_queue_email, render_email_template
 from Overig.background_sync import BackgroundSync
 from Wedstrijden.models import INSCHRIJVING_STATUS_RESERVERING_BESTELD, INSCHRIJVING_STATUS_DEFINITIEF
+from mollie.api.client import Client, RequestSetupError, RequestError
 from decimal import Decimal
 import traceback
 import datetime
 import sys
 
 EMAIL_TEMPLATE_BEVESTIG_BESTELLING = 'email_bestel/bevestig-bestelling.dtl'
+EMAIL_TEMPLATE_BEVESTIG_BETALING = 'email_bestel/bevestig-betaling.dtl'
 
 
-def stuur_email_naar_koper(bestelling):
+def stuur_email_naar_koper_bestelling_details(bestelling):
+    """ Stuur een e-mail naar de koper met details van de bestelling en betaalinstructies """
+
+    account = bestelling.account
+    email = account.accountemail_set.all()[0]
+
+    producten = (bestelling
+                 .producten
+                 .select_related('wedstrijd_inschrijving',
+                                 'wedstrijd_inschrijving__wedstrijd',
+                                 'wedstrijd_inschrijving__sessie',
+                                 'wedstrijd_inschrijving__sporterboog',
+                                 'wedstrijd_inschrijving__sporterboog__boogtype',
+                                 'wedstrijd_inschrijving__sporterboog__sporter',
+                                 'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging')
+                 .order_by('pk'))       # vaste volgorde (primitief, maar functioneel)
+
+    regel_nr = 0
+    for product in producten:
+
+        if product.wedstrijd_inschrijving:
+            inschrijving = product.wedstrijd_inschrijving
+
+            # lege regel gevolgd door een regel nummer
+            regel_nr += 1
+            product.regel_nr = regel_nr
+
+            product.reserveringsnummer = settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk
+            product.wedstrijd_titel = inschrijving.wedstrijd.titel
+            product.sessie_datum = inschrijving.sessie.datum
+            product.sessie_tijd = inschrijving.sessie.tijd_begin
+            product.sporter_lid_nr_naam = inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam()
+
+            sporter_ver = inschrijving.sporterboog.sporter.bij_vereniging
+            if sporter_ver:
+                product.ver_nr_naam = sporter_ver.ver_nr_en_naam()
+            else:
+                product.ver_nr_naam = 'Onbekend'
+
+            product.boog = inschrijving.sporterboog.boogtype.beschrijving
+
+            if inschrijving.gebruikte_code:
+                korting = inschrijving.gebruikte_code
+                product.korting = "code %s (korting: %d%%)" % (korting.code, korting.percentage)
+
+                if korting.combi_basis_wedstrijd:
+                    combi_redenen = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
+                    product.combi_reden = " en ".join(combi_redenen)
+    # for
+
+    context = {
+        'voornaam': account.get_first_name(),
+        'naam_site': settings.NAAM_SITE,
+        'bestelling': bestelling,
+        'producten': producten,
+    }
+
+    mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_BESTELLING)
+
+    mailer_queue_email(email.bevestigde_email,
+                       'Bestelling op MijnHandboogsport (%s)' % bestelling.bestel_nr,
+                       mail_body)
+
+
+def stuur_email_naar_koper_betaalbevestiging(bestelling):
     """ Stuur een e-mail om de betaalde bestelling te bevestigen """
 
     account = bestelling.account
@@ -103,7 +169,7 @@ def stuur_email_naar_koper(bestelling):
         'transacties': transacties,
     }
 
-    mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_BESTELLING)
+    mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_BETALING)
 
     mailer_queue_email(email.bevestigde_email,
                        'Bevestiging aankoop via MijnHandboogsport (%s)' % bestelling.bestel_nr,
@@ -214,6 +280,8 @@ class Command(BaseCommand):
 
                 # bereken het totaal opnieuw
                 mandje.bepaal_totaalprijs_opnieuw()
+        else:
+            self.stdout.write('[WARNING] Kan mandje niet vinden voor mutatie pk=%s' % mutatie.pk)
 
     def _verwerk_mutatie_verwijder(self, mutatie):
         """ een bestelling mag uit het mandje voordat de betaling gestart is """
@@ -257,9 +325,8 @@ class Command(BaseCommand):
         if not handled:
             # product ligt niet meer in het mandje?!
             self.stdout.write('[WARNING] Product pk=%s niet meer in het mandje gevonden' % mutatie.product.pk)
-            inschrijving = mandje.product.wedstrijd_inschrijving
-            if inschrijving:
-                wedstrijden_plugin_verwijder_reservering(self.stdout, inschrijving)
+            if mutatie.product.wedstrijd_inschrijving:
+                wedstrijden_plugin_verwijder_reservering(self.stdout, mutatie.product.wedstrijd_inschrijving)
 
     def _verwerk_mutatie_kortingscode(self, mutatie):
         """ Deze functie controleert of een kortingscode toegepast mag worden op de producten die in het mandje
@@ -279,8 +346,11 @@ class Command(BaseCommand):
     def _verwerk_mutatie_maak_bestellingen(self, mutatie):
         mandje = self._get_mandje(mutatie)
         if mandje:                                  # pragma: no branch
-            # zorg dat we verse informatie ophalen (anders 1 uur geblokkeerd)
+            # zorg dat we verse informatie ophalen (anders duur het 1 uur voordat een update door komt)
             self._clear_instellingen_cache()
+
+            # maak een Mollie-client instantie aan
+            mollie_client = Client(api_endpoint=settings.BETAAL_API)
 
             # verdeel de producten in het mandje naar vereniging waar de betaling heen moet
             ontvanger2producten = dict()      # [ver_nr] = [MandjeProduct, ...]
@@ -330,7 +400,19 @@ class Command(BaseCommand):
                                     verkoper_adres2=ver.adres_regel2,
                                     verkoper_kvk=ver.kvk_nummer,
                                     verkoper_email=ver.contact_email,
-                                    verkoper_telefoon=ver.telefoonnummer)
+                                    verkoper_telefoon=ver.telefoonnummer,
+                                    verkoper_iban=ver.bank_iban,
+                                    verkoper_bic=ver.bank_bic)
+
+                instellingen.ondersteunt_mollie = False
+                try:
+                    mollie_client.validate_api_key(instellingen.mollie_api_key)
+                except RequestSetupError:
+                    # API key lijkt nergens op
+                    pass
+                else:
+                    bestelling.verkoper_heeft_mollie = True
+
                 bestelling.save()
                 bestelling.producten.set(producten)
 
@@ -371,6 +453,10 @@ class Command(BaseCommand):
                 else:
                     # laat de status op BESTELLING_STATUS_NIEUW staan totdat de betaling opgestart is
                     pass
+
+                # stuur voor elke bestelling een bevestiging naar de koper met details van de bestelling
+                # en instructies voor betaling (niet nodig, handmatig, via Mollie)
+                stuur_email_naar_koper_bestelling_details(bestelling)
             # for
 
             # zorg dat het totaal van het mandje ook weer klopt
@@ -457,7 +543,7 @@ class Command(BaseCommand):
                 # for
 
                 # stuur een e-mail aan de koper
-                stuur_email_naar_koper(bestelling)
+                stuur_email_naar_koper_betaalbevestiging(bestelling)
         else:
             self.stdout.write('[INFO] Betaling niet gelukt voor bestelling %s (pk=%s)' % (
                                 bestelling.bestel_nr, bestelling.pk))

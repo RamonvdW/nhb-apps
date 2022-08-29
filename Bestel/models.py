@@ -163,6 +163,11 @@ class Bestelling(models.Model):
     verkoper_email = models.EmailField(default='', blank=True)
     verkoper_telefoon = models.CharField(max_length=20, default='', blank=True)
 
+    # bankrekening details
+    verkoper_iban = models.CharField(max_length=18, default='', blank=True)
+    verkoper_bic = models.CharField(max_length=11, default='', blank=True)          # 8 of 11 tekens
+    verkoper_heeft_mollie = models.BooleanField(default=False)
+
     # de bestelde producten met prijs en korting
     producten = models.ManyToManyField(BestelProduct)
 

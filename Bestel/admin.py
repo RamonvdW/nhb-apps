@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import BestelProduct, BestelMandje, Bestelling, BestelMutatie
+from .models import (BestelProduct, BestelMandje, Bestelling, BestelMutatie,
+                     BESTEL_MUTATIE_TO_STR)
 
 
 class BestelProductAdmin(admin.ModelAdmin):
@@ -64,9 +65,25 @@ class BestellingAdmin(admin.ModelAdmin):
 
 class BestelMutatieAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('when', 'account',)
+    readonly_fields = ('when', 'account', 'code_plus')
 
     auto_complete = ('wedstrijd_inschrijving', 'product', 'bestelling')
+
+    fieldsets = (
+        ('BestelMutatie',
+         {'fields': ('when', 'code_plus', 'is_verwerkt',
+                     'account',
+                     'wedstrijd_inschrijving', 'product', 'kortingscode', 'bestelling', 'betaling_is_gelukt')
+          }),
+    )
+
+    @staticmethod
+    def code_plus(obj):     # pragma: no cover
+        try:
+            msg = "%s: %s" % (obj.code, BESTEL_MUTATIE_TO_STR[obj.code])
+        except KeyError:
+            msg = "%s: (onbekend)" % obj.code
+        return msg
 
 
 admin.site.register(BestelProduct, BestelProductAdmin)
