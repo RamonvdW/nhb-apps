@@ -80,7 +80,7 @@ class Command(BaseCommand):
         beschrijving = mutatie.beschrijving
         bedrag_euro_str = str(mutatie.bedrag_euro)      # moet decimale punt geven
 
-        # schakel de Mollie client over op de API key van deze vereniging
+        # schakel de Mollie-client over op de API key van deze vereniging
         # als de betaling via de NHB loopt, dan zijn dit al de instellingen van de NHB
         try:
             self._mollie_client.set_api_key(instellingen.mollie_api_key)

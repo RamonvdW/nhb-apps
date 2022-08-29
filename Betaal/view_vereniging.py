@@ -65,7 +65,7 @@ class BetalingenInstellenView(UserPassesTestMixin, TemplateView):
         ver = self.functie_nu.nhb_ver
         apikey = request.POST.get('apikey', '')[:MOLLIE_API_KEY_MAXLENGTH]
 
-        # laat de Mollie client de key opschonen en valideren
+        # laat de Mollie-client de key opschonen en controleren
         client = Client()
         try:
             apikey = client.validate_api_key(apikey)
@@ -73,6 +73,8 @@ class BetalingenInstellenView(UserPassesTestMixin, TemplateView):
             # niet geaccepteerd
             # hoe moeilijk is knippen & plakken? Niet veel moeite in stoppen
             raise Http404('Niet geaccepteerd')
+
+        # TODO: doe een echte transactie om te controleren dat de API key echt werkt
 
         instellingen, is_created = BetaalInstellingenVereniging.objects.get_or_create(vereniging=ver)
         instellingen.mollie_api_key = apikey
