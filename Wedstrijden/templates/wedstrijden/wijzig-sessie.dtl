@@ -71,7 +71,7 @@
                             <tr>
                                 <th>Beschrijving</th>
                                 <td>
-                                    <input id="beschr" name="beschrijving" type="text" value="{{ sessie.beschrijving }}" maxlength="50" onchange="gewijzigd()">
+                                    <input id="beschr" name="beschrijving" type="text" value="{{ sessie.beschrijving }}" maxlength="50" oninput="gewijzigd()">
                                 </td>
                             </tr>
 
