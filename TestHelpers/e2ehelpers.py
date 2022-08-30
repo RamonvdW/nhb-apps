@@ -954,7 +954,7 @@ class E2EHelpers(TestCase):
         pos = html.find(' style="')
         while pos > 0:
             pos2 = html.find('"', pos+8)
-            if pos2 > pos:
+            if pos2 > pos:                                                      # pragma: no branch
                 html = html[:pos] + html[pos2 + 1:]
 
             pos = html.find(' style="')
@@ -997,18 +997,18 @@ class E2EHelpers(TestCase):
                     zoek1b = zoek1[:-1]     # verwijder :
                     zoek_th = '<th' + zoek1b + '</th>'
                     pos = html.find(zoek_th)
-                    if pos > 0:
+                    if pos > 0:                                                 # pragma: no branch
                         # verwijder de header en de tag
                         html = html[:pos] + html[pos + len(zoek_th):]
                         th_matched.append(zoek_th)
-                    elif zoek1b not in th_matched:
+                    elif zoek1b not in th_matched:                              # pragma: no cover
                         issues.append('Kan tekst %s niet vinden in html e-mail' % repr(zoek1))
 
                 pos = html.find(zoek2)
-                if pos > 0:
+                if pos > 0:                                                     # pragma: no branch
                     # verwijder de tekst maar behoud de <
                     html = html[:pos] + html[pos + len(zoek2) - 1:]
-                else:
+                else:                                                           # pragma: no cover
                     issues.append('Kan tekst %s niet vinden in html e-mail' % repr(zoek2))
 
                 continue
@@ -1017,7 +1017,7 @@ class E2EHelpers(TestCase):
                 # probeer een zonder de dubbele punt
                 zoek = '>' + line[:-1] + '<'
                 pos = html.find(zoek)
-                if pos > 0:
+                if pos > 0:                                                     # pragma: no branch
                     # verwijder de tekst maar behoud de > en <
                     html = html[:pos + 1] + html[pos + len(zoek) - 1:]
                     continue
@@ -1026,20 +1026,20 @@ class E2EHelpers(TestCase):
                 # [nr] staat in de html als nr.
                 zoek = '>' + line[1:-1] + '.<'
                 pos = html.find(zoek)
-                if pos > 0:
+                if pos > 0:                                                     # pragma: no branch
                     # verwijder de tekst maar behoud de > en <
                     html = html[:pos + 1] + html[pos + len(zoek) - 1:]
                     continue
 
             # probeer als href
-            if line.startswith('http://') or line.startswith('https://'):
+            if line.startswith('http://') or line.startswith('https://'):       # pragma: no branch
                 zoek = ' href="%s"' % line
                 pos = html.find(zoek)
                 if pos > 0:
                     html = html[:pos] + html[pos + len(zoek):]
                     continue
 
-            issues.append('Kan regel %s niet vinden in html e-mail' % repr(line))
+            issues.append('Kan regel %s niet vinden in html e-mail' % repr(line))       # pragma: no cover
         # for
 
         # verwijder referenties naar plaatjes
@@ -1079,11 +1079,11 @@ class E2EHelpers(TestCase):
             html = html.replace(part, '')
         # for
 
-        if html != '':
+        if html != '':                                                              # pragma: no cover
             issues.append('HTML e-mail bevat meer tekst: %s' % repr(html))
             issues.append('Volledige tekst email: %s' % repr(email.mail_text))
 
-        if len(issues):
+        if len(issues):                                                             # pragma: no cover
             issues.insert(0, 'E-mail bericht verschillen tussen html en tekst:')
             self.fail(msg="\n    ".join(issues))
 
