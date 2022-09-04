@@ -101,8 +101,8 @@
                             <td>{{ aanmelding.status_str }}</td>
                             <td class="hide-on-small-only">{{ aanmelding.korting_str }}</td>
                             <td>
-                                {% if aanmelding.url_sporter %}
-                                    <a class="btn-nhb-rood" href="{{ aanmelding.url_sporter }}">
+                                {% if aanmelding.url_details %}
+                                    <a class="btn-nhb-rood" href="{{ aanmelding.url_details }}">
                                         <i class="material-icons-round">play_arrow</i></a>
                                 {% endif %}
                             </td>

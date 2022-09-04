@@ -9,11 +9,11 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import GESLACHT2STR, GESLACHT_VROUW
+from BasisTypen.models import GESLACHT2STR
 from Bestel.mutaties import bestel_mutatieverzoek_afmelden_wedstrijd, bestel_mutatieverzoek_verwijder_product_uit_mandje
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Sporter.models import Sporter, SporterVoorkeuren
+from Sporter.models import Sporter, SporterVoorkeuren, get_sporter_voorkeuren
 from Wedstrijden.models import (Wedstrijd, WedstrijdInschrijving, INSCHRIJVING_STATUS_TO_SHORT_STR,
                                 INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 from decimal import Decimal
@@ -21,7 +21,7 @@ import csv
 
 
 TEMPLATE_WEDSTRIJDEN_AANMELDINGEN = 'wedstrijden/aanmeldingen.dtl'
-TEMPLATE_WEDSTRIJDEN_AANMELDINGEN_SPORTER = 'wedstrijden/aanmeldingen-sporter.dtl'
+TEMPLATE_WEDSTRIJDEN_AANMELDING_DETAILS = 'wedstrijden/aanmelding-details.dtl'
 
 
 class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
@@ -97,8 +97,8 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
             if aanmelding.gebruikte_code:
                 aanmelding.korting_str = '%s%%' % aanmelding.gebruikte_code.percentage
 
-            aanmelding.url_sporter = reverse('Wedstrijden:details-sporter',
-                                             kwargs={'sporter_lid_nr': sporter.lid_nr})
+            aanmelding.url_details = reverse('Wedstrijden:details-aanmelding',
+                                             kwargs={'inschrijving_pk': aanmelding.pk})
 
             totaal_ontvangen_euro += aanmelding.ontvangen_euro
             totaal_retour_euro += aanmelding.retour_euro
@@ -339,12 +339,12 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         return response
 
 
-class KalenderDetailsSporterView(UserPassesTestMixin, TemplateView):
+class KalenderDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
 
     """ Via deze view kunnen beheerders de details van een inschrijving voor een wedstrijd inzien """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_WEDSTRIJDEN_AANMELDINGEN_SPORTER
+    template_name = TEMPLATE_WEDSTRIJDEN_AANMELDING_DETAILS
     raise_exception = True          # genereer PermissionDenied als test_func False terug geeft
     permission_denied_message = 'Geen toegang'
 
@@ -355,81 +355,69 @@ class KalenderDetailsSporterView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_BB)
+        return self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_BB, Rollen.ROL_SPORTER)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
         try:
-            sporter_lid_nr = str(kwargs['sporter_lid_nr'])[:6]     # afkappen voor de veiligheid
-            sporter_lid_nr = int(sporter_lid_nr)
+            inschrijving_pk = str(kwargs['inschrijving_pk'])[:7]     # afkappen voor de veiligheid
+            inschrijving_pk = int(inschrijving_pk)
         except (TypeError, ValueError):
             raise Http404('Geen valide parameter')
 
         try:
-            context['sporter'] = Sporter.objects.get(lid_nr=sporter_lid_nr)
-        except Sporter.DoesNotExist:
-            raise Http404('Sporter niet gevonden')
+            inschrijving = (WedstrijdInschrijving
+                            .objects
+                            .select_related('wedstrijd',
+                                            'sessie',
+                                            'wedstrijd__organiserende_vereniging',
+                                            'sporterboog',
+                                            'sporterboog__sporter',
+                                            'gebruikte_code')
+                            .get(pk=inschrijving_pk))
+        except WedstrijdInschrijving.DoesNotExist:
+            raise Http404('Aanmelding niet gevonden')
 
-        # maak een lijst met transacties van deze sporter
-        # - aanmelding/reservering
-        # - betaling
-        # - afmelding
-        # - restitutie
-        context['lijst'] = lijst = list()
-
-        inschrijvingen = (WedstrijdInschrijving
-                          .objects
-                          .filter(sporterboog__sporter__lid_nr=sporter_lid_nr)
-                          .select_related('wedstrijd',
-                                          'sessie',
-                                          'wedstrijd__organiserende_vereniging',
-                                          'sporterboog',
-                                          'gebruikte_code'))
-        if self.rol_nu != Rollen.ROL_BB:
-            # HWL of SEC --> alleen van de eigen vereniging laten zien
+        if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
+            # alleen van de eigen vereniging laten zien
             ver = self.functie_nu.nhb_ver
-            inschrijvingen.filter(wedstrijd__organiserende_vereniging=ver)
+            if inschrijving.wedstrijd.organiserende_vereniging != self.functie_nu.nhb_ver:
+                raise Http404('Verkeerde vereniging')
 
-        url_aanmeldingen = None
+        if self.rol_nu == Rollen.ROL_SPORTER:
+            # alleen eigen inschrijvingen laten zien
+            account = self.request.user
+            sporter = Sporter.objects.get(account=account)
+            if inschrijving.sporterboog.sporter.lid_nr != sporter.lid_nr:
+                raise Http404('Niet jouw inschrijving')
 
-        for inschrijving in inschrijvingen:
+        context['inschrijving'] = inschrijving
+        context['sporter'] = sporter = inschrijving.sporterboog.sporter
+        context['ver'] = sporter.bij_vereniging
 
-            inschrijving.status_str = INSCHRIJVING_STATUS_TO_SHORT_STR[inschrijving.status]
+        context['voorkeuren'] = voorkeuren = get_sporter_voorkeuren(sporter)
+        voorkeuren.wedstrijdgeslacht_str = GESLACHT2STR[voorkeuren.wedstrijd_geslacht]
 
-            if inschrijving.status != INSCHRIJVING_STATUS_AFGEMELD:
+        inschrijving.status_str = INSCHRIJVING_STATUS_TO_SHORT_STR[inschrijving.status]
 
-                mag_afmelden = True
-                if self.rol_nu != Rollen.ROL_BB:
-                    # controleer dat dit een inschrijving is op een wedstrijd van de vereniging
-                    ver = self.functie_nu.nhb_ver
-                    if inschrijving.wedstrijd.organiserende_vereniging != ver:
-                        mag_afmelden = False
+        if inschrijving.status != INSCHRIJVING_STATUS_AFGEMELD:
+            inschrijving.url_afmelden = reverse('Wedstrijden:afmelden',
+                                                kwargs={'inschrijving_pk': inschrijving.pk})
 
-                if mag_afmelden:
-                    inschrijving.url_afmelden = reverse('Wedstrijden:afmelden',
-                                                        kwargs={'inschrijving_pk': inschrijving.pk})
+        if inschrijving.gebruikte_code:
+            inschrijving.korting_str = '%s%%' % inschrijving.gebruikte_code.percentage
+        else:
+            inschrijving.korting_str = None
 
-            if inschrijving.gebruikte_code:
-                inschrijving.korting_str = '%s%%' % inschrijving.gebruikte_code.percentage
-            else:
-                inschrijving.korting_str = '-'
-
-            tup = (inschrijving.wanneer, 'I', inschrijving)
-            lijst.append(tup)
-
-            if not url_aanmeldingen:
-                url_aanmeldingen = reverse('Wedstrijden:aanmeldingen',
-                                           kwargs={'wedstrijd_pk': inschrijving.wedstrijd.pk})
-        # for
-
-        lijst.sort()
+        url_aanmeldingen = reverse('Wedstrijden:aanmeldingen',
+                                   kwargs={'wedstrijd_pk': inschrijving.wedstrijd.pk})
 
         if self.rol_nu == Rollen.ROL_BB:
             context['kruimels'] = (
                 (reverse('Wedstrijden:manager'), 'Wedstrijdkalender'),
-                (reverse('Wedstrijden:manager'), 'Aanmeldingen'),       # TODO: exacte wedstrijd weten we niet!
+                (url_aanmeldingen, 'Aanmeldingen'),
                 (None, 'Details aanmelding')
             )
         else:
@@ -489,8 +477,7 @@ class AfmeldenView(UserPassesTestMixin, View):
         else:
             bestel_mutatieverzoek_afmelden_wedstrijd(inschrijving, snel == '1')
 
-        sporter_lid_nr = inschrijving.sporterboog.sporter.lid_nr
-        url = reverse('Wedstrijden:details-sporter', kwargs={'sporter_lid_nr': sporter_lid_nr})
+        url = reverse('Wedstrijden:details-aanmelding', kwargs={'inschrijving_pk': inschrijving.pk})
 
         return HttpResponseRedirect(url)
 

@@ -23,7 +23,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
     test_after = ('Wedstrijden.test_wedstrijd',)
 
     url_aanmeldingen_wedstrijd = '/wedstrijden/%s/aanmeldingen/'                    # wedstrijd_pk
-    url_aanmeldingen_sporter = '/wedstrijden/sporter/%s/'                           # sporter_lid_nr
+    url_details_aanmelding = '/wedstrijden/details-aanmelding/%s/'                  # inschrijving_pk
     url_aanmeldingen_afmelden = '/wedstrijden/afmelden/%s/'                         # inschrijving_pk
     url_aanmeldingen_download_tsv = '/wedstrijden/%s/aanmeldingen/download/tsv/'    # wedstrijd_pk
     url_aanmeldingen_download_csv = '/wedstrijden/%s/aanmeldingen/download/csv/'    # wedstrijd_pk
@@ -204,7 +204,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         resp = self.client.get(self.url_aanmeldingen_wedstrijd % self.wedstrijd.pk)
         self.assert403(resp)
 
-        resp = self.client.get(self.url_aanmeldingen_sporter % self.sporter1.lid_nr)
+        resp = self.client.get(self.url_details_aanmelding % self.inschrijving1r.pk)
         self.assert403(resp)
 
         resp = self.client.get(self.url_aanmeldingen_afmelden % self.inschrijving1r.pk)
@@ -266,42 +266,42 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        url = self.url_aanmeldingen_sporter % self.sporter1.lid_nr
+        url = self.url_details_aanmelding % self.inschrijving1r.pk
 
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/aanmeldingen-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/aanmelding-details.dtl', 'plein/site_layout.dtl'))
 
         self.e2e_assert_other_http_commands_not_supported(url)
 
         # als BB
         self.e2e_wisselnaarrol_bb()
 
-        url = self.url_aanmeldingen_sporter % self.sporter1.lid_nr
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/aanmeldingen-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert_template_used(resp, ('wedstrijden/aanmelding-details.dtl', 'plein/site_layout.dtl'))
 
-        # maak de sporter niet ingeschreven
-        self.inschrijving2.delete()
-
-        url = self.url_aanmeldingen_sporter % self.sporter2.lid_nr      # is afgemeld
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/aanmeldingen-sporter.dtl', 'plein/site_layout.dtl'))
+        # # maak de sporter niet ingeschreven
+        # self.inschrijving2.delete()
+        #
+        # url = self.url_details_aanmelding % self.inschrijving2.pk      # is afgemeld
+        # print('url=%s' % repr(url))
+        # with self.assert_max_queries(20):
+        #     resp = self.client.get(url)
+        # self.assertEqual(resp.status_code, 200)     # 200 = OK
+        # self.assert_html_ok(resp)
+        # self.assert_template_used(resp, ('wedstrijden/aanmelding-details.dtl', 'plein/site_layout.dtl'))
 
         # bad
-        resp = self.client.get(self.url_aanmeldingen_sporter % 'Y<42')
+        resp = self.client.get(self.url_details_aanmelding % 'Y<42')
         self.assert404(resp, 'Geen valide parameter')
 
-        resp = self.client.get(self.url_aanmeldingen_sporter % 999999)
-        self.assert404(resp, 'Sporter niet gevonden')
+        resp = self.client.get(self.url_details_aanmelding % 999999)
+        self.assert404(resp, 'Aanmelding niet gevonden')
 
         # maak 1 inschrijving afgemeld
         self.inschrijving1c.status = INSCHRIJVING_STATUS_AFGEMELD
@@ -318,12 +318,10 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
 
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        url = self.url_aanmeldingen_sporter % self.sporter1.lid_nr
+        url = self.url_details_aanmelding % self.inschrijving1c.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('wedstrijden/aanmeldingen-sporter.dtl', 'plein/site_layout.dtl'))
+        self.assert404(resp, 'Verkeerde vereniging')
 
     def test_afmelden(self):
         # wordt HWL
@@ -333,7 +331,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         url = self.url_aanmeldingen_afmelden % self.inschrijving1r.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, self.url_aanmeldingen_sporter % self.sporter1.lid_nr)
+        self.assert_is_redirect(resp, self.url_details_aanmelding % self.inschrijving1r.pk)
 
         # maak een tweede vereniging
         ver2 = NhbVereniging(
@@ -355,7 +353,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         url = self.url_aanmeldingen_afmelden % self.inschrijving2.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, self.url_aanmeldingen_sporter % self.sporter2.lid_nr)
+        self.assert_is_redirect(resp, self.url_details_aanmelding % self.inschrijving2.pk)  # is afgemeld
 
         self.e2e_assert_other_http_commands_not_supported(url, post=False)
 
@@ -376,7 +374,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         url = self.url_aanmeldingen_afmelden % self.inschrijving1r.pk
         with self.assert_max_queries(20):
             resp = self.client.post(url, {'snel': 1})
-        self.assert_is_redirect(resp, self.url_aanmeldingen_sporter % self.sporter1.lid_nr)
+        self.assert_is_redirect(resp, self.url_details_aanmelding % self.inschrijving1r.pk)
 
     def test_download(self):
         # wordt HWL

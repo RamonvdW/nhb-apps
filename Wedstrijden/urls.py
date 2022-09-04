@@ -124,9 +124,9 @@ urlpatterns = [
          view_aanmeldingen.DownloadAanmeldingenBestandCSV.as_view(),
          name='download-aanmeldingen-csv'),
 
-    path('sporter/<sporter_lid_nr>/',
-         view_aanmeldingen.KalenderDetailsSporterView.as_view(),
-         name='details-sporter'),
+    path('details-aanmelding/<inschrijving_pk>/',
+         view_aanmeldingen.KalenderDetailsAanmeldingView.as_view(),
+         name='details-aanmelding'),
 ]
 
 # end of file
