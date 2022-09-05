@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_mandje, view_bestelling
+from . import view_mandje, view_bestelling, view_activiteit
 
 app_name = 'Bestel'
 
@@ -42,7 +42,13 @@ urlpatterns = [
 
     path('na-de-betaling/<bestel_nr>/',
          view_bestelling.BestellingAfgerondView.as_view(),
-         name='na-de-betaling')
+         name='na-de-betaling'),
+
+
+    # manager view
+    path('activiteit/',
+         view_activiteit.BestelActiviteitView.as_view(),
+         name='activiteit'),
 ]
 
 # end of file

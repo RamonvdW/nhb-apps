@@ -1,0 +1,104 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% load overig_filters %}   <!-- highlight filter -->
+
+{% block title %}Bestellingen en Betalingen{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Bestellingen en Betalingen</h3>
+        </div>
+    </div>
+
+    <!-- zoekformulier -->
+    <!-- blauwe balk met dialoog venster -->
+    <div class="row-nhb-blauw">
+        <div class="col s10 offset-s1 m8 offset-m2 l6 offset-l3 white z-depth-3">
+
+            <!-- dialoog venster -->
+            <div style="margin:50px 30px 30px 30px" class="left-align">
+                <form action="{{ zoek_url }}" method="get">
+                    {% csrf_token %}
+
+                    <!-- form field -->
+                    <div class="input-field">
+                        {{ zoekform.zoekterm.label_tag }}{{ zoekform.zoekterm }}
+                    </div>
+
+                    <!-- button -->
+                    <p class="center">
+                        <button class="btn-nhb-rood" type="submit">
+                            <i class="material-icons-round left">search</i>Zoek</button>
+                    </p>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            {% if zoekterm %}
+                <h4>Zoekresultaten</h4>
+                {% if bestellingen %}
+                    <p>{{ bestellingen|length }} bestellingen gevonden</p>
+                {% else %}
+                    <p class="red-text">Niets gevonden</p>
+                {% endif %}
+            {% else %}
+                <h4>Recente bestellingen</h4>
+                <p>{{ bestellingen|length }} bestellingen gevonden</p>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2 left-align">
+
+            <ul class="collapsible">
+                {% for bestelling in bestellingen %}
+                    <li>
+                        <div class="collapsible-header white">
+                            <span>Bestel nummer {{ bestelling.bestel_nr_str|highlight:zoekterm }}</span>
+                        </div>
+                        <div class="collapsible-body white" style="column-count:2">
+                            <div>
+                                <div>
+                                    <span>Datum:<br>Klant:<br>Verkoper:<br>Bedrag:<br>Status:<br>Producten:</span>
+                                    {% for product in bestelling.producten.all %}<br>{% endfor %}
+                                </div>
+                                <div>
+                                    <span>
+{{ bestelling.aangemaakt }}<br>
+[{{ bestelling.account.username|highlight:zoekterm }}] {{ bestelling.account.volledige_naam|highlight:zoekterm }}<br>
+[{{ bestelling.ver_nr_str|highlight:zoekterm }}] {{ bestelling.ver_naam|highlight:zoekterm }}<br>
+&euro;&nbsp;{{ bestelling.totaal_euro }}<br>
+{{ bestelling.status_str }}<br>
+{% for product in bestelling.producten.all %}{{ product }}<br>{% endfor %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+
+        </div>
+    </div>
+
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="bestel-activiteit" %}
+
+{% endblock %}
+

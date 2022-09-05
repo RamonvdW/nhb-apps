@@ -124,6 +124,10 @@
                 {% url 'Feedback:inzicht' as card_url %}
                 {% include 'plein/card.dtl' with title="Site feedback" text="Toon de feedback van de gebruikers." icon="feedback" url=card_url %}
 
+                <!-- betalingen -->
+                {% url 'Bestel:activiteit' as card_url %}
+                {% include 'plein/card.dtl' with title='Bestellingen' text="Toon de bestellingen en betalingen." icon="shopping_cart" url=card_url %}
+
                 <!-- logboek -->
                 {% url 'Logboek:alles' as card_url %}
                 {% include 'plein/card.dtl' with title="Logboek" text="Bekijk het logboek." icon="book" url=card_url %}
