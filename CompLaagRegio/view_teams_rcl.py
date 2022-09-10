@@ -17,7 +17,7 @@ from Competitie.models import (LAAG_REGIO, AG_NUL,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                                CompetitieMutatie, MUTATIE_TEAM_RONDE)
 from Competitie.operations.poules import maak_poule_schema
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbRayon
 from Overig.background_sync import BackgroundSync
@@ -484,6 +484,8 @@ class AGControleView(UserPassesTestMixin, TemplateView):
 
             ag_lijst.append(obj)
         # for
+
+        context['huidige_rol'] = rol_get_beschrijving(self.request)
 
         comp = deelcomp.competitie
         context['kruimels'] = (
