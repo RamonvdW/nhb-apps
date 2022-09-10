@@ -984,8 +984,18 @@ class TestCompLaagRegioTeamsHWL(E2EHelpers, TestCase):
         self.deelnemer_100003_18.gemiddelde = 9.5
         self.deelnemer_100003_18.save(update_fields=['gemiddelde'])
 
+        # probeer vervanger te koppelen zonder team AG
+        with self.assert_max_queries(20):
+            resp = self.client.post(url, {'invaller_1': self.deelnemer_100003_18.pk,
+                                          'invaller_2': self.deelnemer_100004_18.pk,
+                                          'invaller_3': self.deelnemer_100012_18.pk})       # heeft team_ag=0,000
+        self.assert404(resp, 'Geen valide selectie')
+
+        self.deelnemer_100012_18.ag_voor_team = 9.2
+        self.deelnemer_100012_18.save(update_fields=['ag_voor_team'])
+
         # voer 3 vervangers in
-        with self.assert_max_queries(22):
+        with self.assert_max_queries(20):
             resp = self.client.post(url, {'invaller_1': self.deelnemer_100003_18.pk,
                                           'invaller_2': self.deelnemer_100004_18.pk,
                                           'invaller_3': self.deelnemer_100012_18.pk})

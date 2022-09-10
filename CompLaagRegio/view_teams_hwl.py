@@ -1234,7 +1234,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                               inschrijf_voorkeur_team=True,
                               bij_vereniging=self.functie_nu.nhb_ver,
                               sporterboog__boogtype__in=boog_pks,
-                              ag_voor_team__gt=0.0))     # moet een AG hebben
+                              ag_voor_team__gt=0.0))     # sporter moet een team AG hebben
 
         for deelnemer in deelnemers:
             if deelnemer.pk not in deelnemers_bezet_pks:
