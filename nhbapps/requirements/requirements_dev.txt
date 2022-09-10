@@ -14,7 +14,7 @@ cachetools==5.2.0
     # via
     #   -r requirements_test.txt
     #   google-auth
-certifi==2022.6.15
+certifi==2022.6.15.1
     # via
     #   -r requirements_test.txt
     #   requests
@@ -31,17 +31,17 @@ django==3.2.15
     #   django-extensions
 django-debug-toolbar==3.6.0
     # via -r requirements_dev.in
-django-extensions==3.2.0
+django-extensions==3.2.1
     # via -r requirements_dev.in
 et-xmlfile==1.1.0
     # via
     #   -r requirements_test.txt
     #   openpyxl
-google-api-core==2.8.2
+google-api-core==2.10.0
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-google-api-python-client==2.58.0
+google-api-python-client==2.60.0
     # via -r requirements_test.txt
 google-auth==2.11.0
     # via
@@ -70,7 +70,7 @@ idna==3.3
     #   requests
 mollie-api-python==2.13.0
     # via -r requirements_test.txt
-oauthlib==3.2.0
+oauthlib==3.2.1
     # via
     #   -r requirements_test.txt
     #   requests-oauthlib
