@@ -150,6 +150,19 @@
                                     </td>
                             {% endif %}
 
+                            {% if geen_ag %}
+                                <tr class="nhb-grijs">
+                                    <td colspan="2">De volgende sporters hebben geen aanvangsgemiddelde voor de teamcompetitie en kunnen daarom niet gekozen worden.</td>
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td>
+                                        {% for deelnemer in geen_ag %}
+                                            <span>({{ deelnemer.invaller_gem_str }})&nbsp;&nbsp;{{ deelnemer.naam_str }}</span><br>
+                                        {% endfor %}
+                                    </td>
+                            {% endif %}
+
                         </table>
 
                         <div class="fixed-action-btn" style="display: none">
@@ -174,8 +187,8 @@
     <!-- blauw balk met wit informatie veld -->
     <div class="row-nhb-blauw">
         <div class="col s12">
-            <div class="white left-align" style="padding:10px">
-                <span>{{ logboek|linebreaks }}</span>
+            <div class="white left-align" style="padding:30px">
+                <span>{{ logboek|linebreaksbr }}</span>
             </div>
         </div>
     </div>

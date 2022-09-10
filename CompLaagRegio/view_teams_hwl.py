@@ -1070,18 +1070,20 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                       .select_related('sporterboog',
                                       'sporterboog__sporter',
                                       'sporterboog__boogtype')
-                      .order_by('-gemiddelde_begin_team_ronde', 'sporterboog__pk'))
+                      .order_by('-gemiddelde_begin_team_ronde',
+                                'sporterboog__pk'))
 
         unsorted_uitvallers = list()
         unsorted_bezet = list()
+        unsorted_geen_ag = list()
         for deelnemer in deelnemers:
             gem_str = "%.3f" % deelnemer.gemiddelde_begin_team_ronde
             deelnemer.invaller_gem_str = gem_str.replace('.', ',')
-            deelnemer.naam_str = "[%s] %s" % (deelnemer.sporterboog.sporter.lid_nr, deelnemer.sporterboog.sporter.volledige_naam())
+            deelnemer.naam_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
 
             if deelnemer.sporterboog.boogtype.afkorting != ronde_team_nu_afkorting:
                 # vreemde vogel: BB in R team, LB in BB team, etc.
-                # toon expliciet het type boog voor deze sporters
+                # toon uitdrukkelijk het type boog voor deze sporters;
                 # sporters ingeschreven met meerdere bogen worden zo duidelijk onderscheiden
                 deelnemer.naam_str += ' (%s)' % deelnemer.sporterboog.boogtype.beschrijving
 
@@ -1094,12 +1096,21 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                 unsorted_uitvallers.append(tup)
             else:
                 deelnemer.origineel_team_lid = False
-                if deelnemer.pk in deelnemers_bezet_pks:
-                    tup = (deelnemer.gemiddelde_begin_team_ronde, 0-deelnemer.pk, deelnemer)
-                    unsorted_bezet.append(tup)
+                if deelnemer.ag_voor_team < 0.001:
+                    tup = (deelnemer.sporterboog.sporter.lid_nr, deelnemer.sporterboog.pk, deelnemer)
+                    unsorted_geen_ag.append(tup)
+                    deelnemers_bezet_pks.append(deelnemer.pk)
+                else:
+                    if deelnemer.pk in deelnemers_bezet_pks:
+                        tup = (deelnemer.gemiddelde_begin_team_ronde, 0-deelnemer.pk, deelnemer)
+                        unsorted_bezet.append(tup)
         # for
 
         unsorted_uitvallers.sort(reverse=True)      # hoogste gemiddelde eerst
+
+        if len(unsorted_geen_ag) > 0:
+            unsorted_geen_ag.sort()     # op lid_nr
+            context['geen_ag'] = [tup[-1] for tup in unsorted_geen_ag]
 
         if len(unsorted_bezet) > 0:
             unsorted_bezet.sort(reverse=True)
@@ -1192,7 +1203,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
         boog_typen = team.team_type.boog_typen.all()
         boog_pks = boog_typen.values_list('pk', flat=True)
 
-        pk2gem = dict()     # kandidaat deelnemer pk's en gemiddelde
+        pk2gem = dict()     # kandidaat-deelnemer pk's en gemiddelde
 
         max_gem = list()
         for deelnemer in ronde_team.deelnemers_geselecteerd.all():
@@ -1211,7 +1222,8 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                       .filter(deelcompetitie=deelcomp,
                               inschrijf_voorkeur_team=True,
                               bij_vereniging=self.functie_nu.nhb_ver,
-                              sporterboog__boogtype__in=boog_pks))
+                              sporterboog__boogtype__in=boog_pks,
+                              ag_voor_team__gte=1))     # moet een AG hebben
 
         for deelnemer in deelnemers:
             if deelnemer.pk not in deelnemers_bezet_pks:
@@ -1267,7 +1279,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
         ronde_team.deelnemers_feitelijk.set(sel_pks)
 
-        # trigger een update van de team scores
+        # trigger een update van de team-scores
         update_uitslag_teamcompetitie()
 
         url = reverse('CompLaagRegio:teams-regio-invallers',
