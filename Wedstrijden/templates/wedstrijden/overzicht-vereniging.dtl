@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Wedstrijdkalender</h3>
-            <p>Wedstrijden bij de vereniging</p>
+            <p>Wedstrijden bij vereniging <b>{{ ver }}</b></p>
             <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
             {% if geen_locatie %}
                 <p class="red-text">Stel eerst de accommodatie van de vereniging in, of voeg een wedstrijdlocatie toe.</p>

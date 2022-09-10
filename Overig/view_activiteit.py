@@ -11,7 +11,6 @@ from django.views.generic import TemplateView
 from django.utils.formats import date_format
 from django.db.models import F, Count
 from django.utils import timezone
-from django.conf import settings
 from django.urls import reverse
 from Account.models import Account, AccountEmail, AccountSessions
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens

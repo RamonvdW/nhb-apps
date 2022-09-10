@@ -58,7 +58,18 @@
                 </tr>
                 <tr>
                     <th>Status</th>
-                    <td>{{ inschrijving.status_str }}</td>
+                    <td>{% if inschrijving.status == 'R' %}
+                            <span>In mandje</span><span class="grey-text"> | Besteld | Definitief | Afgemeld</span>
+                        {% elif inschrijving.status == 'B' %}
+                            <span class="grey-text">In mandje | </span><span>Besteld</span><span class="grey-text"> | Definitief | Afgemeld</span>
+                        {% elif inschrijving.status == 'D' %}
+                            <span class="grey-text">In mandje | Besteld | </span><span>Definitief</span><span class="grey-text"> | Afgemeld</span>
+                        {% elif inschrijving.status == 'A' %}
+                            <span class="grey-text">In mandje | Besteld | Definitief | </span><span>Afgemeld</span>
+                        {% else %}
+                            <span class="red-text"><i>Onbekend!</i></span>
+                        {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <th>Korting</th>

@@ -516,7 +516,7 @@ class WedstrijdInschrijving(models.Model):
     ontvangen_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
     retour_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
 
-    # TODO: boekingsnummer toevoegen
+    # TODO: bestelnummer toevoegen
 
     # TODO: traceer de gestuurde emails
 
