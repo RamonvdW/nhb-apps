@@ -21,7 +21,7 @@ import datetime
 
 class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
 
-    """ tests voor de Vereniging applicatie, functies voor Wie schiet waar """
+    """ tests voor de CompLaagRegio applicatie, functies voor Wie schiet waar """
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 

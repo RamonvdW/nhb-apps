@@ -10,9 +10,9 @@ from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
 
 
-class TestCompLaagRegioWieSchietWaar(E2EHelpers, TestCase):
+class TestCompLaagRegioMedailles(E2EHelpers, TestCase):
 
-    """ tests voor de Vereniging applicatie, functies voor Wie schiet waar """
+    """ tests voor de CompLaagRegio applicatie, functies voor Medailles """
 
     test_after = ('BasisTypen', 'NhbStructuur', 'Functie', 'Sporter', 'Competitie')
 

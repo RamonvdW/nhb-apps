@@ -20,8 +20,9 @@ import datetime
 import io
 
 
-class TestCompetitieCliRegiocompTussenstand(E2EHelpers, TestCase):
-    """ unittests voor de Competitie applicatie, management command regiocomp_tussenstand """
+class TestCompLaagRegioCliRegiocompTussenstand(E2EHelpers, TestCase):
+
+    """ unittests voor de CompLaagRegio applicatie, management command regiocomp_tussenstand """
 
     def _maak_competitie_aan(self):
         # maak de competitie aan

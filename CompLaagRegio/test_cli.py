@@ -18,7 +18,8 @@ import datetime
 
 
 class TestCompLaagRegioCli(E2EHelpers, TestCase):
-    """ unittests voor de Competitie applicatie, management command check_klasse """
+
+    """ unittests voor de CompLaagRegio applicatie, management command check_klasse """
 
     def setUp(self):
         """ initialisatie van de test case """
