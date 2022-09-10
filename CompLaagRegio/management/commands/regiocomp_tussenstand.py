@@ -447,7 +447,8 @@ class Command(BaseCommand):
                     new_count = ScoreHist.objects.count()
 
                 hist_count = new_count
-                self._update_tussenstand()
+                if new_count > 0:
+                    self._update_tussenstand()
                 now = datetime.datetime.now()
 
             # sleep at least 2 seconds, then check again
