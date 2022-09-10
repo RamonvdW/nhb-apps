@@ -64,7 +64,8 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                                 'ontvanger__vereniging')
                                 .filter(Q(bestel_nr=nr) |
                                         Q(account__username=nr) |
-                                        Q(ontvanger__vereniging__ver_nr=nr))
+                                        Q(ontvanger__vereniging__ver_nr=nr) |
+                                        Q(producten__wedstrijd_inschrijving__sporterboog__sporter__lid_nr=nr))
                                 .order_by('-bestel_nr'))            # nieuwste eerst
             except ValueError:
                 bestellingen = (Bestelling
@@ -72,8 +73,9 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
                                 .select_related('account',
                                                 'ontvanger',
                                                 'ontvanger__vereniging')
-                .filter(Q(account__unaccented_naam__icontains=zoekterm) |
-                                        Q(ontvanger__vereniging__naam__icontains=zoekterm))
+                                .filter(Q(account__unaccented_naam__icontains=zoekterm) |
+                                        Q(ontvanger__vereniging__naam__icontains=zoekterm) |
+                                        Q(producten__wedstrijd_inschrijving__sporterboog__sporter__unaccented_naam__icontains=zoekterm))
                                 .order_by('-bestel_nr'))            # nieuwste eerst
         else:
             # toon de 50 nieuwste bestellingen
@@ -91,6 +93,38 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
             bestelling.ver_nr_str = str(bestelling.ontvanger.vereniging.ver_nr)
             bestelling.ver_naam = bestelling.ontvanger.vereniging.naam
             bestelling.status_str = BESTELLING_STATUS2STR[bestelling.status]
+
+            bestelling.prods_list = list(bestelling
+                                         .producten
+                                         .select_related('wedstrijd_inschrijving',
+                                                         'wedstrijd_inschrijving__wedstrijd',
+                                                         'wedstrijd_inschrijving__wedstrijd__organiserende_vereniging',
+                                                         'wedstrijd_inschrijving__sporterboog__sporter',
+                                                         'wedstrijd_inschrijving__sporterboog__boogtype')
+                                         .all())
+
+            for product in bestelling.prods_list:
+
+                if product.wedstrijd_inschrijving:
+                    inschrijving = product.wedstrijd_inschrijving
+                    product.beschrijving_str1 = 'Wedstrijd bij %s' % inschrijving.wedstrijd.organiserende_vereniging.ver_nr_en_naam()
+                    product.beschrijving_str2 = 'voor %s (%s)' % (
+                        inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam(),
+                        inschrijving.sporterboog.boogtype.beschrijving)
+                    product.beschrijving_str3 = inschrijving.wedstrijd.titel
+
+                else:
+                    product.geen_beschrijving = True
+            # for
+
+            bestelling.trans_list = list(bestelling
+                                         .transacties
+                                         .all())
+
+            for transactie in bestelling.trans_list:
+                pass
+            # for
+
         # for
 
         context['kruimels'] = (

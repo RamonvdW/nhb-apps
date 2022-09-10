@@ -109,8 +109,8 @@
 
                 <tr>
                     <td></td>
-                    <th class="nhb-column-small hide-on-small-only">Naam:<br>Adres:<br><br>KvK nummer:<br>E-mail:<br>Telefoon:</th>
-                    <td class="nhb-column-small">{{ bestelling.verkoper_naam }}<br>{{ bestelling.verkoper_adres1 }}<br>{{ bestelling.verkoper_adres2 }}<br>{{ bestelling.verkoper_kvk }}<br>{{ bestelling.verkoper_email }}<br>{{ bestelling.verkoper_telefoon }}</td>
+                    <th class="nhb-column-small hide-on-small-only">Naam:<br>Adres:<br><br>KvK nummer:<br>IBAN:<br>BIC:<br>E-mail:<br>Telefoon:</th>
+                    <td class="nhb-column-small">{{ bestelling.verkoper_naam }}<br>{{ bestelling.verkoper_adres1 }}<br>{{ bestelling.verkoper_adres2 }}<br>{{ bestelling.verkoper_kvk }}<br>{{ bestelling.verkoper_iban }}<br>{{ bestelling.verkoper_bic }}<br>{{ bestelling.verkoper_email }}<br>{{ bestelling.verkoper_telefoon }}</td>
                     <td></td>
                 </tr>
             </table>

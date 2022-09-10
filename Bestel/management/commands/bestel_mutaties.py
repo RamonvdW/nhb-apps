@@ -11,6 +11,8 @@
 from django.conf import settings
 from django.utils import timezone
 from django.core.management.base import BaseCommand
+from django.utils.timezone import make_aware, get_default_timezone
+from django.utils.formats import date_format
 from django.db.utils import DataError, OperationalError, IntegrityError
 from django.db import transaction
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
@@ -373,6 +375,8 @@ class Command(BaseCommand):
                             ontvanger2producten[ontvanger_ver_nr] = [product]
             # for
 
+            to_tz = get_default_timezone()
+
             nieuwe_bestellingen = list()
             for ver_nr, producten in ontvanger2producten.items():
 
@@ -417,7 +421,9 @@ class Command(BaseCommand):
                 bestelling.producten.set(producten)
 
                 msg = "[%s] Bestelling aangemaakt met %s producten voor totaal euro=%s" % (
-                                                bestelling.aangemaakt, len(producten), totaal_euro)
+                                                date_format(bestelling.aangemaakt.astimezone(to_tz), 'j F Y H:i'),
+                                                len(producten),
+                                                totaal_euro)
                 bestelling.log = msg
                 bestelling.save(update_fields=['log'])
 
