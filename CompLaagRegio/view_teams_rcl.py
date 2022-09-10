@@ -453,14 +453,14 @@ class AGControleView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
 
         context['handmatige_ag'] = ag_lijst = list()
+        context['geen_ag'] = geen_ag_lijst = list()
 
         # zoek de schuttersboog met handmatig_ag voor de teamcompetitie
         for obj in (RegioCompetitieSchutterBoog
                     .objects
                     .filter(deelcompetitie=deelcomp,
                             inschrijf_voorkeur_team=True,
-                            ag_voor_team_mag_aangepast_worden=True,
-                            ag_voor_team__gt=0.0)
+                            ag_voor_team_mag_aangepast_worden=True)
                     .select_related('sporterboog',
                                     'sporterboog__sporter',
                                     'sporterboog__boogtype',
@@ -469,20 +469,22 @@ class AGControleView(UserPassesTestMixin, TemplateView):
                               'sporterboog__sporter__lid_nr',
                               'sporterboog__boogtype__volgorde')):
 
-            ver = obj.bij_vereniging
-            obj.ver_str = "[%s] %s" % (ver.ver_nr, ver.naam)
+            obj.ver_str = obj.bij_vereniging.ver_nr_en_naam()
 
-            sporter = obj.sporterboog.sporter
-            obj.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
+            obj.naam_str = obj.sporterboog.sporter.lid_nr_en_volledige_naam()
 
             obj.boog_str = obj.sporterboog.boogtype.beschrijving
 
             obj.ag_str = "%.3f" % obj.ag_voor_team
+            obj.ag_str = obj.ag_str.replace('.', ',')
 
-            obj.url_details = reverse('CompLaagRegio:wijzig-ag',
-                                      kwargs={'deelnemer_pk': obj.pk})
+            if obj.ag_voor_team < 0.0001:
+                geen_ag_lijst.append(obj)
+            else:
+                obj.url_details = reverse('CompLaagRegio:wijzig-ag',
+                                          kwargs={'deelnemer_pk': obj.pk})
 
-            ag_lijst.append(obj)
+                ag_lijst.append(obj)
         # for
 
         context['huidige_rol'] = rol_get_beschrijving(self.request)
