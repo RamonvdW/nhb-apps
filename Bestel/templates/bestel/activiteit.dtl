@@ -61,88 +61,91 @@
         </div>
     </div>
 
+    {% if bestellingen %}
 
-    <!-- blauwe balk met informatie label : info -->
-    <div class="row-nhb-blauw">
-        <div class="col s12 m10 offset-m1 l8 offset-l2 left-align">
+        <!-- blauwe balk met informatie label : info -->
+        <div class="row-nhb-blauw">
+            <div class="col s12 m10 offset-m1 l8 offset-l2 left-align">
 
-            <ul class="collapsible">
-                {% for bestelling in bestellingen %}
-                    <li>
-                        <div class="collapsible-header white">
-                            <span>Bestel nummer {{ bestelling.bestel_nr_str|highlight:zoekterm }}</span>
-                        </div>
-                        <div class="collapsible-body white">
-                            <table>
-                                <tr>
-                                    <th>Besteldatum:</th>
-                                    <td>{{ bestelling.aangemaakt }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Koper:</th>
-                                    <td>[{{ bestelling.account.username|highlight:zoekterm }}] {{ bestelling.account.volledige_naam|highlight:zoekterm }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Verkoper:</th>
-                                    <td>[{{ bestelling.ver_nr_str|highlight:zoekterm }}] {{ bestelling.ver_naam|highlight:zoekterm }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Bedrag:</th>
-                                    <td>&euro;&nbsp;{{ bestelling.totaal_euro }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Status:</th>
-                                    <td>{% if bestelling.status == 'N' %}
-                                            <span>Nieuw</span><span class="grey-text"> | Te betalen | Afgerond | Mislukt</span>
-                                        {% elif bestelling.status == 'B' %}
-                                            <span class="grey-text">Nieuw | </span>Te betalen<span class="grey-text"> | Afgerond | Mislukt</span>
-                                        {% elif bestelling.status == 'A' %}
-                                            <span class="grey-text">Nieuw | Te betalen | </span>Afgerond<span class="grey-text"> | Mislukt</span>
-                                        {% elif bestelling.status == 'F' %}
-                                            <span class="grey-text">Nieuw | Te betalen | Afgerond | </span><span>Mislukt</span>
-                                        {% else %}
-                                            <i class="red-text">Onverwacht ({{ bestelling.status }})</i>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-
-                                {% for product in bestelling.prods_list %}
+                <ul class="collapsible">
+                    {% for bestelling in bestellingen %}
+                        <li>
+                            <div class="collapsible-header white">
+                                <span>Bestel nummer {{ bestelling.bestel_nr_str|highlight:zoekterm }}</span>
+                            </div>
+                            <div class="collapsible-body white">
+                                <table>
                                     <tr>
-                                        <th>Product:</th>
-                                        <td>
-                                            {% if product.geen_beschrijving %}
-                                                <i>Onbekend</i>
+                                        <th>Besteldatum:</th>
+                                        <td>{{ bestelling.aangemaakt }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Koper:</th>
+                                        <td>[{{ bestelling.account.username|highlight:zoekterm }}] {{ bestelling.account.volledige_naam|highlight:zoekterm }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Verkoper:</th>
+                                        <td>[{{ bestelling.ver_nr_str|highlight:zoekterm }}] {{ bestelling.ver_naam|highlight:zoekterm }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Bedrag:</th>
+                                        <td>&euro;&nbsp;{{ bestelling.totaal_euro }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Status:</th>
+                                        <td>{% if bestelling.status == 'N' %}
+                                                <span>Nieuw</span><span class="grey-text"> | Te betalen | Afgerond | Mislukt</span>
+                                            {% elif bestelling.status == 'B' %}
+                                                <span class="grey-text">Nieuw | </span>Te betalen<span class="grey-text"> | Afgerond | Mislukt</span>
+                                            {% elif bestelling.status == 'A' %}
+                                                <span class="grey-text">Nieuw | Te betalen | </span>Afgerond<span class="grey-text"> | Mislukt</span>
+                                            {% elif bestelling.status == 'F' %}
+                                                <span class="grey-text">Nieuw | Te betalen | Afgerond | </span><span>Mislukt</span>
                                             {% else %}
-                                                <span>{{ product.beschrijving_str1 }}<br>{{ product.beschrijving_str2|highlight:zoekterm }}<br>{{ product.beschrijving_str3 }}</span>
+                                                <i class="red-text">Onverwacht ({{ bestelling.status }})</i>
                                             {% endif %}
                                         </td>
                                     </tr>
-                                {% endfor %}
 
-                                {% for transactie in bestelling.trans_list %}
+                                    {% for product in bestelling.prods_list %}
+                                        <tr>
+                                            <th>Product:</th>
+                                            <td>
+                                                {% if product.geen_beschrijving %}
+                                                    <i>Onbekend</i>
+                                                {% else %}
+                                                    <span>{{ product.beschrijving_str1 }}<br>{{ product.beschrijving_str2|highlight:zoekterm }}<br>{{ product.beschrijving_str3 }}</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+
+                                    {% for transactie in bestelling.trans_list %}
+                                        <tr>
+                                            <th>Transactie:</th>
+                                            <td>{{ transactie }}</td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <th>Transactie:</th>
+                                            <td><i>Nog geen transacties</i></td>
+                                        </tr>
+                                    {% endfor %}
+
                                     <tr>
-                                        <th>Transactie:</th>
-                                        <td>{{ transactie }}</td>
+                                        <th>Logboek:</th>
+                                        <td>{{ bestelling.log|linebreaksbr }}</td>
                                     </tr>
-                                {% empty %}
-                                    <tr>
-                                        <th>Transactie:</th>
-                                        <td><i>Nog geen transacties</i></td>
-                                    </tr>
-                                {% endfor %}
+                                </table>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
 
-                                <tr>
-                                    <th>Logboek:</th>
-                                    <td>{{ bestelling.log|linebreaksbr }}</td>
-                                </tr>
-                            </table>
-                        </div>
-                    </li>
-                {% endfor %}
-            </ul>
-
+            </div>
         </div>
-    </div>
+
+    {% endif %}     <!-- if bestellingen -->
 
 
     {% include 'feedback/sidebar.dtl' with op_pagina="bestel-activiteit" %}
