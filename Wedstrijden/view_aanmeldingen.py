@@ -24,6 +24,8 @@ TEMPLATE_WEDSTRIJDEN_AANMELDINGEN = 'wedstrijden/aanmeldingen.dtl'
 TEMPLATE_WEDSTRIJDEN_AANMELDING_DETAILS = 'wedstrijden/aanmelding-details.dtl'
 
 
+# TODO: HWL moet sporter kunnen verplaatsen naar een andere sessie
+
 class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
 
     """ Via deze view kunnen beheerders de inschrijvingen voor een wedstrijd inzien """
@@ -104,7 +106,7 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
             totaal_retour_euro += aanmelding.retour_euro
         # for
 
-        context['totaal_euro'] = totaal_ontvangen_euro - totaal_retour_euro
+        # context['totaal_euro'] = totaal_ontvangen_euro - totaal_retour_euro
         context['totaal_ontvangen_euro'] = totaal_ontvangen_euro
         context['totaal_retour_euro'] = totaal_retour_euro
         context['aantal_aanmeldingen'] = aantal_aanmeldingen
@@ -227,7 +229,6 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
 
             # TODO: wedstrijdklasse bepalen
             # TODO: wedstrijdklasse afkorting invullen (nu allemaal ?)
-            # TODO: wedstrijdklasse laten kiezen door de sporter
 
             writer.writerow([sporter.lid_nr,        # TODO: sporter met meerdere bogen niet ondersteund
                              sessie_nr,
@@ -410,6 +411,12 @@ class KalenderDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
             inschrijving.korting_str = '%s%%' % inschrijving.gebruikte_code.percentage
         else:
             inschrijving.korting_str = None
+
+        qset = inschrijving.bestelproduct_set.all()
+        if qset.count() > 0:
+            inschrijving.bestelproduct = qset[0]
+        else:
+            inschrijving.bestelproduct = None
 
         url_aanmeldingen = reverse('Wedstrijden:aanmeldingen',
                                    kwargs={'wedstrijd_pk': inschrijving.wedstrijd.pk})

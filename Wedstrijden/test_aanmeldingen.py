@@ -133,8 +133,8 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                         max_sporters=50)
         sessie.save()
         self.wedstrijd.sessies.add(sessie)
-        wkls = self.wedstrijd.wedstrijdklassen.filter(boogtype__afkorting='R')
-        sessie.wedstrijdklassen.set(wkls)
+        wkls_r = self.wedstrijd.wedstrijdklassen.filter(boogtype__afkorting='R')
+        sessie.wedstrijdklassen.set(wkls_r)
         self.sessie_r = sessie
 
         # maak een C sessie aan
@@ -145,8 +145,8 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                         max_sporters=50)
         sessie.save()
         self.wedstrijd.sessies.add(sessie)
-        wkls = self.wedstrijd.wedstrijdklassen.filter(boogtype__afkorting='C')
-        sessie.wedstrijdklassen.set(wkls)
+        wkls_c = self.wedstrijd.wedstrijdklassen.filter(boogtype__afkorting='C')
+        sessie.wedstrijdklassen.set(wkls_c)
         self.sessie_c = sessie
 
         # schrijf de twee sporters in
@@ -158,6 +158,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                                                                         'wedstrijd': self.wedstrijd.pk,
                                                                         'sporterboog': self.sporterboog1r.pk,
                                                                         'sessie': self.sessie_r.pk,
+                                                                        'klasse': wkls_r[0].pk,
                                                                         'boog': self.boog_r.pk})
         self.assert_is_redirect(resp, self.url_kalender_wedstrijd_info % self.wedstrijd.pk)
         self.assertEqual(1, WedstrijdInschrijving.objects.count())
@@ -167,6 +168,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                                                                         'wedstrijd': self.wedstrijd.pk,
                                                                         'sporterboog': self.sporterboog1c.pk,
                                                                         'sessie': self.sessie_r.pk,
+                                                                        'klasse': wkls_c[0].pk,
                                                                         'boog': self.boog_c.pk})
         self.assert_is_redirect(resp, self.url_kalender_wedstrijd_info % self.wedstrijd.pk)
         self.assertEqual(2, WedstrijdInschrijving.objects.count())
@@ -176,6 +178,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                                                                         'wedstrijd': self.wedstrijd.pk,
                                                                         'sporterboog': self.sporterboog2c.pk,
                                                                         'sessie': self.sessie_r.pk,
+                                                                        'klasse': wkls_c[1].pk,
                                                                         'boog': self.boog_c.pk})
         self.assert_is_redirect(resp, self.url_kalender_wedstrijd_info % self.wedstrijd.pk)
         self.assertEqual(3, WedstrijdInschrijving.objects.count())

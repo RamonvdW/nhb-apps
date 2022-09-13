@@ -7,7 +7,7 @@
 from django.test import TestCase
 from django.conf import settings
 from django.utils import timezone
-from BasisTypen.models import BoogType
+from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.models import BestelProduct, BestelMandje, BestelMutatie, Bestelling
 from Betaal.models import BetaalInstellingenVereniging
 from NhbStructuur.models import NhbRegio, NhbVereniging
@@ -115,10 +115,13 @@ class TestBestelMandje(E2EHelpers, TestCase):
         wedstrijd.sessies.add(sessie)
         # wedstrijd.boogtypen.add()
 
+        wkls_r = KalenderWedstrijdklasse.objects.filter(boogtype=boog_r, buiten_gebruik=False)
+
         inschrijving = WedstrijdInschrijving(
                             wanneer=now,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
+                            wedstrijdklasse=wkls_r[0],
                             sporterboog=sporterboog,
                             koper=account)
         inschrijving.save()

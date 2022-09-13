@@ -420,10 +420,13 @@ class Command(BaseCommand):
                 bestelling.save()
                 bestelling.producten.set(producten)
 
-                msg = "[%s] Bestelling aangemaakt met %s producten voor totaal euro=%s" % (
+                totaal_euro_str = "€ %s" % totaal_euro
+                totaal_euro_str = totaal_euro_str.replace('.', ',')     # nederlandse komma
+
+                msg = "[%s] Bestelling aangemaakt met %s producten voor totaal %s" % (
                                                 date_format(bestelling.aangemaakt.astimezone(to_tz), 'j F Y H:i'),
                                                 len(producten),
-                                                totaal_euro)
+                                                totaal_euro_str)
                 bestelling.log = msg
                 bestelling.save(update_fields=['log'])
 

@@ -48,7 +48,7 @@
                 </tr>
                 <tr>
                     <th>Financieel</th>
-                    <td>&euro;&nbsp;{{ totaal_euro }}<span style="margin-left:10px">(&euro;&nbsp;{{ totaal_ontvangen_euro }} ontvangen; &euro;&nbsp;{{ totaal_retour_euro }} retour)</span></td>
+                    <td>&euro;&nbsp;{{ totaal_ontvangen_euro }} ontvangen<br>&euro;&nbsp;{{ totaal_retour_euro }} retour</td>
                 </tr>
             </table>
         </div>
@@ -148,7 +148,6 @@
                         <th>Sporter</th>
                         <th>Boog</th>
                         <th>Status</th>
-                        <th class="hide-on-small-only">Korting</th>
                         <th><!-- kolom voor knoppen --></th>
                     </tr>
                 </thead>
@@ -160,10 +159,9 @@
                             <td>{{ aanmelding.sporter_str }}</td>
                             <td>{{ aanmelding.boog_str }}</td>
                             <td>{{ aanmelding.status_str }}</td>
-                            <td class="hide-on-small-only">{{ aanmelding.korting_str }}</td>
                             <td>
-                                {% if aanmelding.url_sporter %}
-                                    <a class="btn-nhb-rood" href="{{ aanmelding.url_sporter }}">
+                                {% if aanmelding.url_details %}
+                                    <a class="btn-nhb-rood" href="{{ aanmelding.url_details }}">
                                         <i class="material-icons-round">play_arrow</i></a>
                                 {% endif %}
                             </td>

@@ -50,7 +50,11 @@
                 </tr>
                 <tr>
                     <th>Sessie</th>
-                    <td>{{ inschrijving.sessie.beschrijving }}<br>op {{ inschrijving.sessie.datum }} om {{ inschrijving.sessie.tijd_begin }}</td>
+                    <td>{% if inschrijving.status == 'A' %}<del>{% endif %}{{ inschrijving.sessie.beschrijving }}<br>op {{ inschrijving.sessie.datum }} om {{ inschrijving.sessie.tijd_begin }}{% if inschrijving.status == 'A' %}</del>{% endif %}</td>
+                </tr>
+                <tr>
+                    <th>Wedstrijdklasse</th>
+                    <td>{% if inschrijving.status == 'A' %}<del>{% endif %}({{ inschrijving.wedstrijdklasse.afkorting }}) {{ inschrijving.wedstrijdklasse.beschrijving }}{% if inschrijving.status == 'A' %}</del>{% endif %}</td>
                 </tr>
                 <tr>
                     <th>Ingeschreven</th>
@@ -72,6 +76,11 @@
                     </td>
                 </tr>
                 <tr>
+                    <th>Prijs</th>
+                    <td>{% if inschrijving.bestelproduct %}&euro;&nbsp;{{ inschrijving.bestelproduct.prijs_euro }}{% else %}<i>Geen</i> (handmatige inschrijving){% endif %}</td>
+                    <!-- TODO: korting_euro -->
+                </tr>
+                <tr>
                     <th>Korting</th>
                     <td>{% if inschrijving.korting_str %}{{ inschrijving.korting_str }}{% else %}<i>Geen</i>{% endif %}</td>
                 </tr>
@@ -86,6 +95,11 @@
                         <td>&euro;&nbsp;{{ inschrijving.retour_euro }}</td>
                     </tr>
                 {% endif %}
+
+                <tr>
+                    <th>Logboekje</th>
+                    <td>{{ inschrijving.log }}</td>
+                </tr>
 
                 {% if inschrijving.url_afmelden %}
                     <tr>

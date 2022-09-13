@@ -143,9 +143,13 @@ def wedstrijden_plugin_afmelden(inschrijving):
     sessie.aantal_inschrijvingen -= 1
     sessie.save(update_fields=['aantal_inschrijvingen'])
 
-    # inschrijving.sessie kan niet op None gezet worden
+    stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+    msg = "[%s] Afgemeld voor de wedstrijd\n" % stamp_str
+
+    # inschrijving.sessie en inschrijving.klasse kunnen niet op None gezet worden
     inschrijving.status = INSCHRIJVING_STATUS_AFGEMELD
-    inschrijving.save(update_fields=['status'])
+    inschrijving.log += msg
+    inschrijving.save(update_fields=['status', 'log'])
 
 
 def wedstrijden_plugin_verwijder_reservering(stdout, inschrijving):
@@ -154,8 +158,13 @@ def wedstrijden_plugin_verwijder_reservering(stdout, inschrijving):
     # dit heeft de voorkeur over het verwijderen van inschrijvingen,
     # want als er wel een betaling volgt dan kunnen we die nergens aan koppelen
     oude_status = inschrijving.status
+
+    stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+    msg = "[%s] Afgemeld voor de wedstrijd en reservering verwijderd\n" % stamp_str
+
     inschrijving.status = INSCHRIJVING_STATUS_AFGEMELD
-    inschrijving.save(update_fields=['status'])
+    inschrijving.log += msg
+    inschrijving.save(update_fields=['status', 'log'])
 
     # schrijf de sporter uit bij de sessie
     # Noteer: geen concurrency risico want serialisatie via deze achtergrondtaak
@@ -187,7 +196,7 @@ def wedstrijden_plugin_kortingscode_toepassen(stdout, kortingscode_str, producte
             toepassen = False
 
             if korting.voor_sporter:
-                # code voor een specifiek sporter
+                # code voor een specifieke sporter
                 if korting.voor_sporter == inschrijving.sporterboog.sporter:
                     toepassen = True
                     stdout.write('[DEBUG] Kalender korting: past voor_sporter lid_nr=%s' % korting.voor_sporter.lid_nr)
@@ -245,10 +254,14 @@ def wedstrijden_plugin_inschrijving_is_betaald(product):
         of als een bestelling niet betaald hoeft te worden (totaal bedrag nul)
     """
     inschrijving = product.wedstrijd_inschrijving
-
     inschrijving.ontvangen_euro = product.prijs_euro - product.korting_euro
     inschrijving.status = INSCHRIJVING_STATUS_DEFINITIEF
-    inschrijving.save(update_fields=['ontvangen_euro', 'status'])
+
+    stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+    msg = "[%s] Betaling ontvangen (euro %s); status is nu definitief\n" % (stamp_str, inschrijving.ontvangen_euro)
+
+    inschrijving.log += msg
+    inschrijving.save(update_fields=['ontvangen_euro', 'status', 'log'])
 
 
 # end of file

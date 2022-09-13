@@ -488,8 +488,6 @@ class WedstrijdInschrijving(models.Model):
 
     """ Een inschrijving op een wedstrijd sessie, inclusief koper, betaal-status en gebruikte kortingscode """
 
-    # TODO: afmeldingen verplaatsen naar een andere tabel, voor de geschiedenis
-
     # wanneer is deze inschrijving aangemaakt?
     wanneer = models.DateTimeField()
 
@@ -503,10 +501,14 @@ class WedstrijdInschrijving(models.Model):
     # voor welke sessie?
     sessie = models.ForeignKey(WedstrijdSessie, on_delete=models.PROTECT)
 
+    # in welke klasse komt deze sporterboog uit?
+    wedstrijdklasse = models.ForeignKey(KalenderWedstrijdklasse, on_delete=models.PROTECT)
+
     # voor wie is deze inschrijving
     sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT)
 
     # wie is de koper?
+    # (BestelProduct verwijst naar deze inschrijving)
     koper = models.ForeignKey(Account, on_delete=models.PROTECT)
 
     # welke kortingscode is gebruikt
@@ -516,7 +518,8 @@ class WedstrijdInschrijving(models.Model):
     ontvangen_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
     retour_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
 
-    # TODO: bestelnummer toevoegen
+    # log van bestelling, betalingen en eventuele wijzigingen van klasse en sessie
+    log = models.TextField(blank=True)
 
     # TODO: traceer de gestuurde emails
 
@@ -538,7 +541,10 @@ class WedstrijdInschrijving(models.Model):
         verbose_name_plural = "Wedstrijd inschrijvingen"
 
         constraints = [
-            models.UniqueConstraint(fields=('sessie', 'sporterboog'), name='Geen dubbele wedstrijd inschrijving'),
+            # constraint op een sessie i.p.v. wedstrijd zodat sporter mee kan doen met meerdere sessies,
+            # bijvoorbeeld zaterdag/zondag of ochtend/middag
+            models.UniqueConstraint(fields=('sessie', 'sporterboog'),
+                                    name='Geen dubbele wedstrijd inschrijving'),
         ]
 
 # end of file

@@ -130,9 +130,10 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                         max_sporters=50)
         sessie.save()
         self.wedstrijd.sessies.add(sessie)
-        wkls = self.wedstrijd.wedstrijdklassen.filter(boogtype__afkorting='R')
-        sessie.wedstrijdklassen.set(wkls)
+        wkls_r = self.wedstrijd.wedstrijdklassen.filter(boogtype__afkorting='R')
+        sessie.wedstrijdklassen.set(wkls_r)
         self.sessie_r = sessie
+        self.wkls_r = wkls_r
 
         # maak een C sessie aan
         sessie = WedstrijdSessie(
@@ -142,9 +143,10 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                         max_sporters=50)
         sessie.save()
         self.wedstrijd.sessies.add(sessie)
-        wkls = self.wedstrijd.wedstrijdklassen.filter(boogtype__afkorting='C')
-        sessie.wedstrijdklassen.set(wkls)
+        wkls_c = self.wedstrijd.wedstrijdklassen.filter(boogtype__afkorting='C')
+        sessie.wedstrijdklassen.set(wkls_c)
         self.sessie_c = sessie
+        self.wkls_c = wkls_c
 
     def test_anon(self):
         self.client.logout()
@@ -217,7 +219,8 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
                                                                         'wedstrijd': self.wedstrijd.pk,
                                                                         'sporterboog': self.sporterboog.pk,
-                                                                        'sessie': self.sessie_r.pk})
+                                                                        'sessie': self.sessie_r.pk,
+                                                                        'klasse': self.wkls_r[0].pk})
         self.assert_is_redirect(resp, self.url_wedstrijden_wedstrijd_info % self.wedstrijd.pk)
         self.assertEqual(1, WedstrijdInschrijving.objects.count())
 
@@ -248,7 +251,8 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
 
         resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'wedstrijd': 999999,
                                                                         'sporterboog': 999999,
-                                                                        'sessie': 999999})
+                                                                        'sessie': 999999,
+                                                                        'klasse': 999999})
         self.assert404(resp, 'Onderdeel van verzoek niet gevonden')
 
         # login als een gebruiker met een username != lid_nr
@@ -314,7 +318,8 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
                                                                         'wedstrijd': self.wedstrijd.pk,
                                                                         'sporterboog': self.sporterboog.pk,
-                                                                        'sessie': self.sessie_r.pk})
+                                                                        'sessie': self.sessie_r.pk,
+                                                                        'klasse': self.wkls_r[0].pk})
         self.assert_is_redirect(resp, self.url_wedstrijden_wedstrijd_info % self.wedstrijd.pk)
 
         # al wel ingeschreven
@@ -361,6 +366,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                                                                         'wedstrijd': self.wedstrijd.pk,
                                                                         'sporterboog': self.sporterboog.pk,
                                                                         'sessie': self.sessie_r.pk,
+                                                                        'klasse': self.wkls_r[1].pk,
                                                                         'goto': 'F'})
         self.assert_is_redirect(resp, url)
 
@@ -448,17 +454,17 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         resp = self.client.post(url, {'sporterboog': 0, 'sessie': 'x'})
         self.assert404(resp, 'Slecht verzoek')
 
-        resp = self.client.post(url, {'sporterboog': 999999, 'sessie': 999999})
+        resp = self.client.post(url, {'sporterboog': 999999, 'sessie': 999999, 'klasse': 999999})
         self.assert404(resp, 'Onderdeel van verzoek niet gevonden')
 
-        resp = self.client.post(url, {'sporterboog': 999999, 'sessie': self.sessie_r.pk})
+        resp = self.client.post(url, {'sporterboog': 999999, 'sessie': self.sessie_r.pk, 'klasse': self.wkls_r[0].pk})
         self.assert404(resp, 'Onderdeel van verzoek niet gevonden')
 
         self.assertEqual(0, WedstrijdInschrijving.objects.count())
 
         # echt aanmelden
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'sporterboog': self.sporterboog.pk, 'sessie': self.sessie_r.pk,
+            resp = self.client.post(url, {'sporterboog': self.sporterboog.pk, 'sessie': self.sessie_r.pk, 'klasse': self.wkls_r[0].pk,
                                           'snel': 1})
         self.assert_is_redirect(resp, self.url_aanmeldingen % self.wedstrijd.pk)
 
@@ -466,7 +472,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
 
         # al aangemeld
         with self.assert_max_queries(20):
-            resp = self.client.post(url, {'sporterboog': self.sporterboog.pk, 'sessie': self.sessie_r.pk})
+            resp = self.client.post(url, {'sporterboog': self.sporterboog.pk, 'sessie': self.sessie_r.pk, 'klasse': self.wkls_r[0].pk})
         self.assert_is_redirect(resp, self.url_aanmeldingen % self.wedstrijd.pk)
 
         self.assertEqual(1, WedstrijdInschrijving.objects.count())
@@ -480,8 +486,8 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         inschrijving.save(update_fields=['status'])
 
         # opnieuw aanmelden
-        with self.assert_max_queries(22):
-            resp = self.client.post(url, {'sporterboog': self.sporterboog.pk, 'sessie': self.sessie_r.pk,
+        with self.assert_max_queries(24):
+            resp = self.client.post(url, {'sporterboog': self.sporterboog.pk, 'sessie': self.sessie_r.pk, 'klasse': self.wkls_r[0].pk,
                                           'snel': 1})
         self.assert_is_redirect(resp, self.url_aanmeldingen % self.wedstrijd.pk)
 

@@ -6,11 +6,11 @@
 
 from django.test import TestCase
 from django.utils import timezone
-from BasisTypen.models import BoogType
+from BasisTypen.models import BoogType, LeeftijdsKlasse
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
-from Wedstrijden.models import WedstrijdLocatie
+from Wedstrijden.models import WedstrijdLocatie, KalenderWedstrijdklasse
 from .models import (Wedstrijd, WedstrijdSessie, WedstrijdInschrijving, WedstrijdKortingscode,
                      WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING, WEDSTRIJD_KORTING_COMBI)
 from TestHelpers.e2ehelpers import E2EHelpers
@@ -102,6 +102,13 @@ class TestWedstrijdenKortingscodes(E2EHelpers, TestCase):
         self.wedstrijd1.save()
         self.wedstrijd2.save()
         self.wedstrijd3.save()
+
+        wkls = KalenderWedstrijdklasse.objects.filter(organisatie=self.wedstrijd1.organisatie,
+                                                      buiten_gebruik=False,
+                                                      boogtype=boog_c,
+                                                      leeftijdsklasse__volgorde__gte=20)    # Onder18 en ouder
+        self.wedstrijd1.wedstrijdklassen.set(wkls)
+        self.wkls = wkls
 
     def test_anon(self):
         self.client.logout()
@@ -303,10 +310,13 @@ class TestWedstrijdenKortingscodes(E2EHelpers, TestCase):
                     tijd_begin='10:00',
                     tijd_einde='15:00')
         sessie.save()
+        sessie.wedstrijdklassen.set(self.wkls)
+
         inschrijving = WedstrijdInschrijving(
                             wanneer=timezone.now(),
                             wedstrijd=self.wedstrijd1,
                             sessie=sessie,
+                            wedstrijdklasse=self.wkls[0],
                             sporterboog=self.sporterboog,
                             koper=self.account_admin,
                             gebruikte_code=korting_ver)

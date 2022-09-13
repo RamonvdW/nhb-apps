@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.core import management
 from django.conf import settings
 from django.utils import timezone
-from BasisTypen.models import BoogType
+from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.models import (BestelMandje, BestelMutatie, Bestelling,
                            BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING, BESTELLING_STATUS_NIEUW,
                            BESTELLING_STATUS_MISLUKT)
@@ -136,10 +136,13 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         # wedstrijd.boogtypen.add()
         self.wedstrijd = wedstrijd
 
+        wkls_r = KalenderWedstrijdklasse.objects.filter(boogtype=boog_r, buiten_gebruik=False)
+
         inschrijving = WedstrijdInschrijving(
                             wanneer=now,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
+                            wedstrijdklasse=wkls_r[0],
                             sporterboog=sporterboog,
                             koper=account)
         inschrijving.save()

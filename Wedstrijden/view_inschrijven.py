@@ -12,7 +12,7 @@ from django.db.models import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import ORGANISATIE_WA
+from BasisTypen.models import ORGANISATIE_WA, KalenderWedstrijdklasse
 from Bestel.mandje import mandje_tel_inhoud
 from Bestel.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
@@ -31,6 +31,8 @@ TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_GROEPJE = 'wedstrijden/inschrijven-groepje.dtl'
 TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_FAMILIE = 'wedstrijden/inschrijven-familie.dtl'
 TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_HANDMATIG = 'wedstrijden/inschrijven-handmatig.dtl'
 
+
+# TODO: wedstrijdklasse laten kiezen door de sporter
 
 class WedstrijdInfoView(TemplateView):
 
@@ -126,7 +128,7 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
     wedstrijdleeftijd = sporter.bereken_wedstrijdleeftijd(wedstrijd.datum_begin, wedstrijd.organisatie)
 
     wedstrijd_geslacht = '?'
-    if voorkeuren.wedstrijd_geslacht_gekozen:
+    if voorkeuren and voorkeuren.wedstrijd_geslacht_gekozen:
         wedstrijd_geslacht = voorkeuren.wedstrijd_geslacht
 
     sessie_pks = list(wedstrijd.sessies.values_list('pk', flat=True))
@@ -153,10 +155,14 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
         sessie_pk2inschrijving[sessie_pk] = inschrijving
     # for
 
-    wedstrijdklassen = list()
+    unsorted_wedstrijdklassen = list()
     for sessie in sessies:
         sessie.aantal_beschikbaar = sessie.max_sporters - sessie.aantal_inschrijvingen
-        sessie.klassen = sessie.wedstrijdklassen.select_related('leeftijdsklasse', 'boogtype').all()
+        sessie.klassen = (sessie
+                          .wedstrijdklassen
+                          .select_related('leeftijdsklasse',
+                                          'boogtype')
+                          .order_by('volgorde'))        # oudste leeftijdsklasse eerst
 
         sessie.kan_aanmelden = False
 
@@ -182,9 +188,10 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
                 compatible_leeftijd = klasse_compat_leeftijd = True
 
                 # verzamel een lijstje van compatibele wedstrijdklassen om te tonen
-                if lkl.beschrijving not in wedstrijdklassen:
+                lkl_tup = (lkl.volgorde, lkl.beschrijving)
+                if lkl_tup not in unsorted_wedstrijdklassen:
                     if lkl.geslacht_is_compatible(wedstrijd_geslacht):
-                        wedstrijdklassen.append(lkl.beschrijving)
+                        unsorted_wedstrijdklassen.append(lkl_tup)
 
             if klasse_compat_boog and klasse_compat_geslacht and klasse_compat_leeftijd:
                 klasse.is_compat = True
@@ -200,12 +207,17 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
                 # al ingeschreven
                 sessie.al_ingeschreven = True
 
+        # verzamel waarom een sporter niet op deze sessie in kan schrijven
         sessie.compatible_boog = compatible_boog
         sessie.compatible_leeftijd = compatible_leeftijd
         sessie.compatible_geslacht = compatible_geslacht
 
         sessie.prijs_euro_sporter = wedstrijd.bepaal_prijs_voor_sporter(sporter)
     # for
+
+    # sorteer de wedstrijdklassen
+    unsorted_wedstrijdklassen.sort(reverse=True)        # oudste leeftijdsklasse eerst
+    wedstrijdklassen = [lkl for _, lkl in unsorted_wedstrijdklassen]
 
     return sessies, wedstrijdleeftijd, wedstrijdklassen, wedstrijd_geslacht
 
@@ -290,7 +302,7 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
         if geselecteerd:
             context['geselecteerd'] = geselecteerd
 
-            # geen wissel knop meer tonen
+            # geen wisselknop meer tonen
             geselecteerd.is_geselecteerd = True
             geselecteerd.url_selecteer = None
 
@@ -822,7 +834,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
         if geselecteerd:
             context['geselecteerd'] = geselecteerd
 
-            # geen wissel knop meer tonen
+            # geen wisselknop meer tonen
             geselecteerd.is_geselecteerd = True
             geselecteerd.url_selecteer = None
 
@@ -888,14 +900,14 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
     def post(self, request, *args, **kwargs):
 
         try:
-
             wedstrijd_pk = str(kwargs['wedstrijd_pk'])[:6]     # afkappen voor de veiligheid
             wedstrijd = (Wedstrijd
                          .objects
                          .select_related('organiserende_vereniging',
                                          'locatie')
                          .prefetch_related('boogtypen',
-                                           'sessies')
+                                           'sessies',
+                                           'wedstrijdklassen')
                          .get(pk=wedstrijd_pk))
         except Wedstrijd.DoesNotExist:
             raise Http404('Wedstrijd niet gevonden')
@@ -905,15 +917,18 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
 
         sporterboog_str = request.POST.get('sporterboog', '')[:6]   # afkappen voor de veiligheid
         sessie_str = request.POST.get('sessie', '')[:6]             # afkappen voor de veiligheid
+        klasse_str = request.POST.get('klasse', '')[:6]             # afkappen voor de veiligheid
 
         try:
             sporterboog_pk = int(sporterboog_str)
             sessie_pk = int(sessie_str)
+            klasse_pk = int(klasse_str)
         except (ValueError, TypeError):
             raise Http404('Slecht verzoek')
 
         try:
             sessie = wedstrijd.sessies.get(pk=sessie_pk)
+            klasse = wedstrijd.wedstrijdklassen.get(pk=klasse_pk)
             sporterboog = (SporterBoog
                            .objects
                            .select_related('sporter')
@@ -922,6 +937,7 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
             raise Http404('Onderdeel van verzoek niet gevonden')
 
         # TODO: check wedstrijd geslacht gekozen
+        # TODO: check dat klasse bij sporterboog past
 
         account_koper = request.user
 
@@ -938,14 +954,19 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
         if qset.count() > 0:
             qset.delete()
 
+        stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+        msg = "[%s] Handmatig toegevoegd door de HWL: %s\n" % (stamp_str, account_koper.get_account_full_name())
+
         # maak de inschrijving aan en voorkom dubbelen
         inschrijving = WedstrijdInschrijving(
                             wanneer=now,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
+                            wedstrijdklasse=klasse,
                             sporterboog=sporterboog,
                             koper=account_koper,
-                            status=INSCHRIJVING_STATUS_DEFINITIEF)
+                            status=INSCHRIJVING_STATUS_DEFINITIEF,
+                            log=msg)
 
         try:
             with transaction.atomic():
@@ -966,8 +987,6 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
 
 class ToevoegenAanMandjeView(UserPassesTestMixin, View):
 
-    # TODO: verplaats naar Bestel
-
     """ Met deze view wordt het toevoegen van een wedstrijd aan het mandje van de koper afgehandeld """
 
     # class variables shared by all instances
@@ -987,18 +1006,21 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         wedstrijd_str = request.POST.get('wedstrijd', '')[:6]       # afkappen voor de veiligheid
         sporterboog_str = request.POST.get('sporterboog', '')[:6]   # afkappen voor de veiligheid
         sessie_str = request.POST.get('sessie', '')[:6]             # afkappen voor de veiligheid
+        klasse_str = request.POST.get('klasse', '')[:6]             # afkappen voor de veiligheid
         goto_str = request.POST.get('goto', '')[:6]                 # afkappen voor de veiligheid
 
         try:
             wedstrijd_pk = int(wedstrijd_str)
             sporterboog_pk = int(sporterboog_str)
             sessie_pk = int(sessie_str)
+            klasse_pk = int(klasse_str)
         except (ValueError, TypeError):
             raise Http404('Slecht verzoek')
 
         try:
             wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
-            sessie = WedstrijdSessie.objects.get(pk=sessie_pk)
+            sessie = WedstrijdSessie.objects.get(pk=sessie_pk)              # TODO: moet uit wedstrijd komen!
+            klasse = KalenderWedstrijdklasse.objects.get(pk=klasse_pk)      # TODO: moet uit wedstrijd komen!
             sporterboog = (SporterBoog
                            .objects
                            .select_related('sporter')
@@ -1021,13 +1043,18 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         if qset.count() > 0:
             qset.delete()
 
+        stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+        msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, account_koper.get_account_full_name())
+
         # maak de inschrijving aan en voorkom dubbelen
         inschrijving = WedstrijdInschrijving(
                             wanneer=now,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
+                            wedstrijdklasse=klasse,
                             sporterboog=sporterboog,
-                            koper=account_koper)
+                            koper=account_koper,
+                            log=msg)
 
         try:
             with transaction.atomic():
