@@ -12,7 +12,7 @@ from django.core.management.base import BaseCommand
 from Account.models import AccountEmail
 from Account.view_wachtwoord import account_stuur_email_wachtwoord_vergeten
 from Account.view_login import account_stuur_email_bevestig_nieuwe_email
-from BasisTypen.models import BoogType
+from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.management.commands.bestel_mutaties import stuur_email_naar_koper_betaalbevestiging
 from Bestel.models import Bestelling, BestelProduct, BESTELLING_STATUS_WACHT_OP_BETALING
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
@@ -156,11 +156,15 @@ class Command(BaseCommand):
         wedstrijd.save()
         wedstrijd.sessies.add(sessie)
 
+        wkls_r = KalenderWedstrijdklasse.objects.filter(buiten_gebruik=False, boogtype=boog_r)
+        wkls_c = KalenderWedstrijdklasse.objects.filter(buiten_gebruik=False, boogtype=boog_c)
+
         inschrijving_r = WedstrijdInschrijving(
                             wanneer=timezone.now(),
                             status=INSCHRIJVING_STATUS_RESERVERING_BESTELD,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
+                            wedstrijdklasse=wkls_r[0],
                             sporterboog=sporterboog_r,
                             koper=self.account_email.account,
                             ontvangen_euro=Decimal('42.40'))
@@ -171,6 +175,7 @@ class Command(BaseCommand):
                             status=INSCHRIJVING_STATUS_RESERVERING_BESTELD,
                             wedstrijd=wedstrijd,
                             sessie=sessie,
+                            wedstrijdklasse=wkls_c[0],
                             sporterboog=sporterboog_c,
                             koper=self.account_email.account,
                             ontvangen_euro=Decimal('22.41'))
