@@ -296,6 +296,8 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
                 geselecteerd = sporterboog
         # for
 
+        context['toon_kies_wedstrijdboog'] = len(context['sportersboog']) > 1
+
         if not geselecteerd and len(context['sportersboog']) > 0:
             geselecteerd = context['sportersboog'][0]
 
