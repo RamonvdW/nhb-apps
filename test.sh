@@ -50,7 +50,7 @@ then
     FORCE_REPORT=1
     # remove from ARGS used to decide focus
     # will still be given to ./manage.py where --force has no effect
-    ARGS=$(echo "$ARGS" | sed 's/--force//')
+    ARGS=${ARGS/--force/}
 fi
 
 KEEP_DB=1
@@ -59,7 +59,8 @@ then
     KEEP_DB=0
     # remove from ARGS used to decide focus
     # will still be given to ./manage.py where --force has no effect
-    ARGS=$(echo "$ARGS" | sed 's/--clean//')
+    ARGS=${ARGS/--clean/}
+    echo "ARGS without --clean: $ARGS"
 fi
 
 FOCUS=""
@@ -178,7 +179,7 @@ wait $PID_TAIL 2>/dev/null
 # launch log in editor
 [ $RES -eq 0 ] || geany --new-instance "$LOG" &
 
-if [ $RES -eq 0 -a "$FOCUS" != "" ]
+if [ $RES -eq 0 ] && [ "$FOCUS" != "" ]
 then
     echo "[INFO] Discovering all management commands in $FOCUS"
     for cmd in $(python3 ./manage.py --help);
@@ -193,11 +194,12 @@ then
     echo
 fi
 
-if [ $RES -eq 0 -a $# -eq 0 ]
+if [ $RES -eq 0 ] && [ $# -eq 0 ]
 then
     echo "[INFO] Running help for each management command"
-    for cmd in $(for x in */management/commands; do ls -1 $x | grep -v '__pycache__' | rev | cut -d. -f2- | rev; done);
+    for cmd_file in $(ls */management/commands/*py | sed 's/\.py$//g');
     do
+        cmd=$(basename $cmd_file)
         echo -n '.'
         echo "[INFO] ./manage.py help $cmd" >>"$LOG"
         python3 -u $PYCOV ./manage.py help $cmd &>>"$LOG"
@@ -217,7 +219,7 @@ wait $PID_WEBSIM3 2>/dev/null
 ASK_LAUNCH=0
 COVERAGE_RED=0
 
-if [ $ABORTED -eq 0 -o $FORCE_REPORT -eq 1 ]
+if [ $ABORTED -eq 0 ] || [ $FORCE_REPORT -eq 1 ]
 then
     echo "[INFO] Generating reports" | tee -a "$LOG"
 
