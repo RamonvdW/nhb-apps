@@ -44,6 +44,13 @@
                     </tr>
                 {% endif %}
 
+                {% if toon_contactgegevens %}
+                    <tr>
+                        <th>Contactgegevens</th>
+                        <td>E-mail: <code>{{ sporter.email }}</code><br>Telefoon: {{ sporter.telefoon }}</td>
+                    </tr>
+                {% endif %}
+
                 <tr>
                     <th>Wedstrijd</th>
                     <td>{{ inschrijving.wedstrijd.titel }}<br>bij {{ inschrijving.wedstrijd.organiserende_vereniging }}</td>

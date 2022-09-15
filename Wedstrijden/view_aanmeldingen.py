@@ -186,6 +186,7 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
                         .filter(wedstrijd=wedstrijd)
                         .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)
                         .select_related('sessie',
+                                        'wedstrijdklasse',
                                         'sporterboog',
                                         'sporterboog__sporter',
                                         'sporterboog__boogtype',
@@ -212,6 +213,7 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
             sporterboog = aanmelding.sporterboog
             sporter = sporterboog.sporter
             sessie_nr = sessie_pk2nr[aanmelding.sessie.pk]
+            klasse_afkorting = aanmelding.wedstrijdklasse.afkorting
             ver = sporter.bij_vereniging
             if ver:
                 ver_nr = ver.ver_nr
@@ -227,13 +229,10 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
                 # neem het geslacht van de sporter zelf
                 wedstrijd_geslacht = sporter.geslacht
 
-            # TODO: wedstrijdklasse bepalen
-            # TODO: wedstrijdklasse afkorting invullen (nu allemaal ?)
-
             writer.writerow([sporter.lid_nr,        # TODO: sporter met meerdere bogen niet ondersteund
                              sessie_nr,
                              sporterboog.boogtype.afkorting,
-                             'X',                   # wedstrijdklasse zoals gedefinieerd voor de wedstrijd
+                             klasse_afkorting,      # wedstrijdklasse zoals gedefinieerd voor de wedstrijd
                              '',                    # baan
                              1,                     # indiv qualification
                              0,                     # team qualification
@@ -282,12 +281,11 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
             if wedstrijd.organiserende_vereniging.ver_nr != self.functie_nu.nhb_ver.ver_nr:
                 raise Http404('Wedstrijd is niet bij jullie vereniging')
 
-        lid_nr2geslacht = dict()     # [lid_nr] = wedstrijd geslacht (M/V/X)
+        lid_nr2voorkeuren = dict()   # [lid_nr] = SporterVoorkeuren
         for voorkeuren in SporterVoorkeuren.objects.select_related('sporter').all():
             sporter = voorkeuren.sporter
 
-            if voorkeuren.wedstrijd_geslacht_gekozen:
-                lid_nr2geslacht[sporter.lid_nr] = voorkeuren.wedstrijd_geslacht
+            lid_nr2voorkeuren[sporter.lid_nr] = voorkeuren
         # for
 
         aanmeldingen = (WedstrijdInschrijving
@@ -295,9 +293,11 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                         .filter(wedstrijd=wedstrijd)
                         .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)
                         .select_related('sessie',
+                                        'wedstrijdklasse',
                                         'sporterboog',
                                         'sporterboog__sporter',
-                                        'sporterboog__boogtype')
+                                        'sporterboog__boogtype',
+                                        'gebruikte_code')
                         .order_by('sessie',
                                   'wanneer',
                                   'status'))
@@ -306,8 +306,11 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         response['Content-Disposition'] = 'attachment; filename="aanmeldingen.csv"'
 
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
-        writer.writerow(['Lid nr', 'Sporter', 'Geslacht', 'Boog', 'Vereniging', 'Reserveringsnummer', 'Status', 'Sessie', 'Aangemeld op'])
-        # TODO: wedstrijdklasse toevoegen
+        writer.writerow(['Reserveringsnummer', 'Aangemeld op', 'Status',
+                         'Prijs', 'Korting', 'Ontvangen', 'Retour',
+                         'Sessie', 'Code', 'Wedstrijdklasse',
+                         'Lid nr', 'Sporter', 'Geslacht', 'Boog', 'Vereniging',
+                         'Para classificatie', 'Voorwerpen op schietlijn', 'Para opmerking'])
 
         for aanmelding in aanmeldingen:
             sporterboog = aanmelding.sporterboog
@@ -319,22 +322,53 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
             else:
                 ver_str = '[0000] Geen vereniging'
 
-            try:
-                wedstrijd_geslacht = lid_nr2geslacht[sporter.lid_nr]
-            except KeyError:
-                # wedstrijdgeslacht is niet bekend
-                # neem het geslacht van de sporter zelf
-                wedstrijd_geslacht = sporter.geslacht
+            # ga uit van het geslacht van de sporter zelf
+            wedstrijd_geslacht = sporter.geslacht
+            para_materiaal = para_notitie = ''
 
-            writer.writerow([sporter.lid_nr,
-                             sporter.volledige_naam(),
-                             GESLACHT2STR[wedstrijd_geslacht],
-                             sporterboog.boogtype.beschrijving,
-                             INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
-                             reserveringsnummer,
-                             ver_str,
-                             aanmelding.sessie.beschrijving,
-                             aanmelding.wanneer.strftime('%Y-%m-%d %H:%M')])
+            try:
+                voorkeuren = lid_nr2voorkeuren[sporter.lid_nr]
+            except KeyError:
+                pass
+            else:
+                if voorkeuren.para_met_rolstoel:
+                    para_materiaal = 'Ja'
+                para_notitie = voorkeuren.opmerking_para_sporter
+
+                if voorkeuren.wedstrijd_geslacht_gekozen:
+                    wedstrijd_geslacht = voorkeuren.wedstrijd_geslacht
+
+            qset = aanmelding.bestelproduct_set.all()
+            if qset.count() > 0:
+                bestelproduct = qset[0]
+                prijs_str = '€ %s' % bestelproduct.prijs_euro
+            else:
+                prijs_str = 'Geen (handmatige inschrijving)'
+
+            if aanmelding.gebruikte_code:
+                korting_str = '%s%%' % aanmelding.gebruikte_code.percentage
+            else:
+                korting_str = 'Geen'
+
+            writer.writerow([
+                reserveringsnummer,
+                aanmelding.wanneer.strftime('%Y-%m-%d %H:%M'),
+                INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
+                prijs_str,
+                korting_str,
+                '€ %s' % aanmelding.ontvangen_euro,
+                '€ %s' % aanmelding.retour_euro,
+                aanmelding.sessie.beschrijving,
+                aanmelding.wedstrijdklasse.afkorting,
+                aanmelding.wedstrijdklasse.beschrijving,
+                sporter.lid_nr,
+                sporter.volledige_naam(),
+                GESLACHT2STR[wedstrijd_geslacht],
+                sporterboog.boogtype.beschrijving,
+                ver_str,
+                sporter.para_classificatie,
+                para_materiaal,
+                para_notitie])
         # for
 
         return response
@@ -372,8 +406,9 @@ class KalenderDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
             inschrijving = (WedstrijdInschrijving
                             .objects
                             .select_related('wedstrijd',
-                                            'sessie',
                                             'wedstrijd__organiserende_vereniging',
+                                            'sessie',
+                                            'wedstrijdklasse',
                                             'sporterboog',
                                             'sporterboog__sporter',
                                             'gebruikte_code')
@@ -397,6 +432,9 @@ class KalenderDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
         context['inschrijving'] = inschrijving
         context['sporter'] = sporter = inschrijving.sporterboog.sporter
         context['ver'] = sporter.bij_vereniging
+
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_HWL):
+            context['toon_contactgegevens'] = True
 
         context['voorkeuren'] = voorkeuren = get_sporter_voorkeuren(sporter)
         voorkeuren.wedstrijdgeslacht_str = GESLACHT2STR[voorkeuren.wedstrijd_geslacht]
