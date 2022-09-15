@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie, BetaalMutatie
+from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalTransactie, BetaalMutatie
 
 
 class BetaalTransactieAdmin(admin.ModelAdmin):

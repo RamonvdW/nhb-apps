@@ -19,12 +19,12 @@ from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_kla
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Taken.operations import maak_taak
-from Wedstrijden.models import BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, WedstrijdLocatie
-from .models import (Wedstrijd,
-                     ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR, WEDSTRIJD_WA_STATUS_TO_STR,
-                     WEDSTRIJD_STATUS_ONTWERP, WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING, WEDSTRIJD_STATUS_GEACCEPTEERD,
-                     WEDSTRIJD_STATUS_GEANNULEERD, WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
-                     WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_BEGRENZING_TO_STR)
+from Wedstrijden.models import (Wedstrijd, BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN, WedstrijdLocatie,
+                                ORGANISATIE_WEDSTRIJD_DISCIPLINE_STRS, WEDSTRIJD_STATUS_TO_STR,
+                                WEDSTRIJD_WA_STATUS_TO_STR, WEDSTRIJD_STATUS_ONTWERP,
+                                WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING, WEDSTRIJD_STATUS_GEACCEPTEERD,
+                                WEDSTRIJD_STATUS_GEANNULEERD, WEDSTRIJD_WA_STATUS_A, WEDSTRIJD_WA_STATUS_B,
+                                WEDSTRIJD_DUUR_MAX_DAGEN, WEDSTRIJD_BEGRENZING_TO_STR)
 import datetime
 from types import SimpleNamespace
 

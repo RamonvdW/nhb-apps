@@ -16,8 +16,8 @@ from Logboek.models import schrijf_in_logboek
 from Mailer.operations import mailer_email_is_valide, mailer_obfuscate_email
 from Overig.helpers import get_safe_from_ip
 from Plein.menu import menu_dynamics
+from Sporter.forms import RegistreerForm
 from Sporter.models import Sporter, Secretaris, SporterGeenEmail, SporterInactief
-from .forms import RegistreerForm
 import logging
 
 

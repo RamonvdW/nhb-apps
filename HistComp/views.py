@@ -8,9 +8,9 @@ from django.urls import reverse
 from django.http import Http404
 from django.views.generic import TemplateView, ListView
 from django.db.models import Q
+from HistComp.models import HistCompetitie, HistCompetitieIndividueel
+from HistComp.forms import FilterForm
 from Plein.menu import menu_dynamics
-from .models import HistCompetitie, HistCompetitieIndividueel
-from .forms import FilterForm
 from urllib.parse import quote_plus
 
 TEMPLATE_HISTCOMP_ALLEJAREN = 'hist/histcomp_top.dtl'

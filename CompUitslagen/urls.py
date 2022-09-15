@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_uitslagen_bond, view_uitslagen_rayon, view_uitslagen_regio, view_uitslagen_vereniging
+from CompUitslagen import view_uitslagen_bond, view_uitslagen_rayon, view_uitslagen_regio, view_uitslagen_vereniging
 
 app_name = 'CompUitslagen'
 

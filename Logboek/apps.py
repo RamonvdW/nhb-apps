@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -15,7 +15,7 @@ def post_migration_callback(sender, **kwargs):
     msg = "Start met versie %s op %s" % (repr(settings.SITE_VERSIE), repr(settings.SITE_URL))
 
     # must import here to avoid AppRegistryNotReady exception
-    from .models import LogboekRegel, schrijf_in_logboek
+    from Logboek.models import LogboekRegel, schrijf_in_logboek
 
     # schrijf het nieuw versienummer in het logboek
     if LogboekRegel.objects.filter(gebruikte_functie='Uitrol', activiteit=msg).count() == 0:

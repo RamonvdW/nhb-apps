@@ -117,7 +117,7 @@ then
     echo "[INFO] Creating clean database; running migrations and performing run with nodebug"
 
     # add coverage with nodebug
-    python3 -u $PYCOV ./manage.py test --keepdb --noinput --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.TestPlein.test_quick &>>"$LOG"
+    python3 -u $PYCOV ./manage.py test --keepdb --noinput --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.tests.TestPlein.test_quick &>>"$LOG"
     RES=$?
     #echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
     [ $RES -eq 3 ] && ABORTED=1

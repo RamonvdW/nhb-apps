@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import Functie, VerklaringHanterenPersoonsgegevens
+from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 
 
 class FunctieAdmin(admin.ModelAdmin):

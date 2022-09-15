@@ -6,15 +6,13 @@
 
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from .models import (Competitie, CompetitieMatch,
-                     LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie,
-                     CompetitieMutatie,
-                     MUTATIE_AFSLUITEN_REGIOCOMP)
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieMutatie,
+                               LAAG_REGIO, LAAG_RK, LAAG_BK, MUTATIE_AFSLUITEN_REGIOCOMP)
 
 
 TEMPLATE_COMPETITIE_PLANNING_BOND = 'competitie/planning-landelijk.dtl'

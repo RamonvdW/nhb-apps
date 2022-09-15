@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_overzicht, view_otp_controle, view_otp_koppelen, view_vhpg, view_wisselvanrol, view_koppel_beheerder
+from Functie import (view_overzicht, view_otp_controle, view_otp_koppelen, view_vhpg, view_wisselvanrol,
+                     view_koppel_beheerder)
 
 app_name = 'Functie'
 

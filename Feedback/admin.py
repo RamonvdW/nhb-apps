@@ -6,7 +6,7 @@
 
 from django.contrib import admin
 from Account.models import AccountEmail
-from .models import Feedback
+from Feedback.models import Feedback
 
 
 class IsAfgehandeldListFilter(admin.SimpleListFilter):      # pragma: no cover

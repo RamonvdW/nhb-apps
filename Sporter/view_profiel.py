@@ -21,7 +21,7 @@ from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Plein.menu import menu_dynamics
 from Records.models import IndivRecord, MATERIAALKLASSE
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_TEAM, AG_DOEL_INDIV
-from .models import SporterBoog, Speelsterkte, get_sporter_voorkeuren
+from Sporter.models import SporterBoog, Speelsterkte, get_sporter_voorkeuren
 import logging
 import copy
 

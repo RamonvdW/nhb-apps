@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTeam
+from HistComp.models import HistCompetitie, HistCompetitieIndividueel, HistCompetitieTeam
 
 
 class HistCompetitieAdmin(admin.ModelAdmin):

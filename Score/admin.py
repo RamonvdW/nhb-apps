@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, Score, ScoreHist, Uitslag
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, Score, ScoreHist, Uitslag
 
 
 class AanvangsgemiddeldeAdmin(admin.ModelAdmin):

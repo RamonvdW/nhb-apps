@@ -11,9 +11,9 @@ from django.urls import Resolver404, reverse
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from Plein.menu import menu_dynamics
-from .forms import FeedbackForm
-from .models import Feedback
-from .feedback_opslaan import store_feedback
+from Feedback.forms import FeedbackForm
+from Feedback.models import Feedback
+from Feedback.operations import store_feedback
 
 TEMPLATE_FEEDBACK_FORMULIER = 'feedback/formulier.dtl'
 TEMPLATE_FEEDBACK_BEDANKT = 'feedback/bedankt.dtl'

@@ -5,8 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import (view_clusters, view_planning, view_instellingen, view_teams_rcl, view_poules, view_teams_hwl,
-               view_keuze_zeven_wedstrijden, view_wieschietwaar, view_waarschijnlijke_deelnemers, view_medailles)
+from CompLaagRegio import (view_clusters, view_planning, view_instellingen, view_teams_rcl, view_poules, view_teams_hwl,
+                           view_keuze_zeven_wedstrijden, view_wieschietwaar, view_waarschijnlijke_deelnemers,
+                           view_medailles)
 
 app_name = 'CompLaagRegio'
 

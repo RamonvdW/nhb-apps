@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django import forms
-from .models import Feedback
+from Feedback.models import Feedback
 
 
 class FeedbackForm(forms.Form):

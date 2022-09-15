@@ -6,12 +6,12 @@
 
 from django.contrib import admin
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from .models import (Competitie, DeelCompetitie, DeelcompetitieRonde, LAAG_REGIO, LAAG_RK,
-                     CompetitieIndivKlasse, CompetitieTeamKlasse,
-                     DeelcompetitieIndivKlasseLimiet, DeelcompetitieTeamKlasseLimiet,
-                     CompetitieMatch, RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
-                     RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam, KampioenschapTeam,
-                     CompetitieMutatie)
+from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, LAAG_REGIO, LAAG_RK,
+                               CompetitieIndivKlasse, CompetitieTeamKlasse,
+                               DeelcompetitieIndivKlasseLimiet, DeelcompetitieTeamKlasseLimiet,
+                               CompetitieMatch, RegioCompetitieSchutterBoog, KampioenschapSchutterBoog,
+                               RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
+                               KampioenschapTeam, CompetitieMutatie)
 
 
 class CreateOnlyAdmin(admin.ModelAdmin):

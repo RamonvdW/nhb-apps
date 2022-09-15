@@ -7,7 +7,7 @@
 from django.urls import reverse
 from django.views.generic import ListView
 from Plein.menu import menu_dynamics
-from .models import IndivRecord
+from Records.models import IndivRecord
 
 
 TEMPLATE_RECORDS_SPECIAL_ER = 'records/records_special_er.dtl'

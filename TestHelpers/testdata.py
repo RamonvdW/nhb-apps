@@ -19,7 +19,7 @@ from Competitie.models import (Competitie, CompetitieIndivKlasse, CompetitieTeam
                                RegiocompetitieTeam, RegiocompetitieTeamPoule,
                                KampioenschapSchutterBoog, KampioenschapTeam)
 from Competitie.operations import competities_aanmaken
-from Competitie.test_competitie import zet_competitie_fase
+from Competitie.tests.test_competitie import zet_competitie_fase
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from NhbStructuur.models import NhbRegio, NhbCluster, NhbVereniging
 from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV

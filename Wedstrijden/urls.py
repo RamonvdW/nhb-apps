@@ -5,8 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import (view_vereniging, view_manager, view_wijzig_wedstrijd, view_wijzig_sessies,
-               view_inschrijven, view_aanmeldingen, view_kortingscodes)
+from Wedstrijden import (view_vereniging, view_manager, view_wijzig_wedstrijd, view_wijzig_sessies,
+                         view_inschrijven, view_aanmeldingen, view_kortingscodes)
 
 app_name = 'Wedstrijden'
 

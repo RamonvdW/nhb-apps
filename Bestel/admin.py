@@ -5,8 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import (BestelProduct, BestelMandje, Bestelling, BestelMutatie,
-                     BESTEL_MUTATIE_TO_STR)
+from Bestel.models import BestelProduct, BestelMandje, Bestelling, BestelMutatie, BESTEL_MUTATIE_TO_STR
 
 
 class BestelProductAdmin(admin.ModelAdmin):

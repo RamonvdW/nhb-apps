@@ -12,7 +12,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
 from Functie.rol import Rollen, rol_get_huidige
-from .models import Taak
+from Taken.models import Taak
 from Taken.operations import eval_open_taken
 
 

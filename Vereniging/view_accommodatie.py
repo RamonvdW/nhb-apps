@@ -16,7 +16,7 @@ from Plein.menu import menu_dynamics
 from Sporter.models import Secretaris
 from Wedstrijden.models import WedstrijdLocatie, BAANTYPE2STR, BAAN_TYPE_BUITEN, BAAN_TYPE_EXTERN
 from Logboek.models import schrijf_in_logboek
-from .forms import AccommodatieDetailsForm
+from Vereniging.forms import AccommodatieDetailsForm
 
 
 TEMPLATE_ACCOMMODATIE_DETAILS = 'vereniging/accommodatie-details.dtl'

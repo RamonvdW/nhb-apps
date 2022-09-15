@@ -11,7 +11,7 @@ from django.db.models.functions import Concat
 from django.urls import reverse
 from Functie.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
-from .models import LogboekRegel
+from Logboek.models import LogboekRegel
 from urllib.parse import quote_plus
 
 

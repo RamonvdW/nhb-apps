@@ -8,7 +8,7 @@ from django.views.generic import View
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from Functie.rol import Rollen, rol_get_huidige
-from .view_maand import get_url_eerstvolgende_maand_met_wedstrijd
+from Kalender.view_maand import get_url_eerstvolgende_maand_met_wedstrijd
 
 
 class KalenderLandingPageView(View):

@@ -5,7 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_accommodatie, view_externe_locaties, view_overzicht, view_ledenlijst, view_lijst_verenigingen
+from Vereniging import (view_accommodatie, view_externe_locaties, view_overzicht, view_ledenlijst,
+                        view_lijst_verenigingen)
 
 app_name = 'Vereniging'
 

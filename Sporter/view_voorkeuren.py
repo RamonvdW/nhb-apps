@@ -14,7 +14,7 @@ from BasisTypen.models import (BoogType,
                                GESLACHT_MV_MEERVOUD, ORGANISATIE_IFAA)
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_mag_wisselen
 from Plein.menu import menu_dynamics
-from .models import Sporter, SporterBoog, get_sporter_voorkeuren
+from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
 from types import SimpleNamespace
 import logging
 

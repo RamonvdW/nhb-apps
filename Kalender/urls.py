@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_landing_page, view_maand
+from Kalender import view_landing_page, view_maand
 
 app_name = 'Kalender'
 

@@ -5,8 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import (WedstrijdLocatie, Wedstrijd, WedstrijdSessie,  # WedstrijdDeeluitslag,
-                     WedstrijdKortingscode, WedstrijdInschrijving)
+from Wedstrijden.models import (WedstrijdLocatie, Wedstrijd, WedstrijdSessie,
+                                WedstrijdKortingscode, WedstrijdInschrijving)
 
 
 class WedstrijdLocatieAdmin(admin.ModelAdmin):      # pragma: no cover

@@ -6,7 +6,7 @@
 
 from django.contrib import admin
 from django.forms import ModelForm, Textarea
-from .models import LogboekRegel
+from Logboek.models import LogboekRegel
 
 
 class LogboekRegelForm(ModelForm):

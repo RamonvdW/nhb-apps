@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_mandje, view_bestelling, view_activiteit
+from Bestel import view_mandje, view_bestelling, view_activiteit
 
 app_name = 'Bestel'
 

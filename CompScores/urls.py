@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_scores, view_wedstrijden
+from CompScores import view_scores, view_wedstrijden
 
 app_name = 'CompScores'
 

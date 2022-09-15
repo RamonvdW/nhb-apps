@@ -9,9 +9,9 @@ from django.db.models import Q
 from django.views.generic import ListView, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
+from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
+from Functie.models import Functie
 from Plein.menu import menu_dynamics
-from .rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
-from .models import Functie
 
 
 TEMPLATE_OVERZICHT = 'functie/overzicht.dtl'

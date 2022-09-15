@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import views, view_interland
+from HistComp import views, view_interland
 
 app_name = 'HistComp'
 

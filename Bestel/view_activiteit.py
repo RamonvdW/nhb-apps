@@ -6,14 +6,12 @@
 
 from django.db.models.query_utils import Q
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.utils.timezone import get_default_timezone
 from django.views.generic import TemplateView
-from django.utils import timezone
 from django.urls import reverse
+from Bestel.forms import ZoekAccountForm
 from Bestel.models import Bestelling, BESTELLING_STATUS2STR
 from Functie.rol import rol_get_huidige, Rollen
 from Plein.menu import menu_dynamics
-from .forms import ZoekAccountForm
 
 
 TEMPLATE_BESTEL_ACTIVITEIT = 'bestel/activiteit.dtl'

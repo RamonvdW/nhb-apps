@@ -8,11 +8,10 @@ from django.urls import reverse
 from django.db.models import F
 from django.views.generic import TemplateView
 from django.templatetags.static import static
-from Competitie.models import RegioCompetitieSchutterBoog, RegiocompetitieTeam
+from Competitie.models import Competitie, RegioCompetitieSchutterBoog, RegiocompetitieTeam
 from Competitie.operations import bepaal_startjaar_nieuwe_competitie
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from Plein.menu import menu_dynamics
-from .models import Competitie
 
 
 TEMPLATE_COMPETITIE_KIES_SEIZOEN = 'competitie/kies.dtl'

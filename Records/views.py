@@ -11,9 +11,9 @@ from django.db.models import Q
 from django.views.generic import ListView, TemplateView
 from django.templatetags.static import static
 from Plein.menu import menu_dynamics
+from Records.models import IndivRecord
+from Records.forms import ZoekForm
 from Sporter.models import Sporter
-from .models import IndivRecord
-from .forms import ZoekForm
 
 
 TEMPLATE_RECORDS_OVERZICHT = 'records/records_overzicht.dtl'
