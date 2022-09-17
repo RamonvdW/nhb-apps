@@ -177,7 +177,7 @@ kill $PID_TAIL
 wait $PID_TAIL 2>/dev/null
 
 # launch log in editor
-[ $RES -eq 0 ] || geany --new-instance "$LOG" &
+[ $RES -eq 0 ] || geany --new-instance --no-msgwin "$LOG" &
 
 if [ $RES -eq 0 ] && [ "$FOCUS" != "" ]
 then
