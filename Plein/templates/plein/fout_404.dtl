@@ -28,7 +28,7 @@
     <p>Soms zijn deze problemen op te lossen, soms niet.</p>
     <p>Suggestie: Gebruikt de <b>terug</b> knop van je browser, pas de invoer aan en probeer het opnieuw.</p>
 
-    <!-- template geeft help/email contact -->
+    <!-- template layout_minimaal bevat help info en contactgegevens voor ondersteuning -->
 
 {% endblock %}
 
