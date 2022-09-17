@@ -37,7 +37,7 @@
                     <div class="input-field">
                         {{ form.otp_code.label_tag }}
                         <!-- in plaats van {{ form.otp_code }} een handmatig veld met on_input handler -->
-                        <input type="number" name="otp_code" id="id_otp_code" autofocus required autocomplete="off" size="6" min="0" max="999999" inputtype="numeric" oninput="this.value=this.value.slice(0,this.size)">
+                        <input type="number" name="otp_code" id="id_otp_code" autofocus required autocomplete="off" size="6" min="0" max="999999" inputmode="numeric" oninput="this.value=this.value.slice(0,this.size)">
                     </div>
 
                     <div class="center" style="margin-top:30px">
