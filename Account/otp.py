@@ -56,7 +56,7 @@ def account_otp_controleer(request, account, code):
     schrijf_in_logboek(account=None,
                        gebruikte_functie="OTP controle",
                        activiteit='Gebruiker %s OTP controle mislukt vanaf IP %s' % (repr(account.username), from_ip))
-    my_logger.info('%s 2FA mislukte controle voor account %s' % (from_ip, account.username))
+    my_logger.info('%s 2FA mislukt voor account %s met code %s' % (from_ip, account.username, repr(code)))
     return False
 
 

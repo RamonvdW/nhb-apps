@@ -7,6 +7,7 @@
 from django.conf import settings
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
+from django.utils import timezone
 from django.shortcuts import render
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -124,6 +125,8 @@ class OTPControleView(TemplateView):
             return HttpResponseRedirect(reverse('Plein:plein'))
 
         form = OTPControleForm(request.POST)
+        context = {'form': form}
+
         if form.is_valid():
             otp_code = form.cleaned_data.get('otp_code')
             if account_otp_controleer(request, account, otp_code):
@@ -132,13 +135,17 @@ class OTPControleView(TemplateView):
                 if not next_url:
                     next_url = reverse('Functie:wissel-van-rol')
                 return HttpResponseRedirect(next_url)
-            else:
-                # controle is mislukt (is al gelogd en in het logboek geschreven)
-                form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
-                # de code verandert sneller dan een brute-force aan kan, dus niet nodig om te blokkeren
+
+            # controle is mislukt (is al gelogd en in het logboek geschreven)
+            form.add_error(None, 'Verkeerde code. Probeer het nog eens.')
+            context['toon_hulp'] = True
+            context['email_support'] = settings.EMAIL_SUPPORT
+
+            now = timezone.localtime(timezone.now())
+            context['tijdstip'] = now.strftime('%H:%M')
+            # de code verandert sneller dan een brute-force aan kan, dus niet nodig om te blokkeren
 
         # still here --> re-render with error message
-        context = {'form': form}
         menu_dynamics(request, context)
         return render(request, TEMPLATE_OTP_CONTROLE, context)
 
