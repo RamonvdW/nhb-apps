@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
+from django.db.models import F
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, LAAG_REGIO, LAAG_RK,
                                CompetitieIndivKlasse, CompetitieTeamKlasse,
@@ -85,6 +86,46 @@ class CompetitieMatchAdmin(admin.ModelAdmin):
     # TODO: filter toepasselijke indiv_klassen / team_klassen aan de hand van obj.competitie
 
 
+class TeamAGListFilter(admin.SimpleListFilter):
+
+    title = 'Team AG'
+
+    parameter_name = 'TeamAG'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('Ontbreekt', 'Nog niet ingevuld'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'Ontbreekt':
+            queryset = queryset.filter(deelcompetitie__regio_organiseert_teamcompetitie=True,
+                                       inschrijf_voorkeur_team=True,
+                                       ag_voor_team_mag_aangepast_worden=True,
+                                       ag_voor_team__lte="0.1")
+        return queryset
+
+
+class ZelfstandigIngeschrevenListFilter(admin.SimpleListFilter):
+
+    title = 'Inschrijving'
+
+    parameter_name = 'Zelfstandig'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('HWL', 'Ingeschreven door de HWL'),
+            ('Zelf', 'Zelfstandig ingeschreven'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'Zelf':
+            queryset = queryset.filter(sporterboog__sporter__account=F('aangemeld_door'))
+        if self.value() == 'HWL':
+            queryset = queryset.exclude(sporterboog__sporter__account=F('aangemeld_door'))
+        return queryset
+
+
 class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
 
     fieldsets = (
@@ -132,6 +173,8 @@ class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
 
     list_filter = ('deelcompetitie__competitie',
                    'deelcompetitie__nhb_regio',
+                   ZelfstandigIngeschrevenListFilter,
+                   TeamAGListFilter,
                    'sporterboog__boogtype',
                    'inschrijf_voorkeur_rk_bk',
                    ('sporterboog__sporter__bij_vereniging', admin.EmptyFieldListFilter),
