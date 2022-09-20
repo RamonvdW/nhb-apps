@@ -621,7 +621,7 @@
                             <span class="hide-on-small-only">&nbsp;naam van de vereniging</span>
                         </td>
                         <td>boogtype</td>
-                        <td><input type="text" oninput="controleer_score(this)" placeholder="0" value="" size="3" maxlength="3" style="width:3em; height:2rem; margin:0"></td>
+                        <td><input type="text" oninput="controleer_score(this)" placeholder="0" value="" size="3" maxlength="3" inputmode="numeric" style="width:3em; height:2rem; margin:0"></td>
                         {% if deelcomp.regio_organiseert_teamcompetitie %}
                             <td><!-- team name --></td>
                         {% endif %}
@@ -636,7 +636,7 @@
                                 <span class="hide-on-small-only">&nbsp;{{ score.sporterboog.sporter.bij_vereniging.naam }}</span>
                             </td>
                             <td>{{ score.sporterboog.boogtype.beschrijving }}{% if score.team_gem %} ({{ score.team_gem }}){% endif %}</td>
-                            <td><input type="text" oninput="controleer_score(this)" placeholder="0" value="{{ score.waarde }}" size="3" maxlength="3" style="width:3em; height:2rem; margin:0"></td>
+                            <td><input type="text" oninput="controleer_score(this)" placeholder="0" value="{{ score.waarde }}" size="3" maxlength="3" inputmode="numeric" style="width:3em; height:2rem; margin:0"></td>
                             {% if deelcomp.regio_organiseert_teamcompetitie %}
                                 <td>{{ score.team_naam }}</td>
                             {% endif %}
@@ -665,7 +665,7 @@
                 <div class="center">
                     <div class="input-field" style="display:inline-block">
                         <label for="id_lid_nr">Bondsnummer:</label>
-                        <input type="text" name="zoek_lid_nr" placeholder="123456" size="6" maxlength="6" id="id_lid_nr">
+                        <input type="text" name="zoek_lid_nr" placeholder="123456" size="6" maxlength="6" id="id_lid_nr" inputmode="numeric">
 
                     </div>
 

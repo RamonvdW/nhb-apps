@@ -98,7 +98,7 @@
 
                         <div class="input-field">
                             <label for="id_bondsnr">Bondsnummer</label>
-                            <input type="number" min="100000" max="999999" name="bondsnummer" id="id_bondsnr">
+                            <input type="number" min="100000" max="999999" name="bondsnummer" id="id_bondsnr" autofocus>
                         </div>
 
                         <p class="center">

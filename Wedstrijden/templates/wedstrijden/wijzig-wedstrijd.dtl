@@ -364,7 +364,7 @@
                                     {% if block_edits %}
                                         <span>{{ wed.contact_email }}</span>
                                     {% else %}
-                                        <input type="email" name="contact_email" value="{{ wed.contact_email }}" oninput="gewijzigd()">
+                                        <input type="email" name="contact_email" value="{{ wed.contact_email }}" inputmode="email" oninput="gewijzigd()">
                                     {% endif %}
                                 </td>
                             </tr>
@@ -375,7 +375,7 @@
                                     {% if block_edits %}
                                         <span>{{ wed.contact_website }}</span>
                                     {% else %}
-                                        <input type="url" name="contact_website" value="{{ wed.contact_website }}" oninput="gewijzigd()">
+                                        <input type="url" name="contact_website" value="{{ wed.contact_website }}" inputmode="url" oninput="gewijzigd()">
                                     {% endif %}
                                 </td>
                             </tr>
