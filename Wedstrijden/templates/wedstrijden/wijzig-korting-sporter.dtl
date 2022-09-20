@@ -38,7 +38,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Wijzig korting</h3>
-            <p>Voor alle leden van jullie vereniging</p>
+            <p>Voor een specifieke sporter</p>
         </div>
     </div>
 
@@ -54,13 +54,6 @@
                         {% csrf_token %}
 
                         <table class="white">
-
-                            <tr>
-                                <th>Code</th>
-                                <td>
-                                    <input type="text" name="code" value="{{ korting.code }}" minlength="{{ min_code_len }}" oninput="gewijzigd()">
-                                </td>
-                            </tr>
 
                             <tr>
                                 <th>Bruikbaar tot en met</th>
@@ -84,12 +77,23 @@
                             </tr>
 
                             <tr>
-                                <th>Begrens gebruik tot leden van vereniging</th>
+                                <th>Begrens gebruik tot deze sporter</th>
                                 <td>
-                                    <label>
-                                        <input type="checkbox" class="filled-in" name="voor_onze_ver" onchange="gewijzigd()"{% if check_ver %} checked{% endif %}>
-                                        <span class="black-text">{{ ver.ver_nr_en_naam }}</span>
-                                    </label>
+                                    <table>
+                                        {% if voor_sporter_str %}
+                                            <tr>
+                                                <td>Gekozen sporter:</td>
+                                                <td class="nhb-blauw-text">{{ voor_sporter_str }}</td>
+                                            </tr>
+                                        {% endif %}
+                                        <tr>
+                                            <td>Kies sporter:{% if voor_sporter_str %}{% endif %}</td>
+                                            <td>
+                                                <input type="text" name="voor_lid_nr" placeholder="Lid nr" value="{{ korting.sporter.lid_nr }}" inputmode="numeric" minlength="6" maxlength="6" oninput="gewijzigd()">
+                                                {% if voor_sporter_str %}<br>(000000 = verwijder){% endif %}
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </td>
                             </tr>
 
@@ -173,6 +177,6 @@
             })
     </script>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-wijzig-kortingscode-vereniging" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-wijzig-korting-sporter" %}
 
 {% endblock %}

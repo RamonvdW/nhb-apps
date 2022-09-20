@@ -7,7 +7,7 @@
 from django.conf import settings
 from Bestel.models import (BestelMutatie, Bestelling,
                            BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_MAAK_BESTELLINGEN,
-                           BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_KORTINGSCODE, BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN,
+                           BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN,
                            BESTEL_MUTATIE_BETALING_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING)
 from Overig.background_sync import BackgroundSync
 import time
@@ -69,28 +69,6 @@ def bestel_mutatieverzoek_verwijder_product_uit_mandje(account, product, snel):
                                     product=product,
                                     is_verwerkt=False)
     mutatie.save()
-
-    if is_created:
-        # wacht kort op de achtergrondtaak
-        _bestel_ping_achtergrondtaak(mutatie, snel)
-
-
-def bestel_mutatieverzoek_kortingscode_toepassen(account, kortingscode_str, snel):
-    """
-        Voeg een kortingscode toe aan een mandje.
-
-        account: In het mandje van welk account ligt het product nu?
-        code:    De kortingscode tekst
-        snel = True: niet wachten op reactie achtergrond taak (voor testen)
-    """
-
-    # zet dit verzoek door naar de achtergrondtaak
-    # voorkom duplicates (niet 100%)
-    mutatie, is_created = BestelMutatie.objects.get_or_create(
-                                    code=BESTEL_MUTATIE_KORTINGSCODE,
-                                    account=account,
-                                    kortingscode=kortingscode_str,
-                                    is_verwerkt=False)
 
     if is_created:
         # wacht kort op de achtergrondtaak

@@ -6,7 +6,7 @@
 
 from django.contrib import admin
 from Wedstrijden.models import (WedstrijdLocatie, Wedstrijd, WedstrijdSessie,
-                                WedstrijdKortingscode, WedstrijdInschrijving)
+                                WedstrijdKorting, WedstrijdInschrijving)
 
 
 class WedstrijdLocatieAdmin(admin.ModelAdmin):      # pragma: no cover
@@ -88,7 +88,7 @@ class WedstrijdSessieAdmin(admin.ModelAdmin):             # pragma: no cover
                 .all())
 
 
-class WedstrijdKortingscodeAdmin(admin.ModelAdmin):
+class WedstrijdKortingAdmin(admin.ModelAdmin):
 
     list_filter = (
                    ('uitgegeven_door', admin.RelatedOnlyFieldListFilter),
@@ -109,7 +109,7 @@ class WedstrijdInschrijvingAdmin(admin.ModelAdmin):
 admin.site.register(WedstrijdLocatie, WedstrijdLocatieAdmin)
 admin.site.register(Wedstrijd, WedstrijdAdmin)
 admin.site.register(WedstrijdSessie, WedstrijdSessieAdmin)
-admin.site.register(WedstrijdKortingscode, WedstrijdKortingscodeAdmin)
+admin.site.register(WedstrijdKorting, WedstrijdKortingAdmin)
 admin.site.register(WedstrijdInschrijving, WedstrijdInschrijvingAdmin)
 
 # FUTURE: Wedstrijd admin scherm word langzaam als str(WedstrijdLocatie) een self.verenigingen.count() doet

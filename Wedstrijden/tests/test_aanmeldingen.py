@@ -11,7 +11,7 @@ from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
 from Wedstrijden.models import (WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WedstrijdInschrijving,
-                                WedstrijdKortingscode, INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_KORTING_VERENIGING)
+                                WedstrijdKorting, INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_KORTING_VERENIGING)
 from TestHelpers.e2ehelpers import E2EHelpers
 
 
@@ -27,7 +27,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
     url_aanmeldingen_download_tsv = '/wedstrijden/%s/aanmeldingen/download/tsv/'    # wedstrijd_pk
     url_aanmeldingen_download_csv = '/wedstrijden/%s/aanmeldingen/download/csv/'    # wedstrijd_pk
 
-    url_kalender_wedstrijd_info = '/wedstrijden/%s/info/'                           # wedstrijd_pk
+    url_kalender_wedstrijd_details = '/wedstrijden/%s/details/'                     # wedstrijd_pk
     url_kalender_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
     url_kalender_vereniging = '/wedstrijden/vereniging/'
     url_inschrijven_groepje = '/wedstrijden/inschrijven/%s/groep/'                  # wedstrijd_pk
@@ -159,7 +159,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                                                                         'sessie': self.sessie_r.pk,
                                                                         'klasse': wkls_r[0].pk,
                                                                         'boog': self.boog_r.pk})
-        self.assert_is_redirect(resp, self.url_kalender_wedstrijd_info % self.wedstrijd.pk)
+        self.assert_is_redirect(resp, self.url_kalender_wedstrijd_details % self.wedstrijd.pk)
         self.assertEqual(1, WedstrijdInschrijving.objects.count())
         self.inschrijving1r = WedstrijdInschrijving.objects.all()[0]
 
@@ -169,7 +169,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                                                                         'sessie': self.sessie_r.pk,
                                                                         'klasse': wkls_c[0].pk,
                                                                         'boog': self.boog_c.pk})
-        self.assert_is_redirect(resp, self.url_kalender_wedstrijd_info % self.wedstrijd.pk)
+        self.assert_is_redirect(resp, self.url_kalender_wedstrijd_details % self.wedstrijd.pk)
         self.assertEqual(2, WedstrijdInschrijving.objects.count())
         self.inschrijving1c = WedstrijdInschrijving.objects.exclude(pk=self.inschrijving1r.pk)[0]
 
@@ -179,13 +179,12 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                                                                         'sessie': self.sessie_r.pk,
                                                                         'klasse': wkls_c[1].pk,
                                                                         'boog': self.boog_c.pk})
-        self.assert_is_redirect(resp, self.url_kalender_wedstrijd_info % self.wedstrijd.pk)
+        self.assert_is_redirect(resp, self.url_kalender_wedstrijd_details % self.wedstrijd.pk)
         self.assertEqual(3, WedstrijdInschrijving.objects.count())
         self.inschrijving2 = WedstrijdInschrijving.objects.exclude(pk__in=(self.inschrijving1r.pk,
                                                                            self.inschrijving1c.pk))[0]
 
-        korting = WedstrijdKortingscode(
-                        code='TESTING1234',
+        korting = WedstrijdKorting(
                         geldig_tot_en_met='2099-12-31',
                         uitgegeven_door=self.nhbver1,
                         percentage=42,
@@ -193,12 +192,12 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                         voor_vereniging=self.nhbver1)
         korting.save()
 
-        self.inschrijving1r.gebruikte_code = korting
-        self.inschrijving1r.save(update_fields=['gebruikte_code'])
+        self.inschrijving1r.korting = korting
+        self.inschrijving1r.save(update_fields=['korting'])
 
         self.inschrijving2.status = INSCHRIJVING_STATUS_AFGEMELD
-        self.inschrijving2.gebruikte_code = korting
-        self.inschrijving2.save(update_fields=['status', 'gebruikte_code'])
+        self.inschrijving2.korting = korting
+        self.inschrijving2.save(update_fields=['status', 'korting'])
 
     def test_anon(self):
         self.client.logout()

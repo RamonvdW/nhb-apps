@@ -11,7 +11,8 @@ from django.views.generic import TemplateView
 from Bestel.mandje import eval_mandje_inhoud
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import Wedstrijd, WEDSTRIJD_STATUS_GEACCEPTEERD, WEDSTRIJD_STATUS_GEANNULEERD
-from datetime import date
+from datetime import date, timedelta
+
 
 TEMPLATE_KALENDER_MAAND = 'kalender/overzicht-maand.dtl'
 
@@ -143,6 +144,8 @@ class KalenderMaandView(TemplateView):
             maand += 1
         datum_voor = date(year=jaar, month=maand, day=1)
 
+        now_date = timezone.now().date()
+
         context['wedstrijden'] = wedstrijden = (Wedstrijd
                                                 .objects
                                                 .select_related('locatie')
@@ -156,8 +159,13 @@ class KalenderMaandView(TemplateView):
             if wed.status == WEDSTRIJD_STATUS_GEANNULEERD:
                 wed.titel = '[GEANNULEERD] ' + wed.titel
             else:
-                wed.url_details = reverse('Wedstrijden:wedstrijd-info',
+                wed.url_details = reverse('Wedstrijden:wedstrijd-details',
                                           kwargs={'wedstrijd_pk': wed.pk})
+
+            wed.inschrijven_voor = wed.datum_begin - timedelta(days=wed.inschrijven_tot)
+            wed.inschrijven_dagen = (wed.inschrijven_voor - now_date).days
+            wed.inschrijven_let_op = (wed.inschrijven_dagen <= 7)
+            wed.kan_inschrijven = (now_date < wed.inschrijven_voor)
         # for
 
         context['kan_aanmelden'] = self.request.user.is_authenticated

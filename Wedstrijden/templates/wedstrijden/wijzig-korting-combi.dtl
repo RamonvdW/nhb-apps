@@ -38,7 +38,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Wijzig korting</h3>
-            <p>Voor een specifieke sporter</p>
+            <p>Combinatie-korting bij meedoen aan meerdere wedstrijden</p>
         </div>
     </div>
 
@@ -56,13 +56,6 @@
                         <table class="white">
 
                             <tr>
-                                <th>Code</th>
-                                <td>
-                                    <input type="text" name="code" value="{{ korting.code }}" minlength="{{ min_code_len }}" oninput="gewijzigd()">
-                                </td>
-                            </tr>
-
-                            <tr>
                                 <th>Bruikbaar tot en met</th>
                                 <td>
                                     <input type="text" class="nl_datepicker" id="id_datum" onchange="datum_omzetten()">
@@ -71,8 +64,8 @@
                             </tr>
 
                             <tr>
-                                <th>Bruikbaar voor wedstrijd(en)</th>
-                                <td>
+                                <th>Combinatie-korting</th>
+                                <td>Indien ingeschreven voor al deze wedstrijden:<br>
                                     {% for wedstrijd in wedstrijden %}
                                         <label>
                                             <input type="checkbox" class="filled-in" name="wedstrijd_{{ wedstrijd.pk }}" onchange="gewijzigd()"{% if wedstrijd.is_gekozen %} checked{% endif %}>
@@ -80,26 +73,6 @@
                                         </label>
                                         <br>
                                     {% endfor %}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>Begrens gebruik tot deze sporter</th>
-                                <td>
-                                    <table>
-                                        <tr>
-                                            <td>Lid nr:{% if voor_sporter_str %}<br>(000000 = verwijder){% endif %}</td>
-                                            <td>
-                                                <input type="text" name="voor_lid_nr" placeholder="Lid nr" value="{{ korting.sporter.lid_nr }}" oninput="gewijzigd()">
-                                            </td>
-                                        </tr>
-                                        {% if voor_sporter_str %}
-                                            <tr>
-                                                <td>Gekozen sporter:</td>
-                                                <td class="nhb-blauw-text">{{ voor_sporter_str }}</td>
-                                            </tr>
-                                        {% endif %}
-                                    </table>
                                 </td>
                             </tr>
 
@@ -183,6 +156,6 @@
             })
     </script>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-wijzig-kortingscode-sporter" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-wijzig-korting-combi" %}
 
 {% endblock %}

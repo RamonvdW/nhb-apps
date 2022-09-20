@@ -31,46 +31,6 @@
             document.body.appendChild(form);
             form.submit();
         }
-
-        function code_openen()
-        {
-            const el_knopje = document.getElementById('id_code_knopje')
-            el_knopje.style.display = "none"
-
-            const el_invoer = document.getElementById('id_code_invoeren')
-            el_invoer.style.display = "block"
-
-            const el_input = document.getElementById('id_code_invoer')
-            el_input.focus()
-        }
-
-        function code_toevoegen()
-        {
-            const el = document.getElementById('id_code_invoer')
-            const url = el.dataset.url
-            // console.log('url:', url)
-
-            // voer een POST uit om toe te voegen
-            let form = document.createElement('form');
-            form.setAttribute('method', 'post');
-            form.setAttribute('action', url);
-
-            let inp = document.createElement('input');
-            inp.type = "hidden";
-            inp.name = "csrfmiddlewaretoken";
-            inp.value = getCookie('csrftoken');
-            form.appendChild(inp);
-
-            inp = document.createElement('input');
-            inp.type = "hidden";
-            inp.name = "code";
-            inp.value = el.value;
-            form.appendChild(inp);
-
-            form.style.display = 'hidden';
-            document.body.appendChild(form);
-            form.submit();
-        }
     </script>
 
     <!-- banner -->
@@ -108,10 +68,10 @@
                                     </td>
                                 </tr>
 
-                                {% if product.gebruikte_code_str %}
+                                {% if product.gebruikte_korting_str %}
                                     <tr>
-                                        <td class="hide-on-small-only">{% if product.is_combi_korting %}Automatische combi-korting{% else %}Korting{% endif %}</td>
-                                        <td>{{ product.gebruikte_code_str }}{% if product.is_combi_korting %}{% for titel in product.combi_reden %}<br>{{ titel }}{% endfor %}{% endif %}</td>
+                                        <td class="hide-on-small-only">Automatische korting</td>
+                                        <td>{{ product.gebruikte_korting_str }}{% if product.is_combi_korting %}{% for titel in product.combi_reden %}<br>{{ titel }}{% endfor %}{% endif %}</td>
                                         <td class="right-align">{% if product.korting_euro > 0.0001 %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ product.korting_euro }}</td>
                                         <td><!--knoppen--></td>
                                     </tr>
@@ -124,30 +84,6 @@
                                 <td class="right-align"><b>Totaal:</b></td>
                                 <td class="right-align"><b>&euro;&nbsp;{{ mandje.totaal_euro }}</b></td>
                             </tr>
-
-                            <!-- kortingscode invoeren -->
-                            {% if toon_kortingscode_invoer %}
-                                <tr>
-                                    <td colspan="3">
-                                        <div>
-                                            <button id="id_code_knopje" class="btn-nhb-blauw" onclick="code_openen()">
-                                                <i class="material-icons-round">add_circle_outline</i></button>
-                                            <span style="margin-left:20px">Kortingscode toevoegen</span>
-                                        </div>
-
-                                        <div id="id_code_invoeren" class="row" style="display:none; margin-left:10px">
-                                            <div class="col s8 m6 l4">
-                                                <input id="id_code_invoer" type="text" name="code" size="40" maxlength="40" autocomplete="off" data-url="{{ url_code_toevoegen }}" onchange="code_toevoegen()">
-                                            </div>
-                                            <div class="col s4 m6 l8">
-                                                <button class="btn-nhb-rood" onclick="code_toevoegen()">
-                                                    <i class="material-icons-round">add</i></button>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="hide-on-small-only"></td>
-                                </tr>
-                            {% endif %}
 
                             <!-- afrekenen -->
                             <tr>

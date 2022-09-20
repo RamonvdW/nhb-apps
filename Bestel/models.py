@@ -11,8 +11,6 @@ from Wedstrijden.models import WedstrijdInschrijving
 from decimal import Decimal
 
 
-BESTEL_KORTINGSCODE_MINLENGTH = 8
-
 BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK = 1
 
 
@@ -38,16 +36,14 @@ BESTELLING_STATUS2STR = {
 
 BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN = 1        # inschrijven op wedstrijd
 BESTEL_MUTATIE_VERWIJDER = 2                    # product verwijderen uit mandje
-BESTEL_MUTATIE_KORTINGSCODE = 3                 # kortingcode toepassen op mandje
-BESTEL_MUTATIE_MAAK_BESTELLINGEN = 4            # mandje omzetten in bestelling(en)
-BESTEL_MUTATIE_BETALING_AFGEROND = 5            # betaling is afgerond (gelukt of mislukt)
-BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN = 6           # afmelden (na betaling)
-BESTEL_MUTATIE_RESTITUTIE_UITBETAALD = 7        # restitutie uitbetaald
+BESTEL_MUTATIE_MAAK_BESTELLINGEN = 3            # mandje omzetten in bestelling(en)
+BESTEL_MUTATIE_BETALING_AFGEROND = 4            # betaling is afgerond (gelukt of mislukt)
+BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN = 5           # afmelden (na betaling)
+BESTEL_MUTATIE_RESTITUTIE_UITBETAALD = 6        # restitutie uitbetaald
 
 BESTEL_MUTATIE_TO_STR = {
     BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN: "Inschrijven op wedstrijd",
     BESTEL_MUTATIE_VERWIJDER: "Product verwijderen uit mandje",
-    BESTEL_MUTATIE_KORTINGSCODE: "Kortingscode toepassen op mandje",
     BESTEL_MUTATIE_MAAK_BESTELLINGEN: "Mandje omzetten in bestelling(en)",
     BESTEL_MUTATIE_BETALING_AFGEROND: "Betaling afgerond",
     BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN: "Afmelden voor wedstrijd",
@@ -58,7 +54,7 @@ BESTEL_MUTATIE_TO_STR = {
 class BestelProduct(models.Model):
 
     """ Een product dat opgenomen kan worden in een bestelling en in een mandje geplaatst kan worden,
-        eventueel met kortingscode.
+        eventueel met korting.
     """
 
     # inschrijving voor een wedstrijd
@@ -100,7 +96,7 @@ class BestelProduct(models.Model):
 
 class BestelMandje(models.Model):
 
-    """ Een verzameling producten die nog veranderd kunnen worden en waaraan kortingscodes gekoppeld kunnen worden.
+    """ Een verzameling producten die nog veranderd kunnen worden en waaraan een korting gekoppeld kan worden.
         Wordt omgezet in een Bestelling zodra 'afrekenen' wordt gekozen.
     """
 
@@ -229,7 +225,7 @@ class BestelMutatie(models.Model):
 
     # BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN      account(=mandje), inschrijving
     # BESTEL_MUTATIE_VERWIJDER:                 account(=mandje), product
-    # BESTEL_MUTATIE_KORTINGSCODE:              account(=mandje), kortingscode
+    # BESTEL_MUTATIE_KORTING:                   account(=mandje), korting
     # BESTEL_MUTATIE_MAAK_BESTELLING:           account(=mandje)
     # BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN:        inschrijving
     # BESTEL_MUTATIE_BETALING_ONTVANGEN:        bestelling, betaling_is_gelukt
@@ -244,8 +240,8 @@ class BestelMutatie(models.Model):
     # het product waar deze mutatie betrekking op heeft
     product = models.ForeignKey(BestelProduct, on_delete=models.SET_NULL, null=True, blank=True)
 
-    # gevraagde kortingscode om toe te passen
-    kortingscode = models.CharField(max_length=20, default='', blank=True)
+    # gevraagde korting om toe te passen
+    korting = models.CharField(max_length=20, default='', blank=True)
 
     # de bestelling waar deze mutatie betrekking op heeft
     bestelling = models.ForeignKey(Bestelling, on_delete=models.SET_NULL, null=True, blank=True)

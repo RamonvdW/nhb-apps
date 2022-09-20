@@ -16,13 +16,14 @@ from BasisTypen.models import ORGANISATIE_WA, KalenderWedstrijdklasse
 from Bestel.mandje import mandje_tel_inhoud
 from Bestel.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
+from Kalender.view_maand import MAAND2URL
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
 from Wedstrijden.models import (Wedstrijd, WedstrijdSessie, WedstrijdInschrijving,
                                 INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_DEFINITIEF,
                                 INSCHRIJVING_STATUS_TO_STR,
                                 WEDSTRIJD_ORGANISATIE_TO_STR, WEDSTRIJD_BEGRENZING_TO_STR, WEDSTRIJD_WA_STATUS_TO_STR)
-from Kalender.view_maand import MAAND2URL
+from datetime import timedelta
 
 
 TEMPLATE_WEDSTRIJDEN_WEDSTRIJD_DETAILS = 'wedstrijden/wedstrijd-details.dtl'
@@ -32,9 +33,7 @@ TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_FAMILIE = 'wedstrijden/inschrijven-familie.dtl'
 TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_HANDMATIG = 'wedstrijden/inschrijven-handmatig.dtl'
 
 
-# TODO: wedstrijdklasse laten kiezen door de sporter
-
-class WedstrijdInfoView(TemplateView):
+class WedstrijdDetailsView(TemplateView):
 
     """ Via deze view krijgen gebruikers en sporters de wedstrijdkalender te zien """
 
@@ -60,9 +59,15 @@ class WedstrijdInfoView(TemplateView):
 
         context['wed'] = wedstrijd
 
+        now_date = timezone.now().date()
+
         wedstrijd.organisatie_str = WEDSTRIJD_ORGANISATIE_TO_STR[wedstrijd.organisatie]
 
         wedstrijd.begrenzing_str = WEDSTRIJD_BEGRENZING_TO_STR[wedstrijd.begrenzing]
+
+        wedstrijd.inschrijven_voor = wedstrijd.datum_begin - timedelta(days=wedstrijd.inschrijven_tot)
+        wedstrijd.inschrijven_dagen = (wedstrijd.inschrijven_voor - now_date).days
+        wedstrijd.inschrijven_let_op = (wedstrijd.inschrijven_dagen <= 7)
 
         if wedstrijd.organisatie == ORGANISATIE_WA:
             context['toon_wa_status'] = True
@@ -85,8 +90,8 @@ class WedstrijdInfoView(TemplateView):
         # om aan te melden is een account nodig
         context['kan_aanmelden'] = self.request.user.is_authenticated
 
-        # inschrijven kan alleen op een wedstrijd in de toekomst
-        context['kan_inschrijven'] = wedstrijd.datum_begin > timezone.now().date()
+        # inschrijven moet voor de sluitingsdatum
+        context['kan_inschrijven'] = now_date < wedstrijd.inschrijven_voor
 
         if context['kan_aanmelden']:
             context['menu_toon_mandje'] = True
@@ -339,7 +344,7 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
-            (reverse('Wedstrijden:wedstrijd-info', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
+            (reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
             (None, 'Inschrijven sporter')
         )
 
@@ -523,7 +528,7 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
-            (reverse('Wedstrijden:wedstrijd-info', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
+            (reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
             (None, 'Inschrijven groepje')
         )
 
@@ -710,8 +715,8 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (url_terug, 'Wedstrijdkalender'),
-            (reverse('Wedstrijden:wedstrijd-info', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
-            (None, 'Wedstrijd details'),
+            (reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
+            (None, 'Inschrijven familie'),
         )
 
         menu_dynamics(self.request, context)
@@ -1079,7 +1084,7 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
                                   'lid_nr': sporterboog.sporter.lid_nr,
                                   'boog_afk': sporterboog.boogtype.afkorting.lower()})
         else:
-            url = reverse('Wedstrijden:wedstrijd-info', kwargs={'wedstrijd_pk': wedstrijd.pk})
+            url = reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         return HttpResponseRedirect(url)
 

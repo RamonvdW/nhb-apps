@@ -15,10 +15,6 @@ urlpatterns = [
          view_mandje.VerwijderProductUitMandje.as_view(),
          name='mandje-verwijder-product'),
 
-    path('mandje/code-toevoegen/',
-         view_mandje.CodeToevoegenView.as_view(),
-         name='mandje-code-toevoegen'),
-
     path('mandje/',
          view_mandje.ToonInhoudMandje.as_view(),
          name='toon-inhoud-mandje'),

@@ -9,15 +9,13 @@ from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.operations import account_controleer_snelheid_verzoeken
 from Bestel.mandje import mandje_tel_inhoud, eval_mandje_inhoud
-from Bestel.models import BestelMandje, BESTEL_KORTINGSCODE_MINLENGTH
+from Bestel.models import BestelMandje
 from Bestel.mutaties import (bestel_mutatieverzoek_maak_bestellingen,
-                             bestel_mutatieverzoek_verwijder_product_uit_mandje,
-                             bestel_mutatieverzoek_kortingscode_toepassen)
+                             bestel_mutatieverzoek_verwijder_product_uit_mandje)
 from Betaal.models import BetaalInstellingenVereniging
 from Functie.rol import Rollen, rol_get_huidige
-from Wedstrijden.models import WEDSTRIJD_KORTING_COMBI
+from Wedstrijden.models import WEDSTRIJD_KORTING_COMBI, WEDSTRIJD_KORTING_SPORTER, WEDSTRIJD_KORTING_VERENIGING
 from Plein.menu import menu_dynamics
 from decimal import Decimal
 
@@ -45,7 +43,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _beschrijf_inhoud_mandje(account):
-        """ gezamenlijke code voor het tonen van de inhoud van het mandje en het afrekenen """
+        """ gezamenlijk programma voor het tonen van de inhoud van het mandje en het afrekenen """
 
         mandje_is_leeg = True
         bevat_fout = False
@@ -119,14 +117,20 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                     tup = ('Boog', '%s' % sporterboog.boogtype.beschrijving)
                     beschrijving.append(tup)
 
-                    if inschrijving.gebruikte_code:
-                        korting = inschrijving.gebruikte_code
-                        product.gebruikte_code_str = "code %s (korting: %d%%)" % (korting.code, korting.percentage)
-                        if korting.soort == WEDSTRIJD_KORTING_COMBI:
+                    if inschrijving.korting:
+                        korting = inschrijving.korting
+                        if korting.soort == WEDSTRIJD_KORTING_SPORTER:
+                            product.gebruikte_korting_str = "Persoonlijke korting"
+                        elif korting.soort == WEDSTRIJD_KORTING_VERENIGING:
+                            product.gebruikte_korting_str = "Verenigingskorting"
+                        elif korting.soort == WEDSTRIJD_KORTING_COMBI:
+                            product.gebruikte_korting_str = "Combinatiekorting"
                             product.is_combi_korting = True
                             product.combi_reden = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
+                        product.gebruikte_korting_str += ": %d%%" % korting.percentage
                     elif product.korting_euro:
-                        product.gebruikte_code_str = "Onbekende code"
+                        # print('Onverwacht: product %s (pk=%s) heeft korting %s' % (product, product.pk, product.korting_euro))
+                        product.gebruikte_korting_str = "Onbekende korting"
                         bevat_fout = True
 
                     controleer_euro += product.prijs_euro
@@ -183,11 +187,7 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         context['producten'] = producten
         context['bevat_fout'] = bevat_fout
         context['aantal_betalingen'] = len(ontvanger2product_pks.keys())
-        context['url_code_toevoegen'] = reverse('Bestel:mandje-code-toevoegen')
         context['url_voorwaarden'] = settings.VERKOOP_VOORWAARDEN_URL
-
-        if mandje:
-            context['toon_kortingscode_invoer'] = (mandje.totaal_euro > 0)
 
         if not (bevat_fout or mandje_is_leeg):
             context['url_bestellen'] = reverse('Bestel:toon-inhoud-mandje')
@@ -216,46 +216,6 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
 
         # ga naar de pagina met alle bestellingen, zodat de betaling gestart kan worden
         url = reverse('Bestel:toon-bestellingen')
-        return HttpResponseRedirect(url)
-
-
-class CodeToevoegenView(UserPassesTestMixin, View):
-
-    # class variables shared by all instances
-    raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.rol_nu = None
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE
-
-    def post(self, request, *args, **kwargs):
-        """ Voeg de code toe aan het mandje """
-
-        snel = str(request.POST.get('snel', ''))[:1]
-
-        code = ''
-        for char in request.POST.get('code', '')[:40]:        # afkappen voor de veiligheid:
-            if char.isalnum():
-                code += char
-        # for
-
-        if len(code) >= BESTEL_KORTINGSCODE_MINLENGTH:
-            account = request.user
-
-            if account_controleer_snelheid_verzoeken(account):      # pragma: no branch
-                bestel_mutatieverzoek_kortingscode_toepassen(account, code, snel == '1')
-                # achtergrondtaak past de korting toe
-
-                mandje_tel_inhoud(self.request)
-
-        # terug naar het mandje
-        url = reverse('Bestel:toon-inhoud-mandje')
         return HttpResponseRedirect(url)
 
 

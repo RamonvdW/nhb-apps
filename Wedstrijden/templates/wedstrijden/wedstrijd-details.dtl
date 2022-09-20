@@ -57,6 +57,22 @@
                 {% endif %}
 
                 <tr>
+                    <th>Inschrijving moet v&oacute;&oacute;r</th>
+                    <td>
+                        <span>{{ wed.inschrijven_voor }}</span>
+                        {% if not kan_inschrijven %}
+                            <span class="red-text"> (inschrijving is gesloten)</span>
+                        {% else %}
+                            {% if wed.inschrijven_let_op %}
+                                <span class="red-text"> (nog maar {{ wed.inschrijven_dagen }} dagen)</span>
+                            {% else %}
+                                <span> (nog {{ wed.inschrijven_dagen }} dagen)</span>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+
+                <tr>
                     <th>Volgens regels van</th>
                     <td>{{ wed.organisatie_str }}</td>
                 </tr>

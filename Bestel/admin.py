@@ -15,9 +15,15 @@ class BestelProductAdmin(admin.ModelAdmin):
 
 class BestelMandjeAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('account', 'producten')
+    readonly_fields = ('account', 'producten_in_mandje')
+    exclude = ('producten',)
 
     search_fields = ('account__username', 'account__unaccented_naam')
+
+    @staticmethod
+    def producten_in_mandje(obj):     # pragma: no cover
+        return "\n".join(['(pk %s) %s' % (product.pk, product) for product in
+                                            obj.producten.select_related('wedstrijd_inschrijving').all()])
 
 
 class BestellingAdmin(admin.ModelAdmin):
@@ -72,7 +78,7 @@ class BestelMutatieAdmin(admin.ModelAdmin):
         ('BestelMutatie',
          {'fields': ('when', 'code_plus', 'is_verwerkt',
                      'account',
-                     'wedstrijd_inschrijving', 'product', 'kortingscode', 'bestelling', 'betaling_is_gelukt')
+                     'wedstrijd_inschrijving', 'product', 'korting', 'bestelling', 'betaling_is_gelukt')
           }),
     )
 

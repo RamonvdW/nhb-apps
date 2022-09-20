@@ -18,10 +18,10 @@ class TestKalenderMaand(E2EHelpers, TestCase):
     """ tests voor de Kalender applicatie """
 
     url_kalender = '/kalender/'
-    url_kalender_maand = '/kalender/pagina-%s-%s/'  # jaar, maand
-    url_kalender_vereniging = '/wedstrijden/vereniging/'
-    url_kalender_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
-    url_kalender_info = '/wedstrijden/%s/info/'  # wedstrijd_pk
+    url_kalender_maand = '/kalender/pagina-%s-%s/'                          # jaar, maand
+    url_wedstrijden_vereniging = '/wedstrijden/vereniging/'
+    url_wedstrijden_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
+    url_wedstrijd_details = '/wedstrijden/%s/details/'                      # wedstrijd_pk
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -125,8 +125,8 @@ class TestKalenderMaand(E2EHelpers, TestCase):
 
         # maak een wedstrijd en sessie aan
         self._maak_externe_locatie(self.nhbver1)
-        resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'wa'})
-        self.assert_is_redirect(resp, self.url_kalender_vereniging)
+        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'wa'})
+        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
         self.assertEqual(1, Wedstrijd.objects.count())
         wedstrijd = Wedstrijd.objects.all()[0]
 
@@ -163,13 +163,13 @@ class TestKalenderMaand(E2EHelpers, TestCase):
 
         # maak een wedstrijd en sessie aan
         self._maak_externe_locatie(self.nhbver1)
-        resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
-        self.assert_is_redirect(resp, self.url_kalender_vereniging)
+        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'nhb'})
+        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
         self.assertEqual(1, Wedstrijd.objects.count())
         wedstrijd = Wedstrijd.objects.all()[0]
 
         # haal de info pagina van de wedstrijd op
-        url = self.url_kalender_info % wedstrijd.pk
+        url = self.url_wedstrijd_details % wedstrijd.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -180,7 +180,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
         wedstrijd.save(update_fields=['datum_begin'])
 
         # haal de info pagina van de wedstrijd op
-        url = self.url_kalender_info % wedstrijd.pk
+        url = self.url_wedstrijd_details % wedstrijd.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -194,7 +194,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
         self.client.logout()
 
         # haal de info pagina van de wedstrijd op
-        url = self.url_kalender_info % wedstrijd.pk
+        url = self.url_wedstrijd_details % wedstrijd.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
         self.assertEqual(resp.status_code, 200)
@@ -202,7 +202,7 @@ class TestKalenderMaand(E2EHelpers, TestCase):
 
         # corner case: niet bestaande wedstrijd
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_info % 999999)
+            resp = self.client.get(self.url_wedstrijd_details % 999999)
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
         self.e2e_assert_other_http_commands_not_supported(url)

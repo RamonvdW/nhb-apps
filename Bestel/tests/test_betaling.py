@@ -147,7 +147,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
 
-        # bestel wedstrijddeelname met kortingscode
+        # bestel wedstrijddeelname met korting
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 
@@ -237,7 +237,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_check_rol('sporter')
 
-        # bestel wedstrijddeelname met kortingscode
+        # bestel wedstrijddeelname met korting
         bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
         self.verwerk_bestel_mutaties()
 

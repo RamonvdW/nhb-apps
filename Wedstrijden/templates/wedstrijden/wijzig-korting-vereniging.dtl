@@ -38,7 +38,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Wijzig korting</h3>
-            <p>Combinatie-korting bij meedoen aan meerdere wedstrijden</p>
+            <p>Voor alle leden van vereniging <b>{{ ver.ver_nr_en_naam }}</b></p>
         </div>
     </div>
 
@@ -56,13 +56,6 @@
                         <table class="white">
 
                             <tr>
-                                <th>Code</th>
-                                <td>
-                                    <input type="text" name="code" value="{{ korting.code }}" minlength="{{ min_code_len }}" oninput="gewijzigd()">
-                                </td>
-                            </tr>
-
-                            <tr>
                                 <th>Bruikbaar tot en met</th>
                                 <td>
                                     <input type="text" class="nl_datepicker" id="id_datum" onchange="datum_omzetten()">
@@ -71,20 +64,7 @@
                             </tr>
 
                             <tr>
-                                <th>Combinatie-korting</th>
-                                <td>Indien ingeschreven voor al deze wedstrijden:<br>
-                                    {% for wedstrijd in combi_wedstrijden %}
-                                        <label>
-                                            <input type="checkbox" class="filled-in" name="combi_{{ wedstrijd.pk }}" onchange="gewijzigd()"{% if wedstrijd.is_gekozen %} checked{% endif %}>
-                                            <span class="black-text">{{ wedstrijd.titel }}</span>
-                                        </label>
-                                        <br>
-                                    {% endfor %}
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th>Geeft korting op deze wedstrijd</th>
+                                <th>Bruikbaar voor wedstrijd(en)</th>
                                 <td>
                                     {% for wedstrijd in wedstrijden %}
                                         <label>
@@ -176,6 +156,6 @@
             })
     </script>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-wijzig-kortingscode-combi" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-wijzig-korting-vereniging" %}
 
 {% endblock %}

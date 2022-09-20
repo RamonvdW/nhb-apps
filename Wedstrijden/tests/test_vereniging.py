@@ -17,8 +17,8 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
 
     """ tests voor de Wedstrijden applicatie, module vereniging """
 
-    url_kalender_vereniging = '/wedstrijden/vereniging/'
-    url_kalender_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
+    url_wedstrijden_vereniging = '/wedstrijden/vereniging/'
+    url_wedstrijden_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
 
     def setUp(self):
         """ initialisatie van de test case """
@@ -68,11 +68,11 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
     def test_maak_wedstrijd(self):
         # anon mag niet
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_vereniging)
+            resp = self.client.get(self.url_wedstrijden_vereniging)
         self.assert_is_redirect_not_plein(resp)
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_maak_nieuw)
+            resp = self.client.get(self.url_wedstrijden_maak_nieuw)
         self.assert_is_redirect_not_plein(resp)
 
         # wordt HWL
@@ -83,42 +83,42 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
 
         # haal het overzicht op, zonder externe locatie
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_vereniging)
+            resp = self.client.get(self.url_wedstrijden_vereniging)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
 
-        self.e2e_assert_other_http_commands_not_supported(self.url_kalender_vereniging)
+        self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden_vereniging)
 
         # probeer een wedstrijd aan te maken zonder wedstrijdlocatie
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'wa'})
-        self.assert_is_redirect(resp, self.url_kalender_vereniging)
+            resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'wa'})
+        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
         self.assertEqual(0, Wedstrijd.objects.count())
 
-        self.e2e_assert_other_http_commands_not_supported(self.url_kalender_maak_nieuw, post=True)
+        self.e2e_assert_other_http_commands_not_supported(self.url_wedstrijden_maak_nieuw, post=True)
 
         # maak een wedstrijdlocatie van deze vereniging aan
         self._maak_externe_locatie(self.nhbver1)
 
         # haal het overzicht opnieuw op (geen wedstrijden)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_vereniging)
+            resp = self.client.get(self.url_wedstrijden_vereniging)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))
 
         # haal de keuze pagina op
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_maak_nieuw)
+            resp = self.client.get(self.url_wedstrijden_maak_nieuw)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijden/nieuwe-wedstrijd-kies-type.dtl', 'plein/site_layout.dtl'))
 
         # maak een nieuwe wedstrijd aan
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'wa'})
-        self.assert_is_redirect(resp, self.url_kalender_vereniging)
+            resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'wa'})
+        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
         self.assertEqual(1, Wedstrijd.objects.count())
         wedstrijd = Wedstrijd.objects.get(organisatie=ORGANISATIE_WA)
         self.assertEqual(wedstrijd.boogtypen.count(), 5)
@@ -126,14 +126,14 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
 
         # maak een nieuwe wedstrijd aan
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'huh'})
-        self.assert_is_redirect(resp, self.url_kalender_vereniging)
+            resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'huh'})
+        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
         self.assertEqual(1, Wedstrijd.objects.count())
 
         # maak nog een wedstrijd aan
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
-        self.assert_is_redirect(resp, self.url_kalender_vereniging)
+            resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'nhb'})
+        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
         self.assertEqual(2, Wedstrijd.objects.count())
         wedstrijd = Wedstrijd.objects.get(organisatie=ORGANISATIE_NHB)
         self.assertEqual(wedstrijd.boogtypen.count(), 5)
@@ -141,8 +141,8 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
 
         # maak nog een wedstrijd aan
         with self.assert_max_queries(20):
-            resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'ifaa'})
-        self.assert_is_redirect(resp, self.url_kalender_vereniging)
+            resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'ifaa'})
+        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
         self.assertEqual(3, Wedstrijd.objects.count())
         wedstrijd = Wedstrijd.objects.get(organisatie=ORGANISATIE_IFAA)
         self.assertEqual(wedstrijd.boogtypen.count(), 12)
@@ -151,7 +151,7 @@ class TestWedstrijdenVereniging(E2EHelpers, TestCase):
 
         # haal het overzicht opnieuw op (met de 2 wedstrijden)
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_kalender_vereniging)
+            resp = self.client.get(self.url_wedstrijden_vereniging)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('wedstrijden/overzicht-vereniging.dtl', 'plein/site_layout.dtl'))

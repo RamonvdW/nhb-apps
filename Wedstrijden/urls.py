@@ -6,16 +6,16 @@
 
 from django.urls import path
 from Wedstrijden import (view_vereniging, view_manager, view_wijzig_wedstrijd, view_wijzig_sessies,
-                         view_inschrijven, view_aanmeldingen, view_kortingscodes)
+                         view_inschrijven, view_aanmeldingen, view_korting)
 
 app_name = 'Wedstrijden'
 
 urlpatterns = [
 
     # inschrijven
-    path('<wedstrijd_pk>/info/',
-         view_inschrijven.WedstrijdInfoView.as_view(),
-         name='wedstrijd-info'),
+    path('<wedstrijd_pk>/details/',
+         view_inschrijven.WedstrijdDetailsView.as_view(),
+         name='wedstrijd-details'),
 
     path('inschrijven/<wedstrijd_pk>/sporter/<boog_afk>/',
          view_inschrijven.WedstrijdInschrijvenSporter.as_view(),
@@ -71,18 +71,18 @@ urlpatterns = [
          name='nieuwe-wedstrijd-kies-type'),
 
 
-    # kortingscodes
-    path('vereniging/kortingscodes/',
-         view_kortingscodes.VerenigingKortingcodesView.as_view(),
-         name='vereniging-codes'),
+    # kortingen
+    path('vereniging/kortingen/',
+         view_korting.KortingenView.as_view(),
+         name='vereniging-kortingen'),
 
-    path('vereniging/kortingscodes/nieuw/',
-         view_kortingscodes.NieuweKortingcodesView.as_view(),
-         name='vereniging-codes-nieuw-kies'),
+    path('vereniging/kortingen/nieuw/',
+         view_korting.KiesNieuweKortingView.as_view(),
+         name='vereniging-korting-nieuw-kies'),
 
-    path('vereniging/kortingscodes/wijzig/<korting_pk>/',
-         view_kortingscodes.VerenigingWijzigKortingcodesView.as_view(),
-         name='vereniging-wijzig-code'),
+    path('vereniging/kortingen/wijzig/<korting_pk>/',
+         view_korting.WijzigKortingView.as_view(),
+         name='vereniging-korting-wijzig'),
 
 
     # manager

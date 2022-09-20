@@ -61,6 +61,7 @@ class ToonBondspasView(UserPassesTestMixin, View):
                 return FileResponse(open(fpath, 'rb'))
             except (OSError, IOError) as exc:
                 # we hebben een probleem: pas hoort er wel te zijn, maar is niet op te halen?
+                # TODO: bondspas kan opgeruimd zijn. Scrubbing moet ook de status aanpassen
                 my_logger.error('Kan bondspas niet openen: %s' % str(exc))
 
             # laat de pas opnieuw ophalen

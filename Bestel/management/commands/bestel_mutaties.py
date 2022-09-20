@@ -11,7 +11,7 @@
 from django.conf import settings
 from django.utils import timezone
 from django.core.management.base import BaseCommand
-from django.utils.timezone import make_aware, get_default_timezone
+from django.utils.timezone import get_default_timezone
 from django.utils.formats import date_format
 from django.db.utils import DataError, OperationalError, IntegrityError
 from django.db import transaction
@@ -21,16 +21,16 @@ from Bestel.models import (BestelProduct, BestelMandje,
                            BESTELLING_STATUS_MISLUKT, BESTELLING_STATUS2STR,
                            BestelHoogsteBestelNr, BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK,
                            BestelMutatie, BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN,
-                           BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_KORTINGSCODE, BESTEL_MUTATIE_MAAK_BESTELLINGEN,
+                           BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_MAAK_BESTELLINGEN,
                            BESTEL_MUTATIE_BETALING_AFGEROND, BESTEL_MUTATIE_RESTITUTIE_UITBETAALD)
-from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingscodes_toepassen,
+from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingen_toepassen,
                                         wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
-                                        wedstrijden_plugin_kortingscode_toepassen, wedstrijden_plugin_afmelden,
-                                        wedstrijden_plugin_inschrijving_is_betaald)
+                                        wedstrijden_plugin_afmelden, wedstrijden_plugin_inschrijving_is_betaald)
 from Mailer.operations import mailer_queue_email, render_email_template
 from Overig.background_sync import BackgroundSync
-from Wedstrijden.models import INSCHRIJVING_STATUS_RESERVERING_BESTELD, INSCHRIJVING_STATUS_DEFINITIEF
-from mollie.api.client import Client, RequestSetupError, RequestError
+from Wedstrijden.models import (INSCHRIJVING_STATUS_RESERVERING_BESTELD, INSCHRIJVING_STATUS_DEFINITIEF,
+                                WEDSTRIJD_KORTING_COMBI)
+from mollie.api.client import Client, RequestSetupError
 from decimal import Decimal
 import traceback
 import datetime
@@ -81,11 +81,11 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
 
             product.boog = inschrijving.sporterboog.boogtype.beschrijving
 
-            if inschrijving.gebruikte_code:
-                korting = inschrijving.gebruikte_code
-                product.korting = "code %s (korting: %d%%)" % (korting.code, korting.percentage)
+            if inschrijving.korting:
+                korting = inschrijving.korting
+                product.korting = "Korting: %d%%" % korting.percentage
 
-                if korting.combi_basis_wedstrijd:
+                if korting.soort == WEDSTRIJD_KORTING_COMBI:
                     combi_redenen = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
                     product.combi_reden = " en ".join(combi_redenen)
     # for
@@ -145,11 +145,11 @@ def stuur_email_naar_koper_betaalbevestiging(bestelling):
 
             product.boog = inschrijving.sporterboog.boogtype.beschrijving
 
-            if inschrijving.gebruikte_code:
-                korting = inschrijving.gebruikte_code
-                product.korting = "code %s (korting: %d%%)" % (korting.code, korting.percentage)
+            if inschrijving.korting:
+                korting = inschrijving.korting
+                product.korting = "Korting: %d%%" % korting.percentage
 
-                if korting.combi_basis_wedstrijd:
+                if korting.soort == WEDSTRIJD_KORTING_COMBI:
                     combi_redenen = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
                     product.combi_reden = " en ".join(combi_redenen)
     # for
@@ -277,8 +277,8 @@ class Command(BaseCommand):
                 # leg het product in het mandje
                 mandje.producten.add(product)
 
-                # kijk of er automatische kortingscodes zijn die toegepast kunnen worden
-                wedstrijden_plugin_automatische_kortingscodes_toepassen(self.stdout, mandje)
+                # kijk of er automatische kortingen zijn die toegepast kunnen worden
+                wedstrijden_plugin_automatische_kortingen_toepassen(self.stdout, mandje)
 
                 # bereken het totaal opnieuw
                 mandje.bepaal_totaalprijs_opnieuw()
@@ -287,6 +287,10 @@ class Command(BaseCommand):
 
     def _verwerk_mutatie_verwijder(self, mutatie):
         """ een bestelling mag uit het mandje voordat de betaling gestart is """
+
+        if not mutatie.product:
+            # mogelijke oorzaak: een dubbele mutatie
+            return
 
         handled = False
         mandje = self._get_mandje(mutatie)
@@ -318,8 +322,8 @@ class Command(BaseCommand):
                     self.stderr.write('[ERROR] Verwijder product pk=%s uit mandje pk=%s: Type niet ondersteund' % (
                                         product.pk, mandje.pk))
 
-            # kijk of er automatische kortingscodes zijn die niet meer toegepast mogen worden
-            wedstrijden_plugin_automatische_kortingscodes_toepassen(self.stdout, mandje)
+            # kijk of er automatische kortingen zijn die niet meer toegepast mogen worden
+            wedstrijden_plugin_automatische_kortingen_toepassen(self.stdout, mandje)
 
             # bereken het totaal opnieuw
             mandje.bepaal_totaalprijs_opnieuw()
@@ -329,21 +333,6 @@ class Command(BaseCommand):
             self.stdout.write('[WARNING] Product pk=%s niet meer in het mandje gevonden' % mutatie.product.pk)
             if mutatie.product.wedstrijd_inschrijving:
                 wedstrijden_plugin_verwijder_reservering(self.stdout, mutatie.product.wedstrijd_inschrijving)
-
-    def _verwerk_mutatie_kortingscode(self, mutatie):
-        """ Deze functie controleert of een kortingscode toegepast mag worden op de producten die in het mandje
-            van het account staan.
-        """
-        mandje = self._get_mandje(mutatie)
-        if mandje:                                  # pragma: no branch
-            kortingscode_str = mutatie.kortingscode
-            producten = mandje.producten.exclude(wedstrijd_inschrijving=None)
-
-            wedstrijden_plugin_kortingscode_toepassen(self.stdout, kortingscode_str, producten)
-            # FUTURE: opleiding_plugin_kortingscode_toepassen()
-
-            # bereken het totaal opnieuw
-            mandje.bepaal_totaalprijs_opnieuw()
 
     def _verwerk_mutatie_maak_bestellingen(self, mutatie):
         mandje = self._get_mandje(mutatie)
@@ -576,10 +565,6 @@ class Command(BaseCommand):
         elif code == BESTEL_MUTATIE_VERWIJDER:
             self.stdout.write('[INFO] Verwerk mutatie %s: verwijder product uit mandje' % mutatie.pk)
             self._verwerk_mutatie_verwijder(mutatie)
-
-        elif code == BESTEL_MUTATIE_KORTINGSCODE:
-            self.stdout.write('[INFO] Verwerk mutatie %s: kortingscode toepassen' % mutatie.pk)
-            self._verwerk_mutatie_kortingscode(mutatie)
 
         elif code == BESTEL_MUTATIE_MAAK_BESTELLINGEN:
             self.stdout.write('[INFO] Verwerk mutatie %s: mandje omzetten in bestelling(en)' % mutatie.pk)

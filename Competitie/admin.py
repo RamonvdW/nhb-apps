@@ -201,7 +201,7 @@ class RegioCompetitieSchutterBoogAdmin(CreateOnlyAdmin):
 
 class RegiocompetitieTeamAdmin(CreateOnlyAdmin):
 
-    filter_horizontal = ('gekoppelde_schutters', )
+    filter_horizontal = ('gekoppelde_schutters',)
 
     list_filter = ('deelcompetitie__competitie',
                    'vereniging__regio',)
@@ -229,6 +229,15 @@ class RegiocompetitieTeamAdmin(CreateOnlyAdmin):
                                   .filter(competitie=self.obj.deelcompetitie.competitie,
                                           is_voor_teams_rk_bk=False)
                                   .order_by('volgorde'))
+        elif db_field.name == 'deelcompetitie':
+            kwargs['queryset'] = (DeelCompetitie
+                                  .objects
+                                  .select_related('nhb_rayon',
+                                                  'nhb_regio')
+                                  .order_by('competitie__afstand',
+                                            'laag',
+                                            'nhb_rayon__rayon_nr',
+                                            'nhb_regio__regio_nr'))
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
@@ -476,7 +485,7 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
 
     filter_horizontal = ('deelnemers_geselecteerd', 'deelnemers_feitelijk')
 
-    readonly_fields = ('team', 'ronde_nr', 'feitelijke_scores')
+    readonly_fields = ('feitelijke_scores',)
 
     list_filter = ('team__deelcompetitie__competitie',
                    'team__vereniging__regio',
@@ -500,9 +509,17 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
     @staticmethod
     def feitelijke_scores(obj):     # pragma: no cover
         msg = "Scores:\n"
-        msg += "\n".join([str(score) for score in obj.scores_feitelijk.all()])
+        msg += "\n".join([str(score) for score in (obj
+                                                   .scores_feitelijk
+                                                   .select_related('sporterboog',
+                                                                   'sporterboog__sporter',
+                                                                   'sporterboog__sporter__bij_vereniging')
+                                                   .all())])
         msg += "\n\nScoreHist:\n"
-        msg += "\n".join([str(scorehist) for scorehist in obj.scorehist_feitelijk.all()])
+        msg += "\n".join([str(scorehist) for scorehist in (obj
+                                                           .scorehist_feitelijk
+                                                           .select_related('door_account')
+                                                           .all())])
         return msg
 
     def __init__(self, model, admin_site):
@@ -520,18 +537,48 @@ class RegiocompetitieRondeTeamAdmin(CreateOnlyAdmin):
 
         return super().get_form(request, obj, **kwargs)
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):    # pragma: no cover
+        if db_field.name == 'team' and self.deelcomp:
+            kwargs['queryset'] = (RegiocompetitieTeam
+                                  .objects
+                                  .select_related('deelcompetitie',
+                                                  'vereniging',
+                                                  'team_type')
+                                  .filter(deelcompetitie=self.obj.deelcompetitie)
+                                  .order_by('team_naam', 'pk'))
+        else:
+            kwargs['queryset'] = (RegiocompetitieTeam
+                                  .objects
+                                  .select_related('deelcompetitie',
+                                                  'vereniging',
+                                                  'team_type')
+                                  .order_by('team_naam',
+                                            'pk'))
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     def formfield_for_manytomany(self, db_field, request, **kwargs):    # pragma: no cover
-        if self.deelcomp and self.ver:
-            if db_field.name in ('deelnemers_geselecteerd', 'deelnemers_feitelijk'):
-                kwargs['widget'] = FilteredSelectMultiple(db_field.verbose_name, False)
+        if db_field.name in ('deelnemers_geselecteerd', 'deelnemers_feitelijk'):
+            kwargs['widget'] = FilteredSelectMultiple(db_field.verbose_name, False)
+            if self.deelcomp and self.ver:
                 kwargs['queryset'] = (RegioCompetitieSchutterBoog
                                       .objects
-                                      .select_related('sporterboog',
-                                                      'sporterboog__sporter',
-                                                      'sporterboog__boogtype')
                                       .filter(deelcompetitie=self.deelcomp,
                                               bij_vereniging=self.ver,
                                               inschrijf_voorkeur_team=True)
+                                      .select_related('sporterboog',
+                                                      'sporterboog__sporter',
+                                                      'sporterboog__sporter__bij_vereniging',
+                                                      'sporterboog__boogtype')
+                                      .order_by('sporterboog__sporter__lid_nr'))
+            else:
+                kwargs['queryset'] = (RegioCompetitieSchutterBoog
+                                      .objects
+                                      .filter(inschrijf_voorkeur_team=True)
+                                      .select_related('sporterboog',
+                                                      'sporterboog__sporter',
+                                                      'sporterboog__sporter__bij_vereniging',
+                                                      'sporterboog__boogtype')
                                       .order_by('sporterboog__sporter__lid_nr'))
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)

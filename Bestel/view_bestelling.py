@@ -15,6 +15,7 @@ from Bestel.models import (Bestelling, BESTELLING_STATUS2STR, BESTELLING_STATUS_
                            BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT)
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
 from Plein.menu import menu_dynamics
+from Wedstrijden.models import WEDSTRIJD_KORTING_COMBI
 from decimal import Decimal
 
 
@@ -163,14 +164,14 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                 tup = ('Boog', '%s' % sporterboog.boogtype.beschrijving)
                 beschrijving.append(tup)
 
-                if inschrijving.gebruikte_code:
-                    korting = inschrijving.gebruikte_code
-                    product.gebruikte_code_str = "code %s (korting: %d%%)" % (korting.code, korting.percentage)
-                    if korting.combi_basis_wedstrijd:
+                if inschrijving.korting:
+                    korting = inschrijving.korting
+                    product.gebruikte_korting_str = "Korting: %d%%" % korting.percentage
+                    if korting.soort == WEDSTRIJD_KORTING_COMBI:
                         product.is_combi_korting = True
                         product.combi_reden = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
                 elif product.korting_euro:
-                    product.gebruikte_code_str = "Onbekende code"
+                    product.gebruikte_korting_str = "Onbekende korting"
                     bevat_fout = True
 
                 controleer_euro += product.prijs_euro

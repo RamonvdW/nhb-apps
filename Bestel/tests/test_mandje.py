@@ -14,7 +14,7 @@ from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Wedstrijden.models import (WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD,
-                                WedstrijdInschrijving, WedstrijdKortingscode, WEDSTRIJD_KORTING_COMBI)
+                                WedstrijdInschrijving, WedstrijdKorting, WEDSTRIJD_KORTING_COMBI)
 from decimal import Decimal
 
 
@@ -24,7 +24,6 @@ class TestBestelMandje(E2EHelpers, TestCase):
 
     url_mandje_toon = '/bestel/mandje/'
     url_mandje_verwijder = '/bestel/mandje/verwijderen/%s/'        # inhoud_pk
-    url_mandje_code_toevoegen = '/bestel/mandje/code-toevoegen/'
     url_bestellingen_overzicht = '/bestel/overzicht/'
 
     def setUp(self):
@@ -127,9 +126,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         inschrijving.save()
         self.inschrijving = inschrijving
 
-        self.code = 'TESTJE1234'
-        korting = WedstrijdKortingscode(
-                    code=self.code,
+        korting = WedstrijdKorting(
                     geldig_tot_en_met=datum,
                     uitgegeven_door=ver,
                     voor_vereniging=ver,
@@ -158,9 +155,6 @@ class TestBestelMandje(E2EHelpers, TestCase):
 
         # inlog vereist voor mandje
         resp = self.client.get(self.url_mandje_toon)
-        self.assert403(resp)
-
-        resp = self.client.get(self.url_mandje_code_toevoegen)
         self.assert403(resp)
 
         resp = self.client.get(self.url_mandje_verwijder)
@@ -204,7 +198,7 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
 
         # koppel een korting
-        self.inschrijving.gebruikte_code = self.korting
+        self.inschrijving.korting = self.korting
         self.inschrijving.save()
 
         # veroorzaak een uitzondering
@@ -249,66 +243,32 @@ class TestBestelMandje(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
 
-    def test_kortingscode(self):
-        self.e2e_login_and_pass_otp(self.account_admin)
-        self.e2e_check_rol('sporter')
-
-        # vul het mandje
-        product = self._vul_mandje(self.account_admin)
-
-        # zonder code
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_mandje_code_toevoegen)
-        self.assert_is_redirect(resp, self.url_mandje_toon)
-
-        # niet bestaande code
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_mandje_code_toevoegen, {'code': 'hallo'})
-        self.assert_is_redirect(resp, self.url_mandje_toon)
-
-        # numerieke code
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_mandje_code_toevoegen, {'code': 99999})
-        self.assert_is_redirect(resp, self.url_mandje_toon)
-
-        # controleer dat de code nog niet toegepast is
-        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
-        self.assertIsNone(inschrijving.gebruikte_code)
-
-        # pas de code toe, inclusief garbage
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_mandje_code_toevoegen,
-                                    {'code': '@@' + self.code + '!',   # troep wordt verwijderd
-                                     'snel': 1})
-        self.assert_is_redirect(resp, self.url_mandje_toon)
-
-        # nog een keer, dan bestaat de mutatie al (is_created is False)
-        with self.assert_max_queries(20):
-            resp = self.client.post(self.url_mandje_code_toevoegen,
-                                    {'code': '@@' + self.code + '!',   # troep wordt verwijderd
-                                     'snel': 1})
-        self.assert_is_redirect(resp, self.url_mandje_toon)
-
-        self.verwerk_bestel_mutaties()
-
-        # controleer dat de code toegepast is
-        inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
-        self.assertIsNotNone(inschrijving.gebruikte_code)
-        self.assertEqual(inschrijving.gebruikte_code.code, self.code)
-
-        product = BestelProduct.objects.get(pk=product.pk)
-        self.assertTrue(str(product) != '')
-
-        # mandje tonen met kortingscode
-        with self.assert_max_queries(20):
-            resp = self.client.get(self.url_mandje_toon)
-        self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
-
-        self.assertContains(resp, '10,00')    # prijs sessie
-        self.assertContains(resp, '4,20')     # korting
-        self.assertContains(resp, '5,80')     # totaal
+    # def test_korting(self):
+    #     self.e2e_login_and_pass_otp(self.account_admin)
+    #     self.e2e_check_rol('sporter')
+    #
+    #     # vul het mandje
+    #     product = self._vul_mandje(self.account_admin)
+    #
+    #     self.verwerk_bestel_mutaties()
+    #
+    #     # controleer dat de code toegepast is
+    #     inschrijving = WedstrijdInschrijving.objects.get(pk=self.inschrijving.pk)
+    #     self.assertIsNotNone(inschrijving.korting)
+    #
+    #     product = BestelProduct.objects.get(pk=product.pk)
+    #     self.assertTrue(str(product) != '')
+    #
+    #     # mandje tonen met korting
+    #     with self.assert_max_queries(20):
+    #         resp = self.client.get(self.url_mandje_toon)
+    #     self.assertEqual(resp.status_code, 200)     # 200 = OK
+    #     self.assert_html_ok(resp)
+    #     self.assert_template_used(resp, ('bestel/toon-mandje.dtl', 'plein/site_layout.dtl'))
+    #
+    #     self.assertContains(resp, '10,00')    # prijs sessie
+    #     self.assertContains(resp, '4,20')     # korting
+    #     self.assertContains(resp, '5,80')     # totaal
 
     def test_verwijder(self):
         self.e2e_login_and_pass_otp(self.account_admin)

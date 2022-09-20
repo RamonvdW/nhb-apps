@@ -16,7 +16,7 @@ from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
 from TestHelpers.e2ehelpers import E2EHelpers
 from Wedstrijden.models import (Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD, WedstrijdLocatie,
-                                WedstrijdInschrijving, WedstrijdKortingscode,
+                                WedstrijdInschrijving, WedstrijdKorting,
                                 INSCHRIJVING_STATUS_RESERVERING_MANDJE, INSCHRIJVING_STATUS_RESERVERING_BESTELD,
                                 INSCHRIJVING_STATUS_DEFINITIEF, INSCHRIJVING_STATUS_AFGEMELD)
 from decimal import Decimal
@@ -138,9 +138,7 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
         inschrijving.save()
         self.inschrijving = inschrijving
 
-        self.code = 'TESTJE1234'
-        korting = WedstrijdKortingscode(
-                    code=self.code,
+        korting = WedstrijdKorting(
                     geldig_tot_en_met=datum,
                     uitgegeven_door=ver,
                     voor_vereniging=ver,

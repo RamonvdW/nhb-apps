@@ -23,7 +23,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
 
     url_wedstrijden_sessies = '/wedstrijden/%s/sessies/'                               # wedstrijd_pk
     url_wedstrijden_wijzig_sessie = '/wedstrijden/%s/sessies/%s/wijzig/'               # wedstrijd_pk, sessie_pk
-    url_wedstrijden_wedstrijd_info = '/wedstrijden/%s/info/'                           # wedstrijd_pk
+    url_wedstrijden_wedstrijd_details = '/wedstrijden/%s/details/'                     # wedstrijd_pk
     url_aanmeldingen = '/wedstrijden/%s/aanmeldingen/'                                 # wedstrijd_pk
 
     url_wedstrijden_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
@@ -164,7 +164,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_wedstrijd_info(self):
-        resp = self.client.get(self.url_wedstrijden_wedstrijd_info % 999999)
+        resp = self.client.get(self.url_wedstrijden_wedstrijd_details % 999999)
         self.assert404(resp, 'Wedstrijd niet gevonden')
 
         # wedstrijd info met WA status
@@ -172,7 +172,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.wedstrijd.save(update_fields=['organisatie'])
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_wedstrijden_wedstrijd_info % self.wedstrijd.pk)
+            resp = self.client.get(self.url_wedstrijden_wedstrijd_details % self.wedstrijd.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -183,7 +183,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.wedstrijd.save(update_fields=['datum_begin', 'datum_einde'])
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_wedstrijden_wedstrijd_info % self.wedstrijd.pk)
+            resp = self.client.get(self.url_wedstrijden_wedstrijd_details % self.wedstrijd.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -191,7 +191,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.client.logout()
 
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_wedstrijden_wedstrijd_info % self.wedstrijd.pk)
+            resp = self.client.get(self.url_wedstrijden_wedstrijd_details % self.wedstrijd.pk)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('wedstrijden/wedstrijd-details.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -221,7 +221,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                                                                         'sporterboog': self.sporterboog.pk,
                                                                         'sessie': self.sessie_r.pk,
                                                                         'klasse': self.wkls_r[0].pk})
-        self.assert_is_redirect(resp, self.url_wedstrijden_wedstrijd_info % self.wedstrijd.pk)
+        self.assert_is_redirect(resp, self.url_wedstrijden_wedstrijd_details % self.wedstrijd.pk)
         self.assertEqual(1, WedstrijdInschrijving.objects.count())
 
         inschrijving = (WedstrijdInschrijving
@@ -320,7 +320,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                                                                         'sporterboog': self.sporterboog.pk,
                                                                         'sessie': self.sessie_r.pk,
                                                                         'klasse': self.wkls_r[0].pk})
-        self.assert_is_redirect(resp, self.url_wedstrijden_wedstrijd_info % self.wedstrijd.pk)
+        self.assert_is_redirect(resp, self.url_wedstrijden_wedstrijd_details % self.wedstrijd.pk)
 
         # al wel ingeschreven
         with self.assert_max_queries(20):

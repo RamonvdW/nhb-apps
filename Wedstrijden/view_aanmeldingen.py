@@ -66,7 +66,7 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
                                         'sporterboog',
                                         'sporterboog__sporter',
                                         'sporterboog__boogtype',
-                                        'gebruikte_code')
+                                        'korting')
                         .order_by('sessie',
                                   'status'))
         context['aanmeldingen'] = aanmeldingen
@@ -96,8 +96,8 @@ class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
             aanmelding.boog_str = sporterboog.boogtype.beschrijving
 
             aanmelding.korting_str = 'geen'
-            if aanmelding.gebruikte_code:
-                aanmelding.korting_str = '%s%%' % aanmelding.gebruikte_code.percentage
+            if aanmelding.korting:
+                aanmelding.korting_str = '%s%%' % aanmelding.korting.percentage
 
             aanmelding.url_details = reverse('Wedstrijden:details-aanmelding',
                                              kwargs={'inschrijving_pk': aanmelding.pk})
@@ -190,7 +190,7 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
                                         'sporterboog',
                                         'sporterboog__sporter',
                                         'sporterboog__boogtype',
-                                        'gebruikte_code')
+                                        'korting')
                         .order_by('sessie',
                                   'wanneer',
                                   'status'))
@@ -297,7 +297,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                                         'sporterboog',
                                         'sporterboog__sporter',
                                         'sporterboog__boogtype',
-                                        'gebruikte_code')
+                                        'korting')
                         .order_by('sessie',
                                   'wanneer',
                                   'status'))
@@ -345,8 +345,8 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
             else:
                 prijs_str = 'Geen (handmatige inschrijving)'
 
-            if aanmelding.gebruikte_code:
-                korting_str = '%s%%' % aanmelding.gebruikte_code.percentage
+            if aanmelding.korting:
+                korting_str = '%s%%' % aanmelding.korting.percentage
             else:
                 korting_str = 'Geen'
 
@@ -411,7 +411,7 @@ class KalenderDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
                                             'wedstrijdklasse',
                                             'sporterboog',
                                             'sporterboog__sporter',
-                                            'gebruikte_code')
+                                            'korting')
                             .get(pk=inschrijving_pk))
         except WedstrijdInschrijving.DoesNotExist:
             raise Http404('Aanmelding niet gevonden')
@@ -445,8 +445,8 @@ class KalenderDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
             inschrijving.url_afmelden = reverse('Wedstrijden:afmelden',
                                                 kwargs={'inschrijving_pk': inschrijving.pk})
 
-        if inschrijving.gebruikte_code:
-            inschrijving.korting_str = '%s%%' % inschrijving.gebruikte_code.percentage
+        if inschrijving.korting:
+            inschrijving.korting_str = '%s%%' % inschrijving.korting.percentage
         else:
             inschrijving.korting_str = None
 

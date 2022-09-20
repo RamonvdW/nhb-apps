@@ -6,14 +6,14 @@
 {% endcomment %}
 {% load static %}
 
-{% block title %}Nieuwe kortingscode{% endblock %}
+{% block title %}Nieuwe korting{% endblock %}
 
 {% block pagina %}
 
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Nieuwe kortingscode</h3>
+            <h3 class="page-banner">Nieuwe korting</h3>
             <p>Kies het type korting</p>
         </div>
     </div>
@@ -67,11 +67,10 @@
         <div class="col s12">
             <div class="white" style="padding:10px">
                 <h5>Algemeen</h5>
-                <p>Kortingscodes uitgegeven door jouw vereniging zijn alleen bruikbaar op <b>wedstrijden van jouw vereniging</b>.</p>
-                <p>Elke korting heeft een <b>unieke code</b> die je kan delen met de potenti&euml;le gebruiker(s).</p>
-                <p>Alle kortingscodes hebben een <b>uiterste datum</b> waarop ze gebruikt kunnen worden.</p>
-                <p><b>Korting</b> is tussen de 0% en 100% van de prijs van inschrijving voor de wedstrijd.</p>
-                <p>Er zijn drie soorten kortingscodes: persoonlijk, vereniging en combinatie-korting.</p>
+                <p>Kortingen uitgegeven door jouw vereniging zijn alleen bruikbaar op <b>wedstrijden van jouw vereniging</b>.</p>
+                <p>De korting is een percentage wat afgetrokken wordt van de prijs van inschrijving voor de wedstrijd.</p>
+                <p>Alle kortingen hebben een <b>uiterste datum</b> waarop ze gebruikt kunnen worden.</p>
+                <p>Er zijn drie soorten kortingen: persoonlijk, vereniging en combinatie-korting.</p>
 
                 <br>
                 <h5>Persoonlijk</h5>
@@ -92,6 +91,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-nieuwe-kortingscode-vereniging" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-korting-nieuw-kies" %}
 
 {% endblock %}

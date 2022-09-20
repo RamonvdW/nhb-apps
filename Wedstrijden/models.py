@@ -440,17 +440,19 @@ class Wedstrijd(models.Model):
         verbose_name_plural = "Wedstrijden"
 
 
-class WedstrijdKortingscode(models.Model):
+class WedstrijdKorting(models.Model):
 
-    """ Een kortingscode voor een specifieke sporter voor een of meerdere wedstrijden """
+    """ Een korting voor een specifieke sporter, leden van een vereniging of voor een combinatie van wedstrijden """
 
-    # de te gebruiken code
-    code = models.CharField(max_length=20, default='')
+    # de korting kan voor een specifieke sporter zijn (voorbeeld: winnaar van vorige jaar)
+    # de korting kan voor alle leden van een vereniging zijn (voorbeeld: de organiserende vereniging)
+    # de korting kan een combinatie-korting geven (meerdere wedstrijden)
+    soort = models.CharField(max_length=1, choices=WEDSTRIJD_KORTING_SOORT_CHOICES, default=WEDSTRIJD_KORTING_VERENIGING)
 
     # tot wanneer geldig?
     geldig_tot_en_met = models.DateField()
 
-    # welke vereniging heeft deze code uitgegeven? (en mag deze dus wijzigen)
+    # welke vereniging heeft deze korting uitgegeven? (en mag deze dus wijzigen)
     uitgegeven_door = models.ForeignKey(NhbVereniging, on_delete=models.PROTECT,
                                         null=True, blank=True,
                                         related_name='wedstrijd_korting_uitgever')
@@ -458,35 +460,27 @@ class WedstrijdKortingscode(models.Model):
     # hoeveel korting (0% .. 100%)
     percentage = models.PositiveSmallIntegerField(default=100)
 
-    # de kortingscode kan voor een specifieke sporter zijn (voorbeeld: winnaar van vorige jaar)
-    # de kortingscode kan voor alle leden van een vereniging zijn (voorbeeld: de organiserende vereniging)
-    # de kortingscode kan een combinatie-korting geven (meerdere wedstrijden)
-    soort = models.CharField(max_length=1, choices=WEDSTRIJD_KORTING_SOORT_CHOICES, default=WEDSTRIJD_KORTING_VERENIGING)
-
     # voor welke wedstrijden is deze geldig?
     # bij combi-korting: lijst van alle wedstrijden waar op ingeschreven moeten zijn
     voor_wedstrijden = models.ManyToManyField(Wedstrijd)
 
-    # voor welke individuele sporter is deze kortingscode?
+    # voor welke individuele sporter is deze korting?
     voor_sporter = models.ForeignKey(Sporter, on_delete=models.SET_NULL, null=True, blank=True)
 
-    # voor leden van welke vereniging is deze kortingscode?
+    # voor leden van welke vereniging is deze korting?
     voor_vereniging = models.ForeignKey(NhbVereniging, on_delete=models.SET_NULL, null=True, blank=True)
 
-    # bij combi-korting: geldig op deze wedstrijd, indien gecombineerd met ALLE 'voor_wedstrijden'
-    combi_basis_wedstrijd = models.ForeignKey(Wedstrijd, on_delete=models.SET_NULL, null=True, blank=True,
-                                              related_name='wedstrijd_combi_korting')
-
     def __str__(self):
-        return "%s: %s" % (self.pk, self.code)
+        return "[%s] %s %d%%" % (self.uitgegeven_door.pk, WEDSTRIJD_KORTING_SOORT_TO_STR[self.soort], self.percentage)
 
     class Meta:
-        verbose_name = "Wedstrijd kortingscode"
+        verbose_name = "Wedstrijd korting"
+        verbose_name_plural = "Wedstrijd kortingen"
 
 
 class WedstrijdInschrijving(models.Model):
 
-    """ Een inschrijving op een wedstrijd sessie, inclusief koper, betaal-status en gebruikte kortingscode """
+    """ Een inschrijving op een wedstrijd sessie, inclusief koper, betaal-status en gebruikte korting """
 
     # wanneer is deze inschrijving aangemaakt?
     wanneer = models.DateTimeField()
@@ -511,8 +505,8 @@ class WedstrijdInschrijving(models.Model):
     # (BestelProduct verwijst naar deze inschrijving)
     koper = models.ForeignKey(Account, on_delete=models.PROTECT)
 
-    # welke kortingscode is gebruikt
-    gebruikte_code = models.ForeignKey(WedstrijdKortingscode, on_delete=models.SET_NULL, blank=True, null=True)
+    # welke korting is gebruikt
+    korting = models.ForeignKey(WedstrijdKorting, on_delete=models.SET_NULL, blank=True, null=True)
 
     # bedragen ontvangen en terugbetaald
     ontvangen_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))
