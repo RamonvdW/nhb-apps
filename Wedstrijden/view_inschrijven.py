@@ -12,7 +12,7 @@ from django.db.models import ObjectDoesNotExist
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
-from BasisTypen.models import ORGANISATIE_WA, KalenderWedstrijdklasse
+from BasisTypen.models import ORGANISATIE_WA, ORGANISATIE_IFAA, KalenderWedstrijdklasse
 from Bestel.mandje import mandje_tel_inhoud
 from Bestel.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
@@ -84,7 +84,13 @@ class WedstrijdDetailsView(TemplateView):
 
         for sessie in sessies:
             sessie.aantal_beschikbaar = sessie.max_sporters - sessie.aantal_inschrijvingen
-            sessie.klassen = sessie.wedstrijdklassen.all()
+            sessie.klassen = sessie.wedstrijdklassen.order_by('volgorde')
+
+            if wedstrijd.organisatie == ORGANISATIE_IFAA:
+                # voeg afkorting toe aan klasse beschrijving
+                for klasse in sessie.klassen:
+                    klasse.beschrijving += ' [%s]' % klasse.afkorting
+                # for
         # for
 
         # om aan te melden is een account nodig

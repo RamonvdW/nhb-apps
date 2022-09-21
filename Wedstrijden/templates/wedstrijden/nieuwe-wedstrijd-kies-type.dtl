@@ -53,7 +53,7 @@
             {% include 'plein/card_logo.dtl' with text="Meer leeftijdsklassen dan World Archery en eventueel genderneutraal. Gebruik voor verenigingswedstijden." img_height=112 img_src=img_src onclick="keuze('nhb')" %}
 
             {% static 'plein/logo_ifaa_128x200.png' as img_src %}
-            {% include 'plein/card_logo.dtl' with text="Volgens de regels, bogen en klassen van de IFAA.<br>Gebruik voor 3D wedstrijden." img_height=132 img_reduce_top=4 img_src=img_src onclick="keuze('ifaa')" %}
+            {% include 'plein/card_logo.dtl' with text="Volgens de regels, bogen en klassen van de IFAA." img_height=132 img_reduce_top=4 img_src=img_src onclick="keuze('ifaa')" %}
         </div>
     </div>
 

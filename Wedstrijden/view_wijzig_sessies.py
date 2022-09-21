@@ -11,6 +11,7 @@ from django.views.generic import View
 from django.core.exceptions import PermissionDenied
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import UserPassesTestMixin
+from BasisTypen.models import ORGANISATIE_IFAA
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import (Wedstrijd, WedstrijdSessie,
@@ -63,7 +64,12 @@ class WedstrijdSessiesView(UserPassesTestMixin, View):
                    .order_by('datum',
                              'tijd_begin'))
         for sessie in sessies:
-            sessie.klassen_ordered = sessie.wedstrijdklassen.order_by('volgorde')
+            # sessie.klassen_ordered = sessie.wedstrijdklassen.order_by('volgorde')
+            #
+            # if wedstrijd.organisatie == ORGANISATIE_IFAA:
+            #     for klasse in sessie.klassen_ordered:
+            #         klasse.beschrijving += ' [%s]' % klasse.afkorting
+            #     # for
 
             sessie.url_wijzig = reverse('Wedstrijden:wijzig-sessie',
                                         kwargs={'wedstrijd_pk': wedstrijd.pk,
@@ -206,6 +212,10 @@ class WijzigWedstrijdSessieView(UserPassesTestMixin, View):
         for klasse in klassen:
             klasse.sel = 'klasse_%s' % klasse.pk
             klasse.selected = (klasse.pk in pks)
+
+            # voeg afkorting toe aan klasse beschrijving
+            if wedstrijd.organisatie == ORGANISATIE_IFAA:
+                klasse.beschrijving += ' [%s]' % klasse.afkorting
         # for
 
         return klassen
