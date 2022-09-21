@@ -14,6 +14,7 @@ from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
 from decimal import Decimal
+from codecs import BOM_UTF8
 import csv
 
 
@@ -152,6 +153,7 @@ class InterlandAlsBestandView(InterlandView):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="interland.csv"'
 
+        response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
         writer.writerow(['Gemiddelde', 'Klasse', 'Geslacht', 'Lid', 'Naam', 'Vereniging'])
 

@@ -17,6 +17,7 @@ from Sporter.models import Sporter, SporterVoorkeuren, get_sporter_voorkeuren
 from Wedstrijden.models import (Wedstrijd, WedstrijdInschrijving, INSCHRIJVING_STATUS_TO_SHORT_STR,
                                 INSCHRIJVING_STATUS_AFGEMELD, INSCHRIJVING_STATUS_RESERVERING_MANDJE)
 from decimal import Decimal
+from codecs import BOM_UTF8
 import csv
 
 
@@ -199,6 +200,7 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
         response['Content-Disposition'] = 'attachment; filename="aanmeldingen.txt"'
 
         # Ianseo supports a tab-separate file with specific column order, without headers
+        response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter="\t")       # tab separated fields
 
         # maak een mapping van sessie naar nummers 1..n
@@ -305,6 +307,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         response = HttpResponse(content_type='text/csv; charset=UTF-8')
         response['Content-Disposition'] = 'attachment; filename="aanmeldingen.csv"'
 
+        response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
         writer.writerow(['Reserveringsnummer', 'Aangemeld op', 'Status',
                          'Prijs', 'Korting', 'Ontvangen', 'Retour',

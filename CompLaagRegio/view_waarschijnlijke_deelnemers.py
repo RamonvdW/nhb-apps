@@ -13,6 +13,7 @@ from Competitie.models import RegiocompetitieTeam, CompetitieMatch
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers, bepaal_blazoen_behoefte
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
+from codecs import BOM_UTF8
 import csv
 
 TEMPLATE_WAARSCHIJNLIJKE_DEELNEMERS = 'complaagregio/waarschijnlijke-deelnemers-regio.dtl'
@@ -162,6 +163,7 @@ class WaarschijnlijkeDeelnemersAlsBestandView(UserPassesTestMixin, TemplateView)
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="waarschijnlijke-deelnemers-%s.csv"' % match.pk
 
+        response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for import with dutch regional settings
 
         toon_teams = deelcomp.regio_organiseert_teamcompetitie

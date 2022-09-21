@@ -22,6 +22,7 @@ from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbRayon
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
+from codecs import BOM_UTF8
 from types import SimpleNamespace
 import time
 import csv
@@ -337,6 +338,7 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="aanmeldingen-teams-regio-%s.csv"' % regio_nr
 
+        response.write(BOM_UTF8)
         writer = csv.writer(response,
                             delimiter=";")  # ; is good for import with dutch regional settings
 
