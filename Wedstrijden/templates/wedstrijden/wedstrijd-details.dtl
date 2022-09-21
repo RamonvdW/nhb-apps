@@ -243,8 +243,9 @@
         <div class="col s12">
 
             <!-- informatie over leeftijden -->
+            <!-- let op: kopie van dit kaartje op Competitie / kies -->
             {% url 'Sporter:leeftijdsgroepen' as card_url %}
-            {% include 'plein/card.dtl' with title="Leeftijden" text="Informatie over de leeftijds-categori&euml;n voor wedstrijden en de competities." icon="star" url=card_url %}
+            {% include 'plein/card.dtl' with title="Leeftijdsgroepen" text="Algemene informatie over de groepering op leeftijd, voor wedstrijden en de competities." icon="star" url=card_url %}
 
         </div>
     </div>

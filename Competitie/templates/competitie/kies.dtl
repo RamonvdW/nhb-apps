@@ -178,9 +178,10 @@
             {% url 'Competitie:info-competitie' as card_url %}
             {% include 'plein/card.dtl' with title="Informatie" text="Algemene informatie over de competities." icon="info" url=card_url %}
 
-            <!-- informatie over leeftijden -->
+            <!-- leeftijdsgroepen -->
+            <!-- let op: kopie van dit kaartje op Wedstrijden / wedstrijd-details -->
             {% url 'Sporter:leeftijdsgroepen' as card_url %}
-            {% include 'plein/card.dtl' with title="Leeftijden" text="Informatie over de leeftijds-categori&euml;n voor wedstrijden en de competities." icon="star" url=card_url %}
+            {% include 'plein/card.dtl' with title="Leeftijdsgroepen" text="Algemene informatie over de groepering op leeftijd, voor wedstrijden en de competities." icon="star" url=card_url %}
         </div>
     </div>
 
