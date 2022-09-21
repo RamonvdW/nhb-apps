@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Kortingen</h3>
-            <p>Kortingen voor wedstrijden bij jullie vereniging</p>
+            <p>Kortingen uitgegeven door jullie vereniging</p>
             <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
         </div>
     </div>
@@ -44,7 +44,7 @@
                 {% for korting in kortingen %}
                     <tr>
                         <td>{{ korting.geldig_tot_en_met }}</td>
-                        <td><i class="material-icons-round nhb-blauw-text" style="vertical-align:text-bottom">{{ korting.icon_name }}</i></td>
+                        <td><i class="material-icons-round nhb-blauw-text" style="vertical-align:text-bottom; font-size:30px">{{ korting.icon_name }}</i></td>
                         <td>{{ korting.voor_wie_str|linebreaksbr }}</td>
                         <td>{{ korting.voor_wedstrijden_str|linebreaksbr }}</td>
                         <td>{{ korting.percentage }}%</td>
@@ -77,6 +77,47 @@
                 {% endif %}
 
             </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Hoe werkt het?</h4>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+                <h5>Algemeen</h5>
+                <p>Kortingen uitgegeven door jouw vereniging zijn alleen bruikbaar op <b>wedstrijden van jouw vereniging</b>.</p>
+                <p>De korting is een <b>percentage</b> dat afgetrokken wordt van de inschrijfprijs van een wedstrijd.</p>
+                <p>Alle kortingen hebben een <b>uiterste datum</b> waarop ze gebruikt kunnen worden.</p>
+                <p>Kortingen worden <b>automatisch</b> toegepast op de inhoud van een mandje.</p>
+                <p>Kortingen stapelen niet (geen korting op korting).</p>
+                <p>In geval van meerdere kortingen wordt automatisch de <b>hoogste</b> korting gegeven.</p>
+                <br>
+                <p>Er zijn drie soorten kortingen: persoonlijk, vereniging en combinatie-korting.</p>
+
+                <br>
+                <h5><i class="material-icons-round nhb-blauw-text" style="vertical-align:middle; font-size:40px">account_circle</i> Persoonlijk</h5>
+                <p>Voor een specifieke sporter (bondsnummer).</p>
+                <p>Kan geldig zijn voor meerdere wedstrijden.</p>
+                <p>Voorbeelden: winnaar van vorig jaar, eventueel voor hele serie wedstrijden.</p>
+
+                <br>
+                <h5><i class="material-icons-round nhb-blauw-text" style="vertical-align:middle; font-size:40px">home</i> Vereniging</h5>
+                <p>Voor alle leden van jullie vereniging.</p>
+                <p>Voorbeelden: eigen leden thuisvoordeel geven</p>
+
+                <br>
+                <h5><i class="material-icons-round nhb-blauw-text" style="vertical-align:middle; font-size:40px">join_full</i> Combinatie-korting</h5>
+                <p>Korting bij inschrijving op meerdere wedstrijden.</p>
+                <p>Voorbeeld: wedstrijd zaterdag + zondag; korting als je beide dagen mee doet.</p>
+            </div>            </div>
         </div>
     </div>
 

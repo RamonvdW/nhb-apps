@@ -54,43 +54,6 @@
         </div>
     </div>
 
-
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h4>Uitleg verschillen</h4>
-        </div>
-    </div>
-
-    <!-- blauw balk met wit informatie veld -->
-    <div class="row-nhb-blauw">
-        <div class="col s12">
-            <div class="white" style="padding:10px">
-                <h5>Algemeen</h5>
-                <p>Kortingen uitgegeven door jouw vereniging zijn alleen bruikbaar op <b>wedstrijden van jouw vereniging</b>.</p>
-                <p>De korting is een percentage wat afgetrokken wordt van de prijs van inschrijving voor de wedstrijd.</p>
-                <p>Alle kortingen hebben een <b>uiterste datum</b> waarop ze gebruikt kunnen worden.</p>
-                <p>Er zijn drie soorten kortingen: persoonlijk, vereniging en combinatie-korting.</p>
-
-                <br>
-                <h5>Persoonlijk</h5>
-                <p>Kan gebruikt worden door het lid met het gekozen bondsnummer.</p>
-                <p>Kan geldig zijn voor meerdere wedstrijden.</p>
-                <p>Voorbeelden: winnaar van vorig jaar, eventueel voor hele serie wedstrijden.</p>
-
-                <br>
-                <h5>Vereniging</h5>
-                <p>Kan gebruikt worden door alle leden van jullie vereniging.</p>
-                <p>Voorbeelden: eigen leden thuisvoordeel geven</p>
-
-                <br>
-                <h5>Combinatie-korting</h5>
-                <p>Korting bij inschrijving op meerdere wedstrijden.</p>
-                <p>Voorbeeld: wedstrijd zaterdag + zondag; korting als je beide dagen mee doet.</p>
-            </div>
-        </div>
-    </div>
-
     {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-korting-nieuw-kies" %}
 
 {% endblock %}
