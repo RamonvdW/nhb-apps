@@ -60,9 +60,9 @@ LEEFTIJDSKLASSEN = (
     (51,       'VEV', GESLACHT_VROUW, 55, 0,   'Vet V',    'Veteranen Dames (55+)',   ORGANISATIE_IFAA),
     (52,       'VEM', GESLACHT_MAN,   55, 0,   'Vet M',    'Veteranen Heren (55+)',   ORGANISATIE_IFAA),
 
-    # Volwassenen (21-54)
-    (41,       'VWV', GESLACHT_VROUW, 21, 54,  'Volw V',   'Volwassen Dames',         ORGANISATIE_IFAA),
-    (42,       'VWH', GESLACHT_MAN,   21, 54,  'Volw M',   'Volwassen Heren',         ORGANISATIE_IFAA),
+    # open klasse: Volwassenen
+    (41,       'VWV', GESLACHT_VROUW, 0, 0,    'Volw V',   'Volwassen Dames',         ORGANISATIE_IFAA),
+    (42,       'VWH', GESLACHT_MAN,   0, 0,    'Volw M',   'Volwassen Heren',         ORGANISATIE_IFAA),
 
     # Jong volwassenen (17-20)
     (31,       'JVV', GESLACHT_VROUW, 0, 20,   'Jong V',   'Jongvolwassen Dames',     ORGANISATIE_IFAA),

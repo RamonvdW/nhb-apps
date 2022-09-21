@@ -15,10 +15,10 @@ def update_leeftijdsklassen(apps, _):
     """
 
     # haal de klassen op die van toepassing zijn tijdens deze migratie
-    kalenderwedstrijdklasse_klas = apps.get_model('BasisTypen', 'Leeftijdsklasse')
+    leeftijdsklasse_klas = apps.get_model('BasisTypen', 'Leeftijdsklasse')
 
     org_volg2lkl = dict()       # [(organisatie, volgorde)] = Leeftijdsklasse()
-    for lkl in kalenderwedstrijdklasse_klas.objects.all():
+    for lkl in leeftijdsklasse_klas.objects.all():
         org_volg2lkl[(lkl.organisatie, lkl.volgorde)] = lkl
     # for
 
