@@ -39,6 +39,8 @@
             <h3 class="page-banner">Mandje</h3>
             {% if mandje_is_leeg %}
                 <p class="center">Je mandje is leeg</p>
+            {% else %}
+                <p>Hieronder kan je de producten zien die je toegevoegd hebt aan je mandje.</p>
             {% endif %}
         </div>
     </div>
@@ -121,7 +123,7 @@
         <div class="row center">
             <div class="col s12">
                 <h4>Voorwaarden</h4>
-                <p>Onderstaand document beschrijft de verkoopvoorwaarden voor deze bestelling.</p>
+                <p>Onderstaand document beschrijft de verkoopvoorwaarden voor bestelling via deze site.</p>
             </div>
         </div>
 

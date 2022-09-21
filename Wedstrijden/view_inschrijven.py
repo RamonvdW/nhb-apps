@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.db import IntegrityError, transaction
 from django.db.models import ObjectDoesNotExist
+from django.shortcuts import render
 from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -31,6 +32,7 @@ TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_SPORTER = 'wedstrijden/inschrijven-sporter.dtl'
 TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_GROEPJE = 'wedstrijden/inschrijven-groepje.dtl'
 TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_FAMILIE = 'wedstrijden/inschrijven-familie.dtl'
 TEMPLATE_WEDSTRIJDEN_INSCHRIJVEN_HANDMATIG = 'wedstrijden/inschrijven-handmatig.dtl'
+TEMPLATE_WEDSTRIJDEN_TOEGEVOEGD_AAN_MANDJE = 'wedstrijden/inschrijven-toegevoegd-aan-mandje.dtl'
 
 
 class WedstrijdDetailsView(TemplateView):
@@ -1064,7 +1066,7 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
         stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
         msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, account_koper.get_account_full_name())
 
-        # maak de inschrijving aan en voorkom dubbelen
+        # maak de inschrijving aan
         inschrijving = WedstrijdInschrijving(
                             wanneer=now,
                             wedstrijd=wedstrijd,
@@ -1075,6 +1077,7 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
                             log=msg)
 
         try:
+            # voorkom dubbele records
             with transaction.atomic():
                 inschrijving.save()
         except IntegrityError:          # pragma: no cover
@@ -1088,15 +1091,42 @@ class ToevoegenAanMandjeView(UserPassesTestMixin, View):
 
             mandje_tel_inhoud(self.request)
 
-        if goto_str == 'F':
+        context = dict()
+
+        url_maand = reverse('Kalender:maand',
+                            kwargs={'jaar': wedstrijd.datum_begin.year,
+                                    'maand': MAAND2URL[wedstrijd.datum_begin.month]})
+
+        inschrijven_str = 'Inschrijven'
+        url = reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+        if goto_str == 'S':
+            inschrijven_str += ' Sporter'
+
+        elif goto_str == 'G':
+            inschrijven_str += ' Groepje'
+
+        elif goto_str == 'F':
+            inschrijven_str += ' Familie'
             # ga terug naar de familie pagina met dezelfde sporter geselecteerd
             url = reverse('Wedstrijden:inschrijven-familie-lid-boog',
                           kwargs={'wedstrijd_pk': wedstrijd.pk,
                                   'lid_nr': sporterboog.sporter.lid_nr,
                                   'boog_afk': sporterboog.boogtype.afkorting.lower()})
-        else:
-            url = reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
-        return HttpResponseRedirect(url)
+        context['url_verder'] = url
+        context['url_mandje'] = reverse('Bestel:toon-inhoud-mandje')
+
+        context['kruimels'] = (
+            (url_maand, 'Wedstrijdkalender'),
+            (reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
+            (url, inschrijven_str),
+            (None, 'Toegevoegd aan mandje')
+        )
+
+        menu_dynamics(self.request, context)
+
+        return render(request, TEMPLATE_WEDSTRIJDEN_TOEGEVOEGD_AAN_MANDJE, context)
+
 
 # end of file

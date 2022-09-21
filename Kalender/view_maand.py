@@ -51,6 +51,10 @@ def get_url_eerstvolgende_maand_met_wedstrijd():
     """ Geeft de URL terug voor de eerstvolgende maand met een wedstrijd """
     now = timezone.now()
 
+    # default
+    jaar = now.year
+    maand = now.month
+
     # we willen in de eerstvolgende maand komen met een wedstrijd
     wedstrijden = (Wedstrijd
                    .objects
@@ -58,12 +62,15 @@ def get_url_eerstvolgende_maand_met_wedstrijd():
                            datum_begin__gte=now)
                    .order_by('datum_begin'))
 
-    if wedstrijden.count() > 0:
-        jaar = wedstrijden[0].datum_begin.year
-        maand = wedstrijden[0].datum_begin.month
-    else:
-        jaar = now.year
-        maand = now.month
+    for wedstrijd in wedstrijden:
+        print(wedstrijd.datum_begin, wedstrijd)
+        deadline = wedstrijd.datum_begin - timedelta(days=wedstrijd.inschrijven_tot)
+        if now.date() <= deadline:
+            # hier kan nog op ingeschreven worden
+            jaar = wedstrijd.datum_begin.year
+            maand = wedstrijd.datum_begin.month
+            break
+    # for
 
     url = reverse('Kalender:maand',
                   kwargs={'jaar': jaar,

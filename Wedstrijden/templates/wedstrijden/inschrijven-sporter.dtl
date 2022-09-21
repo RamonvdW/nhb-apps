@@ -250,6 +250,6 @@
 
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-inschrijven-sporter" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-inschrijven-sporter" %}
 
 {% endblock %}

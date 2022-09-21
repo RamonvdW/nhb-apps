@@ -321,6 +321,6 @@
     {% endif %}
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-inschrijven-handmatig" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-inschrijven-handmatig" %}
 
 {% endblock %}

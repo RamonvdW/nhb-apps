@@ -254,6 +254,6 @@
 
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-inschrijven-familie" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-inschrijven-familie" %}
 
 {% endblock %}

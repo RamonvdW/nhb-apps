@@ -275,6 +275,6 @@
 
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="kalender-inschrijven-groepje" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-inschrijven-groepje" %}
 
 {% endblock %}

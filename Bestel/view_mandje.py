@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
+from BasisTypen.models import ORGANISATIE_IFAA
 from Bestel.mandje import mandje_tel_inhoud, eval_mandje_inhoud
 from Bestel.models import BestelMandje
 from Bestel.mutaties import (bestel_mutatieverzoek_maak_bestellingen,
@@ -115,6 +116,13 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
                     beschrijving.append(tup)
 
                     tup = ('Boog', '%s' % sporterboog.boogtype.beschrijving)
+                    beschrijving.append(tup)
+
+                    if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
+                        tup = ('Klasse', '%s [%s]' % (inschrijving.wedstrijdklasse.beschrijving,
+                                                      inschrijving.wedstrijdklasse.afkorting))
+                    else:
+                        tup = ('Klasse', '%s' % inschrijving.wedstrijdklasse.beschrijving)
                     beschrijving.append(tup)
 
                     if inschrijving.korting:
