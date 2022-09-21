@@ -62,7 +62,7 @@
                         <th>Beschrijving</th>
                         <th class="center">Wanneer</th>
                         <th class="center">Aanm<span class="hide-on-small-only">eldingen</span></th>
-                        <th>Wedstrijdklassen</th>
+                        <!-- <th>Wedstrijdklassen</th> -->
                         <th><!-- kolom voor de knoppen --></th>
                     </tr>
                 </thead>
@@ -72,6 +72,7 @@
                         <td>{{ sessie.beschrijving }}</td>
                         <td class="center">{% if wed.datum_begin != wed.datum_einde %}{{ sessie.datum }} {% endif %}{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</td>
                         <td class="center">{{ sessie.aantal_inschrijvingen }} / {{ sessie.max_sporters }}</td>
+                        <!--
                         <td>
                             {% for klasse in sessie.klassen_ordered %}
                                 <span>{{ klasse.beschrijving }}</span><br>
@@ -79,6 +80,7 @@
                                 <span><i>Nog geen klassen</i></span>
                             {% endfor %}
                         </td>
+                        -->
                         <td class="center">
                             <a class="btn-nhb-rood" href="{{ sessie.url_wijzig }}">
                                 <i class="material-icons-round">edit</i></a>
@@ -86,7 +88,7 @@
                     </tr>
                 {% empty %}
                     <tr>
-                        <td colspan="5" class="center">
+                        <td colspan="4" class="center">
                             <i>Er zijn nog geen sessies</i>
                         </td>
                     </tr>
@@ -94,7 +96,7 @@
 
                 {% if url_nieuwe_sessie %}
                     <tr>
-                        <td colspan="5" class="center">
+                        <td colspan="4" class="center">
                             <form action="{{ url_nieuwe_sessie }}" method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="nieuwe_sessie" value="1">
