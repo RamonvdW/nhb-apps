@@ -432,6 +432,11 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
                                                            'sporter__bij_vereniging',
                                                            'boogtype')
                                            .order_by('boogtype__volgorde'))
+
+            if len(context['sportersboog']) == 0:
+                # niets gevonden
+                context['gezocht_niet_gevonden'] = str(zoek_lid_nr)
+
         elif lid_nr != -1:
             context['sportersboog'] = list(SporterBoog
                                            .objects

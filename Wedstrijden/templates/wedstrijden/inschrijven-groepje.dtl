@@ -75,6 +75,7 @@
             <div class="white" style="padding:10px">
                 <p>Hieronder kan je een andere sporter zoeken op NHB bondsnummer.</p>
                 <p>Deze sporter kan je inschrijven door een wedstrijd sessie toe te voegen aan jouw winkelmandje en daarna de bestelling te voltooien.</p>
+                <p>Let op: dit werkt alleen als de sporter een account heeft en onder zijn voorkeuren een boog heeft ingesteld welke past bij deze wedstrijd.</p>
             </div>
         </div>
     </div>
@@ -151,6 +152,11 @@
             </div>
         </div>
 
+    {% else %}
+
+        {% if gezocht_niet_gevonden %}
+            <p class="center nhb-rood-text">Sporter {{ gezocht_niet_gevonden }} niet gevonden,<br>of heeft geen boog ingesteld welke past bij deze wedstrijd.</p>
+        {% endif %}
     {% endif %}
 
 
