@@ -10,10 +10,11 @@ from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.utils.timezone import localtime
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.rol import Rollen, rol_get_huidige
+from BasisTypen.models import ORGANISATIE_IFAA
 from Bestel.models import (Bestelling, BESTELLING_STATUS2STR, BESTELLING_STATUS_WACHT_OP_BETALING,
                            BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT)
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
+from Functie.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
 from Wedstrijden.models import WEDSTRIJD_KORTING_COMBI
 from decimal import Decimal
@@ -161,7 +162,17 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                 tup = ('Van vereniging', ver_naam)
                 beschrijving.append(tup)
 
-                tup = ('Boog', '%s' % sporterboog.boogtype.beschrijving)
+                if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
+                    tup = ('Schietstijl', '%s' % sporterboog.boogtype.beschrijving)
+                else:
+                    tup = ('Boog', '%s' % sporterboog.boogtype.beschrijving)
+                beschrijving.append(tup)
+
+                if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
+                    tup = ('Wedstrijdklasse', '%s [%s]' % (inschrijving.wedstrijdklasse.beschrijving,
+                                                           inschrijving.wedstrijdklasse.afkorting))
+                else:
+                    tup = ('Wedstrijdklasse', '%s' % inschrijving.wedstrijdklasse.beschrijving)
                 beschrijving.append(tup)
 
                 if inschrijving.korting:
