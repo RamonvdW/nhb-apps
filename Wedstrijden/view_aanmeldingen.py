@@ -239,8 +239,8 @@ class DownloadAanmeldingenBestandTSV(UserPassesTestMixin, View):
                              0,                     # indiv finals
                              0,                     # team finals
                              0,                     # mixed finals
-                             '',                    # achternaam (wordt omgezet in hoofdletters)
-                             sporter.volledige_naam(),      # voornaam: volledige naam
+                             sporter.achternaam,    # achternaam (wordt oms omgezet in hoofdletters)
+                             sporter.voornaam,      # voornaam
                              wedstrijd_geslacht,    # M/0 is man, de rest vrouw
                              ver_nr,
                              ver_naam,
