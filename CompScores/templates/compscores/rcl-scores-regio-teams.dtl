@@ -43,7 +43,7 @@
             <p class="red-text">Je moet nog {{ aantal_keuzes_nodig }} keuzes maken. Klik daarna op Opslaan.</p>
             {% if anchor %}<p><a class="btn-nhb-rood" href="#{{ anchor }}">Spring naar de eerste</a>{% endif %}</p>
         {% else %}
-            <p>Alle keuzes zijn al gemaakt. Je kan nog aanpassingen doen - vergeet niet om op te staan!</p>
+            <p>Alle keuzes zijn al gemaakt. Je kan nog aanpassingen doen - vergeet niet om op te slaan!</p>
         {% endif %}
     </div>
 
