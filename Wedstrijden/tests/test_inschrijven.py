@@ -221,7 +221,9 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                                                                         'sporterboog': self.sporterboog.pk,
                                                                         'sessie': self.sessie_r.pk,
                                                                         'klasse': self.wkls_r[0].pk})
-        self.assert_is_redirect(resp, self.url_wedstrijden_wedstrijd_details % self.wedstrijd.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
         self.assertEqual(1, WedstrijdInschrijving.objects.count())
 
         inschrijving = (WedstrijdInschrijving
@@ -320,7 +322,9 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                                                                         'sporterboog': self.sporterboog.pk,
                                                                         'sessie': self.sessie_r.pk,
                                                                         'klasse': self.wkls_r[0].pk})
-        self.assert_is_redirect(resp, self.url_wedstrijden_wedstrijd_details % self.wedstrijd.pk)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
 
         # al wel ingeschreven
         with self.assert_max_queries(20):
@@ -368,7 +372,9 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
                                                                         'sessie': self.sessie_r.pk,
                                                                         'klasse': self.wkls_r[1].pk,
                                                                         'goto': 'F'})
-        self.assert_is_redirect(resp, url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('wedstrijden/inschrijven-toegevoegd-aan-mandje.dtl', 'plein/site_layout.dtl'))
 
         # al wel ingeschreven
         with self.assert_max_queries(21):
