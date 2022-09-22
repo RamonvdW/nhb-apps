@@ -124,6 +124,19 @@ class WedstrijdDetailsView(TemplateView):
         return context
 
 
+def inschrijving_open_of_404(wedstrijd):
+    """ Controleer dat de wedstrijd nog open is voor inschrijving.
+        Zo niet, genereer dan fout 404
+    """
+
+    now_date = timezone.now().date()
+    wedstrijd.inschrijven_voor = wedstrijd.datum_begin - timedelta(days=wedstrijd.inschrijven_tot)
+    kan_inschrijven = now_date < wedstrijd.inschrijven_voor
+
+    if not kan_inschrijven:
+        raise Http404('Inschrijving is gesloten')
+
+
 def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
     """ geef de mogelijke sessies terug waarop de sporter zich in kan schrijven
 
@@ -272,6 +285,8 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
 
         context['wed'] = wedstrijd
 
+        inschrijving_open_of_404(wedstrijd)
+
         wedstrijd_boogtype_pks = list(wedstrijd.boogtypen.all().values_list('pk', flat=True))
 
         account = self.request.user
@@ -396,6 +411,8 @@ class WedstrijdInschrijvenGroepje(UserPassesTestMixin, TemplateView):
             raise Http404('Wedstrijd niet gevonden')
 
         context['wed'] = wedstrijd
+
+        inschrijving_open_of_404(wedstrijd)
 
         wedstrijd_boogtype_pks = list(wedstrijd.boogtypen.all().values_list('pk', flat=True))
 
@@ -586,6 +603,8 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
 
         context['wed'] = wedstrijd
 
+        inschrijving_open_of_404(wedstrijd)
+
         wedstrijd_boogtype_pks = list(wedstrijd.boogtypen.all().values_list('pk', flat=True))
 
         # begrens de mogelijkheden tot leden met dezelfde adres_code als de ingelogde gebruiker
@@ -734,6 +753,132 @@ class WedstrijdInschrijvenFamilie(UserPassesTestMixin, TemplateView):
 
         menu_dynamics(self.request, context)
         return context
+
+
+class ToevoegenAanMandjeView(UserPassesTestMixin, View):
+
+    """ Met deze view wordt het toevoegen van een wedstrijd aan het mandje van de koper afgehandeld """
+
+    # class variables shared by all instances
+    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rol_nu = None
+
+    def test_func(self):
+        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
+        self.rol_nu = rol_get_huidige(self.request)
+        return self.rol_nu != Rollen.ROL_NONE
+
+    def post(self, request, *args, **kwargs):
+        wedstrijd_str = request.POST.get('wedstrijd', '')[:6]       # afkappen voor de veiligheid
+        sporterboog_str = request.POST.get('sporterboog', '')[:6]   # afkappen voor de veiligheid
+        sessie_str = request.POST.get('sessie', '')[:6]             # afkappen voor de veiligheid
+        klasse_str = request.POST.get('klasse', '')[:6]             # afkappen voor de veiligheid
+        goto_str = request.POST.get('goto', '')[:6]                 # afkappen voor de veiligheid
+
+        try:
+            wedstrijd_pk = int(wedstrijd_str)
+            sporterboog_pk = int(sporterboog_str)
+            sessie_pk = int(sessie_str)
+            klasse_pk = int(klasse_str)
+        except (ValueError, TypeError):
+            raise Http404('Slecht verzoek')
+
+        try:
+            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
+            sessie = WedstrijdSessie.objects.get(pk=sessie_pk)              # TODO: moet uit wedstrijd komen!
+            klasse = KalenderWedstrijdklasse.objects.get(pk=klasse_pk)      # TODO: moet uit wedstrijd komen!
+            sporterboog = (SporterBoog
+                           .objects
+                           .select_related('sporter')
+                           .get(pk=sporterboog_pk))
+        except ObjectDoesNotExist:
+            raise Http404('Onderdeel van verzoek niet gevonden')
+
+        inschrijving_open_of_404(wedstrijd)
+
+        account_koper = request.user
+
+        now = timezone.now()
+
+        # misschien dat de sporter al ingeschreven staat, maar afgemeld is
+        # verwijder deze inschrijving omdat het nu een andere koper kan zijn
+        # TODO: afmeldingen verplaatsen naar een andere tabel
+        qset = (WedstrijdInschrijving
+                .objects
+                .filter(wedstrijd=wedstrijd,
+                        sporterboog=sporterboog,
+                        status=INSCHRIJVING_STATUS_AFGEMELD))
+        if qset.count() > 0:
+            qset.delete()
+
+        stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
+        msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, account_koper.get_account_full_name())
+
+        # maak de inschrijving aan
+        inschrijving = WedstrijdInschrijving(
+                            wanneer=now,
+                            wedstrijd=wedstrijd,
+                            sessie=sessie,
+                            wedstrijdklasse=klasse,
+                            sporterboog=sporterboog,
+                            koper=account_koper,
+                            log=msg)
+
+        try:
+            # voorkom dubbele records
+            with transaction.atomic():
+                inschrijving.save()
+        except IntegrityError:          # pragma: no cover
+            # er is niet voldaan aan de uniqueness constraint (sessie, sporterboog)
+            # ga uit van user-error (dubbelklik op knop) en skip de rest gewoon
+            pass
+        else:
+            # zet dit verzoek door naar de achtergrondtaak
+            snel = str(request.POST.get('snel', ''))[:1]
+            bestel_mutatieverzoek_inschrijven_wedstrijd(account_koper, inschrijving, snel == '1')
+
+            mandje_tel_inhoud(self.request)
+
+        context = dict()
+
+        url_maand = reverse('Kalender:maand',
+                            kwargs={'jaar': wedstrijd.datum_begin.year,
+                                    'maand': MAAND2URL[wedstrijd.datum_begin.month]})
+
+        inschrijven_str = 'Inschrijven'
+        url = reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk})
+
+        if goto_str == 'S':
+            inschrijven_str += ' Sporter'
+
+        elif goto_str == 'G':
+            inschrijven_str += ' Groepje'
+
+        elif goto_str == 'F':
+            inschrijven_str += ' Familie'
+            # ga terug naar de familie pagina met dezelfde sporter geselecteerd
+            url = reverse('Wedstrijden:inschrijven-familie-lid-boog',
+                          kwargs={'wedstrijd_pk': wedstrijd.pk,
+                                  'lid_nr': sporterboog.sporter.lid_nr,
+                                  'boog_afk': sporterboog.boogtype.afkorting.lower()})
+
+        context['url_verder'] = url
+        context['url_mandje'] = reverse('Bestel:toon-inhoud-mandje')
+
+        context['kruimels'] = (
+            (url_maand, 'Wedstrijdkalender'),
+            (reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
+            (url, inschrijven_str),
+            (None, 'Toegevoegd aan mandje')
+        )
+
+        menu_dynamics(self.request, context)
+
+        return render(request, TEMPLATE_WEDSTRIJDEN_TOEGEVOEGD_AAN_MANDJE, context)
 
 
 class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
@@ -1003,130 +1148,6 @@ class WedstrijdInschrijvenHandmatig(UserPassesTestMixin, TemplateView):
         url = reverse('Wedstrijden:aanmeldingen', kwargs={'wedstrijd_pk': wedstrijd.pk})
 
         return HttpResponseRedirect(url)
-
-
-class ToevoegenAanMandjeView(UserPassesTestMixin, View):
-
-    """ Met deze view wordt het toevoegen van een wedstrijd aan het mandje van de koper afgehandeld """
-
-    # class variables shared by all instances
-    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
-    permission_denied_message = 'Geen toegang'
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.rol_nu = None
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu != Rollen.ROL_NONE
-
-    def post(self, request, *args, **kwargs):
-        wedstrijd_str = request.POST.get('wedstrijd', '')[:6]       # afkappen voor de veiligheid
-        sporterboog_str = request.POST.get('sporterboog', '')[:6]   # afkappen voor de veiligheid
-        sessie_str = request.POST.get('sessie', '')[:6]             # afkappen voor de veiligheid
-        klasse_str = request.POST.get('klasse', '')[:6]             # afkappen voor de veiligheid
-        goto_str = request.POST.get('goto', '')[:6]                 # afkappen voor de veiligheid
-
-        try:
-            wedstrijd_pk = int(wedstrijd_str)
-            sporterboog_pk = int(sporterboog_str)
-            sessie_pk = int(sessie_str)
-            klasse_pk = int(klasse_str)
-        except (ValueError, TypeError):
-            raise Http404('Slecht verzoek')
-
-        try:
-            wedstrijd = Wedstrijd.objects.get(pk=wedstrijd_pk)
-            sessie = WedstrijdSessie.objects.get(pk=sessie_pk)              # TODO: moet uit wedstrijd komen!
-            klasse = KalenderWedstrijdklasse.objects.get(pk=klasse_pk)      # TODO: moet uit wedstrijd komen!
-            sporterboog = (SporterBoog
-                           .objects
-                           .select_related('sporter')
-                           .get(pk=sporterboog_pk))
-        except ObjectDoesNotExist:
-            raise Http404('Onderdeel van verzoek niet gevonden')
-
-        account_koper = request.user
-
-        now = timezone.now()
-
-        # misschien dat de sporter al ingeschreven staat, maar afgemeld is
-        # verwijder deze inschrijving omdat het nu een andere koper kan zijn
-        # TODO: afmeldingen verplaatsen naar een andere tabel
-        qset = (WedstrijdInschrijving
-                .objects
-                .filter(wedstrijd=wedstrijd,
-                        sporterboog=sporterboog,
-                        status=INSCHRIJVING_STATUS_AFGEMELD))
-        if qset.count() > 0:
-            qset.delete()
-
-        stamp_str = timezone.localtime(timezone.now()).strftime('%Y-%m-%d om %H:%M')
-        msg = "[%s] Toegevoegd aan het mandje van %s\n" % (stamp_str, account_koper.get_account_full_name())
-
-        # maak de inschrijving aan
-        inschrijving = WedstrijdInschrijving(
-                            wanneer=now,
-                            wedstrijd=wedstrijd,
-                            sessie=sessie,
-                            wedstrijdklasse=klasse,
-                            sporterboog=sporterboog,
-                            koper=account_koper,
-                            log=msg)
-
-        try:
-            # voorkom dubbele records
-            with transaction.atomic():
-                inschrijving.save()
-        except IntegrityError:          # pragma: no cover
-            # er is niet voldaan aan de uniqueness constraint (sessie, sporterboog)
-            # ga uit van user-error (dubbelklik op knop) en skip de rest gewoon
-            pass
-        else:
-            # zet dit verzoek door naar de achtergrondtaak
-            snel = str(request.POST.get('snel', ''))[:1]
-            bestel_mutatieverzoek_inschrijven_wedstrijd(account_koper, inschrijving, snel == '1')
-
-            mandje_tel_inhoud(self.request)
-
-        context = dict()
-
-        url_maand = reverse('Kalender:maand',
-                            kwargs={'jaar': wedstrijd.datum_begin.year,
-                                    'maand': MAAND2URL[wedstrijd.datum_begin.month]})
-
-        inschrijven_str = 'Inschrijven'
-        url = reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk})
-
-        if goto_str == 'S':
-            inschrijven_str += ' Sporter'
-
-        elif goto_str == 'G':
-            inschrijven_str += ' Groepje'
-
-        elif goto_str == 'F':
-            inschrijven_str += ' Familie'
-            # ga terug naar de familie pagina met dezelfde sporter geselecteerd
-            url = reverse('Wedstrijden:inschrijven-familie-lid-boog',
-                          kwargs={'wedstrijd_pk': wedstrijd.pk,
-                                  'lid_nr': sporterboog.sporter.lid_nr,
-                                  'boog_afk': sporterboog.boogtype.afkorting.lower()})
-
-        context['url_verder'] = url
-        context['url_mandje'] = reverse('Bestel:toon-inhoud-mandje')
-
-        context['kruimels'] = (
-            (url_maand, 'Wedstrijdkalender'),
-            (reverse('Wedstrijden:wedstrijd-details', kwargs={'wedstrijd_pk': wedstrijd.pk}), 'Wedstrijd details'),
-            (url, inschrijven_str),
-            (None, 'Toegevoegd aan mandje')
-        )
-
-        menu_dynamics(self.request, context)
-
-        return render(request, TEMPLATE_WEDSTRIJDEN_TOEGEVOEGD_AAN_MANDJE, context)
 
 
 # end of file
