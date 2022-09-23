@@ -5,8 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Functie import (view_overzicht, view_otp_controle, view_otp_koppelen, view_vhpg, view_wisselvanrol,
-                     view_koppel_beheerder)
+from Functie import (view_overzicht, view_otp_controle, view_otp_koppelen, view_vhpg, view_koppel_beheerder,
+                     view_wisselvanrol, view_activeer_rol)
 
 app_name = 'Functie'
 
@@ -61,11 +61,11 @@ urlpatterns = [
 
 
     path('activeer-functie/<str:functie_pk>/',
-         view_wisselvanrol.ActiveerRolView.as_view(),
+         view_activeer_rol.ActiveerRolView.as_view(),
          name='activeer-functie'),
 
     path('activeer-rol/<str:rol>/',
-         view_wisselvanrol.ActiveerRolView.as_view(),
+         view_activeer_rol.ActiveerRolView.as_view(),
          name='activeer-rol'),
 
     path('wissel-van-rol/',
