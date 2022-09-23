@@ -18,7 +18,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
 
     """ tests voor de Functie applicatie; module wijzig functie e-mail """
 
-    test_after = ('Functie.test_2fa', 'Functie.wisselvanrol')
+    test_after = ('Functie.tests.test_otp', 'Functie.tests.test_wisselvanrol')
 
     url_wijzig_email = '/functie/wijzig-email/%s/'  # % functie_pk
 
@@ -283,7 +283,7 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.all()[0]
         self.assert_email_html_ok(mail.mail_html, 'email_functie/bevestig-toegang-email.dtl')
-        self.assert_consistent_email_html_text(mail)
+        self.assert_consistent_email_html_text(mail, 'email_functie/bevestig-toegang-email.dtl')
 
         # haal de 1e tijdelijke url op
         mail = MailQueue.objects.order_by('-toegevoegd_op')[0]

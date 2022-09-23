@@ -79,8 +79,10 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
     @staticmethod
     def _functie_volgorde(functie):
         # BB heeft volgorde 2
-        if functie.rol == "MO":
-            volgorde = 3
+        if functie.rol == "MWZ":
+            volgorde = 4
+        elif functie.rol == "MO":
+            volgorde = 5
         elif functie.rol == "BKO":
             volgorde = 10  # 10
         elif functie.rol == "RKO":
@@ -93,8 +95,10 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
             volgorde = functie.nhb_ver.ver_nr + 10000   # 11000-19999
         elif functie.rol == "WL":
             volgorde = functie.nhb_ver.ver_nr + 20000   # 21000-29999
+        elif functie.rol == "SUP":
+            volgorde = 50000
         else:             # pragma: no cover
-            volgorde = 0  # valt meteen op dat 'ie bovenaan komt
+            volgorde = 0  # bovenaan zetten zodat het meteen opvalt
         return volgorde
 
     def _get_functies_eigen(self):
@@ -108,7 +112,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
             # rollen die je altijd aan moet kunnen nemen als je ze hebt
             if rol == Rollen.ROL_BB:
-                obj = Functie(beschrijving='Manager competitiezaken')
+                obj = Functie(beschrijving='Manager Competitiezaken')
                 obj.url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
                 obj.selected = (self.rol_nu == rol)
                 obj.pk = 90002
@@ -125,6 +129,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                 objs.append(tup)
 
             elif rol == Rollen.ROL_NONE:
+                # TODO: deze is niet nodig
                 obj = Functie(beschrijving='Gebruiker')
                 obj.url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
                 obj.selected = (self.rol_nu == rol)
@@ -328,6 +333,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         if context['show_vhpg']:
             context['show_beheerder_intro'] = True
 
+        # TODO: handleidingen vervangen door link naar pdf
         context['wiki_2fa_url'] = reverse_handleiding(self.request, settings.HANDLEIDING_2FA)
         context['wiki_rollen'] = reverse_handleiding(self.request, settings.HANDLEIDING_ROLLEN)
         context['wiki_intro_nieuwe_beheerders'] = reverse_handleiding(self.request,

@@ -23,7 +23,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
 
     """ tests voor de Functie applicatie, functionaliteit Koppel bestuurders """
 
-    test_after = ('Account', 'Functie.test_2fa', 'Functie.test_overzicht')
+    test_after = ('Account', 'Functie.tests.test_otp', 'Functie.tests.test_overzicht')
 
     url_overzicht = '/functie/overzicht/'
     url_overzicht_vereniging = '/functie/overzicht/vereniging/'
@@ -228,7 +228,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_activeer_rol % 'BB', follow=True)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        self.assertContains(resp, "Manager competitiezaken")
+        self.assertContains(resp, "Manager Competitiezaken")
 
         # juiste URL om BKO te koppelen
         url = self.url_wijzig_ontvang % self.functie_bko.pk
@@ -251,7 +251,7 @@ class TestFunctieKoppelBeheerder(E2EHelpers, TestCase):
         mail = MailQueue.objects.all()[0]
         self.assert_email_html_ok(mail.mail_html, 'email_functie/rollen-gewijzigd.dtl')
         self.assertTrue(settings.URL_PDF_HANDLEIDING_BEHEERDERS in mail.mail_html)
-        self.assert_consistent_email_html_text(mail)
+        self.assert_consistent_email_html_text(mail, 'email_functie/rollen-gewijzigd.dtl')
 
         # koppel beheerder2
         with self.assert_max_queries(22):

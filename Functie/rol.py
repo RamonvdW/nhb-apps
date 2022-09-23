@@ -36,8 +36,7 @@ class Rollen(enum.IntEnum):
     """
 
     # rollen staan in prio volgorde
-    # dus als je 3 hebt mag je kiezen uit 3 of hoger
-    ROL_BB = 2          # Manager competitiezaken
+    ROL_BB = 2          # Manager Competitiezaken
     ROL_BKO = 3         # BK organisator, specifieke competitie
     ROL_RKO = 4         # RK organisator, specifieke competitie en rayon
     ROL_RCL = 5         # Regiocompetitieleider, specifieke competitie en regio
@@ -45,7 +44,9 @@ class Rollen(enum.IntEnum):
     ROL_WL = 7          # Wedstrijdleider van een vereniging, alle competities
     ROL_SEC = 10        # Secretaris van een vereniging
     ROL_SPORTER = 20    # Individuele sporter en NHB lid
-    ROL_MO = 30         # Manager Opleidingen
+    ROL_MWZ = 30        # Manager Wedstrijdzaken
+    ROL_MO = 40         # Manager Opleidingen
+    ROL_SUP = 50        # Support
     ROL_NONE = 99       # geen rol
 
     """ LET OP!
@@ -64,23 +65,14 @@ url2rol = {
     'HWL': Rollen.ROL_HWL,
     'WL': Rollen.ROL_WL,
     'SEC': Rollen.ROL_SEC,
-    'sporter': Rollen.ROL_SPORTER,
     'MO': Rollen.ROL_MO,
+    'MWZ': Rollen.ROL_MWZ,
+    'support': Rollen.ROL_SUP,
+    'sporter': Rollen.ROL_SPORTER,
     'geen': Rollen.ROL_NONE
 }
 
-rol2url = {
-    Rollen.ROL_BB: 'BB',
-    Rollen.ROL_BKO: 'BKO',
-    Rollen.ROL_RKO: 'RKO',
-    Rollen.ROL_RCL: 'RCL',
-    Rollen.ROL_HWL: 'HWL',
-    Rollen.ROL_WL: 'WL',
-    Rollen.ROL_SEC: 'SEC',
-    Rollen.ROL_SPORTER: 'sporter',
-    Rollen.ROL_MO: 'MO',
-    Rollen.ROL_NONE: 'geen',
-}
+rol2url = {value: key for key, value in url2rol.items()}
 
 
 # plugin administratie
@@ -206,6 +198,10 @@ def rol_zet_sessionvars(account, request):
                     rol = Rollen.ROL_SEC
                 elif functie.rol == "MO":
                     rol = Rollen.ROL_MO
+                elif functie.rol == "MWZ":
+                    rol = Rollen.ROL_MWZ
+                elif functie.rol == "SUP":
+                    rol = Rollen.ROL_SUP
 
                 if rol:
                     child_tup = (rol, functie.pk)
@@ -367,10 +363,10 @@ def rol_bepaal_beschrijving(rol, functie_pk=None):
         functie_naam = ""
 
     if rol == Rollen.ROL_BB:
-        beschr = 'Manager competitiezaken'
-    elif rol == Rollen.ROL_MO:
-        beschr = 'Manager opleidingen'
-    elif rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC):
+        beschr = 'Manager Competitiezaken'
+    elif rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
+                 Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC,
+                 Rollen.ROL_MO, Rollen.ROL_SUP, Rollen.ROL_MWZ):
         beschr = functie_naam
     elif rol == Rollen.ROL_SPORTER:
         beschr = 'Sporter'
@@ -413,8 +409,8 @@ def rol_activeer_rol(request, rolurl):
         else:
             # kijk of dit een toegestane rol is
             if nwe_rol == Rollen.ROL_NONE or nwe_rol in rollen_vast:
-                request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = None
                 request.session[SESSIONVAR_ROL_HUIDIGE] = nwe_rol
+                request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = None
                 request.session[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(nwe_rol)
             else:
                 from_ip = get_safe_from_ip(request)
@@ -496,6 +492,10 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
                 yield Rollen.ROL_BKO, obj.pk
             elif obj.rol == 'MO':
                 yield Rollen.ROL_MO, obj.pk
+            elif obj.rol == 'MWZ':
+                yield Rollen.ROL_MWZ, obj.pk
+            elif obj.rol == 'SUP':
+                yield Rollen.ROL_SUP, obj.pk
         # for
 
         # deze functie mag de HWL van vereniging in regio 100 aannemen

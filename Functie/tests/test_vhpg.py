@@ -16,7 +16,7 @@ class TestFunctieVHPG(E2EHelpers, TestCase):
 
     """ tests voor de Functie applicatie; module VHPG """
 
-    test_after = ('Functie.test_2fa', 'Functie.wisselvanrol')
+    test_after = ('Functie.tests.test_otp', 'Functie.tests.test_wisselvanrol')
 
     url_acceptatie = '/functie/vhpg-acceptatie/'
     url_afspraken = '/functie/vhpg-afspraken/'

@@ -9,7 +9,6 @@ from django.utils import timezone
 from django.utils.formats import date_format
 from Account.models import Account
 from NhbStructuur.models import NhbRegio, NhbRayon, NhbVereniging
-import datetime
 
 """ Deze module houdt bij wie beheerders zijn
 
@@ -52,12 +51,17 @@ class Functie(models.Model):
 
     # een aantal velden om de juiste Functie te kunnen koppelen
 
-    # BKO, RKO, RCL, SEC, HWL, WL, MO
+    # BKO, RKO, RCL, SEC, HWL, WL, MO, MWZ, SUP (zie rol.py)
     rol = models.CharField(max_length=5)
 
     # email adres wat bij deze functie hoort
     bevestigde_email = models.EmailField(blank=True)
     nieuwe_email = models.EmailField(blank=True)
+
+    # taken
+    optout_nieuwe_taak = models.BooleanField(default=False)
+    optout_herinnering_taken = models.BooleanField(default=False)
+    laatste_email_over_taken = models.DateTimeField(blank=True, null=True)
 
     # telefoonnummer wat bij deze functie hoort (optioneel)
     telefoon = models.CharField(max_length=25, default='', blank=True)

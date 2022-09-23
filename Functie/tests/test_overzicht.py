@@ -17,7 +17,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
 
     """ tests voor de Functie applicatie, functionaliteit Koppel bestuurders """
 
-    test_after = ('Account', 'Functie.test_2fa')
+    test_after = ('Account', 'Functie.tests.test_otp')
 
     url_overzicht = '/functie/overzicht/'
     url_overzicht_lid_nrs = '/functie/overzicht/alle-lid-nrs/sec-hwl/'
@@ -137,7 +137,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get('/plein/')
         self.assert_html_ok(resp)
-        self.assertContains(resp, "Manager competitiezaken")
+        self.assertContains(resp, "Manager Competitiezaken")
 
         # controleer de Wijzig knoppen op de functie-overzicht pagina
         with self.assert_max_queries(6):

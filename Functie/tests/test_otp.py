@@ -21,7 +21,7 @@ class TestFunctie2FA(E2EHelpers, TestCase):
 
     """ tests voor de Functie applicatie, module OTP / 2FA """
 
-    test_after = ('Account', 'Functie.test_rol')
+    test_after = ('Account', 'Functie.tests.test_rol')
 
     url_koppel_stap1 = '/functie/otp-koppelen-stap1/'
     url_koppel_stap2 = '/functie/otp-koppelen-stap2/'
@@ -338,7 +338,7 @@ class TestFunctie2FA(E2EHelpers, TestCase):
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.all()[0]
         self.assert_email_html_ok(mail.mail_html, 'email_functie/otp-is-losgekoppeld.dtl')
-        self.assert_consistent_email_html_text(mail)
+        self.assert_consistent_email_html_text(mail, 'email_functie/otp-is-losgekoppeld.dtl')
 
         # al losgekoppeld
         resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,

@@ -11,6 +11,7 @@ from Competitie.menu import get_url_voor_competitie
 from Functie.rol import (Rollen, rol_mag_wisselen, rol_get_huidige_functie, rol_get_beschrijving,
                          rol_activeer_rol, rol_activeer_functie)
 from Overig.helpers import get_safe_from_ip
+from Taken.operations import eval_open_taken
 import logging
 
 
@@ -51,6 +52,10 @@ class ActiveerRolView(UserPassesTestMixin, View):
 
         rol_beschrijving = rol_get_beschrijving(request)
         my_logger.info('%s ROL account %s is nu %s' % (from_ip, self.request.user.username, rol_beschrijving))
+
+        # update het aantal open taken gemeld in het menu
+        # want dit is afhankelijk van de huidige rol
+        eval_open_taken(self.request, forceer=True)
 
         # stuur een aantal rollen door naar een functionele pagina
         # de rest blijft in Wissel van Rol
