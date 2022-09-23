@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 from Competitie.models import DeelCompetitie, RegioCompetitieSchutterBoog, LAAG_REGIO
 from Functie.models import Functie
-from Taken.operations import maak_taak
+from Taken.operations import check_taak_bestaat, maak_taak
 from datetime import timedelta
 
 
@@ -18,6 +18,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         now = timezone.now()
+        now = timezone.localtime(now)
+
+        # dit commando wordt elk uur uitgevoerd
+        # we willen pas vanaf 08:00 een taak / mailtje
+        # voor het geval het commando een keer niet kan draaien herhalen we dit tot 14:00
+        if now.hour < 8 or now.hour > 14:
+            self.stdout.write('[INFO] meld_rcl_nieuwe_inschrijvingen: skipping want uur=%s' % now.hour)
+            return
 
         now_date = now.date()
         gisteren_date = now_date - timedelta(days=1)
@@ -38,6 +46,8 @@ class Command(BaseCommand):
                 tup = (deelcomp.competitie.afstand, deelcomp.nhb_regio.regio_nr)
                 afstand_regio2deelcomp[tup] = deelcomp
         # for
+
+        aantal_nieuwe_taken = 0
 
         # doe 32 queries
         for functie in (Functie
@@ -67,8 +77,6 @@ class Command(BaseCommand):
 
                 aantal = qset.count()
                 if aantal > 0:
-                    self.stdout.write('[INFO] %s: %s nieuwe aanmeldingen' % (functie, aantal))
-
                     regels = list()
                     regels.append('Er zijn nieuwe inschrijvingen')
                     regels.append('')
@@ -94,12 +102,20 @@ class Command(BaseCommand):
                     taak_log = "[%s] Taak aangemaakt" % now
                     taak_deadline = now + timedelta(days=7)
 
-                    maak_taak(toegekend_aan_functie=functie,
-                              deadline=taak_deadline,
-                              aangemaakt_door=None,  # systeem
-                              beschrijving=beschrijving,
-                              log=taak_log)
+                    # voorkom dubbele meldingen
+                    if not check_taak_bestaat(toegekend_aan_functie=functie,
+                                              beschrijving=beschrijving):
 
+                        self.stdout.write('[INFO] %s: %s nieuwe aanmeldingen' % (functie, aantal))
+
+                        maak_taak(toegekend_aan_functie=functie,
+                                  deadline=taak_deadline,
+                                  aangemaakt_door=None,  # systeem
+                                  beschrijving=beschrijving,
+                                  log=taak_log)
+                        aantal_nieuwe_taken += 1
         # for
+
+        self.stdout.write("[INFO] Aantal nieuwe taken aangemaakt voor de RCL's: %s" % aantal_nieuwe_taken)
 
 # end of file
