@@ -6,6 +6,7 @@
 
 from django.utils import timezone
 from django.conf import settings
+from Functie.rol import rol_get_huidige_functie
 from Mailer.operations import mailer_queue_email, render_email_template
 from Taken.models import Taak
 from datetime import timedelta
@@ -18,6 +19,21 @@ TAAK_EVAL_INTERVAL_MINUTES = 1
 
 EMAIL_TEMPLATE_NIEUWE_TAAK = 'email_taken/nieuwe_taak.dtl'
 EMAIL_TEMPLATE_HERINNERING = 'email_taken/herinnering.dtl'
+
+
+def get_taak_functie_pks(request):
+    account = request.user
+    functie_pks = list(account.functie_set.values_list('pk', flat=True))
+
+    # huidige rol toevoegen, zodat taken van die rol er ook bij staan
+    huidige_functie_pk = None
+    _, huidige_functie = rol_get_huidige_functie(request)
+    if huidige_functie:
+        huidige_functie_pk = huidige_functie.pk
+        if huidige_functie_pk not in functie_pks:
+            functie_pks.append(huidige_functie_pk)
+
+    return functie_pks, huidige_functie_pk
 
 
 def aantal_open_taken(request):
@@ -49,15 +65,18 @@ def eval_open_taken(request, forceer=False):
     eval_after = str(next_eval.timestamp())
     request.session[SESSIONVAR_TAAK_EVAL_AFTER] = eval_after
 
+    functie_pks, _ = get_taak_functie_pks(request)
+
     aantal_open = (Taak
                    .objects
                    .exclude(is_afgerond=True)
-                   .filter(toegekend_aan=request.user)
+                   .filter(toegekend_aan_functie__pk__in=functie_pks)
                    .count())
+
     request.session[SESSIONVAR_TAAK_AANTAL_OPEN] = aantal_open
 
 
-def stuur_taak_email_herinnering(email, aantal_open):
+def stuur_email_taak_herinnering(emailadres, aantal_open):
     """ Stuur een e-mail ter herinnering dat er een taak te wachten staat.
     """
 
@@ -69,7 +88,6 @@ def stuur_taak_email_herinnering(email, aantal_open):
         taken_str = "zijn taken die jouw aandacht nodig hebben"
 
     context = {
-        'voornaam': email.account.get_first_name(),
         'site_url': settings.SITE_URL,
         'aantal_str': aantal_str,
         'taken_str': taken_str,
@@ -77,29 +95,27 @@ def stuur_taak_email_herinnering(email, aantal_open):
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_HERINNERING)
 
-    mailer_queue_email(email.bevestigde_email,
+    mailer_queue_email(emailadres,
                        'Er zijn taken voor jou',
                        mail_body)
 
 
-def stuur_nieuwe_taak_email(email, aantal_open):
-    """ Stuur een e-mail dat er een nieuwe taak te wachten staat.
-    """
+def stuur_email_nieuwe_taak(emailadres, aantal_open):
 
+    # op het moment van sturen..
     if aantal_open == 1:
         aantal_str = "stond er 1 taak open"
     else:
         aantal_str = "stonden er %s taken open" % aantal_open
 
     context = {
-        'voornaam': email.account.get_first_name(),
         'site_url': settings.SITE_URL,
         'aantal_str': aantal_str,
     }
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_NIEUWE_TAAK)
 
-    mailer_queue_email(email.bevestigde_email,
+    mailer_queue_email(emailadres,
                        'Er is een nieuwe taak voor jou',
                        mail_body)
 
@@ -109,17 +125,13 @@ def check_taak_bestaat(**kwargs):
 
         Kies uit de volgende argumenten om op te filteren:
 
-            toegekend_aan = <Account>
+            toegekend_aan_functie = <Functie>
 
             deadline = <DateField>
 
             aangemaakt_door = <Account> (of None voor 'systeem')
 
             beschrijving = "beschrijving van de taak - call for action of informatie"
-
-            handleiding_pagina = Een van de settings.HANDLEIDING_xxx (of "")
-
-            deelcompetitie = <DeelCompetitie> waar deze taak bij hoort, of None
     """
     aantal = (Taak
               .objects
@@ -135,7 +147,7 @@ def maak_taak(**kwargs):
 
         De benodigde argumenten (kwargs) zijn:
 
-            toegekend_aan = <Account>
+            toegekend_aan_functie = <Functie>
 
             deadline = <DateField>
 
@@ -143,29 +155,26 @@ def maak_taak(**kwargs):
 
             beschrijving = "beschrijving van de taak - call for action of informatie"
 
-            handleiding_pagina = Een van de settings.HANDLEIDING_xxx (of "")
-
             log = begin van het logboek, typisch "[%s] Taak aangemaakt" % now
-
-            deelcompetitie = <DeelCompetitie> waar deze taak bij hoort, of None
     """
 
     taak = Taak(**kwargs)
     taak.save()
 
-    email = taak.toegekend_aan.accountemail_set.all()[0]        # FUTURE: kan niet tegen Account zonder AccountEmail
+    functie = taak.toegekend_aan_functie
 
-    if not email.optout_nieuwe_taak:
-        email.laatste_email_over_taken = timezone.now()
-        email.save()
+    # TODO: opt-out is nog niet in te stellen
+    if not functie.optout_nieuwe_taak:
+        functie.laatste_email_over_taken = timezone.now()
+        functie.save(update_fields=['laatste_email_over_taken'])
 
         aantal_open = (Taak
                        .objects
                        .exclude(is_afgerond=True)
-                       .filter(toegekend_aan=taak.toegekend_aan)
+                       .filter(toegekend_aan_functie=functie)
                        .count())
 
-        stuur_nieuwe_taak_email(email, aantal_open)
+        stuur_email_nieuwe_taak(functie.bevestigde_email, aantal_open)
 
 
 def herinner_aan_taken():
@@ -173,33 +182,33 @@ def herinner_aan_taken():
         te maken voor openstaande taken (elke 15 min dus).
     """
 
-    taken = dict()      # [toegekend_aan] = aantal
+    taken_functie = dict()      # [toegekend_aan_functie] = aantal
 
     for taak in Taak.objects.exclude(is_afgerond=True):
         try:
-            taken[taak.toegekend_aan] += 1
+            taken_functie[taak.toegekend_aan_functie] += 1
         except KeyError:
-            taken[taak.toegekend_aan] = 1
+            taken_functie[taak.toegekend_aan_functie] = 1
     # for
 
     now = timezone.now()
 
-    for account, aantal_open in taken.items():
-        email = account.accountemail_set.all()[0]
+    for functie, aantal_open in taken_functie.items():
 
-        if email.optout_herinnering_taken:
-            # wil geen herinneringen ontvangen
+        # TODO: opt-out is nog niet in te stellen
+        if functie.optout_herinnering_taken:
+            # wil geen herinnering ontvangen
             continue
 
-        if email.laatste_email_over_taken:
-            if email.laatste_email_over_taken + timedelta(days=7) > now:
+        if functie.laatste_email_over_taken:
+            if functie.laatste_email_over_taken + timedelta(days=7) > now:
                 # te vroeg om weer een mail te sturen
                 continue
 
-        email.laatste_email_over_taken = now
-        email.save()
+        functie.laatste_email_over_taken = now
+        functie.save(update_fields=['laatste_email_over_taken'])
 
-        stuur_taak_email_herinnering(email, aantal_open)
+        stuur_email_taak_herinnering(functie.bevestigde_email, aantal_open)
     # for
 
 # end of file

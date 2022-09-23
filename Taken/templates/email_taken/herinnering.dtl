@@ -6,7 +6,7 @@
 {% endcomment %}
 
 {% block inhoud_text %}
-    |Hallo {{ voornaam }}!
+    |Hallo!
     |
     |Er {{ taken_str }} op {{ site_url }}
     |Op het moment van sturen {{ aantal_str }}.
@@ -15,7 +15,7 @@
 {% endblock %}
 
 {% block inhoud_html %}
-    <div>Hallo {{ voornaam }}!</div>
+    <div>Hallo!</div>
     <br>
     <div>Er {{ taken_str }} op {{ site_url }}</div>
     <div>Op het moment van sturen {{ aantal_str }}.</div>

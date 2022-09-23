@@ -14,7 +14,6 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Taak details</h3>
-            <p>Details van deze aan jou toegekende taak</p>
         </div>
     </div>
 
@@ -24,17 +23,22 @@
 
             <table class="white">
                 <tr>
-                    <td>Taak nummer:</td>
+                    <th>Taak nummer</th>
                     <td>{{ taak.pk }}</td>
                 </tr>
 
                 <tr>
-                    <td>Deadline:</td>
+                    <th>Voor functie</th>
+                    <td>{{ taak.toegekend_aan_functie.beschrijving }}</td>
+                </tr>
+
+                <tr>
+                    <th>Deadline</th>
                     <td>{{ taak.deadline|date:"Y-m-d" }}</td>
                 </tr>
 
                 <tr>
-                    <td>Aangemaakt door:</td>
+                    <th>Aangemaakt door</th>
                     {% if taak.aangemaakt_door %}
                         <td>{{ taak.aangemaakt_door.volledige_naam }}</td>
                     {% else %}
@@ -42,35 +46,31 @@
                     {% endif %}
                 </tr>
 
-                {% if taak.deelcompetitie %}
-                    <tr>
-                        <td>Hoort bij:</td>
-                        <td>{{ taak.deelcompetitie }}</td>
-                    </tr>
-                {% endif %}
-
                 <tr>
-                    <td>Beschrijving:</td>
-                    <td>{{ taak.beschrijving|linebreaks }}</td>
+                    <th>Beschrijving</th>
+                    <td>{{ taak.beschrijving|linebreaksbr }}</td>
                 </tr>
 
+                <!--
                 <tr>
-                    <td>Instructies:</td>
-                    {% if taak.handleiding_pagina %}
-                        <td><a class="btn-nhb-blauw" href="{{ taak.url_handleiding }}">Openen</a></td>
-                    {% else %}
-                        <td><i>Geen instructies beschikbaar</i></td>
-                    {% endif %}
+                    <th>Logboekje</th>
+                    <td>{{ taak.log|linebreaksbr }}</td>
                 </tr>
+                -->
 
                 {% if taak.url_sluiten %}
                     <tr>
-                        <td colspan="2" class="center">Als de taak afgehandeld is, dan kan je deze sluiten:<br><br>
+                        <td colspan="2" class="center" style="padding-top:50px">Als de taak afgehandeld is, dan kan je deze sluiten:<br><br>
                             <form action="{{ taak.url_sluiten }}" method="post">
                                 {% csrf_token %}
                                 <input class="btn-nhb-rood" name="button_sluit_taak" type="submit" value="Taak sluiten">
                             </form>
                         </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <th>Status</th>
+                        <td>Gesloten</td>
                     </tr>
                 {% endif %}
 

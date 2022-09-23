@@ -5,21 +5,23 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from Functie.models import Functie
 from Taken.models import Taak
-from Sporter.models import Sporter
 from TestHelpers.e2ehelpers import E2EHelpers
 from TestHelpers import testdata
-import datetime
 
 
 class TestTakenViews(E2EHelpers, TestCase):
 
-    """ tests voor de Taken applicatie """
+    """ tests voor de applicatie Taken """
 
-    test_after = ('Functie',)
+    test_after = ('Functie', 'Taken.tests.test_taken')
 
     url_overzicht = '/taken/'
     url_details = '/taken/details/%s/'  # taak_pk
+
+    emailadres = 'taak@nhb.not'
+    emailadres2 = 'taak2@nhb.not'
 
     @classmethod
     def setUpTestData(cls):
@@ -29,39 +31,34 @@ class TestTakenViews(E2EHelpers, TestCase):
     def setUp(self):
         """ initialisatie van de test case """
 
-        self.account_normaal = self.e2e_create_account('normaal', 'normaal@test.com', 'Normaal')
-        self.account_same = self.e2e_create_account('same', 'same@test.com', 'same')
+        self.functie_sup = Functie.objects.get(rol='SUP')
+        self.functie_sup.bevestigde_email = self.emailadres
+        self.functie_sup.laatste_email_over_taken = None
+        self.functie_sup.save(update_fields=['bevestigde_email', 'laatste_email_over_taken'])
 
-        sporter = Sporter()
-        sporter.lid_nr = 100042
-        sporter.geslacht = "M"
-        sporter.voornaam = "Beh"
-        sporter.achternaam = "eerder"
-        sporter.geboorte_datum = datetime.date(year=1972, month=3, day=4)
-        sporter.sinds_datum = datetime.date(year=2010, month=11, day=12)
-        sporter.account = self.account_normaal
-        sporter.email = sporter.account.email
-        sporter.save()
+        self.functie_mwz = Functie.objects.get(rol='MWZ')
+        self.functie_mwz.bevestigde_email = self.emailadres2
+        self.functie_mwz.laatste_email_over_taken = None
+        self.functie_mwz.save(update_fields=['bevestigde_email', 'laatste_email_over_taken'])
 
         # maak een taak aan
-        taak = Taak(toegekend_aan=self.testdata.account_admin,
+        taak = Taak(toegekend_aan_functie=self.functie_sup,
                     deadline='2020-01-01',
-                    beschrijving='Testje',
-                    handleiding_pagina='Hoofdpagina')
+                    beschrijving='Testje taak1 met meerdere\nregels\ntest')
         taak.save()
         self.taak1 = taak
 
         # maak een afgeronde taak aan
         taak = Taak(is_afgerond=True,
-                    toegekend_aan=self.account_normaal,
+                    toegekend_aan_functie=self.functie_mwz,
                     deadline='2020-01-01',
-                    beschrijving='Afgerond testje')
+                    beschrijving='Afgerond testje taak2')
         taak.save()
         self.taak2 = taak
 
     def test_anon(self):
-        # do een get van het taken overzicht zonder ingelogd te zijn
-        # resulteert in een redirect naar het plein
+        # do een get van het takenoverzicht zonder ingelogd te zijn
+        # dit leidt tot een redirect naar het plein
         self.e2e_logout()
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_overzicht)
@@ -72,6 +69,9 @@ class TestTakenViews(E2EHelpers, TestCase):
         self.assert403(resp)
 
     def test_allowed(self):
+        self.functie_sup.accounts.add(self.testdata.account_admin)
+        self.functie_mwz.accounts.add(self.testdata.account_admin)
+
         self.e2e_login_and_pass_otp(self.testdata.account_admin)
         self.e2e_wisselnaarrol_bb()
 
@@ -81,16 +81,9 @@ class TestTakenViews(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('taken/overzicht.dtl', 'plein/site_layout.dtl'))
 
-        url = self.url_details % self.taak1.pk
-        with self.assert_max_queries(20):
-            resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assert_html_ok(resp)
-        self.assert_template_used(resp, ('taken/details.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Testje taak1')
+        self.assertContains(resp, 'testje taak2')
 
-        # nogmaals, zonder handleiding
-        self.taak1.handleiding_pagina = ""
-        self.taak1.save()
         url = self.url_details % self.taak1.pk
         with self.assert_max_queries(20):
             resp = self.client.get(url)
@@ -130,6 +123,9 @@ class TestTakenViews(E2EHelpers, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('taken/overzicht.dtl', 'plein/site_layout.dtl'))
+
+        self.assertTrue(str(self.taak1) != '')
+        self.assertTrue(str(self.taak2) != '')
 
     def test_bad(self):
         self.e2e_login_and_pass_otp(self.testdata.account_admin)

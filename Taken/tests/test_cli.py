@@ -5,73 +5,68 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
-from django.core import management
+from Functie.models import Functie
 from Taken.models import Taak
 from TestHelpers.e2ehelpers import E2EHelpers
-import io
 
 
 class TestTakenCLI(E2EHelpers, TestCase):
-    """ unittests voor de Taken applicatie, management command maak_taak """
+    """ unittests voor de applicatie Taken, management command maak_taak """
+
+    emailadres = 'mwz@nhb.not'
 
     def setUp(self):
         """ initialisatie van de test case """
-        self.account1 = self.e2e_create_account('eerste', 'eerste@test.com', 'Eer ste')
-        self.account2 = self.e2e_create_account('tweede', 'tweede@test.com', 'Twee de')
+        pass
 
-    def test_een(self):
+    def test_alles(self):
         self.assertEqual(0, Taak.objects.count())
-        f1 = io.StringIO()
-        f2 = io.StringIO()
+
+        account = self.e2e_create_account('normal', 'normal@nhb.not', 'Normaal')
+        functie = Functie.objects.get(rol='MWZ')
+
+        f1, f2 = self.run_management_command('maak_taak', 'BlaBla', '', '2020-02-03', 'Hallo')
+        self.assertTrue("[ERROR] Geen functie gevonden die voldoet aan 'BlaBla'")
+        self.assertEqual(f2.getvalue(), '')
+        self.assertEqual(0, Taak.objects.count())
+
+        functie.bevestigde_email = ''
+        functie.save(update_fields=['bevestigde_email'])
+
         with self.assert_max_queries(20):
-            management.call_command('maak_taak', 'eerste', 'tweede', '2020-02-03', '', 'Hallo', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('maak_taak', 'MWZ', '', '2020-02-03', 'Hallo')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-        self.assertEqual(1, Taak.objects.count())
+        self.assertEqual(f1.getvalue(), '')
+        self.assertTrue("[WARNING] Geen e-mailadres bekend voor functie Manager Wedstrijdzaken" in f2.getvalue())
 
+        self.assertEqual(1, Taak.objects.count())
         taak = Taak.objects.all()[0]
         self.assertEqual(str(taak.deadline), '2020-02-03')
+        self.assertEqual(taak.toegekend_aan_functie, functie)
+        self.assertIsNone(taak.aangemaakt_door)
+        taak.delete()
 
-    def test_systeem(self):
-        self.assertEqual(0, Taak.objects.count())
-        f1 = io.StringIO()
-        f2 = io.StringIO()
+        functie.bevestigde_email = self.emailadres
+        functie.save(update_fields=['bevestigde_email'])
+
         with self.assert_max_queries(20):
-            management.call_command('maak_taak', 'eerste', 'systeem', '2020-02-03', '', 'Hallo', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('maak_taak', 'MWZ', account.username, '2020-02-03', 'Hallo')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
+        self.assertEqual(f1.getvalue(), '')
+        self.assertTrue('Taak aangemaakt door normal voor functie Manager Wedstrijdzaken met deadline 2020-02-03' in f2.getvalue())
+
         self.assertEqual(1, Taak.objects.count())
+        taak = Taak.objects.all()[0]
+        self.assertEqual(str(taak.deadline), '2020-02-03')
+        self.assertEqual(taak.aangemaakt_door, account)
+        self.assertEqual(taak.toegekend_aan_functie, functie)
 
-    def test_bad(self):
-        self.assertEqual(0, Taak.objects.count())
-        f1 = io.StringIO()
-        f2 = io.StringIO()
         with self.assert_max_queries(20):
-            management.call_command('maak_taak', 'derde', 'systeem', '2020-02-03', '', 'Hallo', stderr=f1, stdout=f2)
+            f1, f2 = self.run_management_command('maak_taak', 'MWZ', 'BlaBla', '2020-02-03', 'Hallo')
         # print("f1: %s" % f1.getvalue())
         # print("f2: %s" % f2.getvalue())
-
-        self.assertEqual(0, Taak.objects.count())
-
-        f1 = io.StringIO()
-        f2 = io.StringIO()
-        with self.assert_max_queries(20):
-            management.call_command('maak_taak', 'eerste', 'derde', '2020-02-03', '', 'Hallo', stderr=f1, stdout=f2)
-        # print("f1: %s" % f1.getvalue())
-        # print("f2: %s" % f2.getvalue())
-        self.assertEqual(0, Taak.objects.count())
-
-    def test_no_email(self):
-        email = self.account1.accountemail_set.all()[0]
-        email.bevestigde_email = ''
-        email.save()
-
-        f1 = io.StringIO()
-        f2 = io.StringIO()
-        with self.assert_max_queries(20):
-            management.call_command('maak_taak', 'eerste', 'systeem', '2020-02-03', '', 'Hallo', stderr=f1, stdout=f2)
-        # print("f1: %s" % f1.getvalue())
-        # print("f2: %s" % f2.getvalue())
-        self.assertTrue('[ERROR] geen e-mailadres bekend voor account Eer' in f1.getvalue())
+        self.assertTrue('Account matching query does not exist' in f1.getvalue())
 
 # end of file
