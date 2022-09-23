@@ -6,7 +6,7 @@
 
 from django.conf import settings
 from django.utils import timezone
-from Account.models import Account
+from Functie.models import Functie
 from Feedback.models import Feedback
 from Taken.operations import maak_taak, check_taak_bestaat
 import datetime
@@ -38,17 +38,15 @@ def store_feedback(gebruiker_str, rol_str, op_pagina, volledige_url, bevinding, 
     taak_deadline = now + datetime.timedelta(days=7)
     taak_tekst = "Er is nieuwe feedback om te bekijken"
 
-    for account in (Account
-                    .objects
-                    .filter(username__in=settings.TAAK_OVER_FEEDBACK_ACCOUNTS)):
+    functie = Functie.objects.get(rol='SUP')
 
-        if not check_taak_bestaat(toegekend_aan=account, beschrijving=taak_tekst):
-            maak_taak(toegekend_aan=account,
-                      deadline=taak_deadline,
-                      aangemaakt_door=None,         # systeem
-                      beschrijving=taak_tekst,
-                      log=taak_log)
-    # for
+    if not check_taak_bestaat(toegekend_aan_functie=functie, beschrijving=taak_tekst):
+
+        maak_taak(toegekend_aan_functie=functie,
+                  deadline=taak_deadline,
+                  aangemaakt_door=None,         # None = 'systeem'
+                  beschrijving=taak_tekst,
+                  log=taak_log)
 
 
 # end of file

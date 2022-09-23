@@ -19,7 +19,7 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
 
     """ tests voor de Wedstrijden applicatie, module Inschrijven """
 
-    test_after = ('Wedstrijden.test_wedstrijd',)
+    test_after = ('Wedstrijden.tests.test_wedstrijd',)
 
     url_wedstrijden_sessies = '/wedstrijden/%s/sessies/'                               # wedstrijd_pk
     url_wedstrijden_wijzig_sessie = '/wedstrijden/%s/sessies/%s/wijzig/'               # wedstrijd_pk, sessie_pk

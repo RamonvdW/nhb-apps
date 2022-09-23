@@ -1512,12 +1512,12 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
 
         # echt afsluiten
         self.assertEqual(Taak.objects.count(), 0)
-        with self.assert_max_queries(28):
+        with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)  # check for success
         deelcomp = DeelCompetitie.objects.get(pk=self.deelcomp_regio101_18.pk)
         self.assertTrue(deelcomp.is_afgesloten)
-        self.assertEqual(Taak.objects.count(), 2)       # RKO + BKO
+        self.assertEqual(Taak.objects.count(), 1)       # RKO
 
         # get terwijl al afgesloten
         with self.assert_max_queries(20):
@@ -1530,7 +1530,7 @@ class TestCompLaagRegioPlanning(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.post(url)
         self.assert_is_redirect_not_plein(resp)  # check for success
-        self.assertEqual(Taak.objects.count(), 2)
+        self.assertEqual(Taak.objects.count(), 1)
 
     def test_bad_afsluiten_regio(self):
         self.client.logout()

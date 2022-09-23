@@ -18,7 +18,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
 
     """ tests voor de Account applicatie, module Login-as """
 
-    test_after = ('Account.test_login.',)
+    test_after = ('Account.tests.test_login.',)
 
     url_wissel = '/account/account-wissel/'
 
@@ -159,7 +159,7 @@ class TestAccountLoginAs(E2EHelpers, TestCase):
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('functie/wissel-van-rol.dtl', 'plein/site_layout.dtl'))
         self.assertContains(resp, 'Gebruiker')
-        self.assertContains(resp, 'Manager competitiezaken')
+        self.assertContains(resp, 'Manager Competitiezaken')
 
     def test_wissel_geblokkeerd(self):
         # login als admin

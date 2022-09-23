@@ -5,21 +5,23 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.test import TestCase
+from django.utils import timezone
 from BasisTypen.models import BoogType
 from Bestel.models import BestelProduct
 from Functie.operations import maak_functie
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
+from TestHelpers.e2ehelpers import E2EHelpers
 from Wedstrijden.models import (WedstrijdLocatie, Wedstrijd, WedstrijdSessie, WedstrijdInschrijving,
                                 WedstrijdKorting, INSCHRIJVING_STATUS_AFGEMELD, WEDSTRIJD_KORTING_VERENIGING)
-from TestHelpers.e2ehelpers import E2EHelpers
+from datetime import timedelta
 
 
 class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
 
     """ tests voor de Wedstrijden applicatie, module Aanmeldingen """
 
-    test_after = ('Wedstrijden.test_wedstrijd',)
+    test_after = ('Wedstrijden.tests.test_wedstrijd',)
 
     url_aanmeldingen_wedstrijd = '/wedstrijden/%s/aanmeldingen/'                    # wedstrijd_pk
     url_details_aanmelding = '/wedstrijden/details-aanmelding/%s/'                  # inschrijving_pk
@@ -27,9 +29,9 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
     url_aanmeldingen_download_tsv = '/wedstrijden/%s/aanmeldingen/download/tsv/'    # wedstrijd_pk
     url_aanmeldingen_download_csv = '/wedstrijden/%s/aanmeldingen/download/csv/'    # wedstrijd_pk
 
-    url_kalender_wedstrijd_details = '/wedstrijden/%s/details/'                     # wedstrijd_pk
-    url_kalender_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
-    url_kalender_vereniging = '/wedstrijden/vereniging/'
+    url_wedstrijd_details = '/wedstrijden/%s/details/'                     # wedstrijd_pk
+    url_wedstrijden_maak_nieuw = '/wedstrijden/vereniging/kies-type/'
+    url_wedstrijden_vereniging = '/wedstrijden/vereniging/'
     url_inschrijven_groepje = '/wedstrijden/inschrijven/%s/groep/'                  # wedstrijd_pk
     url_inschrijven_toevoegen_mandje = '/wedstrijden/inschrijven/toevoegen-mandje/'
     url_sporter_voorkeuren = '/sporter/voorkeuren/%s/'                              # sporter_pk
@@ -118,8 +120,8 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_admin)
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        resp = self.client.post(self.url_kalender_maak_nieuw, {'keuze': 'nhb'})
-        self.assert_is_redirect(resp, self.url_kalender_vereniging)
+        resp = self.client.post(self.url_wedstrijden_maak_nieuw, {'keuze': 'nhb'})
+        self.assert_is_redirect(resp, self.url_wedstrijden_vereniging)
 
         self.assertEqual(1, Wedstrijd.objects.count())
         self.wedstrijd = Wedstrijd.objects.all()[0]
@@ -152,6 +154,31 @@ class TestWedstrijdenInschrijven(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account)
         # self.e2e_wisselnaarrol_sporter()
         url = self.url_inschrijven_groepje % self.wedstrijd.pk
+
+        # zorg dat de wedstrijd als 'gesloten' gezien wordt
+        begin = self.wedstrijd.datum_begin
+        self.wedstrijd.datum_begin = timezone.now().date()
+        self.wedstrijd.save(update_fields=['datum_begin'])
+        resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
+                                                                        'wedstrijd': self.wedstrijd.pk,
+                                                                        'sporterboog': self.sporterboog1r.pk,
+                                                                        'sessie': self.sessie_r.pk,
+                                                                        'klasse': wkls_r[0].pk,
+                                                                        'boog': self.boog_r.pk})
+        self.assert404(resp, 'Inschrijving is gesloten')
+
+        self.wedstrijd.datum_begin += timedelta(days=self.wedstrijd.inschrijven_tot - 1)
+        self.wedstrijd.save(update_fields=['datum_begin'])
+        resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
+                                                                        'wedstrijd': self.wedstrijd.pk,
+                                                                        'sporterboog': self.sporterboog1r.pk,
+                                                                        'sessie': self.sessie_r.pk,
+                                                                        'klasse': wkls_r[0].pk,
+                                                                        'boog': self.boog_r.pk})
+        self.assert404(resp, 'Inschrijving is gesloten')
+
+        self.wedstrijd.datum_begin = begin
+        self.wedstrijd.save(update_fields=['datum_begin'])
 
         resp = self.client.post(self.url_inschrijven_toevoegen_mandje, {'snel': 1,
                                                                         'wedstrijd': self.wedstrijd.pk,

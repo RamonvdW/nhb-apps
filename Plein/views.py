@@ -110,14 +110,12 @@ class PleinView(View):
                 # beheerder
                 template = TEMPLATE_PLEIN_BEHEERDER
 
-                handleiding_pagina = ROL2HANDLEIDING_PAGINA[rol_nu]
-
-                context['handleiding_url'] = reverse_handleiding(request, handleiding_pagina)
-
                 if rol_nu == Rollen.ROL_BB:
                     context['rol_is_bb'] = True
                 elif rol_nu == Rollen.ROL_MO:
                     context['rol_is_mo'] = True
+                elif rol_nu == Rollen.ROL_MWZ:
+                    context['rol_is_mwz'] = True
                 elif rol_nu == Rollen.ROL_BKO:
                     context['rol_is_bko'] = True
                 elif rol_nu == Rollen.ROL_RKO:
@@ -130,6 +128,8 @@ class PleinView(View):
                     context['rol_is_wl'] = True
                 elif rol_nu == Rollen.ROL_SEC:
                     context['rol_is_sec'] = True
+                elif rol_nu == Rollen.ROL_SUP:
+                    context['rol_is_sup'] = True
                 else:                               # pragma: no cover
                     # vangnet voor nieuwe rollen
                     raise Http404("Onbekende rol %s" % rol_nu)

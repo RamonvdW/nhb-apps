@@ -121,7 +121,7 @@ class BoogType(models.Model):
     # sorteervolgorde zodat order_by('volgorde') de juiste sortering oplevert
     volgorde = models.CharField(max_length=1, default='?')
 
-    # is dit boog type nog actueel?
+    # is dit boogtype nog actueel?
     # zolang in gebruik blijft een boogtype bestaan
     # True = niet meer gebruiken voor nieuwe wedstrijden
     buiten_gebruik = models.BooleanField(default=False)

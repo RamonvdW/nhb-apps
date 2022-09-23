@@ -12,7 +12,7 @@ from django.shortcuts import render
 from django.views.generic import View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Account.models import Account
+from Functie.models import Functie
 from BasisTypen.models import (BoogType, KalenderWedstrijdklasse, GESLACHT_ALLE,
                                ORGANISATIES2LONG_STR, ORGANISATIE_WA, ORGANISATIE_IFAA)
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
@@ -602,16 +602,13 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
         taak_tekst = msg % "%s van vereniging %s" % (repr(wedstrijd.titel), wedstrijd.organiserende_vereniging)
         taak_tekst += '\n\nGa naar de Wedstrijdkalender om deze wedstrijd te behandelen.'
 
-        # maak de persoonlijke taak aan voor ieder account met is_BB vlag
-        # FUTURE: omzetten naar taak voor rol BB
-        for account in Account.objects.filter(is_BB=True):
-            maak_taak(
-                toegekend_aan=account,
-                deadline=taak_deadline,
-                beschrijving=taak_tekst,
-                handleiding_pagina='',
-                log=taak_log)
-        # for
+        # maak een taak voor de Manager Wedstrijdzaken
+        functie_mwz = Functie.objects.get(rol='MWZ')
+        maak_taak(
+            toegekend_aan_functie=functie_mwz,
+            deadline=taak_deadline,
+            beschrijving=taak_tekst,
+            log=taak_log)
 
     @staticmethod
     def _maak_taak_voor_hwl(wedstrijd, msg):
@@ -621,18 +618,13 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
         taak_tekst = msg % repr(wedstrijd.titel)
         taak_tekst += '\n\nGa naar de Wedstrijdkalender om deze wedstrijd te behandelen.'
 
+        # maak een taak aan voor de HWL van de organiserende vereniging
         functie_hwl = wedstrijd.organiserende_vereniging.functie_set.filter(rol='HWL')[0]
-
-        # maak de persoonlijke taak aan voor ieder account gekoppeld aan deze functie
-        # FUTURE: omzetten naar taak voor rol HWL
-        for account in functie_hwl.accounts.all():
-            maak_taak(
-                toegekend_aan=account,
-                deadline=taak_deadline,
-                beschrijving=taak_tekst,
-                handleiding_pagina='',
-                log=taak_log)
-        # for
+        maak_taak(
+            toegekend_aan_functie=functie_hwl,
+            deadline=taak_deadline,
+            beschrijving=taak_tekst,
+            log=taak_log)
 
     def post(self, request, *args, **kwargs):
 

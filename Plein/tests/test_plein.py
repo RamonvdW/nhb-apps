@@ -91,7 +91,9 @@ class TestPlein(E2EHelpers, TestCase):
         sporter.email = sporter.account.email
         sporter.save()
 
-        self.functie_mo = maak_functie('Test MO', 'MO')
+        self.functie_mo = maak_functie('Manager Opleidingen', 'MO')
+        self.functie_mwz = maak_functie('Manager Wedstrijdzaken', 'MWZ')
+        self.functie_sup = maak_functie('Support', 'SUP')
 
     def test_plein_anon(self):
         self.e2e_logout()
@@ -154,7 +156,7 @@ class TestPlein(E2EHelpers, TestCase):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Manager competitiezaken')
+        self.assertContains(resp, 'Manager Competitiezaken')
 
         # bko
         self.e2e_wissel_naar_functie(self.functie_bko)
@@ -208,7 +210,25 @@ class TestPlein(E2EHelpers, TestCase):
             resp = self.client.get(self.url_plein)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
-        self.assertContains(resp, 'Manager opleidingen')
+        self.assertContains(resp, 'Manager Opleidingen')
+
+        # mwz
+        self.e2e_wissel_naar_functie(self.functie_mwz)
+        self.e2e_check_rol('MWZ')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Manager Wedstrijdzaken')
+
+        # support
+        self.e2e_wissel_naar_functie(self.functie_sup)
+        self.e2e_check_rol('support')
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_plein)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('plein/plein-beheerder.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Support')
 
         # geen
         self.e2e_wisselnaarrol_gebruiker()

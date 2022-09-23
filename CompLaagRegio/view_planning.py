@@ -1399,52 +1399,28 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
 
             # maak het bericht voor een taak aan de RKO's en BKO's
             account = request.user
-            ter_info_namen = list()
             now = timezone.now()
             taak_deadline = now
             assert isinstance(account, Account)
             taak_tekst = "Ter info: De regiocompetitie %s is zojuist afgesloten door RCL %s" % (
                             str(deelcomp), account.volledige_naam())
-            taak_tekst += "\nAls RKO kan je onder Competitie, Planning Rayon de status van elke regio zien."
+            taak_tekst += "\nAls RKO kan je onder Bondscompetities, Planning Rayon de status van elke regio zien."
             taak_log = "[%s] Taak aangemaakt" % now
 
-            # stuur elke RKO een taak ('ter info')
+            # maak een taak aan voor de RKO
             deelcomp_rk = DeelCompetitie.objects.get(competitie=deelcomp.competitie,
                                                      laag=LAAG_RK,
                                                      nhb_rayon=deelcomp.nhb_regio.rayon)
             functie_rko = deelcomp_rk.functie
-            for account in functie_rko.accounts.all():
-                # maak een taak aan voor deze RKO
-                maak_taak(toegekend_aan=account,
-                          deadline=taak_deadline,
-                          aangemaakt_door=request.user,
-                          beschrijving=taak_tekst,
-                          handleiding_pagina="",
-                          log=taak_log,
-                          deelcompetitie=deelcomp_rk)
-                ter_info_namen.append(account.volledige_naam())
-            # for
-
-            # stuur elke BKO een taak ('ter info')
-            deelcomp_bk = DeelCompetitie.objects.get(is_afgesloten=False,
-                                                     competitie=deelcomp.competitie,
-                                                     laag=LAAG_BK)
-            functie_bko = deelcomp_bk.functie
-            for account in functie_bko.accounts.all():
-                # maak een taak aan voor deze BKO
-                maak_taak(toegekend_aan=account,
-                          deadline=taak_deadline,
-                          aangemaakt_door=request.user,
-                          beschrijving=taak_tekst,
-                          handleiding_pagina="",
-                          log=taak_log,
-                          deelcompetitie=deelcomp_bk)
-                ter_info_namen.append(account.volledige_naam())
-            # for
+            maak_taak(toegekend_aan_functie=functie_rko,
+                      deadline=taak_deadline,
+                      aangemaakt_door=account,
+                      beschrijving=taak_tekst,
+                      log=taak_log)
 
             # schrijf in het logboek
             msg = "Deelcompetitie '%s' is afgesloten" % str(deelcomp)
-            msg += '\nDe volgende beheerders zijn geïnformeerd via een taak: %s' % ", ".join(ter_info_namen)
+            msg += '\nDe %s is geïnformeerd via een taak' % functie_rko.beschrijving
             schrijf_in_logboek(request.user, "Competitie", msg)
 
         url = reverse('Competitie:kies')

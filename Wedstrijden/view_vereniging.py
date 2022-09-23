@@ -129,7 +129,17 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
             keuze = request.POST.get('keuze', '')
             if keuze in ('wa', 'ifaa', 'nhb'):
                 now = timezone.now()
-                begin = date(now.year, now.month, now.day)      # inschrijven kan alleen indien in toekomst
+
+                # zet de wedstrijd minstens 2 maanden in de toekomst
+                day = 1
+                month = now.month + 2
+                year = now.year
+                if now.day > 1:
+                    month += 1
+                if month > 12:
+                    month -= 12
+                    year += 1
+                begin = date(year, month, day)
 
                 keuze2organisatie = {
                     'wa': ORGANISATIE_WA,

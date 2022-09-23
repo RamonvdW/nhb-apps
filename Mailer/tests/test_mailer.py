@@ -14,7 +14,7 @@ class TestMailerGoodBase(TestCase):
 
     """ tests voor de Mailer applicatie """
 
-    test_after = ('Mailer.test_operations', )
+    test_after = ('Mailer.tests.test_operations', )
 
     def test_send_mail_deliver(self):
         # requires websim_mailer.py running in the background
@@ -75,7 +75,7 @@ class TestMailerBadBase(TestCase):
 
     """ tests voor de Mailer applicatie """
 
-    test_after = ('Mailer.test_operations', )
+    test_after = ('Mailer.tests.test_operations', )
 
     def test_send_mail_no_connect(self):
         # deze test eist dat de URL wijst naar een poort waar niet op gereageerd wordt

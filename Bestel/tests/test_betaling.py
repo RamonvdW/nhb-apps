@@ -24,9 +24,9 @@ import re
 
 class TestBestelBetaling(E2EHelpers, TestCase):
 
-    """ tests voor de Bestel applicatie, samenwerking met Betaal applicatie """
+    """ tests voor de applicatie Bestel, samenwerking met applicatie Betaal """
 
-    test_after = ('Bestel.test_bestelling',)
+    test_after = ('Bestel.tests.test_bestelling',)
 
     url_mandje_bestellen = '/bestel/mandje/'
     url_bestellingen_overzicht = '/bestel/overzicht/'

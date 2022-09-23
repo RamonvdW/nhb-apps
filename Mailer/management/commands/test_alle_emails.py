@@ -23,7 +23,7 @@ from Mailer.models import MailQueue
 from Mailer.operations import mailer_email_is_valide
 from NhbStructuur.models import NhbVereniging, NhbRegio
 from Sporter.models import Sporter, SporterBoog
-from Taken.operations import stuur_nieuwe_taak_email, stuur_taak_email_herinnering
+from Taken.operations import stuur_email_nieuwe_taak, stuur_email_taak_herinnering
 from Wedstrijden.models import (Wedstrijd, WEDSTRIJD_STATUS_GEACCEPTEERD,
                                 WedstrijdSessie,
                                 WedstrijdInschrijving, INSCHRIJVING_STATUS_RESERVERING_BESTELD,
@@ -49,7 +49,7 @@ class Command(BaseCommand):
 
     def __init__(self, stdout=None, stderr=None, no_color=False, force_color=False):
         super().__init__(stdout, stderr, no_color, force_color)
-        self.to_email = ''
+        self.to_email = ''              # krijgen we via de command line
         self.account_email = None
         self.bestelling = None
         self.functie = None
@@ -349,11 +349,11 @@ class Command(BaseCommand):
 
     def _test_taken(self):
         self.stdout.write('Maak mail voor Taken - Nieuwe taak')
-        stuur_nieuwe_taak_email(self.account_email, 42)
+        stuur_email_nieuwe_taak(self.to_email, 42)
         self._check_mail_gemaakt()
 
         self.stdout.write('Maak mail voor Taken - Herinnering')
-        stuur_taak_email_herinnering(self.account_email, 42)
+        stuur_email_taak_herinnering(self.to_email, 42)
         self._check_mail_gemaakt()
 
     def _check_to_email(self):
@@ -382,7 +382,7 @@ class Command(BaseCommand):
         mailqueue_pre = self.mailqueue_last
 
         if self._check_to_email():
-            # nu is self.account_email beschikbaar
+            # nu is self.account_email ingevuld en gecontroleerd
             self._database_vullen()
 
             # test iedereen die Mailer.operations.mailer_queue_email gebruikt

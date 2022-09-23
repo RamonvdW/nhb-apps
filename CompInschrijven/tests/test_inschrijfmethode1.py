@@ -22,7 +22,7 @@ class TestCompInschrijvenMethode1(E2EHelpers, TestCase):
 
     """ tests voor de CompInschrijven applicatie, inschrijfmethode 1 """
 
-    test_after = ('Competitie.test_beheerders',)
+    test_after = ('Competitie.tests.test_beheerders',)
 
     url_planning_regio = '/bondscompetities/regio/planning/%s/'                                         # deelcomp_pk
     url_planning_regio_ronde_methode1 = '/bondscompetities/regio/planning/regio-wedstrijden/%s/'        # ronde_pk

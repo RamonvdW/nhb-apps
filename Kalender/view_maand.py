@@ -63,7 +63,6 @@ def get_url_eerstvolgende_maand_met_wedstrijd():
                    .order_by('datum_begin'))
 
     for wedstrijd in wedstrijden:
-        print(wedstrijd.datum_begin, wedstrijd)
         deadline = wedstrijd.datum_begin - timedelta(days=wedstrijd.inschrijven_tot)
         if now.date() <= deadline:
             # hier kan nog op ingeschreven worden

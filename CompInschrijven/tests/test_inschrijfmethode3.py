@@ -22,7 +22,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
 
     """ tests voor de CompInschrijven applicatie, inschrijfmethode 3 """
 
-    test_after = ('Competitie.test_beheerders',)
+    test_after = ('Competitie.tests.test_beheerders',)
 
     url_aangemeld_alles = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/alles/'  # comp_pk
     url_behoefte3 = '/bondscompetities/deelnemen/%s/lijst-regiocompetitie/regio-%s/dagdeel-behoefte/'  # comp_pk, regio_pk
@@ -291,7 +291,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_behoefte3_bestand % (comp.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        csv_file = 'ver_nr;Naam;Blazoen;Geen;Za;Zo;Totaal\r\n1000;Grote Club;60cm;0;0;3;3\r\n1100;Kleine Club;60cm;0;2;0;2\r\n-;-;Totalen;0;2;3;5\r\n-;-;-;-;-;-;-\r\n-;-;Blazoen;Geen;Za;Zo;Totaal\r\n-;-;60cm;0;2;3;5\r\n'
+        csv_file = b'\xef\xbb\xbfver_nr;Naam;Blazoen;Geen;Za;Zo;Totaal\r\n1000;Grote Club;60cm;0;0;3;3\r\n1100;Kleine Club;60cm;0;2;0;2\r\n-;-;Totalen;0;2;3;5\r\n-;-;-;-;-;-;-\r\n-;-;Blazoen;Geen;Za;Zo;Totaal\r\n-;-;60cm;0;2;3;5\r\n'
         self.assertContains(resp, csv_file, msg_prefix="(was: %s)" % resp.content)
 
         # creëer een beetje puinhoop

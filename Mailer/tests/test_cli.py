@@ -20,7 +20,7 @@ class TestMailerCliGoedBase(E2EHelpers, TestCase):
 
     """ tests voor de Mailer applicatie """
 
-    test_after = ('Mailer.test_operations', )
+    test_after = ('Mailer.tests.test_operations', )
 
     def test_leeg(self):
         f1 = io.StringIO()
@@ -179,7 +179,7 @@ class TestMailerCliBadBase(E2EHelpers, TestCase):
 
     """ tests voor de Mailer applicatie """
 
-    test_after = ('Mailer.test_operations',)
+    test_after = ('Mailer.tests.test_operations',)
 
     def test_stuur_mails_bad_duration(self):
         f1 = io.StringIO()

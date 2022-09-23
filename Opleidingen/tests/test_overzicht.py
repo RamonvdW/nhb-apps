@@ -13,7 +13,7 @@ class TestFunctieOverzicht(E2EHelpers, TestCase):
 
     """ tests voor de Opleidingen applicatie, functionaliteit Overzicht """
 
-    test_after = ('Account', 'Functie.test_2fa')
+    test_after = ('Account', 'Functie.tests.test_otp')
 
     url_overzicht = '/opleidingen/'
 

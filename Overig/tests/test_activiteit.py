@@ -19,7 +19,7 @@ class TestOverigActiviteit(E2EHelpers, TestCase):
 
     """ tests voor de Overig applicatie; module Account Activiteit """
 
-    test_after = ('Account.test_login',)
+    test_after = ('Account.tests.test_login',)
 
     url_activiteit = '/overig/activiteit/'
 

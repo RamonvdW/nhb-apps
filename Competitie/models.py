@@ -756,6 +756,10 @@ class DeelcompetitieRonde(models.Model):
 class RegioCompetitieSchutterBoog(models.Model):
     """ Een sporterboog aangemeld bij een regiocompetitie """
 
+    # wanneer is deze aanmelding gedaan?
+    # (wordt gebruikt om de delta aan de RCL te melden)
+    wanneer_aangemeld = models.DateField(auto_now_add=True)
+
     # bij welke deelcompetitie hoort deze inschrijving?
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
 
@@ -833,9 +837,8 @@ class RegioCompetitieSchutterBoog(models.Model):
 
     def __str__(self):
         # deze naam wordt gebruikt in de admin interface, dus kort houden
-        sporter = self.sporterboog.sporter
-        return "[%s] %s (%s)" % (sporter.lid_nr, sporter.volledige_naam(),
-                                 self.sporterboog.boogtype.beschrijving)
+        return "%s (%s)" % (self.sporterboog.sporter.lid_nr_en_volledige_naam(),
+                            self.sporterboog.boogtype.beschrijving)
 
     class Meta:
         verbose_name = "Regiocompetitie Schutterboog"

@@ -223,7 +223,7 @@ class TestNhbStructuurImport(E2EHelpers, TestCase):
         self.assertEqual(sporter.geboorteplaats, 'Papendal')
         self.assertEqual(sporter.telefoon, '+31234567890')
 
-        with self.assert_max_queries(50):
+        with self.assert_max_queries(51):
             f1, f2 = self.run_management_command(IMPORT_COMMAND,
                                                  TESTFILE_09_LID_MUTATIES,
                                                  OPTION_SIM)

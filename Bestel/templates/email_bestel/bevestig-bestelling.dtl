@@ -33,11 +33,11 @@
             |    Van vereniging: {{ product.ver_nr_naam }}
             |    Boog: {{ product.boog }}
 
-            {% if product.korting %}
-                |    Gebruikte korting: {{ product.korting }}
-            {% endif %}
-            {% if product.combi_reden %}
-                |    (combinatie korting voor {{ product.combi_reden }}
+            {% if product.korting_euro > 0.001 %}
+                |    Verkregen korting: {{ product.gebruikte_korting_str }}
+                {% if product.combi_reden %}
+                    |    (combinatie korting voor {{ product.combi_reden }}
+                {% endif %}
             {% endif %}
 
             |    Prijs: € {{ product.prijs_euro }}
@@ -100,7 +100,7 @@
             <tr>
                 <th>#</th>
                 <th>Product</th>
-                <th>Prijs</th>
+                <th>Bedrag</th>
             </tr>
         </thead>
 
@@ -123,9 +123,9 @@
                 {% if product.korting_euro > 0.001 %}
                     <tr>
                         <td></td>
-                        <td>Korting<br>
+                        <td>Verkregen korting:<br>
                             {% if product.korting %}
-                                <span>Gebruikte korting: {{ product.korting }}</span><br>
+                                <span>{{ product.gebruikte_korting_str }}</span><br>
                             {% endif %}
                             {% if product.combi_reden %}
                                 <span>(combinatie korting voor {{ product.combi_reden }}</span><br>

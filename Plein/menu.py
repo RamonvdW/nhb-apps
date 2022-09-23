@@ -46,15 +46,12 @@ def menu_dynamics(request, context):
 
             rol = rol_get_huidige(request)
 
-            # taken
-            if rol in (Rollen.ROL_BB,
-                       Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
-                       Rollen.ROL_HWL):
+            if rol == Rollen.ROL_SPORTER:
+                context['menu_url_profiel'] = reverse('Sporter:profiel')
+            else:
+                # taken
                 context['menu_aantal_open_taken'] = aantal_open_taken(request)
                 context['menu_url_taken'] = reverse('Taken:overzicht')
-
-            elif rol == Rollen.ROL_SPORTER:
-                context['menu_url_profiel'] = reverse('Sporter:profiel')
         else:
             context['menu_url_profiel'] = reverse('Sporter:profiel')
 

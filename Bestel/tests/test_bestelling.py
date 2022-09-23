@@ -31,7 +31,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
 
     """ tests voor de Bestel-applicatie, module bestellingen """
 
-    test_after = ('Bestel.test_mandje',)
+    test_after = ('Bestel.tests.test_mandje',)
 
     url_mandje_bestellen = '/bestel/mandje/'
     url_bestellingen_overzicht = '/bestel/overzicht/'
@@ -176,90 +176,91 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         resp = self.client.get(self.url_na_de_betaling % 999999)
         self.assert403(resp)
 
-    # def test_bestelling(self):
-    #     self.e2e_login_and_pass_otp(self.account_admin)
-    #     self.e2e_check_rol('sporter')
-    #
-    #     # bestel wedstrijddeelname
-    #     bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
-    #     self.verwerk_bestel_mutaties()
-    #
-    #     # bekijk de bestellingen (lege lijst)
-    #     with self.assert_max_queries(20):
-    #         resp = self.client.get(self.url_bestellingen_overzicht)
-    #     self.assertEqual(resp.status_code, 200)     # 200 = OK
-    #     self.assert_html_ok(resp)
-    #     self.assert_template_used(resp, ('bestel/toon-bestellingen.dtl', 'plein/site_layout.dtl'))
-    #
-    #     # zet het mandje om in een bestelling
-    #     self.assertEqual(0, Bestelling.objects.count())
-    #     resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
-    #     self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
-    #     self.verwerk_bestel_mutaties()
-    #     self.assertEqual(1, Bestelling.objects.count())
-    #
-    #     bestelling = Bestelling.objects.prefetch_related('producten').all()[0]
-    #     self.assertEqual(1, bestelling.producten.count())
-    #     product1 = bestelling.producten.all()[0]
-    #
-    #     self.assertEqual(1, MailQueue.objects.count())
-    #     email = MailQueue.objects.all()[0]
-    #     self.assert_email_html_ok(email.mail_html, 'email_bestel/bevestig-bestelling.dtl')
-    #     self.assert_consistent_email_html_text(email)
-    #
-    #     # bekijk de bestellingen
-    #     with self.assert_max_queries(20):
-    #         resp = self.client.get(self.url_bestellingen_overzicht)
-    #     self.assertEqual(resp.status_code, 200)     # 200 = OK
-    #     self.assert_html_ok(resp)
-    #     self.assert_template_used(resp, ('bestel/toon-bestellingen.dtl', 'plein/site_layout.dtl'))
-    #
-    #     # haal de details op
-    #     url = self.url_bestelling_details % bestelling.bestel_nr
-    #     with self.assert_max_queries(20):
-    #         resp = self.client.get(url)
-    #     self.assertEqual(resp.status_code, 200)     # 200 = OK
-    #     self.assert_html_ok(resp)
-    #     self.assert_template_used(resp, ('bestel/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
-    #
-    #     self.e2e_assert_other_http_commands_not_supported(url)
-    #
-    #     # fout: dikke korting (te betalen wordt negatief)
-    #     product1.korting_euro = Decimal('100')
-    #     product1.save()
-    #     # fout: sporter niet meer bij vereniging
-    #     self.sporter.bij_vereniging = None
-    #     self.sporter.save()
-    #     url = self.url_bestelling_afrekenen % bestelling.bestel_nr
-    #     with self.assert_max_queries(20):
-    #         resp = self.client.get(url)
-    #     self.assertEqual(resp.status_code, 200)     # 200 = OK
-    #     self.assert_html_ok(resp)
-    #     self.assert_template_used(resp, ('bestel/bestelling-afrekenen.dtl', 'plein/site_layout.dtl'))
-    #
-    #     # mutileer het product (doorzetten vanuit het mandje lukt niet)
-    #     product1.wedstrijd_inschrijving = None
-    #     product1.save(update_fields=['wedstrijd_inschrijving'])
-    #
-    #     # bekijk de bestellingen
-    #     with self.assert_max_queries(20):
-    #         resp = self.client.get(self.url_bestellingen_overzicht)
-    #     self.assertEqual(resp.status_code, 200)     # 200 = OK
-    #     self.assert_html_ok(resp)
-    #     self.assert_template_used(resp, ('bestel/toon-bestellingen.dtl', 'plein/site_layout.dtl'))
-    #
-    #     url = self.url_bestelling_details % bestelling.bestel_nr
-    #     with self.assert_max_queries(20):
-    #         resp = self.client.get(url)
-    #     self.assertEqual(resp.status_code, 200)     # 200 = OK
-    #     self.assert_html_ok(resp)
-    #     self.assert_template_used(resp, ('bestel/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
-    #
-    #     resp = self.client.get(self.url_bestelling_details % 999999)
-    #     self.assert404(resp, 'Niet gevonden')
-    #
-    #     resp = self.client.get(self.url_bestelling_details % '1=5')
-    #     self.assert404(resp, 'Niet gevonden')
+    def test_bestelling(self):
+        self.e2e_login_and_pass_otp(self.account_admin)
+        self.e2e_check_rol('sporter')
+
+        # bestel wedstrijddeelname
+        bestel_mutatieverzoek_inschrijven_wedstrijd(self.account_admin, self.inschrijving, snel=True)
+        self.verwerk_bestel_mutaties()
+
+        # bekijk de bestellingen (lege lijst)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_bestellingen_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-bestellingen.dtl', 'plein/site_layout.dtl'))
+
+        # zet het mandje om in een bestelling
+        self.assertEqual(0, Bestelling.objects.count())
+        resp = self.client.post(self.url_mandje_bestellen, {'snel': 1})
+        self.assert_is_redirect(resp, self.url_bestellingen_overzicht)
+        self.verwerk_bestel_mutaties()
+        self.assertEqual(1, Bestelling.objects.count())
+
+        bestelling = Bestelling.objects.prefetch_related('producten').all()[0]
+        self.assertEqual(1, bestelling.producten.count())
+        product1 = bestelling.producten.all()[0]
+
+        self.assertEqual(1, MailQueue.objects.count())
+        email = MailQueue.objects.all()[0]
+        self.assert_email_html_ok(email.mail_html, 'email_bestel/bevestig-bestelling.dtl')
+        self.assert_consistent_email_html_text(email, 'email_bestel/bevestig-bestelling.dtl',
+                                               ignore=('>Prijs:', '>Korting:'))
+
+        # bekijk de bestellingen
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_bestellingen_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-bestellingen.dtl', 'plein/site_layout.dtl'))
+
+        # haal de details op
+        url = self.url_bestelling_details % bestelling.bestel_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
+
+        self.e2e_assert_other_http_commands_not_supported(url)
+
+        # fout: dikke korting (te betalen wordt negatief)
+        product1.korting_euro = Decimal('100')
+        product1.save()
+        # fout: sporter niet meer bij vereniging
+        self.sporter.bij_vereniging = None
+        self.sporter.save()
+        url = self.url_bestelling_afrekenen % bestelling.bestel_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/bestelling-afrekenen.dtl', 'plein/site_layout.dtl'))
+
+        # mutileer het product (doorzetten vanuit het mandje lukt niet)
+        product1.wedstrijd_inschrijving = None
+        product1.save(update_fields=['wedstrijd_inschrijving'])
+
+        # bekijk de bestellingen
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_bestellingen_overzicht)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-bestellingen.dtl', 'plein/site_layout.dtl'))
+
+        url = self.url_bestelling_details % bestelling.bestel_nr
+        with self.assert_max_queries(20):
+            resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_html_ok(resp)
+        self.assert_template_used(resp, ('bestel/toon-bestelling-details.dtl', 'plein/site_layout.dtl'))
+
+        resp = self.client.get(self.url_bestelling_details % 999999)
+        self.assert404(resp, 'Niet gevonden')
+
+        resp = self.client.get(self.url_bestelling_details % '1=5')
+        self.assert404(resp, 'Niet gevonden')
 
     def test_geen_instellingen(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -406,7 +407,7 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.all()[0]
         self.assert_email_html_ok(mail.mail_html, 'email_bestel/bevestig-bestelling.dtl')
-        self.assert_consistent_email_html_text(mail)
+        self.assert_consistent_email_html_text(mail, 'email_bestel/bevestig-bestelling.dtl')
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)

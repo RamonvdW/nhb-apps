@@ -292,6 +292,8 @@ class SporterBoog(models.Model):
         verbose_name = "SporterBoog"
         verbose_name_plural = "SporterBoog"
 
+        ordering = ['sporter__lid_nr', 'boogtype__volgorde']
+
         indexes = [
             # ondersteuning voor filteren op voor_wedstrijd=True
             models.Index(fields=['voor_wedstrijd'])

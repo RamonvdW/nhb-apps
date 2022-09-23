@@ -26,7 +26,7 @@ class TestBestelActiviteit(E2EHelpers, TestCase):
 
     """ tests voor de Bestel applicatie, module Activiteit """
 
-    test_after = ('Bestel.test_mandje',)
+    test_after = ('Bestel.tests.test_mandje',)
 
     url_activiteit = '/bestel/activiteit/'
 

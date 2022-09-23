@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -38,6 +38,29 @@ class HierarchyRunner(DiscoverRunner):
         """
         new_suite = self.test_suite()
 
+        # gather all the test cases, for checking the test_after references
+        known_tests = list()
+        for test in suite:
+            test_name = test.id()           # includes the test function name
+            pos = test_name.rfind('.')
+            test_name = test_name[:pos]     # remove the function name
+            if test_name not in known_tests:
+                known_tests.append(test_name)
+
+                # also allow partial dependencies, like the complete application name
+                spl = test_name.split('.')
+                while len(spl) > 1:
+                    spl = spl[:-1]
+                    part_name = ".".join(spl)
+                    if part_name not in known_tests:
+                        known_tests.append(part_name)
+                # while
+        # for
+
+        # print('known_tests: %s' % repr(known_tests))
+
+        reported_warnings = list()
+
         tests = dict()      # [ref] = list(test, test, ..)
         after = dict()      # [ref] = test_after tuple
         for test in suite:
@@ -53,6 +76,7 @@ class HierarchyRunner(DiscoverRunner):
                 for check in test.test_after:
                     if ref.startswith(check):           # pragma: no cover
                         raise LookupError('Circular dependency: %s.test_after depends on %s' % (ref, check))
+                # for
 
                 # store the test object
                 try:
@@ -62,6 +86,18 @@ class HierarchyRunner(DiscoverRunner):
 
                 # store the test dependency
                 after[ref] = test.test_after
+
+                # warn for non-existing test_after dependencies
+                # in case of a partial scope run, this happens naturally, so warnings only
+                for dep in test.test_after:
+                    if dep[-1] == '.':      # remove terminating dot used to avoid circular dependency false positives
+                        dep = dep[:-1]
+                    if dep not in known_tests:
+                        warning = 'Unknown test_after dependency %s in %s' % (repr(dep), ref)
+                        if warning not in reported_warnings:
+                            reported_warnings.append(warning)
+                            print('[WARNING] ' + warning)
+                # for
         # for
 
         # take over tests with no unsatisfied test dependencies

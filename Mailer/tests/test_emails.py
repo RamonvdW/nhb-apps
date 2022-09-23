@@ -15,7 +15,7 @@ class TestMailerEmails(E2EHelpers, TestCase):
 
     """ tests voor de Mailer applicatie """
 
-    test_after = ('Mailer.test_operations', )
+    test_after = ('Mailer.tests.test_operations', )
 
     def test_alle_emails(self):
         self.e2e_create_account('123456', TEST_EMAIL_ADRES, 'Test')

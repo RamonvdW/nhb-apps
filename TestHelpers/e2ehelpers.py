@@ -13,7 +13,7 @@ from Account.models import Account
 from Account.operations import account_create
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
 from Mailer.models import MailQueue
-from TestHelpers.e2estatus import validated_templates, included_templates
+from TestHelpers.e2estatus import validated_templates, included_templates, consistent_email_templates
 from contextlib import contextmanager
 from bs4 import BeautifulSoup
 import subprocess
@@ -940,8 +940,10 @@ class E2EHelpers(TestCase):
 
         return f1, f2
 
-    def assert_consistent_email_html_text(self, email: MailQueue):
+    def assert_consistent_email_html_text(self, email: MailQueue, template_name: str, ignore=()):
         """ Check that the text version and html version of the e-mail are consistent in wording and contents """
+
+        consistent_email_templates.append(template_name)
 
         issues = list()
 
@@ -987,6 +989,9 @@ class E2EHelpers(TestCase):
             if pos > 0:
                 zoek1 = zoek[:pos+1]            # begint met > en eindigt met :
                 zoek2 = zoek[pos+1:].strip()    # eindigt met <
+
+                if zoek1 in ignore:
+                    continue
 
                 pos = html.find(zoek1)
                 if pos > 0:
@@ -1042,6 +1047,23 @@ class E2EHelpers(TestCase):
             issues.append('Kan regel %s niet vinden in html e-mail' % repr(line))       # pragma: no cover
         # for
 
+        # in html e-mail staat informatie soms in een extra kolom
+        pos = html.find('<td>')
+        while pos >= 0:
+            pos2 = html.find('</td>')
+            tekst = html[pos+4:pos2]
+            html = html[:pos] + html[pos2+5:]       # verwijder deze cell
+
+            tekst = tekst.replace('<span></span>', '')
+            tekst = tekst.replace('<br>', '')
+            if tekst:
+                # print('tekst: %s' % repr(tekst))
+                if tekst not in email.mail_text:
+                    issues.append('Kan tekst %s niet vinden in text e-mail' % repr(tekst))
+
+            pos = html.find('<td>')
+        # while
+
         # verwijder referenties naar plaatjes
         pos = html.find('<img ')
         while pos > 0:
@@ -1084,6 +1106,7 @@ class E2EHelpers(TestCase):
             issues.append('Volledige tekst email: %s' % repr(email.mail_text))
 
         if len(issues):                                                             # pragma: no cover
+            issues.insert(0, '(e-mail template: %s)' % repr(template_name))
             issues.insert(0, 'E-mail bericht verschillen tussen html en tekst:')
             self.fail(msg="\n    ".join(issues))
 

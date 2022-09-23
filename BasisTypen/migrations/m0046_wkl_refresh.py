@@ -29,8 +29,9 @@ def update_leeftijdsklassen(apps, _):
 
         assert lkl.afkorting == afkorting
         assert lkl.wedstrijd_geslacht == geslacht
-        assert lkl.min_wedstrijdleeftijd == leeftijd_min
-        assert lkl.max_wedstrijdleeftijd == leeftijd_max
+        # onderstaande asserts zijn uitgezet in verband met migratie m0047
+        # assert lkl.min_wedstrijdleeftijd == leeftijd_min
+        # assert lkl.max_wedstrijdleeftijd == leeftijd_max
 
         if lkl.klasse_kort != kort:                 # pragma: no cover
             lkl.klasse_kort = kort
