@@ -84,6 +84,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         self.account_schutter = self._prep_beheerder_lid('Schutter')
 
         # creëer een competitie met deelcompetities
+        self.assertEqual(0, Competitie.objects.count())
         competities_aanmaken(jaar=self.begin_jaar)
         # nu in fase A
 
@@ -133,7 +134,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         self.assert_is_redirect_not_plein(resp)  # check for success
         # nu in fase A2
 
-        # zet de inschrijfmethode van regio 101 op 'methode 3', oftewel met dagdeel voorkeur
+        # zet de inschrijfmethode van regio 101 op 'methode 3' (=voorkeur dagdelen)
         dagdelen = ['GN', 'ZAT', 'ZON']   # uit: DAGDEEL_AFKORTINGEN
 
         deelcomp = DeelCompetitie.objects.filter(laag=LAAG_REGIO, nhb_regio=self.regio_101, competitie=comp)[0]
@@ -142,20 +143,23 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         deelcomp.save(update_fields=['inschrijf_methode', 'toegestane_dagdelen'])
 
         # zet de datum voor inschrijven op vandaag
-        for comp in Competitie.objects.filter(is_afgesloten=False):
-            zet_competitie_fase(comp, 'B')
-        # for
+        zet_competitie_fase(comp, 'B')
 
         lid_nr = 110000
         recurve_boog_pk = BoogType.objects.get(afkorting='R').pk
         compound_boog_pk = BoogType.objects.get(afkorting='C').pk
         barebow_boog_pk = BoogType.objects.get(afkorting='BB').pk
 
+        print('\ndoe_inschrijven:')
+
         # doorloop de 2 verenigingen in deze regio
-        for nhb_ver in NhbVereniging.objects.filter(regio=self.regio_101):
+        for nhb_ver in NhbVereniging.objects.filter(regio=self.regio_101).order_by('ver_nr'):
             # wordt HWL om voorkeuren aan te kunnen passen en in te kunnen schrijven
             functie_hwl = nhb_ver.functie_set.filter(rol='HWL').all()[0]
             self.e2e_wissel_naar_functie(functie_hwl)
+            self.e2e_check_rol('HWL')
+
+            print('nhb_ver: %s' % nhb_ver)
 
             post_params = dict()
 
@@ -291,7 +295,7 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         with self.assert_max_queries(20):
             resp = self.client.get(self.url_behoefte3_bestand % (comp.pk, self.regio_101.pk))
         self.assertEqual(resp.status_code, 200)     # 200 = OK
-        csv_file = b'\xef\xbb\xbfver_nr;Naam;Blazoen;Geen;Za;Zo;Totaal\r\n1000;Grote Club;60cm;0;0;3;3\r\n1100;Kleine Club;60cm;0;2;0;2\r\n-;-;Totalen;0;2;3;5\r\n-;-;-;-;-;-;-\r\n-;-;Blazoen;Geen;Za;Zo;Totaal\r\n-;-;60cm;0;2;3;5\r\n'
+        csv_file = b'ver_nr;Naam;Blazoen;Geen;Za;Zo;Totaal\r\n1000;Grote Club;60cm;0;0;3;3\r\n1100;Kleine Club;60cm;0;2;0;2\r\n-;-;Totalen;0;2;3;5\r\n-;-;-;-;-;-;-\r\n-;-;Blazoen;Geen;Za;Zo;Totaal\r\n-;-;60cm;0;2;3;5\r\n'
         self.assertContains(resp, csv_file, msg_prefix="(was: %s)" % resp.content)
 
         # creëer een beetje puinhoop

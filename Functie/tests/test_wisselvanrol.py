@@ -300,7 +300,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_wissel_naar_functie(self.functie_rcl)
 
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Sporter")
@@ -322,7 +322,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(self.functie_sec)
         self.e2e_check_rol('SEC')
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Sporter")
@@ -339,7 +339,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_login_and_pass_otp(self.account_normaal)
         self.e2e_wissel_naar_functie(self.functie_hwl)
 
-        with self.assert_max_queries(20):
+        with self.assert_max_queries(21):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assertContains(resp, "Sporter")
@@ -454,7 +454,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(rko18r2)
 
         # nu krijg je 2x alle RCL in rayon 2
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         urls = self._get_wissel_urls(resp)
@@ -486,7 +486,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         self.e2e_wissel_naar_functie(rcl18r111)
 
         # nu krijg je 2x alle HWL in regio 111
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         urls = self._get_wissel_urls(resp)
@@ -518,7 +518,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # wissel naar RKO rol
         self.e2e_wissel_naar_functie(rko18r2)
         self.e2e_check_rol('RKO')
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)       # checkt ook href's
@@ -526,7 +526,7 @@ class TestFunctieWisselVanRol(E2EHelpers, TestCase):
         # wissel door naar de RCL rol
         self.e2e_wissel_naar_functie(rcl18r105)
         self.e2e_check_rol('RCL')
-        with self.assert_max_queries(21):
+        with self.assert_max_queries(22):
             resp = self.client.get(self.url_wissel_van_rol)
         self.assertEqual(resp.status_code, 200)
         self.assert_html_ok(resp)       # checkt ook href's
