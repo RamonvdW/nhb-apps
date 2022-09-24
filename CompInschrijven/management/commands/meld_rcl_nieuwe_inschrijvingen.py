@@ -84,9 +84,9 @@ class Command(BaseCommand):
                     regels.append('Regio: %s' % functie.nhb_regio)
                     regels.append('Datum: %s' % gisteren_date)
                     regels.append('Aantal nieuwe inschrijvingen: %s' % aantal)
-                    regels.append('')
 
                     for deelnemer in qset:
+                        regels.append('')
                         regels.append(str(deelnemer))
                         regels.append('    van vereniging %s' % deelnemer.sporterboog.sporter.bij_vereniging)
 

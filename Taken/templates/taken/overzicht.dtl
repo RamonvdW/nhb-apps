@@ -15,6 +15,7 @@
         <div class="col s12">
             <h3 class="page-banner">Taken overzicht</h3>
             <p>De taken zijn gerelateerd aan een of meerdere functies waar jij toegang tot hebt.</p>
+            <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
         </div>
     </div>
 

@@ -11,7 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Plein.menu import menu_dynamics
-from Functie.rol import rol_mag_wisselen, rol_get_huidige_functie
+from Functie.rol import rol_mag_wisselen, rol_get_beschrijving
 from Taken.models import Taak
 from Taken.operations import eval_open_taken, get_taak_functie_pks
 
@@ -68,6 +68,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         context['heeft_open_taken'] = (count_open > 0)
         context['heeft_afgeronde_taken'] = (count_afgerond > 0)
+        context['huidige_rol'] = rol_get_beschrijving(self.request)
 
         # zorg dat de badge in het menu altijd overeen komt met werkelijk getoonde aantal
         eval_open_taken(self.request, forceer=True)
