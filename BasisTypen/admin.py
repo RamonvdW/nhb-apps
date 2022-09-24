@@ -35,8 +35,6 @@ class BasisTypenReadonlyMetVolgordeAdmin(BasisTypenReadonlyAdmin):
 
 class BoogTypeAdmin(BasisTypenReadonlyAdmin):
 
-    ordering = ('volgorde',)        # alfanumeriek
-
     list_filter = ('organisatie', 'buiten_gebruik')
 
 
