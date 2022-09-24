@@ -150,16 +150,12 @@ class TestCompInschrijvenMethode3(E2EHelpers, TestCase):
         compound_boog_pk = BoogType.objects.get(afkorting='C').pk
         barebow_boog_pk = BoogType.objects.get(afkorting='BB').pk
 
-        print('\ndoe_inschrijven:')
-
         # doorloop de 2 verenigingen in deze regio
         for nhb_ver in NhbVereniging.objects.filter(regio=self.regio_101).order_by('ver_nr'):
             # wordt HWL om voorkeuren aan te kunnen passen en in te kunnen schrijven
             functie_hwl = nhb_ver.functie_set.filter(rol='HWL').all()[0]
             self.e2e_wissel_naar_functie(functie_hwl)
             self.e2e_check_rol('HWL')
-
-            print('nhb_ver: %s' % nhb_ver)
 
             post_params = dict()
 
