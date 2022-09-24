@@ -223,8 +223,6 @@ class UitslagenRegioIndivView(TemplateView):
         klasse = -1
         rank = 0
         objs = list()
-        asps = list()
-        is_asp = False
         deelnemer_count = None
         for deelnemer in deelnemers:
 
@@ -233,17 +231,7 @@ class UitslagenRegioIndivView(TemplateView):
                 deelnemer_count = deelnemer
                 deelnemer.aantal_in_groep = 2   # 1 extra zodat balk doorloopt tot horizontale afsluiter
                 deelnemer.is_eerste_groep = (klasse == -1)
-
                 deelnemer.klasse_str = deelnemer.indiv_klasse.beschrijving
-                is_asp = False
-                if not deelnemer.indiv_klasse.is_voor_rk_bk:
-                    # dit is een aspiranten klassen of een klasse onbekend
-                    for lkl in deelnemer.indiv_klasse.leeftijdsklassen.all():
-                        if lkl.is_aspirant_klasse():
-                            is_asp = True
-                            break
-                    # for
-
                 rank = 0
             klasse = deelnemer.indiv_klasse.volgorde
 
@@ -258,14 +246,11 @@ class UitslagenRegioIndivView(TemplateView):
                 deelnemer.gemiddelde = deelnemer.ag_voor_indiv
 
             deelnemer_count.aantal_in_groep += 1
-
-            if is_asp:
-                asps.append(deelnemer)
-            else:
-                objs.append(deelnemer)
+            objs.append(deelnemer)
         # for
 
         context['deelnemers'] = objs
+        context['heeft_deelnemers'] = (len(objs) > 0)
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
