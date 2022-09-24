@@ -134,6 +134,9 @@ class PleinView(View):
                     # vangnet voor nieuwe rollen
                     raise Http404("Onbekende rol %s" % rol_nu)
 
+                if rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_MO, Rollen.ROL_SUP):
+                    context['toon_manager_sectie'] = True
+
                 context['huidige_rol'] = rol_get_beschrijving(request)
 
                 # kijk hoeveel taken er open staan

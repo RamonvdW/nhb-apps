@@ -71,6 +71,9 @@ class ActiveerRolView(UserPassesTestMixin, View):
             url = get_url_voor_competitie(functie_nu)
             return redirect(url)
 
+        if rol_nu == Rollen.ROL_SUP:
+            return redirect('Feedback:inzicht')
+
         if rol_nu == Rollen.ROL_MO:
             return redirect('Opleidingen:manager')
 

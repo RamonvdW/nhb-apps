@@ -126,7 +126,8 @@ class InzichtView(UserPassesTestMixin, ListView):
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_get_huidige(self.request) == Rollen.ROL_BB
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_SUP)
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """

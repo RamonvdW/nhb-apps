@@ -13,7 +13,7 @@ def maak_rol_mo(apps, _):
     # haal de klassen op die van toepassing zijn op het moment van migratie
     functie_klas = apps.get_model('Functie', 'Functie')
 
-    functie_klas(beschrijving='Manager opleidingen', rol='MO').save()
+    functie_klas(beschrijving='Manager Opleidingen', rol='MO').save()
 
 
 class Migration(migrations.Migration):

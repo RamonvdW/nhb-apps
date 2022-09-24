@@ -233,7 +233,9 @@ class WijzigEmailView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MO, Rollen.ROL_MWZ, Rollen.ROL_SUP,
+                               Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
+                               Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     def _get_functie_or_404(self):
         functie_pk = self.kwargs['functie_pk']
@@ -249,16 +251,25 @@ class WijzigEmailView(UserPassesTestMixin, View):
         context['functie'] = functie
 
         if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
+            # komt van Beheer Vereniging
             context['terug_url'] = reverse('Functie:overzicht-vereniging')
             context['kruimels'] = (
                 (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
                 (reverse('Functie:overzicht-vereniging'), 'Beheerders'),
                 (None, 'Wijzig e-mail')
             )
-        else:
+        elif self.rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+            # komt van Bondscompetities
             context['terug_url'] = reverse('Functie:overzicht')
             context['kruimels'] = (
                 (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Functie:overzicht'), 'Beheerders'),
+                (None, 'Wijzig e-mail')
+            )
+        else:
+            # komt van Het Plein
+            context['terug_url'] = reverse('Functie:overzicht')
+            context['kruimels'] = (
                 (reverse('Functie:overzicht'), 'Beheerders'),
                 (None, 'Wijzig e-mail')
             )
@@ -404,7 +415,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_BB,
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MO, Rollen.ROL_MWZ, Rollen.ROL_SUP,
                                Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
                                Rollen.ROL_SEC, Rollen.ROL_HWL)
 
@@ -502,6 +513,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
         context['form'] = self._form
 
         if self.rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL):
+            # komt van Beheer Vereniging
             context['is_vereniging_rol'] = True
 
             # Je kan hier op twee manieren komen:
@@ -513,10 +525,16 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
                 (reverse('Functie:overzicht-vereniging'), 'Beheerders'),
                 (None, 'Wijzig beheerder')
             )
-        else:
-            # beheerder competitie
+        elif self.rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+            # komt van Bondscompetities
             context['kruimels'] = (
                 (reverse('Competitie:kies'), 'Bondscompetities'),
+                (reverse('Functie:overzicht'), 'Beheerders'),
+                (None, 'Wijzig beheerder')
+            )
+        else:
+            # komt van Het Plein
+            context['kruimels'] = (
                 (reverse('Functie:overzicht'), 'Beheerders'),
                 (None, 'Wijzig beheerder')
             )
