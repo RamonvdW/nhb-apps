@@ -7,6 +7,7 @@
 from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.http import urlencode
 from django.db import IntegrityError, transaction
 from django.db.models import ObjectDoesNotExist
 from django.shortcuts import render
@@ -74,6 +75,11 @@ class WedstrijdDetailsView(TemplateView):
         if wedstrijd.organisatie == ORGANISATIE_WA:
             context['toon_wa_status'] = True
             wedstrijd.wa_status_str = WEDSTRIJD_WA_STATUS_TO_STR[wedstrijd.wa_status]
+
+        if wedstrijd.locatie:
+            zoekterm = wedstrijd.organiserende_vereniging.naam + ' ' + wedstrijd.locatie.adres
+            zoekterm = zoekterm.replace('\n', ' ').replace('\r', '').replace('  ', ' ')
+            context['url_map'] = 'https://google.nl/maps?' + urlencode({'q': zoekterm})
 
         sessie_pks = list(wedstrijd.sessies.values_list('pk', flat=True))
         context['sessies'] = sessies = (WedstrijdSessie

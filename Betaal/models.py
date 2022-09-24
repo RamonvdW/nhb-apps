@@ -51,6 +51,13 @@ class BetaalInstellingenVereniging(models.Model):
         key = key[:5+sub] + '[...]' + key[-sub:]
         return key
 
+    def moet_handmatig(self):
+        # als deze vereniging een eigen Mollie sleutel ingesteld heeft
+        # of akkoord heeft om via de NHB betalingen te ontvangen
+        # dan hoeft het niet online
+        kan_online = self.mollie_api_key or self.akkoord_via_nhb
+        return not kan_online
+
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
         return str(self.vereniging)

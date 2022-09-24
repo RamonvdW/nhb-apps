@@ -18,7 +18,7 @@ def init_hoogste_bestel_nr(apps, _):
     # maak het enige record aan met het hoogste gebruikte bestelnummer
     hoogste_klas(
             pk=BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK,
-            hoogste_gebruikte_bestel_nr=1000000).save()
+            hoogste_gebruikte_bestel_nr=1002000).save()
 
 
 class Migration(migrations.Migration):

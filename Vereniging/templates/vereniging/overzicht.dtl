@@ -103,7 +103,7 @@
                 {% include 'plein/card.dtl' with title="Scores invoeren" text="Scores invoeren voor wedstrijden die bij deze vereniging geschoten worden." icon="edit" url=card_url %}
             {% endif %}
 
-            <!-- wedstrijdkalender -->
+            <!-- wedstrijdkalender (alleen voor de HWL) -->
             {% if toon_wedstrijdkalender %}
                 {% url 'Wedstrijden:vereniging' as card_url %}
                 {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Alle overige wedstrijden die door deze vereniging georganiseerd worden." icon="event_note" url=card_url %}

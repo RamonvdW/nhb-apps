@@ -53,7 +53,9 @@ class BestellingAdmin(admin.ModelAdmin):
                         'verkoper_adres2',
                         'verkoper_kvk',
                         'verkoper_email',
-                        'verkoper_telefoon')
+                        'verkoper_telefoon',
+                        'verkoper_iban',
+                        'verkoper_bic')
              }),
         ('Transactie',
             {'fields': ('status',

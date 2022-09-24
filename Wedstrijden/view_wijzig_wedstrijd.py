@@ -12,10 +12,11 @@ from django.shortcuts import render
 from django.views.generic import View
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.models import Functie
 from BasisTypen.models import (BoogType, KalenderWedstrijdklasse, GESLACHT_ALLE,
                                ORGANISATIES2LONG_STR, ORGANISATIE_WA, ORGANISATIE_IFAA)
 from BasisTypen.operations import get_organisatie_boogtypen, get_organisatie_klassen
+from Betaal.models import BetaalInstellingenVereniging
+from Functie.models import Functie
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
 from Taken.operations import maak_taak
@@ -626,6 +627,14 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
             beschrijving=taak_tekst,
             log=taak_log)
 
+    @staticmethod
+    def _garandeer_instellingen_bestaat(ver):
+        """ BetaalInstellingenVereniging is noodzakelijk voor een inschrijving,
+            maar wordt pas aangemaakt als de vereniging het kaartje Financieel gebruikt.
+            Omdat handmatige overschrijving nu ook kan, zorgen we hier dat het record bestaat.
+        """
+        _ = BetaalInstellingenVereniging.objects.get_or_create(vereniging=ver)
+
     def post(self, request, *args, **kwargs):
 
         try:
@@ -649,6 +658,8 @@ class ZetStatusWedstrijdView(UserPassesTestMixin, View):
             next_url = reverse('Wedstrijden:vereniging')
 
             if wedstrijd.status == WEDSTRIJD_STATUS_ONTWERP and verder:
+                self._garandeer_instellingen_bestaat(wedstrijd.organiserende_vereniging)
+
                 # verzoek tot goedkeuring
                 wedstrijd.status = WEDSTRIJD_STATUS_WACHT_OP_GOEDKEURING
                 wedstrijd.save(update_fields=['status'])

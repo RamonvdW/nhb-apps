@@ -44,25 +44,23 @@
             {% url 'Sporter:profiel' as card_url %}
             {% include 'plein/card.dtl' with title="Mijn pagina" text="Voorkeuren en informatie toegespitst op jou." icon="portrait" url=card_url %}
 
-            <!-- Bondscompetities -->
+            <!-- bondscompetities -->
             {% url 'Competitie:kies' as card_url %}
             {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
 
-            <!-- Records -->
-            {% url 'Records:overzicht' as card_url %}
-            {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
+            <!-- wedstrijdkalender -->
+            {% url 'Kalender:landing-page' as card_url %}
+            {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
 
-            <!-- Wedstrijdkalender -->
-            {% if toon_kalender %}
-                {% url 'Kalender:landing-page' as card_url %}
-                {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
-            {% endif %}
-
-            <!-- Opleidingen -->
+            <!-- opleidingen -->
             {% if toon_opleidingen %}
                 {% url 'Opleidingen:overzicht' as card_url %}
                 {% include 'plein/card.dtl' with title="Opleidingen" text="Bekijk de opleidingen die aangeboden worden." icon="school" url=card_url %}
             {% endif %}
+
+            <!-- records -->
+            {% url 'Records:overzicht' as card_url %}
+            {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
         </div>
     </div>
 

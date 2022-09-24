@@ -89,7 +89,6 @@ class PleinView(View):
         context['ga_naar_live_server'] = settings.IS_TEST_SERVER
 
         # site-specifieke default voor deze kaartjes
-        context['toon_kalender'] = settings.TOON_WEDSTRIJDKALENDER
         context['toon_opleidingen'] = settings.TOON_OPLEIDINGEN
 
         if request.user.is_authenticated:

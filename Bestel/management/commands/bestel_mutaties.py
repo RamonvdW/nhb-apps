@@ -27,6 +27,7 @@ from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortinge
                                         wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
                                         wedstrijden_plugin_afmelden, wedstrijden_plugin_inschrijving_is_betaald)
 from Mailer.operations import mailer_queue_email, render_email_template
+from NhbStructuur.models import NhbVereniging
 from Overig.background_sync import BackgroundSync
 from Wedstrijden.models import (INSCHRIJVING_STATUS_RESERVERING_BESTELD, INSCHRIJVING_STATUS_DEFINITIEF,
                                 WEDSTRIJD_KORTING_COMBI)
@@ -100,7 +101,7 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
     mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_BESTELLING)
 
     mailer_queue_email(email.bevestigde_email,
-                       'Bestelling op MijnHandboogsport (%s)' % bestelling.bestel_nr,
+                       'Bestelling op MijnHandboogsport (%s)' % bestelling.mh_bestel_nr(),
                        mail_body)
 
 
@@ -174,7 +175,7 @@ def stuur_email_naar_koper_betaalbevestiging(bestelling):
     mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_BETALING)
 
     mailer_queue_email(email.bevestigde_email,
-                       'Bevestiging aankoop via MijnHandboogsport (%s)' % bestelling.bestel_nr,
+                       'Bevestiging aankoop via MijnHandboogsport (%s)' % bestelling.mh_bestel_nr(),
                        mail_body)
 
 
@@ -216,31 +217,28 @@ class Command(BaseCommand):
     def _clear_instellingen_cache(self):
         self._instellingen_cache = dict()
 
-        try:
-            self._instellingen_nhb = (BetaalInstellingenVereniging
-                                      .objects
-                                      .select_related('vereniging')
-                                      .get(vereniging__ver_nr=settings.BETAAL_VIA_NHB_VER_NR))
-        except BetaalInstellingenVereniging.DoesNotExist:
-            # nog niet aangemaakt
-            self._instellingen_nhb = None
+        ver_nhb = NhbVereniging.objects.get(ver_nr=settings.BETAAL_VIA_NHB_VER_NR)
 
-    def _get_instellingen(self, ver_nr):
+        self._instellingen_nhb, _ = (BetaalInstellingenVereniging
+                                     .objects
+                                     .select_related('vereniging')
+                                     .get_or_create(vereniging=ver_nhb))
+
+        self._instellingen_cache[settings.BETAAL_VIA_NHB_VER_NR] = self._instellingen_nhb
+
+    def _get_instellingen(self, ver):
         try:
-            instellingen = self._instellingen_cache[ver_nr]
+            instellingen = self._instellingen_cache[ver.ver_nr]
         except KeyError:
-            try:
-                instellingen = (BetaalInstellingenVereniging
-                                .objects
-                                .select_related('vereniging')
-                                .get(vereniging__ver_nr=ver_nr))
-            except BetaalInstellingenVereniging.DoesNotExist:
-                instellingen = None
-            else:
-                if instellingen.akkoord_via_nhb:
-                    instellingen = self._instellingen_nhb
+            instellingen, _ = (BetaalInstellingenVereniging
+                               .objects
+                               .select_related('vereniging')
+                               .get_or_create(vereniging=ver))
 
-                self._instellingen_cache[ver_nr] = instellingen
+            if instellingen.akkoord_via_nhb:
+                instellingen = self._instellingen_nhb
+
+            self._instellingen_cache[ver.ver_nr] = instellingen
 
         return instellingen
 
@@ -354,14 +352,12 @@ class Command(BaseCommand):
 
                 if product.wedstrijd_inschrijving:
                     # wedstrijd van de kalender
-                    ver_nr = product.wedstrijd_inschrijving.wedstrijd.organiserende_vereniging.ver_nr
-                    instellingen = self._get_instellingen(ver_nr)
-                    if instellingen:
-                        ontvanger_ver_nr = instellingen.vereniging.ver_nr
-                        try:
-                            ontvanger2producten[ontvanger_ver_nr].append(product)
-                        except KeyError:
-                            ontvanger2producten[ontvanger_ver_nr] = [product]
+                    instellingen = self._get_instellingen(product.wedstrijd_inschrijving.wedstrijd.organiserende_vereniging)
+                    ontvanger_ver_nr = instellingen.vereniging.ver_nr
+                    try:
+                        ontvanger2producten[ontvanger_ver_nr].append(product)
+                    except KeyError:
+                        ontvanger2producten[ontvanger_ver_nr] = [product]
             # for
 
             to_tz = get_default_timezone()
@@ -369,7 +365,7 @@ class Command(BaseCommand):
             nieuwe_bestellingen = list()
             for ver_nr, producten in ontvanger2producten.items():
 
-                instellingen = self._get_instellingen(ver_nr)
+                instellingen = self._instellingen_cache[ver_nr]
 
                 # neem een bestelnummer uit
                 bestel_nr = self._bestel_get_volgende_bestel_nr()
@@ -490,18 +486,18 @@ class Command(BaseCommand):
         status = bestelling.status
         if status != BESTELLING_STATUS_WACHT_OP_BETALING:
             self.stdout.write('[WARNING] Bestelling %s (pk=%s) wacht niet op een betaling (status=%s)' % (
-                                bestelling.bestel_nr, bestelling.pk, BESTELLING_STATUS2STR[bestelling.status]))
+                                bestelling.mh_bestel_nr(), bestelling.pk, BESTELLING_STATUS2STR[bestelling.status]))
             return
 
         actief = bestelling.betaal_actief
         if not actief:
             self.stdout.write('[WARNING] Bestelling %s (pk=%s) heeft geen actieve transactie' % (
-                                bestelling.bestel_nr, bestelling.pk))
+                                bestelling.mh_bestel_nr(), bestelling.pk))
             return
 
         if is_gelukt:
             self.stdout.write('[INFO] Betaling is gelukt voor bestelling %s (pk=%s)' % (
-                                bestelling.bestel_nr, bestelling.pk))
+                                bestelling.mh_bestel_nr(), bestelling.pk))
 
             # koppel alle (nieuwe) transacties aan de bestelling
             payment_id = actief.payment_id
@@ -519,7 +515,7 @@ class Command(BaseCommand):
             # for
 
             self.stdout.write('[INFO] Bestelling %s (pk=%s) heeft %s van de %s euro ontvangen' % (
-                                bestelling.bestel_nr, bestelling.pk, ontvangen_euro, bestelling.totaal_euro))
+                                bestelling.mh_bestel_nr(), bestelling.pk, ontvangen_euro, bestelling.totaal_euro))
 
             msg = "\n[%s] Bestelling heeft %s van de %s euro ontvangen" % (
                         mutatie.when, ontvangen_euro, bestelling.totaal_euro)
@@ -528,7 +524,7 @@ class Command(BaseCommand):
 
             if ontvangen_euro >= bestelling.totaal_euro:
                 self.stdout.write('[INFO] Bestelling %s (pk=%s) is afgerond' % (
-                                    bestelling.bestel_nr, bestelling.pk))
+                                    bestelling.mh_bestel_nr(), bestelling.pk))
                 bestelling.status = BESTELLING_STATUS_AFGEROND
 
                 msg = "\n[%s] Bestelling is afgerond (volledig betaald)" % mutatie.when
@@ -544,7 +540,7 @@ class Command(BaseCommand):
                 stuur_email_naar_koper_betaalbevestiging(bestelling)
         else:
             self.stdout.write('[INFO] Betaling niet gelukt voor bestelling %s (pk=%s)' % (
-                                bestelling.bestel_nr, bestelling.pk))
+                                bestelling.mh_bestel_nr(), bestelling.pk))
 
             bestelling.status = BESTELLING_STATUS_MISLUKT
 

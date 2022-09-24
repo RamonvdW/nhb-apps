@@ -146,6 +146,9 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                 tup = ('Wedstrijd', inschrijving.wedstrijd.titel)
                 beschrijving.append(tup)
 
+                tup = ('Bij vereniging', inschrijving.wedstrijd.organiserende_vereniging)
+                beschrijving.append(tup)
+
                 sessie = inschrijving.sessie
                 tup = ('Sessie', '%s om %s' % (sessie.datum, sessie.tijd_begin.strftime('%H:%M')))
                 beschrijving.append(tup)
@@ -249,8 +252,15 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
             context['rest_euro'] = rest_euro
 
         if rest_euro >= Decimal('0.01'):
-            context['url_afrekenen'] = reverse('Bestel:bestelling-afrekenen',
-                                               kwargs={'bestel_nr': bestelling.bestel_nr})
+            # betaling is vereist
+
+            if bestelling.ontvanger.moet_handmatig():
+                # betaling moet handmatig
+                context['moet_handmatig'] = True
+            else:
+                # betaling gaat via Mollie
+                context['url_afrekenen'] = reverse('Bestel:bestelling-afrekenen',
+                                                   kwargs={'bestel_nr': bestelling.bestel_nr})
 
         context['url_voorwaarden'] = settings.VERKOOP_VOORWAARDEN_URL
 
@@ -389,7 +399,7 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
             out['status'] = 'nieuw'
 
             # start een nieuwe transactie op
-            beschrijving = "%s bestelling %s" % (settings.AFSCHRIFT_SITE_NAAM, bestelling.bestel_nr)
+            beschrijving = "%s bestelling %s" % (settings.AFSCHRIFT_SITE_NAAM, bestelling.mh_bestel_nr())
 
             # TODO: is het realistisch dat status NIEUW al transacties heeft?
             rest_euro = bestelling.totaal_euro

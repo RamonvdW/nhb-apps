@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Bestelling</h3>
-            <p>Bestelnummer: {{ bestelling.bestel_nr }}</p>
+            <p>Bestelnummer: {{ bestelling.mh_bestel_nr }}</p>
         </div>
     </div>
 
@@ -80,20 +80,27 @@
                     <tr>
                         <td colspan="3" class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
                     </tr>
-                {% elif url_afrekenen %}
+                {% else %}
+                    {% if url_afrekenen %}
+                        <tr>
+                            <td class="hide-on-small-only"></td>
+                            <td class="right-align">
+                                <form action="{{ url_afrekenen }}" method="post">
+                                    {% csrf_token %}
+                                    <button class="btn-nhb-rood">
+                                        <i class="material-icons-round right">shopping_cart_checkout</i>Betalen</button>
+                                </form>
+                            </td>
+                            <td><!-- bedragen --></td>
+                        </tr>
+                    {% endif %}
+
                     <tr>
-                        <td class="hide-on-small-only"></td>
-                        <td class="right-align">
-                            <form action="{{ url_afrekenen }}" method="post">
-                                {% csrf_token %}
-                                <button class="btn-nhb-rood">
-                                    <i class="material-icons-round right">shopping_cart_checkout</i>Betalen</button>
-                            </form>
+                        <td colspan="3">
+                            <p class="center">Betaling is {% if moet_handmatig %}alleen{% else %}ook{% endif %} mogelijk door overboeking van het verschuldigde bedrag naar onderstaande rekening onder vermelding van "Bestelnummer {{ bestelling.mh_bestel_nr }}"</p>
                         </td>
-                        <td><!-- bedragen --></td>
                     </tr>
                 {% endif %}
-
             </table>
         </div>
 

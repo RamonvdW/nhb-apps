@@ -208,10 +208,10 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         f1, f2 = self.verwerk_bestel_mutaties()
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         msg = f2.getvalue()
-        msg = re.sub('pk=[0-9]*', 'pk=X', msg)
-        self.assertTrue('[INFO] Betaling is gelukt voor bestelling 1000001 (pk=X)' in msg)
-        self.assertTrue('[INFO] Bestelling 1000001 (pk=X) heeft 10.00 van de 10.00 euro ontvangen' in msg)
-        self.assertTrue('[INFO] Bestelling 1000001 (pk=X) is afgerond' in msg)
+        msg = re.sub('pk=[0-9]+', 'pk=X', msg)
+        self.assertTrue('[INFO] Betaling is gelukt voor bestelling MH-1002001 (pk=X)' in msg)
+        self.assertTrue('[INFO] Bestelling MH-1002001 (pk=X) heeft 10.00 van de 10.00 euro ontvangen' in msg)
+        self.assertTrue('[INFO] Bestelling MH-1002001 (pk=X) is afgerond' in msg)
 
         self.assertEqual(1, bestelling.transacties.count())
 
@@ -344,7 +344,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         status = data['status']
         self.assertEqual(status, 'error')
 
-        # verander de betaal status in 'afgerond'
+        # verander de betaalstatus in 'afgerond'
         bestelling.status = BESTELLING_STATUS_AFGEROND
         bestelling.save(update_fields=['status'])
         with self.assert_max_queries(20):

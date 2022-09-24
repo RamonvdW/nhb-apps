@@ -29,13 +29,9 @@
             {% url 'Competitie:kies' as card_url %}
             {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
 
-            <!-- records -->
-            {% url 'Records:overzicht' as card_url %}
-            {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
-
             <!-- wedstrijdkalender -->
-            {% if rol_is_bb %}
-                {% url 'Wedstrijden:manager' as card_url %}
+            {% if rol_is_bb or rol_is_mwz %}
+                {% url 'Wedstrijden:manager-status' status='wacht' as card_url %}
                 {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Beheer de wedstrijdkalender." icon="event_note" url=card_url %}
             {% elif rol_is_hwl %}
                 {% url 'Wedstrijden:vereniging' as card_url %}
@@ -47,6 +43,10 @@
                 {% url 'Opleidingen:overzicht' as card_url %}
                 {% include 'plein/card.dtl' with title="Opleidingen" text="Beheer de opleidingen en deelnemers." icon="school" url=card_url %}
             {% endif %}
+
+            <!-- records -->
+            {% url 'Records:overzicht' as card_url %}
+            {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
         </div>
     </div>
 

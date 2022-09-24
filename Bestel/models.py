@@ -197,6 +197,9 @@ class Bestelling(models.Model):
 
         return msg
 
+    def mh_bestel_nr(self):
+        return "MH-%s" % self.bestel_nr
+
     class Meta:
         verbose_name = "Bestelling"
         verbose_name_plural = "Bestellingen"

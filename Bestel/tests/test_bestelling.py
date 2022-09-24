@@ -278,9 +278,9 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         # verwijder de instellingen van de vereniging
         self.instellingen.delete()
 
-        # nu kan de bestelling niet aangemaakt worden
+        # de bestelling wordt toch aangemaakt, zodat handmatig betaald kan worden
         self.verwerk_bestel_mutaties()
-        self.assertEqual(0, Bestelling.objects.count())
+        self.assertEqual(1, Bestelling.objects.count())
 
     def test_geen_instellingen_nhb(self):
         self.e2e_login_and_pass_otp(self.account_admin)
@@ -298,9 +298,9 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         # verwijder de instellingen van de vereniging
         self.instellingen_nhb.delete()
 
-        # nu kan de bestelling niet aangemaakt worden
+        # de bestelling wordt toch aangemaakt, zodat er handmatig betaald kan worden
         self.verwerk_bestel_mutaties()
-        self.assertEqual(0, Bestelling.objects.count())
+        self.assertEqual(1, Bestelling.objects.count())
 
     def test_geen_mandje(self):
         self.e2e_login_and_pass_otp(self.account_admin)

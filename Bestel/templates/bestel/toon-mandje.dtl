@@ -62,7 +62,9 @@
                             {% for product in producten %}
                                 <tr>
                                     <td class="hide-on-small-only">{% for hdr, lijn in product.beschrijving %}{{ hdr }}<br>{% endfor %}{% if not product.kan_afrekenen %}<br>{% endif %}</td>
-                                    <td>{% for hdr, lijn in product.beschrijving %}{{ lijn }}<br>{% endfor %}{% if not product.kan_afrekenen %}<i class="nhb-rood-text">Kan nog niet besteld worden</i>{% endif %}</td>
+                                    <td>{% for hdr, lijn in product.beschrijving %}{{ lijn }}<br>{% endfor %}
+                                        {% if not product.kan_afrekenen %}<i class="nhb-rood-text">Kan nog niet besteld worden</i>{% endif %}
+                                    </td>
                                     <td class="right-align">&euro;&nbsp;{{ product.prijs_euro }}</td>
                                     <td class="right-align">
                                         <button class="btn-nhb-blauw" id="id_verwijder_{{ product.pk }}" onclick="verwijder('id_verwijder_{{ product.pk }}')" data-url="{{ product.url_verwijder }}">

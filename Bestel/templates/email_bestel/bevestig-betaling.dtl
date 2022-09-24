@@ -10,7 +10,7 @@
     |
     |Deze e-mail is de bevestiging van je aankoop op {{ naam_site }}.
     |
-    |Bestelnummer: {{ bestelling.bestel_nr }}
+    |Bestelnummer: {{ bestelling.mh_bestel_nr }}
     |Betaalstatus: Voldaan
     |
     |Verkoper:
@@ -77,7 +77,7 @@
     <br>
 
     <table>
-        <tr><th>Bestelnummer:</th><td>{{ bestelling.bestel_nr }}</td></tr>
+        <tr><th>Bestelnummer:</th><td>{{ bestelling.mh_bestel_nr }}</td></tr>
         <tr><th>Betaalstatus:</th><td>Voldaan</td></tr>
     </table>
 

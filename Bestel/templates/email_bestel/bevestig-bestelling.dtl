@@ -10,7 +10,7 @@
     |
     |Deze e-mail is de bevestiging van je bestelling op {{ naam_site }}.
     |
-    |Bestelnummer: {{ bestelling.bestel_nr }}
+    |Bestelnummer: {{ bestelling.mh_bestel_nr }}
     |Betaalstatus: {% if bestelling.status == BESTELLING_STATUS_AFGEROND %}Voldaan{% else %}Te betalen{% endif %}
     |
     |Verkoper:
@@ -65,7 +65,7 @@
     |  Naam:     {{ bestelling.verkoper_naam }}
     |  IBAN:     {{ bestelling.verkoper_iban }}
     |  BIC:      {{ bestelling.verkoper_bic }}
-    |  Kenmerk:  Bestelnummer {{ bestelling.bestel_nr }}
+    |  Kenmerk:  Bestelnummer {{ bestelling.mh_bestel_nr }}
 
     |
     |Bedankt voor je bestelling!
@@ -79,7 +79,7 @@
     <br>
 
     <table>
-        <tr><th>Bestelnummer:</th><td>{{ bestelling.bestel_nr }}</td></tr>
+        <tr><th>Bestelnummer:</th><td>{{ bestelling.mh_bestel_nr }}</td></tr>
         <tr><th>Betaalstatus:</th><td>{% if bestelling.status == BESTELLING_STATUS_AFGEROND %}Voldaan{% else %}Te betalen{% endif %}</td></tr>
     </table>
 
@@ -165,7 +165,7 @@
             <tr><th>Ontvanger:</th><td>{{ bestelling.verkoper_naam }}</td></tr>
             <tr><th>IBAN:</th><td>{{ bestelling.verkoper_iban }}</td></tr>
             <tr><th>BIC:</th><td>{{ bestelling.verkoper_bic }}</td></tr>
-            <tr><th>Kenmerk:</th><td>Bestelnummer {{ bestelling.bestel_nr }}</td></tr>
+            <tr><th>Kenmerk:</th><td>Bestelnummer {{ bestelling.mh_bestel_nr }}</td></tr>
         </table>
 
     {% endif %}

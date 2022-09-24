@@ -322,9 +322,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
         deelcomp.regio_organiseert_teamcompetitie = False
         deelcomp.save(update_fields=['regio_organiseert_teamcompetitie'])
 
-        with self.settings(TOON_WEDSTRIJDKALENDER=True):
-            with self.assert_max_queries(20):
-                resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))
@@ -337,10 +336,8 @@ class TestVerenigingHWL(E2EHelpers, TestCase):
 
         DeelcompetitieRonde.objects.all().delete()
 
-        # use a port with no service responding to it
-        with self.settings(TOON_WEDSTRIJDKALENDER=False):
-            with self.assert_max_queries(20):
-                resp = self.client.get(self.url_overzicht)
+        with self.assert_max_queries(20):
+            resp = self.client.get(self.url_overzicht)
         self.assertEqual(resp.status_code, 200)     # 200 = OK
         self.assert_html_ok(resp)
         self.assert_template_used(resp, ('vereniging/overzicht.dtl', 'plein/site_layout.dtl'))

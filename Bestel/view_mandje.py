@@ -186,7 +186,13 @@ class ToonInhoudMandje(UserPassesTestMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         account = self.request.user
 
-        eval_mandje_inhoud(self.request)
+        # omdat het heel raar is als het tellertje op het mandje niet overeenkomt
+        # met de inhoud van het mandje, forceren we de telling hier nog een keer
+        mandje_tel_inhoud(self.request)
+        # eval_mandje_inhoud(self.request)
+
+        # force dat het mandje icoon getoond wordt
+        context['menu_toon_mandje'] = True
 
         mandje, producten, ontvanger2product_pks, mandje_is_leeg, bevat_fout = self._beschrijf_inhoud_mandje(account)
 

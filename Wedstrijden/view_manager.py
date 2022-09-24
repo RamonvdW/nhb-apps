@@ -43,7 +43,7 @@ class KalenderManagerView(UserPassesTestMixin, View):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu == Rollen.ROL_BB
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ)
 
     @staticmethod
     def _maak_filter_knoppen(context, gekozen_status):

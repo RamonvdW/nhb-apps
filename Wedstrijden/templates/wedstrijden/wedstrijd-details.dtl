@@ -86,7 +86,10 @@
 
                 <tr>
                     <th>Wedstrijd locatie</th>
-                    <td>{{ wed.locatie.adres|linebreaksbr }}</td>
+                    <td>{{ wed.locatie.adres|linebreaksbr }}<br><br>
+                        <a class="btn-nhb-blauw" href="{{ url_map }}" target="_blank" rel="noopener noreferrer">
+                            <i class="material-icons-round left">open_in_new</i>Toon op de kaart</a>
+                    </td>
                 </tr>
 
                 <tr>

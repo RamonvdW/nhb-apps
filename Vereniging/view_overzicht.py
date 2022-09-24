@@ -87,7 +87,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             context['toon_competities'] = True
 
             if self.rol_nu == Rollen.ROL_HWL:
-                context['toon_wedstrijdkalender'] = settings.TOON_WEDSTRIJDKALENDER
+                context['toon_wedstrijdkalender'] = True
 
             comps = (Competitie
                      .objects
@@ -253,8 +253,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
 
         if self.rol_nu != Rollen.ROL_WL:
             # SEC of HWL
-            if settings.TOON_WEDSTRIJDKALENDER:
-                context['url_betalingen'] = reverse('Betaal:vereniging-instellingen')
+            context['url_betalingen'] = reverse('Betaal:vereniging-instellingen')
 
         # maak een afsluiter (wordt gebruikt in de template)
         if prev_jaar != 0:

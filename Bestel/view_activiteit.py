@@ -87,7 +87,7 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
 
         context['bestellingen'] = list(bestellingen[:50])
         for bestelling in context['bestellingen']:
-            bestelling.bestel_nr_str = str(bestelling.bestel_nr)
+            bestelling.bestel_nr_str = bestelling.mh_bestel_nr()
             bestelling.ver_nr_str = str(bestelling.ontvanger.vereniging.ver_nr)
             bestelling.ver_naam = bestelling.ontvanger.vereniging.naam
             bestelling.status_str = BESTELLING_STATUS2STR[bestelling.status]
