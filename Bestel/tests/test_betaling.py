@@ -12,6 +12,7 @@ from Bestel.models import BestelMandje, Bestelling, BESTELLING_STATUS_AFGEROND, 
 from Bestel.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd, bestel_mutatieverzoek_betaling_afgerond
 from Betaal.models import BetaalInstellingenVereniging, BetaalActief, BetaalMutatie, BetaalTransactie
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
+from Mailer.models import MailQueue
 from Wedstrijden.models import (Wedstrijd, WedstrijdSessie, WEDSTRIJD_STATUS_GEACCEPTEERD,
                                 WedstrijdInschrijving, INSCHRIJVING_STATUS_DEFINITIEF)
 from NhbStructuur.models import NhbRegio, NhbVereniging
@@ -204,6 +205,9 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(0, bestelling.transacties.count())
 
+        # maak de uitgaande mail queue leeg
+        MailQueue.objects.all().delete()
+
         # laat mutatie verwerken die betaal daemon richting bestel daemon heeft gestuurd
         f1, f2 = self.verwerk_bestel_mutaties()
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
@@ -214,6 +218,12 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         self.assertTrue('[INFO] Bestelling MH-1002001 (pk=X) is afgerond' in msg)
 
         self.assertEqual(1, bestelling.transacties.count())
+
+        # controleer dat een e-mailbevestiging van de betaling aangemaakt is
+        self.assertEqual(1, MailQueue.objects.count())
+        email = MailQueue.objects.all()[0]
+        self.assert_email_html_ok(email.mail_html, 'email_bestel/bevestig-bestelling.dtl')
+        self.assert_consistent_email_html_text(email, 'email_bestel/bevestig-bestelling.dtl')
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)

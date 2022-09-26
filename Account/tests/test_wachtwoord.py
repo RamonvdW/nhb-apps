@@ -106,6 +106,7 @@ class TestAccountWachtwoord(E2EHelpers, TestCase):
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.all()[0]
         self.assert_email_html_ok(mail.mail_html, 'email_account/wachtwoord-vergeten.dtl')
+        self.assert_consistent_email_html_text(mail, 'email_account/wachtwoord-vergeten.dtl')
 
         self.assertEqual(SiteTijdelijkeUrl.objects.count(), 1)
         obj = SiteTijdelijkeUrl.objects.all()[0]

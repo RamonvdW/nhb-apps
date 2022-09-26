@@ -34,14 +34,15 @@ def report_validated_templates():
             dtl_str = str(dtl)
             is_email_template = '/templates/email_' in dtl_str
             dtl_str = dtl_str[dtl_str.find('/templates/')+11:]
-            if dtl_str not in validated_templates and dtl_str not in included_templates:    # pragma: no cover
-                if is_email_template:
-                    print('[WARNING] Missing assert_email_html_ok coverage for template %s' % repr(dtl_str))
-                else:
-                    print('[WARNING] Missing assert_html_ok coverage for template %s' % repr(dtl_str))
+            if dtl_str not in included_templates:       # pragma: no cover
+                if dtl_str not in validated_templates:
+                    if is_email_template:
+                        print('[WARNING] Missing assert_email_html_ok coverage for template %s' % repr(dtl_str))
+                    else:
+                        print('[WARNING] Missing assert_html_ok coverage for template %s' % repr(dtl_str))
 
-            if is_email_template and dtl_str not in consistent_email_templates:
-                print('[WARNING] Missing assert_consistent_email_html_text coverage for e-mail template %s' % repr(dtl_str))
+                if is_email_template and dtl_str not in consistent_email_templates:
+                    print('[WARNING] Missing assert_consistent_email_html_text coverage for e-mail template %s' % repr(dtl_str))
         # for
 
 

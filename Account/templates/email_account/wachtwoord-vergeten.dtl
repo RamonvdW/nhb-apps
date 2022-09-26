@@ -9,7 +9,7 @@
     |Hallo!
     |
     |Je hebt aangegeven je wachtwoord vergeten te zijn voor {{ naam_site }}.
-    |Gebruik onderstaande link om een nieuw wachtwoord in te stellen.
+    |Gebruik onderstaande link om een nieuw wachtwoord in te stellen:
     |
     |{{ url }}
     |
