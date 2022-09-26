@@ -312,7 +312,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         writer.writerow(['Reserveringsnummer', 'Aangemeld op', 'Status',
                          'Prijs', 'Korting', 'Ontvangen', 'Retour',
                          'Sessie', 'Code', 'Wedstrijdklasse',
-                         'Lid nr', 'Sporter', 'Geslacht', 'Boog', 'Vereniging',
+                         'Lid nr', 'Sporter', 'E-mailadres', 'Geslacht', 'Boog', 'Vereniging',
                          'Para classificatie', 'Voorwerpen op schietlijn', 'Para opmerking'])
 
         for aanmelding in aanmeldingen:
@@ -366,6 +366,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 aanmelding.wedstrijdklasse.beschrijving,
                 sporter.lid_nr,
                 sporter.volledige_naam(),
+                sporter.email,
                 GESLACHT2STR[wedstrijd_geslacht],
                 sporterboog.boogtype.beschrijving,
                 ver_str,
