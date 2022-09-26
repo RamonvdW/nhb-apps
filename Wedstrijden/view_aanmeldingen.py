@@ -27,6 +27,21 @@ TEMPLATE_WEDSTRIJDEN_AANMELDING_DETAILS = 'wedstrijden/aanmelding-details.dtl'
 
 # TODO: HWL moet sporter kunnen verplaatsen naar een andere sessie
 
+
+def get_inschrijving_mh_bestel_nr(inschrijving):
+    try:
+        bestel_product = inschrijving.bestelproduct_set.all()[0]
+    except IndexError:
+        return ""
+
+    try:
+        bestelling = bestel_product.bestelling_set.all()[0]
+    except IndexError:
+        return ""
+
+    return bestelling.mh_bestel_nr()
+
+
 class KalenderAanmeldingenView(UserPassesTestMixin, TemplateView):
 
     """ Via deze view kunnen beheerders de inschrijvingen voor een wedstrijd inzien """
@@ -310,7 +325,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
         writer.writerow(['Reserveringsnummer', 'Aangemeld op', 'Status',
-                         'Prijs', 'Korting', 'Ontvangen', 'Retour',
+                         'Bestelnummer', 'Prijs', 'Korting', 'Ontvangen', 'Retour',
                          'Sessie', 'Code', 'Wedstrijdklasse',
                          'Lid nr', 'Sporter', 'E-mailadres', 'Geslacht', 'Boog', 'Vereniging',
                          'Para classificatie', 'Voorwerpen op schietlijn', 'Para opmerking'])
@@ -319,6 +334,8 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
             sporterboog = aanmelding.sporterboog
             sporter = sporterboog.sporter
             reserveringsnummer = aanmelding.pk + settings.TICKET_NUMMER_START__WEDSTRIJD
+
+            bestelnummer_str = get_inschrijving_mh_bestel_nr(aanmelding)
 
             if sporter.bij_vereniging:
                 ver_str = sporter.bij_vereniging.ver_nr_en_naam()
@@ -357,6 +374,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 reserveringsnummer,
                 aanmelding.wanneer.strftime('%Y-%m-%d %H:%M'),
                 INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
+                bestelnummer_str,
                 prijs_str,
                 korting_str,
                 '€ %s' % aanmelding.ontvangen_euro,
@@ -443,7 +461,11 @@ class KalenderDetailsAanmeldingView(UserPassesTestMixin, TemplateView):
         context['voorkeuren'] = voorkeuren = get_sporter_voorkeuren(sporter)
         voorkeuren.wedstrijdgeslacht_str = GESLACHT2STR[voorkeuren.wedstrijd_geslacht]
 
+        inschrijving.reserveringsnummer = inschrijving.pk + settings.TICKET_NUMMER_START__WEDSTRIJD
+
         inschrijving.status_str = INSCHRIJVING_STATUS_TO_SHORT_STR[inschrijving.status]
+
+        inschrijving.bestelnummer_str = get_inschrijving_mh_bestel_nr(inschrijving)
 
         if inschrijving.status != INSCHRIJVING_STATUS_AFGEMELD:
             inschrijving.url_afmelden = reverse('Wedstrijden:afmelden',

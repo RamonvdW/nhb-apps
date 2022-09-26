@@ -22,6 +22,10 @@
         <div class="col s12 m10 offset-m1 l8 offset-l2">
             <table class="white">
                 <tr>
+                    <th>Reserveringsnummer</th>
+                    <td>{{ inschrijving.reserveringsnummer }}</td>
+                </tr>
+                <tr>
                     <th>Sporter</th>
                     <td>{{ sporter.lid_nr_en_volledige_naam }}<br>{{ inschrijving.sporterboog.boogtype.beschrijving }}; {{ voorkeuren.wedstrijdgeslacht_str }}</td>
                 </tr>
@@ -46,8 +50,8 @@
 
                 {% if toon_contactgegevens %}
                     <tr>
-                        <th>Contactgegevens</th>
-                        <td>E-mail: <code>{{ sporter.email }}</code><br>Telefoon: {{ sporter.telefoon }}</td>
+                        <th>E-mail sporter</th>
+                        <td><code>{{ sporter.email }}</code></td>
                     </tr>
                 {% endif %}
 
@@ -82,6 +86,12 @@
                         {% endif %}
                     </td>
                 </tr>
+                {% if inschrijving.bestelnummer_str %}
+                    <tr>
+                        <th>Bestelnummer</th>
+                        <td>{{ inschrijving.bestelnummer_str }}</td>
+                    </tr>
+                {% endif %}
                 <tr>
                     <th>Prijs</th>
                     <td>{% if inschrijving.bestelproduct %}&euro;&nbsp;{{ inschrijving.bestelproduct.prijs_euro }}{% else %}<i>Geen</i> (handmatige inschrijving){% endif %}</td>

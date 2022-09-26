@@ -15,6 +15,7 @@ from django.utils.timezone import get_default_timezone
 from django.utils.formats import date_format
 from django.db.utils import DataError, OperationalError, IntegrityError
 from django.db import transaction
+from BasisTypen.models import ORGANISATIE_IFAA
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
 from Bestel.models import (BestelProduct, BestelMandje,
                            Bestelling, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING,
@@ -63,16 +64,20 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
 
         if product.wedstrijd_inschrijving:
             inschrijving = product.wedstrijd_inschrijving
+            wedstrijd = inschrijving.wedstrijd
 
             # lege regel gevolgd door een regel nummer
             regel_nr += 1
             product.regel_nr = regel_nr
 
             product.reserveringsnummer = settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk
-            product.wedstrijd_titel = inschrijving.wedstrijd.titel
+            product.wedstrijd_titel = wedstrijd.titel
+            product.wedstrijd_bij_vereniging = wedstrijd.organiserende_vereniging.ver_nr_en_naam()
             product.sessie_datum = inschrijving.sessie.datum
             product.sessie_tijd = inschrijving.sessie.tijd_begin
             product.sporter_lid_nr_naam = inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam()
+            product.org_email = wedstrijd.contact_email
+            product.org_telefoon = wedstrijd.contact_telefoon
 
             sporter_ver = inschrijving.sporterboog.sporter.bij_vereniging
             if sporter_ver:
@@ -80,7 +85,13 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
             else:
                 product.ver_nr_naam = 'Onbekend'
 
-            product.boog = inschrijving.sporterboog.boogtype.beschrijving
+            if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
+                product.schietstijl = inschrijving.sporterboog.boogtype.beschrijving
+                product.klasse = '%s [%s]' % (inschrijving.wedstrijdklasse.beschrijving,
+                                              inschrijving.wedstrijdklasse.afkorting)
+            else:
+                product.boog = inschrijving.sporterboog.boogtype.beschrijving
+                product.klasse = inschrijving.wedstrijdklasse.beschrijving
 
             if inschrijving.korting:
                 korting = inschrijving.korting

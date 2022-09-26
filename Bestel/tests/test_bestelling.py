@@ -128,6 +128,9 @@ class TestBestelBestelling(E2EHelpers, TestCase):
                         datum_einde=datum,
                         locatie=locatie,
                         organiserende_vereniging=ver,
+                        contact_email='organisatie@ver.not',
+                        contact_telefoon='0600000001',
+                        contact_naam='Organ is a Tie',
                         voorwaarden_a_status_when=now,
                         prijs_euro_normaal=10.00,
                         prijs_euro_onder18=10.00)
