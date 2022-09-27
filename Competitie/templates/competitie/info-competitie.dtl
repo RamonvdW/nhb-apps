@@ -481,7 +481,7 @@ In de shoot-off wordt 1 pijl gesloten en beslist de scheidsrechter welke pijl he
     <br>
     <p class="center"><i>Er kunnen geen rechten ontleend worden aan de informatie op deze pagina. Het schiettechnisch reglement van de NHB is leidend.</i></p>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="info-competitie" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-info-competitie" %}
 
 {% endblock %}
 

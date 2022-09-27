@@ -118,6 +118,6 @@
 
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="klassengrenzen-vaststellen" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-klassengrenzen-vaststellen" %}
 
 {% endblock %}

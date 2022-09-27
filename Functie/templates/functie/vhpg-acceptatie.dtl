@@ -62,6 +62,6 @@ Voordat je aan de slag kan vragen we je onderstaande tekst goed door te lezen en
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="vhpg-acceptatie" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-vhpg-acceptatie" %}
 
 {% endblock %}

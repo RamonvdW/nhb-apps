@@ -254,6 +254,6 @@
 
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-uitslagen-regio-teams" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compuitslagen-regio-teams" %}
 
 {% endblock %}

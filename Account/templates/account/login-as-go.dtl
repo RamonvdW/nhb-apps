@@ -43,6 +43,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="wissel-naar-account" %}
+    <!-- geen feedback with op_pagina="account-login-as-go" -->
 
 {% endblock %}

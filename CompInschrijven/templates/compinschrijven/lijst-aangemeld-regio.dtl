@@ -156,6 +156,6 @@
 
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-lijst-aangemeld-regio" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compinschrijven-lijst-aangemeld-regio" %}
 
 {% endblock %}

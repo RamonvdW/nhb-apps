@@ -89,6 +89,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="otp-koppelen-stap3" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-otp-koppelen-stap3" %}
 
 {% endblock %}

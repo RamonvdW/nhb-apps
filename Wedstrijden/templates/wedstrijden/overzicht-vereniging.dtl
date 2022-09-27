@@ -79,8 +79,7 @@
         <!-- witruimte -->
         <div class="row center">
             <div class="col s12">
-                <h4>Kortingen</h4>
-                <p>Beheer de kortingen van jouw vereniging</p>
+                <h4>Financieel</h4>
             </div>
         </div>
 
@@ -89,9 +88,15 @@
         <div class="row-nhb-blauw">
             <div class="col s12">
 
-                <!-- vereniging menu -->
+                <!-- instellingen -->
+                {% include 'plein/card.dtl' with title="Instellingen" text="Instellingen om inschrijfgelden te kunnen ontvangen via overschrijving of Mollie." icon="settings" url=url_mollie %}
+
+                <!-- kortingen -->
                 {% url 'Wedstrijden:vereniging-kortingen' as card_url %}
                 {% include 'plein/card.dtl' with title="Kortingen" text="Kortingen aanmaken of aanpassen." icon="sell" url=card_url %}
+
+                <!-- betalingen doorgeven -->
+                {% include 'plein/card.dtl' with title="Betaling invoeren" text="Geef de ontvangen wedstrijdgelden door, zodat een reservering definitief kan worden." icon="euro_symbol" url=url_betaling_ontvangen %}
 
             </div>
         </div>

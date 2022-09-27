@@ -230,6 +230,6 @@
         <p class="center"><i>Geen deelnemers gevonden voor deze combinatie van filters</i></p>
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-uitslagen-rayon-indiv" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compuitslagen-rayon-indiv" %}
 
 {% endblock %}

@@ -227,6 +227,6 @@
         <p class="center"><i>Geen deelnemers gevonden voor deze combinatie van filters</i></p>
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-uitslagen-regio-indiv" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compuitslagen-regio-indiv" %}
 
 {% endblock %}

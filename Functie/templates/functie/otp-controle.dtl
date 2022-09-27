@@ -97,6 +97,6 @@
 
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="otp-controle" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-otp-controle" %}
 
 {% endblock %}

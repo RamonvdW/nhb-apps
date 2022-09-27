@@ -116,6 +116,6 @@
     </div>
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="betalingen-vereniging-instellingen" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="betaal-vereniging-instellingen" %}
 
 {% endblock %}

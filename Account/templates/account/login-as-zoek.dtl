@@ -106,5 +106,7 @@
         <p class="center">Tip: gebruiker moet een account aangemaakt hebben.</p>
     {% endif %}
 
+    <!-- geen feedback: with op_pagina="account-login-as-zoek" -->
+
 {% endblock %}
 

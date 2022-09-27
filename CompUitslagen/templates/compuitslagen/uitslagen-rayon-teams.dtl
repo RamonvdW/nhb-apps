@@ -228,6 +228,6 @@
 
     <p class="center">Sporter met ** achter de naam is invaller</p>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-uitslagen-rayon-teams" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compuitslagen-rayon-teams" %}
 
 {% endblock %}

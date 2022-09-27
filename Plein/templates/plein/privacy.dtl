@@ -43,7 +43,7 @@
     <p>Hier kan je <a href="https://www.rijksoverheid.nl/onderwerpen/telecommunicatie/vraag-en-antwoord/mag-een-website-ongevraagd-cookies-plaatsen" target="_blank" rel="noopener noreferrer">meer informatie over cookies</a> vinden.</p>
     -->
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="privacy" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="plein-privacy" %}
 
 {% endblock %}
 

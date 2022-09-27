@@ -447,7 +447,7 @@
     {% endif %}
 
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="account-activiteit" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="overig-activiteit" %}
 
 {% endblock %}
 
