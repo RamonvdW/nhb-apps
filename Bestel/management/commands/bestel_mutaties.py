@@ -14,6 +14,7 @@ from django.core.management.base import BaseCommand
 from django.utils.timezone import get_default_timezone
 from django.utils.formats import date_format
 from django.db.utils import DataError, OperationalError, IntegrityError
+from django.db.models import Count
 from django.db import transaction
 from BasisTypen.models import ORGANISATIE_IFAA
 from Betaal.models import BetaalInstellingenVereniging, BetaalTransactie
@@ -224,6 +225,36 @@ class Command(BaseCommand):
             mandje, is_created = BestelMandje.objects.get_or_create(account=account)
 
         return mandje
+
+    def _mandjes_opschonen(self):
+        """ Verwijder uit de mandjes de producten die er te lang in liggen """
+        self.stdout.write('[INFO] Opschonen mandjes begin')
+
+        verval_datum = timezone.now() - datetime.timedelta(days=settings.MANDJE_VERVAL_NA_DAGEN)
+
+        # doorloop alle producten die nog in een mandje liggen en waarvan de datum verlopen is
+        for product in (BestelProduct
+                        .objects
+                        .annotate(mandje_count=Count('bestelmandje'))
+                        .select_related('wedstrijd_inschrijving',
+                                        'wedstrijd_inschrijving__koper',
+                                        'wedstrijd_inschrijving__sessie')
+                        .filter(mandje_count=1,
+                                wedstrijd_inschrijving__wanneer__lt=verval_datum)):
+
+            inschrijving = product.wedstrijd_inschrijving
+
+            self.stdout.write('[INFO] Vervallen: BestelProduct pk=%s (%s) in mandje van %s' % (
+                                product.pk, inschrijving, inschrijving.koper))
+
+            wedstrijden_plugin_verwijder_reservering(self.stdout, product.wedstrijd_inschrijving)
+
+            # verwijder het product, dan verdwijnt deze ook uit het mandje
+            self.stdout.write('[INFO] BestelProduct met pk=%s wordt verwijderd' % product.pk)
+            product.delete()
+        # for
+
+        self.stdout.write('[INFO] Opschonen mandjes klaar')
 
     def _clear_instellingen_cache(self):
         self._instellingen_cache = dict()
@@ -693,6 +724,7 @@ class Command(BaseCommand):
 
         # vang generieke fouten af
         try:
+            self._mandjes_opschonen()
             self._monitor_nieuwe_mutaties()
         except (DataError, OperationalError, IntegrityError) as exc:  # pragma: no cover
             _, _, tb = sys.exc_info()

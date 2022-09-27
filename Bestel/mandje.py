@@ -52,10 +52,10 @@ def mandje_tel_inhoud(request):
 def eval_mandje_inhoud(request):
     """ Als de gebruiker een tijdje weggeweest is dan kan de achtergrondtaak het mandje geleegd hebben.
         Als er dus iets in het mandje zit van deze gebruiker, kijk dan 1x per minuut of dit nog steeds zo is.
-        Actief toevoegen/verwijderen resulteert ook in de evaluatie.
+        Actief toevoegen/verwijderen leidt ook tot de evaluatie.
     """
 
-    # kijk of het al weer tijd is
+    # kijk of het alweer tijd is
     try:
         eval_after = request.session[SESSIONVAR_MANDJE_EVAL_AFTER]
     except KeyError:

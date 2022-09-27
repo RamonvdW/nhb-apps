@@ -87,32 +87,31 @@
                                 <td class="hide-on-small-only"></td>
                                 <td class="right-align"><b>Totaal:</b></td>
                                 <td class="right-align"><b>&euro;&nbsp;{{ mandje.totaal_euro }}</b></td>
+                                <td><!--knoppen--></td>
                             </tr>
 
-                            <!-- afrekenen -->
-                            <tr>
-                                <td class="hide-on-small-only"></td>
-                                {% if bevat_fout %}
-                                    <td colspan="3" class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
-                                {% else %}
-                                    {% if aantal_betalingen > 1 %}
-                                            <td colspan="3" class="center">Let op: producten worden opgesplitst over {{ aantal_betalingen }} bestellingen.</td>
-                                        </tr>
-                                        <tr>
-                                            <td class="hide-on-small-only"></td>
-                                    {% endif %}
-                                    <td colspan="2" class="right-align">
-                                        <form action="{{ url_bestellen }}" method="post">
-                                            {% csrf_token %}
-                                            <button id="id_bestellen" class="btn-nhb-rood">
-                                                <i class="material-icons-round right">shopping_cart_checkout</i>Bestelling afronden</button>
-                                        </form>
-                                    </td>
-                                    <td></td>
+                            {% if not bevat_fout %}
+                                {% if aantal_betalingen > 1 %}
+                                    <tr>
+                                        <td class="hide-on-small-only"></td>
+                                        <td colspan="3" class="center">Let op: producten worden opgesplitst over {{ aantal_betalingen }} bestellingen.</td>
+                                    </tr>
                                 {% endif %}
-                            </tr>
+                            {% endif %}
 
                         </table>
+
+                        {% if bevat_fout %}
+                            <p class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</p>
+                        {% else %}
+                            <div class="center" style="margin-top:30px">
+                                <form action="{{ url_bestellen }}" method="post">
+                                    {% csrf_token %}
+                                    <button id="id_bestellen" class="btn-nhb-rood">
+                                        <i class="material-icons-round right">shopping_cart_checkout</i>Bestelling afronden</button>
+                                </form>
+                            </div>
+                        {% endif %}
 
                     </div>
                 </div>
