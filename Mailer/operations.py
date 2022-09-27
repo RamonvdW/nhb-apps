@@ -22,10 +22,11 @@ def mailer_queue_email(to_address, onderwerp, mail_body, enforce_whitelist=True)
     """
 
     if isinstance(mail_body, tuple):
-        mail_text, mail_html = mail_body
+        mail_text, mail_html, template_name = mail_body
     else:
         mail_text = mail_body
         mail_html = ''
+        template_name =''
     del mail_body
 
     # e-mailadres is verplicht
@@ -42,7 +43,8 @@ def mailer_queue_email(to_address, onderwerp, mail_body, enforce_whitelist=True)
                         mail_subj=onderwerp,
                         mail_date=mail_date,
                         mail_text=mail_text,
-                        mail_html=mail_html)
+                        mail_html=mail_html,
+                        template_used=template_name)
 
         # als er een whitelist is, dan moet het e-mailadres er in voorkomen
         if enforce_whitelist and len(settings.EMAIL_ADDRESS_WHITELIST) > 0:
@@ -128,7 +130,7 @@ def render_email_template(context, email_template_name):
         Verwerk een django email template tot een mail body.
         De inhoud van context is beschikbaar voor het renderen van de template.
 
-        Returns: email body in text, html
+        Returns: email body in text, html + email_template_name
     """
 
     context['logo_url'] = settings.SITE_URL + static('plein/logo_with_text_nhb_jubileum.png')
@@ -144,12 +146,12 @@ def render_email_template(context, email_template_name):
     html_content = rendered_content[pos:]
 
     # control where the newlines are: pipeline character indicates start of new line
-    text_content = re.sub('\s+\|', '|', text_content)          # verwijder whitespace voor elke pipeline
+    text_content = re.sub(r'\s+\|', '|', text_content)          # verwijder whitespace voor elke pipeline
     text_content = text_content.replace('\n', '')
     text_content = text_content[text_content.find('|')+1:]      # strip all before first pipeline, including pipeline
     text_content = text_content.replace('|', '\n')
     text_content = unescape(text_content)
 
-    return text_content, html_content
+    return text_content, html_content, email_template_name
 
 # end of file

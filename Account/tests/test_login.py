@@ -192,8 +192,8 @@ class TestAccountLogin(E2EHelpers, TestCase):
         # er moet nu een mail in de MailQueue staan met een single-use url
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.all()[0]
-        self.assert_email_html_ok(mail.mail_html, 'email_account/bevestig-toegang-email.dtl')
-        self.assert_consistent_email_html_text(mail, 'email_account/bevestig-toegang-email.dtl')
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail)
 
         self.e2e_login(self.testdata.account_admin)
         url = reverse('Overig:tijdelijke-url', kwargs={'code': code})

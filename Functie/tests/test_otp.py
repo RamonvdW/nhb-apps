@@ -337,8 +337,8 @@ class TestFunctie2FA(E2EHelpers, TestCase):
         # er moet nu een mail in de MailQueue staan met een single-use url
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.all()[0]
-        self.assert_email_html_ok(mail.mail_html, 'email_functie/otp-is-losgekoppeld.dtl')
-        self.assert_consistent_email_html_text(mail, 'email_functie/otp-is-losgekoppeld.dtl')
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail)
 
         # al losgekoppeld
         resp = self.client.post(self.url_loskoppelen, {'reset_tweede_factor': 1,

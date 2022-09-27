@@ -282,8 +282,8 @@ class TestFunctieWijzigEmail(E2EHelpers, TestCase):
         # check dat een mail aangemaakt is
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.all()[0]
-        self.assert_email_html_ok(mail.mail_html, 'email_functie/bevestig-toegang-email.dtl')
-        self.assert_consistent_email_html_text(mail, 'email_functie/bevestig-toegang-email.dtl')
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail)
 
         # haal de 1e tijdelijke url op
         mail = MailQueue.objects.order_by('-toegevoegd_op')[0]

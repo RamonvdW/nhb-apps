@@ -82,10 +82,11 @@ class TestMailerOperations(TestCase):
         }
         test_email_template = 'email_account/wachtwoord-vergeten.dtl'
 
-        out_text, out_html = render_email_template(context, test_email_template)
+        out_text, out_html, template_used = render_email_template(context, test_email_template)
 
         self.assertTrue(out_text != '')
         self.assertTrue(out_html != '')
+        self.assertEqual(template_used, test_email_template)
 
 
 # end of file

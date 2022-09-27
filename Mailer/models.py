@@ -36,6 +36,9 @@ class MailQueue(models.Model):
     # logboekje
     log = models.TextField()
 
+    # voor assert_email_html_ok en assert_consistent_email_text
+    template_used = models.CharField(max_length=100, default='')
+
     def __str__(self):
         """ Lever een tekstuele beschrijving van een database record, voor de admin interface """
         msg = "[%s] to:%s subj:'%s'" % (self.toegevoegd_op.strftime('%Y-%m-%d %H:%M utc'),

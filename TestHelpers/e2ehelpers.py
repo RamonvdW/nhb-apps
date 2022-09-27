@@ -575,20 +575,23 @@ class E2EHelpers(TestCase):
                 # for
                 self.fail(msg=msg)
 
-    def assert_email_html_ok(self, html, dtl):
-        if dtl not in validated_templates:          # pragma: no branch
-            validated_templates.append(dtl)
+    def assert_email_html_ok(self, mail: MailQueue):
+        html = mail.mail_html
+        template_name = mail.template_used
 
-        self._assert_html_basics(html, dtl)
+        if template_name not in validated_templates:          # pragma: no branch
+            validated_templates.append(template_name)
 
-        self.assertNotIn('<script>', html, msg='Unexpected script in e-mail HTML (template: %s)' % dtl)
-        self.assert_link_quality(html, dtl, is_email=True)
-        self._assert_no_div_in_p(html, dtl)
+        self._assert_html_basics(html, template_name)
+
+        self.assertNotIn('<script>', html, msg='Unexpected script in e-mail HTML (template: %s)' % template_name)
+        self.assert_link_quality(html, template_name, is_email=True)
+        self._assert_no_div_in_p(html, template_name)
 
         if settings.TEST_VALIDATE_HTML:             # pragma: no cover
             issues = self._validate_html(html)
             if len(issues):
-                msg = 'Invalid HTML (template: %s):\n' % dtl
+                msg = 'Invalid HTML (template: %s):\n' % template_name
                 for issue in issues:
                     msg += "    %s\n" % issue
                 # for
@@ -942,9 +945,10 @@ class E2EHelpers(TestCase):
 
         return f1, f2
 
-    def assert_consistent_email_html_text(self, email: MailQueue, template_name: str, ignore=()):
+    def assert_consistent_email_html_text(self, email: MailQueue, ignore=()):
         """ Check that the text version and html version of the e-mail are consistent in wording and contents """
 
+        template_name = email.template_used
         consistent_email_templates.append(template_name)
 
         issues = list()

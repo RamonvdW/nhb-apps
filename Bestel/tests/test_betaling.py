@@ -212,7 +212,7 @@ class TestBestelBetaling(E2EHelpers, TestCase):
         f1, f2 = self.verwerk_bestel_mutaties()
         # print('\nf1:', f1.getvalue(), '\nf2:', f2.getvalue())
         msg = f2.getvalue()
-        msg = re.sub('pk=[0-9]+', 'pk=X', msg)
+        msg = re.sub(r'pk=[0-9]+', 'pk=X', msg)
         self.assertTrue('[INFO] Betaling is gelukt voor bestelling MH-1002001 (pk=X)' in msg)
         self.assertTrue('[INFO] Bestelling MH-1002001 (pk=X) heeft 10.00 van de 10.00 euro ontvangen' in msg)
         self.assertTrue('[INFO] Bestelling MH-1002001 (pk=X) is afgerond' in msg)
@@ -221,9 +221,9 @@ class TestBestelBetaling(E2EHelpers, TestCase):
 
         # controleer dat een e-mailbevestiging van de betaling aangemaakt is
         self.assertEqual(1, MailQueue.objects.count())
-        email = MailQueue.objects.all()[0]
-        self.assert_email_html_ok(email.mail_html, 'email_bestel/bevestig-bestelling.dtl')
-        self.assert_consistent_email_html_text(email, 'email_bestel/bevestig-bestelling.dtl')
+        mail = MailQueue.objects.all()[0]
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail)
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)

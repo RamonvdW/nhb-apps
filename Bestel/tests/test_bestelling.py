@@ -206,10 +206,9 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         product1 = bestelling.producten.all()[0]
 
         self.assertEqual(1, MailQueue.objects.count())
-        email = MailQueue.objects.all()[0]
-        self.assert_email_html_ok(email.mail_html, 'email_bestel/bevestig-bestelling.dtl')
-        self.assert_consistent_email_html_text(email, 'email_bestel/bevestig-bestelling.dtl',
-                                               ignore=('>Prijs:', '>Korting:'))
+        mail = MailQueue.objects.all()[0]
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail, ignore=('>Prijs:', '>Korting:'))
 
         # bekijk de bestellingen
         with self.assert_max_queries(20):
@@ -409,8 +408,8 @@ class TestBestelBestelling(E2EHelpers, TestCase):
         # er moet nu een mail in de MailQueue staan
         self.assertEqual(MailQueue.objects.count(), 1)
         mail = MailQueue.objects.all()[0]
-        self.assert_email_html_ok(mail.mail_html, 'email_bestel/bevestig-bestelling.dtl')
-        self.assert_consistent_email_html_text(mail, 'email_bestel/bevestig-bestelling.dtl')
+        self.assert_email_html_ok(mail)
+        self.assert_consistent_email_html_text(mail)
 
         bestelling = Bestelling.objects.get(pk=bestelling.pk)
         self.assertEqual(bestelling.status, BESTELLING_STATUS_AFGEROND)
