@@ -183,12 +183,12 @@ class Loader(AppDirectoriesLoader):
 
         # remove whitespace between elements
         style = style.replace('{', '{;')
-        style = re.sub(';\s+\B', ';', style)
+        style = re.sub(r';\s+\B', ';', style)
         style = style.replace('{;', '{')
         style = style.replace('; ', ';')
 
         # remove whitespace at the start of the style
-        style = re.sub('}\s+\B', '}', style)
+        style = re.sub(r'}\s+\B', '}', style)
 
         style = style.replace(': ', ':')
         style = style.replace('} ', '}')
@@ -222,13 +222,13 @@ class Loader(AppDirectoriesLoader):
         contents = re.sub(r'>\s+<', '><', contents)
 
         # whitespace voor een @import statement in een <style> block
-        contents = re.sub('>\s+@import', '>@import', contents)
+        contents = re.sub(r'>\s+@import', '>@import', contents)
 
         # whitespace tussen een css-syntax puntkomma en een block
-        contents = re.sub(';\s+{%', ';{%', contents)
+        contents = re.sub(r';\s+{%', ';{%', contents)
 
         # whitespace tussen een endblock en </style>
-        contents = re.sub('%}\s+</style>', '%}</style>', contents)
+        contents = re.sub(r'%}\s+</style>', '%}</style>', contents)
 
         new_contents = ''
 
