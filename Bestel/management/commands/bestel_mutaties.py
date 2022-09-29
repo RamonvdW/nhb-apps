@@ -24,7 +24,8 @@ from Bestel.models import (BestelProduct, BestelMandje,
                            BestelHoogsteBestelNr, BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK,
                            BestelMutatie, BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN,
                            BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_MAAK_BESTELLINGEN,
-                           BESTEL_MUTATIE_BETALING_AFGEROND, BESTEL_MUTATIE_RESTITUTIE_UITBETAALD)
+                           BESTEL_MUTATIE_BETALING_AFGEROND, BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN,
+                           BESTEL_MUTATIE_RESTITUTIE_UITBETAALD)
 from Bestel.plugins.wedstrijden import (wedstrijden_plugin_automatische_kortingen_toepassen,
                                         wedstrijden_plugin_inschrijven, wedstrijden_plugin_verwijder_reservering,
                                         wedstrijden_plugin_afmelden, wedstrijden_plugin_inschrijving_is_betaald)
@@ -593,6 +594,77 @@ class Command(BaseCommand):
         bestelling.betaal_actief = None
         bestelling.save(update_fields=['betaal_actief', 'status'])
 
+    def _verwerk_mutatie_overboeking_ontvangen(self, mutatie):
+        bestelling = mutatie.bestelling
+        bedrag_euro = mutatie.bedrag_euro
+
+        self.stdout.write('[INFO] Overboeking %s euro ontvangen voor bestelling %s (pk=%s)' % (bedrag_euro,
+                                                                                               bestelling.mh_bestel_nr(),
+                                                                                               bestelling.pk))
+
+        status = bestelling.status
+        if status == BESTELLING_STATUS_AFGEROND:
+            self.stdout.write('[WARNING] Bestelling %s (pk=%s) is al afgerond (status=%s)' % (
+                                bestelling.mh_bestel_nr(), bestelling.pk, BESTELLING_STATUS2STR[bestelling.status]))
+            return
+
+        self.stdout.write('[INFO] Betaling is gelukt voor bestelling %s (pk=%s)' % (
+                            bestelling.mh_bestel_nr(), bestelling.pk))
+
+        # koppel een transactie aan de bestelling
+        bestaande_pks = list(bestelling.transacties.all().values_list('pk', flat=True))
+        transactie = BetaalTransactie(
+                            payment_id='',
+                            when=timezone.now(),
+                            beschrijving='Overschrijving ontvangen',
+                            is_restitutie=False,
+                            bedrag_euro_klant=bedrag_euro,
+                            bedrag_euro_boeking=bedrag_euro,
+                            klant_naam='',
+                            klant_account='')
+        transactie.save()
+        bestelling.transacties.add(transactie)
+
+        msg = "\n[%s] Bestelling heeft een overboeking van %s euro ontvangen" % (
+                    mutatie.when, bedrag_euro)
+        bestelling.log += msg
+
+        # controleer of we voldoende ontvangen hebben
+        ontvangen_euro = Decimal('0')
+        for transactie in bestelling.transacties.all():
+            if transactie.is_restitutie:
+                ontvangen_euro -= transactie.bedrag_euro_klant
+            else:
+                ontvangen_euro += transactie.bedrag_euro_klant
+        # for
+
+        self.stdout.write('[INFO] Bestelling %s (pk=%s) heeft %s van de %s euro ontvangen' % (
+                            bestelling.mh_bestel_nr(), bestelling.pk, ontvangen_euro, bestelling.totaal_euro))
+
+        msg = "\n[%s] Bestelling heeft %s van de %s euro ontvangen" % (
+                    mutatie.when, ontvangen_euro, bestelling.totaal_euro)
+        bestelling.log += msg
+
+        bestelling.save(update_fields=['log'])
+
+        if ontvangen_euro >= bestelling.totaal_euro:
+            self.stdout.write('[INFO] Bestelling %s (pk=%s) is afgerond' % (
+                                bestelling.mh_bestel_nr(), bestelling.pk))
+            bestelling.status = BESTELLING_STATUS_AFGEROND
+
+            msg = "\n[%s] Bestelling is afgerond (volledig betaald)" % mutatie.when
+            bestelling.log += msg
+
+            bestelling.save(update_fields=['status', 'log'])
+
+            for product in bestelling.producten.all():
+                if product.wedstrijd_inschrijving:
+                    wedstrijden_plugin_inschrijving_is_betaald(product)
+            # for
+
+            # stuur een e-mail aan de koper
+            stuur_email_naar_koper_betaalbevestiging(bestelling)
+
     def _verwerk_mutatie(self, mutatie):
         code = mutatie.code
 
@@ -615,6 +687,10 @@ class Command(BaseCommand):
         elif code == BESTEL_MUTATIE_BETALING_AFGEROND:
             self.stdout.write('[INFO] Verwerk mutatie %s: betaling afgerond' % mutatie.pk)
             self._verwerk_mutatie_betaling_afgerond(mutatie)
+
+        elif code == BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN:
+            self.stdout.write('[INFO] Verwerk mutatie %s: overboeking ontvangen' % mutatie.pk)
+            self._verwerk_mutatie_overboeking_ontvangen(mutatie)
 
         elif code == BESTEL_MUTATIE_RESTITUTIE_UITBETAALD:
             self.stdout.write('[INFO] Verwerk mutatie %s: restitutie uitbetaald' % mutatie.pk)

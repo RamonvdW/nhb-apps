@@ -18,7 +18,7 @@ urlpatterns = [
          name='mollie-webhook'),
 
     path('vereniging/instellingen/',
-         view=view_vereniging.BetalingenInstellenView.as_view(),
+         view=view_vereniging.BetalingInstellingenView.as_view(),
          name='vereniging-instellingen'),
 ]
 

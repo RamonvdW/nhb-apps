@@ -12,14 +12,7 @@
     |
     |Bestelnummer: {{ bestelling.mh_bestel_nr }}
     |Betaalstatus: Voldaan
-    |
-    |Verkoper:
-    |    {{ bestelling.verkoper_naam }}
-    |    {{ bestelling.verkoper_adres1 }}
-    |    {{ bestelling.verkoper_adres2 }}
-    |    KvK nummer: {{ bestelling.verkoper_kvk }}
-    |    E-mail: {{ bestelling.verkoper_email }}
-    |    Telefoon: {{ bestelling.verkoper_telefoon }}
+
 
     {% for product in producten %}
         |
@@ -58,13 +51,24 @@
             |    Restitutie: € {{ transactie.bedrag_euro_klant }}
         {% else %}
             |    Ontvangen: € {{ transactie.bedrag_euro_klant }}
-            |    van {{ transactie.klant_naam }}
+            {% if transactie.klant_naam %}
+                <!-- geen klant naam bij overschrijving -->
+                |    van {{ transactie.klant_naam }}
+            {% endif %}
         {% endif %}
 
         |    op {{ transactie.when_str }}
         |    Beschrijving: {{ transactie.beschrijving }}
     {% endfor %}
 
+    |
+    |Verkoper:
+    |    {{ bestelling.verkoper_naam }}
+    |    {{ bestelling.verkoper_adres1 }}
+    |    {{ bestelling.verkoper_adres2 }}
+    |    KvK nummer: {{ bestelling.verkoper_kvk }}
+    |    E-mail: {{ bestelling.verkoper_email }}
+    |    Telefoon: {{ bestelling.verkoper_telefoon }}
     |
     |Bedankt voor je bestelling!
 {% endblock %}
@@ -79,16 +83,6 @@
     <table>
         <tr><th>Bestelnummer:</th><td>{{ bestelling.mh_bestel_nr }}</td></tr>
         <tr><th>Betaalstatus:</th><td>Voldaan</td></tr>
-    </table>
-
-    <h1>Verkoper</h1>
-
-    <table>
-        <tr><th>Naam:</th><td>{{ bestelling.verkoper_naam }}</td></tr>
-        <tr><th style="vertical-align:top">Adres:<br></th><td>{{ bestelling.verkoper_adres1 }}<br>{{ bestelling.verkoper_adres2 }}</td></tr>
-        <tr><th>KvK nummer:</th><td>{{ bestelling.verkoper_kvk }}</td></tr>
-        <tr><th>E-mail:</th><td>{{ bestelling.verkoper_email }}</td></tr>
-        <tr><th>Telefoon:</th><td>{{ bestelling.verkoper_telefoon }}</td></tr>
     </table>
 
     <h1>Producten</h1>
@@ -160,13 +154,26 @@
                     <td style="vertical-align:top">Ontvangen:</td>
                     <td>
                         <span>op {{ transactie.when_str }}</span><br>
-                        <span>van {{ transactie.klant_naam }}</span><br>
+                        {% if transactie.klant_naam %}
+                            <!-- geen klant naam bij overschrijving -->
+                            <span>van {{ transactie.klant_naam }}</span><br>
+                        {% endif %}
                         <span>Beschrijving: {{ transactie.beschrijving }}</span>
                     </td>
                 {% endif %}
                 <td style="text-align:right; vertical-align:top">&euro;&nbsp;{{ transactie.bedrag_euro_klant }}</td>
             </tr>
         {% endfor %}
+    </table>
+
+    <h1>Verkoper</h1>
+
+    <table>
+        <tr><th>Naam:</th><td>{{ bestelling.verkoper_naam }}</td></tr>
+        <tr><th style="vertical-align:top">Adres:<br></th><td>{{ bestelling.verkoper_adres1 }}<br>{{ bestelling.verkoper_adres2 }}</td></tr>
+        <tr><th>KvK nummer:</th><td>{{ bestelling.verkoper_kvk }}</td></tr>
+        <tr><th>E-mail:</th><td>{{ bestelling.verkoper_email }}</td></tr>
+        <tr><th>Telefoon:</th><td>{{ bestelling.verkoper_telefoon }}</td></tr>
     </table>
 
     <br>

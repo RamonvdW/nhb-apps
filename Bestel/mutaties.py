@@ -8,7 +8,8 @@ from django.conf import settings
 from Bestel.models import (BestelMutatie, Bestelling,
                            BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN, BESTEL_MUTATIE_MAAK_BESTELLINGEN,
                            BESTEL_MUTATIE_VERWIJDER, BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN,
-                           BESTEL_MUTATIE_BETALING_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING)
+                           BESTEL_MUTATIE_BETALING_AFGEROND, BESTELLING_STATUS_WACHT_OP_BETALING,
+                           BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN)
 from Overig.background_sync import BackgroundSync
 import time
 
@@ -151,6 +152,25 @@ def bestel_betaling_is_gestart(bestelling, actief):
     bestelling.log += msg
 
     bestelling.save(update_fields=['betaal_actief', 'status', 'log'])
+
+
+def bestel_overboeking_ontvangen(bestelling, bedrag, snel=False):
+    """
+        Een actieve betaling is afgerond.
+    """
+
+    # zet dit verzoek door naar het mutaties process
+    # voorkom duplicates (niet 100%)
+    mutatie, is_created = BestelMutatie.objects.get_or_create(
+                                    code=BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN,
+                                    bestelling=bestelling,
+                                    bedrag_euro=bedrag,
+                                    is_verwerkt=False)
+    mutatie.save()
+
+    if is_created:
+        # wacht kort op de achtergrondtaak
+        _bestel_ping_achtergrondtaak(mutatie, snel)
 
 
 # end of file

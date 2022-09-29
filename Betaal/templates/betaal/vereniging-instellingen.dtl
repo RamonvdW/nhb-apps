@@ -13,7 +13,7 @@
     <!-- banner -->
     <div class="row center">
         <div class="col s12">
-            <h3 class="page-banner">Financieel</h3>
+            <h3 class="page-banner">Instellingen</h3>
             <p>Voor vereniging <b>{{ ver.ver_nr_en_naam }}</b></p>
         </div>
     </div>
@@ -77,11 +77,9 @@
                         </table>
 
                         <!-- button -->
-                        <div class="center" style="margin-top:40px">
-                            <p>
-                                <button class="btn-nhb-rood" type="submit">
-                                    <i class="material-icons-round left">check</i>Opslaan</button>
-                            </p>
+                        <div class="center" style="margin-top:30px">
+                            <button class="btn-nhb-rood" type="submit">
+                                <i class="material-icons-round left">check</i>Opslaan</button>
                         </div>
 
                     </form>

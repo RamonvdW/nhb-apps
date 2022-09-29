@@ -96,7 +96,7 @@
                 {% include 'plein/card.dtl' with title="Kortingen" text="Kortingen aanmaken of aanpassen." icon="sell" url=card_url %}
 
                 <!-- betalingen doorgeven -->
-                {% include 'plein/card.dtl' with title="Betaling invoeren" text="Geef de ontvangen wedstrijdgelden door, zodat een reservering definitief kan worden." icon="euro_symbol" url=url_betaling_ontvangen %}
+                {% include 'plein/card.dtl' with title="Overboekingen" text="Geef de ontvangen wedstrijd-gelden door, zodat de reservering voor een sporter definitief kan worden." icon="euro_symbol" url=url_overboeking_ontvangen %}
 
             </div>
         </div>

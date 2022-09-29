@@ -39,7 +39,8 @@ BESTEL_MUTATIE_VERWIJDER = 2                    # product verwijderen uit mandje
 BESTEL_MUTATIE_MAAK_BESTELLINGEN = 3            # mandje omzetten in bestelling(en)
 BESTEL_MUTATIE_BETALING_AFGEROND = 4            # betaling is afgerond (gelukt of mislukt)
 BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN = 5           # afmelden (na betaling)
-BESTEL_MUTATIE_RESTITUTIE_UITBETAALD = 6        # restitutie uitbetaald
+BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN = 6        # overboeking ontvangen
+BESTEL_MUTATIE_RESTITUTIE_UITBETAALD = 7        # restitutie uitbetaald
 
 BESTEL_MUTATIE_TO_STR = {
     BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN: "Inschrijven op wedstrijd",
@@ -47,6 +48,7 @@ BESTEL_MUTATIE_TO_STR = {
     BESTEL_MUTATIE_MAAK_BESTELLINGEN: "Mandje omzetten in bestelling(en)",
     BESTEL_MUTATIE_BETALING_AFGEROND: "Betaling afgerond",
     BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN: "Afmelden voor wedstrijd",
+    BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN: "Overboeking ontvangen",
     BESTEL_MUTATIE_RESTITUTIE_UITBETAALD: "Restitutie uitbetaald",
 }
 
@@ -232,6 +234,7 @@ class BestelMutatie(models.Model):
     # BESTEL_MUTATIE_MAAK_BESTELLING:           account(=mandje)
     # BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN:        inschrijving
     # BESTEL_MUTATIE_BETALING_ONTVANGEN:        bestelling, betaling_is_gelukt
+    # BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN:     bestelling, bedrag_euro
     # BESTEL_MUTATIE_RESTITUTIE_UITBETAALD:
 
     # wiens mandje moet omgezet worden?
@@ -251,6 +254,9 @@ class BestelMutatie(models.Model):
 
     # status van de betaling: gelukt, of niet?
     betaling_is_gelukt = models.BooleanField(default=False)
+
+    # het ontvangen of betaalde bedrag
+    bedrag_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))       # max 999,99
 
     class Meta:
         verbose_name = "Bestel mutatie"

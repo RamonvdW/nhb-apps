@@ -80,7 +80,7 @@ class BestelMutatieAdmin(admin.ModelAdmin):
         ('BestelMutatie',
          {'fields': ('when', 'code_plus', 'is_verwerkt',
                      'account',
-                     'wedstrijd_inschrijving', 'product', 'korting', 'bestelling', 'betaling_is_gelukt')
+                     'wedstrijd_inschrijving', 'product', 'korting', 'bestelling', 'betaling_is_gelukt', 'bedrag_euro')
           }),
     )
 

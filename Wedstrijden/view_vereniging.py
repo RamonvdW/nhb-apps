@@ -46,6 +46,8 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
         context = dict()
         context['ver'] = ver = self.functie_nu.nhb_ver
 
+        context['huidige_rol'] = rol_get_beschrijving(request)
+
         wedstrijden = (Wedstrijd
                        .objects
                        .filter(organiserende_vereniging=ver)
@@ -69,7 +71,8 @@ class VerenigingWedstrijdenView(UserPassesTestMixin, View):
         else:
             context['geen_locatie'] = True
 
-        context['huidige_rol'] = rol_get_beschrijving(request)
+        context['url_mollie'] = reverse('Betaal:vereniging-instellingen')
+        context['url_overboeking_ontvangen'] = reverse('Bestel:overboeking-ontvangen')
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),

@@ -251,10 +251,6 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             kaartje.geen_kaartjes = True
             kaartjes.append(kaartje)
 
-        if self.rol_nu != Rollen.ROL_WL:
-            # SEC of HWL
-            context['url_betalingen'] = reverse('Betaal:vereniging-instellingen')
-
         # maak een afsluiter (wordt gebruikt in de template)
         if prev_jaar != 0:
             kaartje = SimpleNamespace()
