@@ -614,12 +614,13 @@ class Command(BaseCommand):
         # koppel een transactie aan de bestelling
         bestaande_pks = list(bestelling.transacties.all().values_list('pk', flat=True))
         transactie = BetaalTransactie(
-                            payment_id='',
                             when=timezone.now(),
+                            is_handmatig=True,
                             beschrijving='Overschrijving ontvangen',
                             is_restitutie=False,
                             bedrag_euro_klant=bedrag_euro,
                             bedrag_euro_boeking=bedrag_euro,
+                            payment_id='',
                             klant_naam='',
                             klant_account='')
         transactie.save()

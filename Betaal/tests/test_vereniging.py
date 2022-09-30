@@ -15,7 +15,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
     """ tests voor de Betaal-applicatie, interactie achtergrond taak met CPSP """
 
-    url_betaal_vereniging = '/bestel/betaal/vereniging/instellingen/'
+    url_ver_instellingen = '/bestel/betaal/vereniging/instellingen/'
 
     def setUp(self):
         self.account = self.e2e_create_account_admin()
@@ -38,7 +38,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
     def test_instellen(self):
         # anon
-        resp = self.client.get(self.url_betaal_vereniging)
+        resp = self.client.get(self.url_ver_instellingen)
         self.assert_is_redirect(resp, '/account/login/')
 
         # login in en wissel naar HWL
@@ -48,24 +48,25 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         # nu mag de pagina wel gebruikt worden
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_betaal_vereniging)
+            resp = self.client.get(self.url_ver_instellingen)
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('betaal/vereniging-instellingen.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
 
-        # probeer te wijzigen
-        resp = self.client.post(self.url_betaal_vereniging)
+        # wijzigen in lege sleutel mag
+        # (=verwijder sleutel, maar ook op Opslaan drukken zonder iets ingevuld te hebben)
+        resp = self.client.post(self.url_ver_instellingen)
+        self.assert_is_redirect(resp, '/wedstrijden/vereniging/')
+
+        resp = self.client.post(self.url_ver_instellingen, {'apikey': 'blabla fout'})
         self.assert404(resp, 'Niet geaccepteerd')
 
-        resp = self.client.post(self.url_betaal_vereniging, {'apikey': 'blabla fout'})
-        self.assert404(resp, 'Niet geaccepteerd')
-
-        resp = self.client.post(self.url_betaal_vereniging, {'apikey': 'test_12345'})
-        self.assert_is_redirect(resp, '/vereniging/')
+        resp = self.client.post(self.url_ver_instellingen, {'apikey': 'test_12345'})
+        self.assert_is_redirect(resp, '/wedstrijden/vereniging/')
 
         # ophalen met instellingen opgeslagen
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_betaal_vereniging)
+            resp = self.client.get(self.url_ver_instellingen)
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('betaal/vereniging-instellingen.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)
@@ -78,7 +79,7 @@ class TestBetaalMutaties(E2EHelpers, TestCase):
 
         # ophalen met instellingen opgeslagen
         with self.assert_max_queries(20):
-            resp = self.client.get(self.url_betaal_vereniging)
+            resp = self.client.get(self.url_ver_instellingen)
         self.assertEqual(resp.status_code, 200)
         self.assert_template_used(resp, ('betaal/vereniging-instellingen.dtl', 'plein/site_layout.dtl'))
         self.assert_html_ok(resp)

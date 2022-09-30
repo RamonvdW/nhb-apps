@@ -41,6 +41,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
 
         overboekingen = list()
 
+        # TODO: optimaliseer het aantal queries naar 1
         for bestelling in (Bestelling
                            .objects
                            .filter(ontvanger__vereniging__ver_nr=self.functie_nu.nhb_ver.ver_nr)
@@ -48,7 +49,7 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
                            .order_by('aangemaakt'))[:250]:
 
             # handmatige overboekingen zoeken
-            for transactie in bestelling.transacties.filter(payment_id=''):
+            for transactie in bestelling.transacties.filter(is_handmatig=True):
                 transactie.bestelling = bestelling
                 overboekingen.append(transactie)
             # for
@@ -127,7 +128,8 @@ class OverboekingOntvangenView(UserPassesTestMixin, TemplateView):
                     if verschil_euro < Decimal('0.01'):
                         if actie == 'regis':  # afgekapte 'registreer'
                             # gebruiker heeft gevraagd om op te slaan
-                            bestel_overboeking_ontvangen(bestelling, bedrag_euro)
+                            snel = str(request.POST.get('snel', ''))[:1]
+                            bestel_overboeking_ontvangen(bestelling, bedrag_euro, snel == '1')
 
                             # geef weer een lege invoer
                             context['bedrag'] = ''

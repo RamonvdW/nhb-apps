@@ -209,8 +209,9 @@ class Command(BaseCommand):
 
         # transactie geschiedenis aanmaken
         BetaalTransactie(
-                payment_id=payment_id[:BETAAL_PAYMENT_ID_MAXLENGTH],
                 when=timezone.now(),
+                is_handmatig=False,
+                payment_id=payment_id[:BETAAL_PAYMENT_ID_MAXLENGTH],
                 beschrijving=description[:BETAAL_BESCHRIJVING_MAXLENGTH],
                 is_restitutie=False,
                 bedrag_euro_klant=bedrag_klant,

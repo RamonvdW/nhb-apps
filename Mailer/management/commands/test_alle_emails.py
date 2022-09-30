@@ -216,8 +216,9 @@ class Command(BaseCommand):
         self.bestelling = bestelling
 
         transactie = BetaalTransactie(
-                            payment_id='test_pay_1',
                             when=now - timezone.timedelta(hours=1),
+                            payment_id='test_pay_1',
+                            is_handmatig=False,
                             beschrijving='Bestelling %s' % self.test_bestel_nr,
                             bedrag_euro_klant=Decimal("142.42"),
                             klant_naam='Pietje Schiet',
@@ -226,8 +227,9 @@ class Command(BaseCommand):
         bestelling.transacties.add(transactie)
 
         transactie = BetaalTransactie(
-                            payment_id='test_pay_1',
                             when=now - timezone.timedelta(minutes=30),
+                            payment_id='test_pay_1',
+                            is_handmatig=False,
                             beschrijving='Terugbetaling teveel betaald',
                             is_restitutie=True,
                             bedrag_euro_klant=Decimal("5.00"),

@@ -496,11 +496,11 @@ class WedstrijdInschrijving(models.Model):
     # voor welke sessie?
     sessie = models.ForeignKey(WedstrijdSessie, on_delete=models.PROTECT)
 
-    # in welke klasse komt deze sporterboog uit?
-    wedstrijdklasse = models.ForeignKey(KalenderWedstrijdklasse, on_delete=models.PROTECT)
-
     # voor wie is deze inschrijving
     sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT)
+
+    # in welke klasse komt deze sporterboog uit?
+    wedstrijdklasse = models.ForeignKey(KalenderWedstrijdklasse, on_delete=models.PROTECT)
 
     # wie is de koper?
     # (BestelProduct verwijst naar deze inschrijving)

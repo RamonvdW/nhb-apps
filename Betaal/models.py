@@ -103,11 +103,23 @@ class BetaalTransactie(models.Model):
     """ Afgeronde transacties: ontvangst en restitutie
     """
 
-    # het nummer dat door de CPSP toegekend is
-    payment_id = models.CharField(max_length=BETAAL_PAYMENT_ID_MAXLENGTH)
-
     # datum/tijdstip van aanmaak
     when = models.DateTimeField()
+
+    # is dit een handmatig ingevoerde informatie van een overboeking?
+    is_handmatig = models.BooleanField(default=False)
+
+    # handmatige overboeking:
+    # - bedrag_euro_klant == bedrag_euro_boeking
+    # - optioneel: klant_naam, klant_account
+    # - payment_id: leeg, wordt niet gebruikt
+
+    # Mollie:
+    # - payment_id = koppeling aan hun systeem
+    # - beschrijving = ontvangen informatie
+
+    # het nummer dat door de CPSP toegekend is
+    payment_id = models.CharField(max_length=BETAAL_PAYMENT_ID_MAXLENGTH)
 
     # beschrijving voor op het afschrift van de klant
     # hierin staat normaal het bestelnummer
