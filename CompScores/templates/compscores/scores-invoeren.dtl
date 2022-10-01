@@ -736,15 +736,17 @@
 
 
     <script type="application/javascript">
+
+        // geef de <enter> door aan de zoekknop
         document.getElementById('id_lid_nr').addEventListener("keyup", function(event) {
-            console.log('event=', event)
-            // geef de <enter> door aan de zoekknop
+            // console.log('event=', event)
             if (event.key === "Enter")
             {
                 let el = document.getElementById('id_zoek_knop');
                 el.click();
             }
         });
+
     </script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="compscores-scores-invoeren" %}
