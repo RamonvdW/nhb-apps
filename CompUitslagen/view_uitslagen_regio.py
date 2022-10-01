@@ -24,7 +24,7 @@ TEMPLATE_COMPUITSLAGEN_REGIO_TEAMS = 'compuitslagen/uitslagen-regio-teams.dtl'
 
 
 def get_sporter_regio_nr(request):
-    """ Geeft het regio nummer van de ingelogde sporter terug,
+    """ Geeft het regionummer van de ingelogde sporter terug,
         of 101 als er geen regio vastgesteld kan worden
     """
     regio_nr = 101
@@ -60,7 +60,7 @@ def get_sporter_regio_nr(request):
 
 class UitslagenRegioIndivView(TemplateView):
 
-    """ Django class-based view voor de de individuele uitslagen van de competitie in 1 regio """
+    """ Django class-based view voor de individuele uitslagen van de competitie in 1 regio """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPUITSLAGEN_REGIO_INDIV
@@ -264,7 +264,7 @@ class UitslagenRegioIndivView(TemplateView):
 
 class UitslagenRegioTeamsView(TemplateView):
 
-    """ Django class-based view voor de de team uitslagen van de competitie in 1 regio """
+    """ Django class-based view voor de teamuitslagen van de competitie in 1 regio """
 
     # class variables shared by all instances
     template_name = TEMPLATE_COMPUITSLAGEN_REGIO_TEAMS

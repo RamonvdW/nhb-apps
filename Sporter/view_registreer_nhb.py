@@ -33,10 +33,10 @@ def sporter_create_account_nhb(lid_nr_str, email, nieuw_wachtwoord):
             - er al een account bestaat
             - het nhb nummer niet valide is
             - het email adres niet bekend is bij de nhb
-            - het email adres niet overeen komt
+            - het email adres niet overeen komt.
         geeft de url terug die in de email verstuurd moet worden
     """
-    # zoek het email adres van dit NHB lid erbij
+    # zoek het e-mailadres van dit NHB lid erbij
     try:
         # deze conversie beschermd ook tegen gevaarlijke invoer
         lid_nr = int(lid_nr_str)

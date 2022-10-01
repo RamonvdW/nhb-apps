@@ -20,6 +20,7 @@ import datetime
 import time
 import sys
 
+
 class Command(BaseCommand):
 
     help = "Probeer een aantal mails te sturen die in de queue staan"
