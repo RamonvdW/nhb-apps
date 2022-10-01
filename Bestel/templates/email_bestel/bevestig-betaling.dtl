@@ -99,7 +99,7 @@
         {% for product in producten %}
             {% if product.wedstrijd_inschrijving %}
                 <tr>
-                    <td style="vertical-align:top">[{{ product.regel_nr }}]</td>
+                    <td style="vertical-align:top">{{ product.regel_nr }}</td>
                     <td>
                         <span>Reserveringsnummer: {{ product.reserveringsnummer }}</span><br>
                         <span>Wedstrijd: {{ product.wedstrijd_titel }}</span><br>
