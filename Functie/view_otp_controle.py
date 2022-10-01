@@ -29,7 +29,8 @@ def functie_stuur_email_otp_losgekoppeld(account):
 
     context = {
         'voornaam': account.get_first_name(),
-        'contact_email': settings.EMAIL_BONDSBUREAU
+        'contact_email': settings.EMAIL_BONDSBUREAU,
+        'url_handleiding_beheerders': settings.URL_PDF_HANDLEIDING_BEHEERDERS
     }
 
     mail_body = render_email_template(context, EMAIL_TEMPLATE_OTP_IS_LOSGEKOPPELD)

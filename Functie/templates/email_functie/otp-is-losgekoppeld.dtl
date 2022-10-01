@@ -11,6 +11,9 @@
     |Op jouw verzoek is je tweede factor door ons losgekoppeld.
     |Na de volgende inlog op MijnHandboogsport krijg je de QR-code weer aangeboden en kan je opnieuw koppelen.
     |
+    |Het koppelen van de tweede factor staat beschrijven in de handleiding voor beheerders:
+    |<a href="{{ url_handleiding_beheerders }}" target="_blank">Handleiding voor beheerders</a>.
+    |
     |Als je dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}
     |
     |Veel plezier met de site!
@@ -21,6 +24,9 @@
     <br>
     <div>Op jouw verzoek is je tweede factor door ons losgekoppeld.</div>
     <div>Na de volgende inlog op MijnHandboogsport krijg je de QR-code weer aangeboden en kan je opnieuw koppelen.</div>
+    <br>
+    <div>Het koppelen van de tweede factor staat beschrijven in de handleiding voor beheerders:<br>
+        <a href="{{ url_handleiding_beheerders }}" target="_blank">Handleiding voor beheerders</a>.</div>
     <br>
     <div>Als je dit verzoekt niet herkent, neem dan contact met ons op via {{ contact_email }}</div>
     <br>
