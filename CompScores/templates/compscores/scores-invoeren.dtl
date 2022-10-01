@@ -661,16 +661,15 @@
                 <!-- dialoog venster -->
                 <h5 style="padding:30px">Zoeken en toevoegen</h5>
 
-                <!-- bondsnummer invoer veld + zoek knop -->
+                <!-- bondsnummer invoer veld + zoekknop -->
                 <div class="center">
                     <div class="input-field" style="display:inline-block">
                         <label for="id_lid_nr">Bondsnummer:</label>
                         <input type="text" name="zoek_lid_nr" placeholder="123456" size="6" maxlength="6" id="id_lid_nr" inputmode="numeric">
-
                     </div>
 
                     <div style="display:inline-block; margin-left:100px">
-                        <button class="btn-nhb-rood" onclick="opzoeken(this)" data-opzoeken="id_lid_nr" data-lid_nr="id_bondsnummer" data-naam="id_naam" data-vereniging="id_ver" data-regio="id_regio_">
+                        <button id="id_zoek_knop" class="btn-nhb-rood" onclick="opzoeken(this)" data-opzoeken="id_lid_nr" data-lid_nr="id_bondsnummer" data-naam="id_naam" data-vereniging="id_ver" data-regio="id_regio_">
                             <i class="material-icons-round left">search</i>Zoek</button>
                     </div>
                 </div>
@@ -734,6 +733,19 @@
         <button class="btn-nhb-rood" onclick="opslaan(this)">
             <i class="material-icons-round left">check</i>Opslaan</button>
     </div>
+
+
+    <script type="application/javascript">
+        document.getElementById('id_lid_nr').addEventListener("keyup", function(event) {
+            console.log('event=', event)
+            // geef de <enter> door aan de zoekknop
+            if (event.key === "Enter")
+            {
+                let el = document.getElementById('id_zoek_knop');
+                el.click();
+            }
+        });
+    </script>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="compscores-scores-invoeren" %}
 
