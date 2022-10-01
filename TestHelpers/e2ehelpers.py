@@ -977,7 +977,7 @@ class E2EHelpers(TestCase):
 
         for line in email.mail_text.split('\n'):
             line = line.strip()     # remove spaces used for layout
-            if not line:
+            if len(line) <= 3:      # kleine teksten matchen mogelijk verkeer en slaan een gat
                 # skip empty lines
                 continue
 
@@ -1062,7 +1062,7 @@ class E2EHelpers(TestCase):
 
             tekst = tekst.replace('<span></span>', '')
             tekst = tekst.replace('<br>', '')
-            if tekst:
+            if len(tekst) > 3:      # skip korten teksten zoals nummering
                 # print('tekst: %s' % repr(tekst))
                 if tekst not in email.mail_text:
                     issues.append('Kan tekst %s niet vinden in text e-mail' % repr(tekst))
