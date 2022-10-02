@@ -29,9 +29,9 @@ class Command(BaseCommand):
 
         self.taken = CompetitieTaken.objects.all()[0]
 
-        self.index2scores = dict()      # [(DeelCompetitie.pk, RegioCompetitieSchutterBoog.pk)] = [(afstand, score), ..]
+        self.sporterboog2scores = dict()   # [SporterBoog.pk] = [(afstand, Score), ..]
 
-        self._onbekend2beter = dict()   # [CompetitieIndivKlasse.pk] = [klasse, ..] met oplopend AG
+        self._onbekend2beter = dict()       # [CompetitieIndivKlasse.pk] = [klasse, ..] met oplopend AG
 
     def add_arguments(self, parser):
         parser.add_argument('duration', type=int,
@@ -83,7 +83,7 @@ class Command(BaseCommand):
         #    overstappen is daarna niet meer mogelijk
 
         regio_comp_pks = list()
-        rk_comp_pks = list()
+        # rk_comp_pks = list()
         for comp in Competitie.objects.filter(is_afgesloten=False):
             comp.bepaal_fase()
             if comp.fase <= 'F':
@@ -139,7 +139,7 @@ class Command(BaseCommand):
             de tussenstand bijgewerkt moet worden.
             Vult index2scores.
         """
-        self.index2scores = dict()
+        self.sporterboog2scores = dict()
 
         scorehist_latest = ScoreHist.objects.latest('pk')
         # als hierna een extra ScoreHist aangemaakt wordt dan verwerken we een record
@@ -163,13 +163,12 @@ class Command(BaseCommand):
         self.taken.save(update_fields=['hoogste_scorehist'])
         self.stdout.write('[INFO] nieuwe hoogste ScoreHist pk is %s' % self.taken.hoogste_scorehist.pk)
 
-        # een deelcompetitie heeft ingeschreven schuttersboog (RegioCompetitieSchutterBoog)
-        # een deelcompetitie bestaat uit rondes (RegioCompetitieRonde)
-        # maar verschil tussen rondes met beschrijving "Ronde N oude programma" en zonder
-        # elke ronde bevat een plan met wedstrijden
-        # wedstrijden hebben een datum
-        # wedstrijden hebben een uitslag met scores
-        # scores refereren aan een sporterboog
+        # een deelcompetitie heeft ingeschreven schuttersboog (RegioCompetitieSchutterBoog);
+        # een deelcompetitie bestaat uit rondes (RegioCompetitieRonde);
+        # elke ronde bevat een plan met wedstrijden;
+        # wedstrijden hebben een datum;
+        # wedstrijden hebben een uitslag met scores;
+        # scores refereren aan een sporterboog;
         # schutters kunnen in een wedstrijd buiten hun ingeschreven rayon geschoten hebben
         rondes = list()
         for ronde in (DeelcompetitieRonde
@@ -187,7 +186,7 @@ class Command(BaseCommand):
             rondes.append(tup)
         # for
 
-        # sorteer op weeknummer, anders raken de scores door de war en berekenen we
+        # sorteer op weeknummer, anders raken de scores in de war en berekenen we
         # een verkeerd gemiddelde en verplaatsen we de schutter naar de verkeerde klasse
         rondes.sort()
 
@@ -208,19 +207,18 @@ class Command(BaseCommand):
                                   .select_related('sporterboog')
                                   .exclude(waarde=0)                # 0 scores zijn voor team competitie only
                                   .all()):
-                        tup = (uitslag.afstand, score)
                         pk = score.sporterboog.pk
-                        index = (ronde.deelcompetitie.pk, score.sporterboog.pk)
                         if pk in allowed_sporterboog_pks:   # presumed better than huge __in
+                            tup = (uitslag.afstand, score)
                             try:
-                                self.index2scores[index].append(tup)
+                                self.sporterboog2scores[pk].append(tup)
                             except KeyError:
-                                self.index2scores[index] = [tup]
+                                self.sporterboog2scores[pk] = [tup]
                     # for
             # for
         # for
 
-        self.stdout.write('[INFO] Aantal unieke (deelcomp + sporterboog) in index2scores: %s' % len(self.index2scores))
+        self.stdout.write('[INFO] Aantal unieke sporterboog in sporterboog2scores: %s' % len(self.sporterboog2scores))
 
     @staticmethod
     def _bepaal_laagste_nr(waardes):
@@ -285,9 +283,8 @@ class Command(BaseCommand):
                               .prefetch_related('scores')
                               .all()):
 
-                index = (deelcomp.pk, deelnemer.sporterboog.pk)
                 try:
-                    tups = self.index2scores[index]
+                    tups = self.sporterboog2scores[deelnemer.sporterboog.pk]
                 except KeyError:
                     pass
                 else:
@@ -401,7 +398,7 @@ class Command(BaseCommand):
                     # sla de ScoreHist op
                     ronde_team.scorehist_feitelijk.set(hist_pks)
 
-                    # de hoogste 3 scores maken de team score
+                    # de hoogste 3 scores maken de teamscore
                     team_score = 0
                     for score in team_scores[:3]:
                         team_score += score
@@ -447,7 +444,8 @@ class Command(BaseCommand):
                     new_count = ScoreHist.objects.count()
 
                 hist_count = new_count
-                self._update_tussenstand()
+                if new_count > 0:
+                    self._update_tussenstand()
                 now = datetime.datetime.now()
 
             # sleep at least 2 seconds, then check again
