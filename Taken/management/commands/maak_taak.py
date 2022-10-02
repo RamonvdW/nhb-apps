@@ -31,15 +31,24 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        toekennen_aan_functie = None
-
         toekennen_aan = options['toekennen_aan'][0]
-        # misschien is het een functie
-        try:
-            toekennen_aan_functie = Functie.objects.get(Q(beschrijving__icontains=toekennen_aan) | Q(rol=toekennen_aan))
-        except Functie.DoesNotExist as exc:
+
+        qset = Functie.objects.filter(Q(beschrijving__icontains=toekennen_aan) | Q(rol=toekennen_aan))
+        functie_count = qset.count()
+
+        if functie_count == 0:
             self.stderr.write('[ERROR] Geen functie gevonden die voldoet aan %s' % repr(toekennen_aan))
             return
+
+        if functie_count > 1:
+            self.stderr.write('[ERROR] Meerdere functies gevonden die voldoen aan %s' % repr(toekennen_aan))
+            for functie in qset:
+                self.stderr.write('    (%s) %s' % (functie.rol, functie.beschrijving))
+            # for
+            return
+
+        toekennen_aan_functie = qset[0]
+        self.stdout.write('[INFO] Gekozen functie: %s' % toekennen_aan_functie)
 
         if not toekennen_aan_functie.bevestigde_email:
             self.stdout.write('[WARNING] Geen e-mailadres bekend voor functie %s' % toekennen_aan_functie)
