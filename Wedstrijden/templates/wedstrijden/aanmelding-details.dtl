@@ -115,7 +115,7 @@
 
                 <tr>
                     <th>Logboekje</th>
-                    <td>{{ inschrijving.log }}</td>
+                    <td>{{ inschrijving.log|linebreaksbr }}</td>
                 </tr>
 
                 {% if inschrijving.url_afmelden %}

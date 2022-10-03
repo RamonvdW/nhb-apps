@@ -437,7 +437,7 @@ class WijzigBeheerdersView(UserPassesTestMixin, ListView):
         # huidige beheerders willen we niet opnieuw vinden
         beheerder_accounts = self._functie.accounts.all()
         for account in beheerder_accounts:
-            account.geo_beschrijving = ''
+            account.geo_beschrijving = '-'
             if account.sporter_set.count() > 0:
                 sporter = account.sporter_set.all()[0]
                 if sporter.bij_vereniging:
