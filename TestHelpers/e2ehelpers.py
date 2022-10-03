@@ -1064,7 +1064,7 @@ class E2EHelpers(TestCase):
             tekst = tekst.replace('<br>', '')
             if len(tekst) > 3:      # skip korten teksten zoals nummering
                 # print('tekst: %s' % repr(tekst))
-                if tekst not in email.mail_text:
+                if tekst not in email.mail_text:                                        # pragma: no cover
                     issues.append('Kan tekst %s niet vinden in text e-mail' % repr(tekst))
 
             pos = html.find('<td>')

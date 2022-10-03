@@ -128,6 +128,14 @@ class TestFunctie2FA(E2EHelpers, TestCase):
         self.testdata.account_admin = Account.objects.get(username='admin')
         self.assertFalse(self.testdata.account_admin.otp_is_actief)
 
+        # geef out of range otp code op
+        with self.assert_max_queries(20):
+            resp = self.client.post(self.url_koppel_stap3, {'otp_code': '-10000'})      # moet 6 posities zijn
+        self.assertEqual(resp.status_code, 200)     # 200 = OK
+        self.assert_template_used(resp, ('functie/otp-koppelen-stap3-code-invoeren.dtl', 'plein/site_layout.dtl'))
+        self.assertContains(resp, 'Fout: Voer de vereiste code in')
+        self.assert_html_ok(resp)
+
         # geef verkeerde otp code op
         with self.assert_max_queries(20):
             resp = self.client.post(self.url_koppel_stap3, {'otp_code': '123456'})
