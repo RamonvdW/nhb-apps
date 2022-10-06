@@ -54,6 +54,12 @@ class BestelActiviteitView(UserPassesTestMixin, TemplateView):
         bestellingen = list()
         if len(zoekterm) >= 2:  # minimaal twee cijfers/tekens van de naam/nummer
             try:
+                # strip "MH-"
+                if isinstance(zoekterm, str):
+                    zoekterm = zoekterm.strip()
+                    if zoekterm[:3].upper() == 'MH-':
+                        zoekterm = zoekterm[3:]
+
                 nr = int(zoekterm[:7])      # afkappen voor de veiligheid (bestel_nr = 7 pos)
                 bestellingen = (Bestelling
                                 .objects

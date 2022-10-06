@@ -247,8 +247,9 @@
                     <table class="white">
                         <tr>
                             <th class="center">Wanneer</th>
-                            <th class="center">Nog beschikbaar</th>
-                            <th class="center">Wedstrijdklasse</th>
+                            <th>Sessie</th>
+                            <th class="center">Plekken</th>
+                            <th class="center">Wedstrijd<wbr/>klasse</th>
                             <th class="center">Prijs</th>
                             <th><!-- kolom voor de knoppen --></th>
                         </tr>
@@ -258,7 +259,8 @@
                                 {% if klasse.is_compat %}
                                     <tr{% if not sessie.kan_aanmelden %} class="grey-text"{% endif %}>
                                         <td class="center">{{ sessie.datum }}<br>{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</td>
-                                        <td class="center">{{ sessie.aantal_beschikbaar }} (van de {{ sessie.max_sporters }})</td>
+                                        <td>{{ sessie.beschrijving }}</td>
+                                        <td class="center">{{ sessie.aantal_beschikbaar }} / {{ sessie.max_sporters }}</td>
                                         <td class="center">{{ klasse.beschrijving }}</td>
                                         <td class="center">{% if sessie.kan_aanmelden %}&euro;&nbsp;{{ prijs_euro_sporter }}{% else %}-{% endif %}</td>
                                         <td class="center">

@@ -178,6 +178,15 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                     tup = ('Wedstrijdklasse', '%s' % inschrijving.wedstrijdklasse.beschrijving)
                 beschrijving.append(tup)
 
+                tup = ('Locatie', inschrijving.wedstrijd.locatie.adres.replace('\n', ', '))
+                beschrijving.append(tup)
+
+                tup = ('E-mail organisatie', inschrijving.wedstrijd.contact_email)
+                beschrijving.append(tup)
+
+                tup = ('Telefoon organisatie', inschrijving.wedstrijd.contact_telefoon)
+                beschrijving.append(tup)
+
                 if inschrijving.korting:
                     korting = inschrijving.korting
                     product.gebruikte_korting_str = "Korting: %d%%" % korting.percentage

@@ -7,6 +7,7 @@
 from django.conf import settings
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.urls import reverse
+from django.utils import timezone
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import GESLACHT2STR
@@ -327,7 +328,7 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
         writer.writerow(['Reserveringsnummer', 'Aangemeld op', 'Status',
                          'Bestelnummer', 'Prijs', 'Korting', 'Ontvangen', 'Retour',
                          'Sessie', 'Code', 'Wedstrijdklasse',
-                         'Lid nr', 'Sporter', 'E-mailadres', 'Geslacht', 'Boog', 'Vereniging',
+                         'Lid nr', 'Sporter', 'E-mailadres', 'Geslacht', 'Boog', 'Ver nr', 'Vereniging',
                          'Para classificatie', 'Voorwerpen op schietlijn', 'Para opmerking'])
 
         for aanmelding in aanmeldingen:
@@ -338,9 +339,11 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
             bestelnummer_str = get_inschrijving_mh_bestel_nr(aanmelding)
 
             if sporter.bij_vereniging:
-                ver_str = sporter.bij_vereniging.ver_nr_en_naam()
+                ver_nr = sporter.bij_vereniging.ver_nr
+                ver_str = sporter.bij_vereniging.naam
             else:
-                ver_str = '[0000] Geen vereniging'
+                ver_nr = 0
+                ver_str = 'geen'
 
             # ga uit van het geslacht van de sporter zelf
             wedstrijd_geslacht = sporter.geslacht
@@ -371,8 +374,8 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 korting_str = 'Geen'
 
             writer.writerow([
-                reserveringsnummer,
-                aanmelding.wanneer.strftime('%Y-%m-%d %H:%M'),
+                str(reserveringsnummer),
+                timezone.localtime(aanmelding.wanneer).strftime('%Y-%m-%d %H:%M'),
                 INSCHRIJVING_STATUS_TO_SHORT_STR[aanmelding.status],
                 bestelnummer_str,
                 prijs_str,
@@ -382,11 +385,12 @@ class DownloadAanmeldingenBestandCSV(UserPassesTestMixin, View):
                 aanmelding.sessie.beschrijving,
                 aanmelding.wedstrijdklasse.afkorting,
                 aanmelding.wedstrijdklasse.beschrijving,
-                sporter.lid_nr,
+                str(sporter.lid_nr),
                 sporter.volledige_naam(),
                 sporter.email,
                 GESLACHT2STR[wedstrijd_geslacht],
                 sporterboog.boogtype.beschrijving,
+                str(ver_nr),
                 ver_str,
                 sporter.para_classificatie,
                 para_materiaal,

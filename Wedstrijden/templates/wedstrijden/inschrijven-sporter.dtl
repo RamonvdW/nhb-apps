@@ -184,6 +184,13 @@
                         <td>{% for beschrijving in leeftijdsklassen %}{{ beschrijving }}<br>{% empty %}<span class="red-text">Geen</span>{% endfor %}</td>
                     </tr>
 
+                    {% if ingeschreven_op_sessie %}
+                        <tr>
+                            <th>Ingeschreven voor sessie</th>
+                            <td>{{ ingeschreven_op_sessie.beschrijving }}<br>op {{ ingeschreven_op_sessie.datum }} van {{ ingeschreven_op_sessie.tijd_begin }} tot {{ ingeschreven_op_sessie.tijd_einde }}</td>
+                        </tr>
+                    {% endif %}
+
                 </table>
             </div>
         </div>
@@ -191,62 +198,66 @@
     {% endif %}
 
 
-    <!-- witruimte -->
-    <div class="row center">
-        <div class="col s12">
-            <h4>Kies een sessie</h4>
-            {% if not kan_aanmelden %}
+    {% if not ingeschreven_op_sessie %}
 
-                <p class="red-text">Je kan niet inschrijven op deze wedstrijd.<br>Dit kan komen door je leeftijd en/of de gekozen bogen onder Mijn pagina, Voorkeuren.</p>
-
-            {% else %}
-                                     <!-- N = NHB -->
-                {% if wed.organisatie == 'N' %}
-                    <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
-                {% endif %}
-
-            {% endif %}
-        </div>
-    </div>
-
-    {% if kan_aanmelden %}
-
-        <div class="row-nhb-blauw">
+        <!-- witruimte -->
+        <div class="row center">
             <div class="col s12">
-                <table class="white">
-                    <tr>
-                        <th class="center">Wanneer</th>
-                        <th class="center">Nog beschikbaar</th>
-                        <th class="center">Wedstrijdklasse</th>
-                        <th class="center">Prijs</th>
-                        <th><!-- kolom voor de knoppen --></th>
-                    </tr>
+                <h4>Kies een sessie</h4>
+                {% if not kan_aanmelden %}
 
-                    {% for sessie in sessies %}
-                        {% for klasse in sessie.klassen %}
-                            {% if klasse.is_compat %}
-                                <tr{% if not sessie.kan_aanmelden %} class="grey-text"{% endif %}>
-                                    <td class="center">{{ sessie.datum }}<br>{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</td>
-                                    <td class="center">{{ sessie.aantal_beschikbaar }} (van de {{ sessie.max_sporters }})</td>
-                                    <td class="center">{{ klasse.beschrijving }}</td>
-                                    <td class="center">{% if sessie.kan_aanmelden %}&euro;&nbsp;{{ prijs_euro_sporter }}{% else %}-{% endif %}</td>
-                                    <td class="center">
-                                        {% if sessie.kan_aanmelden %}
-                                            <button class="btn-nhb-rood" id="id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}" onclick="toevoegen('id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}')" data-wedstrijd="{{ wed.pk }}" data-sessie="{{ sessie.pk }}" data-klasse="{{ klasse.pk }}" data-sporterboog="{{ geselecteerd.pk }}">
-                                                <i class="material-icons-round">add</i></button>
-                                        {% else %}
-                                            {% if not sessie.compatible_leeftijd %}<span>(leeftijd)</span><br>{% endif %}
-                                            {% if not sessie.compatible_boog %}<span>(boog)</span><br>{% endif %}
-                                            {% if not sessie.compatible_geslacht %}<span>(M/V)</span><br>{% endif %}
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endif %}
-                        {% endfor %}
-                    {% endfor %}
-                </table>
+                    <p class="red-text">Je kan niet inschrijven op deze wedstrijd.<br>Dit kan komen door je leeftijd en/of de gekozen bogen onder Mijn pagina, Voorkeuren.</p>
+
+                {% else %}
+                                         <!-- N = NHB -->
+                    {% if wed.organisatie == 'N' %}
+                        <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
+                    {% endif %}
+
+                {% endif %}
             </div>
         </div>
+
+        {% if kan_aanmelden %}
+
+            <div class="row-nhb-blauw">
+                <div class="col s12">
+                    <table class="white">
+                        <tr>
+                            <th class="center">Wanneer</th>
+                            <th class="center">Nog beschikbaar</th>
+                            <th class="center">Wedstrijdklasse</th>
+                            <th class="center">Prijs</th>
+                            <th><!-- kolom voor de knoppen --></th>
+                        </tr>
+
+                        {% for sessie in sessies %}
+                            {% for klasse in sessie.klassen %}
+                                {% if klasse.is_compat %}
+                                    <tr{% if not sessie.kan_aanmelden %} class="grey-text"{% endif %}>
+                                        <td class="center">{{ sessie.datum }}<br>{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</td>
+                                        <td class="center">{{ sessie.aantal_beschikbaar }} (van de {{ sessie.max_sporters }})</td>
+                                        <td class="center">{{ klasse.beschrijving }}</td>
+                                        <td class="center">{% if sessie.kan_aanmelden %}&euro;&nbsp;{{ prijs_euro_sporter }}{% else %}-{% endif %}</td>
+                                        <td class="center">
+                                            {% if sessie.kan_aanmelden %}
+                                                <button class="btn-nhb-rood" id="id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}" onclick="toevoegen('id_toevoegen_{{ sessie.pk }}_{{ klasse.pk }}')" data-wedstrijd="{{ wed.pk }}" data-sessie="{{ sessie.pk }}" data-klasse="{{ klasse.pk }}" data-sporterboog="{{ geselecteerd.pk }}">
+                                                    <i class="material-icons-round">add</i></button>
+                                            {% else %}
+                                                {% if not sessie.compatible_leeftijd %}<span>(leeftijd)</span><br>{% endif %}
+                                                {% if not sessie.compatible_boog %}<span>(boog)</span><br>{% endif %}
+                                                {% if not sessie.compatible_geslacht %}<span>(M/V)</span><br>{% endif %}
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+
+        {% endif %}
 
     {% endif %}
 

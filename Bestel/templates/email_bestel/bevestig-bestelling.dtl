@@ -31,6 +31,7 @@
             |    Schietstijl: {{ product.schietstijl }}
             {% endif %}
             |    Wedstrijdklasse: {{ product.klasse }}
+            |    Locatie: {{ product.wedstrijd_adres }}
             |    E-mail organisatie: {{ product.org_email }}
             |    Telefoon organisatie: {{ product.org_telefoon }}
 
@@ -118,6 +119,7 @@
                         {% if product.boog %}<span>Boog: {{ product.boog }}</span><br>{% endif %}
                         {% if product.schietstijl %}<span>Schietstijl: {{ product.schietstijl }}</span><br>{% endif %}
                         <span>Wedstrijdklasse: {{ product.klasse }}</span><br>
+                        <span>Locatie: {{ product.wedstrijd_adres }}</span>
                         <span>E-mail organisatie: {{ product.org_email }}</span><br>
                         <span>Telefoon organisatie: {{ product.org_telefoon }}</span><br>
                     </td>

@@ -167,41 +167,46 @@
                 </tr>
             </table>
 
-            <ul id="sessies" class="collapsible expandable z-depth-0 white" style="margin-top:50px; margin-bottom:0px">
-                <li>
-                    <div class="collapsible-header white center" style="display:block; cursor:inherit">
-                        <h6 class="nhb-blauw-text">Sessies</h6>
-                        {% if wed.organisatie == 'N' %}
-                            <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
-                        {% endif %}
-                    </div>
-                </li>
+            {% if kan_aanmelden %}
 
-                {% for sessie in sessies %}
+                <ul id="sessies" class="collapsible expandable z-depth-0 white" style="margin-top:50px; margin-bottom:0px">
                     <li>
-                        <div class="collapsible-header white center" style="display:block">
-                            <b>{{ sessie.datum }}, {{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</b><br>
-                            {% if kan_inschrijven %}
-                                <span>{{ sessie.aantal_beschikbaar }} plaatsen beschikbaar (van de {{ sessie.max_sporters }})</span><br>
+                        <div class="collapsible-header white center" style="display:block; cursor:inherit">
+                            <h6 class="nhb-blauw-text">Sessies</h6>
+                            {% if wed.organisatie == 'N' %}
+                                <p>Klassen zonder man/vrouw benoeming zijn genderneutraal</p>
                             {% endif %}
-                            <span>{{ sessie.klassen|length }} wedstrijdklassen</span>
-                        </div>
-                        <div class="collapsible-body white center">
-                            <span>
-                                {% for klasse in sessie.klassen %}
-                                    <span>{{ klasse.beschrijving }}</span><br>
-                                {% endfor %}
-                            </span>
                         </div>
                     </li>
-                {% endfor %}
-            </ul>
+
+                    {% for sessie in sessies %}
+                        <li>
+                            <div class="collapsible-header white center" style="display:block">
+                                {% if sessie.beschrijving %}<span>{{ sessie.beschrijving }}</span><br>{% endif %}
+                                <b>{{ sessie.datum }}, {{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</b><br>
+                                {% if kan_inschrijven %}
+                                    <span>{{ sessie.aantal_beschikbaar }} plaatsen beschikbaar (van de {{ sessie.max_sporters }})</span><br>
+                                {% endif %}
+                                <span>{{ sessie.klassen|length }} wedstrijdklassen</span>
+                            </div>
+                            <div class="collapsible-body white center">
+                                <span>
+                                    {% for klasse in sessie.klassen %}
+                                        <span>{{ klasse.beschrijving }}</span><br>
+                                    {% endfor %}
+                                </span>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+            {% endif %}
 
         </div>
     </div>
 
 
-    {% if kan_aanmelden and kan_inschrijven %}
+    {% if toon_inschrijven %}
 
         <!-- witruimte -->
         <div class="row center">
@@ -214,14 +219,23 @@
         <div class="row-nhb-blauw">
             <div class="col s12">
 
-                <!-- inschrijven sporter -->
-                {% include 'plein/card.dtl' with title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" url=url_inschrijven_sporter %}
+                {% if kan_aanmelden and kan_inschrijven %}
 
-                <!-- inschrijven groepje -->
-                {% include 'plein/card.dtl' with title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." icon="group" url=url_inschrijven_groepje %}
+                    <!-- inschrijven sporter -->
+                    {% include 'plein/card.dtl' with title="Sporter" text="Aanmelden en betalen voor jezelf." icon="person" url=url_inschrijven_sporter %}
 
-                <!-- inschrijven familie -->
-                {% include 'plein/card.dtl' with title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." icon="family_restroom" url=url_inschrijven_familie %}
+                    <!-- inschrijven groepje -->
+                    {% include 'plein/card.dtl' with title="Groep" text="Aanmelden en betalen voor een groepje leden zoals team, vrienden of collega's." icon="group" url=url_inschrijven_groepje %}
+
+                    <!-- inschrijven familie -->
+                    {% include 'plein/card.dtl' with title="Familie" text="Aanmelden en betalen voor jonge leden, door ouders." icon="family_restroom" url=url_inschrijven_familie %}
+
+                {% endif %}
+
+
+               {% if wed.extern_beheerd %}
+                   {% include 'plein/card.dtl' with title='Inschrijven' icon="person" extern_open=1 text="Inschrijven voor deze website gaat via de website van de organisatie" url=wed.contact_website %}
+                {% endif %}
 
             </div>
         </div>

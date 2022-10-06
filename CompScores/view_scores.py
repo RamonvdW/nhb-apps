@@ -739,7 +739,7 @@ class WedstrijdUitslagBekijkenView(UserPassesTestMixin, TemplateView):
         # for
 
         for score in scores:
-            score.schutter_str = score.sporterboog.sporter.volledige_naam()
+            score.schutter_str = score.sporterboog.sporter.lid_nr_en_volledige_naam()
             score.lid_nr = score.sporterboog.sporter.lid_nr
             score.boog_str = score.sporterboog.boogtype.beschrijving
             try:

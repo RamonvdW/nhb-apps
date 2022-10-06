@@ -75,6 +75,7 @@ def stuur_email_naar_koper_bestelling_details(bestelling):
             product.reserveringsnummer = settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk
             product.wedstrijd_titel = wedstrijd.titel
             product.wedstrijd_bij_vereniging = wedstrijd.organiserende_vereniging.ver_nr_en_naam()
+            product.wedstrijd_adres = wedstrijd.locatie.adres.replace('\n', ', ')
             product.sessie_datum = inschrijving.sessie.datum
             product.sessie_tijd = inschrijving.sessie.tijd_begin
             product.sporter_lid_nr_naam = inschrijving.sporterboog.sporter.lid_nr_en_volledige_naam()

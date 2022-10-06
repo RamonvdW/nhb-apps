@@ -102,10 +102,12 @@ class WedstrijdDetailsView(TemplateView):
         # for
 
         # om aan te melden is een account nodig
-        context['kan_aanmelden'] = self.request.user.is_authenticated
+        context['kan_aanmelden'] = self.request.user.is_authenticated and not wedstrijd.extern_beheerd
 
         # inschrijven moet voor de sluitingsdatum
         context['kan_inschrijven'] = now_date < wedstrijd.inschrijven_voor
+
+        context['toon_inschrijven'] = (context['kan_aanmelden'] and context['kan_inschrijven']) or wedstrijd.extern_beheerd
 
         if context['kan_aanmelden']:
             context['menu_toon_mandje'] = True
@@ -134,6 +136,9 @@ def inschrijving_open_of_404(wedstrijd):
     """ Controleer dat de wedstrijd nog open is voor inschrijving.
         Zo niet, genereer dan fout 404
     """
+
+    if wedstrijd.extern_beheerd:
+        raise Http404('Externe inschrijving')
 
     now_date = timezone.now().date()
     wedstrijd.inschrijven_voor = wedstrijd.datum_begin - timedelta(days=wedstrijd.inschrijven_tot)
@@ -173,18 +178,22 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
                          'pk'))
 
     # kijk of de sporter al ingeschreven is
-    sessie_pk2inschrijving = dict()       # [sessie.pk] = inschrijving
+    sessie_pk2inschrijving = dict()       # [sessie.pk] = [inschrijving, ..]
     for inschrijving in (WedstrijdInschrijving
                          .objects
                          .select_related('sessie',
                                          'sporterboog',
-                                         'sporterboog__sporter')
+                                         'sporterboog__sporter',
+                                         'sporterboog__boogtype')
                          .filter(sessie__pk__in=sessie_pks,
                                  sporterboog__sporter=sporter)
                          .exclude(status=INSCHRIJVING_STATUS_AFGEMELD)):
 
         sessie_pk = inschrijving.sessie.pk
-        sessie_pk2inschrijving[sessie_pk] = inschrijving
+        try:
+            sessie_pk2inschrijving[sessie_pk].append(inschrijving)
+        except KeyError:
+            sessie_pk2inschrijving[sessie_pk] = [inschrijving]
     # for
 
     unsorted_wedstrijdklassen = list()
@@ -197,6 +206,7 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
                           .order_by('volgorde'))        # oudste leeftijdsklasse eerst
 
         sessie.kan_aanmelden = False
+        sessie.al_ingeschreven = False
 
         compatible_boog = False
         compatible_geslacht = False
@@ -231,13 +241,19 @@ def get_sessies(wedstrijd, sporter, voorkeuren, wedstrijdboog_pk):
 
         if compatible_boog and compatible_leeftijd and compatible_geslacht:
             try:
-                sessie.inschrijving = sessie_pk2inschrijving[sessie.pk]
+                inschrijvingen = sessie_pk2inschrijving[sessie.pk]
             except KeyError:
                 # nog niet in geschreven
                 sessie.kan_aanmelden = True
             else:
-                # al ingeschreven
-                sessie.al_ingeschreven = True
+                # al ingeschreven - controleer de boog
+                for inschrijving in inschrijvingen:
+                    if inschrijving.sporterboog.boogtype.pk == wedstrijdboog_pk:
+                        sessie.al_ingeschreven = True
+                # for
+
+                if not sessie.al_ingeschreven:
+                    sessie.kan_aanmelden = True
 
         # verzamel waarom een sporter niet op deze sessie in kan schrijven
         sessie.compatible_boog = compatible_boog
@@ -346,12 +362,15 @@ class WedstrijdInschrijvenSporter(UserPassesTestMixin, TemplateView):
             tups = get_sessies(wedstrijd, geselecteerd.sporter, voorkeuren, geselecteerd.boogtype.pk)
             context['sessies'], context['leeftijd'], context['leeftijdsklassen'], geslacht = tups
 
+            ingeschreven_op_sessie = None
             kan_aanmelden = False
             for sessie in context['sessies']:
                 if sessie.kan_aanmelden:
                     kan_aanmelden = True
-                    break
+                if sessie.al_ingeschreven:
+                    ingeschreven_op_sessie = sessie
             # for
+            context['ingeschreven_op_sessie'] = ingeschreven_op_sessie
             context['kan_aanmelden'] = kan_aanmelden
 
             # als de sporter geslacht 'anders' heeft en nog geen keuze gemaakt heeft voor wedstrijden
