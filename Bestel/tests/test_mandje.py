@@ -9,6 +9,7 @@ from django.conf import settings
 from django.utils import timezone
 from BasisTypen.models import BoogType, KalenderWedstrijdklasse
 from Bestel.models import BestelProduct, BestelMandje, BestelMutatie, Bestelling
+from Bestel.mutaties import bestel_mutatieverzoek_inschrijven_wedstrijd
 from Betaal.models import BetaalInstellingenVereniging
 from NhbStructuur.models import NhbRegio, NhbVereniging
 from Sporter.models import Sporter, SporterBoog
@@ -249,6 +250,9 @@ class TestBestelMandje(E2EHelpers, TestCase):
     #
     #     # vul het mandje
     #     product = self._vul_mandje(self.account_admin)
+    #
+    #     # dit doet Wedstrijden.inschrijven:
+    #     bestel_mutatieverzoek_inschrijven_wedstrijd(account_koper, inschrijving, True)
     #
     #     self.verwerk_bestel_mutaties()
     #
