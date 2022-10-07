@@ -9,9 +9,9 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.utils import timezone
+from Overig.models import SiteTijdelijkeUrl
+from Overig.tijdelijke_url import beschrijving_activiteit, do_dispatch
 from Plein.menu import menu_dynamics
-from .models import SiteTijdelijkeUrl
-from .tijdelijke_url import beschrijving_activiteit, do_dispatch
 
 TEMPLATE_TIJDELIJKEURL_GOED = 'overig/tijdelijke-url-goed.dtl'
 TEMPLATE_TIJDELIJKEURL_FOUT = 'overig/tijdelijke-url-fout.dtl'

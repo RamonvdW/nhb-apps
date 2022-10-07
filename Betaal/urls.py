@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_webhooks, view_vereniging
+from Betaal import view_webhooks, view_vereniging
 
 
 app_name = 'Betaal'
@@ -18,7 +18,7 @@ urlpatterns = [
          name='mollie-webhook'),
 
     path('vereniging/instellingen/',
-         view=view_vereniging.BetalingenInstellenView.as_view(),
+         view=view_vereniging.BetalingInstellingenView.as_view(),
          name='vereniging-instellingen'),
 ]
 

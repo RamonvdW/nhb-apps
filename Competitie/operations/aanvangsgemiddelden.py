@@ -10,7 +10,7 @@ from Competitie.models import AG_NUL, get_competitie_boog_typen
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Logboek.models import schrijf_in_logboek
 from Sporter.models import Sporter, SporterBoog
-from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV
 
 
 def get_competitie_bogen(comp=None):
@@ -83,7 +83,7 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
     # for
 
     # verwijder alle bestaande aanvangsgemiddelden
-    Score.objects.filter(type=SCORE_TYPE_INDIV_AG, afstand_meter=afstand).all().delete()
+    Aanvangsgemiddelde.objects.filter(doel=AG_DOEL_INDIV, afstand_meter=afstand).all().delete()
 
     minimum_aantal_scores = {
         18: settings.COMPETITIE_18M_MINIMUM_SCORES_VOOR_AG,
@@ -92,7 +92,7 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
 
     # doorloop alle individuele histcomp records die bij dit seizoen horen
     histcomp = None
-    bulk_score = list()
+    bulk_ag = list()
     for histcomp in histcomps:
         for obj in (HistCompetitieIndividueel
                     .objects
@@ -100,8 +100,8 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
                     .filter(histcompetitie=histcomp)):
 
             # gebruik scores van IB voor gemiddelde van TR (overgang 2021/2022 --> 2022/2023)
-            # TODO: alternatief: bij aanmaken AG's, sla IB AG op als TR AG
-            if obj.boogtype == 'IB':                        # FUTURE: verwijder
+            # FUTURE: verwijder
+            if obj.boogtype == 'IB':        # pragma: no cover
                 obj.boogtype = 'TR'
 
             if (obj.gemiddelde > AG_NUL
@@ -142,52 +142,54 @@ def aanvangsgemiddelden_vaststellen_voor_afstand(afstand: int):
                     #       geboortejaar = 2005 --> leeftijd was 14, dus cadet
                     was_aspirant = (eindjaar - sporterboog.sporter.geboorte_datum.year) <= MAXIMALE_WEDSTRIJDLEEFTIJD_ASPIRANT
 
-                    # zoek het score record erbij
                     if not was_aspirant:
-                        # aanvangsgemiddelde voor deze afstand
-                        waarde = int(obj.gemiddelde * 1000)
+                        # aanvangsgemiddelde voor deze afstand aanmaken
+                        waarde = obj.gemiddelde
 
-                        score = Score(sporterboog=sporterboog,
-                                      type=SCORE_TYPE_INDIV_AG,
-                                      waarde=waarde,
-                                      afstand_meter=afstand)
-                        bulk_score.append(score)
+                        ag = Aanvangsgemiddelde(
+                                    sporterboog=sporterboog,
+                                    boogtype=sporterboog.boogtype,
+                                    doel=AG_DOEL_INDIV,
+                                    waarde=waarde,
+                                    afstand_meter=afstand)
+                        bulk_ag.append(ag)
 
-                        if len(bulk_score) >= 500:
-                            Score.objects.bulk_create(bulk_score)
-                            bulk_score = list()
+                        if len(bulk_ag) >= 500:
+                            Aanvangsgemiddelde.objects.bulk_create(bulk_ag)
+                            bulk_ag = list()
 
         # for
     # for
 
-    if len(bulk_score) > 0:                         # pragma: no branch
-        Score.objects.bulk_create(bulk_score)
-    del bulk_score
+    if len(bulk_ag) > 0:                         # pragma: no branch
+        Aanvangsgemiddelde.objects.bulk_create(bulk_ag)
+    del bulk_ag
 
     # maak nu alle ScoreHist entries in 1x aan
     # (dit kost de meeste tijd)
 
     # hiervoor hebben we Score.pk nodig en die kregen we niet uit bovenstaande Score.objects.bulk_create
-    bulk_scorehist = list()
+    bulk_ag_hist = list()
     notitie = "Uitslag competitie seizoen %s" % histcomp.seizoen
-    for score in (Score
-                  .objects
-                  .filter(type=SCORE_TYPE_INDIV_AG,
-                          afstand_meter=afstand)):
+    for ag in (Aanvangsgemiddelde
+               .objects
+               .filter(doel=AG_DOEL_INDIV,
+                       afstand_meter=afstand)):
 
-        scorehist = ScoreHist(score=score,
-                              oude_waarde=0,
-                              nieuwe_waarde=score.waarde,
-                              door_account=None,
-                              notitie=notitie)
-        bulk_scorehist.append(scorehist)
+        ag_hist = AanvangsgemiddeldeHist(
+                            ag=ag,
+                            oude_waarde=0,
+                            nieuwe_waarde=ag.waarde,
+                            door_account=None,
+                            notitie=notitie)
+        bulk_ag_hist.append(ag_hist)
 
-        if len(bulk_scorehist) > 250:
-            ScoreHist.objects.bulk_create(bulk_scorehist)
-            bulk_scorehist = list()
+        if len(bulk_ag_hist) > 250:
+            AanvangsgemiddeldeHist.objects.bulk_create(bulk_ag_hist)
+            bulk_ag_hist = list()
     # for
-    if len(bulk_scorehist) > 0:                             # pragma: no branch
-        ScoreHist.objects.bulk_create(bulk_scorehist)
+    if len(bulk_ag_hist) > 0:                             # pragma: no branch
+        AanvangsgemiddeldeHist.objects.bulk_create(bulk_ag_hist)
 
 
 # end of file

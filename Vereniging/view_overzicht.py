@@ -14,7 +14,7 @@ from Competitie.models import (Competitie, DeelCompetitie, DeelcompetitieRonde, 
                                LAAG_REGIO, LAAG_RK, INSCHRIJF_METHODE_1)
 from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
-from Taken.taken import eval_open_taken
+from Taken.operations import eval_open_taken
 from Wedstrijden.models import BAAN_TYPE_EXTERN
 from types import SimpleNamespace
 import datetime
@@ -50,6 +50,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_OVERZICHT
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -86,7 +87,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             context['toon_competities'] = True
 
             if self.rol_nu == Rollen.ROL_HWL:
-                context['toon_wedstrijdkalender'] = settings.TOON_WEDSTRIJDKALENDER
+                context['toon_wedstrijdkalender'] = True
 
             comps = (Competitie
                      .objects
@@ -128,7 +129,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             begin_jaar = comp.begin_jaar
             comp.bepaal_fase()
 
-            if prev_jaar != begin_jaar or prev_afstand != comp.afstand:
+            if prev_jaar != begin_jaar or prev_afstand != comp.afstand:     # pragma: no branch
                 if len(kaartjes) and hasattr(kaartjes[-1], 'heading'):
                     # er waren geen kaartjes voor die competitie - meld dat
                     kaartje = SimpleNamespace()
@@ -143,6 +144,7 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                 # nieuwe heading aanmaken
                 kaartje = SimpleNamespace()
                 kaartje.heading = comp.beschrijving
+                kaartje.anker = 'competitie_%s' % comp.pk
                 kaartje.comp_fase = "%s (%s)" % (comp.fase, comp_fase_kort[comp.fase])
                 kaartjes.append(kaartje)
 
@@ -236,8 +238,8 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
                         kaartje.tekst = 'Overzicht gekozen wedstrijden.'
                         kaartje.url = reverse('CompLaagRegio:wie-schiet-waar', kwargs={'deelcomp_pk': deelcomp.pk})
                         kaartje.icon = 'gamepad'
-                        if comp.fase < 'B':
-                            kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)
+                        # if comp.fase < 'B':
+                        #     kaartje.beschikbaar_vanaf = localize(comp.begin_aanmeldingen)
                         kaartjes.append(kaartje)
             # for
 
@@ -248,11 +250,6 @@ class OverzichtView(UserPassesTestMixin, TemplateView):
             kaartje = SimpleNamespace()
             kaartje.geen_kaartjes = True
             kaartjes.append(kaartje)
-
-        if self.rol_nu != Rollen.ROL_WL:
-            # SEC of HWL
-            if settings.TOON_WEDSTRIJDKALENDER:
-                context['url_betalingen'] = reverse('Betaal:vereniging-instellingen')
 
         # maak een afsluiter (wordt gebruikt in de template)
         if prev_jaar != 0:

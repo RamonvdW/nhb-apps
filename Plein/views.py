@@ -8,11 +8,11 @@ from django.conf import settings
 from django.http import Http404
 from django.shortcuts import redirect, render, reverse
 from django.views.generic import TemplateView, View
+from Bestel.mandje import eval_mandje_inhoud
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from Handleiding.views import reverse_handleiding
-from Bestel.mandje import eval_mandje_inhoud
-from Taken.taken import eval_open_taken
-from .menu import menu_dynamics
+from Plein.menu import menu_dynamics
+from Taken.operations import eval_open_taken
 
 
 TEMPLATE_PLEIN_SPORTER = 'plein/plein-sporter.dtl'       # sporter (ROL_SPORTER)
@@ -23,6 +23,7 @@ TEMPLATE_PRIVACY = 'plein/privacy.dtl'
 
 ROL2HANDLEIDING_PAGINA = {
     Rollen.ROL_BB: settings.HANDLEIDING_BB,
+    Rollen.ROL_MO: settings.HANDLEIDING_MO,
     Rollen.ROL_BKO: settings.HANDLEIDING_BKO,
     Rollen.ROL_RKO: settings.HANDLEIDING_RKO,
     Rollen.ROL_RCL: settings.HANDLEIDING_RCL,
@@ -87,7 +88,8 @@ class PleinView(View):
         # ga naar live server banner tonen?
         context['ga_naar_live_server'] = settings.IS_TEST_SERVER
 
-        context['toon_kalender'] = settings.TOON_WEDSTRIJDKALENDER
+        # site-specifieke default voor deze kaartjes
+        context['toon_opleidingen'] = settings.TOON_OPLEIDINGEN
 
         if request.user.is_authenticated:
             rol_nu = rol_get_huidige(request)
@@ -107,13 +109,12 @@ class PleinView(View):
                 # beheerder
                 template = TEMPLATE_PLEIN_BEHEERDER
 
-                handleiding_pagina = ROL2HANDLEIDING_PAGINA[rol_nu]
-
-                context['handleiding_url'] = reverse_handleiding(request, handleiding_pagina)
-
                 if rol_nu == Rollen.ROL_BB:
                     context['rol_is_bb'] = True
-                    context['toon_kalender'] = True     # override default
+                elif rol_nu == Rollen.ROL_MO:
+                    context['rol_is_mo'] = True
+                elif rol_nu == Rollen.ROL_MWZ:
+                    context['rol_is_mwz'] = True
                 elif rol_nu == Rollen.ROL_BKO:
                     context['rol_is_bko'] = True
                 elif rol_nu == Rollen.ROL_RKO:
@@ -126,9 +127,14 @@ class PleinView(View):
                     context['rol_is_wl'] = True
                 elif rol_nu == Rollen.ROL_SEC:
                     context['rol_is_sec'] = True
+                elif rol_nu == Rollen.ROL_SUP:
+                    context['rol_is_sup'] = True
                 else:                               # pragma: no cover
                     # vangnet voor nieuwe rollen
                     raise Http404("Onbekende rol %s" % rol_nu)
+
+                if rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_MO, Rollen.ROL_SUP):
+                    context['toon_manager_sectie'] = True
 
                 context['huidige_rol'] = rol_get_beschrijving(request)
 

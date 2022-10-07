@@ -34,7 +34,9 @@
      "iso_abbr": null,
      "latitude": null,
      "longitude": null,
-     "coc_number": null
+     "coc_number": null,
+     "iban": "NL91ABNA0417164300",
+     "bic": "ABNANL2A"
     }
   ],
   "members": [
@@ -47,11 +49,15 @@
       "gender": "M",
       "email": null,
       "birthday": null,
+      "birthplace": null,
       "member_from": null,
       "para_code": null,
       "address": null,
       "postal_code": null,
       "location_name": null,
+      "phone_business": null,
+      "phone_private": null,
+      "phone_mobile": null,
       "iso_abbr": null,
       "latitude": null,
       "longitude": null,

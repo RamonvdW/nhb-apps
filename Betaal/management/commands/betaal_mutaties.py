@@ -51,7 +51,7 @@ class Command(BaseCommand):
         except BetaalInstellingenVereniging.DoesNotExist:
             self._instellingen_nhb = None
 
-        # maak de Mollie client instantie aan
+        # maak de Mollie-client instantie aan
         # de API key zetten we later, afhankelijk van de vereniging waar we deze transactie voor doen
         self._mollie_client = Client(api_endpoint=settings.BETAAL_API)
 
@@ -80,7 +80,7 @@ class Command(BaseCommand):
         beschrijving = mutatie.beschrijving
         bedrag_euro_str = str(mutatie.bedrag_euro)      # moet decimale punt geven
 
-        # schakel de Mollie client over op de API key van deze vereniging
+        # schakel de Mollie-client over op de API key van deze vereniging
         # als de betaling via de NHB loopt, dan zijn dit al de instellingen van de NHB
         try:
             self._mollie_client.set_api_key(instellingen.mollie_api_key)
@@ -209,8 +209,9 @@ class Command(BaseCommand):
 
         # transactie geschiedenis aanmaken
         BetaalTransactie(
-                payment_id=payment_id[:BETAAL_PAYMENT_ID_MAXLENGTH],
                 when=timezone.now(),
+                is_handmatig=False,
+                payment_id=payment_id[:BETAAL_PAYMENT_ID_MAXLENGTH],
                 beschrijving=description[:BETAAL_BESCHRIJVING_MAXLENGTH],
                 is_restitutie=False,
                 bedrag_euro_klant=bedrag_klant,

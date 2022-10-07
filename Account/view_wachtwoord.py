@@ -16,7 +16,7 @@ from Account.operations import account_test_wachtwoord_sterkte
 from Account.rechten import account_rechten_login_gelukt
 from Account.view_login import account_plugins_login
 from Logboek.models import schrijf_in_logboek
-from Mailer.models import mailer_queue_email, mailer_email_is_valide
+from Mailer.operations import render_email_template, mailer_queue_email, mailer_email_is_valide
 from Overig.helpers import get_safe_from_ip
 from Overig.tijdelijke_url import (set_tijdelijke_url_receiver,
                                    RECEIVER_WACHTWOORD_VERGETEN,
@@ -28,6 +28,7 @@ import logging
 TEMPLATE_VERGETEN = 'account/wachtwoord-vergeten.dtl'
 TEMPLATE_EMAIL = 'account/email_wachtwoord-vergeten.dtl'
 TEMPLATE_NIEUW_WACHTWOORD = 'account/nieuw-wachtwoord.dtl'
+EMAIL_TEMPLATE_WACHTWOORD_VERGETEN = 'email_account/wachtwoord-vergeten.dtl'
 
 my_logger = logging.getLogger('NHBApps.Account')
 
@@ -38,19 +39,17 @@ def account_stuur_email_wachtwoord_vergeten(accountemail, **kwargs):
     """
 
     # maak de url aan om het e-mailadres te bevestigen
-    url = maak_tijdelijke_url_wachtwoord_vergeten(accountemail, **kwargs)
+    context = {
+        'url': maak_tijdelijke_url_wachtwoord_vergeten(accountemail, **kwargs),
+        'naam_site': settings.NAAM_SITE,
+        'contact_email': settings.EMAIL_BONDSBUREAU,
+    }
 
-    text_body = ("Hallo!\n\n"
-                 + "Je hebt aangegeven je wachtwoord vergeten te zijn voor " + settings.NAAM_SITE + ".\n"
-                 + "Klik op onderstaande link om een nieuw wachtwoord in te stellen.\n\n"
-                 + url + "\n\n"
-                 + "Als jij dit niet was, neem dan contact met ons op via " + settings.EMAIL_BONDSBUREAU + "\n\n"
-                 + "Veel plezier met de site!\n"
-                 + "Het bondsbureau\n")
+    mail_body = render_email_template(context, EMAIL_TEMPLATE_WACHTWOORD_VERGETEN)
 
     mailer_queue_email(accountemail.bevestigde_email,
                        'Wachtwoord vergeten',
-                       text_body,
+                       mail_body,
                        enforce_whitelist=False)
 
 
@@ -177,6 +176,7 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_NIEUW_WACHTWOORD
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -192,16 +192,9 @@ class NieuwWachtwoordView(UserPassesTestMixin, TemplateView):
         except KeyError:
             context['moet_oude_ww_weten'] = True
 
-        account = self.request.user
-        if account.sporter_set.count() > 0:      # FUTURE: ongewenste kennis over op Sporter.account
-            context['kruimels'] = (
-                (reverse('Sporter:profiel'), 'Mijn pagina'),
-                (None, 'Wachtwoord wijzigen')
-            )
-        else:
-            context['kruimels'] = (
-                (None, 'Wachtwoord wijzigen'),
-            )
+        context['kruimels'] = (
+            (None, 'Wachtwoord wijzigen'),
+        )
 
         menu_dynamics(self.request, context)
         return context

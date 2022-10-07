@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -10,12 +10,15 @@
 
 from Mailer import mailer
 from Mailer.models import MailQueue
-from Taken.taken import herinner_aan_taken
+from Taken.operations import herinner_aan_taken
 from django.core.management.base import BaseCommand
+from django.db.utils import OperationalError
 from django.utils import timezone
 from django.db.utils import DataError
+import traceback
 import datetime
 import time
+import sys
 
 
 class Command(BaseCommand):
@@ -115,8 +118,13 @@ class Command(BaseCommand):
             if not options['skip_old']:
                 self._stuur_oude_mails()
             self._stuur_nieuwe_mails()
-        except DataError as exc:                        # pragma: no cover
+        except (DataError, OperationalError) as exc:                        # pragma: no cover
+            # OperationalError treed op bij system shutdown, als database gesloten wordt
+            _, _, tb = sys.exc_info()
+            lst = traceback.format_tb(tb)
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
+            self.stderr.write('Traceback:')
+            self.stderr.write(''.join(lst))
         except KeyboardInterrupt:                       # pragma: no cover
             pass
 

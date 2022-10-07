@@ -26,6 +26,7 @@ class WijzigClustersView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPREGIO_WIJZIG_CLUSTERS
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

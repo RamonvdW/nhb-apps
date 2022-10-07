@@ -9,9 +9,9 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 # all klassen zijn hard-coded
-from .models import (BoogType, TeamType, LeeftijdsKlasse,
-                     TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse,
-                     KalenderWedstrijdklasse)
+from BasisTypen.models import (BoogType, TeamType, LeeftijdsKlasse,
+                               TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse,
+                               KalenderWedstrijdklasse)
 
 
 class BasisTypenReadonlyAdmin(admin.ModelAdmin):
@@ -34,8 +34,6 @@ class BasisTypenReadonlyMetVolgordeAdmin(BasisTypenReadonlyAdmin):
 
 
 class BoogTypeAdmin(BasisTypenReadonlyAdmin):
-
-    ordering = ('volgorde',)        # alfanumeriek
 
     list_filter = ('organisatie', 'buiten_gebruik')
 

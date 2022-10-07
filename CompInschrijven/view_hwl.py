@@ -18,9 +18,8 @@ from Competitie.operations import KlasseBepaler
 from Competitie.operations import get_competitie_bogen
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Score.models import Score, SCORE_TYPE_INDIV_AG
-from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren
-from decimal import Decimal
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV, AG_DOEL_TEAM
+from Sporter.models import Sporter, SporterBoog, SporterVoorkeuren, get_sporter_voorkeuren
 import copy
 
 
@@ -38,6 +37,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_LEDEN_AANMELDEN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(*kwargs)
@@ -130,14 +130,22 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
             sporter_dict[sporter.lid_nr] = sporter
         # for
 
-        ag_dict = dict()        # [sporterboog_pk] = Score
-        for score in (Score
-                      .objects
-                      .select_related('sporterboog')
-                      .filter(type=SCORE_TYPE_INDIV_AG,
-                              afstand_meter=comp.afstand)):
-            ag = Decimal(score.waarde) / 1000
-            ag_dict[score.sporterboog.pk] = ag
+        ag_indiv_dict = dict()        # [sporterboog_pk] = Score
+        for ag in (Aanvangsgemiddelde
+                   .objects
+                   .select_related('sporterboog')
+                   .filter(doel=AG_DOEL_INDIV,
+                           afstand_meter=comp.afstand)):
+            ag_indiv_dict[ag.sporterboog.pk] = ag.waarde
+        # for
+
+        ag_teams_dict = dict()        # [sporterboog_pk] = Score
+        for ag in (Aanvangsgemiddelde
+                   .objects
+                   .select_related('sporterboog')
+                   .filter(doel=AG_DOEL_TEAM,
+                           afstand_meter=comp.afstand)):
+            ag_teams_dict[ag.sporterboog.pk] = ag.waarde
         # for
 
         wil_competitie = dict()     # [lid_nr] = True/False
@@ -194,9 +202,14 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     obj.mag_teamschieten = False
 
                 try:
-                    obj.ag = ag_dict[sporterboog.pk]
+                    obj.ag = ag_indiv_dict[sporterboog.pk]
                 except KeyError:
                     obj.ag = AG_NUL
+
+                try:
+                    obj.ag_team = ag_indiv_dict[sporterboog.pk]
+                except KeyError:
+                    obj.ag_team = obj.ag
 
                 # kijk of de schutter al aangemeld is
                 try:
@@ -232,10 +245,15 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         context['nhb_ver'] = hwl_ver = self.functie_nu.nhb_ver
         # rol is HWL (zie test_func)
 
-        deelcomp = (DeelCompetitie
-                    .objects
-                    .get(competitie=self.comp,
-                         nhb_regio=hwl_ver.regio))
+        try:
+            deelcomp = (DeelCompetitie
+                        .objects
+                        .get(competitie=self.comp,
+                             nhb_regio=hwl_ver.regio))
+        except DeelCompetitie.DoesNotExist:
+            regio_organiseert_teamcomp = False
+        else:
+            regio_organiseert_teamcomp = deelcomp.regio_organiseert_teamcompetitie
 
         # splits the ledenlijst op in jeugd, senior en inactief
         jeugd = list()
@@ -254,7 +272,7 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
         context['tweede_jaar'] = self.comp.begin_jaar + 1
         context['url_aanmelden'] = reverse('CompInschrijven:leden-aanmelden', kwargs={'comp_pk': self.comp.pk})
         context['mag_aanmelden'] = True
-        context['mag_team_schieten'] = self.comp.fase == 'B' and deelcomp.regio_organiseert_teamcompetitie
+        context['mag_team_schieten'] = self.comp.fase == 'B' and regio_organiseert_teamcomp
 
         # bepaal de inschrijfmethode voor deze regio
         mijn_regio = self.functie_nu.nhb_ver.regio
@@ -333,9 +351,11 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                             context['dagdelen'].append(dagdeel)
                     # for
 
+        url_overzicht = reverse('Vereniging:overzicht')
+        anker = '#competitie_%s' % self.comp.pk
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer vereniging'),
-            (None, self.comp.beschrijving.replace(' competitie', '')),
+            (url_overzicht, 'Beheer vereniging'),
+            (url_overzicht + anker, self.comp.beschrijving.replace(' competitie', '')),
             (None, 'Aanmelden')
         )
 
@@ -445,8 +465,10 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                     # iemand loopt te klooien
                     raise Http404('Sporter heeft geen voorkeur voor wedstrijden opgegeven')
 
+                sporter = sporterboog.sporter
+
                 # controleer lid bij vereniging HWL
-                if sporterboog.sporter.bij_vereniging != self.functie_nu.nhb_ver:
+                if sporter.bij_vereniging != self.functie_nu.nhb_ver:
                     # iemand loopt te klooien
                     raise PermissionDenied('Geen lid bij jouw vereniging')
 
@@ -458,6 +480,12 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                         .count() > 0):
                     # al aangemeld - zou niet hier moeten zijn gekomen
                     raise Http404('Sporter is al ingeschreven')
+
+                voorkeuren = get_sporter_voorkeuren(sporter)
+                if voorkeuren.wedstrijd_geslacht_gekozen:
+                    wedstrijdgeslacht = voorkeuren.wedstrijd_geslacht   # M/V
+                else:
+                    wedstrijdgeslacht = sporter.geslacht                # M/V/X
 
                 # bepaal in welke wedstrijdklasse de schutter komt
                 age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(deelcomp.competitie.begin_jaar + 1)
@@ -473,18 +501,33 @@ class LedenAanmeldenView(UserPassesTestMixin, ListView):
                                     aangemeld_door=request.user)
 
                 # zoek de aanvangsgemiddelden er bij, indien beschikbaar
-                for score in Score.objects.filter(sporterboog=sporterboog,
-                                                  afstand_meter=comp.afstand,
-                                                  type=SCORE_TYPE_INDIV_AG):
-                    ag = Decimal(score.waarde) / 1000
-                    aanmelding.ag_voor_indiv = ag
-                    aanmelding.ag_voor_team = ag
+                for ag in Aanvangsgemiddelde.objects.filter(sporterboog=sporterboog,
+                                                            afstand_meter=comp.afstand,
+                                                            doel=AG_DOEL_INDIV):
+                    # AG, dus > 0.000
+                    aanmelding.ag_voor_indiv = ag.waarde
+                    aanmelding.ag_voor_team = ag.waarde
                     aanmelding.ag_voor_team_mag_aangepast_worden = False
+                # for
+
+                # zoek de aanvangsgemiddelden er bij, indien beschikbaar
+                ag_hist = (AanvangsgemiddeldeHist
+                           .objects
+                           .filter(ag__sporterboog=sporterboog,
+                                   ag__afstand_meter=comp.afstand,
+                                   ag__doel=AG_DOEL_TEAM)
+                           .order_by('-when'))
+
+                if len(ag_hist):
+                    # gebruik het nieuwste handmatige team AG
+                    ag = ag_hist[0].ag
+                    aanmelding.ag_voor_team = ag.waarde
+                    aanmelding.ag_voor_team_mag_aangepast_worden = True
                 # for
 
                 # zoek een toepasselijke klasse aan de hand van de leeftijd
                 try:
-                    bepaler.bepaal_klasse_deelnemer(aanmelding)
+                    bepaler.bepaal_klasse_deelnemer(aanmelding, wedstrijdgeslacht)
                 except LookupError as exc:
                     raise Http404(str(exc))
 
@@ -516,6 +559,7 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_LEDEN_INGESCHREVEN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -625,9 +669,11 @@ class LedenIngeschrevenView(UserPassesTestMixin, ListView):
         if methode == INSCHRIJF_METHODE_3:
             context['toon_dagdeel'] = DAGDELEN
 
+        url_overzicht = reverse('Vereniging:overzicht')
+        anker = '#competitie_%s' % self.deelcomp.competitie.pk
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, self.deelcomp.competitie.beschrijving.replace(' competitie', '')),
+            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht + anker, self.deelcomp.competitie.beschrijving.replace(' competitie', '')),
             (None, 'Ingeschreven')
         )
 

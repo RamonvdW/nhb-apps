@@ -14,8 +14,8 @@
 
 
 <!-- Lowlands Archery Series -->
-{% static 'plein/logo_lowlands_130x85.png' as img_src %}
-{% include 'plein/card_logo.dtl' with title="Lowlands Series" text="Wedstrijden volgens internationaal format,<br>met finales en prijzengeld." img_src=img_src img_height=85 img_width=130 img_style="padding:10px" url="https://www.handboogsport.nl/lowlands-shootout/" extern_open=True %}
+{% static 'plein/logo_lowlands_109x65.png' as img_src %}
+{% include 'plein/card_logo.dtl' with title="Lowlands Series" text="Wedstrijden volgens internationaal format,<br>met finales en prijzengeld." img_src=img_src img_height=65 img_width=109 img_style="margin:10px" url="https://www.handboogsport.nl/lowlands-shootout/" extern_open=True %}
 
 
 <!-- JeugdFita Cup -->
@@ -26,6 +26,11 @@
 <!-- Free Your Mind -->
 {% static 'plein/logo_hero_512x512.png' as img_src %}
 {% include 'plein/card_logo.dtl' with title="Free your mind" text="Wil je zelf beginnen met handboogschieten?<br>Deze site helpt je op gang." img_src=img_src img_height=85 img_width=85 url="https://www.handboogsport.nl/freeyourmind/" extern_open=True %}
+
+
+<!-- Zoek een vereniging -->
+{% static 'plein/logo_hero_512x512.png' as img_src %}
+{% include 'plein/card.dtl' with title="Waar?" text="Zoek een vereniging bij jou in de buurt." icon_font_size="80px" icon="travel_explore" url="https://www.handboogsport.nl/zoek-je-vereniging/" extern_open=True %}
 
 
 <!-- end of file -->

@@ -6,7 +6,76 @@
 
 from django.db import migrations, models
 from BasisTypen.models import (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_60CM, BLAZOEN_60CM_4SPOT,
-                               ORGANISATIE_NHB, GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE)
+                               ORGANISATIE_WA, ORGANISATIE_NHB, ORGANISATIE_IFAA,
+                               GESLACHT_MAN, GESLACHT_VROUW, GESLACHT_ALLE)
+
+
+LEEFTIJDSKLASSEN = (
+    # WA + NHB
+    # volgorde afk    geslacht        min max  kort        beschrijving               organisatie
+
+    # 60+ (was: Veteranen)
+    (61,       'VV',  GESLACHT_VROUW, 60, 0,   '60+',      '60+ Dames',               ORGANISATIE_NHB),
+    (62,       'VH',  GESLACHT_MAN,   60, 0,   '60+',      '60+ Heren',               ORGANISATIE_NHB),
+    (63,       'VA',  GESLACHT_ALLE,  60, 0,   '60+',      '60+ Uniseks',             ORGANISATIE_NHB),
+
+    # 50+ (was: Master)
+    (51,       'MV',  GESLACHT_VROUW, 50, 0,   '50+',      '50+ Dames',               ORGANISATIE_WA),
+    (52,       'MH',  GESLACHT_MAN,   50, 0,   '50+',      '50+ Heren',               ORGANISATIE_WA),
+    (53,       'MA',  GESLACHT_ALLE,  50, 0,   '50+',      '50+ Uniseks',             ORGANISATIE_NHB),
+
+    # open klasse
+    (41,       'SV',  GESLACHT_VROUW, 0, 0,    'Dames',    'Dames',                   ORGANISATIE_WA),   # 21+
+    (42,       'SH',  GESLACHT_MAN,   0, 0,    'Heren',    'Heren',                   ORGANISATIE_WA),   # 21+
+    (43,       'SA',  GESLACHT_ALLE,  0, 0,    'Uniseks',  'Uniseks',                 ORGANISATIE_NHB),  # 21+
+
+    # Onder 21 (was: Junioren)
+    (31,       'JV',  GESLACHT_VROUW, 0, 20,   'Onder 21', 'Onder 21 Dames',          ORGANISATIE_WA),
+    (32,       'JH',  GESLACHT_MAN,   0, 20,   'Onder 21', 'Onder 21 Heren',          ORGANISATIE_WA),
+    (33,       'JA',  GESLACHT_ALLE,  0, 20,   'Onder 21', 'Onder 21 Uniseks',        ORGANISATIE_NHB),
+
+    # Onder 18 (was: Cadetten)
+    (21,       'CV',  GESLACHT_VROUW, 0, 17,   'Onder 18', 'Onder 18 Dames',          ORGANISATIE_WA),
+    (22,       'CH',  GESLACHT_MAN,   0, 17,   'Onder 18', 'Onder 18 Heren',          ORGANISATIE_WA),
+    (23,       'CA',  GESLACHT_ALLE,  0, 17,   'Onder 18', 'Onder 18 Uniseks',        ORGANISATIE_NHB),
+
+    # Onder 14 (was: Aspiranten)
+    (15,       'AV2', GESLACHT_VROUW, 0, 13,   'Onder 14', 'Onder 14 Meisjes',        ORGANISATIE_NHB),
+    (16,       'AH2', GESLACHT_MAN,   0, 13,   'Onder 14', 'Onder 14 Jongens',        ORGANISATIE_NHB),
+    (17,       'AA2', GESLACHT_ALLE,  0, 13,   'Onder 14', 'Onder 14 Uniseks',        ORGANISATIE_NHB),
+
+    # Onder 12 (was: Aspiranten)
+    (11,       'AV1', GESLACHT_VROUW, 0, 11,   'Onder 12', 'Onder 12 Meisjes',        ORGANISATIE_NHB),
+    (12,       'AH1', GESLACHT_MAN,   0, 11,   'Onder 12', 'Onder 12 Jongens',        ORGANISATIE_NHB),
+    (13,       'AA1', GESLACHT_ALLE,  0, 11,   'Onder 12', 'Onder 12 Uniseks',        ORGANISATIE_NHB),
+
+    # IFAA
+    # volgorde afk    geslacht        min max  kort        beschrijving               organisatie
+
+    # Senioren / 65+
+    (61,       'SEV', GESLACHT_VROUW, 65, 0,   'Sen V',    'Senioren Dames (65+)',    ORGANISATIE_IFAA),
+    (62,       'SEM', GESLACHT_MAN,   65, 0,   'Sen M',    'Senioren Heren (65+)',    ORGANISATIE_IFAA),
+
+    # Veteranen / 55-64
+    (51,       'VEV', GESLACHT_VROUW, 55, 0,   'Vet V',    'Veteranen Dames (55+)',   ORGANISATIE_IFAA),
+    (52,       'VEM', GESLACHT_MAN,   55, 0,   'Vet M',    'Veteranen Heren (55+)',   ORGANISATIE_IFAA),
+
+    # open klasse: Volwassenen
+    (41,       'VWV', GESLACHT_VROUW, 0, 0,    'Volw V',   'Volwassen Dames',         ORGANISATIE_IFAA),
+    (42,       'VWH', GESLACHT_MAN,   0, 0,    'Volw M',   'Volwassen Heren',         ORGANISATIE_IFAA),
+
+    # Jong volwassenen (17-20)
+    (31,       'JVV', GESLACHT_VROUW, 0, 20,   'Jong V',   'Jongvolwassen Dames',     ORGANISATIE_IFAA),
+    (32,       'JVH', GESLACHT_MAN,   0, 20,   'Jong M',   'Jongvolwassen Heren',     ORGANISATIE_IFAA),
+
+    # Junioren (13-16)
+    (21,       'JUV', GESLACHT_VROUW, 0, 16,   'Jun V',    'Junioren Meisjes',        ORGANISATIE_IFAA),
+    (22,       'JUH', GESLACHT_MAN,   0, 16,   'Jun M',    'Junioren Jongens',        ORGANISATIE_IFAA),
+
+    # Welpen (<13)
+    (11,       'WEV', GESLACHT_VROUW, 0, 12,   'Welp V',   'Welpen Meisjes',          ORGANISATIE_IFAA),
+    (12,       'WEH', GESLACHT_MAN,   0, 12,   'Welp M',   'Welpen Jongens',          ORGANISATIE_IFAA),
+)
 
 
 # team competitie klassen volgens spec v2.2, deel 3, tabel 3.5
@@ -29,234 +98,234 @@ TEAM_COMP_KLASSEN = (                    # 18m                                  
 )
 
 # individuele competitie klassen volgens spec v2.2, deel 3, tabel 3.4
-INDIV_COMP_KLASSEN = (                                                          # regio 1       regio 2     rk/bk
-    (1100, 'Recurve klasse 1',                              'R',  ('SA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_DT),   (BLAZOEN_60CM,)),
-    (1101, 'Recurve klasse 2',                              'R',  ('SA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_DT),   (BLAZOEN_60CM,)),
-    (1102, 'Recurve klasse 3',                              'R',  ('SA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
-    (1103, 'Recurve klasse 4',                              'R',  ('SA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
-    (1104, 'Recurve klasse 5',                              'R',  ('SA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
-    (1105, 'Recurve klasse 6',                              'R',  ('SA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
-    (1109, 'Recurve klasse onbekend',                       'R',  ('SA',),       (BLAZOEN_40CM, BLAZOEN_DT),               (BLAZOEN_60CM,)),
+INDIV_COMP_KLASSEN = (                        # boog   lkl            regio 1       regio 2     rk/bk
+    (1100, 'Recurve klasse 1',                  'R',  ('SA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_DT),   (BLAZOEN_60CM,)),
+    (1101, 'Recurve klasse 2',                  'R',  ('SA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_DT),   (BLAZOEN_60CM,)),
+    (1102, 'Recurve klasse 3',                  'R',  ('SA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
+    (1103, 'Recurve klasse 4',                  'R',  ('SA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
+    (1104, 'Recurve klasse 5',                  'R',  ('SA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
+    (1105, 'Recurve klasse 6',                  'R',  ('SA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
+    (1109, 'Recurve klasse onbekend',           'R',  ('SA',),       (BLAZOEN_40CM, BLAZOEN_DT),               (BLAZOEN_60CM,)),
 
-    (1110, 'Recurve Onder 21 klasse 1 (junioren)',          'R',  ('JA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_DT),   (BLAZOEN_60CM,)),
-    (1111, 'Recurve Onder 21 klasse 2 (junioren)',          'R',  ('JA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
-    (1119, 'Recurve Onder 21 klasse onbekend (junioren)',   'R',  ('JA',),       (BLAZOEN_40CM, BLAZOEN_DT),               (BLAZOEN_60CM,)),
+    (1110, 'Recurve Onder 21 klasse 1',         'R',  ('JA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_DT),   (BLAZOEN_60CM,)),
+    (1111, 'Recurve Onder 21 klasse 2',         'R',  ('JA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
+    (1119, 'Recurve Onder 21 klasse onbekend',  'R',  ('JA',),       (BLAZOEN_40CM, BLAZOEN_DT),               (BLAZOEN_60CM,)),
 
-    (1120, 'Recurve Onder 18 klasse 1 (cadetten)',          'R',  ('CA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
-    (1121, 'Recurve Onder 18 klasse 2 (cadetten)',          'R',  ('CA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
-    (1129, 'Recurve Onder 18 klasse onbekend (cadetten)',   'R',  ('CA',),       (BLAZOEN_40CM, BLAZOEN_DT),               (BLAZOEN_60CM,)),
+    (1120, 'Recurve Onder 18 klasse 1',         'R',  ('CA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
+    (1121, 'Recurve Onder 18 klasse 2',         'R',  ('CA',),       (BLAZOEN_40CM, BLAZOEN_DT, BLAZOEN_40CM), (BLAZOEN_60CM,)),
+    (1129, 'Recurve Onder 18 klasse onbekend',  'R',  ('CA',),       (BLAZOEN_40CM, BLAZOEN_DT),               (BLAZOEN_60CM,)),
 
-    (1150, 'Recurve Onder 14 jongens (aspiranten)',         'R',  ('AH2',),      (BLAZOEN_60CM,),                          (BLAZOEN_60CM,), True),
-    (1151, 'Recurve Onder 14 meisjes (aspiranten)',         'R',  ('AV2',),      (BLAZOEN_60CM,),                          (BLAZOEN_60CM,), True),
+    (1150, 'Recurve Onder 14 Jongens',          'R',  ('AH2',),      (BLAZOEN_60CM,),                          (BLAZOEN_60CM,), True),
+    (1151, 'Recurve Onder 14 Meisjes',          'R',  ('AV2',),      (BLAZOEN_60CM,),                          (BLAZOEN_60CM,), True),
 
-    (1160, 'Recurve Onder 12 jongens (aspiranten)',         'R',  ('AH1',),      (BLAZOEN_60CM,),                          (BLAZOEN_60CM,), True),
-    (1161, 'Recurve Onder 12 meisjes (aspiranten)',         'R',  ('AV1',),      (BLAZOEN_60CM,),                          (BLAZOEN_60CM,), True),
-
-
-    (1200, 'Compound klasse 1',                             'C',  ('SA',),       (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
-    (1201, 'Compound klasse 2',                             'C',  ('SA',),       (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
-    (1209, 'Compound klasse onbekend',                      'C',  ('SA',),       (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
-
-    (1210, 'Compound Onder 21 klasse 1 (junioren)',         'C',  ('JA',),       (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
-    (1211, 'Compound Onder 21 klasse 2 (junioren)',         'C',  ('JA',),       (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
-    (1219, 'Compound Onder 21 klasse onbekend (junioren)',  'C',  ('JA',),       (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
-
-    (1220, 'Compound Onder 18 klasse 1 (cadetten)',         'C',  ('CA',),       (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
-    (1221, 'Compound Onder 18 klasse 2 (cadetten)',         'C',  ('CA',),       (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
-    (1229, 'Compound Onder 18 klasse onbekend (cadetten)',  'C',  ('CA',),       (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
-
-    (1250, 'Compound Onder 14 jongens (aspiranten)',        'C',  ('AH2',),      (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM), (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT), True),
-    (1251, 'Compound Onder 14 meisjes (aspiranten)',        'C',  ('AV2',),      (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM), (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT), True),
-
-    (1260, 'Compound Onder 12 jongens (aspiranten)',        'C',  ('AH1',),      (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM), (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT), True),
-    (1261, 'Compound Onder 12 meisjes (aspiranten)',        'C',  ('AV1',),      (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM), (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT), True),
+    (1160, 'Recurve Onder 12 Jongens',          'R',  ('AH1',),      (BLAZOEN_60CM,),                          (BLAZOEN_60CM,), True),
+    (1161, 'Recurve Onder 12 Meisjes',          'R',  ('AV1',),      (BLAZOEN_60CM,),                          (BLAZOEN_60CM,), True),
 
 
-    (1300, 'Barebow klasse 1',                              'BB', ('SA',),       (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
-    (1301, 'Barebow klasse 2',                              'BB', ('SA',),       (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
-    (1309, 'Barebow klasse onbekend',                       'BB', ('SA',),       (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (1200, 'Compound klasse 1',                 'C',  ('SA',),       (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
+    (1201, 'Compound klasse 2',                 'C',  ('SA',),       (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
+    (1209, 'Compound klasse onbekend',          'C',  ('SA',),       (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
 
-    (1310, 'Barebow Jeugd klasse 1',                        'BB', ('JA', 'CA'),  (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (1210, 'Compound Onder 21 klasse 1',        'C',  ('JA',),       (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
+    (1211, 'Compound Onder 21 klasse 2',        'C',  ('JA',),       (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
+    (1219, 'Compound Onder 21 klasse onbekend', 'C',  ('JA',),       (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
 
-    (1350, 'Barebow Onder 14 jongens (aspiranten)',         'BB', ('AH2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
-    (1351, 'Barebow Onder 14 meisjes (aspiranten)',         'BB', ('AV2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+    (1220, 'Compound Onder 18 klasse 1',        'C',  ('CA',),       (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
+    (1221, 'Compound Onder 18 klasse 2',        'C',  ('CA',),       (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
+    (1229, 'Compound Onder 18 klasse onbekend', 'C',  ('CA',),       (BLAZOEN_DT,),                                    (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT)),
 
-    (1360, 'Barebow Onder 12 jongens (aspiranten)',         'BB', ('AH1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
-    (1361, 'Barebow Onder 12 meisjes (aspiranten)',         'BB', ('AV1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+    (1250, 'Compound Onder 14 Jongens',         'C',  ('AH2',),      (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM), (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT), True),
+    (1251, 'Compound Onder 14 Meisjes',         'C',  ('AV2',),      (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM), (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT), True),
 
-
-    (1400, 'Traditional klasse 1',                          'TR', ('SA',),       (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
-    (1401, 'Traditional klasse 2',                          'TR', ('SA',),       (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
-    (1409, 'Traditional klasse onbekend',                   'TR', ('SA',),       (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
-
-    (1410, 'Traditional Jeugd klasse 1',                    'TR', ('JA', 'CA'),  (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
-
-    (1450, 'Traditional Onder 14 jongens (aspiranten)',     'TR', ('AH2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
-    (1451, 'Traditional Onder 14 meisjes (aspiranten)',     'TR', ('AV2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
-
-    (1460, 'Traditional Onder 12 jongens (aspiranten)',     'TR', ('AH1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
-    (1461, 'Traditional Onder 12 meisjes (aspiranten)',     'TR', ('AV1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+    (1260, 'Compound Onder 12 Jongens',         'C',  ('AH1',),      (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM), (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT), True),
+    (1261, 'Compound Onder 12 Meisjes',         'C',  ('AV1',),      (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM), (BLAZOEN_60CM, BLAZOEN_60CM_4SPOT, BLAZOEN_60CM_4SPOT), True),
 
 
-    (1500, 'Longbow klasse 1',                              'LB', ('SA',),       (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
-    (1501, 'Longbow klasse 2',                              'LB', ('SA',),       (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
-    (1509, 'Longbow klasse onbekend',                       'LB', ('SA',),       (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (1300, 'Barebow klasse 1',                  'BB', ('SA',),       (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (1301, 'Barebow klasse 2',                  'BB', ('SA',),       (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (1309, 'Barebow klasse onbekend',           'BB', ('SA',),       (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
 
-    (1510, 'Longbow Jeugd klasse 1',                        'LB', ('JA', 'CA'),  (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (1310, 'Barebow Jeugd klasse 1',            'BB', ('JA', 'CA'),  (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
 
-    (1550, 'Longbow Onder 14 jongens (aspiranten)',         'LB', ('AH2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
-    (1551, 'Longbow Onder 14 meisjes (aspiranten)',         'LB', ('AV2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+    (1350, 'Barebow Onder 14 Jongens',          'BB', ('AH2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+    (1351, 'Barebow Onder 14 Meisjes',          'BB', ('AV2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
 
-    (1555, 'Longbow Onder 12 jongens (aspiranten)',         'LB', ('AH1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
-    (1556, 'Longbow Onder 12 meisjes (aspiranten)',         'LB', ('AV1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+    (1360, 'Barebow Onder 12 Jongens',          'BB', ('AH1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+    (1361, 'Barebow Onder 12 Meisjes',          'BB', ('AV1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+
+
+    (1400, 'Traditional klasse 1',              'TR', ('SA',),       (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (1401, 'Traditional klasse 2',              'TR', ('SA',),       (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (1409, 'Traditional klasse onbekend',       'TR', ('SA',),       (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+
+    (1410, 'Traditional Jeugd klasse 1',        'TR', ('JA', 'CA'),  (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+
+    (1450, 'Traditional Onder 14 Jongens',      'TR', ('AH2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+    (1451, 'Traditional Onder 14 Meisjes',      'TR', ('AV2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+
+    (1460, 'Traditional Onder 12 Jongens',      'TR', ('AH1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+    (1461, 'Traditional Onder 12 Meisjes',      'TR', ('AV1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+
+
+    (1500, 'Longbow klasse 1',                  'LB', ('SA',),       (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (1501, 'Longbow klasse 2',                  'LB', ('SA',),       (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+    (1509, 'Longbow klasse onbekend',           'LB', ('SA',),       (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+
+    (1510, 'Longbow Jeugd klasse 1',            'LB', ('JA', 'CA'),  (BLAZOEN_40CM,), (BLAZOEN_60CM,)),
+
+    (1550, 'Longbow Onder 14 Jongens',          'LB', ('AH2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+    (1551, 'Longbow Onder 14 Meisjes',          'LB', ('AV2',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+
+    (1555, 'Longbow Onder 12 Jongens',          'LB', ('AH1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
+    (1556, 'Longbow Onder 12 Meisjes',          'LB', ('AV1',),      (BLAZOEN_60CM,), (BLAZOEN_60CM,), True),
 )
 
 
 KALENDERWEDSTRIJDENKLASSEN = (
-    # nr  boog afk
-    (100, 'R', 'VA', 'Recurve 60+ (veteraan)'),
-    (101, 'R', 'VH', 'Recurve 60+ mannen (veteraan)'),
-    (102, 'R', 'VV', 'Recurve 60+ vrouwen (veteraan)'),
+    # nr  boog  lkl    afk      beschrijving
+    (100, 'R',  'VA',  'R60U',  'Recurve 60+ Uniseks'),
+    (101, 'R',  'VH',  'R60H',  'Recurve 60+ Heren'),
+    (102, 'R',  'VV',  'R60D',  'Recurve 60+ Dames'),
 
-    (110, 'R', 'MA', 'Recurve 50+ (master)'),
-    (111, 'R', 'MH', 'Recurve 50+ mannen (master)'),
-    (112, 'R', 'MV', 'Recurve 50+ vrouwen (master)'),
+    (110, 'R',  'MA',  'R50U',  'Recurve 50+ Uniseks'),
+    (111, 'R',  'MH',  'R50H',  'Recurve 50+ Heren'),
+    (112, 'R',  'MV',  'R50D',  'Recurve 50+ Dames'),
 
-    (120, 'R', 'SA', 'Recurve (senior)'),
-    (121, 'R', 'SH', 'Recurve mannen (senior)'),
-    (122, 'R', 'SV', 'Recurve vrouwen (senior)'),
+    (120, 'R',  'SA',  'RU',    'Recurve Uniseks'),
+    (121, 'R',  'SH',  'RH',    'Recurve Heren'),
+    (122, 'R',  'SV',  'RD',    'Recurve Dames'),
 
-    (130, 'R', 'JA', 'Recurve Onder 21 (junior)'),
-    (131, 'R', 'JH', 'Recurve Onder 21 mannen (junior)'),
-    (132, 'R', 'JV', 'Recurve Onder 21 vrouwen (junior)'),
+    (130, 'R',  'JA',  'RO21U', 'Recurve Onder 21 Uniseks'),
+    (131, 'R',  'JH',  'RO21H', 'Recurve Onder 21 Heren'),
+    (132, 'R',  'JV',  'RO21D', 'Recurve Onder 21 Dames'),
 
-    (140, 'R', 'CA', 'Recurve Onder 18 (cadet)'),
-    (141, 'R', 'CH', 'Recurve Onder 18 jongens (cadet)'),
-    (142, 'R', 'CV', 'Recurve Onder 18 meisjes (cadet)'),
+    (140, 'R',  'CA',  'RO18U', 'Recurve Onder 18 Uniseks'),
+    (141, 'R',  'CH',  'RO18H', 'Recurve Onder 18 Heren'),
+    (142, 'R',  'CV',  'RO18D', 'Recurve Onder 18 Dames'),
 
-    (150, 'R', 'AA2', 'Recurve Onder 14 (aspirant)'),
-    (151, 'R', 'AH2', 'Recurve Onder 14 jongens (aspirant)'),
-    (152, 'R', 'AV2', 'Recurve Onder 14 meisjes (aspirant)'),
+    (150, 'R',  'AA2', 'RO14U', 'Recurve Onder 14 Uniseks'),
+    (151, 'R',  'AH2', 'RO14H', 'Recurve Onder 14 Jongens'),
+    (152, 'R',  'AV2', 'RO14D', 'Recurve Onder 14 Meisjes'),
 
-    (160, 'R', 'AA1', 'Recurve Onder 12 (aspirant)'),
-    (161, 'R', 'AH1', 'Recurve Onder 12 jongens (aspirant)'),
-    (162, 'R', 'AV1', 'Recurve Onder 12 meisjes (aspirant)'),
-
-
-    (200, 'C', 'VA', 'Compound 60+ (veteraan)'),
-    (201, 'C', 'VH', 'Compound 60+ mannen (veteraan)'),
-    (202, 'C', 'VV', 'Compound 60+ vrouwen (veteraan)'),
-
-    (210, 'C', 'MA', 'Compound 50+ (master)'),
-    (211, 'C', 'MH', 'Compound 50+ mannen (master)'),
-    (212, 'C', 'MV', 'Compound 50+ vrouwen (master)'),
-
-    (220, 'C', 'SA', 'Compound (senior)'),
-    (221, 'C', 'SH', 'Compound mannen (senior)'),
-    (222, 'C', 'SV', 'Compound vrouwen (senior)'),
-
-    (230, 'C', 'JA', 'Compound Onder 21 (junior)'),
-    (231, 'C', 'JH', 'Compound Onder 21 mannen (junior)'),
-    (232, 'C', 'JV', 'Compound Onder 21 vrouwen (junior)'),
-
-    (240, 'C', 'CA', 'Compound Onder 18 (cadet)'),
-    (241, 'C', 'CH', 'Compound Onder 18 jongens (cadet)'),
-    (242, 'C', 'CV', 'Compound Onder 18 meisjes (cadet)'),
-
-    (250, 'C', 'AA2', 'Compound Onder 14 (aspirant)'),
-    (251, 'C', 'AH2', 'Compound Onder 14 jongens (aspirant)'),
-    (252, 'C', 'AV2', 'Compound Onder 14 meisjes (aspirant)'),
-
-    (260, 'C', 'AA1', 'Compound Onder 12 (aspirant)'),
-    (261, 'C', 'AH1', 'Compound Onder 12 jongens (aspirant)'),
-    (262, 'C', 'AV1', 'Compound Onder 12 meisjes (aspirant)'),
+    (160, 'R',  'AA1', 'RO12U', 'Recurve Onder 12 Uniseks'),
+    (161, 'R',  'AH1', 'RO12H', 'Recurve Onder 12 Jongens'),
+    (162, 'R',  'AV1', 'RO12D', 'Recurve Onder 12 Meisjes'),
 
 
-    (300, 'BB', 'VA', 'Barebow 60+ (veteraan)'),
-    (301, 'BB', 'VH', 'Barebow 60+ mannen (veteraan)'),
-    (302, 'BB', 'VV', 'Barebow 60+ vrouwen (veteraan)'),
+    (200, 'C',  'VA',  'C60U',  'Compound 60+ Uniseks'),
+    (201, 'C',  'VH',  'C60H',  'Compound 60+ Heren'),
+    (202, 'C',  'VV',  'C60D',  'Compound 60+ Dames'),
 
-    (310, 'BB', 'MA', 'Barebow 50+ (master)'),
-    (311, 'BB', 'MH', 'Barebow 50+ mannen (master)'),
-    (312, 'BB', 'MV', 'Barebow 50+ vrouwen (master)'),
+    (210, 'C',  'MA',  'C50U',  'Compound 50+ Uniseks'),
+    (211, 'C',  'MH',  'C50H',  'Compound 50+ Heren'),
+    (212, 'C',  'MV',  'C50D',  'Compound 50+ Dames'),
 
-    (320, 'BB', 'SA', 'Barebow (senior)'),
-    (321, 'BB', 'SH', 'Barebow mannen (senior)'),
-    (322, 'BB', 'SV', 'Barebow vrouwen (senior)'),
+    (220, 'C',  'SA',  'CU',    'Compound Uniseks'),
+    (221, 'C',  'SH',  'CH',    'Compound Heren'),
+    (222, 'C',  'SV',  'CD',    'Compound Dames'),
 
-    (330, 'BB', 'JA', 'Barebow Onder 21 (junior)'),
-    (331, 'BB', 'JH', 'Barebow Onder 21 mannen (junior)'),
-    (332, 'BB', 'JV', 'Barebow Onder 21 vrouwen (junior)'),
+    (230, 'C',  'JA',  'CO21U', 'Compound Onder 21 Uniseks'),
+    (231, 'C',  'JH',  'CO21H', 'Compound Onder 21 Heren'),
+    (232, 'C',  'JV',  'CO21D', 'Compound Onder 21 Dames'),
 
-    (340, 'BB', 'CA', 'Barebow Onder 18 (cadet)'),
-    (341, 'BB', 'CH', 'Barebow Onder 18 jongens (cadet)'),
-    (342, 'BB', 'CV', 'Barebow Onder 18 meisjes (cadet)'),
+    (240, 'C',  'CA',  'CO18U', 'Compound Onder 18 Uniseks'),
+    (241, 'C',  'CH',  'CO18H', 'Compound Onder 18 Heren'),
+    (242, 'C',  'CV',  'CO18D', 'Compound Onder 18 Dames'),
 
-    (350, 'BB', 'AA2', 'Barebow Onder 14 (aspirant)'),
-    (351, 'BB', 'AH2', 'Barebow Onder 14 jongens (aspirant)'),
-    (352, 'BB', 'AV2', 'Barebow Onder 14 meisjes (aspirant)'),
+    (250, 'C',  'AA2', 'CO14U', 'Compound Onder 14 Uniseks'),
+    (251, 'C',  'AH2', 'CO14H', 'Compound Onder 14 Jongens'),
+    (252, 'C',  'AV2', 'CO14D', 'Compound Onder 14 Meisjes'),
 
-    (360, 'BB', 'AA1', 'Barebow Onder 12 (aspirant)'),
-    (361, 'BB', 'AH1', 'Barebow Onder 12 jongens (aspirant)'),
-    (362, 'BB', 'AV1', 'Barebow Onder 12 meisjes (aspirant)'),
-
-
-    (500, 'TR', 'VA', 'Traditional 60+ (veteraan)'),
-    (501, 'TR', 'VH', 'Traditional 60+ mannen (veteraan)'),
-    (502, 'TR', 'VV', 'Traditional 60+ vrouwen (veteraan)'),
-
-    (510, 'TR', 'MA', 'Traditional 50+ (master)'),
-    (511, 'TR', 'MH', 'Traditional 50+ mannen (master)'),
-    (512, 'TR', 'MV', 'Traditional 50+ vrouwen (master)'),
-
-    (520, 'TR', 'SA', 'Traditional (senior)'),
-    (521, 'TR', 'SH', 'Traditional mannen (senior)'),
-    (522, 'TR', 'SV', 'Traditional vrouwen (senior)'),
-
-    (530, 'TR', 'JA', 'Traditional Onder 21 (junior)'),
-    (531, 'TR', 'JH', 'Traditional Onder 21 mannen (junior)'),
-    (532, 'TR', 'JV', 'Traditional Onder 21 vrouwen (junior)'),
-
-    (540, 'TR', 'CA', 'Traditional Onder 18 (cadet)'),
-    (541, 'TR', 'CH', 'Traditional Onder 18 jongens (cadet)'),
-    (542, 'TR', 'CV', 'Traditional Onder 18 meisjes (cadet)'),
-
-    (550, 'TR', 'AA2', 'Traditional Onder 14 (aspirant)'),
-    (551, 'TR', 'AH2', 'Traditional Onder 14 jongens (aspirant)'),
-    (552, 'TR', 'AV2', 'Traditional Onder 14 meisjes (aspirant)'),
-
-    (560, 'TR', 'AA1', 'Traditional Onder 12 (aspirant)'),
-    (561, 'TR', 'AH1', 'Traditional Onder 12 jongens (aspirant)'),
-    (562, 'TR', 'AV1', 'Traditional Onder 12 meisjes (aspirant)'),
+    (260, 'C',  'AA1', 'CO12U', 'Compound Onder 12 Uniseks'),
+    (261, 'C',  'AH1', 'CO14H', 'Compound Onder 12 Jongens'),
+    (262, 'C',  'AV1', 'CO14D', 'Compound Onder 12 Meisjes'),
 
 
-    (600, 'LB', 'VA', 'Longbow 60+ (veteraan)'),
-    (601, 'LB', 'VH', 'Longbow 60+ mannen (veteraan)'),
-    (602, 'LB', 'VV', 'Longbow 60+ vrouwen (veteraan)'),
+    (300, 'BB', 'VA',  'B60U',  'Barebow 60+ Uniseks'),
+    (301, 'BB', 'VH',  'B60H',  'Barebow 60+ Heren'),
+    (302, 'BB', 'VV',  'B60D',  'Barebow 60+ Dames'),
 
-    (610, 'LB', 'MA', 'Longbow 50+ (master)'),
-    (611, 'LB', 'MH', 'Longbow 50+ mannen (master)'),
-    (612, 'LB', 'MV', 'Longbow 50+ vrouwen (master)'),
+    (310, 'BB', 'MA',  'B50U',  'Barebow 50+ Uniseks'),
+    (311, 'BB', 'MH',  'B50H',  'Barebow 50+ Heren'),
+    (312, 'BB', 'MV',  'B50D',  'Barebow 50+ Dames'),
 
-    (620, 'LB', 'SA', 'Longbow (senior)'),
-    (621, 'LB', 'SH', 'Longbow mannen (senior)'),
-    (622, 'LB', 'SV', 'Longbow vrouwen (senior)'),
+    (320, 'BB', 'SA',  'BU',    'Barebow Uniseks'),
+    (321, 'BB', 'SH',  'BH',    'Barebow Heren'),
+    (322, 'BB', 'SV',  'BD',    'Barebow Dames'),
 
-    (630, 'LB', 'JA', 'Longbow Onder 21 (junior)'),
-    (631, 'LB', 'JH', 'Longbow Onder 21 mannen (junior)'),
-    (632, 'LB', 'JV', 'Longbow Onder 21 vrouwen (junior)'),
+    (330, 'BB', 'JA',  'BO21U', 'Barebow Onder 21 Uniseks'),
+    (331, 'BB', 'JH',  'BO21H', 'Barebow Onder 21 Heren'),
+    (332, 'BB', 'JV',  'BO21D', 'Barebow Onder 21 Dames'),
 
-    (640, 'LB', 'CA', 'Longbow Onder 18 (cadet)'),
-    (641, 'LB', 'CH', 'Longbow Onder 18 jongens (cadet)'),
-    (642, 'LB', 'CV', 'Longbow Onder 18 meisjes (cadet)'),
+    (340, 'BB', 'CA',  'BO18U', 'Barebow Onder 18 Uniseks'),
+    (341, 'BB', 'CH',  'BO18H', 'Barebow Onder 18 Heren'),
+    (342, 'BB', 'CV',  'BO18D', 'Barebow Onder 18 Dames'),
 
-    (650, 'LB', 'AA2', 'Longbow Onder 14 (aspirant)'),
-    (651, 'LB', 'AH2', 'Longbow Onder 14 jongens (aspirant)'),
-    (652, 'LB', 'AV2', 'Longbow Onder 14 meisjes (aspirant)'),
+    (350, 'BB', 'AA2', 'BO14U', 'Barebow Onder 14 Uniseks'),
+    (351, 'BB', 'AH2', 'BO14H', 'Barebow Onder 14 Jongens'),
+    (352, 'BB', 'AV2', 'BO14D', 'Barebow Onder 14 Meisjes'),
 
-    (660, 'LB', 'AA1', 'Longbow Onder 12 (aspirant)'),
-    (661, 'LB', 'AH1', 'Longbow Onder 12 jongens (aspirant)'),
-    (662, 'LB', 'AV1', 'Longbow Onder 12 meisjes (aspirant)'),
+    (360, 'BB', 'AA1', 'BO12U', 'Barebow Onder 12 Uniseks'),
+    (361, 'BB', 'AH1', 'BO12H', 'Barebow Onder 12 Jongens'),
+    (362, 'BB', 'AV1', 'BO12D', 'Barebow Onder 12 Meisjes'),
+
+
+    (500, 'TR', 'VA',  'T60U',  'Traditional 60+ Uniseks'),
+    (501, 'TR', 'VH',  'T60H',  'Traditional 60+ Heren'),
+    (502, 'TR', 'VV',  'T60D',  'Traditional 60+ Dames'),
+
+    (510, 'TR', 'MA',  'T50U',  'Traditional 50+ Uniseks'),
+    (511, 'TR', 'MH',  'T50H',  'Traditional 50+ Heren'),
+    (512, 'TR', 'MV',  'T50D',  'Traditional 50+ Dames'),
+
+    (520, 'TR', 'SA',  'TU',    'Traditional Uniseks'),
+    (521, 'TR', 'SH',  'TH',    'Traditional Heren'),
+    (522, 'TR', 'SV',  'TD',    'Traditional Dames'),
+
+    (530, 'TR', 'JA',  'TO21U', 'Traditional Onder 21 Uniseks'),
+    (531, 'TR', 'JH',  'TO21H', 'Traditional Onder 21 Heren'),
+    (532, 'TR', 'JV',  'TO21D', 'Traditional Onder 21 Dames'),
+
+    (540, 'TR', 'CA',  'TO18U', 'Traditional Onder 18 Uniseks'),
+    (541, 'TR', 'CH',  'TO18H', 'Traditional Onder 18 Heren'),
+    (542, 'TR', 'CV',  'TO18D', 'Traditional Onder 18 Dames'),
+
+    (550, 'TR', 'AA2', 'TO14U', 'Traditional Onder 14 Uniseks'),
+    (551, 'TR', 'AH2', 'TO14H', 'Traditional Onder 14 Jongens'),
+    (552, 'TR', 'AV2', 'TO14D', 'Traditional Onder 14 Meisjes'),
+
+    (560, 'TR', 'AA1', 'TO12U', 'Traditional Onder 12 Uniseks'),
+    (561, 'TR', 'AH1', 'TO12H', 'Traditional Onder 12 Jongens'),
+    (562, 'TR', 'AV1', 'TO12D', 'Traditional Onder 12 Meisjes'),
+
+
+    (600, 'LB', 'VA',  'L60U',  'Longbow 60+ Uniseks'),
+    (601, 'LB', 'VH',  'L60H',  'Longbow 60+ Heren'),
+    (602, 'LB', 'VV',  'L60D',  'Longbow 60+ Dames'),
+
+    (610, 'LB', 'MA',  'L50U',  'Longbow 50+ Uniseks'),
+    (611, 'LB', 'MH',  'L50H',  'Longbow 50+ Heren'),
+    (612, 'LB', 'MV',  'L50D',  'Longbow 50+ Dames'),
+
+    (620, 'LB', 'SA',  'LU',    'Longbow Uniseks'),
+    (621, 'LB', 'SH',  'LH',    'Longbow Heren'),
+    (622, 'LB', 'SV',  'LD',    'Longbow Dames'),
+
+    (630, 'LB', 'JA',  'LO21U', 'Longbow Onder 21 Uniseks'),
+    (631, 'LB', 'JH',  'LO21H', 'Longbow Onder 21 Heren'),
+    (632, 'LB', 'JV',  'LO21D', 'Longbow Onder 21 Dames'),
+
+    (640, 'LB', 'CA',  'LO18U', 'Longbow Onder 18 Uniseks'),
+    (641, 'LB', 'CH',  'LO18H', 'Longbow Onder 18 Heren'),
+    (642, 'LB', 'CV',  'LO18D', 'Longbow Onder 18 Dames'),
+
+    (650, 'LB', 'AA2', 'LO14U', 'Longbow Onder 14 Uniseks'),
+    (651, 'LB', 'AH2', 'LO14H', 'Longbow Onder 14 Jongens'),
+    (652, 'LB', 'AV2', 'LO14D', 'Longbow Onder 14 Meisjes'),
+
+    (660, 'LB', 'AA1', 'LO12U', 'Longbow Onder 12 Uniseks'),
+    (661, 'LB', 'AH1', 'LO12H', 'Longbow Onder 12 Jongens'),
+    (662, 'LB', 'AV1', 'LO12D', 'Longbow Onder 12 Meisjes'),
 )
 
 
@@ -268,8 +337,6 @@ def init_boogtypen(apps, _):
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     boogtype_klas = apps.get_model('BasisTypen', 'BoogType')
 
-    ifaa = 'F'  # International Field Archery Association
-
     # maak de standaard boogtypen aan
     bulk = [boogtype_klas(pk=1, afkorting='R',  volgorde='A', beschrijving='Recurve'),
             boogtype_klas(pk=2, afkorting='C',  volgorde='D', beschrijving='Compound'),
@@ -277,18 +344,18 @@ def init_boogtypen(apps, _):
             # oud: boogtype IB met pk=4
             boogtype_klas(pk=5, afkorting='LB', volgorde='S', beschrijving='Longbow'),
             boogtype_klas(pk=6, afkorting='TR', volgorde='K', beschrijving='Traditional'),
-            boogtype_klas(pk=7, organisatie=ifaa, afkorting='BBR', volgorde='A', beschrijving='Barebow Recurve'),
-            boogtype_klas(pk=8, organisatie=ifaa, afkorting='BBC', volgorde='B', beschrijving='Barebow Compound'),
-            boogtype_klas(pk=9, organisatie=ifaa, afkorting='FSR', volgorde='F', beschrijving='Freestyle Limited Recurve'),
-            boogtype_klas(pk=10, organisatie=ifaa, afkorting='FSC', volgorde='G', beschrijving='Freestyle Limited Compound'),
-            boogtype_klas(pk=11, organisatie=ifaa, afkorting='FU',  volgorde='H', beschrijving='Freestyle Unlimited'),
-            boogtype_klas(pk=12, organisatie=ifaa, afkorting='BHR', volgorde='K', beschrijving='Bowhunter Recurve'),
-            boogtype_klas(pk=13, organisatie=ifaa, afkorting='BHC', volgorde='L', beschrijving='Bowhunter Compound'),
-            boogtype_klas(pk=14, organisatie=ifaa, afkorting='BHU', volgorde='M', beschrijving='Bowhunter Unlimited'),
-            boogtype_klas(pk=15, organisatie=ifaa, afkorting='BHL', volgorde='N', beschrijving='Bowhunter Limited'),
-            boogtype_klas(pk=16, organisatie=ifaa, afkorting='ITR', volgorde='P', beschrijving='Traditional Recurve Bow'),
-            boogtype_klas(pk=17, organisatie=ifaa, afkorting='ILB', volgorde='R', beschrijving='Longbow'),
-            boogtype_klas(pk=18, organisatie=ifaa, afkorting='IHB', volgorde='T', beschrijving='Historical Bow')]
+            boogtype_klas(pk=7, organisatie=ORGANISATIE_IFAA, afkorting='BBR', volgorde='A', beschrijving='Barebow Recurve'),
+            boogtype_klas(pk=8, organisatie=ORGANISATIE_IFAA, afkorting='BBC', volgorde='B', beschrijving='Barebow Compound'),
+            boogtype_klas(pk=9, organisatie=ORGANISATIE_IFAA, afkorting='FSR', volgorde='F', beschrijving='Freestyle Limited Recurve'),
+            boogtype_klas(pk=10, organisatie=ORGANISATIE_IFAA, afkorting='FSC', volgorde='G', beschrijving='Freestyle Limited Compound'),
+            boogtype_klas(pk=11, organisatie=ORGANISATIE_IFAA, afkorting='FU',  volgorde='H', beschrijving='Freestyle Unlimited'),
+            boogtype_klas(pk=12, organisatie=ORGANISATIE_IFAA, afkorting='BHR', volgorde='K', beschrijving='Bowhunter Recurve'),
+            boogtype_klas(pk=13, organisatie=ORGANISATIE_IFAA, afkorting='BHC', volgorde='L', beschrijving='Bowhunter Compound'),
+            boogtype_klas(pk=14, organisatie=ORGANISATIE_IFAA, afkorting='BHU', volgorde='M', beschrijving='Bowhunter Unlimited'),
+            boogtype_klas(pk=15, organisatie=ORGANISATIE_IFAA, afkorting='BHL', volgorde='N', beschrijving='Bowhunter Limited'),
+            boogtype_klas(pk=16, organisatie=ORGANISATIE_IFAA, afkorting='ITR', volgorde='P', beschrijving='Traditional Recurve Bow'),
+            boogtype_klas(pk=17, organisatie=ORGANISATIE_IFAA, afkorting='ILB', volgorde='R', beschrijving='Longbow'),
+            boogtype_klas(pk=18, organisatie=ORGANISATIE_IFAA, afkorting='IHB', volgorde='T', beschrijving='Historical Bow')]
 
     boogtype_klas.objects.bulk_create(bulk)
 
@@ -304,330 +371,20 @@ def init_leeftijdsklassen(apps, _):
     # haal de klassen op die van toepassing zijn tijdens deze migratie
     leeftijdsklasse_klas = apps.get_model('BasisTypen', 'LeeftijdsKlasse')
 
-    ifaa = 'F'  # International Field Archery Association
+    bulk = list()
+    for volgorde, afkorting, geslacht, leeftijd_min, leeftijd_max, kort, beschrijving, organisatie in LEEFTIJDSKLASSEN:
+        lkl = leeftijdsklasse_klas(
+                    afkorting=afkorting,
+                    wedstrijd_geslacht=geslacht,
+                    klasse_kort=kort,
+                    beschrijving=beschrijving,
+                    volgorde=volgorde,
+                    min_wedstrijdleeftijd=leeftijd_min,
+                    max_wedstrijdleeftijd=leeftijd_max,
+                    organisatie=organisatie)
 
-    bulk = [
-        # 60+
-        leeftijdsklasse_klas(
-            afkorting='VV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='60+',
-            beschrijving='60+ vrouwen (veteranen)',
-            volgorde=61,
-            min_wedstrijdleeftijd=60,
-            max_wedstrijdleeftijd=0,
-            organisatie=ORGANISATIE_NHB),
-        leeftijdsklasse_klas(
-            afkorting='VH',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='60+',
-            beschrijving='60+ mannen (veteranen)',
-            volgorde=62,
-            min_wedstrijdleeftijd=60,
-            max_wedstrijdleeftijd=0,
-            organisatie=ORGANISATIE_NHB),
-        leeftijdsklasse_klas(
-            afkorting='VA',
-            wedstrijd_geslacht=GESLACHT_ALLE,
-            klasse_kort='60+',
-            beschrijving='60+ (veteranen)',
-            volgorde=63,
-            min_wedstrijdleeftijd=60,
-            max_wedstrijdleeftijd=0,
-            organisatie=ORGANISATIE_NHB),
-
-        # 50+
-        leeftijdsklasse_klas(
-            afkorting='MV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='50+',
-            beschrijving='50+ vrouwen (masters)',
-            volgorde=51,
-            min_wedstrijdleeftijd=50,
-            max_wedstrijdleeftijd=0),
-        leeftijdsklasse_klas(
-            afkorting='MH',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='50+',
-            beschrijving='50+ mannen (masters)',
-            volgorde=52,
-            min_wedstrijdleeftijd=50,
-            max_wedstrijdleeftijd=0),
-        leeftijdsklasse_klas(
-            afkorting='MA',
-            wedstrijd_geslacht=GESLACHT_ALLE,
-            klasse_kort='50+',
-            beschrijving='50+ (masters)',
-            volgorde=53,
-            min_wedstrijdleeftijd=50,
-            max_wedstrijdleeftijd=0,
-            organisatie=ORGANISATIE_NHB),
-
-        # open klasse
-        leeftijdsklasse_klas(
-            afkorting='SV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='21+',
-            beschrijving='21+ vrouwen (senioren)',
-            volgorde=41,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=0),
-        leeftijdsklasse_klas(
-            afkorting='SH',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='21+',
-            beschrijving='21+ mannen (senioren)',
-            volgorde=42,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=0),
-        leeftijdsklasse_klas(
-            afkorting='SA',
-            wedstrijd_geslacht=GESLACHT_ALLE,
-            klasse_kort='21+',
-            beschrijving='21+ (senioren)',
-            volgorde=43,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=0,
-            organisatie=ORGANISATIE_NHB),
-
-        # Onder 21
-        leeftijdsklasse_klas(
-            afkorting='JV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Onder 21',
-            beschrijving='Onder 21 vrouwen (junioren)',
-            volgorde=31,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=20),
-        leeftijdsklasse_klas(
-            afkorting='JH',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Onder 21',
-            beschrijving='Onder 21 mannen (junioren)',
-            volgorde=32,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=20),
-        leeftijdsklasse_klas(
-            afkorting='JA',
-            wedstrijd_geslacht=GESLACHT_ALLE,
-            klasse_kort='Onder 21',
-            beschrijving='Onder 21 (junioren)',
-            volgorde=33,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=20,
-            organisatie=ORGANISATIE_NHB),
-
-        # Onder 18
-        leeftijdsklasse_klas(
-            afkorting='CV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Onder 18',
-            beschrijving='Onder 18 meisjes (cadetten)',
-            volgorde=21,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=17),
-        leeftijdsklasse_klas(
-            afkorting='CH',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Onder 18',
-            beschrijving='Onder 18 jongens (cadetten)',
-            volgorde=22,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=17),
-        leeftijdsklasse_klas(
-            afkorting='CA',
-            wedstrijd_geslacht=GESLACHT_ALLE,
-            klasse_kort='Onder 18',
-            beschrijving='Onder 18 (cadetten)',
-            volgorde=23,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=17,
-            organisatie=ORGANISATIE_NHB),
-
-        # Onder 14
-        leeftijdsklasse_klas(
-            afkorting='AV2',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Onder 14',
-            beschrijving='Onder 14 meisjes (aspiranten)',
-            volgorde=15,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=13,
-            organisatie=ORGANISATIE_NHB),
-        leeftijdsklasse_klas(
-            afkorting='AH2',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Onder 14',
-            beschrijving='Onder 14 jongens (aspiranten)',
-            volgorde=16,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=13,
-            organisatie=ORGANISATIE_NHB),
-        leeftijdsklasse_klas(
-            afkorting='AA2',
-            wedstrijd_geslacht=GESLACHT_ALLE,
-            klasse_kort='Onder 14',
-            beschrijving='Onder 14 (aspiranten)',
-            volgorde=17,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=13,
-            organisatie=ORGANISATIE_NHB),
-
-        # Onder 12
-        leeftijdsklasse_klas(
-            afkorting='AV1',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Onder 12',
-            beschrijving='Onder 12 meisjes (aspiranten)',
-            volgorde=11,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=11,
-            organisatie=ORGANISATIE_NHB),
-        leeftijdsklasse_klas(
-            afkorting='AH1',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Onder 12',
-            beschrijving='Onder 12 jongens (aspiranten)',
-            volgorde=12,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=11,
-            organisatie=ORGANISATIE_NHB),
-        leeftijdsklasse_klas(
-            afkorting='AA1',
-            wedstrijd_geslacht=GESLACHT_ALLE,
-            klasse_kort='Onder 12',
-            beschrijving='Onder 12 (aspiranten)',
-            volgorde=13,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=11,
-            organisatie=ORGANISATIE_NHB),
-
-        # IFAA
-
-        # Senioren / 65+
-        leeftijdsklasse_klas(
-            organisatie=ifaa,
-            afkorting='SEM',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Sen M',
-            beschrijving='Senioren mannen (65+)',
-            volgorde=62,
-            min_wedstrijdleeftijd=65,
-            max_wedstrijdleeftijd=0),
-        leeftijdsklasse_klas(
-            organisatie=ifaa,
-            afkorting='SEV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Sen V',
-            beschrijving='Senioren vrouwen (65+)',
-            volgorde=61,
-            min_wedstrijdleeftijd=65,
-            max_wedstrijdleeftijd=0),
-
-        # Veteranen / 55-64
-        leeftijdsklasse_klas(
-            organisatie=ifaa,
-            afkorting='VEM',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Vet',
-            beschrijving='Veteranen mannen (55+)',
-            volgorde=52,
-            min_wedstrijdleeftijd=55,
-            max_wedstrijdleeftijd=0),
-        leeftijdsklasse_klas(
-            organisatie=ifaa,
-            afkorting='VEV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Vet V',
-            beschrijving='Veteranen vrouwen (55+)',
-            volgorde=51,
-            min_wedstrijdleeftijd=55,
-            max_wedstrijdleeftijd=0),
-
-        # Volwassenen (21-54)
-        leeftijdsklasse_klas(
-            organisatie=ifaa,
-            afkorting='VWH',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Volw M',
-            beschrijving='Volwassen mannen',
-            volgorde=42,
-            min_wedstrijdleeftijd=21,
-            max_wedstrijdleeftijd=54),
-
-        leeftijdsklasse_klas(
-            organisatie=ifaa,
-            afkorting='VWV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Volw V',
-            beschrijving='Volwassen vrouwen',
-            volgorde=41,
-            min_wedstrijdleeftijd=21,
-            max_wedstrijdleeftijd=54),
-
-        # Jong volwassenen (17-20)
-        leeftijdsklasse_klas(
-            organisatie=ifaa,
-            afkorting='JVH',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Jong M',
-            beschrijving='Jongvolwassen mannen',
-            volgorde=32,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=20),
-
-        leeftijdsklasse_klas(
-            organisatie=ifaa,
-            afkorting='JVV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Jong V',
-            beschrijving='Jongvolwassen vrouwen',
-            volgorde=31,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=20),
-
-        # Junioren (13-16)
-        leeftijdsklasse_klas(
-            organisatie=ifaa,
-            afkorting='JUH',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Jun M',
-            beschrijving='Junioren jongens',
-            volgorde=22,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=16),
-
-        leeftijdsklasse_klas(
-            organisatie=ifaa,
-            afkorting='JUV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Jun V',
-            beschrijving='Junioren meisjes',
-            volgorde=21,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=16),
-
-        # Welpen (<13)
-        leeftijdsklasse_klas(
-            organisatie=ifaa,
-            afkorting='WEH',
-            wedstrijd_geslacht=GESLACHT_MAN,
-            klasse_kort='Welp M',
-            beschrijving='Welpen jongens',
-            volgorde=12,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=12),
-
-        leeftijdsklasse_klas(
-            organisatie=ifaa,
-            afkorting='WEV',
-            wedstrijd_geslacht=GESLACHT_VROUW,
-            klasse_kort='Welp V',
-            beschrijving='Welpen meisjes',
-            volgorde=11,
-            min_wedstrijdleeftijd=0,
-            max_wedstrijdleeftijd=12),
-    ]
+        bulk.append(lkl)
+    # for
 
     leeftijdsklasse_klas.objects.bulk_create(bulk)
 
@@ -826,7 +583,7 @@ def init_kalenderwedstrijdklassen(apps, _):
     # for
 
     bulk = list()
-    for volgorde, boog_afk, lkl_afk, beschrijving in KALENDERWEDSTRIJDENKLASSEN:
+    for volgorde, boog_afk, lkl_afk, afkorting, beschrijving in KALENDERWEDSTRIJDENKLASSEN:
         boog = afk2boog[boog_afk]
         lkl = afk2lkl[lkl_afk]
 
@@ -835,6 +592,7 @@ def init_kalenderwedstrijdklassen(apps, _):
                         boogtype=boog,
                         leeftijdsklasse=lkl,
                         volgorde=volgorde,
+                        afkorting=afkorting,
                         organisatie=lkl.organisatie)
         bulk.append(obj)
     # for
@@ -866,7 +624,7 @@ def init_kalenderwedstrijdklassen_ifaa(apps, _):
         'BBC': 'BB-C',
         'FSR': 'FS-R',
         'FSC': 'FS-C',
-        'FU': 'FU',
+        'FU':  'FU',
         'BHR': 'BH-R',
         'BHC': 'BH-C',
         'BHU': 'BU',

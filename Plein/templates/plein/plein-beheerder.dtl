@@ -29,15 +29,24 @@
             {% url 'Competitie:kies' as card_url %}
             {% include 'plein/card.dtl' with title="Bondscompetities" text="Informatie over de bonds-competities, inclusief alle uitslagen." icon="my_location" url=card_url %}
 
+            <!-- wedstrijdkalender -->
+            {% if rol_is_bb or rol_is_mwz %}
+                {% url 'Wedstrijden:manager-status' status='wacht' as card_url %}
+                {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Beheer de wedstrijdkalender." icon="event_note" url=card_url %}
+            {% elif rol_is_hwl %}
+                {% url 'Wedstrijden:vereniging' as card_url %}
+                {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Beheer de wedstrijden die jullie vereniging organiseert." icon="event_note" url=card_url %}
+            {% endif %}
+
+            <!-- opleidingen -->
+            {% if rol_is_mo %}
+                {% url 'Opleidingen:overzicht' as card_url %}
+                {% include 'plein/card.dtl' with title="Opleidingen" text="Beheer de opleidingen en deelnemers." icon="school" url=card_url %}
+            {% endif %}
+
             <!-- records -->
             {% url 'Records:overzicht' as card_url %}
             {% include 'plein/card.dtl' with title="Records" text="Alle handboogsport records van nederlandse sporters." icon="insights" url=card_url %}
-
-            <!-- wedstrijdkalender -->
-            {% if rol_is_hwl or rol_is_bb %}
-                {% url 'Kalender:landing-page' as card_url %}
-                {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Bekijk welke wedstrijden georganiseerd worden en schrijf je in." icon="event_note" url=card_url %}
-            {% endif %}
         </div>
     </div>
 
@@ -57,6 +66,10 @@
                 {% url 'Vereniging:overzicht' as card_url %}
                 {% include 'plein/card.dtl' with title="Beheer Vereniging" text="Extra functies voor beheerders van jouw vereniging." icon="store" url=card_url %}
             {% endif %}
+
+            <!-- toon en koppel beheerders -->
+            {% url 'Functie:overzicht' as card_url %}
+            {% include 'plein/card.dtl' with title="Beheerders" text="Toon en koppel beheerders aan rollen en wijzig contactgegevens." icon="face" url=card_url %}
 
             <!-- verenigingen/accommodaties overzicht IT/BB/BKO -->
             {% if rol_is_bko or rol_is_bb %}
@@ -86,15 +99,16 @@
             {% url 'Functie:wissel-van-rol' as card_url %}
             {% include 'plein/card.dtl' with title="Wissel van Rol" text="Wissel naar een andere beheerdersrol of naar Sporter." icon="switch_account" url=card_url %}
 
-            <!-- handleiding -->
+            <!-- TODO: handleiding moet gaan verwijzen naar de pdf's
             {% if handleiding_url %}
-                {% include 'plein/card.dtl' with title="Handleiding" text="Bekijk de handleiding." icon="help" url=handleiding_url extern_open=True %}
+                {% include 'plein/card.dtl' with title="Handleiding Beheerder" text="Bekijk de handleiding voor (nieuwe) beheerders." icon="help" url=handleiding_url extern_open=True %}
             {% endif %}
+            -->
         </div>
     </div>
 
 
-    {% if rol_is_bb %}
+    {% if toon_manager_sectie %}
 
         <!-- witruimte -->
         <div class="row center">
@@ -107,29 +121,47 @@
         <!-- blauwe balk met kaartjes -->
         <div class="row-nhb-blauw">
             <div class="col s12">
-                <!-- account activiteit -->
-                {% url 'Overig:activiteit' as card_url %}
-                {% include 'plein/card.dtl' with title="Account activiteit" text="Toon overzicht van de recent gebruikte en aangemaakte accounts." icon="recent_actors" url=card_url %}
+                {% if rol_is_bb %}
+                    <!-- account activiteit -->
+                    {% url 'Overig:activiteit' as card_url %}
+                    {% include 'plein/card.dtl' with title="Account activiteit" text="Toon overzicht van de recent gebruikte en aangemaakte accounts." icon="recent_actors" url=card_url %}
+                {% endif %}
 
-                <!-- feedback -->
-                {% url 'Feedback:inzicht' as card_url %}
-                {% include 'plein/card.dtl' with title="Site feedback" text="Toon de feedback van de gebruikers." icon="feedback" url=card_url %}
+                {% if rol_is_bb or rol_is_sup %}
+                    <!-- feedback -->
+                    {% url 'Feedback:inzicht' as card_url %}
+                    {% include 'plein/card.dtl' with title="Site feedback" text="Toon de feedback van de gebruikers." icon="feedback" url=card_url %}
+                {% endif %}
 
-                <!-- logboek -->
-                {% url 'Logboek:alles' as card_url %}
-                {% include 'plein/card.dtl' with title="Logboek" text="Bekijk het logboek." icon="book" url=card_url %}
+                {% if rol_is_bb or rol_is_mwz %}
+                    <!-- betalingen -->
+                    {% url 'Bestel:activiteit' as card_url %}
+                    {% include 'plein/card.dtl' with title='Bestellingen' text="Toon de bestellingen en betalingen." icon="shopping_cart" url=card_url %}
+                {% endif %}
 
-                <!-- overzicht VHPG acceptatie -->
-                {% url 'Functie:vhpg-overzicht' as card_url %}
-                {% include 'plein/card.dtl' with title="VHPG status" text="Toon overzicht van beheerders die de verklaring geaccepteerd hebben." icon="verified_user" url=card_url %}
+                {% if rol_is_bb or rol_is_mwz or rol_is_sup %}
+                    <!-- logboek -->
+                    {% url 'Logboek:alles' as card_url %}
+                    {% include 'plein/card.dtl' with title="Logboek" text="Bekijk het logboek." icon="book" url=card_url %}
+                {% endif %}
 
-                <!-- Interland lijst -->
-                {% url 'HistComp:interland' as card_url %}
-                {% include 'plein/card.dtl' with title="Interland lijst" text="Toon de lijst met kandidaat deelnemers voor de Interland." icon="outlined_flag" url=card_url %}
+                {% if rol_is_bb or rol_is_mwz or rol_is_sup %}
+                    <!-- overzicht VHPG acceptatie -->
+                    {% url 'Functie:vhpg-overzicht' as card_url %}
+                    {% include 'plein/card.dtl' with title="VHPG status" text="Toon overzicht van beheerders die de verklaring geaccepteerd hebben." icon="verified_user" url=card_url %}
+                {% endif %}
 
-                <!-- score geschiedenis -->
-                {% url 'Score:geschiedenis' as card_url %}
-                {% include 'plein/card.dtl' with title="Score geschiedenis" text="Bekijk de wijzigingen / geschiedenis van de scores van een sporter." icon="history" url=card_url %}
+                {% if rol_is_bb %}
+                    <!-- Interland lijst -->
+                    {% url 'HistComp:interland' as card_url %}
+                    {% include 'plein/card.dtl' with title="Interland lijst" text="Toon de lijst met kandidaat deelnemers voor de Interland." icon="outlined_flag" url=card_url %}
+                {% endif %}
+
+                {% if rol_is_bb or rol_is_mwz %}
+                    <!-- score geschiedenis -->
+                    {% url 'Score:geschiedenis' as card_url %}
+                    {% include 'plein/card.dtl' with title="Score geschiedenis" text="Bekijk de wijzigingen / geschiedenis van de scores van een sporter." icon="history" url=card_url %}
+                {% endif %}
             </div>
         </div>
 

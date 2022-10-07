@@ -1,0 +1,108 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021-2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Wedstrijdkalender Vereniging{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Wedstrijdkalender</h3>
+            <p>Wedstrijden bij vereniging <b>{{ ver }}</b></p>
+            <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
+            {% if geen_locatie %}
+                <p class="red-text">Stel eerst de accommodatie van de vereniging in, of voeg een wedstrijdlocatie toe.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if not geen_locatie %}
+
+        <!-- blauwe balk met informatie in een tabel -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+                <table class="white">
+                    <thead>
+                        <tr>
+                            <th>Wanneer</th>
+                            <th>Status</th>
+                            <th>Discipline</th>
+                            <th>Titel</th>
+                            <th><!-- kolom voor knoppen --></th>
+                        </tr>
+                    </thead>
+
+                    {% for wed in wedstrijden %}
+                        <tr>
+                            <td>{{ wed.datum_begin }}{% if wed.datum_begin != wed.datum_einde %} - {{ wed.datum_einde }}{% endif %}</td>
+                            <td>{{ wed.status_str }}</td>
+                            <td>{{ wed.disc_str }}</td>
+                            <td>{% if wed.titel %}{{ wed.titel }}{% else %}<i class="red-text">Nog niet ingevuld</i>{% endif %}</td>
+                            <td>
+                                <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
+                                    <a class="btn-nhb-rood" href="{{ wed.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">
+                                        <i class="material-icons-round">edit</i></a>
+                                    <a class="btn-nhb-rood" href="{{ wed.url_sessies}}" style="padding:0; width:35px; margin-right:5px">
+                                        <i class="material-icons-round" style="font-size:33px">edit_note</i></a>
+                                    <a class="btn-nhb-rood" href="{{ wed.url_aanmeldingen }}" style="padding:0; width:35px">
+                                        <i class="material-icons-round">people_alt</i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5"><i>Er zijn nog geen wedstrijden</i></td>
+                        </tr>
+                    {% endfor %}
+
+                    {% if url_nieuwe_wedstrijd %}
+                        <tr>
+                            <td colspan="5" class="center">
+                                <a class="btn-nhb-rood" href="{{ url_nieuwe_wedstrijd }}">
+                                    <i class="material-icons-round">add</i></a>
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                </table>
+            </div>
+        </div>
+
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>Financieel</h4>
+            </div>
+        </div>
+
+
+        <!-- blauwe balk met kaartjes -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+
+                <!-- instellingen -->
+                {% include 'plein/card.dtl' with title="Instellingen" text="Instellingen om inschrijfgelden te kunnen ontvangen via overschrijving of Mollie." icon="settings" url=url_mollie %}
+
+                <!-- kortingen -->
+                {% url 'Wedstrijden:vereniging-kortingen' as card_url %}
+                {% include 'plein/card.dtl' with title="Kortingen" text="Kortingen aanmaken of aanpassen." icon="sell" url=card_url %}
+
+                <!-- betalingen doorgeven -->
+                {% include 'plein/card.dtl' with title="Overboekingen" text="Geef de ontvangen wedstrijd-gelden door, zodat de reservering voor een sporter definitief kan worden." icon="euro_symbol" url=url_overboeking_ontvangen %}
+
+            </div>
+        </div>
+
+    {% endif %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-overzicht-vereniging" %}
+
+{% endblock %}

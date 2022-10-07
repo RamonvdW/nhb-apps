@@ -80,10 +80,15 @@
 
         {% for sporter in sporters %}
             {% if sporter.vereniging_teams %}
+                <!-- samenvattingsregel over de teams van een vereniging -->
                 <tr>
                     <td></td>
-                    <td colspan="5">[{{ sporter.ver_nr }}] {{ sporter.ver_naam }} heeft {{ sporter.vereniging_teams }}</td>
-                    <td colspan="2" class="hide-on-small-only"></td>
+                    <td colspan="3">[{{ sporter.ver_nr }}] {{ sporter.ver_naam }} heeft {{ sporter.vereniging_teams }}</td>
+                    <td class="hide-on-small-only"></td>
+                    {% if deelcomp.regio_organiseert_teamcompetitie %}
+                        <td></td>
+                    {% endif %}
+                    <td class="hide-on-small-only"></td>
                 </tr>
             {% endif %}
 
@@ -110,14 +115,22 @@
 
         {% empty %}
             <tr>
-                <td colspan="{% if deelcomp.regio_organiseert_teamcompetitie %}5{% else %}4{% endif %}"><i>Geen sporters gevonden</i></td>
-                <td colspan="2" class="hide-on-small-only"></td>
+                <td colspan="4"><i>Geen sporters gevonden</i></td>
+                <td class="hide-on-small-only"></td>
+                {% if deelcomp.regio_organiseert_teamcompetitie %}
+                    <td></td>
+                {% endif %}
+                <td class="hide-on-small-only"></td>
             </tr>
         {% endfor %}
 
         <tr>
-            <td colspan="{% if deelcomp.regio_organiseert_teamcompetitie %}5{% else %}4{% endif %}" class="nhb-table-onderrand"></td>
-            <td colspan="2" class="nhb-table-onderrand"></td>
+            <td colspan="4" class="nhb-table-onderrand"></td>
+            <td class="hide-on-small-only nhb-table-onderrand"></td>
+            {% if deelcomp.regio_organiseert_teamcompetitie %}
+                <td class="nhb-table-onderrand"></td>
+            {% endif %}
+            <td class="hide-on-small-only nhb-table-onderrand"></td>
         </tr>
 
     </table>

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2021 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,19 +12,31 @@ DISCIPLINE = [('OD', 'Outdoor'),
               ('18', 'Indoor'),
               ('25', '25m 1pijl')]
 
-GESLACHT = [('M', 'Man'),
-            ('V', 'Vrouw')]
+GESLACHT_MAN = 'M'
+GESLACHT_VROUW = 'V'
+
+GESLACHT = [(GESLACHT_MAN, 'Man'),
+            (GESLACHT_VROUW, 'Vrouw')]
+
+# IB is in 2022 hernoemd naar TR. Records lopen dus door.
+
+MATERIAALKLASSEN = ('R', 'C', 'BB', 'LB', 'TR', 'IB')
 
 MATERIAALKLASSE = [('R', 'Recurve'),
                    ('C', 'Compound'),
                    ('BB', 'Barebow'),
                    ('LB', 'Longbow'),
-                   ('IB', 'Instinctive bow')]
+                   # ('TR', 'Traditional'),
+                   ('IB', 'Instinctive bow')]   # IB = legacy
 
 LEEFTIJDSCATEGORIE = [('M', 'Master'),
+                      # ('m', '50+'),
                       ('S', 'Senior'),
+                      # ('s', '21+'),
                       ('J', 'Junior'),
+                      # ('j', 'Onder 21'),
                       ('C', 'Cadet'),
+                      # ('c', 'Onder 18'),
                       ('U', 'Uniform (para)')]
 
 # FUTURE: support voor team records toevoegen
@@ -81,7 +93,7 @@ class IndivRecord(models.Model):
     # eventuele notities
     score_notitie = models.CharField(max_length=30, blank=True)
 
-    # was het toen een europeesch of wereld record?
+    # was het toen een Europees of wereld record?
     is_european_record = models.BooleanField(default=False)
     is_world_record = models.BooleanField(default=False)
 

@@ -1,0 +1,116 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021-2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Wijzig wedstrijd sessies{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Wedstrijd sessies</h3>
+            <p>Wijzig de sessies van een een wedstrijd</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie label : info -->
+    <div class="row-nhb-blauw">
+        <div class="col s12 m10 offset-m1 l8 offset-l2">
+            <table class="white">
+                <tr>
+                    <th>Titel</th>
+                    <td>{{ wed.titel }}</td>
+                </tr>
+                <tr>
+                    <th>Vereniging</th>
+                    <td>{{ wed.organiserende_vereniging }}</td>
+                </tr>
+                <tr>
+                    {% if wed.datum_begin != wed.datum_einde %}
+                        <th>Datums</th>
+                        <td>{{ wed.datum_begin }} - {{ wed.datum_einde }}</td>
+                    {% else %}
+                        <th>Datum:</th>
+                        <td>{{ wed.datum_begin }}</td>
+                    {% endif %}
+                </tr>
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Sessies</h4>
+            <p>Met sessies kan je een grote wedstrijd over de dag verspreiden<br>of het aantal inschrijvingen beheersen (per boogtype of leeftijd)</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+
+                <thead>
+                    <tr>
+                        <th>Beschrijving</th>
+                        <th class="center">Wanneer</th>
+                        <th class="center">Aanm<span class="hide-on-small-only">eldingen</span></th>
+                        <!-- <th>Wedstrijdklassen</th> -->
+                        <th><!-- kolom voor de knoppen --></th>
+                    </tr>
+                </thead>
+
+                {% for sessie in sessies %}
+                    <tr>
+                        <td>{{ sessie.beschrijving }}</td>
+                        <td class="center">{% if wed.datum_begin != wed.datum_einde %}{{ sessie.datum }} {% endif %}{{ sessie.tijd_begin }} - {{ sessie.tijd_einde }}</td>
+                        <td class="center">{{ sessie.aantal_inschrijvingen }} / {{ sessie.max_sporters }}</td>
+                        <!--
+                        <td>
+                            {% for klasse in sessie.klassen_ordered %}
+                                <span>{{ klasse.beschrijving }}</span><br>
+                            {% empty %}
+                                <span><i>Nog geen klassen</i></span>
+                            {% endfor %}
+                        </td>
+                        -->
+                        <td class="center">
+                            <a class="btn-nhb-rood" href="{{ sessie.url_wijzig }}">
+                                <i class="material-icons-round">edit</i></a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="center">
+                            <i>Er zijn nog geen sessies</i>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                {% if url_nieuwe_sessie %}
+                    <tr>
+                        <td colspan="4" class="center">
+                            <form action="{{ url_nieuwe_sessie }}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="nieuwe_sessie" value="1">
+                                <button class="btn-nhb-rood">
+                                    <i class="material-icons-round">add</i></button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endif %}
+
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-wijzig-sessies" %}
+
+{% endblock %}

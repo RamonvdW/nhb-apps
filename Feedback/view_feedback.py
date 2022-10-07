@@ -11,9 +11,9 @@ from django.urls import Resolver404, reverse
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige, rol_get_beschrijving
 from Plein.menu import menu_dynamics
-from .forms import FeedbackForm
-from .models import Feedback
-from .feedback_opslaan import store_feedback
+from Feedback.forms import FeedbackForm
+from Feedback.models import Feedback
+from Feedback.operations import store_feedback
 
 TEMPLATE_FEEDBACK_FORMULIER = 'feedback/formulier.dtl'
 TEMPLATE_FEEDBACK_BEDANKT = 'feedback/bedankt.dtl'
@@ -29,6 +29,7 @@ class KrijgFeedbackView(UserPassesTestMixin, View):
     # class variables shared by all instances
     template_name = TEMPLATE_FEEDBACK_FORMULIER
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -121,10 +122,12 @@ class InzichtView(UserPassesTestMixin, ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_FEEDBACK_INZICHT
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return rol_get_huidige(self.request) == Rollen.ROL_BB
+        rol_nu = rol_get_huidige(self.request)
+        return rol_nu in (Rollen.ROL_BB, Rollen.ROL_SUP)
 
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """

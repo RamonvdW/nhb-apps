@@ -7,11 +7,9 @@
 from django.db import models
 from Account.models import Account
 from Betaal.models import BetaalActief, BetaalTransactie, BetaalMutatie, BetaalInstellingenVereniging
-from Kalender.models import KalenderInschrijving
+from Wedstrijden.models import WedstrijdInschrijving
 from decimal import Decimal
 
-
-BESTEL_KORTINGSCODE_MINLENGTH = 8
 
 BESTEL_HOOGSTE_BESTEL_NR_FIXED_PK = 1
 
@@ -38,19 +36,19 @@ BESTELLING_STATUS2STR = {
 
 BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN = 1        # inschrijven op wedstrijd
 BESTEL_MUTATIE_VERWIJDER = 2                    # product verwijderen uit mandje
-BESTEL_MUTATIE_KORTINGSCODE = 3                 # kortingcode toepassen op mandje
-BESTEL_MUTATIE_MAAK_BESTELLINGEN = 4            # mandje omzetten in bestelling(en)
-BESTEL_MUTATIE_BETALING_AFGEROND = 5            # betaling is afgerond (gelukt of mislukt)
-BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN = 6           # afmelden (na betaling)
+BESTEL_MUTATIE_MAAK_BESTELLINGEN = 3            # mandje omzetten in bestelling(en)
+BESTEL_MUTATIE_BETALING_AFGEROND = 4            # betaling is afgerond (gelukt of mislukt)
+BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN = 5           # afmelden (na betaling)
+BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN = 6        # overboeking ontvangen
 BESTEL_MUTATIE_RESTITUTIE_UITBETAALD = 7        # restitutie uitbetaald
 
 BESTEL_MUTATIE_TO_STR = {
     BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN: "Inschrijven op wedstrijd",
     BESTEL_MUTATIE_VERWIJDER: "Product verwijderen uit mandje",
-    BESTEL_MUTATIE_KORTINGSCODE: "Kortingscode toepassen op mandje",
     BESTEL_MUTATIE_MAAK_BESTELLINGEN: "Mandje omzetten in bestelling(en)",
     BESTEL_MUTATIE_BETALING_AFGEROND: "Betaling afgerond",
     BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN: "Afmelden voor wedstrijd",
+    BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN: "Overboeking ontvangen",
     BESTEL_MUTATIE_RESTITUTIE_UITBETAALD: "Restitutie uitbetaald",
 }
 
@@ -58,11 +56,11 @@ BESTEL_MUTATIE_TO_STR = {
 class BestelProduct(models.Model):
 
     """ Een product dat opgenomen kan worden in een bestelling en in een mandje geplaatst kan worden,
-        eventueel met kortingscode.
+        eventueel met korting.
     """
 
     # inschrijving voor een wedstrijd
-    inschrijving = models.ForeignKey(KalenderInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
+    wedstrijd_inschrijving = models.ForeignKey(WedstrijdInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
 
     # FUTURE: andere mogelijke regels in dit mandje
 
@@ -76,8 +74,8 @@ class BestelProduct(models.Model):
 
     def __str__(self):
         """ beschrijving voor de admin interface """
-        if self.inschrijving:
-            msg = str(self.inschrijving)
+        if self.wedstrijd_inschrijving:
+            msg = str(self.wedstrijd_inschrijving)
         else:
             # TODO: andere producten
             msg = '?'
@@ -89,8 +87,8 @@ class BestelProduct(models.Model):
         return msg
 
     def korte_beschrijving(self):
-        if self.inschrijving:
-            return self.inschrijving.korte_beschrijving()
+        if self.wedstrijd_inschrijving:
+            return self.wedstrijd_inschrijving.korte_beschrijving()
         return "?"
 
     class Meta:
@@ -100,7 +98,7 @@ class BestelProduct(models.Model):
 
 class BestelMandje(models.Model):
 
-    """ Een verzameling producten die nog veranderd kunnen worden en waaraan kortingscodes gekoppeld kunnen worden.
+    """ Een verzameling producten die nog veranderd kunnen worden en waaraan een korting gekoppeld kan worden.
         Wordt omgezet in een Bestelling zodra 'afrekenen' wordt gekozen.
     """
 
@@ -163,6 +161,11 @@ class Bestelling(models.Model):
     verkoper_email = models.EmailField(default='', blank=True)
     verkoper_telefoon = models.CharField(max_length=20, default='', blank=True)
 
+    # bankrekening details
+    verkoper_iban = models.CharField(max_length=18, default='', blank=True)
+    verkoper_bic = models.CharField(max_length=11, default='', blank=True)          # 8 of 11 tekens
+    verkoper_heeft_mollie = models.BooleanField(default=False)
+
     # de bestelde producten met prijs en korting
     producten = models.ManyToManyField(BestelProduct)
 
@@ -196,6 +199,9 @@ class Bestelling(models.Model):
 
         return msg
 
+    def mh_bestel_nr(self):
+        return "MH-%s" % self.bestel_nr
+
     class Meta:
         verbose_name = "Bestelling"
         verbose_name_plural = "Bestellingen"
@@ -224,29 +230,33 @@ class BestelMutatie(models.Model):
 
     # BESTEL_MUTATIE_WEDSTRIJD_INSCHRIJVEN      account(=mandje), inschrijving
     # BESTEL_MUTATIE_VERWIJDER:                 account(=mandje), product
-    # BESTEL_MUTATIE_KORTINGSCODE:              account(=mandje), kortingscode
+    # BESTEL_MUTATIE_KORTING:                   account(=mandje), korting
     # BESTEL_MUTATIE_MAAK_BESTELLING:           account(=mandje)
     # BESTEL_MUTATIE_WEDSTRIJD_AFMELDEN:        inschrijving
     # BESTEL_MUTATIE_BETALING_ONTVANGEN:        bestelling, betaling_is_gelukt
+    # BESTEL_MUTATIE_OVERBOEKING_ONTVANGEN:     bestelling, bedrag_euro
     # BESTEL_MUTATIE_RESTITUTIE_UITBETAALD:
 
     # wiens mandje moet omgezet worden?
     account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, blank=True)
 
     # de kalender inschrijving
-    inschrijving = models.ForeignKey(KalenderInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
+    wedstrijd_inschrijving = models.ForeignKey(WedstrijdInschrijving, on_delete=models.SET_NULL, null=True, blank=True)
 
     # het product waar deze mutatie betrekking op heeft
     product = models.ForeignKey(BestelProduct, on_delete=models.SET_NULL, null=True, blank=True)
 
-    # gevraagde kortingscode om toe te passen
-    kortingscode = models.CharField(max_length=20, default='', blank=True)
+    # gevraagde korting om toe te passen
+    korting = models.CharField(max_length=20, default='', blank=True)
 
     # de bestelling waar deze mutatie betrekking op heeft
     bestelling = models.ForeignKey(Bestelling, on_delete=models.SET_NULL, null=True, blank=True)
 
     # status van de betaling: gelukt, of niet?
     betaling_is_gelukt = models.BooleanField(default=False)
+
+    # het ontvangen of betaalde bedrag
+    bedrag_euro = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(0))       # max 999,99
 
     class Meta:
         verbose_name = "Bestel mutatie"

@@ -21,7 +21,7 @@ from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbCluster, NhbVereniging
 from Plein.menu import menu_dynamics
-from Taken.taken import maak_taak
+from Taken.operations import maak_taak
 from Wedstrijden.models import WedstrijdLocatie
 from types import SimpleNamespace
 import datetime
@@ -81,6 +81,7 @@ class RegioPlanningView(UserPassesTestMixin, TemplateView):
     template1 = TEMPLATE_COMPREGIO_PLANNING
     template2 = TEMPLATE_COMPREGIO_PLANNING_METHODE1
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -292,6 +293,7 @@ class RegioClusterPlanningView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPREGIO_PLANNING_CLUSTER
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -405,6 +407,7 @@ class RegioRondePlanningView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPREGIO_PLANNING_RONDE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -715,6 +718,7 @@ class RegioRondePlanningMethode1View(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPREGIO_PLANNING_RONDE_METHODE1
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -838,6 +842,7 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPREGIO_WIJZIG_WEDSTRIJD
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -1097,7 +1102,11 @@ class WijzigWedstrijdView(UserPassesTestMixin, TemplateView):
         except (ValueError, CompetitieMatch.DoesNotExist):
             raise Http404('Wedstrijd niet gevonden')
 
-        rondes = match.deelcompetitieronde_set.all()
+        rondes = (match
+                  .deelcompetitieronde_set
+                  .select_related('deelcompetitie',
+                                  'deelcompetitie__competitie')
+                  .all())
         if len(rondes) == 0:
             raise Http404('Geen regio wedstrijd')
         ronde = rondes[0]
@@ -1259,6 +1268,7 @@ class VerwijderWedstrijdView(UserPassesTestMixin, View):
     """ Deze view laat een Regio wedstrijd verwijderen """
 
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -1318,6 +1328,7 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPREGIO_AFSLUITEN_REGIOCOMP
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -1388,52 +1399,28 @@ class AfsluitenRegiocompView(UserPassesTestMixin, TemplateView):
 
             # maak het bericht voor een taak aan de RKO's en BKO's
             account = request.user
-            ter_info_namen = list()
             now = timezone.now()
             taak_deadline = now
             assert isinstance(account, Account)
             taak_tekst = "Ter info: De regiocompetitie %s is zojuist afgesloten door RCL %s" % (
                             str(deelcomp), account.volledige_naam())
-            taak_tekst += "\nAls RKO kan je onder Competitie, Planning Rayon de status van elke regio zien."
+            taak_tekst += "\nAls RKO kan je onder Bondscompetities, Planning Rayon de status van elke regio zien."
             taak_log = "[%s] Taak aangemaakt" % now
 
-            # stuur elke RKO een taak ('ter info')
+            # maak een taak aan voor de RKO
             deelcomp_rk = DeelCompetitie.objects.get(competitie=deelcomp.competitie,
                                                      laag=LAAG_RK,
                                                      nhb_rayon=deelcomp.nhb_regio.rayon)
             functie_rko = deelcomp_rk.functie
-            for account in functie_rko.accounts.all():
-                # maak een taak aan voor deze RKO
-                maak_taak(toegekend_aan=account,
-                          deadline=taak_deadline,
-                          aangemaakt_door=request.user,
-                          beschrijving=taak_tekst,
-                          handleiding_pagina="",
-                          log=taak_log,
-                          deelcompetitie=deelcomp_rk)
-                ter_info_namen.append(account.volledige_naam())
-            # for
-
-            # stuur elke BKO een taak ('ter info')
-            deelcomp_bk = DeelCompetitie.objects.get(is_afgesloten=False,
-                                                     competitie=deelcomp.competitie,
-                                                     laag=LAAG_BK)
-            functie_bko = deelcomp_bk.functie
-            for account in functie_bko.accounts.all():
-                # maak een taak aan voor deze BKO
-                maak_taak(toegekend_aan=account,
-                          deadline=taak_deadline,
-                          aangemaakt_door=request.user,
-                          beschrijving=taak_tekst,
-                          handleiding_pagina="",
-                          log=taak_log,
-                          deelcompetitie=deelcomp_bk)
-                ter_info_namen.append(account.volledige_naam())
-            # for
+            maak_taak(toegekend_aan_functie=functie_rko,
+                      deadline=taak_deadline,
+                      aangemaakt_door=account,
+                      beschrijving=taak_tekst,
+                      log=taak_log)
 
             # schrijf in het logboek
             msg = "Deelcompetitie '%s' is afgesloten" % str(deelcomp)
-            msg += '\nDe volgende beheerders zijn geïnformeerd via een taak: %s' % ", ".join(ter_info_namen)
+            msg += '\nDe %s is geïnformeerd via een taak' % functie_rko.beschrijving
             schrijf_in_logboek(request.user, "Competitie", msg)
 
         url = reverse('Competitie:kies')

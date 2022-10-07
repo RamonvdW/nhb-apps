@@ -9,9 +9,9 @@ from django.db.models import Q
 from django.views.generic import ListView, TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.models import Account
+from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
+from Functie.models import Functie
 from Plein.menu import menu_dynamics
-from .rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving
-from .models import Functie
 
 
 TEMPLATE_OVERZICHT = 'functie/overzicht.dtl'
@@ -27,6 +27,7 @@ class OverzichtVerenigingView(UserPassesTestMixin, ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_OVERZICHT_VERENIGING
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -128,25 +129,29 @@ class OverzichtView(UserPassesTestMixin, ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_OVERZICHT
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.rol_nu = None
+        self.rol_nu, self.functie_nu = None, None
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # alle competitie beheerders + HWL
-        self.rol_nu = rol_get_huidige(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL)
+        self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MO, Rollen.ROL_MWZ, Rollen.ROL_SUP,
+                               Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
+                               Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL)
 
     @staticmethod
     def _sorteer_functies(objs):
         """ Sorteer de functies zodat:
+            MWZ < MO < SUP < rest
             18 < 25
             BKO < RKO < RCL
             op volgorde van rayon- of regionummer (oplopend)
         """
-        sort_level = {'BKO': 1,  'RKO': 2, 'RCL': 3}
+        sort_level = {'MWZ': 1, 'MO': 2, 'SUP': 3, 'BKO': 4,  'RKO': 5, 'RCL': 6}
         tup2obj = dict()
         sort_me = list()
         for obj in objs:
@@ -169,16 +174,14 @@ class OverzichtView(UserPassesTestMixin, ListView):
         """ Voeg een wijzig_url veld toe aan elk Functie object
         """
         # de huidige rol bepaalt welke functies gewijzigd mogen worden
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-
         rko_rayon_nr = None
-        if rol_nu == Rollen.ROL_BB:
+        if self.rol_nu == Rollen.ROL_BB:
             wijzigbare_functie_rol = 'BKO'
-        elif rol_nu == Rollen.ROL_BKO:
+        elif self.rol_nu == Rollen.ROL_BKO:
             wijzigbare_functie_rol = 'RKO'
-        elif rol_nu == Rollen.ROL_RKO:
+        elif self.rol_nu == Rollen.ROL_RKO:
             wijzigbare_functie_rol = 'RCL'
-            rko_rayon_nr = functie_nu.nhb_rayon.rayon_nr
+            rko_rayon_nr = self.functie_nu.nhb_rayon.rayon_nr
         else:
             # beheerder kan niets wijzigen, maar inzien mag wel
             wijzigbare_functie_rol = "niets"
@@ -188,22 +191,22 @@ class OverzichtView(UserPassesTestMixin, ListView):
             if obj.rol == wijzigbare_functie_rol:
                 # als BB mag je beide BKO's wijzigen
                 # overige rollen alleen van hun eigen competitie type (Indoor / 25m1pijl)
-                if rol_nu == Rollen.ROL_BB or obj.comp_type == functie_nu.comp_type:
+                if self.rol_nu == Rollen.ROL_BB or obj.comp_type == self.functie_nu.comp_type:
                     obj.wijzig_url = reverse('Functie:wijzig-beheerders', kwargs={'functie_pk': obj.pk})
 
                     # verdere begrenzing RKO: alleen 'zijn' Regio's
-                    if rol_nu == Rollen.ROL_RKO and obj.rol == "RCL" and obj.nhb_regio.rayon.rayon_nr != rko_rayon_nr:
+                    if self.rol_nu == Rollen.ROL_RKO and obj.rol == "RCL" and obj.nhb_regio.rayon.rayon_nr != rko_rayon_nr:
                         obj.wijzig_url = None
         # for
 
-        wijzigbare_functie = functie_nu
-        if rol_nu == Rollen.ROL_BB:
+        wijzigbare_functie = self.functie_nu
+        if self.rol_nu == Rollen.ROL_BB:
             wijzigbare_email_rol = 'BKO'
-        elif rol_nu == Rollen.ROL_BKO:
+        elif self.rol_nu == Rollen.ROL_BKO:
             wijzigbare_email_rol = 'RKO'
-        elif rol_nu == Rollen.ROL_RKO:
+        elif self.rol_nu == Rollen.ROL_RKO:
             wijzigbare_email_rol = 'RCL'
-            rko_rayon_nr = functie_nu.nhb_rayon.rayon_nr
+            rko_rayon_nr = self.functie_nu.nhb_rayon.rayon_nr
         else:
             # beheerder kan niets wijzigen, maar inzien mag wel
             wijzigbare_email_rol = 'niets'
@@ -216,11 +219,11 @@ class OverzichtView(UserPassesTestMixin, ListView):
             elif obj.rol == wijzigbare_email_rol:
                 # als BB mag je beide BKO's wijzigen
                 # overige rollen alleen van hun eigen competitie type (Indoor / 25m1pijl)
-                if rol_nu == Rollen.ROL_BB or obj.comp_type == functie_nu.comp_type:
+                if self.rol_nu == Rollen.ROL_BB or obj.comp_type == self.functie_nu.comp_type:
                     obj.email_url = reverse('Functie:wijzig-email', kwargs={'functie_pk': obj.pk})
 
                     # verdere begrenzing RKO: alleen 'zijn' Regio's
-                    if rol_nu == Rollen.ROL_RKO and obj.rol == "RCL" and obj.nhb_regio.rayon.rayon_nr != rko_rayon_nr:
+                    if self.rol_nu == Rollen.ROL_RKO and obj.rol == "RCL" and obj.nhb_regio.rayon.rayon_nr != rko_rayon_nr:
                         obj.email_url = None
         # for
 
@@ -237,12 +240,10 @@ class OverzichtView(UserPassesTestMixin, ListView):
     def get_queryset(self):
         """ called by the template system to get the queryset or list of objects for the template """
 
-        rol_nu, functie_nu = rol_get_huidige_functie(self.request)
-
         # maak een lijst van de functies
-        if rol_nu == Rollen.ROL_HWL:
+        if self.rol_nu == Rollen.ROL_HWL:
             # toon alleen de hierarchy vanuit deze vereniging omhoog
-            functie_hwl = functie_nu
+            functie_hwl = self.functie_nu
             objs = (Functie.objects
                     .filter(Q(rol='RCL', nhb_regio=functie_hwl.nhb_ver.regio) |
                             Q(rol='RKO', nhb_rayon=functie_hwl.nhb_ver.regio.rayon) |
@@ -251,13 +252,13 @@ class OverzichtView(UserPassesTestMixin, ListView):
                     .prefetch_related('accounts'))
         else:
             objs = (Functie.objects
-                    .filter(Q(rol='BKO') | Q(rol='RKO') | Q(rol='RCL'))
+                    .filter(Q(rol='BKO') | Q(rol='RKO') | Q(rol='RCL') | Q(rol='MWZ') | Q(rol='SUP') | Q(rol='MO'))
                     .select_related('nhb_rayon', 'nhb_regio', 'nhb_regio__rayon')
                     .prefetch_related('accounts'))
 
         objs = self._sorteer_functies(objs)
 
-        # zet de wijzig urls, waar toegestaan
+        # zet de wijzig-urls, waar toegestaan
         self._zet_wijzig_urls(objs)
         self._zet_accounts(objs)
         return objs
@@ -271,7 +272,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
         if self.rol_nu == Rollen.ROL_HWL:
             context['rol_is_hwl'] = True
 
-        if self.rol_nu == Rollen.ROL_BB:
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_SUP):
             context['accounts_it'] = (Account
                                       .objects
                                       .filter(is_staff=True)
@@ -282,7 +283,7 @@ class OverzichtView(UserPassesTestMixin, ListView):
                                       .filter(is_BB=True)
                                       .order_by('username'))
 
-        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
+        if self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
             context['url_sec_hwl'] = reverse('Functie:sec-hwl-lid_nrs')
 
         context['kruimels'] = (
@@ -303,6 +304,7 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_OVERZICHT_EMAILS_SEC_HWL
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -312,7 +314,7 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         # alle competitie beheerders + HWL
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
+        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_MWZ, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL)
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -337,7 +339,7 @@ class OverzichtEmailsSecHwlView(UserPassesTestMixin, TemplateView):
                       .exclude(bevestigde_email='')
                       .values_list('bevestigde_email', flat=True))
 
-        elif self.rol_nu == Rollen.ROL_RCL:
+        else:  # elif self.rol_nu == Rollen.ROL_RCL:
             regio_nr = self.functie_nu.nhb_regio.regio_nr
             context['geo_str'] = ' in regio %s' % regio_nr
             emails = (Functie

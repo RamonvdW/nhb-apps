@@ -5,8 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 
-# template names found by assert_html_ok
+# template names checked out by assert_html_ok
 validated_templates = list()
+
+# template names checked out by assert_consistent_email_html_text
+consistent_email_templates = list()
 
 # these templates are included by other templates
 included_templates = (
@@ -21,8 +24,8 @@ included_templates = (
     'feedback/sidebar.dtl',
     'logboek/common.dtl',
     'competitie/tijdlijn.dtl',
-    'snippets.dtl'
+    'snippets.dtl',
+    'email_mailer/email_basis.dtl'
 )
-
 
 # end of file

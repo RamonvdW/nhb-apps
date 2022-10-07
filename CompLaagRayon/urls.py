@@ -5,10 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import (view_planning,
-               view_indiv_rko, view_indiv_hwl, view_indiv_wijzig_status,
-               view_teams_bko, view_teams_rko, view_teams_hwl,
-               view_formulieren)
+from CompLaagRayon import (view_planning,
+                           view_indiv_rko, view_indiv_hwl, view_indiv_wijzig_status,
+                           view_teams_bko, view_teams_rko, view_teams_hwl,
+                           view_formulieren)
 
 app_name = 'CompLaagRayon'
 

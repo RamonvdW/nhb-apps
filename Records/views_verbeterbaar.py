@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect
 from django.views.generic import ListView
 from django.templatetags.static import static
 from Plein.menu import menu_dynamics
-from .models import IndivRecord, BesteIndivRecords
+from Records.models import IndivRecord, BesteIndivRecords
 from types import SimpleNamespace
 
 

@@ -14,7 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Bestelling</h3>
-            <p>Bestelnummer: {{ bestelling.bestel_nr }}</p>
+            <p>Bestelnummer: {{ bestelling.mh_bestel_nr }}</p>
         </div>
     </div>
 
@@ -35,10 +35,10 @@
                         <td class="right-align" style="padding-right:20px">&euro;&nbsp;{{ product.prijs_euro }}</td>
                     </tr>
 
-                    {% if product.gebruikte_code_str %}
+                    {% if product.gebruikte_korting_str %}
                         <tr>
                             <td class="hide-on-small-only" style="padding-left:20px">{% if product.is_combi_korting %}Automatische combi-korting{% else %}Korting{% endif %}</td>
-                            <td>{{ product.gebruikte_code_str }}{% if product.is_combi_korting %}{% for titel in product.combi_reden %}<br>{{ titel }}{% endfor %}{% endif %}</td>
+                            <td>{{ product.gebruikte_korting_str }}{% if product.is_combi_korting %}{% for titel in product.combi_reden %}<br>{{ titel }}{% endfor %}{% endif %}</td>
                             <td class="right-align" style="padding-right:20px">{% if product.korting_euro > 0.0001 %}&minus;&nbsp;{% endif %}&euro;&nbsp;{{ product.korting_euro }}</td>
                         </tr>
                     {% endif %}
@@ -80,20 +80,27 @@
                     <tr>
                         <td colspan="3" class="center red-text">Het is niet mogelijk om af te rekenen.<br>Neem contact op met de helpdesk.</td>
                     </tr>
-                {% elif url_afrekenen %}
+                {% else %}
+                    {% if url_afrekenen %}
+                        <tr>
+                            <td class="hide-on-small-only"></td>
+                            <td class="right-align">
+                                <form action="{{ url_afrekenen }}" method="post">
+                                    {% csrf_token %}
+                                    <button class="btn-nhb-rood">
+                                        <i class="material-icons-round right">shopping_cart_checkout</i>Betalen</button>
+                                </form>
+                            </td>
+                            <td><!-- bedragen --></td>
+                        </tr>
+                    {% endif %}
+
                     <tr>
-                        <td class="hide-on-small-only"></td>
-                        <td class="right-align">
-                            <form action="{{ url_afrekenen }}" method="post">
-                                {% csrf_token %}
-                                <button class="btn-nhb-rood">
-                                    <i class="material-icons-round right">shopping_cart_checkout</i>Betalen</button>
-                            </form>
+                        <td colspan="3">
+                            <p class="center">Betaling is {% if moet_handmatig %}alleen{% else %}ook{% endif %} mogelijk door overboeking van het verschuldigde bedrag naar onderstaande rekening onder vermelding van "Bestelnummer {{ bestelling.mh_bestel_nr }}"</p>
                         </td>
-                        <td><!-- bedragen --></td>
                     </tr>
                 {% endif %}
-
             </table>
         </div>
 
@@ -109,8 +116,8 @@
 
                 <tr>
                     <td></td>
-                    <th class="nhb-column-small hide-on-small-only">Naam:<br>Adres:<br><br>KvK nummer:<br>E-mail:<br>Telefoon:</th>
-                    <td class="nhb-column-small">{{ bestelling.verkoper_naam }}<br>{{ bestelling.verkoper_adres1 }}<br>{{ bestelling.verkoper_adres2 }}<br>{{ bestelling.verkoper_kvk }}<br>{{ bestelling.verkoper_email }}<br>{{ bestelling.verkoper_telefoon }}</td>
+                    <th class="nhb-column-small hide-on-small-only">Naam:<br>Adres:<br><br>KvK nummer:<br>IBAN:<br>BIC:<br>E-mail:<br>Telefoon:</th>
+                    <td class="nhb-column-small">{{ bestelling.verkoper_naam }}<br>{{ bestelling.verkoper_adres1 }}<br>{{ bestelling.verkoper_adres2 }}<br>{{ bestelling.verkoper_kvk }}<br>{{ bestelling.verkoper_iban }}<br>{{ bestelling.verkoper_bic }}<br>{{ bestelling.verkoper_email }}<br>{{ bestelling.verkoper_telefoon }}</td>
                     <td></td>
                 </tr>
             </table>

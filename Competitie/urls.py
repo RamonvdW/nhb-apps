@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import views_bb, views_info, views_klassengrenzen, views_kies, views_overzicht, views_planning_bond
+from Competitie import views_bb, views_info, views_klassengrenzen, views_kies, views_overzicht, views_planning_bond
 
 app_name = 'Competitie'
 

@@ -10,10 +10,11 @@ from django.http import HttpResponse, Http404
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige
+from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
-from .models import HistCompetitie, HistCompetitieIndividueel
 from decimal import Decimal
+from codecs import BOM_UTF8
 import csv
 
 
@@ -35,6 +36,7 @@ class InterlandView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_HISTCOMP_INTERLAND
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -151,6 +153,7 @@ class InterlandAlsBestandView(InterlandView):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="interland.csv"'
 
+        response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
         writer.writerow(['Gemiddelde', 'Klasse', 'Geslacht', 'Lid', 'Naam', 'Vereniging'])
 

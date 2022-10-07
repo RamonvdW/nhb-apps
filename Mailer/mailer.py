@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" Deze module kan een email sturen via Postmark
+""" Deze module kan een e-mail sturen via Postmark
 
     Het management commando stuur_emails vind verzoeken in de database
     en roept send_mail aan om deze te versturen.
@@ -31,8 +31,11 @@ def send_mail_postmark(obj, stdout=None, stderr=None):
         'From': settings.EMAIL_FROM_ADDRESS,
         'To': obj.mail_to,
         'Subject': obj.mail_subj,
-        'TextBody': obj.mail_text
+        'TextBody': obj.mail_text,
     }
+
+    if obj.mail_html != '':
+        data['HtmlBody'] = obj.mail_html
 
     headers = {
         'X-Postmark-Server-Token': settings.POSTMARK_API_KEY,

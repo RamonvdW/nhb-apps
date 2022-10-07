@@ -13,16 +13,17 @@ from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Plein.menu import menu_dynamics
 from mollie.api.client import RequestSetupError, Client
 
-TEMPLATE_BETALINGEN_INSTELLEN = 'betaal/vereniging-instellingen.dtl'
+TEMPLATE_BETALING_INSTELLINGEN = 'betaal/vereniging-instellingen.dtl'
 
 
-class BetalingenInstellenView(UserPassesTestMixin, TemplateView):
+class BetalingInstellingenView(UserPassesTestMixin, TemplateView):
 
     """ Deze view is voor de beheerders van de vereniging """
 
     # class variables shared by all instances
-    template_name = TEMPLATE_BETALINGEN_INSTELLEN
+    template_name = TEMPLATE_BETALING_INSTELLINGEN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -52,32 +53,36 @@ class BetalingenInstellenView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, 'Financieel'),
+            (reverse('Wedstrijden:vereniging'), 'Wedstrijdkalender'),
+            (None, 'Instellingen'),
         )
 
         menu_dynamics(self.request, context)
         return context
 
     def post(self, request, *args, **kwargs):
-        """ Deze functie wordt aangeroepen als de gebruiken op Opslaan drukt in het scherm met Financieel. """
+        """ Deze functie wordt aangeroepen als de gebruiken op Opslaan drukt in het instellingenscherm. """
 
         ver = self.functie_nu.nhb_ver
         apikey = request.POST.get('apikey', '')[:MOLLIE_API_KEY_MAXLENGTH]
 
-        # laat de Mollie client de key opschonen en valideren
-        client = Client()
-        try:
-            apikey = client.validate_api_key(apikey)
-        except RequestSetupError:
-            # niet geaccepteerd
-            # hoe moeilijk is knippen & plakken? Niet veel moeite in stoppen
-            raise Http404('Niet geaccepteerd')
+        if apikey:
+            # laat de Mollie-client de key opschonen en controleren
+            client = Client()
+            try:
+                apikey = client.validate_api_key(apikey)
+            except RequestSetupError:
+                # niet geaccepteerd
+                # hoe moeilijk is knippen & plakken? Niet veel moeite in stoppen
+                raise Http404('Niet geaccepteerd')
 
-        instellingen, is_created = BetaalInstellingenVereniging.objects.get_or_create(vereniging=ver)
-        instellingen.mollie_api_key = apikey
-        instellingen.save()
+            # TODO: doe een echte transactie om te controleren dat de API key echt werkt
 
-        url = reverse('Vereniging:overzicht')
+            instellingen, is_created = BetaalInstellingenVereniging.objects.get_or_create(vereniging=ver)
+            instellingen.mollie_api_key = apikey
+            instellingen.save()
+
+        url = reverse('Wedstrijden:vereniging')
         return HttpResponseRedirect(url)
 
 

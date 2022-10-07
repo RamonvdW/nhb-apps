@@ -34,6 +34,7 @@ class ToonBondspasView(UserPassesTestMixin, View):
 
     template_name = TEMPLATE_BONDSPAS_OPHALEN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -60,6 +61,7 @@ class ToonBondspasView(UserPassesTestMixin, View):
                 return FileResponse(open(fpath, 'rb'))
             except (OSError, IOError) as exc:
                 # we hebben een probleem: pas hoort er wel te zijn, maar is niet op te halen?
+                # TODO: bondspas kan opgeruimd zijn. Scrubbing moet ook de status aanpassen
                 my_logger.error('Kan bondspas niet openen: %s' % str(exc))
 
             # laat de pas opnieuw ophalen
@@ -107,6 +109,7 @@ class ToonBondspasView(UserPassesTestMixin, View):
 class DynamicBondspasCheckStatus(UserPassesTestMixin, View):
 
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """

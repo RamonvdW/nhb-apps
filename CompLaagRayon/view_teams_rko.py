@@ -195,8 +195,8 @@ class RayonTeamsView(TemplateView):
             except KeyError:
                 # dit is geen acceptabele klasse (waarschijnlijk een regio klasse)
                 # pas dit meteen even aan
-                team.klasse = None
-                team.save(update_fields=['klasse'])
+                team.team_klasse = None
+                team.save(update_fields=['team_klasse'])
         # for
 
         context['rk_teams'] = klasse2teams
@@ -252,6 +252,7 @@ class RayonTeamsRKOView(UserPassesTestMixin, RayonTeamsView):
     # class variables shared by all instances
     subset_filter = False
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -266,6 +267,7 @@ class RayonTeamsAlleView(UserPassesTestMixin, RayonTeamsView):
     # class variables shared by all instances
     subset_filter = True
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """

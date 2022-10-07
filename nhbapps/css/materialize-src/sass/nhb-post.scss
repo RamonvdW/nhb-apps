@@ -399,6 +399,16 @@ input.table-filter {
     }
 }
 
+/* marge rond een formulier dat zich aanpast aan de schermbreedte */
+.form-padding {
+    padding: 30px;
+}
+@media only screen and (max-width : 720px) {
+    .form-padding {
+        padding: 5px;
+    }
+}
+
 
 /*
 // -------------

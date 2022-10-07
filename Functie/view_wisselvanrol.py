@@ -7,28 +7,23 @@
 from django.conf import settings
 from django.urls import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Account.otp import account_otp_is_gekoppeld
 from Account.rechten import account_rechten_is_otp_verified
-from Competitie.menu import get_url_voor_competitie
+from Functie.models import Functie
+from Functie.operations import account_needs_vhpg
+from Functie.rol import (Rollen, rol_mag_wisselen, rol_enum_pallet, rol2url,
+                         rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
+                         rol_evalueer_opnieuw)
 from Handleiding.views import reverse_handleiding
 from NhbStructuur.models import NhbVereniging
 from Plein.menu import menu_dynamics
-from Overig.helpers import get_safe_from_ip
-from Taken.taken import eval_open_taken
-from .rol import (Rollen, rol_mag_wisselen, rol_enum_pallet, rol2url,
-                  rol_get_huidige, rol_get_huidige_functie, rol_get_beschrijving,
-                  rol_activeer_rol, rol_activeer_functie, rol_evalueer_opnieuw)
-from .models import Functie, account_needs_vhpg
-import logging
+from Taken.operations import eval_open_taken
 
 
 TEMPLATE_WISSEL_VAN_ROL = 'functie/wissel-van-rol.dtl'
 TEMPLATE_WISSEL_NAAR_SEC = 'functie/wissel-naar-sec.dtl'
-
-my_logger = logging.getLogger('NHBApps.Functie')
 
 
 class WisselVanRolView(UserPassesTestMixin, TemplateView):
@@ -40,6 +35,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_WISSEL_VAN_ROL
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -82,7 +78,12 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _functie_volgorde(functie):
-        if functie.rol == "BKO":
+        # BB heeft volgorde 2
+        if functie.rol == "MWZ":
+            volgorde = 4
+        elif functie.rol == "MO":
+            volgorde = 5
+        elif functie.rol == "BKO":
             volgorde = 10  # 10
         elif functie.rol == "RKO":
             volgorde = 20 + functie.nhb_rayon.rayon_nr  # 21-24
@@ -94,8 +95,10 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
             volgorde = functie.nhb_ver.ver_nr + 10000   # 11000-19999
         elif functie.rol == "WL":
             volgorde = functie.nhb_ver.ver_nr + 20000   # 21000-29999
+        elif functie.rol == "SUP":
+            volgorde = 50000
         else:             # pragma: no cover
-            volgorde = 0  # valt meteen op dat 'ie bovenaan komt
+            volgorde = 0  # bovenaan zetten zodat het meteen opvalt
         return volgorde
 
     def _get_functies_eigen(self):
@@ -109,7 +112,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
 
             # rollen die je altijd aan moet kunnen nemen als je ze hebt
             if rol == Rollen.ROL_BB:
-                obj = Functie(beschrijving='Manager competitiezaken')
+                obj = Functie(beschrijving='Manager Competitiezaken')
                 obj.url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
                 obj.selected = (self.rol_nu == rol)
                 obj.pk = 90002
@@ -126,6 +129,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
                 objs.append(tup)
 
             elif rol == Rollen.ROL_NONE:
+                # TODO: deze is niet nodig
                 obj = Functie(beschrijving='Gebruiker')
                 obj.url = reverse('Functie:activeer-rol', kwargs={'rol': rol2url[rol]})
                 obj.selected = (self.rol_nu == rol)
@@ -329,6 +333,7 @@ class WisselVanRolView(UserPassesTestMixin, TemplateView):
         if context['show_vhpg']:
             context['show_beheerder_intro'] = True
 
+        # TODO: handleidingen vervangen door link naar pdf
         context['wiki_2fa_url'] = reverse_handleiding(self.request, settings.HANDLEIDING_2FA)
         context['wiki_rollen'] = reverse_handleiding(self.request, settings.HANDLEIDING_ROLLEN)
         context['wiki_intro_nieuwe_beheerders'] = reverse_handleiding(self.request,
@@ -372,6 +377,7 @@ class WisselNaarSecretarisView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_WISSEL_NAAR_SEC
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -407,57 +413,6 @@ class WisselNaarSecretarisView(UserPassesTestMixin, TemplateView):
 
         menu_dynamics(self.request, context)
         return context
-
-
-class ActiveerRolView(UserPassesTestMixin, View):
-    """ Django class-based view om een andere rol aan te nemen """
-
-    # class variables shared by all instances
-    raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
-
-    def test_func(self):
-        """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
-        return self.request.user.is_authenticated and rol_mag_wisselen(self.request)
-
-    def post(self, request, *args, **kwargs):
-        from_ip = get_safe_from_ip(self.request)
-
-        if 'rol' in kwargs:
-            # activeer rol
-            my_logger.info('%s ROL account %s wissel naar rol %s' % (
-                                from_ip,
-                                self.request.user.username,
-                                repr(kwargs['rol'])))
-            rol_activeer_rol(request, kwargs['rol'])
-        else:
-            # activeer functie
-            my_logger.info('%s ROL account %s wissel naar functie %s' % (
-                            from_ip,
-                            self.request.user.username,
-                            repr(kwargs['functie_pk'])))
-            rol_activeer_functie(request, kwargs['functie_pk'])
-
-        rol_beschrijving = rol_get_beschrijving(request)
-        my_logger.info('%s ROL account %s is nu %s' % (from_ip, self.request.user.username, rol_beschrijving))
-
-        # stuur een aantal rollen door naar een functionele pagina
-        # de rest blijft in Wissel van Rol
-        rol_nu, functie_nu = rol_get_huidige_functie(request)
-
-        if rol_nu == Rollen.ROL_BB:
-            return redirect('Plein:plein')
-
-        if rol_nu == Rollen.ROL_SPORTER:
-            return redirect('Plein:plein')
-
-        if rol_nu in (Rollen.ROL_SEC, Rollen.ROL_HWL, Rollen.ROL_WL):
-            return redirect('Vereniging:overzicht')
-
-        if rol_nu in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL):
-            url = get_url_voor_competitie(functie_nu)
-            return redirect(url)
-
-        return redirect('Functie:wissel-van-rol')
 
 
 # end of file

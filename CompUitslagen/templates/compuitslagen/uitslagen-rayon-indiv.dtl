@@ -150,81 +150,86 @@
     {% endif %}
 
 
-    <table class="white">
-        {% for obj in deelnemers %}
+    {% if heeft_deelnemers %}
+        <table class="white">
+            {% for obj in deelnemers %}
 
-            {% if obj.break_klasse %}
-                {% if not obj.is_eerste_break %}
+                {% if obj.break_klasse %}
+                    {% if not obj.is_eerste_break %}
+                        <tr>
+                            <td colspan="7" class="nhb-table-onderrand"></td>
+                        </tr>
+                    {% endif %}
+
                     <tr>
-                        <td colspan="7" class="nhb-table-onderrand"></td>
+                        <td colspan="9" class="center">
+                            <h5>{{ obj.klasse_str }}</h5>
+                            {% if obj.match %}
+                                {% if comp.rk_is_afgelast %}<s>{% endif %}
+                                <span>{{ obj.match.datum_wanneer }} om {{ obj.match.tijd_begin_wedstrijd }} bij {{ obj.match.vereniging }}</span>
+                                {% if obj.match.locatie %}
+                                    <span> ({{ obj.match.adres_str }})</span>
+                                {% endif %}
+                                {% if comp.rk_is_afgelast %}</s>{% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    <tr class="nhb-table-header">
+                        <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
+                        {% if obj.toon_uitslag %}
+                            <th class="center">Plaats</th>
+                            <th>Sporter</th>
+                            <th class="hide-on-small-only">Vereniging</th>
+                            <th colspan="2"><!-- leeg --></th>
+                            <th colspan="2">RK scores</th>      <!-- 2x qual score + totaal; 10/9/8 counts -->
+                        {% else %}
+                            <th></th>   <!-- rank -->
+                            <th>Sporter</th>
+                            <th class="hide-on-small-only">Vereniging</th>
+                            <th class="center">Gemiddelde</th>
+                            <th></th>   <!-- label -->
+                            <th colspan="2">RK scores</th>
+                        {% endif %}
+                        <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
                     </tr>
                 {% endif %}
 
-                <tr>
-                    <td colspan="9" class="center">
-                        <h5>{{ obj.klasse_str }}</h5>
-                        {% if obj.match %}
-                            {% if comp.rk_is_afgelast %}<s>{% endif %}
-                            <span>{{ obj.match.datum_wanneer }} om {{ obj.match.tijd_begin_wedstrijd }} bij {{ obj.match.vereniging }}</span>
-                            {% if obj.match.locatie %}
-                                <span> ({{ obj.match.adres_str }})</span>
-                            {% endif %}
-                            {% if comp.rk_is_afgelast %}</s>{% endif %}
+                <tr{% if obj.geen_deelname %} class="grey-text"{% endif %}>
+                    {% if obj.toon_uitslag%}
+                        <td class="center">{% if not obj.geen_deelname %}{{ obj.result_rank }}{% endif %}</td>
+                        <td>{{ obj.naam_str }}</td>
+                        <td class="hide-on-small-only">{{ obj.ver_str }}</td>
+                        <td colspan="2"></td>
+                        <td>{{ obj.scores_str_1 }}</td>
+                        <td>{{ obj.scores_str_2 }}</td>
+                    {% else %}
+                        <td class="center">{% if not obj.is_reserve %}{{ obj.rank }}{% endif %}</td>
+                        <td>{{ obj.naam_str }}</td>
+                        <td class="hide-on-small-only">{% if obj.geen_deelname_risico %}<del>{{ obj.ver_str }}</del> (geen RK deelname!){% else %}{{ obj.ver_str }}{% endif %}</td>
+                        <td class="center">{{ obj.gemiddelde }}</td>
+                        {% if obj.is_reserve %}
+                            <td><i>Reserve</i></td>
+                        {% elif is_lijst_rk %}
+                            <td>{{ obj.kampioen_label }}</td>
+                        {% else %}
+                            <td></td>
                         {% endif %}
-                    </td>
+                        <td colspan="2"><i class="grey-text">volgt later</i><!-- RK scores --></td>
+                    {% endif %}
                 </tr>
 
-                <tr class="nhb-table-header">
-                    <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
-                    {% if obj.toon_uitslag %}
-                        <th class="center">Plaats</th>
-                        <th>Sporter</th>
-                        <th class="hide-on-small-only">Vereniging</th>
-                        <th colspan="2"><!-- leeg --></th>
-                        <th colspan="2">RK scores</th>      <!-- 2x qual score + totaal; 10/9/8 counts -->
-                    {% else %}
-                        <th></th>   <!-- rank -->
-                        <th>Sporter</th>
-                        <th class="hide-on-small-only">Vereniging</th>
-                        <th class="center">Gemiddelde</th>
-                        <th></th>   <!-- label -->
-                        <th colspan="2">RK scores</th>
-                    {% endif %}
-                    <td rowspan="{{ obj.aantal_regels }}" class="nhb-table-zijrand"></td>
-                </tr>
-            {% endif %}
+            {% endfor %}
 
-            <tr{% if obj.geen_deelname %} class="grey-text"{% endif %}>
-                {% if obj.toon_uitslag%}
-                    <td class="center">{% if not obj.geen_deelname %}{{ obj.result_rank }}{% endif %}</td>
-                    <td>{{ obj.naam_str }}</td>
-                    <td class="hide-on-small-only">{{ obj.ver_str }}</td>
-                    <td colspan="2"></td>
-                    <td>{{ obj.scores_str_1 }}</td>
-                    <td>{{ obj.scores_str_2 }}</td>
-                {% else %}
-                    <td class="center">{% if not obj.is_reserve %}{{ obj.rank }}{% endif %}</td>
-                    <td>{{ obj.naam_str }}</td>
-                    <td class="hide-on-small-only">{% if obj.geen_deelname_risico %}<del>{{ obj.ver_str }}</del> (geen RK deelname!){% else %}{{ obj.ver_str }}{% endif %}</td>
-                    <td class="center">{{ obj.gemiddelde }}</td>
-                    {% if obj.is_reserve %}
-                        <td><i>Reserve</i></td>
-                    {% elif is_lijst_rk %}
-                        <td>{{ obj.kampioen_label }}</td>
-                    {% else %}
-                        <td></td>
-                    {% endif %}
-                    <td colspan="2"><i class="grey-text">volgt later</i><!-- RK scores --></td>
-                {% endif %}
+            <tr>
+                <td colspan="7" class="nhb-table-onderrand"></td>
             </tr>
+        </table>
 
-        {% endfor %}
+    {% else %}
+        <p class="center"><i>Geen deelnemers gevonden voor deze combinatie van filters</i></p>
+    {% endif %}
 
-        <tr>
-            <td colspan="7" class="nhb-table-onderrand"></td>
-        </tr>
-    </table>
-
-    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-uitslagen-rayon-indiv" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compuitslagen-rayon-indiv" %}
 
 {% endblock %}

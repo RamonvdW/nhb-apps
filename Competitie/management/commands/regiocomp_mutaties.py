@@ -29,7 +29,7 @@ from Competitie.operations import (competities_aanmaken, bepaal_startjaar_nieuwe
 from HistComp.models import HistCompetitie, HistCompetitieIndividueel
 from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
-from Taken.taken import maak_taak
+from Taken.operations import maak_taak
 import traceback
 import datetime
 import sys
@@ -960,21 +960,16 @@ class Command(BaseCommand):
             taak_tekst = "Ter info: De deelnemerslijst voor jouw Rayonkampioenschappen zijn zojuist vastgesteld door de BKO"
             taak_log = "[%s] Taak aangemaakt" % now
 
-            for account in functie_rko.accounts.all():
-                # maak een taak aan voor deze BKO
-                maak_taak(toegekend_aan=account,
-                          deadline=taak_deadline,
-                          aangemaakt_door=None,         # systeem
-                          beschrijving=taak_tekst,
-                          handleiding_pagina="",
-                          log=taak_log,
-                          deelcompetitie=deelcomp_rk)
-                rko_namen.append(account.volledige_naam())
-            # for
+            # maak een taak aan voor deze BKO
+            maak_taak(toegekend_aan_functie=functie_rko,
+                      deadline=taak_deadline,
+                      aangemaakt_door=None,         # systeem
+                      beschrijving=taak_tekst,
+                      log=taak_log)
 
             # schrijf in het logboek
             msg = "De deelnemerslijst voor de Rayonkampioenschappen in %s is zojuist vastgesteld." % str(deelcomp_rk.nhb_rayon)
-            msg += '\nDe volgende beheerders zijn geïnformeerd via een taak: %s' % ", ".join(rko_namen)
+            msg += '\nDe %s is geïnformeerd via een taak' % functie_rko
             schrijf_in_logboek(None, "Competitie", msg)
         # for
 
@@ -1245,6 +1240,7 @@ class Command(BaseCommand):
         try:
             self._monitor_nieuwe_mutaties()
         except (DataError, OperationalError, IntegrityError) as exc:  # pragma: no cover
+            # OperationalError treed op bij system shutdown, als database gesloten wordt
             _, _, tb = sys.exc_info()
             lst = traceback.format_tb(tb)
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))

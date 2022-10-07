@@ -144,6 +144,6 @@
         </table>
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-uitslagen-vereniging-indiv" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compuitslagen-vereniging-indiv" %}
 
 {% endblock %}

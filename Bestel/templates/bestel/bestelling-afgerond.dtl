@@ -16,7 +16,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Bestelling afrekenen</h3>
-            <p>Bestelnummer: {{ bestelling.bestel_nr }}</p>
+            <p>Bestelnummer: {{ bestelling.mh_bestel_nr }}</p>
         </div>
     </div>
 
@@ -26,7 +26,7 @@
             <table class="white">
                 <tr>
                     <th class="nhb-column-small">Bestelnummer</th>
-                    <td colspan="2">{{ bestelling.bestel_nr }}</td>
+                    <td colspan="2">{{ bestelling.mh_bestel_nr }}</td>
                 </tr>
                 <tr>
                     <th class="nhb-column-small">Aangemaakt&nbsp;op</th>

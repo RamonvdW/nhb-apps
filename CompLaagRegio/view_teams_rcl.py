@@ -17,11 +17,12 @@ from Competitie.models import (LAAG_REGIO, AG_NUL,
                                RegiocompetitieTeam, RegiocompetitieTeamPoule, RegiocompetitieRondeTeam,
                                CompetitieMutatie, MUTATIE_TEAM_RONDE)
 from Competitie.operations.poules import maak_poule_schema
-from Functie.rol import Rollen, rol_get_huidige_functie
+from Functie.rol import Rollen, rol_get_huidige_functie, rol_get_beschrijving
 from Logboek.models import schrijf_in_logboek
 from NhbStructuur.models import NhbRayon
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
+from codecs import BOM_UTF8
 from types import SimpleNamespace
 import time
 import csv
@@ -268,6 +269,7 @@ class RegioTeamsRCLView(UserPassesTestMixin, RegioTeamsView):
     # class variables shared by all instances
     subset_filter = False
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -282,6 +284,7 @@ class RegioTeamsAlleView(UserPassesTestMixin, RegioTeamsView):
     # class variables shared by all instances
     subset_filter = True    # Rayon selectie
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -295,6 +298,7 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
     """
 
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -319,7 +323,7 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
 
         if deelcomp.functie != self.functie_nu:
             # niet de beheerder
-            raise PermissionDenied()
+            raise PermissionDenied('Verkeerde beheerder')
 
         regio_nr = deelcomp.nhb_regio.regio_nr
 
@@ -334,6 +338,7 @@ class RegioTeamsAlsBestand(UserPassesTestMixin, View):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="aanmeldingen-teams-regio-%s.csv"' % regio_nr
 
+        response.write(BOM_UTF8)
         writer = csv.writer(response,
                             delimiter=";")  # ; is good for import with dutch regional settings
 
@@ -412,6 +417,7 @@ class AGControleView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPREGIO_RCL_AG_CONTROLE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -440,7 +446,7 @@ class AGControleView(UserPassesTestMixin, TemplateView):
 
         if deelcomp.functie != self.functie_nu:
             # niet de beheerder
-            raise PermissionDenied()
+            raise PermissionDenied('Niet de beheerder')
 
         deelcomp.competitie.bepaal_fase()
         if deelcomp.competitie.fase > 'F':
@@ -449,14 +455,14 @@ class AGControleView(UserPassesTestMixin, TemplateView):
         context['deelcomp'] = deelcomp
 
         context['handmatige_ag'] = ag_lijst = list()
+        context['geen_ag'] = geen_ag_lijst = list()
 
         # zoek de schuttersboog met handmatig_ag voor de teamcompetitie
         for obj in (RegioCompetitieSchutterBoog
                     .objects
                     .filter(deelcompetitie=deelcomp,
                             inschrijf_voorkeur_team=True,
-                            ag_voor_team_mag_aangepast_worden=True,
-                            ag_voor_team__gt=0.0)
+                            ag_voor_team_mag_aangepast_worden=True)
                     .select_related('sporterboog',
                                     'sporterboog__sporter',
                                     'sporterboog__boogtype',
@@ -465,21 +471,25 @@ class AGControleView(UserPassesTestMixin, TemplateView):
                               'sporterboog__sporter__lid_nr',
                               'sporterboog__boogtype__volgorde')):
 
-            ver = obj.bij_vereniging
-            obj.ver_str = "[%s] %s" % (ver.ver_nr, ver.naam)
+            obj.ver_str = obj.bij_vereniging.ver_nr_en_naam()
 
-            sporter = obj.sporterboog.sporter
-            obj.naam_str = "[%s] %s" % (sporter.lid_nr, sporter.volledige_naam())
+            obj.naam_str = obj.sporterboog.sporter.lid_nr_en_volledige_naam()
 
             obj.boog_str = obj.sporterboog.boogtype.beschrijving
 
             obj.ag_str = "%.3f" % obj.ag_voor_team
+            obj.ag_str = obj.ag_str.replace('.', ',')
 
-            obj.url_details = reverse('CompLaagRegio:wijzig-ag',
-                                      kwargs={'deelnemer_pk': obj.pk})
+            if obj.ag_voor_team < 0.0001:
+                geen_ag_lijst.append(obj)
+            else:
+                obj.url_details = reverse('CompLaagRegio:wijzig-ag',
+                                          kwargs={'deelnemer_pk': obj.pk})
 
-            ag_lijst.append(obj)
+                ag_lijst.append(obj)
         # for
+
+        context['huidige_rol'] = rol_get_beschrijving(self.request)
 
         comp = deelcomp.competitie
         context['kruimels'] = (
@@ -500,6 +510,7 @@ class StartVolgendeTeamRondeView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPREGIO_RCL_TEAM_RONDE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

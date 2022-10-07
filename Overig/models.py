@@ -10,7 +10,7 @@ from datetime import timedelta
 from Account.models import AccountEmail
 from Competitie.models import KampioenschapSchutterBoog
 from Functie.models import Functie
-from .tijdelijke_url import set_tijdelijke_url_saver
+from Overig.tijdelijke_url import set_tijdelijke_url_saver
 import datetime
 
 

@@ -10,40 +10,40 @@ asgiref==3.5.2
     #   django
 beautifulsoup4==4.11.1
     # via -r requirements_dev.in
-cachetools==5.1.0
+cachetools==5.2.0
     # via
     #   -r requirements_test.txt
     #   google-auth
-certifi==2022.5.18.1
+certifi==2022.9.14
     # via
     #   -r requirements_test.txt
     #   requests
-charset-normalizer==2.0.12
+charset-normalizer==2.1.1
     # via
     #   -r requirements_test.txt
     #   requests
-coverage==6.4
+coverage==6.4.4
     # via -r requirements_dev.in
-django==3.2.13
+django==3.2.15
     # via
     #   -r requirements_test.txt
     #   django-debug-toolbar
     #   django-extensions
-django-debug-toolbar==3.4.0
+django-debug-toolbar==3.6.0
     # via -r requirements_dev.in
-django-extensions==3.1.5
+django-extensions==3.2.1
     # via -r requirements_dev.in
 et-xmlfile==1.1.0
     # via
     #   -r requirements_test.txt
     #   openpyxl
-google-api-core==2.8.0
+google-api-core==2.10.1
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-google-api-python-client==2.49.0
+google-api-python-client==2.62.0
     # via -r requirements_test.txt
-google-auth==2.6.6
+google-auth==2.11.1
     # via
     #   -r requirements_test.txt
     #   google-api-core
@@ -53,24 +53,24 @@ google-auth-httplib2==0.1.0
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-googleapis-common-protos==1.56.1
+googleapis-common-protos==1.56.4
     # via
     #   -r requirements_test.txt
     #   google-api-core
-html5validator==0.4.0
+html5validator==0.4.2
     # via -r requirements_dev.in
 httplib2==0.20.4
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
     #   google-auth-httplib2
-idna==3.3
+idna==3.4
     # via
     #   -r requirements_test.txt
     #   requests
-mollie-api-python==2.12.0
+mollie-api-python==2.13.0
     # via -r requirements_test.txt
-oauthlib==3.2.0
+oauthlib==3.2.1
     # via
     #   -r requirements_test.txt
     #   requests-oauthlib
@@ -78,11 +78,15 @@ openpyxl==3.0.10
     # via -r requirements_test.txt
 packaging==21.3
     # via pip-review
+pillow==9.2.0
+    # via
+    #   -r requirements_test.txt
+    #   reportlab
 pip-licenses==3.5.4
     # via -r requirements_dev.in
-pip-review==1.1.1
+pip-review==1.2.0
     # via -r requirements_dev.in
-protobuf==3.20.1
+protobuf==4.21.6
     # via
     #   -r requirements_test.txt
     #   google-api-core
@@ -100,14 +104,14 @@ pyasn1-modules==0.2.8
     # via
     #   -r requirements_test.txt
     #   google-auth
-pyotp==2.6.0
+pyotp==2.7.0
     # via -r requirements_test.txt
 pyparsing==3.0.9
     # via
     #   -r requirements_test.txt
     #   httplib2
     #   packaging
-pytz==2022.1
+pytz==2022.2.1
     # via
     #   -r requirements_test.txt
     #   django
@@ -115,7 +119,9 @@ pyyaml==6.0
     # via html5validator
 qrcode==7.3.1
     # via -r requirements_test.txt
-requests==2.27.1
+reportlab==3.6.11
+    # via -r requirements_test.txt
+requests==2.28.1
     # via
     #   -r requirements_test.txt
     #   google-api-core
@@ -125,7 +131,7 @@ requests-oauthlib==1.3.1
     # via
     #   -r requirements_test.txt
     #   mollie-api-python
-rsa==4.8
+rsa==4.9
     # via
     #   -r requirements_test.txt
     #   google-auth
@@ -145,7 +151,7 @@ uritemplate==4.1.1
     # via
     #   -r requirements_test.txt
     #   google-api-python-client
-urllib3==1.26.9
+urllib3==1.26.12
     # via
     #   -r requirements_test.txt
     #   mollie-api-python

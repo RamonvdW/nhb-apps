@@ -5,9 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 # set high performance
-sudo cpupower frequency-set --governor performance > /dev/null
+#sudo cpupower frequency-set --governor performance > /dev/null
 
 export PYTHONDONTWRITEBYTECODE=1
+BG_DURATION=60   # minutes (60 is max voor de meeste commando's)
 
 DEBUG=1
 SETTINGS="nhbapps.settings_dev"
@@ -17,12 +18,11 @@ then
     SETTINGS="nhbapps.settings"
 fi
 
-./manage.py check
-[ $? -eq 0 ] || exit 1
+./manage.py check || exit 1
 
 echo "[INFO] Refreshing static files"
-STATIC_DIR="nhbapps/.static"
-rm -rf "$STATIC_DIR"/*
+STATIC_DIR="nhbapps/.static/"
+rm -rf "$STATIC_DIR"*
 ./manage.py collectstatic -l
 
 # start the background processes
@@ -30,21 +30,21 @@ echo "[INFO] Starting Mollie simulator"
 pkill -f websim_betaal
 python3 ./Betaal/test-tools/websim_betaal.py &
 
-echo "[INFO] Starting betaal_mutaties (runtime: 60 minutes)"
+echo "[INFO] Starting betaal_mutaties (runtime: $BG_DURATION minutes)"
 pkill -f betaal_mutaties
-./manage.py betaal_mutaties --settings=$SETTINGS 60 &
+./manage.py betaal_mutaties --settings=$SETTINGS $BG_DURATION &
 
-echo "[INFO] Starting bestel_mutaties (runtime: 60 minutes)"
+echo "[INFO] Starting bestel_mutaties (runtime: $BG_DURATION minutes)"
 pkill -f bestel_mutaties
-./manage.py bestel_mutaties --settings=$SETTINGS 60 &
+./manage.py bestel_mutaties --settings=$SETTINGS $BG_DURATION &
 
-echo "[INFO] Starting regiocomp_mutaties (runtime: 60 minutes)"
+echo "[INFO] Starting regiocomp_mutaties (runtime: $BG_DURATION minutes)"
 pkill -f regiocomp_mutaties
-./manage.py regiocomp_mutaties --settings=$SETTINGS 60 &
+./manage.py regiocomp_mutaties --settings=$SETTINGS $BG_DURATION &
 
-echo "[INFO] Starting regiocomp_tussenstand (runtime: 60 minutes)"
+echo "[INFO] Starting regiocomp_tussenstand (runtime: $BG_DURATION minutes)"
 pkill -f regiocomp_tussenstand
-./manage.py regiocomp_tussenstand --settings=$SETTINGS 60 &
+./manage.py regiocomp_tussenstand --settings=$SETTINGS $BG_DURATION &
 
 # start the development webserver
 if [ $DEBUG -eq 1 ]
@@ -59,7 +59,7 @@ else
 fi
 
 # set normal performance
-sudo cpupower frequency-set --governor schedutil > /dev/null
+#sudo cpupower frequency-set --governor schedutil > /dev/null
 
 # kill the background processes
 echo "[INFO] Stopping background tasks"

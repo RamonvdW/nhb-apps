@@ -1,0 +1,126 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Kortingen{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Kortingen</h3>
+            <p>Kortingen uitgegeven door jullie vereniging</p>
+            <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white" id="tabel1">
+                <thead>
+                    <tr>        <!-- filter veld -->
+                        <td colspan="2"></td>
+                        <td colspan="2" class="table-filter">
+                            <input class="table-filter" oninput="myTableFilter(this, 'tabel1')" placeholder="Zoeken"/>
+                        </td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr>
+                        <th>Geldig tot en met</th>
+                        <th><!-- icoon --></th>
+                        <th data-filter="on">Voor wie</th>
+                        <th data-filter="on">Geldig op wedstrijden</th>
+                        <th>Percentage</th>
+                        <th><!-- kolom voor knoppen --></th>
+                    </tr>
+                </thead>
+
+                {% for korting in kortingen %}
+                    <tr>
+                        <td>{{ korting.geldig_tot_en_met }}</td>
+                        <td><i class="material-icons-round nhb-blauw-text" style="vertical-align:text-bottom; font-size:30px">{{ korting.icon_name }}</i></td>
+                        <td>{{ korting.voor_wie_str|linebreaksbr }}</td>
+                        <td>{{ korting.voor_wedstrijden_str|linebreaksbr }}</td>
+                        <td>{{ korting.percentage }}%</td>
+
+                        <td>
+                            <a class="btn-nhb-rood" href="{{ korting.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">
+                                <i class="material-icons-round">edit</i></a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="center"><i>Er zijn nog geen codes</i></td>
+                    </tr>
+                {% endfor %}
+
+                {% if url_nieuwe_korting %}
+                    <tr data-tablefilter="stop">
+                        <td colspan="6" class="center">
+                            <a class="btn-nhb-rood" href="{{ url_nieuwe_korting }}">
+                                <i class="material-icons-round">add</i></a>
+                            <!--
+                            <form action="{{ url_nieuwe_korting }}" method="post">
+                                {% csrf_token %}
+                                <button class="btn-nhb-rood">
+                                    <i class="material-icons-round">add</i></button>
+                            </form>
+                            -->
+                        </td>
+                    </tr>
+                {% endif %}
+
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Hoe werkt het?</h4>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+                <h5>Algemeen</h5>
+                <p>Kortingen uitgegeven door jouw vereniging zijn alleen bruikbaar op <b>wedstrijden van jouw vereniging</b>.</p>
+                <p>De korting is een <b>percentage</b> dat afgetrokken wordt van de inschrijfprijs van een wedstrijd.</p>
+                <p>Alle kortingen hebben een <b>uiterste datum</b> waarop ze gebruikt kunnen worden.</p>
+                <p>Kortingen worden <b>automatisch</b> toegepast op de inhoud van een mandje.</p>
+                <p>Kortingen stapelen niet (geen korting op korting).</p>
+                <p>In geval van meerdere kortingen wordt automatisch de <b>hoogste</b> korting gegeven.</p>
+                <br>
+                <p>Er zijn drie soorten kortingen: persoonlijk, vereniging en combinatie-korting.</p>
+
+                <br>
+                <h5><i class="material-icons-round nhb-blauw-text" style="vertical-align:middle; font-size:40px">account_circle</i> Persoonlijk</h5>
+                <p>Voor een specifieke sporter (bondsnummer).</p>
+                <p>Kan geldig zijn voor meerdere wedstrijden.</p>
+                <p>Voorbeelden: winnaar van vorig jaar, eventueel voor hele serie wedstrijden.</p>
+
+                <br>
+                <h5><i class="material-icons-round nhb-blauw-text" style="vertical-align:middle; font-size:40px">home</i> Vereniging</h5>
+                <p>Voor alle leden van jullie vereniging.</p>
+                <p>Voorbeelden: eigen leden thuisvoordeel geven</p>
+
+                <br>
+                <h5><i class="material-icons-round nhb-blauw-text" style="vertical-align:middle; font-size:40px">join_full</i> Combinatie-korting</h5>
+                <p>Korting bij inschrijving op meerdere wedstrijden.</p>
+                <p>Voorbeeld: wedstrijd zaterdag + zondag; korting als je beide dagen mee doet.</p>
+            </div>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-kortingen-overzicht" %}
+
+{% endblock %}

@@ -25,7 +25,7 @@
 
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3">
-                <div style="padding:30px">
+                <div class="form-padding">
 
                     <form action="{% url 'Sporter:registreer' %}" method="post">
                         {% csrf_token %}
@@ -90,5 +90,7 @@
             {% include 'plein/card.dtl' with title="Privacyverklaring" text="Lees hier om we omgaan met jouw privacy." icon="security" url=card_url %}
         </div>
     </div>
+
+    <!-- geen feedback: with op_pagina="sporter-registreer-nhb-account" -->
 
 {% endblock %}

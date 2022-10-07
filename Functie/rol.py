@@ -11,7 +11,8 @@ from Account.rechten import account_add_plugin_rechten, account_rechten_is_otp_v
 from Account.models import AccountSessions
 from NhbStructuur.models import NhbVereniging
 from Overig.helpers import get_safe_from_ip
-from .models import Functie, account_needs_vhpg, account_needs_otp
+from Functie.models import Functie
+from Functie.operations import account_needs_vhpg, account_needs_otp
 from types import SimpleNamespace
 from typing import Tuple
 import logging
@@ -35,8 +36,7 @@ class Rollen(enum.IntEnum):
     """
 
     # rollen staan in prio volgorde
-    # dus als je 3 hebt mag je kiezen uit 3 of hoger
-    ROL_BB = 2          # Manager competitiezaken
+    ROL_BB = 2          # Manager Competitiezaken
     ROL_BKO = 3         # BK organisator, specifieke competitie
     ROL_RKO = 4         # RK organisator, specifieke competitie en rayon
     ROL_RCL = 5         # Regiocompetitieleider, specifieke competitie en regio
@@ -44,6 +44,9 @@ class Rollen(enum.IntEnum):
     ROL_WL = 7          # Wedstrijdleider van een vereniging, alle competities
     ROL_SEC = 10        # Secretaris van een vereniging
     ROL_SPORTER = 20    # Individuele sporter en NHB lid
+    ROL_MWZ = 30        # Manager Wedstrijdzaken
+    ROL_MO = 40         # Manager Opleidingen
+    ROL_SUP = 50        # Support
     ROL_NONE = 99       # geen rol
 
     """ LET OP!
@@ -62,21 +65,14 @@ url2rol = {
     'HWL': Rollen.ROL_HWL,
     'WL': Rollen.ROL_WL,
     'SEC': Rollen.ROL_SEC,
+    'MO': Rollen.ROL_MO,
+    'MWZ': Rollen.ROL_MWZ,
+    'support': Rollen.ROL_SUP,
     'sporter': Rollen.ROL_SPORTER,
     'geen': Rollen.ROL_NONE
 }
 
-rol2url = {
-    Rollen.ROL_BB: 'BB',
-    Rollen.ROL_BKO: 'BKO',
-    Rollen.ROL_RKO: 'RKO',
-    Rollen.ROL_RCL: 'RCL',
-    Rollen.ROL_HWL: 'HWL',
-    Rollen.ROL_WL: 'WL',
-    Rollen.ROL_SEC: 'SEC',
-    Rollen.ROL_SPORTER: 'sporter',
-    Rollen.ROL_NONE: 'geen',
-}
+rol2url = {value: key for key, value in url2rol.items()}
 
 
 # plugin administratie
@@ -200,6 +196,13 @@ def rol_zet_sessionvars(account, request):
                     rol = Rollen.ROL_WL
                 elif functie.rol == "SEC":
                     rol = Rollen.ROL_SEC
+                elif functie.rol == "MO":
+                    rol = Rollen.ROL_MO
+                elif functie.rol == "MWZ":
+                    rol = Rollen.ROL_MWZ
+                elif functie.rol == "SUP":
+                    rol = Rollen.ROL_SUP
+
                 if rol:
                     child_tup = (rol, functie.pk)
                     tup = (child_tup, parent_tup)
@@ -300,10 +303,12 @@ def rol_get_huidige(request):
         een rol uit de groep Rollen.ROL_xxx
     """
     try:
-        return request.session[SESSIONVAR_ROL_HUIDIGE]
+        rol = request.session[SESSIONVAR_ROL_HUIDIGE]
+        if not request.user.is_authenticated and rol != Rollen.ROL_NONE:
+            my_logger.warning('{rol_get_huidige} sessie zegt rol=%s voor anon user' % rol)
     except KeyError:
-        pass
-    return Rollen.ROL_NONE
+        rol = Rollen.ROL_NONE
+    return rol
 
 
 def rol_get_huidige_functie(request) -> Tuple[Rollen, Functie]:
@@ -315,21 +320,30 @@ def rol_get_huidige_functie(request) -> Tuple[Rollen, Functie]:
     functie = None
     try:
         functie_pk = request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK]
-    except KeyError:                    # pragma: no cover
+        if not request.user.is_authenticated:
+            my_logger.warning('{rol_get_huidige_functie} sessie zegt functie_pk=%s voor anon user' % functie_pk)
+    except KeyError:
         # geen functie opgeslagen
+        # of geen pk-like nummer
         pass
     else:
-        if functie_pk:
+        if functie_pk:      # filter None
             try:
-                functie = (Functie
-                           .objects
-                           .select_related('nhb_rayon',
-                                           'nhb_regio', 'nhb_regio__rayon',
-                                           'nhb_ver', 'nhb_ver__regio')
-                           .get(pk=functie_pk))
-            except Functie.DoesNotExist:
-                # onverwacht!
+                functie_pk = int(functie_pk)
+            except ValueError:
+                # slecht getal
                 pass
+            else:
+                try:
+                    functie = (Functie
+                               .objects
+                               .select_related('nhb_rayon',
+                                               'nhb_regio', 'nhb_regio__rayon',
+                                               'nhb_ver', 'nhb_ver__regio')
+                               .get(pk=functie_pk))
+                except Functie.DoesNotExist:
+                    # niet bestaande pk
+                    pass
 
     return rol, functie
 
@@ -349,8 +363,10 @@ def rol_bepaal_beschrijving(rol, functie_pk=None):
         functie_naam = ""
 
     if rol == Rollen.ROL_BB:
-        beschr = 'Manager competitiezaken'
-    elif rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC):
+        beschr = 'Manager Competitiezaken'
+    elif rol in (Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
+                 Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC,
+                 Rollen.ROL_MO, Rollen.ROL_SUP, Rollen.ROL_MWZ):
         beschr = functie_naam
     elif rol == Rollen.ROL_SPORTER:
         beschr = 'Sporter'
@@ -393,8 +409,8 @@ def rol_activeer_rol(request, rolurl):
         else:
             # kijk of dit een toegestane rol is
             if nwe_rol == Rollen.ROL_NONE or nwe_rol in rollen_vast:
-                request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = None
                 request.session[SESSIONVAR_ROL_HUIDIGE] = nwe_rol
+                request.session[SESSIONVAR_ROL_HUIDIGE_FUNCTIE_PK] = None
                 request.session[SESSIONVAR_ROL_BESCHRIJVING] = rol_bepaal_beschrijving(nwe_rol)
             else:
                 from_ip = get_safe_from_ip(request)
@@ -431,14 +447,14 @@ def rol_activeer_functie(request, functie_pk):
                     return
             # for
 
-            # IT en BB mogen wisselen naar SEC
+            # IT en BB mogen wisselen naar elke SEC (dit is niet aan de hierarchie toegevoegd)
             account = request.user
             if account.is_authenticated:                            # pragma: no branch
                 if account_rechten_is_otp_verified(request):        # pragma: no branch
                     if account.is_staff or account.is_BB:
                         try:
                             functie = Functie.objects.get(pk=functie_pk)
-                        except Functie.DoesNotExist:                # pragma: no cover
+                        except Functie.DoesNotExist:
                             pass
                         else:
                             # we komen hier alleen voor rollen die niet al in het pallet zitten bij IT/BB
@@ -474,6 +490,12 @@ def functie_expandeer_rol(functie_cache, nhbver_cache, rol_in, functie_in):
         for pk, obj in functie_cache.items():
             if obj.rol == 'BKO':
                 yield Rollen.ROL_BKO, obj.pk
+            elif obj.rol == 'MO':
+                yield Rollen.ROL_MO, obj.pk
+            elif obj.rol == 'MWZ':
+                yield Rollen.ROL_MWZ, obj.pk
+            elif obj.rol == 'SUP':
+                yield Rollen.ROL_SUP, obj.pk
         # for
 
         # deze functie mag de HWL van vereniging in regio 100 aannemen

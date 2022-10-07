@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2019-2020 Ramon van der Winkel.
+#  Copyright (c) 2019-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -14,12 +14,13 @@ def my_watchdog_dtl(sender, **kwargs):      # pragma: no cover
     """ Deze functie wordt aangeroepen als de auto reloader gestart is
         We vragen om de .dtl files van alle applicaties te monitoren
     """
+    print('[INFO] Watching for template edits')
     for root, dirs, files in os.walk('.'):
         if '/templates/' in root:
-            print('Watching %s/*.dtl' % root)
+            # print('Watching %s/*.dtl' % root)
             sender.watch_dir(root, '*.dtl')
         elif '/compiled_static/' in root:
-            print('Watching %s/*' % root)
+            # print('Watching %s/*' % root)
             sender.watch_dir(root, '*')
     # for
 

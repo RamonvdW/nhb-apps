@@ -8,7 +8,7 @@ from django.views.generic import View
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from Functie.rol import Rollen, rol_get_huidige
-from .view_maand import get_url_eerstvolgende_maand_met_wedstrijd
+from Kalender.view_maand import get_url_eerstvolgende_maand_met_wedstrijd
 
 
 class KalenderLandingPageView(View):
@@ -20,10 +20,10 @@ class KalenderLandingPageView(View):
         rol_nu = rol_get_huidige(request)
 
         if rol_nu == Rollen.ROL_BB:
-            url = reverse('Kalender:manager')
+            url = reverse('Wedstrijden:manager')
 
         elif rol_nu == Rollen.ROL_HWL:
-            url = reverse('Kalender:vereniging')
+            url = reverse('Wedstrijden:vereniging')
 
         else:
             url = get_url_eerstvolgende_maand_met_wedstrijd()

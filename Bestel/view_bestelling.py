@@ -10,13 +10,14 @@ from django.urls import reverse
 from django.views.generic import TemplateView, View
 from django.utils.timezone import localtime
 from django.contrib.auth.mixins import UserPassesTestMixin
-from Functie.rol import Rollen, rol_get_huidige
+from BasisTypen.models import ORGANISATIE_IFAA
 from Bestel.models import (Bestelling, BESTELLING_STATUS2STR, BESTELLING_STATUS_WACHT_OP_BETALING,
                            BESTELLING_STATUS_NIEUW, BESTELLING_STATUS_AFGEROND, BESTELLING_STATUS_MISLUKT)
 from Betaal.mutaties import betaal_mutatieverzoek_start_ontvangst
+from Functie.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
+from Wedstrijden.models import WEDSTRIJD_KORTING_COMBI
 from decimal import Decimal
-import json
 
 
 TEMPLATE_TOON_BESTELLINGEN = 'bestel/toon-bestellingen.dtl'
@@ -32,6 +33,7 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_TOON_BESTELLINGEN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -57,12 +59,12 @@ class ToonBestellingenView(UserPassesTestMixin, TemplateView):
 
             for product in (bestelling
                             .producten
-                            .select_related('inschrijving',
-                                            'inschrijving__wedstrijd',
-                                            'inschrijving__sporterboog__sporter')):
+                            .select_related('wedstrijd_inschrijving',
+                                            'wedstrijd_inschrijving__wedstrijd',
+                                            'wedstrijd_inschrijving__sporterboog__sporter')):
 
-                if product.inschrijving:
-                    beschrijving.append(product.inschrijving.korte_beschrijving())
+                if product.wedstrijd_inschrijving:
+                    beschrijving.append(product.wedstrijd_inschrijving.korte_beschrijving())
                 else:
                     beschrijving.append("??")
             # for
@@ -101,6 +103,7 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_BESTELLING_DETAILS
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -121,26 +124,29 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
 
         producten = (bestelling
                      .producten
-                     .select_related('inschrijving',
-                                     'inschrijving__wedstrijd',
-                                     'inschrijving__sessie',
-                                     'inschrijving__sporterboog',
-                                     'inschrijving__sporterboog__boogtype',
-                                     'inschrijving__sporterboog__sporter',
-                                     'inschrijving__sporterboog__sporter__bij_vereniging'))
-                    # TODO: order_by
+                     .select_related('wedstrijd_inschrijving',
+                                     'wedstrijd_inschrijving__wedstrijd',
+                                     'wedstrijd_inschrijving__sessie',
+                                     'wedstrijd_inschrijving__sporterboog',
+                                     'wedstrijd_inschrijving__sporterboog__boogtype',
+                                     'wedstrijd_inschrijving__sporterboog__sporter',
+                                     'wedstrijd_inschrijving__sporterboog__sporter__bij_vereniging')
+                     .order_by('pk'))       # geen schoonheidsprijs, maar wel vaste volgorde
 
         for product in producten:
             # maak een beschrijving van deze regel
             product.beschrijving = beschrijving = list()
 
-            if product.inschrijving:
-                inschrijving = product.inschrijving
+            if product.wedstrijd_inschrijving:
+                inschrijving = product.wedstrijd_inschrijving
 
                 tup = ('Reserveringsnummer', settings.TICKET_NUMMER_START__WEDSTRIJD + inschrijving.pk)
                 beschrijving.append(tup)
 
                 tup = ('Wedstrijd', inschrijving.wedstrijd.titel)
+                beschrijving.append(tup)
+
+                tup = ('Bij vereniging', inschrijving.wedstrijd.organiserende_vereniging)
                 beschrijving.append(tup)
 
                 sessie = inschrijving.sessie
@@ -159,17 +165,36 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
                 tup = ('Van vereniging', ver_naam)
                 beschrijving.append(tup)
 
-                tup = ('Boog', '%s' % sporterboog.boogtype.beschrijving)
+                if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
+                    tup = ('Schietstijl', '%s' % sporterboog.boogtype.beschrijving)
+                else:
+                    tup = ('Boog', '%s' % sporterboog.boogtype.beschrijving)
                 beschrijving.append(tup)
 
-                if inschrijving.gebruikte_code:
-                    korting = inschrijving.gebruikte_code
-                    product.gebruikte_code_str = "code %s (korting: %d%%)" % (korting.code, korting.percentage)
-                    if korting.combi_basis_wedstrijd:
+                if inschrijving.wedstrijd.organisatie == ORGANISATIE_IFAA:
+                    tup = ('Wedstrijdklasse', '%s [%s]' % (inschrijving.wedstrijdklasse.beschrijving,
+                                                           inschrijving.wedstrijdklasse.afkorting))
+                else:
+                    tup = ('Wedstrijdklasse', '%s' % inschrijving.wedstrijdklasse.beschrijving)
+                beschrijving.append(tup)
+
+                tup = ('Locatie', inschrijving.wedstrijd.locatie.adres.replace('\n', ', '))
+                beschrijving.append(tup)
+
+                tup = ('E-mail organisatie', inschrijving.wedstrijd.contact_email)
+                beschrijving.append(tup)
+
+                tup = ('Telefoon organisatie', inschrijving.wedstrijd.contact_telefoon)
+                beschrijving.append(tup)
+
+                if inschrijving.korting:
+                    korting = inschrijving.korting
+                    product.gebruikte_korting_str = "Korting: %d%%" % korting.percentage
+                    if korting.soort == WEDSTRIJD_KORTING_COMBI:
                         product.is_combi_korting = True
                         product.combi_reden = [wedstrijd.titel for wedstrijd in korting.voor_wedstrijden.all()]
                 elif product.korting_euro:
-                    product.gebruikte_code_str = "Onbekende code"
+                    product.gebruikte_korting_str = "Onbekende korting"
                     bevat_fout = True
 
                 controleer_euro += product.prijs_euro
@@ -236,8 +261,15 @@ class ToonBestellingDetailsView(UserPassesTestMixin, TemplateView):
             context['rest_euro'] = rest_euro
 
         if rest_euro >= Decimal('0.01'):
-            context['url_afrekenen'] = reverse('Bestel:bestelling-afrekenen',
-                                               kwargs={'bestel_nr': bestelling.bestel_nr})
+            # betaling is vereist
+
+            if bestelling.ontvanger.moet_handmatig():
+                # betaling moet handmatig
+                context['moet_handmatig'] = True
+            else:
+                # betaling gaat via Mollie
+                context['url_afrekenen'] = reverse('Bestel:bestelling-afrekenen',
+                                                   kwargs={'bestel_nr': bestelling.bestel_nr})
 
         context['url_voorwaarden'] = settings.VERKOOP_VOORWAARDEN_URL
 
@@ -262,6 +294,7 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_BESTELLING_AFREKENEN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -316,8 +349,9 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
         menu_dynamics(self.request, context)
         return context
 
-    def post(self, request, *args, **kwargs):
-        """ deze functie wordt aangeroepen als de gebruiker op de BETALEN knop drukt in de bestelling
+    @staticmethod
+    def post(request, *args, **kwargs):
+        """ deze functie wordt aangeroepen als de gebruiker op de knop BETALEN drukt in de bestelling
             de enige taak van deze functie is een bestelling met status MISLUKT terug zetten naar NIEUW.
         """
 
@@ -343,6 +377,7 @@ class BestellingAfrekenenView(UserPassesTestMixin, TemplateView):
 class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
 
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -353,7 +388,7 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
     def post(request, *args, **kwargs):
         """ Deze functie wordt aangeroepen vanuit de template om te kijken wat de status van de bestelling/betaling is.
 
-            Dit is een POST by design, om caching te voorkomen.
+            Dit is een POST by-design, om caching te voorkomen.
         """
         account = request.user
 
@@ -373,7 +408,7 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
             out['status'] = 'nieuw'
 
             # start een nieuwe transactie op
-            beschrijving = "%s bestelling %s" % (settings.AFSCHRIFT_SITE_NAAM, bestelling.bestel_nr)
+            beschrijving = "%s bestelling %s" % (settings.AFSCHRIFT_SITE_NAAM, bestelling.mh_bestel_nr())
 
             # TODO: is het realistisch dat status NIEUW al transacties heeft?
             rest_euro = bestelling.totaal_euro
@@ -415,7 +450,7 @@ class DynamicBestellingCheckStatus(UserPassesTestMixin, View):
             out['status'] = 'mislukt'
 
         # niet gebruiken: raise Http404('Onbekende status')
-        # want een 404 resulteert in een foutmelding pagina (status 200)
+        # want een 404 leidt tot een foutmelding pagina met status 200 ("OK")
 
         return JsonResponse(out)
 
@@ -429,6 +464,7 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_BESTELLING_AFGEROND
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -470,6 +506,7 @@ class BestellingAfgerondView(UserPassesTestMixin, TemplateView):
 
         if bestelling.status == BESTELLING_STATUS_AFGEROND:
             context['is_afgerond'] = True
+
         elif bestelling.status == BESTELLING_STATUS_WACHT_OP_BETALING:
             # hier komen we als de betaling uitgevoerd is, maar de payment-status-changed nog niet
             # binnen is of nog niet verwerkt door de achtergrondtaak.

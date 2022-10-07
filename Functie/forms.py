@@ -63,6 +63,9 @@ class OTPControleForm(forms.Form):
             otp_code = self.cleaned_data.get('otp_code')
             try:
                 code = int(otp_code)
+                # prevent negative numbers
+                if code < 0 or code > 999999:
+                    raise ValueError()
             except ValueError:
                 self.add_error(None, 'Voer de vereiste code in')
                 valid = False

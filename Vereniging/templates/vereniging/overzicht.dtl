@@ -103,9 +103,9 @@
                 {% include 'plein/card.dtl' with title="Scores invoeren" text="Scores invoeren voor wedstrijden die bij deze vereniging geschoten worden." icon="edit" url=card_url %}
             {% endif %}
 
-            <!-- wedstrijdkalender -->
+            <!-- wedstrijdkalender (alleen voor de HWL) -->
             {% if toon_wedstrijdkalender %}
-                {% url 'Kalender:vereniging' as card_url %}
+                {% url 'Wedstrijden:vereniging' as card_url %}
                 {% include 'plein/card.dtl' with title="Wedstrijdkalender" text="Alle overige wedstrijden die door deze vereniging georganiseerd worden." icon="event_note" url=card_url %}
             {% endif %}
 
@@ -117,7 +117,7 @@
 
         {% if kaartje.heading %}
             <!-- witruimte -->
-            <div class="row center">
+            <div class="row center" id="{{ kaartje.anker }}">
                 <div class="col s12">
                     <h4>{{ kaartje.heading }}</h4>
                     <p>Competitie fase {{ kaartje.comp_fase }}</p>
@@ -189,10 +189,6 @@
             <!-- externe locaties -->
             {% if url_externe_locaties %}
                 {% include 'plein/card.dtl' with title="Wedstrijdlocaties" text="Externe locaties waar jullie vereniging wedstrijden kan organiseren." icon="hiking" url=url_externe_locaties %}
-            {% endif %}
-
-            {% if url_betalingen %}
-                {% include 'plein/card.dtl' with title="Financieel" text="Instellingen om inschrijf-gelden van wedstrijden direct te kunnen ontvangen." icon="euro_symbol" url=url_betalingen %}
             {% endif %}
         </div>
     </div>

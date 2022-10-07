@@ -157,7 +157,7 @@ class Competitie(models.Model):
     begin_jaar = models.PositiveSmallIntegerField()     # 2019
 
     # wanneer moet een schutter lid zijn bij de bond om mee te mogen doen aan de teamcompetitie?
-    uiterste_datum_lid = models.DateField()
+    uiterste_datum_lid = models.DateField()     # TODO: niet meer gebruiken; mag weg
 
     # alle ondersteunde typen bogen en teams
     teamtypen = models.ManyToManyField(TeamType)
@@ -515,6 +515,8 @@ def get_competitie_indiv_leeftijdsklassen(comp):
                    .prefetch_related('leeftijdsklassen')):
         for lkl in klasse.leeftijdsklassen.all():
             if lkl.pk not in pks:
+                # verwijder Uniseks uit de klasse beschrijving omdat dit niet relevant is voor de bondscompetitie
+                lkl.beschrijving = lkl.beschrijving.replace(' Uniseks', '')
                 pks.append(lkl.pk)
                 tup = (lkl.volgorde, lkl.pk, lkl)
                 lijst.append(tup)
@@ -706,7 +708,11 @@ class DeelcompetitieTeamKlasseLimiet(models.Model):
     limiet = models.PositiveSmallIntegerField(default=24)
 
     def __str__(self):
-        return "%s : %s - %s" % (self.limiet, self.team_klasse.beschrijving, self.deelcompetitie)
+        msg = "%s : " % self.limiet
+        if self.team_klasse:
+            msg += "%s - " % self.team_klasse.beschrijving
+        msg += "%s" % self.deelcompetitie
+        return msg
 
     class Meta:
         verbose_name = "Deelcompetitie TeamKlasse Limiet"
@@ -749,6 +755,10 @@ class DeelcompetitieRonde(models.Model):
 
 class RegioCompetitieSchutterBoog(models.Model):
     """ Een sporterboog aangemeld bij een regiocompetitie """
+
+    # wanneer is deze aanmelding gedaan?
+    # (wordt gebruikt om de delta aan de RCL te melden)
+    wanneer_aangemeld = models.DateField(auto_now_add=True)
 
     # bij welke deelcompetitie hoort deze inschrijving?
     deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE)
@@ -827,9 +837,8 @@ class RegioCompetitieSchutterBoog(models.Model):
 
     def __str__(self):
         # deze naam wordt gebruikt in de admin interface, dus kort houden
-        sporter = self.sporterboog.sporter
-        return "[%s] %s (%s)" % (sporter.lid_nr, sporter.volledige_naam(),
-                                 self.sporterboog.boogtype.beschrijving)
+        return "%s (%s)" % (self.sporterboog.sporter.lid_nr_en_volledige_naam(),
+                            self.sporterboog.boogtype.beschrijving)
 
     class Meta:
         verbose_name = "Regiocompetitie Schutterboog"

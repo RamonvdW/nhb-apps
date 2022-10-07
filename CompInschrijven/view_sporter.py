@@ -17,8 +17,8 @@ from Competitie.models import (DeelCompetitie, DeelcompetitieRonde, RegioCompeti
                                DAGDELEN, DAGDEEL_AFKORTINGEN)
 from Competitie.operations import KlasseBepaler
 from Plein.menu import menu_dynamics
-from Score.models import Score, ScoreHist, SCORE_TYPE_INDIV_AG
-from Sporter.models import SporterVoorkeuren, SporterBoog
+from Score.models import AanvangsgemiddeldeHist, Aanvangsgemiddelde, AG_DOEL_INDIV, AG_DOEL_TEAM
+from Sporter.models import SporterVoorkeuren, SporterBoog, get_sporter_voorkeuren
 from decimal import Decimal
 
 
@@ -31,6 +31,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_SPORTER_AANMELDEN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -67,7 +68,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
         if comp.fase < 'B' or comp.fase >= 'F':
             raise Http404('Verkeerde competitie fase')
 
-        # controleer dat sporterboog bij de ingelogde gebruiker hoort
+        # controleer dat sporterboog bij de ingelogde gebruiker hoort;
         # controleer dat deelcompetitie bij de juist regio hoort
         account = self.request.user
         sporter = account.sporter_set.all()[0]      # ROL_SPORTER geeft bescherming tegen geen nhblid
@@ -87,18 +88,23 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
 
         # urlconf parameters geaccepteerd
 
+        voorkeuren = get_sporter_voorkeuren(sporter)
+        if voorkeuren.wedstrijd_geslacht_gekozen:
+            wedstrijdgeslacht = voorkeuren.wedstrijd_geslacht   # M/V
+        else:
+            wedstrijdgeslacht = sporter.geslacht                # M/V/X
+
         # bepaal in welke wedstrijdklasse de sporter komt
         age = sporterboog.sporter.bereken_wedstrijdleeftijd_wa(comp.begin_jaar + 1)
 
         # haal AG op, indien aanwezig
-        scores = Score.objects.filter(sporterboog=sporterboog,
-                                      type=SCORE_TYPE_INDIV_AG,
-                                      afstand_meter=comp.afstand)
+        ags = Aanvangsgemiddelde.objects.filter(sporterboog=sporterboog,
+                                                doel=AG_DOEL_INDIV,
+                                                afstand_meter=comp.afstand)
         ag = Decimal(AG_NUL)
-        if len(scores):
-            score = scores[0]
-            ag = Decimal(score.waarde) / 1000
-            hist = ScoreHist.objects.filter(score=score).order_by('-when')
+        if len(ags):
+            ag = ags[0].waarde
+            hist = AanvangsgemiddeldeHist.objects.filter(ag=ags[0]).order_by('-when')
             if len(hist):
                 context['ag_hist'] = hist[0]
         context['ag'] = ag
@@ -110,7 +116,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
 
         bepaler = KlasseBepaler(comp)
         try:
-            bepaler.bepaal_klasse_deelnemer(aanmelding)
+            bepaler.bepaal_klasse_deelnemer(aanmelding, wedstrijdgeslacht)
         except LookupError as exc:
             raise Http404(str(exc))
 
@@ -209,8 +215,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
 
         context['kruimels'] = (
             (reverse('Sporter:profiel'), 'Mijn pagina'),
-            (None, comp.beschrijving.replace(' competitie', '')),
-            (None, 'Aanmelden')
+            (None, 'Aanmelden ' + comp.beschrijving.replace(' competitie', ''))
         )
 
         menu_dynamics(self.request, context)
@@ -220,7 +225,7 @@ class RegiocompetitieAanmeldenBevestigView(UserPassesTestMixin, TemplateView):
 class RegiocompetitieAanmeldenView(View):
 
     """ Deze class wordt gebruikt om een sporterboog in te schrijven voor een regiocompetitie
-        methode 1 / 2 : direct geaccepteerd
+        methode 1 of 2: direct geaccepteerd
 
         methode 3: nhblid heeft voorkeuren opgegeven: dagdeel, team schieten, opmerking
     """
@@ -264,7 +269,7 @@ class RegiocompetitieAanmeldenView(View):
         if deelcomp.competitie.fase < 'B' or deelcomp.competitie.fase >= 'F':
             raise Http404('Verkeerde competitie fase')
 
-        # controleer dat sporterboog bij de ingelogde gebruiker hoort
+        # controleer dat sporterboog bij de ingelogde gebruiker hoort;
         # controleer dat deelcompetitie bij de juist regio hoort
         if (sporterboog.sporter != sporter
                 or deelcomp.laag != LAAG_REGIO
@@ -282,6 +287,12 @@ class RegiocompetitieAanmeldenView(View):
 
         # urlconf parameters geaccepteerd
 
+        voorkeuren = get_sporter_voorkeuren(sporter)
+        if voorkeuren.wedstrijd_geslacht_gekozen:
+            wedstrijdgeslacht = voorkeuren.wedstrijd_geslacht   # M/V
+        else:
+            wedstrijdgeslacht = sporter.geslacht                # M/V/X
+
         # bepaal de inschrijfmethode voor deze regio
         methode = deelcomp.inschrijf_methode
 
@@ -298,20 +309,32 @@ class RegiocompetitieAanmeldenView(View):
                             aangemeld_door=account)
 
         # haal AG op, indien aanwezig
-        scores = Score.objects.filter(sporterboog=sporterboog,
-                                      type=SCORE_TYPE_INDIV_AG,
-                                      afstand_meter=deelcomp.competitie.afstand)
-        if len(scores):
-            score = scores[0]
-            ag = Decimal(score.waarde) / 1000
-            aanmelding.ag_voor_indiv = ag
-            aanmelding.ag_voor_team = ag
-            if ag > 0.000:
+        ags = Aanvangsgemiddelde.objects.filter(sporterboog=sporterboog,
+                                                doel=AG_DOEL_INDIV,
+                                                afstand_meter=deelcomp.competitie.afstand)
+        if len(ags):
+            ag = ags[0]
+            aanmelding.ag_voor_indiv = ag.waarde
+            aanmelding.ag_voor_team = ag.waarde
+            if ag.waarde > 0.000:
                 aanmelding.ag_voor_team_mag_aangepast_worden = False
+
+        ags = (AanvangsgemiddeldeHist
+               .objects
+               .filter(ag__sporterboog=sporterboog,
+                       ag__doel=AG_DOEL_TEAM,
+                       ag__afstand_meter=deelcomp.competitie.afstand)
+               .order_by('-when'))      # nieuwste eerst
+
+        if len(ags):
+            # iemand heeft een AG ingevoerd voor de teamcompetitie
+            ag = ags[0].ag
+            aanmelding.ag_voor_team = ag.waarde
+            aanmelding.ag_voor_team_mag_aangepast_worden = True
 
         bepaler = KlasseBepaler(deelcomp.competitie)
         try:
-            bepaler.bepaal_klasse_deelnemer(aanmelding)
+            bepaler.bepaal_klasse_deelnemer(aanmelding, wedstrijdgeslacht)
         except LookupError as exc:
             raise Http404(str(exc))
 

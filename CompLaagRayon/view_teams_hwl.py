@@ -11,7 +11,7 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TeamType
-from Competitie.models import (AG_NUL, DeelCompetitie, LAAG_RK, CompetitieTeamKlasse,
+from Competitie.models import (AG_NUL, DeelCompetitie, LAAG_RK,
                                RegioCompetitieSchutterBoog, KampioenschapSchutterBoog, KampioenschapTeam)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
@@ -54,7 +54,7 @@ def bepaal_rk_team_tijdelijke_sterkte_en_klasse(rk_team, open_inschrijving):
             ags.append(deelnemer.gemiddelde)
         # for
 
-    rk_team.klasse = None       # wordt later bepaald, als de teams al bevroren zijn
+    rk_team.team_klasse = None       # wordt later bepaald, als de teams al bevroren zijn
 
     if len(ags) >= 3:
         # bereken de team sterkte: de som van de 3 sterkste sporters
@@ -75,6 +75,7 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPRAYON_VERTEAMS
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -181,9 +182,11 @@ class TeamsRkView(UserPassesTestMixin, TemplateView):
                                                 kwargs={'rk_deelcomp_pk': deelcomp_rk.pk})
 
         comp = deelcomp_rk.competitie
+        url_overzicht = reverse('Vereniging:overzicht')
+        anker = '#competitie_%s' % comp.pk
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, comp.beschrijving.replace(' competitie', '')),
+            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
             (None, 'Teams RK'),
         )
 
@@ -199,6 +202,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPRAYON_VERTEAMS_WIJZIG
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -284,9 +288,11 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
             context['url_verwijderen'] = context['url_opslaan']
 
         comp = deelcomp_rk.competitie
+        url_overzicht = reverse('Vereniging:overzicht')
+        anker = '#competitie_%s' % comp.pk
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, comp.beschrijving.replace(' competitie', '')),
+            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagRayon:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk}), 'Teams RK'),
             (None, 'Wijzig team')
         )
@@ -367,7 +373,7 @@ class WijzigRKTeamsView(UserPassesTestMixin, TemplateView):
 
                     rk_team.team_type = team_type
                     rk_team.aanvangsgemiddelde = 0.0
-                    rk_team.klasse = None
+                    rk_team.team_klasse = None
                     rk_team.save()
 
                     # verwijder eventueel gekoppelde sporters bij wijziging rk_team type,
@@ -397,6 +403,7 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_COMPRAYON_VERTEAMS_KOPPELEN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -541,9 +548,11 @@ class RKTeamsKoppelLedenView(UserPassesTestMixin, TemplateView):
                                              kwargs={'rk_team_pk': rk_team.pk})
 
         comp = deelcomp_rk.competitie
+        url_overzicht = reverse('Vereniging:overzicht')
+        anker = '#competitie_%s' % comp.pk
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, comp.beschrijving.replace(' competitie', '')),
+            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagRayon:teams-rk', kwargs={'rk_deelcomp_pk': deelcomp_rk.pk}), 'Teams RK'),
             (None, 'Koppel teamleden')
         )

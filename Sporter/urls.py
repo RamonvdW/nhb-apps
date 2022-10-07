@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_registreer_nhb, view_profiel, view_voorkeuren, view_leeftijdsklassen
+from Sporter import view_registreer_nhb, view_profiel, view_voorkeuren, view_leeftijdsklassen
 
 
 app_name = 'Sporter'

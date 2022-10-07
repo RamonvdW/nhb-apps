@@ -176,7 +176,34 @@ class Loader(AppDirectoriesLoader):
         return clean
 
     @staticmethod
-    def minify_template(contents):
+    def _minify_css(style):
+        """ Minify the CSS styling (komt uit een <style> tag) """
+
+        style = style.replace('\n', ' ').strip()
+
+        # remove whitespace between elements
+        style = style.replace('{', '{;')
+        style = re.sub(r';\s+\B', ';', style)
+        style = style.replace('{;', '{')
+        style = style.replace('; ', ';')
+
+        # remove whitespace at the start of the style
+        style = re.sub(r'}\s+\B', '}', style)
+
+        style = style.replace(': ', ':')
+        style = style.replace('} ', '}')
+        style = style.replace(' { ', '{')
+
+        # verwijder onnodige puntkomma
+        style = style.replace(';}', '}')
+
+        # print('style: %s' % repr(style))
+
+        return style
+
+    def minify_template(self, contents):
+        """ Minify the complete inhoud van een Django Template (.dtl file) """
+
         # remove /* css block comments */
         contents = re.sub(r'/\*(.*?)\*/', '', contents)
 
@@ -194,8 +221,26 @@ class Loader(AppDirectoriesLoader):
         # remove whitespace between html tags
         contents = re.sub(r'>\s+<', '><', contents)
 
-        # optimize inside style=""
+        # whitespace voor een @import statement in een <style> block
+        contents = re.sub(r'>\s+@import', '>@import', contents)
+
+        # whitespace tussen een css-syntax puntkomma en een block
+        contents = re.sub(r';\s+{%', ';{%', contents)
+
+        # whitespace tussen een endblock en </style>
+        contents = re.sub(r'%}\s+</style>', '%}</style>', contents)
+
         new_contents = ''
+
+        # optimize inside <style>
+        pos = contents.find('<style>')
+        if pos > 0:
+            pos2 = contents.find('</style>')
+            new_contents += contents[:pos+7]        # <style>
+            new_contents += self._minify_css(contents[pos+7:pos2])
+            contents = contents[pos2:]              # </style> and onwards
+
+        # optimize in inline style=""
         pos = contents.find('style="')      # let op: neemt ook img_style="padding:10px" mee
         while pos > 0:
             new_contents += contents[:pos+7]

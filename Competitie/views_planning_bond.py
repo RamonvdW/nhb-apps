@@ -6,15 +6,13 @@
 
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import UserPassesTestMixin
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from .models import (Competitie, CompetitieMatch,
-                     LAAG_REGIO, LAAG_RK, LAAG_BK, DeelCompetitie,
-                     CompetitieMutatie,
-                     MUTATIE_AFSLUITEN_REGIOCOMP)
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieMutatie,
+                               LAAG_REGIO, LAAG_RK, LAAG_BK, MUTATIE_AFSLUITEN_REGIOCOMP)
 
 
 TEMPLATE_COMPETITIE_PLANNING_BOND = 'competitie/planning-landelijk.dtl'
@@ -30,6 +28,7 @@ class BondPlanningView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_PLANNING_BOND
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -87,6 +86,7 @@ class DoorzettenNaarRKView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_DOORZETTEN_NAAR_RK
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -203,6 +203,7 @@ class DoorzettenNaarBKView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_DOORZETTEN_NAAR_BK
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -283,6 +284,7 @@ class DoorzettenVoorbijBKView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_DOORZETTEN_VOORBIJ_BK
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

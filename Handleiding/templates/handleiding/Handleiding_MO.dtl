@@ -1,0 +1,44 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+{% block title %}Handleiding MO{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Handleiding MO</h3>
+        </div>
+    </div>
+
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white left-align" style="padding:10px">
+
+                <p>Deze pagina beschrijft de mogelijkheden voor de Manager opleidingen.</p>
+
+                <h5>Beheer van de opleidingen</h5>
+
+                <ul style="padding-left: 20px">
+                    <li style="list-style-type: disc; padding-left:0">Opleiding aanmaken, alle details instelling en verwijderen</li>
+                    <li style="list-style-type: disc; padding-left:0">Moment vaststellen: locatie, datum/tijd, opleider</li>
+                    <li style="list-style-type: disc; padding-left:0">Deelnemers beheren: van intresse tot definitief of afgemeld</li>
+                </ul>
+
+                <p>&nbsp;</p>
+                <hr>
+                <h5>Verder</h5>
+                <p>Terug naar de <a class="btn-nhb-rood" href="/handleiding/Hoofdpagina/">Hoofdpagina</a></p>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

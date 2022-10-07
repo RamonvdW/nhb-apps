@@ -1,0 +1,97 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Wedstrijd type{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Nieuwe wedstrijd</h3>
+            <p>Kies een van de wedstrijd typen</p>
+        </div>
+    </div>
+
+    <script type="application/javascript">
+        function keuze(optie) {
+            // voer een POST uit om de keuze door te geven
+            const form = document.createElement('form')
+            form.setAttribute('method', 'post')
+            form.setAttribute('action', '{{ url_nieuwe_wedstrijd }}')
+
+            let inp = document.createElement('input')
+            inp.type = "hidden"
+            inp.name = "keuze"
+            inp.value = optie
+            form.appendChild(inp)
+
+            inp = document.createElement('input')
+            inp.type = "hidden"
+            inp.name = "csrfmiddlewaretoken"
+            inp.value = getCookie('csrftoken')
+            form.appendChild(inp)
+
+            form.style.display = 'hidden'
+            document.body.appendChild(form)
+            form.submit()
+        }
+    </script>
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            {% static 'plein/logo_world_archery_225x246.png' as img_src %}
+            {% include 'plein/card_logo.dtl' with text="Volgens de regels, bogen en klassen van World Archery. Bij A-status kunnen records aangevraagd worden." img_height=112 img_src=img_src onclick="keuze('wa')" %}
+
+            {% static 'plein/logo_nhb_192x192.png' as img_src %}
+            {% include 'plein/card_logo.dtl' with text="Meer leeftijdsklassen dan World Archery en eventueel genderneutraal. Gebruik voor verenigingswedstijden." img_height=112 img_src=img_src onclick="keuze('nhb')" %}
+
+            {% static 'plein/logo_ifaa_128x200.png' as img_src %}
+            {% include 'plein/card_logo.dtl' with text="Volgens de regels, bogen en klassen van de IFAA." img_height=132 img_reduce_top=4 img_src=img_src onclick="keuze('ifaa')" %}
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Uitleg verschillen</h4>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+                <h5>World Archery</h5>
+                <p>Vijf typen bogen: Recurve, Compound, Barebow, Traditional en Longbow</p>
+                <p>Vier leeftijdsklassen: Onder 18, Onder 21, 21+ en 50+</p>
+                <p>Scheiding in Mannen en Vrouwen</p>
+                <p>Disciplines: Outdoor, Indoor, Veld, 3D, Clout, Run Archery</p>
+
+                <br>
+                <h5>IFAA</h5>
+                <p>Twaalf schietstijlen: Barebow Recurve/Compound, Freestyle Limited Recurve/Compound/Unlimited, Bowhunter Recurve/Compound/Unlimited/Limited, Traditional Recurve, Longbow, Historical Bow</p>
+                <p>Zes leeftijdsklassen: Welpen, Junioren, Jongvolwassenen, Volwassenen, Veteranen (55+), Senioren (65+)</p>
+                <p>Scheiding in Mannen en Vrouwen</p>
+                <p>Disciplines: 3D</p>
+
+                <br>
+                <h5>NHB</h5>
+                <p>Dezelfde boogtypen als World Archery</p>
+                <p>Zeven leeftijdsklassen: Onder 12, Onder 14, Onder 18, Onder 21, 21+, 50+ en 60+</p>
+                <p>Scheiding in Mannen en Vrouwen of genderneutrale klassen</p>
+                <p>Disciplines: Outdoor, 3D, Veld, Run Archery, Clout, Indoor, 25m 1pijl</p>
+            </div>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-nieuwe-wedstrijd-kies-type" %}
+
+{% endblock %}

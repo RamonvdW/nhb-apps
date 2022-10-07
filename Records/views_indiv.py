@@ -7,7 +7,7 @@
 from django.urls import reverse
 from django.views.generic import TemplateView
 from Plein.menu import menu_dynamics
-from .models import IndivRecord
+from Records.models import IndivRecord
 from types import SimpleNamespace
 
 

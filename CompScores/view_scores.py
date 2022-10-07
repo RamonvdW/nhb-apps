@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.http import HttpResponseRedirect, JsonResponse, Http404
+from django.http import HttpResponseRedirect, JsonResponse, Http404, UnreadablePostError
 from django.urls import reverse
 from django.utils import timezone
 from django.db.models import Count
@@ -37,6 +37,7 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPSCORES_REGIO
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -110,8 +111,8 @@ class ScoresRegioView(UserPassesTestMixin, TemplateView):
                 match.beschrijving = beschrijving
                 match.save()
 
-            # geef RCL de mogelijkheid om te scores aan te passen
-            # de HWL/WL krijgen deze link vanuit Vereniging::Wedstrijden
+            # geef RCL de mogelijkheid om de scores aan te passen
+            # de HWL/WL krijgen deze link vanuit Vereniging.Wedstrijden
             if heeft_uitslag and not match.uitslag.is_bevroren:
                 match.url_uitslag_controleren = reverse('CompScores:uitslag-controleren',
                                                         kwargs={'match_pk': match.pk})
@@ -192,6 +193,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPSCORES_INVOEREN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
     is_controle = False
     kruimel = 'Invoeren'
 
@@ -206,7 +208,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
 
     @staticmethod
     def _team_naam_toevoegen(scores, deelcomp):
-        """ aan elke score de team naam en vsg toevoegen """
+        """ aan elke score de teamnaam en vsg toevoegen """
 
         sporterboog_pks = scores.values_list('sporterboog__pk', flat=True)
 
@@ -283,7 +285,7 @@ class WedstrijdUitslagInvoerenView(UserPassesTestMixin, TemplateView):
                                   'sporterboog__sporter',
                                   'sporterboog__sporter__bij_vereniging')
                   .order_by('sporterboog__sporter__lid_nr',
-                            'sporterboog__pk'))                 # belangrijk ivm zelfde volgorde by dynamisch toevoegen
+                            'sporterboog__pk'))             # belangrijk i.v.m. zelfde volgorde by dynamisch toevoegen
         context['scores'] = scores
 
         self._team_naam_toevoegen(scores, deelcomp)
@@ -361,6 +363,7 @@ class WedstrijdUitslagControlerenView(WedstrijdUitslagInvoerenView):
 class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
 
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -371,12 +374,12 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
     def post(request, *args, **kwargs):
         """ Deze functie wordt aangeroepen als de knop 'waarschijnlijke deelnemers ophalen' gebruikt wordt
 
-            Dit is een POST by design, om caching te voorkomen.
+            Dit is een POST by-design, om caching te voorkomen.
         """
 
         try:
             data = json.loads(request.body)
-        except json.JSONDecodeError:
+        except (json.JSONDecodeError, UnreadablePostError):
             # garbage in
             raise Http404('Geen valide verzoek')
 
@@ -421,6 +424,7 @@ class DynamicDeelnemersOphalenView(UserPassesTestMixin, View):
 class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
 
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -434,7 +438,7 @@ class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
 
         try:
             data = json.loads(request.body)
-        except json.JSONDecodeError:
+        except (json.JSONDecodeError, UnreadablePostError):
             # garbage in
             raise Http404('Geen valide verzoek')
 
@@ -527,6 +531,7 @@ class DynamicZoekOpBondsnummerView(UserPassesTestMixin, View):
 class DynamicScoresOpslaanView(UserPassesTestMixin, View):
 
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -655,7 +660,7 @@ class DynamicScoresOpslaanView(UserPassesTestMixin, View):
 
         try:
             data = json.loads(request.body)
-        except json.JSONDecodeError:
+        except (json.JSONDecodeError, UnreadablePostError):
             # garbage in
             raise Http404('Geen valide verzoek')
 
@@ -696,6 +701,7 @@ class WedstrijdUitslagBekijkenView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPSCORES_BEKIJKEN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -719,7 +725,7 @@ class WedstrijdUitslagBekijkenView(UserPassesTestMixin, TemplateView):
                                   'sporterboog__boogtype',
                                   'sporterboog__sporter'))
 
-        # maak een opzoek tabel voor de huidige vereniging van elke sporterboog
+        # maak een opzoektabel voor de huidige vereniging van elke sporterboog
         sporterboog_pks = [score.sporterboog.pk for score in scores]
         regioschutters = (RegioCompetitieSchutterBoog
                           .objects
@@ -733,7 +739,7 @@ class WedstrijdUitslagBekijkenView(UserPassesTestMixin, TemplateView):
         # for
 
         for score in scores:
-            score.schutter_str = score.sporterboog.sporter.volledige_naam()
+            score.schutter_str = score.sporterboog.sporter.lid_nr_en_volledige_naam()
             score.lid_nr = score.sporterboog.sporter.lid_nr
             score.boog_str = score.sporterboog.boogtype.beschrijving
             try:
@@ -774,6 +780,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPSCORES_TEAMS
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -1140,7 +1147,7 @@ class ScoresRegioTeamsView(UserPassesTestMixin, TemplateView):
             ronde_team.scores_feitelijk.set(score_pks)
         # for
 
-        # trigger de achtergrondtaak om de team scores opnieuw te berekenen
+        # trigger de achtergrondtaak om de teamscores opnieuw te berekenen
         update_uitslag_teamcompetitie()
 
         url = reverse('CompLaagRegio:start-volgende-team-ronde', kwargs={'deelcomp_pk': deelcomp.pk})

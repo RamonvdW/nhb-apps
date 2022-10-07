@@ -25,6 +25,7 @@ class LedenLijstView(UserPassesTestMixin, ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_LEDENLIJST
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
     kruimel = 'Ledenlijst'
 
     def __init__(self, **kwargs):

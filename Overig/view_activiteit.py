@@ -11,14 +11,13 @@ from django.views.generic import TemplateView
 from django.utils.formats import date_format
 from django.db.models import F, Count
 from django.utils import timezone
-from django.conf import settings
 from django.urls import reverse
 from Account.models import Account, AccountEmail, AccountSessions
 from Functie.models import Functie, VerklaringHanterenPersoonsgegevens
 from Functie.rol import SESSIONVAR_ROL_HUIDIGE, SESSIONVAR_ROL_MAG_WISSELEN, rol2url, rol_get_huidige, Rollen
+from Overig.forms import ZoekAccountForm
 from Plein.menu import menu_dynamics
 from Sporter.models import Sporter
-from .forms import ZoekAccountForm
 import datetime
 
 
@@ -32,11 +31,12 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_ACTIVITEIT
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.rol_nu = Rollen.ROL_NONE
-        self.sort_level = {'BKO': 10000, 'RKO': 500, 'RCL': 40, 'SEC': 3, 'HWL': 2, 'WL': 1}
+        self.sort_level = {'MO': 20000, 'BKO': 10000, 'RKO': 500, 'RCL': 40, 'SEC': 3, 'HWL': 2, 'WL': 1}
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -207,7 +207,7 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                     sporter.tweede_factor_str = 'Ja'
                     if account.otp_controle_gelukt_op:
                         sporter.tweede_factor_str += ' (check gelukt op %s)' % date_format(account.otp_controle_gelukt_op.astimezone(to_tz), 'j F Y H:i').replace(current_year_str, '')
-                    # sporter.kan_loskoppelen = True
+                    sporter.kan_loskoppelen = True
                 elif account.functie_set.count() == 0:
                     sporter.tweede_factor_str = 'n.v.t.'
                     do_vhpg = False
@@ -228,12 +228,14 @@ class ActiviteitView(UserPassesTestMixin, TemplateView):
                         opnieuw = opnieuw.astimezone(to_tz)
                         now = timezone.now()
                         if opnieuw < now:
-                            sporter.vhpg_str = 'Verlopen (geaccepteerd op %s)' % date_format(vhpg.acceptatie_datum, 'j F H:i')
+                            sporter.vhpg_str = 'Verlopen (geaccepteerd op %s)' % date_format(vhpg.acceptatie_datum, 'j F Y H:i').replace(current_year_str, '')
                         else:
-                            sporter.vhpg_str = 'Ja (op %s)' % date_format(vhpg.acceptatie_datum.astimezone(to_tz), 'j F H:i')
+                            sporter.vhpg_str = 'Ja (op %s)' % date_format(vhpg.acceptatie_datum.astimezone(to_tz), 'j F Y H:i').replace(current_year_str, '')
 
                 sporter.functies = account.functie_set.order_by('beschrijving')
         # for
+
+        context['url_reset_tweede_factor'] = reverse('Functie:otp-loskoppelen')
 
         # toon sessies
         if not context:     # aka "never without complains"     # pragma: no cover

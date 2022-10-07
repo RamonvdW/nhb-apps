@@ -14,7 +14,7 @@ from BasisTypen.models import (BoogType,
                                GESLACHT_MV_MEERVOUD, ORGANISATIE_IFAA)
 from Functie.rol import Rollen, rol_get_huidige, rol_get_huidige_functie, rol_mag_wisselen
 from Plein.menu import menu_dynamics
-from .models import Sporter, SporterBoog, get_sporter_voorkeuren
+from Sporter.models import Sporter, SporterBoog, get_sporter_voorkeuren
 from types import SimpleNamespace
 import logging
 
@@ -30,6 +30,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_VOORKEUREN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -56,7 +57,7 @@ class VoorkeurenView(UserPassesTestMixin, TemplateView):
                 raise Http404('Sporter niet gevonden')
 
             try:
-                sporter = Sporter.objects.get(pk=sporter_pk)
+                sporter = Sporter.objects.select_related('bij_vereniging').get(pk=sporter_pk)
             except Sporter.DoesNotExist:
                 raise Http404('Sporter niet gevonden')
 

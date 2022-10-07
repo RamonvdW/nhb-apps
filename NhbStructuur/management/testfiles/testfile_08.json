@@ -32,7 +32,9 @@
      "iso_abbr": null,
      "latitude": null,
      "longitude": null,
-     "coc_number": null
+     "coc_number": null,
+     "iban": "NL91ABNA0417164300",
+     "bic": "ABNANL2A"
     },
     {"club_number": 1001,
      "region_number": 199,
@@ -53,7 +55,9 @@
      "iso_abbr": null,
      "latitude": null,
      "longitude": null,
-     "coc_number": null
+     "coc_number": null,
+     "iban": null,
+     "bic": null
     },
     {"club_number": 1002,
      "region_number": 199,
@@ -74,7 +78,9 @@
      "iso_abbr": null,
      "latitude": null,
      "longitude": null,
-     "coc_number": "X15"
+     "coc_number": "X15",
+     "iban": null,
+     "bic": null
     },
     {"club_number": 1042,
      "region_number": 113,
@@ -93,7 +99,9 @@
      "iso_abbr": null,
      "latitude": null,
      "longitude": null,
-     "coc_number": "1234"
+     "coc_number": "1234",
+     "iban": null,
+     "bic": null
     }
   ],
   "members": [
@@ -106,11 +114,15 @@
       "gender": "F",
       "email": "",
       "birthday": "2000-02-01",
+      "birthplace": null,
       "member_from": "2000-01-01",
       "para_code": null,
       "address": null,
       "postal_code": null,
       "location_name": null,
+      "phone_business": null,
+      "phone_private": null,
+      "phone_mobile": null,
       "iso_abbr": null,
       "latitude": null,
       "longitude": null,

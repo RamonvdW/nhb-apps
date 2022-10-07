@@ -1,0 +1,59 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Nieuwe korting{% endblock %}
+
+{% block pagina %}
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Nieuwe korting</h3>
+            <p>Kies het type korting</p>
+        </div>
+    </div>
+
+    <script type="application/javascript">
+        function keuze(optie) {
+            // voer een POST uit om de keuze door te geven
+            const form = document.createElement('form')
+            form.setAttribute('method', 'post')
+            form.setAttribute('action', '{{ url_nieuwe_korting }}')
+
+            let inp = document.createElement('input')
+            inp.type = "hidden"
+            inp.name = "keuze"
+            inp.value = optie
+            form.appendChild(inp)
+
+            inp = document.createElement('input')
+            inp.type = "hidden"
+            inp.name = "csrfmiddlewaretoken"
+            inp.value = getCookie('csrftoken')
+            form.appendChild(inp)
+
+            form.style.display = 'hidden'
+            document.body.appendChild(form)
+            form.submit()
+        }
+    </script>
+
+    <!-- blauwe balk met kaartjes -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            {% include 'plein/card.dtl' with title="Persoonlijk" text="Voor een individuele sporter." icon="account_circle" onclick="keuze('sporter')" %}
+
+            {% include 'plein/card.dtl' with title="Vereniging" text="Voor alle leden van jullie vereniging." icon="home" onclick="keuze('vereniging')" %}
+
+            {% include 'plein/card.dtl' with title="Combinatie" text="Voor inschrijving op meerdere wedstrijden." icon="join_full" onclick="keuze('combi')" %}
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-korting-nieuw-kies" %}
+
+{% endblock %}

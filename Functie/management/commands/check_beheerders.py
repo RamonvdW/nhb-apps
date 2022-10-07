@@ -58,18 +58,19 @@ class Command(BaseCommand):
         for sporter in (Sporter
                         .objects
                         .select_related('account')
-                        .filter(account__otp_is_actief=True,
-                                account__is_BB=False)       # BB moet 2FA hebben (maar hoeven geen functie te hebben)
+                        .filter(account__otp_is_actief=True)
+                        .exclude(account__is_BB=True)
+                        .exclude(account__is_staff=True)
+                        .exclude(account__is_superuser=True)
                         .prefetch_related('account__functie_set')
                         .order_by('lid_nr')):
 
             account = sporter.account
-            if not (account.is_BB or account.is_staff or account.is_superuser):
-                if account.functie_set.count() == 0:
-                    let_op = ''
-                    if not sporter.is_actief_lid:
-                        let_op = 'LET OP: geen actief lid'
-                    self.stdout.write('  %s  %s' % (sporter.lid_nr_en_volledige_naam(), let_op))
+            if account.functie_set.count() == 0:
+                let_op = ''
+                if not sporter.is_actief_lid:
+                    let_op = 'LET OP: geen actief lid'
+                self.stdout.write('  %s  %s' % (sporter.lid_nr_en_volledige_naam(), let_op))
         # for
 
 # end of file

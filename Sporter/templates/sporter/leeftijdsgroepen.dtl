@@ -59,49 +59,103 @@
                 </thead>
 
                 <tr>
-                    <td>Onder 12 (aspirant)</td>
-                    <td>-</td>
-                    <td>11</td>
-                    <td>Onder 14, Onder 18, Onder 21, 21+</td>
-                </tr>
-
-                <tr>
-                    <td>Onder 14 (aspirant)</td>
-                    <td>-</td>
-                    <td>13</td>
-                    <td>Onder 18, Onder 21, 21+</td>
-                </tr>
-
-                <tr>
-                    <td>Onder 18 (cadet)</td>
+                    <td>Onder 18</td>
                     <td>-</td>
                     <td>17</td>
                     <td>Onder 21, 21+</td>
                 </tr>
 
                 <tr>
-                    <td>Onder 21 (junior)</td>
+                    <td>Onder 21</td>
                     <td>-</td>
                     <td>20</td>
                     <td>21+</td>
                 </tr>
 
                 <tr>
-                    <td>21+ (senior)</td>
+                    <td>21+</td>
                     <td>21</td>
                     <td>-</td>
                     <td>-</td>
                 </tr>
 
                 <tr>
-                    <td>50+ (master)</td>
+                    <td>50+</td>
+                    <td>50</td>
+                    <td>-</td>
+                    <td>21+</td>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Leeftijds<wbr>klassen NHB</h4>
+            <p>De NHB wedstrijdklassen zijn gebaseerd op World Archery met uitbreidingen voor de jongste en oudste sporters.</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white">
+                <thead>
+                    <tr>
+                        <th>Leeftijds<wbr>klasse</th>
+                        <th>Vanaf het jaar<br>waarin je deze leeftijd bereikt</th>
+                        <th>Tot en met het jaar<br>waarin je deze leeftijd bereikt</th>
+                        <th>Andere klassen waarin je uit mag komen</th>
+                    </tr>
+                </thead>
+
+                <tr>
+                    <td>Onder 12</td>
+                    <td>-</td>
+                    <td>11</td>
+                    <td>Onder 14, Onder 18, Onder 21, 21+</td>
+                </tr>
+
+                <tr>
+                    <td>Onder 14</td>
+                    <td>-</td>
+                    <td>13</td>
+                    <td>Onder 18, Onder 21, 21+</td>
+                </tr>
+
+                <tr>
+                    <td>Onder 18</td>
+                    <td>-</td>
+                    <td>17</td>
+                    <td>Onder 21, 21+</td>
+                </tr>
+
+                <tr>
+                    <td>Onder 21</td>
+                    <td>-</td>
+                    <td>20</td>
+                    <td>21+</td>
+                </tr>
+
+                <tr>
+                    <td>21+</td>
+                    <td>21</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>
+
+                <tr>
+                    <td>50+</td>
                     <td>50</td>
                     <td>-</td>
                     <td>21+</td>
                 </tr>
 
                 <tr>
-                    <td>60+ (veteraan)</td>
+                    <td>60+</td>
                     <td>60</td>
                     <td>-</td>
                     <td>50+, 21+</td>
@@ -157,7 +211,7 @@
                 <tr>
                     <td>Volwassen</td>
                     <td>21</td>
-                    <td>54</td>
+                    <td>-</td>
                     <td>-</td>
                 </tr>
 
@@ -203,31 +257,31 @@
                 </thead>
 
                 <tr>
-                    <td>Onder 12 (aspirant)</td>
+                    <td>Onder 12</td>
                     <td>Geboren {{ comp_1.onder12 }} of later</td>
                     <td>Geboren {{ comp_2.onder12 }} of later</td>
                 </tr>
 
                 <tr>
-                    <td>Onder 14 (aspirant)</td>
+                    <td>Onder 14</td>
                     <td>Geboren {{ comp_1.onder14 }}</td>
                     <td>Geboren {{ comp_2.onder14 }}</td>
                 </tr>
 
                 <tr>
-                    <td>Onder 18 (cadet)</td>
+                    <td>Onder 18</td>
                     <td>Geboren {{ comp_1.onder18 }}</td>
                     <td>Geboren {{ comp_2.onder18 }}</td>
                 </tr>
 
                 <tr>
-                    <td>Onder 21 (junior)</td>
+                    <td>Onder 21</td>
                     <td>Geboren {{ comp_1.onder21 }}</td>
                     <td>Geboren {{ comp_2.onder21 }}</td>
                 </tr>
 
                 <tr>
-                    <td>21+ (senior)</td>
+                    <td>21+</td>
                     <td>Geboren {{ comp_1.vanaf21 }} of eerder</td>
                     <td>Geboren {{ comp_2.vanaf21 }} of eerder</td>
                 </tr>
@@ -236,7 +290,7 @@
         </div>
     </div>
 
-    <p class="center">De klassen 50+ (master) en 60+ (veteraan) zijn niet in gebruik in de bondscompetities.</p>
+    <p class="center">De klassen 50+ en 60+ zijn niet in gebruik in de bondscompetities.</p>
 
     {% include 'feedback/sidebar.dtl' with op_pagina="sporter-leeftijdsgroepen" %}
 

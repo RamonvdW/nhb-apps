@@ -4,5 +4,6 @@
 -r requirements.txt
 
 # add-ons for test environment:
+reportlab
 
 # end of file

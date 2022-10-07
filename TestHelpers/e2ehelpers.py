@@ -12,7 +12,8 @@ from django.db import connection
 from Account.models import Account
 from Account.operations import account_create
 from Functie.view_vhpg import account_vhpg_is_geaccepteerd
-from TestHelpers.e2estatus import validated_templates, included_templates
+from Mailer.models import MailQueue
+from TestHelpers.e2estatus import validated_templates, included_templates, consistent_email_templates
 from contextlib import contextmanager
 from bs4 import BeautifulSoup
 import subprocess
@@ -102,8 +103,10 @@ class E2EHelpers(TestCase):
 
     @staticmethod
     def _get_useful_template_name(response):
-        lst = [tmpl.name for tmpl in response.templates if tmpl.name not in included_templates and not tmpl.name.startswith('django/forms')]
-        return ", ".join(lst)
+        lst = [tmpl.name for tmpl in response.templates if tmpl.name not in included_templates and not tmpl.name.startswith('django/forms') and not tmpl.name.startswith('email_')]
+        if len(lst) > 1:        # pragma: no cover
+            print('[WARNING] e2ehelpers._get_useful_template_name: too many choices!!! %s' % repr(lst))
+        return lst[0]
 
     def e2e_create_account(self, username, email, voornaam, accepteer_vhpg=False):
         """ Maak een Account met AccountEmail aan in de database van de website """
@@ -171,6 +174,10 @@ class E2EHelpers(TestCase):
         elif functie.rol in ('BKO', 'RKO', 'RCL') and resp.url.startswith('/bondscompetities/'):    # pragma: no branch
             # als er geen competitie is, dan verwijst deze alsnog naar wissel-van-rol
             self.assert_is_redirect(resp, '/bondscompetities/##')
+        elif functie.rol == "MO":
+            self.assert_is_redirect(resp, '/opleidingen/manager/')
+        elif functie.rol == "SUP":
+            self.assert_is_redirect(resp, '/feedback/inzicht/')
         else:
             self.assert_is_redirect(resp, '/functie/wissel-van-rol/')                               # pragma: no cover
 
@@ -306,7 +313,21 @@ class E2EHelpers(TestCase):
         # while
         return checked, unchecked
 
-    SAFE_LINKS = ('/plein/', '/sporter/', '/bondscompetities/', '/records/', '/account/login/', '/account/logout/')
+    @staticmethod
+    def _get_error_msg_from_403_page(resp):                                         # pragma: no cover
+        error_msg = '??403??'
+        pagina = str(resp.content)
+        pos = pagina.find('<code>')
+        pos2 = pagina.find('</code>')
+        if pos > 0 and pos2 > 0:
+            error_msg = pagina[pos+6:pos2]
+        elif 'We hebben geen extra informatie over deze situatie' in pagina:
+            error_msg = '<not provided>'
+        else:
+            print('_get_error_msg_from_403_page: pagina=%s' % repr(pagina))
+        return error_msg
+
+    SAFE_LINKS = ('/plein/', '/bondscompetities/', '/records/', '/account/login/', '/account/logout/')
 
     def _test_link(self, link, template_name):
         """ make sure the link works """
@@ -314,9 +335,29 @@ class E2EHelpers(TestCase):
             return
 
         resp = self.client.head(link)
+
+        if resp.status_code == 302:                                                 # pragma: no cover
+            self.fail(msg='Found NOK href %s that gives code 302 (redirect to %s) on page %s' % (
+                        repr(link), resp.url, template_name))
+
         if resp.status_code != 200:                                                 # pragma: no cover
-            self.fail(msg='Found NOK href (gives code %s) on page %s (href=%s)' % (
-                resp.status_code, template_name, repr(link)))
+            self.e2e_dump_resp(resp)
+            self.fail(msg='Found NOK href %s that gives code %s on page %s' % (
+                        repr(link), resp.status_code, template_name))
+
+        # 403 and 404 also have status_code 200 but use a special template
+        for templ in resp.templates:
+            if templ.name == 'plein/fout_403.dtl':                                  # pragma: no cover
+                # haal de hele pagina op, inclusief de foutmelding
+                resp = self.client.get(link)
+                error_msg = self._get_error_msg_from_403_page(resp)
+                self.fail(msg='Found NOK href %s that gives code 403 with message "%s" on page %s' % (
+                            repr(link), error_msg, template_name))
+
+            if templ.name == 'plein/fout_404.dtl':                                  # pragma: no cover
+                self.fail(msg='Found NOK href %s that gives code 404 on page %s' % (
+                            repr(link), template_name))
+        # for
 
     def assert_broodkruimels(self, content, template_name):
         # find the start
@@ -328,7 +369,7 @@ class E2EHelpers(TestCase):
             pos = content.find('class="broodkruimels-link" href="')
         # while
 
-    def assert_link_quality(self, content, template_name):
+    def assert_link_quality(self, content, template_name, is_email=False):
         """ assert the quality of links
             - links to external sites must have target="_blank" and rel="noopener noreferrer"
             - links should not be empty
@@ -356,7 +397,7 @@ class E2EHelpers(TestCase):
                             # these must target a blank window
                             if 'target="_blank"' not in link:            # pragma: no cover
                                 self.fail(msg='Missing target="_blank" in link %s on page %s' % (link, template_name))
-                            if 'rel="noopener noreferrer"' not in link:  # pragma: no cover
+                            if not is_email and 'rel="noopener noreferrer"' not in link:  # pragma: no cover
                                 self.fail(msg='Missing rel="noopener noreferrer" in link %s on page %s' % (link, template_name))
             else:
                 content = ''
@@ -445,7 +486,7 @@ class E2EHelpers(TestCase):
         'main', 'nav', 'noscript', 'ol', 'p', 'pre', 'pre', 'section', 'table', 'tfoot', 'ul', 'video'
     )
 
-    def _assert_no_div_in_p(self, response, html):
+    def _assert_no_div_in_p(self, html, dtl):
         pos = html.find('<p')
         while pos >= 0:
             html = html[pos+2:]
@@ -458,7 +499,7 @@ class E2EHelpers(TestCase):
                     elem_pos -= 20
                     if elem_pos < 0:
                         elem_pos = 0
-                    msg = "Bad HTML (template: %s):" % self._get_useful_template_name(response)
+                    msg = "Bad HTML (template: %s):" % dtl
                     msg += "\n   Found block-level element '%s' inside 'p'" % elem
                     msg = msg + "\n   ==> " + sub[elem_pos:elem_pos+40]
                     self.fail(msg)
@@ -486,16 +527,7 @@ class E2EHelpers(TestCase):
             pos = text.find("class=")
         # while
 
-    def assert_html_ok(self, response):
-        """ Doe een aantal basic checks op een html response """
-        html = response.content.decode('utf-8')
-        html = self._remove_debug_toolbar(html)
-
-        dtl = self._get_useful_template_name(response)
-        # print('useful template names:', dtl)
-        if dtl not in validated_templates:
-            validated_templates.append(dtl)
-
+    def _assert_html_basics(self, html, dtl):
         self.assertIn("<!DOCTYPE html>", html, msg='Missing DOCTYPE at start of %s' % dtl)
         self.assertIn("<html", html, msg='Missing <html in %s' % dtl)
         self.assertIn("<head", html, msg='Missing <head in %s' % dtl)
@@ -507,12 +539,25 @@ class E2EHelpers(TestCase):
         self.assertNotIn('<th/>', html, msg='Illegal <th/> must be replaced with <th></th> in %s' % dtl)
         self.assertNotIn('<td/>', html, msg='Illegal <td/> must be replaced with <td></td> in %s' % dtl)
         self.assertNotIn('<thead><th>', html, msg='Missing <tr> between <thead> and <th> in %s' % dtl)
+
+    def assert_html_ok(self, response):
+        """ Doe een aantal basic checks op een html response """
+        html = response.content.decode('utf-8')
+        html = self._remove_debug_toolbar(html)
+
+        dtl = self._get_useful_template_name(response)
+        # print('useful template name:', dtl)
+        if dtl not in validated_templates:
+            validated_templates.append(dtl)
+
+        self._assert_html_basics(html, dtl)
+
         self.assertNotIn('<script>', html, msg='Missing type="application/javascript" in <script> in %s' % dtl)
 
         self.assert_link_quality(html, dtl)
         self.assert_broodkruimels(html, dtl)
         self.assert_scripts_clean(html, dtl)
-        self._assert_no_div_in_p(response, html)
+        self._assert_no_div_in_p(html, dtl)
         self._assert_no_col_white(html, dtl)
 
         urls = self.extract_all_urls(response)
@@ -525,6 +570,28 @@ class E2EHelpers(TestCase):
             issues = self._validate_html(html)
             if len(issues):
                 msg = 'Invalid HTML (template: %s):\n' % dtl
+                for issue in issues:
+                    msg += "    %s\n" % issue
+                # for
+                self.fail(msg=msg)
+
+    def assert_email_html_ok(self, mail: MailQueue):
+        html = mail.mail_html
+        template_name = mail.template_used
+
+        if template_name not in validated_templates:          # pragma: no branch
+            validated_templates.append(template_name)
+
+        self._assert_html_basics(html, template_name)
+
+        self.assertNotIn('<script>', html, msg='Unexpected script in e-mail HTML (template: %s)' % template_name)
+        self.assert_link_quality(html, template_name, is_email=True)
+        self._assert_no_div_in_p(html, template_name)
+
+        if settings.TEST_VALIDATE_HTML:             # pragma: no cover
+            issues = self._validate_html(html)
+            if len(issues):
+                msg = 'Invalid HTML (template: %s):\n' % template_name
                 for issue in issues:
                     msg += "    %s\n" % issue
                 # for
@@ -737,7 +804,7 @@ class E2EHelpers(TestCase):
                         print('-----')
                     print('%5s %s' % (count, msg[7:]))
 
-    def assert403(self, resp, expected_msg=''):
+    def assert403(self, resp, expected_msg='Geen toegang'):
         # controleer dat we op de speciale code-403 handler pagina gekomen zijn
         # of een redirect hebben gekregen naar de login pagina
 
@@ -756,9 +823,9 @@ class E2EHelpers(TestCase):
             self.assertEqual(resp.status_code, 200)
             self.assert_template_used(resp, ('plein/fout_403.dtl', 'plein/site_layout_minimaal.dtl'))
 
-            if expected_msg:
+            if expected_msg:                                                        # pragma: no branch
                 pagina = str(resp.content)
-                if expected_msg not in pagina:                                          # pragma: no cover
+                if expected_msg not in pagina:                                      # pragma: no cover
                     # haal de nuttige regel informatie uit de 403 pagina en toon die
                     pos = pagina.find('<code>')
                     pagina = pagina[pos+6:]
@@ -806,6 +873,22 @@ class E2EHelpers(TestCase):
         header = resp['Content-Disposition']
         if not header.startswith('attachment; filename'):           # pragma: no cover
             self.fail(msg="Response is geen file attachment")
+
+    def run_management_command(self, *args, report_exit_code=True):
+        """ Helper om code duplicate te verminderen en bij een SystemExit toch de traceback (in stderr) te tonen """
+        f1 = io.StringIO()
+        f2 = io.StringIO()
+        try:
+            management.call_command(*args, stderr=f1, stdout=f2)
+        except SystemExit as exc:
+            if report_exit_code:                # pragma: no cover
+                msg = '\nmanagement commando genereerde een SystemExit\n'
+                msg += 'commando: %s\n' % repr(args)
+                msg += 'stderr:\n'
+                msg += f1.getvalue()
+                msg = msg.replace('\n', '\n  ')
+                raise self.failureException(msg) from exc
+        return f1, f2
 
     def verwerk_regiocomp_mutaties(self, show_warnings=True, show_all=False):
         # vraag de achtergrondtaak om de mutaties te verwerken
@@ -861,5 +944,176 @@ class E2EHelpers(TestCase):
             management.call_command('betaal_mutaties', '1', '--quick', stderr=f1, stdout=f2)
 
         return f1, f2
+
+    def assert_consistent_email_html_text(self, email: MailQueue, ignore=()):
+        """ Check that the text version and html version of the e-mail are consistent in wording and contents """
+
+        template_name = email.template_used
+        consistent_email_templates.append(template_name)
+
+        issues = list()
+
+        html = email.mail_html[:]
+
+        html = html[html.find('<body'):]
+        html = html[:html.find('</body>')]
+
+        # verwijder alle style=".."
+        pos = html.find(' style="')
+        while pos > 0:
+            pos2 = html.find('"', pos+8)
+            if pos2 > pos:                                                      # pragma: no branch
+                html = html[:pos] + html[pos2 + 1:]
+
+            pos = html.find(' style="')
+        # while
+
+        # euro teken vindbaar maken
+        html = html.replace('&nbsp;', ' ')
+        html = html.replace('&euro;', '€')
+        html = html.replace('&quot;', '"')
+
+        th_matched = list()
+
+        for line in email.mail_text.split('\n'):
+            line = line.strip()     # remove spaces used for layout
+            if len(line) <= 3:      # kleine teksten matchen mogelijk verkeer en slaan een gat
+                # skip empty lines
+                continue
+
+            # print('check line: %s' % repr(line))
+
+            zoek = '>' + line + '<'
+            pos = html.find(zoek)
+            if pos > 0:
+                # verwijder de tekst maar behoud de > en <
+                html = html[:pos + 1] + html[pos + len(zoek) - 1:]
+                continue
+
+            # misschien lukt het wel als we de zin opsplitsen in twee stukken
+            pos = zoek.find(': ')
+            if pos > 0:
+                zoek1 = zoek[:pos+1]            # begint met > en eindigt met :
+                zoek2 = zoek[pos+1:].strip()    # eindigt met <
+
+                if zoek1 in ignore:
+                    continue
+
+                pos = html.find(zoek1)
+                if pos > 0:
+                    # verwijder de tekst maar behoud de >
+                    html = html[:pos+1] + html[pos + len(zoek1):]
+                else:
+                    # misschien is het een table header zonder dubbele punt
+                    zoek1b = zoek1[:-1]     # verwijder :
+                    zoek_th = '<th' + zoek1b + '</th>'
+                    pos = html.find(zoek_th)
+                    if pos > 0:                                                 # pragma: no branch
+                        # verwijder de header en de tag
+                        html = html[:pos] + html[pos + len(zoek_th):]
+                        th_matched.append(zoek_th)
+                    elif zoek1b not in th_matched:                              # pragma: no cover
+                        issues.append('Kan tekst %s niet vinden in html e-mail' % repr(zoek1))
+
+                pos = html.find(zoek2)
+                if pos > 0:                                                     # pragma: no branch
+                    # verwijder de tekst maar behoud de <
+                    html = html[:pos] + html[pos + len(zoek2) - 1:]
+                else:                                                           # pragma: no cover
+                    issues.append('Kan tekst %s niet vinden in html e-mail' % repr(zoek2))
+
+                continue
+
+            if line[-1] == ':':
+                # probeer een zonder de dubbele punt
+                zoek = '>' + line[:-1] + '<'
+                pos = html.find(zoek)
+                if pos > 0:                                                     # pragma: no branch
+                    # verwijder de tekst maar behoud de > en <
+                    html = html[:pos + 1] + html[pos + len(zoek) - 1:]
+                    continue
+
+            if line[0] == '[' and line[-1] == ']':
+                # [nr] staat in de html als nr.
+                zoek = '>' + line[1:-1] + '.<'
+                pos = html.find(zoek)
+                if pos > 0:                                                     # pragma: no branch
+                    # verwijder de tekst maar behoud de > en <
+                    html = html[:pos + 1] + html[pos + len(zoek) - 1:]
+                    continue
+
+            # probeer als href
+            if line.startswith('http://') or line.startswith('https://'):       # pragma: no branch
+                zoek = ' href="%s"' % line
+                pos = html.find(zoek)
+                if pos > 0:
+                    html = html[:pos] + html[pos + len(zoek):]
+                    continue
+
+            issues.append('Kan regel %s niet vinden in html e-mail' % repr(line))       # pragma: no cover
+        # for
+
+        # in html e-mail staat informatie soms in een extra kolom
+        pos = html.find('<td>')
+        while pos >= 0:
+            pos2 = html.find('</td>')
+            tekst = html[pos+4:pos2]
+            html = html[:pos] + html[pos2+5:]       # verwijder deze cell
+
+            tekst = tekst.replace('<span></span>', '')
+            tekst = tekst.replace('<br>', '')
+            if len(tekst) > 3:      # skip korten teksten zoals nummering
+                # print('tekst: %s' % repr(tekst))
+                if tekst not in email.mail_text:                                        # pragma: no cover
+                    issues.append('Kan tekst %s niet vinden in text e-mail' % repr(tekst))
+
+            pos = html.find('<td>')
+        # while
+
+        # verwijder referenties naar plaatjes
+        pos = html.find('<img ')
+        while pos > 0:
+            pos2 = html.find('>', pos + 4)
+            html = html[:pos] + html[pos2 + 1:]
+            pos = html.find('<img ')
+        # while
+
+        # verwijder "href" en "target" parameters van een "a" tag
+        pos = html.find('<a ')
+        while pos > 0:
+            pos2 = html.find('>', pos + 4)
+            html = html[:pos + 2] + html[pos2:]     # behoud <a en >
+            pos = html.find('<a ')
+        # while
+
+        html = html[html.find('<body>')+6:]
+
+        # haal tag met inhoud weg
+        for tag in ('th', 'h1', 'h2', 'a'):
+            open_tag = '<' + tag + '>'
+            sluit_tag = '</' + tag + '>'
+            pos = html.find(open_tag)
+            while pos > 0:
+                pos2 = html.find(sluit_tag, pos + len(open_tag))
+                html = html[:pos] + html[pos2 + len(sluit_tag):]
+                pos = html.find(open_tag)
+        # for
+
+        html = html.replace('<br>', '')
+        html = html.replace('<div>.</div>', '')     # was punt aan einde regel achter "a" tag
+
+        for tag in ('p', 'span', 'a', 'code', 'div', 'td', 'tr', 'thead', 'table', 'body'):
+            part = '<' + tag + '></' + tag + '>'
+            html = html.replace(part, '')
+        # for
+
+        if html != '':                                                              # pragma: no cover
+            issues.append('HTML e-mail bevat meer tekst: %s' % repr(html))
+            issues.append('Volledige tekst email: %s' % repr(email.mail_text))
+
+        if len(issues):                                                             # pragma: no cover
+            issues.insert(0, '(e-mail template: %s)' % repr(template_name))
+            issues.insert(0, 'E-mail bericht verschillen tussen html en tekst:')
+            self.fail(msg="\n    ".join(issues))
 
 # end of file

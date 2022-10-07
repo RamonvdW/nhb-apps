@@ -46,7 +46,7 @@
 
             <!-- icoon -->
             <div style="margin-bottom:8px">
-                <i class="material-icons-round medium nhb-rood-text">{{ icon }}</i>
+                <i class="material-icons-round medium nhb-rood-text"{% if icon_font_size %} style="font-size:{{ icon_font_size }}"{% endif %}>{{ icon }}</i>
             </div>
 
             <div>{{ text }}</div>

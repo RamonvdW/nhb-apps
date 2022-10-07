@@ -97,4 +97,29 @@ def account_otp_koppel(request, account, code):
     return False
 
 
+def account_otp_loskoppelen(request, account):
+    """ Koppelde de tweede factor los voor het gevraagde account
+
+        Geeft True terug als OTP actief was en echt losgekoppeld is.
+    """
+
+    if not request.user.is_authenticated:           # pragma: no cover
+        return False
+
+    if not account.otp_is_actief:
+        return False
+
+    from_ip = get_safe_from_ip(request)
+
+    account.otp_is_actief = False
+    account.save(update_fields=['otp_is_actief'])
+    my_logger.info('%s 2FA losgekoppeld voor account %s' % (from_ip, account.username))
+
+    # schrijf in het logboek
+    schrijf_in_logboek(account=None,
+                       gebruikte_functie="OTP loskoppelen",
+                       activiteit='OTP is losgekoppeld voor gebruiker %s' % account.username)
+    return True
+
+
 # end of file

@@ -12,16 +12,16 @@ from django.views.generic import TemplateView
 from django.utils.formats import localize
 from django.contrib.auth.mixins import UserPassesTestMixin
 from BasisTypen.models import TemplateCompetitieIndivKlasse, TemplateCompetitieTeamKlasse
+from Competitie.models import (Competitie, DeelCompetitie, CompetitieMutatie, LAAG_REGIO,
+                               MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
+from Competitie.operations import (bepaal_startjaar_nieuwe_competitie, bepaal_klassengrenzen_indiv,
+                                   bepaal_klassengrenzen_teams, competitie_klassengrenzen_vaststellen)
 from Functie.rol import Rollen, rol_get_huidige
 from HistComp.models import HistCompetitie
 from Logboek.models import schrijf_in_logboek
 from Overig.background_sync import BackgroundSync
 from Plein.menu import menu_dynamics
 from Score.operations import wanneer_ag_vastgesteld
-from .models import (Competitie, DeelCompetitie, CompetitieMutatie, LAAG_REGIO,
-                     MUTATIE_COMPETITIE_OPSTARTEN, MUTATIE_AG_VASTSTELLEN_18M, MUTATIE_AG_VASTSTELLEN_25M)
-from .operations import (bepaal_startjaar_nieuwe_competitie, bepaal_klassengrenzen_indiv, bepaal_klassengrenzen_teams,
-                         competitie_klassengrenzen_vaststellen)
 import datetime
 import time
 
@@ -44,6 +44,7 @@ class InstellingenVolgendeCompetitieView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_INSTELLINGEN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -106,6 +107,7 @@ class CompetitieAanmakenView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_AANMAKEN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -176,6 +178,7 @@ class AGVaststellenView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_COMPETITIE_AG_VASTSTELLEN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -279,6 +282,7 @@ class KlassengrenzenVaststellenView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_KLASSENGRENZEN_VASTSTELLEN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -350,6 +354,7 @@ class WijzigDatumsView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_WIJZIG_DATUMS
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -457,6 +462,7 @@ class SeizoenAfsluitenView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPETITIE_SEIZOEN_AFSLUITEN
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """

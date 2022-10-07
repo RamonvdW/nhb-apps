@@ -38,6 +38,7 @@ urlpatterns = [
     path('handleiding/',                    include('Handleiding.urls')),
     path('kalender/',                       include('Kalender.urls')),
     path('logboek/',                        include('Logboek.urls')),
+    path('opleidingen/',                    include('Opleidingen.urls')),
     path('overig/',                         include('Overig.urls')),
     path('plein/',                          include('Plein.urls')),
     path('records/',                        include('Records.urls')),
@@ -46,6 +47,7 @@ urlpatterns = [
     path('score/',                          include('Score.urls')),
     path('taken/',                          include('Taken.urls')),
     path('vereniging/',                     include('Vereniging.urls')),
+    path('wedstrijden/',                    include('Wedstrijden.urls')),
 
     # direct van oude urls naar nieuwe urls
     # path('sporter/bondspas/', lambda request: redirect('ledenpas/', permanent=True)),

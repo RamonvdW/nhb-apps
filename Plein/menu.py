@@ -9,12 +9,12 @@ from django.shortcuts import reverse
 from Account.rechten import account_rechten_is_otp_verified
 from Functie.rol import Rollen, rol_mag_wisselen, rol_get_huidige
 from Bestel.mandje import cached_aantal_in_mandje_get
-from Taken.taken import aantal_open_taken
+from Taken.operations import aantal_open_taken
 
 
 def menu_dynamics(request, context):
     """ Deze functie update the template context voor het dynamische gedrag van
-        menu zoals de 'Andere rollen' en het menu item dat actief is.
+        menu zoals de 'Andere rollen' en het menu-item dat actief is.
     """
 
     # test server banner tonen?
@@ -46,22 +46,19 @@ def menu_dynamics(request, context):
 
             rol = rol_get_huidige(request)
 
-            # taken
-            if rol in (Rollen.ROL_BB,
-                       Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
-                       Rollen.ROL_HWL):
+            if rol == Rollen.ROL_SPORTER:
+                context['menu_url_profiel'] = reverse('Sporter:profiel')
+            else:
+                # taken
                 context['menu_aantal_open_taken'] = aantal_open_taken(request)
                 context['menu_url_taken'] = reverse('Taken:overzicht')
-
-            elif rol == Rollen.ROL_SPORTER:
-                context['menu_url_profiel'] = reverse('Sporter:profiel')
         else:
             context['menu_url_profiel'] = reverse('Sporter:profiel')
 
     else:
         context['menu_url_inloggen'] = reverse('Account:login')
 
-    # het label met de scherm grootte boven aan het scherm
+    # het label met de schermgrootte boven aan het scherm
     context['menu_toon_schermgrootte'] = settings.DEBUG
 
 

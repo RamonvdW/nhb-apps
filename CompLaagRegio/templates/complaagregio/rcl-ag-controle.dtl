@@ -14,6 +14,7 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">AG controle</h3>
+            <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
         </div>
     </div>
 
@@ -67,6 +68,50 @@
             </table>
         </div>
     </div>
+
+
+    {% if geen_ag %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4>AG ontbreekt</h4>
+                <p>De volgende sporters hebben geen aanvangsgemiddelde voor de teamcompetitie gekregen van hun HWL en kunnen daarom <span class="red-text">niet</span> meedoen of invallen in een team.</p>
+            </div>
+        </div>
+
+        <!-- blauwe balk met informatie in een tabel -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+                <table class="white">
+                    <thead>
+                        <tr>
+                            <th>Vereniging</th>
+                            <th>Sporter</th>
+                            <th>Boog type</th>
+                            <th>Aanvangs<wbr>gemiddelde</th>
+                        </tr>
+                    </thead>
+
+                    {% for obj in geen_ag %}
+                        <tr>
+                            <td>{{ obj.ver_str }}</td>
+                            <td>{{ obj.naam_str }}</td>
+                            <td>{{ obj.boog_str }}</td>
+                            <td>{{ obj.ag_str }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4"><i>Alle sporters hebben een team AG</i></td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+    {% else %}
+        <p>Alle team sporters hebben een aanvangsgemiddelde.</p>
+    {% endif %}
 
     {% include 'feedback/sidebar.dtl' with op_pagina="complaagregio-rcl-ag-controle" %}
 

@@ -11,9 +11,9 @@ from django.db.models import Q
 from django.views.generic import ListView, TemplateView
 from django.templatetags.static import static
 from Plein.menu import menu_dynamics
+from Records.models import IndivRecord
+from Records.forms import ZoekForm
 from Sporter.models import Sporter
-from .models import IndivRecord
-from .forms import ZoekForm
 
 
 TEMPLATE_RECORDS_OVERZICHT = 'records/records_overzicht.dtl'
@@ -113,7 +113,7 @@ class RecordsOverzichtView(ListView):
 
 class RecordsIndivSpecifiekView(TemplateView):
     """ Deze view laat een specifiek record zijn aan de hand van het nummer
-        Onder het record worden de relateerde records getoond.
+        Onder het record worden de gerelateerde records getoond.
     """
     # class variables shared by all instances
     template_name = TEMPLATE_RECORDS_SPECIFIEK
@@ -245,9 +245,7 @@ class RecordsZoekView(ListView):
         for obj in context['object_list']:
             obj.para_str = ''
             if obj.para_klasse:
-                obj.para_str = ' - para'
-                if obj.para_klasse != 'Ja':
-                    obj.para_str += ': ' + obj.para_klasse
+                obj.para_str = ' - para: ' + obj.para_klasse
         # for
 
         context['kruimels'] = (

@@ -12,10 +12,10 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views.generic import ListView
 from django.db.models import Q
 from django.core.exceptions import PermissionDenied
-from .forms import ZoekAccountForm, KiesAccountForm
-from .models import Account, AccountEmail
-from .rechten import account_rechten_otp_controle_gelukt, account_rechten_login_gelukt
-from .view_login import account_plugins_login
+from Account.forms import ZoekAccountForm, KiesAccountForm
+from Account.models import Account, AccountEmail
+from Account.rechten import account_rechten_otp_controle_gelukt, account_rechten_login_gelukt
+from Account.view_login import account_plugins_login
 from Overig.tijdelijke_url import (set_tijdelijke_url_receiver,
                                    RECEIVER_ACCOUNT_WISSEL,
                                    maak_tijdelijke_url_accountwissel)
@@ -90,6 +90,7 @@ class LoginAsZoekView(UserPassesTestMixin, ListView):
     # class variables shared by all instances
     template_name = TEMPLATE_LOGIN_AS_ZOEK
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

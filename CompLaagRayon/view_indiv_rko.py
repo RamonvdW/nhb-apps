@@ -15,6 +15,7 @@ from Competitie.models import (LAAG_REGIO, LAAG_RK, DeelCompetitie, Deelcompetit
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Handleiding.views import reverse_handleiding
 from Plein.menu import menu_dynamics
+from codecs import BOM_UTF8
 import csv
 
 
@@ -30,6 +31,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPRAYON_LIJST_RK
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -237,6 +239,7 @@ class LijstRkSelectieAlsBestandView(LijstRkSelectieView):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="rayon%s_alle.csv"' % deelcomp_rk.nhb_rayon.rayon_nr
 
+        response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
         writer.writerow(['Rank', 'NHB nummer', 'Naam', 'Vereniging', 'Label', 'Klasse', 'Gemiddelde'])
 

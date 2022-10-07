@@ -16,11 +16,11 @@ from Account.models import Account, AccountEmail
 from Account.operations import account_email_bevestiging_ontvangen, account_check_gewijzigde_email
 from Account.rechten import account_rechten_login_gelukt
 from Account.views import account_plugins_login, account_add_plugin_login
+from Logboek.models import schrijf_in_logboek
+from Mailer.operations import mailer_queue_email, mailer_obfuscate_email, render_email_template
+from Overig.helpers import get_safe_from_ip
 from Overig.tijdelijke_url import set_tijdelijke_url_receiver, RECEIVER_BEVESTIG_ACCOUNT_EMAIL
 from Plein.menu import menu_dynamics
-from Logboek.models import schrijf_in_logboek
-from Overig.helpers import get_safe_from_ip
-from Mailer.models import mailer_queue_email, mailer_obfuscate_email
 from datetime import timedelta
 import logging
 
@@ -31,13 +31,30 @@ TEMPLATE_AANGEMAAKT = 'account/email_aangemaakt.dtl'
 TEMPLATE_GEBLOKKEERD = 'account/geblokkeerd.dtl'
 TEMPLATE_NIEUWEEMAIL = 'account/nieuwe-email.dtl'
 TEMPLATE_BEVESTIG_EMAIL = 'account/bevestig-email.dtl'
-
+EMAIL_TEMPLATE_BEVESTIG_TOEGANG_EMAIL = 'email_account/bevestig-toegang-email.dtl'
 
 my_logger = logging.getLogger('NHBApps.Account')
 
 
+def account_stuur_email_bevestig_nieuwe_email(mailadres, ack_url):
+    """ Stuur een mail om toegang tot het (gewijzigde) e-mailadres te bevestigen """
+
+    context = {
+        'naam_site': settings.NAAM_SITE,
+        'url': ack_url,
+        'contact_email': settings.EMAIL_BONDSBUREAU
+    }
+
+    mail_body = render_email_template(context, EMAIL_TEMPLATE_BEVESTIG_TOEGANG_EMAIL)
+
+    mailer_queue_email(mailadres,
+                       'Email adres bevestigen',
+                       mail_body,
+                       enforce_whitelist=False)
+
+
 def account_check_nieuwe_email(request, from_ip, account):
-    """ detecteer wissel van email in CRM; stuur bevestig verzoek mail """
+    """ detecteer wissel van e-mail in CRM; stuur bevestig verzoek mail """
 
     # kijk of een nieuw e-mailadres bevestigd moet worden
     ack_url, mailadres = account_check_gewijzigde_email(account)
@@ -48,18 +65,7 @@ def account_check_nieuwe_email(request, from_ip, account):
                            activiteit="Bevestiging van nieuwe email gevraagd voor account %s" % repr(
                                account.username))
 
-        text_body = ("Hallo!\n\n"
-                     + "Dit is een verzoek vanuit " + settings.NAAM_SITE + " om toegang tot je email te bevestigen.\n"
-                     + "Klik op onderstaande link om dit te bevestigen.\n\n"
-                     + ack_url + "\n\n"
-                     + "Als je dit verzoek onverwacht ontvangen hebt, neem dan contact met ons op via " + settings.EMAIL_BONDSBUREAU + "\n\n"
-                     + "Veel plezier met de site!\n"
-                     + "Het bondsbureau\n")
-
-        mailer_queue_email(mailadres,
-                           'Email adres bevestigen',
-                           text_body,
-                           enforce_whitelist=False)
+        account_stuur_email_bevestig_nieuwe_email(mailadres, ack_url)
 
         context = {'partial_email': mailer_obfuscate_email(mailadres)}
         menu_dynamics(request, context)
@@ -69,12 +75,12 @@ def account_check_nieuwe_email(request, from_ip, account):
     return None
 
 
-# skip=True om te voorkomen dat we een email sturen door de login-as
+# skip=True om te voorkomen dat we een e-mail sturen door de login-as
 account_add_plugin_login(30, account_check_nieuwe_email, True)
 
 
 def account_check_geblokkeerd(request, from_ip, account):
-    """ voorkom login op een account totdat het email adres bevestigd is """
+    """ voorkom login op een account totdat het e-mailadres bevestigd is """
 
     if account.accountemail_set.count() < 1:
         # onverwacht geen email bij dit account
@@ -156,7 +162,7 @@ class LoginView(TemplateView):
             account = Account.objects.get(username=login_naam)
         except Account.DoesNotExist:
             # account met deze username bestaat niet
-            # sta ook toe dat met het email adres ingelogd wordt
+            # sta ook toe dat met het e-mailadres ingelogd wordt
             try:
                 email = AccountEmail.objects.get(bevestigde_email__iexact=login_naam)   # iexact = case insensitive volledige match
             except AccountEmail.DoesNotExist:
@@ -277,7 +283,7 @@ class LoginView(TemplateView):
                 # is valide url
                 return HttpResponseRedirect(next_url)
 
-        # TODO: ongewenste kennis over OTP en Functies --> dit door een plug-in laten doen
+        # FUTURE: ongewenste kennis over OTP en Functies --> dit door een plug-in laten doen
         if account.otp_is_actief:
             # 2FA check altijd aanbieden aan IT en BB rollen
             if account.is_staff or account.is_superuser or account.is_BB:

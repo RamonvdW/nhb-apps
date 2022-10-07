@@ -19,6 +19,7 @@ from Functie.rol import Rollen, rol_get_huidige
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Plein.menu import menu_dynamics
 from Sporter.models import SporterVoorkeuren
+from codecs import BOM_UTF8
 import textwrap
 import csv
 
@@ -119,6 +120,7 @@ class LijstAangemeldRegiocompAllesView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -177,6 +179,7 @@ class LijstAangemeldRegiocompRayonView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -243,6 +246,7 @@ class LijstAangemeldRegiocompRegioView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_COMPETITIE_AANGEMELD_REGIO
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -343,6 +347,7 @@ class LijstAangemeldRegiocompAlsBestandView(LijstAangemeldRegiocompRegioView):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="aanmeldingen-regio-%s.csv"' % regio.regio_nr
 
+        response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")  # ; is good for import with dutch regional settings
 
         # voorkeur dagdelen per vereniging
@@ -382,6 +387,7 @@ class Inschrijfmethode3BehoefteView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_COMPETITIE_INSCHRIJFMETHODE3_BEHOEFTE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -690,6 +696,7 @@ class Inschrijfmethode3BehoefteAlsBestandView(Inschrijfmethode3BehoefteView):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="behoefte-%s.csv"' % regio.regio_nr
 
+        response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for import with dutch regional settings
 
         # voorkeur dagdelen per vereniging
@@ -719,6 +726,7 @@ class Inschrijfmethode1BehoefteView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_COMPETITIE_INSCHRIJFMETHODE1_BEHOEFTE
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
@@ -907,6 +915,7 @@ class Inschrijfmethode1BehoefteAlsBestandView(Inschrijfmethode1BehoefteView):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="inschrijf-keuzes-%s.csv"' % regio.regio_nr
 
+        response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for dutch regional settings
 
         blazoen_headers = [BLAZOEN2STR_COMPACT[blazoen] for blazoen in COMPETITIE_BLAZOENEN[afstand]]

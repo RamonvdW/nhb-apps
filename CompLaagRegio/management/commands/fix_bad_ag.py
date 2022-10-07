@@ -7,8 +7,8 @@
 from django.core.management.base import BaseCommand
 from Competitie.models import Competitie, RegioCompetitieSchutterBoog, AG_NUL
 from Competitie.operations.klassengrenzen import KlasseBepaler
-from Score.models import Score, SCORE_TYPE_INDIV_AG, SCORE_TYPE_TEAM_AG
-from decimal import Decimal
+from Score.models import Aanvangsgemiddelde, AanvangsgemiddeldeHist, AG_DOEL_INDIV, AG_DOEL_TEAM
+from Sporter.models import SporterVoorkeuren
 
 
 class Command(BaseCommand):
@@ -42,21 +42,35 @@ class Command(BaseCommand):
         vertel_commit = False
 
         sporterboog_pk2ag_indiv = dict()
-        for score in (Score
-                      .objects
-                      .select_related('sporterboog')
-                      .filter(type=SCORE_TYPE_INDIV_AG,
-                              afstand_meter=afstand)):
-            sporterboog_pk2ag_indiv[score.sporterboog.pk] = Decimal(score.waarde) / 1000
+        for ag in (Aanvangsgemiddelde
+                   .objects
+                   .select_related('sporterboog')
+                   .filter(doel=AG_DOEL_INDIV,
+                           afstand_meter=afstand)):
+            sporterboog_pk2ag_indiv[ag.sporterboog.pk] = ag.waarde
         # for
 
         sporterboog_pk2ag_teams = dict()
-        for score in (Score
-                      .objects
-                      .select_related('sporterboog')
-                      .filter(type=SCORE_TYPE_TEAM_AG,
-                              afstand_meter=afstand)):
-            sporterboog_pk2ag_teams[score.sporterboog.pk] = Decimal(score.waarde) / 1000
+        for ag_hist in (AanvangsgemiddeldeHist
+                        .objects
+                        .select_related('ag',
+                                        'ag__sporterboog')
+                        .filter(ag__doel=AG_DOEL_TEAM,
+                                ag__afstand_meter=afstand)
+                        .order_by('-when')):
+            ag = ag_hist.ag
+            # alleen het eerste (nieuwste) AG gebruiken
+            if ag.sporterboog.pk not in sporterboog_pk2ag_teams:
+                sporterboog_pk2ag_teams[ag.sporterboog.pk] = ag.waarde
+        # for
+
+        sporter_pk2wedstrijdgeslacht = dict()
+        for voorkeuren in SporterVoorkeuren.objects.select_related('sporter').all():
+            if voorkeuren.wedstrijd_geslacht_gekozen:
+                wedstrijdgeslacht = voorkeuren.wedstrijd_geslacht   # M/V
+            else:
+                wedstrijdgeslacht = voorkeuren.sporter.geslacht     # M/V/X
+            sporter_pk2wedstrijdgeslacht[voorkeuren.sporter.pk] = wedstrijdgeslacht
         # for
 
         for deelnemer in (RegioCompetitieSchutterBoog
@@ -91,9 +105,14 @@ class Command(BaseCommand):
                 deelnemer.ag_voor_indiv = ag_indiv
                 do_save = True
 
+                try:
+                    wedstrijdgeslacht = sporter_pk2wedstrijdgeslacht[deelnemer.sporterboog.sporter.pk]
+                except KeyError:
+                    wedstrijdgeslacht = deelnemer.sporterboog.sporter.geslacht
+
                 # klasse opnieuw bepalen
                 indiv_klasse = deelnemer.indiv_klasse
-                bepaler.bepaal_klasse_deelnemer(deelnemer)
+                bepaler.bepaal_klasse_deelnemer(deelnemer, wedstrijdgeslacht)
 
                 if indiv_klasse != deelnemer.indiv_klasse:
                     self.stdout.write('deelnemer %s : indiv_klasse=%s --> %s' % (

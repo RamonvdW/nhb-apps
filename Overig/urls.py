@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_tijdelijke_url, view_activiteit
+from Overig import view_tijdelijke_url, view_activiteit
 
 app_name = 'Overig'
 

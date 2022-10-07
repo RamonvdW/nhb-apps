@@ -95,11 +95,15 @@ ORGANISATIES2SHORT_STR = {
     ORGANISATIE_IFAA: 'IFAA',
 }
 
+# wordt gebruikt in de zin:
+# Beschikbare disciplines van ...
 ORGANISATIES2LONG_STR = {
     ORGANISATIE_WA: 'World Archery',
-    ORGANISATIE_NHB: 'NHB',
-    ORGANISATIE_IFAA: 'IFAA',
+    ORGANISATIE_NHB: 'de NHB',
+    ORGANISATIE_IFAA: 'de IFAA',
 }
+
+BOOGTYPE_AFKORTING_RECURVE = 'R'
 
 
 class BoogType(models.Model):
@@ -115,9 +119,9 @@ class BoogType(models.Model):
     beschrijving = models.CharField(max_length=50)
 
     # sorteervolgorde zodat order_by('volgorde') de juiste sortering oplevert
-    volgorde = models.CharField(max_length=1, default='?')
+    volgorde = models.PositiveSmallIntegerField(default=0)
 
-    # is dit boog type nog actueel?
+    # is dit boogtype nog actueel?
     # zolang in gebruik blijft een boogtype bestaan
     # True = niet meer gebruiken voor nieuwe wedstrijden
     buiten_gebruik = models.BooleanField(default=False)
@@ -130,16 +134,15 @@ class BoogType(models.Model):
     class Meta:
         """ meta data voor de admin interface """
         verbose_name = "Boog type"
-        verbose_name_plural = "Boog types"
+        verbose_name_plural = "Boog typen"
+
+        ordering = ['volgorde']
 
         indexes = [
             # help vinden op afkorting
             models.Index(fields=['afkorting']),
 
-            # help sorteren op volgorde
-            models.Index(fields=['volgorde']),
-
-            # TODO: extra index voor organisatie, in combinatie met afkorting/volgorde??
+            # FUTURE: extra index voor organisatie, in combinatie met afkorting/volgorde??
         ]
 
     objects = models.Manager()      # for the editor only
@@ -178,6 +181,8 @@ class TeamType(models.Model):
         verbose_name = "Team type"
         verbose_name_plural = "Team typen"
 
+        ordering = ['volgorde']
+
         indexes = [
             # help vinden op afkorting
             models.Index(fields=['afkorting']),
@@ -185,7 +190,7 @@ class TeamType(models.Model):
             # help sorteren op volgorde
             models.Index(fields=['volgorde']),
 
-            # TODO: extra index voor organisatie, in combinatie met afkorting/volgorde??
+            # FUTURE: extra index voor organisatie, in combinatie met afkorting/volgorde??
         ]
 
     objects = models.Manager()      # for the editor only
@@ -209,7 +214,7 @@ class LeeftijdsKlasse(models.Model):
     # man, vrouw of genderneutraal
     wedstrijd_geslacht = models.CharField(max_length=1, choices=WEDSTRIJDGESLACHT_MVA)
 
-    # leeftijds grenzen voor de klassen: of ondergrens, of bovengrens
+    # leeftijdsgrenzen voor de klassen: of ondergrens, of bovengrens
     #   de jeugdklassen hebben een leeftijd bovengrens
     #   de masters en veteranen klassen hebben een leeftijd ondergrens
     #   de senioren klasse heeft helemaal geen grens
@@ -258,7 +263,9 @@ class LeeftijdsKlasse(models.Model):
         verbose_name = "Leeftijdsklasse"
         verbose_name_plural = "Leeftijdsklassen"
 
-        # TODO: index voor organisatie, in combinatie met afkorting/volgorde??
+        ordering = ['volgorde']
+
+        # FUTURE: index voor organisatie, in combinatie met afkorting/volgorde??
 
     objects = models.Manager()      # for the editor only
 
@@ -280,8 +287,7 @@ class TemplateCompetitieIndivKlasse(models.Model):
     # lager nummer = betere / oudere deelnemers
     volgorde = models.PositiveIntegerField()
 
-    # de leeftijdsklassen: aspirant, cadet, junior, senior en mannen/vrouwen
-    # typisch zijn twee klassen: mannen en vrouwen
+    # de leeftijdsklassen: Onder 12 Jongens/Meisjes, Onder 14 Jongens/Meisjes, Onder 18, Onder 21, 21+
     leeftijdsklassen = models.ManyToManyField(LeeftijdsKlasse)
 
     # wedstrijdklasse wel/niet meenemen naar de RK/BK
@@ -316,6 +322,8 @@ class TemplateCompetitieIndivKlasse(models.Model):
         """ meta data voor de admin interface """
         verbose_name = "Template Competitie Indiv Klasse"
         verbose_name_plural = "Template Competitie Indiv Klassen"
+
+        ordering = ['volgorde']
 
         indexes = [
             # help sorteren op volgorde
@@ -368,6 +376,8 @@ class TemplateCompetitieTeamKlasse(models.Model):
         verbose_name = "Template Competitie Team Klasse"
         verbose_name_plural = "Template Competitie Team Klassen"
 
+        ordering = ['volgorde']
+
         indexes = [
             # help sorteren op volgorde
             models.Index(fields=['volgorde']),
@@ -409,6 +419,8 @@ class KalenderWedstrijdklasse(models.Model):
         """ meta data voor de admin interface """
         verbose_name = "Kalender Wedstrijdklasse"
         verbose_name_plural = "Kalender Wedstrijdklassen"
+
+        ordering = ['volgorde']
 
         indexes = [
             # help sorteren op volgorde

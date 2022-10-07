@@ -91,7 +91,7 @@
 
                     <!-- dialoog venster -->
                     <div class="white left-align z-depth-3">
-                        <div style="padding:30px">
+                        <div class="form-padding">
 
                             <form method="post" action="{{ ronde_opslaan_url }}">
                                 {% csrf_token %}
@@ -113,9 +113,9 @@
                                 {% if readonly %}
                                     <p>{{ ronde.beschrijving }}</p>
                                 {% else %}
-                                    <td class="input-field">
+                                    <div class="input-field">
                                         <input type="text" name="ronde_naam" placeholder="Beschrijving" value="{{ ronde.beschrijving }}" oninput="gewijzigd()">
-                                    </td>
+                                    </div>
                                 {% endif %}
 
                                 {% if not readonly %}
@@ -276,9 +276,9 @@
                                 {% if readonly %}
                                     <p>{{ ronde.beschrijving }}</p>
                                 {% else %}
-                                <td class="input-field">
+                                    <div class="input-field">
                                         <input type="text" name="ronde_naam" placeholder="Beschrijving" value="{{ ronde.beschrijving }}" oninput="gewijzigd()">
-                                    </td>
+                                    </div>
                                 {% endif %}
 
                                 {% if not readonly %}

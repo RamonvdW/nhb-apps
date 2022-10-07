@@ -1,0 +1,110 @@
+{% extends 'plein/site_layout.dtl' %}
+{% comment %}
+                Copyright (c) 2021-2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+{% load static %}
+
+{% block title %}Manager Wedstrijdkalender{% endblock %}
+
+{% block pagina %}
+
+    <script type="application/javascript">
+        function keuze_gemaakt(groep) {
+
+            const selector = "input[type='radio'][name=" + groep + "]:checked"
+            const el = document.querySelector(selector)
+            const url = el.dataset.url
+
+            // de radiobutton die bij het geladen geselecteerd werd heeft geen url
+            if (url.length > 0)
+                window.location.href = url
+        }
+    </script>
+
+    <!-- banner -->
+    <div class="row center">
+        <div class="col s12">
+            <h3 class="page-banner">Wedstrijdkalender</h3>
+            <p>Beheer door de Manager Competitiezaken</p>
+            <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
+            <p>Wedstrijden worden aangemaakt door de verenigingen</p>
+        </div>
+    </div>
+
+    <!-- blauwe balk filters -->
+    <div class="row-nhb-blauw">
+
+        <!-- filter: status -->
+        <div class="col s4 offset-s4" style="margin-bottom:15px">
+            <div class="white left-align" style="padding:10px">
+                <p><b>Kies een status:</b></p>
+                <ul id="id_status">
+                    {% for obj in status_filters %}
+                        <li>
+                            <label class="black-text" for="id_{{ obj.sel }}">
+                                <input class="with-gap" type="radio" name="status" value="{{ obj.sel }}" required id="id_{{ obj.sel }}" {% if obj.selected %}checked{% endif %} data-url="{{ obj.zoom_url }}">
+                                <span>{{ obj.beschrijving }}</span>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p style="margin-left:35px">
+                    <a class="btn-nhb-rood" onclick="keuze_gemaakt('status')">Activeer</a>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- blauwe balk met informatie in een tabel -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <table class="white" id="table1">
+                <thead>
+                    <tr>        <!-- filter veld -->
+                        <td></td>
+                        <td colspan="3" class="table-filter">
+                            <input class="table-filter" oninput="myTableFilter(this, 'table1')" placeholder="Zoeken"/>
+                        </td>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr>
+                        <th>Wanneer</th>
+                        <th data-filter="on">Vereniging</th>
+                        <th data-filter="on">Titel</th>
+                        <th data-filter="on">Discipline</th>
+                        <th>Status</th>
+                        <th><!-- kolom voor knoppen --></th>
+                    </tr>
+                </thead>
+
+                {% for wed in wedstrijden %}
+                    <tr>
+                        <td>{{ wed.datum_begin }}{% if wed.datum_begin != wed.datum_einde %} - {{ wed.datum_einde }}{% endif %}</td>
+                        <td>[{{ wed.organiserende_vereniging.ver_nr }}]<span class="hide-on-med-and-down"> {{ wed.organiserende_vereniging.naam }}</span></td>
+                        <td>{% if wed.titel %}{{ wed.titel }}{% else %}<i class="nhb-blauw-text">Nog niet ingevuld</i>{% endif %}</td>
+                        <td>{{ wed.disc_str }}</td>
+                        <td{% if wed.status_val_op %} class="red-text"{% endif %}>{{ wed.status_str }}</td>
+                        <td>
+                            <div style="white-space:nowrap">     <!-- keeps buttons side by side -->
+                                <a class="btn-nhb-rood" href="{{ wed.url_wijzig }}" style="padding:0; width:35px; margin-right:5px">
+                                    <i class="material-icons-round">edit</i></a>
+                                <a class="btn-nhb-rood" href="{{ wed.url_sessies}}" style="padding:0; width:35px">
+                                    <i class="material-icons-round" style="font-size:33px">edit_note</i></a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6"><i>Geen wedstrijden gevonden</i></td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="wedstrijden-overzicht-manager" %}
+
+{% endblock %}

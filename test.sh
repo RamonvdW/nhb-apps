@@ -50,22 +50,25 @@ then
     FORCE_REPORT=1
     # remove from ARGS used to decide focus
     # will still be given to ./manage.py where --force has no effect
-    ARGS=$(echo "$ARGS" | sed 's/--force//')
+    ARGS=${ARGS/--force/}
 fi
 
-KEEP_DB=0
-if [[ "$ARGS" =~ "--keep" ]]
+KEEP_DB=1
+if [[ "$ARGS" =~ "--clean" ]]
 then
-    echo "[INFO] Keeping database"
-    KEEP_DB=1
+    KEEP_DB=0
     # remove from ARGS used to decide focus
     # will still be given to ./manage.py where --force has no effect
-    ARGS=$(echo "$ARGS" | sed 's/--keep//')
+    ARGS=${ARGS/--clean/}
+    echo "ARGS without --clean: $ARGS"
 fi
 
 FOCUS=""
-if [ ! -z "$ARGS" ]
+if [ -z "$ARGS" ]
 then
+    # no args = test all = remove database
+    KEEP_DB=0
+else
     # convert Function.testfile.TestCase.test_functie into "Function"
     # also works for just "Function"
     FOCUS1=""
@@ -92,7 +95,7 @@ then
 fi
 
 # set high performance
-sudo cpupower frequency-set --governor performance > /dev/null
+#sudo cpupower frequency-set --governor performance > /dev/null
 
 ABORTED=0
 
@@ -114,7 +117,7 @@ then
     echo "[INFO] Creating clean database; running migrations and performing run with nodebug"
 
     # add coverage with nodebug
-    python3 -u $PYCOV ./manage.py test --keepdb --noinput --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.TestPlein.test_quick &>>"$LOG"
+    python3 -u $PYCOV ./manage.py test --keepdb --noinput --settings=nhbapps.settings_autotest_nodebug -v 2 Plein.tests.tests.TestPlein.test_quick &>>"$LOG"
     RES=$?
     #echo "[DEBUG] Debug run result: $RES --> ABORTED=$ABORTED"
     [ $RES -eq 3 ] && ABORTED=1
@@ -159,7 +162,7 @@ fi
 # -v = verbose
 # note: double quotes not supported around $*
 echo "[INFO] Starting main test run" >>"$LOG"
-python3 -u $PYCOV ./manage.py test --keepdb --settings=nhbapps.settings_autotest -v 2 $* &>>"$LOG"
+python3 -u $PYCOV ./manage.py test --keepdb --settings=nhbapps.settings_autotest -v 2 $ARGS &>>"$LOG"
 RES=$?
 #echo "[DEBUG] Run result: $RES --> ABORTED=$ABORTED"
 [ $RES -eq 3 ] && ABORTED=1
@@ -174,9 +177,9 @@ kill $PID_TAIL
 wait $PID_TAIL 2>/dev/null
 
 # launch log in editor
-[ $RES -eq 0 ] || geany --new-instance "$LOG" &
+[ $RES -eq 0 ] || geany --new-instance --no-msgwin "$LOG" &
 
-if [ $RES -eq 0 -a "$FOCUS" != "" ]
+if [ $RES -eq 0 ] && [ "$FOCUS" != "" ]
 then
     echo "[INFO] Discovering all management commands in $FOCUS"
     for cmd in $(python3 ./manage.py --help);
@@ -191,11 +194,12 @@ then
     echo
 fi
 
-if [ $RES -eq 0 -a $# -eq 0 ]
+if [ $RES -eq 0 ] && [ $# -eq 0 ]
 then
     echo "[INFO] Running help for each management command"
-    for cmd in $(for x in */management/commands; do ls -1 $x | grep -v '__pycache__' | rev | cut -d. -f2- | rev; done);
+    for cmd_file in $(ls */management/commands/*py | sed 's/\.py$//g');
     do
+        cmd=$(basename $cmd_file)
         echo -n '.'
         echo "[INFO] ./manage.py help $cmd" >>"$LOG"
         python3 -u $PYCOV ./manage.py help $cmd &>>"$LOG"
@@ -215,7 +219,7 @@ wait $PID_WEBSIM3 2>/dev/null
 ASK_LAUNCH=0
 COVERAGE_RED=0
 
-if [ $ABORTED -eq 0 -o $FORCE_REPORT -eq 1 ]
+if [ $ABORTED -eq 0 ] || [ $FORCE_REPORT -eq 1 ]
 then
     echo "[INFO] Generating reports" | tee -a "$LOG"
 
@@ -244,7 +248,7 @@ then
 fi
 
 # set normal performance
-sudo cpupower frequency-set --governor schedutil > /dev/null
+#sudo cpupower frequency-set --governor schedutil > /dev/null
 
 if [ $COVERAGE_RED -ne 0 ]
 then

@@ -11,7 +11,7 @@ from django.db.models.functions import Concat
 from django.urls import reverse
 from Functie.rol import Rollen, rol_get_huidige
 from Plein.menu import menu_dynamics
-from .models import LogboekRegel
+from Logboek.models import LogboekRegel
 from urllib.parse import quote_plus
 
 
@@ -52,6 +52,7 @@ class LogboekBasisView(UserPassesTestMixin, ListView):
     base_url = ""                   # must override
     paginate_by = RESULTS_PER_PAGE  # enable Paginator built into ListView
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """

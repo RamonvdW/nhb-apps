@@ -7,7 +7,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
-from .models import Account, AccountEmail, AccountVerzoekenTeller
+from Account.models import Account, AccountEmail, AccountVerzoekenTeller
 
 
 class AccountAdmin(UserAdmin):
@@ -16,7 +16,8 @@ class AccountAdmin(UserAdmin):
     exclude = ('email', )
 
     # velden die niet gewijzigd mogen worden via de admin interface
-    readonly_fields = ('is_staff', 'gekoppelde_functies')
+    readonly_fields = ('is_staff', 'gekoppelde_functies', 'otp_controle_gelukt_op',
+                       'date_joined', 'last_login', 'laatste_inlog_poging')
 
     # volgorde van de te tonen velden
     fieldsets = (
@@ -27,7 +28,8 @@ class AccountAdmin(UserAdmin):
                                        'vraag_nieuw_wachtwoord', 'verkeerd_wachtwoord_teller',
                                        'is_geblokkeerd_tot',
                                        'otp_code', 'otp_is_actief')}),
-        (_('Important dates'), {'fields': ('laatste_inlog_poging', 'last_login', 'date_joined')}),
+        (_('Important dates'), {'fields': ('date_joined', 'laatste_inlog_poging',
+                                           'last_login', 'otp_controle_gelukt_op')}),
     )
 
     list_display = ('get_account_full_name', 'last_login', 'is_staff')

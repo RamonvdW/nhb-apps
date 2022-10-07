@@ -25,6 +25,7 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_COMPRAYON_LIJST_RK
     raise_exception = True      # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -114,9 +115,11 @@ class LijstRkSelectieView(UserPassesTestMixin, TemplateView):
         context['aantal_onbekend'] = aantal_onbekend
         context['aantal_bevestigd'] = aantal_bevestigd
 
+        url_overzicht = reverse('Vereniging:overzicht')
+        anker = '#competitie_%s' % comp.pk
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, comp.beschrijving.replace(' competitie', '')),
+            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
             (None, 'Deelnemers RK'),
         )
 

@@ -80,6 +80,6 @@
         </tr>
     </table>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="competitie-bekijk-wedstrijd-uitslag" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="compscores-scores-bekijken" %}
 
 {% endblock %}

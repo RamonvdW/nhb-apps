@@ -5,19 +5,25 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from .models import BestelProduct, BestelMandje, Bestelling, BestelMutatie, BESTELLING_STATUS_CHOICES
+from Bestel.models import BestelProduct, BestelMandje, Bestelling, BestelMutatie, BESTEL_MUTATIE_TO_STR
 
 
 class BestelProductAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('inschrijving',)
+    readonly_fields = ('wedstrijd_inschrijving',)
 
 
 class BestelMandjeAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('account', 'producten')
+    readonly_fields = ('account', 'producten_in_mandje')
+    exclude = ('producten',)
 
     search_fields = ('account__username', 'account__unaccented_naam')
+
+    @staticmethod
+    def producten_in_mandje(obj):     # pragma: no cover
+        return "\n".join(['(pk %s) %s' % (product.pk, product) for product in
+                                            obj.producten.select_related('wedstrijd_inschrijving').all()])
 
 
 class BestellingAdmin(admin.ModelAdmin):
@@ -47,7 +53,9 @@ class BestellingAdmin(admin.ModelAdmin):
                         'verkoper_adres2',
                         'verkoper_kvk',
                         'verkoper_email',
-                        'verkoper_telefoon')
+                        'verkoper_telefoon',
+                        'verkoper_iban',
+                        'verkoper_bic')
              }),
         ('Transactie',
             {'fields': ('status',
@@ -64,9 +72,25 @@ class BestellingAdmin(admin.ModelAdmin):
 
 class BestelMutatieAdmin(admin.ModelAdmin):
 
-    readonly_fields = ('when', 'account',)
+    readonly_fields = ('when', 'account', 'code_plus')
 
-    auto_complete = ('inschrijving', 'product', 'bestelling')
+    auto_complete = ('wedstrijd_inschrijving', 'product', 'bestelling')
+
+    fieldsets = (
+        ('BestelMutatie',
+         {'fields': ('when', 'code_plus', 'is_verwerkt',
+                     'account',
+                     'wedstrijd_inschrijving', 'product', 'korting', 'bestelling', 'betaling_is_gelukt', 'bedrag_euro')
+          }),
+    )
+
+    @staticmethod
+    def code_plus(obj):     # pragma: no cover
+        try:
+            msg = "%s: %s" % (obj.code, BESTEL_MUTATIE_TO_STR[obj.code])
+        except KeyError:
+            msg = "%s: (onbekend)" % obj.code
+        return msg
 
 
 admin.site.register(BestelProduct, BestelProductAdmin)

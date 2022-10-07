@@ -1,0 +1,194 @@
+{% extends 'email_mailer/email_basis.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% block inhoud_text %}
+    |Hallo {{ voornaam }}!
+    |
+    |Deze e-mail is de bevestiging van je bestelling op {{ naam_site }}.
+    |
+    |Bestelnummer: {{ bestelling.mh_bestel_nr }}
+    |Betaalstatus: {% if bestelling.status == BESTELLING_STATUS_AFGEROND %}Voldaan{% else %}Te betalen{% endif %}
+
+    {% for product in producten %}
+        |
+        |[{{ product.regel_nr }}]
+
+        {% if product.wedstrijd_inschrijving %}
+            |    Reserveringsnummer: {{ product.reserveringsnummer }}
+            |    Wedstrijd: {{ product.wedstrijd_titel }}
+            |    Bij vereniging: {{ product.wedstrijd_bij_vereniging }}
+            |    Sessie: {{ product.sessie_datum|date:"l j F Y" }} om {{ product.sessie_tijd|date:"H:i" }}
+            |    Sporter: {{ product.sporter_lid_nr_naam }}
+            |    Van vereniging: {{ product.ver_nr_naam }}
+            {% if product.boog %}
+            |    Boog: {{ product.boog }}
+            {% endif %}
+            {% if product.schietstijl %}
+            |    Schietstijl: {{ product.schietstijl }}
+            {% endif %}
+            |    Wedstrijdklasse: {{ product.klasse }}
+            |    Locatie: {{ product.wedstrijd_adres }}
+            |    E-mail organisatie: {{ product.org_email }}
+            |    Telefoon organisatie: {{ product.org_telefoon }}
+
+            {% if product.korting_euro > 0.001 %}
+                |    Verkregen korting: {{ product.gebruikte_korting_str }}
+                {% if product.combi_reden %}
+                    |    (combinatie korting voor {{ product.combi_reden }}
+                {% endif %}
+            {% endif %}
+
+            |    Prijs: € {{ product.prijs_euro }}
+            {% if product.korting_euro > 0.001 %}
+                |    Korting: -€ {{ product.korting_euro }}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+    |
+    |TOTAAL: € {{ bestelling.totaal_euro }}
+
+    |
+    |Betaling:
+
+    {% if bestelling.verkoper_heeft_mollie %}
+    |
+    |Betaling via online bankieren is mogelijk. Dit is de meest eenvoudige en snelste manier om te betalen.
+    |Ga hiervoor naar MijnHandboogsport: onder Mijn pagina kan je de bestellingen vinden en de betaling starten.
+    {% endif %}
+
+    |
+    |Betaling is mogelijk door overboeking naar de volgende rekening:
+    |  Bedrag: € {{ bestelling.totaal_euro }}
+    |  Naam: {{ bestelling.verkoper_naam }}
+    |  IBAN: {{ bestelling.verkoper_iban }}
+    |  BIC: {{ bestelling.verkoper_bic }}
+    |  Kenmerk: Bestelnummer {{ bestelling.mh_bestel_nr }}
+
+    |
+    |Verkoper:
+    |    {{ bestelling.verkoper_naam }}
+    |    {{ bestelling.verkoper_adres1 }}
+    |    {{ bestelling.verkoper_adres2 }}
+    |    KvK nummer: {{ bestelling.verkoper_kvk }}
+    |    E-mail: {{ bestelling.verkoper_email }}
+    |    Telefoon: {{ bestelling.verkoper_telefoon }}
+
+    |
+    |Bedankt voor je bestelling!
+{% endblock %}
+
+{% block inhoud_html %}
+    <div>Hallo {{ voornaam }}!</div>
+    <br>
+    <div>Deze e-mail is de bevestiging van je bestelling op {{ naam_site }}.</div>
+
+    <br>
+
+    <table>
+        <tr><th>Bestelnummer:</th><td>{{ bestelling.mh_bestel_nr }}</td></tr>
+        <tr><th>Betaalstatus:</th><td>{% if bestelling.status == BESTELLING_STATUS_AFGEROND %}Voldaan{% else %}Te betalen{% endif %}</td></tr>
+    </table>
+
+    <h1>Producten</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Product</th>
+                <th>Bedrag</th>
+            </tr>
+        </thead>
+
+        {% for product in producten %}
+            {% if product.wedstrijd_inschrijving %}
+                <tr>
+                    <td style="vertical-align:top">{{ product.regel_nr }}.</td>
+                    <td>
+                        <span>Reserveringsnummer: {{ product.reserveringsnummer }}</span><br>
+                        <span>Wedstrijd: {{ product.wedstrijd_titel }}</span><br>
+                        <span>Bij vereniging: {{ product.wedstrijd_bij_vereniging }}</span><br>
+                        <span>Sessie: {{ product.sessie_datum|date:"l j F Y" }} om {{ product.sessie_tijd|date:"H:i" }}</span><br>
+                        <span>Sporter: {{ product.sporter_lid_nr_naam }}</span><br>
+                        <span>Van vereniging: {{ product.ver_nr_naam }}</span><br>
+                        {% if product.boog %}<span>Boog: {{ product.boog }}</span><br>{% endif %}
+                        {% if product.schietstijl %}<span>Schietstijl: {{ product.schietstijl }}</span><br>{% endif %}
+                        <span>Wedstrijdklasse: {{ product.klasse }}</span><br>
+                        <span>Locatie: {{ product.wedstrijd_adres }}</span>
+                        <span>E-mail organisatie: {{ product.org_email }}</span><br>
+                        <span>Telefoon organisatie: {{ product.org_telefoon }}</span><br>
+                    </td>
+
+                    <td style="text-align:right;vertical-align:top">&euro;&nbsp;{{ product.prijs_euro }}</td>
+                </tr>
+
+                {% if product.korting_euro > 0.001 %}
+                    <tr>
+                        <td></td>
+                        <td>Verkregen korting:<br>
+                            {% if product.korting %}
+                                <span>{{ product.gebruikte_korting_str }}</span><br>
+                            {% endif %}
+                            {% if product.combi_reden %}
+                                <span>(combinatie korting voor {{ product.combi_reden }}</span><br>
+                            {% endif %}
+                        </td>
+
+                        <td style="text-align:right; vertical-align:top">-&euro;&nbsp;{{ product.korting_euro }}</td>
+                    </tr>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+        <tr>
+            <td></td>
+            <td style="text-align:right">TOTAAL:</td>
+            <td style="text-align:right">&euro;&nbsp;{{ bestelling.totaal_euro }}</td>
+        </tr>
+        <!-- Totaal regel toevoegen -->
+    </table>
+
+
+    {% if bestelling.status != BESTELLING_STATUS_AFGEROND %}
+
+        <h1>Betaling</h1>
+
+        <!-- TODO: meld hoeveel tijd de koper nog heeft om te betalen -->
+
+        {% if bestelling.verkoper_heeft_mollie %}
+            <p>Betaling via online bankieren is mogelijk. Dit is de meest eenvoudige en snelste manier om te betalen.</p>
+            <p>Ga hiervoor naar MijnHandboogsport: onder Mijn pagina kan je de bestellingen vinden en de betaling starten.</p>
+            <br>
+        {% endif %}
+
+        <p>Betaling is mogelijk door overboeking naar de volgende rekening:</p>
+        <table>
+            <tr><th>Bedrag:</th><td>&euro;&nbsp;{{ bestelling.totaal_euro }}</td></tr>
+            <tr><th>Ontvanger:</th><td>{{ bestelling.verkoper_naam }}</td></tr>
+            <tr><th>IBAN:</th><td>{{ bestelling.verkoper_iban }}</td></tr>
+            <tr><th>BIC:</th><td>{{ bestelling.verkoper_bic }}</td></tr>
+            <tr><th>Kenmerk:</th><td>Bestelnummer {{ bestelling.mh_bestel_nr }}</td></tr>
+        </table>
+
+    {% endif %}
+
+
+    <h1>Verkoper</h1>
+
+    <table>
+        <tr><th>Naam:</th><td>{{ bestelling.verkoper_naam }}</td></tr>
+        <tr><th style="vertical-align:top">Adres:<br></th><td>{{ bestelling.verkoper_adres1 }}<br>{{ bestelling.verkoper_adres2 }}</td></tr>
+        <tr><th>KvK nummer:</th><td>{{ bestelling.verkoper_kvk }}</td></tr>
+        <tr><th>E-mail:</th><td>{{ bestelling.verkoper_email }}</td></tr>
+        <tr><th>Telefoon:</th><td>{{ bestelling.verkoper_telefoon }}</td></tr>
+    </table>
+
+    <br>
+    <br>
+    <div>Bedankt voor je bestelling!</div>
+{% endblock %}

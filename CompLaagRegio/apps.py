@@ -7,7 +7,7 @@
 from django.apps import AppConfig
 
 
-class CompRegioConfig(AppConfig):
+class CompLaagRegioConfig(AppConfig):
     name = 'CompLaagRegio'
 
 # end of file

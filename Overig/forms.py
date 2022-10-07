@@ -12,7 +12,7 @@ class ZoekAccountForm(forms.Form):
         om te zoeken naar een account. Wordt gebruikt voor Account Activiteit.
     """
 
-    # een simpel tekstveld waarin de gebruiker de zoek/filter tekst in kan voeren
+    # een simpel tekstveld waarin de gebruiker de zoektekst in kan voeren
     zoekterm = forms.CharField(
                     label='Bondsnummer of deel volledige naam:',
                     max_length=50,

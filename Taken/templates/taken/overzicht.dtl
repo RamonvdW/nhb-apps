@@ -14,6 +14,8 @@
     <div class="row center">
         <div class="col s12">
             <h3 class="page-banner">Taken overzicht</h3>
+            <p>De taken zijn gerelateerd aan een of meerdere functies waar jij toegang tot hebt.</p>
+            <p>Je huidige rol is: <b>{{ huidige_rol }}</b></p>
         </div>
     </div>
 
@@ -23,8 +25,6 @@
         <div class="row center">
             <div class="col s12">
                 <h4>Open taken</h4>
-                <p>Deze taken zijn gericht aan jou, onafhankelijk van je gekozen rol.</p>
-                <p>Als je andere beheerders helpt (door van rol te wisselen) dan krijg je <i>hun</i> taken dus niet te zien.</p>
             </div>
         </div>
 
@@ -36,6 +36,7 @@
                     <thead>
                         <tr>
                             <th class="center">Nummer</th>
+                            <th class="center">Functie</th>
                             <th class="center">Deadline</th>
                             <th>Beschrijving</th>
                             <th><!-- kolom voor knop --></th>
@@ -46,8 +47,9 @@
                         {% if not taak.is_afgerond %}
                             <tr>
                                 <td class="center">{{ taak.pk }}</td>
+                                <td class="center{% if taak.is_huidige_rol %} nhb-blauw-text{% endif %}">{{ taak.toegekend_aan_functie.beschrijving }}</td>
                                 <td class="center">{{ taak.deadline|date:"Y-m-d" }}</td>
-                                <td>{{ taak.beschrijving|linebreaks }}</td>
+                                <td>{{ taak.titel }}</td>
                                 <td>
                                     <a class="btn-nhb-rood" href="{{ taak.url }}">Details</a>
                                 </td>
@@ -78,6 +80,7 @@
                     <thead>
                         <tr>
                             <th class="center">Nummer</th>
+                            <th class="center">Functie</th>
                             <th class="center">Deadline</th>
                             <th>Beschrijving</th>
                             <th><!-- kolom voor knop --></th>
@@ -88,8 +91,9 @@
                         {% if taak.is_afgerond %}
                             <tr>
                                 <td class="center">{{ taak.pk }}</td>
+                                <td class="center{% if taak.is_huidige_rol %} nhb-blauw-text{% endif %}">{{ taak.toegekend_aan_functie.beschrijving }}</td>
                                 <td class="center">{{ taak.deadline|date:"Y-m-d" }}</td>
-                                <td>{{ taak.beschrijving|linebreaks }}</td>
+                                <td>{{ taak.titel }}</td>
                                 <td>
                                     <a class="btn-nhb-rood" href="{{ taak.url }}">Details</a>
                                 </td>

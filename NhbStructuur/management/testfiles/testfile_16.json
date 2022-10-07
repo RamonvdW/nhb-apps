@@ -28,7 +28,9 @@
      "iso_abbr": null,
      "latitude": null,
      "longitude": null,
-     "coc_number": null
+     "coc_number": null,
+     "iban": "NL91ABNA0417164300",
+     "bic": "ABNANL2A"
     },
     {"club_number": 2000,
      "region_number": 111,
@@ -47,7 +49,9 @@
      "iso_abbr": null,
      "latitude": null,
      "longitude": null,
-     "coc_number": null
+     "coc_number": null,
+     "iban": null,
+     "bic": null
     }
   ],
   "members": [
@@ -60,11 +64,15 @@
       "gender": "M",
       "email": "rdetester@gmail.not",
       "birthday": "1972-03-04",
+      "birthplace": null,
       "member_from": "2010-11-12",
       "para_code": null,
       "address": null,
       "postal_code": null,
       "location_name": null,
+      "phone_business": null,
+      "phone_private": null,
+      "phone_mobile": null,
       "iso_abbr": null,
       "latitude": null,
       "longitude": null,
@@ -80,11 +88,15 @@
       "gender": "F",
       "email": "enige@nhb.test",
       "birthday": "2000-05-05",
+      "birthplace": null,
       "member_from": "2000-06-06",
       "para_code": "W1",
       "address": null,
       "postal_code": null,
       "location_name": null,
+      "phone_business": null,
+      "phone_private": null,
+      "phone_mobile": null,
       "iso_abbr": null,
       "latitude": null,
       "longitude": null,

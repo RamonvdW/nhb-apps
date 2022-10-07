@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from . import view_mandje, view_bestelling
+from Bestel import view_mandje, view_bestelling, view_activiteit, view_overboeking
 
 app_name = 'Bestel'
 
@@ -14,10 +14,6 @@ urlpatterns = [
     path('mandje/verwijderen/<product_pk>/',
          view_mandje.VerwijderProductUitMandje.as_view(),
          name='mandje-verwijder-product'),
-
-    path('mandje/code-toevoegen/',
-         view_mandje.CodeToevoegenView.as_view(),
-         name='mandje-code-toevoegen'),
 
     path('mandje/',
          view_mandje.ToonInhoudMandje.as_view(),
@@ -42,7 +38,18 @@ urlpatterns = [
 
     path('na-de-betaling/<bestel_nr>/',
          view_bestelling.BestellingAfgerondView.as_view(),
-         name='na-de-betaling')
+         name='na-de-betaling'),
+
+
+    # HWL view
+    path('vereniging/overboeking-ontvangen/',
+         view=view_overboeking.OverboekingOntvangenView.as_view(),
+         name='overboeking-ontvangen'),
+
+    # manager view
+    path('activiteit/',
+         view_activiteit.BestelActiviteitView.as_view(),
+         name='activiteit'),
 ]
 
 # end of file

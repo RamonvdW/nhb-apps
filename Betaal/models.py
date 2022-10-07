@@ -49,8 +49,14 @@ class BetaalInstellingenVereniging(models.Model):
         sub = max(sub, 1)       # prevent 0
 
         key = key[:5+sub] + '[...]' + key[-sub:]
-        print('sub=%s, api_key=%s, key=%s' % (sub, repr(self.mollie_api_key), repr(key)))
         return key
+
+    def moet_handmatig(self):
+        # als deze vereniging een eigen Mollie sleutel ingesteld heeft
+        # of akkoord heeft om via de NHB betalingen te ontvangen
+        # dan hoeft het niet online
+        kan_online = self.mollie_api_key or self.akkoord_via_nhb
+        return not kan_online
 
     def __str__(self):
         """ Lever een tekstuele beschrijving voor de admin interface """
@@ -68,7 +74,7 @@ class BetaalActief(models.Model):
     """
 
     # datum/tijdstip van aanmaak (wordt gebruikt voor opschonen)
-    # de online betaal methoden verlopen na 3 uur, iDEAL al na 15 minuten
+    # de online-betaalmethoden verlopen na 3 uur, iDEAL al na 15 minuten
     when = models.DateTimeField(auto_now_add=True)      # automatisch invullen
 
     # referentie naar de instellingen voor de vereniging waar de betaling bij hoort
@@ -97,11 +103,23 @@ class BetaalTransactie(models.Model):
     """ Afgeronde transacties: ontvangst en restitutie
     """
 
-    # het nummer dat door de CPSP toegekend is
-    payment_id = models.CharField(max_length=BETAAL_PAYMENT_ID_MAXLENGTH)
-
     # datum/tijdstip van aanmaak
     when = models.DateTimeField()
+
+    # is dit een handmatig ingevoerde informatie van een overboeking?
+    is_handmatig = models.BooleanField(default=False)
+
+    # handmatige overboeking:
+    # - bedrag_euro_klant == bedrag_euro_boeking
+    # - optioneel: klant_naam, klant_account
+    # - payment_id: leeg, wordt niet gebruikt
+
+    # Mollie:
+    # - payment_id = koppeling aan hun systeem
+    # - beschrijving = ontvangen informatie
+
+    # het nummer dat door de CPSP toegekend is
+    payment_id = models.CharField(max_length=BETAAL_PAYMENT_ID_MAXLENGTH)
 
     # beschrijving voor op het afschrift van de klant
     # hierin staat normaal het bestelnummer
@@ -168,7 +186,7 @@ class BetaalMutatie(models.Model):
     # BETAAL_MUTATIE_START_RESTITUTIE:
     # BETAAL_MUTATIE_PAYMENT_STATUS_CHANGED:
 
-    # Mollie id ontvangen met de payment status changed webhook aanroep
+    # Mollie-id ontvangen met de payment status changed webhook aanroep
     payment_id = models.CharField(max_length=BETAAL_PAYMENT_ID_MAXLENGTH, blank=True)
 
     class Meta:

@@ -17,7 +17,7 @@ from Competitie.models import (CompetitieTeamKlasse, AG_NUL, DeelCompetitie, LAA
                                update_uitslag_teamcompetitie)
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
-from Score.models import ScoreHist, SCORE_TYPE_TEAM_AG
+from Score.models import AanvangsgemiddeldeHist, AG_DOEL_TEAM
 from Score.operations import score_teams_ag_opslaan
 import datetime
 
@@ -32,7 +32,7 @@ TEMPLATE_TEAMS_INVALLERS_KOPPELEN = 'complaagregio/hwl-teams-invallers-koppelen.
 
 def bepaal_team_sterkte_en_klasse(team):
     """ gebruik AG van gekoppelde schutters om team aanvangsgemiddelde te berekenen
-        en bepaal aan de hand daarvan de team wedstrijdklasse
+        en bepaal aan de hand daarvan de team-wedstrijdklasse
     """
     ags = team.gekoppelde_schutters.values_list('ag_voor_team', flat=True)
     ags = list(ags)
@@ -73,6 +73,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_TEAMS_REGIO
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -200,9 +201,12 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
         # for
         context['deelnemers'] = deelnemers
 
+        url_overzicht = reverse('Vereniging:overzicht')
+        anker = '#competitie_%s' % deelcomp.competitie.pk
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, 'Teams Regio %s' % deelcomp.competitie.beschrijving.replace(' competitie', ''))
+            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht + anker, deelcomp.competitie.beschrijving.replace(' competitie', '')),
+            (None, 'Teams Regio')
         )
 
         menu_dynamics(self.request, context)
@@ -210,7 +214,7 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         """ maak een nieuw team aan """
-        deelcomp = self._get_deelcomp(kwargs['deelcomp_pk'])
+        _ = self._get_deelcomp(kwargs['deelcomp_pk'])
 
         if self.rol_nu != Rollen.ROL_HWL:
             raise PermissionDenied('Geen toegang met deze rol')
@@ -271,13 +275,14 @@ class TeamsRegioView(UserPassesTestMixin, TemplateView):
 
 class WijzigRegioTeamsView(UserPassesTestMixin, TemplateView):
 
-    """ laat de HWL een nieuw team aanmaken of een bestaand team wijzigen
+    """ laat de HWL een nieuw team aanmaken of een bestaand team wijzigen (of zelfs verwijderen)
         voor de regiocompetitie
     """
 
     # class variables shared by all instances
     template_name = TEMPLATE_TEAMS_REGIO_WIJZIG
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -470,6 +475,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_TEAMS_WIJZIG_AG
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -523,15 +529,13 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
         ag_str = '%.3f' % deelnemer.ag_voor_team
         deelnemer.ag_str = ag_str.replace('.', ',')
 
-        ag_hist = (ScoreHist
+        ag_hist = (AanvangsgemiddeldeHist
                    .objects
-                   .filter(score__sporterboog=deelnemer.sporterboog,
-                           score__afstand_meter=deelnemer.deelcompetitie.competitie.afstand,
-                           score__type=SCORE_TYPE_TEAM_AG)
+                   .filter(ag__sporterboog=deelnemer.sporterboog,
+                           ag__afstand_meter=deelnemer.deelcompetitie.competitie.afstand,
+                           ag__doel=AG_DOEL_TEAM)
                    .order_by('-when'))
         for obj in ag_hist:
-            obj.oude_waarde /= 1000
-            obj.nieuwe_waarde /= 1000
             obj.oude_waarde_str = "%.3f" % obj.oude_waarde
             obj.nieuwe_waarde_str = "%.3f" % obj.nieuwe_waarde
         # for
@@ -552,6 +556,7 @@ class WijzigTeamAGView(UserPassesTestMixin, TemplateView):
                 (None, 'Wijzig AG')
             )
         else:
+            # RCL
             context['kruimels'] = (
                 (reverse('Competitie:kies'), 'Bondscompetities'),
                 (reverse('Competitie:overzicht', kwargs={'comp_pk': comp.pk}),
@@ -631,6 +636,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_TEAMS_KOPPELEN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -686,7 +692,7 @@ class TeamsRegioKoppelLedenView(UserPassesTestMixin, TemplateView):
             mag_wijzigen = (now <= einde) and not readonly
         else:
             # RCL
-            context['readonly'] = readonly = (comp.fase > 'D')
+            context['readonly'] = (comp.fase > 'D')
             mag_wijzigen = True
 
         context['mag_wijzigen'] = mag_wijzigen
@@ -855,6 +861,7 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_TEAMS_INVALLERS
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -977,10 +984,11 @@ class TeamsRegioInvallersView(UserPassesTestMixin, TemplateView):
         context['deelnemers'] = [tup[-1] for tup in unsorted_deelnemers]
 
         comp = deelcomp.competitie
-
+        url_overzicht = reverse('Vereniging:overzicht')
+        anker = '#competitie_%s' % comp.pk
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, comp.beschrijving.replace(' competitie', '')),
+            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
             (None, 'Team Invallers')
         )
 
@@ -994,6 +1002,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
 
     template_name = TEMPLATE_TEAMS_INVALLERS_KOPPELEN
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -1154,9 +1163,11 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                                          kwargs={'ronde_team_pk': ronde_team_nu.pk})
 
         comp = deelcomp.competitie
+        url_overzicht = reverse('Vereniging:overzicht')
+        anker = '#competitie_%s' % comp.pk
         context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, comp.beschrijving.replace(' competitie', '')),
+            (url_overzicht, 'Beheer Vereniging'),
+            (url_overzicht + anker, comp.beschrijving.replace(' competitie', '')),
             (reverse('CompLaagRegio:teams-regio-invallers', kwargs={'deelcomp_pk': deelcomp.pk}), 'Team Invallers'),
             (None, 'Invallers Koppelen')
         )
@@ -1223,7 +1234,7 @@ class TeamsRegioInvallersKoppelLedenView(UserPassesTestMixin, TemplateView):
                               inschrijf_voorkeur_team=True,
                               bij_vereniging=self.functie_nu.nhb_ver,
                               sporterboog__boogtype__in=boog_pks,
-                              ag_voor_team__gte=1))     # moet een AG hebben
+                              ag_voor_team__gt=0.0))     # sporter moet een team AG hebben
 
         for deelnemer in deelnemers:
             if deelnemer.pk not in deelnemers_bezet_pks:

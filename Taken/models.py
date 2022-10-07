@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2020-2021 Ramon van der Winkel.
+#  Copyright (c) 2020-2022 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -8,6 +8,7 @@ from django.db import models
 from django.utils import timezone
 from Account.models import Account
 from Competitie.models import DeelCompetitie
+from Functie.models import Functie
 import datetime
 
 
@@ -18,10 +19,10 @@ class Taak(models.Model):
     # is de taak afgehandeld / klaar, of nog niet?
     is_afgerond = models.BooleanField(default=False)
 
-    # wie moet actie ondernemen / bij wie op de takenlijst zetten
-    toegekend_aan = models.ForeignKey(Account, on_delete=models.SET_NULL,
-                                      null=True, blank=True,
-                                      related_name='account_taken_toegekend')
+    # welke functie moet actie ondernemen / bij wie op de takenlijst zetten?
+    toegekend_aan_functie = models.ForeignKey(Functie, on_delete=models.SET_NULL,
+                                              null=True, blank=True,
+                                              related_name='functie_taken')
 
     # wanneer moet het af zijn?
     deadline = models.DateField()
@@ -33,23 +34,21 @@ class Taak(models.Model):
                                         related_name='account_taken_aangemaakt')
 
     # beschrijving van de uit te voeren taak
-    beschrijving = models.TextField(max_length=1000)
-
-    # langere uitleg in de handleiding
-    handleiding_pagina = models.CharField(max_length=75, blank=True)
+    beschrijving = models.TextField(max_length=5000)
 
     # geschiedenis van deze taak
-    log = models.TextField(max_length=50000, blank=True)
-
-    # hoort deze bij een deel van de competitie? (Regio/RK/BK)
-    deelcompetitie = models.ForeignKey(DeelCompetitie, on_delete=models.CASCADE,
-                                       null=True, blank=True)
+    log = models.TextField(max_length=5000, blank=True)
 
     def __str__(self):
         msg = str(self.pk)
         if self.is_afgerond:
             msg += " (afgerond)"
-        msg += " [%s] %s" % (self.toegekend_aan, self.beschrijving[:200])
+        msg += " [%s] " % self.toegekend_aan_functie
+
+        pos = self.beschrijving.find('\n')
+        if pos < 0 or pos > 200:
+            pos = 200
+        msg += self.beschrijving[:pos]
         return msg
 
     class Meta:

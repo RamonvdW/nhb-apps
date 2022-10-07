@@ -83,6 +83,6 @@
 
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="schutter-registreer-geen-email" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="sporter-registreer-geen-email" %}
 
 {% endblock %}

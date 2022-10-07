@@ -4,7 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-""" importeer een JSON file met data uit het CRM systeem van de NHB """
+""" importeer een JSON-file met data uit het CRM-systeem van de NHB """
 
 from django.core.management.base import BaseCommand
 from django.db.models import ProtectedError
@@ -14,9 +14,10 @@ from django.conf import settings
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
 from Account.models import Account
-from Functie.models import Functie, maak_functie, maak_account_vereniging_secretaris
+from Functie.models import Functie
+from Functie.operations import maak_functie, maak_account_vereniging_secretaris
 from Logboek.models import schrijf_in_logboek
-from Mailer.models import mailer_email_is_valide
+from Mailer.operations import mailer_email_is_valide, mailer_notify_internal_error
 from NhbStructuur.models import NhbRayon, NhbRegio, NhbVereniging
 from Overig.helpers import maak_unaccented
 from Records.models import IndivRecord
@@ -24,8 +25,11 @@ from Sporter.models import Sporter, Secretaris, Speelsterkte
 from Wedstrijden.models import WedstrijdLocatie, BAAN_TYPE_EXTERN, BAAN_TYPE_BUITEN
 import traceback
 import datetime
+import logging
 import json
 import sys
+
+my_logger = logging.getLogger('NHBApps.NhbStructuur')
 
 
 def get_secretaris_str(sporter):
@@ -49,13 +53,14 @@ EXPECTED_CLUB_KEYS = ('region_number', 'club_number', 'name', 'prefix', 'email',
                       'phone_business', 'phone_private', 'phone_mobile', 'coc_number',
                       'iso_abbr', 'latitude', 'longitude', 'secretaris', 'iban', 'bic')
 EXPECTED_MEMBER_KEYS = ('club_number', 'member_number', 'name', 'prefix', 'first_name',
-                        'initials', 'birthday', 'email', 'gender', 'member_from',
+                        'initials', 'birthday', 'birthplace', 'email', 'gender', 'member_from',
                         'para_code', 'address', 'postal_code', 'location_name',
+                        'phone_business', 'phone_mobile', 'phone_private',
                         'iso_abbr', 'latitude', 'longitude', 'blocked')
 OPTIONAL_MEMBER_KEYS = ('skill_levels',)
 
 # administratieve entries (met fouten) die overslagen moeten worden
-SKIP_MEMBERS = (101711,)        # CRM developer
+SKIP_MEMBERS = (101711,)            # CRM developer
 
 GEEN_SECRETARIS_NODIG = (1377,)     # persoonlijk lid
 
@@ -72,6 +77,9 @@ class Command(BaseCommand):
 
     def __init__(self):
         super().__init__()
+
+        self._exit_code = 0
+
         self._count_errors = 0
         self._count_warnings = 0
         self._count_rayons = 0
@@ -242,6 +250,7 @@ class Command(BaseCommand):
                 keys.remove(key)
             except ValueError:
                 self.stderr.write("[ERROR] Verplichte sleutel %s niet aanwezig in de %s data" % (repr(key), repr(level)))
+                self._exit_code = 2
                 has_error = True
         # for
         for key in optional_keys:
@@ -385,6 +394,9 @@ class Command(BaseCommand):
             try:
                 ver_nr = int(ver_nr)
             except ValueError:
+                if self.dryrun and ver_nr == 'crash':
+                    raise Exception('crash test')
+
                 self.stderr.write('[ERROR] Geen valide verenigingsnummer: %s (geen getal)' % repr(ver_nr))
                 self._count_errors += 1
                 continue
@@ -436,14 +448,15 @@ class Command(BaseCommand):
                     ver_website = ''
 
             ver_tel_nr = ''
-            for field_name in ('phone_business', 'phone_mobile', 'phone_private'):
+            for field_name in ('phone_business', 'phone_mobile', 'phone_private'):      # hoogste voorkeur eerst
                 phone = club[field_name]
                 if phone is None:
                     phone = ''
                 phone = phone.strip()
                 if phone:
+                    # geen fouten kunnen vinden in de telefoonnummers, dus geen waarschuwingen nodig
                     ver_tel_nr = phone
-                    break
+                    break       # gebruik eerste gevonden nummer
             # for
 
             ver_adres1 = ''
@@ -580,6 +593,18 @@ class Command(BaseCommand):
                     obj.adres_regel2 = ver_adres2
                     updated.append('adres_regel2')
 
+                if obj.bank_iban != ver_iban:
+                    self.stdout.write("[INFO] Wijziging van IBAN van vereniging %s: %s --> %s" % (ver_nr, obj.bank_iban, ver_iban))
+                    self._count_wijzigingen += 1
+                    obj.bank_iban = ver_iban
+                    updated.append('bank_iban')
+
+                if obj.bank_bic != ver_bic:
+                    self.stdout.write("[INFO] Wijziging van BIC van vereniging %s: %s --> %s" % (ver_nr, obj.bank_bic, ver_bic))
+                    self._count_wijzigingen += 1
+                    obj.bank_bic = ver_bic
+                    updated.append('bank_bic')
+
                 if not self.dryrun:
                     obj.save(update_fields=updated)
 
@@ -678,9 +703,18 @@ class Command(BaseCommand):
 
             ver_naam = club['name']
 
-            if len(club['secretaris']) < 1:
+            club_secs = club['secretaris']
+            if len(club_secs) < 1:
                 ver_secretaris = None
             else:
+                if len(club_secs) > 1:
+                    # onverwacht meer dan 1 secretaris
+                    lid_nrs = [str(sec['member_number']) for sec in club_secs]
+                    lid_nrs_str = ", ".join(lid_nrs)
+                    self.stdout.write(
+                        '[WARNING] Meerdere secretarissen voor vereniging %s is niet ondersteund: %s' % (
+                            ver_nr, lid_nrs_str))
+
                 ver_secretaris_nr = club['secretaris'][0]['member_number']
                 ver_secretaris = self._vind_sporter(ver_secretaris_nr)
                 if ver_secretaris is None:
@@ -766,10 +800,13 @@ class Command(BaseCommand):
              'email',
              'gender':              'M' or 'V'
              'member_from':         string YYYY-MM-DD
-             'para_code': None      ???
+             'para_code': None of string
              'address':             string with newlines
              'postal_code',
              'location_name',
+             'phone_business',
+             'phone_private',
+             'phone_mobile': None of string "+31123456789"
              'iso_abbr': 'NL',      ???
              'latitude',
              'longitude',
@@ -898,6 +935,7 @@ class Command(BaseCommand):
                 lid_email = ""  # converts potential None to string
 
             if not is_valid:
+                # silently skip due to missing mandatory fields
                 continue
 
             lid_adres_code = ''
@@ -912,7 +950,22 @@ class Command(BaseCommand):
                     postadres = postadres[:pos].strip()
                     spl = postadres.split(' ')
                     lid_adres_code = postcode.replace(' ', '') + spl[-1]
-            # self.stdout.write('[DEBUG] lid_nr=%s, lid_adres_code=%s' % (lid_nr, repr(lid_adres_code)))
+
+            lid_tel_nr = ''
+            for field_name in ('phone_mobile', 'phone_private', 'phone_business'):      # hoogste voorkeur eerst
+                phone = member[field_name]
+                if phone is None:
+                    phone = ''
+                phone = phone.strip()
+                if phone:
+                    # geen fouten kunnen vinden in de telefoonnummers, dus geen waarschuwingen nodig
+                    lid_tel_nr = phone
+                    break       # gebruik eerste gevonden nummer
+            # for
+
+            lid_geboorteplaats = member['birthplace']
+            if not lid_geboorteplaats:
+                lid_geboorteplaats = ''     # vervang None to lege string
 
             # try:
             #     lid_edu = member['educations']
@@ -1058,6 +1111,22 @@ class Command(BaseCommand):
                         updated.append('adres_code')
                         self._count_wijzigingen += 1
 
+                    if obj.telefoon != lid_tel_nr:
+                        # geen telefoonnummer controle hier
+                        if obj.telefoon != '':
+                            self.stdout.write('[INFO] Lid %s: telefoonnummer %s --> %s' % (
+                                lid_nr, repr(obj.telefoon), repr(lid_tel_nr)))
+                        obj.telefoon = lid_tel_nr
+                        updated.append('telefoon')
+                        self._count_wijzigingen += 1
+
+                    if obj.geboorteplaats != lid_geboorteplaats:
+                        self.stdout.write('[INFO] Lid %s: geboorteplaats %s --> %s' % (
+                            lid_nr, repr(obj.geboorteplaats), repr(lid_geboorteplaats)))
+                        obj.geboorteplaats = lid_geboorteplaats
+                        updated.append('geboorteplaats')
+                        self._count_wijzigingen += 1
+
                     if not self.dryrun:
                         obj.save(update_fields=updated)
                         self._cache_sporter[obj.pk] = obj
@@ -1102,7 +1171,9 @@ class Command(BaseCommand):
                 obj.voornaam = lid_voornaam
                 obj.achternaam = lid_achternaam
                 obj.email = lid_email
+                obj.telefoon = lid_tel_nr
                 obj.geboorte_datum = lid_geboorte_datum
+                obj.geboorteplaats = lid_geboorteplaats
                 obj.geslacht = lid_geslacht
                 obj.para_classificatie = lid_para
                 obj.sinds_datum = lid_sinds
@@ -1342,21 +1413,7 @@ class Command(BaseCommand):
         # FUTURE: zichtbaar=False zetten voor wedstrijdlocatie zonder vereniging
         # FUTURE: zichtbaar=True zetten voor (revived) wedstrijdlocatie met vereniging
 
-    def handle(self, *args, **options):
-        self.dryrun = options['dryrun']
-        fname = options['filename'][0]
-
-        if options['sim_now']:
-            try:
-                sim_now = datetime.datetime.strptime(options['sim_now'][0], '%Y-%m-%d')
-            except ValueError as exc:
-                self.stderr.write('[ERROR] geen valide sim_now (%s)' % str(exc))
-                return
-            else:
-                self.zet_lidmaatschap_jaar(sim_now)
-
-        self.stdout.write('[INFO] lidmaatschap jaar = %s' % self.lidmaatschap_jaar)
-
+    def _import_bestand(self, fname):
         try:
             with open(fname, encoding='raw_unicode_escape') as f_handle:
                 data = json.load(f_handle)
@@ -1396,6 +1453,7 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Onverwachte database fout: %s' % str(exc))
             self.stderr.write('Traceback:')
             self.stderr.write(''.join(lst))
+            self._exit_code = 1
 
         self.stdout.write('Import van CRM data is klaar')
         # self.stdout.write("Read %s lines; skipped %s dupes; skipped %s errors; added %s records" % (line_nr, dupe_count, error_count, added_count))
@@ -1432,6 +1490,56 @@ class Command(BaseCommand):
         self.stdout.write(samenvatting)
 
         self.stdout.write('Done')
-        return
+
+    def handle(self, *args, **options):
+        self.dryrun = options['dryrun']
+        if self.dryrun:
+            self.stdout.write("DRY RUN")
+
+        fname = options['filename'][0]
+
+        if options['sim_now']:
+            try:
+                sim_now = datetime.datetime.strptime(options['sim_now'][0], '%Y-%m-%d')
+            except ValueError as exc:
+                self.stderr.write('[ERROR] geen valide sim_now (%s)' % str(exc))
+                return
+            else:
+                self.zet_lidmaatschap_jaar(sim_now)
+
+        self.stdout.write('[INFO] lidmaatschap jaar = %s' % self.lidmaatschap_jaar)
+
+        try:
+            self._import_bestand(fname)
+        except Exception as exc:
+            # schrijf in de output
+            tups = sys.exc_info()
+            lst = traceback.format_tb(tups[2])
+            tb = traceback.format_exception(*tups)
+
+            tb_msg_start = 'Unexpected error during import_nhb_crm\n'
+            tb_msg_start += '\n'
+            tb_msg = tb_msg_start + '\n'.join(tb)
+
+            # full traceback to syslog
+            my_logger.error(tb_msg)
+
+            self.stderr.write('[ERROR] Onverwachte fout tijdens import_nhb_crm: ' + str(exc))
+            self.stderr.write('Traceback:')
+            self.stderr.write(''.join(lst))
+
+            # stuur een mail naar de ontwikkelaars
+            # reduceer tot de nuttige regels
+            tb = [line for line in tb if '/site-packages/' not in line]
+            tb_msg = tb_msg_start + '\n'.join(tb)
+
+            # deze functie stuurt maximaal 1 mail per dag over hetzelfde probleem
+            mailer_notify_internal_error(tb_msg)
+
+            self._exit_code = 1
+
+        if self._exit_code > 0:
+            sys.exit(self._exit_code)
+
 
 # end of file

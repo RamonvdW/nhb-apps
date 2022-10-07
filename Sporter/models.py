@@ -76,8 +76,16 @@ class Sporter(models.Model):
     # het e-mailadres waarop dit lid te bereiken is
     email = models.CharField(max_length=150)
 
+    # het telefoonnummer waarop dit lid te bereiken is
+    # komt uit CRM: mobiel (indien aanwezig), anders vaste nummer (indien aanwezig)
+    telefoon = models.CharField(max_length=25, default='', blank=True)
+
     # geboortedatum van de sporter
     geboorte_datum = models.DateField(validators=[validate_geboorte_datum])
+
+    # geboorteplaats van de sporter
+    # alleen nodig voor op het certificaat van een genoten opleiding
+    geboorteplaats = models.CharField(max_length=100, default='', blank=True)
 
     # geslacht (M/V/X)
     geslacht = models.CharField(max_length=1, choices=GESLACHT_MVX)
@@ -277,12 +285,14 @@ class SporterBoog(models.Model):
     heeft_interesse = models.BooleanField(default=True)
     voor_wedstrijd = models.BooleanField(default=False)
 
-    # aanvangsgemiddelde is opgeslagen in een Score en ScoreHist record
+    # aanvangsgemiddelde is opgeslagen in een Aanvangsgemiddelde en AanvangsgemiddeldeHist record
 
     class Meta:
         """ meta data voor de admin interface """
         verbose_name = "SporterBoog"
         verbose_name_plural = "SporterBoog"
+
+        ordering = ['sporter__lid_nr', 'boogtype__volgorde']
 
         indexes = [
             # ondersteuning voor filteren op voor_wedstrijd=True

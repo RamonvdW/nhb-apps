@@ -27,7 +27,7 @@
         <title>{% block title %}{% endblock %}</title>
         <link rel="icon" href="{% static 'plein/logo_nhb_192x192.png' %}" sizes="192x192">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">
-        <link rel="stylesheet" href="{% static 'materialize-new-103.css' %}">
+        <link rel="stylesheet" href="{% static 'materialize-new-108.css' %}">
     </head>
 
     <body class="white">
@@ -43,15 +43,15 @@
                  kan weggehaald worden door dit block te vervangen in de template -->
             {% block terug_naar_af %}
                 <p>&nbsp;</p>
-                <h5>Terug naar veiligheid</h5>
-                <p>Druk op de volgende knop om terug te gaan naar de begin pagina:</p>
-                <a class="btn-nhb-rood" href="/plein/"><i class="material-icons-round left">home</i>Terug naar Het Plein</a>
+                <h5>Wat kan je nog meer doen?</h5>
+                <a class="btn-nhb-rood" href="/plein/"><i class="material-icons-round left">home</i>Het Plein</a>
+                <p>Bovenstaande knop brengt je naar de startpagina van MijnHandboogsport.</p>
             {% endblock %}
 
             <p>&nbsp;</p>
-            <h5>Help!</h5>
+            <h5>Hulp nodig?</h5>
 
-            <p>Komt je er niet uit? Stuur dan een e-mail naar het volgende adres (druk op de knop om je mailprogramma te starten):</p>
+            <p>Lukt het niet om het probleem op te lossen? Stuur dan een e-mail naar het volgende adres (druk op de knop om je mailprogramma te starten):</p>
             <a class="btn-nhb-blauw" href="mailto:{{ email_support }}"><i class="material-icons-round left">email</i>{{ email_support }}</a>
             <p>Schrijf de volgende informatie in de e-mail:<br>- Je bondsnummer<br>- Datum en tijdstip waarop het probleem ontstond<br>- Beschrijving van je probleem</p>
 

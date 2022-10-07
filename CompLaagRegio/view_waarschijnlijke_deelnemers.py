@@ -13,6 +13,7 @@ from Competitie.models import RegiocompetitieTeam, CompetitieMatch
 from Competitie.operations.wedstrijdcapaciteit import bepaal_waarschijnlijke_deelnemers, bepaal_blazoen_behoefte
 from Functie.rol import Rollen, rol_get_huidige_functie
 from Plein.menu import menu_dynamics
+from codecs import BOM_UTF8
 import csv
 
 TEMPLATE_WAARSCHIJNLIJKE_DEELNEMERS = 'complaagregio/waarschijnlijke-deelnemers-regio.dtl'
@@ -26,6 +27,7 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_WAARSCHIJNLIJKE_DEELNEMERS
     raise_exception = True  # genereer PermissionDefined als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -76,7 +78,6 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
 
         sporters, teams = bepaal_waarschijnlijke_deelnemers(afstand, deelcomp, match)
         context['sporters'] = sporters
-        context['aantal_regels'] = 2 + len(sporters) + len(team_pk2naam.keys())
 
         for sporter in sporters:
             sporter.in_team_naam = team_pk2naam[sporter.team_pk]
@@ -88,10 +89,18 @@ class WaarschijnlijkeDeelnemersView(UserPassesTestMixin, TemplateView):
                                           kwargs={'match_pk': match.pk})
 
         # prep de view
+        context['aantal_regels'] = 2 + len(sporters)
         nr = 1
         for sporter in sporters:
             sporter.volg_nr = nr
             nr += 1
+
+            try:
+                _ = sporter.vereniging_teams
+            except AttributeError:
+                pass
+            else:
+                context['aantal_regels'] += 1
         # for
 
         context['kruimels'] = (
@@ -111,6 +120,7 @@ class WaarschijnlijkeDeelnemersAlsBestandView(UserPassesTestMixin, TemplateView)
 
     # class variables shared by all instances
     raise_exception = True  # genereer PermissionDefined als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -153,6 +163,7 @@ class WaarschijnlijkeDeelnemersAlsBestandView(UserPassesTestMixin, TemplateView)
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="waarschijnlijke-deelnemers-%s.csv"' % match.pk
 
+        response.write(BOM_UTF8)
         writer = csv.writer(response, delimiter=";")      # ; is good for import with dutch regional settings
 
         toon_teams = deelcomp.regio_organiseert_teamcompetitie

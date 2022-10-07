@@ -25,7 +25,7 @@
 
             <!-- dialoog venster -->
             <div class="white left-align z-depth-3">
-                <div style="padding:30px">
+                <div class="form-padding">
                     <form class="row" method="get" action="{{ filter_url }}">
 
                         <div class="row">
@@ -177,6 +177,6 @@
 
     {% endif %}
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="histcomp_indiv" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="histcomp-indiv" %}
 
 {% endblock %}

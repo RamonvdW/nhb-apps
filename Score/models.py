@@ -9,6 +9,7 @@ from django.db.models.constraints import UniqueConstraint
 from django.db.models.query_utils import Q
 from django.utils.formats import localize
 from Account.models import Account
+from BasisTypen.models import BoogType
 from Sporter.models import SporterBoog
 
 
@@ -21,16 +22,89 @@ SCORE_WAARDE_VERWIJDERD = 32767
 # gebruik 'geen score' om bij te houden dat gekozen is deze sporterboog te markeren als 'niet geschoten'
 # zonder een echt score record aan te maken. Elke sporterboog heeft genoeg aan 1 'geen score' record.
 SCORE_TYPE_SCORE = 'S'
-SCORE_TYPE_INDIV_AG = 'I'       # voor de bondscompetities
-SCORE_TYPE_TEAM_AG = 'T'        # voor de bondscompetities
+# SCORE_TYPE_INDIV_AG = 'I'       # voor de bondscompetities
+# SCORE_TYPE_TEAM_AG = 'T'        # voor de bondscompetities
 SCORE_TYPE_GEEN = 'G'           # niet geschoten
 
 SCORE_CHOICES = (
     (SCORE_TYPE_SCORE, 'Score'),
-    (SCORE_TYPE_INDIV_AG, 'Indiv AG'),
-    (SCORE_TYPE_TEAM_AG, 'Team AG'),
     (SCORE_TYPE_GEEN, 'Geen score')
 )
+
+AG_DOEL_INDIV = 'i'
+AG_DOEL_TEAM = 't'
+
+AG_DOEL_CHOICES = (
+    (AG_DOEL_INDIV, 'Individueel'),
+    (AG_DOEL_TEAM,  'Teamcompetitie')
+)
+
+
+class Aanvangsgemiddelde(models.Model):
+    """ Bijhouden van een specifiek aanvangsgemiddelde """
+
+    # bij wie hoort dit aanvangsgemiddelde
+    sporterboog = models.ForeignKey(SporterBoog, on_delete=models.PROTECT)
+
+    # kopie toevoegen van het boogtype van de sporterboog, om eenvoudiger op te kunnen filteren
+    boogtype = models.ForeignKey(BoogType, on_delete=models.PROTECT)
+
+    # AG voor individueel of team gebruik?
+    doel = models.CharField(max_length=1, choices=AG_DOEL_CHOICES, default=AG_DOEL_INDIV)
+
+    # waarde van het aanvangsgemiddelde, bijvoorbeeld 9.123
+    waarde = models.DecimalField(max_digits=6, decimal_places=3)     # max = 10,000
+
+    # afstand voor dit aanvangsgemiddelde (18, 25, 70, etc.)
+    afstand_meter = models.PositiveSmallIntegerField()
+
+    def __str__(self):
+        msg = "[%s] %sm: %s" % (self.sporterboog, self.afstand_meter, self.waarde)
+
+        if self.doel == AG_DOEL_INDIV:
+            msg += ' (indiv)'
+        else:
+            msg += ' (team)'
+
+        return msg
+
+    objects = models.Manager()      # for the editor only
+
+
+class AanvangsgemiddeldeHist(models.Model):
+    """ Bijhouden van de geschiedenis van een aanvangsgemiddelde: vaststellen of invoeer + wijzigingen """
+
+    # datum/tijdstip
+    when = models.DateTimeField(auto_now_add=True)      # automatisch invullen
+
+    # waar gaat dit over?
+    ag = models.ForeignKey(Aanvangsgemiddelde, on_delete=models.CASCADE, null=True, related_name='ag_hist')
+
+    # oude en nieuwe waarde
+    oude_waarde = models.DecimalField(max_digits=6, decimal_places=3)     # max = 10,000
+    nieuwe_waarde = models.DecimalField(max_digits=6, decimal_places=3)     # max = 10,000
+
+    # wie heeft de wijziging gedaan (null = systeem)
+    door_account = models.ForeignKey(Account, on_delete=models.SET_NULL, null=True)
+
+    # notitie bij de wijziging
+    notitie = models.CharField(max_length=100)
+
+    def __str__(self):
+        if self.door_account:
+            account_str = str(self.door_account)
+        else:
+            account_str = 'systeem'
+
+        return "[%s] %s --> %s: %s / door %s" % (localize(self.when), self.oude_waarde, self.nieuwe_waarde, self.notitie, account_str)
+
+    class Meta:
+        indexes = [
+            # help sorteren op datum
+            models.Index(fields=['when'])
+        ]
+
+    objects = models.Manager()      # for the editor only
 
 
 class Score(models.Model):
@@ -79,10 +153,6 @@ class Score(models.Model):
             msg += ' (geen score)'
         else:
             msg += ': %s' % self.waarde
-            if self.type == SCORE_TYPE_INDIV_AG:
-                msg += ' (indiv AG)'
-            elif self.type == SCORE_TYPE_TEAM_AG:
-                msg += ' (team AG)'
         return msg
 
     objects = models.Manager()      # for the editor only

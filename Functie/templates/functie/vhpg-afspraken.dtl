@@ -44,6 +44,6 @@
         </div>
     </div>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="vhpg-afspraken" %}
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-vhpg-afspraken" %}
 
 {% endblock %}

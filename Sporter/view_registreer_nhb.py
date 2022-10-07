@@ -13,12 +13,11 @@ from Account.operations import AccountCreateError, account_create
 from Account.views import account_vraag_email_bevestiging
 from Functie.models import Functie
 from Logboek.models import schrijf_in_logboek
-from Mailer.models import mailer_email_is_valide
-from Mailer.models import mailer_obfuscate_email
+from Mailer.operations import mailer_email_is_valide, mailer_obfuscate_email
 from Overig.helpers import get_safe_from_ip
 from Plein.menu import menu_dynamics
+from Sporter.forms import RegistreerForm
 from Sporter.models import Sporter, Secretaris, SporterGeenEmail, SporterInactief
-from .forms import RegistreerForm
 import logging
 
 
@@ -34,10 +33,10 @@ def sporter_create_account_nhb(lid_nr_str, email, nieuw_wachtwoord):
             - er al een account bestaat
             - het nhb nummer niet valide is
             - het email adres niet bekend is bij de nhb
-            - het email adres niet overeen komt
+            - het email adres niet overeen komt.
         geeft de url terug die in de email verstuurd moet worden
     """
-    # zoek het email adres van dit NHB lid erbij
+    # zoek het e-mailadres van dit NHB lid erbij
     try:
         # deze conversie beschermd ook tegen gevaarlijke invoer
         lid_nr = int(lid_nr_str)
@@ -127,7 +126,7 @@ class RegistreerNhbNummerView(TemplateView):
                                    activiteit="Mislukt voor nhb nummer %s vanaf IP %s: %s" % (repr(nhb_nummer), from_ip, str(exc)))
                 my_logger.info('%s REGISTREER Mislukt voor NHB nummer %s met email %s (reden: %s)' % (from_ip, repr(nhb_nummer), repr(email), str(exc)))
             except SporterInactief:
-                # NHB lid is mag niet gebruik maken van de diensten van de NHB, inclusief deze website
+                # lid is mag niet gebruik maken van de diensten van de NHB, inclusief deze website
                 schrijf_in_logboek(account=None,
                                    gebruikte_functie="Registreer met NHB nummer",
                                    activiteit='NHB lid %s is inactief (geblokkeerd van gebruik NHB diensten).' % nhb_nummer)
@@ -147,6 +146,7 @@ class RegistreerNhbNummerView(TemplateView):
 
         # still here --> re-render with error message
         context = {'form': form, 'verberg_login_knop': True}
+
         context['kruimels'] = (
             (None, 'Account aanmaken'),
         )

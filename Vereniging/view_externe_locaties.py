@@ -28,6 +28,7 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
     # class variables shared by all instances
     template_name = TEMPLATE_EXTERNE_LOCATIE
     raise_exception = True  # genereer PermissionDenied als test_func False terug geeft
+    permission_denied_message = 'Geen toegang'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -36,7 +37,10 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
     def test_func(self):
         """ called by the UserPassesTestMixin to verify the user has permissions to use this view """
         self.rol_nu, self.functie_nu = rol_get_huidige_functie(self.request)
-        return self.rol_nu in (Rollen.ROL_BB, Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL, Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC)
+        # TODO: BB, BKO, RKO hebben geen link naar deze pagina. RCL alleen naar accommodatie pagina.
+        return self.rol_nu in (Rollen.ROL_BB,
+                               Rollen.ROL_BKO, Rollen.ROL_RKO, Rollen.ROL_RCL,
+                               Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC)
 
     def get_vereniging(self):
         try:
@@ -73,10 +77,16 @@ class ExterneLocatiesView(UserPassesTestMixin, TemplateView):
                                                  'locatie_pk': locatie.pk})
         # for
 
-        context['kruimels'] = (
-            (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
-            (None, 'Wedstrijdlocaties')
-        )
+        if self.rol_nu in (Rollen.ROL_HWL, Rollen.ROL_WL, Rollen.ROL_SEC):
+            context['kruimels'] = (
+                (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
+                (None, 'Wedstrijdlocaties')
+            )
+        else:
+            context['kruimels'] = (
+                (reverse('Vereniging:lijst-verenigingen'), 'Verenigingen'),
+                (None, 'Wedstrijdlocaties')
+            )
 
         menu_dynamics(self.request, context)
         return context

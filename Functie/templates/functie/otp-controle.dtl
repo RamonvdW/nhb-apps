@@ -35,7 +35,9 @@
                     {% endif %}
 
                     <div class="input-field">
-                        {{ form.otp_code.label_tag }}{{ form.otp_code }}
+                        {{ form.otp_code.label_tag }}
+                        <!-- in plaats van {{ form.otp_code }} een handmatig veld met on_input handler -->
+                        <input type="text" name="otp_code" id="id_otp_code" autofocus required autocomplete="off" minlength="6" maxlength="6" inputmode="numeric">
                     </div>
 
                     <div class="center" style="margin-top:30px">
@@ -47,8 +49,54 @@
         </div>
     </div>
 
-    <p class="center">Tik de 6-cijferige code over uit je authenticatie app (waarschijnlijk op je mobiel).</p>
 
-    {% include 'feedback/sidebar.dtl' with op_pagina="otp-controle" %}
+    <!-- witruimte -->
+    <div class="row center">
+        <div class="col s12">
+            <h4>Tips</h4>
+        </div>
+    </div>
+
+    <!-- blauw balk met wit informatie veld -->
+    <div class="row-nhb-blauw">
+        <div class="col s12">
+            <div class="white" style="padding:10px">
+                <p>Tik de 6-cijferige code over uit je authenticatie app (waarschijnlijk op je mobiel).</p>
+
+                {% if toon_hulp %}
+
+                    <p>Heb je meerdere sites in je authenticatie app? Controleer dan dat je de juiste gebruikt.</p>
+
+                    <p>Elke 30 seconden verandert de code. Let op dat deze niet verandert terwijl je 'm overtikt.</p>
+
+                    <p>De klok van MijnHandboogsport en het apparaat waarop je authenticatie app staat moeten redelijk gelijk lopen.<br>Volgens MijnHandboogsport is het nu <b>{{ tijdstip }}</b>.</p>
+
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if toon_hulp %}
+
+        <!-- witruimte -->
+        <div class="row center">
+            <div class="col s12">
+                <h4 class="nhb-rood-text">Tweede factor kwijt?</h4>
+            </div>
+        </div>
+
+        <!-- blauw balk met wit informatie veld -->
+        <div class="row-nhb-blauw">
+            <div class="col s12">
+                <div class="white" style="padding:10px">
+                    <p>De koppeling met je tweede factor moet soms opnieuw gedaan worden, bijvoorbeeld als je een nieuwe mobiel aangeschaft hebt.</p>
+                    <p>Neem daarvoor contact met ons op via <code>{{ email_support }}</code></p>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+
+    {% include 'feedback/sidebar.dtl' with op_pagina="functie-otp-controle" %}
 
 {% endblock %}

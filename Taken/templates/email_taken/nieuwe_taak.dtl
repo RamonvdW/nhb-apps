@@ -1,0 +1,24 @@
+{% extends 'email_mailer/email_basis.dtl' %}
+{% comment %}
+                Copyright (c) 2022 Ramon van der Winkel.
+                All rights reserved.
+                Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
+{% endcomment %}
+
+{% block inhoud_text %}
+    |Hallo!
+    |
+    |Er is zojuist een nieuwe taak voor jou aangemaakt op {{ site_url }}
+    |Op het moment van sturen {{ aantal_str }}.
+    |
+    |Bedankt voor je aandacht!
+{% endblock %}
+
+{% block inhoud_html %}
+    <div>Hallo!</div>
+    <br>
+    <div>Er is zojuist een nieuwe taak voor jou aangemaakt op {{ site_url }}</div>
+    <div>Op het moment van sturen {{ aantal_str }}.</div>
+    <br>
+    <div>Bedankt voor je aandacht!</div>
+{% endblock %}

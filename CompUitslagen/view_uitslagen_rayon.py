@@ -291,6 +291,7 @@ class UitslagenRayonIndivView(TemplateView):
         # for
 
         context['deelnemers'] = deelnemers
+        context['heeft_deelnemers'] = (len(deelnemers) > 0)
 
         context['kruimels'] = (
             (reverse('Competitie:kies'), 'Bondscompetities'),
@@ -486,7 +487,7 @@ class UitslagenRayonTeamsView(TemplateView):
                     if teller.team_klasse:
                         teller.klasse_str = teller.team_klasse.beschrijving
                         try:
-                            teller.wedstrijd = teamklasse2match[teller.team_klasse.pk]  # TODO: wedstrijd --> match
+                            teller.match = teamklasse2match[teller.team_klasse.pk]
                         except KeyError:
                             pass
                     else:
@@ -505,9 +506,11 @@ class UitslagenRayonTeamsView(TemplateView):
             team.ver_str = str(team.vereniging)
             team.ag_str = "%05.1f" % (team.aanvangsgemiddelde * aantal_pijlen)
             team.ag_str = team.ag_str.replace('.', ',')
+            team.toon_team_leden = False
+            aantal_regels += 1
 
             if team.ver_nr == toon_team_leden_van_ver_nr:
-                # TODO: dit is uitgezet in de template omdat het ook getoond werd in de uitslag. Nodig om te weten wie naar deze wedstrijd moeten!
+                # TODO: optioneel maken: nodig om te weten wie naar deze wedstrijd moeten, maar niet nodig in eindstand
                 team.toon_team_leden = True
                 team.team_leden = list()
                 for deelnemer in (team
@@ -517,9 +520,6 @@ class UitslagenRayonTeamsView(TemplateView):
                     team.team_leden.append(deelnemer)
                     deelnemer.sporter_str = deelnemer.sporterboog.sporter.lid_nr_en_volledige_naam()
                 # for
-                aantal_regels += 2
-            else:
-                team.toon_team_leden = False
                 aantal_regels += 1
 
             # TODO: dit scherm is zowel een kandidaat-deelnemerslijst als de uitslag
@@ -588,7 +588,7 @@ class UitslagenRayonTeamsView(TemplateView):
             if teller.team_klasse:
                 teller.klasse_str = teller.team_klasse.beschrijving
                 try:
-                    teller.wedstrijd = teamklasse2match[teller.team_klasse.pk]  # TODO: wedstrijd --> match
+                    teller.match = teamklasse2match[teller.team_klasse.pk]
                 except KeyError:
                     pass
             else:
