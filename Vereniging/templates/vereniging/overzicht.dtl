@@ -93,9 +93,11 @@
     <div class="row-nhb-blauw">
         <div class="col s12">
 
-            <!-- wedstrijden -->
-            {% url 'CompScores:wedstrijden' as card_url %}
-            {% include 'plein/card.dtl' with title="Competitiewedstrijden" text="Wedstrijden die bij deze vereniging geschoten worden." icon="event" url=card_url %}
+            <!-- competitiewedstrijden -->
+            {% if toon_competities %}
+                {% url 'CompScores:wedstrijden' as card_url %}
+                {% include 'plein/card.dtl' with title="Competitiewedstrijden" text="Wedstrijden die bij deze vereniging geschoten worden." icon="event" url=card_url %}
+            {% endif %}
 
             <!-- scores invoeren -->
             {% if heeft_wedstrijden %}

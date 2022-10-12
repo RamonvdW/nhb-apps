@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
@@ -106,6 +107,8 @@ class NieuweWedstrijdKiesType(UserPassesTestMixin, View):
         context = dict()
 
         context['url_nieuwe_wedstrijd'] = reverse('Wedstrijden:nieuwe-wedstrijd-kies-type')
+
+        context['url_voorwaarden'] = settings.VERKOOP_VOORWAARDEN_URL
 
         context['kruimels'] = (
             (reverse('Vereniging:overzicht'), 'Beheer Vereniging'),
